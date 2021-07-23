@@ -3013,7 +3013,9 @@
         "ext_participant_sites": "External Participant Sites",
         "ext_participant_sites_desc": "A comma-separated list of site IDs or names from which participant details are sourced from the external databases like EPIC etc",
         "zero_disposed_spmn_qty": "Zero Out Specimen Quantity",
-        "zero_disposed_spmn_qty_desc": "Enable to set the available quantity of specimens to zero when they are disposed."
+        "zero_disposed_spmn_qty_desc": "Enable to set the available quantity of specimens to zero when they are disposed.",
+        "coordinator_role_name": "Coordinator Role",
+      "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state."
       },
 
       "common": {
