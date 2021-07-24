@@ -5,7 +5,7 @@ angular.module('os.administrative.container')
     var oldLocation;
     function init() {
       container.storageLocation = container.storageLocation || {};
-      container.transferTime = new Date();
+      container.transferDate = new Date();
       oldLocation = $scope.oldLocation = {
         siteName: container.siteName,
         position: angular.extend({}, container.storageLocation)
