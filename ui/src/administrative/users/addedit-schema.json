@@ -62,7 +62,8 @@
              "apiUrl": "auth-domains",
              "selectProp": "name",
              "displayProp": "name"
-           }
+           },
+           "showWhen": "type != 'CONTACT'"
          }
        ]
      },
@@ -72,7 +73,8 @@
          {
            "type": "text",
            "label": "Login Name",
-           "name": "loginName"
+           "name": "loginName",
+           "showWhen": "type != 'CONTACT'"
          }
        ]
      },
@@ -133,7 +135,8 @@
              { "caption": "Yes", "value": true },
              { "caption": "No", "value": false }
            ],
-           "class": "inline"
+           "class": "inline",
+           "showWhen": "!type || type == 'NONE'"
          }
        ]
      },
@@ -173,7 +176,8 @@
          {
            "type": "text",
            "label": "IP Address",
-           "name": "ipRange"
+           "name": "ipRange",
+           "showWhen": "apiUser == true"
          }
        ]
      },

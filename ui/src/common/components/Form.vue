@@ -1,13 +1,15 @@
 
 <template>
   <form novalidate>
-    <div class="row" v-for="(formRow, rowIdx) of ctx.formRows" :key="rowIdx">
-      <div class="field" v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
-        <label>{{field.label}}</label>
-        <component :is="field.component" v-bind="field" v-model="ctx.formData[field.name]"
-          @update:model-value="$emit('input', {field: field, data: ctx.formData})">
-        </component>
-      </div>
+    <div class="row" v-for="(formRow, rowIdx) of formRows" :key="rowIdx">
+      <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
+        <div class="field">
+          <label>{{field.label}}</label>
+          <component :is="field.component" v-bind="field" v-model="ctx.formData[field.name]"
+            @update:model-value="$emit('input', {field: field, data: ctx.formData})">
+          </component>
+        </div>
+      </template>
     </div>
 
     <div class="row">
@@ -23,6 +25,8 @@
 import { reactive } from 'vue';
 
 import fieldFactory from '@/common/services/FieldFactory.js';
+import utility from '@/common/services/Utility.js';
+
 import Dropdown from '@/common/components/Dropdown.vue';
 import InputText from '@/common/components/InputText.vue';
 import RadioButton from '@/common/components/RadioButton.vue';
@@ -42,31 +46,51 @@ export default {
 
    setup(props) {
      let ctx = reactive({
-       formRows: [],
-
        formData: props.data
      });
-
-     for (let row of props.schema.rows) {
-       let formRow = [];
-       ctx.formRows.push(formRow);
-
-       for (let field of row.fields) {
-         let component = fieldFactory.getComponent(field.type);
-         formRow.push({...field, component: component});
-       }
-     } 
 
      return {
        ctx
      };
    },
 
+   computed: {
+     formRows: function() {
+       let result = [];
+
+       for (let row of this.schema.rows) {
+         let formRow = [];
+
+         for (let field of row.fields) {
+           if (field.showWhen) {
+             console.log(field.showWhen);
+             if (!utility.eval(field.showWhen, this.ctx.formData)) {
+               continue;
+             }
+           }
+
+           let component = fieldFactory.getComponent(field.type);
+           formRow.push({...field, component: component});
+         }
+
+         if (formRow.length > 0) {
+           result.push(formRow);
+         }
+       }
+
+       return result;
+     }
+   },
+
    watch: {
      'ctx.formData': {
        deep: true,
 
-       handler: function(newVal) { console.log('Handler: '); console.log (newVal); console.log ('----'); }
+       handler: function(newVal) {
+         console.log('Handler: ');
+         console.log(newVal);
+         console.log ('----');
+       }
      }
    }
 }

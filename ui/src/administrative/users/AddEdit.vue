@@ -69,7 +69,7 @@ export default {
     if (props.userId && +props.userId > 0) {
       userSvc.getUserById(+props.userId).then(user => ctx.user = user);
     } else {
-      ctx.user = { dnd: false };
+      ctx.user = { dnd: false, type: 'NONE', apiUser: false };
     }
 
     return {
