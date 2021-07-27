@@ -252,7 +252,7 @@
               </div>
               <div class="col-xs-4 input os-md-time" style="padding-right: 0px;">
                 <timepicker name="time" class="os-time-no-wheels os-md-input" ng-model="specimen.collectionEvent.time"
-                  show-meridian="false" required>
+                  show-meridian="false">
                 </timepicker>
               </div>
             </div>
@@ -320,7 +320,7 @@
             </div>
             <div class="col-xs-3 input">
               <os-date-picker name="visitDate" date="visit.visitDate" required md-type="true"
-                on-change="updateCollDate()" placeholder="{{'specimens.visit_date' | translate}}">
+                on-change="updateCollDate(visit.visitDate)" placeholder="{{'specimens.visit_date' | translate}}">
               </os-date-picker>
               <div os-field-error field="collectionForm.visitDate"></div>
             </div>
@@ -357,7 +357,8 @@
           </div>
           <div class="col-xs-2 input">
             <os-date-picker name="collDate" date="collDetail.collectionDate" md-type="true"
-              required placeholder="{{'specimens.col_event.date' | translate}}">
+              on-change="updateCollDate(collDetail.collectionDate)" required
+              placeholder="{{'specimens.col_event.date' | translate}}">
             </os-date-picker>
             <div os-field-error field="collectionForm.collDate"></div>
           </div>

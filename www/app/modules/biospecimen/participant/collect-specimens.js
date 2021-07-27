@@ -167,6 +167,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
       data.opts.showCollectionEvent = wfData.showCollectionEvent != 'false' && wfData.showCollectionEvent != false;
       data.opts.showReceivedEvent   = wfData.showReceivedEvent != 'false' && wfData.showReceivedEvent != false;
       data.opts.defReceiveQuality   = wfData.defReceiveQuality;
+      data.opts.defCollectionDate   = wfData.defCollectionDate; // current_date or visit_date
       data.opts.defCollectionStatus = wfData.defCollectionStatus;
       data.opts.treeColumns         = wfData.treeColumns;
 
@@ -401,7 +402,12 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
                 specimen.printLabel = printLabel(printSettings, specimen);
                 if (specimen.lineage == 'New') {
                   var collEvent = specimen.collectionEvent = specimen.collectionEvent || {};
-                  collEvent.time = new Date().getTime();
+                  if (uiOpts.defCollectionDate == 'visit_date') {
+                    collEvent.time = visit.visitDate;
+                  } else if (uiOpts.defCollectionDate == 'current_date') {
+                    collEvent.time = new Date().getTime();
+                  }
+
                   collEvent.user = specimen.collector;
                   if (!collEvent.user) {
                     var cu = AuthorizationService.currentUser();
@@ -973,8 +979,24 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
   
         $scope.statusChanged = statusChanged;
   
-        $scope.updateCollDate = function() {
-          $scope.collDetail.collectionDate = $scope.visit.visitDate;
+        $scope.updateCollDate = function(collDate) {
+          $scope.collDetail.collectionDate = collDate;
+          angular.forEach($scope.specimens,
+            function(spmn) {
+              if (spmn.lineage != 'New') {
+                return;
+              }
+
+              var collEvent = spmn.collectionEvent = spmn.collectionEvent || {};
+              collEvent.time = collDate;
+              angular.forEach(spmn.specimensPool,
+                function(s) {
+                  collEvent = s.collectionEvent = s.collectionEvent || {};
+                  collEvent.time = collDate;
+                }
+              );
+            }
+          );
         }
   
         $scope.togglePrintLabels = setAliquotGrpPrintLabel;
