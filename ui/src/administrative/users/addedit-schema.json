@@ -22,12 +22,22 @@
          {
            "type": "text",
            "label": "First Name",
-           "name": "firstName"
+           "name": "firstName",
+           "validations": {
+             "required": {
+               "message": "First name is mandatory"
+             }
+           }
          },
          {
            "type": "text",
            "label": "Last Name",
-           "name": "lastName"
+           "name": "lastName",
+           "validations": {
+             "required": {
+               "message": "Last name is mandatory"
+             }
+           }
          }
        ]
      },
@@ -37,7 +47,15 @@
          {
            "type": "text",
            "label": "Email Address",
-           "name": "emailAddress"
+           "name": "emailAddress",
+           "validations": {
+             "required": {
+               "message": "Email address is mandatory"
+             },
+             "email": {
+               "message": "Email address is invalid"
+             }
+           }
          }
        ]
      },
@@ -63,7 +81,12 @@
              "selectProp": "name",
              "displayProp": "name"
            },
-           "showWhen": "type != 'CONTACT'"
+           "showWhen": "this.fd('type') != 'CONTACT'",
+           "validations": {
+             "required": {
+               "message": "Domain name is mandatory"
+             }
+           }
          }
        ]
      },
@@ -74,7 +97,12 @@
            "type": "text",
            "label": "Login Name",
            "name": "loginName",
-           "showWhen": "type != 'CONTACT'"
+           "showWhen": "this.fd('type') != 'CONTACT'",
+           "validations": {
+             "required": {
+               "message": "Login name is mandatory"
+             }
+           }
          }
        ]
      },
@@ -89,6 +117,11 @@
              "apiUrl": "institutes",
              "selectProp": "name",
              "displayProp": "name"
+           },
+           "validations": {
+             "required": {
+               "message": "Institute is mandatory"
+             }
            }
          }
        ]
@@ -100,11 +133,17 @@
            "type": "dropdown",
            "label": "Primary Site",
            "name": "primarySite",
+           "showWhen": "!!this.fd('instituteName')",
            "listSource": {
              "apiUrl": "sites",
              "selectProp": "name",
              "displayProp": "name",
-             "searchProp": "name"
+             "searchProp": "name",
+             "queryParams": {
+               "dynamic": {
+                 "institute": "this.fd('instituteName')"
+               }
+             }
            }
          }
        ]
@@ -136,7 +175,7 @@
              { "caption": "No", "value": false }
            ],
            "class": "inline",
-           "showWhen": "!type || type == 'NONE'"
+           "showWhen": "!this.fd('type') || this.fd('type') == 'NONE'"
          }
        ]
      },
@@ -177,7 +216,12 @@
            "type": "text",
            "label": "IP Address",
            "name": "ipRange",
-           "showWhen": "apiUser == true"
+           "showWhen": "this.fd('apiUser') == true",
+           "validations": {
+             "required": {
+               "message": "IP address is mandatory"
+             }
+           }
          }
        ]
      },

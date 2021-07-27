@@ -36,7 +36,7 @@ import Dropdown from 'primevue/dropdown';
 import http from '@/common/services/HttpClient.js';
 
 export default {
-  props: ['modelValue', 'listSource'],
+  props: ['modelValue', 'listSource', 'form'],
 
   emits: ['update:modelValue'],
 
@@ -61,54 +61,46 @@ export default {
 
   methods: {
     searchOptions(event) {
-      let query = event && event.value;
-      if (!query) {
-        if (this.ctx.defOptions) {
-          this.ctx.options = this.ctx.defOptions;
-        } else {
-          if (this.listSource.options) {
-            this.ctx.defOptions = this.ctx.options = this.listSource.options;
-          } else if (typeof this.listSource.loadFn == 'function') {
-            let self = this;
-            this.listSource.loadFn({maxResults: 100}).then(
-              function(options) {
-                self.ctx.defOptions = self.ctx.options = options;
-              }
-            );
-          } else if (typeof this.listSource.apiUrl == 'string') {
-            let self = this;
-            http.get(this.listSource.apiUrl, {maxResults: 100}).then(
-              function(options) {
-                self.ctx.defOptions = self.ctx.options = options;
+      let query = (event && event.value) || '';
+      query = query.toLowerCase();
+      if (this.ctx.defOptions && this.ctx.defOptions.length < 100) {
+        this.ctx.options = this.filterOptions(this.ctx.defOptions, query);
+      } else if (this.listSource.options) {
+        this.ctx.options = this.filterOptions(this.listSource.options, query);
+      } else if (typeof this.listSource.loadFn == 'function') {
+        let self = this;
+        this.listSource.loadFn({query: query, maxResults: 100}).then(
+          function(options) {
+            self.ctx.options = options;
+          }
+        );
+      } else if (typeof this.listSource.apiUrl == 'string') {
+        let self = this;
+        let ls = this.listSource;
+
+        let params = {maxResults: 100};
+        params[ls.searchProp || 'query'] = query;
+        if (ls.queryParams) {
+          if (ls.queryParams.static) {
+            Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.static[name]);
+          }
+
+          if (ls.queryParams.dynamic) {
+            let form = this.form;
+            Object.keys(ls.queryParams.dynamic).forEach(
+              function(name) {
+                let expr = ls.queryParams.dynamic[name];
+                params[name] = new Function('return ' + expr).call(form);
               }
             );
           }
         }
-      } else {
-        query = query.toLowerCase();
-        if (this.ctx.defOptions && this.ctx.defOptions.length < 100) {
-          this.ctx.options = this.filterOptions(this.ctx.defOptions, query);
-        } else {
-          if (this.listSource.options) {
-            this.ctx.options = this.filterOptions(this.listSource.options, query);
-          } else if (typeof this.listSource.loadFn == 'function') {
-            let self = this;
-            this.listSource.loadFn({query: query, maxResults: 100}).then(
-              function(options) {
-                self.ctx.options = options;
-              }
-            );
-          } else if (typeof this.listSource.apiUrl == 'string') {
-            let self = this;
-            let params = {maxResults: 100};
-            params[this.listSource.searchProp || 'query'] = query;
-            http.get(this.listSource.apiUrl, params).then(
-              function(options) {
-                self.ctx.options = options;
-              }
-            );
+
+        http.get(this.listSource.apiUrl, params).then(
+          function(options) {
+            self.ctx.options = options;
           }
-        }
+        );
       }
     },
 

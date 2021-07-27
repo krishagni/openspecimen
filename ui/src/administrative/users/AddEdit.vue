@@ -12,7 +12,7 @@
     </PageHeader>
     <PageBody>
       <div v-if="ctx.user">
-        <Form :schema="userSchema" :data="ctx.user" @input="handleUserChange($event)">
+        <Form ref="userForm" :schema="userSchema" :data="ctx.user" @input="handleUserChange($event)">
           <div>
             <Button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate"/>
             <Button label="Update" v-if="!!ctx.user.id" @click="saveOrUpdate"/>
@@ -85,6 +85,10 @@ export default {
     },
 
     saveOrUpdate: function() {
+      if(!this.$refs.userForm.validate()) {
+        return;
+      }
+
       userSvc.saveOrUpdate(this.ctx.user).then(
         function(result) {
           routerSvc.ngGoto('user-detail.overview', {userId: result.id});
