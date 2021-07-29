@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.specimen')
   .controller('BulkCreateDerivativesCtrl', function(
-    $scope, $state, $injector, $translate, $q, parentSpmns, cp, cpr,
+    $scope, $state, $injector, $translate, $q, userRole, parentSpmns, cp, cpr,
     cpDict, derivedFields, spmnHeaders, incrFreezeThawCycles, containerAllocRules,
     Specimen, Alerts, Util, SpecimenUtil, Container, ExtensionsUtil, SpecimensHolder) {
 
@@ -46,8 +46,9 @@ angular.module('os.biospecimen.specimen')
         viewCtx: $scope, static: false,
         showRowCopy: true, hideFooterActions: true, allowBulkUpload: false
       };
+
       var groups = ctx.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(
-        cpDict, derivedFields || [], derivedSpmns, {}, opts);
+        cpDict, derivedFields || [], derivedSpmns, {userRole: userRole}, opts);
       ctx.warnNoMatch = groups.length > 1 && groups[groups.length - 1].noMatch;
       ctx.showCustomFields = (groups.length > 1) || (groups.length == 1 && !groups[0].noMatch);
       if (ctx.showCustomFields) {

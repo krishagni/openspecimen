@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
   .controller('ParticipantOverviewCtrl', function(
-    $scope, $state, $stateParams, $injector, hasSde, hasDict, hasFieldsFn,
+    $scope, $state, $stateParams, $injector, userRole, hasSde, hasDict, hasFieldsFn,
     storePhi, cpDict, visitsTab, cp, cpr, consents, visits,
     Visit, CollectSpecimensSvc, SpecimenLabelPrinter, ExtensionsUtil, Util, Alerts) {
 
@@ -12,7 +12,7 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
 
       ExtensionsUtil.createExtensionFieldMap($scope.cpr.participant, hasDict);
       $scope.partCtx = {
-        obj: {cpr: $scope.cpr, consents: createCodedResps(consents)},
+        obj: {cpr: $scope.cpr, consents: createCodedResps(consents), userRole: userRole},
         inObjs: ['cpr', 'consents', 'calcCpr'],
         showEdit: hasFieldsFn(['cpr'], []),
         auditObjs: [

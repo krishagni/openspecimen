@@ -480,6 +480,14 @@ angular.module('os.biospecimen.specimen',
 
           incrFreezeThawCycles: function(cp, CpConfigSvc) {
             return CpConfigSvc.getCommonCfg(cp.id, 'incrementFreezeThawCycles').then(defBoolTrue);
+          },
+
+          userRole: function(cp, AuthorizationService) {
+            if (cp && cp.id > 0) {
+              return AuthorizationService.getRole(cp);
+            }
+
+            return null;
           }
         },
         parent: 'signed-in'
@@ -559,6 +567,14 @@ angular.module('os.biospecimen.specimen',
 
           incrFreezeThawCycles: function(cp, CpConfigSvc) {
             return CpConfigSvc.getCommonCfg(cp.id, 'incrementFreezeThawCycles').then(defBoolTrue);
+          },
+
+          userRole: function(cp, AuthorizationService) {
+            if (cp && cp.id > 0) {
+              return AuthorizationService.getRole(cp);
+            }
+
+            return null;
           }
         },
         parent: 'signed-in'

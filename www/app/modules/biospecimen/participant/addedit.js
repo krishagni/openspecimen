@@ -2,7 +2,7 @@
 angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', 'os.administrative.models'])
   .controller('ParticipantAddEditCtrl', function(
     $scope, $state, $stateParams, $translate, $modal, $q, $timeout, $injector,
-    cp, cpr, extensionCtxt, hasDict, cpDict, twoStepReg, layout,
+    userRole, cp, cpr, extensionCtxt, hasDict, cpDict, twoStepReg, layout,
     onValueChangeCb, mrnAccessRestriction, addPatientOnLookupFail,
     lookupFieldsCfg, lockedFields, cpEvents, visitsTab,
     CpConfigSvc, CollectionProtocolRegistration, Participant,
@@ -31,7 +31,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
         },
         twoStep: lookupFieldsCfg.configured,
         edit: !!cpr.id,
-        obj: {cpr: $scope.cpr, cp: cp},
+        obj: {cpr: $scope.cpr, cp: cp, userRole: userRole},
         inObjs: ['cpr'],
         mrnAccessRestriction: mrnAccessRestriction,
         step: !cpr.id ? 'lookupParticipant' : 'registerParticipant',

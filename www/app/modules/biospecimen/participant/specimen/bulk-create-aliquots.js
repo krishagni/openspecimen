@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.specimen')
   .controller('BulkCreateAliquotsCtrl', function(
-    $scope, $q, $injector, $translate, parentSpmns, cp, cpr, containerAllocRules, aliquotQtyReq,
+    $scope, $q, $injector, $translate, userRole, parentSpmns, cp, cpr, containerAllocRules, aliquotQtyReq,
     sysAliquotFmt, createDerived, cpDict, aliquotFields, spmnHeaders, incrFreezeThawCycles,
     Specimen, Alerts, Util, SpecimenUtil, Container) {
 
@@ -64,7 +64,7 @@ angular.module('os.biospecimen.specimen')
       };
 
       var groups = ctx.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(
-        cpDict, aliquotFields || [], aliquotsSpec, {}, opts);
+        cpDict, aliquotFields || [], aliquotsSpec, {userRole: userRole}, opts);
       if (groups.length > 1 || (groups.length == 1 && !groups[0].noMatch)) {
         if (groups[groups.length - 1].noMatch) {
           ctx.warnNoMatch = true;

@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.specimen.overview', ['os.biospecimen.models'])
   .controller('SpecimenOverviewCtrl', function(
-    $scope, $rootScope, $modal, hasDict, cpr, visit, specimen, showSpmnActivity,
+    $scope, $rootScope, $modal, hasDict, userRole, cpr, visit, specimen, showSpmnActivity,
     osRightDrawerSvc, Specimen, SpecimenLabelPrinter, Util, ExtensionsUtil) {
 
     function init() {
@@ -10,7 +10,7 @@ angular.module('os.biospecimen.specimen.overview', ['os.biospecimen.models'])
       }
 
       $scope.spmnCtx = {
-        obj: {cpr: cpr, visit: visit, specimen: specimen},
+        obj: {cpr: cpr, visit: visit, specimen: specimen, userRole: userRole},
         inObjs: ['specimen', 'calcSpecimen',],
         exObjs: ['specimen.events'],
         watcher: ['specimen.storageLocation', 'specimen.collectionEvent.user', 'specimen.receivedEvent.user'],
