@@ -45,6 +45,7 @@ import edu.common.dynamicextensions.domain.nui.SubFormControl;
 import edu.common.dynamicextensions.napi.FormData;
 import edu.common.dynamicextensions.nutility.FileUploadMgr;
 import krishagni.catissueplus.beans.FormContextBean;
+import krishagni.catissueplus.beans.FormRecordEntryBean;
 
 public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, Map<String, Object>> {
 	
@@ -82,8 +83,6 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 			String recordId = (String)extnObj.get("recordId");
 			if (importDetail.isCreate() && StringUtils.isNotBlank(recordId)) {
 				return ResponseEvent.userError(FormErrorCode.REC_ID_SPECIFIED_FOR_CREATE);
-			} else if (!importDetail.isCreate() && StringUtils.isBlank(recordId)) {
-				return ResponseEvent.userError(FormErrorCode.REC_ID_REQUIRED);
 			}
 
 			if (importDetail.isCreate() || !isDelete(extnObj)) {
@@ -107,39 +106,81 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 
 		Map<String, String> params  = importDetail.getParams();
 		String entityType = params.get("entityType");
-		Long objectId = null;
+
+		Map<String, Object> objectInfo = getLinkedObjectInfo(entityType, extnObj);
+		CollectionProtocol cp = (CollectionProtocol) objectInfo.get("cp");
+		Long objectId         = (Long) objectInfo.get("objectId");
+		Long reObjectId       = (Long) objectInfo.get("reObjectId");
+		Long entityId         = (Long) objectInfo.get("entityId");
+
+		Container form = getForm(params.get("formName"));
+		Long formCtxId = getFormContextId(form, entityType, cp, entityId);
+
+		Long recordId = null;
+		if (!importDetail.isCreate()) {
+			recordId = getRecordId(extnObj, formCtxId, reObjectId != null ? reObjectId : objectId);
+		}
+
+		Map<String, Object> appData = new HashMap<>();
+		appData.put("formCtxtId", formCtxId);
+		appData.put("objectId", objectId);
+		formValueMap.put("appData", appData);
+		if (recordId != null) {
+			formValueMap.put("id", recordId);
+		}
+
+		initFileFields(importDetail.getUploadedFilesDir(), form, formValueMap);
+
+		FormData formData = FormData.getFormData(form, formValueMap, true, null);
+
+		FormDataDetail formDataDetail = new FormDataDetail();
+		formDataDetail.setFormId(form.getId());
+		formDataDetail.setRecordId(formData.getRecordId());
+		formDataDetail.setFormData(formData);
+		formDataDetail.setPartial(true);
+		ResponseEvent<FormDataDetail> resp = formSvc.saveFormData(new RequestEvent<>(formDataDetail));
+		resp.throwErrorIfUnsuccessful();
+		return ResponseEvent.response(resp.getPayload().getFormData().getFieldNameValueMap(true));
+	}
+
+	private Map<String, Object> getLinkedObjectInfo(String entityType, Map<String, Object> extnObj) {
 		CollectionProtocol cp = null;
+		Long objectId = null;
+		Long reObjectId = null;
 		Long entityId = null;
 
 		if (entityType.equals("Participant") || entityType.equals("CommonParticipant")) {
 			String cpShortTitle = (String)extnObj.get("cpShortTitle");
 			if (StringUtils.isBlank(cpShortTitle)) {
-				return ResponseEvent.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
+				throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
 			}
 
 			String ppid = (String)extnObj.get("ppid");
 			if (StringUtils.isBlank(ppid)) {
-				return ResponseEvent.userError(CprErrorCode.PPID_REQUIRED);
+				throw OpenSpecimenException.userError(CprErrorCode.PPID_REQUIRED);
 			}
 
 			CollectionProtocolRegistration cpr = daoFactory.getCprDao().getCprByCpShortTitleAndPpid(cpShortTitle, ppid);
 			if (cpr == null) {
-				return ResponseEvent.userError(CprErrorCode.M_NOT_FOUND, cpShortTitle + ":" + ppid, 1);
+				throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, cpShortTitle + ":" + ppid, 1);
 			}
-			
+
 			objectId = cpr.getId();
 			cp = cpr.getCollectionProtocol();
+			if (entityType.equals("CommonParticipant")) {
+				reObjectId = cpr.getParticipant().getId();
+			}
 		} else if (entityType.equals("SpecimenCollectionGroup")) {
 			String visitName = (String)extnObj.get("visitName");
 			if (StringUtils.isBlank(visitName)) {
-				return ResponseEvent.userError(VisitErrorCode.NAME_REQUIRED);
+				throw OpenSpecimenException.userError(VisitErrorCode.NAME_REQUIRED);
 			}
 
 			Visit visit = daoFactory.getVisitsDao().getByName(visitName);
 			if (visit == null) {
-				return ResponseEvent.userError(VisitErrorCode.NOT_FOUND, visitName);
+				throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, visitName);
 			}
-			
+
 			objectId = visit.getId();
 			cp = visit.getCollectionProtocol();
 		} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
@@ -153,62 +194,75 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 		} else if (entityType.equals("User")) {
 			String emailId = (String) extnObj.get("emailAddress");
 			if (StringUtils.isBlank(emailId)) {
-				return ResponseEvent.userError(UserErrorCode.EMAIL_REQUIRED);
+				throw OpenSpecimenException.userError(UserErrorCode.EMAIL_REQUIRED);
 			}
 
 			User user = daoFactory.getUserDao().getUserByEmailAddress(emailId);
 			if (user == null) {
-				return ResponseEvent.userError(UserErrorCode.NOT_FOUND, emailId);
+				throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, emailId);
 			}
 
 			objectId = user.getId();
 			entityId = user.getInstitute().getId();
 		}
 
-		String formName = params.get("formName");
+		Map<String, Object> result = new HashMap<>();
+		result.put("cp", cp);
+		result.put("objectId", objectId);
+		result.put("reObjectId", reObjectId);
+		result.put("entityId", entityId);
+		return result;
+	}
+
+	private Container getForm(String formName) {
 		Container form = Container.getContainer(formName);
 		if (form == null) {
-			return ResponseEvent.userError(FormErrorCode.NOT_FOUND, formName, 1);
+			throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, formName, 1);
 		}
 
+		return form;
+	}
+
+	private Long getFormContextId(Container form, String entityType, CollectionProtocol cp, Long entityId) {
 		Long formCtxId = null;
 		if (entityType.equals("User")) {
 			FormContextBean fc  = formDao.getFormContext(false, "User", entityId, form.getId());
 			if (fc == null) {
-				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Form is not associated at users level for the institute: " + entityId);
+				fc = formDao.getFormContext(false, "User", -1L, form.getId());
+				if (fc == null) {
+					throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Form is not associated at users level for the institute: " + entityId);
+				}
 			}
 
 			formCtxId = fc.getIdentifier();
 		} else {
 			formCtxId = formDao.getFormCtxtId(form.getId(), entityType, cp.getId());
 			if (formCtxId == null) {
-				return ResponseEvent.userError(FormErrorCode.NO_ASSOCIATION, cp.getShortTitle(), form.getCaption());
+				throw OpenSpecimenException.userError(FormErrorCode.NO_ASSOCIATION, cp.getShortTitle(), form.getCaption());
 			}
 		}
-		
-		Map<String, Object> appData = new HashMap<>();
-		appData.put("formCtxtId", formCtxId);
-		appData.put("objectId", objectId);
-		formValueMap.put("appData", appData);
 
-		initFileFields(importDetail.getUploadedFilesDir(), form, formValueMap);
-		
-		String recordId = (String)extnObj.get("recordId");
-		if (StringUtils.isNotBlank(recordId)) {
-			formValueMap.put("id", Long.parseLong(recordId));
+		return formCtxId;
+	}
+
+	private Long getRecordId(Map<String, Object> extnObj, Long formCtxId, Long objectId) {
+		Long recordId = null;
+
+		String inputRecordId = (String)extnObj.get("recordId");
+		if (StringUtils.isNotBlank(inputRecordId)) {
+			recordId = Long.parseLong(inputRecordId);
+		} else {
+			List<FormRecordEntryBean> recordEntries = formDao.getRecordEntries(formCtxId, objectId);
+			if (recordEntries == null || recordEntries.isEmpty()) {
+				throw OpenSpecimenException.userError(FormErrorCode.REC_NOT_FOUND);
+			} else if (recordEntries.size() > 1) {
+				throw OpenSpecimenException.userError(FormErrorCode.MULTI_RECS_ID_REQ);
+			}
+
+			recordId = recordEntries.iterator().next().getRecordId();
 		}
-				
-		FormData formData = FormData.getFormData(form, formValueMap, true, null);
-		
-		FormDataDetail formDataDetail = new FormDataDetail();
-		formDataDetail.setFormId(form.getId());
-		formDataDetail.setRecordId(formData.getRecordId());
-		formDataDetail.setFormData(formData);
-		formDataDetail.setPartial(true);
-		ResponseEvent<FormDataDetail> resp = formSvc.saveFormData(new RequestEvent<>(formDataDetail));
-		resp.throwErrorIfUnsuccessful();
-		
-		return ResponseEvent.response(resp.getPayload().getFormData().getFieldNameValueMap(true));
+
+		return recordId;
 	}
 
 	private void initFileFields(String filesDir, Container form, Map<String, Object> formValueMap) {
@@ -283,20 +337,24 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 	}
 	
 	private ResponseEvent<Map<String, Object>> deleteRecord(ImportObjectDetail<Map<String, Object>> importDetail) {
-		String recordId = (String)importDetail.getObject().get("recordId");
-		String formName = importDetail.getParams().get("formName");
-		
-		Container form = Container.getContainer(formName);
-		if (form == null) {
-			return ResponseEvent.userError(FormErrorCode.NOT_FOUND, formName, 1);
-		}
-		
+		Map<String, Object> extnObj = importDetail.getObject();
+		Map<String, String> params  = importDetail.getParams();
+		Map<String, Object> objectInfo = getLinkedObjectInfo(params.get("entityType"), extnObj);
+
+		CollectionProtocol cp = (CollectionProtocol) objectInfo.get("cp");
+		Long objectId         = (Long) objectInfo.get("objectId");
+		Long reObjectId       = (Long) objectInfo.get("reObjectId");
+		Long entityId         = (Long) objectInfo.get("entityId");
+
+		Container form = getForm(params.get("formName"));
+		Long formCtxId = getFormContextId(form, params.get("entityType"), cp, entityId);
+		Long recordId  = getRecordId(extnObj, formCtxId, reObjectId != null ? reObjectId : objectId);
+
 		FormRecordCriteria crit = new FormRecordCriteria();
 		crit.setFormId(form.getId());
-		crit.setRecordId(Long.parseLong(recordId));
+		crit.setRecordId(recordId);
 		ResponseEvent<Long> resp = formSvc.deleteRecord(new RequestEvent<>(crit));
 		resp.throwErrorIfUnsuccessful();
-		
 		return ResponseEvent.response(importDetail.getObject());
 	}
 	
