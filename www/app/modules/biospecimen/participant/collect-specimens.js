@@ -469,11 +469,18 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             rerun: false
           }
 
+          var collDate = null;
+          if (uiOpts.defCollectionDate == 'visit_date') {
+            collDate = visit.visitDate;
+          } else if (uiOpts.defCollectionDate == 'current_date') {
+            collDate = new Date();
+          }
+
           $scope.collDetail = {
             collector: undefined,
-            collectionDate: new Date(),
+            collectionDate: collDate,
             receiver: undefined,
-            receiveDate: new Date(),
+            receiveDate: collDate,
             receiveQuality: CollectSpecimensSvc.defReceiveQuality()
           };
 
