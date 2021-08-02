@@ -10,16 +10,17 @@
   
   <div class="container">
     <div os-wizard="eventWizard" type="classic">
-      <os-wizard-step title="{{'specimens.bulk_events.select_specimens' | translate}}" on-finish="validateSpecimens()">
+      <os-wizard-step order="0" title="{{'specimens.bulk_events.select_specimens' | translate}}"
+        on-finish="validateSpecimens()">
         <div ng-include src="'participant/specimen/bulkevent-select-specimens.html'"></div>
       </os-wizard-step>
       
-      <os-wizard-step title="{{'specimens.bulk_events.options' | translate}}" on-finish="passThrough()"
+      <os-wizard-step order="1" title="{{'specimens.bulk_events.options' | translate}}" on-finish="passThrough()"
         ng-if="ctx.allowEventSelect">
         <div ng-include src="'participant/specimen/bulkevent-options.html'"></div>
       </os-wizard-step>
 
-      <os-wizard-step title="{{'specimens.bulk_events.event_details' | translate}}" on-finish="passThrough()">
+      <os-wizard-step order="2" title="{{'specimens.bulk_events.event_details' | translate}}" on-finish="passThrough()">
         <div ng-include src="'participant/specimen/bulkevent-add-details.html'"></div>
       </os-wizard-step>
     </div>

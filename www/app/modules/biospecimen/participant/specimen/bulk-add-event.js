@@ -1,7 +1,7 @@
 angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models'])
   .controller('BulkAddEventCtrl', function(
     $scope, $translate, $q, events, event, Form, SpecimensHolder,
-    Specimen, SpecimenEvent, Alerts, Util, SpecimenUtil) {
+    Specimen, SpecimenEvent, Alerts, Util, SpecimenUtil, SettingUtil) {
 
     var ctx;
     function init() {
@@ -271,14 +271,32 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
     $scope.initEventDetailsView = function() {
       var formDefQ = Form.getDefinition(ctx.formId);
       var recordsQ = loadRecords();
+      var settingsQ = SettingUtil.getSetting('administrative', 'allow_spmn_relabeling').then(
+        function(setting) {
+          return setting.value == 'true' || setting.value == true;
+        }
+      );
 
       ctx.noEvents = false; ctx.noEventsFor = [];
-      $q.all([formDefQ, recordsQ]).then(
+      $q.all([formDefQ, recordsQ, settingsQ]).then(
         function(resps) {
           var formDef = resps[0];
           var records = resps[1];
+          var allowSpmnRelabeling = resps[2];
 
           ctx.formDef = formDef;
+          if (event && event.name == 'SpecimenReceivedEvent' && allowSpmnRelabeling) {
+            formDef.rows.splice(0, null,
+              [{
+                name: 'label',
+                udn: 'label',
+                caption: $translate.instant('specimens.new_label'),
+                type: 'stringTextField',
+                validationRules: []
+              }]
+            );
+          }
+
           ctx.mFormDef = removeRequiredAndDefValues(formDef);
           setFormDefToUse();
           ctx.opts.formId  = ctx.formId;
