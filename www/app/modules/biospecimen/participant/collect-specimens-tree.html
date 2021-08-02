@@ -350,7 +350,7 @@
       </div>
     </div>
 
-    <div class="row" ng-show="showCollVisitDetails && uiOpts.showCollectionEvent">
+    <div class="row" ng-if="showCollVisitDetails && uiOpts.showCollectionEvent">
       <div class="col-xs-12">
         <div class="form-group">
           <label class="col-xs-2 control-label" translate="specimens.col_event.title">Collection Details</label>
@@ -373,7 +373,7 @@
       </div>
     </div>
 
-    <div class="row" ng-show="showCollVisitDetails && uiOpts.showReceivedEvent">
+    <div class="row" ng-if="showCollVisitDetails && uiOpts.showReceivedEvent">
       <div class="col-xs-12">
         <div class="form-group">
           <label class="col-xs-2 control-label" translate="specimens.recv_event.title">Receive Details</label>
