@@ -146,6 +146,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
         }
       ).map(
         function(specimen) {
+          ExtensionsUtil.createExtensionFieldMap(specimen, true);
           return {
             specimen: specimen,
             quantity: specimen.availableQty,
@@ -396,6 +397,7 @@ angular.module('os.administrative.order.addedit', ['os.administrative.models', '
           angular.forEach(spmns,
             function(spmn) {
               itemsMap[spmn.id].specimen = spmn;
+              ExtensionsUtil.createExtensionFieldMap(spmn, true);
             }
           );
 
