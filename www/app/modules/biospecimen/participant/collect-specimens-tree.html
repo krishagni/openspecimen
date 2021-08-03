@@ -203,7 +203,7 @@
         <td class="col"
           ng-show="uiOpts.treeColumns.quantity"
           ng-style="{width: uiOpts.treeColumns.quantity.width + '%'}">
-          <div ng-switch on="specimen.existingStatus == 'Collected'">
+          <div ng-switch on="!!specimen.existingStatus && specimen.existingStatus != 'Pending'">
             <span ng-switch-when="true">
               <os-spmn-measure-val value="specimen.availableQty" specimen="specimen"></os-spmn-measure-val>
             </span>
@@ -225,7 +225,7 @@
             <os-disp-storage-position position="specimen.storageLocation"></os-disp-storage-position>
           </span>
           <span ng-switch-default>
-            <os-storage-position os-md-input edit-when="entity.existingStatus != 'Collected'"
+            <os-storage-position os-md-input edit-when="!entity.existingStatus || entity.existingStatus == 'Pending'"
               entity="specimen" cp-id="cpr.cpId" virtual="specimen.isVirtual" hide-placeholder>
             </os-storage-position>
           </span>
@@ -234,17 +234,20 @@
           ng-show="uiOpts.treeColumns.collector && showCollector"
           ng-style="{width: uiOpts.treeColumns.collector.width + '%'}">
           <os-users os-md-input ng-model="specimen.collectionEvent.user"
-            ng-if="specimen.lineage == 'New' && specimen.existingStatus != 'Collected'" required>
+            ng-if="specimen.lineage == 'New' && (!specimen.existingStatus || specimen.existingStatus == 'Pending')"
+            required>
           </os-users>
-          <span ng-if="specimen.lineage == 'New' && specimen.existingStatus == 'Collected'">
-            {{specimen.collectionEvent.user | osUserDisplayName}}
+          <span ng-if="specimen.lineage == 'New' &&
+            (!!specimen.existingStatus && specimen.existingStatus != 'Pending')">
+            {{specimen.collectionEvent.user | osUserDisplayName | osNoValue}}
           </span>
         </td>
         <td class="col" style="overflow: visible;"
           ng-show="uiOpts.treeColumns.collectionDate && showCollector"
           ng-style="{width: uiOpts.treeColumns.collectionDate.width + '%'}">
 
-          <div class="row" ng-if="specimen.lineage == 'New' && specimen.existingStatus != 'Collected'">
+          <div class="row" ng-if="specimen.lineage == 'New' &&
+            (!specimen.existingStatus || specimen.existingStatus == 'Pending')">
             <div class="form-group">
               <div class="col-xs-8 input" style="padding-left: 0px;">
                 <os-date-picker date="specimen.collectionEvent.time" md-type="true">
@@ -258,15 +261,16 @@
             </div>
           </div>
 
-          <span ng-if="specimen.lineage == 'New' && specimen.existingStatus == 'Collected'">
-            {{specimen.collectionEvent.time | date: global.dateTimeFmt}}
+          <span ng-if="specimen.lineage == 'New' &&
+            (!!specimen.existingStatus && specimen.existingStatus != 'Pending')">
+            {{specimen.collectionEvent.time | date: global.dateTimeFmt | osNoValue}}
           </span>
         </td>
         <td class="col" style="overflow: visible;"
           ng-show="uiOpts.treeColumns.status"
           ng-style="{width: uiOpts.treeColumns.status.width + '%'}">
-          <os-select os-md-input edit-when="specimen.existingStatus != 'Collected'" list="specimenStatuses" 
-            ng-model="specimen.status" on-select="statusChanged(specimen)" required>
+          <os-select os-md-input edit-when="!specimen.existingStatus || specimen.existingStatus == 'Pending'"
+            list="specimenStatuses" ng-model="specimen.status" on-select="statusChanged(specimen)" required>
           </os-select>
         </td>
         <td class="col">
@@ -346,7 +350,7 @@
       </div>
     </div>
 
-    <div class="row" ng-show="showCollVisitDetails && uiOpts.showCollectionEvent">
+    <div class="row" ng-if="showCollVisitDetails && uiOpts.showCollectionEvent">
       <div class="col-xs-12">
         <div class="form-group">
           <label class="col-xs-2 control-label" translate="specimens.col_event.title">Collection Details</label>
@@ -369,7 +373,7 @@
       </div>
     </div>
 
-    <div class="row" ng-show="showCollVisitDetails && uiOpts.showReceivedEvent">
+    <div class="row" ng-if="showCollVisitDetails && uiOpts.showReceivedEvent">
       <div class="col-xs-12">
         <div class="form-group">
           <label class="col-xs-2 control-label" translate="specimens.recv_event.title">Receive Details</label>

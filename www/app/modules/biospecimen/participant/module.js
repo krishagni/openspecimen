@@ -225,6 +225,10 @@ angular.module('os.biospecimen.participant',
                 return false;
               }
             );
+          },
+
+          userRole: function(cp, AuthorizationService) {
+            return AuthorizationService.getRole(cp);
           }
         },
         parent: 'signed-in',

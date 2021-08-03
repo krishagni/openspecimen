@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
+import com.krishagni.catissueplus.core.biospecimen.services.impl.CpWorkflowTxnCache;
 import com.krishagni.catissueplus.core.common.PvAttributes;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
@@ -108,10 +109,20 @@ public class SpecimenCollectionEvent extends SpecimenEvent {
 			event.setProcedure(event.daoFactory.getPermissibleValueDao().getPv(PvAttributes.COLL_PROC, Specimen.NOT_SPECIFIED));
 		}
 
-		Date collectionTime;
-		if (specimen.getVisit() != null && specimen.getVisit().getVisitDate() != null) {
+		String defCollectionDate = null;
+		if (specimen.getCollectionProtocol() != null) {
+			defCollectionDate = CpWorkflowTxnCache.getInstance()
+				.getValue(specimen.getCpId(), "specimenCollection", "defCollectionDate");
+		}
+
+		Date collectionTime = null;
+		if (StringUtils.equals(defCollectionDate, "current_date")) {
+			collectionTime = Calendar.getInstance().getTime();
+		} else if (!specimen.getCollectionProtocol().isSpecimenCentric() && specimen.getVisit() != null) {
 			collectionTime = specimen.getVisit().getVisitDate();
-		} else {
+		}
+
+		if (collectionTime == null) {
 			collectionTime = Calendar.getInstance().getTime();
 		}
 

@@ -1231,6 +1231,13 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			Specimen specimen = ensureSpecimenUpdateRights(objectId, form.hasPhiFields());
 			object = specimen;
 			if (isCollectionOrReceivedEvent(form)) {
+				if (isReceivedEvent(form.getName())) {
+					String newLabel = (String) formData.getAppData().get("newSpecimenlabel");
+					if (StringUtils.isNotBlank(newLabel)) {
+						specimen.setLabel(newLabel.trim());
+					}
+				}
+
 				specimen.setUpdated(true);
 				collOrRecvEvent = new SpecimenSavedEvent(specimen);
 			}
@@ -1307,7 +1314,15 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	private boolean isCollectionOrReceivedEvent(String name) {
-		return name.equals("SpecimenCollectionEvent") || name.equals("SpecimenReceivedEvent");
+		return isCollectionEvent(name) || isReceivedEvent(name);
+	}
+
+	private boolean isCollectionEvent(String name) {
+		return name.equals("SpecimenCollectionEvent");
+	}
+
+	private boolean isReceivedEvent(String name) {
+		return name.equals("SpecimenReceivedEvent");
 	}
 
 	private boolean isEditableEvent(Container form) {

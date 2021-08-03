@@ -26,8 +26,8 @@ public enum FormErrorCode implements ErrorCode {
 	MULTIPLE_RECS_NOT_ALLOWED,
 	
 	INVALID_REC_ID,
-	
-	REC_ID_REQUIRED,
+
+	MULTI_RECS_ID_REQ,
 	
 	REC_ID_SPECIFIED_FOR_CREATE,
 	

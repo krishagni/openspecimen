@@ -92,6 +92,31 @@ angular.module('openspecimen')
 
       userRights: function() {
         return userRights;
+      },
+
+      getRole: function(cp) {
+        if (currentUser.admin) {
+          return 'system-admin';
+        }
+
+        if (!currentUser.roles || currentUser.roles.length == 0) {
+          return null;
+        }
+
+        for (var i = 0; i < currentUser.roles.length; ++i) {
+          var sr = currentUser.roles[i];
+          if (!sr.site && !sr.collectionProtocol) {
+            return sr.role.name;
+          } else if (sr.collectionProtocol && sr.collectionProtocol.id == cp.id) {
+            return sr.role.name;
+          } else if (sr.site && !sr.collectionProtocol) {
+            if (cp.cpSites.some(function(s) { return s.siteId == sr.site.id; })) {
+              return sr.role.name;
+            }
+          }
+        }
+
+        return null;
       }
     }
   });

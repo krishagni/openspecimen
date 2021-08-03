@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.visit.addedit', [])
   .controller('AddEditVisitCtrl', function(
-    $scope, $state, $stateParams, cp, cpr, visit, latestVisit,
+    $scope, $state, $stateParams, userRole, cp, cpr, visit, latestVisit,
     extensionCtxt, hasDict, layout, onValueChangeCb, mrnAccessRestriction,
     ParticipantSpecimensViewState, PvManager, ExtensionsUtil, CollectSpecimensSvc) {
 
@@ -15,7 +15,7 @@ angular.module('os.biospecimen.visit.addedit', [])
       angular.extend(currVisit, {cprId: cpr.id, cpTitle: cpr.cpTitle});
 
       var ctx = $scope.visitCtx = {
-        obj: {visit: $scope.currVisit, cpr: cpr, cp: cp},
+        obj: {visit: $scope.currVisit, cpr: cpr, cp: cp, userRole: userRole},
         opts: {viewCtx: $scope, layout: layout, onValueChange: onValueChangeCb, mdInput: false},
         inObjs: ['visit'],
         mrnAccessRestriction: mrnAccessRestriction

@@ -352,7 +352,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
         barcodingEnabled: '=',
         spmnBarcodesAutoGen: '=',
         mrnAccessRestriction: '=',
-        onSave: '&'
+        onSave: '&',
+        onCancel: '&'
       },
 
       controller: function($scope) {
@@ -379,7 +380,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           if (!uiOpts.treeColumns) {
             uiOpts.treeColumns = getDefaultTreeColumns($scope.storeSpmnsAllowed);
           } else {
-            uiOpts.treeColumns = getTreeColumns(uiOpts.treeColumns, $scope.storeSpmnsAllowed);
+            var ctx = {cp: cp, cpr: cpr, visit: visit, userRole: AuthorizationService.getRole(cp)}
+            uiOpts.treeColumns = getTreeColumns(uiOpts.treeColumns, ctx, $scope.storeSpmnsAllowed);
           }
 
           var printSettings = {};
@@ -397,7 +399,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
               specimen.existingStatus = specimen.status || 'Pending';
               specimen.isVirtual = specimen.showVirtual();
               specimen.initialQty = Util.getNumberInScientificNotation(specimen.initialQty);
-              if (specimen.status != 'Collected') {
+              if (!specimen.status || specimen.status == 'Pending') {
                 specimen.status = uiOpts.defCollectionStatus || 'Collected';
                 specimen.printLabel = printLabel(printSettings, specimen);
                 if (specimen.lineage == 'New') {
@@ -467,11 +469,18 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             rerun: false
           }
 
+          var collDate = null;
+          if (uiOpts.defCollectionDate == 'visit_date') {
+            collDate = visit.visitDate;
+          } else if (uiOpts.defCollectionDate == 'current_date') {
+            collDate = new Date();
+          }
+
           $scope.collDetail = {
             collector: undefined,
-            collectionDate: new Date(),
+            collectionDate: collDate,
             receiver: undefined,
-            receiveDate: new Date(),
+            receiveDate: collDate,
             receiveQuality: CollectSpecimensSvc.defReceiveQuality()
           };
 
@@ -495,8 +504,28 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           return result;
         }
 
-        function getTreeColumns(treeColumns, storeSpmnsAllowed) {
-          var result = angular.copy(treeColumns);
+        function getTreeColumns(treeColumns, ctx, storeSpmnsAllowed) {
+          var result = {};
+          var match = treeColumns.find(
+            function(columns) {
+              if (!columns.criteria) {
+                return true;
+              }
+
+              return $parse(columns.criteria)(ctx);
+            }
+          );
+
+          if (!match) {
+            return getDefaultTreeColumns(storeSpmnsAllowed);
+          }
+
+          angular.forEach(match.fields,
+            function(field) {
+              result[field.name] = angular.copy(field);
+            }
+          );
+
           if (!result.description) {
             result.description = {width: 30};
           }
@@ -1466,7 +1495,9 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
         };
   
         $scope.cancel = function() {
-          CollectSpecimensSvc.navigateTo($scope, visit);
+          if (!$scope.onCancel({visit: visit})) {
+            CollectSpecimensSvc.navigateTo($scope, visit);
+          }
         }
   
         init();
@@ -1502,7 +1533,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
   })
 
   .directive('osCollectSpecimensNthStep', function(
-    $state, $injector, CollectSpecimensSvc, ExtensionsUtil, SpecimenUtil, Util, ApiUrls, Visit) {
+    $state, $injector, $parse, CollectSpecimensSvc, ExtensionsUtil,
+    SpecimenUtil, Util, ApiUrls, Visit, AuthorizationService) {
     return {
       restrict: 'E',
 
@@ -1560,8 +1592,14 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             hideFooterActions: true
           };
 
+          var userRole = AuthorizationService.getRole(cp);
           var groups = $scope.customFieldGroups = SpecimenUtil.sdeGroupSpecimens(
-            cpDict, spmnCollFields.fieldGroups || [], specimens, {cp: cp, cpr: cpr, visit: visit}, opts);
+            cpDict,
+            spmnCollFields.fieldGroups || [],
+            specimens,
+            {cp: cp, cpr: cpr, visit: visit, userRole: userRole},
+            opts
+          );
 
           $scope.showManifestPrint = (ui.os.appProps.plugins || []).indexOf('os-extras') != -1;
           $scope.visit = visit;
@@ -1579,7 +1617,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
               }
             }
 
-            var visitFieldsGrp = getVisitFieldsGroup(cp, visit, spmnCollFields);
+            var visitFieldsGrp = getVisitFieldsGroup(cp, cpr, visit, spmnCollFields, userRole);
             var showVisitFields = CollectSpecimensSvc.showCollVisitDetails();
             if (visitFieldsGrp && showVisitFields) {
               groups.unshift(visitFieldsGrp);
@@ -1597,15 +1635,35 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           $scope.onSave(dbVisit || visit);
         }
 
-        function getVisitFieldsGroup(cp, visit, spmnCollFields) {
-          if (!spmnCollFields.visitFields) {
+        function getVisitFieldsGroup(cp, cpr, visit, spmnCollFields, userRole) {
+          var group = spmnCollFields.visitFields;
+          if (!group) {
             return undefined;
+          }
+
+          if (group.criteria) {
+            var exprs = group.criteria.rules.map(
+              function(rule) {
+                if (rule.op == 'exists') {
+                  return '!!' + rule.field;
+                } else if (rule.op == 'not_exist') {
+                  return '!' + rule.field;
+                } else {
+                  return rule.field + ' ' + rule.op + ' ' + rule.value;
+                }
+              }
+            );
+
+            var expr = $parse(exprs.join(group.criteria.op == 'AND' ? ' && ' : ' || '));
+            if (!expr({cp: cp, cpr: cpr, visit: visit, userRole: userRole})) {
+              return undefined;
+            }
           }
 
           return {
             visitFields: true,
             multiple: true,
-            fields: {groups: [spmnCollFields.visitFields], table: []},
+            fields: {groups: [group], table: []},
             baseFields: cpDict,
             input: [{cp: cp, visit: visit}],
             opts: {static: true}

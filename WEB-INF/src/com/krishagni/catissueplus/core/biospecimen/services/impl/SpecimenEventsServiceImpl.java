@@ -13,6 +13,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.de.repository.FormDao;
 import com.krishagni.catissueplus.core.de.services.FormService;
 
+import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.napi.FormData;
 
 public class SpecimenEventsServiceImpl implements SpecimenEventsService {
@@ -36,8 +37,8 @@ public class SpecimenEventsServiceImpl implements SpecimenEventsService {
 			return ResponseEvent.response(Collections.emptyList());
 		}
 
-		Long formId = formDataList.get(0).getContainer().getId();
-		Long formCtxtId = formDao.getFormCtxtId(formId, "SpecimenEvent", -1L);
+		Container form = formDataList.get(0).getContainer();
+		Long formCtxtId = formDao.getFormCtxtId(form.getId(), "SpecimenEvent", -1L);
 		for (FormData formData : formDataList) {
 			Map<String, Object> appData = formData.getAppData();
 			appData.put("formCtxtId", formCtxtId);

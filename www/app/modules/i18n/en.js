@@ -757,6 +757,7 @@
     "num_of_specimens": "No. of Specimens",
     "lineage": "Lineage",
     "label": "Label",
+    "new_label": "New Label",
     "barcode": "Barcode",
     "label_barcode": "Label / Barcode",
     "use_barcode": "Use Barcode",
@@ -2907,12 +2908,12 @@
         "store_list_max_retries_desc": "Maximum number of attempts to execute store list before marking the store list as permanently failed.",
         "max_order_spmns_ui_limit": "Order Specimens UI Limit",
         "max_order_spmns_ui_limit_desc": "Maximum number of specimens whose details can be edited at the time of distribution using UI.",
-        "allow_spmn_relabeling": "Relabel Shipment Specimens",
-        "allow_spmn_relabeling_desc": "Enable to allow editing of specimen labels when shipments are received.",
+        "allow_spmn_relabeling": "Relabel Specimens",
+        "allow_spmn_relabeling_desc": "Allow editing of labels when specimens are received.",
         "download_labels_print_file": "Download Labels Print File",
         "download_labels_print_file_desc": "Enable or disable downloading of specimen labels print integration data file. When enabled, a CSV file containing the specimens data to be printed on labels (stickers) is downloaded to the user computer. When disabled, the integration file is not downloaded.",
         "allow_dist_label_printing": "Print Distribution Labels",
-        "allow_dist_label_printing_desc": "Enable to allow printing of labels when specimens are distributed.",
+        "allow_dist_label_printing_desc": "Allow printing of labels when specimens are distributed.",
 
         "order_attachment_type": "Order Attachment",
         "order_attachment_type_desc": "Files to send in the order processed email notifications. Valid values are none, csv_report, manifest, or both."

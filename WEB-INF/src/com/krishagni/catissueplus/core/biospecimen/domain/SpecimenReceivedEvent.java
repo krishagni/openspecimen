@@ -15,6 +15,8 @@ import com.krishagni.catissueplus.core.common.PvAttributes;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 public class SpecimenReceivedEvent extends SpecimenEvent {
+	public static final String FORM_NAME = "SpecimenReceivedEvent";
+
 	private PermissibleValue quality;
 
 	public SpecimenReceivedEvent(Specimen specimen) {
@@ -33,7 +35,7 @@ public class SpecimenReceivedEvent extends SpecimenEvent {
 
 	@Override
 	public String getFormName() {
-		return "SpecimenReceivedEvent";
+		return FORM_NAME;
 	}
 	
 	@Override
@@ -89,7 +91,8 @@ public class SpecimenReceivedEvent extends SpecimenEvent {
 		}
 
 		Date receivedTime;
-		if (specimen.getVisit() != null && specimen.getVisit().getVisitDate() != null) {
+		if (!specimen.getCollectionProtocol().isSpecimenCentric() &&
+			specimen.getVisit() != null && specimen.getVisit().getVisitDate() != null) {
 			receivedTime = specimen.getVisit().getVisitDate();
 		} else {
 			receivedTime = Calendar.getInstance().getTime();
