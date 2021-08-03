@@ -8,6 +8,10 @@ class Router {
       requestor: 'vueapp'
     }, '*');
   }
+
+  back() {
+    window.parent.postMessage({op: 'back', requestor: 'vueapp'}, '*');
+  }
 }
 
 export default new Router();

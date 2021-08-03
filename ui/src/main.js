@@ -18,6 +18,7 @@ import ui from './global.js';
 import App from './App.vue'
 import http from '@/common/services/HttpClient.js';
 import alerts from '@/common/services/Alerts.js';
+import itemsSvc from '@/common/services/ItemsHolder.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
@@ -69,7 +70,10 @@ window.addEventListener('message', function(event) {
     --count;
   } else if (event.data.op == 'getAppMenuItems') {
     ui.menuItems = event.data.resp;
+  } else if (event.data.op == 'getItems') {
+    itemsSvc.setItems(event.data.type, event.data.items);
   }
+    
 
   if (count == 0) {
     app.mount('#app')

@@ -1,0 +1,102 @@
+{
+  "rows": [
+     {
+       "fields": [
+         {
+           "type": "radio",
+           "label": "Type",
+           "name": "type",
+           "class": "inline",
+           "options": [
+             { "caption": "Super Administrator", "value": "SUPER" },
+             { "caption": "Institute Administrator", "value": "INSTITUTE" },
+             { "caption": "Contact", "value": "CONTACT" },
+             { "caption": "Regular", "value": "NONE" }
+           ]
+         }
+       ]
+     },
+
+     {
+       "fields": [
+         {
+           "type": "dropdown",
+           "label": "Institute",
+           "name": "instituteName",
+           "listSource": {
+             "apiUrl": "institutes",
+             "selectProp": "name",
+             "displayProp": "name"
+           }
+         }
+       ]
+     },
+
+     {
+       "fields": [
+         {
+           "type": "dropdown",
+           "label": "Primary Site",
+           "name": "primarySite",
+           "listSource": {
+             "apiUrl": "sites",
+             "selectProp": "name",
+             "displayProp": "name",
+             "searchProp": "name",
+             "queryParams": {
+               "dynamic": {
+                 "institute": "this.fd('instituteName')"
+               }
+             }
+           }
+         }
+       ]
+     },
+
+     {
+       "fields": [
+         {
+           "type": "dropdown",
+           "label": "Time Zone",
+           "name": "timeZone",
+           "listSource": {
+             "apiUrl": "time-zones",
+             "displayProp": "name",
+             "selectProp": "id"
+           }
+         }
+       ]
+     },
+
+     {
+       "fields": [
+         {
+           "type": "radio",
+           "label": "Manage Forms?",
+           "name": "manageForms",
+           "options": [
+             { "caption": "Yes", "value": true },
+             { "caption": "No", "value": false }
+           ],
+           "class": "inline",
+           "showWhen": "!this.fd('type') || this.fd('type') == 'NONE'"
+         }
+       ]
+     },
+
+     {
+       "fields": [
+         {
+           "type": "radio",
+           "label": "Disable Notifications?",
+           "name": "dnd",
+           "options": [
+             { "caption": "Yes", "value": true },
+             { "caption": "No", "value": false }
+           ],
+           "class": "inline"
+         }
+       ]
+     }
+  ]
+}

@@ -5,18 +5,31 @@
         <Breadcrumb :items="ctx.bcrumb" />
       </template>
 
-      <span v-if="!!ctx.user">
-        <h3 v-if="!ctx.user.id">Create User</h3>
-        <h3 v-else>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
+      <span v-if="!ctx.bulkUpdate">
+        <span v-if="!!ctx.user">
+          <h3 v-if="!ctx.user.id">Create User</h3>
+          <h3 v-else>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
+        </span>
+      </span>
+      <span v-else>
+        <h3>Bulk Update Users</h3>
       </span>
     </PageHeader>
     <PageBody>
-      <div v-if="ctx.user">
+      <div v-if="!ctx.bulkUpdate && ctx.user">
         <Form ref="userForm" :schema="userSchema" :data="ctx.user" @input="handleUserChange($event)">
           <div>
             <Button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate"/>
             <Button label="Update" v-if="!!ctx.user.id" @click="saveOrUpdate"/>
-            <Button label="Cancel" />
+            <Button label="Cancel" @click="cancel"/>
+          </div>
+        </Form>
+      </div>
+      <div v-if="ctx.bulkUpdate">
+        <Form ref="userForm" :schema="bulkEditSchema" :data="ctx.user" @input="handleUserChange($event)">
+          <div>
+            <Button label="Update" @click="bulkUpdate"/>
+            <Button label="Cancel" @click="cancel"/>
           </div>
         </Form>
       </div>
@@ -36,8 +49,11 @@ import Button from '@/common/components/Button.vue';
 import Form from '@/common/components/Form.vue';
 
 import userSchema from '@/administrative/users/addedit-schema.json';
+import bulkEditSchema from '@/administrative/users/bulkedit-schema.json';
 
+import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
+import itemsSvc from '@/common/services/ItemsHolder.js';
 import userSvc from '@/administrative/services/User.js';
 
 export default {
@@ -70,12 +86,23 @@ export default {
       userSvc.getUserById(+props.userId).then(user => ctx.user = user);
     } else {
       ctx.user = { dnd: false, type: 'NONE', apiUser: false };
+      itemsSvc.ngGetItems('users').then(
+        items => {
+          if (items && items.length > 0) {
+            ctx.user       = {};
+            ctx.users      = items;
+            ctx.bulkUpdate = true;
+          }
+        }
+      );
     }
 
     return {
       ctx,
 
-      userSchema
+      userSchema,
+
+      bulkEditSchema
     };
   },
 
@@ -94,6 +121,32 @@ export default {
           routerSvc.ngGoto('user-detail.overview', {userId: result.id});
         }
       );
+    },
+
+    bulkUpdate: function() {
+      let detail = {};
+      let self = this;
+      Object.keys(this.ctx.user).forEach(
+        function(prop) {
+          if (Object.prototype.hasOwnProperty.call(self.ctx.user, prop)) {
+            if (self.ctx.user[prop]) {
+              detail[prop] = self.ctx.user[prop];
+            }
+          }
+        }
+      );
+
+      userSvc.bulkUpdate({ids: this.ctx.users.map(u => u.id), detail: detail}).then(
+        function() {
+          let count = self.ctx.users.length;
+          alertsSvc.info('Updated ' + count + (count > 1 ? ' users' : ' user'));
+          routerSvc.back();
+        }
+      );
+    },
+
+    cancel: function() {
+      routerSvc.back();
     }
   }
 }
