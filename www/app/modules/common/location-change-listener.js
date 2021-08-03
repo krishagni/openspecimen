@@ -1,5 +1,5 @@
 angular.module('openspecimen')
-  .factory('LocationChangeListener', function($window, $injector, $translate, $timeout) {
+  .factory('LocationChangeListener', function($window, $injector, $translate, $timeout, $rootScope) {
     var isLocationChangeAllowed = true;
 
     function init() {
@@ -46,17 +46,14 @@ angular.module('openspecimen')
     function back() {
       var currentSt = currentState();
       allowChange();
-      $window.history.back();
 
-      $timeout(
-        function() {
-          var newSt = currentState();
-          if (currentSt == newSt) {
-            $window.history.back();
-          }
-        },
-        250
-      );
+      var sci = $rootScope.stateChangeInfo;
+      if (sci.fromState && sci.fromState.name) {
+        $injector.get('$state').go(sci.fromState.name, sci.fromParams);
+      } else {
+        console.log('No previous registered state. Using window.history.back');
+        $window.history.back();
+      }
     }
 
     init();
