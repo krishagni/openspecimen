@@ -488,6 +488,12 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           initLabelFmts($scope.specimens);
           initAliquotGrps($scope.specimens);
           $scope.$on('$destroy', function() { CollectSpecimensSvc.cancelReservation($scope.specimens); });
+
+          $scope.$watch('collDetail.collectionDate',
+            function(newVal, oldValue) {
+              $scope.updateCollDate(newVal);
+            }
+          );
         }
 
         function getDefaultTreeColumns(storeSpmnsAllowed) {
