@@ -44,14 +44,13 @@ angular.module('openspecimen')
     }
 
     function back() {
-      var currentSt = currentState();
       allowChange();
 
       var sci = $rootScope.stateChangeInfo;
-      if (sci.fromState && sci.fromState.name) {
+      var fromState = sci && sci.fromState;
+      if (fromState && fromState.name && fromState.data && fromState.data.vueView) {
         $injector.get('$state').go(sci.fromState.name, sci.fromParams);
       } else {
-        console.log('No previous registered state. Using window.history.back');
         $window.history.back();
       }
     }
