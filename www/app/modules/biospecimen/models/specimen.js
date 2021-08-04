@@ -411,6 +411,7 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
       return $http.put(Specimen.url() + '/' + specimen.$id() + '/status', statusSpec).then(
         function(result) {
           specimen.activityStatus = result.data.activityStatus;
+          specimen.availabilityStatus = result.data.availabilityStatus;
           return specimen;
         }
       );

@@ -47,7 +47,12 @@ angular.module('os.biospecimen.specimen.detail', [])
     }
 
     $scope.reopen = function() {
-      specimen.reopen().then(specimenUpdatedInline);
+      specimen.reopen().then(
+        function() {
+          $scope.statusCss = SpecimenUtil.getStatusCss(specimen);
+          specimenUpdatedInline();
+        }
+      );
     }
 
     $scope.deleteSpecimen = function() {
@@ -86,9 +91,11 @@ angular.module('os.biospecimen.specimen.detail', [])
           }
         }
       }).result.then(
-        function() {
+        function(result) {
           specimen.storageLocation = undefined;
-          specimen.activityStatus = 'Closed';
+          specimen.activityStatus = result[0].activityStatus;
+          specimen.availabilityStatus = result[0].availabilityStatus;
+          $scope.statusCss = SpecimenUtil.getStatusCss(specimen);
           specimenUpdatedInline();
         }
       );
