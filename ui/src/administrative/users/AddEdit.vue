@@ -17,7 +17,7 @@
     </PageHeader>
     <PageBody>
       <div v-if="!ctx.bulkUpdate && ctx.user">
-        <Form ref="userForm" :schema="userSchema" :data="ctx.user" @input="handleUserChange($event)">
+        <Form ref="userForm" :schema="addEditFormSchema" :data="ctx.user" @input="handleUserChange($event)">
           <div>
             <Button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate"/>
             <Button label="Update" v-if="!!ctx.user.id" @click="saveOrUpdate"/>
@@ -26,7 +26,7 @@
         </Form>
       </div>
       <div v-if="ctx.bulkUpdate">
-        <Form ref="userForm" :schema="bulkEditSchema" :data="ctx.user" @input="handleUserChange($event)">
+        <Form ref="userForm" :schema="bulkEditFormSchema" :data="ctx.user" @input="handleUserChange($event)">
           <div>
             <Button label="Update" @click="bulkUpdate"/>
             <Button label="Cancel" @click="cancel"/>
@@ -48,13 +48,15 @@ import PageBody from '@/common/components/PageBody.vue';
 import Button from '@/common/components/Button.vue';
 import Form from '@/common/components/Form.vue';
 
-import userSchema from '@/administrative/users/addedit-schema.json';
+import userSchema from '@/administrative/users/user-schema.json';
+import addEditSchema from '@/administrative/users/addedit-schema.json';
 import bulkEditSchema from '@/administrative/users/bulkedit-schema.json';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
 import itemsSvc from '@/common/services/ItemsHolder.js';
 import userSvc from '@/administrative/services/User.js';
+import formUtil from '@/common/services/FormUtil.js';
 
 export default {
   name: 'UserAddEdit',
@@ -82,6 +84,9 @@ export default {
       ]
     });
 
+    let addEditFormSchema  = formUtil.getFormSchema(userSchema, addEditSchema);
+    let bulkEditFormSchema = formUtil.getFormSchema(userSchema, bulkEditSchema);
+
     if (props.userId && +props.userId > 0) {
       userSvc.getUserById(+props.userId).then(user => ctx.user = user);
     } else {
@@ -100,9 +105,9 @@ export default {
     return {
       ctx,
 
-      userSchema,
+      addEditFormSchema,
 
-      bulkEditSchema
+      bulkEditFormSchema
     };
   },
 

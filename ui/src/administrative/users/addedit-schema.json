@@ -1,240 +1,59 @@
 {
   "rows": [
      {
-       "fields": [
-         {
-           "type": "radio",
-           "label": "Type",
-           "name": "type",
-           "class": "inline",
-           "options": [
-             { "caption": "Super Administrator", "value": "SUPER" },
-             { "caption": "Institute Administrator", "value": "INSTITUTE" },
-             { "caption": "Contact", "value": "CONTACT" },
-             { "caption": "Regular", "value": "NONE" }
-           ]
-         }
-       ]
+       "fields": [ { "name": "type" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "text",
-           "label": "First Name",
-           "name": "firstName",
-           "validations": {
-             "required": {
-               "message": "First name is mandatory"
-             }
-           }
-         },
-         {
-           "type": "text",
-           "label": "Last Name",
-           "name": "lastName",
-           "validations": {
-             "required": {
-               "message": "Last name is mandatory"
-             }
-           }
-         }
-       ]
+       "fields": [ { "name": "firstName" }, { "name": "lastName" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "text",
-           "label": "Email Address",
-           "name": "emailAddress",
-           "validations": {
-             "required": {
-               "message": "Email address is mandatory"
-             },
-             "email": {
-               "message": "Email address is invalid"
-             }
-           }
-         }
-       ]
+       "fields": [ { "name": "emailAddress" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "text",
-           "label": "Phone Number",
-           "name": "phoneNumber"
-         }
-       ]
+       "fields": [ { "name": "phoneNumber" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "dropdown",
-           "label": "Domain Name",
-           "name": "domainName",
-           "listSource": {
-             "apiUrl": "auth-domains",
-             "selectProp": "name",
-             "displayProp": "name"
-           },
-           "showWhen": "this.fd('type') != 'CONTACT'",
-           "validations": {
-             "required": {
-               "message": "Domain name is mandatory"
-             }
-           }
-         }
-       ]
+       "fields": [ { "name": "domainName" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "text",
-           "label": "Login Name",
-           "name": "loginName",
-           "showWhen": "this.fd('type') != 'CONTACT'",
-           "validations": {
-             "required": {
-               "message": "Login name is mandatory"
-             }
-           }
-         }
-       ]
+       "fields": [ { "name": "loginName" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "dropdown",
-           "label": "Institute",
-           "name": "instituteName",
-           "listSource": {
-             "apiUrl": "institutes",
-             "selectProp": "name",
-             "displayProp": "name"
-           },
-           "validations": {
-             "required": {
-               "message": "Institute is mandatory"
-             }
-           }
-         }
-       ]
+       "fields": [ { "name": "instituteName" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "dropdown",
-           "label": "Primary Site",
-           "name": "primarySite",
-           "showWhen": "!!this.fd('instituteName')",
-           "listSource": {
-             "apiUrl": "sites",
-             "selectProp": "name",
-             "displayProp": "name",
-             "searchProp": "name",
-             "queryParams": {
-               "dynamic": {
-                 "institute": "this.fd('instituteName')"
-               }
-             }
-           }
-         }
-       ]
+       "fields": [ { "name": "primarySite" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "dropdown",
-           "label": "Time Zone",
-           "name": "timeZone",
-           "listSource": {
-             "apiUrl": "time-zones",
-             "displayProp": "name",
-             "selectProp": "id"
-           }
-         }
-       ]
+       "fields": [ { "name": "timeZone" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "radio",
-           "label": "Manage Forms?",
-           "name": "manageForms",
-           "options": [
-             { "caption": "Yes", "value": true },
-             { "caption": "No", "value": false }
-           ],
-           "class": "inline",
-           "showWhen": "!this.fd('type') || this.fd('type') == 'NONE'"
-         }
-       ]
+       "fields": [ { "name": "manageForms" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "radio",
-           "label": "Disable Notifications?",
-           "name": "dnd",
-           "options": [
-             { "caption": "Yes", "value": true },
-             { "caption": "No", "value": false }
-           ],
-           "class": "inline"
-         }
-       ]
+       "fields": [ { "name": "dnd" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "radio",
-           "label": "API User?",
-           "name": "apiUser",
-           "options": [
-             { "caption": "Yes", "value": true },
-             { "caption": "No", "value": false }
-           ],
-           "class": "inline"
-         }
-       ]
+       "fields": [ { "name": "apiUser" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "text",
-           "label": "IP Address",
-           "name": "ipRange",
-           "showWhen": "this.fd('apiUser') == true",
-           "validations": {
-             "required": {
-               "message": "IP address is mandatory"
-             }
-           }
-         }
-       ]
+       "fields": [ { "name": "ipRange" } ]
      },
 
      {
-       "fields": [
-         {
-           "type": "textarea",
-           "label": "Address",
-           "name": "address",
-           "rows": 2
-         }
-       ]
+       "fields": [ { "name": "address" } ]
      }
   ]
 }
