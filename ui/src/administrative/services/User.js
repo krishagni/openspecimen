@@ -36,6 +36,10 @@ class User {
   async broadcast(announcement) {
     return http.post('users/announcements', announcement);
   }
+
+  async updatePassword(input) {
+    return http.put('users/password', input);
+  }
 }
 
 export default new User();

@@ -35,6 +35,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 
 import Dropdown from '@/common/components/Dropdown.vue';
 import InputText from '@/common/components/InputText.vue';
+import Password from '@/common/components/Password.vue';
 import RadioButton from '@/common/components/RadioButton.vue';
 import Textarea from '@/common/components/Textarea.vue';
 import Label from '@/common/components/Label.vue';
@@ -47,6 +48,7 @@ export default {
    components: {
      Dropdown,
      InputText,
+     Password,
      RadioButton,
      Textarea,
      'os-label': Label,

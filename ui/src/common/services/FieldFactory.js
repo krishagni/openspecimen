@@ -8,7 +8,8 @@ class FieldFactory {
     dropdown: 'Dropdown',
     radio: 'RadioButton',
     text: 'InputText',
-    textarea: 'Textarea'
+    textarea: 'Textarea',
+    password: 'Password'
   };
 
   getComponent(fieldType) {
@@ -35,6 +36,10 @@ class FieldFactory {
           validations[rule] = requiredIf(new Function('return ' + fv.expr));
         } else if (field.showWhen) {
           validations[rule] = requiredIf(new Function('return ' + field.showWhen));
+        } else if (rule == 'pattern') {
+          validations[rule] = (value) => new RegExp(fv.expr).test(value);
+        } else if (rule == 'sameAs') {
+          validations[rule] = (value, form) => form.fd(fv.field) == value;
         } else if (fv.params) {
           validations[rule] = Validators[rule](fv.params);
         } else {

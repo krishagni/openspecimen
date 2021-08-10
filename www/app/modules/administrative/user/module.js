@@ -67,7 +67,10 @@ angular.module('os.administrative.user',
           }
         },
         controller: 'UserAddEditCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
       .state('user-edit-profile', {
         url: '/user-edit-profile',
@@ -89,7 +92,10 @@ angular.module('os.administrative.user',
           }
         },
         controller: 'UserAddEditCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
       .state('user-bulk-edit', {
         url: '/bulk-edit-users',
@@ -108,7 +114,10 @@ angular.module('os.administrative.user',
           }
         },
         controller: 'UserAddEditCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
       .state('user-import', {
         url: '/users-import?objectType',
@@ -344,13 +353,11 @@ angular.module('os.administrative.user',
       .state('user-password', {
         url: '/user-password-change/:userId',
         templateUrl: 'modules/administrative/user/password.html',
-        resolve: {
-          user: function($stateParams, User) {
-            return User.getById($stateParams.userId);
-          }
-        },
         controller: 'UserPasswordCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
 
       .state('user-groups', {
