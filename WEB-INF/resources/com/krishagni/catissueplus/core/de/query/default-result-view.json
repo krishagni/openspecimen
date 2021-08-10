@@ -3,7 +3,7 @@
   "Participant.regDate",
   "Participant.gender",
   "Participant.race",
-  "SpecimenCollectionGroup.clinicalDiagnosis",
+  "SpecimenCollectionGroup.clinicalDiagnoses.value",
   "Specimen.label",
   "Specimen.type",
   "Specimen.tissueSite",

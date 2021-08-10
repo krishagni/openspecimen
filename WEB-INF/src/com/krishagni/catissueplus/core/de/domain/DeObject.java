@@ -589,9 +589,13 @@ public abstract class DeObject {
 				if (attr.isOneToOne()) {
 					value = getAttrValues((List<Attr>)attr.getValue());
 				} else {
-					value = ((List<List<Attr>>)attr.getValue()).stream()
-						.map(sfAttrs -> getAttrValues(sfAttrs))
-						.collect(Collectors.toList());
+					if (attr.getValue() == null) {
+						value = new ArrayList<>();
+					} else {
+						value = ((List<List<Attr>>)attr.getValue()).stream()
+							.map(sfAttrs -> getAttrValues(sfAttrs))
+							.collect(Collectors.toList());
+					}
 				}
 			} else {
 				value = attr.getValue();

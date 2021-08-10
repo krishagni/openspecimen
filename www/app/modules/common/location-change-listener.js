@@ -1,5 +1,5 @@
 angular.module('openspecimen')
-  .factory('LocationChangeListener', function($window, $injector, $translate, $timeout) {
+  .factory('LocationChangeListener', function($window, $injector, $translate, $timeout, $rootScope) {
     var isLocationChangeAllowed = true;
 
     function init() {
@@ -44,19 +44,15 @@ angular.module('openspecimen')
     }
 
     function back() {
-      var currentSt = currentState();
       allowChange();
-      $window.history.back();
 
-      $timeout(
-        function() {
-          var newSt = currentState();
-          if (currentSt == newSt) {
-            $window.history.back();
-          }
-        },
-        250
-      );
+      var sci = $rootScope.stateChangeInfo;
+      var fromState = sci && sci.fromState;
+      if (fromState && fromState.name && fromState.data && fromState.data.vueView) {
+        $injector.get('$state').go(sci.fromState.name, sci.fromParams);
+      } else {
+        $window.history.back();
+      }
     }
 
     init();

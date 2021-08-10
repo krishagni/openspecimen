@@ -43,7 +43,10 @@ angular.module('os.administrative.user',
           }
         },
         controller: 'UserListCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
       .state('user-addedit', {
         url: '/user-addedit/:userId?old',

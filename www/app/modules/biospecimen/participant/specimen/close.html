@@ -1,54 +1,55 @@
-
-<div class="os-modal">
-  <div class="os-modal-header">
-    <span translate="specimens.close">Close</span>
-  </div>
-  <div class="os-modal-body">
-    <div class="form-horizontal">
-      <div class="form-group">
-        <label class="col-xs-3 control-label">
-          <span translate="specimens.event_user">User</span>
-        </label>
-        <div class="col-xs-9">
-          <os-users ng-model="closeSpec.user" default-current-user placeholder="{{'specimens.event_user' | translate}}">
-          </os-users>
+<form name="closeForm" os-form-validator="closeForm" novalidate>
+  <div class="os-modal">
+    <div class="os-modal-header">
+      <span translate="specimens.close">Close</span>
+    </div>
+    <div class="os-modal-body">
+      <div class="form-horizontal">
+        <div class="form-group">
+          <label class="col-xs-3 control-label">
+            <span translate="specimens.event_user">User</span>
+          </label>
+          <div class="col-xs-9">
+            <os-users ng-model="closeSpec.user" default-current-user placeholder="{{'specimens.event_user' | translate}}">
+            </os-users>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="col-xs-3 control-label">
-          <span translate="specimens.event_time">Date and Time</span>
-        </label>
-        <div class="col-xs-9">
-          <div class="os-date-time clearfix">
-            <div class="os-col-70 input os-no-padding">
-              <os-date-picker date="closeSpec.date" placeholder="{{'specimens.event_time' | translate}}">
-              </os-date-picker>
-            </div>
-            <div class="os-col-30">
-              <timepicker ng-model="closeSpec.date" class="os-time-no-wheels" show-meridian="false">
-              </timepicker>
+        <div class="form-group">
+          <label class="col-xs-3 control-label">
+            <span translate="specimens.event_time">Date and Time</span>
+          </label>
+          <div class="col-xs-9">
+            <div class="os-date-time clearfix">
+              <div class="os-col-70 input os-no-padding">
+                <os-date-picker date="closeSpec.date" placeholder="{{'specimens.event_time' | translate}}">
+                </os-date-picker>
+              </div>
+              <div class="os-col-30">
+                <timepicker ng-model="closeSpec.date" class="os-time-no-wheels" show-meridian="false">
+                </timepicker>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="col-xs-3 control-label">
-          <span translate="specimens.reason_for_closing">Comments</span>
-        </label>
-        <div class="col-xs-9">
-          <textarea class="form-control" ng-model="closeSpec.reason" rows="2"
-            placeholder="{{'specimens.reason_for_closing' | translate}}">
-          </textarea>
+        <div class="form-group">
+          <label class="col-xs-3 control-label">
+            <span translate="specimens.reason_for_closing">Comments</span>
+          </label>
+          <div class="col-xs-9">
+            <textarea class="form-control" ng-model="closeSpec.reason" rows="2"
+              placeholder="{{'specimens.reason_for_closing' | translate}}">
+            </textarea>
+          </div>
         </div>
       </div>
     </div>
+    <div class="os-modal-footer">
+      <button class="btn os-btn-text" ng-click="cancel()">
+        <span translate="common.buttons.cancel">Cancel</span>
+      </button>
+      <button class="btn btn-primary" ng-click="close()">
+        <span translate="specimens.buttons.close">Close</span>
+      </button>
+    </div>
   </div>
-  <div class="os-modal-footer">
-    <button class="btn os-btn-text" ng-click="cancel()">
-      <span translate="common.buttons.cancel">Cancel</span>
-    </button>
-    <button class="btn btn-primary" ng-click="close()">
-      <span translate="specimens.buttons.close">Close</span>
-    </button>
-  </div>
-</div>
+</form>
