@@ -18,6 +18,12 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "user-addedit" */ '../administrative/users/AddEdit.vue'),
     props: (route) => ({userId: route.params && route.params.userId})
+  },
+  {
+    path: '/user-edit-profile/:userId',
+    name: 'UserEditProfile',
+    component: () => import(/* webpackChunkName: "user-addedit" */ '../administrative/users/AddEdit.vue'),
+    props: (route) => ({userId: route.params && route.params.userId, editProfile: true})
   }
 ]
 

@@ -537,6 +537,12 @@ osApp.config(function(
         if (data.payload.type) {
           ItemsHolder.setItems(data.payload.type, data.payload.items);
         }
+      } else if (data.op == 'getItems') {
+        var items = ItemsHolder.getItems(data.payload.type);
+        ItemsHolder.setItems(data.payload.type, undefined);
+        window.frames['vueapp'].postMessage({op: 'getItems', resp: {type: data.payload.type, items: items}}, '*');
+      } else if (data.op == 'back') {
+        LocationChangeListener.back();
       }
     });
 

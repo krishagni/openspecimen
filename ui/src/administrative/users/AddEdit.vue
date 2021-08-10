@@ -17,7 +17,7 @@
     </PageHeader>
     <PageBody>
       <div v-if="!ctx.bulkUpdate && ctx.user">
-        <Form ref="userForm" :schema="addEditFormSchema" :data="ctx.user" @input="handleUserChange($event)">
+        <Form ref="userForm" :schema="ctx.addEditFs" :data="ctx.user" @input="handleUserChange($event)">
           <div>
             <Button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate"/>
             <Button label="Update" v-if="!!ctx.user.id" @click="saveOrUpdate"/>
@@ -26,7 +26,7 @@
         </Form>
       </div>
       <div v-if="ctx.bulkUpdate">
-        <Form ref="userForm" :schema="bulkEditFormSchema" :data="ctx.user" @input="handleUserChange($event)">
+        <Form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx.user" @input="handleUserChange($event)">
           <div>
             <Button label="Update" @click="bulkUpdate"/>
             <Button label="Cancel" @click="cancel"/>
@@ -51,6 +51,7 @@ import Form from '@/common/components/Form.vue';
 import userSchema from '@/administrative/users/user-schema.json';
 import addEditSchema from '@/administrative/users/addedit-schema.json';
 import bulkEditSchema from '@/administrative/users/bulkedit-schema.json';
+import editProfileSchema from '@/administrative/users/edit-profile-schema.json';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
@@ -61,7 +62,7 @@ import formUtil from '@/common/services/FormUtil.js';
 export default {
   name: 'UserAddEdit',
 
-  props: ['userId'],
+  props: ['userId', 'editProfile'],
 
   inject: ['ui'],
 
@@ -79,16 +80,23 @@ export default {
 
     let ctx = reactive({
       user: null,
+
       bcrumb: [
         {url: ui.ngServer + '#/users', label: 'Users', target: '_parent'}
-      ]
-    });
+      ],
 
-    let addEditFormSchema  = formUtil.getFormSchema(userSchema, addEditSchema);
-    let bulkEditFormSchema = formUtil.getFormSchema(userSchema, bulkEditSchema);
+      addEditFs: {rows: []},
+
+      bulkEditFs: {rows: []}
+    });
 
     if (props.userId && +props.userId > 0) {
       userSvc.getUserById(+props.userId).then(user => ctx.user = user);
+      if (!props.editProfile || props.editProfile != true) {
+        ctx.addEditFs = formUtil.getFormSchema(userSchema, addEditSchema);
+      } else {
+        ctx.addEditFs = formUtil.getFormSchema(userSchema, editProfileSchema);
+      }
     } else {
       ctx.user = { dnd: false, type: 'NONE', apiUser: false };
       itemsSvc.ngGetItems('users').then(
@@ -97,18 +105,15 @@ export default {
             ctx.user       = {};
             ctx.users      = items;
             ctx.bulkUpdate = true;
+            ctx.bulkEditFs = formUtil.getFormSchema(userSchema, bulkEditSchema);
+          } else {
+            ctx.addEditFs = formUtil.getFormSchema(userSchema, addEditSchema);
           }
         }
       );
     }
 
-    return {
-      ctx,
-
-      addEditFormSchema,
-
-      bulkEditFormSchema
-    };
+    return { ctx };
   },
 
   methods: {
@@ -121,9 +126,14 @@ export default {
         return;
       }
 
+      let self = this;
       userSvc.saveOrUpdate(this.ctx.user).then(
         function(result) {
-          routerSvc.ngGoto('user-detail.overview', {userId: result.id});
+          if (self.editProfile) {
+            routerSvc.ngGoto('home', {}, {reload: true});
+          } else {
+            routerSvc.ngGoto('user-detail.overview', {userId: result.id});
+          }
         }
       );
     },

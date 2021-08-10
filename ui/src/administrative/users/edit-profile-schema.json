@@ -1,0 +1,19 @@
+{
+  "rows": [
+     {
+       "fields": [ { "name": "phoneNumber" } ]
+     },
+
+     {
+       "fields": [ { "name": "timeZone" } ]
+     },
+
+     {
+       "fields": [ { "name": "dnd" } ]
+     },
+
+     {
+       "fields": [ { "name": "address" } ]
+     }
+  ]
+}

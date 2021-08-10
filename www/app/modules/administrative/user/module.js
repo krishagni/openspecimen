@@ -61,6 +61,9 @@ angular.module('os.administrative.user',
           },
           users: function() {
             return [];
+          },
+          editProfile: function() {
+            return false;
           }
         },
         controller: 'UserAddEditCtrl',
@@ -80,6 +83,9 @@ angular.module('os.administrative.user',
           },
           users: function() {
             return [];
+          },
+          editProfile: function() {
+            return true;
           }
         },
         controller: 'UserAddEditCtrl',
@@ -96,6 +102,9 @@ angular.module('os.administrative.user',
             var users = ItemsHolder.getItems('users');
             ItemsHolder.setItems('users', undefined);
             return users;
+          },
+          editProfile: function() {
+            return false;
           }
         },
         controller: 'UserAddEditCtrl',
