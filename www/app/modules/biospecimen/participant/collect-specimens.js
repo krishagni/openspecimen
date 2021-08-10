@@ -1033,6 +1033,25 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             }
           );
         }
+
+        $scope.updateCollUser = function(user) {
+          angular.forEach($scope.specimens,
+            function(spmn) {
+              if (spmn.lineage != 'New') {
+                return;
+              }
+
+              var collEvent = spmn.collectionEvent = spmn.collectionEvent || {};
+              collEvent.user = user;
+              angular.forEach(spmn.specimensPool,
+                function(s) {
+                  collEvent = s.collectionEvent = s.collectionEvent || {};
+                  collEvent.user = user;
+                }
+              );
+            }
+          );
+        }
   
         $scope.togglePrintLabels = setAliquotGrpPrintLabel;
           

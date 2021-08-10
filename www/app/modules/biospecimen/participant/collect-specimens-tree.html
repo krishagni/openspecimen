@@ -351,7 +351,9 @@
           <label class="col-xs-2 control-label" translate="specimens.col_event.title">Collection Details</label>
           <div class="col-xs-3 input">
             <div os-md-input ng-model="collDetail.collector" placeholder="{{'specimens.col_event.user' | translate}}">
-              <os-users ng-model="collDetail.collector" placeholder="{{'specimens.col_event.user' | translate}}"> </os-users>
+              <os-users ng-model="collDetail.collector" placeholder="{{'specimens.col_event.user' | translate}}"
+                on-select="updateCollUser(user)">
+              </os-users>
             </div>
           </div>
           <div class="col-xs-2 input">
