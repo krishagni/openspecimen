@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models'])
   .controller('BulkAddEventCtrl', function(
-    $scope, $translate, $q, events, event, Form, SpecimensHolder,
+    $scope, $translate, $q, currentUser, events, event, Form, SpecimensHolder,
     Specimen, SpecimenEvent, Alerts, Util, SpecimenUtil, SettingUtil) {
 
     var ctx;
@@ -285,15 +285,26 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
           var allowSpmnRelabeling = resps[2];
 
           ctx.formDef = formDef;
-          if (event && event.name == 'SpecimenReceivedEvent' && allowSpmnRelabeling) {
-            formDef.rows.splice(0, null,
-              [{
-                name: 'label',
-                udn: 'label',
-                caption: $translate.instant('specimens.new_label'),
-                type: 'stringTextField',
-                validationRules: []
-              }]
+          if (event && event.name == 'SpecimenReceivedEvent') {
+            if (allowSpmnRelabeling) {
+              formDef.rows.splice(0, null,
+                [{
+                  name: 'label',
+                  udn: 'label',
+                  caption: $translate.instant('specimens.new_label'),
+                  type: 'stringTextField',
+                  validationRules: []
+                }]
+              );
+            }
+
+            var time = new Date().getTime();
+            var userId = currentUser.id;
+            angular.forEach(records,
+              function(record) {
+                record.time = time;
+                record.user = userId;
+              }
             );
           }
 
