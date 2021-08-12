@@ -1018,7 +1018,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           $scope.collDetail.collectionDate = collDate;
           angular.forEach($scope.specimens,
             function(spmn) {
-              if (spmn.lineage != 'New') {
+              if (spmn.lineage != 'New' || (spmn.existingStatus && spmn.existingStatus != 'Pending')) {
                 return;
               }
 
@@ -1037,7 +1037,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
         $scope.updateCollUser = function(user) {
           angular.forEach($scope.specimens,
             function(spmn) {
-              if (spmn.lineage != 'New') {
+              if (spmn.lineage != 'New' || (spmn.existingStatus && spmn.existingStatus != 'Pending')) {
                 return;
               }
 
