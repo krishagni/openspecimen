@@ -30,6 +30,12 @@ const routes = [
     name: 'UserChangePassword',
     component: () => import(/* webpackChunkName: "users" */ '../administrative/users/ChangePassword.vue'),
     props: (route) => ({userId: route.params && route.params.userId})
+  },
+  {
+    path: '/users/:userId/overview',
+    name: 'UserDetail',
+    component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Detail.vue'),
+    props: (route) => ({userId: route.params && route.params.userId})
   }
 ]
 
