@@ -1,10 +1,16 @@
 
 angular.module('os.administrative.user.detail', ['os.administrative.models'])
   .controller('UserDetailCtrl', function(
-    $scope, $q, $translate, $state, user,
-    User, AuthDomain, AuthService, PvManager, Alerts, DeleteUtil, Util) {
+    $scope, $q, $translate, $state, $stateParams, user,
+    User, AuthDomain, AuthService, PvManager, Alerts, DeleteUtil, Util, VueApp) {
 
     function init() {
+      if (!$stateParams.old || $stateParams.old == 'false') {
+        var url = 'users/' + user.id + '/overview';
+        VueApp.setVueView(url, {});
+        return;
+      }
+
       $scope.user = user;
       loadPvs();
     }

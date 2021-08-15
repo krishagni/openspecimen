@@ -543,6 +543,11 @@ osApp.config(function(
         window.frames['vueapp'].postMessage({op: 'getItems', resp: {type: data.payload.type, items: items}}, '*');
       } else if (data.op == 'back') {
         LocationChangeListener.back();
+      } else if (data.op == 'impersonate') {
+        $http.defaults.headers.common['X-OS-IMPERSONATE-USER'] = data.token;
+        $cookies.put('osImpersonateUser', data.token);
+        ui.os.global.impersonate = true;
+        $state.go('home', {}, {reload: true});
       }
     });
 

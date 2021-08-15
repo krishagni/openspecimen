@@ -40,6 +40,14 @@ class User {
   async updatePassword(input) {
     return http.put('users/password', input);
   }
+
+  async updateStatus(user, status) {
+    return http.put('users/' + user.id + '/activity-status', {activityStatus: status});
+  }
+
+  async impersonate(user) {
+    return http.post('sessions/impersonate', {userId: user.id});
+  }
 }
 
 export default new User();
