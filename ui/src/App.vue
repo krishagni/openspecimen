@@ -81,11 +81,9 @@ a {
   background: #f5f5f5;
   color: #707070;
   font-size: 12px;
-  border-bottom: 1px solid #ddd;
-  text-align: left;
-  padding: 10px 15px;
 }
 
+.os-table thead th,
 .os-table tbody td {
   border-bottom: 1px solid #ddd;
   text-align: left;

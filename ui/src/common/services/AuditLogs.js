@@ -1,10 +1,14 @@
 
-import httpSvc from '@/common/services/HttpClient.js';
+import http from '@/common/services/HttpClient.js';
 
 class AuditLogs {
 
   async getSummary(objDetail) {
-    return httpSvc.post('audit', objDetail);
+    return http.post('audit', objDetail);
+  }
+
+  async getRevisions(objDetail) {
+    return http.post('audit/revisions', objDetail);
   }
 
 }
