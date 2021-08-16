@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { reactive, watch } from 'vue';
+import { reactive, watchEffect } from 'vue';
 
 import Section from '@/common/components/Section.vue';
 
@@ -29,7 +29,7 @@ export default {
       fields: {}
     });
 
-    watch(() => {
+    watchEffect(() => {
       let simpleFields = [], textAreaFields = [];
       for (let field of props.schema) {
         let value = props.object[field.name];
