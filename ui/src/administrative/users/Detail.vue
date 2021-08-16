@@ -46,6 +46,12 @@
               v-if="userResources.updateAllowed && ctx.user.activityStatus == 'Closed'"
             />
 
+            <Button left-icon="trash"
+              label="Delete"
+              @click="deleteUser"
+              v-show-if-allowed="userResources.deleteOpts"
+            />
+
             <Button left-icon="key"
               label="Reset Password"
               @click="ngGoto('user-password', {userId: ctx.user.id})"
@@ -84,6 +90,8 @@
           <span>An email will be sent to <b>{{ctx.user.firstName}} {{ctx.user.lastName}}</b> to let them know you've signed-in to their account. The email will include details like your name, email address, and device IP address. Do you want to proceed?</span>
         </template>
       </Confirm>
+
+      <DeleteObject ref="deleteObj" :input="ctx.deleteOpts" />
     </PageBody>
   </Page>
 </template>
@@ -100,6 +108,7 @@ import Overview from '@/common/components/Overview.vue';
 import Button from '@/common/components/Button.vue';
 import Message from '@/common/components/Message.vue';
 import Confirm from '@/common/components/Confirm.vue';
+import DeleteObject from '@/common/components/DeleteObject.vue';
 
 import alertSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
@@ -125,7 +134,8 @@ export default {
     Overview,
     Button,
     Message,
-    Confirm
+    Confirm,
+    DeleteObject
   },
 
   setup(props) {
@@ -136,11 +146,24 @@ export default {
 
       bcrumb: [
         {url: ui.ngServer + '#/users', label: 'Users', target: '_parent'}
-      ]
+      ],
+
+      deleteOpts: {}
     });
 
     
-    userSvc.getUserById(+props.userId).then(user => ctx.user = user);
+    userSvc.getUserById(+props.userId).then(
+      user => {
+        ctx.user = user;
+        ctx.deleteOpts = {
+          type: 'User',
+          title: user.firstName + ' ' + user.lastName,
+          dependents: () => userSvc.getDependents(user),
+          deleteObj: () => userSvc.delete(user)
+        }
+      }
+    );
+
     return { ctx, userSchema, userResources };
   },
 
@@ -171,6 +194,16 @@ export default {
 
     archive: function() {
       this.updateStatus('Closed', 'User archived!');
+    },
+
+    deleteUser: function() {
+      this.$refs.deleteObj.execute().then(
+        (resp) => {
+          if (resp == 'deleted') {
+            routerSvc.ngGoto('user-list');
+          }
+        }
+      );
     },
 
     impersonate: function() {

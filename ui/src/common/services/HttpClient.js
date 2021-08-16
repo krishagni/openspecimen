@@ -28,6 +28,10 @@ class HttpClient {
     return this.promise(() => axios.put(this.getUrl(url), data, this.config(params)));
   }
 
+  async delete(url, data, params) {
+    return this.promise(() => axios.delete(this.getUrl(url), this.config(params), data));
+  }
+
   getUrl(url) {
     let result = '';
     if (this.host) {

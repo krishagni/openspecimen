@@ -25,6 +25,10 @@ class User {
     }
   }
 
+  async delete(user) {
+    return http.delete('users/' + user.id);
+  }
+
   async bulkUpdate({detail, ids}) {
     if (!ids || ids.length == 0) {
       return [];
@@ -43,6 +47,10 @@ class User {
 
   async updateStatus(user, status) {
     return http.put('users/' + user.id + '/activity-status', {activityStatus: status});
+  }
+
+  async getDependents(user) {
+    return http.get('users/' + user.id + '/dependent-entities');
   }
 
   async impersonate(user) {
