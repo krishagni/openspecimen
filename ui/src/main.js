@@ -29,6 +29,38 @@ const app = createApp(App)
 
 app.directive('show-if-allowed', showIfAllowed);
 
+let filters = app.config.globalProperties.$filters = app.config.globalProperties.$filters || {};
+filters.username = (user) => {
+  if (!user) {
+    return '-';
+  }
+
+  let result = '';
+  if (user.firstName) {
+    result = user.firstName;
+  }
+
+  if (result) {
+    result += ' ';
+  }
+
+  if (user.lastName) {
+    result += user.lastName;
+  }
+
+  return result || '-';
+}
+
+filters.dateTime = (date) => {
+  if (!date) {
+    return '-';
+  }
+
+  var dt = new Date(date);
+  return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString();
+}
+
+
 alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);
 

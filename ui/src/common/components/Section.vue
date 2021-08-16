@@ -1,8 +1,8 @@
 
 <template>
   <div class="os-section os-line-section">
-    <strong class="title">{{title}}</strong>
-    <pre class="content">{{content}}</pre>
+    <strong class="title"><slot name="title"> </slot></strong>
+    <pre class="content"><slot name="content"> </slot></pre>
   </div>
 </template>
 

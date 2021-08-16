@@ -71,15 +71,21 @@
         </template>
       </PageToolbar>
 
-      <div>
-        <div v-if="ctx.user.activityStatus == 'Locked'">
-          <Message type="info">
-            <span>User account has been locked.</span>
-          </Message>
-        </div>
+      <Grid>
+        <GridColumn width="8">
+          <div v-if="ctx.user.activityStatus == 'Locked'">
+            <Message type="info">
+              <span>User account has been locked.</span>
+            </Message>
+          </div>
 
-        <Overview :schema="userSchema" :object="ctx.user"></Overview>
-      </div>
+          <Overview :schema="userSchema" :object="ctx.user"></Overview>
+        </GridColumn>
+
+        <GridColumn width="4">
+          <AuditOverview :objects="ctx.userObjs"></AuditOverview>
+        </GridColumn>
+      </Grid>
 
       <Confirm ref="confirmImpersonate">
         <template #title>
@@ -109,6 +115,9 @@ import Button from '@/common/components/Button.vue';
 import Message from '@/common/components/Message.vue';
 import Confirm from '@/common/components/Confirm.vue';
 import DeleteObject from '@/common/components/DeleteObject.vue';
+import AuditOverview from '@/common/components/AuditOverview.vue';
+import Grid from '@/common/components/Grid.vue';
+import GridColumn from '@/common/components/GridColumn.vue';
 
 import alertSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
@@ -135,7 +144,10 @@ export default {
     Button,
     Message,
     Confirm,
-    DeleteObject
+    DeleteObject,
+    AuditOverview,
+    Grid,
+    GridColumn
   },
 
   setup(props) {
@@ -148,7 +160,9 @@ export default {
         {url: ui.ngServer + '#/users', label: 'Users', target: '_parent'}
       ],
 
-      deleteOpts: {}
+      deleteOpts: {},
+
+      userObjs: []
     });
 
     
@@ -160,7 +174,8 @@ export default {
           title: user.firstName + ' ' + user.lastName,
           dependents: () => userSvc.getDependents(user),
           deleteObj: () => userSvc.delete(user)
-        }
+        };
+        ctx.userObjs = [{objectName: 'user', objectId: user.id}];
       }
     );
 
