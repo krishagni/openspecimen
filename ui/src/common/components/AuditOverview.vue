@@ -70,7 +70,7 @@
 
 <script>
 
-import { reactive, watch } from 'vue';
+import { reactive, watchEffect } from 'vue';
 
 import Button from '@/common/components/Button.vue';
 import Dialog from '@/common/components/Dialog.vue';
@@ -92,15 +92,14 @@ export default {
       auditTrail: {}
     });
 
-    watch(
-      () => props.objects,
-      (newVal) => {
+    watchEffect(
+      () => {
         ctx.auditTrail = {};
-        if (!newVal || newVal.length <= 0) {
+        if (!props.objects || props.objects.length <= 0) {
           return;
         }
 
-        auditLogSvc.getSummary(newVal).then(
+        auditLogSvc.getSummary(props.objects).then(
           (infoList) => {
             let trail = {};
             infoList.forEach(

@@ -32,10 +32,27 @@ const routes = [
     props: (route) => ({userId: route.params && route.params.userId})
   },
   {
-    path: '/users/:userId/overview',
+    path: '/users/:userId',
     name: 'UserDetail',
     component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Detail.vue'),
-    props: (route) => ({userId: route.params && route.params.userId})
+    props: (route) => ({userId: route.params && route.params.userId}),
+    children: [
+      {
+        path: 'overview',
+        name: 'UserOverview',
+        component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Overview.vue')
+      },
+      {
+        path: 'roles',
+        name: 'UserRoles',
+        component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Roles.vue')
+      },
+      {
+        path: 'forms',
+        name: 'UserForms',
+        component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Forms.vue')
+      }
+    ]
   }
 ]
 
