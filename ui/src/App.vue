@@ -85,9 +85,16 @@ a {
 
 .os-table thead th,
 .os-table tbody td {
-  border-bottom: 1px solid #ddd;
   text-align: left;
   padding: 10px 15px;
+}
+
+.os-table thead th {
+  border-bottom: 2px solid #ddd;
+}
+
+.os-table thead td {
+  border-top: 1px solid #ddd;
 }
 
 .os-border {

@@ -56,6 +56,14 @@ class User {
   async impersonate(user) {
     return http.post('sessions/impersonate', {userId: user.id});
   }
+
+  async getRoles(user) {
+    return http.get('rbac/subjects/' + user.id + '/roles');
+  }
+
+  async deleteRole(user, role) {
+    return http.delete('rbac/subjects/' + user.id + '/roles/' + role.id);
+  }
 }
 
 export default new User();

@@ -1,9 +1,9 @@
 
 <template>
-  <button type="button" class="btn">
-    <icon v-if="leftIcon" :name="leftIcon" class="pad-right"/>
+  <button type="button" :class="buttonClass">
+    <icon v-if="leftIcon" :name="leftIcon" :class="leftIconClass" :size="iconSize"/>
     <span>{{label}}</span>
-    <icon v-if="rightIcon" :name="rightIcon" class="pad-left"/>
+    <icon v-if="rightIcon" :name="rightIcon" :class="rightIconClass" :size="iconSize"/>
   </button>
 </template>
 
@@ -11,10 +11,44 @@
 import Icon from '@/common/components/Icon.vue';
 
 export default {
-  props: ['leftIcon', 'rightIcon', 'label'],
+  props: ['leftIcon', 'rightIcon', 'label', 'size'],
 
   components: {
     'icon': Icon
+  },
+
+  computed: {
+    buttonClass: function() {
+      if (this.size == 'small') {
+        return 'btn btn-xs';
+      }
+
+      return 'btn';
+    },
+
+    iconSize: function() {
+      if (this.size == 'small') {
+        return '0.6rem';
+      }
+
+      return '';
+    },
+
+    leftIconClass: function() {
+      if (this.label) {
+        return 'pad-right';
+      }
+
+      return '';
+    },
+
+    rightIconClass: function() {
+      if (this.label) {
+        return 'pad-left';
+      }
+
+      return '';
+    }
   }
 }
 
@@ -42,5 +76,8 @@ button:hover {
   border: 1px solid #a5a5a5;
 }
 
+.btn.btn-xs {
+  padding: 0px 4px;
+}
 
 </style>
