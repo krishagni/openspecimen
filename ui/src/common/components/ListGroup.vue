@@ -55,8 +55,8 @@ export default {
 }
 
 .os-list-group .item.active {
-  background-color: #007bff;
-  border-color: #007bff;
+  background-color: #337ab7;
+  border-color: #337ab7;
   color: #fff;
   z-index: 2;
 }
