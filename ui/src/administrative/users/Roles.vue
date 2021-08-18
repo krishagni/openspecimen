@@ -32,8 +32,10 @@
               <span>{{userRole.role.name}}</span>
             </td>
             <td>
-              <Button left-icon="edit" size="small" @click="showAddEditRole(userRole)" />
-              <Button left-icon="trash" size="small" @click="deleteRole(userRole)" />
+              <ButtonGroup>
+                <Button left-icon="edit" size="small" @click="showAddEditRole(userRole)" />
+                <Button left-icon="trash" size="small" @click="deleteRole(userRole)" />
+              </ButtonGroup>
             </td>
           </tr>
         </tbody>
@@ -66,6 +68,7 @@
 <script>
 
 import Button from '@/common/components/Button.vue';
+import ButtonGroup from '@/common/components/ButtonGroup.vue';
 import Dialog from '@/common/components/Dialog.vue';
 import Panel from '@/common/components/Panel.vue';
 import Message from '@/common/components/Message.vue';
@@ -83,6 +86,7 @@ export default {
 
   components: {
     Button,
+    ButtonGroup,
     Panel,
     Message,
     Dialog,
