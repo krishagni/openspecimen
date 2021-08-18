@@ -1,5 +1,5 @@
 <template>
-  <Toast />
+  <Toast class="os-app-toast" />
   <router-view/>
 </template>
 
@@ -65,6 +65,14 @@ body .p-component .p-inputtext {
 a {
   color: #337ab7;
   text-decoration: none;
+}
+
+.os-app-toast {
+  z-index: 1102!important;
+}
+
+.os-app-toast .p-toast-message {
+  margin: 0rem;
 }
 
 .os-hide {
