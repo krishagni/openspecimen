@@ -107,6 +107,11 @@ export default {
                   type: "dropdown", name: "site", label: "Site",
                   listSource: {
                     loadFn: (opts) => self.loadSites(opts)
+                  },
+                  validations: {
+                    required: {
+                      message: "Site is mandatory"
+                    }
                   }
                 }
               ]
@@ -117,6 +122,11 @@ export default {
                   type: "dropdown", name: "cp", label: "Collection Protocol",
                   listSource: {
                     loadFn: (opts) => self.loadCps(opts)
+                  },
+                  validations: {
+                    required: {
+                      message: "Collection Protocol is mandatory"
+                    }
                   }
                 }
               ]
@@ -127,6 +137,11 @@ export default {
                   type: "dropdown", name: "role", label: "Role",
                   listSource: {
                     loadFn: (opts) => self.loadRoles(opts)
+                  },
+                  validations: {
+                    required: {
+                      message: "Role is mandatory"
+                    }
                   }
                 }
               ]
@@ -149,6 +164,10 @@ export default {
 
   methods: {
     saveRole: function() {
+      if (!this.$refs.roleForm.validate()) {
+        return;
+      }
+
       let input = this.ctx.role;
       let role = {
         id: input.id,
