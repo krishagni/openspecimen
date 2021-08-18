@@ -5,7 +5,7 @@
       <template #header>
         <span>
           <span class="title">Roles</span>
-          <Button left-icon="plus" label="Add Role" @click="showAddEditRole" />
+          <Button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole"/>
         </span>
       </template>
 
@@ -92,6 +92,8 @@ export default {
   data() {
     let self = this;
     return {
+      all: 'All Current and Future',
+
       ctx: {
         roleFs: {
           rows: [
@@ -135,13 +137,20 @@ export default {
     userSvc.getRoles(this.user).then((roles) => this.ctx.userRoles = roles);
   },
 
+  computed: {
+    hideAddRole: function() {
+      return this.ctx.userRoles && this.ctx.userRoles.some((ur) => !ur.site && !ur.collectionProtocol);
+    }
+  },
+
   methods: {
     saveRole: function() {
+      let input = this.ctx.role;
       let role = {
-        id: this.ctx.role.id,
-        site: {name: this.ctx.role.site},
-        collectionProtocol: {shortTitle: this.ctx.role.cp},
-        role: {name: this.ctx.role.role}
+        id: input.id,
+        site: input.site == this.all ? undefined : {name: input.site },
+        collectionProtocol: input.cp == this.all ? undefined : {shortTitle: input.cp},
+        role: {name: input.role}
       }
 
       let self = this;
@@ -159,9 +168,9 @@ export default {
     },
 
     showAddEditRole: function(userRole) {
-      if (userRole) {
-        let site = userRole.site && userRole.site.name;
-        let cp   = userRole.collectionProtocol && userRole.collectionProtocol.shortTitle;
+      if (userRole.id) {
+        let site = (userRole.site && userRole.site.name) || this.all;
+        let cp   = (userRole.collectionProtocol && userRole.collectionProtocol.shortTitle) || this.all;
         let role = userRole.role && userRole.role.name;
         this.ctx.role = {id: userRole.id, site: site, cp: cp, role: role};
       } else {
@@ -180,6 +189,12 @@ export default {
     },
 
     loadSites: function(opts) {
+      const self     = this;
+      let userRoles  = this.ctx.userRoles;
+      let hasSite    = userRoles.some((userRole) => !!userRole.site);
+      let allCpSites = userRoles.filter((userRole) => !userRole.collectionProtocol)
+        .map((userRole) => !userRole.site ? self.all : userRole.site.name);
+
       opts = opts || {};
       opts.name = opts.query;
       if (this.ui.currentUser.admin) {
@@ -190,16 +205,71 @@ export default {
         opts.operation = 'Update';
       }
 
-      return siteSvc.getSites(opts)
-        .then((sites) => sites.map((site) => site.name));
+      return siteSvc.getSites(opts).then(
+        (sites) => {
+          let result = sites.map((site) => site.name);
+          if (userRoles.length == 0 || !hasSite) {
+            result.splice(0, 0, self.all);
+          }
+
+          return result.filter((site) => allCpSites.indexOf(site) == -1 || self.ctx.role.site == site);
+        }
+      );
     },
 
     loadCps: function(opts) {
+      if (!this.ctx.role.site) {
+        //
+        // no site selected, empty CPs list
+        //
+        return new Promise((resolve) => resolve([]));
+      }
+
+      const self = this;
+      const cpsToRemove = [];
+      let allCps = true;
+      this.ctx.userRoles.forEach(
+        (userRole) => {
+          if (userRole.collectionProtocol) {
+            if (!userRole.site || userRole.site.name == self.ctx.role.site) {
+              //
+              // CPs that have been selected for all sites or current role site should not
+              // appear for selection
+              //
+              cpsToRemove.push(userRole.collectionProtocol.shortTitle);
+            }
+          }
+
+          if (!userRole.site || userRole.site.name == this.ctx.role.site) {
+            if (userRole.id != this.ctx.role.id) {
+              // do not show all CPs when
+              // a) there exists a role for all sites with some CP and that role is not being edited
+              // b) there exists a role with the current role site and that role is not being edited
+              allCps = false;
+            }
+          }
+        }
+      );
+
       opts = opts || {};
-      opts.repositoryName = this.ctx.role.site;
-      opts.instituteId = this.user.instituteId;
-      return cpSvc.getCps(opts)
-        .then((cps) => cps.map((cp) => cp.shortTitle));
+      if (this.ctx.role.site != this.all) {
+        opts.repositoryName = this.ctx.role.site;
+      } else {
+        opts.instituteId = this.user.instituteId;
+      }
+
+      return cpSvc.getCps(opts).then(
+        (cps) => {
+          let result = cps.map((cp) => cp.shortTitle)
+            .filter((cp) => cpsToRemove.indexOf(cp) == -1 || self.ctx.role.cp == cp);
+
+          if (allCps) {
+            result.splice(0, 0, self.all);
+          }
+
+          return result;
+        }
+      );
     },
 
     loadRoles: function() {
