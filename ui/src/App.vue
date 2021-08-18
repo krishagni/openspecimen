@@ -93,7 +93,7 @@ a {
   border-bottom: 2px solid #ddd;
 }
 
-.os-table thead td {
+.os-table tbody td {
   border-top: 1px solid #ddd;
 }
 

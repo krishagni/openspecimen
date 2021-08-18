@@ -61,6 +61,14 @@ class User {
     return http.get('rbac/subjects/' + user.id + '/roles');
   }
 
+  async updateRole(user, role) {
+    if (role.id) {
+      return http.put('rbac/subjects/' + user.id + '/roles/' + role.id, role);
+    } else {
+      return http.post('rbac/subjects/' + user.id + '/roles', role);
+    }
+  }
+
   async deleteRole(user, role) {
     return http.delete('rbac/subjects/' + user.id + '/roles/' + role.id);
   }
