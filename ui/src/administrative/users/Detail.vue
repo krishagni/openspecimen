@@ -13,17 +13,17 @@
       <SideMenu>
         <ul>
           <li>
-            <router-link to="overview">
+            <router-link :to="{name: 'UserOverview'}">
               <Icon name="eye" />
             </router-link>
           </li>
           <li>
-            <router-link to="roles">
+            <router-link :to="{name: 'UserRoles'}">
               <Icon name="users" />
             </router-link>
           </li>
           <li>
-            <router-link to="forms/list">
+            <router-link :to="{name: 'UserFormsList'}">
               <Icon name="copy" />
             </router-link>
           </li>

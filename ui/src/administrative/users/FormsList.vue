@@ -57,7 +57,7 @@
                     <td>
                       <ButtonGroup>
                         <Button left-icon="edit" size="small" />
-                        <Button left-icon="trash" size="small" />
+                        <Button left-icon="trash" size="small" @click="deleteRecord(record)" />
                       </ButtonGroup>
                     </td>
                   </tr>
@@ -68,6 +68,8 @@
         </Panel>
       </GridColumn>
     </Grid>
+
+    <DeleteFormRecord ref="deleteFormDialog" />
   </div>
 </template>
 
@@ -81,6 +83,8 @@ import Panel from '@/common/components/Panel.vue';
 import Button from '@/common/components/Button.vue';
 import ButtonGroup from '@/common/components/ButtonGroup.vue';
 
+import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
+
 export default {
   props: ['forms', 'records', 'formId', 'formCtxtId'],
 
@@ -90,7 +94,8 @@ export default {
     GridColumn,
     Panel,
     Button,
-    ButtonGroup
+    ButtonGroup,
+    DeleteFormRecord
   },
 
   setup(props) {
@@ -114,6 +119,15 @@ export default {
   methods: {
     onSelect: function(event) {
       this.ctx.selectedForm = event.item;
+    },
+
+    deleteRecord: function(record) {
+      this.$refs.deleteFormDialog.execute(record).then(
+        () => {
+          let idx = this.ctx.selectedForm.records.indexOf(record);
+          this.ctx.selectedForm.records.splice(idx, 1);
+        }
+      );
     }
   }
 }

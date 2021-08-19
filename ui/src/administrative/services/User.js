@@ -78,7 +78,18 @@ class User {
   }
 
   async getFormRecords(user) {
-    return http.get('users/' + user.id + '/form-records');
+    return http.get('users/' + user.id + '/form-records').then(
+      (frs) => {
+        frs.forEach(
+          (formRecords) =>
+            formRecords.records.forEach(
+              (record) => record.formCaption = formRecords.caption
+            )
+        );
+
+        return frs;
+      }
+    );
   }
 }
 
