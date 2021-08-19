@@ -303,7 +303,7 @@ task create_war(type: War) {
   }
 }
 
-def grunt_cmd = "/Users/vinayakpawar/work/ka/os/source/www/node_modules/grunt-cli/bin/grunt"
+def grunt_cmd = "grunt"
 
 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
   grunt_cmd = "grunt.cmd"
@@ -337,7 +337,7 @@ task vue_build(type: Exec) {
 vue_install_dependencies.dependsOn vue_backup_src
 vue_restore_src.dependsOn vue_install_dependencies
 vue_build.dependsOn vue_restore_src
-create_war.dependsOn unzip_form_designer
+create_war.dependsOn unzip_form_designer, grunt_build, vue_build
 build.dependsOn create_war
 
 apply from: envScript
