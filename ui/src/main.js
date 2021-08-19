@@ -19,6 +19,7 @@ import App from './App.vue'
 import http from '@/common/services/HttpClient.js';
 import alerts from '@/common/services/Alerts.js';
 import itemsSvc from '@/common/services/ItemsHolder.js';
+import routerSvc from '@/common/services/Router.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
@@ -113,3 +114,19 @@ window.addEventListener('message', function(event) {
     count = -1;
   }
 });
+
+
+//
+// listen for route changes
+//
+
+router.afterEach(
+  (to, from, failure) => {
+    if (!failure) {
+      // alert('Change the window browser URL to: ' + to.fullPath);
+      console.log(to);
+      // window.parent.href = to.href;
+      // routerSvc.changeUrl(to.href);
+    }
+  }
+);

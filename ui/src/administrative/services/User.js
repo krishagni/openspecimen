@@ -72,6 +72,14 @@ class User {
   async deleteRole(user, role) {
     return http.delete('rbac/subjects/' + user.id + '/roles/' + role.id);
   }
+
+  async getForms(user) {
+    return http.get('users/' + user.id + '/forms');
+  }
+
+  async getFormRecords(user) {
+    return http.get('users/' + user.id + '/form-records');
+  }
 }
 
 export default new User();
