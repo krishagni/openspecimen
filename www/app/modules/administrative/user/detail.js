@@ -6,8 +6,8 @@ angular.module('os.administrative.user.detail', ['os.administrative.models'])
 
     function init() {
       if (!$stateParams.old || $stateParams.old == 'false') {
-        var url = 'users/' + user.id + '/overview';
-        VueApp.setVueView(url, {});
+        var url = $state.href($state.$current.name, $stateParams);
+        VueApp.setVueView(url.substring(2), {});
         return;
       }
 

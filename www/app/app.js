@@ -385,14 +385,23 @@ osApp.config(function(
       var global = ui.os.global;
       global.initVueApp = global.vueAppView = true;
 
-      var url = baseUrl + state + '?';
+      var url = baseUrl + state;
+      var query = '';
       angular.forEach(params,
         function(value, key) {
           if (value) {
-            url += key + '=' + value + '&';
+            if (query) {
+              query += '&';
+            }
+
+            query += key + '=' + value;
           }
         }
       );
+
+      if (query) {
+        url += '?' + query;
+      }
 
       $rootScope.vueUrl = $sce.trustAsResourceUrl(url);
     }
