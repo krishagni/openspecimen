@@ -85,6 +85,11 @@ a {
   border-collapse: collapse;
 }
 
+.os-table.os-table-hover tbody tr:hover {
+  background-color: #f7f7f7;
+  cursor: pointer;
+}
+
 .os-table.muted-header thead th {
   background: #f5f5f5;
   color: #707070;

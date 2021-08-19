@@ -83,7 +83,10 @@ class User {
         frs.forEach(
           (formRecords) =>
             formRecords.records.forEach(
-              (record) => record.formCaption = formRecords.caption
+              (record) => {
+                record.formId = formRecords.id;
+                record.formCaption = formRecords.caption;
+              }
             )
         );
 

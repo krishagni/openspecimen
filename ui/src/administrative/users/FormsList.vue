@@ -26,15 +26,19 @@
       <GridColumn width="9">
         <Panel>
           <template #header>
-            <span>{{ctx.selectedForm.formCaption}}</span>
+            <span>
+              <span class="title">{{ctx.selectedForm.formCaption}}</span>
+              <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)"
+                v-if="ctx.selectedRecord && ctx.selectedRecord.recordId"/>
+            </span>
           </template>
 
-          <span v-if="!ctx.selectedRecord.recordId">
+          <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
             <span v-if="!ctx.selectedForm.records || ctx.selectedForm.records.length == 0">
               <span>No records to display</span>
             </span>
             <span v-else-if="ctx.selectedForm.records.length > 0">
-              <table class="os-table">
+              <table class="os-table os-table-hover">
                 <thead>
                   <tr>
                     <th>Record</th>
@@ -46,7 +50,12 @@
                 <tbody>
                   <tr v-for="record of ctx.selectedForm.records" :key="record.recordId">
                     <td>
-                      <a>#{{record.recordId}}</a>
+                      <router-link :to="{
+                        name: 'UserFormsList',
+                        query: {formId: record.formId, formCtxtId: record.fcId, recordId: record.recordId}
+                      }">
+                        <span>#{{record.recordId}}</span>
+                      </router-link>
                     </td>
                     <td>
                       <span>{{$filters.username(record.user)}}</span>
@@ -64,6 +73,9 @@
                 </tbody>
               </table>
             </span>
+          </span>
+          <span v-else>
+            <pre>{{ctx.selectedRecord}}</pre>
           </span>
         </Panel>
       </GridColumn>
@@ -86,7 +98,7 @@ import ButtonGroup from '@/common/components/ButtonGroup.vue';
 import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
 
 export default {
-  props: ['forms', 'records', 'formId', 'formCtxtId'],
+  props: ['forms', 'records', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
     ListGroup,
@@ -107,8 +119,23 @@ export default {
       () => {
         if (props.formCtxtId) {
           ctx.selectedForm = props.forms.find((form) => form.formCtxtId == props.formCtxtId);
+          if (props.recordId) {
+            ctx.selectedRecord = ctx.selectedForm.records.find((record) => record.recordId == props.recordId);
+          } else {
+            ctx.selectedRecord = {};
+          }
         } else if (props.forms.length > 0) {
           ctx.selectedForm = props.forms[0];
+          if (ctx.selectedForm.records && ctx.selectedForm.records.length == 1) {
+            this.$router.push({
+              name: 'UserFormsList',
+              query: {
+                formId: ctx.selectedForm.formId,
+                formCtxtId: ctx.selectedForm.formCtxtId,
+                recordId: ctx.selectedForm.records[0].recordId
+              }
+            });
+          }
         }
       }
     );
@@ -118,14 +145,35 @@ export default {
 
   methods: {
     onSelect: function(event) {
-      this.ctx.selectedForm = event.item;
+      let form = event.item;
+      this.$router.push({
+        name: 'UserFormsList',
+        query: {
+          formId: form.formId,
+          formCtxtId: form.formCtxtId,
+          recordId: form.records && form.records.length == 1 ? form.records[0].recordId : undefined
+        }
+      });
+    },
+
+    showRecord: function(record) {
+      this.$router.push({
+        name: 'UserFormsList',
+        query: { formId: record.formId, formCtxtId: record.fcId, recordId: record.recordId }
+      });
     },
 
     deleteRecord: function(record) {
       this.$refs.deleteFormDialog.execute(record).then(
         () => {
-          let idx = this.ctx.selectedForm.records.indexOf(record);
-          this.ctx.selectedForm.records.splice(idx, 1);
+          let form = this.ctx.selectedForm;
+          let idx = form.records.indexOf(record);
+          form.records.splice(idx, 1);
+          if (form.records.length == 1) {
+            this.showRecord(form.records[0]);
+          }
+
+          this.onSelect({item: form});
         }
       );
     }

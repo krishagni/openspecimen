@@ -56,7 +56,13 @@ const routes = [
             path: 'list',
             name: 'UserFormsList',
             component: () => import(/* webpackChunkName: "users" */ '../administrative/users/FormsList.vue'),
-            props: (route) => ({formId: route.query.formId, formCtxtId: route.query.formCtxtId})
+            props: (route) => {
+              return {
+                formId: route.query.formId,
+                formCtxtId: route.query.formCtxtId,
+                recordId: route.query.recordId
+              };
+            }
           }
         ]
       }
