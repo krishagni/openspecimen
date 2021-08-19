@@ -23,7 +23,7 @@
             </router-link>
           </li>
           <li>
-            <router-link to="forms">
+            <router-link to="forms/list">
               <Icon name="copy" />
             </router-link>
           </li>

@@ -19,7 +19,7 @@ import App from './App.vue'
 import http from '@/common/services/HttpClient.js';
 import alerts from '@/common/services/Alerts.js';
 import itemsSvc from '@/common/services/ItemsHolder.js';
-import routerSvc from '@/common/services/Router.js';
+// import routerSvc from '@/common/services/Router.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 

@@ -18,8 +18,28 @@ export default {
 
     watchEffect(
       () => {
-        userSvc.getForms(props.user).then((forms) => ctx.forms = forms);
-        userSvc.getFormRecords(props.user).then((records) => ctx.records = records);
+        let formsQ = userSvc.getForms(props.user);
+        let recsQ  = userSvc.getFormRecords(props.user);
+        Promise.all([formsQ, recsQ]).then(
+          (data) => {
+            ctx.forms   = data[0];
+            ctx.records = data[1];
+
+            let fcMap = {};
+            ctx.forms.forEach((form) => fcMap[form.formCtxtId] = form);
+            ctx.records.forEach(
+              (formRecs) => {
+                 formRecs.records.forEach(
+                   (record) => {
+                     let form = fcMap[record.fcId];
+                     form.records = form.records || [];
+                     form.records.push(record);
+                   }
+                 );
+              }
+            );
+          }
+        );
       }
     );
 
