@@ -28,8 +28,12 @@
           <template #header>
             <span>
               <span class="title">{{ctx.selectedForm.formCaption}}</span>
-              <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)"
-                v-if="ctx.selectedRecord && ctx.selectedRecord.recordId"/>
+              <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
+                <Button left-icon="plus" label="Add" @click="addRecord" />
+              </span>
+              <span v-else>
+                <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
+              </span>
             </span>
           </template>
 
@@ -176,6 +180,14 @@ export default {
       this.$router.push({
         name: 'UserFormsList',
         query: { formId: record.formId, formCtxtId: record.fcId, recordId: record.recordId }
+      });
+    },
+
+    addRecord: function() {
+      let selectedForm = this.ctx.selectedForm;
+      this.$router.push({
+        name: 'UserFormAddEdit',
+        query: { formId: selectedForm.formId, formCtxtId: selectedForm.formCtxtId }
       });
     },
 

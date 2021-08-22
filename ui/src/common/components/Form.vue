@@ -37,6 +37,8 @@ import Dropdown from '@/common/components/Dropdown.vue';
 import InputText from '@/common/components/InputText.vue';
 import Password from '@/common/components/Password.vue';
 import RadioButton from '@/common/components/RadioButton.vue';
+import BooleanCheckbox from '@/common/components/BooleanCheckbox.vue';
+import Checkbox from '@/common/components/Checkbox.vue';
 import Textarea from '@/common/components/Textarea.vue';
 import Label from '@/common/components/Label.vue';
 import InlineMessage from '@/common/components/InlineMessage.vue';
@@ -50,6 +52,8 @@ export default {
      InputText,
      Password,
      RadioButton,
+     BooleanCheckbox,
+     Checkbox,
      Textarea,
      'os-label': Label,
      'os-inline-message': InlineMessage,

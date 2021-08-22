@@ -7,6 +7,8 @@ class FieldFactory {
   fieldTypes = {
     dropdown: 'Dropdown',
     radio: 'RadioButton',
+    checkbox: 'Checkbox',
+    booleanCheckbox: 'BooleanCheckbox',
     text: 'InputText',
     textarea: 'Textarea',
     password: 'Password'

@@ -63,6 +63,18 @@ const routes = [
                 recordId: route.query.recordId
               };
             }
+          },
+          {
+            path: 'addedit',
+            name: 'UserFormAddEdit',
+            component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEditFormRecord.vue'),
+            props: (route) => {
+              return {
+                formId: route.query.formId,
+                formCtxtId: route.query.formCtxtId,
+                recordId: route.query.recordId
+              };
+            }
           }
         ]
       }
