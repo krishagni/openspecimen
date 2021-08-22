@@ -75,7 +75,8 @@
             </span>
           </span>
           <span v-else>
-            <pre>{{ctx.selectedRecord}}</pre>
+            <pre v-if="!ctx.selectedRecord">{{ctx.selectedRecord}}</pre>
+            <FormRecordOverview v-else :record="ctx.record" />
           </span>
         </Panel>
       </GridColumn>
@@ -88,6 +89,8 @@
 <script>
 
 import {reactive, watchEffect} from 'vue';
+import { useRouter } from 'vue-router'
+
 import ListGroup from '@/common/components/ListGroup.vue';
 import Grid from '@/common/components/Grid.vue';
 import GridColumn from '@/common/components/GridColumn.vue';
@@ -95,7 +98,10 @@ import Panel from '@/common/components/Panel.vue';
 import Button from '@/common/components/Button.vue';
 import ButtonGroup from '@/common/components/ButtonGroup.vue';
 
+import FormRecordOverview from '@/forms/components/FormRecordOverview.vue';
 import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
+
+import formSvc from '@/forms/services/Form.js';
 
 export default {
   props: ['forms', 'records', 'formId', 'formCtxtId', 'recordId'],
@@ -107,6 +113,7 @@ export default {
     Panel,
     Button,
     ButtonGroup,
+    FormRecordOverview,
     DeleteFormRecord
   },
 
@@ -115,6 +122,7 @@ export default {
       selectedRecord: {}
     });
 
+    let router = useRouter();
     watchEffect(
       () => {
         if (props.formCtxtId) {
@@ -124,10 +132,14 @@ export default {
           } else {
             ctx.selectedRecord = {};
           }
+
+          if (ctx.selectedRecord.recordId) {
+            formSvc.getRecord(ctx.selectedRecord, {includeMetadata: true}).then((record) => ctx.record = record);
+          }
         } else if (props.forms.length > 0) {
           ctx.selectedForm = props.forms[0];
           if (ctx.selectedForm.records && ctx.selectedForm.records.length == 1) {
-            this.$router.push({
+            router.push({
               name: 'UserFormsList',
               query: {
                 formId: ctx.selectedForm.formId,

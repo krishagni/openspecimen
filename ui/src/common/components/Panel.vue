@@ -37,7 +37,7 @@ export default {
   padding: 1rem;
 }
 
-.os-panel :deep(.title) {
+.os-panel :deep(.p-panel-header .title) {
   padding-right: 15px;
 }
 </style>
