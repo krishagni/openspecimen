@@ -61,6 +61,34 @@ filters.dateTime = (date) => {
   return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString();
 }
 
+filters.date = (date) => {
+  if (!date) {
+    return '-';
+  }
+
+  return new Date(date).toLocaleDateString();
+}
+
+filters.boolValue = (value, cfg) => {
+  cfg = cfg || {};
+  if (value == 1 || value == true || value == 'true') {
+    return cfg[true] || 'Yes';
+  } else if (value == 0 || value == false || value == 'false') {
+    return cfg[false] || 'No';
+  } else {
+    return '-';
+  }
+}
+
+filters.arrayJoin = (value) => {
+  if (value instanceof Array) {
+    return value.join(', ');
+  } else if (!value) {
+    return '-';
+  } else {
+    return value;
+  }
+}
 
 alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);
@@ -120,13 +148,12 @@ window.addEventListener('message', function(event) {
 // listen for route changes
 //
 
-router.afterEach(
+/*router.afterEach(
   (to, from, failure) => {
     if (!failure) {
       // alert('Change the window browser URL to: ' + to.fullPath);
-      console.log(to);
       // window.parent.href = to.href;
       // routerSvc.changeUrl(to.href);
     }
   }
-);
+);*/

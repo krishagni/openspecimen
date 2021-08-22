@@ -129,6 +129,9 @@ export default {
           ctx.selectedForm = props.forms.find((form) => form.formCtxtId == props.formCtxtId);
           if (props.recordId) {
             ctx.selectedRecord = ctx.selectedForm.records.find((record) => record.recordId == props.recordId);
+            if (!ctx.selectedRecord) {
+              ctx.selectedRecord = {};
+            }
           } else {
             ctx.selectedRecord = {};
           }
@@ -156,14 +159,15 @@ export default {
   },
 
   methods: {
-    onSelect: function(event) {
+    onSelect: function(event, replace) {
       let form = event.item;
-      this.$router.push({
+      let method = replace ? this.$router.replace : this.$router.push;
+      method({
         name: 'UserFormsList',
         query: {
           formId: form.formId,
           formCtxtId: form.formCtxtId,
-          recordId: form.records && form.records.length == 1 ? form.records[0].recordId : undefined
+          recordId: (form.records && form.records.length == 1) ? form.records[0].recordId : undefined
         }
       });
     },
@@ -176,16 +180,13 @@ export default {
     },
 
     deleteRecord: function(record) {
+      let self = this;
       this.$refs.deleteFormDialog.execute(record).then(
         () => {
-          let form = this.ctx.selectedForm;
+          let form = self.ctx.selectedForm;
           let idx = form.records.indexOf(record);
           form.records.splice(idx, 1);
-          if (form.records.length == 1) {
-            this.showRecord(form.records[0]);
-          }
-
-          this.onSelect({item: form});
+          self.onSelect({item: form}, true);
         }
       );
     }
