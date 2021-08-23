@@ -9,7 +9,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
-        @show="searchOptions"
+        @show="loadOptions"
         @filter="searchOptions($event)"
       />
       <label>{{$attrs.placeholder}}</label>
@@ -22,7 +22,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
-        @show="searchOptions"
+        @show="loadOptions"
         @filter="searchOptions($event)"
       />
     </div>
@@ -54,17 +54,28 @@ export default {
   },
 
   methods: {
-    searchOptions(event) {
+    async loadOptions() {
+      if (this.ctx.optionsLoaded) {
+        return;
+      }
+
+      this.searchOptions();
+      this.ctx.optionsLoaded = true;
+    },
+
+    async searchOptions(event) {
       let query = (event && event.value) || '';
       query = query.toLowerCase();
 
+      let selectedVals = await this.selectedValues() || [];
+
       if (this.listSource.options) {
-        this.ctx.options = this.dedup(this.selectedValues().concat(this.listSource.options));
+        this.ctx.options = this.dedup(selectedVals.concat(this.listSource.options));
       } else if (typeof this.listSource.loadFn == 'function') {
         let self = this;
         this.listSource.loadFn({query: query, maxResults: 100}).then(
           function(options) {
-            self.ctx.options = self.dedup(self.selectedValues().concat(options));
+            self.ctx.options = self.dedup(selectedVals.concat(options));
           }
         );
       } else if (typeof this.listSource.apiUrl == 'string') {
@@ -91,35 +102,67 @@ export default {
 
         http.get(this.listSource.apiUrl, params).then(
           function(options) {
-            self.ctx.options = self.dedup(self.selectedValues().concat(options));
+            self.ctx.options = self.dedup(selectedVals.concat(options));
           }
         );
       }
     },
 
-    selectedValues() {
-      if (!this.modelValue) {
-        return [];
+    async selectedValues() {
+      if (!(this.modelValue instanceof Array)) {
+        return undefined;
       }
 
-      return (this.modelValue || []).map(
-        (value) => {
-          if (typeof value == 'object' || !this.listSource.displayProp) {
-            return value;
-          } else if (value) {
-            let selVal = {};
-            selVal[this.listSource.selectProp] = selVal[this.listSource.displayProp] = value.toString();
-            return selVal;
+      if (this.modelValue.some((elem) => typeof elem == 'object')) {
+        return this.modelValue;
+      }
+
+      this.cache = this.cache || {};
+
+      let cached = [], toGet = [];
+      for (let item of this.modelValue) {
+        if (Object.prototype.hasOwnProperty.call(this.cache, item)) {
+          if (this.cache[item]) {
+            cached.push(this.cache[item]);
           }
+        } else {
+          toGet.push(item);
         }
-      );
+      }
+
+      if (toGet.length == 0) {
+        return cached;
+      }
+
+      let ls = this.listSource;
+      let selected = undefined;
+      if (ls.options) {
+        selected = ls.options.filter((option) => toGet.some((testItem) => option[ls.selectProp] == testItem));
+      } else if (typeof ls.loadFn == 'function') {
+        selected = await ls.loadFn({value: toGet});
+      } else if (typeof ls.apiUrl == 'string') {
+        selected = await http.get(ls.apiUrl, {value: toGet});
+      }
+
+      if (selected instanceof Array) {
+        selected.forEach((item) => this.cache[item[ls.selectProp]] = item);
+      }
+
+      let indices = {};
+      for (let idx = 0; idx < this.modelValue.length; ++idx) {
+        indices[this.modelValue[idx]] = idx;
+      }
+
+      let result = cached.concat(selected);
+      result.sort((e1, e2) => indices[e1[ls.selectProp]] - indices[e2[ls.selectProp]]);
+      return result;
     },
 
     dedup(options) {
-      let self = this;
+      let ls = this.listSource;
       let optionsMap = options.reduce(
         (acc, e) => {
-          acc[e[self.listSource.selectProp]] = e;
+          acc[e[ls.selectProp]] = e;
           return acc;
         },
         {}
@@ -150,6 +193,13 @@ export default {
 
     showClear: function() {
       return true;
+    }
+  },
+
+  watch: {
+    selected: function(newVal) {
+      this.cache = this.cache || {};
+      newVal.forEach((item) => this.cache[item[this.listSource.selectProp]] = item);   
     }
   },
 

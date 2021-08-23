@@ -9,7 +9,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
-        @focus="loadOptions()"
+        @focus="loadOptions"
         @filter="searchOptions($event)"
       />
       <label>{{$attrs.placeholder}}</label>
@@ -22,7 +22,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
-        @focus="loadOptions()"
+        @focus="loadOptions"
         @filter="searchOptions($event)"
       />
     </div>
@@ -47,9 +47,7 @@ export default {
   setup() {
     let ctx = reactive({ options: [] });
 
-    return {
-      ctx
-    }
+    return { ctx }
   },
 
   data() {
@@ -124,7 +122,7 @@ export default {
       }
 
       this.cache = this.cache || {};
-      if (Object.prototype.hasOwnProperty.call(this.modelValue, this.modelValue)) {
+      if (Object.prototype.hasOwnProperty.call(this.cache, this.modelValue)) {
         return this.cache[this.modelValue];
       }
 
@@ -147,10 +145,10 @@ export default {
     },
 
     dedup(options) {
-      let self = this;
+      let ls = this.listSource;
       let optionsMap = options.reduce(
         (acc, e) => {
-          acc[e[self.listSource.selectProp]] = e;
+          acc[e[ls.selectProp]] = e;
           return acc;
         },
         {}
@@ -181,6 +179,17 @@ export default {
 
     showClear: function() {
       return true;
+    }
+  },
+
+  watch: {
+    selected: function(newVal) {
+      if (!newVal) {
+        return;
+      }
+
+      this.cache = this.cache || {};
+      this.cache[newVal[this.listSource.selectProp]] = newVal;
     }
   },
 
