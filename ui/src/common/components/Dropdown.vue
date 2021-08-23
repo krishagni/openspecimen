@@ -123,16 +123,27 @@ export default {
         return this.modelValue;
       }
 
-      let ls = this.listSource;
-      if (ls.options) {
-        return ls.options.find((option) => option[ls.selectProp] == this.modelValue);
-      } else if (typeof ls.loadFn == 'function') {
-        return ls.loadFn({value: this.modelValue});
-      } else if (typeof ls.apiUrl == 'string') {
-        return http.get(ls.apiUrl, {value: this.modelValue});
+      this.cache = this.cache || {};
+      if (Object.prototype.hasOwnProperty.call(this.modelValue, this.modelValue)) {
+        return this.cache[this.modelValue];
       }
 
-      return undefined;
+      let ls = this.listSource;
+      let selected = undefined;
+      if (ls.options) {
+        selected = ls.options.find((option) => option[ls.selectProp] == this.modelValue);
+      } else if (typeof ls.loadFn == 'function') {
+        selected = await ls.loadFn({value: this.modelValue});
+      } else if (typeof ls.apiUrl == 'string') {
+        selected = await http.get(ls.apiUrl, {value: this.modelValue});
+      }
+
+      if (selected instanceof Array) {
+        selected = selected.length > 0 ? selected[0] : undefined;
+      }
+
+      this.cache[this.modelValue] = selected;
+      return selected;
     },
 
     dedup(options) {
