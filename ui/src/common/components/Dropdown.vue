@@ -9,7 +9,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
-        @focus="searchOptions"
+        @focus="loadOptions()"
         @filter="searchOptions($event)"
       />
       <label>{{$attrs.placeholder}}</label>
@@ -22,7 +22,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
-        @focus="searchOptions"
+        @focus="loadOptions()"
         @filter="searchOptions($event)"
       />
     </div>
@@ -57,18 +57,31 @@ export default {
   },
 
   methods: {
-    searchOptions(event) {
+    async loadOptions() {
+      if (this.ctx.optionsLoaded) {
+        return;
+      }
+
+      this.searchOptions();
+      this.ctx.optionsLoaded = true;
+    },
+
+    async searchOptions(event) {
       let query = (event && event.value) || '';
       query = query.toLowerCase();
 
-      let selectedValues = this.selectedValue() ? [this.selectedValue()] : [];
+      let selectedVal = await this.selectedValue() || [];
+      if (!(selectedVal instanceof Array)) {
+        selectedVal = [selectedVal];
+      }
+
       if (this.listSource.options) {
-        this.ctx.options = this.dedup(selectedValues.concat(this.listSource.options));
+        this.ctx.options = this.dedup(selectedVal.concat(this.listSource.options));
       } else if (typeof this.listSource.loadFn == 'function') {
         let self = this;
         this.listSource.loadFn({query: query, maxResults: 100}).then(
           function(options) {
-            self.ctx.options = self.dedup(selectedValues.concat(options));
+            self.ctx.options = self.dedup(selectedVal.concat(options));
           }
         );
       } else if (typeof this.listSource.apiUrl == 'string') {
@@ -95,24 +108,31 @@ export default {
 
         http.get(this.listSource.apiUrl, params).then(
           function(options) {
-            self.ctx.options = self.dedup(selectedValues.concat(options));
+            self.ctx.options = self.dedup(selectedVal.concat(options));
           }
         );
       }
     },
 
-    selectedValue() {
+    async selectedValue() {
       if (!this.modelValue) {
         return undefined;
       }
 
-      if (typeof this.modelValue == 'object' || !this.listSource.displayProp) {
+      if (typeof this.modelValue == 'object') {
         return this.modelValue;
-      } else if (this.modelValue) {
-        let selVal = {};
-        selVal[this.listSource.selectProp] = selVal[this.listSource.displayProp] = this.modelValue.toString();
-        return selVal;
       }
+
+      let ls = this.listSource;
+      if (ls.options) {
+        return ls.options.find((option) => option[ls.selectProp] == this.modelValue);
+      } else if (typeof ls.loadFn == 'function') {
+        return ls.loadFn({value: this.modelValue});
+      } else if (typeof ls.apiUrl == 'string') {
+        return http.get(ls.apiUrl, {value: this.modelValue});
+      }
+
+      return undefined;
     },
 
     dedup(options) {
