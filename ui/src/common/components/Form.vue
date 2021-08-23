@@ -34,6 +34,8 @@ import alertSvc from '@/common/services/Alerts.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 
 import Dropdown from '@/common/components/Dropdown.vue';
+import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
+import DatePicker from '@/common/components/DatePicker.vue';
 import InputText from '@/common/components/InputText.vue';
 import Password from '@/common/components/Password.vue';
 import RadioButton from '@/common/components/RadioButton.vue';
@@ -49,6 +51,8 @@ export default {
 
    components: {
      Dropdown,
+     MultiSelectDropdown,
+     DatePicker,
      InputText,
      Password,
      RadioButton,

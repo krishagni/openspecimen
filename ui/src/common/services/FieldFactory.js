@@ -6,12 +6,14 @@ class FieldFactory {
 
   fieldTypes = {
     dropdown: 'Dropdown',
+    multiselect: 'MultiSelectDropdown',
     radio: 'RadioButton',
     checkbox: 'Checkbox',
     booleanCheckbox: 'BooleanCheckbox',
     text: 'InputText',
     textarea: 'Textarea',
-    password: 'Password'
+    password: 'Password',
+    datePicker: 'DatePicker'
   };
 
   getComponent(fieldType) {

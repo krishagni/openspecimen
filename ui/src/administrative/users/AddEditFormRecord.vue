@@ -9,6 +9,8 @@
       <Button label="Save" @click="saveRecord" />
       <Button label="Cancel" @click="cancel" />
     </Form>
+
+    <pre> {{ ctx.formDef }} </pre>
   </Panel>
 </template>
 
@@ -68,6 +70,16 @@ export default {
                         displayProp: 'caption',
                         selectProp: 'value'
                       }
+                    } else if (field.type == 'multiSelectListbox') {
+                      fs.type = 'multiselect';
+                      fs.listSource = {
+                        options: (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value})),
+                        displayProp: 'caption',
+                        selectProp: 'value'
+                      }
+                    } else if (field.type == 'datePicker') {
+                      fs.type = 'datePicker';
+                      fs.showTime = field.format && field.format.indexOf('HH:mm') > 0;
                     }
 
                     if (fs.type) {
@@ -94,7 +106,17 @@ export default {
       console.log(event);
     },
 
-    
+    saveRecord: function() {
+      if (!this.$refs.deForm.validate()) {
+        return;
+      }
+
+      alert(JSON.stringify(this.ctx.record));
+    },
+
+    cancel: function() {
+      alert('cancel');
+    }
   }
 }
 
