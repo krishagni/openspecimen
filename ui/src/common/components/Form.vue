@@ -45,6 +45,9 @@ import Textarea from '@/common/components/Textarea.vue';
 import FileUpload from '@/common/components/FileUpload.vue';
 import SignaturePad from '@/common/components/SignaturePad.vue';
 import UserDropdown from '@/common/components/UserDropdown.vue';
+import PvDropdown from '@/common/components/PvDropdown.vue';
+import SiteDropdown from '@/common/components/SiteDropdown.vue';
+import StorageContainerDropdown from '@/common/components/StorageContainerDropdown.vue';
 import Label from '@/common/components/Label.vue';
 import InlineMessage from '@/common/components/InlineMessage.vue';
 import Divider from '@/common/components/Divider.vue';
@@ -65,6 +68,9 @@ export default {
      FileUpload,
      SignaturePad,
      UserDropdown,
+     PvDropdown,
+     SiteDropdown,
+     StorageContainerDropdown,
      'os-label': Label,
      'os-inline-message': InlineMessage,
      'os-divider': Divider

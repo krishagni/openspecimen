@@ -38,7 +38,14 @@ export default {
     let ctx = reactive({
       formSchema: { rows: [] },
 
-      record: { "city": "Mysore", "skills": ["Carpenter", "Painting"], "entered_by": 5 },
+      record: {
+        "city": "Mysore",
+        "skills": ["Carpenter", "Painting"],
+        "entered_by": 5,
+        "diagnoses": 76130,
+        "visit_site": 2,
+        "designated_freezer": 20
+      },
     });
 
     watchEffect(
@@ -91,6 +98,17 @@ export default {
                       fs.imageUrl = (fileId) => http.getUrl('form-files/' + fileId);
                     } else if (field.type == 'userField') {
                       fs.type = 'user';
+                      fs.selectProp = 'id';
+                    } else if (field.type == 'pvField') {
+                      fs.type = 'pv';
+                      fs.selectProp = 'id';
+                      fs.attribute = field.attribute;
+                      fs.leafValue = field.leafValue;
+                    } else if (field.type == 'siteField') {
+                      fs.type = 'site';
+                      fs.selectProp = 'id';
+                    } else if (field.type == 'storageContainer') {
+                      fs.type = 'storageContainer';
                       fs.selectProp = 'id';
                     }
 

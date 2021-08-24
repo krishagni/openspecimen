@@ -16,7 +16,10 @@ class FieldFactory {
     datePicker: 'DatePicker',
     fileUpload: 'FileUpload',
     signature: 'SignaturePad',
-    user: 'UserDropdown'
+    user: 'UserDropdown',
+    pv: 'PvDropdown',
+    site: 'SiteDropdown',
+    storageContainer: 'StorageContainerDropdown'
   };
 
   getComponent(fieldType) {
