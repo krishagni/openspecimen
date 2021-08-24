@@ -43,6 +43,7 @@ import BooleanCheckbox from '@/common/components/BooleanCheckbox.vue';
 import Checkbox from '@/common/components/Checkbox.vue';
 import Textarea from '@/common/components/Textarea.vue';
 import FileUpload from '@/common/components/FileUpload.vue';
+import SignaturePad from '@/common/components/SignaturePad.vue';
 import Label from '@/common/components/Label.vue';
 import InlineMessage from '@/common/components/InlineMessage.vue';
 import Divider from '@/common/components/Divider.vue';
@@ -61,6 +62,7 @@ export default {
      Checkbox,
      Textarea,
      FileUpload,
+     SignaturePad,
      'os-label': Label,
      'os-inline-message': InlineMessage,
      'os-divider': Divider

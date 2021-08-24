@@ -14,7 +14,8 @@ class FieldFactory {
     textarea: 'Textarea',
     password: 'Password',
     datePicker: 'DatePicker',
-    fileUpload: 'FileUpload'
+    fileUpload: 'FileUpload',
+    'signature': 'SignaturePad'
   };
 
   getComponent(fieldType) {

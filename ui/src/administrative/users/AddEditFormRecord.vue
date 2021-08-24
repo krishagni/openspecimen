@@ -85,6 +85,10 @@ export default {
                       fs.type = 'fileUpload';
                       fs.url = http.getUrl('form-files');
                       fs.headers = http.headers;
+                    } else if (field.type == 'signature') {
+                      fs.type = 'signature';
+                      fs.uploader = (data) => http.post('form-files/images', {dataUrl: data}).then((r) => r.fileId);
+                      fs.imageUrl = (fileId) => http.getUrl('form-files/' + fileId);
                     }
 
                     if (fs.type) {
