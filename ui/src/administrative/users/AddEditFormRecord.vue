@@ -38,7 +38,7 @@ export default {
     let ctx = reactive({
       formSchema: { rows: [] },
 
-      record: { },
+      record: { "city": "Mysore", "skills": ["Carpenter", "Painting"], "entered_by": 5 },
     });
 
     watchEffect(
@@ -89,6 +89,9 @@ export default {
                       fs.type = 'signature';
                       fs.uploader = (data) => http.post('form-files/images', {dataUrl: data}).then((r) => r.fileId);
                       fs.imageUrl = (fileId) => http.getUrl('form-files/' + fileId);
+                    } else if (field.type == 'userField') {
+                      fs.type = 'user';
+                      fs.selectProp = 'id';
                     }
 
                     if (fs.type) {

@@ -205,7 +205,8 @@ export default {
 
   mounted() {
     if (this.modelValue) {
-      this.searchOptions({value: ''});
+      // this.searchOptions({value: ''});
+      this.selectedValues().then((values) => this.ctx.options = values);
     }
   }
 }

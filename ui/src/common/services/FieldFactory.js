@@ -15,7 +15,8 @@ class FieldFactory {
     password: 'Password',
     datePicker: 'DatePicker',
     fileUpload: 'FileUpload',
-    'signature': 'SignaturePad'
+    signature: 'SignaturePad',
+    user: 'UserDropdown'
   };
 
   getComponent(fieldType) {
