@@ -13,7 +13,8 @@ class FieldFactory {
     text: 'InputText',
     textarea: 'Textarea',
     password: 'Password',
-    datePicker: 'DatePicker'
+    datePicker: 'DatePicker',
+    fileUpload: 'FileUpload'
   };
 
   getComponent(fieldType) {

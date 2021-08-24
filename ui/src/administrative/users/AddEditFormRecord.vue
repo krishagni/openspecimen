@@ -22,6 +22,7 @@ import Button from '@/common/components/Button.vue';
 import Form from '@/common/components/Form.vue';
 import Panel from '@/common/components/Panel.vue';
 
+import http from '@/common/services/HttpClient.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
@@ -37,7 +38,7 @@ export default {
     let ctx = reactive({
       formSchema: { rows: [] },
 
-      record: {}
+      record: { },
     });
 
     watchEffect(
@@ -80,6 +81,10 @@ export default {
                     } else if (field.type == 'datePicker') {
                       fs.type = 'datePicker';
                       fs.showTime = field.format && field.format.indexOf('HH:mm') > 0;
+                    } else if (field.type == 'fileUpload') {
+                      fs.type = 'fileUpload';
+                      fs.url = http.getUrl('form-files');
+                      fs.headers = http.headers;
                     }
 
                     if (fs.type) {
