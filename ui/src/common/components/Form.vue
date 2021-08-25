@@ -5,9 +5,11 @@
       <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
           <os-label>{{field.label}}</os-label>
-          <component :is="field.component" v-bind="field" v-model="ctx.formData[field.name]"
-            :form="ctx" @update:model-value="handleInput(field)">
-          </component>
+          <div class="input">
+            <component :is="field.component" v-bind="field" v-model="ctx.formData[field.name]"
+              :form="ctx" @update:model-value="handleInput(field)">
+            </component>
+          </div>
           <div v-if="v$.ctx.formData[field.name] && v$.ctx.formData[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
           </div>
@@ -48,6 +50,7 @@ import UserDropdown from '@/common/components/UserDropdown.vue';
 import PvDropdown from '@/common/components/PvDropdown.vue';
 import SiteDropdown from '@/common/components/SiteDropdown.vue';
 import StorageContainerDropdown from '@/common/components/StorageContainerDropdown.vue';
+import Subform from '@/common/components/Subform.vue';
 import Label from '@/common/components/Label.vue';
 import InlineMessage from '@/common/components/InlineMessage.vue';
 import Divider from '@/common/components/Divider.vue';
@@ -71,6 +74,7 @@ export default {
      PvDropdown,
      SiteDropdown,
      StorageContainerDropdown,
+     Subform,
      'os-label': Label,
      'os-inline-message': InlineMessage,
      'os-divider': Divider
@@ -147,8 +151,7 @@ export default {
              }
            }
 
-           let component = fieldFactory.getComponent(field.type);
-           formRow.push({...field, component: component});
+           formRow.push(field);
          }
 
          if (formRow.length > 0) {
@@ -209,6 +212,11 @@ form {
 .row .field {
   flex: 1 1 0;
   padding: 0.5rem 1rem;
+  overflow-x: auto;
+}
+
+.row .field .input {
+  overflow-x: auto;
 }
 
 .row .field :deep(.btn) {

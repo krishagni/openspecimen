@@ -22,7 +22,8 @@ import Button from '@/common/components/Button.vue';
 import Form from '@/common/components/Form.vue';
 import Panel from '@/common/components/Panel.vue';
 
-import http from '@/common/services/HttpClient.js';
+// import http from '@/common/services/HttpClient.js';
+import fieldFactory from '@/common/services/FieldFactory.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
@@ -44,7 +45,8 @@ export default {
         "entered_by": 5,
         "diagnoses": 76130,
         "visit_site": 2,
-        "designated_freezer": 20
+        "designated_freezer": 20,
+        "office_addresses": [ { "type": "Office", "landmark": "Ganesh Temple" } ]
       },
     });
 
@@ -58,60 +60,7 @@ export default {
                 let rs = {fields: []};
                 row.forEach(
                   (field) => {
-                    let fs = { name: field.udn, label: field.caption };
-                    if (field.type == 'stringTextField') {
-                      fs.type = 'text';
-                    } else if (field.type == 'textArea') {
-                      fs.type = 'textarea';
-                    } else if (field.type == 'radiobutton') {
-                      fs.type = 'radio';
-                      fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value}));
-                    } else if (field.type == 'checkbox') {
-                      fs.type = 'checkbox';
-                      fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value}));
-                    } else if (field.type == 'booleanCheckbox') {
-                      fs.type = 'booleanCheckbox';
-                    } else if (field.type == 'combobox') {
-                      fs.type = 'dropdown';
-                      fs.listSource = {
-                        options: (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value})),
-                        displayProp: 'caption',
-                        selectProp: 'value'
-                      }
-                    } else if (field.type == 'multiSelectListbox') {
-                      fs.type = 'multiselect';
-                      fs.listSource = {
-                        options: (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value})),
-                        displayProp: 'caption',
-                        selectProp: 'value'
-                      }
-                    } else if (field.type == 'datePicker') {
-                      fs.type = 'datePicker';
-                      fs.showTime = field.format && field.format.indexOf('HH:mm') > 0;
-                    } else if (field.type == 'fileUpload') {
-                      fs.type = 'fileUpload';
-                      fs.url = http.getUrl('form-files');
-                      fs.headers = http.headers;
-                    } else if (field.type == 'signature') {
-                      fs.type = 'signature';
-                      fs.uploader = (data) => http.post('form-files/images', {dataUrl: data}).then((r) => r.fileId);
-                      fs.imageUrl = (fileId) => http.getUrl('form-files/' + fileId);
-                    } else if (field.type == 'userField') {
-                      fs.type = 'user';
-                      fs.selectProp = 'id';
-                    } else if (field.type == 'pvField') {
-                      fs.type = 'pv';
-                      fs.selectProp = 'id';
-                      fs.attribute = field.attribute;
-                      fs.leafValue = field.leafValue;
-                    } else if (field.type == 'siteField') {
-                      fs.type = 'site';
-                      fs.selectProp = 'id';
-                    } else if (field.type == 'storageContainer') {
-                      fs.type = 'storageContainer';
-                      fs.selectProp = 'id';
-                    }
-
+                    let fs = fieldFactory.getFieldSchema(field);
                     if (fs.type) {
                       rs.fields.push(fs);
                     }
