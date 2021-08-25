@@ -30,7 +30,7 @@ class FormUtil {
 
   relinkFormRecords(forms, records) {
     let fcMap = {};
-    forms.forEach((form) => fcMap[form.formCtxtId] = form);
+    forms.forEach((form) => { form.records = []; fcMap[form.formCtxtId] = form });
     records.forEach(
       (formRecs) => {
         formRecs.records.forEach(

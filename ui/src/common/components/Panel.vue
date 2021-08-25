@@ -40,4 +40,8 @@ export default {
 .os-panel :deep(.p-panel-header .title) {
   padding-right: 15px;
 }
+
+.os-panel :deep(.p-panel-header button) {
+  margin-right: 0.25rem;
+}
 </style>
