@@ -101,6 +101,7 @@ export default {
   methods: {
     handleInput: function(sfRowData, field) {
       console.log(sfRowData);
+      console.log(field);
     },
 
     addSfRow: function() {
