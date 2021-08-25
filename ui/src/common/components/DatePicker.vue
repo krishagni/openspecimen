@@ -25,6 +25,14 @@ export default {
   computed: {
     inputValue: {
       get() {
+        if (typeof this.modelValue == 'string') {
+          try {
+            return new Date(parseInt(this.modelValue));
+          } catch {
+            return new Date(this.modelValue);
+          }
+        }
+
         return this.modelValue;
       },
 

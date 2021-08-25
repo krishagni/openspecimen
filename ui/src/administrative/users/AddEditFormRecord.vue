@@ -39,15 +39,7 @@ export default {
     let ctx = reactive({
       formSchema: { rows: [] },
 
-      record: {
-        "city": "Mysore",
-        "skills": ["Carpenter", "Painting"],
-        "entered_by": 5,
-        "diagnoses": 76130,
-        "visit_site": 2,
-        "designated_freezer": 20,
-        "office_addresses": [ { "type": "Office", "landmark": "Ganesh Temple" } ]
-      },
+      record: { },
     });
 
     watchEffect(
@@ -72,6 +64,12 @@ export default {
 
             ctx.formSchema = schema;
             ctx.formDef = formDef;
+          }
+        );
+
+        formSvc.getRecord({formId: props.formId, recordId: props.recordId}).then(
+          (record) => {
+            ctx.record = record;
           }
         );
       }

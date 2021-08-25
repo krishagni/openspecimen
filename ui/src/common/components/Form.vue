@@ -22,6 +22,8 @@
         <slot></slot>
       </div>
     </div>
+
+    <pre> {{ctx.formData}} </pre>
   </form>
 </template>
 
@@ -184,6 +186,10 @@ export default {
    },
 
    watch: {
+     data: function(newVal) {
+       this.ctx.formData = newVal;
+     },
+
      'ctx.formData': {
        deep: true,
 

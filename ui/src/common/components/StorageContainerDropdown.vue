@@ -40,6 +40,10 @@ export default {
   computed: {
     inputValue: {
       get() {
+        if (this.modelValue != null && !isNaN(this.modelValue)) {
+          return +this.modelValue;
+        }
+
         return this.modelValue;
       },
 

@@ -21,7 +21,7 @@ export default {
   computed: {
     inputValue: {
       get() {
-        return this.modelValue;
+        return this.modelValue == 1 || this.modelValue == 'true' || this.modelValue == true;
       },
 
       set(value) {

@@ -9,6 +9,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
+        @change="onChange"
         @focus="loadOptions"
         @filter="searchOptions($event)"
       />
@@ -22,6 +23,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
+        @change="onChange"
         @focus="loadOptions"
         @filter="searchOptions($event)"
       />
@@ -155,6 +157,10 @@ export default {
       );
 
       return Object.keys(optionsMap).map((key) => optionsMap[key]);
+    },
+
+    onChange: function() {
+      this.optionSelected = true;
     }
   },
 
@@ -190,12 +196,26 @@ export default {
 
       this.cache = this.cache || {};
       this.cache[newVal[this.listSource.selectProp]] = newVal;
+    },
+
+    modelValue: async function() {
+      if (!this.optionSelected) {
+        let selectedVal = await this.selectedValue();
+        if (selectedVal) {
+          if (this.ctx.optionsLoaded && this.ctx.options) {
+            this.ctx.options = this.dedup([selectedVal].concat(this.ctx.options));
+          } else {
+            this.ctx.options = [selectedVal];
+          }
+        }
+      }
+
+      this.optionSelected = false;
     }
   },
 
   mounted() {
     if (this.modelValue) {
-      // this.searchOptions({value: ''});
       this.selectedValue().then((val) => this.ctx.options = val ? [val] : []);
     }
   }

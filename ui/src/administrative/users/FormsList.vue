@@ -1,4 +1,3 @@
-
 <template>
   <div>
     <Grid>
@@ -32,6 +31,8 @@
                 <Button left-icon="plus" label="Add" @click="addRecord" />
               </span>
               <span v-else>
+                <Button left-icon="edit" label="Edit" @click="editRecord(ctx.selectedRecord)" />
+
                 <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
               </span>
             </span>
@@ -188,6 +189,18 @@ export default {
       this.$router.push({
         name: 'UserFormAddEdit',
         query: { formId: selectedForm.formId, formCtxtId: selectedForm.formCtxtId }
+      });
+    },
+
+    editRecord: function(record) {
+      let selectedForm = this.ctx.selectedForm;
+      this.$router.push({
+        name: 'UserFormAddEdit',
+        query: {
+          formId: selectedForm.formId,
+          formCtxtId: selectedForm.formCtxtId,
+          recordId: record.recordId || record.id
+        }
       });
     },
 
