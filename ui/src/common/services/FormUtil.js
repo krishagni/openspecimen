@@ -27,6 +27,22 @@ class FormUtil {
 
     return result;
   }
+
+  relinkFormRecords(forms, records) {
+    let fcMap = {};
+    forms.forEach((form) => fcMap[form.formCtxtId] = form);
+    records.forEach(
+      (formRecs) => {
+        formRecs.records.forEach(
+          (record) => {
+            let form = fcMap[record.fcId];
+            form.records = form.records || [];
+            form.records.push(record);
+          }
+        );
+      }
+    );
+  }
 }
 
 export default new FormUtil();

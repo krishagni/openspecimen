@@ -80,4 +80,19 @@ button:hover {
   padding: 0px 4px;
 }
 
+.inline-button.btn {
+  background: #fff;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid;
+  border-color: #007bff;
+  border-radius: 4px;
+}
+
+.inline-button.btn:hover {
+  background: #0069d9;
+  color: #ffffff;
+  border-color: #0069d9;
+  cursor: pointer;
+}
+
 </style>

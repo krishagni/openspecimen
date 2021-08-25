@@ -27,7 +27,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['forms', 'records', 'formId', 'formCtxtId', 'recordId'],
+  props: ['objectId', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
     Button,
@@ -90,7 +90,21 @@ export default {
         return;
       }
 
-      alert(JSON.stringify(this.ctx.record));
+      let formData = this.ctx.record;
+      formData.appData = {objectId: +this.objectId, formCtxtId: +this.formCtxtId, formId: +this.formId};
+      formSvc.saveOrUpdateRecord(formData).then(
+        (savedData) => {
+          this.$emit('reload-records');
+          this.$router.push({
+            name: 'UserFormsList',
+            query: {
+              formId: this.formId,
+              formCtxtId: this.formCtxtId,
+              recordId: savedData.id
+            }
+          });
+        }
+      );
     },
 
     cancel: function() {

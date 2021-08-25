@@ -74,23 +74,23 @@ class FieldFactory {
       fs.type = 'textarea';
     } else if (field.type == 'radiobutton') {
       fs.type = 'radio';
-      fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value}));
+      fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value}));
     } else if (field.type == 'checkbox') {
       fs.type = 'checkbox';
-      fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value}));
+      fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value}));
     } else if (field.type == 'booleanCheckbox') {
       fs.type = 'booleanCheckbox';
     } else if (field.type == 'combobox') {
       fs.type = 'dropdown';
       fs.listSource = {
-        options: (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value})),
+        options: (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value})),
         displayProp: 'caption',
         selectProp: 'value'
       }
     } else if (field.type == 'multiSelectListbox') {
       fs.type = 'multiselect';
       fs.listSource = {
-        options: (field.pvs || []).map((pv) => ({caption: pv.optionName, value: pv.value})),
+        options: (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value})),
         displayProp: 'caption',
         selectProp: 'value'
       }

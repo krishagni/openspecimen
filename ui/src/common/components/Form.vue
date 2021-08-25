@@ -5,11 +5,9 @@
       <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
           <os-label>{{field.label}}</os-label>
-          <div class="input">
-            <component :is="field.component" v-bind="field" v-model="ctx.formData[field.name]"
-              :form="ctx" @update:model-value="handleInput(field)">
-            </component>
-          </div>
+          <component :is="field.component" v-bind="field" v-model="ctx.formData[field.name]"
+            :form="ctx" @update:model-value="handleInput(field)">
+          </component>
           <div v-if="v$.ctx.formData[field.name] && v$.ctx.formData[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
           </div>
@@ -201,7 +199,7 @@ export default {
 <style scoped>
 
 form {
-  max-width: 720px;
+  max-width: 80%;
   margin: auto;
 }
 
@@ -212,10 +210,6 @@ form {
 .row .field {
   flex: 1 1 0;
   padding: 0.5rem 1rem;
-  overflow-x: auto;
-}
-
-.row .field .input {
   overflow-x: auto;
 }
 

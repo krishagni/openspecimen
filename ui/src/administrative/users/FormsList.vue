@@ -108,7 +108,7 @@ import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['forms', 'records', 'formId', 'formCtxtId', 'recordId'],
+  props: ['objectId', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
     ListGroup,

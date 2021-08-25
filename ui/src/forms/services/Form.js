@@ -2,15 +2,25 @@
 import http from '@/common/services/HttpClient.js';
 
 class Form {
-  getDefinition(formId) {
+  async getDefinition(formId) {
     return http.get('forms/' + formId + '/definition');
   }
 
-  getRecord(record, opts) {
+  async getRecord(record, opts) {
     return http.get('forms/' + record.formId + '/data/' + record.recordId, opts);
   }
 
-  deleteRecord(record) {
+  async saveOrUpdateRecord(record) {
+    record.appData = record.appData || {};
+    let formId = record.appData.formId;
+    if (record.id) {
+      return http.put('forms/' + formId + '/data', record);
+    } else {
+      return http.post('forms/' + formId + '/data', record);
+    }
+  }
+
+  async deleteRecord(record) {
     return http.delete('forms/' + record.formId + '/data/' + record.recordId);
   }
 }

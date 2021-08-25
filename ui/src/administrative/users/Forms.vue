@@ -1,7 +1,12 @@
 
 <template>
   <div>
-    <router-view :forms="ctx.forms" :records="ctx.records" v-if="ctx.forms && ctx.records"> </router-view>
+    <router-view :object-id="user.id"
+      :forms="ctx.forms"
+      :records="ctx.records"
+      @reload-records="reloadRecords"
+      v-if="ctx.forms && ctx.records"
+    />
   </div>
 </template>
 
@@ -9,6 +14,7 @@
 
 import {reactive, watchEffect} from 'vue';
 import userSvc from '@/administrative/services/User.js';
+import formUtil from '@/common/services/FormUtil.js';
 
 export default {
   props: ['user'],
@@ -24,26 +30,25 @@ export default {
           (data) => {
             ctx.forms   = data[0];
             ctx.records = data[1];
-
-            let fcMap = {};
-            ctx.forms.forEach((form) => fcMap[form.formCtxtId] = form);
-            ctx.records.forEach(
-              (formRecs) => {
-                 formRecs.records.forEach(
-                   (record) => {
-                     let form = fcMap[record.fcId];
-                     form.records = form.records || [];
-                     form.records.push(record);
-                   }
-                 );
-              }
-            );
+            formUtil.relinkFormRecords(ctx.forms, ctx.records);
           }
         );
       }
     );
 
     return { ctx };
+  },
+
+  methods: {
+    reloadRecords: function() {
+      this.ctx.records = undefined;
+      userSvc.getFormRecords(this.user).then(
+        (records) => {
+          this.ctx.records = records;
+          formUtil.relinkFormRecords(this.ctx.forms, this.ctx.records);
+        }
+      );
+    }
   }
 }
 

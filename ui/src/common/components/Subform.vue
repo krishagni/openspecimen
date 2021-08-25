@@ -18,14 +18,14 @@
               </component>
             </td>
             <td class="actioncol">
-              <Button left-icon="times" @click="removeSfRow(sfRdIdx)"/>
+              <Button class="inline-button" left-icon="times" @click="removeSfRow(sfRdIdx)"/>
             </td>
           </tr>
         </tbody>
       </table> 
     </div>
 
-    <Button left-icon="plus" 
+    <Button class="inline-button" left-icon="plus"
       :label="inputValue && inputValue.length > 0 ? 'Add Another' : 'Add'"
       @click="addSfRow"
     />
