@@ -15,6 +15,7 @@ class FieldFactory {
     text: 'InputText',
     textarea: 'Textarea',
     password: 'Password',
+    number: 'InputNumber',
     datePicker: 'DatePicker',
     fileUpload: 'FileUpload',
     signature: 'SignaturePad',
@@ -72,6 +73,10 @@ class FieldFactory {
       fs.type = 'text';
     } else if (field.type == 'textArea') {
       fs.type = 'textarea';
+    } else if (field.type == 'numberField') {
+      fs.type = 'number';
+      fs.maxFractionDigits = field.noOfDigitsAfterDecimal || 0;
+      alert(field.noOfDigitsAfterDecimal);
     } else if (field.type == 'radiobutton') {
       fs.type = 'radio';
       fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value}));
@@ -131,6 +136,31 @@ class FieldFactory {
 
     if (fs.type) {
       fs.component = this.getComponent(fs.type);
+    }
+
+    fs.validations = fs.validations = {};
+    if (field.mandatory == true) {
+      fs.validations.required = {message: field.caption + ' is mandatory'};
+    }
+
+    if (field.validationRules) {
+      for (let rule of field.validationRules) {
+        if (rule.name == 'range') {
+          if (rule.params && rule.params.min != undefined && rule.params.min != null) {
+            fs.validations.minValue = {
+              params: rule.params.min,
+              message: field.caption + ' is less than ' + rule.params.min
+            }
+          }
+
+          if (rule.params && rule.params.max != undefined && rule.params.max != null) {
+            fs.validations.maxValue = {
+              params: rule.params.max,
+              message: field.caption + ' is greater than ' + rule.params.max
+            }
+          }
+        }
+      }
     }
 
     return fs;

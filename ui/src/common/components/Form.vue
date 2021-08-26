@@ -5,8 +5,8 @@
       <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
           <os-label>{{field.label}}</os-label>
-          <component :is="field.component" v-bind="field" v-model="ctx.formData[field.name]"
-            :form="ctx" @update:model-value="handleInput(field)">
+          <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
+            v-model="ctx.formData[field.name]" :form="ctx" @update:model-value="handleInput(field)">
           </component>
           <div v-if="v$.ctx.formData[field.name] && v$.ctx.formData[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
@@ -38,6 +38,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 import Dropdown from '@/common/components/Dropdown.vue';
 import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 import DatePicker from '@/common/components/DatePicker.vue';
+import InputNumber from '@/common/components/InputNumber.vue';
 import InputText from '@/common/components/InputText.vue';
 import Password from '@/common/components/Password.vue';
 import RadioButton from '@/common/components/RadioButton.vue';
@@ -64,6 +65,7 @@ export default {
      DatePicker,
      InputText,
      Password,
+     InputNumber,
      RadioButton,
      BooleanCheckbox,
      Checkbox,
@@ -108,12 +110,25 @@ export default {
 
      validate: function() {
        this.v$.$touch();
-       this.$emit('form-validity', {invalid: this.v$.$invalid});
-       if (this.v$.$invalid) {
+
+       let invalid = this.v$.$invalid;
+       for (let formRow of this.formRows) {
+         for (let field of formRow) {
+           if (field.type == 'subform') {
+             let sf = this.$refs['osField-' + field.name];
+             if (!sf.validate()) {
+               invalid = true;
+             }
+           }
+         }
+       }
+
+       this.$emit('form-validity', {invalid: invalid});
+       if (invalid) {
          alertSvc.error('There are validation errors as highlighted below. Please correct them.');
        }
 
-       return !this.v$.$invalid;
+       return !invalid;
      },
 
      fd: function(name) {
