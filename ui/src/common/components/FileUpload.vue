@@ -2,7 +2,7 @@
 <template>
   <div v-if="!inputValue">
     <FileUpload ref="uploader" mode="basic" name="file" :auto="true" :url="url" 
-      @before-send="addHeaders" @upload="onUpload" />
+      @before-send="addHeaders" @upload="onUpload" @error="onError" />
   </div>
   <div v-else class="os-selected-file">
     <span class="filename">{{inputValue.filename}}</span>
@@ -14,6 +14,8 @@
 import FileUpload from 'primevue/fileupload';
 
 import Button from '@/common/components/Button.vue';
+
+import alertSvc from '@/common/services/Alerts.js';
 
 export default {
   props: ['name', 'url', 'modelValue', 'headers'],
@@ -49,6 +51,23 @@ export default {
 
     onUpload: function({xhr}) {
       this.$emit('update:modelValue', JSON.parse(xhr.responseText));
+      alertSvc.success('File uploaded!');
+    },
+
+    onError: function({xhr}) {
+      try {
+        let errors = JSON.parse(xhr.responseText);
+        if (errors instanceof Array) {
+          let msg = errors.map(err => err.message + ' (' + err.code + ')').join(',');
+          alertSvc.error(msg);
+        } else if (errors) {
+          alertSvc.error(errors);
+        } else {
+          alertSvc.error('Error uploading the file');
+        }
+      } catch {
+        alertSvc.error(xhr.status + ': ' + xhr.responseText);
+      }
     },
 
     removeFile: function() {

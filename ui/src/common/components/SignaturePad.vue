@@ -92,7 +92,7 @@ export default {
         let value = await this.uploader(data);
         this.$emit('update:modelValue', value);
         this.imageData = data;
-        alertSvc.success('Signature saved');
+        alertSvc.success('Signature saved!');
       }
 
       this.editMode = false;
