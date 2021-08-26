@@ -71,22 +71,33 @@ class FieldFactory {
     let fs = { name: field.udn, label: field.caption, tooltip: field.toolTip };
     if (field.type == 'stringTextField') {
       fs.type = 'text';
+      fs.defaultValue = field.defaultValue;
     } else if (field.type == 'textArea') {
       fs.type = 'textarea';
       fs.rows = field.noOfRows;
+      fs.defaultValue = field.defaultValue;
     } else if (field.type == 'numberField') {
       fs.type = 'number';
       fs.maxFractionDigits = field.noOfDigitsAfterDecimal || 0;
+      fs.defaultValue = field.defaultValue;
     } else if (field.type == 'radiobutton') {
       fs.type = 'radio';
       fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value}));
       fs.optionsPerRow = field.optionsPerRow || 1;
+      fs.defaultValue = this.getDefaultOption(field);
     } else if (field.type == 'checkbox') {
       fs.type = 'checkbox';
       fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value}));
       fs.optionsPerRow = field.optionsPerRow || 1;
+      fs.defaultValue = this.getDefaultOption(field);
+      if (fs.defaultValue) {
+        fs.defaultValue = [fs.defaultValue];
+      }
     } else if (field.type == 'booleanCheckbox') {
       fs.type = 'booleanCheckbox';
+      if (field.defaultChecked) {
+        fs.defaultValue = true;
+      }
     } else if (field.type == 'combobox') {
       fs.type = 'dropdown';
       fs.listSource = {
@@ -94,6 +105,7 @@ class FieldFactory {
         displayProp: 'caption',
         selectProp: 'value'
       }
+      fs.defaultValue = this.getDefaultOption(field);
     } else if (field.type == 'multiSelectListbox') {
       fs.type = 'multiselect';
       fs.listSource = {
@@ -101,9 +113,16 @@ class FieldFactory {
         displayProp: 'caption',
         selectProp: 'value'
       }
+      fs.defaultValue = this.getDefaultOption(field);
+      if (fs.defaultValue) {
+        fs.defaultValue = [fs.defaultValue];
+      }
     } else if (field.type == 'datePicker') {
       fs.type = 'datePicker';
       fs.showTime = field.format && field.format.indexOf('HH:mm') > 0;
+      if (field.defaultType == 'CURRENT_DATE') {
+        fs.defaultValue = '' + new Date().getTime();
+      }
     } else if (field.type == 'fileUpload') {
       fs.type = 'fileUpload';
       fs.url = http.getUrl('form-files');
@@ -166,6 +185,16 @@ class FieldFactory {
     }
 
     return fs;
+  }
+
+  getDefaultOption(field) {
+    if (typeof field.defaultValue == 'object') {
+      return field.defaultValue.optionName || field.defaultValue.value;
+    } else if (typeof field.defaultValue == 'string') {
+      return field.defaultValue;
+    }
+
+    return undefined;
   }
 }
 

@@ -9,6 +9,8 @@
       <Button label="Save" @click="saveRecord" />
       <Button label="Cancel" @click="cancel" />
     </Form>
+
+    <pre> {{ ctx.formDef }} </pre>
   </Panel>
 </template>
 
@@ -44,6 +46,8 @@ export default {
         formSvc.getDefinition(props.formId).then(
           (formDef) => {
             let schema = { rows: [] };
+            let dvRec = {};
+
             formDef.rows.forEach(
               (row) => {
                 let rs = {fields: []};
@@ -52,6 +56,9 @@ export default {
                     let fs = fieldFactory.getFieldSchema(field);
                     if (fs.type) {
                       rs.fields.push(fs);
+                      if (fs.defaultValue) {
+                        dvRec[field.name] = fs.defaultValue;
+                      }
                     }
                   }
                 );
@@ -61,6 +68,9 @@ export default {
 
             ctx.formSchema = schema;
             ctx.formDef = formDef;
+            if (!props.recordId) {
+              ctx.record = dvRec;
+            }
           }
         );
 

@@ -167,7 +167,18 @@ export default {
 
     addSfRow: function() {
       this.inputValue = this.inputValue || [];
-      this.inputValue.push({});
+      this.inputValue.push(
+        this.fields.reduce(
+          (acc, field) => {
+            if (field.defaultValue) {
+              acc[field.name] = field.defaultValue;
+            }
+
+            return acc;
+          },
+          {}
+        )
+      );
     },
 
     removeSfRow: function(idx) {
