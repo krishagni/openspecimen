@@ -6,7 +6,8 @@
         <div class="field">
           <os-label>{{field.label}}</os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
-            v-model="ctx.formData[field.name]" :form="ctx" @update:model-value="handleInput(field)">
+            v-model="ctx.formData[field.name]" v-os-tooltip.bottom="field.tooltip"
+            :form="ctx" @update:model-value="handleInput(field)">
           </component>
           <div v-if="v$.ctx.formData[field.name] && v$.ctx.formData[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>

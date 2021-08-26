@@ -68,7 +68,7 @@ class FieldFactory {
   }
 
   getFieldSchema(field) {
-    let fs = { name: field.udn, label: field.caption };
+    let fs = { name: field.udn, label: field.caption, tooltip: field.toolTip };
     if (field.type == 'stringTextField') {
       fs.type = 'text';
     } else if (field.type == 'textArea') {
