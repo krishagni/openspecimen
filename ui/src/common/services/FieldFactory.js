@@ -76,13 +76,14 @@ class FieldFactory {
     } else if (field.type == 'numberField') {
       fs.type = 'number';
       fs.maxFractionDigits = field.noOfDigitsAfterDecimal || 0;
-      alert(field.noOfDigitsAfterDecimal);
     } else if (field.type == 'radiobutton') {
       fs.type = 'radio';
       fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value}));
+      fs.optionsPerRow = field.optionsPerRow || 1;
     } else if (field.type == 'checkbox') {
       fs.type = 'checkbox';
       fs.options = (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value}));
+      fs.optionsPerRow = field.optionsPerRow || 1;
     } else if (field.type == 'booleanCheckbox') {
       fs.type = 'booleanCheckbox';
     } else if (field.type == 'combobox') {
