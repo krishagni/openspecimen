@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <pre> {{ctx.formData}} </pre>
+    <pre> {{ ctx.formData }} </pre>
   </form>
 </template>
 
@@ -148,6 +148,13 @@ export default {
              var showFn = new Function('return ' + field.showWhen);
              if (!showFn.call(this)) {
                continue;
+             }
+           }
+
+           if (!field.component) {
+             let component = fieldFactory.getComponent(field.type);
+             if (component) {
+               field = Object.assign({...field, component: component});
              }
            }
 

@@ -9,8 +9,6 @@
       <Button label="Save" @click="saveRecord" />
       <Button label="Cancel" @click="cancel" />
     </Form>
-
-    <pre> {{ ctx.formDef }} </pre>
   </Panel>
 </template>
 
@@ -22,7 +20,6 @@ import Button from '@/common/components/Button.vue';
 import Form from '@/common/components/Form.vue';
 import Panel from '@/common/components/Panel.vue';
 
-// import http from '@/common/services/HttpClient.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 import formSvc from '@/forms/services/Form.js';
 
@@ -67,11 +64,13 @@ export default {
           }
         );
 
-        formSvc.getRecord({formId: props.formId, recordId: props.recordId}).then(
-          (record) => {
-            ctx.record = record;
-          }
-        );
+        if (props.recordId) {
+          formSvc.getRecord({formId: props.formId, recordId: props.recordId}).then(
+            (record) => {
+              ctx.record = record;
+            }
+          );
+        }
       }
     );
 

@@ -34,6 +34,8 @@
                 <Button left-icon="edit" label="Edit" @click="editRecord(ctx.selectedRecord)" />
 
                 <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
+
+                <Button left-icon="plus" label="Add Another" @click="addRecord" />
               </span>
             </span>
           </template>
@@ -70,7 +72,7 @@
                     </td>
                     <td>
                       <ButtonGroup>
-                        <Button left-icon="edit" size="small" />
+                        <Button left-icon="edit" size="small" @click="editRecord(record)" />
                         <Button left-icon="trash" size="small" @click="deleteRecord(record)" />
                       </ButtonGroup>
                     </td>
