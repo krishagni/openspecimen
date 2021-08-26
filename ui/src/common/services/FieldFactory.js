@@ -73,6 +73,7 @@ class FieldFactory {
       fs.type = 'text';
     } else if (field.type == 'textArea') {
       fs.type = 'textarea';
+      fs.rows = field.noOfRows;
     } else if (field.type == 'numberField') {
       fs.type = 'number';
       fs.maxFractionDigits = field.noOfDigitsAfterDecimal || 0;
