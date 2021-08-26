@@ -12,6 +12,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
 import router from './router'
 import ui from './global.js';
@@ -29,6 +30,7 @@ const app = createApp(App)
   .use(ToastService);
 
 app.directive('show-if-allowed', showIfAllowed);
+app.directive('os-tooltip', Tooltip);
 
 let filters = app.config.globalProperties.$filters = app.config.globalProperties.$filters || {};
 filters.username = (user) => {
