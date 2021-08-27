@@ -3,6 +3,7 @@ import * as Validators from '@vuelidate/validators';
 import { requiredIf } from '@vuelidate/validators';
 
 import http from '@/common/services/HttpClient.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 
 class FieldFactory {
 
@@ -47,9 +48,9 @@ class FieldFactory {
       for (let rule in field.validations) {
         let fv = field.validations[rule];
         if (rule == 'requiredIf') {
-          validations[rule] = requiredIf(new Function('return ' + fv.expr));
+          validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(fv.expr)));
         } else if (field.showWhen) {
-          validations[rule] = requiredIf(new Function('return ' + field.showWhen));
+          validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(field.showWhen)));
         } else if (rule == 'pattern') {
           validations[rule] = (value) => new RegExp(fv.expr).test(value);
         } else if (rule == 'sameAs') {

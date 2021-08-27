@@ -9,17 +9,17 @@ class ExpressionUtil {
     jsep.addBinaryOp('and', 2);
   }
 
-  eval(context, inputExpr) {
-    let outputExpr = this.cachedExprs[inputExpr];
-    if (!outputExpr) {
-      outputExpr = this.cachedExprs[inputExpr] = this.parse(inputExpr);
-    }
-
-    return new Function('return ' + outputExpr).call(context);
+  eval(context, expr) {
+    return new Function('return ' + this.parse(expr)).call(context);
   }
 
   parse(expr) {
-    return this.decorate(jsep(expr));
+    let parsed = this.cachedExprs[expr];
+    if (!parsed) {
+      parsed = this.cachedExprs[expr] = this.decorate(jsep(expr));
+    }
+
+    return parsed;
   }
 
   decorate(exprTree) {

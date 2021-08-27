@@ -1,11 +1,17 @@
 
 <template>
   <div class="os-checkboxes">
-    <div v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
-      <span class="p-field-checkbox" v-for="(option, idx) of optionsRow" :key="idx">
-        <Checkbox :name="name" :value="option.value" v-model="inputValue" />
-        <label> <span>{{option.caption}}</span> </label>
-      </span>
+    <div class="options-row" v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
+      <div class="option" v-for="(option, idx) of optionsRow" :key="idx">
+        <span class="p-field-checkbox">
+          <div>
+            <Checkbox :id="name + '.' + rowIdx + '.' + idx" :name="name" :value="option.value" v-model="inputValue" />
+            <label :for="name + '.' + rowIdx + '.' + idx">
+              <span>{{option.caption}}</span>
+            </label>
+          </div>
+        </span>
+      </div>
     </div>
   </div>
 </template>
@@ -52,8 +58,15 @@ export default {
 <style scoped>
 
 .os-checkboxes {
-  display: flex;
-  flex-flow: row wrap;
+  display: table;
+}
+
+.os-checkboxes .options-row {
+  display: table-row;
+}
+
+.os-checkboxes .options-row .option {
+  display: table-cell;
 }
 
 .os-checkboxes label {

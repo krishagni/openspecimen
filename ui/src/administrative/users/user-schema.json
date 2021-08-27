@@ -3,7 +3,7 @@
     "type": "radio",
     "label": "Type",
     "name": "type",
-    "class": "inline",
+    "optionsPerRow": 4,
     "options": [
       { "caption": "Super Administrator", "value": "SUPER" },
       { "caption": "Institute Administrator", "value": "INSTITUTE" },
@@ -132,11 +132,11 @@
     "type": "radio",
     "label": "Manage Forms?",
     "name": "manageForms",
+    "optionsPerRow": 2,
     "options": [
       { "caption": "Yes", "value": true },
       { "caption": "No", "value": false }
     ],
-    "class": "inline",
     "showWhen": "!type || type == 'NONE'"
   },
 
@@ -144,11 +144,11 @@
     "type": "radio",
     "label": "Disable Notifications?",
     "name": "dnd",
+    "optionsPerRow": 2,
     "options": [
       { "caption": "Yes", "value": true },
       { "caption": "No", "value": false }
-    ],
-    "class": "inline"
+    ]
   },
 
   {
@@ -156,11 +156,11 @@
     "label": "API User?",
     "name": "apiUser",
     "showWhen": "type != 'CONTACT'",
+    "optionsPerRow": 2,
     "options": [
       { "caption": "Yes", "value": true },
       { "caption": "No", "value": false }
-    ],
-    "class": "inline"
+    ]
   },
 
   {

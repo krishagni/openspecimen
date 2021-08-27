@@ -72,10 +72,6 @@ export default {
       query = query.toLowerCase();
 
       let selectedVal = await this.selectedValue() || [];
-      if (!(selectedVal instanceof Array)) {
-        selectedVal = [selectedVal];
-      }
-
       if (this.listSource.options) {
         this.ctx.options = this.dedup(selectedVal.concat(this.listSource.options));
       } else if (typeof this.listSource.loadFn == 'function') {
@@ -117,11 +113,11 @@ export default {
 
     async selectedValue() {
       if (!this.modelValue) {
-        return undefined;
+        return [];
       }
 
       if (typeof this.modelValue == 'object') {
-        return this.modelValue;
+        return [this.modelValue];
       }
 
       this.cache = this.cache || {};
@@ -130,17 +126,17 @@ export default {
       }
 
       let ls = this.listSource;
+      let searchOpts = {};
+      searchOpts[ls.searchProp || 'value'] = this.modelValue;
+
       let selected = undefined;
       if (ls.options) {
         selected = ls.options.find((option) => option[ls.selectProp] == this.modelValue);
+        selected = (selected && [selected]) || [];
       } else if (typeof ls.loadFn == 'function') {
-        selected = await ls.loadFn({value: this.modelValue});
+        selected = await ls.loadFn(searchOpts);
       } else if (typeof ls.apiUrl == 'string') {
-        selected = await http.get(ls.apiUrl, {value: this.modelValue});
-      }
-
-      if (selected instanceof Array) {
-        selected = selected.length > 0 ? selected[0] : undefined;
+        selected = await http.get(ls.apiUrl, searchOpts);
       }
 
       this.cache[this.modelValue] = selected;
@@ -202,12 +198,10 @@ export default {
     modelValue: async function() {
       if (!this.optionSelected) {
         let selectedVal = await this.selectedValue();
-        if (selectedVal) {
-          if (this.ctx.optionsLoaded && this.ctx.options) {
-            this.ctx.options = this.dedup([selectedVal].concat(this.ctx.options));
-          } else {
-            this.ctx.options = [selectedVal];
-          }
+        if (this.ctx.optionsLoaded && this.ctx.options) {
+          this.ctx.options = this.dedup(selectedVal.concat(this.ctx.options));
+        } else {
+          this.ctx.options = selectedVal;
         }
       }
 
@@ -217,7 +211,7 @@ export default {
 
   mounted() {
     if (this.modelValue) {
-      this.selectedValue().then((val) => this.ctx.options = val ? [val] : []);
+      this.selectedValue().then((val) => this.ctx.options = val);
     }
   }
 }

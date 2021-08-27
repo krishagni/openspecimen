@@ -1,13 +1,15 @@
 
 <template>
   <div class="os-radio-buttons">
-    <div v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
-      <span class="p-field-radiobutton" v-for="(option, optionIdx) of optionsRow" :key="optionIdx">
-        <label>
-          <RadioButton :name="name" :value="option.value" v-model="inputValue" />
-          <span>{{option.caption}}</span>
-        </label>
-      </span>
+    <div class="options-row" v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
+      <div class="option" v-for="(option, optionIdx) of optionsRow" :key="optionIdx">
+        <span class="p-field-radiobutton">
+          <label>
+            <RadioButton :name="name" :value="option.value" v-model="inputValue" />
+            <span>{{option.caption}}</span>
+          </label>
+        </span>
+      </div>
     </div>
   </div>
 </template>
@@ -54,8 +56,15 @@ export default {
 <style scoped>
 
 .os-radio-buttons {
-  display: flex;
-  flex-flow: row wrap;
+  display: table;
+}
+
+.os-radio-buttons .options-row {
+  display: table-row;
+}
+
+.os-radio-buttons .options-row .option {
+  display: table-cell;
 }
 
 .os-radio-buttons label {

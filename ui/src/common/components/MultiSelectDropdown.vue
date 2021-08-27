@@ -112,7 +112,7 @@ export default {
 
     async selectedValues() {
       if (!(this.modelValue instanceof Array)) {
-        return undefined;
+        return [];
       }
 
       if (this.modelValue.some((elem) => typeof elem == 'object')) {
@@ -137,13 +137,16 @@ export default {
       }
 
       let ls = this.listSource;
+      let searchOpts = {};
+      searchOpts[ls.searchProp || 'value'] = toGet;
+
       let selected = undefined;
       if (ls.options) {
         selected = ls.options.filter((option) => toGet.some((testItem) => option[ls.selectProp] == testItem));
       } else if (typeof ls.loadFn == 'function') {
-        selected = await ls.loadFn({value: toGet});
+        selected = await ls.loadFn(searchOpts);
       } else if (typeof ls.apiUrl == 'string') {
-        selected = await http.get(ls.apiUrl, {value: toGet});
+        selected = await http.get(ls.apiUrl, searchOpts);
       }
 
       if (selected instanceof Array) {
@@ -211,12 +214,10 @@ export default {
     modelValue: async function() {
       if (!this.optionSelected) {
         let selectedVals = await this.selectedValues();
-        if (selectedVals) {
-          if (this.ctx.optionsLoaded && this.ctx.options) {
-            this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
-          } else {
-            this.ctx.options = selectedVals;
-          }
+        if (this.ctx.optionsLoaded && this.ctx.options) {
+          this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
+        } else {
+          this.ctx.options = selectedVals;
         }
       }
 
