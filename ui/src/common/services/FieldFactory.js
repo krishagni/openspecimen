@@ -68,7 +68,13 @@ class FieldFactory {
   }
 
   getFieldSchema(field) {
-    let fs = { name: field.udn, label: field.caption, tooltip: field.toolTip };
+    let fs = {
+      name: field.udn,
+      label: field.caption,
+      tooltip: field.toolTip,
+      showWhen: field.showWhen
+    };
+
     if (field.type == 'stringTextField') {
       fs.type = 'text';
       fs.defaultValue = field.defaultValue;

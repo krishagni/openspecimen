@@ -36,6 +36,7 @@ import { reactive } from 'vue';
 import Dropdown from 'primevue/dropdown';
 
 import http from '@/common/services/HttpClient.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 
 export default {
   props: ['modelValue', 'listSource', 'form'],
@@ -100,7 +101,7 @@ export default {
             Object.keys(ls.queryParams.dynamic).forEach(
               function(name) {
                 let expr = ls.queryParams.dynamic[name];
-                params[name] = new Function('return ' + expr).call(form);
+                params[name] = exprUtil.eval(form, expr);
               }
             );
           }

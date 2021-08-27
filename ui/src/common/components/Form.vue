@@ -35,6 +35,7 @@ import useVuelidate from '@vuelidate/core'
 
 import alertSvc from '@/common/services/Alerts.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 
 import Dropdown from '@/common/components/Dropdown.vue';
 import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
@@ -160,11 +161,8 @@ export default {
          let formRow = [];
 
          for (let field of row.fields) {
-           if (field.showWhen) {
-             var showFn = new Function('return ' + field.showWhen);
-             if (!showFn.call(this)) {
-               continue;
-             }
+           if (field.showWhen && !exprUtil.eval(this, field.showWhen)) {
+             continue;
            }
 
            if (!field.component) {
