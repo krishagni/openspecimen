@@ -98,19 +98,18 @@ export default {
         ctx.addEditFs = formUtil.getFormSchema(userSchema, editProfileSchema);
       }
     } else {
-      ctx.user = { dnd: false, type: 'NONE', apiUser: false };
-      itemsSvc.ngGetItems('users').then(
-        items => {
-          if (items && items.length > 0) {
-            ctx.user       = {};
-            ctx.users      = items;
-            ctx.bulkUpdate = true;
-            ctx.bulkEditFs = formUtil.getFormSchema(userSchema, bulkEditSchema);
-          } else {
-            ctx.addEditFs = formUtil.getFormSchema(userSchema, addEditSchema);
-          }
-        }
-      );
+      ctx.user  = { dnd: false, type: 'NONE', apiUser: false };
+      let users = itemsSvc.getItems('users');
+      itemsSvc.clearItems();
+
+      if (users && users.length > 0) {
+        ctx.user       = {};
+        ctx.users      = users;
+        ctx.bulkUpdate = true;
+        ctx.bulkEditFs = formUtil.getFormSchema(userSchema, bulkEditSchema);
+      } else {
+        ctx.addEditFs = formUtil.getFormSchema(userSchema, addEditSchema);
+      }
     }
 
     return { ctx };
@@ -132,7 +131,7 @@ export default {
           if (self.editProfile) {
             routerSvc.ngGoto('home', {}, {reload: true});
           } else {
-            routerSvc.ngGoto('user-detail.overview', {userId: result.id});
+            routerSvc.goto('UserOverview', {userId: result.id});
           }
         }
       );

@@ -16,7 +16,7 @@ class Router {
   }
 
   back() {
-    window.parent.postMessage({op: 'back', requestor: 'vueapp'}, '*');
+    router.go(-1);
   }
 }
 

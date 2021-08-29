@@ -10,6 +10,10 @@ class ItemsHolder {
     this.itemsMap[type] = items;
   }
 
+  clearItems(type) {
+    this.itemsMap[type] = undefined;
+  }
+
   ngGetItems(type) {
     let payload = { type: type };
     window.parent.postMessage({

@@ -143,7 +143,6 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
     ui.currentUser = currUser;
     ui.menuItems = [];
 
-    alert(JSON.stringify(resp[3]));
     console.log(ui);
     app.mount('#app')
     app.provide('ui', ui);

@@ -167,7 +167,17 @@ export default {
           hrefTarget: '_parent'
         },
         { name: 'emailAddress', caption: 'Email Address' },
-        { name: 'loginName', caption: 'Login Name' },
+        {
+          name: 'loginName',
+          caption: 'Login Name',
+          value: function(user) {
+            if (user.type == 'CONTACT') {
+              return '-';
+            }
+
+            return user.loginName;
+          },
+        },
         { name: 'instituteName', caption: 'Institute' },
         { name: 'primarySite', caption: 'Primary Site' },
         {
@@ -175,7 +185,7 @@ export default {
           caption: 'Active Since',
           value: function (user) {
             if (user.creationDate) {
-              return format(new Date(user.creationDate), ui.os.global.dateFmt);
+              return format(new Date(user.creationDate), ui.global.locale.dateFmt);
             }
             return undefined;
           }
@@ -205,7 +215,15 @@ export default {
         },
         { name: 'activityStatus', type: 'dropdown', caption: 'Activity Status',
           listSource: {
-            options: ['Active', 'Archived', 'Expired', 'Locked', 'Pending']
+            selectProp: 'value',
+            displayProp: 'value',
+            options: [
+              {value: 'Active'},
+              {value: 'Archived'},
+              {value: 'Expired'},
+              {value: 'Locked'},
+              {value: 'Pending'}
+            ]
           }
         },
         { name: 'type', type: 'dropdown', caption: 'Type',
@@ -267,7 +285,7 @@ export default {
       if (this.ctx.group) {
         params.groupId = this.ctx.group.id;
       }
-      routerSvc.ngGoto(undefined, params, {notify: false});
+      routerSvc.goto('UsersList', {}, params);
 
       let opts = Object.assign({maxResults: pageSize}, filters);
       if (this.ctx.group) {
@@ -304,8 +322,8 @@ export default {
 
     bulkEdit: function() {
       let users = this.ctx.selectedUsers.map(user => ({id: user.rowObject.id}));
-      itemsSvc.ngSetItems('users', users);
-      routerSvc.ngGoto('user-bulk-edit');
+      itemsSvc.setItems('users', users);
+      routerSvc.goto('UserBulkEdit');
     },
 
     updateStatus: function(fromStatuses, toStatus, msg) {
