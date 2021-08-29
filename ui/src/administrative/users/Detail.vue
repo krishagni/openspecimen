@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { reactive, inject } from 'vue';
+import { reactive } from 'vue';
 
 import Page from '@/common/components/Page.vue';
 import PageHeader from '@/common/components/PageHeader.vue';
@@ -46,6 +46,7 @@ import PageBody from '@/common/components/PageBody.vue';
 import SideMenu from '@/common/components/SideMenu.vue';
 import Icon from '@/common/components/Icon.vue';
 
+import routerSvc from '@/common/services/Router.js';
 import userSvc from '@/administrative/services/User.js';
 import userResources from '@/administrative/users/Resources.js';
 
@@ -53,8 +54,6 @@ export default {
   name: 'UserDetail',
 
   props: ['userId'],
-
-  inject: ['ui'],
 
   components: {
     Page,
@@ -66,13 +65,11 @@ export default {
   },
 
   setup(props) {
-    const ui = inject('ui');
-
     let ctx = reactive({
       user: {},
 
       bcrumb: [
-        {url: ui.ngServer + '#/users', label: 'Users', target: '_parent'}
+        {url: routerSvc.getUrl('UsersList'), label: 'Users'}
       ]
     });
 

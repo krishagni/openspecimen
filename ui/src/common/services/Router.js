@@ -2,13 +2,30 @@
 import router from '@/router/index.js';
 
 class Router {
-  ngGoto(state, params, opts) {
-    let payload = { state: state, params: params, opts: opts };
-    window.parent.postMessage({
-      op: 'changeRoute',
-      payload: payload,
-      requestor: 'vueapp'
-    }, '*');
+  // baseUrl = '#/';
+  baseUrl = 'http://localhost:9000/#/';
+
+  ngGoto(state, params) {
+    let url   = this.baseUrl + state;
+    let query = '';
+    Object.keys(params || {}).forEach(
+      (key) => {
+        let value = params[key];
+        if (value) {
+          if (query) {
+            query += '&';
+          }
+
+          query += key + '=' + value;
+        }
+      }
+    );
+
+    if (query) {
+      url += '?' + query;
+    }
+
+    window.location.href = url;
   }
 
   goto(name, params, query) {
@@ -17,6 +34,11 @@ class Router {
 
   back() {
     router.go(-1);
+  }
+
+  getUrl(name, params, query) {
+    let route = router.resolve({name: name, params: params, query: query});
+    return route && route.href;
   }
 }
 

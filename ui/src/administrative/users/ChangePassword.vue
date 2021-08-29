@@ -65,7 +65,7 @@ export default {
       user: {},
 
       bcrumb: [
-        {url: ui.ngServer + '#/users', label: 'Users', target: '_parent'}
+        {url: routerSvc.getUrl('UsersList'), label: 'Users'}
       ],
 
       chgPasswdFs: {rows: []},

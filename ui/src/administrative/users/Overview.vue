@@ -4,7 +4,7 @@
       <div v-if="(ui.currentUser.admin || !ctx.user.admin) && ctx.user.activityStatus != 'Pending'">
         <Button left-icon="edit"
           label="Edit"
-          @click="ngGoto('user-addedit', {userId: ctx.user.id})"
+          @click="goto('UserAddEdit', {userId: ctx.user.id})"
           v-if="userResources.updateAllowed"
         />
 
@@ -43,7 +43,7 @@
 
         <Button left-icon="key"
           label="Reset Password"
-          @click="ngGoto('user-password', {userId: ctx.user.id})"
+          @click="goto('UserChangePassword', {userId: ctx.user.id})"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.domainName == 'openspecimen' &&
             ui.currentUser.id != ctx.user.id &&
             (ui.currentUser.admin || ui.currentUser.instituteAdmin) &&
@@ -162,7 +162,7 @@ export default {
   },
 
   methods: {
-    ngGoto: routerSvc.ngGoto,
+    goto: (name, params, query) => routerSvc.goto(name, params, query),
 
     updateStatus: function(status, msg) {
       let self = this;
@@ -194,17 +194,18 @@ export default {
       this.$refs.deleteObj.execute().then(
         (resp) => {
           if (resp == 'deleted') {
-            routerSvc.ngGoto('user-list');
+            routerSvc.goto('UsersList');
           }
         }
       );
     },
 
     impersonate: function() {
-      let self = this;
+      //let self = this;
       this.$refs.confirmImpersonate.open().then(
         () => {
-          userSvc.impersonate(self.ctx.user).then(
+          alertSvc.info('This function is under development. We sincerely regret the inconvenience caused to you!');
+          /*userSvc.impersonate(self.ctx.user).then(
             (detail) => {
               window.parent.postMessage({
                 op: 'impersonate',
@@ -212,7 +213,7 @@ export default {
                 requestor: 'vueapp'
               }, '*');
             }
-          );
+          );*/
         }
       );
     }

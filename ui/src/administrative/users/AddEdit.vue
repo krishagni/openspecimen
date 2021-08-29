@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { reactive, inject } from 'vue';
+import { reactive } from 'vue';
 
 import Page from '@/common/components/Page.vue';
 import PageHeader from '@/common/components/PageHeader.vue';
@@ -64,8 +64,6 @@ export default {
 
   props: ['userId', 'editProfile'],
 
-  inject: ['ui'],
-
   components: {
     Page,
     PageHeader,
@@ -76,13 +74,11 @@ export default {
   },
 
   setup(props) {
-    const ui = inject('ui');
-
     let ctx = reactive({
       user: null,
 
       bcrumb: [
-        {url: ui.ngServer + '#/users', label: 'Users', target: '_parent'}
+        {url: routerSvc.getUrl('UsersList'), label: 'Users'}
       ],
 
       addEditFs: {rows: []},

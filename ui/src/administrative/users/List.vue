@@ -161,10 +161,7 @@ export default {
           value: function (user) {
             return user.firstName + ' ' + user.lastName;
           },
-          href: function (user) {
-            return '../#/users/' + user.rowObject.id + '/overview';
-          },
-          hrefTarget: '_parent'
+          href: (user) => routerSvc.getUrl('UserOverview', {userId: user.rowObject.id})
         },
         { name: 'emailAddress', caption: 'Email Address' },
         {
@@ -317,7 +314,7 @@ export default {
     },
 
     onUserRowClick: function(user) {
-      routerSvc.ngGoto('user-detail.overview', {userId: user.id});
+      routerSvc.goto('UserOverview', {userId: user.id});
     },
 
     bulkEdit: function() {
@@ -360,11 +357,12 @@ export default {
       if (group) {
         userGroupSvc.addUsers(group, users).then(() => alertSvc.success('Users added to the group ' + group.name));
       } else {
-        itemsSvc.ngSetItems(
+        alertSvc.info('This function is under development. We sincerely regret the inconvenience caused to you.');
+        /*itemsSvc.ngSetItems(
           'users',
           users.map(user => ({id: user.id, insituteId: user.instituteId, instituteName: user.instituteName}))
         );
-        routerSvc.ngGoto('user-group-addedit', {groupId: ''});
+        routerSvc.ngGoto('user-group-addedit', {groupId: ''});*/
       }
     },
 
@@ -431,9 +429,9 @@ export default {
       routerSvc.ngGoto('user-export-forms');
     },
 
-    ngGoto: routerSvc.ngGoto,
+    ngGoto: (url, params) => routerSvc.ngGoto(url, params),
 
-    goto: routerSvc.goto,
+    goto: (name, params) => routerSvc.goto(name, params),
 
     help: function() {
       window.open('http://help.openspecimen.org/user', '_blank').focus();
@@ -443,10 +441,10 @@ export default {
   computed: {
     importOpts: function() {
       return [
-        { icon: 'user', caption: 'Users', onSelect: () => this.ngGoto('user-import', {objectType: 'user'}) },
-        { icon: 'lock', caption: 'User Roles', onSelect: () => this.ngGoto('user-import', {objectType: 'userRoles'}) },
-        { icon: 'copy', caption: 'Forms', onSelect: () => this.ngGoto('user-import', {objectType: 'extensions'}) },
-        { icon: 'table', caption: 'View Past Imports', onSelect: () => this.ngGoto('user-import-jobs') }
+        { icon: 'user', caption: 'Users', onSelect: () => this.ngGoto('users-import', {objectType: 'user'}) },
+        { icon: 'lock', caption: 'User Roles', onSelect: () => this.ngGoto('users-import', {objectType: 'userRoles'}) },
+        { icon: 'copy', caption: 'Forms', onSelect: () => this.ngGoto('users-import', {objectType: 'extensions'}) },
+        { icon: 'table', caption: 'View Past Imports', onSelect: () => this.ngGoto('users-import-jobs') }
       ]
     },
 
