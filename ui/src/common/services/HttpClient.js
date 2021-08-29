@@ -33,15 +33,7 @@ class HttpClient {
   }
 
   getUrl(url) {
-    let result = '';
-    if (this.host) {
-      result = this.protocol ? (this.protocol + '://') : 'https://';
-      result += this.host;
-      if (this.port) {
-        result += ':' + this.port;
-      }
-    }
-
+    let result = this.getServerUrl();
     if (this.path) {
       result += this.path;
     }
@@ -51,6 +43,19 @@ class HttpClient {
     }
 
     result += url;
+    return result;
+  }
+
+  getServerUrl() {
+    let result = '';
+    if (this.host) {
+      result = this.protocol ? (this.protocol + '://') : 'https://';
+      result += this.host;
+      if (this.port) {
+        result += ':' + this.port;
+      }
+    }
+
     return result;
   }
 
