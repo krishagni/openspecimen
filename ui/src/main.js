@@ -113,7 +113,11 @@ if (http.path) {
 }
 
 http.path += 'rest/ng'
-http.headers['X-OS-API-TOKEN'] = params.get('token');
+if (params.get('token')) {
+  localStorage.osAuthToken = http.headers['X-OS-API-TOKEN'] = params.get('token');
+} else {
+  http.headers['X-OS-API-TOKEN'] = localStorage.osAuthToken;
+}
 
 let settingsQ  = settingSvc.getAppProps();
 let localeQ    = settingSvc.getLocale();
