@@ -1018,7 +1018,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           $scope.collDetail.collectionDate = collDate;
           angular.forEach($scope.specimens,
             function(spmn) {
-              if (spmn.lineage != 'New') {
+              if (spmn.lineage != 'New' || (spmn.existingStatus && spmn.existingStatus != 'Pending')) {
                 return;
               }
 
@@ -1028,6 +1028,25 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
                 function(s) {
                   collEvent = s.collectionEvent = s.collectionEvent || {};
                   collEvent.time = collDate;
+                }
+              );
+            }
+          );
+        }
+
+        $scope.updateCollUser = function(user) {
+          angular.forEach($scope.specimens,
+            function(spmn) {
+              if (spmn.lineage != 'New' || (spmn.existingStatus && spmn.existingStatus != 'Pending')) {
+                return;
+              }
+
+              var collEvent = spmn.collectionEvent = spmn.collectionEvent || {};
+              collEvent.user = user;
+              angular.forEach(spmn.specimensPool,
+                function(s) {
+                  collEvent = s.collectionEvent = s.collectionEvent || {};
+                  collEvent.user = user;
                 }
               );
             }
