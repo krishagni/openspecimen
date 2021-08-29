@@ -1,7 +1,33 @@
 
 import ui from '@/global.js';
+import http from '@/common/services/HttpClient.js';
 
 class Authorization {
+
+  userRights = [];
+
+  async loadUserRights() {
+    this.userRights = [];
+    return http.get('users/current-user-roles').then(
+      (userRoles) => {
+        this.userRights = [];
+        for (let userRole of userRoles) {
+          let site = userRole.site ? userRole.site.name : null;
+          let cp = userRole.collectionProtocol ? userRole.collectionProtocol.shortTitle : null;
+          for (let ac of userRole.role.acl || []) {
+            this.userRights.push({
+              site: site,
+              cp: cp,
+              resource: ac.resourceName,
+              operations: ac.operations.map(function(op) { return op.operationName; } )
+            });
+          }
+        }
+
+        return this.userRights;
+      }
+    );
+  }
 
   isAllowed(opts) {
     if (ui.currentUser.admin) {
@@ -16,7 +42,7 @@ class Authorization {
 
     let resources = opts.resources || [opts.resource];
     let allowed = false;
-    for (let right of ui.userRights) {
+    for (let right of this.userRights) {
       if (!opts.sites && !opts.cp && resources.indexOf(right.resource) != -1) {
         //
         // For resources whose rights are independent of CP and Site

@@ -23,7 +23,7 @@
       <PageToolbar>
         <template #default>
           <span v-if="ctx.selectedUsers.length == 0 && !ctx.group">
-            <Button left-icon="plus" label="Create" @click="ngGoto('user-addedit', {userId: ''})" />
+            <Button left-icon="plus" label="Create" @click="goto('UserAddEdit', {userId: -1})" />
 
             <Button left-icon="users" label="User Groups" @click="ngGoto('user-groups')" />
 
@@ -415,6 +415,8 @@ export default {
 
     ngGoto: routerSvc.ngGoto,
 
+    goto: routerSvc.goto,
+
     help: function() {
       window.open('http://help.openspecimen.org/user', '_blank').focus();
     }
@@ -443,7 +445,7 @@ export default {
         { icon: 'bullhorn', caption: 'New Announcement', onSelect: () => this.$refs.announcementDialog.open() }
       ];
 
-      if (this.ui.os.appProps.plugins.indexOf('os-extras') && authSvc.isAllowed('institute-admin')) {
+      if (this.ui.global.appProps.plugins.indexOf('os-extras') && authSvc.isAllowed('institute-admin')) {
         //
         // temporary. will go away when first class support for plugin views is implemented
         //

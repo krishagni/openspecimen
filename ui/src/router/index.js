@@ -2,7 +2,15 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   {
-    path: '/users',
+    path: '/',
+    name: 'App',
+    component: () => import("../App.vue"),
+    props: (route) => {
+      return {token: route.query.token};
+    },
+    children: [
+  {
+    path: 'users',
     name: 'UsersList',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
@@ -11,7 +19,7 @@ const routes = [
     props: (route) => ({filters: route.query.filters, groupId: route.query.groupId})
   },
   {
-    path: '/user-addedit/:userId',
+    path: 'user-addedit/:userId',
     name: 'UserAddEdit',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
@@ -20,19 +28,19 @@ const routes = [
     props: (route) => ({userId: route.params && route.params.userId})
   },
   {
-    path: '/user-edit-profile/:userId',
+    path: 'user-edit-profile/:userId',
     name: 'UserEditProfile',
     component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEdit.vue'),
     props: (route) => ({userId: route.params && route.params.userId, editProfile: true})
   },
   {
-    path: '/user-password-change/:userId',
+    path: 'user-password-change/:userId',
     name: 'UserChangePassword',
     component: () => import(/* webpackChunkName: "users" */ '../administrative/users/ChangePassword.vue'),
     props: (route) => ({userId: route.params && route.params.userId})
   },
   {
-    path: '/users/:userId',
+    path: 'users/:userId',
     name: 'UserDetail',
     component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Detail.vue'),
     props: (route) => ({userId: route.params && route.params.userId}),
@@ -79,6 +87,8 @@ const routes = [
         ]
       }
     ]
+  }
+  ]
   }
 ]
 

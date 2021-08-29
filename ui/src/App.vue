@@ -1,6 +1,8 @@
 <template>
-  <Toast class="os-app-toast" />
-  <router-view/>
+  <div class="os-app-body">
+    <Toast class="os-app-toast" />
+    <router-view/>
+  </div>
 </template>
 
 <script>
@@ -9,11 +11,16 @@ import Toast from "primevue/toast";
 export default {
   name: 'App',
 
+  props: ['token'],
+
   components: {
-    Toast
+    Toast,
   },
 
   setup() {
+  },
+
+  mounted() {
   }
 }
 </script>
@@ -211,6 +218,11 @@ a {
     column-count: 1;
     -webkit-perspective: 1;
   }
+}
+
+.os-app-body {
+  position: relative;
+  height: 100%;
 }
 
 </style>

@@ -3,6 +3,10 @@ import http from '@/common/services/HttpClient.js';
 
 class User {
 
+  async getCurrentUser() {
+    return http.get('/users/current-user');
+  }
+
   async getUserById(userId) {
     return http.get('users/' + userId);
   }

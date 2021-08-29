@@ -16,15 +16,20 @@ import Tooltip from 'primevue/tooltip';
 
 import router from './router'
 import ui from './global.js';
-import App from './App.vue'
-import http from '@/common/services/HttpClient.js';
+import Root from './Root.vue'
+
 import alerts from '@/common/services/Alerts.js';
-import itemsSvc from '@/common/services/ItemsHolder.js';
+import http from '@/common/services/HttpClient.js';
+import authSvc from '@/common/services/Authorization.js';
+import settingSvc from '@/administrative/services/Setting.js';
+import userSvc from '@/administrative/services/User.js';
+
+// import itemsSvc from '@/common/services/ItemsHolder.js';
 // import routerSvc from '@/common/services/Router.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
-const app = createApp(App)
+const app = createApp(Root)
   .use(router)
   .use(PrimeVue)
   .use(ToastService);
@@ -95,55 +100,106 @@ filters.arrayJoin = (value) => {
 alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);
 
-window.parent.postMessage({op: 'getGlobalProps', requestor: 'vueapp'}, '*');
-window.parent.postMessage({op: 'getAuthToken', requestor: 'vueapp'}, '*');
-window.parent.postMessage({op: 'getUserDetails', requestor: 'vueapp'}, '*');
-window.parent.postMessage({op: 'getAppMenuItems', requestor: 'vueapp'}, '*');
-let count = 3;
-window.addEventListener('message', function(event) {
-  if (event.data.op == 'getGlobalProps') {
-    ui.os = event.data.resp.os || {};
+let url = window.location.href;
+let params = new URLSearchParams(url.split('?')[1]);
 
-    let server = ui.os.server || {};
-    http.protocol = server.secure ? 'https' : 'http';
-    http.host = server.hostname;
-    http.port = server.port;
-    http.path = server.app || '..';
-    if (http.path) {
-      http.path += '/';
-    }
+let server = ui.server || {};
+http.protocol = server.secure ? 'https' : 'http';
+http.host = server.hostname;
+http.port = server.port;
+http.path = server.app || '..';
+if (http.path) {
+  http.path += '/';
+}
 
-    http.path += 'rest/ng'
+http.path += 'rest/ng'
+http.headers['X-OS-API-TOKEN'] = params.get('token');
 
-    --count;
-  } else if (event.data.op == 'getAuthToken') {
-    let resp = event.data.resp;
-    ui.token = resp.token;
+let settingsQ  = settingSvc.getAppProps();
+let localeQ    = settingSvc.getLocale();
+let currUserQ  = userSvc.getCurrentUser();
+let usrRightsQ = authSvc.loadUserRights();
+Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
+  (resp) => {
+    let appProps = resp[0];
+    let locale   = resp[1];
+    let currUser = resp[2];
 
-    http.headers['X-OS-API-TOKEN'] = ui.token; // localStorage.getItem('osAuthToken');
-    if (resp.impUserToken) {
-      http.headers['X-OS-IMPERSONATE-USER'] = resp.impUserToken;
-    } else {
-      delete http.headers['X-OS-IMPERSONATE-USER'];
-    }
+    ui.global = {
+      defaultDomain: 'openspecimen',
+      filterWaitInterval: appProps.searchDelay,
+      appProps: appProps,
+      locale: {
+        dateFmt: locale.dateFmt,
+        shortDateFmt: locale.deBeDateFmt,
+        timeFmt: locale.timeFmt,
+        queryDateFmt: {format: locale.deFeDateFmt},
+        dateTimeFmt: locale.dateFmt + ' ' + locale.timeFmt,
+        locale: locale.locale,
+        utcOffset: locale.utcOffset
+      }
+    };
 
-    --count;
-  } else if (event.data.op == 'getUserDetails') {
-    Object.assign(ui, event.data.resp);
-    --count;
-  } else if (event.data.op == 'getAppMenuItems') {
-    ui.menuItems = event.data.resp;
-  } else if (event.data.op == 'getItems') {
-    itemsSvc.setItems(event.data.type, event.data.items);
-  }
-    
+    ui.currentUser = currUser;
+    ui.menuItems = [];
 
-  if (count == 0) {
+    alert(JSON.stringify(resp[3]));
+    console.log(ui);
     app.mount('#app')
     app.provide('ui', ui);
-    count = -1;
   }
-});
+);
+
+
+// window.parent.postMessage({op: 'getGlobalProps', requestor: 'vueapp'}, '*');
+// window.parent.postMessage({op: 'getAuthToken', requestor: 'vueapp'}, '*');
+// window.parent.postMessage({op: 'getUserDetails', requestor: 'vueapp'}, '*');
+// window.parent.postMessage({op: 'getAppMenuItems', requestor: 'vueapp'}, '*');
+// let count = 3;
+// window.addEventListener('message', function(event) {
+//   if (event.data.op == 'getGlobalProps') {
+//     ui.os = event.data.resp.os || {};
+// 
+//     let server = ui.os.server || {};
+//     http.protocol = server.secure ? 'https' : 'http';
+//     http.host = server.hostname;
+//     http.port = server.port;
+//     http.path = server.app || '..';
+//     if (http.path) {
+//       http.path += '/';
+//     }
+// 
+//     http.path += 'rest/ng'
+// 
+//     --count;
+//   } else if (event.data.op == 'getAuthToken') {
+//     let resp = event.data.resp;
+//     ui.token = resp.token;
+// 
+//     http.headers['X-OS-API-TOKEN'] = ui.token; // localStorage.getItem('osAuthToken');
+//     if (resp.impUserToken) {
+//       http.headers['X-OS-IMPERSONATE-USER'] = resp.impUserToken;
+//     } else {
+//       delete http.headers['X-OS-IMPERSONATE-USER'];
+//     }
+// 
+//     --count;
+//   } else if (event.data.op == 'getUserDetails') {
+//     Object.assign(ui, event.data.resp);
+//     --count;
+//   } else if (event.data.op == 'getAppMenuItems') {
+//     ui.menuItems = event.data.resp;
+//   } else if (event.data.op == 'getItems') {
+//     itemsSvc.setItems(event.data.type, event.data.items);
+//   }
+//     
+// 
+//   if (count == 0) {
+//     app.mount('#app')
+//     app.provide('ui', ui);
+//     count = -1;
+//   }
+// });
 
 
 //
