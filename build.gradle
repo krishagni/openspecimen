@@ -291,7 +291,7 @@ task create_war(type: War) {
   from ('./ui/dist') {
     include '**/**'
 
-    into 'vue-app/'
+    into 'ui-app/'
   }
   
   manifest {
