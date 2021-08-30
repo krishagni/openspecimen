@@ -60,6 +60,7 @@ export default {
 
   methods: {
     open: function() {
+      this.announcement = {};
       this.$refs.dialog.open();
     },
 
