@@ -357,7 +357,8 @@ export default {
       if (group) {
         userGroupSvc.addUsers(group, users).then(() => alertSvc.success('Users added to the group ' + group.name));
       } else {
-        alertSvc.info('This function is under development. We sincerely regret the inconvenience caused to you.');
+        this.underDev();
+
         /*itemsSvc.ngSetItems(
           'users',
           users.map(user => ({id: user.id, insituteId: user.instituteId, instituteName: user.instituteName}))
@@ -425,8 +426,13 @@ export default {
 
     exportForms: function() {
       let users = this.ctx.selectedUsers.map(user => ({emailAddress: user.rowObject.emailAddress}));
-      itemsSvc.ngSetItems('users', users);
-      routerSvc.ngGoto('user-export-forms');
+      if (users.length > 0) {
+        this.underDev();
+        itemsSvc.ngSetItems('users', users);
+        return;
+      }
+
+      routerSvc.ngGoto('users-export-forms');
     },
 
     ngGoto: (url, params) => routerSvc.ngGoto(url, params),
@@ -435,6 +441,10 @@ export default {
 
     help: function() {
       window.open('http://help.openspecimen.org/user', '_blank').focus();
+    },
+
+    underDev: function() {
+      alertSvc.info('This function is under development. We sincerely regret the inconvenience caused to you!');
     }
   },
 
