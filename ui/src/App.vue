@@ -74,6 +74,12 @@ a {
   text-decoration: none;
 }
 
+a:focus, a:hover {
+  color: #23527c;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .os-app-toast {
   z-index: 1102!important;
 }
