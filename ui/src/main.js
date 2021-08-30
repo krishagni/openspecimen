@@ -29,10 +29,7 @@ import userSvc from '@/administrative/services/User.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
-const app = createApp(Root)
-  .use(router)
-  .use(PrimeVue)
-  .use(ToastService);
+const app = createApp(Root);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
@@ -148,8 +145,11 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
     ui.menuItems = [];
 
     console.log(ui);
-    app.mount('#app')
-    app.provide('ui', ui);
+    app.use(router)
+      .use(PrimeVue)
+      .use(ToastService)
+      .provide('ui', ui)
+      .mount('#app');
   }
 );
 
