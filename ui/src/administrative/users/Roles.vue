@@ -96,7 +96,9 @@ export default {
   data() {
     let self = this;
     return {
-      all: 'All Current and Future',
+      allSites: {name: 'All Current and Future'},
+
+      allCps: {shortTitle: 'All Current and Future'},
 
       ctx: {
         roleFs: {
@@ -106,6 +108,7 @@ export default {
                 {
                   type: "dropdown", name: "site", label: "Site",
                   listSource: {
+                    displayProp: 'name', selectProp: 'name',
                     loadFn: (opts) => self.loadSites(opts)
                   },
                   validations: {
@@ -121,6 +124,7 @@ export default {
                 {
                   type: "dropdown", name: "cp", label: "Collection Protocol",
                   listSource: {
+                    displayProp: 'shortTitle', selectProp: 'shortTitle',
                     loadFn: (opts) => self.loadCps(opts)
                   },
                   validations: {
@@ -136,6 +140,7 @@ export default {
                 {
                   type: "dropdown", name: "role", label: "Role",
                   listSource: {
+                    displayProp: 'name', selectProp: 'name',
                     loadFn: (opts) => self.loadRoles(opts)
                   },
                   validations: {
@@ -171,8 +176,8 @@ export default {
       let input = this.ctx.role;
       let role = {
         id: input.id,
-        site: input.site == this.all ? undefined : {name: input.site },
-        collectionProtocol: input.cp == this.all ? undefined : {shortTitle: input.cp},
+        site: input.site == this.allSites.name ? undefined : { name: input.site },
+        collectionProtocol: input.cp == this.allCps.shortTitle ? undefined : {shortTitle: input.cp},
         role: {name: input.role}
       }
 
@@ -192,8 +197,8 @@ export default {
 
     showAddEditRole: function(userRole) {
       if (userRole.id) {
-        let site = (userRole.site && userRole.site.name) || this.all;
-        let cp   = (userRole.collectionProtocol && userRole.collectionProtocol.shortTitle) || this.all;
+        let site = (userRole.site && userRole.site.name) || this.allSites.name;
+        let cp   = (userRole.collectionProtocol && userRole.collectionProtocol.shortTitle) || this.allCps.shortTitle;
         let role = userRole.role && userRole.role.name;
         this.ctx.role = {id: userRole.id, site: site, cp: cp, role: role};
       } else {
@@ -216,7 +221,7 @@ export default {
       let userRoles  = this.ctx.userRoles;
       let hasSite    = userRoles.some((userRole) => !!userRole.site);
       let allCpSites = userRoles.filter((userRole) => !userRole.collectionProtocol)
-        .map((userRole) => !userRole.site ? self.all : userRole.site.name);
+        .map((userRole) => !userRole.site ? self.allSites.name : userRole.site.name);
 
       opts = opts || {};
       opts.name = opts.query;
@@ -230,12 +235,12 @@ export default {
 
       return siteSvc.getSites(opts).then(
         (sites) => {
-          let result = sites.map((site) => site.name);
+          let result = sites.map((site) => ({name: site.name}));
           if (userRoles.length == 0 || !hasSite) {
-            result.splice(0, 0, self.all);
+            result.splice(0, 0, self.allSites);
           }
 
-          return result.filter((site) => allCpSites.indexOf(site) == -1 || self.ctx.role.site == site);
+          return result.filter((site) => allCpSites.indexOf(site.name) == -1 || self.ctx.role.site == site.name);
         }
       );
     },
@@ -275,7 +280,7 @@ export default {
       );
 
       opts = opts || {};
-      if (this.ctx.role.site != this.all) {
+      if (this.ctx.role.site != this.allSites.name) {
         opts.repositoryName = this.ctx.role.site;
       } else {
         opts.instituteId = this.user.instituteId;
@@ -283,11 +288,11 @@ export default {
 
       return cpSvc.getCps(opts).then(
         (cps) => {
-          let result = cps.map((cp) => cp.shortTitle)
-            .filter((cp) => cpsToRemove.indexOf(cp) == -1 || self.ctx.role.cp == cp);
+          let result = cps.map((cp) => ({shortTitle: cp.shortTitle}))
+            .filter((cp) => cpsToRemove.indexOf(cp.shortTitle) == -1 || self.ctx.role.cp == cp.shortTitle);
 
           if (allCps) {
-            result.splice(0, 0, self.all);
+            result.splice(0, 0, self.allCps);
           }
 
           return result;
@@ -296,7 +301,7 @@ export default {
     },
 
     loadRoles: function() {
-      return rolesSvc.getRoles().then((roles) => roles.map((role) => role.name));
+      return rolesSvc.getRoles().then((roles) => roles.map((role) => ({name: role.name})));
     }
   }
 }
