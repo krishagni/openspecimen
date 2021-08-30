@@ -29,7 +29,8 @@ import userSvc from '@/administrative/services/User.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
-const app = createApp(Root);
+const app = createApp(Root)
+  .use(ToastService);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
@@ -100,6 +101,7 @@ library.add(fas);
 let url = window.location.href;
 let params = new URLSearchParams(url.split('?')[1]);
 
+app.config.globalProperties.$ui = ui;
 let server = ui.server || {};
 http.protocol = server.secure ? 'https' : 'http';
 http.host = server.hostname;
@@ -147,7 +149,6 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
     console.log(ui);
     app.use(router)
       .use(PrimeVue)
-      .use(ToastService)
       .provide('ui', ui)
       .mount('#app');
   }
