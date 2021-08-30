@@ -26,7 +26,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['objectId', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
+  props: ['entity', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
     Button,
@@ -98,7 +98,7 @@ export default {
       }
 
       let formData = this.ctx.record;
-      formData.appData = {objectId: +this.objectId, formCtxtId: +this.formCtxtId, formId: +this.formId};
+      formData.appData = {objectId: +this.entity.id, formCtxtId: +this.formCtxtId, formId: +this.formId};
       formSvc.saveOrUpdateRecord(formData).then(
         (savedData) => {
           this.$emit('reload-records');

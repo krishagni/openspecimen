@@ -5,7 +5,7 @@
       <template #header>
         <span>
           <span class="title">Roles</span>
-          <Button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole"/>
+          <Button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole && updateAllowed"/>
         </span>
       </template>
 
@@ -32,7 +32,7 @@
               <span>{{userRole.role.name}}</span>
             </td>
             <td>
-              <ButtonGroup>
+              <ButtonGroup v-if="isRoleUpdateAllowed(userRole)">
                 <Button left-icon="edit" size="small" @click="showAddEditRole(userRole)" />
                 <Button left-icon="trash" size="small" @click="deleteRole(userRole)" />
               </ButtonGroup>
@@ -77,7 +77,9 @@ import Form from '@/common/components/Form.vue';
 import userSvc from '@/administrative/services/User.js';
 import siteSvc from '@/administrative/services/Site.js';
 import rolesSvc from '@/administrative/services/Role.js';
+import userResources from '@/administrative/users/Resources.js';
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import authSvc from '@/common/services/Authorization.js';
 
 export default {
   props: ['user'],
@@ -164,10 +166,28 @@ export default {
   computed: {
     hideAddRole: function() {
       return this.ctx.userRoles && this.ctx.userRoles.some((ur) => !ur.site && !ur.collectionProtocol);
+    },
+
+    updateAllowed: function() {
+      return userResources.isUpdateAllowed();
     }
   },
 
   methods: {
+    isRoleUpdateAllowed: function(role) {
+      if (this.ui.currentUser.admin) {
+        return true;
+      }
+
+      if (role.site && role.site.name != this.allSites.name) {
+        return authSvc.isAllowed(Object.assign({sites: [role.site.name]}, {resource: 'User', operations: ['Update']}));
+      } else if (this.ui.currentUser.instituteName == this.user.instituteName) {
+        return userResources.isUpdateAllowed();
+      }
+
+      return false;
+    },
+
     saveRole: function() {
       if (!this.$refs.roleForm.validate()) {
         return;

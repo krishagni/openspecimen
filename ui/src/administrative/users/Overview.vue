@@ -5,13 +5,13 @@
         <Button left-icon="edit"
           label="Edit"
           @click="goto('UserAddEdit', {userId: ctx.user.id})"
-          v-if="userResources.updateAllowed"
+          v-if="updateAllowed"
         />
 
         <Button left-icon="lock"
           label="Lock"
           @click="lock"
-          v-if="userResources.updateAllowed &&
+          v-if="updateAllowed &&
             ctx.user.activityStatus != 'Locked' &&
             ctx.user.activityStatus != 'Closed' &&
             ctx.user.type != 'CONTACT'"
@@ -20,19 +20,19 @@
         <Button left-icon="lock-open"
           label="Unlock"
           @click="activate"
-          v-if="userResources.updateAllowed && ctx.user.activityStatus == 'Locked'"
+          v-if="updateAllowed && ctx.user.activityStatus == 'Locked'"
         />
 
         <Button left-icon="archive"
           label="Archive"
           @click="archive"
-          v-if="userResources.updateAllowed && ctx.user.activityStatus != 'Closed'"
+          v-if="updateAllowed && ctx.user.activityStatus != 'Closed'"
         />
 
         <Button left-icon="check"
           label="Reactivate"
           @click="activate"
-          v-if="userResources.updateAllowed && ctx.user.activityStatus == 'Closed'"
+          v-if="updateAllowed && ctx.user.activityStatus == 'Closed'"
         />
 
         <Button left-icon="trash"
@@ -159,6 +159,12 @@ export default {
     );
 
     return { ctx, userSchema, userResources };
+  },
+
+  computed: {
+    updateAllowed: function() {
+      return userResources.isUpdateAllowed();
+    }
   },
 
   methods: {

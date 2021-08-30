@@ -23,37 +23,47 @@
       <PageToolbar>
         <template #default>
           <span v-if="ctx.selectedUsers.length == 0 && !ctx.group">
-            <Button left-icon="plus" label="Create" @click="goto('UserAddEdit', {userId: -1})" />
+            <Button left-icon="plus" label="Create"
+              @click="goto('UserAddEdit', {userId: -1})"
+              v-show-if-allowed="userResources.createOpts" />
 
             <Button left-icon="users" label="User Groups" @click="ngGoto('user-groups')" />
 
-            <Menu label="Import" :options="importOpts" />
+            <Menu label="Import" :options="importOpts" v-show-if-allowed="userResources.importOpts" />
 
             <Menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
 
-            <Menu label="More" :options="moreOpts" />
+            <Menu label="More" :options="moreOpts" v-show-if-allowed="institute" />
 
             <Button left-icon="question-circle" label="Help" @click="help" />
           </span>
 
           <span v-if="ctx.selectedUsers.length > 0">
-            <Button left-icon="edit" label="Edit" @click="bulkEdit" />
+            <Button left-icon="edit" label="Edit" @click="bulkEdit" v-show-if-allowed="userResources.updateOpts" />
 
-            <AssignGroup v-if="!ctx.group" @addToGroup="addToGroup" />
+            <AssignGroup v-if="!ctx.group" @addToGroup="addToGroup"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button v-if="ctx.group" left-icon="times" label="Remove from Group" @click="removeFromGroup"/>
+            <Button v-if="ctx.group" left-icon="times" label="Remove from Group" @click="removeFromGroup"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="archive" label="Archive" @click="archiveUsers" />
+            <Button left-icon="archive" label="Archive" @click="archiveUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="check" label="Reactivate" @click="reactivateUsers" />
+            <Button left-icon="check" label="Reactivate" @click="reactivateUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="trash" label="Delete" @click="deleteUsers" />
+            <Button left-icon="trash" label="Delete" @click="deleteUsers"
+              v-show-if-allowed="userResources.deleteOpts" />
 
-            <Button left-icon="lock" label="Lock" @click="lockUsers" />
+            <Button left-icon="lock" label="Lock" @click="lockUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="unlock" label="Unlock" @click="unlockUsers" />
+            <Button left-icon="unlock" label="Unlock" @click="unlockUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="thumbs-up" label="Approve" @click="approveUsers" />
+            <Button left-icon="thumbs-up" label="Approve" @click="approveUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
             <Menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
           </span>

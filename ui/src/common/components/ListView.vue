@@ -325,6 +325,15 @@ export default {
   padding-right: 15px;
 }
 
+.os-table .results .results-inner .p-inline-message {
+  width: 100%;
+}
+
+.os-table .results .results-inner .p-inline-message span {
+  width: 100%;
+  text-align: left;
+}
+
 .os-table .filters {
   float: left;
   display: none;

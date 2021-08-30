@@ -27,15 +27,17 @@
           <template #header>
             <span>
               <span class="title">{{ctx.selectedForm.formCaption}}</span>
-              <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
-                <Button left-icon="plus" label="Add" @click="addRecord" />
-              </span>
-              <span v-else>
-                <Button left-icon="edit" label="Edit" @click="editRecord(ctx.selectedRecord)" />
+              <span v-if="entity.isActive && entity.isUpdateAllowed">
+                <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
+                  <Button left-icon="plus" label="Add" @click="addRecord" />
+                </span>
+                <span v-else>
+                  <Button left-icon="edit" label="Edit" @click="editRecord(ctx.selectedRecord)" />
 
-                <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
+                  <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
 
-                <Button left-icon="plus" label="Add Another" @click="addRecord" />
+                  <Button left-icon="plus" label="Add Another" @click="addRecord" />
+                </span>
               </span>
             </span>
           </template>
@@ -71,7 +73,7 @@
                       <span>{{$filters.dateTime(record.updateTime)}}</span>
                     </td>
                     <td>
-                      <ButtonGroup>
+                      <ButtonGroup v-if="entity.isActive && entity.isUpdateAllowed">
                         <Button left-icon="edit" size="small" @click="editRecord(record)" />
                         <Button left-icon="trash" size="small" @click="deleteRecord(record)" />
                       </ButtonGroup>
@@ -111,7 +113,7 @@ import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['objectId', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
+  props: ['entity', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
     ListGroup,

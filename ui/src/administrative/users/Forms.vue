@@ -1,7 +1,7 @@
 
 <template>
   <div>
-    <router-view :object-id="user.id"
+    <router-view :entity="ctx.entity"
       :forms="ctx.forms"
       :records="ctx.records"
       @reload-records="reloadRecords"
@@ -13,6 +13,8 @@
 <script>
 
 import {reactive, watchEffect} from 'vue';
+
+import userResources from '@/administrative/users/Resources.js';
 import userSvc from '@/administrative/services/User.js';
 import formUtil from '@/common/services/FormUtil.js';
 
@@ -24,6 +26,13 @@ export default {
 
     watchEffect(
       () => {
+        ctx.entity = {
+          isActive: props.user.activityStatus == 'Active',
+          isUpdateAllowed: userResources.isUpdateAllowed(),
+          entity: props.user,
+          id: props.user.id
+        };
+
         let formsQ = userSvc.getForms(props.user);
         let recsQ  = userSvc.getFormRecords(props.user);
         Promise.all([formsQ, recsQ]).then(
