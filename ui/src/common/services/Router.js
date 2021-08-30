@@ -1,9 +1,10 @@
 
+import ui from '@/global.js';
 import router from '@/router/index.js';
 
 class Router {
-  // baseUrl = '#/';
-  baseUrl = 'http://localhost:9000/#/';
+  baseUrl = ui.ngServer + '#/';
+  // baseUrl = 'http://localhost:9000/#/';
 
   ngGoto(state, params) {
     let url   = this.baseUrl + state;

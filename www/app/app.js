@@ -377,14 +377,11 @@ osApp.config(function(
       };
     }
   })
-  .factory('VueApp', function($sce, $rootScope) {
-    var baseUrl = 'vue-app/#/';
+  .factory('VueApp', function($sce, $rootScope, $window) {
+    var baseUrl = 'ui-app/#/';
     // var baseUrl = 'http://localhost:8081/#/';
 
     function setVueView(state, params) {
-      var global = ui.os.global;
-      global.initVueApp = global.vueAppView = true;
-
       var url = baseUrl + state;
       var query = '';
       angular.forEach(params,
@@ -399,24 +396,23 @@ osApp.config(function(
         }
       );
 
+      if (baseUrl.indexOf('http') == 0) {
+        if (query) {
+          query += '&';
+        }
+
+        query += 'token=' + $window.localStorage['osAuthToken'];
+      }
+
       if (query) {
         url += '?' + query;
       }
 
-      $rootScope.vueUrl = $sce.trustAsResourceUrl(url);
-    }
-
-    function unloadVueView() {
-      var global = ui.os.global;
-
-      global.vueAppView = false;
-      $rootScope.vueUrl = null;
+      window.location.href = $rootScope.vueUrl = $sce.trustAsResourceUrl(url);
     }
 
     return {
-      setVueView: setVueView,
-
-      unloadVueView: unloadVueView
+      setVueView: setVueView
     }
   })
   .run(function(
@@ -466,7 +462,6 @@ osApp.config(function(
     $rootScope.$on('$stateChangeSuccess',
       function(event, toState, toParams, fromState, fromParams) {
         $rootScope.state = toState;
-        VueApp.unloadVueView();
       }
     );
 
