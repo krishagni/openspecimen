@@ -14,8 +14,6 @@ import Navbar from '@/common/components/Navbar.vue';
 export default {
   name: 'App',
 
-  props: ['token'],
-
   components: {
     Toast,
     Navbar

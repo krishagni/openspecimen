@@ -31,7 +31,6 @@
       </SideMenu>
 
       <router-view :user="ctx.user" v-if="ctx.user.id"> </router-view>
-
     </PageBody>
   </Page>
 </template>

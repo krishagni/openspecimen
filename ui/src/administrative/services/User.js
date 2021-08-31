@@ -84,6 +84,9 @@ class User {
   async getFormRecords(user) {
     return http.get('users/' + user.id + '/form-records').then(
       (frs) => {
+        //
+        // frs: [{id: <formId>, caption: <formCaption>, records: [<rec1>, <rec2>, ...]},...]
+        //
         frs.forEach(
           (formRecords) =>
             formRecords.records.forEach(

@@ -5,7 +5,7 @@
       <template #header>
         <span>
           <span class="title">Roles</span>
-          <Button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole && updateAllowed"/>
+          <Button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole && updateAllowed" />
         </span>
       </template>
 
@@ -180,7 +180,7 @@ export default {
       }
 
       if (role.site && role.site.name != this.allSites.name) {
-        return authSvc.isAllowed(Object.assign({sites: [role.site.name]}, {resource: 'User', operations: ['Update']}));
+        return authSvc.isAllowed({resource: 'User', operations: ['Update'], sites: [role.site.name]});
       } else if (this.ui.currentUser.instituteName == this.user.instituteName) {
         return userResources.isUpdateAllowed();
       }
@@ -197,8 +197,8 @@ export default {
       let role = {
         id: input.id,
         site: input.site == this.allSites.name ? undefined : { name: input.site },
-        collectionProtocol: input.cp == this.allCps.shortTitle ? undefined : {shortTitle: input.cp},
-        role: {name: input.role}
+        collectionProtocol: input.cp == this.allCps.shortTitle ? undefined : { shortTitle: input.cp },
+        role: { name: input.role }
       }
 
       let self = this;

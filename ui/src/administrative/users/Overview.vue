@@ -3,14 +3,12 @@
     <template #default>
       <div v-if="(ui.currentUser.admin || !ctx.user.admin) && ctx.user.activityStatus != 'Pending'">
         <Button left-icon="edit"
-          label="Edit"
-          @click="goto('UserAddEdit', {userId: ctx.user.id})"
+          label="Edit" @click="goto('UserAddEdit', {userId: ctx.user.id})"
           v-if="updateAllowed"
         />
 
         <Button left-icon="lock"
-          label="Lock"
-          @click="lock"
+          label="Lock" @click="lock"
           v-if="updateAllowed &&
             ctx.user.activityStatus != 'Locked' &&
             ctx.user.activityStatus != 'Closed' &&
@@ -18,32 +16,27 @@
         />
 
         <Button left-icon="lock-open"
-          label="Unlock"
-          @click="activate"
+          label="Unlock" @click="activate"
           v-if="updateAllowed && ctx.user.activityStatus == 'Locked'"
         />
 
         <Button left-icon="archive"
-          label="Archive"
-          @click="archive"
+          label="Archive" @click="archive"
           v-if="updateAllowed && ctx.user.activityStatus != 'Closed'"
         />
 
         <Button left-icon="check"
-          label="Reactivate"
-          @click="activate"
+          label="Reactivate" @click="activate"
           v-if="updateAllowed && ctx.user.activityStatus == 'Closed'"
         />
 
         <Button left-icon="trash"
-          label="Delete"
-          @click="deleteUser"
+          label="Delete" @click="deleteUser"
           v-show-if-allowed="userResources.deleteOpts"
         />
 
         <Button left-icon="key"
-          label="Reset Password"
-          @click="goto('UserChangePassword', {userId: ctx.user.id})"
+          label="Reset Password" @click="goto('UserChangePassword', {userId: ctx.user.id})"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.domainName == 'openspecimen' &&
             ui.currentUser.id != ctx.user.id &&
             (ui.currentUser.admin || ui.currentUser.instituteAdmin) &&
@@ -51,8 +44,7 @@
         />
 
         <Button left-icon="user-secret"
-          label="Impersonate"
-          @click="impersonate"
+          label="Impersonate" @click="impersonate"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.activityStatus == 'Active' &&
             ui.currentUser.id != ctx.user.id && ui.currentUser.admin"
         />
@@ -90,7 +82,7 @@
 </template>
 
 <script>
-import { reactive, inject, watchEffect } from 'vue';
+import { reactive, watchEffect } from 'vue';
 
 import PageToolbar from '@/common/components/PageToolbar.vue';
 import Overview from '@/common/components/Overview.vue';
@@ -130,18 +122,12 @@ export default {
   },
 
   setup(props) {
-    const ui = inject('ui');
-
     let ctx = reactive({
-      user: {},
+      user: {},          // details of user being displayed
 
-      bcrumb: [
-        {url: ui.ngServer + '#/users', label: 'Users', target: '_parent'}
-      ],
+      deleteOpts: {},    // delete dialog details
 
-      deleteOpts: {},
-
-      userObjs: []
+      userObjs: []       // list of objects whose audit info is being queried
     });
 
     

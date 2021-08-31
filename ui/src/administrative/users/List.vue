@@ -178,11 +178,7 @@ export default {
           name: 'loginName',
           caption: 'Login Name',
           value: function(user) {
-            if (user.type == 'CONTACT') {
-              return '-';
-            }
-
-            return user.loginName;
+            return user.type == 'CONTACT' ?  '-' : user.loginName;
           },
         },
         { name: 'instituteName', caption: 'Institute' },
@@ -222,8 +218,7 @@ export default {
         },
         { name: 'activityStatus', type: 'dropdown', caption: 'Activity Status',
           listSource: {
-            selectProp: 'value',
-            displayProp: 'value',
+            selectProp: 'value', displayProp: 'value',
             options: [
               {value: 'Active'},
               {value: 'Archived'},
@@ -235,8 +230,7 @@ export default {
         },
         { name: 'type', type: 'dropdown', caption: 'Type',
           listSource: {
-            selectProp: 'name',
-            displayProp: 'caption',
+            selectProp: 'name', displayProp: 'caption',
             options: [
               { name: 'SUPER', caption: 'Super Admin' },
               { name: 'INSTITUTE', caption: 'Institute Admin' },
@@ -438,7 +432,7 @@ export default {
       let users = this.ctx.selectedUsers.map(user => ({emailAddress: user.rowObject.emailAddress}));
       if (users.length > 0) {
         this.underDev();
-        itemsSvc.ngSetItems('users', users);
+        // itemsSvc.ngSetItems('users', users);
         return;
       }
 

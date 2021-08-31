@@ -6,9 +6,7 @@
       </template>
 
       <span>
-        <span>
-          <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
-        </span>
+        <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
       </span>
     </PageHeader>
     <PageBody>

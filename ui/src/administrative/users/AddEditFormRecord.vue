@@ -2,11 +2,11 @@
 <template>
   <Panel>
     <template #header>
-      <span v-if="ctx.formDef">{{ctx.formDef.caption}}</span>
+      <span>{{ctx.formDef && ctx.formDef.caption}}</span>
     </template>
 
     <Form ref="deForm" :schema="ctx.formSchema" :data="ctx.record" @input="handleChange($event)">
-      <Button label="Save" @click="saveRecord" />
+      <Button label="Save"   @click="saveRecord" />
       <Button label="Cancel" @click="cancel" />
     </Form>
   </Panel>
@@ -25,7 +25,7 @@ import routerSvc from '@/common/services/Router.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['entity', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
+  props: ['entity', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
     Button,
@@ -45,23 +45,23 @@ export default {
         formSvc.getDefinition(props.formId).then(
           (formDef) => {
             let schema = { rows: [] };
-            let dvRec = {};
+            let dvRec = {}; // default values record
 
             formDef.rows.forEach(
               (row) => {
-                let rs = {fields: []};
+                let rowSchema = {fields: []};
                 row.forEach(
                   (field) => {
-                    let fs = fieldFactory.getFieldSchema(field);
-                    if (fs.type) {
-                      rs.fields.push(fs);
-                      if (fs.defaultValue) {
-                        dvRec[field.name] = fs.defaultValue;
+                    let fieldSchema = fieldFactory.getFieldSchema(field);
+                    if (fieldSchema.type) {
+                      rowSchema.fields.push(fieldSchema);
+                      if (fieldSchema.defaultValue) {
+                        dvRec[field.name] = fieldSchema.defaultValue;
                       }
                     }
                   }
                 );
-                schema.rows.push(rs);
+                schema.rows.push(rowSchema);
               }
             );
 
@@ -87,8 +87,8 @@ export default {
   },
 
   methods: {
-    handleChange: function(event) {
-      console.log(event);
+    handleChange: function(/* event */) {
+      // console.log(event);
     },
 
     saveRecord: function() {

@@ -7,11 +7,11 @@
 
     <template #content>
       <ul class="os-key-values os-one-col">
-        <li class="item">
+        <li class="item" v-if="ctx.auditTrail.createdBy">
           <strong class="key key-sm">Entered By</strong>
           <span class="value value-md">{{$filters.username(ctx.auditTrail.createdBy)}}</span>
         </li>
-        <li class="item">
+        <li class="item" v-if="ctx.auditTrail.createdOn">
           <strong class="key key-sm">Entered On</strong>
           <span class="value value-md">{{$filters.dateTime(ctx.auditTrail.createdOn)}}</span>
         </li>
@@ -27,7 +27,7 @@
           <strong class="key key-sm">Number of Revisions</strong>
           <span class="value value-md">
             <span>{{ctx.auditTrail.revisionsCount}}</span>
-            <a @click="showRevs">
+            <a @click="showRevs" v-if="ctx.auditTrail.revisionsCount > 0">
               <span>(View All)</span>
             </a>
           </span>
@@ -65,7 +65,6 @@
       <Button label="Done" type="primary" @click="closeRevs" />
     </template>
   </Dialog>
-
 </template>
 
 <script>
@@ -146,7 +145,4 @@ export default {
     }
   }
 }
-
 </script>
-
-

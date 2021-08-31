@@ -20,7 +20,7 @@
         <Form ref="userForm" :schema="ctx.addEditFs" :data="ctx.user" @input="handleUserChange($event)">
           <div>
             <Button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate"/>
-            <Button label="Update" v-if="!!ctx.user.id" @click="saveOrUpdate"/>
+            <Button label="Update" v-else @click="saveOrUpdate"/>
             <Button label="Cancel" @click="cancel"/>
           </div>
         </Form>
@@ -125,7 +125,7 @@ export default {
       userSvc.saveOrUpdate(this.ctx.user).then(
         function(result) {
           if (self.editProfile) {
-            routerSvc.ngGoto('home', {}, {reload: true});
+            routerSvc.ngGoto('home', {});
           } else {
             routerSvc.goto('UserOverview', {userId: result.id});
           }

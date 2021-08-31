@@ -2,7 +2,7 @@
   <div>
     <Grid>
       <GridColumn width="3">
-        <ListGroup :list="forms" :selected="ctx.selectedForm" @on-item-select="onSelect($event)">
+        <ListGroup :list="forms" :selected="ctx.selectedForm" @on-item-select="onFormSelect($event)">
           <template #header>
             <span>Forms</span>
           </template>
@@ -84,8 +84,7 @@
             </span>
           </span>
           <span v-else>
-            <pre v-if="!ctx.selectedRecord">{{ctx.selectedRecord}}</pre>
-            <FormRecordOverview v-else :record="ctx.record" />
+            <FormRecordOverview :record="ctx.record" />
           </span>
         </Panel>
       </GridColumn>
@@ -97,7 +96,7 @@
 
 <script>
 
-import {reactive, watchEffect} from 'vue';
+import { reactive, watchEffect } from 'vue';
 import { useRouter } from 'vue-router'
 
 import ListGroup from '@/common/components/ListGroup.vue';
@@ -113,7 +112,7 @@ import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['entity', 'forms', 'records', 'formId', 'formCtxtId', 'recordId'],
+  props: ['entity', 'forms', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
     ListGroup,
@@ -168,7 +167,7 @@ export default {
   },
 
   methods: {
-    onSelect: function(event, replace) {
+    onFormSelect: function(event, replace) {
       let form = event.item;
       let method = replace ? this.$router.replace : this.$router.push;
       method({
@@ -215,7 +214,7 @@ export default {
           let form = self.ctx.selectedForm;
           let idx = form.records.indexOf(record);
           form.records.splice(idx, 1);
-          self.onSelect({item: form}, true);
+          self.onFormSelect({item: form}, true);
         }
       );
     }

@@ -3,7 +3,7 @@ import http from '@/common/services/HttpClient.js';
 
 class Site {
 
-  getSites(filterOpts) {
+  async getSites(filterOpts) {
     return http.get('sites', filterOpts || {});
   }
 
