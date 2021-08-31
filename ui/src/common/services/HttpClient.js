@@ -1,6 +1,7 @@
 
 import axios from 'axios';
 import alertSvc from './Alerts.js';
+import routerSvc from './Router.js';
 
 class HttpClient {
   protocol = '';
@@ -83,6 +84,11 @@ class HttpClient {
       apiCall()
         .then(resp => resolve(resp.data))
         .catch(e => {
+          if (e.response.status == 401) {
+            routerSvc.ngGoto('', {logout: true});
+            return;
+          }
+
           let errors = e.response.data;
           if (errors instanceof Array) {
             let msg = errors.map(err => err.message + ' (' + err.code + ')').join(',');
