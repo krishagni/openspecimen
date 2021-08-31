@@ -10,7 +10,6 @@ class Authorization {
     this.userRights = [];
     return http.get('users/current-user-roles').then(
       (userRoles) => {
-        this.userRights = [];
         for (let userRole of userRoles) {
           let site = userRole.site ? userRole.site.name : null;
           let cp = userRole.collectionProtocol ? userRole.collectionProtocol.shortTitle : null;

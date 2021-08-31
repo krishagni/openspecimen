@@ -28,6 +28,9 @@ class Utility {
     return fn.apply(null, valuesList()); 
   }
 
+  //
+  // TODO: check the utility of this method
+  //
   eval(expr, vars) {
     return this.evaluator(expr, vars);
   }

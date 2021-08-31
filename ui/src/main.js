@@ -99,7 +99,9 @@ alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);
 
 let url = window.location.href;
-let params = new URLSearchParams(url.split('?')[1]);
+let urlParts = url.split('?')
+let query = urlParts.length > 1 ? urlParts[1] : '';
+let params = new URLSearchParams(query);
 
 app.config.globalProperties.$ui = ui;
 let server = ui.server || {};
@@ -145,66 +147,12 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
 
     ui.currentUser = currUser;
     ui.menuItems = [];
-
-    console.log(ui);
     app.use(router)
       .use(PrimeVue)
       .provide('ui', ui)
       .mount('#app');
   }
 );
-
-
-// window.parent.postMessage({op: 'getGlobalProps', requestor: 'vueapp'}, '*');
-// window.parent.postMessage({op: 'getAuthToken', requestor: 'vueapp'}, '*');
-// window.parent.postMessage({op: 'getUserDetails', requestor: 'vueapp'}, '*');
-// window.parent.postMessage({op: 'getAppMenuItems', requestor: 'vueapp'}, '*');
-// let count = 3;
-// window.addEventListener('message', function(event) {
-//   if (event.data.op == 'getGlobalProps') {
-//     ui.os = event.data.resp.os || {};
-// 
-//     let server = ui.os.server || {};
-//     http.protocol = server.secure ? 'https' : 'http';
-//     http.host = server.hostname;
-//     http.port = server.port;
-//     http.path = server.app || '..';
-//     if (http.path) {
-//       http.path += '/';
-//     }
-// 
-//     http.path += 'rest/ng'
-// 
-//     --count;
-//   } else if (event.data.op == 'getAuthToken') {
-//     let resp = event.data.resp;
-//     ui.token = resp.token;
-// 
-//     http.headers['X-OS-API-TOKEN'] = ui.token; // localStorage.getItem('osAuthToken');
-//     if (resp.impUserToken) {
-//       http.headers['X-OS-IMPERSONATE-USER'] = resp.impUserToken;
-//     } else {
-//       delete http.headers['X-OS-IMPERSONATE-USER'];
-//     }
-// 
-//     --count;
-//   } else if (event.data.op == 'getUserDetails') {
-//     Object.assign(ui, event.data.resp);
-//     --count;
-//   } else if (event.data.op == 'getAppMenuItems') {
-//     ui.menuItems = event.data.resp;
-//   } else if (event.data.op == 'getItems') {
-//     itemsSvc.setItems(event.data.type, event.data.items);
-//   }
-//     
-// 
-//   if (count == 0) {
-//     app.mount('#app')
-//     app.provide('ui', ui);
-//     count = -1;
-//   }
-// });
-
 
 //
 // listen for route changes

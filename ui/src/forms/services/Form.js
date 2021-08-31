@@ -13,6 +13,12 @@ class Form {
   async saveOrUpdateRecord(record) {
     record.appData = record.appData || {};
     let formId = record.appData.formId;
+    if (!formId) {
+      alert('Unknown form ID. Maybe a bug in the UI contact. Contact the system administrator');
+      alert(JSON.stringify(record));
+      return;
+    }
+
     if (record.id) {
       return http.put('forms/' + formId + '/data', record);
     } else {

@@ -65,7 +65,6 @@ class ExpressionUtil {
       return JSON.stringify(exprTree);
     } 
   }
-
 }
 
 export default new ExpressionUtil();

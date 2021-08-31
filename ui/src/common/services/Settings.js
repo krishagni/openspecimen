@@ -2,7 +2,7 @@
 import httpSvc from '@/common/services/HttpClient.js';
 
 class Settings {
-  getPasswordRules() {
+  async getPasswordRules() {
     return httpSvc.get('config-settings/password');
   }
 }

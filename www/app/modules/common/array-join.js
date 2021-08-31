@@ -9,7 +9,7 @@ angular.module('openspecimen')
         return collection;
       }
 
-      if(!fun) {
+      if (!fun) {
          return collection.join(", ");
       }
 

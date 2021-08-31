@@ -28,12 +28,7 @@ class FieldFactory {
   };
 
   getComponent(fieldType) {
-    let component = this.fieldTypes[fieldType];
-    if (!component) {
-      component = 'Unknown Component';
-    }
-
-    return component;
+    return this.fieldTypes[fieldType] || 'Unknown Component';
   }
 
   getValidationRules(fields) {
@@ -49,7 +44,7 @@ class FieldFactory {
         let fv = field.validations[rule];
         if (rule == 'requiredIf') {
           validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(fv.expr)));
-        } else if (field.showWhen) {
+        } else if (rule == 'required' && field.showWhen) {
           validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(field.showWhen)));
         } else if (rule == 'pattern') {
           validations[rule] = (value) => new RegExp(fv.expr).test(value);
