@@ -19,35 +19,19 @@ export default {
 
   computed: {
     buttonClass: function() {
-      if (this.size == 'small') {
-        return 'btn btn-xs';
-      }
-
-      return 'btn';
+      return this.size == 'small' ? 'btn btn-xs' : 'btn';
     },
 
     iconSize: function() {
-      if (this.size == 'small') {
-        return '0.6rem';
-      }
-
-      return '';
+      return this.size == 'small' ? '0.6rem' : '';
     },
 
     leftIconClass: function() {
-      if (this.label) {
-        return 'pad-right';
-      }
-
-      return '';
+      return this.label ? 'pad-right' : '';
     },
 
     rightIconClass: function() {
-      if (this.label) {
-        return 'pad-left';
-      }
-
-      return '';
+      return this.label ?  'pad-left' : '';
     }
   }
 }
@@ -94,5 +78,4 @@ button:hover {
   border-color: #0069d9;
   cursor: pointer;
 }
-
 </style>

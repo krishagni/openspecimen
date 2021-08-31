@@ -44,7 +44,7 @@ export default {
       if (this.$ui && this.$ui.global && this.$ui.global.appProps.deploy_env) {
         return this.$ui.global.appProps.deploy_env.toUpperCase();
       }
-      return null;
+      return 'UNKNOWN';
     },
 
     deploySiteUrl: function() {
