@@ -229,11 +229,13 @@ export default {
     },
 
     rowClick: function(row) {
-      if (row.originalEvent &&
-          row.originalEvent.target &&
-          row.originalEvent.target.className &&
-          row.originalEvent.target.className.indexOf('os-selection-cb') != -1) {
-        return;
+      let el = row.originalEvent.target;
+      while (el != null && el.tagName.toUpperCase() != 'TR') {
+        if (el.className.indexOf('os-selection-cb') != -1) {
+          return;
+        }
+
+        el = el.parentNode;
       }
 
       this.$emit('rowClicked', row.data.rowObject);
@@ -321,6 +323,15 @@ export default {
   right: 0px;
   overflow: auto;
   padding-right: 15px;
+}
+
+.os-table .results .results-inner .p-inline-message {
+  width: 100%;
+}
+
+.os-table .results .results-inner .p-inline-message span {
+  width: 100%;
+  text-align: left;
 }
 
 .os-table .filters {

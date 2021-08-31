@@ -68,4 +68,8 @@ export default {
     color: #999;
     opacity: 1;
   }
+
+  .os-input-text input {
+    width: 100%;
+  }
 </style>

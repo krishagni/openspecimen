@@ -9,13 +9,24 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
-        @focus="searchOptions"
-        @filter="searchOptions($event)">
-      </Dropdown>
+        @change="onChange"
+        @focus="loadOptions"
+        @filter="searchOptions($event)"
+      />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <span>Under construction</span>
+      <Dropdown
+        v-model="selected"
+        :options="ctx.options"
+        :option-label="displayProp"
+        :option-value="selectProp"
+        :filter="true"
+        :show-clear="showClear"
+        @change="onChange"
+        @focus="loadOptions"
+        @filter="searchOptions($event)"
+      />
     </div>
   </div>
 </template>
@@ -24,8 +35,11 @@
 import { reactive } from 'vue';
 import Dropdown from 'primevue/dropdown';
 
+import http from '@/common/services/HttpClient.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
+
 export default {
-  props: ['modelValue', 'listSource'],
+  props: ['modelValue', 'listSource', 'form'],
 
   emits: ['update:modelValue'],
 
@@ -34,14 +48,9 @@ export default {
   },
 
   setup() {
-    let ctx = reactive({
-      defOptions: null,
-      options: []
-    });
+    let ctx = reactive({ options: [] });
 
-    return {
-      ctx
-    }
+    return { ctx }
   },
 
   data() {
@@ -49,54 +58,106 @@ export default {
   },
 
   methods: {
-    searchOptions(event) {
-      let query = event && event.value;
-      if (!query) {
-        if (this.ctx.defOptions) {
-          this.ctx.options = this.ctx.defOptions;
-        } else {
-          if (this.listSource.options) {
-            this.ctx.defOptions = this.ctx.options = this.listSource.options;
-          } else if (typeof this.listSource.loadFn == 'function') {
-            let self = this;
-            this.listSource.loadFn({maxResults: 100}).then(
-              function(options) {
-                self.ctx.defOptions = self.ctx.options = options;
+    async loadOptions() {
+      if (this.ctx.optionsLoaded) {
+        return;
+      }
+
+      this.searchOptions();
+      this.ctx.optionsLoaded = true;
+    },
+
+    async searchOptions(event) {
+      let query = (event && event.value) || '';
+      query = query.toLowerCase();
+
+      let selectedVal = await this.selectedValue() || [];
+      if (this.listSource.options) {
+        this.ctx.options = this.dedup(selectedVal.concat(this.listSource.options));
+      } else if (typeof this.listSource.loadFn == 'function') {
+        let self = this;
+        this.listSource.loadFn({query: query, maxResults: 100}).then(
+          function(options) {
+            self.ctx.options = self.dedup(selectedVal.concat(options));
+          }
+        );
+      } else if (typeof this.listSource.apiUrl == 'string') {
+        let self = this;
+        let ls = this.listSource;
+
+        let params = {maxResults: 100};
+        params[ls.searchProp || 'query'] = query;
+        if (ls.queryParams) {
+          if (ls.queryParams.static) {
+            Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.static[name]);
+          }
+
+          if (ls.queryParams.dynamic) {
+            let form = this.form;
+            Object.keys(ls.queryParams.dynamic).forEach(
+              function(name) {
+                let expr = ls.queryParams.dynamic[name];
+                params[name] = exprUtil.eval(form, expr);
               }
             );
           }
         }
-      } else {
-        query = query.toLowerCase();
-        if (this.ctx.defOptions && this.ctx.defOptions.length < 100) {
-          this.ctx.options = this.filterOptions(this.ctx.defOptions, query);
-        } else {
-          if (this.listSource.options) {
-            this.ctx.options = this.filterOptions(this.listSource.options, query);
-          } else if (typeof this.listSource.loadFn == 'function') {
-            let self = this;
-            this.listSource.loadFn({query: query, maxResults: 100}).then(
-              function(options) {
-                self.ctx.options = options;
-              }
-            );
+
+        http.get(this.listSource.apiUrl, params).then(
+          function(options) {
+            self.ctx.options = self.dedup(selectedVal.concat(options));
           }
-        }
+        );
       }
     },
 
-    filterOptions(inputOptions, query) {
-      let self = this;
-      return (inputOptions || []).filter(
-        function(option) {
-          if (typeof option == 'object') {
-            return (option[self.listSource.displayProp] || '').toString().toLowerCase().indexOf(query) > -1 ||
-              (option[self.listSource.selectProp] || '').toString().toLowerCase().indexOf(query) > -1;
-          } else {
-            return (option || '').toString().toLowerCase().indexOf(query) > -1;
-          }
-        }
+    async selectedValue() {
+      if (!this.modelValue) {
+        return [];
+      }
+
+      if (typeof this.modelValue == 'object') {
+        return [this.modelValue];
+      }
+
+      this.cache = this.cache || {};
+      if (Object.prototype.hasOwnProperty.call(this.cache, this.modelValue)) {
+        return this.cache[this.modelValue];
+      }
+
+      let ls = this.listSource;
+      let searchOpts = {};
+      searchOpts[ls.searchProp || 'value'] = this.modelValue;
+
+      let selected = undefined;
+      if (ls.options) {
+        selected = ls.options.find((option) => option[ls.selectProp] == this.modelValue);
+        selected = (selected && [selected]) || [];
+      } else if (typeof ls.loadFn == 'function') {
+        selected = await ls.loadFn(searchOpts);
+      } else if (typeof ls.apiUrl == 'string') {
+        selected = await http.get(ls.apiUrl, searchOpts);
+      }
+
+      this.cache[this.modelValue] = selected;
+      return selected;
+    },
+
+    dedup(options) {
+      let ls = this.listSource;
+      let optionsMap = options.reduce(
+        (acc, e) => {
+          acc[e[ls.selectProp]] = e;
+          return acc;
+        },
+        {}
       );
+
+      return Object.keys(optionsMap).map((key) => optionsMap[key]);
+    },
+
+    onChange: function() {
+      this.optionSelected = true;
     }
   },
 
@@ -125,10 +186,32 @@ export default {
   },
 
   watch: {
-    selected(newVal, oldVal) {
-      if (!oldVal && !!newVal) {
-        this.searchOptions({value: newVal});
+    selected: function(newVal) {
+      if (!newVal) {
+        return;
       }
+
+      this.cache = this.cache || {};
+      this.cache[newVal[this.listSource.selectProp]] = newVal;
+    },
+
+    modelValue: async function() {
+      if (!this.optionSelected) {
+        let selectedVal = await this.selectedValue();
+        if (this.ctx.optionsLoaded && this.ctx.options) {
+          this.ctx.options = this.dedup(selectedVal.concat(this.ctx.options));
+        } else {
+          this.ctx.options = selectedVal;
+        }
+      }
+
+      this.optionSelected = false;
+    }
+  },
+
+  mounted() {
+    if (this.modelValue) {
+      this.selectedValue().then((val) => this.ctx.options = val);
     }
   }
 }
@@ -148,6 +231,10 @@ export default {
     border-bottom: 2px solid #ced4da;
     border-radius: 0px;
     box-shadow: none;
+  }
+
+  .os-dropdown :deep(.p-dropdown) {
+    width: 100%;
   }
 
   .os-dropdown .p-float-label :deep(.p-dropdown .p-inputtext) {

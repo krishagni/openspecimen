@@ -10,7 +10,9 @@ class UserResources {
 
   importOpts    = {resource: 'User', operations: ['Export Import']};
 
-  updateAllowed = authSvc.isAllowed({resource: 'User', operations: ['Update']});
+  isUpdateAllowed() {
+    return authSvc.isAllowed({resource: 'User', operations: ['Update']});
+  }
 }
 
 export default new UserResources();

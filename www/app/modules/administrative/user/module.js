@@ -49,7 +49,7 @@ angular.module('os.administrative.user',
         }
       })
       .state('user-addedit', {
-        url: '/user-addedit/:userId',
+        url: '/user-addedit/:userId?old',
         templateUrl: 'modules/administrative/user/addedit.html',
         resolve: {
           user: function($stateParams, User) {
@@ -61,10 +61,16 @@ angular.module('os.administrative.user',
           },
           users: function() {
             return [];
+          },
+          editProfile: function() {
+            return false;
           }
         },
         controller: 'UserAddEditCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
       .state('user-edit-profile', {
         url: '/user-edit-profile',
@@ -80,10 +86,16 @@ angular.module('os.administrative.user',
           },
           users: function() {
             return [];
+          },
+          editProfile: function() {
+            return true;
           }
         },
         controller: 'UserAddEditCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
       .state('user-bulk-edit', {
         url: '/bulk-edit-users',
@@ -96,10 +108,16 @@ angular.module('os.administrative.user',
             var users = ItemsHolder.getItems('users');
             ItemsHolder.setItems('users', undefined);
             return users;
+          },
+          editProfile: function() {
+            return false;
           }
         },
         controller: 'UserAddEditCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
       .state('user-import', {
         url: '/users-import?objectType',
@@ -335,13 +353,11 @@ angular.module('os.administrative.user',
       .state('user-password', {
         url: '/user-password-change/:userId',
         templateUrl: 'modules/administrative/user/password.html',
-        resolve: {
-          user: function($stateParams, User) {
-            return User.getById($stateParams.userId);
-          }
-        },
         controller: 'UserPasswordCtrl',
-        parent: 'user-root'
+        parent: 'user-root',
+        data: {
+          vueView: true
+        }
       })
 
       .state('user-groups', {

@@ -1,5 +1,5 @@
 {
-  "name": "ui",
+  "name": "OpenSpecimen",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,9 +11,12 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/vue-fontawesome": "^3.0.0-4",
+    "@vuelidate/core": "^2.0.0-alpha.21",
+    "@vuelidate/validators": "^2.0.0-alpha.18",
     "bootstrap": "^5.0.1",
     "core-js": "^3.6.5",
     "date-fns": "^2.21.3",
+    "jsep": "^1.0.1",
     "primeflex": "^2.0.0",
     "primeicons": "^4.1.0",
     "primevue": "^3.5.0",

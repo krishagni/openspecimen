@@ -1174,6 +1174,14 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			detail.setManageForms(input.getManageForms());
 		}
 
+		if (input.isAttrModified("dnd")) {
+			detail.setDnd(input.getDnd());
+		}
+
+		if (input.isAttrModified("timeZone")) {
+			detail.setTimeZone(input.getTimeZone());
+		}
+
 		if (input.isAttrModified("activityStatus")) {
 			detail.setActivityStatus(input.getActivityStatus());
 		}

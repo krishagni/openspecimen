@@ -377,37 +377,42 @@ osApp.config(function(
       };
     }
   })
-  .factory('VueApp', function($sce, $rootScope) {
-    var baseUrl = 'vue-app/#/';
+  .factory('VueApp', function($sce, $rootScope, $window) {
+    var baseUrl = 'ui-app/#/';
     // var baseUrl = 'http://localhost:8081/#/';
 
     function setVueView(state, params) {
-      var global = ui.os.global;
-      global.initVueApp = global.vueAppView = true;
-
-      var url = baseUrl + state + '?';
+      var url = baseUrl + state;
+      var query = '';
       angular.forEach(params,
         function(value, key) {
           if (value) {
-            url += key + '=' + value + '&';
+            if (query) {
+              query += '&';
+            }
+
+            query += key + '=' + value;
           }
         }
       );
 
-      $rootScope.vueUrl = $sce.trustAsResourceUrl(url);
-    }
+      if (baseUrl.indexOf('http') == 0) {
+        if (query) {
+          query += '&';
+        }
 
-    function unloadVueView() {
-      var global = ui.os.global;
+        query += 'token=' + $window.localStorage['osAuthToken'];
+      }
 
-      global.vueAppView = false;
-      $rootScope.vueUrl = null;
+      if (query) {
+        url += '?' + query;
+      }
+
+      window.location.href = $rootScope.vueUrl = $sce.trustAsResourceUrl(url);
     }
 
     return {
-      setVueView: setVueView,
-
-      unloadVueView: unloadVueView
+      setVueView: setVueView
     }
   })
   .run(function(
@@ -457,7 +462,6 @@ osApp.config(function(
     $rootScope.$on('$stateChangeSuccess',
       function(event, toState, toParams, fromState, fromParams) {
         $rootScope.state = toState;
-        VueApp.unloadVueView();
       }
     );
 
@@ -537,6 +541,17 @@ osApp.config(function(
         if (data.payload.type) {
           ItemsHolder.setItems(data.payload.type, data.payload.items);
         }
+      } else if (data.op == 'getItems') {
+        var items = ItemsHolder.getItems(data.payload.type);
+        ItemsHolder.setItems(data.payload.type, undefined);
+        window.frames['vueapp'].postMessage({op: 'getItems', resp: {type: data.payload.type, items: items}}, '*');
+      } else if (data.op == 'back') {
+        LocationChangeListener.back();
+      } else if (data.op == 'impersonate') {
+        $http.defaults.headers.common['X-OS-IMPERSONATE-USER'] = data.token;
+        $cookies.put('osImpersonateUser', data.token);
+        ui.os.global.impersonate = true;
+        $state.go('home', {}, {reload: true});
       }
     });
 

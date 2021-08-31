@@ -23,37 +23,47 @@
       <PageToolbar>
         <template #default>
           <span v-if="ctx.selectedUsers.length == 0 && !ctx.group">
-            <Button left-icon="plus" label="Create" @click="ngGoto('user-addedit', {userId: ''})" />
+            <Button left-icon="plus" label="Create"
+              @click="goto('UserAddEdit', {userId: -1})"
+              v-show-if-allowed="userResources.createOpts" />
 
             <Button left-icon="users" label="User Groups" @click="ngGoto('user-groups')" />
 
-            <Menu label="Import" :options="importOpts" />
+            <Menu label="Import" :options="importOpts" v-show-if-allowed="userResources.importOpts" />
 
             <Menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
 
-            <Menu label="More" :options="moreOpts" />
+            <Menu label="More" :options="moreOpts" v-show-if-allowed="institute" />
 
             <Button left-icon="question-circle" label="Help" @click="help" />
           </span>
 
           <span v-if="ctx.selectedUsers.length > 0">
-            <Button left-icon="edit" label="Edit" @click="bulkEdit" />
+            <Button left-icon="edit" label="Edit" @click="bulkEdit" v-show-if-allowed="userResources.updateOpts" />
 
-            <AssignGroup v-if="!ctx.group" @addToGroup="addToGroup" />
+            <AssignGroup v-if="!ctx.group" @addToGroup="addToGroup"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button v-if="ctx.group" left-icon="times" label="Remove from Group" @click="removeFromGroup"/>
+            <Button v-if="ctx.group" left-icon="times" label="Remove from Group" @click="removeFromGroup"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="archive" label="Archive" @click="archiveUsers" />
+            <Button left-icon="archive" label="Archive" @click="archiveUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="check" label="Reactivate" @click="reactivateUsers" />
+            <Button left-icon="check" label="Reactivate" @click="reactivateUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="trash" label="Delete" @click="deleteUsers" />
+            <Button left-icon="trash" label="Delete" @click="deleteUsers"
+              v-show-if-allowed="userResources.deleteOpts" />
 
-            <Button left-icon="lock" label="Lock" @click="lockUsers" />
+            <Button left-icon="lock" label="Lock" @click="lockUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="unlock" label="Unlock" @click="unlockUsers" />
+            <Button left-icon="unlock" label="Unlock" @click="unlockUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="thumbs-up" label="Approve" @click="approveUsers" />
+            <Button left-icon="thumbs-up" label="Approve" @click="approveUsers"
+              v-show-if-allowed="userResources.updateOpts" />
 
             <Menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
           </span>
@@ -161,13 +171,16 @@ export default {
           value: function (user) {
             return user.firstName + ' ' + user.lastName;
           },
-          href: function (user) {
-            return '../#/users/' + user.rowObject.id + '/overview';
-          },
-          hrefTarget: '_parent'
+          href: (user) => routerSvc.getUrl('UserOverview', {userId: user.rowObject.id})
         },
         { name: 'emailAddress', caption: 'Email Address' },
-        { name: 'loginName', caption: 'Login Name' },
+        {
+          name: 'loginName',
+          caption: 'Login Name',
+          value: function(user) {
+            return user.type == 'CONTACT' ?  '-' : user.loginName;
+          },
+        },
         { name: 'instituteName', caption: 'Institute' },
         { name: 'primarySite', caption: 'Primary Site' },
         {
@@ -175,7 +188,7 @@ export default {
           caption: 'Active Since',
           value: function (user) {
             if (user.creationDate) {
-              return format(new Date(user.creationDate), ui.os.global.dateFmt);
+              return format(new Date(user.creationDate), ui.global.locale.dateFmt);
             }
             return undefined;
           }
@@ -205,13 +218,19 @@ export default {
         },
         { name: 'activityStatus', type: 'dropdown', caption: 'Activity Status',
           listSource: {
-            options: ['Active', 'Archived', 'Expired', 'Locked', 'Pending']
+            selectProp: 'value', displayProp: 'value',
+            options: [
+              {value: 'Active'},
+              {value: 'Archived'},
+              {value: 'Expired'},
+              {value: 'Locked'},
+              {value: 'Pending'}
+            ]
           }
         },
         { name: 'type', type: 'dropdown', caption: 'Type',
           listSource: {
-            selectProp: 'name',
-            displayProp: 'caption',
+            selectProp: 'name', displayProp: 'caption',
             options: [
               { name: 'SUPER', caption: 'Super Admin' },
               { name: 'INSTITUTE', caption: 'Institute Admin' },
@@ -267,7 +286,7 @@ export default {
       if (this.ctx.group) {
         params.groupId = this.ctx.group.id;
       }
-      routerSvc.ngGoto(undefined, params, {notify: false});
+      routerSvc.goto('UsersList', {}, params);
 
       let opts = Object.assign({maxResults: pageSize}, filters);
       if (this.ctx.group) {
@@ -299,13 +318,13 @@ export default {
     },
 
     onUserRowClick: function(user) {
-      routerSvc.ngGoto('user-detail.overview', {userId: user.id});
+      routerSvc.goto('UserOverview', {userId: user.id});
     },
 
     bulkEdit: function() {
       let users = this.ctx.selectedUsers.map(user => ({id: user.rowObject.id}));
-      itemsSvc.ngSetItems('users', users);
-      routerSvc.ngGoto('user-bulk-edit');
+      itemsSvc.setItems('users', users);
+      routerSvc.goto('UserBulkEdit');
     },
 
     updateStatus: function(fromStatuses, toStatus, msg) {
@@ -342,11 +361,13 @@ export default {
       if (group) {
         userGroupSvc.addUsers(group, users).then(() => alertSvc.success('Users added to the group ' + group.name));
       } else {
-        itemsSvc.ngSetItems(
+        this.underDev();
+
+        /*itemsSvc.ngSetItems(
           'users',
           users.map(user => ({id: user.id, insituteId: user.instituteId, instituteName: user.instituteName}))
         );
-        routerSvc.ngGoto('user-group-addedit', {groupId: ''});
+        routerSvc.ngGoto('user-group-addedit', {groupId: ''});*/
       }
     },
 
@@ -409,24 +430,35 @@ export default {
 
     exportForms: function() {
       let users = this.ctx.selectedUsers.map(user => ({emailAddress: user.rowObject.emailAddress}));
-      itemsSvc.ngSetItems('users', users);
-      routerSvc.ngGoto('user-export-forms');
+      if (users.length > 0) {
+        this.underDev();
+        // itemsSvc.ngSetItems('users', users);
+        return;
+      }
+
+      routerSvc.ngGoto('users-export-forms');
     },
 
-    ngGoto: routerSvc.ngGoto,
+    ngGoto: (url, params) => routerSvc.ngGoto(url, params),
+
+    goto: (name, params) => routerSvc.goto(name, params),
 
     help: function() {
       window.open('http://help.openspecimen.org/user', '_blank').focus();
+    },
+
+    underDev: function() {
+      alertSvc.info('This function is under development. We sincerely regret the inconvenience caused to you!');
     }
   },
 
   computed: {
     importOpts: function() {
       return [
-        { icon: 'user', caption: 'Users', onSelect: () => this.ngGoto('user-import', {objectType: 'user'}) },
-        { icon: 'lock', caption: 'User Roles', onSelect: () => this.ngGoto('user-import', {objectType: 'userRoles'}) },
-        { icon: 'copy', caption: 'Forms', onSelect: () => this.ngGoto('user-import', {objectType: 'extensions'}) },
-        { icon: 'table', caption: 'View Past Imports', onSelect: () => this.ngGoto('user-import-jobs') }
+        { icon: 'user', caption: 'Users', onSelect: () => this.ngGoto('users-import', {objectType: 'user'}) },
+        { icon: 'lock', caption: 'User Roles', onSelect: () => this.ngGoto('users-import', {objectType: 'userRoles'}) },
+        { icon: 'copy', caption: 'Forms', onSelect: () => this.ngGoto('users-import', {objectType: 'extensions'}) },
+        { icon: 'table', caption: 'View Past Imports', onSelect: () => this.ngGoto('users-import-jobs') }
       ]
     },
 
@@ -443,7 +475,7 @@ export default {
         { icon: 'bullhorn', caption: 'New Announcement', onSelect: () => this.$refs.announcementDialog.open() }
       ];
 
-      if (this.ui.os.appProps.plugins.indexOf('os-extras') && authSvc.isAllowed('institute-admin')) {
+      if (this.ui.global.appProps.plugins.indexOf('os-extras') && authSvc.isAllowed('institute-admin')) {
         //
         // temporary. will go away when first class support for plugin views is implemented
         //

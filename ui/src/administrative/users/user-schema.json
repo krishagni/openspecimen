@@ -1,0 +1,184 @@
+[
+  {
+    "type": "radio",
+    "label": "Type",
+    "name": "type",
+    "optionsPerRow": 4,
+    "options": [
+      { "caption": "Super Administrator", "value": "SUPER" },
+      { "caption": "Institute Administrator", "value": "INSTITUTE" },
+      { "caption": "Contact", "value": "CONTACT" },
+      { "caption": "Regular", "value": "NONE" }
+    ]
+  },
+
+  {
+    "type": "text",
+    "label": "First Name",
+    "name": "firstName",
+    "validations": {
+      "required": {
+        "message": "First name is mandatory"
+      }
+    }
+  },
+
+  {
+    "type": "text",
+    "label": "Last Name",
+    "name": "lastName",
+    "validations": {
+      "required": {
+        "message": "Last name is mandatory"
+      }
+    }
+  },
+
+  {
+    "type": "text",
+    "label": "Email Address",
+    "name": "emailAddress",
+    "validations": {
+      "required": {
+        "message": "Email address is mandatory"
+      },
+      "email": {
+        "message": "Email address is invalid"
+      }
+    }
+  },
+
+  {
+    "type": "text",
+    "label": "Phone Number",
+    "name": "phoneNumber"
+  },
+
+  {
+    "type": "dropdown",
+    "label": "Domain Name",
+    "name": "domainName",
+    "listSource": {
+      "apiUrl": "auth-domains",
+      "selectProp": "name",
+      "displayProp": "name"
+    },
+    "showWhen": "type != 'CONTACT'",
+    "validations": {
+      "required": {
+        "message": "Domain name is mandatory"
+      }
+    }
+  },
+
+  {
+    "type": "text",
+    "label": "Login Name",
+    "name": "loginName",
+    "showWhen": "type != 'CONTACT'",
+    "validations": {
+      "required": {
+        "message": "Login name is mandatory"
+      }
+    }
+  },
+
+  {
+    "type": "dropdown",
+    "label": "Institute",
+    "name": "instituteName",
+    "listSource": {
+      "apiUrl": "institutes",
+      "selectProp": "name",
+      "displayProp": "name"
+    },
+    "validations": {
+      "required": {
+        "message": "Institute is mandatory"
+      }
+    }
+  },
+
+  {
+    "type": "dropdown",
+    "label": "Primary Site",
+    "name": "primarySite",
+    "showWhen": "!!instituteName",
+    "listSource": {
+      "apiUrl": "sites",
+      "selectProp": "name",
+      "displayProp": "name",
+      "searchProp": "name",
+      "queryParams": {
+        "dynamic": {
+          "institute": "instituteName"
+        }
+      }
+    }
+  },
+
+  {
+    "type": "dropdown",
+    "label": "Time Zone",
+    "name": "timeZone",
+    "listSource": {
+      "apiUrl": "time-zones",
+      "displayProp": "name",
+      "selectProp": "id"
+    }
+  },
+
+  {
+    "type": "radio",
+    "label": "Manage Forms?",
+    "name": "manageForms",
+    "optionsPerRow": 2,
+    "options": [
+      { "caption": "Yes", "value": true },
+      { "caption": "No", "value": false }
+    ],
+    "showWhen": "!type || type == 'NONE'"
+  },
+
+  {
+    "type": "radio",
+    "label": "Disable Notifications?",
+    "name": "dnd",
+    "optionsPerRow": 2,
+    "options": [
+      { "caption": "Yes", "value": true },
+      { "caption": "No", "value": false }
+    ]
+  },
+
+  {
+    "type": "radio",
+    "label": "API User?",
+    "name": "apiUser",
+    "showWhen": "type != 'CONTACT'",
+    "optionsPerRow": 2,
+    "options": [
+      { "caption": "Yes", "value": true },
+      { "caption": "No", "value": false }
+    ]
+  },
+
+  {
+    "type": "text",
+    "label": "IP Address",
+    "name": "ipRange",
+    "showWhen": "type != 'CONTACT' && apiUser == true",
+    "validations": {
+      "required": {
+        "message": "IP address is mandatory"
+      }
+    }
+  },
+
+  {
+    "type": "textarea",
+    "label": "Address",
+    "name": "address",
+    "rows": 2
+  }
+]

@@ -1,6 +1,7 @@
 
 import axios from 'axios';
 import alertSvc from './Alerts.js';
+import routerSvc from './Router.js';
 
 class HttpClient {
   protocol = '';
@@ -28,16 +29,12 @@ class HttpClient {
     return this.promise(() => axios.put(this.getUrl(url), data, this.config(params)));
   }
 
-  getUrl(url) {
-    let result = '';
-    if (this.host) {
-      result = this.protocol ? (this.protocol + '://') : 'https://';
-      result += this.host;
-      if (this.port) {
-        result += ':' + this.port;
-      }
-    }
+  async delete(url, data, params) {
+    return this.promise(() => axios.delete(this.getUrl(url), this.config(params), data));
+  }
 
+  getUrl(url) {
+    let result = this.getServerUrl();
     if (this.path) {
       result += this.path;
     }
@@ -47,6 +44,19 @@ class HttpClient {
     }
 
     result += url;
+    return result;
+  }
+
+  getServerUrl() {
+    let result = '';
+    if (this.host) {
+      result = this.protocol ? (this.protocol + '://') : 'https://';
+      result += this.host;
+      if (this.port) {
+        result += ':' + this.port;
+      }
+    }
+
     return result;
   }
 
@@ -74,6 +84,11 @@ class HttpClient {
       apiCall()
         .then(resp => resolve(resp.data))
         .catch(e => {
+          if (e.response.status == 401) {
+            routerSvc.ngGoto('', {logout: true});
+            return;
+          }
+
           let errors = e.response.data;
           if (errors instanceof Array) {
             let msg = errors.map(err => err.message + ' (' + err.code + ')').join(',');

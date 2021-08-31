@@ -1,0 +1,101 @@
+<template>
+  <div>
+    <ul class="os-key-values bg-col os-one-col" :class="{'vertical': ctx.verticalLayout}">
+      <li class="item" v-for="field in ctx.simpleFields" :key="field.udn">
+        <strong class="key key-sm strong">
+          <span v-html="field.caption"></span>
+        </strong>
+        <span class="value value-md">
+          <FormFieldValue :field="field" />
+        </span>
+      </li>
+    </ul>
+
+    <template v-for="sf in ctx.sfFields" :key="sf.udn">
+      <Section>
+        <template #title>
+          <span v-html="sf.caption"></span>
+        </template>
+        <template #content>
+          <table class="os-table muted-header os-border">
+            <thead>
+              <tr>
+                <th v-for="field in sf.value[0].fields" :key="field.udn">
+                  <span v-html="field.caption"></span>
+                </th>
+              </tr>
+            </thead>
+              <tbody class="os-table-body">
+              <tr class="row" v-for="(sfr, rowIdx) in sf.value" :key="rowIdx">
+                <td class="col" v-for="field in sfr.fields" :key="field.udn">
+                  <FormFieldValue :field="field" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+      </Section>
+    </template>
+  </div>
+</template>
+
+<script>
+import { reactive, watchEffect } from 'vue';
+
+import FormFieldValue from '@/forms/components/FormFieldValue.vue';
+import Section from '@/common/components/Section.vue';
+
+export default {
+
+  props: ['record'],
+
+  components: {
+    FormFieldValue,
+    Section
+  },
+
+  setup(props) {
+    let ctx = reactive({});
+
+    watchEffect(
+      () => {
+        let record = props.record;
+        if (!record) {
+          return;
+        }
+
+        let longerCaptionFields  = 0;
+        let totalFields = 0;
+
+        let simpleFields = [];
+        let sfFields = [];
+
+        record.fields.forEach(
+          (field) => {
+            if (field.type == 'subForm') {
+              if (field.value && field.value.length > 0) {
+                sfFields.push(field);
+              }
+
+              return;
+            }
+          
+            if (field.caption && field.caption.length >= 30) {
+              ++longerCaptionFields;
+            }
+
+            ++totalFields;
+            simpleFields.push(field);
+          }
+        );
+
+        ctx.verticalLayout = (longerCaptionFields * 100 / totalFields >= 30);
+        ctx.simpleFields = simpleFields;
+        ctx.sfFields = sfFields;
+      }
+    );
+
+    return { ctx };
+  }
+}
+</script>
