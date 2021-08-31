@@ -9,8 +9,6 @@
       <Button label="Save" @click="saveRecord" />
       <Button label="Cancel" @click="cancel" />
     </Form>
-
-    <pre> {{ ctx.formDef }} </pre>
   </Panel>
 </template>
 
@@ -23,6 +21,7 @@ import Form from '@/common/components/Form.vue';
 import Panel from '@/common/components/Panel.vue';
 
 import fieldFactory from '@/common/services/FieldFactory.js';
+import routerSvc from '@/common/services/Router.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
@@ -115,7 +114,7 @@ export default {
     },
 
     cancel: function() {
-      alert('cancel');
+      routerSvc.back();
     }
   }
 }

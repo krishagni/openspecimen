@@ -41,11 +41,26 @@ class ExpressionUtil {
       } else {
         return arg + exprTree.operator;
       }
+    } else if (exprTree.type == 'MemberExpression') {
+      let objectExpr = exprTree.property.name;
+      let object = exprTree.object;
+      while (object) {
+        if (object.type == 'MemberExpression') {
+          objectExpr += '.' + object.property.name;
+        } else if (object.type == 'Identifier') {
+          objectExpr += '.' + object.name;
+        }
+
+        object = object.object;
+      }
+
+      return 'this.fd(\'' + objectExpr.split('.').reverse().join('.') + '\')';
     } else if (exprTree.type == 'Identifier') {
       return 'this.fd(\'' + exprTree.name + '\')';
     } else if (exprTree.type == 'Literal') {
       return exprTree.raw;
     } else {
+      console.log(exprTree);
       console.log('Could not identify the expression type: ' + exprTree.type + ', ' + JSON.stringify(exprTree));
       return JSON.stringify(exprTree);
     } 

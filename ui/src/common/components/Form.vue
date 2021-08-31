@@ -23,8 +23,6 @@
         <slot></slot>
       </div>
     </div>
-
-    <pre> {{ ctx.formData }} </pre>
   </form>
 </template>
 
@@ -90,7 +88,20 @@ export default {
      let ctx = reactive({
        formData: props.data,
        fd: function(name) {
-         return ctx.formData[name];
+         let object = ctx.formData;
+         if (!name) {
+           return object;
+         }
+
+         let props = name.split('.');
+         for (let i = 0; i < props.length; ++i) {
+           if (!object) {
+             return undefined;
+           }
+           object = object[props[i]];
+         }
+
+         return object;
        }
      });
 
@@ -134,7 +145,20 @@ export default {
      },
 
      fd: function(name) {
-       return this.ctx.formData[name]
+       let object = this.ctx.formData;
+       if (!name) {
+         return object;
+       }
+
+       let props = name.split('.');
+       for (let i = 0; i < props.length; ++i) {
+         if (!object) {
+           return undefined;
+         }
+         object = object[props[i]];
+       }
+
+       return object;
      }
    },
 
