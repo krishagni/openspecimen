@@ -361,13 +361,8 @@ export default {
       if (group) {
         userGroupSvc.addUsers(group, users).then(() => alertSvc.success('Users added to the group ' + group.name));
       } else {
-        this.underDev();
-
-        /*itemsSvc.ngSetItems(
-          'users',
-          users.map(user => ({id: user.id, insituteId: user.instituteId, instituteName: user.instituteName}))
-        );
-        routerSvc.ngGoto('user-group-addedit', {groupId: ''});*/
+        itemsSvc.setItems('users', users);
+        routerSvc.goto('UserGroupAddEdit', {groupId: -1});
       }
     },
 

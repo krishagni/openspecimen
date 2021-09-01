@@ -66,7 +66,6 @@ import DeleteObject from '@/common/components/DeleteObject.vue';
 
 import listSchema from '@/administrative/user-groups/schemas/list.js';
 
-import alertSvc   from '@/common/services/Alerts.js';
 import routerSvc  from '@/common/services/Router.js';
 import userGrpSvc from '@/administrative/services/UserGroup.js';
 
@@ -131,7 +130,7 @@ export default {
     },
 
     editGroup: function(group) {
-      alertSvc.underDev(group);
+      routerSvc.goto('UserGroupAddEdit', {groupId: group.id}, {});
     },
 
     deleteGroup: function(group) {

@@ -105,6 +105,15 @@ const routes = [
         component: () => import(/* webpackChunkName: "user-groups" */ '../administrative/user-groups/List.vue'),
         props: (route) => ({filters: route.query.filters})
       },
+      {
+        path: 'user-group-addedit/:groupId',
+        name: 'UserGroupAddEdit',
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "user-groups" */ '../administrative/user-groups/AddEdit.vue'),
+        props: (route) => ({groupId: route.params && route.params.groupId})
+      },
     ]
   }
 ]

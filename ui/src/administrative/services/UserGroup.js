@@ -17,6 +17,14 @@ class UserGroup {
     return http.get('user-groups/' + id);
   }
 
+  async saveOrUpdate(group) {
+    if (!group.id || group.id == -1) {
+      return http.post('user-groups', group);
+    } else {
+      return http.put('user-groups/' + group.id, group);
+    }
+  }
+
   async deleteGroup(group) {
     return http.delete('user-groups/' + group.id);
   }
