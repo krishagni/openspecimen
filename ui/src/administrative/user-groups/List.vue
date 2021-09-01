@@ -44,6 +44,8 @@
           </ButtonGroup>
         </template>
       </ListView>
+
+      <DeleteObject ref="deleteGroup" :input="ctx.deleteGroupOpts" />
     </PageBody>
   </Page>
 </template>
@@ -60,6 +62,7 @@ import Button from '@/common/components/Button.vue';
 import ButtonGroup from '@/common/components/ButtonGroup.vue';
 import ListView from '@/common/components/ListView.vue';
 import ListSize from '@/common/components/ListSize.vue';
+import DeleteObject from '@/common/components/DeleteObject.vue';
 
 import listSchema from '@/administrative/user-groups/schemas/list.js';
 
@@ -78,7 +81,8 @@ export default {
     Button,
     ButtonGroup,
     ListView,
-    ListSize
+    ListSize,
+    DeleteObject
   },
 
   setup(props) {
@@ -88,6 +92,7 @@ export default {
       query: props.filters,
       pageSize: undefined,
       groupsCount: -1,
+      deleteGroupOpts: { }
     });
 
     return { ctx, listSchema };
@@ -99,13 +104,16 @@ export default {
     },
 
     loadGroups: function({filters, uriEncoding, pageSize}) {
-      this.ctx.loading = true;
       this.ctx.filterValues = filters;
       this.ctx.pageSize = pageSize;
 
       routerSvc.goto('UserGroupsList', {}, {filters: uriEncoding});
+      this.reloadGroups();
+    },
 
-      let opts = Object.assign({includeStats: true, maxResults: pageSize}, filters);
+    reloadGroups: function() {
+      this.ctx.loading = true;
+      let opts = Object.assign({includeStats: true, maxResults: this.ctx.pageSize}, this.ctx.filterValues || {});
       userGrpSvc.getUserGroups(opts).then(resp => {
         this.ctx.loading    = false;
         this.ctx.userGroups = resp;
@@ -127,7 +135,24 @@ export default {
     },
 
     deleteGroup: function(group) {
-      alertSvc.underDev(group);
+      Object.assign(
+        this.ctx.deleteGroupOpts,
+        {
+          type: 'User Group',
+          title: group.name,
+          dependents: () => new Promise((resolve) => resolve([])),
+          deleteObj: () => userGrpSvc.deleteGroup(group)
+        }
+      );
+
+      let self = this;
+      this.$refs.deleteGroup.execute().then(
+        (resp) => {
+          if (resp == 'deleted') {
+            self.reloadGroups();
+          }
+        }
+      );
     }
   },
 

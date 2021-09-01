@@ -37,6 +37,10 @@ class Router {
     router.go(-1);
   }
 
+  reload() {
+    router.go(router.currentRoute);
+  }
+
   getUrl(name, params, query) {
     let route = router.resolve({name: name, params: params, query: query});
     return route && route.href;
