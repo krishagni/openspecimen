@@ -31,7 +31,7 @@
         :filters="listSchema.filters"
         :query="ctx.query"
         :allowSelection="false"
-        :showRowActions="true"
+        :showRowActions="updateAllowed"
         :loading="ctx.loading"
         @filtersUpdated="loadGroups"
         @rowClicked="showGroupDetails"
@@ -66,6 +66,7 @@ import DeleteObject from '@/common/components/DeleteObject.vue';
 
 import listSchema from '@/administrative/user-groups/schemas/list.js';
 
+import authSvc    from '@/common/services/Authorization.js';
 import routerSvc  from '@/common/services/Router.js';
 import userGrpSvc from '@/administrative/services/UserGroup.js';
 
@@ -156,6 +157,9 @@ export default {
   },
 
   computed: {
+    updateAllowed: function() {
+      return authSvc.isAllowed({resource: 'User', operations: ['Update']})
+    }
   }
 }
 </script>
