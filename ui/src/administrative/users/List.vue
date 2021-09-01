@@ -27,7 +27,7 @@
               @click="goto('UserAddEdit', {userId: -1})"
               v-show-if-allowed="userResources.createOpts" />
 
-            <Button left-icon="users" label="User Groups" @click="ngGoto('user-groups')" />
+            <Button left-icon="users" label="User Groups" @click="goto('UserGroupsList')" />
 
             <Menu label="Import" :options="importOpts" v-show-if-allowed="userResources.importOpts" />
 
@@ -247,7 +247,7 @@ export default {
 
       usersCount: -1,
 
-      ugCrumb: [ {url: ui.ngServer + '#/user-groups', label: 'User Groups', target: '_parent'} ]
+      ugCrumb: [ { url: routerSvc.getUrl('UserGroupsList'), label: 'User Groups' } ]
     });
 
     if (props.groupId) {

@@ -30,6 +30,11 @@
               </span>
             </template>
           </column>
+          <column v-if="showRowActions">
+            <template #body="slotProps">
+              <slot name="rowActions" :rowObject="slotProps.data.rowObject"> </slot>
+            </template>
+          </column>
         </data-table>
       </div>
     </div>
@@ -102,7 +107,8 @@ export default {
     'filters',
     'query',
     'allowSelection',
-    'loading'
+    'loading',
+    'showRowActions'
   ],
 
   emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked'],

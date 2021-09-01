@@ -9,6 +9,10 @@ class UserGroup {
     return http.get('user-groups', params);
   }
 
+  getGroupsCount(filterOpts) {
+    return http.get('user-groups/count', filterOpts || {});
+  }
+
   getUserGroup(id) {
     return http.get('user-groups/' + id);
   }

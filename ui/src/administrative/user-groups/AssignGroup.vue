@@ -56,7 +56,7 @@ export default {
           },
           {
             label: 'Manage Groups',
-            command: () => routerSvc.ngGoto('user-groups')
+            command: () => routerSvc.goto('UserGroupsList')
           }
         ]
       }

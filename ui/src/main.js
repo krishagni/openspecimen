@@ -23,9 +23,9 @@ import http from '@/common/services/HttpClient.js';
 import authSvc from '@/common/services/Authorization.js';
 import settingSvc from '@/administrative/services/Setting.js';
 import userSvc from '@/administrative/services/User.js';
+import routerSvc from '@/common/services/Router.js';
 
 // import itemsSvc from '@/common/services/ItemsHolder.js';
-// import routerSvc from '@/common/services/Router.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
@@ -94,6 +94,9 @@ filters.arrayJoin = (value) => {
     return value;
   }
 }
+
+app.config.globalProperties.$goto =
+  (name, params, query) => routerSvc.goto(name, params, query);
 
 alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);

@@ -26,6 +26,10 @@ class Alerts {
   remove(id) {
     this.toastSvc.removeGroup(id);
   }
+
+  underDev() {
+    this.info('This function is under development. We sincerely regret the inconvenience caused to you!');
+  }
 }
 
 export default new Alerts();
