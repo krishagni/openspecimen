@@ -10,6 +10,15 @@ class ExpressionUtil {
   }
 
   eval(context, expr) {
+    if (context == undefined || context == null) {
+      return context;
+    } else if (context.fd == null || context.fd == undefined) {
+      context.fd = this.fd;
+    } else if (typeof context.fd != 'function') {
+      alert('Dev error - FD is not a function');
+      return;
+    }
+
     return new Function('return ' + this.parse(expr)).call(context);
   }
 
@@ -64,6 +73,23 @@ class ExpressionUtil {
       console.log('Could not identify the expression type: ' + exprTree.type + ', ' + JSON.stringify(exprTree));
       return JSON.stringify(exprTree);
     } 
+  }
+
+  fd(name) {
+    let object = this;
+    if (!name) {
+      return object;
+    }
+
+    let props = name.split('.');
+    for (let i = 0; i < props.length; ++i) {
+      if (!object) {
+        return undefined;
+      }
+      object = object[props[i]];
+    }
+
+    return object;
   }
 }
 

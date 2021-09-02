@@ -114,6 +114,14 @@ const routes = [
         component: () => import(/* webpackChunkName: "user-groups" */ '../administrative/user-groups/AddEdit.vue'),
         props: (route) => ({groupId: route.params && route.params.groupId})
       },
+
+
+      {
+        path: 'sites',
+        name: 'SitesList',
+        component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      }
     ]
   }
 ]
