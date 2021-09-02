@@ -30,6 +30,13 @@
               </span>
             </template>
           </column>
+          <column v-if="showRowActions">
+            <template #body="slotProps">
+              <div class="os-click-esc">
+                <slot name="rowActions" :rowObject="slotProps.data.rowObject"> </slot>
+              </div>
+            </template>
+          </column>
         </data-table>
       </div>
     </div>
@@ -102,7 +109,8 @@ export default {
     'filters',
     'query',
     'allowSelection',
-    'loading'
+    'loading',
+    'showRowActions'
   ],
 
   emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked'],
@@ -231,7 +239,9 @@ export default {
     rowClick: function(row) {
       let el = row.originalEvent.target;
       while (el != null && el.tagName.toUpperCase() != 'TR') {
-        if (el.className.indexOf('os-selection-cb') != -1) {
+        if (el.className &&
+          typeof el.className.indexOf == 'function' &&
+          (el.className.indexOf('os-selection-cb') != -1 || el.className.indexOf('os-click-esc') != -1)) {
           return;
         }
 

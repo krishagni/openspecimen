@@ -56,7 +56,7 @@ export default {
           },
           {
             label: 'Manage Groups',
-            command: () => routerSvc.ngGoto('user-groups')
+            command: () => routerSvc.goto('UserGroupsList')
           }
         ]
       }
@@ -71,7 +71,7 @@ export default {
         return ctx.defGroups.filter(group => group.name.toLowerCase().indexOf(searchTerm.toLowerCase()) != -1);
       }
 
-      return userGroupSvc.getUserGroups({query: searchTerm}).then(
+      return userGroupSvc.getGroups({query: searchTerm}).then(
         groups => {
           if (!searchTerm) {
             ctx.defGroups = groups;
