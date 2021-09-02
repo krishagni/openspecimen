@@ -16,7 +16,14 @@
     </PageHeader>
     <PageBody>
       <PageToolbar>
-        <template #default> </template>
+        <template #default>
+          <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
+          </span>
+          <span v-else>
+            <Button left-icon="trash"    label="Delete" @click="deleteSites" />
+            <Button left-icon="download" label="Export" @click="exportSites" />
+          </span>
+        </template>
 
         <template #right>
           <Button left-icon="search" label="Search" @click="openSearch" />
@@ -31,9 +38,16 @@
         :allowSelection="true"
         :loading="ctx.loading"
         @filtersUpdated="loadSites"
+        @selectedRows="onSitesSelection"
         @rowClicked="showSiteDetails"
         ref="listView"
       />
+
+      <ConfirmDelete ref="deleteDialog">
+        <template #message>
+          <span>Are you sure you want to delete the selected sites?</span>
+        </template>
+      </ConfirmDelete>
     </PageBody>
   </Page>
 </template>
@@ -47,10 +61,12 @@ import PageToolbar from '@/common/components/PageToolbar.vue';
 import ListView    from '@/common/components/ListView.vue';
 import ListSize    from '@/common/components/ListSize.vue';
 import Button      from '@/common/components/Button.vue';
+import ConfirmDelete from '@/common/components/ConfirmDelete.vue';
 
 import listSchema from './schemas/list.js';
 
 import alertSvc   from '@/common/services/Alerts.js';
+import exportSvc  from '@/common/services/ExportService.js';
 import routerSvc  from '@/common/services/Router.js';
 import siteSvc    from '@/administrative/services/Site.js';
 
@@ -64,7 +80,8 @@ export default {
     PageToolbar,
     ListView,
     ListSize,
-    Button
+    Button,
+    ConfirmDelete
   },
 
   data() {
@@ -108,8 +125,36 @@ export default {
       siteSvc.getSitesCount(opts).then((resp) => this.ctx.sitesCount = resp.count);
     },
 
+    onSitesSelection: function(selection) {
+      this.ctx.selectedSites = (selection || []).map((row) => row.rowObject.site);
+    },
+
     showSiteDetails: function() {
       alertSvc.underDev();
+    },
+
+    deleteSites: function() {
+      let siteIds = (this.ctx.selectedSites || []).map((site) => site.id);
+      if (siteIds.length <= 0) {
+        return;
+      }
+
+      let self = this;
+      this.$refs.deleteDialog.open().then(
+        () => {
+          siteSvc.bulkUpdate({detail: {activityStatus: 'Disabled'}, ids: siteIds}).then(
+            function(saved) {
+              alertSvc.success(saved.length + (saved.length != 1 ? ' sites ' : ' site ') + ' deleted');
+              self.$refs.listView.reload();
+            }
+          );
+        }
+      );
+    },
+
+    exportSites: function() {
+      let siteIds = this.ctx.selectedSites.map(site => site.id);
+      exportSvc.exportRecords({objectType: 'site', recordIds: siteIds});
     }
   }
 }
