@@ -213,7 +213,7 @@ export default {
           listSource: {
             displayProp: 'name',
             selectProp: 'name',
-            loadFn: (opts) => userGrpSvc.getUserGroups(opts)
+            loadFn: (opts) => userGrpSvc.getGroups(opts)
           }
         },
         { name: 'activityStatus', type: 'dropdown', caption: 'Activity Status',
@@ -256,7 +256,7 @@ export default {
       //
       ctx.filters.splice(2, 2);
 
-      userGrpSvc.getUserGroup(props.groupId)
+      userGrpSvc.getGroup(props.groupId)
         .then(group => {
           ctx.group = group;
           ctx.inited = true;

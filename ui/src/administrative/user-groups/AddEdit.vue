@@ -13,8 +13,7 @@
     <PageBody>
       <Form ref="groupForm" :schema="ctx.addEditFs" :data="ctx.group" @input="handleUserChange($event)">
         <div>
-          <Button label="Create" v-if="!ctx.group.id" @click="saveOrUpdate"/>
-          <Button label="Update" v-else @click="saveOrUpdate"/>
+          <Button :label="!ctx.group.id ? 'Create' : 'Update'" @click="saveOrUpdate"/>
           <Button label="Cancel" @click="cancel"/>
         </div>
       </Form>
@@ -65,13 +64,11 @@ export default {
         {url: routerSvc.getUrl('UserGroupsList'), label: 'User Groups'}
       ],
 
-      addEditFs: {rows: []},
-
-      bulkEditFs: {rows: []}
+      addEditFs: {rows: []}
     });
 
     if (props.groupId && +props.groupId > 0) {
-      userGrpSvc.getUserGroup(+props.groupId).then(group => ctx.group = group);
+      userGrpSvc.getGroup(+props.groupId).then(group => ctx.group = group);
     } else {
       let users = itemsSvc.getItems('users');
       itemsSvc.clearItems();
@@ -116,7 +113,7 @@ export default {
       let toSave = this.ctx.group;
       userGrpSvc.saveOrUpdate(toSave).then(
         (savedGroup) => {
-          let action  = !toSave.id || toSave.id == -1 ? ' created!' : ' updated!'
+          let action  = !toSave.id ? ' created!' : ' updated!'
           alertSvc.success('User group ' + savedGroup.name + action);
           routerSvc.back();
         }

@@ -114,7 +114,7 @@ export default {
     reloadGroups: function() {
       this.ctx.loading = true;
       let opts = Object.assign({includeStats: true, maxResults: this.ctx.pageSize}, this.ctx.filterValues || {});
-      userGrpSvc.getUserGroups(opts).then(resp => {
+      userGrpSvc.getGroups(opts).then(resp => {
         this.ctx.loading    = false;
         this.ctx.userGroups = resp;
       });

@@ -3,7 +3,7 @@ import http from '@/common/services/HttpClient.js';
 
 class UserGroup {
 
-  async getUserGroups(filterOpts, pageOpts) {
+  async getGroups(filterOpts, pageOpts) {
     let params = Object.assign({}, filterOpts || {});
     params = Object.assign(params, pageOpts || {});
     return http.get('user-groups', params);
@@ -13,7 +13,7 @@ class UserGroup {
     return http.get('user-groups/count', filterOpts || {});
   }
 
-  async getUserGroup(id) {
+  async getGroup(id) {
     return http.get('user-groups/' + id);
   }
 
