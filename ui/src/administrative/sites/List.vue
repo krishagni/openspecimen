@@ -18,9 +18,18 @@
       <PageToolbar>
         <template #default>
           <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
+            <Button left-icon="plus" label="Create" @click="createSite" />
+
+            <Menu label="Import" :options="importOpts" />
+
+            <Button left-icon="download" label="Export" @click="exportSites" />
+
+            <ButtonLink left-icon="question-circle" label="Help"
+              url="https://help.openspecimen.org/sites" new-tab="true" />
           </span>
           <span v-else>
             <Button left-icon="trash"    label="Delete" @click="deleteSites" />
+
             <Button left-icon="download" label="Export" @click="exportSites" />
           </span>
         </template>
@@ -61,6 +70,8 @@ import PageToolbar from '@/common/components/PageToolbar.vue';
 import ListView    from '@/common/components/ListView.vue';
 import ListSize    from '@/common/components/ListSize.vue';
 import Button      from '@/common/components/Button.vue';
+import ButtonLink  from '@/common/components/ButtonLink.vue';
+import Menu        from '@/common/components/Menu.vue';
 import ConfirmDelete from '@/common/components/ConfirmDelete.vue';
 
 import listSchema from './schemas/list.js';
@@ -81,6 +92,8 @@ export default {
     ListView,
     ListSize,
     Button,
+    ButtonLink,
+    Menu,
     ConfirmDelete
   },
 
@@ -90,10 +103,16 @@ export default {
         sites: [],
         sitesCount: -1,
         loading: true,
-        query: this.filters
+        query: this.filters,
+        selectedSites: []
       },
 
-      listSchema
+      listSchema,
+
+      importOpts: [
+        { icon: 'hospital', caption: 'Sites',             onSelect: () => routerSvc.ngGoto('sites-import') },
+        { icon: 'table',    caption: 'View Past Imports', onSelect: () => routerSvc.ngGoto('sites-import-jobs') }
+      ]
     };
   },
 
@@ -134,7 +153,7 @@ export default {
     },
 
     deleteSites: function() {
-      let siteIds = (this.ctx.selectedSites || []).map((site) => site.id);
+      let siteIds = this.ctx.selectedSites.map((site) => site.id);
       if (siteIds.length <= 0) {
         return;
       }
@@ -155,6 +174,10 @@ export default {
     exportSites: function() {
       let siteIds = this.ctx.selectedSites.map(site => site.id);
       exportSvc.exportRecords({objectType: 'site', recordIds: siteIds});
+    },
+
+    createSite: function() {
+      alertSvc.underDev();
     }
   }
 }
