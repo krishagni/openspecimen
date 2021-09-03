@@ -29,6 +29,15 @@ class Site {
 
     return http.put('sites/bulk-update', {detail: detail, ids: ids});
   }
+
+  async delete(site) {
+    return http.delete('sites/' + site.id);
+  }
+
+  async getDependents(site) {
+    return http.get('sites/' + site.id + '/dependent-entities');
+  }
+
 }
 
 export default new Site();

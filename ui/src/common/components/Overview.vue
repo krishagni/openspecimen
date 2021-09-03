@@ -23,6 +23,7 @@
 import { reactive, watchEffect } from 'vue';
 
 import Section from '@/common/components/Section.vue';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 
 export default {
   props: ['object', 'schema'],
@@ -39,9 +40,15 @@ export default {
     watchEffect(() => {
       let simpleFields = [], textAreaFields = [];
       for (let field of props.schema) {
-        let value = props.object[field.name];
+        let value = exprUtil.getValue(props.object, field.name); // props.object[field.name];
         if (value === null || value === undefined || value === '') {
           value = '-';
+        } else if (field.type == 'user') {
+          if (value instanceof Array) {
+            value = value.map(user => user.firstName + ' ' + user.lastName).join(', ') || '-';
+          } else {
+            value = value.firstName + ' ' + value.lastName;
+          }
         } else if (field.options instanceof Array) {
           let option = field.options.find((option) => option.value == value);
           if (option) {

@@ -127,6 +127,19 @@ const routes = [
         name: 'SiteAddEdit',
         component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/AddEdit.vue'),
         props: (route) => ({siteId: route.params && route.params.siteId})
+      },
+      {
+        path: 'sites/:siteId',
+        name: 'SiteDetail',
+        component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Detail.vue'),
+        props: (route) => ({siteId: route.params && route.params.siteId}),
+        children: [
+          {
+            path: 'overview',
+            name: 'SiteOverview',
+            component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Overview.vue')
+          }
+        ]
       }
     ]
   }

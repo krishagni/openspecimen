@@ -95,7 +95,7 @@ export default {
       siteSvc.saveOrUpdate(this.dataCtx.site).then(
         function(savedSite) {
           alertSvc.success('Site ' + savedSite.name + ' saved!');
-          routerSvc.ngGoto('sites/' + savedSite.id + '/overview');
+          routerSvc.goto('SiteOverview', {siteId: savedSite.id});
         }
       );
     },

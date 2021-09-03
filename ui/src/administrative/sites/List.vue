@@ -148,8 +148,8 @@ export default {
       this.ctx.selectedSites = (selection || []).map((row) => row.rowObject.site);
     },
 
-    showSiteDetails: function() {
-      alertSvc.underDev();
+    showSiteDetails: function(row) {
+      this.$goto('SiteOverview', {siteId: row.site.id}, {});
     },
 
     deleteSites: function() {
@@ -174,10 +174,6 @@ export default {
     exportSites: function() {
       let siteIds = this.ctx.selectedSites.map(site => site.id);
       exportSvc.exportRecords({objectType: 'site', recordIds: siteIds});
-    },
-
-    createSite: function() {
-      alertSvc.underDev();
     }
   }
 }
