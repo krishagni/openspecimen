@@ -121,6 +121,12 @@ const routes = [
         name: 'SitesList',
         component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/List.vue'),
         props: (route) => ({filters: route.query.filters})
+      },
+      {
+        path: 'site-addedit/:siteId',
+        name: 'SiteAddEdit',
+        component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/AddEdit.vue'),
+        props: (route) => ({siteId: route.params && route.params.siteId})
       }
     ]
   }

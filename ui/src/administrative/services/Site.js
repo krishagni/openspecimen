@@ -10,6 +10,18 @@ class Site {
     return http.get('sites/count', filterOpts || {});
   }
 
+  async getSite(id) {
+    return http.get('sites/' + id);
+  }
+
+  async saveOrUpdate(site) {
+    if (!site.id) {
+      return http.post('sites', site);
+    } else {
+      return http.put('sites/' + site.id, site);
+    }
+  }
+
   async bulkUpdate({detail, ids}) {
     if (!ids || ids.length == 0) {
       return [];

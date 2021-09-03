@@ -6,10 +6,10 @@
         <div class="field">
           <os-label>{{field.label}}</os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
-            v-model="ctx.formData[field.name]" v-os-tooltip.bottom="field.tooltip"
+            v-model="formModel[field.name]" v-os-tooltip.bottom="field.tooltip"
             :form="ctx" @update:model-value="handleInput(field)">
           </component>
-          <div v-if="v$.ctx.formData[field.name] && v$.ctx.formData[field.name].$error">
+          <div v-if="v$.formModel[field.name] && v$.formModel[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
           </div>
         </div>
@@ -113,9 +113,10 @@ export default {
 
    methods: {
      handleInput: function(field) {
+       exprUtil.setValue(this.ctx.formData, field.name, this.formModel[field.name]);
        this.$emit('input', {field: field, data: this.ctx.formData})
-       if (this.v$.ctx.formData[field.name]) {
-         this.v$.ctx.formData[field.name].$touch();
+       if (this.v$.formModel[field.name]) {
+         this.v$.formModel[field.name].$touch();
        }
 
        this.$emit('form-validity', {invalid: this.v$.$invalid});
@@ -171,9 +172,7 @@ export default {
      }
 
      return {
-       ctx: {
-         formData: fieldFactory.getValidationRules(fields)
-       }
+       formModel: fieldFactory.getValidationRules(fields)
      }
    },
 
@@ -207,12 +206,26 @@ export default {
        return result;
      },
 
+     //
+     // TODO: Is this efficient?
+     //
+     formModel: function() {
+       let model = {};
+       for (let row of this.schema.rows) {
+         for (let field of row.fields) {
+           model[field.name] = exprUtil.getValue(this.ctx.formData, field.name);
+         }
+       }
+
+       return model;
+     },
+
      errorMessages: function() {
        let result = {};
 
        for (let row of this.schema.rows) {
          for (let field of row.fields) {
-           let validators = this.v$.ctx.formData && this.v$.ctx.formData[field.name];
+           let validators = this.v$.formModel && this.v$.formModel[field.name];
            if (!validators) {
              continue;
            }

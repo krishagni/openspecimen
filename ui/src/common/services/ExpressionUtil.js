@@ -77,6 +77,7 @@ class ExpressionUtil {
 
   fd(name) {
     let object = this;
+
     if (!name) {
       return object;
     }
@@ -90,6 +91,36 @@ class ExpressionUtil {
     }
 
     return object;
+  }
+
+  getValue(object, name) {
+    if (!name) {
+      return object;
+    }
+
+    let props = name.split('.');
+    for (let i = 0; i < props.length; ++i) {
+      if (!object) {
+        return undefined;
+      }
+      object = object[props[i]];
+    }
+
+    return object;
+  }
+
+  setValue(object, name, value) {
+    if (!name) {
+      return;
+    }
+
+    object = object || {};
+    let props = name.split('.');
+    for (let i = 0; i < props.length - 1; ++i) {
+      object = object[props[i]] || {};
+    }
+
+    object[props[props.length - 1]] = value;
   }
 }
 

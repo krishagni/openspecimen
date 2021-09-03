@@ -29,12 +29,17 @@ export default {
           );
 
           if (opts.value || opts.value == 0) {
+
             try {
               let id = parseInt(opts.value);
-              return http.get('permissible-values/v/' + id).then((pv) => [pv]);
+              if (!isNaN(id)) {
+                return http.get('permissible-values/v/' + id).then((pv) => [pv]);
+              }
             } catch {
-              return http.get('permissible-values/v', opts);
+              console.log('PvDropdown: Error getting value: ' + opts.value);
             }
+
+            return http.get('permissible-values/v', opts);
           } else {
             return http.get('permissible-values/v', opts);
           }

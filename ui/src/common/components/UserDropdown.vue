@@ -1,18 +1,25 @@
 
 <template>
-  <Dropdown v-model="inputValue" :list-source="listSource" />
+  <span v-if="multiple">
+    <MultiSelectDropdown v-model="inputValue" :list-source="listSource" />
+  </span>
+  <span v-else>
+    <Dropdown v-model="inputValue" :list-source="listSource" />
+  </span>
 </template>
 
 <script>
 import Dropdown from '@/common/components/Dropdown.vue';
+import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 
 import http from '@/common/services/HttpClient.js';
 
 export default {
-  props: ['modelValue', 'selectProp'],
+  props: ['modelValue', 'selectProp', 'multiple'],
 
   components: {
-    Dropdown
+    Dropdown,
+    MultiSelectDropdown
   },
 
   data() {
@@ -21,20 +28,13 @@ export default {
         loadFn: (opts) => {
           opts = opts || {maxResults: 100};
           if (opts.value) {
-            return http.get('users/' + opts.value).then(
-              (user) => [ {id: user.id, name: user.firstName + ' ' + user.lastName} ]
-            );
+            return http.get('users/' + opts.value).then((user) => [user]);
           } else {
-            return http.get('users', Object.assign({searchString: opts.query || ''}, opts)).then(
-              (users) => {
-                users.forEach((user) => user.name = user.firstName + ' ' + user.lastName);
-                return users;
-              }
-            );
+            return http.get('users', Object.assign({searchString: opts.query || ''}, opts));
           }
         },
         selectProp: this.selectProp,
-        displayProp: 'name'
+        displayProp: (user) => user.firstName + ' ' + user.lastName
       }
     }
   },

@@ -18,7 +18,7 @@
       <PageToolbar>
         <template #default>
           <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
-            <Button left-icon="plus" label="Create" @click="createSite" />
+            <Button left-icon="plus" label="Create" @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
 
             <Menu label="Import" :options="importOpts" />
 

@@ -142,7 +142,8 @@ export default {
 
       let selected = undefined;
       if (ls.options) {
-        selected = ls.options.filter((option) => toGet.some((testItem) => option[ls.selectProp] == testItem));
+        let selectProp = ls.selectProp || 'id';
+        selected = ls.options.filter((option) => toGet.some((testItem) => option[selectProp] == testItem));
       } else if (typeof ls.loadFn == 'function') {
         selected = await ls.loadFn(searchOpts);
       } else if (typeof ls.apiUrl == 'string') {
@@ -150,7 +151,7 @@ export default {
       }
 
       if (selected instanceof Array) {
-        selected.forEach((item) => this.cache[item[ls.selectProp]] = item);
+        selected.forEach((item) => this.cache[item[ls.selectProp || 'id']] = item);
       }
 
       let indices = {};
@@ -159,15 +160,18 @@ export default {
       }
 
       let result = cached.concat(selected);
-      result.sort((e1, e2) => indices[e1[ls.selectProp]] - indices[e2[ls.selectProp]]);
+      result.sort((e1, e2) => indices[e1[ls.selectProp || 'id']] - indices[e2[ls.selectProp || 'id']]);
       return result;
     },
 
     dedup(options) {
-      let ls = this.listSource;
+      let selectProp = this.listSource.selectProp || 'id';
       let optionsMap = options.reduce(
         (acc, e) => {
-          acc[e[ls.selectProp]] = e;
+          if (!acc[e[selectProp]]) {
+            acc[e[selectProp]] = e;
+          }
+
           return acc;
         },
         {}
@@ -208,7 +212,11 @@ export default {
   watch: {
     selected: function(newVal) {
       this.cache = this.cache || {};
-      newVal.forEach((item) => this.cache[item[this.listSource.selectProp]] = item);   
+      if (!newVal) {
+        return;
+      }
+
+      newVal.forEach((item) => this.cache[item[this.listSource.selectProp || 'id']] = item);
     },
 
     modelValue: async function() {
