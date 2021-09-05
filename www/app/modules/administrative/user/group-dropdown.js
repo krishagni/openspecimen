@@ -28,7 +28,8 @@ angular.module('os.administrative.user')
       scope: true,
       replace: true,
       link : linker,
-      template: '<os-select refresh="searchGroups($select.search)" list="groups" display-prop="name"> ' +
-                '</os-select>'
+      template:
+        '<os-select refresh="searchGroups($select.search)" list="groups" display-prop="name" append-to-body="true"> ' +
+        '</os-select>'
     };
   });

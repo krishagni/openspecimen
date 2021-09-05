@@ -1,4 +1,5 @@
-<div>
+<form name="queryFolderForm" class="os-assign-query-folder-modal"
+  os-form-validator="queryFolderForm" validator="queryFolderFormValidator" novalidate>
   <div class="os-modal-header">
     <span ng-if="!folder.id" translate="queries.new_query_folder">New Query Folder</span>
     <span ng-if="!!folder.id" translate="queries.update_query_folder">Update Query Folder</span>
@@ -78,4 +79,4 @@
       </span>
     </button>
   </div> 
-</div>
+</form>
