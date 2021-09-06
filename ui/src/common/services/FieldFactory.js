@@ -8,23 +8,23 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 class FieldFactory {
 
   fieldTypes = {
-    dropdown: 'Dropdown',
-    multiselect: 'MultiSelectDropdown',
-    radio: 'RadioButton',
-    checkbox: 'Checkbox',
-    booleanCheckbox: 'BooleanCheckbox',
-    text: 'InputText',
-    textarea: 'Textarea',
-    password: 'Password',
-    number: 'InputNumber',
-    datePicker: 'DatePicker',
-    fileUpload: 'FileUpload',
-    signature: 'SignaturePad',
-    user: 'UserDropdown',
-    pv: 'PvDropdown',
-    site: 'SiteDropdown',
-    storageContainer: 'StorageContainerDropdown',
-    subform: 'Subform'
+    dropdown: 'os-dropdown',
+    multiselect: 'os-multi-select-dropdown',
+    radio: 'os-radio-button',
+    checkbox: 'os-checkbox',
+    booleanCheckbox: 'os-boolean-checkbox',
+    text: 'os-input-text',
+    textarea: 'os-textarea',
+    password: 'os-password',
+    number: 'os-input-number',
+    datePicker: 'os-date-picker',
+    fileUpload: 'os-file-upload',
+    signature: 'os-signature-pad',
+    user: 'os-user-dropdown',
+    pv: 'os-pv-dropdown',
+    site: 'os-site-dropdown',
+    storageContainer: 'os-containers-dropdown',
+    subform: 'os-subform'
   };
 
   getComponent(fieldType) {

@@ -35,52 +35,8 @@ import alertSvc from '@/common/services/Alerts.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 
-import Dropdown from '@/common/components/Dropdown.vue';
-import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
-import DatePicker from '@/common/components/DatePicker.vue';
-import InputNumber from '@/common/components/InputNumber.vue';
-import InputText from '@/common/components/InputText.vue';
-import Password from '@/common/components/Password.vue';
-import RadioButton from '@/common/components/RadioButton.vue';
-import BooleanCheckbox from '@/common/components/BooleanCheckbox.vue';
-import Checkbox from '@/common/components/Checkbox.vue';
-import Textarea from '@/common/components/Textarea.vue';
-import FileUpload from '@/common/components/FileUpload.vue';
-import SignaturePad from '@/common/components/SignaturePad.vue';
-import UserDropdown from '@/common/components/UserDropdown.vue';
-import PvDropdown from '@/common/components/PvDropdown.vue';
-import SiteDropdown from '@/common/components/SiteDropdown.vue';
-import StorageContainerDropdown from '@/common/components/StorageContainerDropdown.vue';
-import Subform from '@/common/components/Subform.vue';
-import Label from '@/common/components/Label.vue';
-import InlineMessage from '@/common/components/InlineMessage.vue';
-import Divider from '@/common/components/Divider.vue';
-
 export default {
    props: ['schema', 'data'],
-
-   components: {
-     Dropdown,
-     MultiSelectDropdown,
-     DatePicker,
-     InputText,
-     Password,
-     InputNumber,
-     RadioButton,
-     BooleanCheckbox,
-     Checkbox,
-     Textarea,
-     FileUpload,
-     SignaturePad,
-     UserDropdown,
-     PvDropdown,
-     SiteDropdown,
-     StorageContainerDropdown,
-     Subform,
-     'os-label': Label,
-     'os-inline-message': InlineMessage,
-     'os-divider': Divider
-   },
 
    emits: ['input', 'form-validity'],
 
