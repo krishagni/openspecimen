@@ -1,35 +1,28 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <template #breadcrumb>
-        <Breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
       <span>
         <h3 v-if="!ctx.group.id">Create User Group</h3>
         <h3 v-else>Update {{ctx.group.name}}</h3>
       </span>
-    </PageHeader>
-    <PageBody>
-      <Form ref="groupForm" :schema="ctx.addEditFs" :data="ctx.group" @input="handleUserChange($event)">
+    </os-page-head>
+    <os-page-body>
+      <os-form ref="groupForm" :schema="ctx.addEditFs" :data="ctx.group" @input="handleUserChange($event)">
         <div>
-          <Button :label="!ctx.group.id ? 'Create' : 'Update'" @click="saveOrUpdate"/>
-          <Button label="Cancel" @click="cancel"/>
+          <os-button :label="!ctx.group.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
+          <os-button label="Cancel" @click="cancel" />
         </div>
-      </Form>
-    </PageBody>
-  </Page>
+      </os-form>
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
 import { reactive, inject } from 'vue';
-
-import Page from '@/common/components/Page.vue';
-import PageHeader from '@/common/components/PageHeader.vue';
-import Breadcrumb from '@/common/components/Breadcrumb.vue';
-import PageBody from '@/common/components/PageBody.vue';
-import Button from '@/common/components/Button.vue';
-import Form from '@/common/components/Form.vue';
 
 import groupSchema from '@/administrative/user-groups/schemas/group.js';
 import addEditSchema from '@/administrative/user-groups/schemas/addedit.js';
@@ -44,15 +37,6 @@ export default {
   props: ['groupId'],
 
   inject: ['ui'],
-
-  components: {
-    Page,
-    PageHeader,
-    Breadcrumb,
-    PageBody,
-    Form,
-    Button
-  },
 
   setup(props) {
     const ui = inject('ui');
