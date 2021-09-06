@@ -17,6 +17,8 @@
               <Icon name="eye" />
             </router-link>
           </li>
+
+          <PluginViews page="site-detail" view="side-menu" />
         </ul>
       </SideMenu>
 
@@ -34,9 +36,10 @@ import PageBody from '@/common/components/PageBody.vue';
 import Breadcrumb from '@/common/components/Breadcrumb.vue';
 import SideMenu from '@/common/components/SideMenu.vue';
 import Icon from '@/common/components/Icon.vue';
+import PluginViews from '@/common/components/PluginViews.vue';
 
-import routerSvc from '@/common/services/Router.js';
-import siteSvc from '@/administrative/services/Site.js';
+import routerSvc   from '@/common/services/Router.js';
+import siteSvc     from '@/administrative/services/Site.js';
 
 export default {
   props: ['siteId'],
@@ -47,7 +50,8 @@ export default {
     PageBody,
     Breadcrumb,
     SideMenu,
-    Icon
+    Icon,
+    PluginViews
   },
 
   setup(props) {

@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import * as Vue from 'vue';
 import PrimeVue from 'primevue/config';
 
 // import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,19 +22,32 @@ import Root from './Root.vue'
 import alerts from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
 import authSvc from '@/common/services/Authorization.js';
+import pluginLoader from '@/common/services/PluginLoader.js';
 import settingSvc from '@/administrative/services/Setting.js';
 import userSvc from '@/administrative/services/User.js';
 import routerSvc from '@/common/services/Router.js';
 
+import svcRegistry from '@/common/services/ServicesRegistry.js';
+
 // import itemsSvc from '@/common/services/ItemsHolder.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
+
+import Icon from '@/common/components/Icon.vue';
+import Message from '@/common/components/Message.vue';
+
+
+window['Vue'] = Vue;
+window['osSvcRegistry'] = svcRegistry;
 
 const app = createApp(Root)
   .use(ToastService);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
+
+app.component('os-icon', Icon);
+app.component('os-message', Message);
 
 let filters = app.config.globalProperties.$filters = app.config.globalProperties.$filters || {};
 filters.username = (user) => {
@@ -116,7 +130,7 @@ if (http.path) {
   http.path += '/';
 }
 
-http.path += 'rest/ng'
+// http.path += 'rest/ng'
 if (params.get('token')) {
   localStorage.osAuthToken = http.headers['X-OS-API-TOKEN'] = params.get('token');
 } else {
@@ -150,10 +164,37 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
 
     ui.currentUser = currUser;
     ui.menuItems = [];
-    app.use(router)
-      .use(PrimeVue)
-      .provide('ui', ui)
-      .mount('#app');
+    app.provide('ui', ui);
+
+    let count = appProps.plugins.length;
+    // app.use(router).use(PrimeVue)
+    //  .mount('#app');
+    appProps.plugins.forEach(
+      (pluginName) => {
+        pluginLoader.load(pluginName).then(
+          function(pluginModule) {
+            app.use(pluginModule.default, { router });
+            --count;
+            if (count <= 0) {
+              app.use(router).use(PrimeVue)
+                .mount('#app');
+
+              console.log(router.getRoutes());
+            }
+          },
+
+          function(error) {
+            console.log('Error loading the plugin: ' + pluginName);
+            console.log(error);
+            --count;
+            if (count <= 0) {
+              app.use(router).use(PrimeVue)
+                .mount('#app');
+            }
+          }
+        )
+      }
+    );
   }
 );
 

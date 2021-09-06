@@ -277,6 +277,7 @@ task create_war(type: War) {
     include 'applicationContext.xml'
     include 'restApiContext.xml'
     include 'pluginUiContext.xml'
+    include 'pluginVueUiContext.xml'
     include 'migrationContext.xml'
     include 'postInitContext.xml'
     include 'web.xml'
