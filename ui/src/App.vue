@@ -1,5 +1,5 @@
 <template>
-  <Navbar />
+  <os-navbar />
   <div class="os-app-body">
     <Toast class="os-app-toast" />
     <router-view/>
@@ -9,14 +9,11 @@
 <script>
 import Toast from "primevue/toast";
 
-import Navbar from '@/common/components/Navbar.vue';
-
 export default {
   name: 'App',
 
   components: {
-    Toast,
-    Navbar
+    Toast
   },
 
   setup() {
@@ -91,7 +88,7 @@ a:focus, a:hover {
 }
 
 .os-hide {
-  display: none;
+  display: none!important;
 }
 
 .os-table {
