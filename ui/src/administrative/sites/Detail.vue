@@ -1,58 +1,40 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <template #breadcrumb>
-        <Breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
       <span>
         <h3>{{ctx.site.name}}</h3>
       </span>
-    </PageHeader>
-    <PageBody>
-      <SideMenu>
+    </os-page-head>
+    <os-page-body>
+      <os-side-menu>
         <ul>
           <li>
             <router-link :to="{name: 'SiteOverview'}">
-              <Icon name="eye" />
+              <os-icon name="eye" />
             </router-link>
           </li>
 
-          <PluginViews page="site-detail" view="side-menu" />
+          <os-plugin-views page="site-detail" view="side-menu" />
         </ul>
-      </SideMenu>
+      </os-side-menu>
 
       <router-view :site="ctx.site" v-if="ctx.site.id"> </router-view>
-    </PageBody>
-  </Page>
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
 import { reactive } from 'vue';
-
-import Page from '@/common/components/Page.vue';
-import PageHeader from '@/common/components/PageHeader.vue';
-import PageBody from '@/common/components/PageBody.vue';
-import Breadcrumb from '@/common/components/Breadcrumb.vue';
-import SideMenu from '@/common/components/SideMenu.vue';
-import Icon from '@/common/components/Icon.vue';
-import PluginViews from '@/common/components/PluginViews.vue';
 
 import routerSvc   from '@/common/services/Router.js';
 import siteSvc     from '@/administrative/services/Site.js';
 
 export default {
   props: ['siteId'],
-
-  components: {
-    Page,
-    PageHeader,
-    PageBody,
-    Breadcrumb,
-    SideMenu,
-    Icon,
-    PluginViews
-  },
 
   setup(props) {
     let ctx = reactive({

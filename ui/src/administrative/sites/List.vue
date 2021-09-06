@@ -1,45 +1,46 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <span>
         <h3>Sites</h3>
       </span>
 
       <template #right>
-        <ListSize
+        <os-list-size
           :list="ctx.sites"
           :page-size="ctx.pageSize"
           :list-size="ctx.sitesCount"
           @updateListSize="getSitesCount"
         />
       </template>
-    </PageHeader>
-    <PageBody>
-      <PageToolbar>
+    </os-page-head>
+
+    <os-page-body>
+      <os-page-toolbar>
         <template #default>
           <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
-            <Button left-icon="plus" label="Create" @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
+            <os-button left-icon="plus" label="Create" @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
 
-            <Menu label="Import" :options="importOpts" />
+            <os-menu label="Import" :options="importOpts" />
 
-            <Button left-icon="download" label="Export" @click="exportSites" />
+            <os-button left-icon="download" label="Export" @click="exportSites" />
 
-            <ButtonLink left-icon="question-circle" label="Help"
+            <os-button-link left-icon="question-circle" label="Help"
               url="https://help.openspecimen.org/sites" new-tab="true" />
           </span>
           <span v-else>
-            <Button left-icon="trash"    label="Delete" @click="deleteSites" />
+            <os-button left-icon="trash"    label="Delete" @click="deleteSites" />
 
-            <Button left-icon="download" label="Export" @click="exportSites" />
+            <os-button left-icon="download" label="Export" @click="exportSites" />
           </span>
         </template>
 
         <template #right>
-          <Button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" label="Search" @click="openSearch" />
         </template>
-      </PageToolbar>
+      </os-page-toolbar>
 
-      <ListView
+      <os-list-view
         :data="ctx.sites"
         :columns="listSchema.columns"
         :filters="listSchema.filters"
@@ -52,27 +53,16 @@
         ref="listView"
       />
 
-      <ConfirmDelete ref="deleteDialog">
+      <os-confirm-delete ref="deleteDialog">
         <template #message>
           <span>Are you sure you want to delete the selected sites?</span>
         </template>
-      </ConfirmDelete>
-    </PageBody>
-  </Page>
+      </os-confirm-delete>
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
-
-import Page        from '@/common/components/Page.vue';
-import PageHeader  from '@/common/components/PageHeader.vue';
-import PageBody    from '@/common/components/PageBody.vue';
-import PageToolbar from '@/common/components/PageToolbar.vue';
-import ListView    from '@/common/components/ListView.vue';
-import ListSize    from '@/common/components/ListSize.vue';
-import Button      from '@/common/components/Button.vue';
-import ButtonLink  from '@/common/components/ButtonLink.vue';
-import Menu        from '@/common/components/Menu.vue';
-import ConfirmDelete from '@/common/components/ConfirmDelete.vue';
 
 import listSchema from './schemas/list.js';
 
@@ -83,19 +73,6 @@ import siteSvc    from '@/administrative/services/Site.js';
 
 export default {
   props: ['filters'],
-
-  components: {
-    Page,
-    PageHeader,
-    PageBody,
-    PageToolbar,
-    ListView,
-    ListSize,
-    Button,
-    ButtonLink,
-    Menu,
-    ConfirmDelete
-  },
 
   data() {
     return {

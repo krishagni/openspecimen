@@ -32,22 +32,17 @@ import svcRegistry from '@/common/services/ServicesRegistry.js';
 // import itemsSvc from '@/common/services/ItemsHolder.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
-
-import Icon from '@/common/components/Icon.vue';
-import Message from '@/common/components/Message.vue';
-
+import CommonComponents from '@/common/components';
 
 window['Vue'] = Vue;
 window['osSvcRegistry'] = svcRegistry;
 
 const app = createApp(Root)
-  .use(ToastService);
+  .use(ToastService)
+  .use(CommonComponents);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
-
-app.component('os-icon', Icon);
-app.component('os-message', Message);
 
 let filters = app.config.globalProperties.$filters = app.config.globalProperties.$filters || {};
 filters.username = (user) => {

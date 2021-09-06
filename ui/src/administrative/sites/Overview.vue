@@ -1,35 +1,27 @@
 <template>
-  <PageToolbar>
+  <os-page-toolbar>
     <template #default>
-      <Button left-icon="edit" label="Edit" @click="$goto('SiteAddEdit', {siteId: ctx.site.id})" />
+      <os-button left-icon="edit" label="Edit" @click="$goto('SiteAddEdit', {siteId: ctx.site.id})" />
 
-      <Button left-icon="trash" label="Delete" @click="deleteSite" />
+      <os-button left-icon="trash" label="Delete" @click="deleteSite" />
     </template>
-  </PageToolbar>
+  </os-page-toolbar>
 
-  <Grid>
-    <GridColumn width="8">
-      <Overview :schema="siteSchema.fields" :object="ctx"></Overview>
-    </GridColumn>
+  <os-grid>
+    <os-grid-column width="8">
+      <os-overview :schema="siteSchema.fields" :object="ctx" />
+    </os-grid-column>
 
-    <GridColumn width="4">
-      <AuditOverview :objects="ctx.siteObjs" v-if="ctx.site.id"></AuditOverview>
-    </GridColumn>
-  </Grid>
+    <os-grid-column width="4">
+      <os-audit-overview :objects="ctx.siteObjs" v-if="ctx.site.id" />
+    </os-grid-column>
+  </os-grid>
 
-  <DeleteObject ref="deleteObj" :input="ctx.deleteOpts" />
+  <os-delete-object ref="deleteObj" :input="ctx.deleteOpts" />
 </template>
 
 <script>
 import { reactive, watchEffect } from 'vue';
-
-import PageToolbar from '@/common/components/PageToolbar.vue';
-import Grid from '@/common/components/Grid.vue';
-import GridColumn from '@/common/components/GridColumn.vue';
-import Overview from '@/common/components/Overview.vue';
-import Button from '@/common/components/Button.vue';
-import AuditOverview from '@/common/components/AuditOverview.vue';
-import DeleteObject from '@/common/components/DeleteObject.vue';
 
 import siteSchema from '@/administrative/sites/schemas/site.js';
 
@@ -40,16 +32,6 @@ export default {
   props: ['site'],
 
   inject: ['ui'],
-
-  components: {
-    PageToolbar,
-    Overview,
-    Button,
-    AuditOverview,
-    Grid,
-    GridColumn,
-    DeleteObject
-  },
 
   setup(props) {
     let ctx = reactive({
