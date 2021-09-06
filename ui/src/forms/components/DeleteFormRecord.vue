@@ -1,5 +1,5 @@
 <template>
-  <Dialog ref="dialogInstance">
+  <os-dialog ref="dialogInstance">
     <template #header>
       <span>Deleting form record #{{record.recordId}} of {{record.formCaption}}</span>
     </template>
@@ -9,25 +9,17 @@
     </template>
 
     <template #footer>
-      <Button label="Cancel" type="text" @click="cancel" />
-      <Button label="Yes" type="primary" @click="proceed" />
+      <os-button label="Cancel" type="text" @click="cancel" />
+      <os-button label="Yes" type="primary" @click="proceed" />
     </template>
-  </Dialog>
+  </os-dialog>
 </template>
 
 <script>
 
-import Button from '@/common/components/Button.vue';
-import Dialog from '@/common/components/Dialog.vue';
-
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  components: {
-    Button,
-    Dialog
-  },
-
   methods: {
     execute: function(record) {
       let self = this;

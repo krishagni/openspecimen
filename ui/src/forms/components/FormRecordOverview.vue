@@ -12,7 +12,7 @@
     </ul>
 
     <template v-for="sf in ctx.sfFields" :key="sf.udn">
-      <Section>
+      <os-section>
         <template #title>
           <span v-html="sf.caption"></span>
         </template>
@@ -34,7 +34,7 @@
             </tbody>
           </table>
         </template>
-      </Section>
+      </os-section>
     </template>
   </div>
 </template>
@@ -43,15 +43,13 @@
 import { reactive, watchEffect } from 'vue';
 
 import FormFieldValue from '@/forms/components/FormFieldValue.vue';
-import Section from '@/common/components/Section.vue';
 
 export default {
 
   props: ['record'],
 
   components: {
-    FormFieldValue,
-    Section
+    FormFieldValue
   },
 
   setup(props) {
