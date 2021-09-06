@@ -1,8 +1,8 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <template #breadcrumb v-if="ctx.group">
-        <Breadcrumb :items="ctx.ugCrumb" />
+        <os-breadcrumb :items="ctx.ugCrumb" />
       </template>
 
       <span>
@@ -11,70 +11,70 @@
       </span>
 
       <template #right>
-        <ListSize
+        <os-list-size
           :list="ctx.users"
           :page-size="ctx.pageSize"
           :list-size="ctx.usersCount"
           @updateListSize="getUsersCount"
         />
       </template>
-    </PageHeader>
-    <PageBody v-if="ctx.inited">
-      <PageToolbar>
+    </os-page-head>
+    <os-page-body v-if="ctx.inited">
+      <os-page-toolbar>
         <template #default>
           <span v-if="ctx.selectedUsers.length == 0 && !ctx.group">
-            <Button left-icon="plus" label="Create"
+            <os-button left-icon="plus" label="Create"
               @click="goto('UserAddEdit', {userId: -1})"
               v-show-if-allowed="userResources.createOpts" />
 
-            <Button left-icon="users" label="User Groups" @click="goto('UserGroupsList')" />
+            <os-button left-icon="users" label="User Groups" @click="goto('UserGroupsList')" />
 
-            <Menu label="Import" :options="importOpts" v-show-if-allowed="userResources.importOpts" />
+            <os-menu label="Import" :options="importOpts" v-show-if-allowed="userResources.importOpts" />
 
-            <Menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
+            <os-menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
 
-            <Menu label="More" :options="moreOpts" v-show-if-allowed="institute" />
+            <os-menu label="More" :options="moreOpts" v-show-if-allowed="institute" />
 
-            <Button left-icon="question-circle" label="Help" @click="help" />
+            <os-button left-icon="question-circle" label="Help" @click="help" />
           </span>
 
           <span v-if="ctx.selectedUsers.length > 0">
-            <Button left-icon="edit" label="Edit" @click="bulkEdit" v-show-if-allowed="userResources.updateOpts" />
+            <os-button left-icon="edit" label="Edit" @click="bulkEdit" v-show-if-allowed="userResources.updateOpts" />
 
             <AssignGroup v-if="!ctx.group" @addToGroup="addToGroup"
               v-show-if-allowed="userResources.updateOpts" />
 
-            <Button v-if="ctx.group" left-icon="times" label="Remove from Group" @click="removeFromGroup"
+            <os-button v-if="ctx.group" left-icon="times" label="Remove from Group" @click="removeFromGroup"
               v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="archive" label="Archive" @click="archiveUsers"
+            <os-button left-icon="archive" label="Archive" @click="archiveUsers"
               v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="check" label="Reactivate" @click="reactivateUsers"
+            <os-button left-icon="check" label="Reactivate" @click="reactivateUsers"
               v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="trash" label="Delete" @click="deleteUsers"
+            <os-button left-icon="trash" label="Delete" @click="deleteUsers"
               v-show-if-allowed="userResources.deleteOpts" />
 
-            <Button left-icon="lock" label="Lock" @click="lockUsers"
+            <os-button left-icon="lock" label="Lock" @click="lockUsers"
               v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="unlock" label="Unlock" @click="unlockUsers"
+            <os-button left-icon="unlock" label="Unlock" @click="unlockUsers"
               v-show-if-allowed="userResources.updateOpts" />
 
-            <Button left-icon="thumbs-up" label="Approve" @click="approveUsers"
+            <os-button left-icon="thumbs-up" label="Approve" @click="approveUsers"
               v-show-if-allowed="userResources.updateOpts" />
 
-            <Menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
+            <os-menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts" />
           </span>
         </template>
 
         <template #right>
-          <Button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" label="Search" @click="openSearch" />
         </template>
-      </PageToolbar>
+      </os-page-toolbar>
 
-      <ListView
+      <os-list-view
         :data="ctx.users"
         :columns="ctx.columns"
         :filters="ctx.filters"
@@ -85,34 +85,22 @@
         @selectedRows="onUsersSelection"
         @rowClicked="onUserRowClick"
         ref="listView"
-      >
-      </ListView>
+      />
 
-      <ConfirmDelete ref="deleteDialog">
+      <os-confirm-delete ref="deleteDialog">
         <template #message>
           <span>Are you sure you want to delete the selected users?</span>
         </template>
-      </ConfirmDelete>
+      </os-confirm-delete>
 
       <Announcement ref="announcementDialog" />
-    </PageBody>
-  </Page>
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
 import { reactive, inject } from 'vue';
 import { format } from 'date-fns';
-
-import ListSize from '@/common/components/ListSize.vue';
-import ListView from '@/common/components/ListView.vue';
-import Page from '@/common/components/Page.vue';
-import PageHeader from '@/common/components/PageHeader.vue';
-import Breadcrumb from '@/common/components/Breadcrumb.vue';
-import PageBody from '@/common/components/PageBody.vue';
-import PageToolbar from '@/common/components/PageToolbar.vue';
-import Button from '@/common/components/Button.vue';
-import Menu from '@/common/components/Menu.vue';
-import ConfirmDelete from '@/common/components/ConfirmDelete.vue';
 
 import instituteSvc from '@/administrative/services/Institute.js';
 import userGrpSvc from '@/administrative/services/UserGroup.js';
@@ -138,16 +126,6 @@ export default {
   props: ['filters', 'groupId'],
 
   components: {
-    Page,
-    PageHeader,
-    Breadcrumb,
-    PageBody,
-    PageToolbar,
-    Button,
-    ListSize,
-    ListView,
-    Menu,
-    ConfirmDelete,
     AssignGroup,
     Announcement
   },

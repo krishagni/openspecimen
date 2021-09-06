@@ -1,37 +1,29 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <template #breadcrumb>
-        <Breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
       <span>
         <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
       </span>
-    </PageHeader>
-    <PageBody>
+    </os-page-head>
+    <os-page-body>
       <div>
-        <Form ref="userForm" :schema="ctx.chgPasswdFs" :data="ctx.passwdDetail">
+        <os-form ref="userForm" :schema="ctx.chgPasswdFs" :data="ctx.passwdDetail">
           <div>
-            <Button label="Update" @click="updatePassword"/>
-            <Button label="Cancel" @click="cancel"/>
+            <os-button label="Update" @click="updatePassword" />
+            <os-button label="Cancel" @click="cancel" />
           </div>
-        </Form>
+        </os-form>
       </div>
-    </PageBody>
-  </Page>
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
 import { reactive, inject } from 'vue';
-
-import Page       from '@/common/components/Page.vue';
-import PageHeader from '@/common/components/PageHeader.vue';
-import Breadcrumb from '@/common/components/Breadcrumb.vue';
-import PageBody   from '@/common/components/PageBody.vue';
-
-import Button     from '@/common/components/Button.vue';
-import Form       from '@/common/components/Form.vue';
 
 import chgPasswdFs from '@/administrative/users/change-password-schema.json';
 
@@ -46,15 +38,6 @@ export default {
   props: ['userId'],
 
   inject: ['ui'],
-
-  components: {
-    Page,
-    PageHeader,
-    Breadcrumb,
-    PageBody,
-    Form,
-    Button
-  },
 
   setup(props) {
     const ui = inject('ui');

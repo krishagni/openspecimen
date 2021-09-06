@@ -1,49 +1,42 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <template #breadcrumb>
-        <Breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
       <span>
         <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
       </span>
-    </PageHeader>
-    <PageBody>
-      <SideMenu>
+    </os-page-head>
+    <os-page-body>
+      <os-side-menu>
         <ul>
           <li>
             <router-link :to="{name: 'UserOverview'}">
-              <Icon name="eye" />
+              <os-icon name="eye" />
             </router-link>
           </li>
           <li>
             <router-link :to="{name: 'UserRoles'}">
-              <Icon name="users" />
+              <os-icon name="users" />
             </router-link>
           </li>
           <li>
             <router-link :to="{name: 'UserFormsList'}">
-              <Icon name="copy" />
+              <os-icon name="copy" />
             </router-link>
           </li>
         </ul>
-      </SideMenu>
+      </os-side-menu>
 
       <router-view :user="ctx.user" v-if="ctx.user.id"> </router-view>
-    </PageBody>
-  </Page>
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
 import { reactive } from 'vue';
-
-import Page from '@/common/components/Page.vue';
-import PageHeader from '@/common/components/PageHeader.vue';
-import Breadcrumb from '@/common/components/Breadcrumb.vue';
-import PageBody from '@/common/components/PageBody.vue';
-import SideMenu from '@/common/components/SideMenu.vue';
-import Icon from '@/common/components/Icon.vue';
 
 import routerSvc from '@/common/services/Router.js';
 import userSvc from '@/administrative/services/User.js';
@@ -53,15 +46,6 @@ export default {
   name: 'UserDetail',
 
   props: ['userId'],
-
-  components: {
-    Page,
-    PageHeader,
-    Breadcrumb,
-    PageBody,
-    SideMenu,
-    Icon
-  },
 
   setup(props) {
     let ctx = reactive({

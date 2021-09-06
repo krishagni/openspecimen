@@ -1,11 +1,11 @@
 
 <template>
   <div>
-    <Panel>
+    <os-panel>
       <template #header>
         <span>
           <span class="title">Roles</span>
-          <Button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole && updateAllowed" />
+          <os-button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole && updateAllowed" />
         </span>
       </template>
 
@@ -32,47 +32,40 @@
               <span>{{userRole.role.name}}</span>
             </td>
             <td>
-              <ButtonGroup v-if="isRoleUpdateAllowed(userRole)">
-                <Button left-icon="edit" size="small" @click="showAddEditRole(userRole)" />
-                <Button left-icon="trash" size="small" @click="deleteRole(userRole)" />
-              </ButtonGroup>
+              <os-button-group v-if="isRoleUpdateAllowed(userRole)">
+                <os-button left-icon="edit" size="small" @click="showAddEditRole(userRole)" />
+                <os-button left-icon="trash" size="small" @click="deleteRole(userRole)" />
+              </os-button-group>
             </td>
           </tr>
         </tbody>
       </table>
 
       <div v-else>
-        <Message type="info">
+        <os-message type="info">
           <span>No roles to display. Add a new role by clicking on Add Role button.</span>
-        </Message>
+        </os-message>
       </div>
-    </Panel>
+    </os-panel>
 
-    <Dialog ref="roleFormDialog">
+    <os-dialog ref="roleFormDialog">
       <template #header>
         <span v-if="!ctx.role.id">Add Role</span>
         <span v-else>Update Role</span>
       </template>
       <template #content>
-        <Form ref="roleForm" :schema="ctx.roleFs" :data="ctx.role" @input="handleRoleChange($event)" />
+        <os-form ref="roleForm" :schema="ctx.roleFs" :data="ctx.role" @input="handleRoleChange($event)" />
       </template>
       <template #footer>
-        <Button label="Cancel" @click="cancelAddEditRole" />
-        <Button label="Add" @click="saveRole" v-if="!ctx.role.id"/>
-        <Button label="Update" @click="saveRole" v-else />
+        <os-button label="Cancel" @click="cancelAddEditRole" />
+        <os-button label="Add" @click="saveRole" v-if="!ctx.role.id"/>
+        <os-button label="Update" @click="saveRole" v-else />
       </template>
-    </Dialog>
+    </os-dialog>
   </div>
 </template>
 
 <script>
-
-import Button from '@/common/components/Button.vue';
-import ButtonGroup from '@/common/components/ButtonGroup.vue';
-import Dialog from '@/common/components/Dialog.vue';
-import Panel from '@/common/components/Panel.vue';
-import Message from '@/common/components/Message.vue';
-import Form from '@/common/components/Form.vue';
 
 import userSvc from '@/administrative/services/User.js';
 import siteSvc from '@/administrative/services/Site.js';
@@ -85,15 +78,6 @@ export default {
   props: ['user'],
 
   inject: ['ui'],
-
-  components: {
-    Button,
-    ButtonGroup,
-    Panel,
-    Message,
-    Dialog,
-    Form
-  },
 
   data() {
     let self = this;

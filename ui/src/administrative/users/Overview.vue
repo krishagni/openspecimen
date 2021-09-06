@@ -1,13 +1,13 @@
 <template>
-  <PageToolbar>
+  <os-page-toolbar>
     <template #default>
       <div v-if="(ui.currentUser.admin || !ctx.user.admin) && ctx.user.activityStatus != 'Pending'">
-        <Button left-icon="edit"
+        <os-button left-icon="edit"
           label="Edit" @click="goto('UserAddEdit', {userId: ctx.user.id})"
           v-if="updateAllowed"
         />
 
-        <Button left-icon="lock"
+        <os-button left-icon="lock"
           label="Lock" @click="lock"
           v-if="updateAllowed &&
             ctx.user.activityStatus != 'Locked' &&
@@ -15,27 +15,27 @@
             ctx.user.type != 'CONTACT'"
         />
 
-        <Button left-icon="lock-open"
+        <os-button left-icon="lock-open"
           label="Unlock" @click="activate"
           v-if="updateAllowed && ctx.user.activityStatus == 'Locked'"
         />
 
-        <Button left-icon="archive"
+        <os-button left-icon="archive"
           label="Archive" @click="archive"
           v-if="updateAllowed && ctx.user.activityStatus != 'Closed'"
         />
 
-        <Button left-icon="check"
+        <os-button left-icon="check"
           label="Reactivate" @click="activate"
           v-if="updateAllowed && ctx.user.activityStatus == 'Closed'"
         />
 
-        <Button left-icon="trash"
+        <os-button left-icon="trash"
           label="Delete" @click="deleteUser"
           v-show-if-allowed="userResources.deleteOpts"
         />
 
-        <Button left-icon="key"
+        <os-button left-icon="key"
           label="Reset Password" @click="goto('UserChangePassword', {userId: ctx.user.id})"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.domainName == 'openspecimen' &&
             ui.currentUser.id != ctx.user.id &&
@@ -43,32 +43,32 @@
             (ctx.user.activityStatus == 'Active' || ctx.user.activityStatus == 'Expired')"
         />
 
-        <Button left-icon="user-secret"
+        <os-button left-icon="user-secret"
           label="Impersonate" @click="impersonate"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.activityStatus == 'Active' &&
             ui.currentUser.id != ctx.user.id && ui.currentUser.admin"
         />
       </div>
     </template>
-  </PageToolbar>
+  </os-page-toolbar>
 
-  <Grid>
-    <GridColumn width="8">
+  <os-grid>
+    <os-grid-column width="8">
       <div v-if="ctx.user.activityStatus == 'Locked'">
-        <Message type="info">
+        <os-message type="info">
           <span>User account has been locked.</span>
-        </Message>
+        </os-message>
       </div>
 
-      <Overview :schema="userSchema" :object="ctx.user"></Overview>
-    </GridColumn>
+      <os-overview :schema="userSchema" :object="ctx.user" />
+    </os-grid-column>
 
-    <GridColumn width="4">
-      <AuditOverview :objects="ctx.userObjs" v-if="ctx.user.id"></AuditOverview>
-    </GridColumn>
-  </Grid>
+    <os-grid-column width="4">
+      <os-audit-overview :objects="ctx.userObjs" v-if="ctx.user.id" />
+    </os-grid-column>
+  </os-grid>
 
-  <Confirm ref="confirmImpersonate">
+  <os-confirm ref="confirmImpersonate">
     <template #title>
       <span>Sign-in as {{ctx.user.firstName}} {{ctx.user.lastName}}...</span>
     </template>
@@ -76,23 +76,13 @@
     <template #message>
       <span>An email will be sent to <b>{{ctx.user.firstName}} {{ctx.user.lastName}}</b> to let them know you've signed-in to their account. The email will include details like your name, email address, and device IP address. Do you want to proceed?</span>
     </template>
-  </Confirm>
+  </os-confirm>
 
-  <DeleteObject ref="deleteObj" :input="ctx.deleteOpts" />
+  <os-delete-object ref="deleteObj" :input="ctx.deleteOpts" />
 </template>
 
 <script>
 import { reactive, watchEffect } from 'vue';
-
-import PageToolbar from '@/common/components/PageToolbar.vue';
-import Overview from '@/common/components/Overview.vue';
-import Button from '@/common/components/Button.vue';
-import Message from '@/common/components/Message.vue';
-import Confirm from '@/common/components/Confirm.vue';
-import DeleteObject from '@/common/components/DeleteObject.vue';
-import AuditOverview from '@/common/components/AuditOverview.vue';
-import Grid from '@/common/components/Grid.vue';
-import GridColumn from '@/common/components/GridColumn.vue';
 
 import alertSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
@@ -108,18 +98,6 @@ export default {
   props: ['user'],
 
   inject: ['ui'],
-
-  components: {
-    PageToolbar,
-    Overview,
-    Button,
-    Message,
-    Confirm,
-    DeleteObject,
-    AuditOverview,
-    Grid,
-    GridColumn
-  },
 
   setup(props) {
     let ctx = reactive({
