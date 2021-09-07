@@ -27,19 +27,20 @@ import settingSvc from '@/administrative/services/Setting.js';
 import userSvc from '@/administrative/services/User.js';
 import routerSvc from '@/common/services/Router.js';
 
-import svcRegistry from '@/common/services/ServicesRegistry.js';
-
 // import itemsSvc from '@/common/services/ItemsHolder.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
+
 import CommonComponents from '@/common/components';
+import CommonServices   from '@/common/services';
+import AdminServices    from '@/administrative/services';
 
 window['Vue'] = Vue;
-window['osSvcRegistry'] = svcRegistry;
-
 const app = createApp(Root)
   .use(ToastService)
-  .use(CommonComponents);
+  .use(CommonComponents)
+  .use(CommonServices)
+  .use(AdminServices);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
@@ -159,16 +160,17 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
 
     ui.currentUser = currUser;
     ui.menuItems = [];
+
+    let osSvc = app.config.globalProperties.$osSvc;
     app.provide('ui', ui);
+    app.provide('osSvc', osSvc);
 
     let count = appProps.plugins.length;
-    // app.use(router).use(PrimeVue)
-    //  .mount('#app');
     appProps.plugins.forEach(
       (pluginName) => {
         pluginLoader.load(pluginName).then(
           function(pluginModule) {
-            app.use(pluginModule.default, { router });
+            app.use(pluginModule.default, { router, osSvc });
             --count;
             if (count <= 0) {
               app.use(router).use(PrimeVue)
