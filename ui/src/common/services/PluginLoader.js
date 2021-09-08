@@ -1,22 +1,19 @@
 
 class PluginLoader {
-  dev = true;
 
   load(name) {
-    if (window[name]) {
-      return window[name];
+    let lookupName = 'os-plugins.' + name;
+    if (window[lookupName]) {
+      return window[lookupName];
     }
 
-    window[name] = new Promise((resolve, reject) => {
+    window[lookupName] = new Promise((resolve, reject) => {
       const script = document.createElement('script');
       let url = script.src = 'plugins/' + name + '/' + name + '.umd.js';
       script.async = true;
 
       script.addEventListener('load', () => {
-        alert('loaded: ' + name);
-        // console.log(name);
-        resolve(window[name]);
-        // resolve(eval(name));
+        resolve(window[lookupName]);
       });
 
       script.addEventListener('error', () => {
@@ -26,7 +23,7 @@ class PluginLoader {
       document.head.appendChild(script);
     });
 
-    return window[name];
+    return window[lookupName];
   }
 }
 

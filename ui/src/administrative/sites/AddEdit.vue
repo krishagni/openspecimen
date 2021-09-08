@@ -72,7 +72,7 @@ export default {
     },
 
     saveOrUpdate: function() {
-      if(!this.$refs.siteForm.validate()) {
+      if (!this.$refs.siteForm.validate()) {
         return;
       }
 

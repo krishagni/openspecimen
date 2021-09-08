@@ -11,7 +11,7 @@
       </span>
     </os-page-head>
     <os-page-body>
-      <os-form ref="groupForm" :schema="ctx.addEditFs" :data="ctx.group" @input="handleUserChange($event)">
+      <os-form ref="groupForm" :schema="ctx.addEditFs" :data="ctx.group" @input="handleInput($event)">
         <div>
           <os-button :label="!ctx.group.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
           <os-button label="Cancel" @click="cancel" />
@@ -85,7 +85,7 @@ export default {
   },
 
   methods: {
-    handleUserChange: function(event) {
+    handleInput: function(event) {
       Object.assign(this.ctx.group, event.data);
     },
 

@@ -108,6 +108,8 @@ filters.arrayJoin = (value) => {
 app.config.globalProperties.$goto =
   (name, params, query) => routerSvc.goto(name, params, query);
 
+app.config.globalProperties.$goback = () => routerSvc.back();
+
 alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);
 
@@ -161,7 +163,7 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
     ui.currentUser = currUser;
     ui.menuItems = [];
 
-    let osSvc = app.config.globalProperties.$osSvc;
+    let osSvc = window.osSvc = app.config.globalProperties.$osSvc;
     app.provide('ui', ui);
     app.provide('osSvc', osSvc);
 
@@ -175,8 +177,6 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
             if (count <= 0) {
               app.use(router).use(PrimeVue)
                 .mount('#app');
-
-              console.log(router.getRoutes());
             }
           },
 

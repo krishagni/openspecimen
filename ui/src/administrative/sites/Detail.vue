@@ -45,7 +45,6 @@ export default {
       ]
     });
 
-    
     siteSvc.getSite(+props.siteId).then(site => ctx.site = site);
     return { ctx };
   },

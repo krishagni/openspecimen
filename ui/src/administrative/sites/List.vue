@@ -139,7 +139,7 @@ export default {
       this.$refs.deleteDialog.open().then(
         () => {
           siteSvc.bulkUpdate({detail: {activityStatus: 'Disabled'}, ids: siteIds}).then(
-            function(saved) {
+            (saved) => {
               alertSvc.success(saved.length + (saved.length != 1 ? ' sites ' : ' site ') + ' deleted');
               self.$refs.listView.reload();
             }

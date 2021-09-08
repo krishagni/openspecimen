@@ -12,8 +12,6 @@ export default {
 
   computed: {
     views: function() {
-      alert('Get views of ' + this.page + ' for ' + this.view);
-      alert(JSON.stringify(pluginViewsReg.getViews(this.page, this.view) || []));
       return pluginViewsReg.getViews(this.page, this.view);
     }
   }

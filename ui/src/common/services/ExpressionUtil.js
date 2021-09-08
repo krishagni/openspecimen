@@ -77,7 +77,6 @@ class ExpressionUtil {
 
   fd(name) {
     let object = this;
-
     if (!name) {
       return object;
     }

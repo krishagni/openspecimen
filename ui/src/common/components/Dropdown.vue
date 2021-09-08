@@ -155,9 +155,9 @@ export default {
       let ls = this.listSource;
       let selectProp = ls.selectProp || 'id';
       let optionsMap = options.reduce(
-        (acc, e) => {
-          if (!acc[e[selectProp]]) {
-            acc[e[selectProp]] = e;
+        (acc, option) => {
+          if (!acc[option[selectProp]]) {
+            acc[option[selectProp]] = option;
           }
 
           return acc;

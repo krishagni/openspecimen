@@ -1,5 +1,5 @@
 
-// import routerSvc from '@/common/services/Router.js';
+import routerSvc from '@/common/services/Router.js';
 import instituteSvc from '@/administrative/services/Institute.js';
 
 export default {
@@ -7,7 +7,7 @@ export default {
     {
       "name": "site.name",
       "caption": "Name",
-      "href": (row) => '#/' + row.rowObject.site.id
+      "href": (row) => routerSvc.getUrl('SiteOverview', {siteId: row.rowObject.site.id})
     },
     {
       "name": "site.type",
