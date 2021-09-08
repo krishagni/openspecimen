@@ -13,7 +13,7 @@ class PluginLoader {
       script.async = true;
 
       script.addEventListener('load', () => {
-        resolve(window[lookupName]);
+        resolve(window[name]);
       });
 
       script.addEventListener('error', () => {
