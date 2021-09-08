@@ -1,9 +1,11 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" label="Edit" @click="$goto('SiteAddEdit', {siteId: ctx.site.id})" />
+      <span v-show-if-allowed="'institute-admin'">
+        <os-button left-icon="edit" label="Edit" @click="$goto('SiteAddEdit', {siteId: ctx.site.id})" />
 
-      <os-button left-icon="trash" label="Delete" @click="deleteSite" />
+        <os-button left-icon="trash" label="Delete" @click="deleteSite" />
+      </span>
     </template>
   </os-page-toolbar>
 

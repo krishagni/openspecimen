@@ -18,21 +18,23 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
-            <os-button left-icon="plus" label="Create" @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
+          <span v-show-if-allowed="'institute-admin'">
+            <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
+              <os-button left-icon="plus" label="Create" @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
 
-            <os-menu label="Import" :options="importOpts" />
+              <os-menu label="Import" :options="importOpts" />
 
-            <os-button left-icon="download" label="Export" @click="exportSites" />
+              <os-button left-icon="download" label="Export" @click="exportSites" />
+            </span>
+            <span v-else>
+              <os-button left-icon="trash"    label="Delete" @click="deleteSites" />
 
-            <os-button-link left-icon="question-circle" label="Help"
-              url="https://help.openspecimen.org/sites" new-tab="true" />
+              <os-button left-icon="download" label="Export" @click="exportSites" />
+            </span>
           </span>
-          <span v-else>
-            <os-button left-icon="trash"    label="Delete" @click="deleteSites" />
 
-            <os-button left-icon="download" label="Export" @click="exportSites" />
-          </span>
+          <os-button-link left-icon="question-circle" label="Help"
+            url="https://help.openspecimen.org/sites" new-tab="true" />
         </template>
 
         <template #right>
