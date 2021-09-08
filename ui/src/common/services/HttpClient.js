@@ -34,17 +34,7 @@ class HttpClient {
   }
 
   getUrl(url) {
-    let result = this.getServerUrl();
-    if (this.path) {
-      result += this.path;
-    }
-
-    if (result && !result.endsWith('/')) {
-      result += '/';
-    }
-
-    result += url;
-    return result;
+    return this.getServerAppUrl() + 'rest/ng/' + url;
   }
 
   getServerUrl() {
@@ -55,6 +45,19 @@ class HttpClient {
       if (this.port) {
         result += ':' + this.port;
       }
+    }
+
+    return result;
+  }
+
+  getServerAppUrl() {
+    let result = this.getServerUrl();
+    if (this.path) {
+      result += this.path;
+    }
+
+    if (result && !result.endsWith('/')) {
+      result += '/';
     }
 
     return result;

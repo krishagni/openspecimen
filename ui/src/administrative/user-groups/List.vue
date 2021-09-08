@@ -1,31 +1,31 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <span>
         <h3>User Groups</h3>
       </span>
 
       <template #right>
-        <ListSize
+        <os-list-size
           :list="ctx.userGroups"
           :page-size="ctx.pageSize"
           :list-size="ctx.groupsCount"
           @updateListSize="getGroupsCount"
         />
       </template>
-    </PageHeader>
-    <PageBody>
-      <PageToolbar>
+    </os-page-head>
+    <os-page-body>
+      <os-page-toolbar>
         <template #default>
-          <Button left-icon="user" label="Users" @click="$goto('UsersList')" />
+          <os-button left-icon="user" label="Users" @click="$goto('UsersList')" />
         </template>
 
         <template #right>
-          <Button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" label="Search" @click="openSearch" />
         </template>
-      </PageToolbar>
+      </os-page-toolbar>
 
-      <ListView
+      <os-list-view
         :data="ctx.userGroups"
         :columns="listSchema.columns"
         :filters="listSchema.filters"
@@ -38,31 +38,21 @@
         ref="listView"
       >
         <template #rowActions="{rowObject}">
-          <ButtonGroup>
-            <Button left-icon="edit"   size="small" @click="editGroup(rowObject)"   />
-            <Button left-icon="trash"  size="small" @click="deleteGroup(rowObject)" />
-          </ButtonGroup>
+          <os-button-group>
+            <os-button left-icon="edit"   size="small" @click="editGroup(rowObject)"   />
+            <os-button left-icon="trash"  size="small" @click="deleteGroup(rowObject)" />
+          </os-button-group>
         </template>
-      </ListView>
+      </os-list-view>
 
-      <DeleteObject ref="deleteGroup" :input="ctx.deleteGroupOpts" />
-    </PageBody>
-  </Page>
+      <os-delete-object ref="deleteGroup" :input="ctx.deleteGroupOpts" />
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
 
 import { reactive } from 'vue';
-
-import Page from '@/common/components/Page.vue';
-import PageHeader from '@/common/components/PageHeader.vue';
-import PageBody from '@/common/components/PageBody.vue';
-import PageToolbar from '@/common/components/PageToolbar.vue';
-import Button from '@/common/components/Button.vue';
-import ButtonGroup from '@/common/components/ButtonGroup.vue';
-import ListView from '@/common/components/ListView.vue';
-import ListSize from '@/common/components/ListSize.vue';
-import DeleteObject from '@/common/components/DeleteObject.vue';
 
 import listSchema from '@/administrative/user-groups/schemas/list.js';
 
@@ -72,18 +62,6 @@ import userGrpSvc from '@/administrative/services/UserGroup.js';
 
 export default {
   props: ['filters'],
-
-  components: {
-    Page,
-    PageHeader,
-    PageBody,
-    PageToolbar,
-    Button,
-    ButtonGroup,
-    ListView,
-    ListSize,
-    DeleteObject
-  },
 
   setup(props) {
     let ctx = reactive({

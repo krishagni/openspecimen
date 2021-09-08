@@ -11,25 +11,18 @@ angular.module('os.administrative.site',
     $stateProvider
       .state('site-list', {
         url: '/sites?filters',
-        templateUrl: 'modules/administrative/site/list.html',
-        controller: 'SiteListCtrl',
+        template: '<div></div>',
+        controller: function(VueApp) {
+          VueApp.setVueView('sites');
+        },
         parent: 'signed-in'
       })
       .state('site-addedit', {
         url: '/site-addedit/:siteId',
-        templateUrl: 'modules/administrative/site/addedit.html',
-        resolve: {
-          site: function($stateParams, Site) {
-            if ($stateParams.siteId) {
-              return Site.getById($stateParams.siteId);
-            }
-            return new Site();
-          },
-          extensionCtxt: function(Site) {
-            return Site.getExtensionCtxt();
-          }
+        template: '<div></div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('site-addedit/' + (+$stateParams.siteId > 0 ? +$stateParams.siteId : -1));
         },
-        controller: 'SiteAddEditCtrl',
         parent: 'signed-in'
       })
       .state('site-import', {

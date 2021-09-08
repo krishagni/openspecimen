@@ -1,24 +1,20 @@
 
 <template>
-  <Panel>
+  <os-panel>
     <template #header>
       <span>{{ctx.formDef && ctx.formDef.caption}}</span>
     </template>
 
-    <Form ref="deForm" :schema="ctx.formSchema" :data="ctx.record" @input="handleChange($event)">
-      <Button label="Save"   @click="saveRecord" />
-      <Button label="Cancel" @click="cancel" />
-    </Form>
-  </Panel>
+    <os-form ref="deForm" :schema="ctx.formSchema" :data="ctx.record" @input="handleChange($event)">
+      <os-button label="Save"   @click="saveRecord" />
+      <os-button label="Cancel" @click="cancel" />
+    </os-form>
+  </os-panel>
 </template>
 
 <script>
 
 import { reactive, watchEffect } from 'vue';
-
-import Button from '@/common/components/Button.vue';
-import Form from '@/common/components/Form.vue';
-import Panel from '@/common/components/Panel.vue';
 
 import fieldFactory from '@/common/services/FieldFactory.js';
 import routerSvc from '@/common/services/Router.js';
@@ -26,12 +22,6 @@ import formSvc from '@/forms/services/Form.js';
 
 export default {
   props: ['entity', 'formId', 'formCtxtId', 'recordId'],
-
-  components: {
-    Button,
-    Form,
-    Panel
-  },
 
   setup(props) {
     let ctx = reactive({

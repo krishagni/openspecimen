@@ -6,10 +6,10 @@
         <div class="field">
           <os-label>{{field.label}}</os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
-            v-model="ctx.formData[field.name]" v-os-tooltip.bottom="field.tooltip"
+            v-model="formModel[field.name]" v-os-tooltip.bottom="field.tooltip"
             :form="ctx" @update:model-value="handleInput(field)">
           </component>
-          <div v-if="v$.ctx.formData[field.name] && v$.ctx.formData[field.name].$error">
+          <div v-if="v$.formModel[field.name] && v$.formModel[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
           </div>
         </div>
@@ -35,52 +35,8 @@ import alertSvc from '@/common/services/Alerts.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 
-import Dropdown from '@/common/components/Dropdown.vue';
-import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
-import DatePicker from '@/common/components/DatePicker.vue';
-import InputNumber from '@/common/components/InputNumber.vue';
-import InputText from '@/common/components/InputText.vue';
-import Password from '@/common/components/Password.vue';
-import RadioButton from '@/common/components/RadioButton.vue';
-import BooleanCheckbox from '@/common/components/BooleanCheckbox.vue';
-import Checkbox from '@/common/components/Checkbox.vue';
-import Textarea from '@/common/components/Textarea.vue';
-import FileUpload from '@/common/components/FileUpload.vue';
-import SignaturePad from '@/common/components/SignaturePad.vue';
-import UserDropdown from '@/common/components/UserDropdown.vue';
-import PvDropdown from '@/common/components/PvDropdown.vue';
-import SiteDropdown from '@/common/components/SiteDropdown.vue';
-import StorageContainerDropdown from '@/common/components/StorageContainerDropdown.vue';
-import Subform from '@/common/components/Subform.vue';
-import Label from '@/common/components/Label.vue';
-import InlineMessage from '@/common/components/InlineMessage.vue';
-import Divider from '@/common/components/Divider.vue';
-
 export default {
    props: ['schema', 'data'],
-
-   components: {
-     Dropdown,
-     MultiSelectDropdown,
-     DatePicker,
-     InputText,
-     Password,
-     InputNumber,
-     RadioButton,
-     BooleanCheckbox,
-     Checkbox,
-     Textarea,
-     FileUpload,
-     SignaturePad,
-     UserDropdown,
-     PvDropdown,
-     SiteDropdown,
-     StorageContainerDropdown,
-     Subform,
-     'os-label': Label,
-     'os-inline-message': InlineMessage,
-     'os-divider': Divider
-   },
 
    emits: ['input', 'form-validity'],
 
@@ -113,9 +69,10 @@ export default {
 
    methods: {
      handleInput: function(field) {
+       exprUtil.setValue(this.ctx.formData, field.name, this.formModel[field.name]);
        this.$emit('input', {field: field, data: this.ctx.formData})
-       if (this.v$.ctx.formData[field.name]) {
-         this.v$.ctx.formData[field.name].$touch();
+       if (this.v$.formModel[field.name]) {
+         this.v$.formModel[field.name].$touch();
        }
 
        this.$emit('form-validity', {invalid: this.v$.$invalid});
@@ -171,9 +128,7 @@ export default {
      }
 
      return {
-       ctx: {
-         formData: fieldFactory.getValidationRules(fields)
-       }
+       formModel: fieldFactory.getValidationRules(fields)
      }
    },
 
@@ -207,12 +162,26 @@ export default {
        return result;
      },
 
+     //
+     // TODO: Is this efficient?
+     //
+     formModel: function() {
+       let model = {};
+       for (let row of this.schema.rows) {
+         for (let field of row.fields) {
+           model[field.name] = exprUtil.getValue(this.ctx.formData, field.name);
+         }
+       }
+
+       return model;
+     },
+
      errorMessages: function() {
        let result = {};
 
        for (let row of this.schema.rows) {
          for (let field of row.fields) {
-           let validators = this.v$.ctx.formData && this.v$.ctx.formData[field.name];
+           let validators = this.v$.formModel && this.v$.formModel[field.name];
            if (!validators) {
              continue;
            }

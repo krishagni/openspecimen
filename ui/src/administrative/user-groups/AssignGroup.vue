@@ -20,9 +20,6 @@
 import { reactive, ref } from 'vue';
 import Menu from 'primevue/menu';
 
-import Button from '@/common/components/Button.vue';
-import InputText from '@/common/components/InputText.vue';
-
 import routerSvc from '@/common/services/Router.js';
 import userGroupSvc from '@/administrative/services/UserGroup.js';
 
@@ -30,8 +27,6 @@ export default {
   emits: ['addToGroup'],
 
   components: {
-    'os-button': Button,
-    'os-input-text': InputText,
     'dropdown-menu': Menu
   },
 

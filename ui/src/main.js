@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import * as Vue from 'vue';
 import PrimeVue from 'primevue/config';
 
 // import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,6 +22,7 @@ import Root from './Root.vue'
 import alerts from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
 import authSvc from '@/common/services/Authorization.js';
+import pluginLoader from '@/common/services/PluginLoader.js';
 import settingSvc from '@/administrative/services/Setting.js';
 import userSvc from '@/administrative/services/User.js';
 import routerSvc from '@/common/services/Router.js';
@@ -29,8 +31,16 @@ import routerSvc from '@/common/services/Router.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
+import CommonComponents from '@/common/components';
+import CommonServices   from '@/common/services';
+import AdminServices    from '@/administrative/services';
+
+window['Vue'] = Vue;
 const app = createApp(Root)
-  .use(ToastService);
+  .use(ToastService)
+  .use(CommonComponents)
+  .use(CommonServices)
+  .use(AdminServices);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
@@ -98,6 +108,8 @@ filters.arrayJoin = (value) => {
 app.config.globalProperties.$goto =
   (name, params, query) => routerSvc.goto(name, params, query);
 
+app.config.globalProperties.$goback = () => routerSvc.back();
+
 alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);
 
@@ -116,7 +128,7 @@ if (http.path) {
   http.path += '/';
 }
 
-http.path += 'rest/ng'
+// http.path += 'rest/ng'
 if (params.get('token')) {
   localStorage.osAuthToken = http.headers['X-OS-API-TOKEN'] = params.get('token');
 } else {
@@ -150,10 +162,36 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
 
     ui.currentUser = currUser;
     ui.menuItems = [];
-    app.use(router)
-      .use(PrimeVue)
-      .provide('ui', ui)
-      .mount('#app');
+
+    let osSvc = window.osSvc = app.config.globalProperties.$osSvc;
+    app.provide('ui', ui);
+    app.provide('osSvc', osSvc);
+
+    let count = appProps.plugins.length;
+    appProps.plugins.forEach(
+      (pluginName) => {
+        pluginLoader.load(pluginName).then(
+          function(pluginModule) {
+            app.use(pluginModule.default, { router, osSvc });
+            --count;
+            if (count <= 0) {
+              app.use(router).use(PrimeVue)
+                .mount('#app');
+            }
+          },
+
+          function(error) {
+            console.log('Error loading the plugin: ' + pluginName);
+            console.log(error);
+            --count;
+            if (count <= 0) {
+              app.use(router).use(PrimeVue)
+                .mount('#app');
+            }
+          }
+        )
+      }
+    );
   }
 );
 

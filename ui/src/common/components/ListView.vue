@@ -22,11 +22,11 @@
             <template #body="slotProps">
               <span v-if="column.href">
                 <a :href="column.href(slotProps.data)" :target="column.hrefTarget">
-                  <span v-text="slotProps.data[column.name]"></span>
+                  <span>{{columnValue(slotProps.data, column)}}</span>
                 </a>
               </span>
               <span v-else>
-                <span v-text="slotProps.data[column.name]"></span>
+                <span>{{columnValue(slotProps.data, column)}}</span>
               </span>
             </template>
           </column>
@@ -101,6 +101,8 @@ import Dropdown from '@/common/components/Dropdown.vue';
 import Button from '@/common/components/Button.vue';
 import RadioButton from '@/common/components/RadioButton.vue';
 import Message from '@/common/components/Message.vue';
+
+import exprUtil from '@/common/services/ExpressionUtil.js';
 
 export default {
   props: [
@@ -249,6 +251,17 @@ export default {
       }
 
       this.$emit('rowClicked', row.data.rowObject);
+    },
+
+    columnValue: function(data, column) {
+      let value = undefined;
+      if (typeof column.value == 'function') {
+        value = column.value(data.rowObject);
+      } else {
+        value = exprUtil.eval(data.rowObject, column.name);
+      }
+
+      return value || '-';
     }
   },
 

@@ -1,8 +1,8 @@
 <template>
   <div>
-    <Grid>
-      <GridColumn width="3">
-        <ListGroup :list="forms" :selected="ctx.selectedForm" @on-item-select="onFormSelect($event)">
+    <os-grid>
+      <os-grid-column width="3">
+        <os-list-group :list="forms" :selected="ctx.selectedForm" @on-item-select="onFormSelect($event)">
           <template #header>
             <span>Forms</span>
           </template>
@@ -20,23 +20,23 @@
               </span>
             </div>
           </template>
-        </ListGroup>
-      </GridColumn>
-      <GridColumn width="9">
-        <Panel>
+        </os-list-group>
+      </os-grid-column>
+      <os-grid-column width="9">
+        <os-panel>
           <template #header>
             <span>
               <span class="title">{{ctx.selectedForm.formCaption}}</span>
               <span v-if="entity.isActive && entity.isUpdateAllowed">
                 <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
-                  <Button left-icon="plus" label="Add" @click="addRecord" />
+                  <os-button left-icon="plus" label="Add" @click="addRecord" />
                 </span>
                 <span v-else>
-                  <Button left-icon="edit" label="Edit" @click="editRecord(ctx.selectedRecord)" />
+                  <os-button left-icon="edit" label="Edit" @click="editRecord(ctx.selectedRecord)" />
 
-                  <Button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
+                  <os-button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
 
-                  <Button left-icon="plus" label="Add Another" @click="addRecord" />
+                  <os-button left-icon="plus" label="Add Another" @click="addRecord" />
                 </span>
               </span>
             </span>
@@ -73,10 +73,10 @@
                       <span>{{$filters.dateTime(record.updateTime)}}</span>
                     </td>
                     <td>
-                      <ButtonGroup v-if="entity.isActive && entity.isUpdateAllowed">
-                        <Button left-icon="edit" size="small" @click="editRecord(record)" />
-                        <Button left-icon="trash" size="small" @click="deleteRecord(record)" />
-                      </ButtonGroup>
+                      <os-button-group v-if="entity.isActive && entity.isUpdateAllowed">
+                        <os-button left-icon="edit" size="small" @click="editRecord(record)" />
+                        <os-button left-icon="trash" size="small" @click="deleteRecord(record)" />
+                      </os-button-group>
                     </td>
                   </tr>
                 </tbody>
@@ -86,9 +86,9 @@
           <span v-else>
             <FormRecordOverview :record="ctx.record" />
           </span>
-        </Panel>
-      </GridColumn>
-    </Grid>
+        </os-panel>
+      </os-grid-column>
+    </os-grid>
 
     <DeleteFormRecord ref="deleteFormDialog" />
   </div>
@@ -99,13 +99,6 @@
 import { reactive, watchEffect } from 'vue';
 import { useRouter } from 'vue-router'
 
-import ListGroup from '@/common/components/ListGroup.vue';
-import Grid from '@/common/components/Grid.vue';
-import GridColumn from '@/common/components/GridColumn.vue';
-import Panel from '@/common/components/Panel.vue';
-import Button from '@/common/components/Button.vue';
-import ButtonGroup from '@/common/components/ButtonGroup.vue';
-
 import FormRecordOverview from '@/forms/components/FormRecordOverview.vue';
 import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
 
@@ -115,12 +108,6 @@ export default {
   props: ['entity', 'forms', 'formId', 'formCtxtId', 'recordId'],
 
   components: {
-    ListGroup,
-    Grid,
-    GridColumn,
-    Panel,
-    Button,
-    ButtonGroup,
     FormRecordOverview,
     DeleteFormRecord
   },

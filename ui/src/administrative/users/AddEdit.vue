@@ -1,8 +1,8 @@
 <template>
-  <Page>
-    <PageHeader>
+  <os-page>
+    <os-page-head>
       <template #breadcrumb>
-        <Breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
       <span v-if="!ctx.bulkUpdate">
@@ -14,39 +14,32 @@
       <span v-else>
         <h3>Bulk Update Users</h3>
       </span>
-    </PageHeader>
-    <PageBody>
+    </os-page-head>
+
+    <os-page-body>
       <div v-if="!ctx.bulkUpdate && ctx.user">
-        <Form ref="userForm" :schema="ctx.addEditFs" :data="ctx.user" @input="handleUserChange($event)">
+        <os-form ref="userForm" :schema="ctx.addEditFs" :data="ctx.user" @input="handleUserChange($event)">
           <div>
-            <Button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate"/>
-            <Button label="Update" v-else @click="saveOrUpdate"/>
-            <Button label="Cancel" @click="cancel"/>
+            <os-button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate" />
+            <os-button label="Update" v-else @click="saveOrUpdate" />
+            <os-button label="Cancel" @click="cancel" />
           </div>
-        </Form>
+        </os-form>
       </div>
       <div v-if="ctx.bulkUpdate">
-        <Form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx.user" @input="handleUserChange($event)">
+        <os-form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx.user" @input="handleUserChange($event)">
           <div>
-            <Button label="Update" @click="bulkUpdate"/>
-            <Button label="Cancel" @click="cancel"/>
+            <os-button label="Update" @click="bulkUpdate" />
+            <os-button label="Cancel" @click="cancel" />
           </div>
-        </Form>
+        </os-form>
       </div>
-    </PageBody>
-  </Page>
+    </os-page-body>
+  </os-page>
 </template>
 
 <script>
 import { reactive } from 'vue';
-
-import Page from '@/common/components/Page.vue';
-import PageHeader from '@/common/components/PageHeader.vue';
-import Breadcrumb from '@/common/components/Breadcrumb.vue';
-import PageBody from '@/common/components/PageBody.vue';
-
-import Button from '@/common/components/Button.vue';
-import Form from '@/common/components/Form.vue';
 
 import userSchema from '@/administrative/users/user-schema.json';
 import addEditSchema from '@/administrative/users/addedit-schema.json';
@@ -63,15 +56,6 @@ export default {
   name: 'UserAddEdit',
 
   props: ['userId', 'editProfile'],
-
-  components: {
-    Page,
-    PageHeader,
-    Breadcrumb,
-    PageBody,
-    Form,
-    Button
-  },
 
   setup(props) {
     let ctx = reactive({

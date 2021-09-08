@@ -10,6 +10,10 @@ class Setting {
   async getLocale() {
     return http.get('config-settings/locale');
   }
+
+  async getPasswordRules() {
+    return http.get('config-settings/password');
+  }
 }
 
 export default new Setting();

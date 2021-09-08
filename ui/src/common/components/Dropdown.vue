@@ -131,7 +131,15 @@ export default {
 
       let selected = undefined;
       if (ls.options) {
-        selected = ls.options.find((option) => option[ls.selectProp] == this.modelValue);
+        selected = ls.options.find(
+          (option) => {
+            if (ls.selectProp) {
+              return option[ls.selectProp] == this.modelValue;
+            } else {
+              return option == this.modelValue;
+            }
+          }
+        );
         selected = (selected && [selected]) || [];
       } else if (typeof ls.loadFn == 'function') {
         selected = await ls.loadFn(searchOpts);
@@ -145,9 +153,13 @@ export default {
 
     dedup(options) {
       let ls = this.listSource;
+      let selectProp = ls.selectProp || 'id';
       let optionsMap = options.reduce(
-        (acc, e) => {
-          acc[e[ls.selectProp]] = e;
+        (acc, option) => {
+          if (!acc[option[selectProp]]) {
+            acc[option[selectProp]] = option;
+          }
+
           return acc;
         },
         {}
@@ -191,8 +203,9 @@ export default {
         return;
       }
 
+      let selectProp = this.listSource.selectProp || 'id';
       this.cache = this.cache || {};
-      this.cache[newVal[this.listSource.selectProp]] = newVal;
+      this.cache[newVal[selectProp]] = newVal;
     },
 
     modelValue: async function() {

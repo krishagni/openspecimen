@@ -114,6 +114,33 @@ const routes = [
         component: () => import(/* webpackChunkName: "user-groups" */ '../administrative/user-groups/AddEdit.vue'),
         props: (route) => ({groupId: route.params && route.params.groupId})
       },
+
+
+      {
+        path: 'sites',
+        name: 'SitesList',
+        component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+      {
+        path: 'site-addedit/:siteId',
+        name: 'SiteAddEdit',
+        component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/AddEdit.vue'),
+        props: (route) => ({siteId: route.params && route.params.siteId})
+      },
+      {
+        path: 'sites/:siteId',
+        name: 'SiteDetail',
+        component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Detail.vue'),
+        props: (route) => ({siteId: route.params && route.params.siteId}),
+        children: [
+          {
+            path: 'overview',
+            name: 'SiteOverview',
+            component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Overview.vue')
+          }
+        ]
+      }
     ]
   }
 ]
