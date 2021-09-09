@@ -1,5 +1,8 @@
 
 import http from '@/common/services/HttpClient.js';
+import formUtil from '@/common/services/FormUtil.js';
+
+import siteSchema from '@/administrative/schemas/sites/site.js';
 
 class Site {
   async getSites(filterOpts) {
@@ -46,6 +49,24 @@ class Site {
         }
 
         return http.get('forms/' + resp.formId + '/definition');
+      }
+    );
+  }
+
+  async getDict() {
+    let result = JSON.parse(JSON.stringify(siteSchema.fields)); // copy
+    return http.get('sites/extension-form').then(
+      function(extensionCtxt) {
+        if (!extensionCtxt || !extensionCtxt.formId) {
+          return result;
+        }
+
+        return http.get('forms/' + extensionCtxt.formId + '/definition').then(
+          function(formDef) {
+            let customFields = formUtil.deFormToDict(formDef, 'site.extensionDetail.attrsMap.');
+            return result.concat(customFields);
+          }
+        );
       }
     );
   }

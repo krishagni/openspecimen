@@ -25,8 +25,8 @@
 <script>
 import { reactive, inject } from 'vue';
 
-import siteSchema    from '@/administrative/sites/schemas/site.js';
-import addEditSchema from '@/administrative/sites/schemas/addedit.js';
+import siteSchema    from '@/administrative/schemas/sites/site.js';
+import addEditSchema from '@/administrative/schemas/sites/addedit.js';
 
 import alertSvc  from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';

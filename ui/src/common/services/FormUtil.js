@@ -46,6 +46,25 @@ class FormUtil {
     );
   }
 
+  deFormToDict(formDef, namePrefix) {
+    if (!formDef || !formDef.rows) {
+      return [];
+    }
+
+    return formDef.rows.map(
+      (row) => row.map(
+        (field) => {
+          let fieldSchema = {source: 'de', ...fieldFactory.getFieldSchema(field, namePrefix)};
+          if (fieldSchema.type == 'subform') {
+            fieldSchema.fields.forEach(field => field.source = 'de');
+          }
+
+          return fieldSchema.type && fieldSchema;
+        }
+      )
+    ).flatMap(row => row).filter(field => !!field);
+  }
+
   fromDeToStdSchema(formDef, namePrefix) {
     let schema = { rows: [] };
     let dvRec = {}; // default values record
@@ -75,36 +94,37 @@ class FormUtil {
     return { schema, defaultValues: dvRec};
   }
 
-  createCustomFieldsMap(object) {
+  createCustomFieldsMap(object, useDisplayValue) {
     let extnDetail = object.extensionDetail;
     if (!extnDetail || !extnDetail.attrs) {
       return;
     }
 
-    let valueMap = this._createCustomFieldsMap(extnDetail.attrs);
+    let valueMap = this._createCustomFieldsMap(extnDetail.attrs, useDisplayValue);
     extnDetail.attrsMap = Object.assign(valueMap, {id: extnDetail.id, containerId: extnDetail.formId});
   }
 
-  _createCustomFieldsMap(attrs) {
+  _createCustomFieldsMap(attrs, useDisplayValue) {
     let valueMap = {};
 
     for (let attr of attrs) {
-      if (attr.type == 'datePicker') {
+      let value = attr.value;
+      if (attr.type == 'subForm') {
+        value = (attr.value || []).map(sfAttrs => this._createCustomFieldsMap(sfAttrs, useDisplayValue));
+      } else if (attr.type != 'fileUpload' && useDisplayValue && attr.displayValue) {
+        value = attr.displayValue;
+      } else if (attr.type == 'datePicker') {
         if (!isNaN(attr.value) && !isNaN(parseInt(attr.value))) {
-          attr.value = new Date(parseInt(attr.value));
+          value = new Date(parseInt(attr.value));
         } else if (!!attr.value || attr.value === 0) {
-          attr.value = new Date(attr.value);
+          value = new Date(attr.value);
         }
       }
 
-      valueMap[attr.name] = attr.type != 'subForm' ? attr.value : this._createSubformFieldMap(attr);
+      valueMap[attr.name] = value;
     }
 
     return valueMap;
-  }
-
-  _createSubformFieldMap(sf) {
-    return (sf.value || []).map(attrs => this._createCustomFieldsMap(attrs));
   }
 }
 

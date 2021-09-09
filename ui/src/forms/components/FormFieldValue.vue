@@ -47,8 +47,10 @@ export default {
         return this.$filters.boolValue(this.field.value);
       } else if (this.field.displayValue) {
         return this.field.displayValue;
-      } else {
+      } else if (this.field.value instanceof Array) {
         return this.$filters.arrayJoin(this.field.value);
+      } else {
+        return this.field.value;
       }
     }
   }
