@@ -96,7 +96,7 @@ export default {
       let simpleFields = [], textAreaFields = [], subformFields = [];
       for (let field of this.schema) {
         if (field.type == 'subform') {
-          let collection = exprUtil.getValue(this.object, field.name);
+          let collection = exprUtil.getValue(this.object, field.name) || [];
           let values = collection.map(element => field.fields.map(sfField => this.getValue(element, sfField)));
           subformFields.push({...field, value: values});
         } else {

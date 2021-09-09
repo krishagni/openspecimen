@@ -66,7 +66,7 @@
 
 <script>
 
-import listSchema from './schemas/list.js';
+import listSchema from '@/administrative/schemas/sites/list.js';
 
 import alertSvc   from '@/common/services/Alerts.js';
 import exportSvc  from '@/common/services/ExportService.js';

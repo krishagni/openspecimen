@@ -25,9 +25,6 @@
 <script>
 import { reactive, inject } from 'vue';
 
-import siteSchema    from '@/administrative/schemas/sites/site.js';
-import addEditSchema from '@/administrative/schemas/sites/addedit.js';
-
 import alertSvc  from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
 import formUtil  from '@/common/services/FormUtil.js';
@@ -47,7 +44,7 @@ export default {
         {url: routerSvc.getUrl('SitesList'), label: 'Sites'}
       ],
 
-      addEditFs: formUtil.getFormSchema(siteSchema.fields, addEditSchema.layout)
+      addEditFs: {rows: []}
     });
 
     let dataCtx = reactive({
@@ -56,15 +53,15 @@ export default {
       currentUser: ui.currentUser
     });
 
-    let promises = [ siteSvc.getCustomFieldsForm() ];
+    let promises = [ siteSvc.getAddEditFormSchema() ];
     if (props.siteId && +props.siteId > 0) {
       promises.push(siteSvc.getSite(+props.siteId));
     }
 
     Promise.all(promises).then(
       function(result) {
-        const { schema, defaultValues }   = formUtil.fromDeToStdSchema(result[0], 'site.extensionDetail.attrsMap.');
-        ctx.addEditFs.rows = ctx.addEditFs.rows.concat(schema.rows);
+        const { schema, defaultValues }   = result[0];
+        ctx.addEditFs = schema;
 
         if (result.length > 1) {
           dataCtx.site = result[1];
