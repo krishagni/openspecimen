@@ -31,9 +31,13 @@ export default {
           } catch {
             return new Date(this.modelValue);
           }
+        } else if (typeof this.modelValue == 'number') {
+          return new Date(this.modelValue);
+        } else if (this.modelValue instanceof Date) {
+          return this.modelValue;
         }
 
-        return this.modelValue;
+        return null;
       },
 
       set(value) {

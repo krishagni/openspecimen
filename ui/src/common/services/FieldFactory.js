@@ -63,9 +63,9 @@ class FieldFactory {
     return rules;
   }
 
-  getFieldSchema(field) {
+  getFieldSchema(field, namePrefix) {
     let fs = {
-      name: field.udn,
+      name: (namePrefix || '') + field.udn,
       label: field.caption,
       tooltip: field.toolTip,
       showWhen: field.showWhen

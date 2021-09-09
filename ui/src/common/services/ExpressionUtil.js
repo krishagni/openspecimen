@@ -109,14 +109,13 @@ class ExpressionUtil {
   }
 
   setValue(object, name, value) {
-    if (!name) {
+    if (!object || !name) {
       return;
     }
 
-    object = object || {};
     let props = name.split('.');
     for (let i = 0; i < props.length - 1; ++i) {
-      object = object[props[i]] || {};
+      object = object[props[i]] = object[props[i]] || {};
     }
 
     object[props[props.length - 1]] = value;

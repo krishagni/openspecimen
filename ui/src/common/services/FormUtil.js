@@ -1,4 +1,6 @@
 
+import fieldFactory from '@/common/services/FieldFactory.js';
+
 class FormUtil {
 
   getFormSchema(baseSchema, layoutSchema) {
@@ -42,6 +44,67 @@ class FormUtil {
         );
       }
     );
+  }
+
+  fromDeToStdSchema(formDef, namePrefix) {
+    let schema = { rows: [] };
+    let dvRec = {}; // default values record
+
+    if (!formDef || !formDef.rows) {
+      return { schema, defaultValues: dvRec};
+    }
+
+    formDef.rows.forEach(
+      (row) => {
+        let rowSchema = {fields: []};
+        row.forEach(
+          (field) => {
+            let fieldSchema = fieldFactory.getFieldSchema(field, namePrefix);
+            if (fieldSchema.type) {
+              rowSchema.fields.push(fieldSchema);
+              if (fieldSchema.defaultValue) {
+                dvRec[field.name] = fieldSchema.defaultValue;
+              }
+            }
+          }
+        );
+        schema.rows.push(rowSchema);
+      }
+    );
+
+    return { schema, defaultValues: dvRec};
+  }
+
+  createCustomFieldsMap(object) {
+    let extnDetail = object.extensionDetail;
+    if (!extnDetail || !extnDetail.attrs) {
+      return;
+    }
+
+    let valueMap = this._createCustomFieldsMap(extnDetail.attrs);
+    extnDetail.attrsMap = Object.assign(valueMap, {id: extnDetail.id, containerId: extnDetail.formId});
+  }
+
+  _createCustomFieldsMap(attrs) {
+    let valueMap = {};
+
+    for (let attr of attrs) {
+      if (attr.type == 'datePicker') {
+        if (!isNaN(attr.value) && !isNaN(parseInt(attr.value))) {
+          attr.value = new Date(parseInt(attr.value));
+        } else if (!!attr.value || attr.value === 0) {
+          attr.value = new Date(attr.value);
+        }
+      }
+
+      valueMap[attr.name] = attr.type != 'subForm' ? attr.value : this._createSubformFieldMap(attr);
+    }
+
+    return valueMap;
+  }
+
+  _createSubformFieldMap(sf) {
+    return (sf.value || []).map(attrs => this._createCustomFieldsMap(attrs));
   }
 }
 

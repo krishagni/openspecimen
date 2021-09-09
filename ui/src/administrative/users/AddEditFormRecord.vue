@@ -16,7 +16,7 @@
 
 import { reactive, watchEffect } from 'vue';
 
-import fieldFactory from '@/common/services/FieldFactory.js';
+import formUtil from '@/common/services/FormUtil.js';
 import routerSvc from '@/common/services/Router.js';
 import formSvc from '@/forms/services/Form.js';
 
@@ -34,29 +34,9 @@ export default {
       () => {
         formSvc.getDefinition(props.formId).then(
           (formDef) => {
-            let schema = { rows: [] };
-            let dvRec = {}; // default values record
-
-            formDef.rows.forEach(
-              (row) => {
-                let rowSchema = {fields: []};
-                row.forEach(
-                  (field) => {
-                    let fieldSchema = fieldFactory.getFieldSchema(field);
-                    if (fieldSchema.type) {
-                      rowSchema.fields.push(fieldSchema);
-                      if (fieldSchema.defaultValue) {
-                        dvRec[field.name] = fieldSchema.defaultValue;
-                      }
-                    }
-                  }
-                );
-                schema.rows.push(rowSchema);
-              }
-            );
-
+            const { schema, dvRec } = formUtil.fromDeToStdSchema(formDef);
             ctx.formSchema = schema;
-            ctx.formDef = formDef;
+            ctx.formDef    = formDef;
             if (!props.recordId) {
               ctx.record = dvRec;
             }

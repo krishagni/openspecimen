@@ -47,7 +47,7 @@ export default {
         {url: routerSvc.getUrl('SitesList'), label: 'Sites'}
       ],
 
-      addEditFs: {rows: []}
+      addEditFs: formUtil.getFormSchema(siteSchema.fields, addEditSchema.layout)
     });
 
     let dataCtx = reactive({
@@ -56,13 +56,31 @@ export default {
       currentUser: ui.currentUser
     });
 
+    let promises = [ siteSvc.getCustomFieldsForm() ];
     if (props.siteId && +props.siteId > 0) {
-      siteSvc.getSite(+props.siteId).then(site => dataCtx.site = site);
-    } else if (!ui.currentUser.admin) {
-      dataCtx.site.instituteName = ui.currentUser.instituteName;
+      promises.push(siteSvc.getSite(+props.siteId));
     }
 
-    ctx.addEditFs = formUtil.getFormSchema(siteSchema.fields, addEditSchema.layout);
+    Promise.all(promises).then(
+      function(result) {
+        const { schema, defaultValues }   = formUtil.fromDeToStdSchema(result[0], 'site.extensionDetail.attrsMap.');
+        ctx.addEditFs.rows = ctx.addEditFs.rows.concat(schema.rows);
+
+        if (result.length > 1) {
+          dataCtx.site = result[1];
+          formUtil.createCustomFieldsMap(dataCtx.site);
+        } else {
+          if (Object.keys(defaultValues).length > 0) {
+            dataCtx.site.extensionDetail = {attrsMap: defaultValues};
+          }
+
+          if (!ui.currentUser.admin) {
+            dataCtx.site.instituteName = ui.currentUser.instituteName;
+          }
+        }
+      }
+    );
+
     return { ctx, dataCtx };
   },
 

@@ -38,6 +38,17 @@ class Site {
     return http.get('sites/' + site.id + '/dependent-entities');
   }
 
+  async getCustomFieldsForm() {
+    return http.get('sites/extension-form').then(
+      function(resp) {
+        if (!resp || !resp.formId) {
+          return null;
+        }
+
+        return http.get('forms/' + resp.formId + '/definition');
+      }
+    );
+  }
 }
 
 export default new Site();
