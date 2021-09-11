@@ -71,7 +71,6 @@ export default {
     });
 
     if (props.userId && +props.userId > 0) {
-      userSvc.getUserById(+props.userId).then(user => ctx.user = user);
       if (!props.editProfile || props.editProfile != true) {
         ctx.addEditFs = formUtil.getFormSchema(userSchema, addEditSchema);
       } else {
@@ -95,9 +94,24 @@ export default {
     return { ctx };
   },
 
+  created() {
+    if (this.userId && +this.userId > 0) {
+      userSvc.getUserById(+this.userId).then(
+        user => {
+          this.ctx.user = user;
+          this.selectedInstitute = user.instituteName;
+        }
+      );
+    }
+  },
+
   methods: {
-    handleUserChange: function(event) {
-      Object.assign(this.ctx.user, event.data);
+    handleUserChange: function({field, value, data}) {
+      Object.assign(this.ctx.user, data);
+      if (field.name == 'instituteName' && this.selectedInstitute != value) {
+        this.selectedInstitute = value;
+        this.ctx.user.primarySite = undefined;
+      }
     },
 
     saveOrUpdate: function() {
