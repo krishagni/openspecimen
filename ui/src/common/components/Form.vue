@@ -42,7 +42,7 @@ export default {
 
    setup(props) {
      let ctx = reactive({
-       formData: props.data,
+       formData: props.data || {},
        fd: function(name) {
          let object = ctx.formData;
          if (!name) {

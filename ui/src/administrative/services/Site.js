@@ -1,5 +1,9 @@
 
 import http from '@/common/services/HttpClient.js';
+import formUtil from '@/common/services/FormUtil.js';
+
+import siteSchema    from '@/administrative/schemas/sites/site.js';
+import addEditLayout from '@/administrative/schemas/sites/addedit.js';
 
 class Site {
   async getSites(filterOpts) {
@@ -46,6 +50,27 @@ class Site {
         }
 
         return http.get('forms/' + resp.formId + '/definition');
+      }
+    );
+  }
+
+  async getDict() {
+    let result = JSON.parse(JSON.stringify(siteSchema.fields)); // copy
+    return this.getCustomFieldsForm().then(
+      function(formDef) {
+        let customFields = formUtil.deFormToDict(formDef, 'site.extensionDetail.attrsMap.');
+        return result.concat(customFields);
+      }
+    );
+  }
+
+  async getAddEditFormSchema() {
+    return this.getCustomFieldsForm().then(
+      function(formDef) {
+        const addEditFs = formUtil.getFormSchema(siteSchema.fields, addEditLayout.layout);
+        const { schema, defaultValues }   = formUtil.fromDeToStdSchema(formDef, 'site.extensionDetail.attrsMap.');
+        addEditFs.rows = addEditFs.rows.concat(schema.rows);
+        return { schema: addEditFs, defaultValues };
       }
     );
   }

@@ -34,11 +34,11 @@ export default {
       () => {
         formSvc.getDefinition(props.formId).then(
           (formDef) => {
-            const { schema, dvRec } = formUtil.fromDeToStdSchema(formDef);
+            const { schema, defaultValues } = formUtil.fromDeToStdSchema(formDef);
             ctx.formSchema = schema;
             ctx.formDef    = formDef;
             if (!props.recordId) {
-              ctx.record = dvRec;
+              ctx.record = defaultValues;
             }
           }
         );

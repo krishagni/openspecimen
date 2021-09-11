@@ -174,6 +174,10 @@ a:focus, a:hover {
   float: left;
 }
 
+.os-key-values .item .value img {
+  width: 100%;
+}
+
 .os-key-values .item .key {
   color: #707070;
   font-weight: normal;

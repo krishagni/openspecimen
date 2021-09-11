@@ -11,7 +11,7 @@
 
   <os-grid>
     <os-grid-column width="8">
-      <os-overview :schema="siteSchema.fields" :object="ctx" />
+      <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
     </os-grid-column>
 
     <os-grid-column width="4">
@@ -24,8 +24,6 @@
 
 <script>
 import { reactive, watchEffect } from 'vue';
-
-import siteSchema from '@/administrative/sites/schemas/site.js';
 
 import routerSvc from '@/common/services/Router.js';
 import siteSvc from '@/administrative/services/Site.js';
@@ -41,7 +39,9 @@ export default {
 
       deleteOpts: {},
 
-      siteObjs: []
+      siteObjs: [],
+
+      dict: []
     });
 
     
@@ -58,7 +58,8 @@ export default {
       }
     );
 
-    return { ctx, siteSchema };
+    siteSvc.getDict().then(dict => ctx.dict = dict);
+    return { ctx };
   },
 
   computed: {

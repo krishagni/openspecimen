@@ -31,6 +31,7 @@
 import { reactive } from 'vue';
 
 import routerSvc   from '@/common/services/Router.js';
+import formUtil    from '@/common/services/FormUtil.js';
 import siteSvc     from '@/administrative/services/Site.js';
 
 export default {
@@ -45,7 +46,13 @@ export default {
       ]
     });
 
-    siteSvc.getSite(+props.siteId).then(site => ctx.site = site);
+    siteSvc.getSite(+props.siteId).then(
+      (site) => {
+        ctx.site = site;
+        formUtil.createCustomFieldsMap(site, true);
+      }
+    );
+
     return { ctx };
   },
 
