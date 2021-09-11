@@ -41,7 +41,7 @@
         <span>{{field.label}}</span>
       </template>
       <template #content>
-        <div class="sf-table">
+        <div class="os-sf-table">
           <table class="os-table muted-header os-border">
             <thead>
               <tr>
@@ -164,9 +164,9 @@ export default {
 
 <style scoped>
 
-.sf-table {
+.os-sf-table {
   width: 100%;
-  padding: 2px 5px;
+  padding: 0.125rem 0.250rem;
   overflow-x: auto;
 }
 
