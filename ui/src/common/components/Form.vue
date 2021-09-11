@@ -70,7 +70,7 @@ export default {
    methods: {
      handleInput: function(field) {
        exprUtil.setValue(this.ctx.formData, field.name, this.formModel[field.name]);
-       this.$emit('input', {field: field, data: this.ctx.formData})
+       this.$emit('input', {field: field, value: this.formModel[field.name], data: this.ctx.formData})
        if (this.v$.formModel[field.name]) {
          this.v$.formModel[field.name].$touch();
        }
