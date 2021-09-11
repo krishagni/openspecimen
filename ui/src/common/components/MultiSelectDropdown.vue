@@ -57,12 +57,7 @@ export default {
 
   methods: {
     async loadOptions() {
-      if (this.ctx.optionsLoaded) {
-        return;
-      }
-
       this.searchOptions();
-      this.ctx.optionsLoaded = true;
     },
 
     async searchOptions(event) {
@@ -81,7 +76,6 @@ export default {
           }
         );
       } else if (typeof this.listSource.apiUrl == 'string') {
-        let self = this;
         let ls = this.listSource;
 
         let params = {maxResults: 100};
@@ -102,11 +96,14 @@ export default {
           }
         }
 
-        http.get(this.listSource.apiUrl, params).then(
-          function(options) {
-            self.ctx.options = self.dedup(selectedVals.concat(options));
-          }
-        );
+        let key = this.queryString(params);
+        this.cachedQueries = this.cachedQueries || {};
+        let options = this.cachedQueries[key];
+        if (!options) {
+          this.cachedQueries[key] = options = await http.get(this.listSource.apiUrl, params);
+        }
+
+        this.ctx.options = this.dedup(selectedVals.concat(options));
       }
     },
 
@@ -180,6 +177,23 @@ export default {
       return Object.keys(optionsMap).map((key) => optionsMap[key]);
     },
 
+    queryString(params) {
+      return Object.keys(params || {}).sort().reduce(
+        (result, param) => {
+          if (result) {
+            result += '&';
+          }
+
+          if (params[param]) {
+            result += param + '=' + params[param];
+          }
+
+          return result;
+        },
+        ''
+      );
+    },
+
     onChange: function() {
       this.optionSelected = true;
     }
@@ -222,7 +236,7 @@ export default {
     modelValue: async function() {
       if (!this.optionSelected) {
         let selectedVals = await this.selectedValues();
-        if (this.ctx.optionsLoaded && this.ctx.options) {
+        if (this.ctx.options) {
           this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
         } else {
           this.ctx.options = selectedVals;
