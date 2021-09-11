@@ -65,7 +65,7 @@ class FieldFactory {
 
   getFieldSchema(field, namePrefix) {
     let fs = {
-      name: (namePrefix || '') + field.udn,
+      name: (namePrefix || '') + field.name,
       label: field.caption,
       tooltip: field.toolTip,
       showWhen: field.showWhen

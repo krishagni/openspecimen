@@ -17,22 +17,24 @@
           <span v-html="sf.caption"></span>
         </template>
         <template #content>
-          <table class="os-table muted-header os-border">
-            <thead>
-              <tr>
-                <th v-for="field in sf.value[0].fields" :key="field.udn">
-                  <span v-html="field.caption"></span>
-                </th>
-              </tr>
-            </thead>
-              <tbody class="os-table-body">
-              <tr class="row" v-for="(sfr, rowIdx) in sf.value" :key="rowIdx">
-                <td class="col" v-for="field in sfr.fields" :key="field.udn">
-                  <FormFieldValue :field="field" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="os-sf-table">
+            <table class="os-table muted-header os-border">
+              <thead>
+                <tr>
+                  <th v-for="field in sf.value[0].fields" :key="field.udn">
+                    <span v-html="field.caption"></span>
+                  </th>
+                </tr>
+              </thead>
+                <tbody class="os-table-body">
+                <tr class="row" v-for="(sfr, rowIdx) in sf.value" :key="rowIdx">
+                  <td class="col" v-for="field in sfr.fields" :key="field.udn">
+                    <FormFieldValue :field="field" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </template>
       </os-section>
     </template>
@@ -97,3 +99,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+.os-sf-table {
+  width: 100%;
+  overflow: auto;
+  padding: 0.125rem 0.250rem;
+}
+
+</style>

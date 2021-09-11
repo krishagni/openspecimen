@@ -1,5 +1,5 @@
 
-import routerSvc from '@/common/services/Router.js';
+import routerSvc    from '@/common/services/Router.js';
 import instituteSvc from '@/administrative/services/Institute.js';
 
 export default {
