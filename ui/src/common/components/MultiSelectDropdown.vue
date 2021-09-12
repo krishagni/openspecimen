@@ -11,7 +11,7 @@
         :show-clear="showClear"
         @change="onChange"
         @show="loadOptions"
-        @filter="searchOptions($event)"
+        @filter="filterOptions($event)"
       />
       <label>{{$attrs.placeholder}}</label>
     </div>
@@ -25,7 +25,7 @@
         :show-clear="showClear"
         @change="onChange"
         @show="loadOptions"
-        @filter="searchOptions($event)"
+        @filter="filterOptions($event)"
       />
     </div>
   </div>
@@ -57,11 +57,16 @@ export default {
   },
 
   methods: {
-    async loadOptions() {
-      this.searchOptions();
+    async filterOptions(event) {
+      if (this.filterTimeout) {
+        clearTimeout(this.filterTimeout);
+        this.filterTimeout = null;
+      }
+
+      this.filterTimeout = setTimeout(() => this.loadOptions(event), this.$ui.global.appProps.searchDelay || 500);
     },
 
-    async searchOptions(event) {
+    async loadOptions(event) {
       let query = (event && event.value) || '';
       query = query.toLowerCase();
 
