@@ -117,9 +117,9 @@ export default {
         return [this.modelValue];
       }
 
-      this.cache = this.cache || {};
-      if (Object.prototype.hasOwnProperty.call(this.cache, this.modelValue)) {
-        return this.cache[this.modelValue];
+      this.cachedModels = this.cachedModels || {};
+      if (Object.prototype.hasOwnProperty.call(this.cachedModels, this.modelValue)) {
+        return this.cachedModels[this.modelValue];
       }
 
       let ls = this.listSource;
@@ -144,7 +144,7 @@ export default {
         selected = await http.get(ls.apiUrl, searchOpts);
       }
 
-      this.cache[this.modelValue] = selected;
+      this.cachedModels[this.modelValue] = selected;
       return selected;
     },
 
@@ -183,7 +183,6 @@ export default {
     },
 
     onChange: function() {
-      this.optionSelected = true;
     }
   },
 
@@ -212,27 +211,16 @@ export default {
   },
 
   watch: {
-    selected: function(newVal) {
-      if (!newVal) {
-        return;
-      }
-
-      let selectProp = this.listSource.selectProp || 'id';
-      this.cache = this.cache || {};
-      this.cache[newVal[selectProp]] = newVal;
+    selected: function() {
     },
 
     modelValue: async function() {
-      if (!this.optionSelected) {
-        let selectedVal = await this.selectedValue();
-        if (this.ctx.options) {
-          this.ctx.options = this.dedup(selectedVal.concat(this.ctx.options));
-        } else {
-          this.ctx.options = selectedVal;
-        }
+      let selectedVal = await this.selectedValue();
+      if (this.ctx.options) {
+        this.ctx.options = this.dedup(selectedVal.concat(this.ctx.options));
+      } else {
+        this.ctx.options = selectedVal;
       }
-
-      this.optionSelected = false;
     }
   },
 

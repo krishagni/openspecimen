@@ -79,7 +79,23 @@ class HttpClient {
   }
 
   config(params) {
-    return {headers: this.headers, params: params}
+    if (params) {
+      params = Object.keys(params).reduce(
+        (urlSearchParams, name) => {
+          let value = params[name];
+          if (value instanceof Array) {
+            value.forEach(element => urlSearchParams.append(name, element));
+          } else {
+            urlSearchParams.append(name, value);
+          }
+
+          return urlSearchParams;
+        },
+        new URLSearchParams()
+      );
+    }
+
+    return {headers: this.headers, params: params};
   }
 
   promise(apiCall) {

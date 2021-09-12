@@ -116,13 +116,13 @@ export default {
         return this.modelValue;
       }
 
-      this.cache = this.cache || {};
+      this.cachedModels = this.cachedModels || {};
 
       let cached = [], toGet = [];
       for (let item of this.modelValue) {
-        if (Object.prototype.hasOwnProperty.call(this.cache, item)) {
-          if (this.cache[item]) {
-            cached.push(this.cache[item]);
+        if (Object.prototype.hasOwnProperty.call(this.cachedModels, item)) {
+          if (this.cachedModels[item]) {
+            cached.push(this.cachedModels[item]);
           }
         } else {
           toGet.push(item);
@@ -148,7 +148,7 @@ export default {
       }
 
       if (selected instanceof Array) {
-        selected.forEach((item) => this.cache[item[ls.selectProp || 'id']] = item);
+        selected.forEach((item) => this.cachedModels[item[ls.selectProp || 'id']] = item);
       }
 
       let indices = {};
@@ -195,7 +195,6 @@ export default {
     },
 
     onChange: function() {
-      this.optionSelected = true;
     }
   },
 
@@ -224,26 +223,16 @@ export default {
   },
 
   watch: {
-    selected: function(newVal) {
-      this.cache = this.cache || {};
-      if (!newVal) {
-        return;
-      }
-
-      newVal.forEach((item) => this.cache[item[this.listSource.selectProp || 'id']] = item);
+    selected: function() {
     },
 
     modelValue: async function() {
-      if (!this.optionSelected) {
-        let selectedVals = await this.selectedValues();
-        if (this.ctx.options) {
-          this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
-        } else {
-          this.ctx.options = selectedVals;
-        }
+      let selectedVals = await this.selectedValues();
+      if (this.ctx.options) {
+        this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
+      } else {
+        this.ctx.options = selectedVals;
       }
-
-      this.optionSelected = false;
     }
   },
 

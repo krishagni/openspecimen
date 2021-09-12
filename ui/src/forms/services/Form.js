@@ -3,7 +3,37 @@ import http from '@/common/services/HttpClient.js';
 
 class Form {
   async getDefinition(formId) {
-    return http.get('forms/' + formId + '/definition');
+    return http.get('forms/' + formId + '/definition', {maxPvs: 100}).then(
+      (formDef) => {
+        formDef.id = formId;
+        formDef.rows.forEach(row => row.forEach(
+          (field) => {
+            field.formId = formId;
+            if (field.type == 'subForm') {
+              field.rows.forEach(sfRow => sfRow.forEach(
+                sfField => {
+                  sfField.formId = formId;
+                  sfField.fqn = field.name + '.' + sfField.name;
+                }
+              ));
+            } else {
+              field.fqn = field.name;
+            }
+          }
+        ));
+
+        return formDef;
+      }
+    );
+  }
+
+  async getPvs(formId, fieldName, query) {
+    let params = {controlName: fieldName};
+    if (query) {
+      params.searchString = query;
+    }
+
+    return http.get('forms/' + formId + '/permissible-values', params);
   }
 
   async getRecord(record, opts) {

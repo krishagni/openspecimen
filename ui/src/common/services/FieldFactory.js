@@ -3,6 +3,7 @@ import * as Validators from '@vuelidate/validators';
 import { requiredIf } from '@vuelidate/validators';
 
 import http from '@/common/services/HttpClient.js';
+import formSvc from '@/forms/services/Form.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 
 class FieldFactory {
@@ -102,19 +103,11 @@ class FieldFactory {
       }
     } else if (field.type == 'combobox') {
       fs.type = 'dropdown';
-      fs.listSource = {
-        options: (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value})),
-        displayProp: 'caption',
-        selectProp: 'value'
-      }
+      fs.listSource = this.getListSource(field);
       fs.defaultValue = this.getDefaultOption(field);
     } else if (field.type == 'multiSelectListbox') {
       fs.type = 'multiselect';
-      fs.listSource = {
-        options: (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value})),
-        displayProp: 'caption',
-        selectProp: 'value'
-      }
+      fs.listSource = this.getListSource(field);
       fs.defaultValue = this.getDefaultOption(field);
       if (fs.defaultValue) {
         fs.defaultValue = [fs.defaultValue];
@@ -197,6 +190,30 @@ class FieldFactory {
     }
 
     return undefined;
+  }
+
+  getListSource(field) {
+    let ls = {
+      options: (field.pvs || []).map((pv) => ({caption: pv.optionName || pv.value, value: pv.value})),
+      displayProp: 'caption',
+      selectProp: 'value'
+    }
+
+    let defOptions = ls.options;
+    if (field.pvs && field.pvs.length >= 100) {
+      ls.searchProp = 'query';
+      ls.options = undefined;
+      ls.loadFn = async function({query}) {
+        if (!query) {
+          return defOptions;
+        } else {
+          let pvs = await formSvc.getPvs(field.formId, field.fqn, query);
+          return pvs.map(pv => ({caption: pv.optionName || pv.value, value: pv.value}));
+        }
+      }
+    }
+
+    return ls;
   }
 }
 

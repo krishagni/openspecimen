@@ -78,9 +78,13 @@ class FormUtil {
         let rowSchema = {fields: []};
         row.forEach(
           (field) => {
-            let fieldSchema = fieldFactory.getFieldSchema(field, namePrefix);
+            let fieldSchema = {source: 'de', ...fieldFactory.getFieldSchema(field, namePrefix)};
             if (fieldSchema.type) {
               rowSchema.fields.push(fieldSchema);
+              if (fieldSchema.type == 'subform') {
+                fieldSchema.fields.forEach(sfField => sfField.source = 'de');
+              }
+
               if (fieldSchema.defaultValue) {
                 dvRec[field.name] = fieldSchema.defaultValue;
               }
