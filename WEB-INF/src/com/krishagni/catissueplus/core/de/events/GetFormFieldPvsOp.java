@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.de.events;
 
+import java.util.List;
+
 public class GetFormFieldPvsOp {
 	private Long formId;
 
@@ -7,7 +9,7 @@ public class GetFormFieldPvsOp {
 	
 	private String controlName;
 	
-	private String searchString;
+	private List<String> queries;
 
 	private boolean useUdn;
 	
@@ -37,12 +39,12 @@ public class GetFormFieldPvsOp {
 		this.controlName = controlName;
 	}
 
-	public String getSearchString() {
-		return searchString;
+	public List<String> getQueries() {
+		return queries;
 	}
 
-	public void setSearchString(String searchString) {
-		this.searchString = searchString;
+	public void setQueries(List<String> queries) {
+		this.queries = queries;
 	}
 
 	public boolean isUseUdn() {

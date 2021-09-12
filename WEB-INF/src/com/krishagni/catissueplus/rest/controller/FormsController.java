@@ -464,7 +464,7 @@ public class FormsController {
 		boolean useUdn,
 			
 		@RequestParam(value = "searchString", required = false, defaultValue = "")
-		String searchStr,
+		List<String> queries,
 			
 		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
 		int maxResults) {
@@ -473,7 +473,7 @@ public class FormsController {
 		op.setFormId(formId);
 		op.setControlName(controlName);
 		op.setUseUdn(useUdn);
-		op.setSearchString(searchStr);
+		op.setQueries(queries);
 		op.setMaxResults(maxResults);
 
 		ResponseEvent<List<PermissibleValue>> resp = formSvc.getPvs(getRequest(op));
@@ -498,7 +498,7 @@ public class FormsController {
 		boolean useUdn,
 
 		@RequestParam(value = "searchString", required = false, defaultValue = "")
-		String searchStr,
+		List<String> queries,
 
 		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
 		int maxResults) {
@@ -508,7 +508,7 @@ public class FormsController {
 		op.setFormName(formName);
 		op.setControlName(controlName);
 		op.setUseUdn(useUdn);
-		op.setSearchString(searchStr);
+		op.setQueries(queries);
 		op.setMaxResults(maxResults);
 
 		ResponseEvent<List<PermissibleValue>> resp = formSvc.getPvs(getRequest(op));

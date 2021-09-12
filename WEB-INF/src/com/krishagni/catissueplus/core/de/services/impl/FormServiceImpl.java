@@ -872,11 +872,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				return ResponseEvent.userError(FormErrorCode.NOT_SELECT_CONTROL, controlName);
 			}
 
-			String searchStr = input.getSearchString();
-			int maxResults = input.getMaxResults() <= 0 ? 100 : input.getMaxResults();
-
-			SelectControl selectControl = (SelectControl) control;
-			List<PermissibleValue> pvs = selectControl.getPvDataSource().getPermissibleValues(searchStr, maxResults);
+			SelectControl selectCtrl = (SelectControl) control;
+			int maxPvs = input.getMaxResults() <= 0 ? 100 : input.getMaxResults();
+			List<PermissibleValue> pvs = selectCtrl.getPvDataSource().getPermissibleValues(input.getQueries(), maxPvs);
 			return ResponseEvent.response(pvs);
 		} catch (IllegalArgumentException iae) {
 			return ResponseEvent.error(OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, iae.getMessage()));
