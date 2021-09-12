@@ -200,6 +200,7 @@ class FieldFactory {
     }
 
     let defOptions = ls.options;
+    let cachedPvs = {};
     if (field.pvs && field.pvs.length >= 100) {
       ls.searchProp = 'query';
       ls.options = undefined;
@@ -207,7 +208,10 @@ class FieldFactory {
         if (!query) {
           return defOptions;
         } else {
-          let pvs = await formSvc.getPvs(field.formId, field.fqn, query);
+          let pvs = cachedPvs[query];
+          if (!pvs) {
+            pvs = cachedPvs[query] = await formSvc.getPvs(field.formId, field.fqn, query);
+          }
           return pvs.map(pv => ({caption: pv.optionName || pv.value, value: pv.value}));
         }
       }

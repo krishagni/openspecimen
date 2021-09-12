@@ -37,6 +37,7 @@ import Dropdown from 'primevue/dropdown';
 
 import http from '@/common/services/HttpClient.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['modelValue', 'listSource', 'form'],
@@ -63,6 +64,11 @@ export default {
     },
 
     async searchOptions(event) {
+      if (this.optionSelected) {
+        this.optionSelected = false;
+        return;
+      }
+
       let query = (event && event.value) || '';
       query = query.toLowerCase();
 
@@ -97,7 +103,7 @@ export default {
           }
         }
 
-        let key = this.queryString(params);
+        let key = util.queryString(params);
         this.cachedQueries = this.cachedQueries || {};
         let options = this.cachedQueries[key];
         if (!options) {
@@ -165,24 +171,8 @@ export default {
       return Object.keys(optionsMap).map((key) => optionsMap[key]);
     },
 
-    queryString(params) {
-      return Object.keys(params || {}).sort().reduce(
-        (result, param) => {
-          if (result) {
-            result += '&';
-          }
-
-          if (params[param]) {
-            result += param + '=' + params[param];
-          }
-
-          return result;
-        },
-        ''
-      );
-    },
-
     onChange: function() {
+      this.optionSelected = true;
     }
   },
 

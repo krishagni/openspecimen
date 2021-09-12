@@ -7,6 +7,7 @@
 import Dropdown from '@/common/components/Dropdown.vue';
 
 import http from '@/common/services/HttpClient.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['modelValue', 'selectProp'],
@@ -18,7 +19,7 @@ export default {
   data() {
     return {
       listSource: {
-        loadFn: (opts) => {
+        loadFn: async (opts) => {
           opts = Object.assign( { name: opts.query || '' }, opts || {maxResults: 100});
           if (opts.value || opts.value == 0) {
             try {
@@ -28,7 +29,14 @@ export default {
               return http.get('storage-containers/byname/' + opts.value).then((container) => [container]);
             }
           } else {
-            return http.get('storage-containers', opts);
+            let key = util.queryString(opts);
+            this.cachedQueries = this.cachedQueries || {};
+            let containers = this.cachedQueries[key];
+            if (!containers) {
+              containers = this.cachedQueries[key] = await http.get('storage-containers', opts);
+            }
+
+            return containers;
           }
         },
         selectProp: this.selectProp,

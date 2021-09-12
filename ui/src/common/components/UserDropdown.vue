@@ -13,6 +13,7 @@ import Dropdown from '@/common/components/Dropdown.vue';
 import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 
 import http from '@/common/services/HttpClient.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['modelValue', 'selectProp', 'multiple'],
@@ -25,12 +26,20 @@ export default {
   data() {
     return {
       listSource: {
-        loadFn: (opts) => {
+        loadFn: async (opts) => {
           opts = opts || {maxResults: 100};
           if (opts.value) {
             return http.get('users/' + opts.value).then((user) => [user]);
           } else {
-            return http.get('users', Object.assign({searchString: opts.query || ''}, opts));
+            let queryParams = Object.assign({searchString: opts.query || ''}, opts);
+            let key = util.queryString(queryParams);
+            this.cachedQueries = this.cachedQueries || {};
+            let options = this.cachedQueries[key];
+            if (!options) {
+              this.cachedQueries[key] = options = await http.get('users', queryParams);
+            }
+
+            return options;
           }
         },
         selectProp: this.selectProp,

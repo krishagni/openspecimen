@@ -7,6 +7,7 @@
 import Dropdown from '@/common/components/Dropdown.vue';
 
 import http from '@/common/services/HttpClient.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['modelValue', 'selectProp', 'attribute', 'leafValue'],
@@ -18,31 +19,35 @@ export default {
   data() {
     return {
       listSource: {
-        loadFn: (opts) => {
-          opts = Object.assign(
+        loadFn: async (opts) => {
+          let queryParams = Object.assign(
             {
               searchString: opts.query || '',
               attribute: this.attribute,
-              includeOnlyLeafValue: this.leafValue
+              includeOnlyLeafValue: this.leafValue == true
             },
             opts || {maxResults: 100}
           );
 
           if (opts.value || opts.value == 0) {
-
             try {
               let id = parseInt(opts.value);
               if (!isNaN(id)) {
-                return http.get('permissible-values/v/' + id).then((pv) => [pv]);
+                return http.get('permissible-values/v/' + id).then(pv => [pv]);
               }
             } catch {
               console.log('PvDropdown: Error getting value: ' + opts.value);
             }
-
-            return http.get('permissible-values/v', opts);
-          } else {
-            return http.get('permissible-values/v', opts);
           }
+
+          let key = util.queryString(queryParams);
+          this.cachedQueries = this.cachedQueries || {};
+          let options = this.cachedQueries[key];
+          if (!options) {
+            options = this.cachedQueries[key] = await http.get('permissible-values/v', queryParams);
+          }
+
+          return options;
         },
         selectProp: this.selectProp,
         displayProp: 'value'
