@@ -1,6 +1,7 @@
 
 import http from '@/common/services/HttpClient.js';
 import formUtil from '@/common/services/FormUtil.js';
+import formSvc from '@/forms/services/Form.js';
 
 import siteSchema    from '@/administrative/schemas/sites/site.js';
 import addEditLayout from '@/administrative/schemas/sites/addedit.js';
@@ -49,7 +50,7 @@ class Site {
           return null;
         }
 
-        return http.get('forms/' + resp.formId + '/definition');
+        return formSvc.getDefinition(resp.formId);
       }
     );
   }

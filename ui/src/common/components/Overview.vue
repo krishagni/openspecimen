@@ -97,8 +97,11 @@ export default {
       for (let field of this.schema) {
         if (field.type == 'subform') {
           // convert into 2-d array of values: [ [1, "abc"], [2, "xyz"], [3, "abcxyz"] ]
-          let collection = this.getValue(this.object, field.name) || [];
-          let values = collection.map(element => field.fields.map(sfField => this.getValue(element, sfField)));
+          let values = this.getValue(this.object, field) || [];
+          if (values != '-') {
+            values = values.map(element => field.fields.map(sfField => this.getValue(element, sfField)));
+          }
+
           subformFields.push({...field, value: values});
         } else {
           let value = this.getValue(this.object, field);
@@ -121,7 +124,7 @@ export default {
 
       if (field.source == 'de') {
         value = exprUtil.getValue(object, field.name);
-        if (value) {
+        if (value != null && value != undefined && value != '') {
           switch (field.type) {
             case 'fileUpload':
               value.url = http.getUrl('form-files/' + value.fileId +
@@ -132,6 +135,8 @@ export default {
               value = {value: value, url: http.getUrl('form-files/' + value)};
               break;
           }
+        } else {
+          value = '-';
         }
       } else {
         value = exprUtil.getValue(object, field.name); // props.object[field.name];
