@@ -185,7 +185,7 @@ export default {
     },
 
     clearFilters: function() {
-      this.filters.forEach((filter) => this.filterValues[filter.name] = undefined);
+      this.filters.forEach((filter) => delete this.filterValues[filter.name]);
     },
 
     emitFiltersUpdated: function() {
