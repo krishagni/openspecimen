@@ -10,7 +10,6 @@ import itemsSvc       from './ItemsHolder.js';
 import pluginLoader   from './PluginLoader.js';
 import pluginViews    from './PluginViewsRegistry.js';
 import routerSvc      from './Router.js';
-import utility        from './Utility.js';
 
 export default {
   install(app) {
@@ -27,8 +26,7 @@ export default {
       itemsSvc:     itemsSvc,
       pluginLoader: pluginLoader,
       pluginViews:  pluginViews,
-      routerSvc:    routerSvc,
-      utility:      utility
+      routerSvc:    routerSvc
     });
   }
 }
