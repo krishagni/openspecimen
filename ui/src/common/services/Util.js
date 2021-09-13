@@ -24,7 +24,7 @@ class Util {
 
     let curatedParams = {};
     for (const [key, value] of Object.entries(params)) {
-      if (value) {
+      if (value || value == 0 || value == false || value == 'false') {
         curatedParams[key] = value;
       }
     }

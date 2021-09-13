@@ -47,9 +47,6 @@ export default {
 
     instituteSvc.getInstitute(+props.instituteId).then(institute => ctx.institute = institute);
     return { ctx };
-  },
-
-  methods: {
   }
 }
 </script>
