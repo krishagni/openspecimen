@@ -151,12 +151,18 @@ const routes = [
        * Institutes module         *
        *****************************
        *****************************/
-       {
-         path: 'institutes',
-         name: 'InstitutesList',
-         component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/List.vue'),
-         props: (route) => ({filters: route.query.filters})
-       }
+      {
+        path: 'institutes',
+        name: 'InstitutesList',
+        component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+      {
+        path: 'institute-addedit/:instituteId',
+        name: 'InstituteAddEdit',
+        component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/AddEdit.vue'),
+        props: (route) => ({instituteId: route.params && route.params.instituteId})
+      }
     ]
   }
 ]

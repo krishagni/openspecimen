@@ -18,6 +18,16 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
+          <span v-show-if-allowed="'admin'">
+            <span v-if="!ctx.selectedInstitutes || ctx.selectedInstitutes.length == 0">
+              <os-button left-icon="plus" label="Create" @click="$goto('InstituteAddEdit', {instituteId: -1})" />
+
+              <os-menu label="Import" :options="importOpts" />
+
+              <os-button left-icon="download" label="Export" @click="exportInstitutes" />
+            </span>
+          </span>
+
           <os-button-link left-icon="question-circle" label="Help"
             url="https://help.openspecimen.org/institute" new-tab="true" />
         </template>
@@ -46,6 +56,7 @@
 <script>
 
 import routerSvc    from '@/common/services/Router.js';
+import exportSvc    from '@/common/services/ExportService.js';
 import instituteSvc from '@/administrative/services/Institute.js';
 
 export default {
@@ -61,7 +72,12 @@ export default {
         selectedInstitutes: []
       },
 
-      listSchema: { columns: [] }
+      listSchema: { columns: [] },
+
+      importOpts: [
+        { icon: 'university', caption: 'Institutes',        onSelect: () => routerSvc.ngGoto('institutes-import') },
+        { icon: 'table',      caption: 'View Past Imports', onSelect: () => routerSvc.ngGoto('institutes-import-jobs') }
+      ]
     };
   },
 
@@ -104,6 +120,11 @@ export default {
     showDetails: function(row) {
       alert('Show details of ' + row.institute.name);
     },
+
+    exportInstitutes: function() {
+      let instituteIds = this.ctx.selectedInstitutes.map(institute => institute.id);
+      exportSvc.exportRecords({objectType: 'institute', recordIds: instituteIds});
+    }
   }
 }
 </script>
