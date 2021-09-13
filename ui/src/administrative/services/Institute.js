@@ -27,6 +27,10 @@ class Institute {
     }
   }
 
+  async delete(institute) {
+    return http.delete('institutes/' + institute.id);
+  }
+
   async deleteInstitutes(instituteIds) {
     return http.delete('institutes', {}, {id: instituteIds});
   }

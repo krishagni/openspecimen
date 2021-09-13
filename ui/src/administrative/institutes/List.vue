@@ -128,7 +128,7 @@ export default {
     },
 
     showDetails: function(row) {
-      alert('Show details of ' + row.institute.name);
+      this.$goto('InstituteOverview', {instituteId: row.institute.id});
     },
 
     exportInstitutes: function() {

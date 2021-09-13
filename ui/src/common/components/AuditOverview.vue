@@ -6,7 +6,7 @@
     </template>
 
     <template #content>
-      <ul class="os-key-values os-one-col">
+      <ul class="os-key-values os-one-col" v-if="ctx.auditTrail.createdBy || ctx.auditTrail.lastUpdatedBy">
         <li class="item" v-if="ctx.auditTrail.createdBy">
           <strong class="key key-sm">Entered By</strong>
           <span class="value value-md">{{$filters.username(ctx.auditTrail.createdBy)}}</span>
@@ -33,6 +33,9 @@
           </span>
         </li>
       </ul>
+      <span v-else>
+        <span>No trail to show!</span>
+      </span>
     </template>
   </Section>
 

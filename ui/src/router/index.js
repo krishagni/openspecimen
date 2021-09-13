@@ -162,6 +162,19 @@ const routes = [
         name: 'InstituteAddEdit',
         component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/AddEdit.vue'),
         props: (route) => ({instituteId: route.params && route.params.instituteId})
+      },
+      {
+        path: 'institutes/:instituteId',
+        name: 'InstituteDetail',
+        component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Detail.vue'),
+        props: (route) => ({instituteId: route.params && route.params.instituteId}),
+        children: [
+          {
+            path: 'overview',
+            name: 'InstituteOverview',
+            component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Overview.vue')
+          }
+        ]
       }
     ]
   }

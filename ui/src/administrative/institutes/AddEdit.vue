@@ -82,7 +82,7 @@ export default {
       instituteSvc.saveOrUpdate(this.dataCtx.institute).then(
         function(savedInstitute) {
           alertSvc.success('Institute ' + savedInstitute.name + ' saved!');
-          routerSvc.goto('InstitutesList');
+          routerSvc.goto('InstituteOverview', {instituteId: savedInstitute.id});
         }
       );
     },
