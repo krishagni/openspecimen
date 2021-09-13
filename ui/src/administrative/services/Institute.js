@@ -27,8 +27,20 @@ class Institute {
     }
   }
 
+  async deleteInstitutes(instituteIds) {
+    return http.delete('institutes', {}, {id: instituteIds});
+  }
+
+  async getDependents(institute) {
+    return http.get('institutes/' + institute.id + '/dependent-entities');
+  }
+
   async getListViewSchema() {
     return listSchema;
+  }
+
+  async getDict() {
+    return JSON.parse(JSON.stringify(baseSchema.fields));
   }
 
   async getAddEditFormSchema() {

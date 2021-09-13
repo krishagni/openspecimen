@@ -23,10 +23,13 @@
               <os-button left-icon="plus" label="Create" @click="$goto('InstituteAddEdit', {instituteId: -1})" />
 
               <os-menu label="Import" :options="importOpts" />
-
-              <os-button left-icon="download" label="Export" @click="exportInstitutes" />
+            </span>
+            <span v-else>
+              <os-button left-icon="trash" label="Delete" @click="deleteInstitutes" />
             </span>
           </span>
+
+          <os-button left-icon="download" label="Export" @click="exportInstitutes" />
 
           <os-button-link left-icon="question-circle" label="Help"
             url="https://help.openspecimen.org/institute" new-tab="true" />
@@ -49,14 +52,21 @@
         @rowClicked="showDetails"
         ref="listView"
       />
+
+      <os-confirm-delete ref="deleteDialog">
+        <template #message>
+          <span>Are you sure you want to delete the selected institutes?</span>
+        </template>
+      </os-confirm-delete>
     </os-page-body>
   </os-page>
 </template>
 
 <script>
 
-import routerSvc    from '@/common/services/Router.js';
+import alertSvc     from '@/common/services/Alerts.js';
 import exportSvc    from '@/common/services/ExportService.js';
+import routerSvc    from '@/common/services/Router.js';
 import instituteSvc from '@/administrative/services/Institute.js';
 
 export default {
@@ -124,6 +134,25 @@ export default {
     exportInstitutes: function() {
       let instituteIds = this.ctx.selectedInstitutes.map(institute => institute.id);
       exportSvc.exportRecords({objectType: 'institute', recordIds: instituteIds});
+    },
+
+    deleteInstitutes: function() {
+      let instituteIds = this.ctx.selectedInstitutes.map(institute => institute.id);
+      if (instituteIds.length <= 0) {
+        return;
+      }
+
+      let self = this;
+      this.$refs.deleteDialog.open().then(
+        () => {
+          instituteSvc.deleteInstitutes(instituteIds).then(
+            (deleted) => {
+              alertSvc.success(deleted.length + (deleted.length != 1 ? ' institutes ' : ' institute ') + ' deleted');
+              self.$refs.listView.reload();
+            }
+          );
+        }
+      );
     }
   }
 }
