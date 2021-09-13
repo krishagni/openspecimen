@@ -103,6 +103,7 @@ import RadioButton from '@/common/components/RadioButton.vue';
 import Message from '@/common/components/Message.vue';
 
 import exprUtil from '@/common/services/ExpressionUtil.js';
+import util     from '@/common/services/Util.js';
 
 export default {
   props: [
@@ -189,20 +190,7 @@ export default {
     },
 
     emitFiltersUpdated: function() {
-      let fb = undefined;
-      if (this.filterValues && Object.keys(this.filterValues).length > 0) {
-        let curatedFilters = {};
-        for (const [key, value] of Object.entries(this.filterValues)) {
-          if (value) {
-            curatedFilters[key] = value;
-          }
-        }
-
-        if (Object.keys(curatedFilters).length > 0) {
-          fb = btoa(encodeURIComponent(JSON.stringify(curatedFilters)));
-        }
-      }
-
+      let fb = util.uriEncode(this.filterValues);
       let event = {filters: this.filterValues, uriEncoding: fb, pageSize: this.pageSizeOpts.currentPageSize + 1};
       this.$emit('filtersUpdated', event);
     },

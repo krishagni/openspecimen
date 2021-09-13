@@ -115,7 +115,11 @@ const routes = [
         props: (route) => ({groupId: route.params && route.params.groupId})
       },
 
-
+      /*****************************
+       *****************************
+       * Sites module              *
+       *****************************
+       *****************************/
       {
         path: 'sites',
         name: 'SitesList',
@@ -140,7 +144,19 @@ const routes = [
             component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Overview.vue')
           }
         ]
-      }
+      },
+
+      /*****************************
+       *****************************
+       * Institutes module         *
+       *****************************
+       *****************************/
+       {
+         path: 'institutes',
+         name: 'InstitutesList',
+         component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/List.vue'),
+         props: (route) => ({filters: route.query.filters})
+       }
     ]
   }
 ]

@@ -11,8 +11,10 @@ angular.module('os.administrative.institute',
     $stateProvider
       .state('institute-list', {
         url: '/institutes?filters',
-        templateUrl: 'modules/administrative/institute/list.html',
-        controller: 'InstituteListCtrl',
+        template: '<div></div>',
+        controller: function($state, VueApp) {
+          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
+        },
         parent: 'signed-in'
       })
       .state('institute-addedit', {
