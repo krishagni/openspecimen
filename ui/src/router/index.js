@@ -115,7 +115,11 @@ const routes = [
         props: (route) => ({groupId: route.params && route.params.groupId})
       },
 
-
+      /*****************************
+       *****************************
+       * Sites module              *
+       *****************************
+       *****************************/
       {
         path: 'sites',
         name: 'SitesList',
@@ -138,6 +142,37 @@ const routes = [
             path: 'overview',
             name: 'SiteOverview',
             component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Overview.vue')
+          }
+        ]
+      },
+
+      /*****************************
+       *****************************
+       * Institutes module         *
+       *****************************
+       *****************************/
+      {
+        path: 'institutes',
+        name: 'InstitutesList',
+        component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+      {
+        path: 'institute-addedit/:instituteId',
+        name: 'InstituteAddEdit',
+        component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/AddEdit.vue'),
+        props: (route) => ({instituteId: route.params && route.params.instituteId})
+      },
+      {
+        path: 'institutes/:instituteId',
+        name: 'InstituteDetail',
+        component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Detail.vue'),
+        props: (route) => ({instituteId: route.params && route.params.instituteId}),
+        children: [
+          {
+            path: 'overview',
+            name: 'InstituteOverview',
+            component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Overview.vue')
           }
         ]
       }

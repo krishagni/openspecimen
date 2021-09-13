@@ -12,7 +12,7 @@
     <template #content>
       <div v-if="ctx.dependents.length > 0">
         <div class="message">
-          <span>Cannot delete {{input.type}} {{input.title}} because of the following dependent objects:</span>
+          <span>Cannot delete {{input.type}} <b>{{input.title}}</b> because of the following dependent objects:</span>
         </div>
 
         <div class="dependents">
