@@ -40,8 +40,9 @@
           </ul>
         </div>
       </span>
-      <button ng-if="!!visit.id && visit.status != 'Missed Collection' && visit.status != 'Not Collected'
-        && specimens.length  > 0" show-if-allowed="specimenResource.updateOpts" class="default"
+      <button ng-if="!cpViewCtx.isCoordinator && !!visit.id && visit.status != 'Missed Collection' &&
+        visit.status != 'Not Collected' && specimens.length  > 0"
+        show-if-allowed="specimenResource.updateOpts" class="default"
         ng-click="printSpecimenLabels()" title="{{'specimens.tooltip.print' | translate}}">
         <span class="fa fa-print"></span>
         <span translate="common.buttons.print">Print</span>
