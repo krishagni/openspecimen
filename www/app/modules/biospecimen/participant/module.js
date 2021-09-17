@@ -227,7 +227,7 @@ angular.module('os.biospecimen.participant',
             );
           },
 
-          userRole: function(cp, AuthorizationService) {
+          userRole: function(authInit, cp, AuthorizationService) {
             return AuthorizationService.getRole(cp);
           },
 
