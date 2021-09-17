@@ -7,15 +7,16 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
     function init() {
       var spmns = SpecimensHolder.getSpecimens() || [];
       SpecimensHolder.setSpecimens(null);
-      filterSpecimens(spmns);
 
       var formOpts = {};
+      var recvWf   = event && event.name == 'SpecimenReceivedEvent';
       $scope.ctx = ctx = {
+        recvWf   : recvWf,
         events   : events,
         event    : event,
         specimens: spmns,
-        op       : event && event.name == 'SpecimenReceivedEvent' ? 'EDIT' : 'ADD',
-        mode     : event && event.name == 'SpecimenReceivedEvent' ? 'TABLE' : 'SINGLE',
+        op       : recvWf ? 'EDIT' : 'ADD',
+        mode     : recvWf ? 'TABLE' : 'SINGLE',
         tabCtrl  : {},
         formCtrl : {},
         opts     : {
@@ -33,9 +34,11 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
         mFormDef : undefined,
         formDefToUse: undefined,
         allowEventSelect: !event,
-        spmnFilterOpts: {exactMatch: true, includeExtensions: false},
+        spmnFilterOpts: {exactMatch: true, includeExtensions: false, includeOnlyTbr: recvWf},
         records  : []
       };
+
+      filterSpecimens(spmns);
     }
 
     function isAddOp() {
@@ -215,7 +218,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
         return false;
       }
 
-      if (event && event.name == 'SpecimenReceivedEvent') {
+      if (ctx.recvWf) {
         var nonPrimarySpmns = spmns.filter(function(spmn) { return spmn.lineage != 'New'; });
         if (nonPrimarySpmns.length > 0) {
           showError('specimens.non_primary_receive_na', nonPrimarySpmns);
@@ -256,7 +259,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
     }
 
     $scope.validateSpecimens = function() {
-      if (event && event.name == 'SpecimenReceivedEvent') {
+      if (ctx.recvWf) {
         ctx.formId = event.formId;
         $scope.initEventDetailsView();
       }
@@ -285,7 +288,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
           var allowSpmnRelabeling = resps[2];
 
           ctx.formDef = formDef;
-          if (event && event.name == 'SpecimenReceivedEvent') {
+          if (ctx.recvWf) {
             if (allowSpmnRelabeling) {
               formDef.rows.splice(0, null,
                 [{

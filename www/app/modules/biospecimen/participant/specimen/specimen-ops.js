@@ -6,6 +6,13 @@ angular.module('os.biospecimen.specimen')
 
     function initOpts(scope, element, attrs) {
       scope.title = attrs.title || 'specimens.ops';
+      if (scope.cp) {
+        SettingUtil.getSetting('biospecimen', 'coordinator_role_name').then(
+          function(setting) {
+            scope.isCoordinator = (setting.value == AuthorizationService.getRole(scope.cp));
+          }
+        );
+      }
 
       if (!scope.resourceOpts) {
         var cpShortTitle = scope.cp && scope.cp.shortTitle;

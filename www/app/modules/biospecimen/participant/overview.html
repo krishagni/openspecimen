@@ -12,12 +12,13 @@
           Register to Another Protocol
         </span>
       </a>
-      <button ng-if="partCtx.showAnonymize" show-if-allowed="participantResource.updateOpts" class="default"
-        ng-click="anonymize()">
+      <button ng-if="partCtx.showAnonymize && !cpViewCtx.isCoordinator"
+        show-if-allowed="participantResource.updateOpts" class="default" ng-click="anonymize()">
         <span class="fa fa-warning"></span>
         <span translate="participant.buttons.anonymize">Anonymize</span>
       </button>
-      <button ng-if="occurredVisits.length > 0 && (!specimenAllowedOps || specimenAllowedOps.update)" class="default"
+      <button ng-if="!cpViewCtx.isCoordinator && occurredVisits.length > 0 &&
+        (!specimenAllowedOps || specimenAllowedOps.update)" class="default"
         ng-click="printSpecimenLabels()" title="{{'specimens.tooltip.print' | translate}}">
         <span class="fa fa-print"></span>
         <span translate="specimens.buttons.print">Print</span>

@@ -34,6 +34,8 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 
 	private Long visitId;
 
+	private List<String> visitNames;
+
 	private Long ancestorId;
 
 	private String anatomicSite;
@@ -53,6 +55,8 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 	private Long reservedForDp;
 
 	private boolean minimalInfo;
+
+	private boolean includeOnlyTbr;
 
 	@Override
 	public SpecimenListCriteria self() {		
@@ -193,6 +197,16 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 		return self();
 	}
 
+	public List<String> visitNames() {
+		return visitNames;
+	}
+
+	@JsonProperty("visitNames")
+	public SpecimenListCriteria visitNames(List<String> visitNames) {
+		this.visitNames = visitNames;
+		return self();
+	}
+
 	public Long ancestorId() {
 		return ancestorId;
 	}
@@ -290,6 +304,16 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 	@JsonProperty("minimalInfo")
 	public SpecimenListCriteria minimalInfo(boolean minimalInfo) {
 		this.minimalInfo = minimalInfo;
+		return self();
+	}
+
+	public boolean includeOnlyTbr() {
+		return includeOnlyTbr;
+	}
+
+	@JsonProperty("includeOnlyTbr")
+	public SpecimenListCriteria includeOnlyTbr(boolean includeOnlyTbr) {
+		this.includeOnlyTbr = includeOnlyTbr;
 		return self();
 	}
 }

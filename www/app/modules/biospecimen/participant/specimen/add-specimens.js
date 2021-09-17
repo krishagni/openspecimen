@@ -1,6 +1,6 @@
 
 angular.module('os.biospecimen.specimen')
-  .directive('osAddSpecimens', function($q, CollectionProtocol, SpecimenUtil) {
+  .directive('osAddSpecimens', function($q, CollectionProtocol, SpecimenUtil, Alerts) {
     return {
       restrict: 'E',
 
@@ -11,6 +11,7 @@ angular.module('os.biospecimen.specimen')
         filterOpts: '=?',
         errorOpts: '=?',
         ctrl: '=?',
+        allowVisitNames: '=?'
       },
 
       controller: function($scope) {
@@ -24,7 +25,11 @@ angular.module('os.biospecimen.specimen')
           var filterOpts = $scope.filterOpts || {};
           var errorOpts = $scope.errorOpts || {};
           var labels = undefined;
-          if (!!$scope.input.useBarcode) {
+
+          filterOpts.visitNames = filterOpts.barcode = undefined;
+          if (!!$scope.input.useVisit) {
+            filterOpts.visitNames = inputs;
+          } else if (!!$scope.input.useBarcode) {
             filterOpts.barcode = inputs;
           } else {
             labels = inputs;
@@ -36,6 +41,11 @@ angular.module('os.biospecimen.specimen')
                 return false;
               }
 
+              if (specimens.length == 0) {
+                Alerts.error('specimens.no_matching_spmns');
+                return false;
+              }
+
               return $q.when($scope.onAdd({specimens: specimens})).then(
                 function(success) {
                   return success;
@@ -43,6 +53,12 @@ angular.module('os.biospecimen.specimen')
               );
             }
           );
+        }
+
+        $scope.onUseVisitSelection = function() {
+          if ($scope.input.useVisit) {
+            $scope.input.useBarcode = false;
+          }
         }
 
         this.getLabels = function() {
@@ -65,12 +81,22 @@ angular.module('os.biospecimen.specimen')
 
       template: function(tElem, tAttrs) {
         return  '<div class="os-no-label-form">' +
-                '  <div class="os-text-checkbox" ng-if="barcodingEnabled">' +
-                '    <div class="checkbox">' +
-                '      <os-checkbox ng-model="input.useBarcode"></os-checkbox>' +
+                '  <div class="clearfix">' +
+                '    <div class="pull-left os-text-checkbox" ng-if="barcodingEnabled && !input.useVisit">' +
+                '      <div class="checkbox">' +
+                '        <os-checkbox ng-model="input.useBarcode"></os-checkbox>' +
+                '      </div>' +
+                '      <div class="message os-ctrl-padding-top">' +
+                '        <span translate="specimens.use_barcode">Use Barcode</span>' +
+                '      </div>' +
                 '    </div>' +
-                '    <div class="message os-ctrl-padding-top">' +
-                '      <span translate="specimens.use_barcode">Use Barcode</span>' +
+                '    <div class="pull-left os-text-checkbox" style="padding-left: 5px;" ng-if="allowVisitNames">' +
+                '      <div class="checkbox">' +
+                '        <os-checkbox ng-model="input.useVisit" ng-change="onUseVisitSelection()"></os-checkbox>' +
+                '      </div>' +
+                '      <div class="message os-ctrl-padding-top">' +
+                '        <span translate="specimens.use_visit_names">Use Visit Names</span>' +
+                '      </div>' +
                 '    </div>' +
                 '  </div>' +
                 '  <os-add-items ctrl="input" on-add="addSpecimen(itemLabels)"' +

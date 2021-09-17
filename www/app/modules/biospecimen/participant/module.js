@@ -227,8 +227,17 @@ angular.module('os.biospecimen.participant',
             );
           },
 
-          userRole: function(cp, AuthorizationService) {
+          userRole: function(authInit, cp, AuthorizationService) {
             return AuthorizationService.getRole(cp);
+          },
+
+          isCoordinator: function(userRole, cpViewCtx, SettingUtil) {
+            return SettingUtil.getSetting('biospecimen', 'coordinator_role_name').then(
+              function(setting) {
+                cpViewCtx.isCoordinator = (setting.value == userRole);
+                return cpViewCtx.isCoordinator;
+              }
+            );
           }
         },
         parent: 'signed-in',

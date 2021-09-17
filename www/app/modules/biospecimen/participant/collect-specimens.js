@@ -410,7 +410,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
                     collEvent.time = new Date().getTime();
                   }
 
-                  collEvent.user = specimen.collector;
+                  collEvent.user = specimen.collector || collEvent.user;
                   if (!collEvent.user) {
                     var cu = AuthorizationService.currentUser();
                     collEvent.user = {id: cu.id, firstName: cu.firstName, lastName: cu.lastName};
@@ -489,11 +489,13 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           initAliquotGrps($scope.specimens);
           $scope.$on('$destroy', function() { CollectSpecimensSvc.cancelReservation($scope.specimens); });
 
-          $scope.$watch('collDetail.collectionDate',
-            function(newVal, oldValue) {
-              $scope.updateCollDate(newVal);
-            }
-          );
+          if ($scope.showCollVisitDetails && $scope.uiOpts.showCollectionEvent) {
+            $scope.$watch('collDetail.collectionDate',
+              function(newVal, oldValue) {
+                $scope.updateCollDate(newVal);
+              }
+            );
+          }
         }
 
         function getDefaultTreeColumns(storeSpmnsAllowed) {
