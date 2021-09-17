@@ -460,6 +460,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		addAnatomicSiteCond(query, crit);
 		addAvailableSpecimenCond(query, crit);
 		addNoQtySpecimenCond(query, crit);
+		addTbrSpecimensCond(query, crit);
 		return detachedCriteria;
 	}
 
@@ -549,7 +550,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	private void addVisitIdCond(Criteria query, SpecimenListCriteria crit) {
-		if (crit.visitId() == null) {
+		if (crit.visitId() == null && CollectionUtils.isEmpty(crit.visitNames())) {
 			return;
 		}
 
@@ -559,7 +560,13 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			}
 		}
 
-		query.add(Restrictions.eq("visit.id", crit.visitId()));
+		if (crit.visitId() != null) {
+			query.add(Restrictions.eq("visit.id", crit.visitId()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.visitNames())) {
+			query.add(Restrictions.in("visit.name", crit.visitNames()));
+		}
 	}
 
 	private void addAncestorId(Criteria query, SpecimenListCriteria crit) {
@@ -678,6 +685,15 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		);
 	}
 
+	private void addTbrSpecimensCond(Criteria query, SpecimenListCriteria crit) {
+		if (!crit.includeOnlyTbr()) {
+			return;
+		}
+
+		query.add(Restrictions.eq("specimen.lineage", Specimen.NEW));
+		query.add(Restrictions.sqlRestriction("exists (" + TBR_SPMNS_SQL + ")"));
+	}
+
 	private static final String FQN = Specimen.class.getName();
 	
 	private static final String GET_BY_LABEL = FQN + ".getByLabel";
@@ -712,4 +728,14 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	private static final String GET_DESCENDENTS_SQL =
 		"select descendent_id from catissue_specimen_hierarchy where ancestor_id = %d and ancestor_id != descendent_id";
+
+	private static final String TBR_SPMNS_SQL =
+		"select " +
+		"  specimen_id " +
+		"from " +
+		"  catissue_received_event_param rcv " +
+		"  inner join catissue_permissible_value rqual on rqual.identifier = rcv.received_quality_id " +
+		"where " +
+		"  rqual.value = 'To be Received' and " +
+		"  rcv.specimen_id = {alias}.identifier";
 }
