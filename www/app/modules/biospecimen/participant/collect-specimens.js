@@ -404,10 +404,12 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
                 specimen.printLabel = printLabel(printSettings, specimen);
                 if (specimen.lineage == 'New') {
                   var collEvent = specimen.collectionEvent = specimen.collectionEvent || {};
-                  if (uiOpts.defCollectionDate == 'visit_date') {
-                    collEvent.time = visit.visitDate;
-                  } else if (uiOpts.defCollectionDate == 'current_date') {
-                    collEvent.time = new Date().getTime();
+                  if (!collEvent.time) {
+                    if (uiOpts.defCollectionDate == 'visit_date') {
+                      collEvent.time = visit.visitDate;
+                    } else if (uiOpts.defCollectionDate == 'current_date') {
+                      collEvent.time = new Date().getTime();
+                    }
                   }
 
                   collEvent.user = specimen.collector || collEvent.user;
