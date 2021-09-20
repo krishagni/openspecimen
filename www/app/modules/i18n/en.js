@@ -823,6 +823,7 @@
     "location" : "Location",
     "search_results": "Specimen Search Result for {{key}}",
     "print": "Print",
+    "print_labels": "Print Labels",
     "close_parent": "Close Parent",
     "ops": "Actions",
     "auto": "Auto",

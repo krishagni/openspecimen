@@ -204,6 +204,16 @@
     </div>
 
     <div class="form-group" ng-if="ctx.mode == 'TABLE'">
+      <div class="pull-left" style="padding: 0px 15px;" ng-if="ctx.recvWf">
+        <div class="os-text-checkbox">
+          <div class="checkbox">
+            <os-checkbox ng-model="ctx.printLabels"></os-checkbox>
+          </div>
+          <div class="message os-ctrl-padding-top">
+            <span translate="specimens.print_labels">Print Labels</span>
+          </div>
+        </div>
+      </div>
       <button class="btn os-btn-text" ng-click="copyFirstToAll()" ng-if="!!ctx.opts.tableData">
         <span translate="specimens.bulk_events.copy_first_to_all">Copy First To All</span>
       </button>
@@ -219,7 +229,17 @@
 
 
     <div class="form-group right-btns">
-      <div class="col-xs-offset-3 col-xs-9">
+      <div class="col-xs-offset-3 col-xs-9" ng-if="ctx.recvWf">
+        <div style="padding: 0px 15px;vertical-align: middle;display: inline-block;">
+          <div class="os-text-checkbox">
+            <div class="checkbox">
+              <os-checkbox ng-model="ctx.printLabels"></os-checkbox>
+            </div>
+            <div class="message os-ctrl-padding-top">
+              <span translate="specimens.print_labels">Print Labels</span>
+            </div>
+          </div>
+        </div>
         <button class="btn os-btn-text" ng-click="back()">
           <span translate="common.buttons.cancel">Cancel</span>
         </button>
