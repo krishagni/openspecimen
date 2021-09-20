@@ -320,7 +320,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
         var sd = data.stateDetail || {};
         if (sd.state && sd.state.name) {
           $state.go(sd.state.name, angular.extend(sd.params, {visitId: visit.id}));
-        } else if (gotoVisit) {
+        } else if (gotoVisit && visit && visit.id > 0) {
           $state.go('visit', {visitId: visit.id});
         } else {
           LocationChangeListener.back();

@@ -1,7 +1,7 @@
 angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models'])
   .controller('BulkAddEventCtrl', function(
-    $scope, $translate, $q, currentUser, events, event, Form, SpecimensHolder,
-    Specimen, SpecimenEvent, Alerts, Util, SpecimenUtil, SettingUtil) {
+    $scope, $translate, $q, $state, currentUser, events, event, acceptablePv, Form, SpecimensHolder,
+    Specimen, SpecimenEvent, Alerts, Util, SpecimenUtil, SettingUtil, CollectSpecimensSvc, SpecimenLabelPrinter) {
 
     var ctx;
     function init() {
@@ -29,6 +29,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
           labelAlignment    : 'horizontal',
           records           : []
         },
+        printLabels: false,
         showVisit: showVisit(spmns),
         formDef  : undefined,
         mFormDef : undefined,
@@ -305,6 +306,10 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
             var userId = currentUser.id;
             angular.forEach(records,
               function(record) {
+                if (acceptablePv) {
+                  record.quality = acceptablePv.id;
+                }
+
                 record.time = time;
                 record.user = userId;
               }
@@ -367,6 +372,38 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
             ctx.opts.tableData = undefined;
             ctx.opts.formDef = undefined;
             $scope.eventWizard.previous()
+          } else if (ctx.recvWf) {
+            var spmnIds = savedData.data.map(function(event) { return event.appData.objectId });
+            if (ctx.printLabels) {
+              SpecimenLabelPrinter.printLabels({specimenIds: spmnIds});
+            }
+
+            Specimen.getByIds(spmnIds, true).then(
+              function(spmns) {
+                var recvd = spmns.filter(
+                  function(spmn) {
+                    return spmn.receivedEvent.receivedQuality != 'To be Received';
+                  }
+                );
+
+                if (recvd.length == 0) {
+                  $scope.back();
+                  return;
+                }
+
+                var cpId = recvd[0].cpId;
+                if (recvd.some(function(spmn) { return spmn.cpId != cpId; })) {
+                  cpId = -1;
+                }
+
+                CollectSpecimensSvc.setData({visit: {cpId: cpId}, specimens: recvd});
+                $state.go(
+                  'participant-detail.collect-specimens.nth-step',
+                  {cpId: cpId, cprId: -1, visitId: -1},
+                  {location: 'replace'}
+                );
+              }
+            );
           } else {
             $scope.back();
           }

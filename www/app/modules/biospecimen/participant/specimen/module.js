@@ -629,6 +629,10 @@ angular.module('os.biospecimen.specimen',
 
           event: function() {
             return null;
+          },
+
+          acceptablePv: function() {
+            return null;
           }
         },
         parent: 'signed-in'
@@ -644,6 +648,14 @@ angular.module('os.biospecimen.specimen',
 
           event: function(events) {
             return events.find(function(event) { return event.name == 'SpecimenReceivedEvent'; });
+          },
+
+          acceptablePv: function(PvManager) {
+            return PvManager.loadPvs('receive_quality', 'Acceptable', function(pv) { return pv; }).then(
+              function(pvs) {
+                return pvs.find(function(pv) { return pv.value == 'Acceptable'; });
+              }
+            );
           }
         },
         parent: 'signed-in'
