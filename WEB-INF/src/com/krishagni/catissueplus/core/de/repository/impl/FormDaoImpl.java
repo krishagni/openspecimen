@@ -773,6 +773,15 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 
 	@Override
+	public int undeleteRecords(Long cpId, List<String> entityTypes, Long objectId) {
+		return getCurrentSession().getNamedQuery(UNDO_DELETE_ENTITY_RECS)
+			.setParameter("cpId", cpId)
+			.setParameterList("entityTypes", entityTypes)
+			.setParameter("objectId", objectId)
+			.executeUpdate();
+	}
+
+	@Override
 	public int deleteFormContexts(Long cpId, List<String> entityTypes) {
 		return getCurrentSession().getNamedQuery(SOFT_DELETE_CP_FORMS)
 			.setParameter("deleteTime", Calendar.getInstance().getTime())
@@ -1383,6 +1392,8 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 
 
 	private static final String SOFT_DELETE_ENTITY_RECS = RE_FQN + ".deleteEntityRecords";
+
+	private static final String UNDO_DELETE_ENTITY_RECS = RE_FQN + ".undeleteEntityRecords";
 
 	private static final String SOFT_DELETE_CP_FORMS = FQN + ".deleteCpEntityForms";
 

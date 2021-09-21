@@ -309,6 +309,13 @@ public class SpecimensController {
 		return resp.getPayload();
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value="/undelete")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public SpecimenDetail undelete(@RequestBody SpecimenQueryCriteria crit) {
+		return ResponseEvent.unwrap(specimenSvc.undeleteSpecimen(RequestEvent.wrap(crit)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/forms")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

@@ -118,6 +118,8 @@ public interface FormDao extends Dao<FormContextBean> {
 
 	int deleteRecords(Long cpId, List<String> entityTypes, Long objectId);
 
+	int undeleteRecords(Long cpId, List<String> entityTypes, Long objectId);
+
 	int deleteFormContexts(Long cpId, List<String> entityTypes);
 
 	// object id -> [record id]

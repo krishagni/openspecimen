@@ -99,6 +99,22 @@ public class Utility {
 		return value + "_" + Calendar.getInstance().getTimeInMillis();
 	}
 
+	public static String stripTs(String value) {
+		if (StringUtils.isBlank(value)) {
+			return value;
+		}
+
+		int ucIdx = value.lastIndexOf("_");
+		try {
+			Long.parseLong(value.substring(ucIdx + 1));
+			return value.substring(0, ucIdx);
+		} catch (NumberFormatException nfe) {
+
+		}
+
+		return value;
+	}
+
 	public static Long numberToLong(Object number) {
 		if (number == null) {
 			return null;

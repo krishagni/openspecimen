@@ -887,6 +887,18 @@ public class Specimen extends BaseExtensionEntity {
 		updateAvailableStatus();
 		FormUtil.getInstance().deleteRecords(getCpId(), Arrays.asList("Specimen", "SpecimenEvent", "SpecimenExtension"), getId());
 	}
+
+	public void undelete(boolean includeChildren) {
+		setLabel(Utility.stripTs(getLabel()));
+		setBarcode(Utility.stripTs(getBarcode()));
+		setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+		updateAvailableStatus();
+		FormUtil.getInstance().undeleteRecords(getCpId(), Arrays.asList("Specimen", "SpecimenEvent", "SpecimenExtension"), getId());
+
+		if (includeChildren) {
+			getChildCollection().forEach(child -> child.undelete(includeChildren));
+		}
+	}
 	
 	public static boolean isCollected(String status) {
 		return COLLECTED.equals(status);

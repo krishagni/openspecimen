@@ -40,4 +40,8 @@ public class FormUtil {
 	public int deleteRecords(Long cpId, List<String> entityTypes, Long objectId) {
 		return formDao.deleteRecords(cpId, entityTypes, objectId);
 	}
+
+	public int undeleteRecords(Long cpId, List<String> entityTypes, Long objectId) {
+		return formDao.undeleteRecords(cpId, entityTypes, objectId);
+	}
 }
