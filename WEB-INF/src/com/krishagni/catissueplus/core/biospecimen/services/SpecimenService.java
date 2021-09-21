@@ -67,6 +67,11 @@ public interface SpecimenService {
 	public Long getPrimarySpecimen(SpecimenQueryCriteria crit);
 
 	//
+	// Mostly used for administrative purpose
+	//
+	public ResponseEvent<SpecimenDetail> undeleteSpecimen(RequestEvent<SpecimenQueryCriteria> req);
+
+	//
 	// For internal and plugin usage purpose
 	//
 	public List<Specimen> getSpecimensByLabel(List<String> labels);

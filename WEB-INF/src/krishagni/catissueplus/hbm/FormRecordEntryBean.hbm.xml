@@ -167,6 +167,26 @@
         re.activity_status = 'ACTIVE'
     </sql-query>
 
+    <sql-query name="undeleteEntityRecords">
+      update
+        catissue_form_record_entry re
+      set
+        re.activity_status = 'ACTIVE'
+      where
+        re.form_ctxt_id in (
+          select
+            identifier
+          from
+            catissue_form_context fc
+          where
+            (fc.cp_id = -1 or fc.cp_id = :cpId) and
+            fc.deleted_on is null and
+            fc.entity_type in (:entityTypes)
+        ) and
+        re.object_id = :objectId and
+        re.activity_status = 'CLOSED'
+    </sql-query>
+
     <sql-query name="getLatestRecordIds">
       <return-scalar column="objectId" type="long"/>
       <return-scalar column="formCtxtId" type="long"/>

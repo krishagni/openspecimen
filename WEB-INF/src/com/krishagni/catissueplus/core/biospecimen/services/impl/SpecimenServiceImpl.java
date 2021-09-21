@@ -652,6 +652,45 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<SpecimenDetail> undeleteSpecimen(RequestEvent<SpecimenQueryCriteria> req) {
+		try {
+			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+
+			SpecimenQueryCriteria crit = req.getPayload();
+			Long specimenId = crit != null ? crit.getId() : null;
+			if (specimenId == null) {
+				return ResponseEvent.userError(SpecimenErrorCode.ID_REQUIRED);
+			}
+
+			Map<String, Object> info = daoFactory.getSpecimenDao().getDeletedSpecimenInfo(specimenId);
+			if (info == null) {
+				return ResponseEvent.userError(SpecimenErrorCode.DEL_NOT_FOUND, specimenId);
+			}
+
+			//
+			// first activate the specimen so that it is visible to Hibernate
+			//
+			int activated = daoFactory.getSpecimenDao().activateSpecimen(specimenId, crit.isIncludeChildren());
+			if (activated <= 0) {
+				return ResponseEvent.response(null);
+			}
+
+			//
+			// Do the rest of manipulation using Hibernate attached object so that
+			// changes are recorded in the audit logs
+			//
+			Specimen spmn = daoFactory.getSpecimenDao().getById(specimenId);
+			spmn.undelete(crit.isIncludeChildren());
+			return ResponseEvent.response(SpecimenDetail.from(spmn, false, true));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public List<Specimen> getSpecimensByLabel(List<String> labels) {
 		if (CollectionUtils.isEmpty(labels)) {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_REQUEST);

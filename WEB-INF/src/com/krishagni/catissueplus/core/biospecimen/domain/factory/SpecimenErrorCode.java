@@ -15,6 +15,8 @@ public enum SpecimenErrorCode implements ErrorCode {
 	INVALID_VISIT,
 	
 	VISIT_REQUIRED,
+
+	ID_REQUIRED,
 	
 	LABEL_REQUIRED,
 	
@@ -136,7 +138,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	EVT_ID_REQ,
 
-	INV_EVT_ID;
+	INV_EVT_ID,
+
+	DEL_NOT_FOUND;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

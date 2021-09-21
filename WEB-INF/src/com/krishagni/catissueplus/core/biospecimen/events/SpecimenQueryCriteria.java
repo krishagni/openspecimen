@@ -9,6 +9,10 @@ public class SpecimenQueryCriteria extends EntityQueryCriteria {
 
 	private boolean includeChildren = true;
 
+	public SpecimenQueryCriteria() {
+		super(-1L);
+	}
+
 	public SpecimenQueryCriteria(Long id) {
 		super(id);
 	}

@@ -62,4 +62,8 @@ public interface SpecimenDao extends Dao<Specimen> {
 	Map<Long, Long> getSpecimenStorageSite(Set<Long> specimenIds);
 
 	List<String> getNonCompliantSpecimens(SpecimenListCriteria crit);
+
+	Map<String, Object> getDeletedSpecimenInfo(Long specimenId);
+
+	int activateSpecimen(Long specimenId, boolean includeChildren);
 }

@@ -370,6 +370,32 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		return query.list();
 	}
 
+	@Override
+	public Map<String, Object> getDeletedSpecimenInfo(Long specimenId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_DELETED_SPMN)
+			.setParameter("specimenId", specimenId)
+			.list();
+		if (rows.isEmpty()) {
+			return null;
+		}
+
+		Object[] info = rows.iterator().next();
+		int idx = -1;
+		Map<String, Object> result = new HashMap<>();
+		result.put("id", info[++idx]);
+		result.put("label", info[++idx]);
+		result.put("barcode", info[++idx]);
+		return result;
+	}
+
+	@Override
+	public int activateSpecimen(Long specimenId, boolean includeChildren) {
+		String query = includeChildren ? ACTIVATE_HIERARCHY : ACTIVATE_SPMN;
+		return getCurrentSession().getNamedQuery(query)
+			.setParameter("specimenId", specimenId)
+			.executeUpdate();
+	}
+
 	private void addIdsCond(Criteria query, List<Long> ids) {
 		addInCond(query, "specimen.id", ids);
 	}
@@ -725,6 +751,12 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String GET_STORAGE_SITE = FQN + ".getStorageSite";
 
 	private static final String GET_ROOT_ID = FQN + ".getRootId";
+
+	private static final String GET_DELETED_SPMN = FQN + ".getDeletedSpecimen";
+
+	private static final String ACTIVATE_SPMN = FQN + ".activateSpecimen";
+
+	private static final String ACTIVATE_HIERARCHY = FQN + ".activateHierarchy";
 
 	private static final String GET_DESCENDENTS_SQL =
 		"select descendent_id from catissue_specimen_hierarchy where ancestor_id = %d and ancestor_id != descendent_id";

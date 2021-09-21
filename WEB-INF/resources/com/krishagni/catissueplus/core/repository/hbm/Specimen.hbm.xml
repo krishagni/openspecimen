@@ -300,5 +300,59 @@
         s.parent_specimen_id is null and
         s.activity_status != 'Disabled'
     </sql-query>
+
+    <sql-query name="getDeletedSpecimen">
+      <return-scalar column="spmnId" type="long"/>
+      <return-scalar column="label" type="string"/>
+      <return-scalar column="barcode" type="string"/>
+
+      select
+        s.identifier as spmnId, s.label as label, s.barcode as barcode
+      from
+        catissue_specimen s
+      where
+        s.activity_status = 'Disabled' and
+        s.identifier = :specimenId
+    </sql-query>
+
+    <sql-query name="activateSpecimen">
+      update
+        catissue_specimen
+      set
+        activity_status = 'Active'
+      where
+        identifier = :specimenId
+    </sql-query>
+
+    <sql-query name="activateHierarchy">
+      update
+        catissue_specimen
+      set
+        activity_status = 'Active'
+      where
+        identifier in (
+          select
+            descendent_id
+          from
+            catissue_specimen_hierarchy
+          where
+            ancestor_id = :specimenId
+        ) and
+        identifier in (
+          select
+            identifier
+          from
+            catissue_specimen_aud
+          where
+            rev in (
+              select
+                max(rev)
+              from
+                catissue_specimen_aud
+              where
+                identifier = :specimenId
+            )
+        )
+    </sql-query>
   </class>
 </hibernate-mapping>
