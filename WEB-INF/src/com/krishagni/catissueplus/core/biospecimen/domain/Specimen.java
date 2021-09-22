@@ -174,6 +174,8 @@ public class Specimen extends BaseExtensionEntity {
 	
 	private boolean concentrationInit = false;
 
+	private Set<SpecimenDeleteEvent> deleteEvents = new HashSet<>();
+
 	@Autowired
 	@Qualifier("specimenLabelGenerator")
 	private LabelGenerator labelGenerator;
@@ -660,6 +662,15 @@ public class Specimen extends BaseExtensionEntity {
 		this.specimenListItems = specimenListItems;
 	}
 
+	@NotAudited
+	public Set<SpecimenDeleteEvent> getDeleteEvents() {
+		return deleteEvents;
+	}
+
+	public void setDeleteEvents(Set<SpecimenDeleteEvent> deleteEvents) {
+		this.deleteEvents = deleteEvents;
+	}
+
 	public Set<DistributionProtocol> getDistributionProtocols() {
 		return getCollectionProtocol().getDistributionProtocols();
 	}
@@ -873,10 +884,12 @@ public class Specimen extends BaseExtensionEntity {
 		}
 		
 		for (Specimen child : getChildCollection()) {
+			child.setOpComments(getOpComments());
 			child.disable(checkChildSpecimens);
 		}
 		
 		for (Specimen specimen : getSpecimensPool()) {
+			specimen.setOpComments(getOpComments());
 			specimen.disable(checkChildSpecimens);
 		}
 
@@ -886,17 +899,26 @@ public class Specimen extends BaseExtensionEntity {
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 		updateAvailableStatus();
 		FormUtil.getInstance().deleteRecords(getCpId(), Arrays.asList("Specimen", "SpecimenEvent", "SpecimenExtension"), getId());
+		getDeleteEvents().add(SpecimenDeleteEvent.deleteEvent(this, getOpComments()));
 	}
 
 	public void undelete(boolean includeChildren) {
+		if (getParentSpecimen() != null && getParentSpecimen().isDeleted()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.PARENT_DELETED, getLabel(), getParentSpecimen().getId());
+		}
+
 		setLabel(Utility.stripTs(getLabel()));
 		setBarcode(Utility.stripTs(getBarcode()));
 		setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		updateAvailableStatus();
 		FormUtil.getInstance().undeleteRecords(getCpId(), Arrays.asList("Specimen", "SpecimenEvent", "SpecimenExtension"), getId());
+		getDeleteEvents().add(SpecimenDeleteEvent.undeleteEvent(this, getOpComments()));
 
 		if (includeChildren) {
-			getChildCollection().forEach(child -> child.undelete(includeChildren));
+			for (Specimen child : getChildCollection()) {
+				child.setOpComments(getOpComments());
+				child.undelete(includeChildren);
+			}
 		}
 	}
 	

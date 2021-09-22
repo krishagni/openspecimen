@@ -149,4 +149,100 @@
   <changeSet author="vpawar" id="PDE audit log identifier generator" dbms="oracle">
     <createSequence sequenceName="OS_PDE_AUDIT_LOGS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen delete events">
+    <createTable tableName="OS_DELETE_SPMN_EVENTS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_DELETE_EVENT_SPMN_ID"
+          referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER"/>
+      </column>
+      <column name="USER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_DELETE_EVENT_USER_ID"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER"/>
+      </column>
+      <column name="EVENT_TIME" type="${timestamp.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="COMMENTS" type="${text.type}(255)"/>
+      <column name="UNDELETE" type="${boolean.type}"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen delete event ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_DELETE_SPMN_EVENT_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to add record entry for specimen delete event" dbms="mysql" runOnChange="true">
+    <sql endDelimiter="//" >
+      drop trigger if exists os_trg_spmn_delete_event_re //
+    </sql>
+    <sql endDelimiter="//" >
+      create trigger os_trg_spmn_delete_event_re after insert on os_delete_spmn_events
+      for each row
+      begin
+        declare formName VARCHAR(255);
+
+        if (new.undelete != 0) then
+          set formName = 'SpecimenUndeleteEvent';
+        else
+          set formName = 'SpecimenDeleteEvent';
+        end if;
+
+        select
+          fc.identifier into @fcId
+        from
+          catissue_form_context fc
+          inner join dyextn_containers c on c.identifier = fc.container_id
+        where
+          c.name = formName and
+          c.deleted_on is null and
+          fc.deleted_on is null and
+          fc.entity_type = 'SpecimenEvent' and
+          fc.cp_id = -1;
+
+        insert into catissue_form_record_entry
+          (identifier, form_ctxt_id, object_id, record_id, updated_by, update_time, activity_status)
+        values
+          (default, @fcId, new.specimen_id, new.identifier, new.user_id, current_timestamp(), 'ACTIVE');
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to add record entry for specimen delete event" dbms="oracle" runOnChange="true">
+    <sql splitStatements="false">
+      create or replace trigger os_trg_spmn_delete_event_re after insert on os_delete_spmn_events
+      for each row
+      declare
+        fcId catissue_form_context.identifier%type;
+        formName varchar2(255);
+      begin
+        if (:new.undelete != 0) then
+          formName := 'SpecimenUndeleteEvent';
+        else
+          formName := 'SpecimenDeleteEvent';
+        end if;
+
+        select
+          fc.identifier into fcId
+        from
+          catissue_form_context fc
+          inner join dyextn_containers c on c.identifier = fc.container_id
+        where
+          c.name = formName and
+          c.deleted_on is null and
+          fc.deleted_on is null and
+          fc.entity_type = 'SpecimenEvent' and
+          fc.cp_id = -1;
+
+        insert into catissue_form_record_entry
+          (identifier, form_ctxt_id, object_id, record_id, updated_by, update_time, activity_status)
+        values
+          (catissue_form_rec_entry_seq.nextval, fcId, :new.specimen_id, :new.identifier, :new.user_id, current_timestamp, 'ACTIVE');
+      end;
+    </sql>
+  </changeSet>
 </databaseChangeLog>

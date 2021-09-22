@@ -1,0 +1,44 @@
+#macro(getMessage $code)$messageSource.getMessage($code, null, $locale)#end
+
+<form>
+  <view>
+    <name>SpecimenUndeleteEvent</name>
+    <caption>#getMessage("undelete_event")</caption>
+    <table>OS_DELETE_SPMN_EVENTS</table>
+    <primaryKey>IDENTIFIER</primaryKey>
+
+    <row>
+      <userField>
+        <name>user</name>
+        <udn>user</udn>
+        <caption>#getMessage("specimen_event_user")</caption>
+        <column>USER_ID</column>
+        <showInGrid>true</showInGrid>
+        <mandatory>true</mandatory>
+      </userField>
+    </row>
+
+    <row>
+      <datePicker>
+        <name>time</name>
+        <udn>time</udn>
+        <caption>#getMessage("specimen_event_date_time")</caption>
+        <column>EVENT_TIME</column>
+        <format>MM-dd-yyyy HH:mm</format>
+        <showInGrid>true</showInGrid>
+        <default>current_date</default>
+        <mandatory>true</mandatory>
+      </datePicker>
+    </row>
+
+    <row>
+      <textArea>
+        <name>comments</name>
+        <udn>comments</udn>
+        <caption>#getMessage("specimen_event_comments")</caption>
+        <column>COMMENTS</column>
+        <height>2</height>
+      </textArea>
+    </row>
+  </view>
+</form>

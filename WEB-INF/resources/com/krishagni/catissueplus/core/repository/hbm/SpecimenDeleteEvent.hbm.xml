@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenDeleteEvent" table="OS_DELETE_SPMN_EVENTS">
+    <id name="id" column="IDENTIFIER" type="long">
+      <generator class="native">
+        <param name="sequence">OS_DELETE_SPMN_EVENT_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="specimen" column="SPECIMEN_ID"/>
+
+    <many-to-one name="user" column="USER_ID"/>
+
+    <property name="time" column="EVENT_TIME"/>
+
+    <property name="comments" column="COMMENTS"/>
+
+    <property name="undo" column="UNDELETE"/>
+  </class>
+</hibernate-mapping>

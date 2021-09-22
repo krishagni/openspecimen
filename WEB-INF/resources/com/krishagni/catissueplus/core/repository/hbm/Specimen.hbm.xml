@@ -112,6 +112,11 @@
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenChildrenEvent"/>
     </set>
 
+    <set name="deleteEvents" table="OS_DELETE_SPMN_EVENTS" inverse="true" cascade="all-delete-orphan" order-by="id">
+      <key column="SPECIMEN_ID"/>
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenDeleteEvent"/>
+    </set>
+
     <many-to-one name="reservedEvent" column="RESERVED_EVENT_ID"/>
 
     <filter name="activeEntity"/>
