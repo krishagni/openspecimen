@@ -140,7 +140,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	INV_EVT_ID,
 
-	DEL_NOT_FOUND;
+	DEL_NOT_FOUND,
+
+	PARENT_DELETED;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

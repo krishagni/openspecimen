@@ -680,6 +680,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			// changes are recorded in the audit logs
 			//
 			Specimen spmn = daoFactory.getSpecimenDao().getById(specimenId);
+			spmn.setOpComments(crit.paramString("comments"));
 			spmn.undelete(crit.isIncludeChildren());
 			return ResponseEvent.response(SpecimenDetail.from(spmn, false, true));
 		} catch (OpenSpecimenException ose) {

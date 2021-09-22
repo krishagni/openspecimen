@@ -29,6 +29,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.VisitSpecimensQueryCri
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolRegistrationService;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
@@ -312,7 +313,23 @@ public class SpecimensController {
 	@RequestMapping(method = RequestMethod.POST, value="/undelete")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SpecimenDetail undelete(@RequestBody SpecimenQueryCriteria crit) {
+	public SpecimenDetail undelete(@RequestBody Map<String, Object> payload) {
+		if (payload == null || payload.get("id") == null) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.ID_REQUIRED);
+		}
+
+		SpecimenQueryCriteria crit = null;
+		try {
+			Number id = (Number) payload.get("id");
+			Boolean includeChildren = (Boolean) payload.get("includeChildren");
+			String reason = (String) payload.get("reason");
+			crit = new SpecimenQueryCriteria(id.longValue());
+			crit.setIncludeChildren(includeChildren == null ? false : includeChildren);
+			crit.setParams(Collections.singletonMap("comments", reason));
+		} catch (Exception e) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());
+		}
+
 		return ResponseEvent.unwrap(specimenSvc.undeleteSpecimen(RequestEvent.wrap(crit)));
 	}
 
