@@ -38,7 +38,7 @@
     </div>
 
     <os-add-specimens allow-visit-names="ctx.recvWf" on-add="addSpecimens(specimens)" filter-opts="ctx.spmnFilterOpts"
-      placeholder="{{'specimens.bulk_events.enter_specimen_label' | translate}}">
+      error-opts="ctx.errorOpts" placeholder="{{'specimens.bulk_events.enter_specimen_label' | translate}}">
     </os-add-specimens>
 
     <table class="os-table bulk-edit" ng-if="ctx.specimens && ctx.specimens.length > 0">
@@ -204,16 +204,6 @@
     </div>
 
     <div class="form-group" ng-if="ctx.mode == 'TABLE'">
-      <div class="pull-left" style="padding: 0px 15px;" ng-if="ctx.recvWf">
-        <div class="os-text-checkbox">
-          <div class="checkbox">
-            <os-checkbox ng-model="ctx.printLabels"></os-checkbox>
-          </div>
-          <div class="message os-ctrl-padding-top">
-            <span translate="specimens.print_labels">Print Labels</span>
-          </div>
-        </div>
-      </div>
       <button class="btn os-btn-text" ng-click="copyFirstToAll()" ng-if="!!ctx.opts.tableData">
         <span translate="specimens.bulk_events.copy_first_to_all">Copy First To All</span>
       </button>
@@ -230,13 +220,40 @@
 
     <div class="form-group right-btns">
       <div class="col-xs-offset-3 col-xs-9" ng-if="ctx.recvWf">
-        <div style="padding: 0px 15px;vertical-align: middle;display: inline-block;">
+        <div style="margin-top: -11px;padding-right: 15px;vertical-align: middle;display: inline-block;">
           <div class="os-text-checkbox">
-            <div class="checkbox">
-              <os-checkbox ng-model="ctx.printLabels"></os-checkbox>
-            </div>
             <div class="message os-ctrl-padding-top">
               <span translate="specimens.print_labels">Print Labels</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
+          <div class="os-text-checkbox">
+            <div class="checkbox">
+              <os-checkbox ng-model="ctx.printPrimary"></os-checkbox>
+            </div>
+            <div class="message os-ctrl-padding-top">
+              <span translate="specimens.primary">Primary</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
+          <div class="os-text-checkbox">
+            <div class="checkbox">
+              <os-checkbox ng-model="ctx.printDerived"></os-checkbox>
+            </div>
+            <div class="message os-ctrl-padding-top">
+              <span translate="specimens.derived">Derived</span>
+            </div>
+          </div>
+        </div>
+        <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
+          <div class="os-text-checkbox">
+            <div class="checkbox">
+              <os-checkbox ng-model="ctx.printAliquots"></os-checkbox>
+            </div>
+            <div class="message os-ctrl-padding-top">
+              <span translate="specimens.aliquot">Aliquots</span>
             </div>
           </div>
         </div>

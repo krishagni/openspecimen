@@ -42,7 +42,8 @@ angular.module('os.biospecimen.specimen')
               }
 
               if (specimens.length == 0) {
-                Alerts.error('specimens.no_matching_spmns');
+                var opts = errorOpts || {};
+                Alerts.error(opts.no_match || 'specimens.no_matching_spmns');
                 return false;
               }
 
@@ -90,7 +91,8 @@ angular.module('os.biospecimen.specimen')
                 '        <span translate="specimens.use_barcode">Use Barcode</span>' +
                 '      </div>' +
                 '    </div>' +
-                '    <div class="pull-left os-text-checkbox" style="padding-left: 5px;" ng-if="allowVisitNames">' +
+                '    <div class="pull-left os-text-checkbox" style="padding-left: 5px;" ' +
+                '      ng-if="allowVisitNames && !input.useBarcode">' +
                 '      <div class="checkbox">' +
                 '        <os-checkbox ng-model="input.useVisit" ng-change="onUseVisitSelection()"></os-checkbox>' +
                 '      </div>' +

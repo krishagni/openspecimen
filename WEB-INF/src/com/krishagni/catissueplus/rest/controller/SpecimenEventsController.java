@@ -53,18 +53,12 @@ public class SpecimenEventsController {
 			}
 		}
 
-		ResponseEvent<List<FormData>> resp = specimenEventsSvc.saveSpecimenEvents(getRequest(formDataList));
-		resp.throwErrorIfUnsuccessful();
-		
-		List<Map<String, Object>> savedValueMapList = new ArrayList<Map<String, Object>>();
-		for (FormData data : resp.getPayload()) {
+		List<FormData> savedDataList = ResponseEvent.unwrap(specimenEventsSvc.saveSpecimenEvents(RequestEvent.wrap(formDataList)));
+		List<Map<String, Object>> savedValueMapList = new ArrayList<>();
+		for (FormData data : savedDataList) {
 			savedValueMapList.add(data.getFieldNameValueMap(data.isUsingUdn()));
 		}
 		
 		return savedValueMapList;
 	}
-	
-	private <T> RequestEvent<T> getRequest(T payload) {
-		return new RequestEvent<T>(payload);
-	}	
 }

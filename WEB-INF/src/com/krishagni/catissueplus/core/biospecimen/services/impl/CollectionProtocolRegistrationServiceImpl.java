@@ -1336,6 +1336,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		cpr.setOpComments(reason);
 		cpr.delete(!forceDelete, checkOnlyCollectedSpmns);
 		DeleteLogUtil.getInstance().log(cpr);
+		EventPublisher.getInstance().publish(new CprSavedEvent(cpr));
 	}
 
 	private void notifyOnCprsDeleted(User user, List<CollectionProtocolRegistration> cprs) {

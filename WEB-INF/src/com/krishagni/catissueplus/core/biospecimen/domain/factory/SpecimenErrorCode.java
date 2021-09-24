@@ -142,7 +142,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	DEL_NOT_FOUND,
 
-	PARENT_DELETED;
+	PARENT_DELETED,
+
+	PRIMARY_NOT_RCVD;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

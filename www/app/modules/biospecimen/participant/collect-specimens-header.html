@@ -1,5 +1,5 @@
 <div os-page-header>
-  <div class="os-page-header-content" ng-switch on="!!fieldsCtx.headers.visit.breadcrumb">
+  <div class="os-page-header-content" ng-switch on="!!fieldsCtx.headers.visit.breadcrumb && cpr.id > 0">
     <os-html-template ng-switch-when="true" template="fieldsCtx.headers.visit.breadcrumb"></os-html-template>
 
     <ul ng-switch-when="false" os-breadcrumbs>
@@ -8,12 +8,12 @@
           <span>{{cpr.cpShortTitle}}</span>
         </a> 
       </li>
-      <li ng-if="!cp.specimenCentric">
+      <li ng-if="!cp.specimenCentric && cpr.id > 0">
         <a ui-sref="participant-detail.overview({cpId: cp.id, cprId: cpr.id})">
           <span>{{cpr.ppid}}</span>
         </a>
       </li>
-      <li ng-if="!cp.specimenCentric">
+      <li ng-if="!cp.specimenCentric && cpr.id > 0">
         <a ui-sref="participant-detail.visits({visitId: visit.id, eventId: visit.eventId})">
           <span translate="visits.list">Visits</span>
         </a>
@@ -22,17 +22,19 @@
 
     <h3>
       <span>Specimen Collection</span>
-      <span ng-switch on="!!fieldsCtx.headers.visit.leftTitle">
-        <span ng-switch-when="true">
-          <span>:</span>
-          <os-html-template template="fieldsCtx.headers.visit.leftTitle"></os-html-template>
-        </span>
-        <span ng-switch-default>
-          <span ng-if="!cp.specimenCentric">
+      <span ng-if="cpr.id > 0">
+        <span ng-switch on="!!fieldsCtx.headers.visit.leftTitle">
+          <span ng-switch-when="true">
             <span>:</span>
-            <os-event-desc event-point="visit.eventPoint" event-point-unit="visit.eventPointUnit"
-              event-label="visit.eventLabel">
-            </os-event-desc>
+            <os-html-template template="fieldsCtx.headers.visit.leftTitle"></os-html-template>
+          </span>
+          <span ng-switch-default>
+            <span ng-if="!cp.specimenCentric">
+              <span>:</span>
+              <os-event-desc event-point="visit.eventPoint" event-point-unit="visit.eventPointUnit"
+                event-label="visit.eventLabel">
+              </os-event-desc>
+            </span>
           </span>
         </span>
       </span>
@@ -40,7 +42,7 @@
   </div>
 
   <div class="os-page-header-actions">
-    <h3 ng-if="!!fieldsCtx.headers.visit.rightTitle">
+    <h3 ng-if="!!fieldsCtx.headers.visit.rightTitle && cpr.id > 0">
       <os-html-template template="fieldsCtx.headers.visit.rightTitle"></os-html-template>
     </h3>
   </div>
