@@ -29,14 +29,21 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
           labelAlignment    : 'horizontal',
           records           : []
         },
-        printLabels: false,
         showVisit: showVisit(spmns),
         formDef  : undefined,
         mFormDef : undefined,
         formDefToUse: undefined,
         allowEventSelect: !event,
         spmnFilterOpts: {exactMatch: true, includeExtensions: false, includeOnlyTbr: recvWf},
-        records  : []
+        errorOpts: {
+          code  : (recvWf ? 'specimens.received_or_not_found' : 'specimen_not_found'),
+          code_m: (recvWf ? 'specimens.m_received_or_not_found' : 'specimen_m_not_found'),
+          no_match: 'specimens.all_visit_spmns_recvd'
+        },
+        records  : [],
+        printPrimary: false,
+        printDerived: false,
+        printAliquots: false
       };
 
       filterSpecimens(spmns);
@@ -230,6 +237,33 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
       return true;
     }
 
+    function addPrintToLabels(records) {
+      if (!ctx.recvWf) {
+        return;
+      }
+
+      var printLabels = [];
+      if (ctx.printPrimary) {
+        printLabels.push('New');
+      }
+
+      if (ctx.printDerived) {
+        printLabels.push('Derived');
+      }
+
+      if (ctx.printAliquots) {
+        printLabels.push('Aliquot');
+      }
+
+      if (printLabels.length > 0) {
+        angular.forEach(records,
+          function(record) {
+            record.appData.printLabels = printLabels;
+          }
+        );
+      }
+    }
+
     //
     // View functions
     //
@@ -360,6 +394,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
 
     $scope.saveEvent = function(addMore) {
       var records = getEventRecords();
+      addPrintToLabels(records);
       SpecimenEvent.save(ctx.formId, records).then(
         function(savedData) {
           Alerts.success("specimens.bulk_events.events_saved");
@@ -374,10 +409,6 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
             $scope.eventWizard.previous()
           } else if (ctx.recvWf) {
             var spmnIds = savedData.data.map(function(event) { return event.appData.objectId });
-            if (ctx.printLabels) {
-              SpecimenLabelPrinter.printLabels({specimenIds: spmnIds});
-            }
-
             Specimen.getByIds(spmnIds, true).then(
               function(spmns) {
                 var recvd = spmns.filter(
@@ -393,7 +424,8 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
 
                 var cpId = recvd[0].cpId;
                 if (recvd.some(function(spmn) { return spmn.cpId != cpId; })) {
-                  cpId = -1;
+                  $scope.back();
+                  return;
                 }
 
                 CollectSpecimensSvc.setData({visit: {cpId: cpId}, specimens: recvd});

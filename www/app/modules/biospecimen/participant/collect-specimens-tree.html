@@ -213,7 +213,7 @@
         </td>
         <td class="col"
           ng-switch on="autoAlloc.enabled && !autoAlloc.manual"
-          ng-show="storeSpmnsAllowed && uiOpts.treeColumns.position"
+          ng-if="storeSpmnsAllowed && uiOpts.treeColumns.position"
           ng-style="{width: uiOpts.treeColumns.position.width + '%',
             overflow: !autoAlloc.enabled || autoAlloc.manual ? 'visible' : 'initial'}">
           <span ng-switch-when="true">
@@ -278,7 +278,8 @@
           </div>
         </td>
         <td class="col os-col-5">
-          <button class="btn btn-xs btn-default" ng-click="remove(specimen)">
+          <button class="btn btn-xs btn-default" ng-click="remove(specimen)"
+            ng-show="specimen.hasChildren || specimen.existingStatus == 'Pending' || !specimen.existingStatus">
             <span class="fa fa-remove"></span>
           </button>
         </td>

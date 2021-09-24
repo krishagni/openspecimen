@@ -242,6 +242,7 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 			visit.setOpComments(crit.getReason());
 
 			DeleteLogUtil.getInstance().log(visit);
+			EventPublisher.getInstance().publish(new VisitSavedEvent(visit));
 			return ResponseEvent.response(VisitDetail.from(visit));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);

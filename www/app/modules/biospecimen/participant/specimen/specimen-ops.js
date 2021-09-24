@@ -4,6 +4,8 @@ angular.module('os.biospecimen.specimen')
     SpecimensHolder, Alerts, DeleteUtil, SpecimenLabelPrinter, ParticipantSpecimensViewState,
     AuthorizationService, SettingUtil) {
 
+    var SPMN_TBR = 'To be Received';
+
     function initOpts(scope, element, attrs) {
       scope.title = attrs.title || 'specimens.ops';
       if (scope.cp) {
@@ -442,7 +444,7 @@ angular.module('os.biospecimen.specimen')
           }
 
           var specimenIds = selectedSpmns.map(function(spmn) {return spmn.id});
-          Specimen.getByIds(specimenIds, false).then(
+          Specimen.getByIds(specimenIds, true).then(
             function(spmns) {
               var nonPrimarySpmns = spmns.filter(function(spmn) { return spmn.lineage != 'New'; });
               if (nonPrimarySpmns.length > 0) {
@@ -457,6 +459,11 @@ angular.module('os.biospecimen.specimen')
               var ncSpmns = spmns.filter(function(spmn) { return spmn.status != 'Collected'; });
               if (ncSpmns.length > 0) {
                 return showError('specimens.not_collected', ncSpmns);
+              }
+
+              var rcvdSpmns = spmns.filter(function(spmn) { return spmn.receivedEvent.receivedQuality != SPMN_TBR; });
+              if (rcvdSpmns.length > 0) {
+                return showError('specimens.already_received', rcvdSpmns);
               }
 
               angular.forEach(spmns, function(spmn) { ExtensionsUtil.createExtensionFieldMap(spmn, true); });

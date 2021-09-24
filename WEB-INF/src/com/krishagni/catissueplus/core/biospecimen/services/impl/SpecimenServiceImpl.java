@@ -332,6 +332,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					DeleteLogUtil.getInstance().log(specimen);
 				}
 
+				EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 				result.add(SpecimenDetail.from(specimen));
 			}
 
@@ -361,6 +362,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.disable(!criteria.isForceDelete());
 
 			DeleteLogUtil.getInstance().log(specimen);
+			EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 			result.add(SpecimenInfo.from(specimen));
 		}
 
@@ -1040,8 +1042,12 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.setParentUid(detail.getParentUid());
 		}
 
-		if (existing == null && specimen.isMissedOrNotCollected()) {
-			specimen.updateHierarchyStatus();
+		if (existing == null) {
+			if (specimen.isMissedOrNotCollected()) {
+				specimen.updateHierarchyStatus();
+			}
+
+			specimen.setStatusChanged(true);
 		}
 
 		specimen.updateAvailableStatus();

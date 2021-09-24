@@ -35,10 +35,12 @@ import com.krishagni.catissueplus.core.administrative.domain.SpecimenReservedEve
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenReturnEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -47,6 +49,7 @@ import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -870,6 +873,10 @@ public class Specimen extends BaseExtensionEntity {
 		return getAvailableQuantity() == null || NumUtil.greaterThanZero(getAvailableQuantity());
 	}
 
+	public boolean isReceived() {
+		return isPrimary() && isCollected() && !getReceivedEvent().getQuality().getValue().equals("To be Received");
+	}
+
 	public void disable() {
 		disable(!isForceDelete());
 	}
@@ -941,6 +948,14 @@ public class Specimen extends BaseExtensionEntity {
 	public boolean isPrePrintEnabled() {
 		return getSpecimenRequirement() != null &&
 			getSpecimenRequirement().getLabelAutoPrintModeToUse() == CollectionProtocol.SpecimenLabelAutoPrintMode.PRE_PRINT;
+	}
+
+	public List<Specimen> createPendingSpecimens() {
+		if (getSpecimenRequirement() == null || !isPrimary() || !isCollected() || CollectionUtils.isNotEmpty(getChildCollection())) {
+			return Collections.emptyList();
+		}
+
+		return createPendingSpecimens(getSpecimenRequirement(), this);
 	}
 
 	public void prePrintChildrenLabels(String prevStatus, LabelPrinter<Specimen> printer) {
@@ -1026,6 +1041,49 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		return result;
+	}
+
+	//
+	// Very specific to receive specimen workflow
+	//
+	public void printLabelsOnReceive(List<String> printLabels) {
+		if (printLabels == null || printLabels.isEmpty() || !isReceived()) {
+			return;
+		}
+
+		boolean printPrimary    = printLabels.contains(Specimen.NEW);
+		boolean printDerivative = printLabels.contains(Specimen.DERIVED);
+		boolean printAliquots   = printLabels.contains(Specimen.ALIQUOT);
+		if (printDerivative || printAliquots) {
+			createPendingSpecimens(getSpecimenRequirement(), this);
+		}
+
+		List<PrintItem<Specimen>> printItems = new ArrayList<>();
+		if (printPrimary) {
+			printItems.add(PrintItem.make(this, 1));
+		}
+
+		if (printDerivative || printAliquots) {
+			List<Specimen> children = new ArrayList<>(getChildCollection());
+			while (!children.isEmpty()) {
+				Specimen child = children.remove(0);
+				if (child.isMissedOrNotCollected()) {
+					continue;
+				}
+
+				if (printDerivative && child.isDerivative()) {
+					printItems.add(PrintItem.make(child, 1));
+				} else if (printAliquots && child.isAliquot()) {
+					printItems.add(PrintItem.make(child, 1));
+				}
+
+				children.addAll(0, child.getChildCollection());
+			}
+		}
+
+		if (!printItems.isEmpty()) {
+			getLabelPrinter().print(printItems);
+		}
 	}
 
 	public void close(User user, Date time, String reason) {
@@ -1869,6 +1927,7 @@ public class Specimen extends BaseExtensionEntity {
 	
 	private void updateHierarchyStatus0(String status) {
 		setCollectionStatus(status);
+		setStatusChanged(true);
 		updateAvailableStatus();
 
 		if (getId() != null && !isCollected(status)) {
@@ -2039,5 +2098,14 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		return result;
+	}
+
+	private LabelPrinter<Specimen> getLabelPrinter() {
+		String labelPrinterBean = ConfigUtil.getInstance().getStrSetting(
+			ConfigParams.MODULE,
+			ConfigParams.SPECIMEN_LABEL_PRINTER,
+			"defaultSpecimenLabelPrinter");
+
+		return (LabelPrinter<Specimen>)OpenSpecimenAppCtxProvider.getAppCtx().getBean(labelPrinterBean);
 	}
 }

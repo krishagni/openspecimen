@@ -37,6 +37,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGrou
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
@@ -95,7 +96,6 @@ import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
-
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.domain.nui.DataType;
@@ -493,6 +493,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		
 		try {
 			FormData formData = saveOrUpdateFormData(detail.getRecordId(), detail.getFormData(), detail.isPartial());
+			formData.getAppData().remove("object");
 			return ResponseEvent.response(FormDataDetail.ok(formData.getContainer().getId(), formData.getRecordId(), formData));
 		} catch(IllegalArgumentException ex) {
 			return ResponseEvent.userError(FormErrorCode.INVALID_DATA, ex.getMessage());
@@ -509,13 +510,18 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	@PlusTransactional
 	public ResponseEvent<List<FormData>> saveBulkFormData(RequestEvent<List<FormData>> req) {
 		try{
-			List<FormData> formDataList = req.getPayload();
 			List<FormData> savedFormDataList = new ArrayList<>();
-			for (FormData formData : formDataList) {
+			for (FormData formData : req.getPayload()) {
 				FormData savedFormData = saveOrUpdateFormData(formData.getRecordId(), formData, true);
+				Object obj = savedFormData.getAppData().remove("object");
 				savedFormDataList.add(savedFormData);
+
+				if (formData.getContainer().getName().equals(SpecimenReceivedEvent.FORM_NAME)) {
+					Specimen spmn = (Specimen) obj;
+					spmn.printLabelsOnReceive((List<String>) formData.getAppData().get("printLabels"));
+				}
 			}
-			
+
 			return ResponseEvent.response(savedFormDataList);
 		} catch(IllegalArgumentException ex) {
 			return ResponseEvent.userError(FormErrorCode.INVALID_DATA, ex.getMessage());
@@ -1150,7 +1156,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		return formCtxt;
 	}
 
-
 	private FormData saveOrUpdateFormData(Long recordId, FormData formData, boolean isPartial) {
 		Map<String, Object> appData = formData.getAppData();
 		if (appData.get("formCtxtId") == null || appData.get("objectId") == null) {
@@ -1252,6 +1257,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		}
 
 		formData.setRecordId(recordId);
+		formData.getAppData().put("object", object);
 		
 		FormRecordEntryBean recordEntry = null;
 		

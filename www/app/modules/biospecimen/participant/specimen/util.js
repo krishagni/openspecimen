@@ -335,10 +335,15 @@ angular.module('os.biospecimen.specimen')
 
     function showError(notFoundLabels, errorOpts) {
       errorOpts = errorOpts || {};
-      errorOpts.code = errorOpts.code || 'specimens.specimen_not_found';
-      errorOpts.params = errorOpts.params || {};
-      errorOpts.params.label = notFoundLabels.join(', ');
-      Alerts.error(errorOpts.code, errorOpts.params);
+
+      var code = errorOpts.code || 'specimens.specimen_not_found';
+      if (notFoundLabels.length > 1) {
+        code = errorOpts.code_m || 'specimens.specimen_m_not_found';
+      }
+
+      var params = angular.extend({}, errorOpts.params || {});
+      params.label = notFoundLabels.join(', ');
+      Alerts.error(code, params);
     }
 
     function showInsufficientQtyWarning(opts) {
