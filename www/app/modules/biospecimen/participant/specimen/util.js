@@ -299,7 +299,7 @@ angular.module('os.biospecimen.specimen')
 
       if (notFoundLabels.length != 0) {
         showError(notFoundLabels, errorOpts);
-        return deferred(undefined);
+        // return deferred(undefined);
       }
 
       if (dupLabels.length == 0) {
