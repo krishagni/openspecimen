@@ -212,51 +212,53 @@
     <div class="form-group" ng-if="ctx.mode == 'TABLE' && !!ctx.opts.tableData">
       <div class="col-xs-12">
         <div os-de-table opts="ctx.opts" ctrl="ctx.tabCtrl"></div>
-      </div>
 
-      <div class="os-divider"></div>
+        <div class="os-divider"></div>
+      </div>
     </div>
 
 
     <div class="form-group right-btns">
-      <div class="col-xs-offset-3 col-xs-9" ng-if="ctx.recvWf">
-        <div style="margin-top: -11px;padding-right: 15px;vertical-align: middle;display: inline-block;">
-          <div class="os-text-checkbox">
-            <div class="message os-ctrl-padding-top">
-              <span translate="specimens.print_labels">Print Labels</span>
+      <div class="col-xs-offset-3 col-xs-9">
+        <span ng-if="ctx.recvWf">
+          <div style="margin-top: -11px;padding-right: 15px;vertical-align: middle;display: inline-block;">
+            <div class="os-text-checkbox">
+              <div class="message os-ctrl-padding-top">
+                <span translate="specimens.print_labels">Print Labels</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
-          <div class="os-text-checkbox">
-            <div class="checkbox">
-              <os-checkbox ng-model="ctx.printPrimary"></os-checkbox>
-            </div>
-            <div class="message os-ctrl-padding-top">
-              <span translate="specimens.primary">Primary</span>
-            </div>
-          </div>
-        </div>
-        <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
-          <div class="os-text-checkbox">
-            <div class="checkbox">
-              <os-checkbox ng-model="ctx.printDerived"></os-checkbox>
-            </div>
-            <div class="message os-ctrl-padding-top">
-              <span translate="specimens.derived">Derived</span>
+          <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
+            <div class="os-text-checkbox">
+              <div class="checkbox">
+                <os-checkbox ng-model="ctx.printPrimary"></os-checkbox>
+              </div>
+              <div class="message os-ctrl-padding-top">
+                <span translate="specimens.primary">Primary</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
-          <div class="os-text-checkbox">
-            <div class="checkbox">
-              <os-checkbox ng-model="ctx.printAliquots"></os-checkbox>
-            </div>
-            <div class="message os-ctrl-padding-top">
-              <span translate="specimens.aliquot">Aliquots</span>
+          <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
+            <div class="os-text-checkbox">
+              <div class="checkbox">
+                <os-checkbox ng-model="ctx.printDerived"></os-checkbox>
+              </div>
+              <div class="message os-ctrl-padding-top">
+                <span translate="specimens.derived">Derived</span>
+              </div>
             </div>
           </div>
-        </div>
+          <div style="padding-right: 15px;vertical-align: middle;display: inline-block;">
+            <div class="os-text-checkbox">
+              <div class="checkbox">
+                <os-checkbox ng-model="ctx.printAliquots"></os-checkbox>
+              </div>
+              <div class="message os-ctrl-padding-top">
+                <span translate="specimens.aliquot">Aliquots</span>
+              </div>
+            </div>
+          </div>
+        </span>
         <button class="btn os-btn-text" ng-click="back()">
           <span translate="common.buttons.cancel">Cancel</span>
         </button>
