@@ -245,4 +245,30 @@
       end;
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Print label files staging data">
+    <createTable tableName="OS_LABEL_PRINT_FILE_ITEMS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="JOB_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PRINT_FILE_JOB_ID"
+          referencedTableName="OS_LABEL_PRINT_JOBS" referencedColumnNames="IDENTIFIER"/>
+      </column>
+      <column name="CONTENT" type="${clob.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="CREATOR_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PRINT_FILE_USER_ID"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER"/>
+      </column>
+      <column name="CREATION_TIME" type="${timestamp.type}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Print label files staging ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_LBL_PRN_FILE_ITEMS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
 </databaseChangeLog>

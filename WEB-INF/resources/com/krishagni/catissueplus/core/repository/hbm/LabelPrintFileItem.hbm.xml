@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.common.domain.LabelPrintFileItem" table="OS_LABEL_PRINT_FILE_ITEMS">
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_LBL_PRN_FILE_ITEMS_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="job" column="JOB_ID" not-null="true"/>
+
+    <property name="content" column="CONTENT" not-null="true"/>
+
+    <many-to-one name="creator" column="CREATOR_ID"/>
+
+    <property name="creationTime" column="CREATION_TIME"/>
+
+    <sql-query name="deleteItems">
+      delete from os_label_print_file_items where job_id = :jobId
+    </sql-query>
+
+    <sql-query name="deleteItemsOlderThan">
+      <![CDATA[delete from os_label_print_file_items where creation_time < :olderThan]]>
+    </sql-query>
+  </class>
+</hibernate-mapping>

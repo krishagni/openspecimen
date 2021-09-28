@@ -6,13 +6,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,9 +24,11 @@ import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroupSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.TransactionAwareInterceptor;
+import com.krishagni.catissueplus.core.common.TransactionEventListener;
+import com.krishagni.catissueplus.core.common.domain.LabelPrintFileItem;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJobItem;
-import com.krishagni.catissueplus.core.common.domain.LabelPrintJobItem.Status;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplTokenRegistrar;
@@ -41,7 +44,7 @@ import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
-public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
+public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, TransactionEventListener {
 	//
 	// format: <entity_type>_<yyyyMMddHHmm>_<unique_os_run_num>_<copy>.txt
 	// E.g. specimen_201604040807_1_1.txt, specimen_201604040807_1_2.txt, visit_201604040807_1_1.txt etc
@@ -60,12 +63,34 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 
 	protected LabelTmplTokenRegistrar printLabelTokensRegistrar;
 
+	private TransactionAwareInterceptor transactionAwareInterceptor;
+
+	private LabelPrintFileSpooler labelPrintFilesSpooler;
+
+	private ThreadLocal<Set<Long>> jobIds = new ThreadLocal<Set<Long>>() {
+		@Override
+		protected Set<Long> initialValue() {
+			return new LinkedHashSet<>();
+		}
+	};
+
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
 	}
 
 	public void setPrintLabelTokensRegistrar(LabelTmplTokenRegistrar printLabelTokensRegistrar) {
 		this.printLabelTokensRegistrar = printLabelTokensRegistrar;
+	}
+
+	public void setTransactionAwareInterceptor(TransactionAwareInterceptor transactionAwareInterceptor) {
+		this.transactionAwareInterceptor = transactionAwareInterceptor;
+		if (transactionAwareInterceptor != null) {
+			transactionAwareInterceptor.addListener(this);
+		}
+	}
+
+	public void setLabelPrintFilesSpooler(LabelPrintFileSpooler labelPrintFilesSpooler) {
+		this.labelPrintFilesSpooler = labelPrintFilesSpooler;
 	}
 
 	@Override
@@ -133,8 +158,8 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 				return null;
 			}
 
-			generateCmdFiles(labelDataList);
-			daoFactory.getLabelPrintJobDao().saveOrUpdate(job);
+			daoFactory.getLabelPrintJobDao().saveOrUpdate(job, true);
+			generateCmdFiles(job, labelDataList);
 			return job;
 		} catch (Exception e) {
 			logger.error("Error printing distribution labels", e);
@@ -176,6 +201,13 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 		}
 	}
 
+	@Override
+	public void onFinishTransaction() {
+		Set<Long> printJobIds = jobIds.get();
+		jobIds.remove();
+		printJobIds.forEach(labelPrintFilesSpooler::queueJob);
+	}
+
 	protected abstract boolean isApplicableFor(LabelPrintRule rule, T obj, User user, String ipAddr);
 
 	protected abstract String getObjectType();
@@ -209,16 +241,43 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void generateCmdFiles(List<Map<String, Object>> labelDataList) {
+	protected void generateCmdFiles(LabelPrintJob job, List<Map<String, Object>> labelDataList) {
+		jobIds.get().add(job.getId());
+
+		List<Map<String, Object>> fileItems = new ArrayList<>();
 		for (Map<String, Object> labelData : labelDataList) {
-			generateCmdFile(
-				(LabelPrintJobItem)labelData.get("jobItem"),
-				(LabelPrintRule)labelData.get("rule"),
-				(Map<String, String>)labelData.get("dataItems"));
+			generateCmdFileContent(
+				(LabelPrintJobItem) labelData.get("jobItem"),
+				(LabelPrintRule) labelData.get("rule"),
+				(Map<String, String>) labelData.get("dataItems"),
+				fileItems
+			);
+
+			if (fileItems.size() >= 25) {
+				writeToDb(job, fileItems);
+				fileItems.clear();
+			}
+		}
+
+		if (!fileItems.isEmpty()) {
+			writeToDb(job, fileItems);
 		}
 	}
 
-	private void generateCmdFile(LabelPrintJobItem jobItem, LabelPrintRule rule, Map<String, String> dataItems) {
+	private void writeToDb(LabelPrintJob job, List<Map<String, Object>> items) {
+		try {
+			LabelPrintFileItem fileItem = new LabelPrintFileItem();
+			fileItem.setJob(job);
+			fileItem.setContent(new ObjectMapper().writeValueAsString(items));
+			fileItem.setCreator(AuthUtil.getCurrentUser());
+			fileItem.setCreationTime(Calendar.getInstance().getTime());
+			daoFactory.getLabelPrintJobDao().savePrintFileItem(fileItem);
+		} catch (Exception e) {
+			throw new RuntimeException("Error spooling labels", e);
+		}
+	}
+
+	private void generateCmdFileContent(LabelPrintJobItem jobItem, LabelPrintRule rule, Map<String, String> dataItems, List<Map<String, Object>> out) {
 		if (StringUtils.isBlank(rule.getCmdFilesDir()) || rule.getCmdFilesDir().trim().equals("*")) {
 			return;
 		}
@@ -239,8 +298,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 					break;
 			}
 
-			writeToFile(jobItem, rule, content);
-			jobItem.setStatus(Status.QUEUED);
+			generateCmdFileContent(jobItem, rule, content, out);
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		}
@@ -267,14 +325,18 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 		return "CRLF".equals(lineEnding) ? "\r\n" : "\n";
 	}
 
-	private void writeToFile(LabelPrintJobItem item, LabelPrintRule rule, String content)
+	private void generateCmdFileContent(LabelPrintJobItem item, LabelPrintRule rule, String content, List<Map<String, Object>> out)
 	throws IOException {
 		String tstamp = new SimpleDateFormat(TSTAMP_FMT).format(item.getJob().getSubmissionDate());
 		int labelCount = uniqueNum.incrementAndGet();
 
 		for (int i = 0; i < item.getCopies(); ++i) {
 			String filename = String.format(LABEL_FILENAME_FMT, item.getJob().getItemType(), tstamp, labelCount, (i + 1), rule.getFileExtn());
-			FileUtils.write(new File(rule.getCmdFilesDir(), filename), content);
+
+			Map<String, Object> label = new HashMap<>();
+			label.put("file", new File(rule.getCmdFilesDir(), filename).getAbsolutePath());
+			label.put("content", content);
+			out.add(label);
 		}
 	}
 }
