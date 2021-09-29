@@ -33,9 +33,9 @@ import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail.AttrDetail;
 import com.krishagni.catissueplus.core.de.events.FormRecordSummary;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
-
 import edu.common.dynamicextensions.domain.nui.CheckBox;
 import edu.common.dynamicextensions.domain.nui.Container;
+import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.domain.nui.DatePicker;
 import edu.common.dynamicextensions.domain.nui.SubFormControl;
 import edu.common.dynamicextensions.domain.nui.UserContext;
@@ -554,13 +554,17 @@ public abstract class DeObject {
 		return formCtxt;
 	}
 
+	//
+	// get list of all attributes that have some value
+	//
 	private List<Attr> getAttrs(FormData formData) {
 		List<Attr> attrs = new ArrayList<>();
-		for (ControlValue cv : formData.getOrderedFieldValues()) {
+		for (Control ctrl : formData.getContainer().getOrderedControlList()) {
+			ControlValue cv = formData.getFieldValue(ctrl.getName());
 			if (cv == null) {
 				continue;
 			}
-                
+
 			if (cv.getControl() instanceof SubFormControl && cv.getValue() != null) {
 				SubFormControl sfCtrl = (SubFormControl)cv.getControl();
 				if (sfCtrl.isOneToOne()) {
