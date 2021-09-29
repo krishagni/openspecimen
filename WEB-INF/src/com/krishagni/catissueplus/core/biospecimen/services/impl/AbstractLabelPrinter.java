@@ -29,6 +29,7 @@ import com.krishagni.catissueplus.core.common.TransactionEventListener;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintFileItem;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJobItem;
+import com.krishagni.catissueplus.core.common.domain.LabelPrintJobSavedEvent;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplTokenRegistrar;
@@ -140,6 +141,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 					item.setStatus(LabelPrintJobItem.Status.QUEUED);
 					item.setLabelType(rule.getLabelType());
 					item.setData(new ObjectMapper().writeValueAsString(labelDataItems));
+					item.setObject(obj);
 					item.setDataItems(labelDataItems);
 
 					job.getItems().add(item);
@@ -159,6 +161,8 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 			}
 
 			daoFactory.getLabelPrintJobDao().saveOrUpdate(job, true);
+			EventPublisher.getInstance().publish(new LabelPrintJobSavedEvent(job));
+
 			generateCmdFiles(job, labelDataList);
 			return job;
 		} catch (Exception e) {

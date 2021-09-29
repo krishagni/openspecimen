@@ -30,6 +30,8 @@ public class LabelPrintJobItem extends BaseEntity {
 	
 	private String data;
 
+	private transient Object object;
+
 	private transient Map<String, String> dataItems;
 
 	public LabelPrintJob getJob() {
@@ -102,6 +104,14 @@ public class LabelPrintJobItem extends BaseEntity {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public Object getObject() {
+		return object;
+	}
+
+	public void setObject(Object object) {
+		this.object = object;
 	}
 
 	public Map<String, String> getDataItems() {
