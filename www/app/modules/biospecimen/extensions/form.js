@@ -66,7 +66,7 @@ angular.module('os.biospecimen.extensions', ['os.biospecimen.models'])
             formDataUrl    : baseUrl + '/:formId/data/:recordId',
             formSaveUrl    : baseUrl + '/:formId/data',
             formPvUrl      : baseUrl + '/:formId/permissible-values',
-            fileUploadUrl  : filesUrl,
+            fileUploadUrl  : opts.filesUploadUrl || filesUrl,
             fileDownloadUrl: ExtensionsUtil.getFileDownloadUrl,
             formData       : opts.formData,
             recordId       : opts.recordId,
