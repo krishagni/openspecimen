@@ -5,7 +5,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -117,7 +116,24 @@ public class AuthUtil {
 	}
 
 	public static void setTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp, String authToken) {
-		String cookieValue = "osAuthToken=" + (authToken != null ? authToken : "") + ";";
+		setCookie(httpReq, httpResp, "osAuthToken", authToken, -1);
+	}
+
+	public static void clearTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		setTokenCookie(httpReq, httpResp, null);
+		setImpersonateTokenCookie(httpReq, httpResp, null);
+	}
+
+	public static void setImpersonateTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp, String impToken) {
+		setCookie(httpReq, httpResp, "osImpersonateUser", impToken, 60 * 60);
+	}
+
+	public static void clearImpersonateTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		setImpersonateTokenCookie(httpReq, httpResp, null);
+	}
+
+	public static void setCookie(HttpServletRequest httpReq, HttpServletResponse httpResp, String name, String value, int maxAge) {
+		String cookieValue = name + "=" + (value != null ? value : "") + ";";
 		cookieValue += "Path=" + getContextPath(httpReq) + ";";
 		cookieValue += "HttpOnly;";
 		cookieValue += "SameSite=Strict;";
@@ -125,15 +141,13 @@ public class AuthUtil {
 			cookieValue += "secure;";
 		}
 
-		if (authToken == null) {
+		if (value == null) {
 			cookieValue += "Max-Age=0;";
+		} else if (maxAge != -1) {
+			cookieValue += "Max-Age=" + maxAge + ";";
 		}
 
-		httpResp.setHeader("Set-Cookie", cookieValue);
-	}
-
-	public static void clearTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
-		setTokenCookie(httpReq, httpResp, null);
+		httpResp.addHeader("Set-Cookie", cookieValue);
 	}
 
 	public static void resetTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
@@ -185,7 +199,7 @@ public class AuthUtil {
 				continue;
 			}
 
-			String[] parts = cookie.trim().split("=");
+			String[] parts = cookie.trim().split("=", 2);
 			if (parts.length == 2) {
 				try {
 					value = URLDecoder.decode(parts[1], "utf-8");

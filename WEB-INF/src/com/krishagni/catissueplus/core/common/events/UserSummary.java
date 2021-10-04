@@ -53,6 +53,8 @@ public class UserSummary implements Serializable {
 
 	private String activityStatus;
 
+	private Boolean impersonated;
+
 	public Long getId() {
 		return id;
 	}
@@ -181,6 +183,14 @@ public class UserSummary implements Serializable {
 		this.activityStatus = activityStatus;
 	}
 
+	public Boolean getImpersonated() {
+		return impersonated;
+	}
+
+	public void setImpersonated(Boolean impersonated) {
+		this.impersonated = Boolean.TRUE.equals(impersonated) ? true : null;
+	}
+
 	public String formattedName() {
 		StringBuilder name = new StringBuilder();
 		if (StringUtils.isNotBlank(firstName)) {
@@ -216,6 +226,7 @@ public class UserSummary implements Serializable {
 		result.setCreationDate(user.getCreationDate());
 		result.setManageForms(user.getManageForms());
 		result.setActivityStatus(user.getActivityStatus());
+		result.setImpersonated(user.isImpersonated());
 
 		if (user.getInstitute() != null) {
 			result.setInstituteId(user.getInstitute().getId());

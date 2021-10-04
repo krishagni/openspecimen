@@ -4,7 +4,6 @@ package com.krishagni.catissueplus.rest.controller;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,7 +26,6 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
-
 import ua_parser.Client;
 import ua_parser.Device;
 import ua_parser.OS;
@@ -105,7 +103,17 @@ public class AuthenticationController {
 	@RequestMapping(method=RequestMethod.POST, value="/impersonate")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, Object> impersonate(@RequestBody Map<String, Object> input) {
-		return ResponseEvent.unwrap(userAuthService.impersonate(RequestEvent.wrap(input)));
+	public Map<String, Object> impersonate(HttpServletRequest httpReq, HttpServletResponse httpResp, @RequestBody Map<String, Object> input) {
+		Map<String, Object> token = ResponseEvent.unwrap(userAuthService.impersonate(RequestEvent.wrap(input)));
+		AuthUtil.setImpersonateTokenCookie(httpReq, httpResp, (String) token.get("impersonateUserToken"));
+		return token;
+	}
+
+	@RequestMapping(method=RequestMethod.DELETE, value="/impersonate")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> impersonate(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		AuthUtil.setImpersonateTokenCookie(httpReq, httpResp, null);
+		return Collections.singletonMap("impersonateUserToken", null);
 	}
 }

@@ -96,6 +96,8 @@ public class User extends BaseEntity implements UserDetails {
 	private Set<SubjectAccess> acl = new HashSet<>();
 
 	private Set<UserGroup> groups = new HashSet<>();
+
+	private transient boolean impersonated;
 	
 	@Autowired 
 	private DaoFactory daoFactory;
@@ -316,6 +318,14 @@ public class User extends BaseEntity implements UserDetails {
 
 	public void setGroups(Set<UserGroup> groups) {
 		this.groups = groups;
+	}
+
+	public boolean isImpersonated() {
+		return impersonated;
+	}
+
+	public void setImpersonated(boolean impersonated) {
+		this.impersonated = impersonated;
 	}
 
 	@Override

@@ -47,9 +47,16 @@ angular.module('os.administrative.models.user', ['os.common.models'])
     }
 
     User.prototype.impersonate = function() {
-      return $http.post(ApiUrls.getBaseUrl() + 'sessions/impersonate', {userId: this.id}).then(
+      var promise;
+      if (this.id > 0) {
+        promise = $http.post(ApiUrls.getBaseUrl() + 'sessions/impersonate', {userId: this.id});
+      } else {
+        promise = $http.delete(ApiUrls.getBaseUrl() + 'sessions/impersonate');
+      }
+
+      return promise.then(
         function(resp) {
-          return resp.data.impersonateUserToken;
+          return resp.data && resp.data.impersonateUserToken;
         }
       );
     }

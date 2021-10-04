@@ -450,8 +450,7 @@ osApp.config(function(
     ui.os.global = $rootScope.global = {
       defaultDomain: 'openspecimen',
       filterWaitInterval: ui.os.appProps.searchDelay,
-      appProps: ui.os.appProps,
-      impersonate: !!$cookies['osImpersonateUser']
+      appProps: ui.os.appProps
     };
 
     $rootScope.$on('$stateChangeSuccess',
