@@ -187,8 +187,8 @@ public class UserSummary implements Serializable {
 		return impersonated;
 	}
 
-	public void setImpersonated(boolean impersonated) {
-		this.impersonated = impersonated ? true : null;
+	public void setImpersonated(Boolean impersonated) {
+		this.impersonated = Boolean.TRUE.equals(impersonated) ? true : null;
 	}
 
 	public String formattedName() {
