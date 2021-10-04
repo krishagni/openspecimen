@@ -1,5 +1,11 @@
 <template>
   <os-navbar />
+
+  <div class="os-user-impersonate-warn" v-if="ui.currentUser && ui.currentUser.impersonated">
+    <span>You are viewing {{$filters.username(ui.currentUser)}}'s account.
+    <a @click="returnToMyAccount">Return back to your account.</a></span>
+  </div>
+
   <div class="os-app-body">
     <Toast class="os-app-toast" />
     <router-view/>
@@ -9,8 +15,13 @@
 <script>
 import Toast from "primevue/toast";
 
+import userSvc from '@/administrative/services/User.js';
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   name: 'App',
+
+  inject: ['ui'],
 
   components: {
     Toast
@@ -20,6 +31,12 @@ export default {
   },
 
   mounted() {
+  },
+
+  methods: {
+    returnToMyAccount: function() {
+      userSvc.unpersonate().then(() => routerSvc.ngGoto(''));
+    }
   }
 }
 </script>
@@ -235,4 +252,26 @@ a:focus, a:hover {
   height: 100%;
 }
 
+</style>
+
+<style scoped>
+
+.os-user-impersonate-warn {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 40%;
+  margin: auto;
+  z-index: 10;
+  background: #c33;
+  padding: 0.25rem 0.5rem;
+  color: #fff;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.os-user-impersonate-warn a {
+  color: #fff;
+  text-decoration-line: underline;
+}
 </style>

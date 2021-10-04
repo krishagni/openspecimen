@@ -1380,7 +1380,7 @@
     "confirm_institute_update_q": "Changing the institute will remove all the site specific roles assigned to the {{count > 1 ? 'users' : 'user'}}. Are you sure you want to proceed?",
 
     "impersonate": "Impersonate",
-    "impersonate_warning": "You are now viewing {{user | osUserDisplayName}}'s account.",
+    "impersonate_warning": "You are viewing {{user | osUserDisplayName}}'s account.",
     "return_back_to_account": "Return back to your account.",
     "impersonate_as": "Sign-in as {{user | osUserDisplayName}} ...",
     "confirm_impersonate_as": "An email will be sent to {{user | osUserDisplayName}} to let them know you've signed-in to their account. The email will include details like your name, email address, and device IP address. Do you want to proceed?",

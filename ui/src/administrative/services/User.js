@@ -61,6 +61,10 @@ class User {
     return http.post('sessions/impersonate', {userId: user.id});
   }
 
+  async unpersonate() {
+    return http.delete('sessions/impersonate');
+  }
+
   async getRoles(user) {
     return http.get('rbac/subjects/' + user.id + '/roles');
   }
