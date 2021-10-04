@@ -215,13 +215,27 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		if (user.isAdmin() && !user.isSysUser()) {
 			String impUserStr = AuthUtil.getImpersonateUser(httpReq);
 			if (StringUtils.isNotBlank(impUserStr)) {
-				impersonatedUser = getUser(user, Utility.getRemoteAddress(httpReq), impUserStr);
+				try {
+					impersonatedUser = getUser(user, Utility.getRemoteAddress(httpReq), impUserStr);
+				} catch (OpenSpecimenException ose) {
+					if (ose.containsError(AuthErrorCode.IMP_TOKEN_EXP) || ose.containsError(AuthErrorCode.IMP_TOKEN_INV)) {
+						AuthUtil.clearTokenCookie(httpReq, httpResp);
+						httpResp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ose.getMessage());
+						teardownReqDataProviders(httpReq, httpResp);
+						return;
+					}
+
+					throw ose;
+				}
+
 				if (impersonatedUser == null || !impersonatedUser.isActive()) {
 					String message = impersonatedUser == null ? " does not exist!" : " is not active!";
 					httpResp.sendError(HttpServletResponse.SC_BAD_REQUEST, "User " + impUserStr + message);
 					teardownReqDataProviders(httpReq, httpResp);
 					return;
 				}
+
+				impersonatedUser.setImpersonated(true);
 			}
 		}
 

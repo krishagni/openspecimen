@@ -7,6 +7,7 @@ angular.module('openspecimen')
        $scope.alerts = Alerts.messages;
        $rootScope.currentUser = currentUser;
        $rootScope.logout = false;
+       ui.os.global.impersonate = !!currentUser.impersonated;
 
        var ctx = $scope.userCtx = {
          hasPhiAccess: AuthorizationService.hasPhiAccess(),
@@ -90,13 +91,15 @@ angular.module('openspecimen')
      }
 
      $scope.returnToAccount = function() {
-       AuthService.impersonate(null);
-
-       //
-       // delayed reloading of state is present to ensure
-       // the cookie is removed from the store
-       //
-       $timeout(function() { $state.go('home', {}, {reload: true}) }, 500);
+       AuthService.impersonate(null).then(
+         function() {
+           //
+           // delayed reloading of state is present to ensure
+           // the cookie is removed from the store
+           //
+           $timeout(function() { $state.go('home', {}, {reload: true}) }, 500);
+         }
+       );
      }
 
      init();

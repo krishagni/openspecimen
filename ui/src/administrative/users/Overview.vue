@@ -171,20 +171,8 @@ export default {
     },
 
     impersonate: function() {
-      //let self = this;
       this.$refs.confirmImpersonate.open().then(
-        () => {
-          alertSvc.info('This function is under development. We sincerely regret the inconvenience caused to you!');
-          /*userSvc.impersonate(self.ctx.user).then(
-            (detail) => {
-              window.parent.postMessage({
-                op: 'impersonate',
-                token: detail.impersonateUserToken,
-                requestor: 'vueapp'
-              }, '*');
-            }
-          );*/
-        }
+        () => userSvc.impersonate(this.ctx.user).then(() => routerSvc.ngGoto(''))
       );
     }
   }

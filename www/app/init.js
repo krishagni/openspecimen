@@ -14,7 +14,10 @@ ui.os.appProps = {
 
 (function($) {
   var pluginScriptsCnt = 0;
+
   var pluginsCnt = 0;
+
+  var errorCount = 0;
 
   function init() {
     var server = ui.os.server;
@@ -44,11 +47,23 @@ ui.os.appProps = {
           } else {
             bootstrapApp();
           }
+
+          errorCount = 0;
         }
       ).fail(
-        function() {
+        function(xhr) {
           console.log("Failed to load app props. Initialisation might fail");
-          bootstrapApp();
+          console.log(xhr);
+          if (xhr.status == 401) {
+            localStorage.removeItem('osAuthToken');
+          }
+
+          ++errorCount;
+          if (errorCount == 3) {
+            alert('Failed to load app props. Initialisation failed');
+          } else {
+            init();
+          }
         }
       );
   }
