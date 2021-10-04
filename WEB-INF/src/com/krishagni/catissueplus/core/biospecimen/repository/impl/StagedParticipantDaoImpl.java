@@ -2,18 +2,15 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.SimpleExpression;
-import org.hibernate.criterion.Subqueries;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.StagedParticipant;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
@@ -30,13 +27,13 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 	@Override
 	@SuppressWarnings("unchecked")	
 	public List<StagedParticipant> getByPmis(List<PmiDetail> pmis) {
-		DetachedCriteria subQuery = getByPmisQuery(pmis);
-		if (subQuery == null) {
+	    List<Long> participantIds = getMatchingParticipantIds(pmis);
+		if (participantIds == null || participantIds.isEmpty()) {
 			return Collections.emptyList();
 		}
 
 		return getCurrentSession().createCriteria(StagedParticipant.class, "sp")
-			.add(Subqueries.propertyIn("sp.id", subQuery))
+			.add(Restrictions.in("sp.id", participantIds))
 			.list();
 	}
 	
@@ -88,36 +85,33 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 		return deleteOldParticipantRecs(DEL_OLD_PARTICIPANTS, olderThanDt);
 	}
 
-	private DetachedCriteria getByPmisQuery(List<PmiDetail> pmis) {
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(StagedParticipant.class)
-			.setProjection(Projections.distinct(Projections.property("id")));
-		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession())
-			.createAlias("pmiList", "pmi");
-
-		Disjunction junction = Restrictions.disjunction();
-		boolean added = false;
+	private List<Long> getMatchingParticipantIds(List<PmiDetail> pmis) {
+		List<String> disjunctions = new ArrayList<>();
 		for (PmiDetail pmi : pmis) {
 			if (StringUtils.isBlank(pmi.getSiteName()) || StringUtils.isBlank(pmi.getMrn())) {
 				continue;
 			}
 
-			SimpleExpression eqMrn  = Restrictions.eq("pmi.medicalRecordNumber", pmi.getMrn());
-			SimpleExpression eqSite = Restrictions.eq("pmi.site", pmi.getSiteName());
-			if (!isMySQL()) {
-				eqMrn  = eqMrn.ignoreCase();
-				eqSite = eqSite.ignoreCase();
+			if (isMySQL()) {
+				disjunctions.add(String.format(
+					"pmi.medical_record_number = '%s' and pmi.site_name = '%s'",
+					pmi.getMrn(), pmi.getSiteName()
+				));
+			} else {
+				disjunctions.add(String.format(
+					"lower(pmi.medical_record_number) = '%s' and lower(pmi.site_name) = '%s'",
+					pmi.getMrn().toLowerCase(), pmi.getSiteName().toLowerCase()
+				));
 			}
-
-			junction.add(Restrictions.and(eqMrn, eqSite));
-			added = true;
 		}
 
-		if (added) {
-			query.add(junction);
-			return detachedCriteria;
-		} else {
-			return null;
+		if (disjunctions.isEmpty()) {
+			return Collections.emptyList();
 		}
+
+		String sql = String.format(GET_MRN_MATCHING_PIDS, StringUtils.join(disjunctions, " or "));
+		List<Object> result = getCurrentSession().createSQLQuery(sql).list();
+		return result.stream().map(id -> ((Number) id).longValue()).collect(Collectors.toList());
 	}
 
 	private int deleteOldParticipantRecs(String query, Date olderThanDt) {
@@ -133,4 +127,6 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 	private static final String DEL_OLD_PARTICIPANT_RACES = FQN + ".deleteOldParticipantRaces";
 
 	private static final String DEL_OLD_PARTICIPANT_ETHNICITIES = FQN + ".deleteOldParticipantEthnicities";
+
+	private static final String GET_MRN_MATCHING_PIDS = "select distinct participant_id from os_staged_part_medical_ids pmi where %s";
 }
