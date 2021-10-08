@@ -523,7 +523,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 				}
 			}
 
-		} else if (isNotSpecified(anatomicSite)) {
+		} else if (isNotSpecified(anatomicSite, false)) {
 			specimen.setTissueSite(sr != null ? sr.getAnatomicSite() : getNotSpecified(SPECIMEN_ANATOMIC_SITE));
 		} else {
 			PermissibleValue site = getPv(SPECIMEN_ANATOMIC_SITE, anatomicSite, true);
@@ -558,7 +558,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 					ose.addError(SpecimenErrorCode.LATERALITY_NOT_SAME_AS_PARENT, laterality, parentValue);
 				}
 			}
-		} else if (isNotSpecified(laterality)) {
+		} else if (isNotSpecified(laterality, false)) {
 			specimen.setTissueSide(sr != null ? sr.getLaterality() : getNotSpecified(SPECIMEN_LATERALITY));
 		} else {
 			PermissibleValue pv = getPv(SPECIMEN_LATERALITY, laterality, false);
@@ -593,7 +593,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 					ose.addError(SpecimenErrorCode.PATHOLOGY_NOT_SAME_AS_PARENT, pathology, parentValue);
 				}
 			}
-		} else if (isNotSpecified(pathology)) {
+		} else if (isNotSpecified(pathology, false)) {
 			specimen.setPathologicalStatus(sr != null ? sr.getPathologyStatus() : getNotSpecified(PATH_STATUS));
 		} else {
 			PermissibleValue pv = getPv(PATH_STATUS, pathology, false);
@@ -1154,7 +1154,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		if (specimen.isAliquot()) {
 			fromParent = true;
 		} else if (specimen.isDerivative()) {
-			if (isNotSpecified(value) && isNotSpecified(PermissibleValue.getValue(anticipatedValue))) {
+			if (isNotSpecified(value, true) && isNotSpecified(PermissibleValue.getValue(anticipatedValue), true)) {
 				fromParent = true;
 			}
 		}
@@ -1162,8 +1162,8 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		return fromParent;
 	}
 
-	private boolean isNotSpecified(String value) {
-		return StringUtils.isBlank(value) || Specimen.NOT_SPECIFIED.equalsIgnoreCase(value);
+	private boolean isNotSpecified(String value, boolean trueIfNotSpecified) {
+		return StringUtils.isBlank(value) || (trueIfNotSpecified && Specimen.NOT_SPECIFIED.equalsIgnoreCase(value));
 	}
 
 	private boolean isAliquotQtyReq() {
