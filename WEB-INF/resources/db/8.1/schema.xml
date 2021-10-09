@@ -150,6 +150,7 @@
     <createSequence sequenceName="OS_PDE_AUDIT_LOGS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
 
+<<<<<<< HEAD
   <changeSet author="vpawar" id="Specimen delete events">
     <createTable tableName="OS_DELETE_SPMN_EVENTS">
       <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
@@ -270,5 +271,25 @@
 
   <changeSet author="vpawar" id="Print label files staging ID generator" dbms="oracle">
     <createSequence sequenceName="OS_LBL_PRN_FILE_ITEMS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Function based index on staged participants UID" dbms="oracle">
+    <createIndex tableName="OS_STAGED_PARTICIPANTS" indexName="STAGED_LOWER_UID_IDX">
+      <column name="lower(NUID)"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Function based index on staged participants EMPI" dbms="oracle">
+    <createIndex tableName="OS_STAGED_PARTICIPANTS" indexName="STAGED_LOWER_EMPI_IDX">
+      <column name="lower(EMPI_ID)"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Function based index on staged MRNs" dbms="oracle">
+    <createIndex tableName="OS_STAGED_PART_MEDICAL_IDS" indexName="STAGED_LOWER_MRN_IDX">
+      <column name="lower(MEDICAL_RECORD_NUMBER)"/>
+      <column name="lower(SITE_NAME)"/>
+      <column name="PARTICIPANT_ID"/>
+    </createIndex>
   </changeSet>
 </databaseChangeLog>

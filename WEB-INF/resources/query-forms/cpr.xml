@@ -200,7 +200,7 @@
         <udn>regDate</udn>
         <caption>#getMessage("participant_registration_date")</caption>
         <column>REGISTRATION_DATE</column>
-        <format>MM-dd-yyyy</format>
+        <format>MM-dd-yyyy/dateOnly</format>
       </datePicker>
     </row>
     <row>
