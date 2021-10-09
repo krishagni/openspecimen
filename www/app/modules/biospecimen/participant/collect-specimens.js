@@ -463,7 +463,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             visit.site = cpr.participant.pmis[0].siteName;
           }
 
-          $scope.showManifestPrint = (ui.os.appProps.plugins || []).indexOf('os-extras') != -1;
+          $scope.showManifestPrint = !cp.specimenCentric &&
+            (ui.os.appProps.plugins || []).indexOf('os-extras') != -1;
           $scope.visit = visit;
           $scope.autoAlloc = {
             enabled: !!$scope.cp.containerSelectionStrategy,
@@ -1630,7 +1631,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             opts
           );
 
-          $scope.showManifestPrint = (ui.os.appProps.plugins || []).indexOf('os-extras') != -1;
+          $scope.showManifestPrint = !cp.specimenCentric &&
+            (ui.os.appProps.plugins || []).indexOf('os-extras') != -1;
           $scope.visit = visit;
           if (visit) {
             isVisitCompleted = (visit.status == 'Complete');
