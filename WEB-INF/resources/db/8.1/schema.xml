@@ -150,7 +150,6 @@
     <createSequence sequenceName="OS_PDE_AUDIT_LOGS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
 
-<<<<<<< HEAD
   <changeSet author="vpawar" id="Specimen delete events">
     <createTable tableName="OS_DELETE_SPMN_EVENTS">
       <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
