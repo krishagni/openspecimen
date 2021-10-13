@@ -22,7 +22,7 @@
     </field>
 
     <field>
-      <type>date</type>
+      <type>dateOnly</type>
       <caption>#getMessage("participant_registration_date")</caption>
       <attribute>registrationDate</attribute>
     </field>
