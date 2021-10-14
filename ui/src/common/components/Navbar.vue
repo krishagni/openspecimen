@@ -17,7 +17,31 @@
         <span> </span>
       </div>
       <div class="buttons">
-        <span> </span>
+        <div class="user-profile">
+          <a @click="toggleProfileMenu">
+            <os-username-avatar :name="username" />
+          </a>
+
+          <os-overlay ref="userProfileMenu">
+            <ul class="user-profile-options">
+              <li>
+                <a @click="holdYourHorses">{{username}}</a>
+              </li>
+              <li class="divider">
+                <os-divider />
+              </li>
+              <li>
+                <a @click="holdYourHorses">Change Password</a>
+              </li>
+              <li class="divider">
+                <os-divider />
+              </li>
+              <li>
+                <a @click="holdYourHorses">Log Out</a>
+              </li>
+            </ul>
+          </os-overlay>
+        </div>
       </div>
     </div>
   </div>
@@ -27,6 +51,7 @@
 
 import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
+import alertSvc from '@/common/services/Alerts.js';
 
 export default {
   data() {
@@ -58,6 +83,21 @@ export default {
       }
 
       return logoUrl;
+    },
+
+    username: function() {
+      return this.$filters.username(this.$ui.currentUser);
+    }
+  },
+
+  methods: {
+    toggleProfileMenu: function(event) {
+      this.$refs.userProfileMenu.toggle(event);
+    },
+
+    holdYourHorses: function(event) {
+      alertSvc.underDev();
+      this.toggleProfileMenu(event);
     }
   }
 }
@@ -77,17 +117,15 @@ export default {
 
 .os-navbar .items {
   width: 100%;
-}
-
-.os-navbar .items:after {
-  content: '';
-  display: inline-block;
-  clear: both;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
 }
 
 .os-navbar .items .logo {
-  float: left;
-  width: 25%;
+  display: flex;
+  flex: 1;
+  flex-direction: row;
   padding: 0.15rem;
 }
 
@@ -108,18 +146,47 @@ export default {
   display: inline-block;
   height: 1.125rem;
   margin-left: 0.4rem;
-  position: absolute;
-  top: 0.5rem;
+  margin-top: 0.2rem;
 }
 
 .os-navbar .items .search {
-  float: left;
-  width: 50%;
+  display: flex;
+  flex: 2;
 }
 
 .os-navbar .items .buttons {
-  float: left;
-  width: 25%;
+  display: flex;
+  flex: 1;
+  justify-content: right;
+  padding: 0.2rem 1rem;
 }
 
+.user-profile,
+.user-profile a {
+  display: inline-block;
+}
+
+.user-profile-options {
+  margin: -1.25rem;
+  list-style: none;
+  padding: 0.5rem 0rem;
+}
+
+.user-profile-options li a {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  transition: box-shadow 0.15s;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+}
+
+.user-profile-options li:not(.divider):hover {
+  background: #e9ecef;
+}
+
+.user-profile-options li.divider {
+  padding: 0.25rem 0rem;
+  margin: -1rem 0rem;
+}
 </style>

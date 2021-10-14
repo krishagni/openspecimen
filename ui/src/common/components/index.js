@@ -1,4 +1,5 @@
 import AuditOverview from './AuditOverview.vue';
+import Avatar from './Avatar.vue';
 import BooleanCheckbox from './BooleanCheckbox.vue';
 import Breadcrumb from './Breadcrumb.vue';
 import Button from './Button.vue';
@@ -30,6 +31,7 @@ import Menu from './Menu.vue';
 import Message from './Message.vue';
 import MultiSelectDropdown from './MultiSelectDropdown.vue';
 import Navbar from './Navbar.vue';
+import Overlay from './Overlay.vue';
 import Overview from './Overview.vue';
 import Page from './Page.vue';
 import PageBody from './PageBody.vue';
@@ -48,10 +50,12 @@ import StorageContainerDropdown from './StorageContainerDropdown.vue';
 import Subform from './Subform.vue';
 import Textarea from './Textarea.vue';
 import UserDropdown from './UserDropdown.vue';
+import UsernameAvatar from './UsernameAvatar.vue';
 
 export default {
   install(app) {
     app.component('os-audit-overview',   AuditOverview);
+    app.component('os-avatar',           Avatar);
     app.component('os-boolean-checkbox', BooleanCheckbox);
     app.component('os-breadcrumb',       Breadcrumb);
     app.component('os-button',           Button);
@@ -83,6 +87,7 @@ export default {
     app.component('os-message',          Message);
     app.component('os-multi-select-dropdown', MultiSelectDropdown);
     app.component('os-navbar',           Navbar);
+    app.component('os-overlay',          Overlay);
     app.component('os-overview',         Overview);
     app.component('os-page',             Page);
     app.component('os-page-body',        PageBody);
@@ -101,5 +106,6 @@ export default {
     app.component('os-subform',          Subform);
     app.component('os-textarea',         Textarea);
     app.component('os-user-dropdown',    UserDropdown);
+    app.component('os-username-avatar',  UsernameAvatar);
   }
 }

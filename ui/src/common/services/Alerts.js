@@ -28,7 +28,7 @@ class Alerts {
   }
 
   underDev() {
-    this.info('This function is under development. We sincerely regret the inconvenience caused to you!');
+    this.info('Hold your horses! This function is under development. We sincerely regret the inconvenience caused to you!');
   }
 }
 
