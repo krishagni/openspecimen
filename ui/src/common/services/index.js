@@ -5,6 +5,7 @@ import exportSvc      from './ExportService.js';
 import exprUtil       from './ExpressionUtil.js';
 import fieldFactory   from './FieldFactory.js';
 import formUtil       from './FormUtil.js';
+import homePageSvc    from './HomePageService.js';
 import http           from './HttpClient.js';
 import itemsSvc       from './ItemsHolder.js';
 import pluginLoader   from './PluginLoader.js';
@@ -23,6 +24,7 @@ export default {
       exprUtil:     exprUtil,
       fieldFactory: fieldFactory,
       formUtil:     formUtil,
+      homePageSvc:  homePageSvc,
       http:         http,
       itemsSvc:     itemsSvc,
       pluginLoader: pluginLoader,

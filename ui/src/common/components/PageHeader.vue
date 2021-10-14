@@ -49,6 +49,8 @@ import Sidebar from 'primevue/sidebar';
 import Icon from './Icon.vue'
 
 import authSvc from '@/common/services/Authorization.js';
+import homePageSvc from '@/common/services/HomePageService.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   inject: ['ui'],
@@ -67,10 +69,36 @@ export default {
 
   computed: {
     items: function() {
-      let items = this.ui.menuItems
-        .filter(menuItem => !menuItem.showIf || authSvc.isAllowed(menuItem.showIf))
-        .map(menuItem => ({label: menuItem.title, url: this.ui.ngServer + menuItem.href, target: '_parent'}));
-      items.splice(0, 0, {label: 'Home', url: this.ui.ngServer + '#/home', target: '_parent'});
+      let items = homePageSvc.getCards()
+        .filter(card => {
+          if (typeof card.showIf == 'function') {
+            return card.showIf();
+          }
+
+          return !card.showIf || authSvc.isAllowed(card.showIf);
+        })
+        .map(card => {
+          let item = {label: card.title};
+          if (typeof card.href == 'string') {
+            item.url = this.ui.ngServer + card.href;
+          } else if (typeof card.href == 'function') {
+            item.command = () => {
+              Promise.resolve(card.href()).then(
+                link => {
+                  if (card.newTab) {
+                    window.open(link, '_blank');
+                  } else {
+                    routerSvc.ngGoto(link);
+                  }
+                }
+              );
+            }
+          }
+
+          return item;
+        });
+
+      items.splice(0, 0, {label: 'Home', url: this.ui.ngServer + '#/home'});
       return items;
     }
   }

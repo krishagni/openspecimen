@@ -105,6 +105,141 @@ filters.arrayJoin = (value) => {
   }
 }
 
+function registerHomePageCards(osSvc) {
+  osSvc.homePageSvc.registerCards([
+    {
+      showIf: {resource: 'CollectionProtocol', operations: ['Read']},
+      href: '#/cps',
+      icon: 'fa fa-calendar',
+      title: 'Collection Protocols',
+      description: 'Create, update SOP of visits and specimens'
+    },
+
+    {
+      showIf: 'admin',
+      href: '#/institutes',
+      icon: 'fa fa-institution',
+      title: 'Institutes',
+      description: 'Update information about institutions'
+    },
+
+    {
+      showIf: {resource: 'User', operations: ['Create', 'Update']},
+      href: '#/users',
+      icon: 'fa fa-user',
+      title: 'Users',
+      description: 'Add, rename and manage users'
+    },
+
+    {
+      showIf: {resource: 'User', operations: ['Create', 'Update']},
+      href: '#/roles',
+      icon: 'fa fa-lock',
+      title: 'Roles',
+      description: 'Create, update user access controls'
+    },
+
+    {
+      showIf: 'institute-admin',
+      href: '#/sites',
+      icon: 'fa fa-hospital-o',
+      title: 'Sites',
+      description: 'Add and update sites'
+    },
+
+    {
+      showIf: {resource: 'StorageContainer', operations: ['Read']},
+      href: '#/containers',
+      icon: 'fa fa-dropbox',
+      title: 'Containers',
+      description: 'Manage containers and their restrictions'
+    },
+
+    {
+      showIf: {resource: 'Query', operations: ['Read']},
+      href: '#/queries/list',
+      icon: 'fa fa-dashboard',
+      title: 'Queries',
+      description: 'Create, share, and schedule queries'
+    },
+
+    {
+      showIf: {resources: ['Specimen', 'PrimarySpecimen'], operations: ['Read']},
+      href: '#/specimen-lists',
+      icon: 'fa fa-shopping-cart',
+      title: 'Carts',
+      description: 'Create, share, and manage specimen carts'
+    },
+
+    {
+      href: '#/forms',
+      icon: 'fa fa-copy',
+      title: 'Forms',
+      description: 'Create and manage custom forms',
+      showIf: () => ui.currentUser.admin || ui.currentUser.instituteAdmin || ui.currentUser.manageForms
+    },
+
+    {
+      showIf: {resource: 'DistributionProtocol', operations: ['Read']},
+      href: '#/dps',
+      icon: 'fa fa-truck',
+      title: 'Distribution Protocols',
+      description: 'Create, update procedures for distributing specimens'
+    },
+
+    {
+      showIf: {resource: 'Order', operations: ['Read']},
+      href: '#/orders',
+      icon: 'fa fa-share',
+      title: 'Orders',
+      description: 'Create, execute request orders for distributing specimens'
+    },
+
+    {
+      showIf: {resource: 'ShippingAndTracking', operations: ['Read']},
+      href: '#/shipments',
+      icon: 'fa fa-paper-plane-o',
+      title: 'Shipments',
+      description: 'Create, ship, track, and receive specimen shipments'
+    },
+
+    {
+      showIf: {resource: 'ScheduledJob', operations: ['Read']},
+      href: '#/jobs',
+      icon: 'fa fa-gears',
+      title: 'Jobs',
+      description: 'Create, schedule, execute jobs'
+    },
+
+    {
+      showIf: 'institute-admin',
+      href: '#/consent-statements',
+      icon: 'fa fa-file-text-o',
+      title: 'Consents',
+      description: 'Manage coded consent statements'
+    },
+
+    {
+      href: async () => {
+        let setting = await settingSvc.getSetting('training', 'training_url');
+        return setting[0].value;
+      },
+      icon: 'fa fa-graduation-cap',
+      title: 'Training',
+      description: 'User manual and training videos portal',
+      newTab: true
+    },
+
+    {
+      showIf: 'admin',
+      href: '#/settings/settings-list',
+      icon: 'fa fa-wrench',
+      title: 'Settings',
+      description: 'Manage application configuration settings'
+    }
+  ]);
+}
+
 app.config.globalProperties.$goto =
   (name, params, query) => routerSvc.goto(name, params, query);
 
@@ -160,10 +295,10 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
       }
     };
 
-    ui.currentUser = currUser;
-    ui.menuItems = [];
-
     let osSvc = window.osSvc = app.config.globalProperties.$osSvc;
+    ui.currentUser = currUser;
+    registerHomePageCards(osSvc);
+
     app.provide('ui', ui);
     app.provide('osSvc', osSvc);
 
@@ -194,17 +329,3 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
     );
   }
 );
-
-//
-// listen for route changes
-//
-
-/*router.afterEach(
-  (to, from, failure) => {
-    if (!failure) {
-      // alert('Change the window browser URL to: ' + to.fullPath);
-      // window.parent.href = to.href;
-      // routerSvc.changeUrl(to.href);
-    }
-  }
-);*/
