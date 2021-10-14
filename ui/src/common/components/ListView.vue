@@ -1,5 +1,5 @@
 <template>
-  <div class="os-table os-table-hover" :class="{'show-filters': showFilters}">
+  <div class="os-list os-list-hover" :class="{'show-filters': showFilters}">
 
     <div class="results">
       <div class="info" v-if="loading || list.length == 0">
@@ -300,72 +300,64 @@ export default {
 
 <style scoped>
   
-.os-table {
+.os-list {
   overflow: auto;
   margin-right: -15px;
+  display: flex;
+  flex-direction: row;
 }
 
-.os-table:after {
+.os-list:after {
   content: ' ';
   clear: both;
   display: block;
 }
 
-.os-table .results {
-  float: left;
-  width: 100%;
+.os-list .results {
+  display: flex;
   height: 100%;
-  position: relative;
+  flex-direction: column;
+  width: 100%;
 }
 
-.os-table.show-filters .results {
+.os-list.show-filters .results {
   width: 75%;
 }
 
-.os-table .results .info {
+.os-list .results .info {
   padding-right: 15px;
 }
 
-.os-table .results .results-inner {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
+.os-list .results .results-inner {
   overflow: auto;
   padding-right: 15px;
+  height: 100%;
 }
 
-.os-table .results .results-inner .p-inline-message {
+.os-list .results .results-inner .p-inline-message {
   width: 100%;
 }
 
-.os-table .results .results-inner .p-inline-message span {
+.os-list .results .results-inner .p-inline-message span {
   width: 100%;
   text-align: left;
 }
 
-.os-table .filters {
-  float: left;
-  display: none;
-  position: relative;
-  height: 100%;
+.os-list .filters {
   width: 25%;
+  display: none;
+  flex-direction: column;
 }
 
-.os-table.show-filters .filters {
-  display: block;
+.os-list.show-filters .filters {
+  display: flex;
   border-left: 1px solid #ddd;
 }
 
-.os-table .filters .filters-inner {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
+.os-list .filters .filters-inner {
   overflow: auto;
-  padding: 0px 15px 15px
+  padding: 0px 15px 15px;
+  height: 100%;
 }
 
 .filters .title {
@@ -386,7 +378,7 @@ export default {
   margin-bottom: 30px;
 }
 
-.os-table :deep(table) {
+.os-list :deep(table) {
   width: 100%;
   margin-bottom: 20px;
   display: table;
@@ -394,13 +386,13 @@ export default {
   table-layout: inherit;
 }
 
-.os-table :deep(tr) {
+.os-list :deep(tr) {
   margin-right: 0px;
   margin-left: 0px;
 }
 
-.os-table :deep(thead tr th),
-.os-table :deep(tbody tr td) {
+.os-list :deep(thead tr th),
+.os-list :deep(tbody tr td) {
   padding: 8px;
   line-height: 1.42857143;
   vertical-align: top;
@@ -408,44 +400,44 @@ export default {
   word-break: break-word;
 }        
         
-.os-table :deep(thead tr th) {
+.os-list :deep(thead tr th) {
   vertical-align: bottom;
   border-bottom: 1px solid #ddd;
   font-weight: bold;
 }
     
-.os-table :deep(thead tr:first-child th) {
+.os-list :deep(thead tr:first-child th) {
   border-top: 0;
 }   
 
-.os-table-hover :deep(tbody tr:hover) {
+.os-list-hover :deep(tbody tr:hover) {
   background: #f7f7f7;
   cursor: pointer;
 }
 
-.os-table :deep(.p-datatable .p-datatable-tbody > tr.p-highlight) {
+.os-list :deep(.p-datatable .p-datatable-tbody > tr.p-highlight) {
   /*background: #E3F2FD;
   color: #495057;*/
   background: inherit;
   color: inherit;
 }
 
-.os-table :deep(.p-checkbox .p-checkbox-box.p-highlight) {
+.os-list :deep(.p-checkbox .p-checkbox-box.p-highlight) {
   background: #2196F3;
   border-color: #2196F3;
 }
 
-.os-table :deep(th.os-selection-cb) {
+.os-list :deep(th.os-selection-cb) {
   vertical-align: middle;
 }
 
-.os-table :deep(.os-selection-cb .p-checkbox) {
+.os-list :deep(.os-selection-cb .p-checkbox) {
   height: 15px;
   width: 15px;
   vertical-align: text-top;
 }
 
-.os-table :deep(.os-selection-cb .p-checkbox .p-checkbox-box) {
+.os-list :deep(.os-selection-cb .p-checkbox .p-checkbox-box) {
   height: 15px;
   width: 15px;
 }
