@@ -123,7 +123,7 @@ export default {
       userSvc.saveOrUpdate(this.ctx.user).then(
         function(result) {
           if (self.editProfile) {
-            routerSvc.ngGoto('home', {});
+            routerSvc.back();
           } else {
             routerSvc.goto('UserOverview', {userId: result.id});
           }

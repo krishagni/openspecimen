@@ -22,22 +22,27 @@
             <os-username-avatar :name="username" />
           </a>
 
-          <os-overlay ref="userProfileMenu">
+          <os-overlay ref="userProfileMenu" @click="toggleProfileMenu">
             <ul class="user-profile-options">
               <li>
-                <a @click="holdYourHorses">{{username}}</a>
+                <router-link :to="{name: 'UserEditProfile', params: {userId: $ui.currentUser.id}}">
+                  <span>{{username}}</span>
+                </router-link>
               </li>
               <li class="divider">
                 <os-divider />
               </li>
-              <li>
-                <a @click="holdYourHorses">Change Password</a>
+              <li v-if="$ui.currentUser.domain == $ui.global.defaultDomain">
+                <router-link :to="{name: 'UserChangePassword', params: {userId: $ui.currentUser.id}}">
+                  <span>Change Password</span>
+                </router-link>
               </li>
-              <li class="divider">
+              <li class="divider" v-if="$ui.currentUser.domain == $ui.global.defaultDomain">
                 <os-divider />
               </li>
               <li>
-                <a @click="holdYourHorses">Log Out</a>
+                <a v-if="ssoLogout" href="saml/logout">Log Out</a>
+                <a v-else :href="$ui.ngServer + '#/?logout=true'">Log Out</a>
               </li>
             </ul>
           </os-overlay>
@@ -52,12 +57,25 @@
 import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
 import alertSvc from '@/common/services/Alerts.js';
+import settingsSvc from '@/common/services/Setting.js';
 
 export default {
   data() {
     return {
-      osLogo: osLogo
+      osLogo: osLogo,
+
+      ssoLogout: false
     };
+  },
+
+  created() {
+    let samlEnabled = settingsSvc.getSetting('auth', 'saml_enable');
+    let sloEnabled  = settingsSvc.getSetting('auth', 'single_logout');
+    Promise.all([samlEnabled, sloEnabled]).then(
+      (resp) => {
+        this.ssoLogout = (resp[0] == true || resp[0] == 'true') && (resp[1] == true || resp[1] == 'true');
+      }
+    );
   },
 
   computed: {

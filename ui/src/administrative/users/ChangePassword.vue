@@ -29,7 +29,7 @@ import chgPasswdFs from '@/administrative/users/change-password-schema.json';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
-import settingsSvc from '@/administrative/services/Setting.js';
+import settingsSvc from '@/common/services/Setting.js';
 import userSvc from '@/administrative/services/User.js';
 
 export default {

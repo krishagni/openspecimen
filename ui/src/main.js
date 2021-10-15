@@ -23,7 +23,7 @@ import alerts from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
 import authSvc from '@/common/services/Authorization.js';
 import pluginLoader from '@/common/services/PluginLoader.js';
-import settingSvc from '@/administrative/services/Setting.js';
+import settingSvc from '@/common/services/Setting.js';
 import userSvc from '@/administrative/services/User.js';
 import routerSvc from '@/common/services/Router.js';
 
