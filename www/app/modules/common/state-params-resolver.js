@@ -23,5 +23,17 @@ angular.module('openspecimen')
         }
       },
       parent: 'signed-in'
+    })
+    .state('url-resolver', {
+      url: '/resolve-url?:urlKey&:entityId',
+      controller: function($state, $stateParams, $location, UrlResolver) {
+        var state = UrlResolver.getStateParams($stateParams.urlKey, $stateParams.entityId);
+        if (state) {
+          $state.go(state.name, state.params, {location: 'replace'});
+        } else {
+          $state.go('home');
+        }
+      },
+      parent: 'signed-in'
     });
   });

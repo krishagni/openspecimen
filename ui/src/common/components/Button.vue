@@ -1,9 +1,9 @@
 
 <template>
   <button type="button" :class="buttonClass">
-    <icon v-if="leftIcon" :name="leftIcon" :class="leftIconClass" :size="iconSize"/>
+    <icon v-if="leftIcon" :name="leftIcon" :class="leftIconClass" :size="iconSize" />
     <span>{{label}}</span>
-    <icon v-if="rightIcon" :name="rightIcon" :class="rightIconClass" :size="iconSize"/>
+    <icon v-if="rightIcon" :name="rightIcon" :class="rightIconClass" :size="iconSize" />
   </button>
 </template>
 

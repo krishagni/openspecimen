@@ -15,6 +15,8 @@
 <script>
 import Toast from "primevue/toast";
 
+import Navbar from '@/common/components/Navbar.vue';
+
 import userSvc from '@/administrative/services/User.js';
 import routerSvc from '@/common/services/Router.js';
 
@@ -24,7 +26,8 @@ export default {
   inject: ['ui'],
 
   components: {
-    Toast
+    Toast,
+    'os-navbar': Navbar
   },
 
   setup() {

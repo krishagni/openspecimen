@@ -8,6 +8,11 @@ angular.module('os.common')
     }
 
     function getUrl(urlKey, idValue) {
+      var state = getStateParams(urlKey, idValue);
+      return state ? $state.href(state.name, state.params) : null;
+    }
+
+    function getStateParams(urlKey, idValue) {
       var urlState = urlStateMap[urlKey];
       if (!urlState) {
         return null;
@@ -15,13 +20,15 @@ angular.module('os.common')
 
       var params = {};
       params[urlState.idName || 'id'] = idValue;
-      return $state.href(urlState.stateName, params);
+      return {name: urlState.stateName, params: params};
     }
 
     return {
       regUrlState: regUrlState,
 
-      getUrl: getUrl
+      getUrl: getUrl,
+
+      getStateParams: getStateParams
     };
   }
 );

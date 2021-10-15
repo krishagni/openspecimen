@@ -14,6 +14,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import BadgeDirective from 'primevue/badgedirective';
 
 import router from './router'
 import ui from './global.js';
@@ -44,6 +45,7 @@ const app = createApp(Root)
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
+app.directive('os-badge', BadgeDirective);
 
 let filters = app.config.globalProperties.$filters = app.config.globalProperties.$filters || {};
 filters.username = (user) => {

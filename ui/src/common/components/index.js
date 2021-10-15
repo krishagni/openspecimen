@@ -30,7 +30,6 @@ import ListView from './ListView.vue';
 import Menu from './Menu.vue';
 import Message from './Message.vue';
 import MultiSelectDropdown from './MultiSelectDropdown.vue';
-import Navbar from './Navbar.vue';
 import Overlay from './Overlay.vue';
 import Overview from './Overview.vue';
 import Page from './Page.vue';
@@ -86,7 +85,6 @@ export default {
     app.component('os-menu',             Menu);
     app.component('os-message',          Message);
     app.component('os-multi-select-dropdown', MultiSelectDropdown);
-    app.component('os-navbar',           Navbar);
     app.component('os-overlay',          Overlay);
     app.component('os-overview',         Overview);
     app.component('os-page',             Page);

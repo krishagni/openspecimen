@@ -8,6 +8,7 @@ import formUtil       from './FormUtil.js';
 import homePageSvc    from './HomePageService.js';
 import http           from './HttpClient.js';
 import itemsSvc       from './ItemsHolder.js';
+import notifSvc       from './Notif.js';
 import pluginLoader   from './PluginLoader.js';
 import pluginViews    from './PluginViewsRegistry.js';
 import routerSvc      from './Router.js';
@@ -28,6 +29,7 @@ export default {
       homePageSvc:  homePageSvc,
       http:         http,
       itemsSvc:     itemsSvc,
+      notifSvc:     notifSvc,
       pluginLoader: pluginLoader,
       pluginViews:  pluginViews,
       routerSvc:    routerSvc,

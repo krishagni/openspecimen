@@ -14,9 +14,19 @@ export default {
     OverlayPanel
   },
 
+  emits: ['show', 'hide'],
+
+  mounted() {
+    this.$watch(() => this.$refs.op.visible, (visibility) => this.emitShowHide(visibility));
+  },
+
   methods: {
     toggle: function(event) {
       this.$refs.op.toggle(event);
+    },
+
+    emitShowHide: function(visibility) {
+      this.$emit(visibility ? 'show' : 'hide');
     }
   }
 }
