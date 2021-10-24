@@ -1135,6 +1135,13 @@ public class Specimen extends BaseExtensionEntity {
 		if (!isActive()) {
 			otherSpecimen.setPosition(null);
 		}
+
+		//
+		// OPSMN-5615
+		//
+		if (isClosed()) {
+			otherSpecimen.zeroOutAvailableQty();
+		}
 	}
 
 	//
