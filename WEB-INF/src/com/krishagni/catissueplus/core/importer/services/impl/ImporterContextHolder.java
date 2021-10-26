@@ -8,30 +8,24 @@ public class ImporterContextHolder {
     // Stores boolean indicating whether current thread is
     // doing import operation or not.
     //
-    private static ThreadLocal<Boolean> importerCtx = null;
+    private static ThreadLocal<Boolean> ctx = ThreadLocal.withInitial(() -> false);
 
     private ImporterContextHolder() {
     }
-
 
     public static ImporterContextHolder getInstance() {
         return instance;
     }
 
     public void newContext() {
-        importerCtx = new ThreadLocal<Boolean>() {
-            protected Boolean initialValue() {
-                return true;
-            }
-        };
+        ctx.set(true);
     }
 
     public void clearContext() {
-        importerCtx.remove();
-        importerCtx = null;
+        ctx.set(false);
     }
 
     public boolean isImportOp() {
-        return importerCtx != null && importerCtx.get();
+        return ctx.get();
     }
 }
