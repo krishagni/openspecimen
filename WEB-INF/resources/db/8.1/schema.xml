@@ -291,4 +291,22 @@
       <column name="PARTICIPANT_ID"/>
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on staged participant MRNs" dbms="mysql">
+    <addUniqueConstraint constraintName="OS_STAGED_PART_MRNS_UQ"
+      tableName="OS_STAGED_PART_MEDICAL_IDS"
+      columnNames="SITE_NAME,MEDICAL_RECORD_NUMBER" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on staged participant MRNs" dbms="oracle">
+    <sql>
+      create unique index OS_STAGED_PART_MRNS_UQ on OS_STAGED_PART_MEDICAL_IDS(
+        case when
+          site_name is not null and medical_record_number is not null
+        then
+          lower(site_name) || '-' || lower(medical_record_number)
+        end
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
