@@ -8,7 +8,7 @@ public class ExporterContextHolder {
 	// Stores boolean indicating whether current thread is
 	// doing export operation or not.
 	//
-	private static ThreadLocal<Boolean> exporterCtx = null;
+	private static ThreadLocal<Boolean> ctx = ThreadLocal.withInitial(() -> false);
 
 	private ExporterContextHolder() {
 	}
@@ -19,15 +19,14 @@ public class ExporterContextHolder {
 	}
 
 	public void newContext() {
-		exporterCtx = ThreadLocal.withInitial(() -> true);
+		ctx.set(true);
 	}
 
 	public void clearContext() {
-		exporterCtx.remove();
-		exporterCtx = null;
+		ctx.set(false);
 	}
 
 	public boolean isExportOp() {
-		return exporterCtx != null && exporterCtx.get();
+		return ctx.get();
 	}
 }
