@@ -12,14 +12,18 @@
     <span v-else-if="field.type == 'signature'">
       <img :src="imageUrl">
     </span>
+    <span v-else-if="field.type == 'textArea' || field.type == 'stringTextField'">
+      <pre v-html="displayValue"></pre>
+    </span>
     <span v-else>
-      <span>{{displayValue}}</span>
+      <span><pre>{{displayValue}}</pre></span>
     </span>
   </span>
 </template>
 
 <script>
 import http from '@/common/services/HttpClient.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['field'],
@@ -45,6 +49,8 @@ export default {
         }
       } else if (this.field.type == 'booleanCheckbox') {
         return this.$filters.boolValue(this.field.value);
+      } else if (this.field.type == 'textArea' || this.field.type == 'stringTextField') {
+        return util.linkify(this.field.displayValue || this.field.value);
       } else if (this.field.displayValue) {
         return this.field.displayValue;
       } else if (this.field.value instanceof Array) {
@@ -56,3 +62,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+pre {
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: inherit;
+  padding: 0px;
+  margin: 0px;
+}
+</style>

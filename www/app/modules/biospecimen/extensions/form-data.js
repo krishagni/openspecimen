@@ -1,6 +1,6 @@
 
 angular.module('os.biospecimen.extensions')
-  .directive('osFormData', function(ApiUrls, ExtensionsUtil) {
+  .directive('osFormData', function(ApiUrls, ExtensionsUtil, Util) {
     return {
       restrict: 'E',
 
@@ -23,11 +23,27 @@ angular.module('os.biospecimen.extensions')
         angular.forEach(scope.data.fields,
           function(field) {
             if (field.type == 'subForm') {
+              angular.forEach(field.value,
+                function(sfData) {
+                  angular.forEach(sfData.fields,
+                    function(sfField) {
+                      if (sfField.type == 'textArea' || sfField.type == 'stringTextField') {
+                        sfField.displayValue = Util.linkify(sfField.value);
+                      }
+                    }
+                  );
+                }
+              );
+
               return;
             }
 
             if (field.caption && field.caption.length >= 30) {
               ++longerCaptionFields;
+            }
+
+            if (field.type == 'textArea' || field.type == 'stringTextField') {
+              field.displayValue = Util.linkify(field.value);
             }
 
             ++totalFields;

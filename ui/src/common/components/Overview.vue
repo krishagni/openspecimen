@@ -10,11 +10,14 @@
         <span v-else>
           <span v-if="field.type == 'fileUpload'">
             <a :href="field.value.url" target="_blank" rel="noopener">
-              {{field.value.filename}}
+              <span>{{field.value.filename}}</span>
             </a>
           </span>
           <span v-else-if="field.type == 'signature'">
             <img :src="field.value.url">
+          </span>
+          <span v-else-if="field.type == 'text'">
+            <span v-html="field.value"></span>
           </span>
           <span v-else>
             <span>{{field.value}}</span>
@@ -30,7 +33,7 @@
         <span>{{field.label}}</span>
       </template>
       <template #content>
-        <span>{{field.value}}</span>
+        <span v-if="field.value" v-html="field.value"></span>
       </template>
     </Section>
   </template>
@@ -65,6 +68,9 @@
                     <span v-else-if="field.fields[colIdx].type == 'signature'">
                       <img :src="colValue.url">
                     </span>
+                    <span v-else-if="field.fields[colIdx].type == 'text' || field.fields[colIdx].type == 'textarea'">
+                      <span v-html="colValue"></span>
+                    </span>
                     <span v-else>
                       <span>{{colValue}}</span>
                     </span>
@@ -83,6 +89,7 @@
 import Section from '@/common/components/Section.vue';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import http from '@/common/services/HttpClient.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['object', 'schema'],
@@ -99,7 +106,18 @@ export default {
           // convert into 2-d array of values: [ [1, "abc"], [2, "xyz"], [3, "abcxyz"] ]
           let values = this.getValue(this.object, field) || [];
           if (values != '-') {
-            values = values.map(element => field.fields.map(sfField => this.getValue(element, sfField)));
+            values = values.map(
+              element => field.fields.map(
+                sfField => {
+                  let sfv = this.getValue(element, sfField);
+                  if (sfField.type == 'textarea' || sfField.type == 'text') {
+                    sfv = util.linkify(sfv);
+                  }
+
+                  return sfv;
+                }
+              )
+            );
           }
 
           subformFields.push({...field, value: values});
@@ -107,8 +125,13 @@ export default {
           let value = this.getValue(this.object, field);
           let item = {...field, value: value};
           if (item.type == 'textarea') {
+            item.value = util.linkify(item.value);
             textAreaFields.push(item);
           } else {
+            if (item.type == 'text') {
+              item.value = util.linkify(item.value);
+            }
+
             simpleFields.push(item);
           }
         }

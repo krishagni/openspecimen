@@ -657,6 +657,15 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
   font-style: italic;
 }
 
+.os-key-values .item .value pre {
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: inherit;
+  padding: 0px;
+  margin-bottom: 0px;
+}
+
 .os-line-section >.key:after {
   content: '';
   display: block;

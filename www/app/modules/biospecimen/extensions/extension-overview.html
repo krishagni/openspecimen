@@ -53,10 +53,10 @@
     <span ng-switch-default>
       <span ng-switch on="!!attr.displayValue">
         <span ng-switch-when="true">
-          {{attr.displayValue | osNoValue}}
+          <pre ng-bind-html="attr.displayValue"></pre>
         </span>
         <span ng-switch-default>
-          {{attr.value | osArrayJoin | osNoValue}}
+          <pre>{{attr.value | osArrayJoin | osNoValue}}</pre>
         </span>
       </span>
     </span>

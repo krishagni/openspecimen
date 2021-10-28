@@ -11,6 +11,12 @@ angular.module('openspecimen')
       'js', 'json', 'pdf', 'png', 'tif', 'tiff', 'txt', 'xls', 'xlsx', 'xml', 'zip'
     ];
 
+    var httpsRe = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+
+    var wwwRe   = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+
+    var mailRe  = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+
     function clear(input) {
       input.splice(0, input.length);
     };
@@ -706,6 +712,16 @@ angular.module('openspecimen')
       return $filter('date')(date, format);
     }
 
+    function linkify(text) {
+      if (!text) {
+        return text;
+      }
+
+      return text.replace(httpsRe, '<a href="$1" target="_blank">$1</a>')
+        .replace(wwwRe, '$1<a href="http://$2" target="_blank">$2</a>')
+        .replace(mailRe, '<a href="mailto:$1">$1</a>');
+    }
+
     return {
       clear: clear,
 
@@ -764,6 +780,8 @@ angular.module('openspecimen')
         return $filter('date')(input, fmt);
       },
 
-      formatDate: formatDate
+      formatDate: formatDate,
+
+      linkify: linkify
     };
   });
