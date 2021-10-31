@@ -60,7 +60,7 @@
                   <tr v-for="record of ctx.selectedForm.records" :key="record.recordId">
                     <td>
                       <router-link :to="{
-                        name: 'UserFormsList',
+                        name: listView,
                         query: {formId: record.formId, formCtxtId: record.fcId, recordId: record.recordId}
                       }">
                         <span>#{{record.recordId}}</span>
@@ -105,7 +105,7 @@ import DeleteFormRecord from '@/forms/components/DeleteFormRecord.vue';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['entity', 'forms', 'formId', 'formCtxtId', 'recordId'],
+  props: ['entity', 'forms', 'formId', 'formCtxtId', 'recordId', 'listView', 'addEditView'],
 
   components: {
     FormRecordOverview,
@@ -138,7 +138,7 @@ export default {
           ctx.selectedForm = props.forms[0];
           if (ctx.selectedForm.records && ctx.selectedForm.records.length == 1) {
             router.push({
-              name: 'UserFormsList',
+              name: props.listView,
               query: {
                 formId: ctx.selectedForm.formId,
                 formCtxtId: ctx.selectedForm.formCtxtId,
@@ -158,7 +158,7 @@ export default {
       let form = event.item;
       let method = replace ? this.$router.replace : this.$router.push;
       method({
-        name: 'UserFormsList',
+        name: this.listView,
         query: {
           formId: form.formId,
           formCtxtId: form.formCtxtId,
@@ -169,7 +169,7 @@ export default {
 
     showRecord: function(record) {
       this.$router.push({
-        name: 'UserFormsList',
+        name: this.listView,
         query: { formId: record.formId, formCtxtId: record.fcId, recordId: record.recordId }
       });
     },
@@ -177,7 +177,7 @@ export default {
     addRecord: function() {
       let selectedForm = this.ctx.selectedForm;
       this.$router.push({
-        name: 'UserFormAddEdit',
+        name: this.addEditView,
         query: { formId: selectedForm.formId, formCtxtId: selectedForm.formCtxtId }
       });
     },
@@ -185,7 +185,7 @@ export default {
     editRecord: function(record) {
       let selectedForm = this.ctx.selectedForm;
       this.$router.push({
-        name: 'UserFormAddEdit',
+        name: this.addEditView,
         query: {
           formId: selectedForm.formId,
           formCtxtId: selectedForm.formCtxtId,

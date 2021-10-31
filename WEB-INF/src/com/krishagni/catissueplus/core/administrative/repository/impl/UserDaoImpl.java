@@ -250,8 +250,9 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<FormCtxtSummary> getForms(Long userId) {
+	public List<FormCtxtSummary> getForms(String entityType, Long userId) {
 		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_FORMS)
+			.setParameter("entityType", entityType)
 			.setParameter("userId", userId)
 			.list();
 		return getEntityForms(rows);

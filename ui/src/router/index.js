@@ -67,30 +67,59 @@ const routes = [
             path: 'forms',
             name: 'UserForms',
             component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Forms.vue'),
+            props: () => ({ entityType: 'User', listView: 'UserFormsList', addEditView: 'UserFormAddEdit' }),
             children: [
               {
                 path: 'list',
                 name: 'UserFormsList',
                 component: () => import(/* webpackChunkName: "users" */ '../administrative/users/FormsList.vue'),
-                props: (route) => {
-                  return {
-                    formId: route.query.formId,
-                    formCtxtId: route.query.formCtxtId,
-                    recordId: route.query.recordId
-                  };
-                }
+                props: (route) => ({
+                  formId: route.query.formId,
+                  formCtxtId: route.query.formCtxtId,
+                  recordId: route.query.recordId
+                })
               },
               {
                 path: 'addedit',
                 name: 'UserFormAddEdit',
                 component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEditFormRecord.vue'),
-                props: (route) => {
-                  return {
-                    formId: route.query.formId,
-                    formCtxtId: route.query.formCtxtId,
-                    recordId: route.query.recordId
-                  };
-                }
+                props: (route) => ({
+                  formId: route.query.formId,
+                  formCtxtId: route.query.formCtxtId,
+                  recordId: route.query.recordId
+                })
+              }
+            ]
+          },
+          {
+            path: 'profile-forms',
+            name: 'UserProfileForms',
+            component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Forms.vue'),
+            props: () => ({
+              entityType: 'UserProfile',
+              listView: 'UserProfileFormsList',
+              addEditView: 'UserProfileFormAddEdit'
+            }),
+            children: [
+              {
+                path: 'list',
+                name: 'UserProfileFormsList',
+                component: () => import(/* webpackChunkName: "users" */ '../administrative/users/FormsList.vue'),
+                props: (route) => ({
+                  formId: route.query.formId,
+                  formCtxtId: route.query.formCtxtId,
+                  recordId: route.query.recordId
+                })
+              },
+              {
+                path: 'addedit',
+                name: 'UserProfileFormAddEdit',
+                component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEditFormRecord.vue'),
+                props: (route) => ({
+                  formId: route.query.formId,
+                  formCtxtId: route.query.formCtxtId,
+                  recordId: route.query.recordId,
+                })
               }
             ]
           }

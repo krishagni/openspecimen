@@ -1375,6 +1375,7 @@
     "no_forms": "No user forms",
     "email_ids": "Email Addresses",
     "email_ids_csv": "Comma separated list of users' email addresses",
+    "my_forms": "My Forms",
 
     "confirm_institute_update_title": "Update Institute?",
     "confirm_institute_update_q": "Changing the institute will remove all the site specific roles assigned to the {{count > 1 ? 'users' : 'user'}}. Are you sure you want to proceed?",
@@ -2220,6 +2221,7 @@
     "order_extension": "Order Custom Fields",
     "container_extension": "Container Custom Fields",
     "user_forms": "User Forms",
+    "user_profile_forms": "User Profile Forms",
     "user_group": "User Group"
   },
 

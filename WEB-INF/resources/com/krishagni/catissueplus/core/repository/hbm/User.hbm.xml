@@ -242,7 +242,7 @@
       where
         c.deleted_on is null and
         fc.deleted_on is null and
-        fc.entity_type = 'User' and (usrEntity.identifier = :userId or fc.entity_id = -1)
+        fc.entity_type = :entityType and (usrEntity.identifier = :userId or fc.entity_id = -1)
       group by
         fc.identifier, fc.container_id, c.name, c.caption, fc.entity_id, fc.entity_type,
         c.create_time, c.last_modify_time, u.identifier, u.first_name, u.last_name,

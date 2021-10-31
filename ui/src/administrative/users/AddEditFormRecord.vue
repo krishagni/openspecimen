@@ -21,7 +21,7 @@ import routerSvc from '@/common/services/Router.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['entity', 'formId', 'formCtxtId', 'recordId'],
+  props: ['entity', 'formId', 'formCtxtId', 'recordId', 'listView'],
 
   setup(props) {
     let ctx = reactive({
@@ -72,7 +72,7 @@ export default {
         (savedData) => {
           this.$emit('reload-records');
           this.$router.push({
-            name: 'UserFormsList',
+            name: this.listView,
             query: {
               formId: this.formId,
               formCtxtId: this.formCtxtId,

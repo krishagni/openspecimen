@@ -68,6 +68,12 @@ angular.module('os.administrative.form.entities', ['os.common'])
       allCps: true, multipleRecs: true
     });
 
+    list.addItem({
+      name: 'UserProfile',
+      caption: '', key: 'entities.user_profile_forms',
+      allCps: true, multipleRecs: true
+    });
+
     return {
       getEntities: list.getItems,
 

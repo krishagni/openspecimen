@@ -99,18 +99,22 @@ public class AccessCtrlMgr {
 	//                                                                                  //
 	//////////////////////////////////////////////////////////////////////////////////////
 	public void ensureCreateUserRights(User user) {
-		ensureUserObjectRights(user, Operation.CREATE);
-		ensureUserEximRights(user);
+		ensureUserObjectRights(user, Operation.CREATE, true);
+		ensureUserEximRights(user, true);
 	}
 
 	public void ensureUpdateUserRights(User user) {
-		ensureUserObjectRights(user, Operation.UPDATE);
-		ensureUserEximRights(user);
+		ensureUpdateUserRights(user, true);
+	}
+
+	public void ensureUpdateUserRights(User user, boolean selfUpdateAllowed) {
+		ensureUserObjectRights(user, Operation.UPDATE, selfUpdateAllowed);
+		ensureUserEximRights(user, selfUpdateAllowed);
 	}
 
 	public void ensureDeleteUserRights(User user) {
-		ensureUserObjectRights(user, Operation.DELETE);
-		ensureUserEximRights(user);
+		ensureUserObjectRights(user, Operation.DELETE, true);
+		ensureUserEximRights(user, true);
 	}
 
 	public void ensureCreateUpdateUserRolesRights(User user, Site roleSite) {
@@ -153,7 +157,7 @@ public class AccessCtrlMgr {
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 
-		ensureUserEximRights(user);
+		ensureUserEximRights(user, true);
 	}
 
 	public List<User> getSuperAndSiteAdmins(Site site, CollectionProtocol cp) {
@@ -181,13 +185,13 @@ public class AccessCtrlMgr {
 		return result;
 	}
 
-	private void ensureUserObjectRights(User user, Operation op) {
+	private void ensureUserObjectRights(User user, Operation op, boolean selfUpdateAllowed) {
 		if (AuthUtil.isAdmin()) {
 			// admin allowed to update all kinds of users
 			return;
 		}
 
-		if (user.equals(AuthUtil.getCurrentUser()) && op != Operation.DELETE) {
+		if (selfUpdateAllowed && user.equals(AuthUtil.getCurrentUser()) && op != Operation.DELETE) {
 			// user is editing his/her own profile
 			return;
 		}
@@ -202,9 +206,9 @@ public class AccessCtrlMgr {
 		}
 	}
 
-	private void ensureUserEximRights(User user) {
+	private void ensureUserEximRights(User user, boolean selfUpdateAllowed) {
 		if (isImportOp() || isExportOp()) {
-			ensureUserObjectRights(user, Operation.EXIM);
+			ensureUserObjectRights(user, Operation.EXIM, selfUpdateAllowed);
 		}
 	}
 

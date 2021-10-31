@@ -1,7 +1,7 @@
 angular.module('openspecimen')
   .controller('SignedInCtrl', function(
      $scope, $rootScope, $state, $timeout, $sce, $modal, $filter, currentUser, userUiState, videoSettings,
-     AuthService, Alerts, AuthorizationService, SettingUtil, User) {
+     AuthService, Alerts, AuthorizationService, SettingUtil, User, VueApp) {
 
      function init() {
        $scope.alerts = Alerts.messages;
@@ -13,7 +13,8 @@ angular.module('openspecimen')
          hasPhiAccess: AuthorizationService.hasPhiAccess(),
          state: userUiState,
          showNewStuff: true,
-         name: $filter('osUserDisplayName')(currentUser) || ''
+         name: $filter('osUserDisplayName')(currentUser) || '',
+         profileFormsUrl: VueApp.getVueViewUrl('users/' + currentUser.id + '/profile-forms/list')
        }
 
        var revision = ui.os.global.appProps.build_commit_revision;

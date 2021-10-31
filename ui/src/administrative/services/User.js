@@ -81,12 +81,14 @@ class User {
     return http.delete('rbac/subjects/' + user.id + '/roles/' + role.id);
   }
 
-  async getForms(user) {
-    return http.get('users/' + user.id + '/forms');
+  async getForms(user, entityType) {
+    let params = {entityType: entityType || 'User'};
+    return http.get('users/' + user.id + '/forms', params);
   }
 
-  async getFormRecords(user) {
-    return http.get('users/' + user.id + '/form-records').then(
+  async getFormRecords(user, entityType) {
+    let params = {entityType: entityType || 'User'};
+    return http.get('users/' + user.id + '/form-records', params).then(
       (frs) => {
         //
         // frs: [{id: <formId>, caption: <formCaption>, records: [<rec1>, <rec2>, ...]},...]

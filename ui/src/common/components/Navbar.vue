@@ -43,6 +43,11 @@
                   <span>{{username}}</span>
                 </router-link>
               </li>
+              <li>
+                <router-link :to="{name: 'UserProfileFormsList', params: {userId: $ui.currentUser.id}}">
+                  <span>My Forms</span>
+                </router-link>
+              </li>
               <li class="divider">
                 <os-divider />
               </li>

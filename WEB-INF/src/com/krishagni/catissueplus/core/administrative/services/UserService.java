@@ -20,6 +20,7 @@ import com.krishagni.catissueplus.core.de.events.EntityFormRecords;
 import com.krishagni.catissueplus.core.de.events.FormCtxtSummary;
 import com.krishagni.catissueplus.core.de.events.FormRecordsList;
 import com.krishagni.catissueplus.core.de.events.GetEntityFormRecordsOp;
+import com.krishagni.catissueplus.core.de.events.GetFormRecordsListOp;
 import com.krishagni.rbac.events.SubjectRoleDetail;
 
 public interface UserService {
@@ -60,9 +61,9 @@ public interface UserService {
 	public ResponseEvent<Boolean> broadcastAnnouncement(RequestEvent<AnnouncementDetail> req);
 
 	//
-	// Returns list of forms for data entry given the user ID.
+	// Returns list of forms for data entry given the user ID and entity type.
 	//
-	ResponseEvent<List<FormCtxtSummary>> getForms(RequestEvent<Long> req);
+	ResponseEvent<List<FormCtxtSummary>> getForms(RequestEvent<Map<String, Object>> req);
 
 	//
 	// Returns list of records of a given form for a given user.
@@ -72,5 +73,5 @@ public interface UserService {
 	//
 	// Returns list of records of all forms for a given user.
 	//
-	ResponseEvent<List<FormRecordsList>> getAllFormRecords(RequestEvent<Long> req);
+	ResponseEvent<List<FormRecordsList>> getAllFormRecords(RequestEvent<GetFormRecordsListOp> req);
 }

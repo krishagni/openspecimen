@@ -17,14 +17,19 @@
               <os-icon name="eye" />
             </router-link>
           </li>
-          <li>
+          <li v-if="ctx.isUpdateAllowed">
             <router-link :to="{name: 'UserRoles'}">
               <os-icon name="users" />
             </router-link>
           </li>
-          <li>
+          <li v-if="ctx.isUpdateAllowed">
             <router-link :to="{name: 'UserFormsList'}">
               <os-icon name="copy" />
+            </router-link>
+          </li>
+          <li v-if="ctx.pfuAllowed">
+            <router-link :to="{name: 'UserProfileFormsList'}">
+              <os-icon name="user" />
             </router-link>
           </li>
         </ul>
@@ -50,6 +55,10 @@ export default {
   setup(props) {
     let ctx = reactive({
       user: {},
+
+      isUpdateAllowed: userResources.isUpdateAllowed(),
+
+      pfuAllowed: userResources.isFormUpdateAllowed('UserProfile', props.userId),
 
       bcrumb: [
         {url: routerSvc.getUrl('UsersList'), label: 'Users'}

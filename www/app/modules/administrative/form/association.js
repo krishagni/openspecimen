@@ -37,7 +37,8 @@ angular.module('os.administrative.form.formctxts', ['os.administrative.models'])
             fc.collectionProtocol.shortTitle = $translate.instant('form.na');
           }
 
-          if (fc.level == 'User' && fc.entityId > 0 && instituteIds.indexOf(fc.entityId) == -1) {
+          if ((fc.level == 'User' || fc.level == 'UserProfile') &&
+              fc.entityId > 0 && instituteIds.indexOf(fc.entityId) == -1) {
             instituteIds.push(fc.entityId);
           }
 
@@ -112,7 +113,7 @@ angular.module('os.administrative.form.formctxts', ['os.administrative.models'])
       var cpIds = [];
       var entityIds = [];
       if (formCtxt.allProtocols || formCtxt.selectedEntity.allCps) {
-        if (formCtxt.selectedEntity.name == 'User') {
+        if (formCtxt.selectedEntity.name == 'User' || formCtxt.selectedEntity.name == 'UserProfile') {
           if (!currentUser.admin) {
             entityIds = [currentUser.instituteId];
           } else if (formCtxt.allInstitutes) {
@@ -192,20 +193,21 @@ angular.module('os.administrative.form.formctxts', ['os.administrative.models'])
     }
 
     $scope.editCtx = function() {
+      var ctx = $scope.editCtxData.ctx;
       var cpIds = [];
       var entityIds = [];
-      if ($scope.editCtxData.ctx.level.name == 'User') {
-        entityIds = [$scope.editCtxData.ctx.entityId || - 1];
+      if (ctx.level.name == 'User' || ctx.level.name == 'UserProfile') {
+        entityIds = [ctx.entityId || - 1];
       } else {
-        cpIds = [$scope.editCtxData.ctx.collectionProtocol.id || -1];
+        cpIds = [ctx.collectionProtocol.id || -1];
       }
 
       var fc = $scope.form.newFormContext({
         form: $scope.form,
         cpIds: cpIds,
-        entity: $scope.editCtxData.ctx.level.name,
+        entity: ctx.level.name,
         entityIds: entityIds,
-        isMultiRecord: $scope.editCtxData.ctx.multiRecord
+        isMultiRecord: ctx.multiRecord
       });
 
       fc.$saveOrUpdate().then(

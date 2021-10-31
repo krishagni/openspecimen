@@ -1,4 +1,5 @@
 
+import ui from '@/global.js';
 import authSvc from '@/common/services/Authorization.js';
 
 class UserResources {
@@ -12,6 +13,14 @@ class UserResources {
 
   isUpdateAllowed() {
     return authSvc.isAllowed({resource: 'User', operations: ['Update']});
+  }
+
+  isFormUpdateAllowed(entityType, userId) {
+    if (entityType == 'User') {
+      return this.isUpdateAllowed();
+    } else if (entityType == 'UserProfile') {
+      return ui.currentUser.id == userId || this.isUpdateAllowed();
+    }
   }
 }
 

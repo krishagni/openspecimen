@@ -381,7 +381,7 @@ osApp.config(function(
     var baseUrl = 'ui-app/#/';
     // var baseUrl = 'http://localhost:8081/#/';
 
-    function setVueView(state, params) {
+    function getVueViewUrl(state, params) {
       var url = baseUrl + state;
       var query = '';
       angular.forEach(params,
@@ -408,10 +408,17 @@ osApp.config(function(
         url += '?' + query;
       }
 
+      return url;
+    }
+
+    function setVueView(state, params) {
+      var url = getVueViewUrl(state, params);
       window.location.href = $rootScope.vueUrl = $sce.trustAsResourceUrl(url);
     }
 
     return {
+      getVueViewUrl: getVueViewUrl,
+
       setVueView: setVueView
     }
   })

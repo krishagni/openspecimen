@@ -23,6 +23,11 @@
               <span>{{currentUser | osUserDisplayName}}</span>
             </a>
           </li>
+          <li>
+            <a href="{{userCtx.profileFormsUrl}}">
+              <span translate="user.my_forms">My Forms</span>
+            </a>
+          </li>
           <li class="divider"></li>
           <li ng-if="currentUser.domain == global.defaultDomain">
             <a ui-sref="user-password({userId: currentUser.id})">

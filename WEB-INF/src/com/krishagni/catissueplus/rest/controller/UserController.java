@@ -6,9 +6,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -29,6 +29,8 @@ import com.krishagni.catissueplus.core.administrative.events.UserDetail;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.UserService;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
@@ -41,6 +43,7 @@ import com.krishagni.catissueplus.core.de.events.EntityFormRecords;
 import com.krishagni.catissueplus.core.de.events.FormCtxtSummary;
 import com.krishagni.catissueplus.core.de.events.FormRecordsList;
 import com.krishagni.catissueplus.core.de.events.GetEntityFormRecordsOp;
+import com.krishagni.catissueplus.core.de.events.GetFormRecordsListOp;
 import com.krishagni.rbac.events.SubjectRoleDetail;
 
 @Controller
@@ -427,15 +430,49 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/forms")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public List<FormCtxtSummary> getForms(@PathVariable Long id) {
-		return ResponseEvent.unwrap(userService.getForms(RequestEvent.wrap(id)));
+	public List<FormCtxtSummary> getForms(
+		@PathVariable("id")
+		Long userId,
+
+		@RequestParam(value = "entityType", required = false, defaultValue = "User")
+		String entityType) {
+
+		if (StringUtils.isBlank(entityType)) {
+			entityType = "User";
+		}
+
+		if (!entityType.equals("User") && !entityType.equals("UserProfile")) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, entityType);
+		}
+
+		Map<String, Object> req = new HashMap<>();
+		req.put("userId", userId);
+		req.put("entityType", entityType);
+		return ResponseEvent.unwrap(userService.getForms(RequestEvent.wrap(req)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value="/{id}/form-records")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<FormRecordsList> getFormRecords(@PathVariable("id") Long userId) {
-		return ResponseEvent.unwrap(userService.getAllFormRecords(RequestEvent.wrap(userId)));
+	public List<FormRecordsList> getFormRecords(
+		@PathVariable("id")
+		Long userId,
+
+		@RequestParam(value = "entityType", required = false, defaultValue = "User")
+		String entityType) {
+
+		if (StringUtils.isBlank(entityType)) {
+			entityType = "User";
+		}
+
+		if (!entityType.equals("User") && !entityType.equals("UserProfile")) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, entityType);
+		}
+
+		GetFormRecordsListOp op = new GetFormRecordsListOp();
+		op.setEntityType(entityType);
+		op.setObjectId(userId);
+		return ResponseEvent.unwrap(userService.getAllFormRecords(RequestEvent.wrap(op)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/forms/{formCtxtId}/records")

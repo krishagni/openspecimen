@@ -46,6 +46,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.domain.Notification;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
@@ -608,13 +609,30 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		}
 	}
 
+	//
+	// Input: {userId: <userId>, entityType: <User | User Profile>}
+	//
 	@Override
 	@PlusTransactional
-	public ResponseEvent<List<FormCtxtSummary>> getForms(RequestEvent<Long> req) {
+	public ResponseEvent<List<FormCtxtSummary>> getForms(RequestEvent<Map<String, Object>> req) {
 		try {
-			User user = getUser(req.getPayload(), null);
-			AccessCtrlMgr.getInstance().ensureUpdateUserRights(user);
-			return ResponseEvent.response(daoFactory.getUserDao().getForms(user.getId()));
+			Number userId     = (Number) req.getPayload().get("userId");
+			if (userId == null) {
+				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "User ID is required");
+			}
+
+			String entityType = (String) req.getPayload().get("entityType");
+			if (StringUtils.isBlank(entityType)) {
+				entityType = "User";
+			}
+
+			if (!entityType.equals("User") && !entityType.equals("UserProfile")) {
+				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, entityType);
+			}
+
+			User user = getUser(userId.longValue(), null);
+			AccessCtrlMgr.getInstance().ensureUpdateUserRights(user, entityType.equals("UserProfile"));
+			return ResponseEvent.response(daoFactory.getUserDao().getForms(entityType, user.getId()));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -627,8 +645,12 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	public ResponseEvent<EntityFormRecords> getFormRecords(RequestEvent<GetEntityFormRecordsOp> req) {
 		try {
 			GetEntityFormRecordsOp op = req.getPayload();
-			User user = getUser(op.getEntityId(), null);
-			AccessCtrlMgr.getInstance().ensureUpdateUserRights(user);
+			op.setAccessAllowed(entityType -> {
+				User user = getUser(op.getEntityId(), null);
+				AccessCtrlMgr.getInstance().ensureUpdateUserRights(user, entityType.equals("UserProfile"));
+				return true;
+			});
+
 			return formSvc.getEntityFormRecords(req);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -639,15 +661,9 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<List<FormRecordsList>> getAllFormRecords(RequestEvent<Long> req) {
+	public ResponseEvent<List<FormRecordsList>> getAllFormRecords(RequestEvent<GetFormRecordsListOp> req) {
 		try {
-			User user = getUser(req.getPayload(), null);
-			AccessCtrlMgr.getInstance().ensureUpdateUserRights(user);
-
-			GetFormRecordsListOp op = new GetFormRecordsListOp();
-			op.setObjectId(user.getId());
-			op.setEntityType("User");
-			return formSvc.getFormRecords(RequestEvent.wrap(op));
+			return formSvc.getFormRecords(req);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
