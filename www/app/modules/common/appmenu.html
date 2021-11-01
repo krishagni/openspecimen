@@ -19,19 +19,8 @@
         <a class="dropdown-toggle" os-letter-avatar name="userCtx.name" style="margin-top: -7px;"></a>
         <ul class="dropdown-menu dropdown-menu-right" role="menu">
           <li>
-            <a ui-sref="user-edit-profile">
+            <a ui-sref="user-detail.overview({userId: currentUser.id})">
               <span>{{currentUser | osUserDisplayName}}</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{userCtx.profileFormsUrl}}">
-              <span translate="user.my_forms">My Forms</span>
-            </a>
-          </li>
-          <li class="divider"></li>
-          <li ng-if="currentUser.domain == global.defaultDomain">
-            <a ui-sref="user-password({userId: currentUser.id})">
-              <span translate="user.change_password.change_password">Change Password</span>
             </a>
           </li>
           <li class="divider"></li>

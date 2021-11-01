@@ -39,24 +39,11 @@
           <os-overlay ref="userProfileMenu" @click="toggleProfileMenu">
             <ul class="user-profile-options">
               <li>
-                <router-link :to="{name: 'UserEditProfile', params: {userId: $ui.currentUser.id}}">
+                <router-link :to="{name: 'UserOverview', params: {userId: $ui.currentUser.id}}">
                   <span>{{username}}</span>
                 </router-link>
               </li>
-              <li>
-                <router-link :to="{name: 'UserProfileFormsList', params: {userId: $ui.currentUser.id}}">
-                  <span>My Forms</span>
-                </router-link>
-              </li>
               <li class="divider">
-                <os-divider />
-              </li>
-              <li v-if="$ui.currentUser.domain == $ui.global.defaultDomain">
-                <router-link :to="{name: 'UserChangePassword', params: {userId: $ui.currentUser.id}}">
-                  <span>Change Password</span>
-                </router-link>
-              </li>
-              <li class="divider" v-if="$ui.currentUser.domain == $ui.global.defaultDomain">
                 <os-divider />
               </li>
               <li>

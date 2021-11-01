@@ -7,6 +7,11 @@
           v-if="updateAllowed"
         />
 
+        <os-button left-icon="edit"
+          label="Edit" @click="goto('UserEditProfile', {userId: ctx.user.id})"
+          v-if="!updateAllowed && ui.currentUser.id == ctx.user.id"
+        />
+
         <os-button left-icon="lock"
           label="Lock" @click="lock"
           v-if="updateAllowed &&
@@ -38,8 +43,7 @@
         <os-button left-icon="key"
           label="Reset Password" @click="goto('UserChangePassword', {userId: ctx.user.id})"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.domainName == 'openspecimen' &&
-            ui.currentUser.id != ctx.user.id &&
-            (ui.currentUser.admin || ui.currentUser.instituteAdmin) &&
+            (ui.currentUser.id == ctx.user.id || ui.currentUser.admin || ui.currentUser.instituteAdmin) &&
             (ctx.user.activityStatus == 'Active' || ctx.user.activityStatus == 'Expired')"
         />
 
