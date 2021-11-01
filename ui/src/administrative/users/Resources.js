@@ -15,12 +15,8 @@ class UserResources {
     return authSvc.isAllowed({resource: 'User', operations: ['Update']});
   }
 
-  isFormUpdateAllowed(entityType, userId) {
-    if (entityType == 'User') {
-      return this.isUpdateAllowed();
-    } else if (entityType == 'UserProfile') {
-      return ui.currentUser.id == userId || this.isUpdateAllowed();
-    }
+  isProfileUpdateAllowed(userId) {
+    return ui.currentUser.id == userId || this.isUpdateAllowed();
   }
 }
 

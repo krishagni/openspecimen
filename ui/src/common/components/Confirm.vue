@@ -48,6 +48,7 @@ export default {
     },
 
     cancel: function() {
+      this.resolve('cancel');
       this.$refs.dialogInstance.close();
       this.resolve = null;
     },

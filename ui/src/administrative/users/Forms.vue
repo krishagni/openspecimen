@@ -38,7 +38,8 @@ export default {
       () => {
         ctx.entity = {
           isActive: props.user.activityStatus == 'Active',
-          isUpdateAllowed: userResources.isFormUpdateAllowed(props.entityType, props.user.id),
+          isUpdateAllowed: props.entityType == 'UserProfile' ?
+            userResources.isProfileUpdateAllowed(props.user.id) : userResources.isUpdateAllowed(),
           entity: props.user,
           id: props.user.id,
           entityType: props.entityType,

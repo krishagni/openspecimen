@@ -32,6 +32,8 @@
               <os-icon name="user" />
             </router-link>
           </li>
+
+          <os-plugin-views page="user-detail" view="side-menu" />
         </ul>
       </os-side-menu>
 
@@ -58,7 +60,7 @@ export default {
 
       isUpdateAllowed: userResources.isUpdateAllowed(),
 
-      pfuAllowed: userResources.isFormUpdateAllowed('UserProfile', props.userId),
+      pfuAllowed: userResources.isProfileUpdateAllowed(props.userId),
 
       bcrumb: [
         {url: routerSvc.getUrl('UsersList'), label: 'Users'}
