@@ -9,6 +9,10 @@ class Common {
   async saveUiState(uiState) {
     return http.put('users/current-user-ui-state', uiState);
   }
+
+  async submitFeedback(feedback) {
+    return http.post('support/user-feedback', feedback);
+  }
 }
 
 export default new Common();

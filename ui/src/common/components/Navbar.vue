@@ -19,30 +19,7 @@
       <div class="buttons">
         <os-new-stuff />
 
-        <div class="feedback" v-if="$ui.global.appProps.feedback_enabled">
-          <button @click="showFeedbackForm">
-            <os-icon name="bullhorn" />
-          </button>
-
-          <os-dialog ref="feedbackDialog">
-            <template #header>
-              <span>Your feedback counts!</span>
-            </template>
-            <template #content>
-              <os-message type="info">
-                <span>Please let us know what you think of OpenSpecimen. </span>
-                <span>Your feedback to improve the product is most welcome.</span>
-              </os-message>
-
-              <os-form ref="feedbackForm" :schema="feedbackFormSchema" @input="handleFeedbackChange($event)">
-                <div>
-                  <os-button label="Submit" @click="submitFeedback()" />
-                  <os-button label="Cancel" @click="cancelFeedback()" />
-                </div>
-              </os-form>
-            </template>
-          </os-dialog>
-        </div>
+        <os-user-feedback />
 
         <div class="help">
           <button @click="toggleHelpMenu">
@@ -183,17 +160,18 @@
 <script>
 
 import osLogo from '@/assets/images/os_logo.png';
-import alertsSvc from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';
 import notifSvc from '@/common/services/Notif.js';
 
 import NewStuff from '@/common/components/NewStuff';
+import Feedback from '@/common/components/Feedback';
 import NotificationsList from '@/common/components/NotificationsList';
 
 export default {
   components: {
     'os-new-stuff': NewStuff,
+    'os-user-feedback': Feedback,
     'os-user-notifs': NotificationsList
   },
 
@@ -204,48 +182,6 @@ export default {
       ssoLogout: false,
 
       unreadNotifCount: 0,
-
-      uiState: this.$ui.global.state,
-
-      releaseNotes: undefined,
-
-      releaseNotesLink: undefined,
-
-      feedback: {},
-
-      feedbackFormSchema: {
-        "rows": [
-          {
-            "fields": [
-              {
-                "type": "text",
-                "label": "Subject",
-                "name": "subject",
-                "validations": {
-                  "required": {
-                    "message": "Subject is mandatory"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "fields": [
-              {
-                "type": "textarea",
-                "label": "Feedback",
-                "name": "feedback",
-                "rows": 5,
-                "validations": {
-                  "required": {
-                    "message": "Feedback is mandatory"
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      }
     }
   },
 
@@ -258,8 +194,6 @@ export default {
           (resp[1][0].value == true || resp[1][0].value == 'true');
       }
     );
-
-    settingsSvc.getSetting('training', 'release_notes').then(setting => this.releaseNotesLink = setting[0].value);
 
     let self = this;
     let timeout;
@@ -315,36 +249,6 @@ export default {
   },
 
   methods: {
-    showFeedbackForm: function() {
-      this.feedback = {};
-      this.$refs.feedbackDialog.open();
-    },
-
-    handleFeedbackChange: function({data}) {
-      Object.assign(this.feedback, data);
-    },
-
-    submitFeedback: function() {
-      if (!this.$refs.feedbackForm.validate()) {
-        return;
-      }
-
-      http.post('support/user-feedback', this.feedback).then(
-        (resp) => {
-          if (resp == false || resp == 'false') {
-            alertsSvc.error('Failed to send the feedback. Contact system administrator for further help!');
-          } else {
-            alertsSvc.success('Feedback sent successfully!');
-            this.$refs.feedbackDialog.close();
-          }
-        }
-      );
-    },
-
-    cancelFeedback: function() {
-      this.$refs.feedbackDialog.close();
-    },
-
     toggleHelpMenu: function(event) {
       this.$refs.helpMenu.toggle(event);
     },
