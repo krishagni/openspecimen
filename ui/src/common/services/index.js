@@ -1,6 +1,7 @@
 import alertsSvc      from './Alerts.js';
 import auditLogsSvc   from './AuditLogs.js';
 import authSvc        from './Authorization.js';
+import commonSvc      from './Common.js';
 import exportSvc      from './ExportService.js';
 import exprUtil       from './ExpressionUtil.js';
 import fieldFactory   from './FieldFactory.js';
@@ -22,6 +23,7 @@ export default {
       alertsSvc:    alertsSvc,
       auditLogsSvc: auditLogsSvc,
       authSvc:      authSvc,
+      commonSvc:    commonSvc,
       exportSvc:    exportSvc,
       exprUtil:     exprUtil,
       fieldFactory: fieldFactory,
