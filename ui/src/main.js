@@ -275,8 +275,9 @@ if (params.get('token')) {
 let settingsQ  = settingSvc.getAppProps();
 let localeQ    = settingSvc.getLocale();
 let currUserQ  = userSvc.getCurrentUser();
+let usrStateQ  = userSvc.getUiState();
 let usrRightsQ = authSvc.loadUserRights();
-Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
+Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ, usrStateQ]).then(
   (resp) => {
     let appProps = resp[0];
     let locale   = resp[1];
@@ -294,7 +295,8 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ]).then(
         dateTimeFmt: locale.dateFmt + ' ' + locale.timeFmt,
         locale: locale.locale,
         utcOffset: locale.utcOffset
-      }
+      },
+      state: resp[4]
     };
 
     let osSvc = window.osSvc = app.config.globalProperties.$osSvc;

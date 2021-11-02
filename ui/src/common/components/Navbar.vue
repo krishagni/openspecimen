@@ -17,6 +17,25 @@
         <span> </span>
       </div>
       <div class="buttons">
+        <div class="new-stuff">
+          <os-button label="What's New?" @click="toggleNewStuffOverlay"
+            v-if="uiState.notesRead != $ui.global.appProps.build_commit_revision" />
+
+          <os-overlay ref="newStuffOverlay" :dismissable="false" @hide="newStuffOverlayClosed">
+            <div class="new-stuff-container">
+              <div class="header">
+                <span>Announcements</span>
+              </div>
+              <div class="content">
+                <span v-html="releaseNotes"></span>
+              </div>
+              <div class="footer">
+                <a :href="releaseNotesLink" target="_blank" rel="noopener">Read more...</a>
+              </div>
+            </div>
+          </os-overlay>
+        </div>
+
         <div class="feedback" v-if="$ui.global.appProps.feedback_enabled">
           <button @click="showFeedbackForm">
             <os-icon name="bullhorn" />
@@ -185,6 +204,7 @@ import alertsSvc from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';
 import notifSvc from '@/common/services/Notif.js';
+import userSvc from '@/administrative/services/User.js';
 
 import NotificationsList from '@/common/components/NotificationsList';
 
@@ -200,6 +220,12 @@ export default {
       ssoLogout: false,
 
       unreadNotifCount: 0,
+
+      uiState: this.$ui.global.state,
+
+      releaseNotes: undefined,
+
+      releaseNotesLink: undefined,
 
       feedback: {},
 
@@ -244,9 +270,12 @@ export default {
     let sloEnabled  = settingsSvc.getSetting('auth', 'single_logout');
     Promise.all([samlEnabled, sloEnabled]).then(
       (resp) => {
-        this.ssoLogout = (resp[0] == true || resp[0] == 'true') && (resp[1] == true || resp[1] == 'true');
+        this.ssoLogout = (resp[0][0].value == true || resp[0][0].value == 'true') &&
+          (resp[1][0].value == true || resp[1][0].value == 'true');
       }
     );
+
+    settingsSvc.getSetting('training', 'release_notes').then(setting => this.releaseNotesLink = setting[0].value);
 
     let self = this;
     let timeout;
@@ -302,6 +331,20 @@ export default {
   },
 
   methods: {
+    toggleNewStuffOverlay: async function(event) {
+      this.$refs.newStuffOverlay.toggle(event);
+      if (this.releaseNotes == undefined) {
+        let summary = await http.get('release-notes/latest-summary');
+        this.releaseNotes = summary.notes;
+      }
+    },
+
+    newStuffOverlayClosed: function() {
+      userSvc.saveUiState({notesRead: this.$ui.global.appProps.build_commit_revision}).then(
+        uiState => this.uiState = this.$ui.global.state = uiState
+      );
+    },
+
     showFeedbackForm: function() {
       this.feedback = {};
       this.$refs.feedbackDialog.open();
@@ -432,6 +475,26 @@ export default {
   font-size: 1.2rem;
   padding: 0.5rem 1.25rem 0rem 1.25rem;
   cursor: pointer;
+}
+
+.new-stuff button {
+  padding: 0.25rem;
+  font-size: 0.8rem;
+  width: 7rem;
+  background: #5cb85c;
+  margin-top: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.new-stuff-container .header {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.new-stuff-container .footer {
+  border-top: 1px solid #ddd;
+  padding-top: 0.5rem;
 }
 
 .help-footer {

@@ -1,6 +1,6 @@
 
 <template>
-  <OverlayPanel ref="op" appendTo="body">
+  <OverlayPanel ref="op" appendTo="body" :dismissable="isDismissable" :showCloseIcon="!isDismissable">
     <slot></slot>
   </OverlayPanel>
 </template>
@@ -10,6 +10,8 @@
 import OverlayPanel from 'primevue/overlaypanel';
 
 export default {
+  props: ['dismissable'],
+
   components: {
     OverlayPanel
   },
@@ -18,6 +20,12 @@ export default {
 
   mounted() {
     this.$watch(() => this.$refs.op.visible, (visibility) => this.emitShowHide(visibility));
+  },
+
+  computed: {
+    isDismissable: function() {
+      return this.dismissable != false;
+    }
   },
 
   methods: {
