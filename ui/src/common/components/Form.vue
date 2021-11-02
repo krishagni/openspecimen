@@ -223,6 +223,10 @@ form {
   margin: auto;
 }
 
+.p-dialog form {
+  max-width: 100%;
+}
+
 .row {
   display: flex;
 }
