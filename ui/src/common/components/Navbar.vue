@@ -25,19 +25,7 @@
 
         <os-about />
 
-        <div class="notifs">
-          <button @click="toggleNotifOverlay">
-            <os-icon name="bell" v-os-badge.danger="unreadNotifCount" v-if="unreadNotifCount > 0" />
-            <os-icon name="bell" v-else />
-          </button>
-
-          <os-overlay class="os-notifs-overlay" ref="notifsOverlay"
-            @click="toggleNotifOverlay" @show="notifsDisplayed" @hide="notifsHidden">
-            <div class="content">
-              <os-user-notifs />
-            </div>
-          </os-overlay>
-        </div>
+        <os-notifs-overlay />
 
         <div class="user-profile">
           <button @click="toggleProfileMenu">
@@ -71,28 +59,25 @@
 import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';
-import notifSvc from '@/common/services/Notif.js';
 
-import NewStuff from '@/common/components/NewStuff';
-import Feedback from '@/common/components/Feedback';
-import About    from '@/common/components/About';
-import NotificationsList from '@/common/components/NotificationsList';
+import NewStuff      from '@/common/components/NewStuff';
+import Feedback      from '@/common/components/Feedback';
+import About         from '@/common/components/About';
+import NotifsOverlay from '@/common/components/NotifsOverlay';
 
 export default {
   components: {
     'os-new-stuff': NewStuff,
     'os-user-feedback': Feedback,
     'os-about': About,
-    'os-user-notifs': NotificationsList
+    'os-notifs-overlay': NotifsOverlay
   },
 
   data() {
     return {
       osLogo: osLogo,
 
-      ssoLogout: false,
-
-      unreadNotifCount: 0,
+      ssoLogout: false
     }
   },
 
@@ -105,28 +90,6 @@ export default {
           (resp[1][0].value == true || resp[1][0].value == 'true');
       }
     );
-
-    let self = this;
-    let timeout;
-    function getUnreadNotifCount() {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-
-      if (self.notifsOpen) {
-        timeout = setTimeout(getUnreadNotifCount, 10000);
-        return;
-      }
-
-      notifSvc.getUnreadCount().then(
-        (result) => {
-          self.unreadNotifCount = result.count;
-          timeout = setTimeout(getUnreadNotifCount, 10000);
-        }
-      );
-    }
-
-    getUnreadNotifCount();
   },
 
   computed: {
@@ -162,25 +125,6 @@ export default {
   methods: {
     toggleProfileMenu: function(event) {
       this.$refs.userProfileMenu.toggle(event);
-    },
-
-    toggleNotifOverlay: function(event) {
-      this.$refs.notifsOverlay.toggle(event);
-    },
-
-    notifsDisplayed: function() {
-      this.notifsOpen = true;
-      if (this.unreadNotifCount > 0) {
-        this.notifOpenTime = new Date();
-      }
-    },
-
-    notifsHidden: function() {
-      this.notifsOpen = false;
-      if (this.notifOpenTime) {
-        notifSvc.markAsRead(this.notifOpenTime).then(() => this.unreadNotifCount = 0);
-        this.notifOpenTime = null;
-      }
     }
   }
 }
@@ -244,7 +188,7 @@ export default {
   padding: 0.2rem 1rem;
 }
 
-.buttons button {
+.buttons :deep(button) {
   background: transparent;
   border: none;
   color: #fff;
@@ -252,11 +196,6 @@ export default {
   font-size: 1.2rem;
   padding: 0.5rem 1.25rem 0rem 1.25rem;
   cursor: pointer;
-}
-
-.help-footer {
-  padding: 0.75rem 1rem;
-  text-align: center;
 }
 
 .user-profile {
@@ -291,12 +230,4 @@ export default {
   margin: -1rem 0rem;
 }
 
-</style>
-
-<style>
-.os-notifs-overlay {
-  max-height: calc(100% - 100px);
-  width: 35%;
-  overflow: auto;
-}
 </style>

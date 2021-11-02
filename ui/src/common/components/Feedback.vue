@@ -102,17 +102,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-.os-user-feedback button {
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.2rem;
-  padding: 0.5rem 1.25rem 0rem 1.25rem;
-  cursor: pointer;
-}
-
-</style>
