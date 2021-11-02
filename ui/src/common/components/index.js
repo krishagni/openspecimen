@@ -20,6 +20,7 @@ import FormGroup from './FormGroup.vue';
 import Grid from './Grid.vue';
 import GridColumn from './GridColumn.vue';
 import Icon from './Icon.vue';
+import IconTitle from './IconTitle.vue';
 import InlineMessage from './InlineMessage.vue';
 import InputNumber from './InputNumber.vue';
 import InputText from './InputText.vue';
@@ -48,6 +49,8 @@ import SiteDropdown from './SiteDropdown.vue';
 import StorageContainerDropdown from './StorageContainerDropdown.vue';
 import Subform from './Subform.vue';
 import Textarea from './Textarea.vue';
+import TabView from './TabView.vue';
+import TabPanel from './TabPanel.vue';
 import UserDropdown from './UserDropdown.vue';
 import UsernameAvatar from './UsernameAvatar.vue';
 
@@ -75,6 +78,7 @@ export default {
     app.component('os-grid',             Grid);
     app.component('os-grid-column',      GridColumn);
     app.component('os-icon',             Icon);
+    app.component('os-icon-title',       IconTitle);
     app.component('os-inline-message',   InlineMessage);
     app.component('os-input-number',     InputNumber);
     app.component('os-input-text',       InputText);
@@ -103,6 +107,8 @@ export default {
     app.component('os-containers-dropdown', StorageContainerDropdown);
     app.component('os-subform',          Subform);
     app.component('os-textarea',         Textarea);
+    app.component('os-tabs',             TabView);
+    app.component('os-tab',              TabPanel);
     app.component('os-user-dropdown',    UserDropdown);
     app.component('os-username-avatar',  UsernameAvatar);
   }
