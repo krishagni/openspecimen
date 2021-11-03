@@ -15,7 +15,7 @@
       </div>
 
       <div class="search">
-        <span> </span>
+        <os-search />
       </div>
 
       <div class="buttons">
@@ -60,6 +60,7 @@ import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';
 
+import Search        from '@/common/components/Search';
 import NewStuff      from '@/common/components/NewStuff';
 import Feedback      from '@/common/components/Feedback';
 import About         from '@/common/components/About';
@@ -67,6 +68,7 @@ import NotifsOverlay from '@/common/components/NotifsOverlay';
 
 export default {
   components: {
+    'os-search': Search,
     'os-new-stuff': NewStuff,
     'os-user-feedback': Feedback,
     'os-about': About,
