@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, watchEffect } from 'vue';
 
 import routerSvc from '@/common/services/Router.js';
 import userSvc from '@/administrative/services/User.js';
@@ -57,18 +57,19 @@ export default {
   setup(props) {
     let ctx = reactive({
       user: {},
-
-      isUpdateAllowed: userResources.isUpdateAllowed(),
-
-      pfuAllowed: userResources.isProfileUpdateAllowed(props.userId),
-
       bcrumb: [
         {url: routerSvc.getUrl('UsersList'), label: 'Users'}
       ]
     });
 
-    
-    userSvc.getUserById(+props.userId).then(user => ctx.user = user);
+    watchEffect(
+      () => {
+        ctx.isUpdateAllowed = userResources.isUpdateAllowed();
+        ctx.pfuAllowed = userResources.isProfileUpdateAllowed(props.userId);
+        userSvc.getUserById(+props.userId).then(user => ctx.user = user);
+      }
+    );
+
     return { ctx, userResources };
   },
 

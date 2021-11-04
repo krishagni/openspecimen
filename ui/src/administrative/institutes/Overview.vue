@@ -46,15 +46,20 @@ export default {
   },
 
   created() {
-    this.ctx.institute = this.institute;
-    this.ctx.deleteOpts = {
-      type: 'Institute',
-      title: this.institute.name,
-      dependents: () => instituteSvc.getDependents(this.institute),
-      deleteObj: () => instituteSvc.delete(this.institute)
-    };
-    this.ctx.instituteObjs = [{objectName: 'institute', objectId: this.institute.id}];
-    instituteSvc.getDict().then(dict => this.ctx.dict = dict);
+    let setup = () => {
+      this.ctx.institute = this.institute;
+      this.ctx.deleteOpts = {
+        type: 'Institute',
+        title: this.institute.name,
+        dependents: () => instituteSvc.getDependents(this.institute),
+        deleteObj: () => instituteSvc.delete(this.institute)
+      };
+      this.ctx.instituteObjs = [{objectName: 'institute', objectId: this.institute.id}];
+      instituteSvc.getDict().then(dict => this.ctx.dict = dict);
+    }
+
+    this.$watch(() => this.institute, setup);
+    setup();
   },
 
   methods: {

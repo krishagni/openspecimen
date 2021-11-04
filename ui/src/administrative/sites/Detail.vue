@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, watchEffect } from 'vue';
 
 import routerSvc   from '@/common/services/Router.js';
 import formUtil    from '@/common/services/FormUtil.js';
@@ -46,13 +46,16 @@ export default {
       ]
     });
 
-    siteSvc.getSite(+props.siteId).then(
-      (site) => {
-        ctx.site = site;
-        formUtil.createCustomFieldsMap(site, true);
+    watchEffect(
+      () => {
+        siteSvc.getSite(+props.siteId).then(
+          (site) => {
+            ctx.site = site;
+            formUtil.createCustomFieldsMap(site, true);
+          }
+        );
       }
     );
-
     return { ctx };
   },
 

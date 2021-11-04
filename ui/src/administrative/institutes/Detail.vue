@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, watchEffect } from 'vue';
 
 import routerSvc    from '@/common/services/Router.js';
 import instituteSvc from '@/administrative/services/Institute.js';
@@ -45,7 +45,12 @@ export default {
       ]
     });
 
-    instituteSvc.getInstitute(+props.instituteId).then(institute => ctx.institute = institute);
+    watchEffect(
+      () => {
+        instituteSvc.getInstitute(+props.instituteId).then(institute => ctx.institute = institute);
+      }
+    );
+
     return { ctx };
   }
 }
