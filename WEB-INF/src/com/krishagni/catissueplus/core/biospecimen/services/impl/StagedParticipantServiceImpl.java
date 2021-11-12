@@ -224,12 +224,11 @@ public class StagedParticipantServiceImpl implements StagedParticipantService {
 
 		if (StringUtils.isNotBlank(detail.getNewEmpi())) {
 			participant.setEmpi(detail.getNewEmpi());
-			participant.getPmiList().addAll(getPmis(participant, detail.getPmis()));
 		} else {
 			participant.setEmpi(detail.getEmpi());
-			participant.setPmiList(getPmis(participant, detail.getPmis()));
-
 		}
+
+		participant.setPmiList(getPmis(participant, detail.getPmis()));
 
 		Set<String> races = detail.getRaces();
 		if (CollectionUtils.isNotEmpty(races)) {
