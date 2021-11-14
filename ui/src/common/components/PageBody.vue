@@ -14,6 +14,14 @@
     max-height: 55px;
   }
 
+  .os-page-body :deep(> div:not(.os-page-toolbar)) {
+    height: 100%;
+  }
+
+  .os-page-body :deep(.p-grid) {
+    height: 100%;
+  }
+
   .os-page-body :deep(.os-page-toolbar + div) {
     height: calc(100% - 55px);
   }

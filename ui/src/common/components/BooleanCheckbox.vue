@@ -2,6 +2,7 @@
 <template>
   <div class="p-field-checkbox">
     <Checkbox :name="name" v-model="inputValue" :binary="true" />
+    <slot></slot>
   </div>
 </template>
 

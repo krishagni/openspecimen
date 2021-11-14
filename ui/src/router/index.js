@@ -204,6 +204,64 @@ const routes = [
             component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Overview.vue')
           }
         ]
+      },
+
+      /*****************************
+       *****************************
+       * Shipments module          *
+       *****************************
+       *****************************/
+      {
+        path: 'shipments',
+        name: 'ShipmentsList',
+        component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+      {
+        path: 'shipments/:shipmentId',
+        name: 'ShipmentDetail',
+        component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Detail.vue'),
+        props: (route) => ({shipmentId: route.params && route.params.shipmentId}),
+        children: [
+          {
+            path: 'overview',
+            name: 'ShipmentOverview',
+            component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Overview.vue')
+          },
+          {
+            path: 'specimens',
+            name: 'ShipmentSpecimens',
+            component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Specimens.vue')
+          },
+          {
+            path: 'containers',
+            name: 'ShipmentContainers',
+            component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Containers.vue')
+          }
+        ]
+      },
+      {
+        path: 'shipment-addedit/:shipmentId',
+        name: 'ShipmentAddEdit',
+        component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/AddEdit.vue'),
+        props: (route) => (
+          {
+            shipmentId: route.params && route.params.shipmentId,
+            shipmentType: route.query && route.query.shipmentType
+          }
+        )
+      },
+      {
+        path: 'shipment-receive/:shipmentId',
+        name: 'ShipmentReceive',
+        component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/AddEdit.vue'),
+        props: (route) => (
+          {
+            shipmentId: route.params && route.params.shipmentId,
+            shipmentType: route.query && route.query.shipmentType,
+            receive: true
+          }
+        )
       }
     ]
   }

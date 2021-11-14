@@ -39,6 +39,8 @@
           </column>
         </data-table>
       </div>
+
+      <slot name="footer"></slot>
     </div>
     <div class="filters">
       <div class="filters-inner">
@@ -55,6 +57,11 @@
                 <dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
                   :list-source="filter.listSource">
                 </dropdown>
+              </span>
+              <span v-if="filter.type == 'site'">
+                <os-site-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                  :list-source="filter.listSource" :context="filterValues">
+                </os-site-dropdown>
               </span>
             </cell>
           </form-group>
@@ -247,6 +254,18 @@ export default {
         value = column.value(data.rowObject);
       } else {
         value = exprUtil.eval(data.rowObject, column.name);
+        if (value) {
+          let extra = {metadata: column, context: data.rowObject};
+          if (column.type == 'user') {
+            value = this.$filters.username(value, extra);
+          } else if (column.type == 'date') {
+            value = this.$filters.date(value, extra);
+          } else if (column.type == 'storage-position') {
+            value = this.$filters.storagePosition(value, extra);
+          } else if (column.type == 'specimen-measure') {
+            value = this.$filters.specimenMeasure(value, extra);
+          }
+        }
       }
 
       return value || '-';
@@ -284,8 +303,7 @@ export default {
       deep: true,
 
       handler() {
-        let self = this;
-        this.debounce(() => self.emitFiltersUpdated());
+        this.debounce(() => this.emitFiltersUpdated());
       }
     },
 
@@ -302,7 +320,7 @@ export default {
   
 .os-list {
   overflow: auto;
-  margin-right: -15px;
+  height: 100%;
   display: flex;
   flex-direction: row;
 }

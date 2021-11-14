@@ -25,6 +25,7 @@ import http from '@/common/services/HttpClient.js';
 import authSvc from '@/common/services/Authorization.js';
 import pluginLoader from '@/common/services/PluginLoader.js';
 import settingSvc from '@/common/services/Setting.js';
+import util from '@/common/services/Util.js';
 import userSvc from '@/administrative/services/User.js';
 import routerSvc from '@/common/services/Router.js';
 
@@ -34,6 +35,7 @@ import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
 import CommonComponents from '@/common/components';
 import CommonServices   from '@/common/services';
+import CommonFilters    from '@/common/filters';
 import AdminServices    from '@/administrative/services';
 
 window['Vue'] = Vue;
@@ -41,6 +43,7 @@ const app = createApp(Root)
   .use(ToastService)
   .use(CommonComponents)
   .use(CommonServices)
+  .use(CommonFilters)
   .use(AdminServices);
 
 app.directive('show-if-allowed', showIfAllowed);
@@ -277,7 +280,8 @@ let localeQ    = settingSvc.getLocale();
 let currUserQ  = userSvc.getCurrentUser();
 let usrStateQ  = userSvc.getUiState();
 let usrRightsQ = authSvc.loadUserRights();
-Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ, usrStateQ]).then(
+let spmnPropsQ = util.loadSpecimenTypeProps();
+Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ]).then(
   (resp) => {
     let appProps = resp[0];
     let locale   = resp[1];

@@ -1,25 +1,27 @@
 
 <template>
-  <div class="os-signature" v-show="editMode || imageData || imageSrc">
-    <canvas ref="canvasEl" v-show="editMode"></canvas>
+  <div>
+    <div class="os-signature" v-show="editMode || imageData || imageSrc">
+      <canvas ref="canvasEl" v-show="editMode"></canvas>
 
-    <div class="read" v-if="!editMode">
-      <img :src="imageData" v-if="imageData" />
-      <img :src="imageSrc"  v-else-if="imageSrc" />
-    </div>
+      <div class="read" v-if="!editMode">
+        <img :src="imageData" v-if="imageData" />
+        <img :src="imageSrc"  v-else-if="imageSrc" />
+      </div>
 
-    <div class="actions" v-if="editMode">
-      <input type="button" value="Save"   @click="save" />
-      <input type="button" value="Clear"  @click="clear" />
-      <input type="button" value="Cancel" @click="cancel" />
+      <div class="actions" v-if="editMode">
+        <input type="button" value="Save"   @click="save" />
+        <input type="button" value="Clear"  @click="clear" />
+        <input type="button" value="Cancel" @click="cancel" />
+      </div>
+      <div class="actions" v-else>
+        <input type="button" value="Edit" @click="edit" />
+        <input type="button" value="Remove" @click="remove"/>
+      </div>
     </div>
-    <div class="actions" v-else>
-      <input type="button" value="Edit" @click="edit" />
-      <input type="button" value="Remove" @click="remove"/>
+    <div class="os-signature-add" v-show="!editMode && !imageData && !imageSrc" >
+      <Button left-icon="plus" label="Add" @click="edit" /> 
     </div>
-  </div>
-  <div class="os-signature-add" v-show="!editMode && !imageData && !imageSrc" >
-    <Button left-icon="plus" label="Add" @click="edit" /> 
   </div>
 </template>
 

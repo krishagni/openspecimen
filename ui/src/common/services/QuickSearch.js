@@ -99,12 +99,9 @@ class QuickSearch {
 
     'shipment': {
       caption: 'Shipment',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=shipment-detail.overview&' +
-           'objectName=shipment&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'ShipmentOverview',
+      params: {entityId: 'shipmentId'}
     },
 
     'specimen_list': {

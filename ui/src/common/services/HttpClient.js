@@ -33,8 +33,26 @@ class HttpClient {
     return this.promise(() => axios.delete(this.getUrl(url), this.config(params), data));
   }
 
-  getUrl(url) {
-    return this.getServerAppUrl() + 'rest/ng/' + url;
+  getUrl(url, {query = ''} = {}) {
+    url = this.getServerAppUrl() + 'rest/ng/' + url;
+    if (query && typeof query == 'object') {
+      let qp = '';
+      Object.keys(query).forEach(
+        (name) => {
+          if (qp) {
+            qp += '&';
+          }
+
+          qp += name + '=' + encodeURIComponent(query[name])
+        }
+      );
+
+      if (qp) {
+        url += '?' + qp;
+      }
+    }
+
+    return url;
   }
 
   getServerUrl() {
@@ -83,6 +101,10 @@ class HttpClient {
       params = Object.keys(params).reduce(
         (urlSearchParams, name) => {
           let value = params[name];
+          if (value === undefined || value === null) {
+            return urlSearchParams;
+          }
+
           if (value instanceof Array) {
             value.forEach(element => urlSearchParams.append(name, element));
           } else {
@@ -103,6 +125,11 @@ class HttpClient {
       apiCall()
         .then(resp => resolve(resp.data))
         .catch(e => {
+          if (!e.response) {
+            alertSvc.error(e.message);
+            return;
+          }
+
           if (e.response.status == 401) {
             routerSvc.ngGoto('', {logout: true});
             return;

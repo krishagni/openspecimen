@@ -1,14 +1,14 @@
 
 <template>
   <div class="os-input-number">
-    <div class="p-float-label" v-if="$attrs['md-type']">
-      <InputNumber v-model="inputValue" :mode="decimal"
+    <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
+      <InputNumber v-model="inputValue" :mode="'decimal'"
         :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
       <InputNumber v-model="inputValue" :placeholder="$attrs.placeholder"
-        :mode="decimal" :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits" />
+        :mode="'decimal'" :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits" />
     </div>
   </div>
 </template>
@@ -31,7 +31,7 @@ export default {
   computed: {
     inputValue: {
       get() {
-        return this.modelValue;
+        return this.modelValue && +this.modelValue;
       },
 
       set(value) {
@@ -46,11 +46,11 @@ export default {
 </script>
 
 <style scoped>
-.os-input-number .p-float-label {
+.os-input-number .p-float-label:not(.no-label) {
   margin-top: 10px;
 }
 
-.os-input-number .p-float-label :deep(.p-inputnumber) {
+.os-input-number .p-float-label :deep(.p-inputtext) {
   border: 0px;
   border-bottom: 2px solid #ced4da;
   border-radius: 0px;
@@ -58,7 +58,7 @@ export default {
   box-shadow: none;
 }
 
-.os-input-number .p-float-label :deep(.p-inputnumber:enabled:focus) {
+.os-input-number .p-float-label :deep(.p-inputtext:enabled:focus) {
   border-bottom-color: #007bff;
 }
 
@@ -66,7 +66,7 @@ export default {
   left: 0rem;
 }
 
-.os-input-number .p-float-label :deep(.p-inputnumber:not(:enabled:focus) ~ label) {
+.os-input-number .p-float-label :deep(.p-inputtext:not(:enabled:focus) ~ label) {
   color: #999;
   opacity: 1;
 }

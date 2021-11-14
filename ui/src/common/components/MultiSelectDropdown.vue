@@ -9,6 +9,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
+        :disabled="disabled"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -23,6 +24,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
+        :disabled="disabled"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -39,7 +41,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context'],
 
   emits: ['update:modelValue'],
 
@@ -102,13 +104,7 @@ export default {
           }
         }
 
-        let key = util.queryString(params);
-        this.cachedQueries = this.cachedQueries || {};
-        let options = this.cachedQueries[key];
-        if (!options) {
-          this.cachedQueries[key] = options = await http.get(this.listSource.apiUrl, params);
-        }
-
+        const options = this.getFromBackend(params);
         this.ctx.options = this.dedup(selectedVals.concat(options));
       }
     },
@@ -165,6 +161,19 @@ export default {
       let result = cached.concat(selected);
       result.sort((e1, e2) => indices[e1[ls.selectProp || 'id']] - indices[e2[ls.selectProp || 'id']]);
       return result;
+    },
+
+    async getFromBackend(params) {
+      let cache = (this.form || this.context || {})._formCache || {}
+      cache = cache['ms-dropdown'] = cache['ms-dropdown'] || {};
+
+      const qs = util.queryString(Object.assign({url: this.listSource.apiUrl}, params || {}));
+      let options = cache[qs];
+      if (!options) {
+        options = cache[qs] = await http.get(this.listSource.apiUrl, params);
+      }
+
+      return options;
     },
 
     dedup(options) {

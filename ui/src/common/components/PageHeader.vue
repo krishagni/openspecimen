@@ -155,6 +155,20 @@ export default {
     width: 65%;
   }
 
+  .os-page-header .content-wrapper .content .left :deep(h3) {
+    display: inline-block;
+  }
+
+  .os-page-header .content-wrapper .content .left :deep(.os-title) {
+    position: relative;
+  }
+
+  .os-page-header .content-wrapper .content .left :deep(.os-title .os-tag) {
+    position: absolute;
+    top: -0.6rem;
+    padding-left: 0.5rem;
+  }
+
   .os-page-header .content-wrapper .content .right {
     float: right;
     width: 20%;

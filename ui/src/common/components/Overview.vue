@@ -171,6 +171,10 @@ export default {
           } else {
             value = value.firstName + ' ' + value.lastName;
           }
+        } else if (field.type == 'date' || (field.type == 'datePicker' && field.showTime != true)) {
+          value = this.$filters.date(value);
+        } else if (field.type == 'datetime' || (field.type == 'datePicker' && field.showTime == true)) {
+          value = this.$filters.dateTime(value);
         } else if (field.options instanceof Array) {
           let option = field.options.find((option) => option.value == value);
           if (option) {

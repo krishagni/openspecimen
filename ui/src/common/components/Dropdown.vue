@@ -1,7 +1,7 @@
 
 <template>
   <div class="os-dropdown">
-    <div class="p-float-label" v-if="$attrs['md-type']">
+    <div class="p-float-label" v-if="$attrs['md-type']" :class="!$attrs.placeholder && 'no-label'">
       <Dropdown
         v-model="selected"
         :options="ctx.options"
@@ -9,6 +9,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
+        :disabled="disabled"
         @change="onChange"
         @focus="loadOptions"
         @filter="filterOptions($event)"
@@ -23,6 +24,7 @@
         :option-value="selectProp"
         :filter="true"
         :show-clear="showClear"
+        :disabled="disabled"
         @change="onChange"
         @focus="loadOptions"
         @filter="filterOptions($event)"
@@ -40,7 +42,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context'],
 
   emits: ['update:modelValue'],
 
@@ -108,13 +110,7 @@ export default {
           }
         }
 
-        let key = util.queryString(params);
-        this.cachedQueries = this.cachedQueries || {};
-        let options = this.cachedQueries[key];
-        if (!options) {
-          this.cachedQueries[key] = options = await http.get(this.listSource.apiUrl, params);
-        }
-
+        const options = await this.getFromBackend(params);
         this.ctx.options = this.dedup(selectedVal.concat(options));
       }
     },
@@ -126,11 +122,6 @@ export default {
 
       if (typeof this.modelValue == 'object') {
         return [this.modelValue];
-      }
-
-      this.cachedModels = this.cachedModels || {};
-      if (Object.prototype.hasOwnProperty.call(this.cachedModels, this.modelValue)) {
-        return this.cachedModels[this.modelValue];
       }
 
       let ls = this.listSource;
@@ -152,11 +143,23 @@ export default {
       } else if (typeof ls.loadFn == 'function') {
         selected = await ls.loadFn(searchOpts);
       } else if (typeof ls.apiUrl == 'string') {
-        selected = await http.get(ls.apiUrl, searchOpts);
+        selected = this.getFromBackend(searchOpts);
       }
 
-      this.cachedModels[this.modelValue] = selected;
       return selected;
+    },
+
+    async getFromBackend(params) {
+      let cache = (this.form || this.context || {})._formCache || {};
+      cache = cache['dropdown'] = cache['dropdown'] || {};
+
+      const qs = util.queryString(Object.assign({url: this.listSource.apiUrl}, params || {}));
+      let options = cache[qs];
+      if (!options) {
+        options = cache[qs] = await http.get(this.listSource.apiUrl, params);
+      }
+
+      return options;
     },
 
     dedup(options) {
@@ -176,8 +179,8 @@ export default {
       return Object.keys(optionsMap).map((key) => optionsMap[key]);
     },
 
-    onChange: function() {
-      this.optionSelected = true;
+    onChange: function(event) {
+      this.optionSelected = !!event.value;
     }
   },
 
@@ -228,7 +231,7 @@ export default {
 </script>
 
 <style scoped>
-  .os-dropdown .p-float-label {
+  .os-dropdown .p-float-label:not(.no-label) {
     margin-top: 10px;
   }
 

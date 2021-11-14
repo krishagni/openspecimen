@@ -10,7 +10,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'attribute', 'leafValue'],
+  props: ['modelValue', 'selectProp', 'attribute', 'leafValue', 'context'],
 
   components: {
     Dropdown
@@ -40,14 +40,15 @@ export default {
             }
           }
 
+          let cache = (this.context && this.context._formCache) || {};
+          cache = cache['pvs'] = cache['pvs'] || {};
+
           let key = util.queryString(queryParams);
-          this.cachedQueries = this.cachedQueries || {};
-          let options = this.cachedQueries[key];
-          if (!options) {
-            options = this.cachedQueries[key] = await http.get('permissible-values/v', queryParams);
+          if (!cache[key]) {
+            cache[key] = await http.get('permissible-values/v', queryParams);
           }
 
-          return options;
+          return cache[key];
         },
         selectProp: this.selectProp,
         displayProp: 'value'

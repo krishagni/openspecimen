@@ -24,8 +24,11 @@ class FieldFactory {
     user: 'os-user-dropdown',
     pv: 'os-pv-dropdown',
     site: 'os-site-dropdown',
+    span: 'os-span',
+    'specimen-measure': 'os-specimen-measure',
     storageContainer: 'os-containers-dropdown',
-    subform: 'os-subform'
+    subform: 'os-subform',
+    'storage-position': 'os-storage-position'
   };
 
   getComponent(fieldType) {

@@ -10,7 +10,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp'],
+  props: ['modelValue', 'selectProp', 'context'],
 
   components: {
     Dropdown
@@ -20,24 +20,33 @@ export default {
     return {
       listSource: {
         loadFn: async (opts) => {
+          let cache = (this.context && this.context._formCache) || {};
+          cache = cache['storage-container'] = cache['storage-container'] || {};
+
+          let containers = [];
           opts = Object.assign( { name: opts.query || '' }, opts || {maxResults: 100});
           if (opts.value || opts.value == 0) {
-            try {
-              let id = parseInt(opts.value);
-              return http.get('storage-containers/' + id).then((container) => [container]);
-            } catch {
-              return http.get('storage-containers/byname/' + opts.value).then((container) => [container]);
+            let id = parseInt(opts.value);
+            if (!isNaN(id)) {
+              containers = cache[id];
+              if (!containers) {
+                containers = cache[id] = [await http.get('storage-containers/' + id)];
+              }
+            } else {
+              containers = cache[opts.value];
+              if (!containers) {
+                containers = cache[opts.value] = [await http.get('storage-containers/byname/' + opts.value)];
+              }
             }
           } else {
-            let key = util.queryString(opts);
-            this.cachedQueries = this.cachedQueries || {};
-            let containers = this.cachedQueries[key];
+            const qs = util.queryString(opts);
+            containers = cache[qs];
             if (!containers) {
-              containers = this.cachedQueries[key] = await http.get('storage-containers', opts);
+              containers = cache[qs] = await http.get('storage-containers', opts);
             }
-
-            return containers;
           }
+
+          return containers;
         },
         selectProp: this.selectProp,
         displayProp: 'name'
@@ -59,9 +68,6 @@ export default {
         this.$emit('update:modelValue', value);
       }
     }
-  },
-
-  methods: {
   }
 }
 </script>

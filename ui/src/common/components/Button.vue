@@ -23,7 +23,7 @@ export default {
     },
 
     iconSize: function() {
-      return this.size == 'small' ? '0.6rem' : '';
+      return this.size == 'small' ? '85%' : '';
     },
 
     leftIconClass: function() {
@@ -61,7 +61,7 @@ button:hover {
 }
 
 .btn.btn-xs {
-  padding: 0px 4px;
+  padding: 1px 6px;
 }
 
 .inline-button.btn {
@@ -78,4 +78,12 @@ button:hover {
   border-color: #0069d9;
   cursor: pointer;
 }
+</style>
+
+<style>
+
+.os-form-footer button {
+  margin-right: 0.5rem;
+}
+
 </style>

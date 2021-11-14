@@ -1,10 +1,10 @@
 
 <template>
   <span v-if="multiple">
-    <MultiSelectDropdown v-model="inputValue" :list-source="listSource" />
+    <MultiSelectDropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled" />
   </span>
   <span v-else>
-    <Dropdown v-model="inputValue" :list-source="listSource" />
+    <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled" />
   </span>
 </template>
 
@@ -14,9 +14,10 @@ import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 
 import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'multiple'],
+  props: ['modelValue', 'selectProp', 'listSource', 'context', 'multiple', 'disabled'],
 
   components: {
     Dropdown,
@@ -25,24 +26,46 @@ export default {
 
   data() {
     return {
-      listSource: {
+      ddListSource: {
         loadFn: async (opts) => {
-          opts = opts || {maxResults: 100};
-          if (opts.value) {
-            return http.get('users/' + opts.value).then((user) => [user]);
-          } else {
-            let queryParams = Object.assign({searchString: opts.query || ''}, opts);
-            let key = util.queryString(queryParams);
-            this.cachedQueries = this.cachedQueries || {};
-            let options = this.cachedQueries[key];
-            if (!options) {
-              this.cachedQueries[key] = options = await http.get('users', queryParams);
-            }
+          let cache = (this.context && this.context._formCache) || {};
+          cache = cache['user-dropdown'] = cache['user-dropdown'] || {};
 
-            return options;
+          opts = opts || {maxResults: 100};
+          if (opts.value || opts.value == 0) {
+            let id = parseInt(opts.value);
+            if (!isNaN(id)) {
+              if (!cache[id]) {
+                cache[id] = await http.get('users/' + id);
+              }
+
+              return [cache[id]];
+            }
           }
+
+          let params = Object.assign({searchString: opts.query || ''}, opts || {maxResults: 100});
+          let ls = this.listSource || {};
+          let qp = ls.queryParams || {};
+          if (qp.static) {
+            Object.keys(qp.static).forEach(name => params[name] = qp.static[name]);
+          }
+
+          if (qp.dynamic && this.context) {
+            Object.keys(qp.dynamic).forEach(name => params[name] = exprUtil.eval(this.context, qp.dynamic[name]));
+          }
+
+          if (this.listAll) {
+            params.listAll = true;
+          }
+
+          const qs = util.queryString(params);
+          if (!cache[qs]) {
+            cache[qs] = await http.get('users', params);
+          }
+
+          return cache[qs];
         },
-        selectProp: this.selectProp,
+        selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
         displayProp: (user) => user.firstName + ' ' + user.lastName
       }
     }
@@ -62,9 +85,6 @@ export default {
         this.$emit('update:modelValue', value);
       }
     }
-  },
-
-  methods: {
   }
 }
 </script>

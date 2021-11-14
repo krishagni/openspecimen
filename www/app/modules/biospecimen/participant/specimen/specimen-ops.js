@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.specimen')
   .directive('osSpecimenOps', function(
-    $state, $rootScope, $modal, $q, Util, DistributionProtocol, DistributionOrder, Specimen, ExtensionsUtil,
+    $state, $rootScope, $modal, $q, $window, Util, DistributionProtocol, DistributionOrder, Specimen, ExtensionsUtil,
     SpecimensHolder, Alerts, DeleteUtil, SpecimenLabelPrinter, ParticipantSpecimensViewState,
     AuthorizationService, SettingUtil) {
 
@@ -313,7 +313,7 @@ angular.module('os.biospecimen.specimen')
 
         initOpts(scope, element, attrs);
 
-        function gotoView(state, params, msgCode, anyStatus, excludeExtensions) {
+        function gotoView(state, params, msgCode, anyStatus, excludeExtensions, vueView) {
           var selectedSpmns = scope.specimens({anyStatus: anyStatus});
           if (!selectedSpmns || selectedSpmns.length == 0) {
             Alerts.error('specimen_list.' + msgCode);
@@ -321,6 +321,12 @@ angular.module('os.biospecimen.specimen')
           }
 
           var specimenIds = selectedSpmns.map(function(spmn) {return spmn.id});
+          if (vueView) {
+            $window.localStorage['selectedSpecimenIds'] = JSON.stringify(specimenIds);
+            navTo(scope, state, params);
+            return;
+          }
+
           Specimen.getByIds(specimenIds, excludeExtensions != true).then(
             function(spmns) {
               angular.forEach(spmns, function(spmn) { ExtensionsUtil.createExtensionFieldMap(spmn, true); });
@@ -433,7 +439,7 @@ angular.module('os.biospecimen.specimen')
         }
 
         scope.shipSpecimens = function() {
-          gotoView('shipment-addedit', {shipmentId: ''}, 'no_specimens_for_shipment');
+          gotoView('shipment-addedit', {shipmentId: -1}, 'no_specimens_for_shipment', undefined, undefined, true);
         }
 
         scope.receiveSpecimens = function() {

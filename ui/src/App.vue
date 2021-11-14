@@ -1,14 +1,16 @@
 <template>
-  <os-navbar />
+  <div class="os-root">
+    <os-navbar />
 
-  <div class="os-user-impersonate-warn" v-if="ui.currentUser && ui.currentUser.impersonated">
-    <span>You are viewing {{$filters.username(ui.currentUser)}}'s account.
-    <a @click="returnToMyAccount">Return back to your account.</a></span>
-  </div>
+    <div class="os-user-impersonate-warn" v-if="ui.currentUser && ui.currentUser.impersonated">
+      <span>You are viewing {{$filters.username(ui.currentUser)}}'s account.
+      <a @click="returnToMyAccount">Return back to your account.</a></span>
+    </div>
 
-  <div class="os-app-body">
-    <Toast class="os-app-toast" />
-    <router-view/>
+    <div class="os-app-body">
+      <Toast class="os-app-toast" />
+      <router-view/>
+    </div>
   </div>
 </template>
 
@@ -130,8 +132,9 @@ a:focus, a:hover {
 
 .os-table thead th,
 .os-table tbody td {
-  text-align: left;
   padding: 10px 15px;
+  vertical-align: top;
+  text-align: left;
 }
 
 .os-table thead th {
@@ -140,6 +143,11 @@ a:focus, a:hover {
 
 .os-table tbody td {
   border-top: 1px solid #ddd;
+}
+
+.os-table.os-table-borderless thead th,
+.os-table.os-table-borderless tbody td {
+  border: 0;
 }
 
 .os-border {
@@ -249,10 +257,62 @@ a:focus, a:hover {
   }
 }
 
+.os-root {
+  height: 100%;
+}
+
 .os-app-body {
   position: relative;
   height: calc(100% - 40px);
   height: 100%;
+}
+
+.os-col-1 {
+  width: 8.33%;
+}
+
+.os-col-2 {
+  width: 16.67%;
+}
+
+.os-col-3 {
+  width: 25%;
+}
+
+.os-col-4 {
+  width: 33.33%;
+}
+
+.os-col-5 {
+  width: 41.67%;
+}
+
+.os-col-6 {
+  width: 50%;
+}
+
+.os-col-7 {
+  width: 58.33%;
+}
+
+.os-col-8 {
+  width: 66.67%;
+}
+
+.os-col-9 {
+  width: 75%;
+}
+
+.os-col-10 {
+  width: 83.33%;
+}
+
+.os-col-11 {
+  width: 91.67%;
+}
+
+.os-col-12 {
+  width: 100%;
 }
 
 </style>

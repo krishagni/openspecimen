@@ -1,16 +1,17 @@
 
 <template>
-  <Dropdown v-model="inputValue" :list-source="listSource" />
+  <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled" />
 </template>
 
 <script>
 import Dropdown from '@/common/components/Dropdown.vue';
 
-import http from '@/common/services/HttpClient.js';
-import util from '@/common/services/Util.js';
+import http     from '@/common/services/HttpClient.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
+import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp'],
+  props: ['modelValue', 'selectProp', 'listSource', 'context', 'disabled'],
 
   components: {
     Dropdown
@@ -18,28 +19,45 @@ export default {
 
   data() {
     return {
-      listSource: {
+      ddListSource: {
         loadFn: async (opts) => {
-          let queryParams = opts = Object.assign({name: opts.query || ''}, opts || {maxResults: 100});
+          let cache = (this.context && this.context._formCache) || {};
+          cache = cache['site-dropdown'] = cache['site-dropdown'] || {};
+
           if (opts.value || opts.value == 0) {
-            try {
-              let id = parseInt(opts.value);
-              return http.get('sites/' + id).then((site) => [site]);
-            } catch {
-              queryParams = Object.assign(Object.assign({}, opts), {name: opts.value, exactMatch: true});
+            let id = parseInt(opts.value);
+            if (!isNaN(id)) {
+              if (!cache[id]) {
+                cache[id] = await http.get('sites/' + id);
+              }
+
+              return [cache[id]];
             }
           }
 
-          let key = util.queryString(queryParams);
-          this.cachedQueries = this.cachedQueries || {};
-          let options = this.cachedQueries[key];
-          if (!options) {
-            this.cachedQueries[key] = options = await http.get('sites', queryParams);
+          let params = Object.assign({name: opts.query || ''}, opts || {maxResults: 100});
+          let ls = this.listSource || {};
+          let qp = ls.queryParams || {};
+          if (qp.static) {
+            Object.keys(qp.static).forEach(name => params[name] = qp.static[name]);
           }
 
-          return options;
+          if (qp.dynamic && this.context) {
+            Object.keys(qp.dynamic).forEach(name => params[name] = exprUtil.eval(this.context, qp.dynamic[name]));
+          }
+
+          if (this.listAll) {
+            params.listAll = true;
+          }
+
+          const qs = util.queryString(params);
+          if (!cache[qs]) {
+            cache[qs] = await http.get('sites', params);
+          }
+
+          return cache[qs];
         },
-        selectProp: this.selectProp,
+        selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
         displayProp: 'name'
       }
     }

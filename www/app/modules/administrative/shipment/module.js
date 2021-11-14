@@ -25,47 +25,18 @@ angular.module('os.administrative.shipment',
       })
       .state('shipment-list', {
         url: '/shipments?filters',
-        templateUrl: 'modules/administrative/shipment/list.html',     
-        controller: 'ShipmentListCtrl',
+        template: '<div></div>',
+        controller: function($state, VueApp) {
+          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
+        },
         parent: 'shipment-root'
       })
       .state('shipment-addedit', {
         url: '/shipment-addedit/:shipmentId?type',
-        templateUrl: 'modules/administrative/shipment/addedit.html',
-        resolve: {
-          shipment: function($stateParams , Shipment) {
-            if ($stateParams.shipmentId) {
-              return Shipment.getById($stateParams.shipmentId);
-            }
-
-            var type = $stateParams.type;
-            if (type != 'SPECIMEN' && type != 'CONTAINER') {
-              type = 'SPECIMEN';
-            }
-            return new Shipment({id: '', status: 'Pending', type: type, shipmentSpmns: [], shipmentContainers: []});
-          },
-
-          shipmentItems: function(shipment) {
-            var items = [];
-            if (!shipment.id) {
-              return items;
-            }
-
-            if (shipment.isSpecimenShipment()) {
-              items = shipment.getSpecimens(0, 10000);
-            } else {
-              items = shipment.getContainers(0, 10000);
-            }
-
-            return items;
-          },
-
-          isEditAllowed: function(shipment, Util) {
-            var editAllowed = !shipment.status || shipment.status == 'Pending' || shipment.status == 'Shipped';
-            return Util.booleanPromise(editAllowed);
-          }
+        template: '<div></div>',
+        controller: function($state, $window, VueApp) {
+          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
         },
-        controller: 'ShipmentAddEditCtrl',
         parent: 'shipment-root'
       })
       .state('shipment-import', {
@@ -102,63 +73,37 @@ angular.module('os.administrative.shipment',
       })
       .state('shipment-detail', {
         url: '/shipments/:shipmentId',
-        templateUrl: 'modules/administrative/shipment/detail.html',
-        resolve: {
-          shipment: function($stateParams , Shipment) {
-            return Shipment.getById($stateParams.shipmentId);
-          }
+        template: '<div></div>',
+        controller: function($state, $window, VueApp) {
+          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
         },
-        controller: 'ShipmentDetailCtrl',
         parent: 'shipment-root'
       })
       .state('shipment-detail.overview', {
         url: '/overview',
-        templateUrl: 'modules/administrative/shipment/overview.html',
+        template: '<div></div>',
+        controller: function() { },
         parent: 'shipment-detail'
       })
       .state('shipment-detail.specimens', {
         url: '/specimens',
         templateUrl: 'modules/administrative/shipment/specimens.html',
+        template: '<div></div>',
+        controller: function() { },
         parent: 'shipment-detail',
-        controller: 'ShipmentSpecimensCtrl'
       })
       .state('shipment-detail.containers', {
         url: '/containers',
-        templateUrl: 'modules/administrative/shipment/containers.html',
+        template: '<div></div>',
+        controller: function() { },
         parent: 'shipment-detail',
-        controller: 'ShipmentContainersCtrl'
       })
       .state('shipment-receive', {
         url: '/shipments/:shipmentId/receive',
-        templateUrl: 'modules/administrative/shipment/addedit.html',
-        resolve: {
-          shipment: function($stateParams , Shipment) {
-            return Shipment.getById($stateParams.shipmentId);
-          },
-          
-          isReceiveAllowed: function(shipment, Util) {
-            return Util.booleanPromise(shipment.status == 'Shipped' || shipment.status == 'Received');
-          },
-
-          shipmentItems: function(isReceiveAllowed, shipment) {
-            if (shipment.isSpecimenShipment()) {
-              items = shipment.getSpecimens(0, 10000);
-            } else {
-              items = shipment.getContainers(0, 10000);
-            }
-
-            return items;
-          },
-
-          isSpmnRelabelingAllowed: function(SettingUtil) {
-            return SettingUtil.getSetting('administrative', 'allow_spmn_relabeling').then(
-              function(setting) {
-                return setting.value == true || setting.value == 'true';
-              }
-            );
-          }
+        template: '<div></div>',
+        controller: function($state, VueApp) {
+          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
         },
-        controller: 'ShipmentReceiveCtrl',
         parent: 'shipment-root'
       })
   })

@@ -7,7 +7,7 @@
           <os-label>{{field.label}}</os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
             v-model="formModel[field.name]" v-os-tooltip.bottom="field.tooltip"
-            :form="ctx" @update:model-value="handleInput(field)">
+            :form="ctx" :context="ctx" @update:model-value="handleInput(field)">
           </component>
           <div v-if="v$.formModel[field.name] && v$.formModel[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
@@ -65,6 +65,10 @@ export default {
        ctx,
        v$: useVuelidate(),
      };
+   },
+
+   beforeCreate: function() {
+     this.ctx._formCache = {};
    },
 
    methods: {
@@ -149,6 +153,10 @@ export default {
              if (component) {
                field = Object.assign({...field, component: component});
              }
+           }
+
+           if (field.disableWhen) {
+             field.disabled = exprUtil.eval(this, field.disableWhen);
            }
 
            formRow.push(field);
