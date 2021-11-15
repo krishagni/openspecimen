@@ -1,7 +1,7 @@
 
 <template>
   <div class="os-new-stuff">
-    <os-button label="What's New?" @click="toggleOverlay"
+    <os-button label="What's New?" @click="toggleOverlay($event)"
       v-if="uiState.notesRead != $ui.global.appProps.build_commit_revision" />
 
     <os-overlay ref="overlay" :dismissable="false" @hide="overlayClosed">
@@ -38,15 +38,18 @@ export default {
   },
 
   methods: {
-    toggleOverlay: async function() {
-      this.$refs.overlay.toggle(event);
+    toggleOverlay: async function(event) {
+      let tgt = event.currentTarget;
+
       if (this.releaseNotes == undefined) {
-        let summary = await http.get('release-notes/latest-summary');
-        let linkSetting = await settingsSvc.getSetting('training', 'release_notes');
+        const summary = await http.get('release-notes/latest-summary');
+        const link    = await settingsSvc.getSetting('training', 'release_notes');
 
         this.releaseNotes = summary.notes;
-        this.releaseNotesLink = linkSetting[0].value;
+        this.releaseNotesLink = link[0].value;
       }
+
+      this.$refs.overlay.toggle({currentTarget: tgt});
     },
 
     overlayClosed: async function() {
