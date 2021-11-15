@@ -59,7 +59,7 @@ export default {
 
 <style scoped>
 
-.os-new-stuff button {
+.os-new-stuff .btn {
   background: #5cb85c;
   border: none;
   color: #fff;
