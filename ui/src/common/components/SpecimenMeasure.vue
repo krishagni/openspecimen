@@ -56,13 +56,7 @@ export default {
     showInput: function() {
       return this.readOnly == null || this.readOnly == undefined ||
         util.isFalse(this.readOnly) ||
-        util.isFalse(exprUtil.eval(this.context, this.readOnly));
-    }
-  },
-
-  watch: {
-    'specimen.type': function() {
-      util.getSpecimenMeasureUnit(this.specimen, this.measure || 'quantity').then(unit => this.unit = unit);
+        util.isFalse(exprUtil.eval(this.context, this.readOnly + ' == true'));
     }
   }
 }
