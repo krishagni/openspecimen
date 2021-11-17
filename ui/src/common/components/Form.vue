@@ -16,7 +16,7 @@
       </template>
     </div>
 
-    <os-divider></os-divider>
+    <os-divider v-if="$slots.default && $slots.default().length > 0"></os-divider>
 
     <div class="row">
       <div class="field">
