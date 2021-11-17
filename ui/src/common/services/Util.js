@@ -139,13 +139,13 @@ class Util {
       return '-';
     }
 
-    let props = this.spmnTypeProps[specimenClass + ':' + type];
+    const props = this.spmnTypeProps[specimenClass + ':' + type] || {};
     switch (measure) {
       case 'quantity':
-        return props.qtyHtmlDisplayCode || props.qtyUnit;
+        return props.qtyHtmlDisplayCode || props.qtyUnit || '-';
 
       case 'concentration':
-        return props.concHtmlDisplayCode || props.concUnit;
+        return props.concHtmlDisplayCode || props.concUnit || '-';
     }
 
     return '-';
