@@ -177,9 +177,23 @@ public class FormsController {
 			
 		HttpServletResponse httpResp)
 	throws IOException {
-		ResponseEvent<Container> resp = formSvc.getFormDefinition(getRequest(formId));
-		resp.throwErrorIfUnsuccessful();
-		serializeToJson(resp.getPayload(), maxPvListSize, httpResp);
+		Container form = ResponseEvent.unwrap(formSvc.getFormDefinition(RequestEvent.wrap(formId)));
+		serializeToJson(form, maxPvListSize, httpResp);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value="/definition")
+	@ResponseStatus(HttpStatus.OK)
+	public void getFormDefinition(
+		@RequestParam(value = "name")
+		String name,
+
+		@RequestParam(value = "maxPvs", required = false, defaultValue = "0")
+		int maxPvListSize,
+
+		HttpServletResponse httpResp)
+	throws IOException {
+		Container form = ResponseEvent.unwrap(formSvc.getFormDefinitionByName(RequestEvent.wrap(name)));
+		serializeToJson(form, maxPvListSize, httpResp);
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value="{id}")

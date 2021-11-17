@@ -43,6 +43,8 @@ public interface FormService {
 	
 	public ResponseEvent<Container> getFormDefinition(RequestEvent<Long> req);
 
+	ResponseEvent<Container> getFormDefinitionByName(RequestEvent<String> req);
+
 	ResponseEvent<FormSummary> importForm(RequestEvent<String> req);
 
 	public ResponseEvent<Long> saveForm(RequestEvent<Map<String, Object>> req);

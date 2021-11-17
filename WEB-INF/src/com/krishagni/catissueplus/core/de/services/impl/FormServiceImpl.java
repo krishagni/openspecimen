@@ -264,6 +264,13 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<Container> getFormDefinitionByName(RequestEvent<String> req) {
+		Container form = getContainer(null, req.getPayload());
+		return ResponseEvent.response(form);
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<FormSummary> importForm(RequestEvent<String> req) {
 		try {
 			AccessCtrlMgr.getInstance().ensureFormUpdateRights();

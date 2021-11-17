@@ -3,28 +3,13 @@ import http from '@/common/services/HttpClient.js';
 
 class Form {
   async getDefinition(formId) {
-    return http.get('forms/' + formId + '/definition', {maxPvs: 100}).then(
-      (formDef) => {
-        formDef.id = formId;
-        formDef.rows.forEach(row => row.forEach(
-          (field) => {
-            field.formId = formId;
-            if (field.type == 'subForm') {
-              field.rows.forEach(sfRow => sfRow.forEach(
-                sfField => {
-                  sfField.formId = formId;
-                  sfField.fqn = field.name + '.' + sfField.name;
-                }
-              ));
-            } else {
-              field.fqn = field.name;
-            }
-          }
-        ));
+    const formDef = await http.get('forms/' + formId + '/definition', {maxPvs: 100});
+    return this._addFormId(formDef);
+  }
 
-        return formDef;
-      }
-    );
+  async getDefinitionByName(formName) {
+    const formDef = await http.get('forms/definition', {name: formName, maxPvs: 100});
+    return this._addFormId(formDef);
   }
 
   async getPvs(formId, fieldName, query) {
@@ -58,6 +43,30 @@ class Form {
 
   async deleteRecord(record) {
     return http.delete('forms/' + record.formId + '/data/' + record.recordId);
+  }
+
+  _addFormId(formDef) {
+    formDef.rows.forEach(
+      row => row.forEach(
+        (field) => {
+          field.formId = formDef.id;
+          if (field.type == 'subForm') {
+            field.rows.forEach(
+              sfRow => sfRow.forEach(
+                sfField => {
+                  sfField.formId = formDef.id;
+                  sfField.fqn = field.name + '.' + sfField.name;
+                }
+              )
+            );
+          } else {
+            field.fqn = field.name;
+          }
+        }
+      )
+    );
+
+    return formDef;
   }
 }
 
