@@ -43,6 +43,15 @@ public class ConfigUtil {
 
 		return dir;
 	}
+
+	public File getTempDir() {
+		File tmpDir = new File(getDataDir(), "tmp");
+		if (!tmpDir.exists()) {
+			tmpDir.mkdirs();
+		}
+
+		return tmpDir;
+	}
 	
 	public String getAdminEmailId() {
 		return cfgSvc.getStrSetting("email", "admin_email_id", "");

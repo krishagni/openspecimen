@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import javax.activation.FileTypeMap;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -61,6 +61,7 @@ import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
@@ -69,11 +70,10 @@ import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PdfUtil;
 import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 public class Utility {
 	private static SecretKey secretKey = null;
@@ -383,6 +383,38 @@ public class Utility {
 			throw OpenSpecimenException.serverError(e);
 		} finally {
 			IOUtils.closeQuietly(out);
+		}
+	}
+
+	public static void inflateZip(InputStream in, String destination) {
+		ZipInputStream zipIn = null;
+
+		try {
+			if (StringUtils.isNotBlank(destination)) {
+				destination += File.separator;
+			}
+
+			zipIn = new ZipInputStream(in);
+			while (true) {
+				try {
+					ZipEntry zipEntry = zipIn.getNextEntry();
+					if (zipEntry == null) {
+						break;
+					}
+
+					if (zipEntry.isDirectory()) {
+						continue;
+					}
+
+					inflateZipEntry(zipIn, zipEntry.getName(), destination);
+				} finally {
+					zipIn.closeEntry();
+				}
+			}
+		} catch (IOException e) {
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(zipIn);
 		}
 	}
 
@@ -1117,6 +1149,23 @@ public class Utility {
 		} else {
 			ConfigurationService cfgSvc = OpenSpecimenAppCtxProvider.getBean(CFG_SVC_BEAN);
 			return cfgSvc.getDataDir();
+		}
+	}
+
+	private static void inflateZipEntry(ZipInputStream zipIn, String entryName, String destinationPath)
+	throws IOException {
+		FileOutputStream fout = null;
+		try {
+			File outputFile = new File(destinationPath, entryName);
+			File parentDir  = outputFile.getParentFile();
+			if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
+				throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "Error creating the directory: " + parentDir.getAbsolutePath());
+			}
+
+			fout = new FileOutputStream(outputFile);
+			IOUtils.copy(zipIn, fout);
+		} finally {
+			IOUtils.closeQuietly(fout);
 		}
 	}
 
