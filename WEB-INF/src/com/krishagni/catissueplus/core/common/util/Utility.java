@@ -63,6 +63,7 @@ import org.springframework.web.util.JavaScriptUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
@@ -81,6 +82,15 @@ public class Utility {
 	private static String algorithm = null;
 
 	private static FileTypeMap fileTypesMap = null;
+
+	private static final ThreadLocal<ObjectMapper> om = new ThreadLocal<ObjectMapper>() {
+		@Override
+		protected ObjectMapper initialValue() {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			return mapper;
+		}
+	};
 
 	public static String getDisabledValue(String value, int maxLength) {
 		if (StringUtils.isBlank(value)) {
@@ -702,9 +712,9 @@ public class Utility {
 				return Collections.emptyMap();
 			}
 
-			return new ObjectMapper().readValue(json, new TypeReference<HashMap<String, Object>>() {});
+			return om.get().readValue(json, new TypeReference<HashMap<String, Object>>() {});
 		} catch (Exception e) {
-			throw new RuntimeException("Error parsing JSON into Map:\n" + json, e);
+			throw new RuntimeException("Error parsing JSON to map:\n" + json, e);
 		}
 	}
 
@@ -714,9 +724,33 @@ public class Utility {
 				map = Collections.emptyMap();
 			}
 
-			return new ObjectMapper().writeValueAsString(map);
+			return om.get().writeValueAsString(map);
 		} catch (IOException e) {
-			throw new RuntimeException("Error on converting Map to JSON", e);
+			throw new RuntimeException("Error converting to JSON string", e);
+		}
+	}
+
+	public static <T> T jsonToObject(String json, Class<T> klass) {
+		try {
+			if (StringUtils.isBlank(json)) {
+				return null;
+			}
+
+			return om.get().convertValue(json, klass);
+		}  catch (Exception e) {
+			throw new RuntimeException("Error converting to object of type: " + klass.getName(), e);
+		}
+	}
+
+	public static <T> T mapToObject(Map<String, Object> map, Class<T> klass) {
+		try {
+			if (map == null) {
+				map = Collections.emptyMap();
+			}
+
+			return om.get().convertValue(map, klass);
+		}  catch (Exception e) {
+			throw new RuntimeException("Error converting to object of type: " + klass.getName(), e);
 		}
 	}
 

@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -353,6 +355,16 @@ public class SpecimenDetail extends SpecimenInfo {
 	@JsonProperty
 	public void setHoldingLocation(StorageLocationSummary holdingLocation) {
 		this.holdingLocation = holdingLocation;
+	}
+
+	@JsonIgnore
+	public String getLogKey() {
+		String result = getId().toString();
+		if (StringUtils.isNotBlank(getLabel())) {
+			result += " (" + getLabel() + ")";
+		}
+
+		return result;
 	}
 
 	public static SpecimenDetail from(Specimen specimen) {

@@ -217,13 +217,15 @@
       <return-scalar column="recordId" type="long"/>
 
       select
-        re.object_id as objectId, re.record_id as recordId
+        re.object_id as objectId, re.record_id as recordId, re.update_time
       from
         catissue_form_record_entry re
       where
         re.form_ctxt_id = :formCtxtId and
         re.object_id in (:objectIds) and
         re.activity_status = 'ACTIVE'
+      order by
+        re.update_time
     </sql-query>
 
     <sql-query name="getEntityFormRecordIds">

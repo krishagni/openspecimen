@@ -25,7 +25,7 @@ public class ClassPathUtil {
 			method.setAccessible(true);
 			method.invoke(loader, new Object[] { u });
 		} catch (Throwable t) {
-			throw new IOException("Error, could not add URL to classloader: " + u);
+			throw new IOException("Error, could not add URL to classloader: " + u, t);
 		}
 	}
 }
