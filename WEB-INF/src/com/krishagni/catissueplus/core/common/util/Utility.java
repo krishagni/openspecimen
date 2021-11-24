@@ -736,7 +736,7 @@ public class Utility {
 				return null;
 			}
 
-			return om.get().convertValue(json, klass);
+			return om.get().readValue(json, klass);
 		}  catch (Exception e) {
 			throw new RuntimeException("Error converting to object of type: " + klass.getName(), e);
 		}
