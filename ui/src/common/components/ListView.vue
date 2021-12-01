@@ -25,6 +25,9 @@
                   <span>{{columnValue(slotProps.data, column)}}</span>
                 </a>
               </span>
+              <span v-else-if="column.type == 'component'">
+                <component :is="column.component" v-bind="column.data(slotProps.data.rowObject)" />
+              </span>
               <span v-else>
                 <span>{{columnValue(slotProps.data, column)}}</span>
               </span>
@@ -260,6 +263,8 @@ export default {
             value = this.$filters.username(value, extra);
           } else if (column.type == 'date') {
             value = this.$filters.date(value, extra);
+          } else if (column.type == 'date-time' || column.type == 'dateTime') {
+            value = this.$filters.dateTime(value, extra);
           } else if (column.type == 'storage-position') {
             value = this.$filters.storagePosition(value, extra);
           } else if (column.type == 'specimen-measure') {
