@@ -1,7 +1,7 @@
 
 <template>
   <div class="os-input-text">
-    <div class="p-float-label" v-if="$attrs['md-type']">
+    <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <p-textarea v-model="inputValue" rows="2"/>
       <label>{{$attrs.placeholder}}</label>
     </div>
@@ -44,7 +44,7 @@ export default {
 </script>
 
 <style scoped>
-  .os-input-text .p-float-label {
+  .os-input-text .p-float-label:not(.no-label) {
     margin-top: 10px;
   }
 
