@@ -120,6 +120,15 @@ export default {
        }
 
        return object;
+     },
+
+     uploadFile: async function(fieldName) {
+       const fieldRef = this.$refs['osField-' + fieldName];
+       if (fieldRef) {
+         return fieldRef.upload();
+       }
+
+       return null;
      }
    },
 
