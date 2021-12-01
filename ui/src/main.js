@@ -258,7 +258,7 @@ let urlParts = url.split('?')
 let query = urlParts.length > 1 ? urlParts[1] : '';
 let params = new URLSearchParams(query);
 
-app.config.globalProperties.$ui = ui;
+window.osUi = app.config.globalProperties.$ui = ui;
 let server = ui.server || {};
 http.protocol = server.secure ? 'https' : 'http';
 http.host = server.hostname;
