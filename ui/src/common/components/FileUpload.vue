@@ -1,7 +1,7 @@
 
 <template>
   <div v-if="!inputValue">
-    <FileUpload ref="uploader" mode="basic" name="file" :auto="true" :url="url" 
+    <FileUpload ref="uploader" mode="basic" name="file" :auto="auto != false" :url="url"
       @before-send="addHeaders" @upload="onUpload" @error="onError" />
   </div>
   <div v-else class="os-selected-file">
@@ -18,16 +18,11 @@ import Button from '@/common/components/Button.vue';
 import alertSvc from '@/common/services/Alerts.js';
 
 export default {
-  props: ['name', 'url', 'modelValue', 'headers'],
+  props: ['name', 'url', 'modelValue', 'headers', 'auto'],
 
   components: {
     Button,
     FileUpload
-  },
-
-  data() {
-    return {
-    }
   },
 
   computed: {
@@ -43,6 +38,19 @@ export default {
   },
 
   methods: {
+    upload: function() {
+      if (!this.$refs.uploader.hasFiles) {
+        alertSvc.error('File not selected');
+        return;
+      }
+
+      return new Promise((resolve, reject) => {
+        this.$refs.uploader.upload();
+        this.resolve = resolve;
+        this.reject = reject;
+      });
+    },
+
     addHeaders: function({xhr}) {
       if (this.headers) {
         Object.keys(this.headers).forEach((name) => xhr.setRequestHeader(name, this.headers[name]));
@@ -50,13 +58,27 @@ export default {
     },
 
     onUpload: function({xhr}) {
-      this.$emit('update:modelValue', JSON.parse(xhr.responseText));
-      alertSvc.success('File uploaded!');
+      const response = JSON.parse(xhr.responseText);
+      this.$emit('update:modelValue', response);
+
+      if (this.resolve) {
+        this.resolve(response);
+        this.resolve = undefined;
+      }
+
+      if (this.auto != false) {
+        alertSvc.success('File uploaded!');
+      }
     },
 
     onError: function({xhr}) {
       try {
-        let errors = JSON.parse(xhr.responseText);
+        const errors = JSON.parse(xhr.responseText);
+        if (this.reject) {
+          this.reject(errors);
+          this.reject = undefined;
+        }
+
         if (errors instanceof Array) {
           let msg = errors.map(err => err.message + ' (' + err.code + ')').join(',');
           alertSvc.error(msg);
