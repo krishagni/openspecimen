@@ -47,7 +47,15 @@ public class SpecimenFreezeThawEventFilter implements FormDataFilter {
 			}
 
 			ControlValue incrFreezeThaw = input.getFieldValue("incrementFreezeThaw");
-			boolean increment = incrFreezeThaw == null ? false : incrFreezeThaw.getControl().fromString((String)incrFreezeThaw.getValue());
+			boolean increment = false;
+			if (incrFreezeThaw != null) {
+				if (incrFreezeThaw.getValue() instanceof Boolean) {
+					increment = (Boolean) incrFreezeThaw.getValue();
+				} else {
+					increment = incrFreezeThaw.getControl().fromString((String)incrFreezeThaw.getValue());
+				}
+			}
+
 			if (increment) {
 				Specimen specimen = daoFactory.getSpecimenDao().getById(specimenId);
 				Integer existingCount = specimen.getFreezeThawCycles();
