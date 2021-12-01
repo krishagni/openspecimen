@@ -217,7 +217,10 @@ export default {
 
       for (let idx = 1; idx < this.itemModels.length; ++idx) {
         let toCopy = value;
-        if (typeof value == 'object' && value) {
+
+        if (value instanceof Date) {
+          toCopy = new Date(value.getTime());
+        } else if (typeof value == 'object' && value) {
           toCopy = JSON.parse(JSON.stringify(value));
         }
 
