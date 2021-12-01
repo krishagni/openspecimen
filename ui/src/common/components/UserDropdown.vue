@@ -1,10 +1,12 @@
 
 <template>
   <span v-if="multiple">
-    <MultiSelectDropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled" />
+    <MultiSelectDropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
+      :md-type="$attrs['md-type']" />
   </span>
   <span v-else>
-    <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled" />
+    <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
+      :md-type="$attrs['md-type']" />
   </span>
 </template>
 
