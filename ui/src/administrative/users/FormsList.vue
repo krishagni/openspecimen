@@ -8,9 +8,12 @@
           </template>
           <template #default="{item}">
             <div class="heading">
-              <strong>{{item.formCaption}}</strong>
+              <strong class="title">{{item.formCaption}}</strong>
+              <span class="status" :class="item.records && item.records.length > 0 && 'completed'">
+                <os-icon name="circle" />
+              </span>
             </div>
-            <div class="content" v-if="item.records">
+            <div class="content" v-if="item.records && item.records.length > 0">
               <span v-if="item.records.length == 1">
                 <div>{{$filters.username(item.records[0].user)}}</div>
                 <div>{{$filters.dateTime(item.records[0].updateTime)}}</div>
@@ -209,3 +212,25 @@ export default {
 }
 
 </script>
+
+<style scoped>
+
+.heading {
+  display: flex;
+}
+
+.heading .title {
+  flex-grow: 1;
+}
+
+.heading .status {
+  display: inline-block;
+  color: #f0ad4e;
+  margin-left: 0.25rem;
+}
+
+.heading .status.completed {
+  color: #5cb85c;
+}
+
+</style>
