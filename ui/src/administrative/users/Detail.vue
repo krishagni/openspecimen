@@ -17,7 +17,7 @@
               <os-icon name="eye" />
             </router-link>
           </li>
-          <li v-if="ctx.isUpdateAllowed">
+          <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'">
             <router-link :to="{name: 'UserRoles'}">
               <os-icon name="users" />
             </router-link>
