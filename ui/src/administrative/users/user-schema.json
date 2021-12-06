@@ -90,7 +90,8 @@
     "listSource": {
       "apiUrl": "institutes",
       "selectProp": "name",
-      "displayProp": "name"
+      "displayProp": "name",
+      "searchProp": "name"
     },
     "validations": {
       "required": {
