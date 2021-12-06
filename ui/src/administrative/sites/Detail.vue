@@ -12,7 +12,7 @@
     <os-page-body>
       <os-side-menu>
         <ul>
-          <li>
+          <li v-os-tooltip.right="'Overview'">
             <router-link :to="{name: 'SiteOverview'}">
               <os-icon name="eye" />
             </router-link>

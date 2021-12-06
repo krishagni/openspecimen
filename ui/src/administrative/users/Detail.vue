@@ -12,22 +12,22 @@
     <os-page-body>
       <os-side-menu>
         <ul>
-          <li>
+          <li v-os-tooltip.right="'Overview'">
             <router-link :to="{name: 'UserOverview'}">
               <os-icon name="eye" />
             </router-link>
           </li>
-          <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'">
+          <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'" v-os-tooltip.right="'Roles'">
             <router-link :to="{name: 'UserRoles'}">
               <os-icon name="users" />
             </router-link>
           </li>
-          <li v-if="ctx.isUpdateAllowed">
+          <li v-if="ctx.isUpdateAllowed" v-os-tooltip.right="'Forms'">
             <router-link :to="{name: 'UserFormsList'}">
               <os-icon name="copy" />
             </router-link>
           </li>
-          <li v-if="ctx.pfuAllowed">
+          <li v-if="ctx.pfuAllowed" v-os-tooltip.right="'Profile Forms'">
             <router-link :to="{name: 'UserProfileFormsList'}">
               <os-icon name="user" />
             </router-link>

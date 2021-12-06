@@ -13,20 +13,20 @@
     <os-page-body>
       <os-side-menu>
         <ul>
-          <li>
+          <li v-os-tooltip.right="'Overview'">
             <router-link :to="{name: 'ShipmentOverview'}">
               <os-icon name="eye" />
             </router-link>
           </li>
 
-          <li v-if="ctx.shipment.type == 'CONTAINER'">
+          <li v-if="ctx.shipment.type == 'CONTAINER'" v-os-tooltip.right="'Containers'">
             <router-link :to="{name: 'ShipmentContainers'}">
               <os-icon name="box-open" />
             </router-link>
           </li>
 
           <li>
-            <router-link :to="{name: 'ShipmentSpecimens'}">
+            <router-link :to="{name: 'ShipmentSpecimens'}" v-os-tooltip.right="'Specimens'">
               <os-icon name="flask" />
             </router-link>
           </li>
