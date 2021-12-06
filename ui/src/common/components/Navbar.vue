@@ -43,7 +43,7 @@
                 <os-divider />
               </li>
               <li>
-                <a v-if="ssoLogout" href="saml/logout">Log Out</a>
+                <a v-if="ssoLogout" :href="ssoLogoutUrl">Log Out</a>
                 <a v-else :href="$ui.ngServer + '#/?logout=true'">Log Out</a>
               </li>
             </ul>
@@ -59,6 +59,7 @@
 import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';
+import util from '@/common/services/Util.js';
 
 import Search        from '@/common/components/Search';
 import NewStuff      from '@/common/components/NewStuff';
@@ -79,19 +80,25 @@ export default {
     return {
       osLogo: osLogo,
 
-      ssoLogout: false
+      ssoLogout: false,
+
+      ssoLogoutUrl: ''
     }
   },
 
-  mounted() {
-    let samlEnabled = settingsSvc.getSetting('auth', 'saml_enable');
-    let sloEnabled  = settingsSvc.getSetting('auth', 'single_logout');
-    Promise.all([samlEnabled, sloEnabled]).then(
-      (resp) => {
-        this.ssoLogout = (resp[0][0].value == true || resp[0][0].value == 'true') &&
-          (resp[1][0].value == true || resp[1][0].value == 'true');
+  async created() {
+    const samlEnabled = await settingsSvc.getSetting('auth', 'saml_enable');
+    const sloEnabled  = await settingsSvc.getSetting('auth', 'single_logout');
+    this.ssoLogout = util.isTrue(samlEnabled[0].value) && util.isTrue(sloEnabled[0].value);
+    if (this.ssoLogout) {
+      const appUrl = await settingsSvc.getSetting('common', 'app_url');
+      this.ssoLogoutUrl = appUrl[0].value;
+      if (!this.ssoLogoutUrl.endsWith("/")) {
+        this.ssoLogoutUrl += '/';
       }
-    );
+
+      this.ssoLogoutUrl += 'saml/logout';
+    }
   },
 
   computed: {
