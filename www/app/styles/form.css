@@ -4,7 +4,6 @@
 }
 
 .os-form-association .os-modal-body {
-  max-height: 520px;
   display: flex;
   flex-direction: column;
 }

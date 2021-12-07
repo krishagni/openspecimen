@@ -28,6 +28,8 @@
 
 .os-modal-body {
   padding: 10px 20px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
 }
 
 .os-modal-footer {
