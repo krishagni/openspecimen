@@ -27,6 +27,7 @@ angular.module('openspecimen')
 
       controller: function($scope) {
         this.nodeChecked = function(node) {
+          node.checked = !this.isNodeChecked(node);
           if (typeof $scope.opts.nodeChecked == "function") {
             $scope.opts.nodeChecked(node);
           }
@@ -111,8 +112,8 @@ angular.module('openspecimen')
         '         ng-click="onNodeToggle(node)"> ' +
         '    </div> ' +
         '    <div class="os-tree-node-checkbox"> ' +
-        '      <input type="checkbox" ng-model="node.checked" ng-checked="isNodeChecked(node)" ' +
-        '        ng-change="nodeChecked(node)"> ' +
+        '      <input type="checkbox" ng-checked="isNodeChecked(node)" ' +
+        '        ng-click="nodeChecked(node)"> ' +
         '    </div> ' +
         '    <div class="os-tree-node-label"> ' +
         '      <div ng-if="nodeTmpl" ng-include src="nodeTmpl"></div> ' +
