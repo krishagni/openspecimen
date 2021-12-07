@@ -835,9 +835,11 @@ public class StorageContainer extends BaseExtensionEntity {
 	public boolean canContain(Specimen specimen) {
 		if (isDistributionContainer()) {
 			return canContainSpecimen(specimen.getDp());
-		} else {
+		} else if (specimen.getSpecimenClass() != null && specimen.getSpecimenType() != null) {
 			return canContainSpecimen(specimen.getCollectionProtocol(), specimen.getSpecimenClass().getValue(), specimen.getSpecimenType().getValue());
 		}
+
+		return false;
 	}
 	
 	public boolean canContain(StorageContainer container) {

@@ -1721,13 +1721,15 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public static String getDesc(PermissibleValue specimenClass, PermissibleValue type) {
-		return getDesc(specimenClass.getValue(), type.getValue());
+		String spmnClass = specimenClass != null && StringUtils.isNotBlank(specimenClass.getValue()) ? specimenClass.getValue() : "Unknown";
+		String spmnType  = type != null && StringUtils.isNotBlank(type.getValue()) ? type.getValue() : "Unknown";
+		return getDesc(spmnClass, spmnType);
 	}
 
 	public static String getDesc(String specimenClass, String type) {
 		StringBuilder desc = new StringBuilder();
 		if (StringUtils.isNotBlank(specimenClass)) {
-			desc.append(specimenClass);
+			desc.append(specimenClass.trim());
 		}
 		
 		if (StringUtils.isNotBlank(type)) {
@@ -1735,7 +1737,11 @@ public class Specimen extends BaseExtensionEntity {
 				desc.append("-");
 			}
 			
-			desc.append(type);
+			desc.append(type.trim());
+		}
+
+		if (desc.length() == 0) {
+			desc.append("Unknown");
 		}
 			
 		return desc.toString();		
