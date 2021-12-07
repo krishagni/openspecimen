@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -456,6 +457,9 @@ public class QueryServiceImpl implements QueryService {
 			return ResponseEvent.userError(getErrorCode(qe.getErrorCode()), qe.getMessage());
 		} catch (IllegalAccessError iae) {
 			return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED, iae.getMessage());
+		} catch (QueryTimeoutException qte) {
+			logger.error("Query aborted", qte);
+			return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, Utility.getErrorMessage(qte));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1079,7 +1083,8 @@ public class QueryServiceImpl implements QueryService {
 			.outputExpression(op.isOutputColumnExprs())
 			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt())
-			.timeZone(tz != null ? tz.getID() : null);
+			.timeZone(tz != null ? tz.getID() : null)
+			.timeout(op.getTimeout());
 		addAutoJoinParams(query);
 
 
@@ -1607,6 +1612,7 @@ public class QueryServiceImpl implements QueryService {
 				proc = new DefaultQueryExportProcessor(op.getCpId(), op.getCpGroupId());
 			}
 
+			op.setTimeout(-1);
 			ExportQueryDataTask task = new ExportQueryDataTask();
 			task.op = op;
 			task.auth = AuthUtil.getAuth();

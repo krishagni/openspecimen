@@ -136,8 +136,10 @@
             </div>
           </div>
 
-          <div ng-if="!resultsCtx.waitingForRecords && resultsCtx.error">
-            <span translate="queries.error"></span>
+          <div class="os-alert-container inline" ng-if="!resultsCtx.waitingForRecords && resultsCtx.error">
+            <div class="alert alert-danger" ng-repeat="error in resultsCtx.errorData">
+              <span ng-bind-html="error.message"></span>
+            </div>
           </div>
 
           <div class="os-alert-container inline" ng-if="resultsCtx.moreData">

@@ -51,7 +51,9 @@ public enum SavedQueryErrorCode implements ErrorCode {
 
 	INVALID_GROUPS_LIST,
 
-	DEPS_FOUND;
+	DEPS_FOUND,
+
+	TIMEOUT;
 	
 	@Override
 	public String code() {

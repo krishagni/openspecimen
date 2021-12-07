@@ -184,9 +184,10 @@ angular.module('os.query.results', ['os.query.models'])
           }
         },
 
-        function() {
-          $scope.resultsCtx.waitForRecords = false;
+        function(error) {
+          $scope.resultsCtx.waitingForRecords = false;
           $scope.resultsCtx.error = true;
+          $scope.resultsCtx.errorData = error.data;
         }
       );
 

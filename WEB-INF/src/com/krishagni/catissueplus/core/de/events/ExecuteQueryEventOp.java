@@ -33,6 +33,8 @@ public class ExecuteQueryEventOp  {
 
 	private boolean disableAccessChecks;
 
+	private int timeoutInSeconds = 55;
+
 	public String getQuerySpace() {
 		return querySpace;
 	}
@@ -143,5 +145,13 @@ public class ExecuteQueryEventOp  {
 
 	public void setDisableAccessChecks(boolean disableAccessChecks) {
 		this.disableAccessChecks = disableAccessChecks;
+	}
+
+	public int getTimeout() {
+		return timeoutInSeconds;
+	}
+
+	public void setTimeout(int timeoutInSeconds) {
+		this.timeoutInSeconds = timeoutInSeconds;
 	}
 }
