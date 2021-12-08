@@ -58,7 +58,8 @@ export default {
           return cache[qs];
         },
         selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
-        displayProp: 'name'
+        displayProp: 'name',
+        searchProp: 'name'
       }
     }
   },

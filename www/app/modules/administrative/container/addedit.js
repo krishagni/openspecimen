@@ -110,8 +110,15 @@ angular.module('os.administrative.container.addedit', ['os.administrative.models
       ContainerType.query({name: searchTerm, maxResults: 101}).then(
         function(types) {
           $scope.containerTypes = types;
-          if (!searchTerm) {
-            defTypes = types;
+          if (searchTerm) {
+            return;
+          }
+
+          defTypes = types;
+
+          var typeName = container.typeName;
+          if (types.length >= 101 && !!typeName && !types.some(function(type) { return type.name == typeName; })) {
+            types.splice(types.length - 1, 1, {id: container.typeId, name: container.typeName});
           }
         }
       );
