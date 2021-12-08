@@ -203,7 +203,8 @@
             </div>
 
             <div class="pull-right">
-              <button type="button" class="btn btn-xs btn-default" ng-click="editFolder(folder)">
+              <button type="button" class="btn btn-xs btn-default" ng-click="editFolder(folder)"
+                os-tooltip="{{'queries.edit_folder' | translate}}" placement="bottom">
                 <span class="fa fa-pencil"></span>
               </button> 
             </div>
@@ -238,7 +239,8 @@
               {{folder.name}}
             </div>
             <div class="pull-right">
-              <button class="btn btn-xs btn-default" ng-click="showFolderInfo(folder)">
+              <button class="btn btn-xs btn-default" ng-click="showFolderInfo(folder)"
+                os-tooltip="{{'queries.view_folder_details' | translate}}" placement="bottom">
                 <span style="font-size: 14px;" class="fa fa-info-circle"></span>
               </button>
             </div>

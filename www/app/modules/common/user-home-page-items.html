@@ -8,10 +8,12 @@
             <span translate="{{widget.title}}"></span>
           </h5>
           <span class="btns">
-            <a class="btn btn-xs default" ng-click="openSearch(widget)">
+            <a class="btn btn-xs default" ng-click="openSearch(widget)"
+              os-tooltip="{{'common.search' | translate}}" placement="bottom">
               <span class="fa fa-search"></span>
             </a>
-            <a class="btn btn-xs default" ui-sref="{{widget.detailedList}}" ng-if="!!widget.detailedList">
+            <a class="btn btn-xs default" ui-sref="{{widget.detailedList}}" ng-if="!!widget.detailedList"
+              os-tooltip="{{'common.expand' | translate}}" placement="bottom">
               <span class="fa fa-expand"></span>
             </a>
           </span>
