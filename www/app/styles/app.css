@@ -7,6 +7,10 @@ body {
   height: 100%;
 }
 
+pre {
+  white-space: pre-wrap;
+}
+
 .os-home {
   background: #2d67a3;
   height: 100%;
@@ -664,6 +668,7 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
   font-size: inherit;
   padding: 0px;
   margin-bottom: 0px;
+  white-space: pre-wrap;
 }
 
 .os-line-section >.key:after {
@@ -786,6 +791,7 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
   font-size: inherit;
   padding: 0px;
   margin-bottom: 0px;
+  white-space: pre-wrap;
 }
 
 .os-line-section .os-btn-section-collapse {
