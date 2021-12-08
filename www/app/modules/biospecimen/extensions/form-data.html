@@ -5,7 +5,7 @@
       <strong class="key key-sm strong">
         <span os-unsafe-html="field.caption"></span>
       </strong>
-      <span class="value value-md">
+      <span class="value value-md" ng-show="field.type != 'label'">
         <span ng-include src="'modules/biospecimen/extensions/field-value.html'"></span>
       </span>
     </li>

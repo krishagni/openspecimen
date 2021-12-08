@@ -28,7 +28,8 @@ class FieldFactory {
     'specimen-measure': 'os-specimen-measure',
     storageContainer: 'os-containers-dropdown',
     subform: 'os-subform',
-    'storage-position': 'os-storage-position'
+    'storage-position': 'os-storage-position',
+    note: 'os-note'
   };
 
   getComponent(fieldType) {
@@ -151,6 +152,10 @@ class FieldFactory {
           fields.push(this.getFieldSchema(subfield));
         }
       }
+    } else if (field.type == 'label') {
+      fs.type = 'note';
+      fs.note = field.caption || field.label;
+      fs.label = '';
     }
 
     if (fs.type) {

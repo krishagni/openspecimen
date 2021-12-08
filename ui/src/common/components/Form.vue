@@ -4,7 +4,7 @@
     <div class="row" v-for="(formRow, rowIdx) of formRows" :key="rowIdx">
       <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
-          <os-label>{{field.label}}</os-label>
+          <os-label v-show="field.label">{{field.label}}</os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
             v-model="formModel[field.name]" v-os-tooltip.bottom="field.tooltip"
             :form="ctx" :context="ctx" @update:model-value="handleInput(field)">

@@ -5,7 +5,7 @@
         <strong class="key key-sm strong">
           <span v-html="field.caption"></span>
         </strong>
-        <span class="value value-md">
+        <span class="value value-md" v-if="field.type != 'label'">
           <FormFieldValue :field="field" />
         </span>
       </li>
