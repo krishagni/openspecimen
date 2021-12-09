@@ -6,6 +6,8 @@
 .os-form-association .os-modal-body {
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
 }
 
 .os-form-association-list {
