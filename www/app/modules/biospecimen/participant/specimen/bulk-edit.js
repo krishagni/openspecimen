@@ -1,7 +1,7 @@
 angular.module('os.biospecimen.specimen')
   .controller('BulkEditSpecimensCtrl', function(
       $scope, $timeout, $parse, hasSde, cpDict, customFields,
-      Specimen, SpecimensHolder, PvManager, Util) {
+      Specimen, SpecimensHolder, PvManager, Util, Alerts) {
 
       var EXCLUSION_LIST = [
         'specimen.label',
@@ -40,6 +40,12 @@ angular.module('os.biospecimen.specimen')
         };
 
         spmnIds = (SpecimensHolder.getSpecimens() || []).map(function(spmn) { return spmn.id; });
+        if (spmnIds.length > 100) {
+          Alerts.error('specimens.edit_limit_maxed', {count: spmns.length});
+          $scope.back();
+          return;
+        }
+
         SpecimensHolder.setSpecimens(null);
 
         if (spmnFields.length == 0) {

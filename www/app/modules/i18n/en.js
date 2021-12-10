@@ -847,6 +847,7 @@
     "warn_large_no_derivatives": "The UI is not designed for creation of such large number of derived specimens. You might notice slowness in page rendering. In such a scenario, we recommend you to use bulk import option.",
     "no_read_access": "You do not have rights to view specimens of the CP: {{cp.shortTitle}}",
     "aliquots_count_req_auto_alloc": "Aliquots count is required for auto-allocation!",
+    "edit_limit_maxed": "{{count}} specimens selected. Only 100 specimens can be edited in bulk!",
 
     "non_primary_receive_na": "One or more specimens are not primary specimens. Non-primary specimens: {{specimens}}",
     "closed_edit_na": "Closed specimens cannot be edited. Closed specimens: {{specimens}}",

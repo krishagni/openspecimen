@@ -348,6 +348,11 @@ angular.module('os.biospecimen.specimen')
             return;
           }
 
+          if (spmns.length > 100) {
+            Alerts.error('specimens.edit_limit_maxed', {count: spmns.length});
+            return;
+          }
+
           SpecimensHolder.setSpecimens(spmns);
           navTo(scope, 'specimen-bulk-edit');
         }
