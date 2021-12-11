@@ -93,7 +93,7 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
         } else {
           return field.pvs ? "multiSelect" : "tagsSelect";
         }
-      } else if (field.lookupProps) {
+      } else if (field.lookupProps && !(op.name == 'contains' || op.name == 'starts_with' || op.name == 'ends_with')) {
         return "lookupSingle";
       } else if (op && op.name == "between") {
         return field.type == "DATE" ? "betweenDate" : "betweenNumeric";
