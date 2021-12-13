@@ -18,7 +18,7 @@
 
     <os-page-body>
       <div v-if="!ctx.bulkUpdate && ctx.user">
-        <os-form ref="userForm" :schema="ctx.addEditFs" :data="ctx.user" @input="handleUserChange($event)">
+        <os-form ref="userForm" :schema="ctx.addEditFs" :data="ctx" @input="handleUserChange($event)">
           <div>
             <os-button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate" />
             <os-button label="Update" v-else @click="saveOrUpdate" />
@@ -27,7 +27,7 @@
         </os-form>
       </div>
       <div v-if="ctx.bulkUpdate">
-        <os-form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx.user" @input="handleUserChange($event)">
+        <os-form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx" @input="handleUserChange($event)">
           <div>
             <os-button label="Update" @click="bulkUpdate" />
             <os-button label="Cancel" @click="cancel" />
@@ -39,12 +39,12 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, inject } from 'vue';
 
-import userSchema from '@/administrative/users/user-schema.json';
-import addEditSchema from '@/administrative/users/addedit-schema.json';
-import bulkEditSchema from '@/administrative/users/bulkedit-schema.json';
-import editProfileSchema from '@/administrative/users/edit-profile-schema.json';
+import userSchema from '@/administrative/schemas/users/user.js';
+import addEditSchema from '@/administrative/schemas/users/addedit-schema.js';
+import bulkEditSchema from '@/administrative/schemas/users/bulkedit-schema.js';
+import editProfileSchema from '@/administrative/schemas/users/edit-profile-schema.js';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
@@ -57,8 +57,12 @@ export default {
 
   props: ['userId', 'editProfile'],
 
+  inject: ['ui'],
+
   setup(props) {
-    let ctx = reactive({
+    const ui = inject('ui');
+
+    const ctx = reactive({
       user: null,
 
       bcrumb: [
@@ -67,27 +71,31 @@ export default {
 
       addEditFs: {rows: []},
 
-      bulkEditFs: {rows: []}
+      bulkEditFs: {rows: []},
+
+      bulkUpdate: false,
+
+      currentUser: ui.currentUser
     });
 
     if (props.userId && +props.userId > 0) {
       if (!props.editProfile || props.editProfile != true) {
-        ctx.addEditFs = formUtil.getFormSchema(userSchema, addEditSchema);
+        ctx.addEditFs = formUtil.getFormSchema(userSchema.fields, addEditSchema.layout);
       } else {
-        ctx.addEditFs = formUtil.getFormSchema(userSchema, editProfileSchema);
+        ctx.addEditFs = formUtil.getFormSchema(userSchema.fields, editProfileSchema.layout);
       }
     } else {
       ctx.user  = { dnd: false, type: 'NONE', apiUser: false };
       let users = itemsSvc.getItems('users');
-      itemsSvc.clearItems();
+      itemsSvc.clearItems('users');
 
       if (users && users.length > 0) {
         ctx.user       = {};
         ctx.users      = users;
         ctx.bulkUpdate = true;
-        ctx.bulkEditFs = formUtil.getFormSchema(userSchema, bulkEditSchema);
+        ctx.bulkEditFs = formUtil.getFormSchema(userSchema.fields, bulkEditSchema.layout);
       } else {
-        ctx.addEditFs = formUtil.getFormSchema(userSchema, addEditSchema);
+        ctx.addEditFs = formUtil.getFormSchema(userSchema.fields, addEditSchema.layout);
       }
     }
 
@@ -107,7 +115,7 @@ export default {
 
   methods: {
     handleUserChange: function({field, value, data}) {
-      Object.assign(this.ctx.user, data);
+      Object.assign(this.ctx.user, data.user);
       if (field.name == 'instituteName' && this.selectedInstitute != value) {
         this.selectedInstitute = value;
         this.ctx.user.primarySite = undefined;
