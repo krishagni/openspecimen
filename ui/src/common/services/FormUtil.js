@@ -1,5 +1,6 @@
 
 import fieldFactory from '@/common/services/FieldFactory.js';
+import util from '@/common/services/Util.js';
 
 class FormUtil {
 
@@ -13,12 +14,12 @@ class FormUtil {
     for (let row of layoutSchema.rows) {
       let fields = [];
       for (let field of row.fields) {
-        let ff = JSON.parse(JSON.stringify(field));
-        if (!ff.name || !dict[ff.name]) {
+        if (!field.name || !dict[field.name]) {
           continue;
         }
 
-        ff = Object.assign(JSON.parse(JSON.stringify(dict[ff.name])), ff);
+        let ff = util.clone(field);
+        ff = Object.assign(util.clone(dict[field.name]), ff);
         fields.push(ff);
       }
 

@@ -22,6 +22,29 @@ class Util {
     'js', 'json', 'pdf', 'png', 'tif', 'tiff', 'txt', 'xls', 'xlsx', 'xml', 'zip'
   ];
 
+
+  clone(obj) {
+    if (obj == null || typeof obj != 'object') {
+      return obj;
+    } else if (obj instanceof Date) {
+      let copy = new Date();
+      copy.setTime(obj.getTime());
+      return copy;
+    } else if (obj instanceof Array) {
+      return obj.map(elem => this.clone(elem));
+    } else if (obj instanceof Object) {
+      let copy = {};
+      for (let prop in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+          copy[prop] = this.clone(obj[prop]);
+        }
+      }
+      return copy;
+    }
+
+    throw new Error("Unrecognised object field.");
+  }
+
   queryString(params) {
     return Object.keys(params || {}).sort().reduce(
       (result, param) => {
