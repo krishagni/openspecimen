@@ -54,7 +54,7 @@ class FieldFactory {
         } else if (rule == 'pattern') {
           validations[rule] = (value) => new RegExp(fv.expr).test(value);
         } else if (rule == 'sameAs') {
-          validations[rule] = (value, form) => form.fd(fv.field) == value;
+          validations[rule] = (value, form) => form[fv.field] == value
         } else if (fv.params) {
           validations[rule] = Validators[rule](fv.params);
         } else {
