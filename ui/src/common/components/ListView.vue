@@ -1,6 +1,5 @@
 <template>
   <div class="os-list os-list-hover" :class="{'show-filters': showFilters}">
-
     <div class="results">
       <div class="info" v-if="loading || list.length == 0">
         <div v-show="loading">
@@ -35,7 +34,7 @@
           </column>
           <column v-if="showRowActions">
             <template #body="slotProps">
-              <div class="os-click-esc">
+              <div class="os-click-esc actions">
                 <slot name="rowActions" :rowObject="slotProps.data.rowObject"> </slot>
               </div>
             </template>
@@ -427,6 +426,10 @@ export default {
   vertical-align: bottom;
   border-bottom: 1px solid #ddd;
   font-weight: bold;
+}
+
+.os-list :deep(thead tr th) {
+  white-space: nowrap;
 }
     
 .os-list :deep(thead tr:first-child th) {
