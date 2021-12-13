@@ -4,8 +4,11 @@
       <table>
         <thead>
           <tr>
-            <th v-for="(field, idx) of fields" :key="idx">
+            <th v-for="(field, idx) of sfFields" :key="idx">
               <span v-html="field.label"></span>
+              <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
+                <span>*</span>
+              </span>
             </th>
             <th class="actioncol">&nbsp;</th>
           </tr>
@@ -73,6 +76,21 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
       }
+    },
+
+    sfFields: function() {
+      const result = [];
+      for (const field of this.fields) {
+        const fv = field.validations;
+        if (fv && fv.required) {
+          field.required = true;
+          field.requiredTooltip = (fv.required && fv.required.message) || 'Mandatory field';
+        }
+
+        result.push(field);
+      }
+
+      return result;
     },
 
     errorMessages: function() {
@@ -159,6 +177,13 @@ export default {
   text-align: left;
 }
 
+.os-subform .required-indicator {
+  display: inline-block;
+  padding: 0.25rem;
+  color: red;
+  cursor: help;
+}
+
 .os-subform table td {
   padding: 0.5rem 0.75rem;
 }
@@ -177,4 +202,5 @@ export default {
 .os-subform table .actioncol :deep(button) {
   background: #fff;
 }
+
 </style>

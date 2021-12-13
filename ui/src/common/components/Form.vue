@@ -4,7 +4,12 @@
     <div class="row" v-for="(formRow, rowIdx) of formRows" :key="rowIdx">
       <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
-          <os-label v-show="field.label">{{field.label}}</os-label>
+          <os-label v-show="field.label">
+            <span>{{field.label}}</span>
+            <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
+              <span>*</span>
+            </span>
+          </os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
             v-model="formModel[field.name]" v-os-tooltip.bottom="field.tooltip"
             :form="ctx" :context="ctx" @update:model-value="handleInput(field)">
@@ -168,6 +173,14 @@ export default {
              field.disabled = exprUtil.eval(this, field.disableWhen);
            }
 
+           const fv = field.validations;
+           if (fv && (fv.requiredIf || fv.required)) {
+             field.required = !!fv.required || exprUtil.eval(fv.requiredIf.expr);
+             if (field.required) {
+               field.requiredTooltip = (fv.required || field.requiredIf).message || 'Mandatory field'
+             }
+           }
+
            formRow.push(field);
          }
 
@@ -256,5 +269,12 @@ form {
 
 .row .field :deep(.btn) {
   margin-right: 0.5rem;
+}
+
+.row .field .required-indicator {
+  display: inline-block;
+  padding: 0.25rem;
+  color: red;
+  cursor: help;
 }
 </style>
