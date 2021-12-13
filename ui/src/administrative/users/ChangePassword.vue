@@ -25,7 +25,7 @@
 <script>
 import { reactive, inject } from 'vue';
 
-import chgPasswdFs from '@/administrative/users/change-password-schema.json';
+import chgPasswdFs from '@/administrative/schemas/users/change-password-schema.json';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
