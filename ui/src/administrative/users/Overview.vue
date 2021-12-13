@@ -53,6 +53,15 @@
             ui.currentUser.id != ctx.user.id && ui.currentUser.admin"
         />
       </div>
+      <div v-else-if="ctx.user.activityStatus == 'Pending' && ui.currentUser.admin">
+        <os-button left-icon="check"
+          label="Approve User" @click="activate"
+        />
+        <os-button left-icon="times"
+          label="Reject User" @click="deleteUser"
+        />
+      </div>
+
     </template>
   </os-page-toolbar>
 
@@ -64,7 +73,7 @@
         </os-message>
       </div>
 
-      <os-overview :schema="userSchema" :object="ctx.user" />
+      <os-overview :schema="userSchema.fields" :object="ctx" />
     </os-grid-column>
 
     <os-grid-column width="4">
@@ -93,7 +102,7 @@ import routerSvc from '@/common/services/Router.js';
 import userSvc from '@/administrative/services/User.js';
 
 import userResources from '@/administrative/users/Resources.js';
-import userSchema from '@/administrative/users/user-schema.json';
+import userSchema from '@/administrative/schemas/users/user.js';
 
 
 export default {
