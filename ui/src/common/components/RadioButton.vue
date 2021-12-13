@@ -19,7 +19,7 @@
 import RadioButton from 'primevue/radiobutton';
 
 export default {
-  props: ['name', 'options', 'modelValue', 'optionsPerRow'],
+  props: ['name', 'options', 'modelValue', 'optionsPerRow', 'context'],
 
   emits: ['change', 'update:modelValue'],
 
@@ -39,11 +39,23 @@ export default {
       }
     },
 
+    optionsList: function() {
+      if (this.options instanceof Array) {
+        return this.options;
+      } else if (typeof this.options == 'function') {
+        return this.options(this.context);
+      } else {
+        return [];
+      }
+    },
+
     optionRows: function() {
-      let numOptions = this.optionsPerRow || 1;
-      let result = [];
-      for (let i = 0; i < this.options.length; i += numOptions) {
-        result.push(this.options.slice(i, i + numOptions));
+      const optionsList = this.optionsList;
+      const numOptions = this.optionsPerRow || 1;
+      const result = [];
+
+      for (let i = 0; i < optionsList.length; i += numOptions) {
+        result.push(optionsList.slice(i, i + numOptions));
       }
 
       return result;
