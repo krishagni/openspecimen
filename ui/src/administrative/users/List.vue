@@ -402,11 +402,9 @@ export default {
     },
 
     exportForms: function() {
-      let users = this.ctx.selectedUsers.map(user => ({emailAddress: user.rowObject.emailAddress}));
+      const users = this.ctx.selectedUsers.map(user => ({emailAddress: user.rowObject.emailAddress}));
       if (users.length > 0) {
-        this.underDev();
-        // itemsSvc.ngSetItems('users', users);
-        return;
+        localStorage.setItem('os.users', JSON.stringify(users));
       }
 
       routerSvc.ngGoto('users-export-forms');
@@ -419,10 +417,6 @@ export default {
     help: function() {
       window.open('http://help.openspecimen.org/user', '_blank').focus();
     },
-
-    underDev: function() {
-      alertSvc.info('This function is under development. We sincerely regret the inconvenience caused to you!');
-    }
   },
 
   computed: {
