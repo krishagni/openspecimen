@@ -1,12 +1,12 @@
 angular.module('os.administrative.user.addedit', ['os.administrative.models'])
   .controller('UserAddEditCtrl', function(
-    $scope, $rootScope, $state, $stateParams, user, users, currentUser, editProfile,
+    $scope, $rootScope, $state, $stateParams, user, users, currentUser, editProfile, oldView,
     User, Institute, AuthDomain, Util, TimeZone, LocationChangeListener, ItemsHolder, VueApp) {
 
     var instituteSites = {}, prevInstitute;
 
     function init() {
-      if (!$stateParams.old || $stateParams.old == 'false') {
+      if (!oldView) {
         var url = 'user-addedit';
         if (editProfile) {
           url = 'user-edit-profile/' + currentUser.id;

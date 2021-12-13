@@ -73,6 +73,12 @@ angular.module('openspecimen')
           },
           currentUser: function() {
             return null;
+          },
+          editProfile: function() {
+            return false;
+          },
+          oldView: function() {
+            return true;
           }
         },
         controller: 'UserAddEditCtrl',

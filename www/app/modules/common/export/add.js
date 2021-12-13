@@ -40,15 +40,18 @@ angular.module('os.common.export')
       job.$saveOrUpdate().then(
         function(savedJob) {
           Alerts.remove(msg);
+
+          var timeout = 0;
           if (savedJob.status == 'COMPLETED') {
             Alerts.info('export.downloading_file');
-            $timeout(function() { Util.downloadFile(savedJob.fileUrl()); }, 250);
+            Util.downloadFile(savedJob.fileUrl());
+            timeout = exportDetail.delayedNav || 250;
           } else if (savedJob.status == 'FAILED') {
             Alerts.error('export.failed', savedJob);
           } else {
             Alerts.info('export.file_will_be_emailed', savedJob);
           }
-          $state.go(exportDetail.onSuccess.state, exportDetail.onSuccess.params);
+          $timeout(function() { $state.go(exportDetail.onSuccess.state, exportDetail.onSuccess.params) }, timeout);
         }
       );
     }

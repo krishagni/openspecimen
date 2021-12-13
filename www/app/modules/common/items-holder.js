@@ -4,11 +4,24 @@ angular.module('openspecimen')
 
      return {
        getItems: function(type) {
-         return itemsMap[type] || [];
+         var items = itemsMap[type];
+         if (!items && localStorage.getItem('os.' + type)) {
+           items = JSON.parse(localStorage.getItem('os.' + type));
+         }
+
+         return items || [];
        },
 
-       setItems: function(type, items) {
-         itemsMap[type] = items;
+       setItems: function(type, items, storeLocally) {
+         if (!items) {
+           delete itemsMap[type];
+           localStorage.removeItem('os.' + type);
+         } else {
+           itemsMap[type] = items;
+           if (storeLocally) {
+             localStorage.setItem('os.' + type, JSON.stringify(items));
+           }
+         }
        }
      }
   });
