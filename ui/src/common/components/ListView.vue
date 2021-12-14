@@ -17,7 +17,7 @@
         </div>
         <data-table :value="list" v-model:selection="selectedRows" @row-click="rowClick($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
-          <column v-for="column of columns" :header="column.caption" :key="column.name">
+          <column v-for="column of columns" :header="column.caption" :key="column.name" :style="column.uiStyle">
             <template #body="slotProps">
               <span v-if="column.href">
                 <a :href="column.href(slotProps.data)" :target="column.hrefTarget">
