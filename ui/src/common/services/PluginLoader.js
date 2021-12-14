@@ -1,9 +1,16 @@
 
+import ui from '@/global.js';
+
 class PluginLoader {
 
   load(name) {
     let lookupName = 'os-plugins.' + name;
     if (window[lookupName]) {
+      return window[lookupName];
+    }
+
+    if (ui.localPlugins) {
+      window[lookupName] = import('@/plugins/' + name);
       return window[lookupName];
     }
 
