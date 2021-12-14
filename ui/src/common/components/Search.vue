@@ -124,6 +124,7 @@ export default {
 .os-search :deep(.p-autocomplete-input) {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif, primeicons;
   width: 100%;
+  padding: 0.375rem 0.75rem;
 }
 
 .os-search-match {
