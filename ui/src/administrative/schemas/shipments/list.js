@@ -4,6 +4,13 @@ import routerSvc    from '@/common/services/Router.js';
 export default {
   columns: [
     {
+      name: "shipment.icon",
+      caption: "",
+      type: "component",
+      component: "os-icon",
+      data: (rowObject) => ({name: rowObject.shipment.type == 'SPECIMEN' ? 'flask' : 'box-open'})
+    },
+    {
       "name": "shipment.name",
       "caption": "Name",
       "href": (row) => routerSvc.getUrl('ShipmentOverview', {shipmentId: row.rowObject.shipment.id}),
@@ -28,7 +35,7 @@ export default {
       "caption": "Receiving Site"
     },
     {
-      "name": "shipment.receivingSite",
+      "name": "shipment.receiver",
       "caption": "Receiver",
       "type": "user"
     },
@@ -39,7 +46,10 @@ export default {
     },
     {
       "name": "shipment.status",
-      "caption": "Status"
+      "caption": "Status",
+      "uiStyle": {
+        "min-width": "80px"
+      }
     },
     {
       "name": "shipment.specimensCount",
@@ -69,7 +79,7 @@ export default {
     {
       name: 'recvInstitute',
       type: 'dropdown',
-      caption: 'Institute',
+      caption: 'Receiving Institute',
       listSource: {
         apiUrl: 'institutes',
         displayProp: 'name',
