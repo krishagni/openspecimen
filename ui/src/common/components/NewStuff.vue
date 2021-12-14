@@ -70,7 +70,6 @@ export default {
   font-weight: bold;
   font-size: 0.8rem;
   width: 7rem;
-  margin-top: 0.25rem;
   border-radius: 0.25rem;
   cursor: pointer;
 }

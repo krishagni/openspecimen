@@ -193,8 +193,8 @@ export default {
 .os-navbar .items .buttons {
   display: flex;
   flex: 1;
-  justify-content: right;
-  padding: 0.2rem 1rem;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .buttons :deep(button) {
@@ -203,8 +203,8 @@ export default {
   color: #fff;
   font-weight: bold;
   font-size: 1.2rem;
-  padding: 0.5rem 1.25rem 0rem 1.25rem;
   cursor: pointer;
+  margin: 0rem 0.5rem;
 }
 
 .user-profile {

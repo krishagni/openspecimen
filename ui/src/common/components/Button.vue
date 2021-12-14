@@ -79,11 +79,3 @@ button:hover {
   cursor: pointer;
 }
 </style>
-
-<style>
-
-.os-form-footer button {
-  margin-right: 0.5rem;
-}
-
-</style>
