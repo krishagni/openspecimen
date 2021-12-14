@@ -315,6 +315,13 @@ a:focus, a:hover {
   width: 100%;
 }
 
+.os-form-footer {
+  padding: 0.5rem;
+}
+
+.os-form-footer button {
+  margin-right: 0.5rem;
+}
 </style>
 
 <style scoped>
