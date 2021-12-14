@@ -26,6 +26,11 @@ export default {
       "name": "shipment.trackingUrl"
     },
     {
+      "type": "user",
+      "label": "Sender",
+      "name": "shipment.sender"
+    },
+    {
       "type": "site",
       "label": "Sending Site",
       "name": "shipment.sendingSite",
@@ -51,6 +56,11 @@ export default {
           "message": "Receiving institute is mandatory"
         }
       }
+    },
+    {
+      "type": "user",
+      "label": "Receiver",
+      "name": "shipment.receiver"
     },
     {
       "type": "site",
