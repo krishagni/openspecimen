@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -38,6 +39,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.events.MergedObject;
@@ -80,7 +82,6 @@ import com.krishagni.catissueplus.core.importer.services.ObjectSchemaFactory;
 import com.krishagni.catissueplus.core.init.AppProperties;
 
 import edu.common.dynamicextensions.query.cachestore.LinkedEhCacheMap;
-import edu.common.dynamicextensions.util.ZipUtility;
 
 public class ImportServiceImpl implements ImportService, ApplicationListener<ContextRefreshedEvent> {
 	private static final Log logger = LogFactory.getLog(ImportServiceImpl.class);
@@ -377,9 +378,8 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			in = new FileInputStream(zipFile);
 
 			File zipDirFile = new File(getImportDir() + File.separator + "inflated-" + fileId);
-			ZipUtility.extractZipToDestination(in, zipDirFile.getAbsolutePath());
-
-			inputFile = Arrays.stream(zipDirFile.listFiles())
+			Utility.inflateZip(in, zipDirFile.getAbsolutePath());
+			inputFile = Arrays.stream(Objects.requireNonNull(zipDirFile.listFiles()))
 				.filter(f -> !f.isDirectory() && f.getName().endsWith(".csv"))
 				.map(File::getAbsolutePath)
 				.findFirst()

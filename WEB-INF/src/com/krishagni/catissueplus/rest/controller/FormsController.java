@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.auth.domain.UserRequestData;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -63,7 +64,6 @@ import edu.common.dynamicextensions.nutility.ContainerJsonSerializer;
 import edu.common.dynamicextensions.nutility.ContainerSerializer;
 import edu.common.dynamicextensions.nutility.FormDefinitionExporter;
 import edu.common.dynamicextensions.nutility.IoUtil;
-import edu.common.dynamicextensions.util.ZipUtility;
 
 
 @Controller
@@ -440,7 +440,7 @@ public class FormsController {
 					tmpDir.mkdirs();
 				}
 
-				ZipUtility.extractZipToDestination(file.getInputStream(), tmpDir.getAbsolutePath());
+				Utility.inflateZip(file.getInputStream(), tmpDir.getAbsolutePath());
 			} else {
 				Utility.downloadFile(file.getInputStream(), tmpDir.getAbsolutePath(), "forms.xml");
 			}
