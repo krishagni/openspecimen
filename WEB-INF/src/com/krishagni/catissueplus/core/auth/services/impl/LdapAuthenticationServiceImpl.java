@@ -2,8 +2,6 @@ package com.krishagni.catissueplus.core.auth.services.impl;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
@@ -11,14 +9,16 @@ import org.springframework.security.ldap.authentication.BindAuthenticator;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 
+
 import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
 import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class LdapAuthenticationServiceImpl implements AuthenticationService {
 
-	private final static Log logger = LogFactory.getLog(LdapAuthenticationServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(LdapAuthenticationServiceImpl.class);
 	
 	private LdapAuthenticationProvider provider;
 	

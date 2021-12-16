@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -19,16 +17,18 @@ import org.hibernate.sql.JoinType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
+
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.events.ContainerCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 @Configurable
 public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectionStrategy {
-	private static Log logger = LogFactory.getLog(RecentlyUsedContainerSelectionStrategy.class);
+	private static final LogUtil logger = LogUtil.getLogger(RecentlyUsedContainerSelectionStrategy.class);
 
 	@Autowired
 	private DaoFactory daoFactory;

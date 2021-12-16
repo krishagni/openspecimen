@@ -28,9 +28,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -45,6 +44,7 @@ import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvReader;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.exporter.domain.ExportErrorCode;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
@@ -60,7 +60,7 @@ import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.nutility.IoUtil;
 
 public class ExportServiceImpl implements ExportService {
-	private final static Log logger = LogFactory.getLog(ExportServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(ExportServiceImpl.class);
 
 	private Map<String, Supplier<Function<ExportJob, List<? extends Object>>>> genFactories = new HashMap<>();
 

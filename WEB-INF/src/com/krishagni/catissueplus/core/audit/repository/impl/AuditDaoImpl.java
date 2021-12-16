@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.MatchMode;
@@ -29,6 +27,7 @@ import org.hibernate.type.TimestampType;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
+
 import com.krishagni.catissueplus.core.audit.domain.DeleteLog;
 import com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord;
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
@@ -41,6 +40,7 @@ import com.krishagni.catissueplus.core.audit.repository.RevisionsListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 import edu.common.dynamicextensions.ndao.DbSettingsFactory;
 
@@ -450,7 +450,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	}
 
-	private static final Log logger = LogFactory.getLog(AuditDaoImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(AuditDaoImpl.class);
 
 	private static final String FQN = UserApiCallLog.class.getName();
 

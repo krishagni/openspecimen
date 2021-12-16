@@ -3,24 +3,23 @@ package com.krishagni.catissueplus.core.common.util;
 import java.util.Calendar;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
+
 import com.krishagni.catissueplus.core.common.domain.UnhandledException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.service.CommonService;
 
 @Configurable
 public class UnhandledExceptionUtil {
-	
-	private static Log logger = LogFactory.getLog(UnhandledExceptionUtil.class);
+
+	private static final LogUtil logger = LogUtil.getLogger(UnhandledExceptionUtil.class);
 
 	private static UnhandledExceptionUtil instance = null;
 	

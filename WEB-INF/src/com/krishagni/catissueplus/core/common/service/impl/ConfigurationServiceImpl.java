@@ -22,13 +22,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.event.ContextRefreshedEvent;
+
 
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -47,11 +46,12 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class ConfigurationServiceImpl implements ConfigurationService, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
-	private static final Log logger = LogFactory.getLog(ConfigurationServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(ConfigurationServiceImpl.class);
 	
 	private Map<String, List<ConfigChangeListener>> changeListeners = new ConcurrentHashMap<>();
 	

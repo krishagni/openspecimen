@@ -16,7 +16,12 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.ResourceUtils;
 
+
+import com.krishagni.catissueplus.core.common.util.LogUtil;
+
 public class WildcardReloadableResourceBundle extends ReloadableResourceBundleMessageSource {
+	private static final LogUtil logger = LogUtil.getLogger(WildcardReloadableResourceBundle.class);
+
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 	private String pluginDir;

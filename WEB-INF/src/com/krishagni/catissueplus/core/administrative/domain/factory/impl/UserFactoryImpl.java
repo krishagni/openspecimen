@@ -6,9 +6,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
@@ -24,12 +23,13 @@ import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class UserFactoryImpl implements UserFactory {
 
-	private static final Log logger = LogFactory.getLog(UserFactoryImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(UserFactoryImpl.class);
 
 	private DaoFactory daoFactory;
 

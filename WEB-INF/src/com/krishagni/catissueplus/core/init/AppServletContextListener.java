@@ -18,16 +18,15 @@ import javax.servlet.ServletContextListener;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+
 
 import com.krishagni.catissueplus.core.common.PluginManager;
 import com.krishagni.catissueplus.core.common.util.ClassPathUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class AppServletContextListener implements ServletContextListener {
 
-	private static final Logger logger = Logger.getLogger(AppServletContextListener.class);
+	private static final LogUtil logger = LogUtil.getLogger(AppServletContextListener.class);
 
 	private static final String DATA_DIR_PROP   = "app.data_dir";
 
@@ -104,12 +103,8 @@ public class AppServletContextListener implements ServletContextListener {
 			System.setProperty("os_log_file", "os");
 		}
 
-		BasicConfigurator.resetConfiguration();
-		PropertyConfigurator.configure(url);
+		LogUtil.configure(url);
 		logger.info("Initialised logging configuration from following file: " + url);
-		if (url.getProtocol().equals("file")) {
-			PropertyConfigurator.configureAndWatch(url.getFile());
-		}
 	}
 
 	private void loadPluginResources(String pluginDirPath) {

@@ -20,11 +20,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.FormDataDeleteEvent;
 import com.krishagni.catissueplus.core.administrative.domain.FormDataSavedEvent;
@@ -64,6 +63,7 @@ import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.Form;
@@ -96,6 +96,7 @@ import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
+
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.domain.nui.DataType;
@@ -120,7 +121,7 @@ import krishagni.catissueplus.beans.FormRecordEntryBean;
 import krishagni.catissueplus.beans.FormRecordEntryBean.Status;
 
 public class FormServiceImpl implements FormService, InitializingBean {
-	private static Log logger = LogFactory.getLog(FormServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(FormServiceImpl.class);
 
 	private static final String CP_FORM = "CollectionProtocol";
 

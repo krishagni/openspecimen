@@ -10,18 +10,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintFileItem;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class LabelPrintFileSpooler implements InitializingBean {
-    private static final Log logger = LogFactory.getLog(LabelPrintFileSpooler.class);
+    private static final LogUtil logger = LogUtil.getLogger(LabelPrintFileSpooler.class);
 
     private BlockingQueue<Long> queuedJobs = new LinkedBlockingQueue<>();
 

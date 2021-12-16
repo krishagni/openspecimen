@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -19,10 +18,11 @@ import com.krishagni.catissueplus.core.common.events.MessageLogCriteria;
 import com.krishagni.catissueplus.core.common.service.MessageHandler;
 import com.krishagni.catissueplus.core.common.service.MessageLogService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class MessageLogServiceImpl implements MessageLogService {
-	private static final Log logger = LogFactory.getLog(MessageLogServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(MessageLogServiceImpl.class);
 
 	private Map<String, MessageHandler> handlers = new HashMap<>();
 

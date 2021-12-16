@@ -15,8 +15,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,10 +23,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.openspecimen.core.migration.domain.Migration.Status;
 import com.krishagni.openspecimen.core.migration.domain.Migration.Version;
@@ -36,8 +36,8 @@ import com.krishagni.openspecimen.core.migration.events.MigrationDetail;
 import com.krishagni.openspecimen.core.migration.services.MigrationService;
 
 public class MigrateSurgicalPathologyReports implements InitializingBean {
-	
-	private static Log logger = LogFactory.getLog(MigrateSurgicalPathologyReports.class);
+
+	private static final LogUtil logger = LogUtil.getLogger(MigrateSurgicalPathologyReports.class);
 
 	private PlatformTransactionManager txnMgr;
 	

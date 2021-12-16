@@ -7,10 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.krishagni.catissueplus.core.common.Pair;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 
 import liquibase.change.custom.CustomTaskChange;
@@ -130,7 +129,7 @@ public class InitializeSavedQueryCpId implements CustomTaskChange {
 		}
 	}
 
-	private static final Log logger = LogFactory.getLog(InitializeSavedQueryCpId.class);
+	private static final LogUtil logger = LogUtil.getLogger(InitializeSavedQueryCpId.class);
 
 	private static final String GET_CP_IDS_SQL = "select identifier from catissue_collection_protocol";
 

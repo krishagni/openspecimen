@@ -10,9 +10,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
@@ -33,9 +32,10 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class StagedParticipantServiceImpl implements StagedParticipantService {
-	private static final Log logger = LogFactory.getLog(StagedParticipantServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(StagedParticipantServiceImpl.class);
 
 	private DaoFactory daoFactory;
 

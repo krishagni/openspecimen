@@ -9,10 +9,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -23,6 +22,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.events.QueryExecResult;
@@ -32,7 +32,7 @@ import edu.common.dynamicextensions.query.WideRowMode;
 
 @Configurable
 public class CpReportGenerator {
-	private static final Log logger = LogFactory.getLog(CpReportGenerator.class);
+	private static final LogUtil logger = LogUtil.getLogger(CpReportGenerator.class);
 
 	private static final String RPTS_DIR = "cp-reports";
 

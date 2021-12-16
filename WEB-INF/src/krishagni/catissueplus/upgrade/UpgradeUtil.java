@@ -10,7 +10,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 import edu.common.dynamicextensions.domain.nui.UserContext;
 import edu.common.dynamicextensions.ndao.JdbcDao;
@@ -98,6 +99,6 @@ public class UpgradeUtil {
 			"	identifier " +
 			"from catissue_user " +
 			"	where login_name = ? AND activity_status = 'Active'";
-	
-	private static final Logger logger = Logger.getLogger(UpgradeUtil.class);
+
+	private static final LogUtil logger = LogUtil.getLogger(UpgradeUtil.class);
 }

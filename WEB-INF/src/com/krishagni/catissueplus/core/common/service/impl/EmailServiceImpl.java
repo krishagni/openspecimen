@@ -30,8 +30,6 @@ import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.integration.mail.ImapMailReceiver;
@@ -39,6 +37,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
@@ -53,12 +52,13 @@ import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.service.TemplateService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class EmailServiceImpl implements EmailService, ConfigChangeListener, InitializingBean {
-	private static final Log logger = LogFactory.getLog(EmailServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(EmailServiceImpl.class);
 	
 	private static final String MODULE = "email";
 	

@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -18,6 +16,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.common.events.ConfigSettingDetail;
@@ -25,6 +24,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.QueryFolder;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
@@ -32,7 +32,7 @@ import com.krishagni.catissueplus.core.de.repository.DaoFactory;
 
 public class ImportDefaultQueries implements InitializingBean {
 
-	private static Log LOGGER = LogFactory.getLog(ImportDefaultQueries.class);
+	private static final LogUtil LOGGER = LogUtil.getLogger(ImportDefaultQueries.class);
 
 	private PlatformTransactionManager txnMgr;
 

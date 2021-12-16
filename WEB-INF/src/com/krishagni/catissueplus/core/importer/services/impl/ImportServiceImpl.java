@@ -27,8 +27,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -57,6 +55,7 @@ import com.krishagni.catissueplus.core.common.util.CsvFileReader;
 import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.SessionUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -84,7 +83,7 @@ import com.krishagni.catissueplus.core.init.AppProperties;
 import edu.common.dynamicextensions.query.cachestore.LinkedEhCacheMap;
 
 public class ImportServiceImpl implements ImportService, ApplicationListener<ContextRefreshedEvent> {
-	private static final Log logger = LogFactory.getLog(ImportServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(ImportServiceImpl.class);
 
 	private static final int MAX_RECS_PER_TXN = 5000;
 
@@ -351,7 +350,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 					logger.info("Starting bulk import jobs scheduler");
 					runImportJobScheduler();
 				} catch (Throwable t) {
-					logger.fatal("Bulk import jobs thread stopped. Restarting the thread after 60 seconds.", t);
+					logger.error("Bulk import jobs thread stopped. Restarting the thread after 60 seconds.", t);
 				} finally {
 					lastRefreshTime = System.currentTimeMillis();
 				}

@@ -14,12 +14,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
@@ -31,12 +30,13 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.init.AppProperties;
 
 public class ScheduledTaskManagerImpl implements ScheduledTaskManager, ScheduledTaskListener {
-	private static final Log logger = LogFactory.getLog(ScheduledTaskManagerImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(ScheduledTaskManagerImpl.class);
 
 	private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(5);
 	

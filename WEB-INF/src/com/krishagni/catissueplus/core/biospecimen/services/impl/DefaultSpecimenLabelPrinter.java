@@ -10,11 +10,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -31,10 +30,11 @@ import com.krishagni.catissueplus.core.common.domain.PrintRuleConfig;
 import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 import com.krishagni.catissueplus.core.common.service.ChangeLogService;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> implements InitializingBean, ApplicationListener<OpenSpecimenEvent> {
-	private static final Log logger = LogFactory.getLog(DefaultSpecimenLabelPrinter.class);
+	private static final LogUtil logger = LogUtil.getLogger(DefaultSpecimenLabelPrinter.class);
 
 	private ConfigurationService cfgSvc;
 

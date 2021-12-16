@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.PositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.RowMajorPositionAssigner;
@@ -27,11 +26,12 @@ import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class ContainerEmptyPositionsReport extends AbstractContainerReport implements ContainerReport {
-	private static final Log logger = LogFactory.getLog(ContainerEmptyPositionsReport.class);
+	private static final LogUtil logger = LogUtil.getLogger(ContainerEmptyPositionsReport.class);
 
 	@Override
 	public String getName() {

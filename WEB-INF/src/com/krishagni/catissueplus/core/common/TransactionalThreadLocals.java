@@ -3,11 +3,11 @@ package com.krishagni.catissueplus.core.common;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class TransactionalThreadLocals {
-	private static Log logger = LogFactory.getLog(TransactionalThreadLocals.class);
+	private static final LogUtil logger = LogUtil.getLogger(TransactionalThreadLocals.class);
 
 	private static ThreadLocal<TransactionalThreadLocals> instance = new ThreadLocal<TransactionalThreadLocals>() {
 		@Override

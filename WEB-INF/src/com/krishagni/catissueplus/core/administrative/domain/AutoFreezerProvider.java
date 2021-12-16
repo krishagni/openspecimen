@@ -4,16 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.krishagni.catissueplus.core.administrative.events.AutoFreezerProviderErrorCode;
 import com.krishagni.catissueplus.core.administrative.services.AutomatedFreezer;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class AutoFreezerProvider extends BaseEntity {
-	private static final Log logger = LogFactory.getLog(AutoFreezerProvider.class);
+	private static final LogUtil logger = LogUtil.getLogger(AutoFreezerProvider.class);
 
 	private static final Map<String, Class<AutomatedFreezer>> providersClassMap = new WeakHashMap<>();
 

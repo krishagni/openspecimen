@@ -1,10 +1,9 @@
 package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+
 
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
@@ -14,9 +13,10 @@ import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class ParticipantLookupFactoryImpl implements ParticipantLookupFactory, InitializingBean {
-	private static final Log logger = LogFactory.getLog(ParticipantLookupFactoryImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(ParticipantLookupFactoryImpl.class);
 
 	private ParticipantLookupLogic defaultParticipantLookupFlow;
 

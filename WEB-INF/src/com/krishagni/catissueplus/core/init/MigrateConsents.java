@@ -8,19 +8,19 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+
 
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.openspecimen.core.migration.domain.Migration.Status;
 import com.krishagni.openspecimen.core.migration.domain.Migration.Version;
 import com.krishagni.openspecimen.core.migration.events.MigrationDetail;
 import com.krishagni.openspecimen.core.migration.services.MigrationService;
 
 public class MigrateConsents implements InitializingBean {
-	private static Log logger = LogFactory.getLog(MigrateConsents.class);
+	private static final LogUtil logger = LogUtil.getLogger(MigrateConsents.class);
 	
 	private ConfigurationService cfgSvc;
 	

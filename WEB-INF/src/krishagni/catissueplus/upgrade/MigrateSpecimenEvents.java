@@ -16,14 +16,13 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import au.com.bytecode.opencsv.CSVWriter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.de.ui.UserControlFactory;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.UserContext;
 import edu.common.dynamicextensions.domain.nui.factory.ControlManager;
@@ -37,7 +36,7 @@ import edu.common.dynamicextensions.ndao.TransactionManager.Transaction;
 import edu.common.dynamicextensions.nutility.IoUtil;
 
 public class MigrateSpecimenEvents {
-	private static final Logger logger = Logger.getLogger(MigrateSpecimenEvents.class);
+	private static final LogUtil logger = LogUtil.getLogger(MigrateSpecimenEvents.class);
 
 	private static final int INSERT_BATCH_SIZE = 5000;
 	
@@ -56,7 +55,7 @@ public class MigrateSpecimenEvents {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) 
 	throws Exception {
-		logger.setLevel(Level.INFO);
+		LogUtil.setInfoLevel();
 		logger.info("Migrating Specimen Events ...");
 
 		if (args.length != 2) {

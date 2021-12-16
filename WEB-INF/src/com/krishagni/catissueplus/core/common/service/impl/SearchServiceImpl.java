@@ -12,8 +12,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
@@ -30,6 +28,7 @@ import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.persister.entity.EntityPersister;
 import org.springframework.beans.factory.InitializingBean;
 
+
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.domain.SearchEntityKeyword;
@@ -39,9 +38,10 @@ import com.krishagni.catissueplus.core.common.service.SearchEntityKeywordProvide
 import com.krishagni.catissueplus.core.common.service.SearchResultProcessor;
 import com.krishagni.catissueplus.core.common.service.SearchService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class SearchServiceImpl implements SearchService, InitializingBean {
-	private static final Log logger = LogFactory.getLog(SearchServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(SearchServiceImpl.class);
 
 	private SessionFactory sessionFactory;
 

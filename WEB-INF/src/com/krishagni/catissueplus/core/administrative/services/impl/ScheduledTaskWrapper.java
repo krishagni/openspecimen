@@ -1,16 +1,14 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskListener;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class ScheduledTaskWrapper implements Runnable {
-	private static final Log logger = LogFactory.getLog(ScheduledTaskWrapper.class);
+	private static final LogUtil logger = LogUtil.getLogger(ScheduledTaskWrapper.class);
 
 	private ScheduledJob job;
 	
