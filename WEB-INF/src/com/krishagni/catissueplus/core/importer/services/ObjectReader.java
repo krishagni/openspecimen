@@ -15,14 +15,14 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.CsvException;
 import com.krishagni.catissueplus.core.common.util.CsvFileReader;
 import com.krishagni.catissueplus.core.common.util.CsvReader;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.importer.domain.ImportJobErrorCode;
@@ -31,7 +31,7 @@ import com.krishagni.catissueplus.core.importer.domain.ObjectSchema.Field;
 import com.krishagni.catissueplus.core.importer.domain.ObjectSchema.Record;
 
 public class ObjectReader implements Closeable {
-	private static final Log logger = LogFactory.getLog(ObjectReader.class);
+	private static final LogUtil logger = LogUtil.getLogger(ObjectReader.class);
 
 	private static final String SET_TO_BLANK = "##set_to_blank##";
 

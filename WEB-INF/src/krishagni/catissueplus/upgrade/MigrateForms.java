@@ -15,8 +15,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import edu.common.dynamicextensions.domain.nui.UserContext;
@@ -27,13 +27,11 @@ import edu.common.dynamicextensions.nutility.IoUtil;
 
 
 public class MigrateForms {
-	
-	private static final Logger logger = Logger.getLogger(MigrateForms.class);
+
+	private static final LogUtil logger = LogUtil.getLogger(MigrateForms.class);
 	
 	public static void main(String[] args) 
 	throws Exception {
-		logger.setLevel(Level.INFO);
-		
 		if (args.length == 0) {
 			logger.error("Requires admin username as input. Exiting migration");
 			return;

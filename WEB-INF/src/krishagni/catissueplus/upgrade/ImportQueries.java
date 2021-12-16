@@ -14,11 +14,11 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-import org.springframework.util.DigestUtils;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 
@@ -29,7 +29,7 @@ import edu.common.dynamicextensions.ndao.TransactionManager;
 import edu.common.dynamicextensions.nutility.IoUtil;
 
 public class ImportQueries {
-	private static final Logger logger = Logger.getLogger(ImportQueries.class);
+	private static final LogUtil logger = LogUtil.getLogger(ImportQueries.class);
 	
 	public static void main(String[] args) 
 	throws Exception {

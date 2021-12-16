@@ -1,8 +1,6 @@
 
 package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
-import static com.krishagni.catissueplus.core.common.PvAttributes.*;
-
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -17,8 +15,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -26,6 +22,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
@@ -48,13 +45,19 @@ import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
+import static com.krishagni.catissueplus.core.common.PvAttributes.ETHNICITY;
+import static com.krishagni.catissueplus.core.common.PvAttributes.GENDER;
+import static com.krishagni.catissueplus.core.common.PvAttributes.RACE;
+import static com.krishagni.catissueplus.core.common.PvAttributes.VITAL_STATUS;
+
 public class ParticipantFactoryImpl implements ParticipantFactory, InitializingBean {
-	private static final Log logger = LogFactory.getLog(ParticipantFactoryImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(ParticipantFactoryImpl.class);
 
 	private static final String DEAD_STATUS = "Dead";
 

@@ -10,10 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
@@ -22,11 +21,12 @@ import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Configurable
 public class PickDistributedSpecimensNotification implements ScheduledTask {
-	private static final Log logger = LogFactory.getLog(PickDistributedSpecimensNotification.class);
+	private static final LogUtil logger = LogUtil.getLogger(PickDistributedSpecimensNotification.class);
 
 	private static final String PICK_DIST_SPMNS_TMPL = "order_pick_spmns";
 

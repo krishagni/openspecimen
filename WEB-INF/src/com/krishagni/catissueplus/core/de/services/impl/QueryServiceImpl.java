@@ -33,13 +33,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -64,6 +63,7 @@ import com.krishagni.catissueplus.core.common.service.StarredItemService;
 import com.krishagni.catissueplus.core.common.service.TemplateService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -116,7 +116,7 @@ import edu.common.dynamicextensions.query.ResultColumn;
 import edu.common.dynamicextensions.query.WideRowMode;
 
 public class QueryServiceImpl implements QueryService {
-	private static final Log logger = LogFactory.getLog(QueryServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(QueryServiceImpl.class);
 
 	private static final String cpForm = "CollectionProtocol";
 

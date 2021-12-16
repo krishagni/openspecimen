@@ -5,12 +5,11 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.TimeZone;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,13 +17,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
+
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.domain.ConfigErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 public class AuthUtil {
-	private static final Log logger = LogFactory.getLog(AuthUtil.class);
+	private static final LogUtil logger = LogUtil.getLogger(AuthUtil.class);
 
 	private static final String OS_AUTH_TOKEN_HDR = "X-OS-API-TOKEN";
 

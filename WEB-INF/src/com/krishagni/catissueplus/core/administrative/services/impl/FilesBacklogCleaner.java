@@ -5,15 +5,14 @@ import java.io.FilenameFilter;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class FilesBacklogCleaner implements ScheduledTask {
-	private static final Log logger = LogFactory.getLog(FilesBacklogCleaner.class);
+	private static final LogUtil logger = LogUtil.getLogger(FilesBacklogCleaner.class);
 
 	private static final String QUERY_EXPORT_DIR = "query-exported-data";
 

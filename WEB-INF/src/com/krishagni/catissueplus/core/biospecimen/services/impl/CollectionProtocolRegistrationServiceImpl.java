@@ -28,12 +28,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -100,6 +99,7 @@ import com.krishagni.catissueplus.core.common.service.impl.ConfigurationServiceI
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
@@ -108,7 +108,7 @@ import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class CollectionProtocolRegistrationServiceImpl implements CollectionProtocolRegistrationService, ObjectAccessor, InitializingBean {
-	private Log logger = LogFactory.getLog(CollectionProtocolRegistrationServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(CollectionProtocolRegistrationServiceImpl.class);
 
 	private DaoFactory daoFactory;
 

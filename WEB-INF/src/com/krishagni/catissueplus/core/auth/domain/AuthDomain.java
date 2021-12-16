@@ -4,17 +4,16 @@ package com.krishagni.catissueplus.core.auth.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.krishagni.catissueplus.core.auth.domain.factory.AuthProviderErrorCode;
 import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class AuthDomain {
-	private static final Log logger = LogFactory.getLog(AuthDomain.class);
+	private static final LogUtil logger = LogUtil.getLogger(AuthDomain.class);
 
 	private static Map<Long, AuthenticationService> authProviderMap = new HashMap<>();
 

@@ -1,14 +1,12 @@
 package com.krishagni.catissueplus.core.common.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
 @Configurable
 public class SessionUtil {
-	private static final Log logger = LogFactory.getLog(SessionUtil.class);
+	private static final LogUtil logger = LogUtil.getLogger(SessionUtil.class);
 
 	private static SessionUtil instance = null;
 

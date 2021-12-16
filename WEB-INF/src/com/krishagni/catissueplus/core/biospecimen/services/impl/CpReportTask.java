@@ -3,12 +3,11 @@ package com.krishagni.catissueplus.core.biospecimen.services.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -18,10 +17,11 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 @Configurable
 public class CpReportTask implements ScheduledTask, Runnable {
-	private static final Log logger = LogFactory.getLog(CpReportTask.class);
+	private static final LogUtil logger = LogUtil.getLogger(CpReportTask.class);
 
 	@Autowired
 	private DaoFactory daoFactory;

@@ -25,10 +25,13 @@ import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.errors.ParameterizedError;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 
 @ControllerAdvice
 public class RestErrorController extends ResponseEntityExceptionHandler {
+
+	private static final LogUtil logger = LogUtil.getLogger(RestErrorController.class);
 
 	private static final String INTERNAL_ERROR = "internal_error";
 

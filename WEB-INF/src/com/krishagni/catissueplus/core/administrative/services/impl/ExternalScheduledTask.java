@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class ExternalScheduledTask implements ScheduledTask {
-	private static final Log logger = LogFactory.getLog(ExternalScheduledTask.class);
+	private static final LogUtil logger = LogUtil.getLogger(ExternalScheduledTask.class);
 
 	private static final String SPACE_DELIMITED_TOKENS = "\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
 

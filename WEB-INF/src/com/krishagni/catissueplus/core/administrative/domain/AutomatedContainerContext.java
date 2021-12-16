@@ -7,11 +7,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
@@ -20,10 +19,11 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 @Configurable
 public class AutomatedContainerContext {
-	private static final Log logger = LogFactory.getLog(AutomatedContainerContext.class);
+	private static final LogUtil logger = LogUtil.getLogger(AutomatedContainerContext.class);
 
 	private static AutomatedContainerContext instance = new AutomatedContainerContext();
 

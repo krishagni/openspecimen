@@ -15,10 +15,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroupSavedEvent;
@@ -43,6 +42,7 @@ import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCri
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, TransactionEventListener {
@@ -50,7 +50,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 	// format: <entity_type>_<yyyyMMddHHmm>_<unique_os_run_num>_<copy>.txt
 	// E.g. specimen_201604040807_1_1.txt, specimen_201604040807_1_2.txt, visit_201604040807_1_1.txt etc
 	//
-	private static final Log logger = LogFactory.getLog(AbstractLabelPrinter.class);
+	private static final LogUtil logger = LogUtil.getLogger(AbstractLabelPrinter.class);
 
 	private static final String LABEL_FILENAME_FMT = "%s_%s_%d_%d.%s";
 

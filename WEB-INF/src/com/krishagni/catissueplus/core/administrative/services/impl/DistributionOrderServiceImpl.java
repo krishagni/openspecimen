@@ -27,10 +27,9 @@ import javax.mail.internet.MimeUtility;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncTaskExecutor;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder.Status;
@@ -89,6 +88,7 @@ import com.krishagni.catissueplus.core.common.service.ManifestGeneratorFactory;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
@@ -110,7 +110,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 import edu.common.dynamicextensions.query.WideRowMode;
 
 public class DistributionOrderServiceImpl implements DistributionOrderService, ObjectAccessor, InitializingBean {
-	private static final Log logger = LogFactory.getLog(DistributionOrderServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(DistributionOrderServiceImpl.class);
 
 	private static final long ASYNC_CALL_TIMEOUT = 5000L;
 

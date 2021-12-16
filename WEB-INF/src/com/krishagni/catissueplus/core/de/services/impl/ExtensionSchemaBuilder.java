@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.ResourceUtils;
 
+
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.TemplateService;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
 import com.krishagni.catissueplus.core.de.repository.FormDao;
 import com.krishagni.catissueplus.core.importer.domain.ObjectSchema;
@@ -37,7 +37,7 @@ import edu.common.dynamicextensions.domain.nui.SignatureControl;
 import edu.common.dynamicextensions.domain.nui.SubFormControl;
 
 public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
-	private static final Log logger = LogFactory.getLog(ExtensionSchemaBuilder.class);
+	private static final LogUtil logger = LogUtil.getLogger(ExtensionSchemaBuilder.class);
 
 	private TemplateService templateService;
 

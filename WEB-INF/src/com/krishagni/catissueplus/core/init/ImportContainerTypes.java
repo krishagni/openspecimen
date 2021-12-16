@@ -10,14 +10,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.events.ContainerTypeDetail;
 import com.krishagni.catissueplus.core.administrative.services.ContainerTypeService;
@@ -26,9 +25,10 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class ImportContainerTypes implements InitializingBean {
-	private static final Log logger = LogFactory.getLog(ImportContainerTypes.class);
+	private static final LogUtil logger = LogUtil.getLogger(ImportContainerTypes.class);
 
 	private ContainerTypeService containerTypeSvc;
 

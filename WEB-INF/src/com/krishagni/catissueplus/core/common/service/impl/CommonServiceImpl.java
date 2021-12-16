@@ -6,11 +6,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskManager;
@@ -26,11 +25,12 @@ import com.krishagni.catissueplus.core.common.repository.UnhandledExceptionListC
 import com.krishagni.catissueplus.core.common.service.CommonService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class CommonServiceImpl implements CommonService, InitializingBean {
-	private static final Log logger = LogFactory.getLog(CommonServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(CommonServiceImpl.class);
 
 	private DaoFactory daoFactory;
 

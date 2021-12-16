@@ -5,9 +5,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.ScheduledJobErrorCode;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
@@ -15,12 +14,13 @@ import com.krishagni.catissueplus.core.administrative.services.impl.ExternalSche
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 
 public class ScheduledJob extends BaseEntity {
-	private static final Log logger = LogFactory.getLog(ScheduledJob.class);
+	private static final LogUtil logger = LogUtil.getLogger(ScheduledJob.class);
 
 	public enum RepeatSchedule { 
 		MINUTELY,

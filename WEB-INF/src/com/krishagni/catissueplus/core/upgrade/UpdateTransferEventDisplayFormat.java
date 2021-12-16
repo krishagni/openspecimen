@@ -5,11 +5,10 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.common.Pair;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
@@ -20,7 +19,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 
 public class UpdateTransferEventDisplayFormat implements CustomTaskChange {
-	private static final Log logger = LogFactory.getLog(UpdateTransferEventDisplayFormat.class);
+	private static final LogUtil logger = LogUtil.getLogger(UpdateTransferEventDisplayFormat.class);
 
 	@Override
 	public void execute(Database database)

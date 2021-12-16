@@ -8,8 +8,9 @@ import java.sql.Statement;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
@@ -21,7 +22,7 @@ import liquibase.resource.ResourceAccessor;
 
 public class DeleteDbObjectsUtil implements CustomTaskChange {
 
-	private static Log logger = LogFactory.getLog(DeleteDbObjectsUtil.class);
+	private static final LogUtil logger = LogUtil.getLogger(DeleteDbObjectsUtil.class);
 
 	private String file;
 

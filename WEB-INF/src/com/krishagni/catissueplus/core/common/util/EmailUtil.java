@@ -3,17 +3,16 @@ package com.krishagni.catissueplus.core.common.util;
 import java.io.File;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+
 
 import com.krishagni.catissueplus.core.common.service.EmailService;
 
 @Configurable
 public class EmailUtil {
 
-	private static Log logger = LogFactory.getLog(EmailUtil.class);
+	private static final LogUtil logger = LogUtil.getLogger(EmailUtil.class);
 
 	private static EmailUtil instance = null;
 

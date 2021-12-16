@@ -1,9 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
@@ -11,11 +10,12 @@ import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 @Configurable
 public class StagedParticipantsCleanupTask implements ScheduledTask {
 
-	private static final Log logger = LogFactory.getLog(StagedParticipantsCleanupTask.class);
+	private static final LogUtil logger = LogUtil.getLogger(StagedParticipantsCleanupTask.class);
 
 	private static final int DEF_CLEANUP_INT = 90;
 

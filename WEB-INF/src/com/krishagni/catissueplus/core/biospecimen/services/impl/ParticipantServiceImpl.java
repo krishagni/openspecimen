@@ -8,8 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
@@ -33,9 +32,10 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.MpiGenerator;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class ParticipantServiceImpl implements ParticipantService, ObjectAccessor {
-	private static final Log logger = LogFactory.getLog(ParticipantServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(ParticipantServiceImpl.class);
 
 	private DaoFactory daoFactory;
 

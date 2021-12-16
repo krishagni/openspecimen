@@ -7,11 +7,10 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -23,9 +22,10 @@ import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
 import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 public class DefaultVisitLabelPrinter extends AbstractLabelPrinter<Visit> implements InitializingBean, ConfigChangeListener, ApplicationListener<OpenSpecimenEvent> {
-	private static final Log logger = LogFactory.getLog(DefaultVisitLabelPrinter.class);
+	private static final LogUtil logger = LogUtil.getLogger(DefaultVisitLabelPrinter.class);
 	
 	private ConfigurationService cfgSvc;
 	

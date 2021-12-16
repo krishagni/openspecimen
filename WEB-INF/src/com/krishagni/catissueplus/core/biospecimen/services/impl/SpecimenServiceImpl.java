@@ -20,9 +20,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
@@ -80,6 +79,7 @@ import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -90,7 +90,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, ConfigChangeListener, InitializingBean {
 
-	private static Log logger = LogFactory.getLog(SpecimenServiceImpl.class);
+	private static final LogUtil logger = LogUtil.getLogger(SpecimenServiceImpl.class);
 
 	private DaoFactory daoFactory;
 
