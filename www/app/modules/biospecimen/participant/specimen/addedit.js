@@ -31,7 +31,6 @@ angular.module('os.biospecimen.specimen.addedit', [])
         }
       );
 
-
       if (!specimen.id && !specimen.reqId && defSpmns.length > 0) {
         inputCtxts = $scope.inputCtxts = getInputCtxts(defSpmns);
       } else {
@@ -246,6 +245,28 @@ angular.module('os.biospecimen.specimen.addedit', [])
       return result;
     }
 
+    function getDefValues(opts) {
+      var currentDate = new Date().getTime();
+      var defValues = {};
+      angular.forEach(opts.cpDict || opts.sysDict,
+        function(field) {
+          if (!field.name || !field.name.startsWith('specimen.')) {
+            return;
+          }
+
+          defValues[field.name] = field.defaultValue;
+          if (field.defaultValue == 'current_user') {
+            defValues[field.name] = $rootScope.currentUser;
+          } else if (field.defaultValue == 'current_date') {
+            defValues[field.name] = currentDate;
+          }
+        }
+      );
+
+      return defValues;
+    }
+
+
     return {
       restrict: 'E',
 
@@ -302,6 +323,7 @@ angular.module('os.biospecimen.specimen.addedit', [])
         }
       },
 
+
       link: function(scope, element, attrs, ctrl) {
         var opts = scope.opts, specimen = scope.specimen;
         scope.ctrl.ctrl = ctrl;
@@ -317,9 +339,10 @@ angular.module('os.biospecimen.specimen.addedit', [])
           inputSpmn.anatomicSite = inputSpmn.laterality = undefined;
         }
 
+        var defValues = opts.defValues = opts.defValues || getDefValues(opts) || {};
         if (inputSpmn.status != 'Collected') {
           if (!inputSpmn.id) {
-            inputSpmn.status = 'Collected';
+            inputSpmn.status = defValues['specimen.status'] || 'Collected';
           }
 
           inputSpmn.availableQty = inputSpmn.initialQty;
@@ -336,16 +359,19 @@ angular.module('os.biospecimen.specimen.addedit', [])
         }
 
         var exObjs = ['specimen.lineage', 'specimen.parentLabel', 'specimen.events'];
+
         if (!inputSpmn.id && !inputSpmn.reqId) {
           var ce = inputSpmn.collectionEvent = inputSpmn.collectionEvent || {};
           ce.user = (!ce.user || !ce.user.id) ? $rootScope.currentUser : ce.user;
-          ce.container = ce.container || 'Not Specified';
-          ce.procedure = ce.procedure || 'Not Specified';
+
+          ce.container = ce.container || defValues['specimen.collectionEvent.container'] || 'Not Specified';
+          ce.procedure = ce.procedure || defValues['specimen.collectionEvent.procedure'] || 'Not Specified';
 
           var re = inputSpmn.receivedEvent = inputSpmn.receivedEvent || {};
           re.user = (!re.user || !re.user.id) ? $rootScope.currentUser : re.user;
           re.receivedQuality = re.receivedQuality ||
             (opts.spmnCollFields && opts.spmnCollFields.defReceiveQuality) ||
+            defValues['specimen.receivedEvent.receivedQuality'] ||
             'Acceptable';
         }
 
