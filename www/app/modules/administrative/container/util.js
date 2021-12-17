@@ -56,6 +56,10 @@ angular.module('os.administrative.container.util', ['os.common.box'])
       angular.forEach(kvList,
         function(kv) {
           var kvPair = kv.split('=');
+          if (!kvPair || kvPair.length <= 1) {
+            return;
+          }
+
           result[kvPair[0].trim()] = kvPair[1].trim();
         }
       );

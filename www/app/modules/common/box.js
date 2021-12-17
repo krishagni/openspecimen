@@ -324,7 +324,7 @@ angular.module('os.common.box', [])
       // match[3] = 'x, y, z'; labels to scan or parse
       //
       var re = /("([^"]+)")?\s*([^"]+)/g;
-      inputLabels = inputLabels.trim();
+      inputLabels = (inputLabels && inputLabels.trim()) || '';
 
       var input = [], match;
       while ((match = re.exec(inputLabels)) != null) {
