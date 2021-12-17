@@ -326,6 +326,10 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 	}
 
 	public static ParticipantDetail from(Participant participant, boolean excludePhi, List<CollectionProtocolRegistration> cprs) {
+		if (participant == null) {
+			return null;
+		}
+
 		ParticipantDetail result = new ParticipantDetail();
 		result.setId(participant.getId());
 		result.setSource(participant.getSource());

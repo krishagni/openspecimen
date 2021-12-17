@@ -1337,6 +1337,13 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		cpr.delete(!forceDelete, checkOnlyCollectedSpmns);
 		DeleteLogUtil.getInstance().log(cpr);
 		EventPublisher.getInstance().publish(new CprSavedEvent(cpr));
+		if (!cpr.getParticipant().isDeleted()) {
+			//
+			// OPSMN-5770: This is to allow, in the future, registration and deletion of the
+			// same participant multiple times.
+			//
+			cpr.setParticipant(null);
+		}
 	}
 
 	private void notifyOnCprsDeleted(User user, List<CollectionProtocolRegistration> cprs) {

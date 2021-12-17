@@ -147,6 +147,8 @@
   <include file="db/8.1/audit.xml"/>
   <include file="db/8.1/migration.xml"/>
 
+  <include file="db/8.2/schema.xml"/>
+
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
 </databaseChangeLog>

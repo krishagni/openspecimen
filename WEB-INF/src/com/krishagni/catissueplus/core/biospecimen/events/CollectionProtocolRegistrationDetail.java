@@ -186,7 +186,9 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 
 	public static CollectionProtocolRegistrationDetail from(CollectionProtocolRegistration cpr, boolean excludePhi, List<CollectionProtocolRegistration> otherCprs) {
 		Participant participant = cpr.getParticipant();
-		participant.setCpId(cpr.getCollectionProtocol().getId());
+		if (participant != null) {
+			participant.setCpId(cpr.getCollectionProtocol().getId());
+		}
 
 		CollectionProtocolRegistrationDetail detail = new CollectionProtocolRegistrationDetail();
 		detail.setParticipant(ParticipantDetail.from(participant, excludePhi, otherCprs));

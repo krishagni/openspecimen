@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="OPSMN-5770: Drop unique constraint on (cp_id, participant_id) to allow null participant IDs" dbms="oracle">
+    <dropUniqueConstraint constraintName="CATISSUE_CP_PART_UNIQUE_KEY"
+      tableName="CATISSUE_COLL_PROT_REG"  uniqueColumns="PARTICIPANT_ID, COLLECTION_PROTOCOL_ID, ACTIVITY_STATUS"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="OPSMN-5770: Unique constraint/index on (cp_id, participant_id) to allow null participant IDs" dbms="oracle">
+    <sql>
+      create unique index OS_REG_CP_PARTICIPANT_UQ on CATISSUE_COLL_PROT_REG(
+        case when
+          participant_id is not null
+        then
+          participant_id || '-' || collection_protocol_id || '-' || activity_status
+        end
+      );
+    </sql>
+  </changeSet>
+</databaseChangeLog>
