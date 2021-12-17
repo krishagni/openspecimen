@@ -687,6 +687,9 @@
     "names": "Visit Names",
     "names_csv": "Comma separated list of visit names",
 
+    "visit_saved": "Visit saved!",
+    "no_planned_coll": "No planned specimens to collect!",
+
     "visits_text_rpts": "Visits (Text Reports)",
     "visits_pdf_rpts": "Visits (PDF Reports)",
 

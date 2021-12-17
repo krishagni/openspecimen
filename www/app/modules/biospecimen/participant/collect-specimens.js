@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.models'])
   .factory('CollectSpecimensSvc', function(
-    $state, $parse, CpConfigSvc, Specimen, Container, ParticipantSpecimensViewState, LocationChangeListener) {
+    $state, $parse, CpConfigSvc, Specimen, Container, ParticipantSpecimensViewState, LocationChangeListener, Alerts) {
 
     var data = {opts: {}};
 
@@ -250,8 +250,13 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
         Specimen.listFor(cprId, visitDetail).then(
           function(specimens) {
             if (specimens.length == 0) {
-              // no planned specimens
-              $state.go('visit-addedit', {cprId: cprId, visitId: visit.id, eventId: visit.eventId});
+              if (!visit.id || (!visit.status || visit.status == 'Pending')) {
+                $state.go('visit-addedit', {cprId: cprId, visitId: visit.id, eventId: visit.eventId});
+              } else {
+                Alerts.info('visits.no_planned_coll');
+                $state.go('visit-detail.overview', {cprId: cprId, visitId: visit.id, eventId: visit.eventId});
+              }
+
               return;
             }
 
