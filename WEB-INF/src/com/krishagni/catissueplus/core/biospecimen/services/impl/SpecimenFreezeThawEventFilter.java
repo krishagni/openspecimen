@@ -27,20 +27,10 @@ public class SpecimenFreezeThawEventFilter implements FormDataFilter {
 			}
 
 			if (input.getRecordId() != null) {
-				// could be insert post filter or update pre/post filter
-
-				if (!appData.containsKey("newFreezeThawEvent")) {
-					//
-					// only insert post filter will have newFreezeThawEvent
-					// therefore the current invocation is for update pre/post filter
-					//
-					return input;
-				}
-			} else {
-				appData.put("newFreezeThawEvent", true);
+				return input;
 			}
 
-
+			appData.put("newFreezeThawEvent", true);
 			Long specimenId = Utility.numberToLong(appData.get("objectId"));
 			if (specimenId == null) {
 				return input;

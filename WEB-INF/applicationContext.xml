@@ -1032,21 +1032,6 @@
         </entry>
       </map>
     </property>
-
-    <property name="postFormSaveFilters">
-      <map>
-        <entry key="SpecimenFrozenEvent">
-          <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenFreezeThawEventFilter">
-            <property name="daoFactory" ref="biospecimenDaoFactory"/>
-          </bean>
-        </entry>
-        <entry key="SpecimenThawEvent">
-          <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenFreezeThawEventFilter">
-            <property name="daoFactory" ref="biospecimenDaoFactory"/>
-          </bean>
-        </entry>
-      </map>
-    </property>
   </bean>
 
   <!-- Move these to importer-beans.xml -->
