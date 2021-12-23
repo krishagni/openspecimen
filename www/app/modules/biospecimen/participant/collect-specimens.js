@@ -1701,7 +1701,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             multiple: true,
             fields: {groups: [group], table: []},
             baseFields: cpDict,
-            input: [{cp: cp, visit: visit}],
+            input: [{cp: cp, cpr: cpr, visit: visit, userRole: userRole}],
             opts: {static: true}
           };
         }
