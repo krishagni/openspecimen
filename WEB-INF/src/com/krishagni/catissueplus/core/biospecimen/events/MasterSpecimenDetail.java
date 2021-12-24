@@ -8,11 +8,15 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 
+
+import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
+import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.NameValuePair;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
-public class MasterSpecimenDetail {
+@ListenAttributeChanges
+public class MasterSpecimenDetail extends AttributeModifiedSupport {
 	private String cpShortTitle;
 	
 	private String ppid;

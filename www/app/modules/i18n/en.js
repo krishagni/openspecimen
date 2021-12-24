@@ -2248,6 +2248,7 @@
     "object_type": "Object Type",
     "create": "Create",
     "update": "Update",
+    "upsert": "Update Else Create",
     "date_format": "Date Format",
     "time_format": "Time Format",
     "date_time_format": "Date and Time Format",
@@ -2313,7 +2314,8 @@
 
     "import_types": {
       "CREATE": "Create",
-      "UPDATE": "Update"
+      "UPDATE": "Update",
+      "UPSERT": "Upsert"
     },
 
     "extension_name": "{{params.formName}} ({{params.entityType}})",

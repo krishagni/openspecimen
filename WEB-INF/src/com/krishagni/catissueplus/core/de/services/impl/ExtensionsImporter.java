@@ -119,6 +119,9 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 		Long recordId = null;
 		if (!importDetail.isCreate()) {
 			recordId = getRecordId(extnObj, formCtxId, reObjectId != null ? reObjectId : objectId);
+			if ("UPDATE".equals(importDetail.getType()) && recordId == null) {
+				throw OpenSpecimenException.userError(FormErrorCode.REC_NOT_FOUND);
+			}
 		}
 
 		Map<String, Object> appData = new HashMap<>();
@@ -254,7 +257,7 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 		} else {
 			List<FormRecordEntryBean> recordEntries = formDao.getRecordEntries(formCtxId, objectId);
 			if (recordEntries == null || recordEntries.isEmpty()) {
-				throw OpenSpecimenException.userError(FormErrorCode.REC_NOT_FOUND);
+				return null;
 			} else if (recordEntries.size() > 1) {
 				throw OpenSpecimenException.userError(FormErrorCode.MULTI_RECS_ID_REQ);
 			}

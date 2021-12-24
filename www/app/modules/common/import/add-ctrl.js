@@ -108,6 +108,7 @@ angular.module('os.common.import.addctrl', ['os.common.import.importjob'])
     $scope.onTypeSelect = function(objectType) {
       $scope.importDetail.objectType = objectType.type;
       $scope.importDetail.showImportType = objectType.showImportType;
+      $scope.importDetail.showUpsert = objectType.showUpsert;
       $scope.importDetail.importType = objectType.importType;
 
       var importJob            = $scope.importJob;

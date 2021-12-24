@@ -962,6 +962,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 				detail.setId(job.getId().toString());
 				detail.setObjectName(job.getName());
 				detail.setCreate(job.getType() == Type.CREATE);
+				detail.setType(job.getType().name());
 				detail.setObject(object);
 				detail.setParams(params);
 				detail.setUploadedFilesDir(getFilesDirPath(job.getId()));

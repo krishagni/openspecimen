@@ -19,7 +19,8 @@ public class ImportJob extends BaseEntity {
 	
 	public enum Type {
 		CREATE,
-		UPDATE
+		UPDATE,
+		UPSERT
 	}
 	
 	public enum CsvType {

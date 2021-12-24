@@ -1273,12 +1273,14 @@
         <entry key="cpr">
           <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.CprImporter">
             <property name="cprSvc" ref="cprSvc"/>
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
           </bean>
         </entry>
         
         <entry key="cprMultiple">
           <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.MultiCprImporter">
             <property name="cprSvc" ref="cprSvc"/>
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
           </bean>
         </entry>
 
@@ -1298,12 +1300,14 @@
         <entry key="visit">
           <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.VisitImporter">
             <property name="visitSvc" ref="visitService"/>
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
           </bean>
         </entry>
 
         <entry key="specimen">
           <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenImporter">
             <property name="specimenSvc" ref="specimenSvc"/>
+            <property name="daoFactory" ref="biospecimenDaoFactory"/>
           </bean>
         </entry>
 

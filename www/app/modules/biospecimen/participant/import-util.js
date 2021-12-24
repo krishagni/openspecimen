@@ -31,7 +31,8 @@ angular.module('os.biospecimen.participant')
           params: {
             entityType: entityType,
             formName: form.name
-          }
+          },
+          showUpsert: true
         });
       });
 
@@ -46,13 +47,13 @@ angular.module('os.biospecimen.participant')
         importTypes = [
           {
             group: group, type: 'cprMultiple', title: 'participant.registrations',
-            showImportType: true, importType: 'CREATE'
+            showImportType: true, importType: 'CREATE', showUpsert: true
           }
         ]
       } else {
         importTypes = [
           {
-            group: group, type: 'cpr', title: 'participant.list'
+            group: group, type: 'cpr', title: 'participant.list', showUpsert: true
           }
         ]
       }
@@ -83,7 +84,7 @@ angular.module('os.biospecimen.participant')
 
     function getVisitTypes(entityForms) {
       var group = $translate.instant('visits.title');
-      var importTypes = [{ group: group, type: 'visit', title: 'visits.list' }];
+      var importTypes = [{ group: group, type: 'visit', title: 'visits.list', showUpsert: true }];
       addPluginTypes(importTypes, group, 'SpecimenCollectionGroup');
       return addForms(importTypes, group, 'SpecimenCollectionGroup', entityForms['SpecimenCollectionGroup']);
     }
@@ -93,7 +94,7 @@ angular.module('os.biospecimen.participant')
 
       var importTypes = [];
 
-      importTypes.push({ group: group, type: 'specimen', title: 'specimens.list' });
+      importTypes.push({ group: group, type: 'specimen', title: 'specimens.list', showUpsert: true });
 
       if (allowedEntityTypes.indexOf('DerivativeAndAliquots') != -1) {
         importTypes.push({
@@ -109,7 +110,7 @@ angular.module('os.biospecimen.participant')
       if (!cp.specimenCentric) {
         importTypes.push({
           group: group, type: 'masterSpecimen', title: 'participant.master_specimens',
-          showImportType: false, importType    : 'CREATE'
+          showImportType: false, importType    : 'CREATE', showUpsert: true
         });
       }
 

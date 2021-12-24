@@ -83,13 +83,17 @@
               <span translate="bulk_imports.import_type">Import Type</span>
             </label>
             <div class="col-xs-6 clearfix">
-              <label class="radio-inline col-xs-3">
+              <label class="radio-inline col-xs-2">
                 <input type="radio" name="importType" ng-model="importJob.importType" ng-value="'CREATE'">
                 <span translate="bulk_imports.create"></span>
               </label>
-              <label class="radio-inline col-xs-3">
+              <label class="radio-inline col-xs-2">
                 <input type="radio" name="importType" ng-model="importJob.importType" ng-value="'UPDATE'">
                 <span translate="bulk_imports.update"></span>
+              </label>
+              <label class="radio-inline col-xs-6" ng-show="importDetail.showUpsert == true">
+                <input type="radio" name="importType" ng-model="importJob.importType" ng-value="'UPSERT'">
+                <span translate="bulk_imports.upsert">Create, if not present. Otherwise, update</span>
               </label>
             </div>
           </div>

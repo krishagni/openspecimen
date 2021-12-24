@@ -11,6 +11,8 @@ public class ImportObjectDetail<T> {
 	private T object;
 	
 	private boolean create;
+
+	private String type;
 	
 	private Map<String, String> params = new HashMap<>();
 
@@ -47,7 +49,15 @@ public class ImportObjectDetail<T> {
 	public void setCreate(boolean create) {
 		this.create = create;
 	}
-	
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	public Map<String, String> getParams() {
 		return params;
 	}

@@ -63,8 +63,7 @@ public class SprText2PdfGenerator implements SprPdfGenerator {
 		
 			String fileText = Utility.getFileText(file);
 			document.add(new Paragraph(fileText, getFont(8,false)));
-			
-			
+
 			Chunk endReport = getChunk(getMessage("spr_end_of_report"), 6, false, true);
 			Paragraph footer = new Paragraph();
 			footer.setAlignment(Element.ALIGN_CENTER);
