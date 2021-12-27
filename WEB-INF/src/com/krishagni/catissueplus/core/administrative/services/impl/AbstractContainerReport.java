@@ -81,7 +81,7 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 			type,
 			uuid,
 			AuthUtil.getCurrentUser().getId().toString(),
-			container.getName().replaceAll("\\s+", "_"));
+			container.getName().replaceAll("\\s+|#+", "_"));
 	}
 
 	protected static final String CONTAINER_DETAILS        = "storage_container_details";
