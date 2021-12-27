@@ -460,6 +460,9 @@ public class SiteServiceImpl implements SiteService, ObjectAccessor, Initializin
 
 				int maxRecs = CollectionUtils.isNotEmpty(job.getRecordIds()) ? job.getRecordIds().size() : 100;
 				SiteListCriteria crit = new SiteListCriteria().ids(job.getRecordIds()).startAt(startAt).maxResults(maxRecs);
+				if (!AuthUtil.isAdmin()) {
+					crit.institute(AuthUtil.getCurrentUserInstitute().getName());
+				}
 
 				Collection<Site> sites = daoFactory.getSiteDao().getSites(crit);
 				startAt += sites.size();
