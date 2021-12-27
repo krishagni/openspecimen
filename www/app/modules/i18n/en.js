@@ -1846,7 +1846,7 @@
       "ShippingAndTracking": "Shipping and Tracking",
       "DistributionProtocol": "Distribution Protocols",
       "Query": "Query",
-      "Consent": "Consents"
+      "Consent": "Consent Responses"
     },
 
     "menu": {
