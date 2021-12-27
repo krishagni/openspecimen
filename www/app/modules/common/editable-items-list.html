@@ -24,7 +24,7 @@
         <fieldset ng-disabled="saving" ng-switch on="!!itemPvs">
           <div class="form-group" ng-switch-when="true">
             <os-select ng-model="editItem.text" list="itemPvs" display-prop="displayValue" select-prop="itemKey"
-              refresh="refresh($select.search)" ui-keyup="{'enter': 'updateItem()', 'esc': 'revertEdit()'}">
+              refresh="refreshItems" ui-keyup="{'enter': 'updateItem()', 'esc': 'revertEdit()'}">
             </os-select>
           </div>
           <div class="form-group" ng-switch-when="false">
@@ -47,7 +47,7 @@
       <fieldset ng-disabled="saving" ng-switch on="!!itemPvs">
         <div class="form-group" ng-switch-when="true">
           <os-select ng-model="newItem.text" list="itemPvs" display-prop="displayValue" select-prop="itemKey" 
-            refresh="refresh($select.search)" ui-keyup="{'enter': 'addItem()', 'esc': 'revertAdd()'}">
+            refresh="refreshItems" ui-keyup="{'enter': 'addItem()', 'esc': 'revertAdd()'}">
           </os-select>
         </div>
         <div class="form-group" ng-switch-when="false">

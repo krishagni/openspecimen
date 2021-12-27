@@ -22,6 +22,10 @@ angular.module('openspecimen')
         scope.newItem = {text: ''};
         scope.editItem = {text: ''};
 
+        scope.refreshItems = function(searchTerm) {
+          return scope.refresh()(searchTerm);
+        },
+
         scope.showAddItem = function() {
           if (scope.saving) {
             return;
@@ -77,7 +81,15 @@ angular.module('openspecimen')
 
           var prop = !scope.itemPvs ? scope.textAttr : 'itemKey';
           scope.editItemIdx = idx;
-          scope.editItem = {text: scope.items[idx][prop]};
+
+          var text = scope.items[idx][prop];
+          scope.editItem = {text: text};
+          if (scope.itemPvs) {
+            if (!scope.itemPvs.find(function(itemPv) { return itemPv[prop] == text; })) {
+              scope.refreshItems(text);
+            }
+          }
+
           scope.addMode = false;
         };
 
