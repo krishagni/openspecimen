@@ -66,7 +66,9 @@ angular.module('os.biospecimen.common.specimenprops', [])
     }
 
     return {
-      getProps: getProps
+      getProps: getProps,
+
+      getPropsFromMap: getPropsFromMap
     }
   })
   .directive('osSpecimenTypeProp', function(SpecimenPropsSvc) {
@@ -220,5 +222,28 @@ angular.module('os.biospecimen.common.specimenprops', [])
         '  </span>' +
         '  <span ng-switch-default>{{value | osNoValue}}</span>' +
         '</span>'
+    }
+  })
+  .filter("osSpecimenQuantity", function(SpecimenPropsSvc) {
+    var propsInited = false;
+
+    return function(input, spmn, measure) {
+      if (!spmn || !spmn.specimenClass || !spmn.type) {
+        return input;
+      }
+
+      if (!propsInited) {
+        SpecimenPropsSvc.getProps(spmn.specimenClass, spmn.type);
+        propsInited = true;
+        return input; // will be called again
+      }
+
+      var props = SpecimenPropsSvc.getPropsFromMap(spmn.specimenClass, spmn.type) || {};
+      props = props.props || {};
+      if (measure == 'quantity') {
+        return input + ' ' + (props.qtyHtmlDisplayCode || props.qtyUnit);
+      } else {
+        return input + ' ' + (props.concHtmlDisplayCode || props.concUnit);
+      }
     }
   });
