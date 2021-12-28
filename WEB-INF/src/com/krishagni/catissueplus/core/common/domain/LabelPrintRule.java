@@ -193,7 +193,10 @@ public abstract class LabelPrintRule {
 	}
 
 	public void clearEffectiveUsers() {
-		effectiveUsers.clear();
+		if (effectiveUsers != null) {
+			effectiveUsers.clear();
+		}
+
 		effectiveUsers = null;
 	}
 
@@ -204,7 +207,7 @@ public abstract class LabelPrintRule {
 
 	public boolean isApplicableFor(User user, String ipAddr) {
 		List<User> applicableFor = getEffectiveUsers();
-		if (!applicableFor.isEmpty() && applicableFor.indexOf(user) == -1) {
+		if (!applicableFor.isEmpty() && !applicableFor.contains(user)) {
 			return false;
 		}
 
