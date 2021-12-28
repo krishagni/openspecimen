@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.de.services;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +36,7 @@ import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.PermissibleValue;
 import edu.common.dynamicextensions.napi.FormData;
+import krishagni.catissueplus.beans.FormContextBean;
 
 public interface FormService {
 	public ResponseEvent<List<FormSummary>> getForms(RequestEvent<FormListCriteria> req);
@@ -116,4 +118,6 @@ public interface FormService {
 	List<FormSummary> getEntityForms(Long cpId, String[] entityTypes);
 
 	void anonymizeRecord(Container form, Long recordId);
+
+	void addAccessChecker(String entityType, Function<FormContextBean, Boolean> checker);
 }

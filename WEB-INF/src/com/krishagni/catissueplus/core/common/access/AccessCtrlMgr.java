@@ -23,6 +23,7 @@ import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ScheduledJobErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
@@ -249,6 +250,15 @@ public class AccessCtrlMgr {
 		ensureDpObjectRights(dp, new Operation[] {Operation.READ}, false);
 	}
 
+	public boolean hasCreateUpdateDpRights(Long dpId) {
+		DistributionProtocol dp = bsDaoFactory.getDistributionProtocolDao().getById(dpId);
+		if (dp == null) {
+			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.NOT_FOUND, dpId);
+		}
+
+		return hasDpObjectRights(dp, new Operation[] { Operation.CREATE, Operation.UPDATE }, true);
+	}
+
 	public void ensureCreateUpdateDpRights(DistributionProtocol dp) {
 		ensureDpObjectRights(dp, new Operation[] {Operation.CREATE, Operation.UPDATE});
 		ensureDpEximRights(dp);
@@ -267,14 +277,18 @@ public class AccessCtrlMgr {
 	}
 
 	private void ensureDpObjectRights(DistributionProtocol dp, Operation[] ops, boolean allSites) {
+		if (!hasDpObjectRights(dp, ops, allSites)) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+	}
+
+	private boolean hasDpObjectRights(DistributionProtocol dp, Operation[] ops, boolean allSites) {
 		if (AuthUtil.isAdmin()) {
-			return;
+			return true;
 		}
 
 		Set<SiteCpPair> allowedSites = getSiteCps(Resource.DP, ops);
-		if (!isAccessAllowedOnSites(allowedSites, dp.getAllowedDistributingSites(), allSites)) {
-			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
-		}
+		return isAccessAllowedOnSites(allowedSites, dp.getAllowedDistributingSites(), allSites);
 	}
 
 	private void ensureDpEximRights(DistributionProtocol dp) {
@@ -376,16 +390,30 @@ public class AccessCtrlMgr {
 	}
 
 	public void ensureUpdateCpRights(Long cpId) {
+		if (!hasUpdateCpRights(cpId)) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+	}
+
+	public boolean hasUpdateCpRights(Long cpId) {
+		if (AuthUtil.isAdmin()) {
+			return true;
+		}
+
 		CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
 		if (cp == null) {
 			throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND, cpId);
 		}
 
-		ensureUpdateCpRights(cp);
+		return hasUpdateCpRights(cp);
 	}
 
 	public void ensureUpdateCpRights(CollectionProtocol cp) {
 		ensureCpObjectRights(cp, Operation.UPDATE);
+	}
+
+	public boolean hasUpdateCpRights(CollectionProtocol cp) {
+		return hasCpObjectRights(cp, Operation.UPDATE);
 	}
 
 	public void ensureDeleteCpRights(CollectionProtocol cp) {
@@ -393,8 +421,14 @@ public class AccessCtrlMgr {
 	}
 
 	private void ensureCpObjectRights(CollectionProtocol cp, Operation op) {
+		if (!hasCpObjectRights(cp, op)) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+	}
+
+	private boolean hasCpObjectRights(CollectionProtocol cp, Operation op) {
 		if (AuthUtil.isAdmin()) {
-			return;
+			return true;
 		}
 
 		Long     userId   = AuthUtil.getCurrentUser().getId();
@@ -402,10 +436,7 @@ public class AccessCtrlMgr {
 		String[] ops      = { op.getName() };
 
 		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(userId, cp.getId(), resource, ops);
-		boolean allowed = isAccessAllowedOnAnySite(accessList, cp.getRepositories());
-		if (!allowed) {
-			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
-		}
+		return isAccessAllowedOnAnySite(accessList, cp.getRepositories());
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////

@@ -139,9 +139,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	
 	private static Map<String, String> customFieldEntities = new HashMap<>();
 
-	private Map<String, Function<Long, Boolean>> entityAccessCheckers = new HashMap<>();
-
 	private static Map<String, List<String>> editableEvents;
+
+	private Map<String, Function<FormContextBean, Boolean>> formAccessCheckers = new HashMap<>();
 
 	static {
 		staticExtendedForms.add(PARTICIPANT_FORM);
@@ -215,8 +215,23 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				AuthUtil.getCurrentUser().isInstituteAdmin();
 		};
 
-		entityAccessCheckers.put("User",        userFormsCheck);
-		entityAccessCheckers.put("UserProfile", userFormsCheck);
+		formAccessCheckers.put("CollectionProtocolExtension", SYS_FORMS_CHECKER);
+		formAccessCheckers.put("StorageContainerExtension", SYS_FORMS_CHECKER);
+		formAccessCheckers.put("DpRequirementExtension", SYS_FORMS_CHECKER);
+		formAccessCheckers.put("DistributionProtocolExtension", SYS_FORMS_CHECKER);
+		formAccessCheckers.put("SiteExtension", SYS_FORMS_CHECKER);
+		formAccessCheckers.put("CommonParticipant", SYS_FORMS_CHECKER);
+		formAccessCheckers.put("SpecimenEvent", SYS_FORMS_CHECKER);
+
+		formAccessCheckers.put("ParticipantExtension", CP_FORMS_CHECKER);
+		formAccessCheckers.put("Participant", CP_FORMS_CHECKER);
+		formAccessCheckers.put("VisitExtension", CP_FORMS_CHECKER);
+		formAccessCheckers.put("SpecimenCollectionGroup", CP_FORMS_CHECKER);
+		formAccessCheckers.put("SpecimenExtension", CP_FORMS_CHECKER);
+		formAccessCheckers.put("Specimen", CP_FORMS_CHECKER);
+
+		formAccessCheckers.put("User", USER_FORM_CHECKER);
+		formAccessCheckers.put("UserProfile", USER_FORM_CHECKER);
 	}
 
 	@Override
@@ -313,6 +328,24 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	public ResponseEvent<Long> saveForm(RequestEvent<Map<String, Object>> req) {
 		AccessCtrlMgr.getInstance().ensureFormUpdateRights();
 		Container input = new ContainerPropsParser(req.getPayload()).parse();
+
+		Form form = null;
+		if (input.getId() != null) {
+			form = formDao.getFormById(input.getId());
+		} else if (StringUtils.isNotBlank(input.getName())) {
+			form = formDao.getFormByName(input.getName());
+		}
+
+		if (form == null) {
+			if (input.getId() != null) {
+				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getId());
+			}
+		} else {
+			for (FormContextBean formCtxt : form.getAssociations()) {
+				ensureUpdateAllowed(formCtxt);
+			}
+		}
+
 		return ResponseEvent.response(Container.createContainer(getUserContext(false), input, true));
 	}
     
@@ -329,9 +362,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, formIds, formIds.size());
 			}
 
+			for (Form form : forms) {
+				form.getAssociations().forEach(this::ensureUpdateAllowed);
+			}
+
 			formIds.forEach(formId -> Container.softDeleteContainer(getUserContext(false), formId));
 			formDao.deleteFormContexts(formIds);
-
 			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -372,27 +408,78 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	@PlusTransactional
 	public ResponseEvent<List<FormContextDetail>> addFormContexts(RequestEvent<List<FormContextDetail>> req) { // TODO: check form is deleted
 		try {
+			Map<Long, Form> forms = new HashMap<>();
+
 			List<FormContextDetail> formCtxts = req.getPayload();
 			for (FormContextDetail formCtxtDetail : req.getPayload()) {
+				Long formId = formCtxtDetail.getFormId();
+				Form form = forms.get(formCtxtDetail.getFormId());
+				if (form == null) {
+					form = formDao.getFormById(formId);
+					if (form == null) {
+						return ResponseEvent.userError(FormErrorCode.NOT_FOUND, formId);
+					}
+
+					forms.put(formId, form);
+				}
+
+				form.getAssociations().forEach(this::ensureUpdateAllowed);
+
 				Long cpId = formCtxtDetail.getCollectionProtocol().getId();
 				String entity = formCtxtDetail.getLevel();
 				Long entityId = formCtxtDetail.getEntityId();
-
-				if (entityId != null) {
-					Function<Long, Boolean> accessChecker = entityAccessCheckers.get(entity);
-					if (accessChecker != null && !accessChecker.apply(entityId)) {
-						throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
-					}
-				} else if (cpId == -1L && !AuthUtil.isAdmin()) {
-					throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
-				} else if (cpId != -1L) {
-					AccessCtrlMgr.getInstance().ensureUpdateCpRights(cpId);
+				if (StringUtils.isBlank(entity)) {
+					return ResponseEvent.userError(FormErrorCode.ENTITY_TYPE_REQUIRED);
 				}
 
+				ensureUpdateAllowed(formCtxtDetail);
 				addFormContext(formCtxtDetail);
 			}
 			
 			return ResponseEvent.response(formCtxts);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Boolean> removeFormContext(RequestEvent<RemoveFormContextOp> req) {
+		try {
+			AccessCtrlMgr.getInstance().ensureFormUpdateRights();
+
+			RemoveFormContextOp opDetail = req.getPayload();
+			Long cpId = opDetail.getCpId();
+			Long entityId = opDetail.getEntityId();
+			FormContextBean formCtx = formDao.getFormContext(
+				entityId == null,
+				opDetail.getEntityType(),
+				entityId == null ? opDetail.getCpId() : entityId,
+				opDetail.getFormId());
+
+			if (formCtx == null) {
+				return ResponseEvent.userError(FormErrorCode.NO_ASSOCIATION, cpId, opDetail.getFormId()	);
+			}
+
+			if (formCtx.isSysForm()) {
+				return ResponseEvent.userError(FormErrorCode.SYS_FORM_DEL_NOT_ALLOWED);
+			}
+
+			ensureUpdateAllowed(formCtx);
+			notifyContextRemoved(formCtx);
+			switch (opDetail.getRemoveType()) {
+				case SOFT_REMOVE:
+					formCtx.setDeletedOn(Calendar.getInstance().getTime());
+					break;
+
+				case HARD_REMOVE:
+					formDao.delete(formCtx);
+					break;
+			}
+
+			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -691,60 +778,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
-	@Override
-	@PlusTransactional
-	public ResponseEvent<Boolean> removeFormContext(RequestEvent<RemoveFormContextOp> req) {
-		try {
-			AccessCtrlMgr.getInstance().ensureFormUpdateRights();
 
-			RemoveFormContextOp opDetail = req.getPayload();
-			Long cpId = opDetail.getCpId();
-			Long entityId = opDetail.getEntityId();
-			FormContextBean formCtx = formDao.getFormContext(
-				entityId == null,
-				opDetail.getEntityType(),
-				entityId == null ? opDetail.getCpId() : entityId,
-				opDetail.getFormId());
-
-			if (formCtx == null) {
-				return ResponseEvent.userError(FormErrorCode.NO_ASSOCIATION, cpId, opDetail.getFormId()	);
-			}
-			
-			if (formCtx.isSysForm()) {
-				return ResponseEvent.userError(FormErrorCode.SYS_FORM_DEL_NOT_ALLOWED);
-			}
-
-			if (entityId != null) {
-				Function<Long, Boolean> accessChecker = entityAccessCheckers.get(opDetail.getEntityType());
-				if (accessChecker != null && !accessChecker.apply(entityId)) {
-					return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
-				}
-			} else if (cpId == -1L && !AuthUtil.isAdmin()) {
-				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
-			} else if (cpId != -1L) {
-				AccessCtrlMgr.getInstance().ensureUpdateCpRights(cpId);
-			}
-
-			notifyContextRemoved(formCtx);
-			switch (opDetail.getRemoveType()) {
-				case SOFT_REMOVE:
-					formCtx.setDeletedOn(Calendar.getInstance().getTime());
-					break;
-					
-				case HARD_REMOVE:
-					formDao.delete(formCtx);
-					break;
-			}
-			
-			return ResponseEvent.response(true);
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
-	}
-		
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Long> addRecordEntry(RequestEvent<AddRecordEntryOp> req) {
@@ -986,6 +1020,11 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		recEntry.setUpdatedBy(AuthUtil.getCurrentUser().getId());
 		recEntry.setUpdatedTime(Calendar.getInstance().getTime());
 		formDao.saveOrUpdateRecordEntry(recEntry);
+	}
+
+	@Override
+	public void addAccessChecker(String entityType, Function<FormContextBean, Boolean> checker) {
+		formAccessCheckers.put(entityType, checker);
 	}
 
 	private FormListCriteria addFormsListCriteria(FormListCriteria crit) {
@@ -1674,6 +1713,26 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		return fc;
 	}
 
+	private void ensureUpdateAllowed(FormContextBean formCtxt) {
+		String[] entityType = formCtxt.getEntityType().split("-");
+		Function<FormContextBean, Boolean> checker = formAccessCheckers.get(entityType[0]);
+		if (checker == null || !checker.apply(formCtxt)) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+	}
+
+	private void ensureUpdateAllowed(FormContextDetail detail) {
+		FormContextBean ctxt = new FormContextBean();
+		ctxt.setContainerId(detail.getFormId());
+		ctxt.setCpId(detail.getCollectionProtocol() != null ? detail.getCollectionProtocol().getId() : -1L);
+		ctxt.setEntityType(detail.getLevel());
+		ctxt.setEntityId(detail.getEntityId());
+		ctxt.setSysForm(detail.isSysForm());
+		ctxt.setMultiRecord(detail.isMultiRecord());
+		ctxt.setSysForm(detail.isSysForm());
+		ensureUpdateAllowed(ctxt);
+	}
+
 	private Function<ExportJob, List<? extends Object>> getFormRecordsGenerator() {
 		return new Function<ExportJob, List<? extends Object>>() {
 			private boolean endOfRecords = false;
@@ -2019,4 +2078,25 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		return form;
 	}
+
+	//
+	// form checkers
+	//
+	private static final Function<FormContextBean, Boolean> SYS_FORMS_CHECKER = (formCtxt) -> AuthUtil.isAdmin();
+
+	private static final Function<FormContextBean, Boolean> CP_FORMS_CHECKER = (formCtxt) -> {
+		Long cpId = formCtxt.getCpId();
+		return ((cpId == null || cpId == -1L) && AuthUtil.isAdmin()) ||
+			(cpId != null && cpId != -1L && AccessCtrlMgr.getInstance().hasUpdateCpRights(cpId));
+	};
+
+	private static final Function<FormContextBean, Boolean> USER_FORM_CHECKER =  (formCtxt) -> {
+		if (AuthUtil.getCurrentUser().isAdmin()) {
+			return true;
+		}
+
+		return formCtxt.getEntityId() != -1L &&
+			AuthUtil.getCurrentUserInstitute().getId().equals(formCtxt.getEntityId()) &&
+			AuthUtil.getCurrentUser().isInstituteAdmin();
+	};
 }
