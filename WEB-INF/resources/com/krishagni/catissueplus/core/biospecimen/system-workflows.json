@@ -421,6 +421,9 @@
                             "name": "specimen.parent.availableQty",
                             "caption": "Parent Quantity",
                             "type": "span",
+                            "formatType": "specimen-quantity",
+                            "specimen": "specimen.parent",
+                            "measure": "quantity",
                             "width": "120px"
                         },
                         {
@@ -573,6 +576,9 @@
                             "name": "specimen.parent.availableQty",
                             "caption": "Parent Quantity",
                             "type": "span",
+                            "formatType": "specimen-quantity",
+                            "specimen": "specimen.parent",
+                            "measure": "quantity",
                             "width": "120px"
                         },
                         {
