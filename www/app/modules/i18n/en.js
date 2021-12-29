@@ -3095,7 +3095,14 @@
         "allowed_req_origins": "Allowed Request Origins",
         "allowed_req_origins_desc": "Comma-separated list of allowed request origin servers.",
         "hosting_institute": "Hosting Institute",
-        "hosting_institute_desc": "Name of the institute hosting OpenSpecimen and the biobank services"
+        "hosting_institute_desc": "Name of the institute hosting OpenSpecimen and the biobank services",
+
+        "date_format": "Long Date Format",
+        "date_format_desc": "Date format for displaying date fields in the view mode.",
+        "de_date_format": "Short Date Format",
+        "de_date_format_desc": "Date format for parsing date field values in the data entry forms.",
+        "time_format": "Time Format",
+        "time_format_desc": "Time format for displaying and parsing time component of the date-time fields."
       },
 
       "email": {

@@ -1,7 +1,7 @@
 
 angular.module('os.administrative.setting.list', ['os.administrative.models'])
   .controller('SettingsListCtrl', function(
-    $scope, $state, $stateParams, $sce, $filter, Setting, SettingUtil, Alerts) {
+    $rootScope, $scope, $state, $stateParams, $sce, $filter, Setting, SettingUtil, Alerts) {
 
     function init() {
       $scope.isEdit = false;
@@ -36,6 +36,10 @@ angular.module('os.administrative.setting.list', ['os.administrative.models'])
           angular.extend($scope.existingSetting, resp);
           $scope.isEdit = false;
           SettingUtil.clearSetting(resp.module, resp.name, resp);
+
+          if (resp.module == 'common' && ['date_format', 'de_date_format', 'time_format'].indexOf(resp.name) > -1) {
+            $rootScope.loadLocale();
+          }
         }
       );
     }

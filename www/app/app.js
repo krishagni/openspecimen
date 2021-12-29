@@ -561,21 +561,29 @@ osApp.config(function(
       }
     });
 
-    Setting.getLocale().then(
-      function(localeSettings) {
-        angular.extend(
-          $rootScope.global,
-          {
-            dateFmt: localeSettings.dateFmt,
-            shortDateFmt: localeSettings.deBeDateFmt,
-            timeFmt: localeSettings.timeFmt,
-            queryDateFmt: {format: localeSettings.deFeDateFmt},
-            dateTimeFmt: localeSettings.dateFmt + ' ' + localeSettings.timeFmt,
-            locale: localeSettings.locale,
-            utcOffset: localeSettings.utcOffset
-          }
-        );
+    var loadLocale = $rootScope.loadLocale = function() {
+      return Setting.getLocale().then(
+        function(localeSettings) {
+          angular.extend(
+            $rootScope.global,
+            {
+              dateFmt: localeSettings.dateFmt,
+              shortDateFmt: localeSettings.deBeDateFmt,
+              timeFmt: localeSettings.timeFmt,
+              queryDateFmt: {format: localeSettings.deFeDateFmt},
+              dateTimeFmt: localeSettings.dateFmt + ' ' + localeSettings.timeFmt,
+              locale: localeSettings.locale,
+              utcOffset: localeSettings.utcOffset
+            }
+          );
 
+          return localeSettings;
+        }
+      );
+    }
+
+    loadLocale().then(
+      function(localeSettings) {
         var plugins = ui.os.appProps.plugins;
         PluginReg.usePlugins(plugins);
         angular.forEach(plugins, function(plugin) {

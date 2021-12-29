@@ -17,6 +17,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -52,6 +54,8 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class ConfigurationServiceImpl implements ConfigurationService, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
 	private static final LogUtil logger = LogUtil.getLogger(ConfigurationServiceImpl.class);
+
+	private static final Pattern DATE_FORMAT = Pattern.compile("(?<day>d+)|(?<month>M+)|(?<year>y+)|(?<week>EEE+)");
 	
 	private Map<String, List<ConfigChangeListener>> changeListeners = new ConcurrentHashMap<>();
 	
@@ -149,7 +153,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 			
 			notifyListeners(module, prop, setting);
 			successful = true;
-			return ResponseEvent.response(ConfigSettingDetail.from(newSetting));
+			return ResponseEvent.response(ConfigSettingDetail.from(moduleSettings.get(prop)));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -385,25 +389,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 
 	@Override
 	public void registerChangeListener(String module, ConfigChangeListener callback) {
-		List<ConfigChangeListener> listeners = changeListeners.get(module);
-		if (listeners == null) {
-			listeners = new ArrayList<>();
-			changeListeners.put(module, listeners);
-		}
-		
+		List<ConfigChangeListener> listeners = changeListeners.computeIfAbsent(module, k -> new ArrayList<>());
 		listeners.add(callback);
 	}
 	
 	@Override
 	public Map<String, Object> getLocaleSettings() {
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 
 		Locale locale = Locale.getDefault();
 		result.put("locale", locale.toString());
-		result.put("dateFmt", messageSource.getMessage("common_date_fmt", null, locale));
-		result.put("timeFmt", messageSource.getMessage("common_time_fmt", null, locale));
-		result.put("deFeDateFmt", messageSource.getMessage("common_de_fe_date_fmt", null, locale));
-		result.put("deBeDateFmt", messageSource.getMessage("common_de_be_date_fmt", null, locale));
+		result.put("dateFmt", getDateFormat());
+		result.put("timeFmt", getTimeFormat());
+		result.put("deFeDateFmt", getDeFeDateFormat());
+		result.put("deBeDateFmt", getDeDateFormat());
 		result.put("utcOffset", Utility.getTimezoneOffset());
 
 		return result;
@@ -411,17 +410,32 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		
 	@Override
 	public String getDateFormat() {
-		return messageSource.getMessage("common_date_fmt", null, Locale.getDefault());
+		String dateFmt = getStrSetting("common", "date_format");
+		if (StringUtils.isBlank(dateFmt)) {
+			dateFmt = messageSource.getMessage("common_date_fmt", null, Locale.getDefault());
+		}
+
+		return dateFmt;
 	}
 	
 	@Override
-	public String getDeDateFormat() {		
-		return messageSource.getMessage("common_de_be_date_fmt", null, Locale.getDefault());
+	public String getDeDateFormat() {
+		String dateFmt = getStrSetting("common", "de_date_format");
+		if (StringUtils.isBlank(dateFmt)) {
+			dateFmt = messageSource.getMessage("common_de_be_date_fmt", null, Locale.getDefault());
+		}
+
+		return dateFmt;
 	}
 
 	@Override
 	public String getTimeFormat() {
-		return messageSource.getMessage("common_time_fmt", null, Locale.getDefault());
+		String timeFmt = getStrSetting("common", "time_format");
+		if (StringUtils.isBlank(timeFmt)) {
+			timeFmt = messageSource.getMessage("common_time_fmt", null, Locale.getDefault());
+		}
+
+		return timeFmt;
 	}
 
 	@Override
@@ -579,9 +593,19 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 					break;
 					
 				case FILE:
-					String path = getSettingFilesDir() + setting;
-					if (!new File(path).exists()) {
-						throw new FileNotFoundException("File at path " + path + " does not exists");
+					if (setting != null && setting.startsWith("classpath:")) {
+						try (InputStream in = getClass().getResourceAsStream(setting.substring(10))) {
+							if (in == null) {
+								return false;
+							}
+						} catch (Exception e) {
+							return false;
+						}
+					} else {
+						String path = getSettingFilesDir() + setting;
+						if (!new File(path).exists()) {
+							throw new FileNotFoundException("File at path " + path + " does not exists");
+						}
 					}
 					break;
 
@@ -689,5 +713,77 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		}
 
 		return result;
+	}
+
+	private String getDeFeDateFormat() {
+		String dateFmt       = getDeDateFormat();
+		StringBuilder result = new StringBuilder();
+		int lastIdx          = 0;
+
+		Matcher matcher = DATE_FORMAT.matcher(dateFmt);
+		while (matcher.find()) {
+			String replacement = "";
+			String match = matcher.group();
+
+			if (matcher.group("day") != null) {
+				if (match.length() < 2) {
+					replacement = "d";
+				} else {
+					replacement = "dd";
+				}
+			}
+
+			if (matcher.group("month") != null) {
+				switch (match.length()) {
+					case 1:
+						replacement = "m";
+						break;
+
+					case 2:
+						replacement = "mm";
+						break;
+
+					case 3:
+						replacement = "M";
+						break;
+
+					default:
+						replacement = "MM";
+						break;
+				}
+			}
+
+			if (matcher.group("year") != null) {
+				switch (match.length()) {
+					case 2:
+						replacement = "yy";
+						break;
+
+					case 4:
+					default:
+						replacement = "yyyy";
+						break;
+				}
+			}
+
+			if (matcher.group("week") != null) {
+				switch (match.length()) {
+					case 3:
+						replacement = "D";
+						break;
+
+					case 4:
+					default:
+						replacement = "DD";
+						break;
+				}
+			}
+
+			result.append(dateFmt, lastIdx, matcher.start());
+			result.append(replacement);
+			lastIdx = matcher.end();
+		}
+
+		return result.toString();
 	}
 }

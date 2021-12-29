@@ -11,7 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
+
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.ui.PvControlFactory;
@@ -68,16 +68,7 @@ public class DeInitializer implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Map<String, Object> localeSettings = cfgSvc.getLocaleSettings();		
-		String dateFormat = (String)localeSettings.get("deBeDateFmt");
-		String timeFormat = (String)localeSettings.get("timeFmt");
-		String dataDir = cfgSvc.getDataDir();
-		
-		String dir = new StringBuilder(dataDir).append(File.separator)
-			.append("de-file-data").append(File.separator)
-			.toString();
-		
-		File dirFile = new File(dir);
+		File dirFile = new File(cfgSvc.getDataDir(), "de-file-data");
 		if (!dirFile.exists()) {
 			if (!dirFile.mkdirs()) {
 				throw new RuntimeException("Error couldn't create directory for storing de file data");
@@ -86,9 +77,9 @@ public class DeInitializer implements InitializingBean {
 		
 		DeConfiguration.getInstance()
 			.dataSource(dataSource, transactionManager)
-			.fileUploadDir(dir)
-			.dateFormat(dateFormat)
-			.timeFormat(timeFormat);
+			.fileUploadDir(dirFile.getAbsolutePath())
+			.dateFormat(cfgSvc.getDeDateFormat())
+			.timeFormat(cfgSvc.getTimeFormat());
 
 		ControlManager.getInstance().registerFactory(UserControlFactory.getInstance());			
 		ControlManager.getInstance().registerFactory(StorageContainerControlFactory.getInstance());
@@ -103,18 +94,14 @@ public class DeInitializer implements InitializingBean {
 			IOUtils.closeQuietly(in);
 		}
 		
-		cfgSvc.registerChangeListener("common", new ConfigChangeListener() {			
-			@Override
-			public void onConfigChange(String name, String value) {
-				if (!name.equals("locale")) {
-					return;
-				}
-				
-				Map<String, Object> localeSettings = cfgSvc.getLocaleSettings();
-				DeConfiguration.getInstance()
-					.dateFormat((String)localeSettings.get("deBeDateFmt"))
-					.timeFormat((String)localeSettings.get("timeFmt"));
+		cfgSvc.registerChangeListener("common", (name, value) -> {
+			if (!name.equals("locale") && !name.equals("date_format") && !name.equals("de_date_format") && !name.equals("time_format")) {
+				return;
 			}
+
+			DeConfiguration.getInstance()
+				.dateFormat(cfgSvc.getDeDateFormat())
+				.timeFormat(cfgSvc.getTimeFormat());
 		});
 
 		setFormFilters();
