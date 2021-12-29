@@ -46,13 +46,18 @@ angular.module('os.administrative.user.dropdown', ['os.administrative.models'])
         return;
       }
 
-      var selectedUser = usersList.find(function(user) { return user[selectProp] == scope.ngModel; });
+      var model = scope.ngModel;
+      if (typeof scope.ngModel == 'object') {
+        model = scope.ngModel[selectProp];
+      }
+
+      var selectedUser = usersList.find(function(user) { return user[selectProp] == model; });
       if (selectedUser) {
         scope.ngModel = selectedUser;
         return;
       }
 
-      User.getById(scope.ngModel).then(
+      User.getById(model).then(
         function(user) {
           scope.ngModel = user;
           usersList.push(user);
