@@ -74,4 +74,9 @@
   </bean>
 
   <import resource="classpath*:pluginPostInitContext.xml"/>
+
+  <bean id="late-init-liquibase" class="liquibase.integration.spring.SpringLiquibase">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="changeLog" value="classpath:db/db-os-changelog-late-init.xml" />
+  </bean>
 </beans>

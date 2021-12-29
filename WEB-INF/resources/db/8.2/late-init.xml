@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Non-system specimen event forms are editable via form designer" dbms="mysql">
+    <sql>
+      <![CDATA[
+        update
+          dyextn_containers
+        set
+          xml = replace(
+            xml,
+            '<managedTables>true</managedTables>',
+            '<managedTables>false</managedTables>'
+          )
+        where
+          name in (
+            'SpecimenCellReviewEvent',
+            'SpecimenCheckInCheckOutEvent',
+            'SpecimenEmbeddedEvent',
+            'SpecimenFixedEvent',
+            'SpecimenFluidEvent',
+            'SpecimenFrozenEvent',
+            'SpecimenMolecularReviewEvent',
+            'SpecimenProcedureEvent',
+            'SpecimenSpunEvent',
+            'SpecimenThawEvent',
+            'SpecimenTissueReviewEvent'
+          );
+      ]]>
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Non-system specimen event forms are editable via form designer" dbms="oracle">
+    <sql>
+      <![CDATA[
+        update
+          dyextn_containers
+        set
+          xml = convert_to_blob(
+            replace(
+              convert_to_clob(xml),
+              '<managedTables>true</managedTables>',
+              '<managedTables>false</managedTables>'
+            )
+          )
+        where
+          name in (
+            'SpecimenCellReviewEvent',
+            'SpecimenCheckInCheckOutEvent',
+            'SpecimenEmbeddedEvent',
+            'SpecimenFixedEvent',
+            'SpecimenFluidEvent',
+            'SpecimenFrozenEvent',
+            'SpecimenMolecularReviewEvent',
+            'SpecimenProcedureEvent',
+            'SpecimenSpunEvent',
+            'SpecimenThawEvent',
+            'SpecimenTissueReviewEvent'
+          );
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>
