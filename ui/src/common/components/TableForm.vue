@@ -4,12 +4,16 @@
     <table class="os-table">
       <thead>
         <tr>
-          <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" :style="field.uiStyle || {'min-width': '150px'}">
+          <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" :style="field.uiStyle" @click="sort(field)">
             <span>{{field.label}}</span>
             <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
-            <a v-if="field.enableCopyFirstToAll" @click="copyFirstToAll(field)">
+            <span v-show="ctx.sort.field == field.name">
+              <span v-show="ctx.sort.direction == 'ASC'"> &uarr; </span>
+              <span v-show="ctx.sort.direction == 'DESC'"> &darr; </span>
+            </span>
+            <a v-if="field.enableCopyFirstToAll" @click="copyFirstToAll($event, field)">
               <span> (Copy first to all) </span>
             </a>
           </th>
@@ -23,7 +27,8 @@
           <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
             <component :is="field.component" v-bind="field" :md-type="true"
               v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
-              :form="{...items[itemIdx], ...data, _formCache}" :context="{...items[itemIdx], ...data, _formCache}"
+              :form="{...ctx.items[itemIdx], ...data, _formCache}"
+              :context="{...ctx.items[itemIdx], ...data, _formCache}"
               @update:model-value="handleInput(itemIdx, field, itemModel)">
             </component>
             <div v-if="v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
@@ -48,6 +53,7 @@
 
 <script>
 
+import { reactive } from 'vue';
 import useVuelidate from '@vuelidate/core'
 
 import alertSvc from '@/common/services/Alerts.js';
@@ -59,8 +65,16 @@ export default {
 
   emits: ['input', 'form-validity'],
 
-  setup() {
-    return { v$: useVuelidate() };
+  setup(props) {
+    let ctx = reactive({
+      items: props.items,
+      sort: { field: '', direction: '' }
+    });
+
+    return {
+      v$: useVuelidate(),
+      ctx
+    };
   },
 
   beforeCreate: function() {
@@ -95,6 +109,11 @@ export default {
           field.requiredTooltip = fv.required.message || 'Mandatory field'
         }
 
+        field.uiStyle = field.uiStyle || {'min-width': '150px'};
+        if (field.sortable) {
+          field.uiStyle['cursor'] = 'pointer';
+        }
+
         result.push(field);
       }
 
@@ -103,7 +122,7 @@ export default {
 
     itemModels: function() {
       let models = [];
-      for (let item of this.items) {
+      for (let item of this.ctx.items) {
         let model = {};
         for (let field of this.fields) {
           if (typeof field.value == 'function') {
@@ -162,8 +181,8 @@ export default {
 
   methods: {
     handleInput: function(itemIdx, field, itemModel) {
-      exprUtil.setValue(this.items[itemIdx], field.name, itemModel[field.name]);
-      this.$emit('input', {field: field, value: itemModel[field.name], item: this.items[itemIdx], itemIdx: itemIdx})
+      exprUtil.setValue(this.ctx.items[itemIdx], field.name, itemModel[field.name]);
+      this.$emit('input', {field: field, value: itemModel[field.name], item: this.ctx.items[itemIdx], itemIdx: itemIdx})
 
       if (this.v$.itemModels[itemIdx][field.name]) {
         this.v$.itemModels[itemIdx][field.name].$touch();
@@ -202,17 +221,55 @@ export default {
     },
 
     removeItem: function(idx) {
-      this.$emit('removeItem', {item: this.items[idx], idx: idx});
+      this.$emit('removeItem', {item: this.ctx.items[idx], idx: idx});
     },
 
-    copyFirstToAll: function(field) {
+    sort: function(field) {
+      if (!field.sortable) {
+        return;
+      }
+
+      const sort = this.ctx.sort;
+      let factor = 1;
+      if (sort.field == field.name) {
+        if (sort.direction == 'ASC') {
+          sort.direction = 'DESC';
+          factor = -1;
+        } else {
+          sort.direction = 'ASC';
+        }
+      } else {
+        sort.field = field.name;
+        sort.direction = 'ASC';
+      }
+
+      let valueFn;
+      if (typeof field.value == 'function') {
+        valueFn = (item) => field.value(item);
+      } else {
+        valueFn = (item) => exprUtil.getValue(item, field.name);
+      }
+
+      this.ctx.items.sort(
+        (i1, i2) => {
+          const v1 = valueFn(i1);
+          const v2 = valueFn(i2);
+          return factor * (v1 < v2 ? -1 : (v1 > v2 ? 1 : 0));
+        }
+      );
+    },
+
+    copyFirstToAll: function(event, field) {
+      event.stopPropagation();
+      console.log(event);
+
       if (!this.itemModels || this.itemModels.length == 0) {
         return;
       }
 
       let value = null;
       if (typeof field.valueToCopy == 'function') {
-        value = field.valueToCopy(this.items[0]);
+        value = field.valueToCopy(this.ctx.items[0]);
       } else if (field.type == 'storage-position') {
         value = this.itemModels[0][field.name];
         if (value && value.name) {
@@ -221,7 +278,7 @@ export default {
           value = {};
         }
       } else {
-        value = exprUtil.getValue(this.items[0], field.name);
+        value = exprUtil.getValue(this.ctx.items[0], field.name);
       }
 
       for (let idx = 1; idx < this.itemModels.length; ++idx) {

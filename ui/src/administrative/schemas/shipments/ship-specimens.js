@@ -17,7 +17,8 @@ export default {
         }
 
         return label;
-      }
+      },
+      "sortable": true
     },
     {
       "name": "specimen.label",
@@ -28,7 +29,8 @@ export default {
         "required": {
           "message": "Specimen label is mandatory"
         }
-      }
+      },
+      "sortable": true
     },
     {
       "name": "specimen.externalIds",
@@ -44,7 +46,8 @@ export default {
       },
       "showWhen": (context) => {
         return context.specimenItems.some(item => item.specimen.externalIds && item.specimen.externalIds.length > 0)
-      }
+      },
+      "sortable": true
     },
     {
       "name": "specimen.type",
@@ -54,13 +57,15 @@ export default {
     {
       "name": "specimen.cpShortTitle",
       "label": "Collection Protocol",
-      "type": "span"
+      "type": "span",
+      "sortable": true
     },
     {
       "name": "specimen.ppid",
       "label": "PPID",
       "type": "span",
-      "showWhen": (context) => context.specimenItems.some(item => typeof item.specimen.ppid == 'string')
+      "showWhen": (context) => context.specimenItems.some(item => typeof item.specimen.ppid == 'string'),
+      "sortable": true
     },
     {
       "name": "specimen.availableQty",
