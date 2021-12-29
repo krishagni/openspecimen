@@ -6,6 +6,9 @@
         <tr>
           <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" :style="field.uiStyle || {'min-width': '150px'}">
             <span>{{field.label}}</span>
+            <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
+              <span>*</span>
+            </span>
             <a v-if="field.enableCopyFirstToAll" @click="copyFirstToAll(field)">
               <span> (Copy first to all) </span>
             </a>
@@ -84,6 +87,12 @@ export default {
           if (component) {
             field = Object.assign({...field, component: component});
           }
+        }
+
+        const fv = field.validations;
+        if (fv && fv.required) {
+          field.required = true;
+          field.requiredTooltip = fv.required.message || 'Mandatory field'
         }
 
         result.push(field);
@@ -236,6 +245,13 @@ export default {
 
 table th a {
   font-weight: normal;
+}
+
+table th .required-indicator {
+  display: inline-block;
+  padding: 0.25rem;
+  color: red;
+  cursor: help;
 }
 
 .buttons :deep(button) {
