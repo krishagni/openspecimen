@@ -640,6 +640,16 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	throws Exception {
 		listSvc.registerListConfigurator(RESV_SPMNS_LIST_NAME, this::getReservedSpecimensConfig);
 		exportSvc.registerObjectsGenerator("distributionProtocol", this::getDpsGenerator);
+		formSvc.addAccessChecker(DistributionOrder.getExtnEntityType(),
+			(formCtxt) -> {
+				Long dpId = formCtxt.getEntityId();
+				if (dpId == null || dpId == -1L) {
+					return AuthUtil.isAdmin();
+				} else {
+					return AccessCtrlMgr.getInstance().hasCreateUpdateDpRights(dpId);
+				}
+			}
+		);
 
 		FormEventsNotifier.getInstance().addListener(
 			new FormEventsListener() {
