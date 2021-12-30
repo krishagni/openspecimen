@@ -74,6 +74,7 @@ import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PdfUtil;
 import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
@@ -1125,7 +1126,20 @@ public class Utility {
 				return secretKey;
 			}
 
-			File file = new File(getDataDir(conn), "secret.key");
+
+			File dataDir = new File(getDataDir(conn));
+			try {
+				String canonicalPath = dataDir.getCanonicalPath();
+				String absolutePath  = dataDir.getAbsolutePath();
+				if (!StringUtils.equals(canonicalPath, absolutePath)) {
+					throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Data directory has path traversal. Always use absolute path");
+				}
+			} catch (IOException ioe) {
+				throw new RuntimeException("Error checking whether data directory path is absolute or not", ioe);
+			}
+
+			Path secretKeyPath = dataDir.toPath().resolve("secret.key");
+			File file = secretKeyPath.toFile();
 			InputStream fin = null;
 			try {
 				if (!file.exists()) {
