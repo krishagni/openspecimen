@@ -6,6 +6,8 @@ angular.module('os.biospecimen.specimen.overview', ['os.biospecimen.models'])
 
     function init() {
       if (hasDict) {
+        ExtensionUtil.createExtensionFieldMap(cpr.participant, hasDict);
+        ExtensionUtil.createExtensionFieldMap(visit, hasDict);
         ExtensionsUtil.createExtensionFieldMap(specimen, hasDict);
       }
 
