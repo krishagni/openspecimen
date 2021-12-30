@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,6 +41,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
 import javax.activation.FileTypeMap;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -61,21 +63,22 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
-
-import au.com.bytecode.opencsv.CSVWriter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PdfUtil;
 import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
-import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class Utility {
 	private static SecretKey secretKey = null;
@@ -1193,13 +1196,11 @@ public class Utility {
 				throw new IOException("Zip entry contains path traversal");
 			}
 
-			File outputFile = new File(destination, entryName);
-			File parentDir  = outputFile.getParentFile();
-			if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
-				throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "Error creating the directory: " + parentDir.getAbsolutePath());
+			if (entryPath.getParent() != null) {
+				Files.createDirectories(entryPath.getParent());
 			}
 
-			fout = new FileOutputStream(outputFile);
+			fout = new FileOutputStream(entryPath.toFile());
 			IOUtils.copy(zipIn, fout);
 		} finally {
 			IOUtils.closeQuietly(fout);
