@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -400,10 +401,7 @@ public class Utility {
 		ZipInputStream zipIn = null;
 
 		try {
-			if (StringUtils.isNotBlank(destination)) {
-				destination += File.separator;
-			}
-
+			File destinationDir = new File(destination);
 			zipIn = new ZipInputStream(in);
 			while (true) {
 				try {
@@ -416,7 +414,7 @@ public class Utility {
 						continue;
 					}
 
-					inflateZipEntry(zipIn, zipEntry.getName(), destination);
+					inflateZipEntry(zipIn, zipEntry.getName(), destinationDir);
 				} finally {
 					zipIn.closeEntry();
 				}
@@ -1186,11 +1184,16 @@ public class Utility {
 		}
 	}
 
-	private static void inflateZipEntry(ZipInputStream zipIn, String entryName, String destinationPath)
+	private static void inflateZipEntry(ZipInputStream zipIn, String entryName, File destination)
 	throws IOException {
 		FileOutputStream fout = null;
 		try {
-			File outputFile = new File(destinationPath, entryName);
+			Path entryPath = destination.toPath().resolve(entryName);
+			if (!entryPath.normalize().startsWith(destination.toPath())) {
+				throw new IOException("Zip entry contains path traversal");
+			}
+
+			File outputFile = new File(destination, entryName);
 			File parentDir  = outputFile.getParentFile();
 			if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
 				throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "Error creating the directory: " + parentDir.getAbsolutePath());
