@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -41,6 +44,7 @@ import com.krishagni.catissueplus.core.common.domain.ConfigErrorCode;
 import com.krishagni.catissueplus.core.common.domain.ConfigProperty;
 import com.krishagni.catissueplus.core.common.domain.ConfigSetting;
 import com.krishagni.catissueplus.core.common.domain.Module;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.ConfigSettingDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -199,9 +203,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 			FileDetail detail = req.getPayload();
 			String filename = UUID.randomUUID() + "_" + detail.getFilename();
 
-			out = new FileOutputStream(new File(getSettingFilesDir() + filename));
-			IOUtils.copy(detail.getFileIn(), out);
+			File settingsDir = getSettingFilesDir();
+			Path settingFile = settingsDir.toPath().resolve(filename);
+			if (!settingFile.normalize().startsWith(settingsDir.toPath())) {
+				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Input filename contains path traversal characters");
+			}
 
+			out = new FileOutputStream(settingFile.toFile());
+			IOUtils.copy(detail.getFileIn(), out);
 			return ResponseEvent.response(filename);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
@@ -285,7 +294,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 			return defValue != null && defValue.length > 0 ? defValue[0] : null;
 		}
 
-		File file = new File(getSettingFilesDir() + value);
+		File settingsDir = getSettingFilesDir();
+		Path settingFile = settingsDir.toPath().resolve(value);
+		if (!settingFile.normalize().startsWith(settingsDir.toPath())) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Setting file has one or more path traversal characters/sequences. Value: " + value);
+		}
+
+		File file = settingFile.toFile();
 		if (!file.exists()) {
 			value = value.split("_", 2)[1];
 			throw OpenSpecimenException.userError(ConfigErrorCode.FILE_MOVED_OR_DELETED, value);
@@ -333,11 +348,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 				filename = value.substring(value.lastIndexOf(File.separator) + 1);
 				in = this.getClass().getResourceAsStream(value.substring(10));
 			} else {
-				File file = new File(value); // taking a chance whether setting was a string based before
-				if (!file.exists()) {
-					file = new File(getSettingFilesDir() + value);
+				File settingsDir = getSettingFilesDir();
+				Path filePath = settingsDir.toPath().resolve(value);
+				if (!filePath.normalize().startsWith(settingsDir.toPath())) {
+					throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The setting filename has one or more path traversal sequences. Value = " + value);
 				}
 
+				File file = filePath.toFile();
 				contentType = Utility.getContentType(file);
 				filename = file.getName().substring(file.getName().indexOf("_") + 1);
 				in = new FileInputStream(file);
@@ -353,7 +370,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 			fileDetail.setFileIn(in);
 			return fileDetail;
 		} catch (Exception e) {
-			throw OpenSpecimenException.serverError(e);
+			OpenSpecimenException ose = null;
+			if (e instanceof OpenSpecimenException) {
+				ose = (OpenSpecimenException) e;
+			} else {
+				ose = OpenSpecimenException.serverError(e);
+			}
+
+			throw ose;
 		}
 	}
 
@@ -602,9 +626,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 							return false;
 						}
 					} else {
-						String path = getSettingFilesDir() + setting;
-						if (!new File(path).exists()) {
-							throw new FileNotFoundException("File at path " + path + " does not exists");
+						File settingsDir = getSettingFilesDir();
+						Path filePath = settingsDir.toPath().resolve(setting);
+						if (!filePath.normalize().startsWith(settingsDir.toPath())) {
+							throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Setting filename contains one or more path traversal sequences. Value = " + setting);
+						}
+
+						File file = filePath.toFile();
+						if (!file.exists()) {
+							throw new FileNotFoundException("File at path " + file.getAbsolutePath() + " does not exists");
 						}
 					}
 					break;
@@ -666,10 +696,18 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 				StringUtils.isNotBlank(getStrSetting("biospecimen", "mpi_generator", ""));
 	}
 
-	private String getSettingFilesDir() {
-		String dir = getDataDir() + File.separator + "config-setting-files";
-		new File(dir).mkdirs();
-		return dir + File.separator;
+	private File getSettingFilesDir() {
+		try {
+			Path dir = new File(getDataDir()).toPath().resolve("config-setting-files");
+			if (!dir.normalize().startsWith(getDataDir())) {
+				throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Relative data directory paths not allowed");
+			}
+
+			Files.createDirectories(dir);
+			return dir.toFile();
+		} catch (IOException e) {
+			throw OpenSpecimenException.serverError(new RuntimeException("Error getting settings file directory.", e));
+		}
 	}
 
 	private void deleteOldSettingFile(ConfigSetting oldSetting) {
@@ -677,10 +715,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 			return;
 		}
 
+		File settingsDir = getSettingFilesDir();
+		Path oldSettingFile = settingsDir.toPath().resolve(oldSetting.getValue());
+		if (!oldSettingFile.normalize().startsWith(settingsDir.toPath())) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Filenames with path traversal characters not allowed");
+		}
 
-		File file = new File(getSettingFilesDir() + oldSetting.getValue());
-		if (file.exists()) {
-			file.delete(); // Very dangerous to do! Should we just rename the file?
+		try {
+			Files.deleteIfExists(oldSettingFile);
+		} catch (Exception e) {
+			logger.error("Error deleting the old setting file: " + oldSettingFile.toString());
 		}
 	}
 
