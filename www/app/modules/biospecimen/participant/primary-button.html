@@ -11,12 +11,13 @@
     show-if-allowed="partRegOpts"
     ui-sref="rde-collect-specimens({startAt: 'rde-collect-participant-details', cpId: cp.id})">
     <span class="fa fa-plus"></span>
-    <span translate="participant.buttons.register">Register</span>
+    <span translate="participant.buttons.register_or_select">Register</span>
   </button>
 
   <button class="default dropdown-toggle" title="{{'participant.tooltip.register' | translate}}">
     <span class="fa fa-plus"></span>
-    <span translate="participant.buttons.register">Register</span>
+    <span translate="participant.buttons.register" ng-show="!listViewCtx.showRapidRegistration">Register</span>
+    <span translate="participant.buttons.register_or_select" ng-show="!!listViewCtx.showRapidRegistration">Register</span>
   </button>
 
   <ul class="dropdown-menu">

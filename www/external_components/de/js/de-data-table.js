@@ -175,7 +175,7 @@ edu.common.de.DataTable = function(args) {
           .addClass("truncate-small")
           .append(appColumnsData[appColumns[i].id])
         )
-        .attr('title',appColumnsData[appColumns[i].id]));
+      );
     }
 
     var rows = this.formDef.rows;

@@ -11,7 +11,8 @@ angular.module('os.biospecimen.specimen')
         filterOpts: '=?',
         errorOpts: '=?',
         ctrl: '=?',
-        allowVisitNames: '=?'
+        allowVisitNames: '=?',
+        scanVisitNames: '=?'
       },
 
       controller: function($scope) {
@@ -19,7 +20,10 @@ angular.module('os.biospecimen.specimen')
           $scope.ctrl.ctrl = this;
         }
 
-        $scope.input = {useBarcode: false};
+        $scope.input = {
+          useBarcode: false,
+          useVisit: ($scope.allowVisitNames == true && $scope.scanVisitNames == true)
+        };
 
         $scope.addSpecimen = function(inputs) {
           var filterOpts = $scope.filterOpts || {};

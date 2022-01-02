@@ -610,6 +610,7 @@
     
     "buttons": {
       "register": "Add Participant",
+      "register_or_select": "Add/Select Participant",
       "register_n_collect": "Proceed to Collection",
       "register_n_consent": "Proceed to Consents",
       "lookup_add_part": "Lookup and Add Participant",
@@ -3037,7 +3038,9 @@
         "zero_disposed_spmn_qty": "Zero Out Specimen Quantity",
         "zero_disposed_spmn_qty_desc": "Enable to set the available quantity of specimens to zero when they are disposed.",
         "coordinator_role_name": "Coordinator Role",
-      "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state."
+        "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state.",
+        "print_labels_on_receipt": "Print Labels",
+        "print_labels_on_receipt_desc": "Comma-separated list of specimens whose labels need to be printed on receiving the specimens. Used in receive specimens UI. For example: primary,derived,aliquot."
       },
 
       "common": {

@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models'])
   .controller('BulkAddEventCtrl', function(
-    $scope, $translate, $q, $state, currentUser, events, event, acceptablePv, Form, SpecimensHolder,
+    $scope, $compile, $translate, $q, $state, currentUser, events, event, acceptablePv, Form, SpecimensHolder,
     Specimen, SpecimenEvent, Alerts, Util, SpecimenUtil, SettingUtil, CollectSpecimensSvc, SpecimenLabelPrinter) {
 
     var ctx;
@@ -10,6 +10,8 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
 
       var formOpts = {};
       var recvWf   = event && event.name == 'SpecimenReceivedEvent';
+      var printLabels = {printPrimary: false, printDerived: false, printAliquots: false};
+
       $scope.ctx = ctx = {
         recvWf   : recvWf,
         events   : events,
@@ -20,7 +22,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
         tabCtrl  : {},
         formCtrl : {},
         opts     : {
-          appColumns        : [],
+          appColumns        : [{label: $translate.instant('specimens.description'), id: '$osUiDesc'}],
           idColumnLabel     : $translate.instant('specimens.title'),
           mode              : 'add',
           allowRowSelection : false,
@@ -47,6 +49,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
       };
 
       filterSpecimens(spmns);
+      loadPrintSettings();
     }
 
     function isAddOp() {
@@ -77,14 +80,19 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
     function getTableData() {
       var opts = [], optsMap = {};
       angular.forEach(ctx.specimens,
-        function(spmn) {
+        function(spmn, idx) {
+          var uiDescTmpl = '<os-specimen-desc specimen="ctx.specimens[' + idx + ']" show-req-label="true" ' +
+                           '  detailed="true"> ' +
+                           '</os-specimen-desc>'
           var opt = {
             key: {
               id: spmn.id,
               objectId: spmn.id,
               label: spmn.label
             },
-            appColumnsData: {},
+            appColumnsData: {
+              '$osUiDesc': $compile(uiDescTmpl)($scope)
+            },
             records: []
           };
           opts.push(opt);
@@ -237,6 +245,27 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
       return true;
     }
 
+    function loadPrintSettings() {
+      if (!ctx.recvWf) {
+        return;
+      }
+
+      SettingUtil.getSetting('biospecimen', 'print_labels_on_receipt').then(
+        function(setting) {
+          var value = [];
+          if (setting.value) {
+            value = setting.value.split(',')
+              .map(function(v) { return v.trim().toLowerCase(); })
+              .filter(function(v) { return !!v; });
+          }
+
+          ctx.printPrimary = value.indexOf('primary') > -1;
+          ctx.printDerived = value.indexOf('derived') > -1;
+          ctx.printAliquots = value.indexOf('aliquot') > -1;
+        }
+      );
+    }
+
     function addPrintToLabels(records) {
       if (!ctx.recvWf) {
         return;
@@ -334,6 +363,22 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
                   validationRules: []
                 }]
               );
+            }
+
+            var found = false;
+            for (var i = 0; i < formDef.rows.length; ++i) {
+              for (var j = 0; j < formDef.rows[i].length; ++j) {
+                var field = formDef.rows[i][j];
+                if (field.name == 'user') {
+                  field.caption = $translate.instant('specimens.recv_event.user');
+                  found = true;
+                  break;
+                }
+              }
+
+              if (found) {
+                break;
+              }
             }
 
             var time = new Date().getTime();

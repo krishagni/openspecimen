@@ -34,4 +34,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen labels to be printed when primary specimen is received">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'print_labels_on_receipt',
+        'print_labels_on_receipt', 'print_labels_on_receipt_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

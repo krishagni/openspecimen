@@ -168,8 +168,13 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
       data.opts.showReceivedEvent   = wfData.showReceivedEvent != 'false' && wfData.showReceivedEvent != false;
       data.opts.defReceiveQuality   = wfData.defReceiveQuality;
       data.opts.defCollectionDate   = wfData.defCollectionDate; // current_date or visit_date
-      data.opts.defCollectionStatus = wfData.defCollectionStatus;
+      data.opts.defCollectionStatus = wfData.defCollectionStatus || {};
       data.opts.treeColumns         = wfData.treeColumns;
+
+      var cs = data.opts.defCollectionStatus;
+      if (typeof cs == 'string') {
+        data.opts.defCollectionStatus = {'New': cs, 'Derived': cs, 'Aliquot': cs};
+      }
 
       if (navigateToCollPage) {
         navigateToCollPage(state, params);
@@ -405,7 +410,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
               specimen.isVirtual = specimen.showVirtual();
               specimen.initialQty = Util.getNumberInScientificNotation(specimen.initialQty);
               if (!specimen.status || specimen.status == 'Pending') {
-                specimen.status = uiOpts.defCollectionStatus || 'Collected';
+                specimen.status = uiOpts.defCollectionStatus[specimen.lineage] || 'Collected';
                 specimen.printLabel = printLabel(printSettings, specimen);
                 if (specimen.lineage == 'New') {
                   var collEvent = specimen.collectionEvent = specimen.collectionEvent || {};
@@ -1605,7 +1610,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           specimens.forEach(
             function(spmn) {
               if (!spmn.status || spmn.status == 'Pending') {
-                spmn.status = uiOpts.defCollectionStatus || 'Collected';
+                spmn.status = uiOpts.defCollectionStatus[spmn.lineage] || 'Collected';
               }
 
               if (spmn.children && spmn.children.some(function(s) { return s.selected; })) {

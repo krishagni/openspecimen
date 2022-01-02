@@ -37,8 +37,9 @@
       </div>
     </div>
 
-    <os-add-specimens allow-visit-names="ctx.recvWf" on-add="addSpecimens(specimens)" filter-opts="ctx.spmnFilterOpts"
-      error-opts="ctx.errorOpts" placeholder="{{'specimens.bulk_events.enter_specimen_label' | translate}}">
+    <os-add-specimens allow-visit-names="ctx.recvWf" scan-visit-names="ctx.recvWf" on-add="addSpecimens(specimens)"
+      filter-opts="ctx.spmnFilterOpts" error-opts="ctx.errorOpts"
+      placeholder="{{'specimens.bulk_events.enter_specimen_label' | translate}}">
     </os-add-specimens>
 
     <table class="os-table bulk-edit" ng-if="ctx.specimens && ctx.specimens.length > 0">
@@ -74,7 +75,7 @@
           </td>
           <td class="col">
             <a ui-sref="specimen({specimenId: spmn.id})">
-              <os-specimen-desc specimen="spmn" detailed="true"></os-specimen-desc>
+              <os-specimen-desc specimen="spmn" detailed="true" show-req-label="true"></os-specimen-desc>
             </a>
           </td>
           <td class="col" ng-if="ctx.showVisit">
