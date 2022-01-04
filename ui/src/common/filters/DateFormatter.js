@@ -1,4 +1,6 @@
 
+import { format } from 'date-fns';
+import ui from '@/global.js';
 
 export default {
   dateTime(date) {
@@ -7,7 +9,7 @@ export default {
     }
 
     var dt = new Date(date);
-    return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString();
+    return format(dt, ui.global.locale.dateTimeFmt);
   },
 
   date(date) {
@@ -15,6 +17,6 @@ export default {
       return '-';
     }
 
-    return new Date(date).toLocaleDateString();
+    return format(new Date(date), ui.global.locale.dateFmt);
   }
 }
