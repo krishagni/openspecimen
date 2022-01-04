@@ -56,10 +56,12 @@ angular.module('openspecimen')
         rootEl.attr('show-if-admin', '');
       } else if (opts.showIf == 'institute-admin') {
         rootEl.attr('show-if-admin', 'institute');
-      } else if (opts.showIf) {
+      } else if (typeof opts.showIf == 'object') {
         var ifOpts = 'hpOpts_' + idx;
         rootEl.attr('ng-init', ifOpts + '=' + JSON.stringify(opts.showIf));
         rootEl.attr('show-if-allowed', ifOpts);
+      } else if (typeof opts.showIf == 'string') {
+        rootEl.attr('ng-show', opts.showIf);
       }
 
       angular.forEach(opts.attrs,
