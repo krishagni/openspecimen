@@ -119,7 +119,7 @@ export default {
       "type": "dropdown",
       "label": "Primary Site",
       "name": "user.primarySite",
-      "showWhen": "!!instituteName",
+      "showWhen": "!!user.instituteName",
       "listSource": {
         "apiUrl": "sites",
         "selectProp": "name",
@@ -127,7 +127,7 @@ export default {
         "searchProp": "name",
         "queryParams": {
           "dynamic": {
-            "institute": "instituteName"
+            "institute": "user.instituteName"
           }
         }
       }
