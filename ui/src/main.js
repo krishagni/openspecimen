@@ -50,66 +50,6 @@ app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
 app.directive('os-badge', BadgeDirective);
 
-let filters = app.config.globalProperties.$filters = app.config.globalProperties.$filters || {};
-filters.username = (user) => {
-  if (!user) {
-    return '-';
-  }
-
-  let result = '';
-  if (user.firstName) {
-    result = user.firstName;
-  }
-
-  if (result) {
-    result += ' ';
-  }
-
-  if (user.lastName) {
-    result += user.lastName;
-  }
-
-  return result || '-';
-}
-
-filters.dateTime = (date) => {
-  if (!date) {
-    return '-';
-  }
-
-  var dt = new Date(date);
-  return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString();
-}
-
-filters.date = (date) => {
-  if (!date) {
-    return '-';
-  }
-
-  return new Date(date).toLocaleDateString();
-}
-
-filters.boolValue = (value, cfg) => {
-  cfg = cfg || {};
-  if (value == 1 || value == true || value == 'true') {
-    return cfg[true] || 'Yes';
-  } else if (value == 0 || value == false || value == 'false') {
-    return cfg[false] || 'No';
-  } else {
-    return '-';
-  }
-}
-
-filters.arrayJoin = (value) => {
-  if (value instanceof Array) {
-    return value.join(', ');
-  } else if (!value) {
-    return '-';
-  } else {
-    return value;
-  }
-}
-
 function registerHomePageCards(osSvc) {
   osSvc.homePageSvc.registerCards([
     {
