@@ -53,7 +53,7 @@
 
 <script>
 
-import { reactive } from 'vue';
+import { reactive, watchEffect } from 'vue';
 import useVuelidate from '@vuelidate/core'
 
 import alertSvc from '@/common/services/Alerts.js';
@@ -67,10 +67,11 @@ export default {
 
   setup(props) {
     let ctx = reactive({
-      items: props.items,
+      items: [],
       sort: { field: '', direction: '' }
     });
 
+    watchEffect(() => { ctx.items = props.items; });
     return {
       v$: useVuelidate(),
       ctx
@@ -122,6 +123,7 @@ export default {
 
     itemModels: function() {
       let models = [];
+
       for (let item of this.ctx.items) {
         let model = {};
         for (let field of this.fields) {
