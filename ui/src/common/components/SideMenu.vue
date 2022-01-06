@@ -58,9 +58,28 @@ export default {
   padding: 15px 5px;
   text-align: center;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .os-side-menu :deep(ul li a:hover) {
   background: #e0e0e0;
+}
+
+.os-side-menu :deep(ul li a.router-link-active) {
+  color: #428bca;
+}
+
+.os-side-menu :deep(ul li a.router-link-active:before) {
+  content: ' ';
+  display: block;
+  position: absolute;
+  border-left: 4px solid #428bca;
+  top: 0px;
+  bottom: 1px;
+  left: 0px;
+}
+
+.os-side-menu :deep(ul li:first-child a.router-link-active:before) {
+  top: 2px;
 }
 </style>
