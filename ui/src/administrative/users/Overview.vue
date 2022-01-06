@@ -152,6 +152,7 @@ export default {
       userSvc.updateStatus(self.ctx.user, status).then(
         (savedUser) => {
           self.ctx.user = savedUser;
+          Object.assign(this.user, savedUser); // OPSMN-5800: switch between tabs
           alertSvc.success(msg);
         }
       );
