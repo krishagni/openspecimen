@@ -56,7 +56,7 @@ export default {
     },
 
     format: function() {
-      let fmt = this.ui.global.shortDateFmt || 'dd-mm-yyyy';
+      let fmt = this.ui.global.locale.shortDateFmt || 'dd-mm-yyyy';
       fmt = fmt.toLowerCase();
       if (fmt.indexOf('yyyy') >= 0) {
         fmt = fmt.replaceAll('yyyy', 'yy');
