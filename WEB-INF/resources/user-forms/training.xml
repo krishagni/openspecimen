@@ -19,6 +19,11 @@
         <options>
           <option>
             <value>
+              <![CDATA[2022]]>
+            </value>
+          </option>
+          <option>
+            <value>
               <![CDATA[2021]]>
             </value>
           </option>
@@ -147,7 +152,7 @@
         <showInGrid>false</showInGrid>
         <hidden>false</hidden>
         <defaultValue>
-          <![CDATA[Not due this year]]>
+          <![CDATA[NOT Required]]>
         </defaultValue>
         <options>
           <option>
@@ -208,7 +213,7 @@
         <showInGrid>false</showInGrid>
         <hidden>false</hidden>
         <defaultValue>
-          <![CDATA[Not du]]>
+          <![CDATA[NOT Required]]>
         </defaultValue>
         <options>
           <option>
@@ -500,6 +505,11 @@
           <option>
             <value>
               <![CDATA[NOT Completed]]>
+            </value>
+          </option>
+          <option>
+            <value>
+              <![CDATA[NOT Required]]>
             </value>
           </option>
           <option>
