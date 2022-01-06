@@ -20,8 +20,8 @@
     </template>
 
     <template #footer>
-      <os-button label="Cancel" type="text" @click="cancel" />
-      <os-button label="Yes" type="primary" @click="proceed" :disabled="disabled" />
+      <os-button label="Cancel" @click="cancel" />
+      <os-button danger label="Yes" @click="proceed" :disabled="disabled" />
     </template>
   </os-dialog>
 </template>

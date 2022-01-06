@@ -22,7 +22,7 @@
           <os-step title="Shipment Details" :validate="validateDetails">
             <os-form ref="shipmentDetails" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
               <div>
-                <os-button label="Next" @click="next" />
+                <os-button label="Next" primary @click="next" />
                 <os-button label="Cancel" @click="cancel" />
               </div>
             </os-form>
@@ -51,12 +51,12 @@
               <os-divider />
 
               <div class="os-form-footer">
-                <os-button label="Previous"   @click="previous" />
-                <os-button label="Save Draft" @click="saveDraft"       v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button label="Ship"       @click="ship"            v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button label="Receive"    @click="receiveShipment" v-if="dataCtx.receive" />
-                <os-button label="Update"     @click="updateShipment"  v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
-                <os-button label="Cancel"     @click="cancel" />
+                <os-button secondary label="Previous" @click="previous" />
+                <os-button primary label="Save Draft" @click="saveDraft" v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary label="Ship" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary label="Receive" @click="receiveShipment" v-if="dataCtx.receive" />
+                <os-button primary label="Update" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
+                <os-button label="Cancel" @click="cancel" />
               </div>
 
               <os-items-validation ref="validationsDialog" :report-messages="validationReportMsgs">
@@ -97,12 +97,12 @@
               <os-divider />
 
               <div class="os-form-footer">
-                <os-button label="Previous"   @click="previous" />
-                <os-button label="Save Draft" @click="saveDraft"       v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button label="Ship"       @click="ship"            v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button label="Receive"    @click="receiveShipment" v-if="dataCtx.receive" />
-                <os-button label="Update"     @click="updateShipment"  v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
-                <os-button label="Cancel"     @click="cancel" />
+                <os-button secondary label="Previous" @click="previous" />
+                <os-button primary label="Save Draft" @click="saveDraft" v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary label="Ship" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary label="Receive" @click="receiveShipment" v-if="dataCtx.receive" />
+                <os-button primary label="Update" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
+                <os-button label="Cancel" @click="cancel" />
               </div>
             </div>
           </os-step>

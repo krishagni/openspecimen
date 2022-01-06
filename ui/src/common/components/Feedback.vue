@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-user-feedback" v-if="$ui.global.appProps.feedback_enabled">
+  <div class="os-user-feedback" v-if="$ui.global.appProps.feedback_enabled" v-os-tooltip.bottom="'Submit Feedback'">
     <button @click="showForm">
       <os-icon name="bullhorn" />
     </button>
@@ -17,7 +17,7 @@
 
         <os-form ref="form" :schema="formSchema" @input="handleInput($event)">
           <div>
-            <os-button label="Submit" @click="submit()" />
+            <os-button primary label="Submit" @click="submit()" />
             <os-button label="Cancel" @click="cancel()" />
           </div>
         </os-form>

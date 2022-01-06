@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-help">
+  <div class="os-help" v-os-tooltip.bottom="'Online Help'">
     <button @click="toggleHelpMenu">
       <os-icon name="question-circle" />
     </button>

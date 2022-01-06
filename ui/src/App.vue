@@ -322,6 +322,10 @@ a:focus, a:hover {
 .os-form-footer button {
   margin-right: 0.5rem;
 }
+
+.p-tooltip.p-component {
+  background: transparent;
+}
 </style>
 
 <style scoped>

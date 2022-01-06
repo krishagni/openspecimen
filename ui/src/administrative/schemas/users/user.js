@@ -78,7 +78,7 @@ export default {
         "selectProp": "name",
         "displayProp": "name"
       },
-      "showWhen": "type != 'CONTACT'",
+      "showWhen": "user.type != 'CONTACT'",
       "validations": {
         "required": {
           "message": "Domain name is mandatory"
@@ -90,7 +90,7 @@ export default {
       "type": "text",
       "label": "Login Name",
       "name": "user.loginName",
-      "showWhen": "type != 'CONTACT'",
+      "showWhen": "user.type != 'CONTACT'",
       "validations": {
         "required": {
           "message": "Login name is mandatory"
@@ -153,7 +153,7 @@ export default {
         { "caption": "Yes", "value": true },
         { "caption": "No", "value": false }
       ],
-      "showWhen": "!type || type == 'NONE'"
+      "showWhen": "!user.type || user.type == 'NONE'"
     },
 
     {
@@ -171,7 +171,7 @@ export default {
       "type": "radio",
       "label": "API User?",
       "name": "user.apiUser",
-      "showWhen": "type != 'CONTACT'",
+      "showWhen": "user.type != 'CONTACT'",
       "optionsPerRow": 2,
       "options": [
         { "caption": "Yes", "value": true },
@@ -183,7 +183,7 @@ export default {
       "type": "text",
       "label": "IP Address",
       "name": "user.ipRange",
-      "showWhen": "type != 'CONTACT' && apiUser == true",
+      "showWhen": "user.type != 'CONTACT' && user.apiUser == true",
       "validations": {
         "required": {
           "message": "IP address is mandatory"

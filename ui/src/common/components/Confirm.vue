@@ -10,7 +10,7 @@
 
     <template #footer>
       <os-button :label="noButtonLabel"  type="text" @click="cancel" />
-      <os-button :label="yesButtonLabel" type="primary" @click="proceed" />
+      <os-button primary :label="yesButtonLabel" type="primary" @click="proceed" />
     </template>
   </os-dialog>
 </template>

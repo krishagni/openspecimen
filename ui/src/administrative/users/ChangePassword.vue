@@ -13,7 +13,7 @@
       <div>
         <os-form ref="userForm" :schema="ctx.chgPasswdFs" :data="ctx.passwdDetail">
           <div>
-            <os-button label="Update" @click="updatePassword" />
+            <os-button primary label="Update" @click="updatePassword" />
             <os-button label="Cancel" @click="cancel" />
           </div>
         </os-form>

@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-notifs">
+  <div class="os-notifs" v-os-tooltip.bottom="'Notifications'">
     <button @click="toggleOverlay">
       <os-icon name="bell" v-os-badge.danger="unreadNotifCount" v-if="unreadNotifCount > 0" />
       <os-icon name="bell" v-else />
@@ -80,6 +80,10 @@ export default {
 </script>
 
 <style>
+.os-notifs .p-badge {
+  top: 0.3rem;
+}
+
 .os-notifs-overlay {
   max-height: calc(100% - 100px);
   width: 35%;

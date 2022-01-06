@@ -24,8 +24,9 @@ export default {
           let cache = (this.context && this.context._formCache) || {};
           cache = cache['site-dropdown'] = cache['site-dropdown'] || {};
 
-          if (opts.value || opts.value == 0) {
-            let id = parseInt(opts.value);
+          const selectProp = this.selectProp || (this.listSource && this.listSource.selectProp);
+          if (selectProp == 'id' && (opts.name || opts.name == 0)) {
+            const id = parseInt(opts.name);
             if (!isNaN(id)) {
               if (!cache[id]) {
                 cache[id] = await http.get('sites/' + id);
@@ -67,7 +68,7 @@ export default {
   computed: {
     inputValue: {
       get() {
-        if (this.modelValue != null && !isNaN(this.modelValue)) {
+        if (this.ddListSource.selectProp != 'name' && this.modelValue != null && !isNaN(this.modelValue)) {
           return +this.modelValue;
         }
 

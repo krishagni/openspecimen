@@ -13,7 +13,7 @@
     <os-page-body>
       <os-form ref="groupForm" :schema="ctx.addEditFs" :data="ctx.group" @input="handleInput($event)">
         <div>
-          <os-button :label="!ctx.group.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
+          <os-button primary :label="!ctx.group.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
           <os-button label="Cancel" @click="cancel" />
         </div>
       </os-form>

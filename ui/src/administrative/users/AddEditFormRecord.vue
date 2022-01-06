@@ -6,7 +6,7 @@
     </template>
 
     <os-form ref="deForm" :schema="ctx.formSchema" :data="ctx.record" @input="handleChange($event)">
-      <os-button label="Save"   @click="saveRecord" />
+      <os-button primary label="Save"   @click="saveRecord" />
       <os-button label="Cancel" @click="cancel" />
     </os-form>
   </os-panel>

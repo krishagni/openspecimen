@@ -58,8 +58,8 @@
       </template>
       <template #footer>
         <os-button label="Cancel" @click="cancelAddEditRole" />
-        <os-button label="Add" @click="saveRole" v-if="!ctx.role.id" />
-        <os-button label="Update" @click="saveRole" v-else />
+        <os-button primary label="Add" @click="saveRole" v-if="!ctx.role.id" />
+        <os-button primary label="Update" @click="saveRole" v-else />
       </template>
     </os-dialog>
   </div>

@@ -35,11 +35,14 @@
                   <os-button left-icon="plus" label="Add" @click="addRecord" />
                 </span>
                 <span v-else>
-                  <os-button left-icon="edit" label="Edit" @click="editRecord(ctx.selectedRecord)" />
+                  <os-button primary left-icon="edit"
+                    label="Edit" @click="editRecord(ctx.selectedRecord)" />
 
-                  <os-button left-icon="trash" label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
+                  <os-button danger left-icon="trash"
+                    label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
 
-                  <os-button left-icon="plus" label="Add Another" @click="addRecord" />
+                  <os-button v-if="ctx.selectedForm.multiRecord" left-icon="plus"
+                    label="Add Another" @click="addRecord" />
                 </span>
               </span>
             </span>

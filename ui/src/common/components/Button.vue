@@ -19,7 +19,16 @@ export default {
 
   computed: {
     buttonClass: function() {
-      return this.size == 'small' ? 'btn btn-xs' : 'btn';
+      let kls = this.size == 'small' ? 'btn btn-xs' : 'btn';
+
+      const types = ['primary', 'secondary', 'danger'];
+      for (const type of types) {
+        if (Object.prototype.hasOwnProperty.call(this.$attrs, type)) {
+          kls += ' ' + type;
+        }
+      }
+
+      return kls;
     },
 
     iconSize: function() {
@@ -78,4 +87,44 @@ button:hover {
   border-color: #0069d9;
   cursor: pointer;
 }
+
+.btn.primary {
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.btn.primary:hover,
+.btn.primary:focus {
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74;
+}
+
+.btn.secondary {
+  color: #fff;
+  background: #888;
+  border-color: #666;
+}
+
+.btn.secondary:hover,
+.btn.secondary:focus {
+  color: #fff;
+  background: #777;
+  border-color: #555;
+}
+
+.btn.danger {
+  color: #fff;
+  background-color: #d9534f;
+  border-color: #d43f3a;
+}
+
+.btn.danger:hover,
+.btn.danger:focus {
+  color: #fff;
+  background-color: #c9302c;
+  border-color: #ac2925;
+}
+
 </style>

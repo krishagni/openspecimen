@@ -23,7 +23,7 @@
 
     <template #footer>
       <os-button label="Cancel" @click="close" />
-      <os-button label="Send" @click="send" />
+      <os-button primary label="Send" @click="send" />
     </template>
   </os-dialog>
 </template>

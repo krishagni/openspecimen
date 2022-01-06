@@ -11,7 +11,7 @@
       <os-textarea :placeholder="label" v-model="input" />
 
       <span class="buttons">
-        <os-button label="Add" @click="addSpecimens" />
+        <os-button primary label="Add" @click="addSpecimens" />
         <slot></slot>
       </span>
     </div>
@@ -52,7 +52,7 @@
 
       <template #footer>
         <os-button label="Cancel" @click="closeResolver" />
-        <os-button label="Done" @click="resolved" />
+        <os-button primary label="Done" @click="resolved" />
       </template>
     </os-dialog>
   </div>
@@ -235,10 +235,6 @@ export default {
   flex: 1;
 }
 
-.os-add-specimens :deep(.os-input-text > div) {
-  margin-bottom: -5px;
-}
-
 .os-add-specimens :deep(.os-input-text textarea) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
@@ -249,7 +245,7 @@ export default {
 }
 
 .os-add-specimens .buttons :deep(button) {
-  height: 100%;
+  height: calc(100% - 1.75px);
   border-radius: 0;
 }
 

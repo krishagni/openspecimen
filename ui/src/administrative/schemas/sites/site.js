@@ -39,7 +39,14 @@ export default {
       "type": "user",
       "label": "Coordinators",
       "name": "site.coordinators",
-      "multiple": true
+      "multiple": true,
+      "listSource": {
+        "queryParams": {
+          "dynamic": {
+            "institute": "site.instituteName"
+          }
+        }
+      }
     },
 
     {

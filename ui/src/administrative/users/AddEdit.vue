@@ -20,8 +20,8 @@
       <div v-if="!ctx.bulkUpdate && ctx.user">
         <os-form ref="userForm" :schema="ctx.addEditFs" :data="ctx" @input="handleUserChange($event)">
           <div>
-            <os-button label="Create" v-if="!ctx.user.id" @click="saveOrUpdate" />
-            <os-button label="Update" v-else @click="saveOrUpdate" />
+            <os-button primary label="Create" v-if="!ctx.user.id" @click="saveOrUpdate" />
+            <os-button primary label="Update" v-else @click="saveOrUpdate" />
             <os-button label="Cancel" @click="cancel" />
           </div>
         </os-form>
@@ -29,7 +29,7 @@
       <div v-if="ctx.bulkUpdate">
         <os-form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx" @input="handleUserChange($event)">
           <div>
-            <os-button label="Update" @click="bulkUpdate" />
+            <os-button primary label="Update" @click="bulkUpdate" />
             <os-button label="Cancel" @click="cancel" />
           </div>
         </os-form>

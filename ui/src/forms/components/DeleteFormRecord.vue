@@ -10,7 +10,7 @@
 
     <template #footer>
       <os-button label="Cancel" type="text" @click="cancel" />
-      <os-button label="Yes" type="primary" @click="proceed" />
+      <os-button danger label="Yes" type="primary" @click="proceed" />
     </template>
   </os-dialog>
 </template>

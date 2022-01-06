@@ -14,7 +14,7 @@
     <os-page-body>
       <os-form ref="siteForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <div>
-          <os-button :label="!dataCtx.site.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
+          <os-button primary :label="!dataCtx.site.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
           <os-button label="Cancel" @click="cancel" />
         </div>
       </os-form>

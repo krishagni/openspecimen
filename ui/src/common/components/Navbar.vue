@@ -27,7 +27,7 @@
 
         <os-notifs-overlay />
 
-        <div class="user-profile">
+        <div class="user-profile" v-os-tooltip.bottom="'User Profile'">
           <button @click="toggleProfileMenu">
             <os-username-avatar :name="username" />
           </button>
@@ -195,6 +195,7 @@ export default {
   flex: 1;
   justify-content: flex-end;
   align-items: center;
+  margin-right: 0.67rem;
 }
 
 .buttons :deep(button) {

@@ -21,8 +21,8 @@
     </template>
     <template #footer>
       <os-button label="Cancel" @click="close" />
-      <os-button label="Previous" v-if="step == 'position_selection'" @click="previous" />
-      <os-button label="Done" @click="done" />
+      <os-button secondary label="Previous" v-if="step == 'position_selection'" @click="previous" />
+      <os-button primary label="Done" @click="done" />
     </template>
   </os-dialog>
 </template>

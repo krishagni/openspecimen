@@ -25,8 +25,8 @@
       </template>
 
       <template #footer>
-        <os-button label="Copy to Clipboard" @click="generateReport" v-if="isReportAvailable" />
-        <os-button label="Ok" @click="dismiss" />
+        <os-button primary label="Copy to Clipboard" @click="generateReport" v-if="isReportAvailable" />
+        <os-button primary label="Ok" @click="dismiss" />
       </template>
     </os-dialog>
 
