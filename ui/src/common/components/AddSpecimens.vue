@@ -51,7 +51,7 @@
       </template>
 
       <template #footer>
-        <os-button label="Cancel" @click="closeResolver" />
+        <os-button text label="Cancel" @click="closeResolver" />
         <os-button primary label="Done" @click="resolved" />
       </template>
     </os-dialog>

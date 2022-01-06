@@ -57,7 +57,7 @@
         <os-form ref="roleForm" :schema="ctx.roleFs" :data="ctx.role" @input="handleRoleChange($event)" />
       </template>
       <template #footer>
-        <os-button label="Cancel" @click="cancelAddEditRole" />
+        <os-button text label="Cancel" @click="cancelAddEditRole" />
         <os-button primary label="Add" @click="saveRole" v-if="!ctx.role.id" />
         <os-button primary label="Update" @click="saveRole" v-else />
       </template>

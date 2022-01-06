@@ -22,7 +22,7 @@
           <div>
             <os-button primary label="Create" v-if="!ctx.user.id" @click="saveOrUpdate" />
             <os-button primary label="Update" v-else @click="saveOrUpdate" />
-            <os-button label="Cancel" @click="cancel" />
+            <os-button text label="Cancel" @click="cancel" />
           </div>
         </os-form>
       </div>
@@ -30,7 +30,7 @@
         <os-form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx" @input="handleUserChange($event)">
           <div>
             <os-button primary label="Update" @click="bulkUpdate" />
-            <os-button label="Cancel" @click="cancel" />
+            <os-button text label="Cancel" @click="cancel" />
           </div>
         </os-form>
       </div>

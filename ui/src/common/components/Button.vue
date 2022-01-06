@@ -21,7 +21,7 @@ export default {
     buttonClass: function() {
       let kls = this.size == 'small' ? 'btn btn-xs' : 'btn';
 
-      const types = ['primary', 'secondary', 'danger'];
+      const types = ['primary', 'secondary', 'danger', 'text'];
       for (const type of types) {
         if (Object.prototype.hasOwnProperty.call(this.$attrs, type)) {
           kls += ' ' + type;
@@ -127,4 +127,14 @@ button:hover {
   border-color: #ac2925;
 }
 
+.btn.text {
+  background: transparent;
+  border: 0px;
+  color: #428bca;
+}
+
+.btn.text:hover {
+  color: #2a6496;
+  text-decoration: underline;
+}
 </style>

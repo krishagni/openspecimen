@@ -20,7 +20,7 @@
       </os-steps>
     </template>
     <template #footer>
-      <os-button label="Cancel" @click="close" />
+      <os-button text label="Cancel" @click="close" />
       <os-button secondary label="Previous" v-if="step == 'position_selection'" @click="previous" />
       <os-button primary label="Done" @click="done" />
     </template>

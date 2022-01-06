@@ -42,12 +42,12 @@
 
     <template #footer>
       <div v-if="ctx.dependents.length > 0">
-        <Button label="Ok" @click="cancel" />
+        <Button primary label="Ok" @click="cancel" />
       </div>
       <div v-else>
-        <Button label="Cancel" @click="cancel" />
+        <Button text label="Cancel" @click="cancel" />
 
-        <Button label="Yes" @click="proceed" />
+        <Button danger label="Yes" @click="proceed" />
       </div>
     </template>
   </Dialog>

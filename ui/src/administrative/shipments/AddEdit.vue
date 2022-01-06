@@ -22,8 +22,8 @@
           <os-step title="Shipment Details" :validate="validateDetails">
             <os-form ref="shipmentDetails" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
               <div>
-                <os-button label="Next" primary @click="next" />
-                <os-button label="Cancel" @click="cancel" />
+                <os-button primary label="Next" @click="next" />
+                <os-button text label="Cancel" @click="cancel" />
               </div>
             </os-form>
           </os-step>
@@ -56,7 +56,7 @@
                 <os-button primary label="Ship" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
                 <os-button primary label="Receive" @click="receiveShipment" v-if="dataCtx.receive" />
                 <os-button primary label="Update" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
-                <os-button label="Cancel" @click="cancel" />
+                <os-button text label="Cancel" @click="cancel" />
               </div>
 
               <os-items-validation ref="validationsDialog" :report-messages="validationReportMsgs">
@@ -102,7 +102,7 @@
                 <os-button primary label="Ship" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
                 <os-button primary label="Receive" @click="receiveShipment" v-if="dataCtx.receive" />
                 <os-button primary label="Update" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
-                <os-button label="Cancel" @click="cancel" />
+                <os-button text label="Cancel" @click="cancel" />
               </div>
             </div>
           </os-step>

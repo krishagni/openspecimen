@@ -18,7 +18,7 @@
         <os-form ref="form" :schema="formSchema" @input="handleInput($event)">
           <div>
             <os-button primary label="Submit" @click="submit()" />
-            <os-button label="Cancel" @click="cancel()" />
+            <os-button text label="Cancel" @click="cancel()" />
           </div>
         </os-form>
       </template>

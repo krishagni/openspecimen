@@ -15,7 +15,7 @@
       <os-form ref="instituteForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <div>
           <os-button primary :label="!dataCtx.institute.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-          <os-button label="Cancel" @click="cancel" />
+          <os-button text label="Cancel" @click="cancel" />
         </div>
       </os-form>
     </os-page-body>

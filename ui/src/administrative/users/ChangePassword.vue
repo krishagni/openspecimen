@@ -14,7 +14,7 @@
         <os-form ref="userForm" :schema="ctx.chgPasswdFs" :data="ctx.passwdDetail">
           <div>
             <os-button primary label="Update" @click="updatePassword" />
-            <os-button label="Cancel" @click="cancel" />
+            <os-button text label="Cancel" @click="cancel" />
           </div>
         </os-form>
       </div>
