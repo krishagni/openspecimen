@@ -22,7 +22,11 @@ angular.module('os.administrative.user.dropdown', ['os.administrative.models'])
       ctrl.listLoaded = true;
       var promise;
       if (!attrs.listFn) {
-        promise = ctrl.formCtrl.getCachedValues('users', JSON.stringify(opts), function() { return User.query(opts); });
+        if (ctrl.formCtrl && typeof ctrl.formCtrl.getCachedValues == 'function') {
+          promise = ctrl.formCtrl.getCachedValues('users', JSON.stringify(opts), function() { return User.query(opts); });
+        } else {
+          promise = User.query(opts);
+        }
       } else {
         promise = scope.listFn(opts);
       }
