@@ -44,6 +44,8 @@ public class UserSummary implements Serializable {
 	private Boolean admin;
 	
 	private Boolean instituteAdmin;
+
+	private String phoneNumber;
 	
 	private Boolean manageForms;
 
@@ -151,6 +153,14 @@ public class UserSummary implements Serializable {
 		this.instituteAdmin = instituteAdmin;
 	}
 
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
 	public Boolean getManageForms() {
 		return manageForms;
 	}
@@ -224,6 +234,7 @@ public class UserSummary implements Serializable {
 		result.setAdmin(user.isAdmin());
 		result.setInstituteAdmin(user.isInstituteAdmin());
 		result.setCreationDate(user.getCreationDate());
+		result.setPhoneNumber(user.getPhoneNumber());
 		result.setManageForms(user.getManageForms());
 		result.setActivityStatus(user.getActivityStatus());
 		result.setImpersonated(user.isImpersonated());

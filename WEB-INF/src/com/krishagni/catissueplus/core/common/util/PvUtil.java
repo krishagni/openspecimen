@@ -1,11 +1,18 @@
 package com.krishagni.catissueplus.core.common.util;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
 
 @Configurable
 public class PvUtil {
@@ -13,6 +20,13 @@ public class PvUtil {
 
 	@Autowired
 	private DaoFactory daoFactory;
+
+	private ThreadLocal<Map<String, PermissibleValue>> typeUnits = new ThreadLocal<Map<String, PermissibleValue>>() {
+		protected Map<String, PermissibleValue> initialValue() {
+			TransactionalThreadLocals.getInstance().register(this);
+			return new HashMap<>();
+		}
+	};
 
 	public static PvUtil getInstance() {
 		if (instance == null || instance.daoFactory == null) {
@@ -42,6 +56,59 @@ public class PvUtil {
 		}
 
 		return abbr;
+	}
+
+	public String getSpecimenUnit(String measure, String spmnClass, String type) {
+		String key = spmnClass + ":" + type;
+		PermissibleValue pv = typeUnits.get().get(key);
+		if (pv == null) {
+			List<PermissibleValue> pvs = daoFactory.getPermissibleValueDao()
+				.getPvs("specimen_type", spmnClass, Collections.singleton(type), true);
+			if (!pvs.isEmpty()) {
+				pv = pvs.get(0);
+				typeUnits.get().put(key, pv);
+			}
+		}
+
+		if (pv == null) {
+			return "";
+		}
+
+		String result = "";
+		if ("quantity".equals(measure)) {
+			result = pv.getProps().get("quantity_display_unit");
+			if (StringUtils.isBlank(result)) {
+				result = pv.getParent().getProps().get("quantity_display_unit");
+			}
+
+			if (StringUtils.isBlank(result)) {
+				result = pv.getProps().get("quantity_unit");
+			}
+
+			if (StringUtils.isBlank(result)) {
+				result = pv.getParent().getProps().get("quantity_unit");
+			}
+		} else if ("concentration".equals(measure)) {
+			result = pv.getProps().get("concentration_display_unit");
+			if (StringUtils.isBlank(result)) {
+				result = pv.getParent().getProps().get("concentration_display_unit");
+			}
+
+			if (StringUtils.isBlank(result)) {
+				result = pv.getProps().get("concentration_unit");
+			}
+
+			if (StringUtils.isBlank(result)) {
+				result = pv.getParent().getProps().get("concentration_unit");
+			}
+		} else if (StringUtils.isNotBlank(measure)) {
+			result = pv.getProps().get(measure);
+			if (StringUtils.isBlank(result)) {
+				result = pv.getParent().getProps().get(measure);
+			}
+		}
+
+		return result;
 	}
 
 	private static final String ABBREVIATION = "abbreviation";

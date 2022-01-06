@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
@@ -20,6 +23,7 @@ import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.NameValuePair;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
+import com.krishagni.catissueplus.core.common.util.PvUtil;
 
 @ListenAttributeChanges
 public class SpecimenInfo extends AttributeModifiedSupport implements Comparable<SpecimenInfo>, Serializable {
@@ -464,6 +468,17 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 
 	public void setExternalIds(List<NameValuePair> externalIds) {
 		this.externalIds = externalIds;
+	}
+
+	// requires transactions
+	@JsonIgnore
+	public String getQuantityUnit() {
+		return PvUtil.getInstance().getSpecimenUnit("quantity", getSpecimenClass(), getType());
+	}
+
+	@JsonIgnore
+	public String getConcentrationUnit() {
+		return PvUtil.getInstance().getSpecimenUnit("concentration", getSpecimenClass(), getType());
 	}
 
 	public static SpecimenInfo from(Specimen specimen) {
