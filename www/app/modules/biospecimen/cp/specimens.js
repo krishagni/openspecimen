@@ -111,18 +111,17 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
     };
     
     function loadLabelAutoPrintModes() {
-      $scope.spmnLabelAutoPrintModes = [];
+      $scope.primaryLabelAutoPrintModes = [];
+      $scope.childLabelAutoPrintModes   = [];
+
       PvManager.loadPvs('specimen-label-auto-print-modes').then(
         function(pvs) {
-          if ($scope.cp.spmnLabelPrePrintMode != 'NONE' || $injector.has('Supply')) {
-            $scope.spmnLabelAutoPrintModes = pvs;
-          } else {
-            $scope.spmnLabelAutoPrintModes = pvs.filter(
-      	      function(pv) {
-      	        return pv.name != 'PRE_PRINT';
-      	      }
-      	    );
+          if ($scope.cp.spmnLabelPrePrintMode == 'NONE' && !$injector.has('Supply')) {
+            pvs = pvs.filter(function(pv) { return pv.name != 'PRE_PRINT'; });
           }
+
+          $scope.primaryLabelAutoPrintModes = pvs;
+          $scope.childLabelAutoPrintModes = pvs.filter(function(pv) { return pv.name != 'ON_RECEIVE'; });
         }
       );
     }

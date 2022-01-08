@@ -36,7 +36,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGrou
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
@@ -52,6 +51,7 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.domain.PdeAuditLog;
+import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
@@ -617,11 +617,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				FormData savedFormData = saveOrUpdateFormData(formData.getRecordId(), formData, true);
 				Object obj = savedFormData.getAppData().remove("object");
 				savedFormDataList.add(savedFormData);
-
-				if (formData.getContainer().getName().equals(SpecimenReceivedEvent.FORM_NAME)) {
-					Specimen spmn = (Specimen) obj;
-					spmn.printLabelsOnReceive((List<String>) formData.getAppData().get("printLabels"));
-				}
 			}
 
 			return ResponseEvent.response(savedFormDataList);
@@ -1271,6 +1266,8 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		
 		formData.validate();
 
+		String prevStatus = null;
+		String prevRecv = null;
 		OpenSpecimenEvent<?> collOrRecvEvent = null;
 		Object object = null;
 
@@ -1308,6 +1305,11 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					String newLabel = (String) formData.getAppData().get("newSpecimenlabel");
 					if (StringUtils.isNotBlank(newLabel)) {
 						specimen.setLabel(newLabel.trim());
+					}
+
+					prevStatus = specimen.getCollectionStatus();
+					if (specimen.getReceivedEvent() != null && specimen.getReceivedEvent().getQuality() != null) {
+						prevRecv = specimen.getReceivedEvent().getQuality().getValue();
 					}
 				}
 
@@ -1359,7 +1361,22 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		formData.setRecordId(recordId);
 
 		if (collOrRecvEvent != null) {
+			Specimen specimen = (Specimen) collOrRecvEvent.getEventData();
+			if (isReceivedEvent(form.getName())) {
+				// This is to flush out the old received event values
+				specimen.getReceivedEvent().setAttrValues(formData.getFieldNameValueMap(true));
+			}
+
 			EventPublisher.getInstance().publish(collOrRecvEvent);
+			if (isReceivedEvent(form.getName())) {
+				Object printLabel = formData.getAppData().get("printLabel");
+				if (printLabel != null && printLabel.toString().toLowerCase().equals("true")) {
+					PrintItem<Specimen> printItem = PrintItem.make(specimen, specimen.getCopiesToPrint());
+					Specimen.getLabelPrinter().print(Collections.singletonList(printItem));
+				}
+
+				specimen.prePrintChildrenLabels(prevStatus, prevRecv);
+			}
 		} else if (object != null) {
 			EventPublisher.getInstance().publish(new FormDataSavedEvent(entityType, object, formData));
 		}

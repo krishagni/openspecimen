@@ -69,16 +69,18 @@ angular.module('openspecimen')
     ];
 
     var spmnLabelPrePrintModes = [
-      {name: 'ON_REGISTRATION', displayKey:'cp.spmn_label_pre_print_modes.ON_REGISTRATION'},
-      {name: 'ON_VISIT', displayKey:'cp.spmn_label_pre_print_modes.ON_VISIT'},
+      {name: 'ON_REGISTRATION', displayKey: 'cp.spmn_label_pre_print_modes.ON_REGISTRATION'},
+      {name: 'ON_VISIT',        displayKey: 'cp.spmn_label_pre_print_modes.ON_VISIT'},
       {name: 'ON_PRIMARY_COLL', displayKey: 'cp.spmn_label_pre_print_modes.ON_PRIMARY_COLL'},
-      {name: 'NONE', displayKey:'cp.spmn_label_pre_print_modes.NONE'}
+      {name: 'ON_PRIMARY_RECV', displayKey: 'cp.spmn_label_pre_print_modes.ON_PRIMARY_RECV'},
+      {name: 'NONE',            displayKey: 'cp.spmn_label_pre_print_modes.NONE'}
     ];
 
     var spmnLabelAutoPrintModes = [
-      {name: 'PRE_PRINT', displayKey:'srs.spmn_label_auto_print_modes.PRE_PRINT'},
-      {name: 'ON_COLLECTION', displayKey:'srs.spmn_label_auto_print_modes.ON_COLLECTION'},
-      {name: 'NONE', displayKey:'srs.spmn_label_auto_print_modes.NONE'}
+      {name: 'PRE_PRINT',     displayKey: 'srs.spmn_label_auto_print_modes.PRE_PRINT'},
+      {name: 'ON_COLLECTION', displayKey: 'srs.spmn_label_auto_print_modes.ON_COLLECTION'},
+      {name: 'ON_RECEIVE',    displayKey: 'srs.spmn_label_auto_print_modes.ON_RECEIVE'},
+      {name: 'NONE',          displayKey: 'srs.spmn_label_auto_print_modes.NONE'}
     ];
 
     var intervalUnits = [

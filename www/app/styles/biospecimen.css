@@ -414,6 +414,12 @@ table .os-md-time table {
   overflow: auto;
 }
 
+.os-cp-print-modes.radio-inline {
+  margin-right: 10px;
+  margin-left: 0px;
+  width: calc(33% - 10px);
+}
+
 /** Scroll bar **/
 .os-participant-tree::-webkit-scrollbar,
 .os-specimen-tree-body::-webkit-scrollbar {

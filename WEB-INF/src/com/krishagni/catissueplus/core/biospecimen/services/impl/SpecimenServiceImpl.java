@@ -54,7 +54,6 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
-import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -618,12 +617,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	@SuppressWarnings("unchecked")
 	@Override
 	public LabelPrinter<Specimen> getLabelPrinter() {
-		String labelPrinterBean = cfgSvc.getStrSetting(
-				ConfigParams.MODULE,
-				ConfigParams.SPECIMEN_LABEL_PRINTER,
-				"defaultSpecimenLabelPrinter");
-		
-		return (LabelPrinter<Specimen>)OpenSpecimenAppCtxProvider.getAppCtx().getBean(labelPrinterBean);
+		return Specimen.getLabelPrinter();
 	}
 		
 	@Override
@@ -1004,7 +998,15 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen);
 		EventPublisher.getInstance().publish(new SpecimenPreSaveEvent(existing, specimen));
 
-		String prevStatus = existing != null ? existing.getCollectionStatus() : null;
+		String prevStatus = null;
+		String prevRecv   = null;
+		if (existing != null) {
+			prevStatus = existing.getCollectionStatus();
+			if (existing.getReceivedEvent() != null && existing.getReceivedEvent().getQuality() != null) {
+				prevRecv = existing.getReceivedEvent().getQuality().getValue();
+			}
+		}
+
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ensureValidAndUniqueLabel(existing, specimen, ose);
 		ensureUniqueBarcode(existing, specimen, ose);
@@ -1060,7 +1062,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 
 		EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
-		specimen.prePrintChildrenLabels(prevStatus, getLabelPrinter());
+		specimen.prePrintChildrenLabels(prevStatus, prevRecv, getLabelPrinter());
 		return specimen;
 	}
 
@@ -1124,7 +1126,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		specimens.stream().sorted(Comparator.comparingLong(Specimen::getId)).forEach(
 			(specimen) -> {
 				if (specimen.isPrintLabel()) {
-					printItems.add(PrintItem.make(specimen, getCopiesToPrint(specimen)));
+					printItems.add(PrintItem.make(specimen, specimen.getCopiesToPrint()));
 				}
 
 				if (CollectionUtils.isNotEmpty(specimen.getSpecimensPool())) {
@@ -1138,15 +1140,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		);
 
 		return printItems;
-	}
-
-	private Integer getCopiesToPrint(Specimen spmn) {
-		if (spmn.getSpecimenRequirement() != null) {
-			return spmn.getSpecimenRequirement().getLabelPrintCopiesToUse();
-		}
-
-		CpSpecimenLabelPrintSetting setting = spmn.getCollectionProtocol().getSpmnLabelPrintSetting(spmn.getLineage());
-		return setting != null ? setting.getCopies() : null;
 	}
 
 	private List<Specimen> getFlattenedSpecimens(Collection<Specimen> specimens) {

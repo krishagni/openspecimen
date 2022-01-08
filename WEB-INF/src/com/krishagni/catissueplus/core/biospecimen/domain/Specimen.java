@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -81,6 +82,8 @@ public class Specimen extends BaseExtensionEntity {
 	public static final String RESERVED = "Reserved";
 
 	public static final String ACCEPTABLE = "Acceptable";
+
+	public static final String TO_BE_RECEIVED = "To be Received";
 	
 	public static final String NOT_SPECIFIED = "Not Specified";
 
@@ -874,7 +877,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public boolean isReceived() {
-		return isPrimary() && isCollected() && !getReceivedEvent().getQuality().getValue().equals("To be Received");
+		return isPrimary() && isCollected() && !getReceivedEvent().getQuality().getValue().equals(TO_BE_RECEIVED);
 	}
 
 	public void disable() {
@@ -945,6 +948,19 @@ public class Specimen extends BaseExtensionEntity {
 		return NOT_COLLECTED.equals(status);
 	}
 
+	public static boolean isReceived(String quality) {
+		return StringUtils.isNotBlank(quality) && !quality.equals(TO_BE_RECEIVED);
+	}
+
+	public Integer getCopiesToPrint() {
+		if (getSpecimenRequirement() != null) {
+			return getSpecimenRequirement().getLabelPrintCopiesToUse();
+		}
+
+		CpSpecimenLabelPrintSetting setting = getCollectionProtocol().getSpmnLabelPrintSetting(getLineage());
+		return setting != null ? setting.getCopies() : null;
+	}
+
 	public boolean isPrePrintEnabled() {
 		return getSpecimenRequirement() != null &&
 			getSpecimenRequirement().getLabelAutoPrintModeToUse() == CollectionProtocol.SpecimenLabelAutoPrintMode.PRE_PRINT;
@@ -958,7 +974,11 @@ public class Specimen extends BaseExtensionEntity {
 		return createPendingSpecimens(getSpecimenRequirement(), this);
 	}
 
-	public void prePrintChildrenLabels(String prevStatus, LabelPrinter<Specimen> printer) {
+	public void prePrintChildrenLabels(String prevStatus, String prevRecv) {
+		prePrintChildrenLabels(prevStatus, prevRecv, getLabelPrinter());
+	}
+
+	public void prePrintChildrenLabels(String prevStatus, String prevRecv, LabelPrinter<Specimen> printer) {
 		if (getSpecimenRequirement() == null) {
 			//
 			// We pre-print child specimen labels of only planned specimens
@@ -973,18 +993,38 @@ public class Specimen extends BaseExtensionEntity {
 			return;
 		}
 
-		if (!isCollected() || getCollectionProtocol().getSpmnLabelPrePrintMode() != CollectionProtocol.SpecimenLabelPrePrintMode.ON_PRIMARY_COLL) {
+		if (!isCollected()) {
 			//
-			// specimen is either not collected or print on collection is not enabled
+			// We pre-print child specimen labels of only collected specimens
 			//
 			return;
 		}
 
-		if (Specimen.isCollected(prevStatus)) {
-			//
-			// specimen was previously collected. no need to print the child specimen labels
-			//
-			return;
+		switch (getCollectionProtocol().getSpmnLabelPrePrintMode()) {
+			case ON_PRIMARY_COLL:
+				if (Specimen.isCollected(prevStatus)) {
+					//
+					// specimen was previously collected. no need to print the child specimen labels
+					//
+					return;
+				}
+				break;
+
+			case ON_PRIMARY_RECV:
+				if (Specimen.isReceived(prevRecv)) {
+					//
+					// specimen was previously received. no need to print the child specimen labels
+					//
+					return;
+				}
+
+				if (!isReceived()) {
+					//
+					// specimen is not received, yet
+					//
+					return;
+				}
+				break;
 		}
 
 		if (getCollectionProtocol().isManualSpecLabelEnabled()) {
@@ -1041,49 +1081,6 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		return result;
-	}
-
-	//
-	// Very specific to receive specimen workflow
-	//
-	public void printLabelsOnReceive(List<String> printLabels) {
-		if (printLabels == null || printLabels.isEmpty() || !isReceived()) {
-			return;
-		}
-
-		boolean printPrimary    = printLabels.contains(Specimen.NEW);
-		boolean printDerivative = printLabels.contains(Specimen.DERIVED);
-		boolean printAliquots   = printLabels.contains(Specimen.ALIQUOT);
-		if (printDerivative || printAliquots) {
-			createPendingSpecimens(getSpecimenRequirement(), this);
-		}
-
-		List<PrintItem<Specimen>> printItems = new ArrayList<>();
-		if (printPrimary) {
-			printItems.add(PrintItem.make(this, 1));
-		}
-
-		if (printDerivative || printAliquots) {
-			List<Specimen> children = new ArrayList<>(getChildCollection());
-			while (!children.isEmpty()) {
-				Specimen child = children.remove(0);
-				if (child.isMissedOrNotCollected()) {
-					continue;
-				}
-
-				if (printDerivative && child.isDerivative()) {
-					printItems.add(PrintItem.make(child, 1));
-				} else if (printAliquots && child.isAliquot()) {
-					printItems.add(PrintItem.make(child, 1));
-				}
-
-				children.addAll(0, child.getChildCollection());
-			}
-		}
-
-		if (!printItems.isEmpty()) {
-			getLabelPrinter().print(printItems);
-		}
 	}
 
 	public void close(User user, Date time, String reason) {
@@ -1720,6 +1717,15 @@ public class Specimen extends BaseExtensionEntity {
 		getExternalIds().size();
 	}
 
+	public static LabelPrinter<Specimen> getLabelPrinter() {
+		String labelPrinterBean = ConfigUtil.getInstance().getStrSetting(
+			ConfigParams.MODULE,
+			ConfigParams.SPECIMEN_LABEL_PRINTER,
+			"defaultSpecimenLabelPrinter");
+
+		return (LabelPrinter<Specimen>)OpenSpecimenAppCtxProvider.getAppCtx().getBean(labelPrinterBean);
+	}
+
 	public static String getDesc(PermissibleValue specimenClass, PermissibleValue type) {
 		String spmnClass = specimenClass != null && StringUtils.isNotBlank(specimenClass.getValue()) ? specimenClass.getValue() : "Unknown";
 		String spmnType  = type != null && StringUtils.isNotBlank(type.getValue()) ? type.getValue() : "Unknown";
@@ -2111,14 +2117,5 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		return result;
-	}
-
-	private LabelPrinter<Specimen> getLabelPrinter() {
-		String labelPrinterBean = ConfigUtil.getInstance().getStrSetting(
-			ConfigParams.MODULE,
-			ConfigParams.SPECIMEN_LABEL_PRINTER,
-			"defaultSpecimenLabelPrinter");
-
-		return (LabelPrinter<Specimen>)OpenSpecimenAppCtxProvider.getAppCtx().getBean(labelPrinterBean);
 	}
 }

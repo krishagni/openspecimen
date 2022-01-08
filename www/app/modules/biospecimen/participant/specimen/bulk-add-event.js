@@ -10,8 +10,6 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
 
       var formOpts = {};
       var recvWf   = event && event.name == 'SpecimenReceivedEvent';
-      var printLabels = {printPrimary: false, printDerived: false, printAliquots: false};
-
       $scope.ctx = ctx = {
         recvWf   : recvWf,
         events   : events,
@@ -43,13 +41,10 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
           no_match: 'specimens.all_visit_spmns_recvd'
         },
         records  : [],
-        printPrimary: false,
-        printDerived: false,
-        printAliquots: false
+        printLabels: false
       };
 
       filterSpecimens(spmns);
-      loadPrintSettings();
     }
 
     function isAddOp() {
@@ -202,13 +197,23 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
         return result;
       }
 
-      var spmnIds = ctx.specimens.map(function(spmn) { return spmn.id; });
-      return Form.getLatestRecords(ctx.formId, 'SpecimenEvent', spmnIds).then(
+      var spmnIds = ctx.specimens.reduce(
+        function(acc, spmn) {
+          acc[spmn.id] = spmn.labelAutoPrintMode;
+          return acc;
+        },
+        {}
+      );
+
+      return Form.getLatestRecords(ctx.formId, 'SpecimenEvent', Object.keys(spmnIds)).then(
         function(records) {
           angular.forEach(records,
             function(record) {
               record.$$original = angular.copy(record);
               result.push(record);
+              if (ctx.recvWf) {
+                record.printLabel = spmnIds[record.appData.objectId] == 'ON_RECEIVE';
+              }
             }
           );
 
@@ -245,52 +250,16 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
       return true;
     }
 
-    function loadPrintSettings() {
+    function addPrintLabel(records) {
       if (!ctx.recvWf) {
         return;
       }
 
-      SettingUtil.getSetting('biospecimen', 'print_labels_on_receipt').then(
-        function(setting) {
-          var value = [];
-          if (setting.value) {
-            value = setting.value.split(',')
-              .map(function(v) { return v.trim().toLowerCase(); })
-              .filter(function(v) { return !!v; });
-          }
-
-          ctx.printPrimary = value.indexOf('primary') > -1;
-          ctx.printDerived = value.indexOf('derived') > -1;
-          ctx.printAliquots = value.indexOf('aliquot') > -1;
+      angular.forEach(records,
+        function(record) {
+          record.appData.printLabel = +record.printLabel == 1 || record.printLabel == 'true';
         }
       );
-    }
-
-    function addPrintToLabels(records) {
-      if (!ctx.recvWf) {
-        return;
-      }
-
-      var printLabels = [];
-      if (ctx.printPrimary) {
-        printLabels.push('New');
-      }
-
-      if (ctx.printDerived) {
-        printLabels.push('Derived');
-      }
-
-      if (ctx.printAliquots) {
-        printLabels.push('Aliquot');
-      }
-
-      if (printLabels.length > 0) {
-        angular.forEach(records,
-          function(record) {
-            record.appData.printLabels = printLabels;
-          }
-        );
-      }
     }
 
     //
@@ -364,6 +333,18 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
                 }]
               );
             }
+
+            formDef.rows.push(
+              [{
+                name: 'printLabel',
+                udn: 'printLabel',
+                caption: '<span class="fa fa-print"></span>',
+                type: 'booleanCheckbox',
+                validationRules: [],
+                width: 30
+               }
+              ]
+            );
 
             var found = false;
             for (var i = 0; i < formDef.rows.length; ++i) {
@@ -439,7 +420,7 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
 
     $scope.saveEvent = function(addMore) {
       var records = getEventRecords();
-      addPrintToLabels(records);
+      addPrintLabel(records);
       SpecimenEvent.save(ctx.formId, records).then(
         function(savedData) {
           Alerts.success("specimens.bulk_events.events_saved");

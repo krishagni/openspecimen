@@ -411,6 +411,7 @@
       "ON_REGISTRATION": "On Registration",
       "ON_VISIT": "On Visit Collection",
       "ON_PRIMARY_COLL": "On Primary Collection",
+      "ON_PRIMARY_RECV": "On Primary Receive",
       "NONE": "None"
     },
 
@@ -1120,6 +1121,7 @@
     "spmn_label_auto_print_modes": {
       "PRE_PRINT": "Pre-print",
       "ON_COLLECTION": "On Collection",
+      "ON_RECEIVE": "On Receive",
       "NONE": "None"
     }
   },
@@ -3038,9 +3040,7 @@
         "zero_disposed_spmn_qty": "Zero Out Specimen Quantity",
         "zero_disposed_spmn_qty_desc": "Enable to set the available quantity of specimens to zero when they are disposed.",
         "coordinator_role_name": "Coordinator Role",
-        "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state.",
-        "print_labels_on_receipt": "Print Labels",
-        "print_labels_on_receipt_desc": "Comma-separated list of specimens whose labels need to be printed on receiving the specimens. Used in receive specimens UI. For example: primary,derived,aliquot."
+        "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state."
       },
 
       "common": {

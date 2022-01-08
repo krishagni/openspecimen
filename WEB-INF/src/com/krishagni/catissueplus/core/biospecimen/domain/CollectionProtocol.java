@@ -39,12 +39,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		ON_REGISTRATION,
 		ON_VISIT,
 		ON_PRIMARY_COLL,
+		ON_PRIMARY_RECV,
 		NONE
 	}
 
 	public enum SpecimenLabelAutoPrintMode {
 		PRE_PRINT,
 		ON_COLLECTION,
+		ON_RECEIVE,
 		NONE
 	}
 

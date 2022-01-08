@@ -380,7 +380,7 @@
           <span translate="cp.pre_print_spmn_labels">Pre-print Labels</span>
         </label>
         <div class="col-xs-6">
-          <label class="radio-inline" ng-repeat="prePrintMode in settingCtx.spmnLabelPrePrintModes">
+          <label class="os-cp-print-modes radio-inline" ng-repeat="prePrintMode in settingCtx.spmnLabelPrePrintModes">
             <input type="radio" name="spmnLblPrePrintMode" ng-model="settingCtx.cp.spmnLabelPrePrintMode"
               ng-value="prePrintMode.name" ng-change="onPrePrintModeChange()">
             <span>{{prePrintMode.displayName}}</span>
@@ -413,10 +413,17 @@
         <label class="col-xs-3 control-label">
           <span>{{'cp.spmn_lineages.' + setting.lineage | translate}}</span>
         </label>
-        <div class="col-xs-3">
-          <os-select ng-model="setting.printMode" list="settingCtx.spmnLabelAutoPrintModes"
-            display-prop="displayName" select-prop="name">
-          </os-select>
+        <div class="col-xs-3" ng-switch on="setting.lineage">
+          <div ng-switch-when="New">
+            <os-select ng-model="setting.printMode" list="settingCtx.primaryLabelAutoPrintModes"
+              display-prop="displayName" select-prop="name">
+            </os-select>
+          </div>
+          <div ng-switch-default>
+            <os-select ng-model="setting.printMode" list="settingCtx.childLabelAutoPrintModes"
+              display-prop="displayName" select-prop="name">
+            </os-select>
+          </div>
         </div>
         <div class="col-xs-3">
           <input name="copies" type="text" ng-model="setting.copies" class="form-control" ng-pattern="/^[0-9]+$/">

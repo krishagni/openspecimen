@@ -35,13 +35,29 @@
     </sql>
   </changeSet>
 
-  <changeSet author="vpawar" id="Specimen labels to be printed when primary specimen is received">
+  <changeSet author="vpawar" id="Removed the defunct print labels on receipt config">
     <sql>
-      call add_cfg_prop(
-        'biospecimen', 'print_labels_on_receipt',
-        'print_labels_on_receipt', 'print_labels_on_receipt_desc',
-        'STRING', ''
-      );
+      delete from
+        os_cfg_settings
+      where
+        property_id in (
+          select
+            p.identifier
+          from
+            os_cfg_props p
+            inner join os_modules m on m.identifier = p.module_id
+          where
+            m.name = 'biospecimen' and
+            p.name = 'print_labels_on_receipt'
+        )
+    </sql>
+
+    <sql>
+      delete from
+        os_cfg_props p
+      where
+        name = 'print_labels_on_receipt' and
+        module_id in (select identifier from os_modules where name = 'biospecimen')
     </sql>
   </changeSet>
 </databaseChangeLog>

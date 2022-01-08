@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenChildrenEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail;
@@ -117,6 +118,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private String imageId;
 
 	private List<NameValuePair> externalIds;
+
+	private String labelAutoPrintMode;
 
 	public Long getId() {
 		return id;
@@ -470,6 +473,14 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		this.externalIds = externalIds;
 	}
 
+	public String getLabelAutoPrintMode() {
+		return labelAutoPrintMode;
+	}
+
+	public void setLabelAutoPrintMode(String labelAutoPrintMode) {
+		this.labelAutoPrintMode = labelAutoPrintMode;
+	}
+
 	// requires transactions
 	@JsonIgnore
 	public String getQuantityUnit() {
@@ -548,6 +559,16 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setExternalIds(specimen.getExternalIds().stream()
 			.map(externalId -> NameValuePair.create(externalId.getName(), externalId.getValue()))
 			.collect(Collectors.toList()));
+
+		if (sr != null && sr.getLabelAutoPrintModeToUse() != null) {
+			result.setLabelAutoPrintMode(sr.getLabelAutoPrintModeToUse().name());
+		} else {
+			CpSpecimenLabelPrintSetting setting = specimen.getCollectionProtocol()
+				.getSpmnLabelPrintSetting(specimen.getLineage());
+			if (setting != null && setting.getPrintMode() != null) {
+				result.setLabelAutoPrintMode(setting.getPrintMode().name());
+			}
+		}
 
 		SpecimenCollectionReceiveDetail collRecvDetail = specimen.getCollRecvDetails();
 		if (collRecvDetail != null) {

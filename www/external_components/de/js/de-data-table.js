@@ -100,7 +100,7 @@ edu.common.de.DataTable = function(args) {
     for (var j =0 ; j < rows.length; j++) {
       var row = rows[j];
       for (k = 0 ; k < row.length; k++) {
-        var minWidth = this.tableRowsData[0].fieldObjs[fieldCnt].minWidth;
+        var minWidth = this.tableRowsData[0].fieldObjs[fieldCnt].minWidth || row[k].width;
         if (!minWidth) {
           minWidth = 200;
         }

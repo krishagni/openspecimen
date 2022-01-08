@@ -11,9 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -33,8 +34,6 @@ public class SpecimenDetail extends SpecimenInfo {
 	private ReceivedEventDetail receivedEvent;
 	
 	private String labelFmt;
-	
-	private String labelAutoPrintMode;
 	
 	private Set<String> biohazards;
 	
@@ -115,14 +114,6 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	public void setLabelFmt(String labelFmt) {
 		this.labelFmt = labelFmt;
-	}
-
-	public String getLabelAutoPrintMode() {
-		return labelAutoPrintMode;
-	}
-
-	public void setLabelAutoPrintMode(String labelAutoPrintMode) {
-		this.labelAutoPrintMode = labelAutoPrintMode;
 	}
 
 	public List<SpecimenDetail> getChildren() {
@@ -405,10 +396,6 @@ public class SpecimenDetail extends SpecimenInfo {
 		// false to ensure we don't end up in infinite recurssion
 		//
 		result.setLabelFmt(specimen.getLabelTmpl(false));
-		if (sr != null && sr.getLabelAutoPrintModeToUse() != null) {
-			result.setLabelAutoPrintMode(sr.getLabelAutoPrintModeToUse().name());
-		}
-
 		result.setReqCode(sr != null ? sr.getCode() : null);
 		result.setBiohazards(PermissibleValue.toValueSet(specimen.getBiohazards()));
 		result.setComments(specimen.getComment());
