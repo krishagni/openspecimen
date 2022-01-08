@@ -64,6 +64,12 @@ export default {
         fmt = fmt.replaceAll('yy', 'y');
       }      
 
+      if (fmt.indexOf('mmmm') >= 0) {
+        fmt = fmt.replaceAll('mmmm', 'MM');
+      } else if (fmt.indexOf('mmm') >= 0) {
+        fmt = fmt.replaceAll('mmm', 'M');
+      }
+
       return fmt;
     }
   },
