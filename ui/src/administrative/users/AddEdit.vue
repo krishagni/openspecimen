@@ -116,7 +116,7 @@ export default {
   methods: {
     handleUserChange: function({field, value, data}) {
       Object.assign(this.ctx.user, data.user);
-      if (field.name == 'instituteName' && this.selectedInstitute != value) {
+      if (field.name == 'user.instituteName' && this.selectedInstitute != value) {
         this.selectedInstitute = value;
         this.ctx.user.primarySite = undefined;
       }
