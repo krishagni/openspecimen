@@ -1,6 +1,7 @@
 
 <template>
-  <OverlayPanel ref="op" appendTo="body" :dismissable="isDismissable" :showCloseIcon="!isDismissable">
+  <OverlayPanel class="os-overlay" ref="op" appendTo="body" :dismissable="isDismissable"
+    :showCloseIcon="!isDismissable">
     <slot></slot>
   </OverlayPanel>
 </template>
@@ -40,3 +41,31 @@ export default {
 }
 
 </script>
+
+<style scoped>
+.os-overlay ::v-slotted(ul.menu-options-list) {
+  margin: -1.25rem;
+  list-style: none;
+  padding: 0.5rem 0rem;
+}
+
+.os-overlay ::v-slotted(ul.menu-options-list li) {
+  display: block;
+  padding: 0.75rem 1rem;
+  transition: box-shadow 0.15s;
+}
+
+.os-overlay ::v-slotted(ul.menu-options-list li a) {
+  text-decoration: none;
+  color: inherit;
+}
+
+.os-overlay ::v-slotted(ul.menu-options-list li:not(.divider):hover) {
+  background: #e9ecef;
+}
+
+.os-overlay ::v-slotted(ul.menu-options-list li.divider) {
+  padding: 0.25rem 0rem;
+  margin: -1rem 0rem;
+}
+</style>
