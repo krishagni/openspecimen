@@ -10,13 +10,103 @@ const routes = [
     },
     children: [
       {
-        path: 'users',
+        path: 'users/:userId',
         name: 'UsersList',
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "users" */ '../administrative/users/List.vue'),
-        props: (route) => ({filters: route.query.filters, groupId: route.query.groupId})
+        props: (route) => (
+          {
+            userId: route.params && route.params.userId,
+            filters: route.query.filters,
+            groupId: route.query.groupId
+          }
+        ),
+        children: [
+          {
+            path: '',
+            name: 'UsersListItemDetail',
+            component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Detail.vue'),
+            props: (route) => ({userId: route.params && route.params.userId}),
+            children: [
+              {
+                path: 'overview',
+                name: 'UsersListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Overview.vue')
+              },
+              {
+                path: 'roles',
+                name: 'UsersListItemDetail.Roles',
+                component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Roles.vue')
+              },
+              {
+                path: 'forms',
+                name: 'UsersListItemDetail.Forms',
+                component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Forms.vue'),
+                props: () => ({
+                  entityType: 'User',
+                  listView: 'UsersListItemDetail.Forms.List',
+                  addEditView: 'UsersListItemDetail.Forms.AddEdit'
+                }),
+                children: [
+                  {
+                    path: 'list',
+                    name: 'UsersListItemDetail.Forms.List',
+                    component: () => import(/* webpackChunkName: "users" */ '../administrative/users/FormsList.vue'),
+                    props: (route) => ({
+                      formId: route.query.formId,
+                      formCtxtId: route.query.formCtxtId,
+                      recordId: route.query.recordId
+                    })
+                  },
+                  {
+                    path: 'addedit',
+                    name: 'UsersListItemDetail.Forms.AddEdit',
+                    component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEditFormRecord.vue'),
+                    props: (route) => ({
+                      formId: route.query.formId,
+                      formCtxtId: route.query.formCtxtId,
+                      recordId: route.query.recordId
+                    })
+                  }
+                ]
+              },
+              {
+                path: 'profile-forms',
+                name: 'UsersListItemDetail.ProfileForms',
+                component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Forms.vue'),
+                props: () => ({
+                  entityType: 'UserProfile',
+                  listView: 'UsersListItemDetail.ProfileForms.List',
+                  addEditView: 'UsersListItemDetail.ProfileForms.AddEdit'
+                }),
+                children: [
+                  {
+                    path: 'list',
+                    name: 'UsersListItemDetail.ProfileForms.List',
+                    component: () => import(/* webpackChunkName: "users" */ '../administrative/users/FormsList.vue'),
+                    props: (route) => ({
+                      formId: route.query.formId,
+                      formCtxtId: route.query.formCtxtId,
+                      recordId: route.query.recordId
+                    })
+                  },
+                  {
+                    path: 'addedit',
+                    name: 'UsersListItemDetail.ProfileForms.AddEdit',
+                    component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEditFormRecord.vue'),
+                    props: (route) => ({
+                      formId: route.query.formId,
+                      formCtxtId: route.query.formCtxtId,
+                      recordId: route.query.recordId,
+                    })
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       {
         path: 'user-addedit/:userId',
@@ -48,30 +138,34 @@ const routes = [
         props: (route) => ({userId: route.params && route.params.userId})
       },
       {
-        path: 'users/:userId',
+        path: 'users/:userId/detail',
         name: 'UserDetail',
         component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Detail.vue'),
         props: (route) => ({userId: route.params && route.params.userId}),
         children: [
           {
             path: 'overview',
-            name: 'UserOverview',
+            name: 'UserDetail.Overview',
             component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Overview.vue')
           },
           {
             path: 'roles',
-            name: 'UserRoles',
+            name: 'UserDetail.Roles',
             component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Roles.vue')
           },
           {
             path: 'forms',
-            name: 'UserForms',
+            name: 'UserDetail.Forms',
             component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Forms.vue'),
-            props: () => ({ entityType: 'User', listView: 'UserFormsList', addEditView: 'UserFormAddEdit' }),
+            props: () => ({
+              entityType: 'User',
+              listView: 'UserDetail.Forms.List',
+              addEditView: 'UserDetail.Forms.AddEdit'
+            }),
             children: [
               {
                 path: 'list',
-                name: 'UserFormsList',
+                name: 'UserDetail.Forms.List',
                 component: () => import(/* webpackChunkName: "users" */ '../administrative/users/FormsList.vue'),
                 props: (route) => ({
                   formId: route.query.formId,
@@ -81,7 +175,7 @@ const routes = [
               },
               {
                 path: 'addedit',
-                name: 'UserFormAddEdit',
+                name: 'UserDetail.Forms.AddEdit',
                 component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEditFormRecord.vue'),
                 props: (route) => ({
                   formId: route.query.formId,
@@ -93,17 +187,17 @@ const routes = [
           },
           {
             path: 'profile-forms',
-            name: 'UserProfileForms',
+            name: 'UserDetail.ProfileForms',
             component: () => import(/* webpackChunkName: "users" */ '../administrative/users/Forms.vue'),
             props: () => ({
               entityType: 'UserProfile',
-              listView: 'UserProfileFormsList',
-              addEditView: 'UserProfileFormAddEdit'
+              listView: 'UserDetail.ProfileForms.List',
+              addEditView: 'UserDetail.ProfileForms.AddEdit'
             }),
             children: [
               {
                 path: 'list',
-                name: 'UserProfileFormsList',
+                name: 'UserDetail.ProfileForms.List',
                 component: () => import(/* webpackChunkName: "users" */ '../administrative/users/FormsList.vue'),
                 props: (route) => ({
                   formId: route.query.formId,
@@ -113,7 +207,7 @@ const routes = [
               },
               {
                 path: 'addedit',
-                name: 'UserProfileFormAddEdit',
+                name: 'UserDetail.ProfileForms.AddEdit',
                 component: () => import(/* webpackChunkName: "users" */ '../administrative/users/AddEditFormRecord.vue'),
                 props: (route) => ({
                   formId: route.query.formId,
@@ -150,10 +244,25 @@ const routes = [
        *****************************
        *****************************/
       {
-        path: 'sites',
+        path: 'sites/:siteId',
         name: 'SitesList',
         component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/List.vue'),
-        props: (route) => ({filters: route.query.filters})
+        props: (route) => ({siteId: route.params && route.params.siteId, filters: route.query.filters}),
+        children: [
+          {
+            path: '',
+            name: 'SitesListItemDetail',
+            component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Detail.vue'),
+            props: (route) => ({siteId: route.params && route.params.siteId, noNavButton: true}),
+            children: [
+              {
+                path: 'overview',
+                name: 'SitesListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Overview.vue')
+              }
+            ]
+          }
+        ]
       },
       {
         path: 'site-addedit/:siteId',
@@ -162,14 +271,14 @@ const routes = [
         props: (route) => ({siteId: route.params && route.params.siteId})
       },
       {
-        path: 'sites/:siteId',
+        path: 'sites/:siteId/detail',
         name: 'SiteDetail',
         component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Detail.vue'),
         props: (route) => ({siteId: route.params && route.params.siteId}),
         children: [
           {
             path: 'overview',
-            name: 'SiteOverview',
+            name: 'SiteDetail.Overview',
             component: () => import(/* webpackChunkName: "sites" */ '../administrative/sites/Overview.vue')
           }
         ]
@@ -181,10 +290,25 @@ const routes = [
        *****************************
        *****************************/
       {
-        path: 'institutes',
+        path: 'institutes/:instituteId',
         name: 'InstitutesList',
         component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/List.vue'),
-        props: (route) => ({filters: route.query.filters})
+        props: (route) => ({filters: route.query.filters, instituteId: route.params && route.params.instituteId}),
+        children: [
+          {
+            path: '',
+            name: 'InstitutesListItemDetail',
+            component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Detail.vue'),
+            props: (route) => ({instituteId: route.params && route.params.instituteId, noNavButton: true}),
+            children: [
+              {
+                path: 'overview',
+                name: 'InstitutesListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Overview.vue')
+              }
+            ]
+          }
+        ]
       },
       {
         path: 'institute-addedit/:instituteId',
@@ -193,14 +317,14 @@ const routes = [
         props: (route) => ({instituteId: route.params && route.params.instituteId})
       },
       {
-        path: 'institutes/:instituteId',
+        path: 'institutes/:instituteId/detail',
         name: 'InstituteDetail',
         component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Detail.vue'),
         props: (route) => ({instituteId: route.params && route.params.instituteId}),
         children: [
           {
             path: 'overview',
-            name: 'InstituteOverview',
+            name: 'InstituteDetail.Overview',
             component: () => import(/* webpackChunkName: "institutes" */ '../administrative/institutes/Overview.vue')
           }
         ]
@@ -212,30 +336,55 @@ const routes = [
        *****************************
        *****************************/
       {
-        path: 'shipments',
+        path: 'shipments/:shipmentId',
         name: 'ShipmentsList',
         component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/List.vue'),
-        props: (route) => ({filters: route.query.filters})
+        props: (route) => ({filters: route.query.filters, shipmentId: route.params && route.params.shipmentId}),
+        children: [
+          {
+            path: '',
+            name: 'ShipmentsListItemDetail',
+            component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Detail.vue'),
+            props: (route) => ({shipmentId: route.params && route.params.shipmentId, noNavButton: true}),
+            children: [
+              {
+                path: 'overview',
+                name: 'ShipmentsListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Overview.vue')
+              },
+              {
+                path: 'specimens',
+                name: 'ShipmentsListItemDetail.Specimens',
+                component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Specimens.vue')
+              },
+              {
+                path: 'containers',
+                name: 'ShipmentsListItemDetail.Containers',
+                component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Containers.vue')
+              }
+            ]
+          }
+        ]
       },
       {
-        path: 'shipments/:shipmentId',
+        path: 'shipments/:shipmentId/detail',
         name: 'ShipmentDetail',
         component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Detail.vue'),
         props: (route) => ({shipmentId: route.params && route.params.shipmentId}),
         children: [
           {
             path: 'overview',
-            name: 'ShipmentOverview',
+            name: 'ShipmentDetail.Overview',
             component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Overview.vue')
           },
           {
             path: 'specimens',
-            name: 'ShipmentSpecimens',
+            name: 'ShipmentDetail.Specimens',
             component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Specimens.vue')
           },
           {
             path: 'containers',
-            name: 'ShipmentContainers',
+            name: 'ShipmentDetail.Containers',
             component: () => import(/* webpackChunkName: "shipments" */ '../administrative/shipments/Containers.vue')
           }
         ]

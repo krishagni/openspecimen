@@ -135,7 +135,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('ShipmentsList'), label: 'Shipments'}
+        {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: 'Shipments'}
       ],
 
       addEditFs: {rows: []},
@@ -373,7 +373,12 @@ export default {
       }
 
       const savedShipment = await shipmentSvc.saveOrUpdate(toSave);
-      routerSvc.goto('ShipmentOverview', {shipmentId: savedShipment.id});
+      if (!toSave.id) {
+        routerSvc.goto('ShipmentDetail.Overview', {shipmentId: savedShipment.id});
+      } else {
+        routerSvc.back();
+      }
+
       return savedShipment;
     },
 

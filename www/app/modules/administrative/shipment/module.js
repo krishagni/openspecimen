@@ -27,7 +27,7 @@ angular.module('os.administrative.shipment',
         url: '/shipments?filters',
         template: '<div></div>',
         controller: function($state, VueApp) {
-          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
+          VueApp.setVueView('shipments/-1', $state.params);
         },
         parent: 'shipment-root'
       })

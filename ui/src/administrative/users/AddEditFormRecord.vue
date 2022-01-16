@@ -21,7 +21,7 @@ import routerSvc from '@/common/services/Router.js';
 import formSvc from '@/forms/services/Form.js';
 
 export default {
-  props: ['entity', 'formId', 'formCtxtId', 'recordId', 'listView'],
+  props: ['entity', 'formId', 'formCtxtId', 'recordId', 'listView', 'routeQuery'],
 
   setup(props) {
     let ctx = reactive({
@@ -29,6 +29,7 @@ export default {
 
       record: { },
     });
+
 
     watchEffect(
       () => {
@@ -74,6 +75,7 @@ export default {
           this.$router.push({
             name: this.listView,
             query: {
+              ...this.routeQuery,
               formId: this.formId,
               formCtxtId: this.formCtxtId,
               recordId: savedData.id

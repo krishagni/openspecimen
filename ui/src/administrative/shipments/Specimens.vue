@@ -5,7 +5,7 @@
       <os-grid-column width="12">
         <os-list-view
           :data="ctx.specimens"
-          :columns="listSchema.columns"
+          :schema="listSchema"
           :filters="listSchema.filters"
           :query="ctx.query"
           :allowSelection="false"

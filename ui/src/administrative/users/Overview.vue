@@ -96,6 +96,7 @@
 
 <script>
 import { reactive, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
 
 import alertSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
@@ -113,12 +114,16 @@ export default {
   inject: ['ui'],
 
   setup(props) {
-    let ctx = reactive({
+    const route = useRoute();
+
+    const ctx = reactive({
       user: {},          // details of user being displayed
 
       deleteOpts: {},    // delete dialog details
 
-      userObjs: []       // list of objects whose audit info is being queried
+      userObjs: [],      // list of objects whose audit info is being queried
+
+      routeQuery: route.query
     });
 
     
@@ -178,7 +183,7 @@ export default {
       this.$refs.deleteObj.execute().then(
         (resp) => {
           if (resp == 'deleted') {
-            routerSvc.goto('UsersList');
+            routerSvc.goto('UsersList', {userId: -2}, this.ctx.routeQuery);
           }
         }
       );

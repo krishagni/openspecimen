@@ -1,65 +1,79 @@
 <template>
-  <os-page>
-    <os-page-head>
-      <span>
-        <h3>Institutes</h3>
-      </span>
-
-      <template #right>
-        <os-list-size
-          :list="ctx.institutes"
-          :page-size="ctx.pageSize"
-          :list-size="ctx.institutesCount"
-          @updateListSize="getInstitutesCount"
-        />
-      </template>
-    </os-page-head>
-
-    <os-page-body>
-      <os-page-toolbar>
-        <template #default>
-          <span v-show-if-allowed="'admin'">
-            <span v-if="!ctx.selectedInstitutes || ctx.selectedInstitutes.length == 0">
-              <os-button left-icon="plus" label="Create" @click="$goto('InstituteAddEdit', {instituteId: -1})" />
-
-              <os-menu label="Import" :options="importOpts" />
-            </span>
-            <span v-else>
-              <os-button left-icon="trash" label="Delete" @click="deleteInstitutes" />
-            </span>
+  <os-screen>
+    <os-screen-panel :width="ctx.detailView ? 3 : 12">
+      <os-page>
+        <os-page-head>
+          <span>
+            <h3>Institutes</h3>
           </span>
 
-          <os-button left-icon="download" label="Export" @click="exportInstitutes" />
+          <template #right>
+            <os-button v-if="ctx.detailView"
+              size="small" left-icon="expand-alt"
+              v-os-tooltip.bottom="'Switch to table view'"
+              @click="showTable"
+            />
 
-          <os-button-link left-icon="question-circle" label="Help"
-            url="https://help.openspecimen.org/institute" new-tab="true" />
-        </template>
+            <os-list-size v-else
+              :list="ctx.institutes"
+              :page-size="ctx.pageSize"
+              :list-size="ctx.institutesCount"
+              @updateListSize="getInstitutesCount"
+            />
+          </template>
+        </os-page-head>
 
-        <template #right>
-          <os-button left-icon="search" label="Search" @click="openSearch" />
-        </template>
-      </os-page-toolbar>
+        <os-page-body>
+          <os-page-toolbar v-if="!ctx.detailView">
+            <template #default>
+              <span v-show-if-allowed="'admin'">
+                <span v-if="!ctx.selectedInstitutes || ctx.selectedInstitutes.length == 0">
+                  <os-button left-icon="plus" label="Create" @click="$goto('InstituteAddEdit', {instituteId: -1})" />
 
-      <os-list-view
-        :data="ctx.institutes"
-        :columns="listSchema.columns"
-        :filters="listSchema.filters"
-        :query="ctx.query"
-        :allowSelection="true"
-        :loading="ctx.loading"
-        @filtersUpdated="loadInstitutes"
-        @selectedRows="onInstituteSelection"
-        @rowClicked="showDetails"
-        ref="listView"
-      />
+                  <os-menu label="Import" :options="importOpts" />
+                </span>
+                <span v-else>
+                  <os-button left-icon="trash" label="Delete" @click="deleteInstitutes" />
+                </span>
+              </span>
 
-      <os-confirm-delete ref="deleteDialog">
-        <template #message>
-          <span>Are you sure you want to delete the selected institutes?</span>
-        </template>
-      </os-confirm-delete>
-    </os-page-body>
-  </os-page>
+              <os-button left-icon="download" label="Export" @click="exportInstitutes" />
+
+              <os-button-link left-icon="question-circle" label="Help"
+                url="https://help.openspecimen.org/institute" new-tab="true" />
+            </template>
+
+            <template #right>
+              <os-button left-icon="search" label="Search" @click="openSearch" />
+            </template>
+          </os-page-toolbar>
+
+          <os-list-view
+            :data="ctx.institutes"
+            :schema="listSchema"
+            :query="ctx.query"
+            :allowSelection="true"
+            :loading="ctx.loading"
+            :selected="ctx.selectedInstitute"
+            @filtersUpdated="loadInstitutes"
+            @selectedRows="onInstituteSelection"
+            @rowClicked="onInstituteRowClick"
+            ref="listView"
+          />
+
+          <os-confirm-delete ref="deleteDialog">
+            <template #message>
+              <span>Are you sure you want to delete the selected institutes?</span>
+            </template>
+          </os-confirm-delete>
+        </os-page-body>
+      </os-page>
+    </os-screen-panel>
+
+    <os-screen-panel :width="9" v-if="$route.params && $route.params.instituteId > 0 && ctx.selectedInstitute">
+      <router-view :instituteId="ctx.selectedInstitute.institute.id" :key="$route.params.instituteId" />
+    </os-screen-panel>
+  </os-screen>
 </template>
 
 <script>
@@ -70,7 +84,7 @@ import routerSvc    from '@/common/services/Router.js';
 import instituteSvc from '@/administrative/services/Institute.js';
 
 export default {
-  props: ['filters'],
+  props: ['filters', 'instituteId'],
 
   data() {
     return {
@@ -79,7 +93,9 @@ export default {
         institutesCount: -1,
         loading: true,
         query: this.filters,
-        selectedInstitutes: []
+        selectedInstitutes: [],
+        selectedInstitute: null,
+        detailView: false
       },
 
       listSchema: { columns: [] },
@@ -95,25 +111,54 @@ export default {
     instituteSvc.getListViewSchema().then(listSchema => this.listSchema = listSchema);
   },
 
+  watch: {
+    'instituteId': function(newValue, oldValue) {
+      if (newValue == oldValue) {
+        return;
+      }
+
+      if (newValue > 0) {
+        let selectedRow = this.ctx.institutes.find(rowObject => rowObject.institute.id == this.instituteId);
+        if (!selectedRow) {
+          selectedRow = {institute: {id: this.instituteId}};
+        }
+
+        this.showDetails(selectedRow);
+      } else {
+        this.showTable(newValue == -2);
+      }
+    }
+  },
+
   methods: {
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
     },
 
-    loadInstitutes: function({filters, uriEncoding, pageSize}) {
+    loadInstitutes: async function({filters, uriEncoding, pageSize}) {
       this.ctx.filterValues = filters;
       this.ctx.pageSize     = pageSize;
 
-      routerSvc.goto('InstitutesList', {}, {filters: uriEncoding});
-      this.reloadInstitutes();
+      const institutes = await this.reloadInstitutes();
+      if (this.instituteId <= 0) {
+        routerSvc.goto('InstitutesList', {instituteId: -1}, {filters: uriEncoding});
+      } else {
+        let selectedRow = institutes.find(rowObject => rowObject.institute.id == this.instituteId);
+        if (!selectedRow) {
+          selectedRow = {institute: {id: this.instituteId}};
+        }
+
+        this.showDetails(selectedRow);
+      }
     },
 
     reloadInstitutes: function() {
       this.ctx.loading = true;
       let opts = Object.assign({includeStats: true, maxResults: this.ctx.pageSize}, this.ctx.filterValues || {});
-      instituteSvc.getInstitutes(opts).then(resp => {
+      return instituteSvc.getInstitutes(opts).then(resp => {
         this.ctx.loading = false;
         this.ctx.institutes = resp.map(institute => ({institute: institute}));
+        return this.ctx.institutes;
       });
     },
 
@@ -127,8 +172,29 @@ export default {
       this.ctx.selectedInstitutes = (selection || []).map((row) => row.rowObject.institute);
     },
 
-    showDetails: function(row) {
-      this.$goto('InstituteOverview', {instituteId: row.institute.id});
+    onInstituteRowClick: function(rowObject) {
+      routerSvc.goto(
+        'InstitutesListItemDetail.Overview',
+        {instituteId: rowObject.institute.id},
+        {filters: this.filters}
+      );
+    },
+
+    showDetails: function(rowObject) {
+      this.ctx.selectedInstitute = rowObject;
+      if (!this.ctx.detailView) {
+        this.ctx.detailView = true;
+        this.$refs.listView.switchToSummaryView();
+      }
+    },
+
+    showTable: function(reload) {
+      this.ctx.detailView = false;
+      this.$refs.listView.switchToTableView();
+      routerSvc.goto('InstitutesList', {instituteId: -1}, {filters: this.filters});
+      if (reload) {
+        this.$refs.listView.reload();
+      }
     },
 
     exportInstitutes: function() {

@@ -10,6 +10,10 @@
   height: 100%;
 }
 
+.os-page:not(:last-child) {
+  border-right: 1px solid #ddd;
+}
+
 .os-page :deep(.os-page-body) {
   height: calc(100% - 107px);
   overflow-y: auto;

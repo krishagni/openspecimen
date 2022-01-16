@@ -23,7 +23,7 @@ angular.module('os.administrative.user.list', ['os.administrative.models'])
       };
 
       if (!ctx.old) {
-        VueApp.setVueView('users', $stateParams);
+        VueApp.setVueView('users/-1', $stateParams);
       } else {
         initPvsAndFilterOpts();
         loadUsers($scope.userFilterOpts);

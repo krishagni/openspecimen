@@ -67,7 +67,7 @@ export default {
       this.$refs.deleteObj.execute().then(
         (resp) => {
           if (resp == 'deleted') {
-            routerSvc.goto('InstitutesList');
+            routerSvc.goto('InstitutesList', {instituteId: -2});
           }
         }
       );

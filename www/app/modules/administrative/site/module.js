@@ -13,7 +13,7 @@ angular.module('os.administrative.site',
         url: '/sites?filters',
         template: '<div></div>',
         controller: function(VueApp) {
-          VueApp.setVueView('sites');
+          VueApp.setVueView('sites/-1');
         },
         parent: 'signed-in'
       })

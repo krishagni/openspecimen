@@ -39,7 +39,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('InstitutesList'), label: 'Institutes'}
+        {url: routerSvc.getUrl('InstitutesList', {instituteId: -1}), label: 'Institutes'}
       ],
 
       addEditFs: {rows: []}
@@ -74,17 +74,19 @@ export default {
       Object.assign(this.dataCtx, event.data);
     },
 
-    saveOrUpdate: function() {
+    saveOrUpdate: async function() {
       if (!this.$refs.instituteForm.validate()) {
         return;
       }
 
-      instituteSvc.saveOrUpdate(this.dataCtx.institute).then(
-        function(savedInstitute) {
-          alertSvc.success('Institute ' + savedInstitute.name + ' saved!');
-          routerSvc.goto('InstituteOverview', {instituteId: savedInstitute.id});
-        }
-      );
+      const savedInstitute = await instituteSvc.saveOrUpdate(this.dataCtx.institute);
+      alertSvc.success('Institute ' + savedInstitute.name + ' saved!');
+
+      if (!this.dataCtx.institute.id) {
+        routerSvc.goto('InstituteDetail.Overview', {instituteId: savedInstitute.id});
+      } else {
+        routerSvc.back();
+      }
     },
 
     cancel: function() {

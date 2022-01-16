@@ -17,7 +17,7 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="user" label="Users" @click="$goto('UsersList')" />
+          <os-button left-icon="user" label="Users" @click="$goto('UsersList', {userId: -1})" />
         </template>
 
         <template #right>
@@ -27,8 +27,7 @@
 
       <os-list-view
         :data="ctx.userGroups"
-        :columns="listSchema.columns"
-        :filters="listSchema.filters"
+        :schema="listSchema"
         :query="ctx.query"
         :allowSelection="false"
         :showRowActions="updateAllowed"
@@ -105,7 +104,7 @@ export default {
     },
 
     showGroupDetails: function(group) {
-      routerSvc.goto('UsersList', {}, {groupId: group.id});
+      routerSvc.goto('UsersList', {userId: -1}, {groupId: group.id});
     },
 
     editGroup: function(group) {

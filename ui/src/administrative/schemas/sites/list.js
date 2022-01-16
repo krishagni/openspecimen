@@ -3,11 +3,23 @@ import routerSvc    from '@/common/services/Router.js';
 import instituteSvc from '@/administrative/services/Institute.js';
 
 export default {
+  summary: {
+    "title": {
+      "text": "site.name",
+      "url": (ro) => routerSvc.getUrl('SiteDetail.Overview', {siteId: ro.site.id})
+    },
+
+    "descriptions": [
+      "site.type",
+      "site.instituteName"
+    ]
+  },
+
   columns: [
     {
       "name": "site.name",
       "caption": "Name",
-      "href": (row) => routerSvc.getUrl('SiteOverview', {siteId: row.rowObject.site.id})
+      "href": (row) => routerSvc.getUrl('SiteDetail.Overview', {siteId: row.rowObject.site.id})
     },
     {
       "name": "site.type",

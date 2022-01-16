@@ -1,4 +1,6 @@
 
+import listSchema from '@/administrative/schemas/users/list.js';
+
 import http from '@/common/services/HttpClient.js';
 
 class User {
@@ -117,6 +119,13 @@ class User {
 
   async saveUiState(uiState) {
     return http.put('users/current-user-ui-state', uiState);
+  }
+
+  //
+  // Schema
+  //
+  async getListViewSchema() {
+    return listSchema;
   }
 }
 

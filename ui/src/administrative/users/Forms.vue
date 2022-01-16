@@ -14,6 +14,7 @@
       :records="ctx.records"
       :list-view="listView"
       :add-edit-view="addEditView"
+      :route-query="ctx.routeQuery"
       @reload-records="reloadRecords"
       v-if="!ctx.loading && ctx.forms && ctx.forms.length > 0 && ctx.records"
     />
@@ -22,7 +23,8 @@
 
 <script>
 
-import {reactive, watchEffect} from 'vue';
+import { reactive, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
 
 import userResources from '@/administrative/users/Resources.js';
 import userSvc from '@/administrative/services/User.js';
@@ -32,7 +34,10 @@ export default {
   props: ['user', 'entityType', 'listView', 'addEditView'],
 
   setup(props) {
-    let ctx = reactive({ });
+    const route = useRoute();
+    let ctx = reactive({
+      routeQuery: route.query
+    });
 
     watchEffect(
       () => {
@@ -46,8 +51,10 @@ export default {
           loading: true
         };
 
-        let formsQ = userSvc.getForms(props.user, props.entityType);
-        let recsQ  = userSvc.getFormRecords(props.user, props.entityType);
+        ctx.forms   = [];
+        ctx.records = []
+        const formsQ = userSvc.getForms(props.user, props.entityType);
+        const recsQ  = userSvc.getFormRecords(props.user, props.entityType);
         Promise.all([formsQ, recsQ]).then(
           (data) => {
             ctx.loading = false;

@@ -7,6 +7,7 @@
 
 <style scoped>
   .os-page-body {
+    position: relative;
     padding: 10px 15px 0px;
   }
 

@@ -41,7 +41,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('SitesList'), label: 'Sites'}
+        {url: routerSvc.getUrl('SitesList', {siteId: -1}), label: 'Sites'}
       ],
 
       addEditFs: {rows: []}
@@ -86,17 +86,18 @@ export default {
       Object.assign(this.dataCtx, event.data);
     },
 
-    saveOrUpdate: function() {
+    saveOrUpdate: async function() {
       if (!this.$refs.siteForm.validate()) {
         return;
       }
 
-      siteSvc.saveOrUpdate(this.dataCtx.site).then(
-        function(savedSite) {
-          alertSvc.success('Site ' + savedSite.name + ' saved!');
-          routerSvc.goto('SiteOverview', {siteId: savedSite.id});
-        }
-      );
+      const savedSite = await siteSvc.saveOrUpdate(this.dataCtx.site);
+      alertSvc.success('Site ' + savedSite.name + ' saved!');
+      if (!this.dataCtx.site.id) {
+        routerSvc.goto('SiteDetail.Overview', {siteId: savedSite.id});
+      } else {
+        routerSvc.back();
+      }
     },
 
     cancel: function() {

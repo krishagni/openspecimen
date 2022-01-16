@@ -7,7 +7,7 @@ export default {
     {
       "name": "name",
       "caption": "Name",
-      "href": (row) => routerSvc.getUrl('UsersList', {}, {groupId: row.rowObject.id})
+      "href": (row) => routerSvc.getUrl('UsersList', {userId: -1}, {groupId: row.rowObject.id})
     },
     {
       "name": "description",

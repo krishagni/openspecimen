@@ -56,7 +56,7 @@ class QuickSearch {
     'user': {
       caption: 'User',
       ngView: false,
-      viewName: 'UserOverview',
+      viewName: 'UserDetail.Overview',
       params: {entityId: 'userId'}
     },
 
@@ -100,7 +100,7 @@ class QuickSearch {
     'shipment': {
       caption: 'Shipment',
       ngView: false,
-      viewName: 'ShipmentOverview',
+      viewName: 'ShipmentDetail.Overview',
       params: {entityId: 'shipmentId'}
     },
 

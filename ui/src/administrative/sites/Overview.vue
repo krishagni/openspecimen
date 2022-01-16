@@ -24,6 +24,7 @@
 
 <script>
 import { reactive, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
 
 import routerSvc from '@/common/services/Router.js';
 import siteSvc from '@/administrative/services/Site.js';
@@ -34,17 +35,19 @@ export default {
   inject: ['ui'],
 
   setup(props) {
-    let ctx = reactive({
+    const route = useRoute();
+    const ctx = reactive({
       site: {},
 
       deleteOpts: {},
 
       siteObjs: [],
 
-      dict: []
+      dict: [],
+
+      routeQuery: route.query
     });
 
-    
     watchEffect(
       () => {
         ctx.site = props.site;
@@ -70,7 +73,7 @@ export default {
       this.$refs.deleteObj.execute().then(
         (resp) => {
           if (resp == 'deleted') {
-            routerSvc.goto('SitesList');
+            routerSvc.goto('SitesList', {siteId: -2}, this.ctx.routeQuery);
           }
         }
       );

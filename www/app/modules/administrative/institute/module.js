@@ -13,7 +13,7 @@ angular.module('os.administrative.institute',
         url: '/institutes?filters',
         template: '<div></div>',
         controller: function($state, VueApp) {
-          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
+          VueApp.setVueView('institutes/-1');
         },
         parent: 'signed-in'
       })

@@ -66,7 +66,7 @@ export default {
       user: null,
 
       bcrumb: [
-        {url: routerSvc.getUrl('UsersList'), label: 'Users'}
+        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: 'Users'}
       ],
 
       addEditFs: {rows: []},
@@ -86,7 +86,7 @@ export default {
       }
     } else {
       ctx.user  = { dnd: false, type: 'NONE', apiUser: false };
-      let users = itemsSvc.getItems('users');
+      const users = itemsSvc.getItems('users');
       itemsSvc.clearItems('users');
 
       if (users && users.length > 0) {
@@ -130,10 +130,10 @@ export default {
       let self = this;
       userSvc.saveOrUpdate(this.ctx.user).then(
         function(result) {
-          if (self.editProfile) {
+          if (self.editProfile || self.ctx.user.id > 0) {
             routerSvc.back();
           } else {
-            routerSvc.goto('UserOverview', {userId: result.id});
+            routerSvc.goto('UserDetail.Overview', {userId: result.id});
           }
         }
       );

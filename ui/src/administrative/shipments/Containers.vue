@@ -5,8 +5,7 @@
       <os-grid-column width="12">
         <os-list-view
           :data="ctx.containers"
-          :columns="listSchema.columns"
-          :filters="listSchema.filters"
+          :schema="listSchema"
           :query="ctx.query"
           :allowSelection="false"
           :loading="ctx.loading"
@@ -19,7 +18,7 @@
 
 <script>
 
-import { reactive, watchEffect } from 'vue';
+import { reactive } from 'vue';
 
 import listSchema from '@/administrative/schemas/shipments/containers.js';
 import shipmentSvc from '@/administrative/services/Shipment.js';
@@ -33,25 +32,15 @@ export default {
       loading: true
     });
 
-    let lastShipmentId = -1;
-    watchEffect(
-      () => {
-        if (lastShipmentId == props.shipment.id) {
-          return;
-        }
-
-        ctx.loading = true;
-        shipmentSvc.getContainers(props.shipment.id).then(
-          (containers) => {
-            ctx.loading = false;
-            ctx.containers = containers;
-            lastShipmentId = props.shipment.id;
-          }
-        );
+    ctx.loading = true;
+    shipmentSvc.getContainers(props.shipment.id).then(
+      (containers) => {
+        ctx.loading = false;
+        ctx.containers = containers;
       }
     );
 
     return { ctx, listSchema };
-  }
+  },
 }
 </script>

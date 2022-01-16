@@ -35,7 +35,7 @@
           <os-overlay ref="userProfileMenu" @click="toggleProfileMenu">
             <ul class="user-profile-options">
               <li>
-                <router-link :to="{name: 'UserOverview', params: {userId: $ui.currentUser.id}}">
+                <router-link :to="{name: 'UserDetail.Overview', params: {userId: $ui.currentUser.id}}">
                   <span>{{username}}</span>
                 </router-link>
               </li>

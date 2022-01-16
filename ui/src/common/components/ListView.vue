@@ -1,5 +1,5 @@
 <template>
-  <div class="os-list os-list-hover" :class="{'show-filters': showFilters}">
+  <div class="os-list os-list-hover" :class="{'show-filters': showFilters}" v-if="!summaryView">
     <div class="results">
       <div class="info" v-if="loading || list.length == 0">
         <div v-show="loading">
@@ -17,7 +17,7 @@
         </div>
         <data-table :value="list" v-model:selection="selectedRows" @row-click="rowClick($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
-          <column v-for="column of columns" :header="column.caption" :key="column.name" :style="column.uiStyle">
+          <column v-for="column of schema.columns" :header="column.caption" :key="column.name" :style="column.uiStyle">
             <template #body="slotProps">
               <span v-if="column.href">
                 <a :href="column.href(slotProps.data)" :target="column.hrefTarget">
@@ -44,13 +44,14 @@
 
       <slot name="footer"></slot>
     </div>
+
     <div class="filters">
       <div class="filters-inner">
         <div class="title">
           <span>Filters</span>
         </div>
         <div class="body">
-          <form-group dense v-for="filter of filters" :key="filter.name">
+          <form-group dense v-for="filter of schema.filters" :key="filter.name">
             <cell :width="12">
               <span v-if="filter.type == 'text'">
                 <input-text md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"/>
@@ -95,6 +96,23 @@
       </div>
     </div>
   </div>
+
+  <div class="os-list-items" v-else-if="schema.summary">
+    <div class="item" :ref="'item' + idx" v-for="(item, idx) of list" :key="idx" @click="itemSelected($event, item)"
+      :class="{active: selectedItem && item.rowObject == selectedItem}">
+      <div class="header">
+        <os-icon :name="item.$summary.icon" v-if="item.$summary.icon" />
+        <a class="os-click-esc" :href="item.$summary.url" v-if="item.$summary.url" target="_blank">
+          <span>{{item.$summary.title}}</span>
+        </a>
+      </div>
+      <div class="descriptions">
+        <div v-for="(description, descIdx) of item.$summary.descriptions" :key="descIdx">
+          <span>{{description}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -117,9 +135,9 @@ import util     from '@/common/services/Util.js';
 export default {
   props: [
     'data',
-    'columns',
-    'filters',
+    'schema',
     'query',
+    'selected',
     'allowSelection',
     'loading',
     'showRowActions'
@@ -154,11 +172,15 @@ export default {
 
   data() {
     return {
+      summaryView: false,
+
       showFilters: false,
 
       filterValues: { },
 
       selectedRows: [],
+
+      selectedItem: null,
 
       pageSizeOpts: {
         currentPageSize: 100,
@@ -190,12 +212,22 @@ export default {
   },
 
   methods: {
+    switchToSummaryView: function() {
+      this.summaryView = true;
+    },
+
+    switchToTableView: function() {
+      this.summaryView = false;
+    },
+
     toggleShowFilters: function() {
       this.showFilters = !this.showFilters;
     },
 
     clearFilters: function() {
-      this.filters.forEach((filter) => delete this.filterValues[filter.name]);
+      if (this.schema.filters) {
+        this.schema.filters.forEach((filter) => delete this.filterValues[filter.name]);
+      }
     },
 
     emitFiltersUpdated: function() {
@@ -273,18 +305,62 @@ export default {
       }
 
       return value || '-';
+    },
+
+    itemSelected: function(event, item) {
+      let el = event.target;
+      while (el != null) {
+        if (el.className && typeof el.className.indexOf == 'function') {
+          if (el.className.indexOf('os-selection-cb') != -1 || el.className.indexOf('os-click-esc') != -1) {
+            return;
+          } else if (el.className.indexOf('item') != -1) {
+            break;
+          }
+        }
+
+        el = el.parentNode;
+      }
+
+      this.selectedItem = item.rowObject;
+      this.$emit('rowClicked', item.rowObject);
+    },
+
+    valueFn: function(input) {
+      if (typeof input == 'function') {
+        return input;
+      }
+
+      return (ro) => input && exprUtil.getValue(ro, input) || '';
     }
   },
 
   computed: {
     list() {
+      const summaryFns = {
+        icon: () => '',
+        titleText: () => '',
+        url: () => '',
+        descriptions: []
+      };
+
+      if (this.schema.summary) {
+        const title = this.schema.summary.title || {};
+        summaryFns.icon  = this.valueFn(title.icon);
+        summaryFns.titleText = this.valueFn(title.text);
+        summaryFns.url = this.valueFn(title.url);
+        summaryFns.descriptions = (this.schema.summary.descriptions || []).map(desc => this.valueFn(desc));
+      }
+
       let input      = this.data || [];
-      let columnDefs = this.columns || [];
+      let columnDefs = this.schema.columns || [];
 
       let result = [];
       let length = input.length > this.pageSizeOpts.currentPageSize ? input.length - 1 : input.length;
       for (let rowIdx = 0; rowIdx < length; ++rowIdx) {
-        let row = {rowObject: input[rowIdx]};
+        let row = {idx: rowIdx, rowObject: input[rowIdx]};
+        if (this.schema.key) {
+          row.key = exprUtil.getValue(input[rowIdx], this.schema.key);
+        }
 
         for (let colIdx = 0; colIdx < columnDefs.length; ++colIdx) {
           let cd = columnDefs[colIdx];
@@ -293,6 +369,15 @@ export default {
           } else {
             row[cd.name] = input[rowIdx][cd.name];
           }
+        }
+
+        if (this.schema.summary) {
+          row.$summary = {
+            icon:         summaryFns.icon(row.rowObject),
+            title:        summaryFns.titleText(row.rowObject),
+            url:          summaryFns.url(row.rowObject),
+            descriptions: summaryFns.descriptions.map(desc => desc(row.rowObject))
+          };
         }
 
         result.push(row);
@@ -314,6 +399,23 @@ export default {
     selectedRows: {
       handler(newVal) {
         this.$emit('selectedRows', newVal);
+      }
+    },
+
+    selected: {
+      handler(newVal) {
+        if (newVal && this.selectedItem != newVal) {
+          this.selectedItem = newVal;
+          const idx = this.list.findIndex(item => item.rowObject == this.selectedItem);
+          if (idx >= 0) {
+            setTimeout(() => {
+              const el = this.$refs['item' + idx];
+              if (el) {
+                el.scrollIntoView({behaviour: 'smooth'});
+              }
+            }, 500);
+          }
+        }
       }
     }
   }
@@ -475,5 +577,36 @@ export default {
 
 .filters .body .input-group :deep(.os-input-text) {
   width: 100%;
+}
+
+.os-list-items {
+  margin: -8px -15px;
+}
+
+.os-list-items .item {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.os-list-items .item:hover {
+  background: #f7f7f7;
+  cursor: pointer;
+}
+
+.os-list-items .item.active {
+  background: #e9ecef;
+}
+
+.os-list-items .item .header {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.os-list-items .item .header .os-icon-wrapper {
+  margin-right: 0.5rem;
+}
+
+.os-list-items .item .descriptions > div:not(:last-child) {
+  margin-bottom: 0.5rem;
 }
 </style>

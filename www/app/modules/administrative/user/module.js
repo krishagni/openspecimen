@@ -35,9 +35,9 @@ angular.module('os.administrative.user',
         templateUrl: 'modules/administrative/user/list.html',
         resolve: {
           group: function($stateParams, UserGroup) {
-            if ($stateParams.groupId > 0) {
-              return UserGroup.getById($stateParams.groupId);
-            }
+            // if ($stateParams.groupId > 0) {
+            //  return UserGroup.getById($stateParams.groupId);
+            // }
 
             return null;
           }

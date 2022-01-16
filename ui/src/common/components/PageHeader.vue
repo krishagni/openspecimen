@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-page-header">
+  <div class="os-page-header" :class="{'no-border': this.noNavButton == true}">
     <sidebar class="os-sidenav" v-model:visible="showNav" :showCloseIcon="false" :dismissable="true">
       <div class="header">
         <div class="nav-button">
@@ -21,19 +21,19 @@
       </div>
     </sidebar>
 
-    <div class="nav-button">
+    <div class="nav-button" v-if="this.noNavButton != true">
       <button @click="showNav = true">
         <os-icon name="bars" size="24px" />
       </button>
     </div>
 
-    <div class="content-wrapper">
-      <slot name="breadcrumb"></slot>
+    <div class="content-wrapper" :style="[this.noNavButton == true ? {'padding-left': '0px'} : {}]">
+      <slot name="breadcrumb" v-if="this.noNavButton != true"></slot>
       <div class="content">
         <div class="left">
           <slot></slot>
         </div>
-        <div class="right">
+        <div class="right" v-if="this.noNavButton != true">
           <slot name="right"></slot>
         </div>
       </div>
@@ -53,6 +53,8 @@ import homePageSvc from '@/common/services/HomePageService.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
+  props: ['noNavButton'],
+
   inject: ['ui'],
 
   components: {
@@ -110,6 +112,10 @@ export default {
   .os-page-header {
     padding: 10px 15px 0px;
     border-bottom: 1px solid #ddd;
+  }
+
+  .os-page-header.no-border {
+    border-bottom: 0;
   }
 
   .os-page-header:after {

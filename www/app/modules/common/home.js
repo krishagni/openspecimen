@@ -418,7 +418,7 @@ angular.module('openspecimen')
 
         {
           showIf: {resource: 'User', operations: ['Create', 'Update']},
-          sref: 'user-list',
+          sref: 'user-list({userId: - 1})',
           icon: 'fa fa-user',
           title: 'menu.users',
           description: 'menu.users_desc'

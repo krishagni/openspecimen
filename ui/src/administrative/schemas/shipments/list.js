@@ -2,6 +2,29 @@
 import routerSvc    from '@/common/services/Router.js';
 
 export default {
+  key: "shipment.id",
+
+  summary: {
+    title: {
+      icon: (ro) => ro.shipment.type == 'SPECIMEN' ? 'flask' : 'box-open',
+      text: (ro) => '#' + ro.shipment.id + ' ' + ro.shipment.name,
+      url:  (ro) => routerSvc.getUrl('ShipmentDetail.Overview', {shipmentId: ro.shipment.id}),
+    },
+
+    descriptions: [
+      "shipment.status",
+
+      (ro) => {
+        let result = ro.shipment.sendingSite;
+        if (ro.shipment.receivingSite) {
+          result += ' | ' + ro.shipment.receivingSite;
+        }
+
+        return result;
+      }
+    ]
+  },
+
   columns: [
     {
       name: "shipment.icon",
@@ -13,7 +36,7 @@ export default {
     {
       "name": "shipment.name",
       "caption": "Name",
-      "href": (row) => routerSvc.getUrl('ShipmentOverview', {shipmentId: row.rowObject.shipment.id}),
+      "href": (row) => routerSvc.getUrl('ShipmentDetail.Overview', {shipmentId: row.rowObject.shipment.id}),
       "value": (rowObject) => '#' + rowObject.shipment.id + ' ' + rowObject.shipment.name
     },
     {
