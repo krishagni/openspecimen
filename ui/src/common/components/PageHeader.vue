@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-page-header" :class="{'no-border': this.noNavButton == true}">
+  <div class="os-page-header" :class="{'no-border': noNavButton == true}">
     <sidebar class="os-sidenav" v-model:visible="showNav" :showCloseIcon="false" :dismissable="true">
       <div class="header">
         <div class="nav-button">
@@ -21,19 +21,19 @@
       </div>
     </sidebar>
 
-    <div class="nav-button" v-if="this.noNavButton != true">
+    <div class="nav-button" v-if="noNavButton != true">
       <button @click="showNav = true">
         <os-icon name="bars" size="24px" />
       </button>
     </div>
 
-    <div class="content-wrapper" :style="[this.noNavButton == true ? {'padding-left': '0px'} : {}]">
-      <slot name="breadcrumb" v-if="this.noNavButton != true"></slot>
+    <div class="content-wrapper" :style="[noNavButton == true ? {'padding-left': '0px'} : {}]">
+      <slot name="breadcrumb" v-if="noNavButton != true"></slot>
       <div class="content">
         <div class="left">
           <slot></slot>
         </div>
-        <div class="right" v-if="this.noNavButton != true">
+        <div class="right" v-if="noNavButton != true">
           <slot name="right"></slot>
         </div>
       </div>
