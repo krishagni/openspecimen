@@ -160,7 +160,7 @@ public class AuthUtil {
 
 	public static String getImpersonateUser(HttpServletRequest httpReq) {
 		String impUserString = Utility.getHeader(httpReq, OS_IMP_USER_HDR);
-		if (StringUtils.isNotBlank(impUserString)) {
+		if (StringUtils.isNotBlank(impUserString) && !impUserString.equalsIgnoreCase("undefined") && !impUserString.equalsIgnoreCase("null")) {
 			return impUserString;
 		}
 

@@ -128,6 +128,9 @@ export default {
         "queryParams": {
           "dynamic": {
             "institute": "user.instituteName"
+          },
+          "static": {
+            "listAll": true
           }
         }
       }

@@ -15,6 +15,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.PermissibleValueDao;
@@ -57,18 +58,6 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 			.list();
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public PermissibleValue getByConceptCode(String attribute, String conceptCode) {
-		List<PermissibleValue> pvs = getSessionFactory().getCurrentSession()
-				.getNamedQuery(GET_BY_CONCEPT_CODE)
-				.setString("attribute", attribute)
-				.setString("conceptCode", conceptCode)
-				.list();
-		
-		return CollectionUtils.isEmpty(pvs) ? null : pvs.iterator().next();
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public PermissibleValue getByValue(String attribute, String value) {
@@ -268,8 +257,6 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	}
 
 	private static final String FQN = PermissibleValue.class.getName();
-
-	private static final String GET_BY_CONCEPT_CODE = FQN + ".getByConceptCode";
 
 	private static final String GET_BY_VALUE = FQN + ".getByValue";
 

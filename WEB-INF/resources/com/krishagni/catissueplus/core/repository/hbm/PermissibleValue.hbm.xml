@@ -67,14 +67,6 @@
         cpv.value = :type
     </query>
 
-    <query name="getByConceptCode">
-      from
-        com.krishagni.catissueplus.core.administrative.domain.PermissibleValue pv
-      where
-        pv.attribute = :attribute and
-        pv.conceptCode = :conceptCode
-    </query>
-
     <query name="getByValue">
       from
         com.krishagni.catissueplus.core.administrative.domain.PermissibleValue pv
