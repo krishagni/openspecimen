@@ -100,6 +100,7 @@
 import { reactive, inject } from 'vue';
 
 import alertSvc    from '@/common/services/Alerts.js';
+import formUtil    from '@/common/services/FormUtil.js';
 import routerSvc   from '@/common/services/Router.js';
 import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
@@ -194,6 +195,7 @@ export default {
 
       if (this.orderId && +this.orderId > 0) {
         order = dataCtx.order = await orderSvc.getOrder(this.orderId);
+        formUtil.createCustomFieldsMap(order);
       }
 
       let input = localStorage['os.orderDetails'] && JSON.parse(localStorage['os.orderDetails']);
@@ -208,7 +210,7 @@ export default {
         };
       }
 
-      const promises = [ orderSvc.getAddEditFormSchema() ];
+      const promises = [ orderSvc.getAddEditFormSchema(order.distributionProtocol) ];
       if (input) {
         if (input.specimenIds) {
           //
@@ -273,10 +275,16 @@ export default {
       localStorage.removeItem('os.orderDetails');
       Promise.all(promises).then(
         (result) => {
-          let idx              = 0;
-          ctx.loading          = false;
-          ctx.addEditFs        = result[idx++].schema;
-          ctx.specimensSchema  = specimensSchema;
+          ctx.loading = false;
+          ctx.specimensSchema = specimensSchema;
+
+          let idx = 0;
+          const {schema, defaultValues} = result[idx++];
+
+          ctx.addEditFs = schema;
+          if (!order.id) {
+            order.extensionDetail = { attrsMap: defaultValues || {} };
+          }
 
           if (result.length > 1) {
             const items = dataCtx.orderItems = result[idx++];
