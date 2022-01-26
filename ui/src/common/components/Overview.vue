@@ -4,7 +4,7 @@
     <li class="item" v-for="(field, idx) of fields.simple" :key="idx">
       <strong class="key key-sm">{{field.label}}</strong>
       <span class="value value-md">
-        <span v-if="!field.value && field.value != 0">
+        <span v-if="(!field.value && field.value != 0) || field.value == '-'">
           <span>-</span>
         </span>
         <span v-else>
