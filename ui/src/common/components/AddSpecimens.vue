@@ -112,9 +112,9 @@ export default {
             resolvedSpmns => {
               if (resolvedSpmns && resolvedSpmns.length > 0) {
                 this.input = '';
-                this.$emit('on-add', {specimens: resolvedSpmns});
+                this.$emit('on-add', {specimens: resolvedSpmns, useBarcode: this.useBarcode});
               } else if (resolvedSpmns) {
-                let opts = this.errorOpts || {};
+                const opts = this.errorOpts || {};
                 alerts.error(opts.no_match || 'No specimens match the input criteria.');
               }
             }

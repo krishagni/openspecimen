@@ -982,6 +982,7 @@
       "close": "Close",
       "add_specimen": "Add Specimen",
       "distribute": "Distribute",
+      "distribute_all": "Distribute All",
       "copy_last_aliquots": "Copy Last (including Aliquots)",
       "print_current": "No, only current specimen",
       "rerun_auto_alloc": "Yes, rerun",

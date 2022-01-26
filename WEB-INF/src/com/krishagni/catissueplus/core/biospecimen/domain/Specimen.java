@@ -1351,7 +1351,7 @@ public class Specimen extends BaseExtensionEntity {
 		} else {
 			if (getAvailableQuantity() == null) {
 				setAvailableQuantity(item.getReturnedQuantity());
-			} else {
+			} else if (item.getReturnedQuantity() != null) {
 				setAvailableQuantity(getAvailableQuantity().add(item.getReturnedQuantity()));
 			}
 		}

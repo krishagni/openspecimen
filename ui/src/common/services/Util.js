@@ -1,4 +1,5 @@
 
+import { format } from 'date-fns';
 import useClipboard from 'vue-clipboard3'
 
 import alertSvc from '@/common/services/Alerts.js';
@@ -92,26 +93,38 @@ class Util {
       .replace(this.mailRe, '<a href="mailto:$1">$1</a>');
   }
 
+  getAbsentItems(dstArray, srcArray, keyProp) {
+    if (!keyProp) {
+      return srcArray;
+    }
+
+    const map = dstArray.reduce(
+      (acc, obj) => {
+        acc[exprUtil.eval(obj, keyProp)] = obj;
+        return acc;
+      },
+      {}
+    );
+
+    const result = [];
+    for (let obj of srcArray) {
+      let key = exprUtil.eval(obj, keyProp);
+      if (!map[key]) {
+        result.push(obj);
+        map[key] = obj;
+      }
+    }
+
+    return result;
+  }
+
   addIfAbsent(dstArray, srcArray, keyProp) {
     if (!keyProp) {
       return;
     }
 
-    const map = {};
-    dstArray.forEach(obj => map[exprUtil.eval(obj, keyProp)] = obj);
-
-    const added = [];
-    srcArray.forEach(
-      obj => {
-        let key = exprUtil.eval(obj, keyProp);
-        if (!map[key]) {
-          dstArray.push(obj);
-          map[key] = obj;
-          added.push(obj);
-        }
-      }
-    );
-
+    const added = this.getAbsentItems(dstArray, srcArray, keyProp);
+    dstArray.push(...added);
     return added;
   }
 
@@ -157,7 +170,8 @@ class Util {
     return this.spmnTypeProps;
   }
 
-  getSpecimenMeasureUnit({specimenClass, type}, measure) {
+  getSpecimenMeasureUnit({specimenClass, type, specimenType}, measure) {
+    type = type || specimenType;
     if (!specimenClass || !type) {
       return '-';
     }
@@ -204,6 +218,14 @@ class Util {
     } else if (result.dataFile) {
       alertSvc.info(msgs.emailed || 'Report generation is taking more time than anticipated. Report will be emailed');
     }
+  }
+
+  formatDate(date, pattern) {
+    if (!(date instanceof Date)) {
+      return date;
+    }
+
+    return format(date, pattern);
   }
 }
 

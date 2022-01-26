@@ -8,8 +8,17 @@ export default {
       return '-';
     }
 
-    var dt = new Date(date);
+    const dt = new Date(date);
     return format(dt, ui.global.locale.dateTimeFmt);
+  },
+
+  shortDateTime(date) {
+    if (!date) {
+      return '-';
+    }
+
+    const locale = ui.global.locale;
+    return format(new Date(date), locale.shortDateFmt + ' ' + locale.timeFmt);
   },
 
   date(date) {

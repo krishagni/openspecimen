@@ -37,7 +37,11 @@ export default {
       get() {
         if (typeof this.modelValue == 'string') {
           try {
-            return new Date(parseInt(this.modelValue));
+            const intValue = parseInt(this.modelValue);
+            if (intValue.toString().length == this.modelValue.trim().length) {
+              return new Date(intValue);
+            }
+            return new Date(this.modelValue);
           } catch {
             return new Date(this.modelValue);
           }

@@ -84,7 +84,7 @@ export default {
         this.ctx.options = this.dedup(selectedVal.concat(this.listSource.options));
       } else if (typeof this.listSource.loadFn == 'function') {
         let self = this;
-        this.listSource.loadFn({query: query, maxResults: 100}).then(
+        this.listSource.loadFn({context: this.context, query: query, maxResults: 100}).then(
           function(options) {
             self.ctx.options = self.dedup(selectedVal.concat(options));
           }
@@ -125,7 +125,7 @@ export default {
       }
 
       let ls = this.listSource;
-      let searchOpts = {};
+      let searchOpts = {query: this.modelValue};
       searchOpts[ls.searchProp || 'value'] = this.modelValue;
 
       let selected = undefined;
@@ -141,7 +141,7 @@ export default {
         );
         selected = (selected && [selected]) || [];
       } else if (typeof ls.loadFn == 'function') {
-        selected = await ls.loadFn(searchOpts);
+        selected = await ls.loadFn({...searchOpts, context: this.context});
       } else if (typeof ls.apiUrl == 'string') {
         selected = this.getFromBackend(searchOpts);
       }

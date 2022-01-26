@@ -1,7 +1,7 @@
 
 <template>
-  <div class="os-steps">
-    <div class="step-items">
+  <div class="os-steps" :class="{'first-step': currentStep == 0, 'last-step': currentStep == steps.length - 1}">
+    <div class="step-items" v-if="steps.length > 1">
       <div class="step-item" v-for="(step, idx) of steps" :key="idx" :class="{'active': idx == currentStep}">
         <span class="step-number">{{idx + 1}}</span>
         <span class="step-title">{{step.title}}</span>
@@ -36,9 +36,18 @@ export default {
       return this.steps[this.currentStep] == step;
     },
 
+    isLastStep: function(step) {
+      let idx = this.currentStep;
+      if (step) {
+        idx = this.steps.indexOf(step);
+      }
+
+      return idx == this.steps.length - 1;
+    },
+
     next: function() {
       let step = this.steps[this.currentStep];
-      if (typeof step.validate == 'function' && !step.validate()) {
+      if (typeof step.validate == 'function' && !step.validate(true)) {
         return;
       }
 
@@ -49,7 +58,7 @@ export default {
 
     previous: function() {
       let step = this.steps[this.currentStep];
-      if (typeof step.validate == 'function' && !step.validate()) {
+      if (typeof step.validate == 'function' && !step.validate(false)) {
         return;
       }
 
@@ -109,6 +118,14 @@ export default {
 
 .os-steps .step-items .step-item.active .step-title {
   opacity: 1;
+}
+
+.os-steps.last-step :deep(.next) {
+  display: none;
+}
+
+.os-steps.first-step :deep(.previous) {
+  display: none;
 }
 
 </style>

@@ -15,9 +15,10 @@
           <span v-show="selectedRows.length == 1">1 record selected</span>
           <span v-show="selectedRows.length > 1">{{selectedRows.length}} records selected</span>
         </div>
-        <data-table :value="list" v-model:selection="selectedRows" @row-click="rowClick($event)">
+        <data-table :value="list" v-model:selection="selectedRows" @row-click="rowClick($event)" @sort="sort($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
-          <column v-for="column of schema.columns" :header="column.caption" :key="column.name" :style="column.uiStyle">
+          <column v-for="column of schema.columns" :header="column.caption" :key="column.name" :field="column.name"
+            :style="column.uiStyle" :sortable="column.sortable">
             <template #body="slotProps">
               <span v-if="column.href">
                 <a :href="column.href(slotProps.data)" :target="column.hrefTarget">
@@ -39,6 +40,9 @@
               </div>
             </template>
           </column>
+          <template #footer v-if="$slots.footerRow">
+            <slot name="footerRow"> </slot>
+          </template>
         </data-table>
       </div>
 
@@ -54,17 +58,51 @@
           <form-group dense v-for="filter of schema.filters" :key="filter.name">
             <cell :width="12">
               <span v-if="filter.type == 'text'">
-                <input-text md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"/>
+                <os-input-text md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]" />
               </span>
-              <span v-if="filter.type == 'dropdown'">
+              <span v-else-if="filter.type == 'number'">
+                <div class="range" v-if="filter.range">
+                  <os-input-number md-type="true" :placeholder="'Min. ' + filter.caption"
+                    v-model="filterValues[filter.name + '.$min']" :max-fraction-digits="filter.maxFractionDigits" />
+                  <os-input-number md-type="true" :placeholder="'Max. ' + filter.caption"
+                    v-model="filterValues[filter.name + '.$max']" :max-fraction-digits="filter.maxFractionDigits" />
+                </div>
+                <div v-else>
+                  <os-input-number md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                    :max-fraction-digits="filter.maxFractionDigits" />
+                </div>
+              </span>
+              <span v-else-if="filter.type == 'dropdown'">
                 <dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
                   :list-source="filter.listSource">
                 </dropdown>
               </span>
-              <span v-if="filter.type == 'site'">
+              <span v-else-if="filter.type == 'site'">
                 <os-site-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
                   :list-source="filter.listSource" :context="filterValues">
                 </os-site-dropdown>
+              </span>
+              <span v-else-if="filter.type == 'user'">
+                <os-user-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                  :select-prop="filter.selectProp" :context="filterValues">
+                </os-user-dropdown>
+              </span>
+              <span v-else-if="filter.type == 'date'">
+                <div class="range" v-if="filter.range">
+                  <os-date-picker md-type="true" :placeholder="'Min. ' + filter.caption"
+                    v-model="filterValues[filter.name + '.$min']"
+                    @update:model-value="handleDateInput(filter, filter.name + '.$min')">
+                  </os-date-picker>
+                  <os-date-picker md-type="true" :placeholder="'Max. ' + filter.caption"
+                    v-model="filterValues[filter.name + '.$max']"
+                    @update:model-value="handleDateInput(filter, filter.name + '.$max')">
+                  </os-date-picker>
+                </div>
+                <div v-else>
+                  <os-date-picker md-type="true" :placeholder="filter.caption"
+                    v-model="filterValues[filter.name]" @update:model-value="handleDateInput(filter)">
+                  </os-date-picker>
+                </div>
               </span>
             </cell>
           </form-group>
@@ -143,7 +181,7 @@ export default {
     'showRowActions'
   ],
 
-  emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked'],
+  emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked', 'sort'],
 
   components: {
     'data-table': DataTable,
@@ -226,14 +264,34 @@ export default {
 
     clearFilters: function() {
       if (this.schema.filters) {
-        this.schema.filters.forEach((filter) => delete this.filterValues[filter.name]);
+        this.schema.filters.forEach(
+          filter => {
+            if (filter.range) {
+              delete this.filterValues[filter.name + '.$min'];
+              delete this.filterValues[filter.name + '.$max'];
+            } else {
+              delete this.filterValues[filter.name];
+            }
+          }
+        );
       }
     },
 
     emitFiltersUpdated: function() {
-      let fb = util.uriEncode(this.filterValues);
-      let event = {filters: this.filterValues, uriEncoding: fb, pageSize: this.pageSizeOpts.currentPageSize + 1};
+      const fb = util.uriEncode(this.filterValues);
+      const event = {filters: this.filterValues, uriEncoding: fb, pageSize: this.pageSizeOpts.currentPageSize + 1};
       this.$emit('filtersUpdated', event);
+    },
+
+    handleDateInput: function(filter, name) {
+      const key  = name || filter.name;
+      const date = this.filterValues[key];
+      if (date && filter.format) {
+        this.filterValues[key] = util.formatDate(date, filter.format);
+        if (filter.stringLiteral) {
+          this.filterValues[key] = '"' + this.filterValues[key] + '"';
+        }
+      }
     },
 
     changePageSize: function(input) {
@@ -331,6 +389,10 @@ export default {
       }
 
       return (ro) => input && exprUtil.getValue(ro, input) || '';
+    },
+
+    sort: function(event) {
+      this.$emit('sort', event);
     }
   },
 
@@ -577,6 +639,22 @@ export default {
 
 .filters .body .input-group :deep(.os-input-text) {
   width: 100%;
+}
+
+.filters .body .range {
+  display: flex;
+}
+
+.filters .body .range > div {
+  flex: 1;
+}
+
+.filters .body .range > div:first-child {
+  margin-right: 0.25rem;
+}
+
+.filters .body .range > div:last-child {
+  margin-left: 0.25rem;
 }
 
 .os-list-items {

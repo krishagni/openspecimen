@@ -39,10 +39,19 @@ angular.module('os.administrative.order',
       .state('order-list', {
         url: '/orders?filters',
         templateUrl: 'modules/administrative/order/list.html',     
-        controller: 'OrderListCtrl',
-        parent: 'order-root'
+        controller: function(VueApp) {
+          VueApp.setVueView('orders/-1');
+        },
+        parent: 'signed-in'
       })
       .state('order-addedit', {
+        url: '/order-addedit/:orderId',
+        template: '<div></div>',
+        controller: function($state, $window, VueApp) {
+          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
+        }
+      })
+      /*.state('order-addedit', {
         url: '/order-addedit/:orderId?requestId&specimenListId&allReservedSpmns&dpId&clearFromCart&clearCart',
         templateUrl: 'modules/administrative/order/addedit.html',
         controller: 'OrderAddEditCtrl',
@@ -136,7 +145,7 @@ angular.module('os.administrative.order',
           }
         },
         parent: 'order-root'
-      })
+      })*/
       .state('order-import', {
         url: '/orders-import',
         templateUrl: 'modules/common/import/add.html',

@@ -1,0 +1,127 @@
+
+<template>
+  <os-page-toolbar>
+    <template #default>
+      <os-button left-icon="print" label="Print" @click="printLabels" />
+      <os-button left-icon="reply" label="Retrieve" @click="retrieveSpecimens" v-if="showRetrieveSpmns" />
+    </template>
+    <template #right v-if="$refs.specimensList && $refs.specimensList.list && $refs.specimensList.list.rows">
+      <os-list-size
+        :list="$refs.specimensList.list.rows"
+        :page-size="$refs.specimensList.pageSize"
+        :list-size="$refs.specimensList.size"
+        @updateListSize="getSpecimensCount"
+      />
+
+      <os-button left-icon="search" label="Search" @click="toggleSearch" />
+    </template>
+  </os-page-toolbar>
+
+  <os-query-list-view
+    name="order-specimens-list-view"
+    :object-id="order.id"
+    :allow-selection="printDistLabels"
+    :include-count="includeCount"
+    url="'#/specimens/' + hidden.specimenId"
+    @selectedRows="onSpecimenSelection"
+    @rowClicked="onSpecimenRowClick"
+    ref="specimensList"
+  />
+
+  <os-dialog ref="retrieveSpmnComments">
+    <template #header>
+      <span> Retrieve Specimens </span>
+    </template>
+    <template #content>
+      <os-textarea placeholder="Reason for retrieving specimens" rows="5" v-model="retrieveSpmnsReason" />
+    </template>
+    <template #footer>
+      <os-button text    label="Cancel" @click="cancelRetrieveSpecimens" />
+      <os-button primary label="Retrieve" @click="submitRetrieveSpecimens" />
+    </template>
+  </os-dialog>
+</template>
+
+<script>
+
+import orderSvc   from '@/administrative/services/Order.js';
+import alertSvc   from '@/common/services/Alerts.js';
+import routerSvc  from '@/common/services/Router.js';
+import settingSvc from '@/common/services/Setting.js';
+
+export default {
+  props: ['order'],
+
+  data() {
+    return {
+      printDistLabels: false,
+
+      showRetrieveSpmns: false,
+
+      selectedSpecimens: [],
+
+      retrieveSpmnsReason: '',
+
+      includeCount: false
+    }
+  },
+
+  async created() {
+    const setting = await settingSvc.getSetting('administrative', 'allow_dist_label_printing');
+    this.printDistLabels = setting[0].value == 'true' || setting[0].value == true;
+
+    if (this.order.status == 'EXECUTED') {
+      const items = await orderSvc.getOrderItems(this.order.id, {maxResults: 1, storedInDistributionContainer: true});
+      this.showRetrieveSpmns = items.length > 0;
+    }
+  },
+
+  methods: {
+    toggleSearch: function() {
+      this.$refs.specimensList.toggleShowFilters();
+    },
+
+    onSpecimenSelection: function(specimens) {
+      this.selectedSpecimens = specimens.map(({rowObject}) => +rowObject.hidden.orderItemId_);
+    },
+
+    onSpecimenRowClick: function(event) {
+      const spmnId = +event.hidden.specimenId;
+      routerSvc.ngGoto('specimens/' + spmnId);
+    },
+
+    getSpecimensCount: function() {
+      this.$refs.specimensList.loadListSize();
+    },
+
+    printLabels: async function() {
+      if (this.selectedSpecimens.length == 0) {
+        alertSvc.error('No specimens selected.');
+        return;
+      }
+
+      const printJob = await orderSvc.printLabels(this.order.id, this.selectedSpecimens);
+      const downloadEnabled = await settingSvc.getSetting('administrative', 'download_labels_print_file');
+      if (downloadEnabled[0].value == 'true' || downloadEnabled[0].value == true) {
+        orderSvc.downloadLabelsFile(printJob.id, this.order.name + '.csv');
+      }
+    },
+
+    retrieveSpecimens: function() {
+      this.retrieveSpmnsReason = '';
+      this.$refs.retrieveSpmnComments.open();
+    },
+
+    submitRetrieveSpecimens: async function() {
+      await orderSvc.retrieveSpecimens(this.order.id, this.retrieveSpmnsReason);
+      this.showRetrieveSpmns = false;
+      this.$refs.specimensList.reload();
+      this.$refs.retrieveSpmnComments.close();
+    },
+
+    cancelRetrieveSpecimens: async function() {
+      this.$refs.retrieveSpmnComments.close();
+    }
+  }
+}
+</script>

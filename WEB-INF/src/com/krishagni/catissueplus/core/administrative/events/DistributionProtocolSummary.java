@@ -28,6 +28,8 @@ public class DistributionProtocolSummary extends AttributeModifiedSupport {
 	
 	private Date endDate;
 
+	private String instituteName;
+
 	private String defReceivingSiteName;
 
 	private int distributedSpecimensCount;
@@ -82,6 +84,14 @@ public class DistributionProtocolSummary extends AttributeModifiedSupport {
 		this.endDate = endDate;
 	}
 
+	public String getInstituteName() {
+		return instituteName;
+	}
+
+	public void setInstituteName(String instituteName) {
+		this.instituteName = instituteName;
+	}
+
 	public String getDefReceivingSiteName() {
 		return defReceivingSiteName;
 	}
@@ -123,6 +133,7 @@ public class DistributionProtocolSummary extends AttributeModifiedSupport {
 		detail.setPrincipalInvestigator(UserSummary.from(dp.getPrincipalInvestigator()));
 		detail.setStartDate(dp.getStartDate());
 		detail.setEndDate(dp.getEndDate());
+		detail.setInstituteName(dp.getInstitute().getName());
 		if (dp.getDefReceivingSite() != null) {
 			detail.setDefReceivingSiteName(dp.getDefReceivingSite().getName());
 		}

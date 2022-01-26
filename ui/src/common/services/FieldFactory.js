@@ -48,13 +48,48 @@ class FieldFactory {
       for (let rule in field.validations) {
         let fv = field.validations[rule];
         if (rule == 'requiredIf') {
-          validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(fv.expr)));
+          validations[rule] = (value, form) => {
+            const required = exprUtil.eval({...form.$context, ...form}, fv.expr);
+            return !required || (value == 0 || !!value);
+          }
         } else if (rule == 'required' && field.showWhen) {
           validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(field.showWhen)));
         } else if (rule == 'pattern') {
           validations[rule] = (value) => new RegExp(fv.expr).test(value);
         } else if (rule == 'sameAs') {
           validations[rule] = (value, form) => form[fv.field] == value
+        } else if (rule == 'lt' || rule == 'le' || rule == 'gt' || rule == 'ge') {
+          validations[rule] = (value, form) => {
+            if (value == undefined || value == null) {
+              return true;
+            }
+
+            let target = fv.value;
+            if ((target == undefined || target == null) && fv.expr) {
+              target = form[fv.expr]
+              if (target == undefined || target == null) {
+                target = exprUtil.eval(form.$context, fv.expr);
+              }
+            }
+
+            if (target == undefined || target == null) {
+              return false;
+            }
+
+            if (rule == 'lt') {
+              return value < target;
+            } else if (rule == 'le') {
+              return value <= target;
+            } else if (rule == 'gt') {
+              return value > target;
+            } else if (rule == 'ge') {
+              return value >= target;
+            }
+
+            return false;
+          }
+        } else if (rule == 'nz') {
+          validations[rule] = (value) => value != 0
         } else if (fv.params) {
           validations[rule] = Validators[rule](fv.params);
         } else {

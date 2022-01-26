@@ -185,6 +185,13 @@ export default {
           if (dispValue) {
             value = dispValue;
           }
+        } else if (field.type == 'dropdown') {
+          if (typeof value == 'object') {
+            const ls = field.listSource || {};
+            if (ls.displayProp) {
+              value = value[ls.displayProp];
+            }
+          }
         }
       }
 

@@ -3,8 +3,7 @@
     <div class="os-detail-sublist">
       <div class="os-page-commands">
         <div class="left">
-          <button ui-sref="order-addedit({allReservedSpmns: true, dpId: distributionProtocol.id})"
-            show-if-allowed="lctx.orderCreateOpts" class="default">
+          <button show-if-allowed="lctx.orderCreateOpts" class="default" ng-click="distributeAll()">
             <span class="fa fa-share"></span>
             <span translate="dp.distribute_all">Distribute All</span>
           </button>

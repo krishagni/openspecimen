@@ -2,11 +2,11 @@
 <template>
   <span v-if="multiple">
     <MultiSelectDropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
-      :md-type="$attrs['md-type']" />
+      :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
   </span>
   <span v-else>
     <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
-      :md-type="$attrs['md-type']" />
+      :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
   </span>
 </template>
 

@@ -411,6 +411,67 @@ const routes = [
             receive: true
           }
         )
+      },
+
+      /*****************************
+       *****************************
+       * Orders module              *
+       *****************************
+       *****************************/
+      {
+        path: 'orders/:orderId',
+        name: 'OrdersList',
+        component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/List.vue'),
+        props: (route) => ({orderId: route.params && route.params.orderId, filters: route.query.filters}),
+        children: [
+          {
+            path: '',
+            name: 'OrdersListItemDetail',
+            component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/Detail.vue'),
+            props: (route) => ({orderId: route.params && route.params.orderId, listItemDetailView: true}),
+            children: [
+              {
+                path: 'overview',
+                name: 'OrdersListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/Overview.vue')
+              },
+              {
+                path: 'specimens',
+                name: 'OrdersListItemDetail.Specimens',
+                component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/Specimens.vue')
+              }
+            ]
+          }
+        ]
+      },
+      {
+        path: 'orders/:orderId/detail',
+        name: 'OrderDetail',
+        component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/Detail.vue'),
+        props: (route) => ({orderId: route.params && route.params.orderId, listItemDetailView: false}),
+        children: [
+          {
+            path: 'overview',
+            name: 'OrderDetail.Overview',
+            component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/Overview.vue')
+          },
+          {
+            path: 'specimens',
+            name: 'OrderDetail.Specimens',
+            component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/Specimens.vue')
+          }
+        ]
+      },
+      {
+        path: 'order-addedit/:orderId',
+        name: 'OrderAddEdit',
+        component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/AddEdit.vue'),
+        props: (route) => ({orderId: route.params && route.params.orderId})
+      },
+      {
+        path: 'order-return-specimens',
+        name: 'OrderReturnSpecimens',
+        component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/ReturnSpecimens.vue'),
       }
     ]
   }

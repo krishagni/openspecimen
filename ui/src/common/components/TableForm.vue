@@ -5,7 +5,11 @@
       <thead>
         <tr>
           <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" :style="field.uiStyle" @click="sort(field)">
-            <span>{{field.label}}</span>
+            <span v-if="field.label">{{field.label}}</span>
+            <div v-else-if="field.icon" v-os-tooltip="field.tooltip"
+              :class="{'align-icon': field.enableCopyFirstToAll && field.type == 'booleanCheckbox'}">
+              <os-icon :name="field.icon" />
+            </div>
             <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
@@ -13,9 +17,15 @@
               <span v-show="ctx.sort.direction == 'ASC'"> &uarr; </span>
               <span v-show="ctx.sort.direction == 'DESC'"> &darr; </span>
             </span>
-            <a v-if="field.enableCopyFirstToAll" @click="copyFirstToAll($event, field)">
-              <span> (Copy first to all) </span>
-            </a>
+            <span v-if="field.enableCopyFirstToAll">
+              <a v-if="field.type != 'booleanCheckbox'" @click="copyFirstToAll($event, field)">
+                <span> (Copy first to all) </span>
+              </a>
+              <div v-else>
+                <os-boolean-checkbox v-model="ctx.selects[field.name]" style="margin-bottom: 0"
+                  @change="copySelectToAll($event, field)" />
+              </div>
+            </span>
           </th>
           <th v-if="removeItems == true">
             <span>&nbsp;</span>
@@ -40,6 +50,9 @@
             <os-button size="small" left-icon="times" @click="removeItem(itemIdx)" />
           </td>
         </tr>
+        <tr class="footer-row" v-if="$slots.footerRow">
+          <slot name="footerRow" />
+        </tr>
       </tbody>
     </table>
 
@@ -63,12 +76,13 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 export default {
   props: ['schema', 'data', 'items', 'removeItems'],
 
-  emits: ['input', 'form-validity'],
+  emits: ['input', 'form-validity', 'remove-item'],
 
   setup(props) {
-    let ctx = reactive({
+    const ctx = reactive({
       items: [],
-      sort: { field: '', direction: '' }
+      sort: { field: '', direction: '' },
+      selects: { }
     });
 
     watchEffect(() => { ctx.items = props.items; });
@@ -80,6 +94,10 @@ export default {
 
   beforeCreate: function() {
     this._formCache = {};
+  },
+
+  created: function() {
+    this.updateSelects();
   },
 
   computed: {
@@ -134,6 +152,7 @@ export default {
           }
         }
 
+        model.$context = item;
         models.push(model);
       }
 
@@ -171,6 +190,12 @@ export default {
     }
   },
 
+  watch: {
+    'items.length'() {
+      this.updateSelects();
+    }
+  },
+
   validations() {
     if (!this.itemModels) {
       return {itemModels: []};
@@ -188,6 +213,14 @@ export default {
 
       if (this.v$.itemModels[itemIdx][field.name]) {
         this.v$.itemModels[itemIdx][field.name].$touch();
+      }
+
+      if (field.type == 'booleanCheckbox' && field.enableCopyFirstToAll) {
+        if (itemModel[field.name] == true) {
+          this.ctx.selects[field.name] = this.itemModels.every(item => item[field.name] == true);
+        } else {
+          this.ctx.selects[field.name] = false;
+        }
       }
 
       this.$emit('form-validity', {invalid: this.v$.$invalid});
@@ -223,7 +256,7 @@ export default {
     },
 
     removeItem: function(idx) {
-      this.$emit('removeItem', {item: this.ctx.items[idx], idx: idx});
+      this.$emit('remove-item', {item: this.ctx.items[idx], idx: idx});
     },
 
     sort: function(field) {
@@ -263,8 +296,6 @@ export default {
 
     copyFirstToAll: function(event, field) {
       event.stopPropagation();
-      console.log(event);
-
       if (!this.itemModels || this.itemModels.length == 0) {
         return;
       }
@@ -295,12 +326,37 @@ export default {
         this.itemModels[idx][field.name] = toCopy;
         this.handleInput(idx, field, this.itemModels[idx]);
       }
+    },
+
+    copySelectToAll: function(value, field) {
+      if (!this.itemModels || this.itemModels.length == 0) {
+        return;
+      }
+
+      for (let idx = 0; idx < this.itemModels.length; ++idx) {
+        this.itemModels[idx][field.name] = value;
+        this.handleInput(idx, field, this.itemModels[idx]);
+      }
+    },
+
+    updateSelects: function() {
+      for (let field of this.fields) {
+        if (field.type != 'booleanCheckbox' || !field.enableCopyFirstToAll) {
+          continue;
+        }
+
+        this.ctx.selects[field.name] = this.itemModels.every(item => item[field.name] == true);
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+form {
+  width: 100%;
+  overflow-x: auto;
+}
 
 table th a {
   font-weight: normal;
@@ -317,4 +373,10 @@ table th .required-indicator {
   margin-right: 0.5rem;
 }
 
+table th .align-icon {
+  margin-top: -20px;
+  margin-left: 3px;
+  position: absolute;
+  z-index: 10000;
+}
 </style>

@@ -14,6 +14,7 @@ export default {
       boolValue: boolValue.toString,
       date: dateFmt.date,
       dateTime: dateFmt.dateTime,
+      shortDateTime: dateFmt.shortDateTime,
       specimenMeasure: specimenMeasure.format,
       storagePosition: storagePosition.toString,
       username: user.name

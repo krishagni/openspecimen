@@ -1,5 +1,5 @@
 angular.module('os.administrative.dp')
-  .controller('DpReservedSpecimensCtrl', function($scope, $state, distributionProtocol, Specimen, SpecimensHolder) {
+  .controller('DpReservedSpecimensCtrl', function($scope, $state, $window, distributionProtocol, Specimen) {
 
     var lctx;
 
@@ -21,14 +21,21 @@ angular.module('os.administrative.dp')
       lctx.listCtrl.loadList();
     }
 
+    $scope.distributeAll = function() {
+      $window.localStorage['os.orderDetails'] = JSON.stringify({
+        allReserved: true,
+        dp: distributionProtocol
+      });
+      $state.go('order-addedit', {orderId: -1});
+    }
+
     $scope.distributeSpecimens = function() {
       var spmnIds = lctx.listCtrl.getSelectedItems().map(function(spmn) { return spmn.hidden.specimenId });
-      Specimen.getByIds(spmnIds).then(
-        function(spmns) {
-          SpecimensHolder.setSpecimens(spmns);
-          $state.go('order-addedit', {dpId: distributionProtocol.id});
-        }
-      );
+      $window.localStorage['os.orderDetails'] = JSON.stringify({
+        specimenIds: spmnIds,
+        dp: distributionProtocol
+      });
+      $state.go('order-addedit', {orderId: -1});
     }
 
     $scope.cancelReservation = function() {

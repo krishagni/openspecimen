@@ -11,7 +11,7 @@
         </os-cell>
       </os-form-group>
 
-      <os-form-group dense>
+      <os-form-group dense v-if="captcha != false">
         <os-cell :width="12">
           <div>Type 'DELETE ANYWAY' to continue.</div>
           <os-input-text v-model="input" />
@@ -35,6 +35,8 @@ import FormGroup from '@/common/components/FormGroup.vue';
 import InputText from '@/common/components/InputText.vue';
 
 export default {
+  props: ['captcha'],
+
   components: {
     'os-button': Button,
     'os-cell': Col,
@@ -51,7 +53,7 @@ export default {
 
   computed: {
     disabled: function() {
-      return this.input != 'DELETE ANYWAY'
+      return this.captcha != false && this.input != 'DELETE ANYWAY'
     }
   },
 

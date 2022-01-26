@@ -9,8 +9,8 @@
     </template>
 
     <template #footer>
-      <os-button text :label="noButtonLabel"  type="text" @click="cancel" />
-      <os-button primary :label="yesButtonLabel" type="primary" @click="proceed" />
+      <os-button text    :label="noButtonLabel"  @click="cancel" />
+      <os-button primary :label="yesButtonLabel" @click="proceed" />
     </template>
   </os-dialog>
 </template>

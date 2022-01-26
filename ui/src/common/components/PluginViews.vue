@@ -5,7 +5,7 @@
     :view="view"
     :query="query"
     :is="pluginView.component"
-    v-bind="pluginView"
+    v-bind="viewProps"
     v-for="pluginView of views"
     :key="pluginView.name"
   />
@@ -16,7 +16,7 @@
 import pluginViewsReg from '@/common/services/PluginViewsRegistry.js';
 
 export default {
-  props: ['page', 'view', 'query'],
+  props: ['page', 'view', 'query', 'viewProps'],
 
   computed: {
     views: function() {

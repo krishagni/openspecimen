@@ -24,8 +24,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 
 	private List<UserSummary> coordinators;
 
-	private String instituteName;
-
 	private String irbId;
 
 	private String activityStatus;
@@ -50,14 +48,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 
 	public void setCoordinators(List<UserSummary> coordinators) {
 		this.coordinators = coordinators;
-	}
-
-	public String getInstituteName() {
-		return instituteName;
-	}
-
-	public void setInstituteName(String instituteName) {
-		this.instituteName = instituteName;
 	}
 
 	public String getIrbId() {
@@ -163,7 +153,6 @@ public class DistributionProtocolDetail extends DistributionProtocolSummary {
 		DistributionProtocolDetail detail = new DistributionProtocolDetail();
 		
 		copy(dp, detail);
-		detail.setInstituteName(dp.getInstitute().getName());
 		detail.setIrbId(dp.getIrbId());
 		detail.setPrincipalInvestigator(UserSummary.from(dp.getPrincipalInvestigator()));
 		detail.setCoordinators(UserSummary.from(dp.getCoordinators()));

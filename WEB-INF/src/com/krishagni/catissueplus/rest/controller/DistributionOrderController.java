@@ -250,14 +250,20 @@ public class DistributionOrderController {
 		@RequestParam(value = "barcode", required = false)
 		List<String> barcodes) {
 
-		if (CollectionUtils.isEmpty(labels) && CollectionUtils.isEmpty(barcodes)) {
+		return searchDistributedSpecimens(new SpecimenListCriteria().labels(labels).barcodes(barcodes));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/specimens")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<DistributionOrderItemDetail> searchDistributedSpecimens(@RequestBody SpecimenListCriteria crit) {
+		if (CollectionUtils.isEmpty(crit.ids()) &&
+			CollectionUtils.isEmpty(crit.labels()) &&
+			CollectionUtils.isEmpty(crit.barcodes())) {
 			return Collections.emptyList();
 		}
 
-		SpecimenListCriteria crit = new SpecimenListCriteria()
-			.labels(labels)
-			.barcodes(barcodes)
-			.exactMatch(true);
+		crit.exactMatch(true);
 		return ResponseEvent.unwrap(distributionService.getDistributedSpecimens(RequestEvent.wrap(crit)));
 	}
 

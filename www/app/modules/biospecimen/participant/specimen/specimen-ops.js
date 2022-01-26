@@ -169,7 +169,7 @@ angular.module('os.biospecimen.specimen')
       getDp(scope, hideDistributeBtn, distList).then(
         function(details) {
           if (details.distribute) {
-            if (specimens) {
+            /*if (specimens) {
               SettingUtil.getSetting('administrative', 'max_order_spmns_ui_limit').then(
                 function(setting) {
                   var limit = (setting.value && +setting.value) || 100;
@@ -190,7 +190,7 @@ angular.module('os.biospecimen.specimen')
               );
 
               return;
-            }
+            }*/
 
             distributeSpmns(scope, details, specimens);
           } else {
@@ -207,11 +207,22 @@ angular.module('os.biospecimen.specimen')
       }
 
       if (details.editOrder) {
-        SpecimensHolder.setSpecimens(specimens, details);
+        details.specimenIds = specimens && specimens.map(function(spmn) { return spmn.id; });
+        $window.localStorage['os.orderDetails'] = JSON.stringify({
+          dp: details.dp,
+          clearFromCart: details.clearListId,
+          clearCart: details.clearListMode,
+          specimenListId: specimenListId,
+          specimenIds: details.specimenIds,
+          printLabel: details.printLabels,
+          comments: details.comments
+        });
+
         navTo(
           scope,
           'order-addedit',
           {
+            orderId: -1,
             dpId: details.dp.id,
             clearFromCart: details.clearListId,
             clearCart: details.clearListMode,
