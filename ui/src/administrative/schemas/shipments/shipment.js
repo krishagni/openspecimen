@@ -72,6 +72,9 @@ export default {
         "queryParams": {
           "dynamic": {
             "institute": "shipment.receivingInstitute"
+          },
+          "static": {
+            "listAll": true
           }
         }
       },
