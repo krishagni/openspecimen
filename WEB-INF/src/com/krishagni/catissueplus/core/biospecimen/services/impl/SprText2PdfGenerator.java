@@ -9,16 +9,19 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.MessageSource;
-
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Font.FontFamily;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
+
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -43,7 +46,27 @@ public class SprText2PdfGenerator implements SprPdfGenerator {
 			File sprReport = File.createTempFile("spr-report", ".pdf");
 			out= new FileOutputStream(sprReport);
 			
-			PdfWriter.getInstance(document, out);
+			PdfWriter pdfWriter = PdfWriter.getInstance(document, out);
+			pdfWriter.setPageEvent(new PdfPageEventHelper() {
+				@Override
+				public void onStartPage(PdfWriter writer, Document document) {
+					String restricted = getMessage("spr_restricted");
+					Paragraph paragraph = new Paragraph(restricted);
+					paragraph.getFont().setSize(10);
+
+					float xOffset = pdfWriter.getPageSize().getWidth() / 2;
+					float yOffset = pdfWriter.getPageSize().getTop() - 25;
+					ColumnText.showTextAligned(
+						writer.getDirectContent(),
+						Element.ALIGN_CENTER,
+						paragraph,
+						xOffset,
+						yOffset,
+						0
+					);
+				}
+			});
+
 			document.open();
 			document.addTitle(getMessage("spr_title"));
 			
