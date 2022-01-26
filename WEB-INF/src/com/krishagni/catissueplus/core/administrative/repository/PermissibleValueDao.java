@@ -17,8 +17,6 @@ public interface PermissibleValueDao extends Dao<PermissibleValue>{
 
 	public String getSpecimenClass(String type);
 	
-	public PermissibleValue getByConceptCode(String attribute, String conceptCode);
-	
 	public PermissibleValue getByValue(String attribute, String value);
 	
 	public List<PermissibleValue> getByPropertyKeyValue(String attribute,String propName, String propValue);
