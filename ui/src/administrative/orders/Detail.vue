@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
+import { reactive } from 'vue';
 
 import routerSvc   from '@/common/services/Router.js';
 import formUtil    from '@/common/services/FormUtil.js';
@@ -63,7 +63,7 @@ import orderSvc    from '@/administrative/services/Order.js';
 export default {
   props: ['orderId', 'listItemDetailView'],
 
-  setup(props) {
+  setup() {
     const ctx = reactive({
       order: {},
 
@@ -71,13 +71,6 @@ export default {
         {url: routerSvc.getUrl('OrdersList', {orderId: -1}), label: 'Orders'}
       ]
     });
-
-    watchEffect(
-      async () => {
-        ctx.order = await orderSvc.getOrder(+props.orderId);
-        formUtil.createCustomFieldsMap(ctx.order, true);
-      }
-    );
 
     return { ctx };
   },
@@ -89,9 +82,24 @@ export default {
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
     }
+
+    this.loadOrder();
+  },
+
+  watch: {
+    orderId: function(newVal, oldVal) {
+      if (oldVal != newVal) {
+        this.loadOrder();
+      }
+    }
   },
 
   methods: {
+    loadOrder: async function() {
+      this.ctx.order = await orderSvc.getOrder(+this.orderId);
+      formUtil.createCustomFieldsMap(this.ctx.order, true);
+    },
+
     getRoute: function(routeName, params, query) {
       return {
         name: this.detailRouteName + '.' + routeName,

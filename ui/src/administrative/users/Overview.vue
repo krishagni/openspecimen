@@ -95,7 +95,7 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
+import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
 import alertSvc from '@/common/services/Alerts.js';
@@ -113,7 +113,7 @@ export default {
 
   inject: ['ui'],
 
-  setup(props) {
+  setup() {
     const route = useRoute();
 
     const ctx = reactive({
@@ -127,20 +127,17 @@ export default {
     });
 
     
-    watchEffect(
-      () => {
-        ctx.user = props.user;
-        ctx.deleteOpts = {
-          type: 'User',
-          title: props.user.firstName + ' ' + props.user.lastName,
-          dependents: () => userSvc.getDependents(props.user),
-          deleteObj: () => userSvc.delete(props.user)
-        };
-        ctx.userObjs = [{objectName: 'user', objectId: props.user.id}];
-      }
-    );
-
     return { ctx, userSchema, userResources };
+  },
+
+  created() {
+    this.setupUser();
+  },
+
+  watch: {
+    user: function() {
+      this.setupUser();
+    }
   },
 
   computed: {
@@ -150,6 +147,19 @@ export default {
   },
 
   methods: {
+    setupUser: function() {
+      const ctx = this.ctx;
+      ctx.user = this.user;
+      ctx.deleteOpts = {
+        type: 'User',
+        title: this.user.firstName + ' ' + this.user.lastName,
+        dependents: () => userSvc.getDependents(this.user),
+        deleteObj: () => userSvc.delete(this.user)
+      };
+
+      ctx.userObjs = [{objectName: 'user', objectId: this.user.id}];
+    },
+
     goto: (name, params, query) => routerSvc.goto(name, params, query),
 
     updateStatus: function(status, msg) {

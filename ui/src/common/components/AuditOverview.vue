@@ -72,10 +72,8 @@
 
 <script>
 
-import { reactive, watchEffect } from 'vue';
-
-import Button from '@/common/components/Button.vue';
-import Dialog from '@/common/components/Dialog.vue';
+import Button  from '@/common/components/Button.vue';
+import Dialog  from '@/common/components/Dialog.vue';
 import Section from '@/common/components/Section.vue';
 
 import auditLogSvc from '@/common/services/AuditLogs.js';
@@ -89,51 +87,63 @@ export default {
     Section
   },
 
-  setup(props) {
-    let ctx = reactive({
-      auditTrail: {}
-    });
-
-    watchEffect(
-      () => {
-        ctx.auditTrail = {};
-        if (!props.objects || props.objects.length <= 0) {
-          return;
-        }
-
-        auditLogSvc.getSummary(props.objects).then(
-          (infoList) => {
-            let trail = {};
-            infoList.forEach(
-              (info, idx) => {
-                if (idx == 0) {
-                  trail = info;
-                } else {
-                  if (trail.createdOn < info.createdOn) {
-                    trail.createdBy = info.createdBy;
-                    trail.createdOn = info.createdOn;
-                  }
-
-                  if (info.lastUpdatedOn > trail.lastUpdatedOn) {
-                    trail.lastUpdatedBy = info.lastUpdatedBy;
-                    trail.lastUpdatedOn = info.lastUpdatedOn;
-                  }
-
-                  trail.revisionsCount += info.revisionsCount;
-                }
-              }
-            );
-
-            ctx.auditTrail = trail;
-          }
-        );
+  data() {
+    return {
+      ctx: {
+        auditTrail: {}
       }
-    );
+    };
+  },
 
-    return { ctx };
+  created() {
+    this.loadAuditTrail();
+  },
+
+  watch: {
+    objects: function(newVal, oldVal) {
+      if (newVal == oldVal) {
+        return;
+      }
+
+      this.loadAuditTrail();
+    }
   },
 
   methods: {
+    loadAuditTrail: async function() {
+      const ctx = this.ctx;
+
+      ctx.auditTrail = {};
+      if (!this.objects || this.objects.length <= 0) {
+        return;
+      }
+
+      const infoList = await auditLogSvc.getSummary(this.objects);
+
+      let trail = {};
+      infoList.forEach(
+        (info, idx) => {
+          if (idx == 0) {
+            trail = info;
+          } else {
+            if (trail.createdOn < info.createdOn) {
+              trail.createdBy = info.createdBy;
+              trail.createdOn = info.createdOn;
+            }
+
+            if (info.lastUpdatedOn > trail.lastUpdatedOn) {
+              trail.lastUpdatedBy = info.lastUpdatedBy;
+              trail.lastUpdatedOn = info.lastUpdatedOn;
+            }
+
+            trail.revisionsCount += info.revisionsCount;
+          }
+        }
+      );
+
+      ctx.auditTrail = trail;
+    },
+
     showRevs: function() {
       auditLogSvc.getRevisions(this.objects).then(
         (revisions) => {

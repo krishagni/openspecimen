@@ -113,7 +113,7 @@
 </template>
 
 <script>
-import { reactive, inject, watchEffect } from 'vue';
+import { reactive, inject } from 'vue';
 
 import alertSvc    from '@/common/services/Alerts.js';
 import routerSvc   from '@/common/services/Router.js';
@@ -133,7 +133,7 @@ export default {
   setup(props) {
     const ui = inject('ui');
 
-    let ctx = reactive({
+    const ctx = reactive({
       bcrumb: [
         {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: 'Shipments'}
       ],
@@ -147,7 +147,7 @@ export default {
       loading: false
     });
 
-    let dataCtx = reactive({
+    const dataCtx = reactive({
       shipment: {},
 
       currentUser: ui.currentUser,
@@ -159,86 +159,13 @@ export default {
       allowSpecimenRelabeling: false
     });
 
-
-    settingsSvc.getSetting('administrative', 'allow_spmn_relabeling').then(
-      setting => dataCtx.allowSpecimenRelabeling = util.isTrue(setting[0].value)
-    );
-
-    watchEffect(
-      () => {
-        ctx.loading = true;
-
-        let promises = [ shipmentSvc.getAddEditFormSchema() ];
-        if (props.shipmentId && +props.shipmentId > 0) {
-          promises.push(shipmentSvc.getShipment(+props.shipmentId));
-
-          if (props.shipmentType == 'SPECIMEN') {
-            promises.push(shipmentSvc.getSpecimens(+props.shipmentId));
-          } else {
-            promises.push(shipmentSvc.getContainers(+props.shipmentId));
-          }
-        } else {
-          const shipment = dataCtx.shipment = {
-            type: props.shipmentType || 'SPECIMEN',
-            shippedDate: new Date(),
-            status: 'Pending',
-            notifyUsers: []
-          };
-
-          if (shipment.type == 'SPECIMEN') { // TODO: remove when everything is Vue based
-            const spmnsQ  = shipmentSvc.getSelectedSpecimens(localStorage.selectedSpecimenIds);
-            if (spmnsQ) {
-              promises.push(spmnsQ);
-            }
-
-            localStorage.removeItem('selectedSpecimenIds');
-          }
-
-          dataCtx.specimenItems = [];
-          dataCtx.containerItems = [];
-        }
-
-        Promise.all(promises).then(
-          function(result) {
-            ctx.loading   = false;
-            ctx.addEditFs = result[0].schema;
-            if (result.length > 1) {
-              let idx = 1;
-              if (result.length == 3) {          // when there are 3 promises/results
-                dataCtx.shipment = result[idx];  // the second argument (idx = 1) is shipment
-                dataCtx.receivingInstitute = result[idx].receivingInstitute;
-                ++idx;
-              }
-
-              if (dataCtx.shipment.type == 'SPECIMEN') {
-                dataCtx.specimenItems  = result[idx];
-              } else {
-                dataCtx.containerItems = result[idx];
-              }
-            }
-
-            if (props.receive) {
-              dataCtx.shipment.receivedDate = new Date();
-
-              if (dataCtx.shipment.type == 'SPECIMEN') {
-                dataCtx.specimenItems.forEach(item => item.specimen.storageLocation = null);
-              } else {
-                dataCtx.containerItems.forEach(item => item.container.storageLocation = null);
-              }
-            }
-
-            ctx.specimensSchema  =  shipSpecimensSchema;
-            ctx.containersSchema =  shipContainersSchema;
-          },
-
-          function() {
-            ctx.loading = false;
-          }
-        );
-      }
-    );
-
     return { ctx, dataCtx };
+  },
+
+  created: async function() {
+    const setting = await settingsSvc.getSetting('administrative', 'allow_spmn_relabeling');
+    this.dataCtx.allowSpecimenRelabeling = util.isTrue(setting[0].value);
+    this.loadShipment();
   },
 
   computed: {
@@ -249,10 +176,96 @@ export default {
         notFound: 'Not present in the shipment',
         extra: 'Additional specimen present in the shipment'
       }
+    },
+
+    loadKey: function() {
+      return this.shipmentId + ':' + this.shipmentType + ':' + this.receive;
+    }
+  },
+
+  watch: {
+    loadKey: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        alert(oldVal + ' => ' + newVal);
+        this.loadShipment();
+      }
     }
   },
 
   methods: {
+    loadShipment: function() {
+      const ctx     = this.ctx;
+      const dataCtx = this.dataCtx;
+
+      ctx.loading = true;
+
+      let promises = [ shipmentSvc.getAddEditFormSchema() ];
+      if (this.shipmentId && +this.shipmentId > 0) {
+        promises.push(shipmentSvc.getShipment(+this.shipmentId));
+
+        if (this.shipmentType == 'SPECIMEN') {
+          promises.push(shipmentSvc.getSpecimens(+this.shipmentId));
+        } else {
+          promises.push(shipmentSvc.getContainers(+this.shipmentId));
+        }
+      } else {
+        const shipment = dataCtx.shipment = {
+          type: this.shipmentType || 'SPECIMEN',
+          shippedDate: new Date(),
+          status: 'Pending',
+          notifyUsers: []
+        };
+
+        if (shipment.type == 'SPECIMEN') { // TODO: remove when everything is Vue based
+          const spmnsQ  = shipmentSvc.getSelectedSpecimens(localStorage.selectedSpecimenIds);
+          if (spmnsQ) {
+            promises.push(spmnsQ);
+          }
+
+          localStorage.removeItem('selectedSpecimenIds');
+        }
+
+        dataCtx.specimenItems = [];
+        dataCtx.containerItems = [];
+      }
+
+      Promise.all(promises).then(
+        (result) => {
+          ctx.loading   = false;
+          ctx.addEditFs = result[0].schema;
+          if (result.length > 1) {
+            let idx = 1;
+            if (result.length == 3) {          // when there are 3 promises/results
+              dataCtx.shipment = result[idx];  // the second argument (idx = 1) is shipment
+              dataCtx.receivingInstitute = result[idx].receivingInstitute;
+              ++idx;
+            }
+
+            if (dataCtx.shipment.type == 'SPECIMEN') {
+              dataCtx.specimenItems  = result[idx];
+            } else {
+              dataCtx.containerItems = result[idx];
+            }
+          }
+
+          if (this.receive) {
+            dataCtx.shipment.receivedDate = new Date();
+
+            if (dataCtx.shipment.type == 'SPECIMEN') {
+              dataCtx.specimenItems.forEach(item => item.specimen.storageLocation = null);
+            } else {
+              dataCtx.containerItems.forEach(item => item.container.storageLocation = null);
+            }
+          }
+
+          ctx.specimensSchema  =  shipSpecimensSchema;
+          ctx.containersSchema =  shipContainersSchema;
+        },
+
+        () => ctx.loading = false
+      );
+    },
+
     handleInput: function({field, value, data}) {
       Object.assign(this.dataCtx, data);
       if (field.name == 'shipment.receivingInstitute' && this.dataCtx.receivingInstitute != value) {

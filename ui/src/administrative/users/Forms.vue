@@ -23,7 +23,7 @@
 
 <script>
 
-import { reactive, watchEffect } from 'vue';
+import { reactive, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import userResources from '@/administrative/users/Resources.js';
@@ -39,33 +39,35 @@ export default {
       routeQuery: route.query
     });
 
-    watchEffect(
-      () => {
-        ctx.entity = {
-          isActive: props.user.activityStatus == 'Active',
-          isUpdateAllowed: props.entityType == 'UserProfile' ?
-            userResources.isProfileUpdateAllowed(props.user.id) : userResources.isUpdateAllowed(),
-          entity: props.user,
-          id: props.user.id,
-          entityType: props.entityType,
-          loading: true
-        };
+    const loadFormsAndRecords =  () => {
+      alert(props.entityType);
 
-        ctx.forms   = [];
-        ctx.records = []
-        const formsQ = userSvc.getForms(props.user, props.entityType);
-        const recsQ  = userSvc.getFormRecords(props.user, props.entityType);
-        Promise.all([formsQ, recsQ]).then(
-          (data) => {
-            ctx.loading = false;
-            ctx.forms   = data[0];
-            ctx.records = data[1];
-            formUtil.relinkFormRecords(ctx.forms, ctx.records);
-          }
-        );
-      }
-    );
+      ctx.entity = {
+        isActive: props.user.activityStatus == 'Active',
+        isUpdateAllowed: props.entityType == 'UserProfile' ?
+          userResources.isProfileUpdateAllowed(props.user.id) : userResources.isUpdateAllowed(),
+        entity: props.user,
+        id: props.user.id,
+        entityType: props.entityType,
+        loading: true
+      };
 
+      ctx.forms   = [];
+      ctx.records = []
+      const formsQ = userSvc.getForms(props.user, props.entityType);
+      const recsQ  = userSvc.getFormRecords(props.user, props.entityType);
+      Promise.all([formsQ, recsQ]).then(
+        (data) => {
+          ctx.loading = false;
+          ctx.forms   = data[0];
+          ctx.records = data[1];
+          formUtil.relinkFormRecords(ctx.forms, ctx.records);
+        }
+      );
+    }
+
+    loadFormsAndRecords();
+    watch(() => [props.user, props.entityType], () => loadFormsAndRecords());
     return { ctx };
   },
 

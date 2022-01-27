@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
+import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
 import orderSvc   from '@/administrative/services/Order.js';
@@ -46,7 +46,7 @@ export default {
 
   inject: ['ui'],
 
-  setup(props) {
+  setup() {
     const route = useRoute();
     const ctx = reactive({
       order: {},
@@ -60,25 +60,38 @@ export default {
       routeQuery: route.query
     });
 
-    watchEffect(
-      async () => {
-        ctx.order = props.order;
-        ctx.orderObjs = [{objectName: 'distribution_order', objectId: props.order.id}];
-        ctx.dict = await orderSvc.getDict(ctx.order.distributionProtocol);
-
-        if (ctx.order.distributionProtocol.report && ctx.order.distributionProtocol.report.id) {
-          ctx.rptTmplConfigured = true;
-        } else {
-          const setting = await settingSvc.getSetting('common', 'distribution_report_query');
-          ctx.rptTmplConfigured = !!setting[0].value;
-        }
-      }
-    );
-
     return { ctx, orderResources };
   },
 
+  created() {
+    this.setupView();
+  },
+
+  watch: {
+    'order.id': function(newVal, oldVal) {
+      if (newVal == oldVal) {
+        return;
+      }
+
+      this.setupView();
+    }
+  },
+
   methods: {
+    setupView: async function() {
+      const ctx = this.ctx;
+      ctx.order = this.order;
+      ctx.orderObjs = [{objectName: 'distribution_order', objectId: this.order.id}];
+      ctx.dict = await orderSvc.getDict(ctx.order.distributionProtocol);
+
+      if (ctx.order.distributionProtocol.report && ctx.order.distributionProtocol.report.id) {
+        ctx.rptTmplConfigured = true;
+      } else {
+        const setting = await settingSvc.getSetting('common', 'distribution_report_query');
+        ctx.rptTmplConfigured = !!setting[0].value;
+      }
+    },
+
     editOrder: function() {
       routerSvc.goto('OrderAddEdit', {orderId: this.order.id});
     },

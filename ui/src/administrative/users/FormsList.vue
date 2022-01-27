@@ -102,7 +102,7 @@
 
 <script>
 
-import { reactive, watchEffect } from 'vue';
+import { reactive, watch } from 'vue';
 import { useRouter } from 'vue-router'
 
 import FormRecordOverview from '@/forms/components/FormRecordOverview.vue';
@@ -119,40 +119,57 @@ export default {
   },
 
   setup(props) {
-    let ctx = reactive({
+    const ctx = reactive({
       selectedRecord: {}
     });
 
-    let router = useRouter();
-    watchEffect(
-      () => {
-        if (props.formCtxtId) {
-          ctx.selectedForm = props.forms.find((form) => form.formCtxtId == props.formCtxtId);
-          if (props.recordId) {
-            ctx.selectedRecord = ctx.selectedForm.records.find((record) => record.recordId == props.recordId);
-            if (!ctx.selectedRecord) {
-              ctx.selectedRecord = {};
-            }
-          } else {
+    const router = useRouter();
+    const loadRecord = () => {
+      alert('loadRecord');
+      if (props.formCtxtId) {
+        ctx.selectedForm = props.forms.find((form) => form.formCtxtId == props.formCtxtId);
+        if (props.recordId) {
+          ctx.selectedRecord = ctx.selectedForm.records.find((record) => record.recordId == props.recordId);
+          if (!ctx.selectedRecord) {
             ctx.selectedRecord = {};
           }
+        } else {
+          ctx.selectedRecord = {};
+        }
 
-          if (ctx.selectedRecord.recordId) {
-            formSvc.getRecord(ctx.selectedRecord, {includeMetadata: true}).then((record) => ctx.record = record);
+        if (ctx.selectedRecord.recordId) {
+          formSvc.getRecord(ctx.selectedRecord, {includeMetadata: true}).then((record) => ctx.record = record);
+        }
+      } else if (props.forms.length > 0) {
+        ctx.selectedForm = props.forms[0];
+        if (ctx.selectedForm.records && ctx.selectedForm.records.length == 1) {
+          router.push({
+            name: props.listView,
+            query: {
+              ...props.routeQuery,
+              formId: ctx.selectedForm.formId,
+              formCtxtId: ctx.selectedForm.formCtxtId,
+              recordId: ctx.selectedForm.records[0].recordId
+            }
+          });
+        }
+      }
+    }
+
+    loadRecord();
+    watch(
+      () => [props.forms, props.formCtxtId, props.recordId, props.listView, props.routeQuery],
+      (newVal, oldVal) => {
+        let load = false;
+        for (let idx = 0; idx < newVal.length; ++idx) {
+          if (newVal[idx] != oldVal[idx]) {
+            load = true;
+            break;
           }
-        } else if (props.forms.length > 0) {
-          ctx.selectedForm = props.forms[0];
-          if (ctx.selectedForm.records && ctx.selectedForm.records.length == 1) {
-            router.push({
-              name: props.listView,
-              query: {
-                ...props.routeQuery,
-                formId: ctx.selectedForm.formId,
-                formCtxtId: ctx.selectedForm.formCtxtId,
-                recordId: ctx.selectedForm.records[0].recordId
-              }
-            });
-          }
+        }
+
+        if (load) {
+          loadRecord();
         }
       }
     );

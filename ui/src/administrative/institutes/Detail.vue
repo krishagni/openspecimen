@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
 
 import routerSvc    from '@/common/services/Router.js';
 import instituteSvc from '@/administrative/services/Institute.js';
@@ -49,22 +48,16 @@ import instituteSvc from '@/administrative/services/Institute.js';
 export default {
   props: ['instituteId', 'noNavButton'],
 
-  setup(props) {
-    let ctx = reactive({
-      institute: {},
+  data() {
+    return {
+      ctx: {
+        institute: {},
 
-      bcrumb: [
-        {url: routerSvc.getUrl('InstitutesList', {instituteId: -1}), label: 'Institutes'}
-      ]
-    });
-
-    watchEffect(
-      () => {
-        instituteSvc.getInstitute(+props.instituteId).then(institute => ctx.institute = institute);
+        bcrumb: [
+          {url: routerSvc.getUrl('InstitutesList', {instituteId: -1}), label: 'Institutes'}
+        ]
       }
-    );
-
-    return { ctx };
+    };
   },
 
   created() {
@@ -74,9 +67,23 @@ export default {
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
     }
+
+    this.loadInstitute();
+  },
+
+  watch: {
+    instituteId: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this.loadInstitute();
+      }
+    }
   },
 
   methods: {
+    loadInstitute: async function() {
+      this.ctx.institute = await instituteSvc.getInstitute(+this.instituteId);
+    },
+
     getRoute: function(routeName, params, query) {
       return {
         name: this.detailRouteName + '.' + routeName,

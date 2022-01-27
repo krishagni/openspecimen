@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
 
 import routerSvc   from '@/common/services/Router.js';
 import formUtil    from '@/common/services/FormUtil.js';
@@ -51,26 +50,16 @@ import siteSvc     from '@/administrative/services/Site.js';
 export default {
   props: ['siteId', 'noNavButton'],
 
-  setup(props) {
-    let ctx = reactive({
-      site: {},
+  data() {
+    return {
+      ctx : {
+        site: {},
 
-      bcrumb: [
-        {url: routerSvc.getUrl('SitesList', {siteId: -1}), label: 'Sites'}
-      ]
-    });
-
-    watchEffect(
-      () => {
-        siteSvc.getSite(+props.siteId).then(
-          (site) => {
-            ctx.site = site;
-            formUtil.createCustomFieldsMap(site, true);
-          }
-        );
+        bcrumb: [
+          {url: routerSvc.getUrl('SitesList', {siteId: -1}), label: 'Sites'}
+        ]
       }
-    );
-    return { ctx };
+    };
   },
 
   created() {
@@ -80,9 +69,24 @@ export default {
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
     }
+
+    this.loadSite();
+  },
+
+  watch: {
+    siteId: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this.loadSite();
+      }
+    }
   },
 
   methods: {
+    loadSite: async function() {
+      this.ctx.site = await siteSvc.getSite(+this.siteId);
+      formUtil.createCustomFieldsMap(this.ctx.site, true);
+    },
+
     getRoute: function(routeName, params, query) {
       return {
         name: this.detailRouteName + '.' + routeName,

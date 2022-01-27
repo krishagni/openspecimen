@@ -23,52 +23,54 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
-
 import routerSvc from '@/common/services/Router.js';
 import siteSvc from '@/administrative/services/Site.js';
 
 export default {
   props: ['site'],
 
-  inject: ['ui'],
+  data() {
+    return {
+      ctx: {
+        site: {},
 
-  setup(props) {
-    const route = useRoute();
-    const ctx = reactive({
-      site: {},
+        deleteOpts: {},
 
-      deleteOpts: {},
+        siteObjs: [],
 
-      siteObjs: [],
+        dict: [],
 
-      dict: [],
-
-      routeQuery: route.query
-    });
-
-    watchEffect(
-      () => {
-        ctx.site = props.site;
-        ctx.deleteOpts = {
-          type: 'Site',
-          title: props.site.name,
-          dependents: () => siteSvc.getDependents(props.site),
-          deleteObj: () => siteSvc.delete(props.site)
-        };
-        ctx.siteObjs = [{objectName: 'site', objectId: props.site.id}];
+        routeQuery: this.$route.query
       }
-    );
-
-    siteSvc.getDict().then(dict => ctx.dict = dict);
-    return { ctx };
+    };
   },
 
-  computed: {
+  async created() {
+    this.setupSite();
+    this.ctx.dict = await siteSvc.getDict();
+  },
+
+  watch: {
+    site: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this.setupSite();
+      }
+    }
   },
 
   methods: {
+    setupSite: function() {
+      const ctx = this.ctx;
+      ctx.site = this.site;
+      ctx.deleteOpts = {
+        type: 'Site',
+        title: this.site.name,
+        dependents: () => siteSvc.getDependents(this.site),
+        deleteObj: () => siteSvc.delete(this.site)
+      };
+      ctx.siteObjs = [{objectName: 'site', objectId: this.site.id}];
+    },
+
     deleteSite: function() {
       this.$refs.deleteObj.execute().then(
         (resp) => {

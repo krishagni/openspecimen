@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
+import { reactive } from 'vue';
 
 import routerSvc from '@/common/services/Router.js';
 import userSvc from '@/administrative/services/User.js';
@@ -82,25 +82,13 @@ export default {
 
   props: ['userId', 'listDetailView'],
 
-  setup(props) {
-    let ctx = reactive({
+  setup() {
+    const ctx = reactive({
       user: {},
       bcrumb: [
         {url: routerSvc.getUrl('UsersList', {userId: -1}), label: 'Users'}
       ]
     });
-
-    watchEffect(
-      () => {
-        if (ctx.user && ctx.user.id == +props.userId) {
-          return;
-        }
-
-        ctx.isUpdateAllowed = userResources.isUpdateAllowed();
-        ctx.pfuAllowed = userResources.isProfileUpdateAllowed(props.userId);
-        userSvc.getUserById(+props.userId).then(user => ctx.user = user);
-      }
-    );
 
     return { ctx, userResources };
   },
@@ -112,9 +100,32 @@ export default {
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters, groupId: this.$route.query.groupId});
     }
+
+    this.loadUser();
+  },
+
+  watch: {
+    'userId': function(newVal, oldVal) {
+      if (newVal == oldVal) {
+        return;
+      }
+
+      this.loadUser();
+    }
   },
 
   methods: {
+    loadUser: async function() {
+      const ctx = this.ctx;
+      if (ctx.user && ctx.user.id == +this.userId) {
+        return;
+      }
+
+      ctx.isUpdateAllowed = userResources.isUpdateAllowed();
+      ctx.pfuAllowed      = userResources.isProfileUpdateAllowed(this.userId);
+      ctx.user            = await userSvc.getUserById(+this.userId);
+    },
+
     getRoute: function(routeName, params, query) {
       return {
         name: this.detailRouteName + '.' + routeName,

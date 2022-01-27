@@ -65,31 +65,22 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
-
 import routerSvc    from '@/common/services/Router.js';
 import shipmentSvc  from '@/administrative/services/Shipment.js';
 
 export default {
   props: ['shipmentId', 'noNavButton'],
 
-  setup(props) {
-    let ctx = reactive({
-      shipment: {},
+  data() {
+    return {
+      ctx: {
+        shipment: {},
 
-      bcrumb: [
-        {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: 'Shipments'}
-      ]
-    });
-
-    watchEffect(
-      async () => {
-        ctx.shipment = {};
-        ctx.shipment = await shipmentSvc.getShipment(+props.shipmentId);
+        bcrumb: [
+          {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: 'Shipments'}
+        ]
       }
-    );
-
-    return { ctx };
+    };
   },
 
   created() {
@@ -98,6 +89,16 @@ export default {
     this.query = {};
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
+    }
+
+    this.loadShipment();
+  },
+
+  watch: {
+    shipmentId: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this.loadShipment();
+      }
     }
   },
 
@@ -117,6 +118,10 @@ export default {
   },
 
   methods: {
+    loadShipment: async function() {
+      this.ctx.shipment = await shipmentSvc.getShipment(+this.shipmentId);
+    },
+
     getRoute: function(routeName, params, query) {
       return {
         name: this.detailRouteName + '.' + routeName,

@@ -42,8 +42,6 @@
 </template>
 
 <script>
-import { reactive, watchEffect } from 'vue';
-
 import FormFieldValue from '@/forms/components/FormFieldValue.vue';
 
 export default {
@@ -54,48 +52,58 @@ export default {
     FormFieldValue
   },
 
-  setup(props) {
-    let ctx = reactive({});
+  data() {
+    return {
+      ctx: { }
+    };
+  },
 
-    watchEffect(
-      () => {
-        let record = props.record;
-        if (!record) {
-          return;
-        }
-
-        let longerCaptionFields  = 0;
-        let totalFields = 0;
-
-        let simpleFields = [];
-        let sfFields = [];
-
-        record.fields.forEach(
-          (field) => {
-            if (field.type == 'subForm') {
-              if (field.value && field.value.length > 0) {
-                sfFields.push(field);
-              }
-
-              return;
-            }
-          
-            if (field.caption && field.caption.length >= 30) {
-              ++longerCaptionFields;
-            }
-
-            ++totalFields;
-            simpleFields.push(field);
-          }
-        );
-
-        ctx.verticalLayout = (longerCaptionFields * 100 / totalFields >= 30);
-        ctx.simpleFields = simpleFields;
-        ctx.sfFields = sfFields;
+  watch: {
+    'record': function(newVal, oldVal) {
+      if (newVal == oldVal) {
+        return;
       }
-    );
 
-    return { ctx };
+      this.loadRecord();
+    }
+  },
+
+  methods: {
+    loadRecord: function() {
+      const record = this.record;
+      if (!record) {
+        return;
+      }
+
+      let longerCaptionFields  = 0;
+      let totalFields = 0;
+
+      let simpleFields = [];
+      let sfFields = [];
+
+      record.fields.forEach(
+        (field) => {
+          if (field.type == 'subForm') {
+            if (field.value && field.value.length > 0) {
+              sfFields.push(field);
+            }
+
+            return;
+          }
+          
+          if (field.caption && field.caption.length >= 30) {
+            ++longerCaptionFields;
+          }
+
+          ++totalFields;
+          simpleFields.push(field);
+        }
+      );
+
+      this.ctx.verticalLayout = (longerCaptionFields * 100 / totalFields >= 30);
+      this.ctx.simpleFields = simpleFields;
+      this.ctx.sfFields = sfFields;
+    }
   }
 }
 </script>
