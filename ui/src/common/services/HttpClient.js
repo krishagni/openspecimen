@@ -14,7 +14,15 @@ class HttpClient {
 
   headers = {};
 
+  listeners = [];
+
   constructor() {
+  }
+
+  addListener(listener) {
+    if (this.listeners.indexOf(listener) == -1) {
+      this.listeners.push(listener);
+    }
   }
 
   get(url, params) {
@@ -120,11 +128,29 @@ class HttpClient {
     return {headers: this.headers, params: params};
   }
 
+  notifyStart() {
+    this.listeners.forEach(listener => listener.callStarted());
+  }
+
+  notifyComplete() {
+    this.listeners.forEach(listener => listener.callCompleted());
+  }
+
+  notifyFail() {
+    this.listeners.forEach(listener => listener.callFailed());
+  }
+
   promise(apiCall) {
+    this.notifyStart();
     return new Promise((resolve) => {
       apiCall()
-        .then(resp => resolve(resp.data))
+        .then(resp => {
+          this.notifyComplete();
+          resolve(resp.data);
+        })
         .catch(e => {
+          this.notifyFail();
+
           if (!e.response) {
             alertSvc.error(e.message);
             return;

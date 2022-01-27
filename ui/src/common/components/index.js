@@ -33,6 +33,7 @@ import Label from './Label.vue';
 import ListGroup from './ListGroup.vue';
 import ListSize from './ListSize.vue';
 import ListView from './ListView.vue';
+import LoadingBar from './LoadingBar.vue';
 import Menu from './Menu.vue';
 import Message from './Message.vue';
 import MultiSelectDropdown from './MultiSelectDropdown.vue';
@@ -111,6 +112,7 @@ export default {
     app.component('os-list-group',       ListGroup);
     app.component('os-list-size',        ListSize);
     app.component('os-list-view',        ListView);
+    app.component('os-loading-bar',      LoadingBar);
     app.component('os-menu',             Menu);
     app.component('os-message',          Message);
     app.component('os-multi-select-dropdown', MultiSelectDropdown);

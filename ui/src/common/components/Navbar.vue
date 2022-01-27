@@ -51,6 +51,8 @@
         </div>
       </div>
     </div>
+
+    <os-loading-bar ref="loadingBar" />
   </div>
 </template>
 
@@ -99,6 +101,12 @@ export default {
 
       this.ssoLogoutUrl += 'saml/logout';
     }
+
+    http.addListener({
+      callStarted:   () => this.$refs.loadingBar.increment(),
+      callFailed:    () => this.$refs.loadingBar.decrement(),
+      callCompleted: () => this.$refs.loadingBar.decrement(),
+    });
   },
 
   computed: {
