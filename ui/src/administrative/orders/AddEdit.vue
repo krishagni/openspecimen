@@ -40,7 +40,12 @@
           <os-step title="Specimens" :validate="validateSpecimenDetails" v-if="dataCtx.order.status == 'PENDING'">
             <span v-if="ctx.maxSpmnsLimitExceeded">
               <os-message type="warn">
-                <span>Limit exceeded</span>
+                <span>
+                  The order has more specimens {{ctx.itemsCount && '(' + ctx.itemsCount + ')'}} than the 
+                  allowed limit ({{ctx.maxSpmnsLimit}}) for displaying on UI. Please use CSV import if you 
+                  like to specify additional details (quantity, cost etc). 
+                  Contact your Super Administrator to modify the UI limit.
+                </span>
               </os-message>
             </span>
 
@@ -132,6 +137,8 @@ export default {
       maxSpmnsLimit: undefined,
 
       maxSpmnsLimitExceeded: false,
+
+      itemsCount: undefined
     });
 
     let dataCtx = reactive({
@@ -229,7 +236,7 @@ export default {
           //
           // distribute entire cart
           //
-          const size = await orderSvc.getCartSize(input.specimenListId)
+          const size = this.ctx.itemsCount = await orderSvc.getCartSize(input.specimenListId)
           if (size > this.ctx.maxSpmnsLimit) {
             order.specimenList = {id: input.specimenListId};
             this.ctx.maxSpmnsLimitExceeded = true;
@@ -242,7 +249,7 @@ export default {
           //
           // distribute all reserved specimens of the selected DP
           //
-          const size = await orderSvc.getReservedSpecimensListSize(input.dp.id);
+          const size = this.ctx.itemsCount = await orderSvc.getReservedSpecimensListSize(input.dp.id);
           if (size > this.ctx.maxSpmnsLimit) {
             order.allReservedSpmns = true;
             this.ctx.maxSpmnsLimitExceeded = true;
