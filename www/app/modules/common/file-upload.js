@@ -78,7 +78,7 @@ angular.module('openspecimen')
                 xhr.setRequestHeader('X-OS-API-TOKEN', $http.defaults.headers.common['X-OS-API-TOKEN']);
               }
 
-              if (ui.os.global.impersonate) {
+              if (ui.os.global.impersonate && $cookies.get('osImpersonateUser')) {
                 xhr.setRequestHeader('X-OS-IMPERSONATE-USER', $cookies.get('osImpersonateUser'));
               }
             },

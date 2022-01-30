@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.util;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,8 +10,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -55,6 +61,10 @@ import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -937,6 +947,69 @@ public class Utility {
 		return result;
 	}
 
+	public static File tarGzip(File sourceDir, File destDir) {
+		if (!sourceDir.isDirectory()) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Source directory path is required");
+		}
+
+		String name = sourceDir.getName() + ".tar.gz";
+		Path targetPath = Paths.get(destDir.getAbsolutePath(), name);
+		try (
+			OutputStream out = Files.newOutputStream(targetPath);
+			BufferedOutputStream bout = new BufferedOutputStream(out);
+			GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(bout);
+			TarArchiveOutputStream tarOut = new TarArchiveOutputStream(gzOut);
+		) {
+			Path sourceDirPath = sourceDir.toPath();
+			Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
+				public FileVisitResult visitFile(Path file, BasicFileAttributes fattrs) {
+					if (fattrs.isSymbolicLink()) {
+						return FileVisitResult.CONTINUE;
+					}
+
+					Path filePath = sourceDirPath.relativize(file);
+					try {
+						TarArchiveEntry tarEntry = new TarArchiveEntry(file.toFile(), filePath.toString());
+						tarOut.putArchiveEntry(tarEntry);
+						Files.copy(file, tarOut);
+						tarOut.closeArchiveEntry();
+					} catch (IOException ie) {
+						throw new RuntimeException("Error creating tar.gz file: " + ie.getMessage(), ie);
+					}
+
+					return FileVisitResult.CONTINUE;
+				}
+			});
+
+			return targetPath.toFile();
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		}
+	}
+
+	public static String byteCountToDisplaySize(long inputSize) {
+		BigDecimal size = BigDecimal.valueOf(inputSize);
+		final String displaySize;
+
+		if (inputSize / FileUtils.ONE_EB > 0) {
+			displaySize = divide(size, FileUtils.ONE_EB, " EB");
+		} else if (inputSize / FileUtils.ONE_PB > 0) {
+			displaySize = divide(size, FileUtils.ONE_PB, " PB");
+		} else if (inputSize / FileUtils.ONE_TB > 0) {
+			displaySize = divide(size, FileUtils.ONE_TB, " PB");
+		} else if (inputSize / FileUtils.ONE_GB > 0) {
+			displaySize = divide(size, FileUtils.ONE_GB, " GB");
+		} else if (inputSize / FileUtils.ONE_MB > 0) {
+			displaySize = divide(size, FileUtils.ONE_MB, " MB");
+		} else if (inputSize / FileUtils.ONE_KB > 0) {
+			displaySize = divide(size, FileUtils.ONE_KB, " KB");
+		} else {
+			displaySize = String.valueOf(size) + " bytes";
+		}
+
+		return displaySize;
+	}
+
 	private static Map<String, Object> getExtnAttrValues(BaseExtensionEntity obj) {
 		if (obj.getExtension() != null) {
 			return obj.getExtension().getAttrValues();
@@ -1219,6 +1292,10 @@ public class Utility {
 		} finally {
 			IOUtils.closeQuietly(fout);
 		}
+	}
+
+	private static String divide(BigDecimal dividend, long divisor, String unit) {
+		return String.valueOf(dividend.divide(BigDecimal.valueOf(divisor), 2, BigDecimal.ROUND_HALF_UP)) + unit;
 	}
 
 	private static final String GET_DATA_DIR =
