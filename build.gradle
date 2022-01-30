@@ -97,6 +97,7 @@ dependencies {
   compile group: 'commons-lang', name: 'commons-lang', version:'2.6'
   compile group: 'org.apache.commons', name: 'commons-digester3', version:'3.2'
   compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.4'
+  compile group: 'org.apache.commons', name: 'commons-compress', version: '1.21'
   compile group: 'org.apache.taglibs', name: 'taglibs-standard-impl', version: '1.2.5'
   compile group: 'org.apache.tika', name: 'tika-parsers', version: '1.27'
   compile group: 'net.sf.kxml', name: 'kxml2-min', version:'2.3.0'
