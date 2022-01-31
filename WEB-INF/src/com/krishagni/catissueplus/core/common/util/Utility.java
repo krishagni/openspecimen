@@ -960,6 +960,7 @@ public class Utility {
 			GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(bout);
 			TarArchiveOutputStream tarOut = new TarArchiveOutputStream(gzOut);
 		) {
+			tarOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
 			Path sourceDirPath = sourceDir.toPath();
 			Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes fattrs) {
