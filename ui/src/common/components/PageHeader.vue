@@ -167,6 +167,7 @@ export default {
 
   .os-page-header .content-wrapper .content .left :deep(.os-title) {
     position: relative;
+    display: inline-block;
   }
 
   .os-page-header .content-wrapper .content .left :deep(.os-title .os-tag) {

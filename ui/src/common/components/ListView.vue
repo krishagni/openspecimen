@@ -55,7 +55,7 @@
           <span>Filters</span>
         </div>
         <div class="body">
-          <form-group dense v-for="filter of schema.filters" :key="filter.name">
+          <form-group dense v-for="filter of searchFilters" :key="filter.name">
             <cell :width="12">
               <span v-if="filter.type == 'text'">
                 <os-input-text md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]" />
@@ -172,6 +172,7 @@ import util     from '@/common/services/Util.js';
 
 export default {
   props: [
+    'context',
     'data',
     'schema',
     'query',
@@ -263,8 +264,8 @@ export default {
     },
 
     clearFilters: function() {
-      if (this.schema.filters) {
-        this.schema.filters.forEach(
+      if (this.searchFilters) {
+        this.searchFilters.forEach(
           filter => {
             if (filter.range) {
               delete this.filterValues[filter.name + '.$min'];
@@ -446,6 +447,19 @@ export default {
       }
 
       return result;
+    },
+
+    searchFilters() {
+      const filters = this.schema.filters || [];
+      return filters.filter(
+        (filter) => {
+          if (filter.showWhen && !exprUtil.eval(this.context, filter.showWhen)) {
+            return false;
+          }
+
+          return true;
+        }
+      );
     }
   },
 
@@ -630,6 +644,18 @@ export default {
 .os-list :deep(.os-selection-cb .p-checkbox .p-checkbox-box) {
   height: 15px;
   width: 15px;
+}
+
+.os-list :deep(.actions) {
+  text-align: right;
+}
+
+.os-list :deep(.actions .os-icon-wrapper) {
+  font-size: 80%!important;
+}
+
+.os-list :deep(.actions .btn) {
+  padding: 0px 6px;
 }
 
 .filters .body .input-group {
