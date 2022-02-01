@@ -347,7 +347,7 @@ export default {
         value = column.value(data.rowObject);
       } else {
         value = exprUtil.eval(data.rowObject, column.name);
-        if (value) {
+        if (value || value == 0) {
           let extra = {metadata: column, context: data.rowObject};
           if (column.type == 'user') {
             value = this.$filters.username(value, extra);
@@ -363,7 +363,7 @@ export default {
         }
       }
 
-      return value || '-';
+      return value || (value == 0 ? value : '-');
     },
 
     itemSelected: function(event, item) {
