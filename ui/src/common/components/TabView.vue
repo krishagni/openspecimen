@@ -1,6 +1,6 @@
 
 <template>
-  <TabView>
+  <TabView :lazy="lazy" @tab-change="tabChanged($event)">
     <TabPanel v-for="(tab, idx) of tabs" :header="tab.props && tab.props.header" :key="idx">
       <template #header v-if="tab.children && tab.children.header">
         <component :is="tab.children.header"></component>
@@ -16,6 +16,10 @@ import TabView  from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
 export default {
+  props: ['lazy'],
+
+  emits: ['tab-changed'],
+
   components: {
     TabView,
     TabPanel
@@ -29,6 +33,13 @@ export default {
       });
 
       return tabs;
+    },
+  },
+
+  methods: {
+    tabChanged: function({index}) {
+      const tab = this.tabs[index];
+      this.$emit('tab-changed', { tab });
     }
   }
 }

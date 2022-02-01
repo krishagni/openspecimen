@@ -1,6 +1,6 @@
 
 <template>
-  <div header="header">
+  <div header="header" name="name">
     <slot></slot>
   </div>
 </template>
@@ -8,7 +8,7 @@
 <script>
 
 export default {
-  props: ['header']
+  props: ['header', 'name']
 }
 
 </script>
