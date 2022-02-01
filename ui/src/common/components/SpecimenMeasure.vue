@@ -1,7 +1,7 @@
 <template>
   <div v-if="showInput">
     <div class="os-spmn-measure" :class="$attrs['md-type'] && 'md-type'">
-      <os-input-number v-model="inputValue" :md-type="$attrs['md-type']" :maxFractionDigits="maxFractionDigits" />
+      <os-input-text v-model="inputValue" :md-type="$attrs['md-type']" />
       <div class="unit">
         <span>{{unit}}</span>
       </div>
@@ -22,8 +22,10 @@
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
+const NUMBER_RE = /^[0-9]*(\.[0-9]*)?(([e][+-]?)[0-9]*)?$/;
+
 export default {
-  props: ['modelValue', 'maxFractionDigits', 'measure', 'entity', 'context', 'readOnly'],
+  props: ['modelValue', 'measure', 'entity', 'context', 'readOnly'],
 
   data() {
     return { 
@@ -33,7 +35,7 @@ export default {
   computed: {
     inputValue: {
       get() {
-        return this.modelValue && +this.modelValue;
+        return this.modelValue;
       },
 
       set(value) {
@@ -57,6 +59,16 @@ export default {
       return this.readOnly == null || this.readOnly == undefined ||
         util.isFalse(this.readOnly) ||
         util.isFalse(exprUtil.eval(this.context, this.readOnly + ' == true'));
+    }
+  },
+
+  watch: {
+    inputValue: function(newVal, oldVal) {
+      if ((!isNaN(newVal) && !newVal) || NUMBER_RE.test(newVal)) {
+        return;
+      }
+
+      this.inputValue = oldVal;
     }
   }
 }
