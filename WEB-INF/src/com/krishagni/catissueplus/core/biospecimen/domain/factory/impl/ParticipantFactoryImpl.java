@@ -91,11 +91,19 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 	@Override
 	public Participant createParticipant(ParticipantDetail input) {
 		Participant participant = new Participant();
-		copyMatchedParticipantFields(null, input);
+		Long matchedId = copyMatchedParticipantFields(null, input);
+
+		boolean partial = false;
+		if (matchedId != null && matchedId > 0) {
+			Participant match = daoFactory.getParticipantDao().getById(matchedId);
+			match.setCpId(input.getCpId());
+			BeanUtils.copyProperties(match, participant, "cprs", "source");
+			participant.setId(matchedId);
+			partial = true;
+		}
 		
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-		setParticipantAttrs(input, participant, false, ose);
-		
+		setParticipantAttrs(input, participant, partial, ose);
 		ose.checkAndThrow();
 		return participant;
 	}
