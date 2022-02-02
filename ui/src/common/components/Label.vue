@@ -2,8 +2,17 @@
 <template>
   <label>
     <slot></slot>
+    <span class="required-indicator" v-if="requiredTooltip" v-os-tooltip="requiredTooltip">
+      <span>*</span>
+    </span>
   </label>
 </template>
+
+<script>
+export default {
+  props: ['requiredTooltip']
+}
+</script>
 
 <style scoped>
 label {
@@ -16,5 +25,12 @@ label {
 label.underlined {
   border-bottom: 2px solid #ddd;
   padding: 8px 0px;
+}
+
+label .required-indicator {
+  display: inline-block;
+  padding: 0.25rem;
+  color: red;
+  cursor: help;
 }
 </style>
