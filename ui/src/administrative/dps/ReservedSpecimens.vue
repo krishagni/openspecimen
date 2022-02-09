@@ -40,6 +40,7 @@
 
 import authSvc   from '@/common/services/Authorization.js';
 import routerSvc from '@/common/services/Router.js';
+import util      from '@/common/services/Util.js';
 import dpSvc     from '@/administrative/services/DistributionProtocol.js';
 
 export default {
@@ -83,18 +84,24 @@ export default {
     },
 
     distributeAll: function() {
+      const dp = util.clone(this.dp);
+      delete dp.distributingSites;
+
       localStorage['os.orderDetails'] = JSON.stringify({
         allReserved: true,
-        dp: this.dp
+        dp: dp
       });
 
       routerSvc.goto('OrderAddEdit', {orderId: -1});
     },
 
     distribute: function() {
+      const dp = util.clone(this.dp);
+      delete dp.distributingSites;
+
       localStorage['os.orderDetails'] = JSON.stringify({
         specimenIds: this.selectedSpecimens,
-        dp: this.dp
+        dp: dp
       });
 
       routerSvc.goto('OrderAddEdit', {orderId: -1});
