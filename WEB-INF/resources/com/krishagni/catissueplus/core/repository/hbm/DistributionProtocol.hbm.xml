@@ -169,5 +169,29 @@
     <sql-query name="unlinkCustomForm">
       update catissue_distribution_protocol set order_extn_form_id = null where order_extn_form_id = :formId
     </sql-query>
+
+    <sql-query name="getDependents">
+      <return-scalar column="dp_id" type="long" />
+      <return-scalar column="specimen" type="int" />
+      <return-scalar column="storage_container" type="int" />
+      <return-scalar column="distribution_order" type="int" />
+
+      select
+        dp.identifier as dp_id,
+        count(distinct sp.identifier) as specimen,
+        count(distinct cont.identifier) as storage_container,
+        count(distinct o.identifier) as distribution_order
+      from
+        catissue_distribution_protocol dp
+        left join os_spmn_reserved_events rs on rs.dp_id = dp.identifier
+        left join catissue_specimen sp on sp.identifier = rs.specimen_id and sp.reserved_event_id = rs.identifier and sp.activity_status != 'Disabled'
+        left join os_stor_container_dps dp_cont on dp_cont.dp_id = dp.identifier
+        left join os_storage_containers cont on cont.identifier = dp_cont.storage_container_id and cont.activity_status != 'Disabled'
+        left join os_orders o on o.distribution_protocol_id = dp.identifier and o.activity_status != 'Disabled'
+      where
+        dp.identifier = :dpId
+      group by
+        dp.identifier
+    </sql-query>
   </class>
 </hibernate-mapping>

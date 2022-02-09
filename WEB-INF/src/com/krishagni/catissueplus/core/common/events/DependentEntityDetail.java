@@ -43,10 +43,10 @@ public class DependentEntityDetail {
 	}
 	
 	public static class DependentEntityDetailListBuilder {
-		private List<DependentEntityDetail> dependentEntities = new ArrayList<DependentEntityDetail>();
+		private List<DependentEntityDetail> dependentEntities = new ArrayList<>();
 		
-		public DependentEntityDetailListBuilder add(String name, int count) {
-			if (count > 0) {
+		public DependentEntityDetailListBuilder add(String name, Integer count) {
+			if (count != null && count > 0) {
 				dependentEntities.add(DependentEntityDetail.from(name, count));
 			}
 			

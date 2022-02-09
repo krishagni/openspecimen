@@ -6,18 +6,22 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -28,6 +32,7 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 
+@Configurable
 @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 @AuditTable(value = "CAT_DISTRIBUTION_PROTOCOL_AUD")
 public class DistributionProtocol extends BaseExtensionEntity {
@@ -84,6 +89,9 @@ public class DistributionProtocol extends BaseExtensionEntity {
 	private Set<DpConsentTier> consentTiers = new HashSet<>();
 
 	private Set<StorageContainer> distributionContainers = new HashSet<>();
+
+	@Autowired
+	private DaoFactory daoFactory;
 	
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -302,10 +310,12 @@ public class DistributionProtocol extends BaseExtensionEntity {
 	}
 	
 	public List<DependentEntityDetail> getDependentEntities() {
+		Map<String, Integer> dependents = daoFactory.getDistributionProtocolDao().getDependents(getId());
 		return DependentEntityDetail
 			.listBuilder()
-			.add(DistributionOrder.getEntityName(), getDistributionOrders().size())
-			.add(StorageContainer.getEntityName(), getDistributionContainers().size())
+			.add(DistributionOrder.getEntityName(), dependents.get(DistributionOrder.getEntityName()))
+			.add(StorageContainer.getEntityName(), dependents.get(StorageContainer.getEntityName()))
+			.add(Specimen.getEntityName(), dependents.get(Specimen.getEntityName()))
 			.build();
 	}
 	

@@ -41,4 +41,6 @@ public interface DistributionProtocolDao extends Dao<DistributionProtocol> {
 	void saveReservedEvents(Collection<SpecimenReservedEvent> events);
 
 	void unlinkCustomForm(Long formId);
+
+	Map<String, Integer> getDependents(Long dpId);
 }

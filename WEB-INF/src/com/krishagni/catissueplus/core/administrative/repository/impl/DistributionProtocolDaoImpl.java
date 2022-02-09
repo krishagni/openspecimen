@@ -32,11 +32,13 @@ import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.SpecimenReservedEvent;
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderStat;
 import com.krishagni.catissueplus.core.administrative.events.DistributionOrderStatListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
 import com.krishagni.catissueplus.core.administrative.repository.DistributionProtocolDao;
 import com.krishagni.catissueplus.core.administrative.repository.DpListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -165,6 +167,26 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 	@Override
 	public void unlinkCustomForm(Long formId) {
 		getCurrentSession().getNamedQuery(UNLINK_CUSTOM_FORM).setParameter("formId", formId).executeUpdate();
+	}
+
+	@Override
+	public Map<String, Integer> getDependents(Long dpId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_DEPENDENT_ENTITY_COUNTS)
+			.setParameter("dpId", dpId)
+			.list();
+
+		if (rows.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		int idx = 0;
+		Object[] row = rows.get(0);
+
+		Map<String, Integer> dependents = new HashMap<>();
+		dependents.put(Specimen.getEntityName(), (Integer) row[++idx]);
+		dependents.put(StorageContainer.getEntityName(), (Integer) row[++idx]);
+		dependents.put(DistributionOrder.getEntityName(), (Integer) row[++idx]);
+		return dependents;
 	}
 
 	private Criteria getDpListQuery(DpListCriteria crit) {
@@ -389,4 +411,6 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 	private static final String GET_NON_CONSENTING_SPMNS = FQN + ".getNonConsentingSpecimens";
 
 	private static final String UNLINK_CUSTOM_FORM = FQN + ".unlinkCustomForm";
+
+	private static final String GET_DEPENDENT_ENTITY_COUNTS = FQN + ".getDependents";
 }
