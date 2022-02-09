@@ -3,6 +3,8 @@ import ui from '@/global.js';
 import authSvc from '@/common/services/Authorization.js';
 
 class UserResources {
+  readOpts      = {resource: 'User', operations: ['Read']};
+
   createOpts    = {resource: 'User', operations: ['Create']};
 
   updateOpts    = {resource: 'User', operations: ['Update']};

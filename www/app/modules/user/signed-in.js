@@ -14,7 +14,8 @@ angular.module('openspecimen')
          state: userUiState,
          showNewStuff: true,
          name: $filter('osUserDisplayName')(currentUser) || '',
-         profileFormsUrl: VueApp.getVueViewUrl('users/' + currentUser.id + '/profile-forms/list')
+         profileUrl: VueApp.getVueViewUrl('users/' + currentUser.id + '/detail/overview'),
+         profileFormsUrl: VueApp.getVueViewUrl('users/' + currentUser.id + '/detail/profile-forms/list')
        }
 
        var revision = ui.os.global.appProps.build_commit_revision;

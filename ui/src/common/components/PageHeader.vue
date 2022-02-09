@@ -191,7 +191,7 @@ export default {
     color: inherit;
   }
 
-  .os-page-header :deep(.os-breadcrumb + .content) {
+  .os-page-header :deep(.os-breadcrumb:not(.os-hide) + .content) {
     margin-top: 0px;
   }
 </style>

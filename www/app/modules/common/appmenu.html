@@ -19,7 +19,7 @@
         <a class="dropdown-toggle" os-letter-avatar name="userCtx.name" style="margin-top: -7px;"></a>
         <ul class="dropdown-menu dropdown-menu-right" role="menu">
           <li>
-            <a ui-sref="user-detail.overview({userId: currentUser.id})">
+            <a href="{{userCtx.profileUrl}}">
               <span>{{currentUser | osUserDisplayName}}</span>
             </a>
           </li>

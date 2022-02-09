@@ -2,7 +2,7 @@
   <os-page v-if="userId > 0">
     <os-page-head :noNavButton="listDetailView == true">
       <template #breadcrumb>
-        <os-breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="ctx.bcrumb" v-show-if-allowed="userResources.readOpts" />
       </template>
 
       <span>
