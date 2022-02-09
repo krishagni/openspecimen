@@ -93,7 +93,9 @@ export default {
       dp.disableEmailNotifs = dp.disableEmailNotifs == true;
 
       const sites = dp.distributingSites || {};
-      dp.distributingSites = Object.keys(sites).map(institute => ({institute: institute, sites: sites[institute]}));
+      if (!(sites instanceof Array)) {
+        dp.distributingSites = Object.keys(sites).map(institute => ({institute: institute, sites: sites[institute]}));
+      }
 
       this.ctx.dpObjs = [{objectName: 'distribution_protocol', objectId: this.dp.id}];
 
