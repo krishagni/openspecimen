@@ -1,5 +1,5 @@
 <template>
-  <div class="os-loading-bar" v-show="this.pendingCount > 0">
+  <div class="os-loading-bar" v-show="pendingCount > 0">
     <ProgressBar mode="indeterminate" style="height: 0.25rem;" />
   </div>
 </template>
