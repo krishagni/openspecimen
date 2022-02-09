@@ -55,6 +55,10 @@ angular.module('os.administrative.user.dropdown', ['os.administrative.models'])
         model = scope.ngModel[selectProp];
       }
 
+      if (!model) {
+        return;
+      }
+
       var selectedUser = usersList.find(function(user) { return user[selectProp] == model; });
       if (selectedUser) {
         scope.ngModel = selectedUser;
