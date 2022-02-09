@@ -25,8 +25,8 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -994,7 +994,14 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 					return resp.getError().getMessage();
 				}
 			} catch (Exception e) {
-				String msg = ExceptionUtils.getRootCauseMessage(e);
+				String msg   = ExceptionUtils.getMessage(e);
+				String rcMsg = ExceptionUtils.getRootCauseMessage(e);
+				if (StringUtils.isBlank(msg)) {
+					msg = rcMsg;
+				} else if (StringUtils.isNotBlank(rcMsg)) {
+					msg += "; Exception: " + rcMsg;
+				}
+
 				if (StringUtils.isBlank(msg)) {
 					msg = "Internal Server Error: Despite our best efforts, we could not find the root cause of the error. " +
 						  "Please check the log files";

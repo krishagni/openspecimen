@@ -31,7 +31,15 @@ public class SessionUtil {
 			// log and move forward
 			//
 			logger.info("Error flushing the database session", e);
-			throw e;
+			throw new RuntimeException(
+				"Error flushing the database session. " +
+				"This happens when the app has encountered database errors like " +
+				"data truncation errors, unique constraint violation errors etc. " +
+				"Ensure the data size is within the permissible limits, the auto " +
+				"generated labels/names are unique. " +
+				"Refer to the first record that generated this error!",
+				e
+			);
 		} finally {
 			try {
 				sessionFactory.getCurrentSession().clear();
