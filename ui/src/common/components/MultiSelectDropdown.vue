@@ -177,7 +177,7 @@ export default {
     },
 
     dedup(options) {
-      let selectProp = this.listSource.selectProp || 'id';
+      let selectProp = this.listSource.selectProp || this.listSource.idProp || 'id';
       let optionsMap = options.reduce(
         (acc, option) => {
           if (!acc[option[selectProp]]) {

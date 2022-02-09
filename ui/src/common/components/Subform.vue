@@ -15,9 +15,9 @@
         </thead>
         <tbody>
           <tr v-for="(sfRowData, sfRdIdx) of inputValue" :key="sfRdIdx">
-            <td v-for="(field, cidx) of fields" :key="cidx">
+            <td v-for="(field, cidx) of sfFields" :key="cidx">
               <component :is="field.component" v-bind="field" v-model="sfRowData[field.name]"
-                @update:model-value="handleInput(sfRowData, sfRdIdx, field)">
+                :context="{...sfRowData}" @update:model-value="handleInput(sfRowData, sfRdIdx, field)">
               </component>
               <div v-if="v$.inputValue[sfRdIdx][field.name] && v$.inputValue[sfRdIdx][field.name].$error">
                 <os-inline-message>{{errorMessages[sfRdIdx][field.name]}}</os-inline-message>
@@ -80,7 +80,14 @@ export default {
 
     sfFields: function() {
       const result = [];
-      for (const field of this.fields) {
+      for (let field of this.fields) {
+        if (!field.component) {
+          const component = fieldFactory.getComponent(field.type);
+          if (component) {
+            field = {...field, component: component};
+          }
+        }
+
         const fv = field.validations;
         if (fv && fv.required) {
           field.required = true;

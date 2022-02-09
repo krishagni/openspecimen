@@ -1,20 +1,29 @@
 
 <template>
-  <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled" />
+  <span v-if="multiple">
+    <MultiSelectDropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
+      :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
+  </span>
+  <span v-else>
+    <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
+      :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
+  </span>
 </template>
 
 <script>
 import Dropdown from '@/common/components/Dropdown.vue';
+import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 
 import http     from '@/common/services/HttpClient.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'listSource', 'context', 'disabled'],
+  props: ['modelValue', 'selectProp', 'listSource', 'context', 'multiple', 'disabled'],
 
   components: {
-    Dropdown
+    Dropdown,
+    MultiSelectDropdown
   },
 
   data() {
@@ -60,7 +69,8 @@ export default {
         },
         selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
         displayProp: 'name',
-        searchProp: 'name'
+        searchProp: 'name',
+        idProp: this.listSource && this.listSource.idProp
       }
     }
   },

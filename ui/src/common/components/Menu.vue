@@ -2,7 +2,7 @@
 <template>
   <span>
     <Button :label="label" right-icon="caret-down" @click="toggle" />
-    <dropdown-menu ref="menu" :model="items" :popup="true">
+    <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
       <template #item="{item}">
         <a class="p-menuitem-link" @click="item.command">
           <Icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon"></Icon>
@@ -42,7 +42,18 @@ export default {
 </script>
 
 <style scoped>
-  .os-menu-item-icon {
-    padding-right: 15px;
-  }
+
+.os-menu-item-icon {
+  padding-right: 15px;
+}
+
+</style>
+
+<style>
+
+.os-menu {
+  width: auto;
+  max-width: 32rem;
+}
+
 </style>

@@ -51,6 +51,10 @@ export default {
       });
     },
 
+    hasFiles: function() {
+      return this.$refs.uploader.hasFiles;
+    },
+
     addHeaders: function({xhr}) {
       if (this.headers) {
         Object.keys(this.headers).forEach((name) => xhr.setRequestHeader(name, this.headers[name]));

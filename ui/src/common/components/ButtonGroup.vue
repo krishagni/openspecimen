@@ -11,6 +11,7 @@ export default {
 </script>
 
 <style scoped>
+
 .os-btn-group :deep(button:not(:last-child)) {
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;

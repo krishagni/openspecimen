@@ -137,4 +137,8 @@ button:hover {
   color: #2a6496;
   text-decoration: underline;
 }
+
+.btn[disabled] {
+  opacity: 0.6;
+}
 </style>

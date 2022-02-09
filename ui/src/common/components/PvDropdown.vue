@@ -1,19 +1,26 @@
 
 <template>
-  <Dropdown v-model="inputValue" :list-source="listSource" />
+  <span v-if="multiple">
+    <MultiSelectDropdown v-model="inputValue" :list-source="listSource" />
+  </span>
+  <span v-else>
+    <Dropdown v-model="inputValue" :list-source="listSource" />
+  </span>
 </template>
 
 <script>
 import Dropdown from '@/common/components/Dropdown.vue';
+import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 
 import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'attribute', 'leafValue', 'context'],
+  props: ['modelValue', 'selectProp', 'attribute', 'leafValue', 'context', 'multiple'],
 
   components: {
-    Dropdown
+    Dropdown,
+    MultiSelectDropdown
   },
 
   data() {

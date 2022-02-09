@@ -163,6 +163,13 @@ export default {
         }
       } else {
         value = exprUtil.getValue(object, field.name); // props.object[field.name];
+        if (field.displayValues) {
+          const dispValue = field.displayValues[value];
+          if (dispValue) {
+            value = dispValue;
+          }
+        }
+
         if (value === null || value === undefined || value === '') {
           value = '-';
         } else if (field.type == 'user') {
@@ -171,6 +178,12 @@ export default {
           } else {
             value = value.firstName + ' ' + value.lastName;
           }
+        } else if (field.type == 'site') {
+          if (value instanceof Array) {
+            value = value.map(site => typeof site == 'object' ? site.name : site).join(', ');
+          } else {
+            value = typeof value == 'object' ? value.name : value;
+          }
         } else if (field.type == 'date' || (field.type == 'datePicker' && field.showTime != true)) {
           value = this.$filters.date(value);
         } else if (field.type == 'datetime' || (field.type == 'datePicker' && field.showTime == true)) {
@@ -178,12 +191,7 @@ export default {
         } else if (field.options instanceof Array) {
           let option = field.options.find((option) => option.value == value);
           if (option) {
-            value = option.caption;
-          }
-        } else if (field.displayValues) {
-          let dispValue = field.displayValues[value];
-          if (dispValue) {
-            value = dispValue;
+            value = option.caption || option.name;
           }
         } else if (field.type == 'dropdown') {
           if (typeof value == 'object') {

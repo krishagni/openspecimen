@@ -34,6 +34,9 @@
               <os-button left-icon="undo" label="Return Specimens"
                 @click="returnSpecimens" v-show-if-allowed="orderResources.updateOpts" />
 
+              <os-button left-icon="truck" label="View Distribution Protocols"
+                @click="viewDps" v-show-if-allowed="orderResources.dpOpts" />
+
               <os-button-link left-icon="question-circle" label="Help"
                 url="https://help.openspecimen.org/orders" new-tab="true" />
             </template>
@@ -194,6 +197,10 @@ export default {
 
     returnSpecimens: function() {
       routerSvc.goto('OrderReturnSpecimens');
+    },
+
+    viewDps: function() {
+      routerSvc.goto('DpsList', {dpId: -1});
     }
   }
 }

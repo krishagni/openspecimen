@@ -1,0 +1,253 @@
+<template>
+  <os-screen>
+    <os-screen-panel :width="ctx.detailView ? 3 : 12">
+      <os-page>
+        <os-page-head>
+          <span>
+            <h3>Distribution Protocols</h3>
+          </span>
+
+          <template #right>
+            <os-button v-if="ctx.detailView"
+              size="small" left-icon="expand-alt"
+              v-os-tooltip.bottom="'Switch to table view'"
+              @click="showTable"
+            />
+
+            <os-list-size v-else
+              :list="ctx.dps"
+              :page-size="ctx.pageSize"
+              :list-size="ctx.dpsCount"
+              @updateListSize="getDpsCount"
+            />
+          </template>
+        </os-page-head>
+
+        <os-page-body>
+          <os-page-toolbar v-if="!ctx.detailView">
+            <template #default>
+              <span v-if="!ctx.selectedDps || ctx.selectedDps.length == 0">
+                <os-button left-icon="plus" label="Create" @click="createDp"
+                  v-show-if-allowed="dpResources.createOpts" />
+
+                <os-menu label="Import" :options="importOpts" v-show-if-allowed="dpResources.importOpts" />
+
+                <os-button left-icon="download" label="Export" @click="exportDps"
+                  v-show-if-allowed="dpResources.importOpts" />
+
+                <os-button left-icon="share" label="View Orders" @click="viewOrders"
+                  v-show-if-allowed="dpResources.orderOpts" />
+
+                <os-button-link left-icon="question-circle" label="Help"
+                  url="https://help.openspecimen.org/distribution" new-tab="true" />
+              </span>
+
+              <span v-else>
+                <os-button left-icon="trash" label="Delete" @click="deleteDps"
+                  v-show-if-allowed="dpResources.deleteOpts" />
+
+                <os-button left-icon="download" label="Export" @click="exportDps"
+                  v-show-if-allowed="dpResources.importOpts" />
+              </span>
+            </template>
+
+            <template #right>
+              <os-button left-icon="search" label="Search" @click="openSearch" />
+            </template>
+          </os-page-toolbar>
+
+          <os-list-view
+            :data="ctx.dps"
+            :selected="ctx.selectedDp"
+            :schema="listSchema"
+            :query="ctx.query"
+            :allowSelection="true"
+            :loading="ctx.loading"
+            @filtersUpdated="loadDps"
+            @selectedRows="onDpsSelection"
+            @rowClicked="onDpRowClick"
+            ref="listView"
+          />
+
+          <os-confirm-delete ref="deleteDialog">
+            <template #message>
+              <span>Are you sure you want to delete the selected distribution protocols?</span>
+            </template>
+          </os-confirm-delete>
+        </os-page-body>
+      </os-page>
+    </os-screen-panel>
+
+    <os-screen-panel :width="9" v-if="$route.params && $route.params.dpId > 0 && ctx.selectedDp">
+      <router-view :dpId="ctx.selectedDp.dp.id" :key="$route.params.dpId" />
+    </os-screen-panel>
+  </os-screen>
+</template>
+
+<script>
+
+import alertsSvc from '@/common/services/Alerts.js';
+import exportSvc from '@/common/services/ExportService.js';
+import routerSvc from '@/common/services/Router.js';
+import dpSvc     from '@/administrative/services/DistributionProtocol.js';
+
+import dpResources from './Resources.js';
+
+export default {
+  props: ['filters', 'dpId'],
+
+  data() {
+    return {
+      ctx: {
+        dps: [],
+        dpsCount: -1,
+        loading: true,
+        query: this.filters,
+
+        detailView: false,
+        selectedDps: []
+      },
+
+      importOpts: [
+        {
+          icon: 'truck',
+          caption: 'Distribution Protocols',
+          onSelect: () => routerSvc.ngGoto('dp-import')
+        },
+        {
+          icon: 'list-ol',
+          caption: 'Requirements',
+          onSelect: () => routerSvc.ngGoto('dp-req-import')
+        },
+        {
+          icon: 'table',
+          caption: 'View Past Imports',
+          onSelect: () => routerSvc.ngGoto('dp-import-jobs')
+        }
+      ],
+
+      dpResources,
+
+      listSchema: { columns: [] },
+    };
+  },
+
+  created() {
+    dpSvc.getListViewSchema().then(listSchema => this.listSchema = listSchema);
+  },
+
+  watch: {
+    'dpId': function(newValue, oldValue) {
+      if (newValue == oldValue) {
+        return;
+      }
+
+      if (newValue > 0) {
+        let selectedRow = this.ctx.dps.find(rowObject => rowObject.dp.id == this.dpId);
+        if (!selectedRow) {
+          selectedRow = {dp: {id: this.dpId}};
+        }
+
+        this.showDetails(selectedRow);
+      } else {
+        this.showTable(newValue == -2);
+      }
+    }
+  },
+
+  methods: {
+    openSearch: function() {
+      this.$refs.listView.toggleShowFilters();
+    },
+
+    loadDps: async function({filters, uriEncoding, pageSize}) {
+      this.ctx.filterValues = filters;
+      this.ctx.pageSize     = pageSize;
+
+      const dps = await this.reloadDps();
+      if (this.dpId <= 0) {
+        routerSvc.goto('DpsList', {dpId: -1}, {filters: uriEncoding});
+      } else {
+        let selectedRow = dps.find(rowObject => rowObject.dp.id == this.dpId);
+        if (!selectedRow) {
+          selectedRow = {dp: {id: this.dpId}};
+        }
+
+        this.showDetails(selectedRow);
+      }
+    },
+
+    reloadDps: async function() {
+      this.ctx.loading = true;
+
+      const opts = Object.assign({includeStats: true, maxResults: this.ctx.pageSize}, this.ctx.filterValues || {});
+      const dps = await dpSvc.getDps(opts);
+
+      this.ctx.loading = false;
+      this.ctx.dps = dps.map(dp => ({dp}));
+      return this.ctx.dps;
+    },
+
+    getDpsCount: async function() {
+      this.ctx.dpsCount = -1;
+      const opts = Object.assign({}, this.ctx.filterValues);
+      const { count } = await dpSvc.getDpsCount(opts);
+      this.ctx.dpsCount = count;
+    },
+
+    onDpRowClick: function({dp}) {
+      routerSvc.goto('DpsListItemDetail.Overview', {dpId: dp.id}, {filters: this.filters});
+    },
+
+    showDetails: function(rowObject) {
+      this.ctx.selectedDp = rowObject;
+      if (!this.ctx.detailView) {
+        this.ctx.detailView = true;
+        this.$refs.listView.switchToSummaryView();
+      }
+    },
+
+    showTable: function(reload) {
+      this.ctx.detailView = false;
+      this.$refs.listView.switchToTableView();
+      routerSvc.goto('DpsList', {dpId: -1}, {filters: this.filters});
+      if (reload) {
+        this.$refs.listView.reload();
+      }
+    },
+
+    onDpsSelection: function(selection) {
+      this.ctx.selectedDps = (selection || []).map((row) => row.rowObject.dp);
+    },
+
+    createDp: function() {
+      routerSvc.goto('DpAddEdit', {dpId: -1});
+    },
+
+    exportDps: function() {
+      const dpIds = this.ctx.selectedDps.map(dp => dp.id);
+      exportSvc.exportRecords({objectType: 'distributionProtocol', recordIds: dpIds});
+    },
+
+    deleteDps: function() {
+      this.$refs.deleteDialog.open().then(
+        async () => {
+          const dpIds = this.ctx.selectedDps.map(dp => dp.id);
+          const deletedDps = await dpSvc.bulkDelete(dpIds);
+          if (deletedDps.length == 1) {
+            alertsSvc.success('1 distribution protocol deleted');
+          } else {
+            alertsSvc.success(deletedDps.length + ' distribution protocols deleted');
+          }
+
+          this.$refs.listView.reload();
+        }
+      );
+    },
+
+    viewOrders: function() {
+      routerSvc.goto('OrdersList', {orderId: -1});
+    }
+  }
+}
+</script>

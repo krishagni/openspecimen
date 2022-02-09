@@ -164,7 +164,7 @@ export default {
 
     dedup(options) {
       let ls = this.listSource;
-      let selectProp = ls.selectProp || 'id';
+      let selectProp = ls.selectProp || ls.idProp || 'id';
       let optionsMap = options.reduce(
         (acc, option) => {
           if (!acc[option[selectProp]]) {

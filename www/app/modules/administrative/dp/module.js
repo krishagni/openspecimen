@@ -29,7 +29,9 @@ angular.module('os.administrative.dp',
       .state('dp-list', {
         url: '/dps?filters',
         templateUrl: 'modules/administrative/dp/list.html',
-        controller: 'DpListCtrl',
+        controller: function($state, VueApp) {
+          VueApp.setVueView('dps/-1', $state.params);
+        },
         parent: 'dp-root'
       })
       .state('dp-addedit', {

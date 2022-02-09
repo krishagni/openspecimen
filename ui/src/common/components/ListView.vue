@@ -79,12 +79,12 @@
               </span>
               <span v-else-if="filter.type == 'site'">
                 <os-site-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
-                  :list-source="filter.listSource" :context="filterValues">
+                  :list-source="filter.listSource" :context="filtersContext">
                 </os-site-dropdown>
               </span>
               <span v-else-if="filter.type == 'user'">
                 <os-user-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
-                  :select-prop="filter.selectProp" :context="filterValues">
+                  :select-prop="filter.selectProp" :context="filtersContext">
                 </os-user-dropdown>
               </span>
               <span v-else-if="filter.type == 'date'">
@@ -217,6 +217,8 @@ export default {
 
       filterValues: { },
 
+      filtersContext: { },
+
       selectedRows: [],
 
       selectedItem: null,
@@ -243,6 +245,8 @@ export default {
     }
 
     Object.assign(this.filterValues, values);
+    Object.assign(this.filtersContext, this.filterValues);
+
     if (Object.keys(values).length > 0) {
       this.showFilters = true;
     } else {
@@ -359,11 +363,13 @@ export default {
             value = this.$filters.storagePosition(value, extra);
           } else if (column.type == 'specimen-measure') {
             value = this.$filters.specimenMeasure(value, extra);
+          } else if (value instanceof Array) {
+            value = value.join(', ');
           }
         }
       }
 
-      return value || (value == 0 ? value : '-');
+      return value || (value === 0 ? value : '-');
     },
 
     itemSelected: function(event, item) {
@@ -468,6 +474,7 @@ export default {
       deep: true,
 
       handler() {
+        this.filtersContext = Object.assign(this.filtersContext, this.filterValues || {});
         this.debounce(() => this.emitFiltersUpdated());
       }
     },

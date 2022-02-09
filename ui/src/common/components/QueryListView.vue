@@ -20,7 +20,7 @@ import http     from '@/common/services/HttpClient.js';
 export default {
   props: ['name', 'objectId', 'url', 'allowSelection'],
 
-  emits: ['selectedRows', 'rowClicked'],
+  emits: ['selectedRows', 'rowClicked', 'listLoaded'],
 
   data() {
     return {
@@ -192,6 +192,8 @@ export default {
           }
         );
       }
+
+      this.$emit('listLoaded', {list: this.list});
     },
 
     reload: function() {

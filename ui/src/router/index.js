@@ -472,7 +472,109 @@ const routes = [
         path: 'order-return-specimens',
         name: 'OrderReturnSpecimens',
         component: () => import(/* webpackChunkName: "orders" */ '../administrative/orders/ReturnSpecimens.vue'),
-      }
+      },
+
+      /*****************************
+       *****************************
+       * DPs module                *
+       *****************************
+       *****************************/
+      {
+        path: 'dps/:dpId',
+        name: 'DpsList',
+        component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/List.vue'),
+        props: (route) => ({filters: route.query.filters, dpId: route.params && route.params.dpId}),
+        children: [
+          {
+            path: '',
+            name: 'DpsListItemDetail',
+            component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Detail.vue'),
+            props: (route) => ({dpId: route.params && route.params.dpId, noNavButton: true}),
+            children: [
+              {
+                path: 'overview',
+                name: 'DpsListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Overview.vue')
+              },
+              {
+                path: 'consents',
+                name: 'DpsListItemDetail.Consents',
+                component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Consents.vue')
+              },
+              {
+                path: 'reserved-specimens',
+                name: 'DpsListItemDetail.ReservedSpecimens',
+                component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/ReservedSpecimens.vue')
+              },
+              {
+                path: 'requirements',
+                name: 'DpsListItemDetail.Requirements',
+                component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Requirements.vue'),
+                children: [
+                  {
+                    path: 'list',
+                    name: 'DpsListItemDetail.Requirements.List',
+                    component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/RequirementsList.vue')
+                  },
+                  {
+                    path: 'addedit/:reqId',
+                    name: 'DpsListItemDetail.Requirements.AddEdit',
+                    component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/RequirementsAddEdit.vue'),
+                    props: (route) => ({reqId: route.params && route.params.reqId}),
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        path: 'dps/:dpId/detail',
+        name: 'DpDetail',
+        component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Detail.vue'),
+        props: (route) => ({dpId: route.params && route.params.dpId}),
+        children: [
+          {
+            path: 'overview',
+            name: 'DpDetail.Overview',
+            component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Overview.vue')
+          },
+          {
+            path: 'consents',
+            name: 'DpDetail.Consents',
+            component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Consents.vue')
+          },
+          {
+            path: 'reserved-specimens',
+            name: 'DpDetail.ReservedSpecimens',
+            component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/ReservedSpecimens.vue')
+          },
+          {
+            path: 'requirements',
+            name: 'DpDetail.Requirements',
+            component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/Requirements.vue'),
+            children: [
+              {
+                path: 'list',
+                name: 'DpDetail.Requirements.List',
+                component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/RequirementsList.vue')
+              },
+              {
+                path: 'addedit/:reqId',
+                name: 'DpDetail.Requirements.AddEdit',
+                component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/RequirementsAddEdit.vue'),
+                props: (route) => ({reqId: route.params && route.params.reqId}),
+              }
+            ]
+          }
+        ]
+      },
+      {
+        path: 'dp-addedit/:dpId',
+        name: 'DpAddEdit',
+        component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/AddEdit.vue'),
+        props: (route) => ({dpId: route.params && route.params.dpId})
+      },
     ]
   }
 ]

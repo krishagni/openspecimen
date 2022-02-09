@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
+
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.de.domain.SelectField;
@@ -41,15 +41,12 @@ import edu.common.dynamicextensions.nutility.IoUtil;
 public class SavedQueriesController {
 
 	@Autowired
-	private HttpServletRequest httpServletRequest;
-
-	@Autowired
 	private QueryService querySvc;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SavedQueriesList getSavedQueries(
+	public Object getSavedQueries(
 		@RequestParam(value = "cpId", required = false)
 		Long cpId,
 
@@ -66,7 +63,10 @@ public class SavedQueriesController {
 		boolean countReq,
 
 		@RequestParam(value = "orderByStarred", required = false, defaultValue = "false")
-		boolean orderByStarred) {
+		boolean orderByStarred,
+
+		@RequestParam(value = "returnList", required = false, defaultValue = "false")
+		boolean returnList) {
 		
 		ListSavedQueriesCriteria crit = new ListSavedQueriesCriteria()
 			.cpId(cpId)
@@ -75,7 +75,8 @@ public class SavedQueriesController {
 			.orderByStarred(orderByStarred)
 			.startAt(start)
 			.maxResults(max);
-		return response(querySvc.getSavedQueries(request(crit)));
+		SavedQueriesList list = response(querySvc.getSavedQueries(request(crit)));
+		return returnList ? list.getQueries() : list;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/count")

@@ -2,11 +2,11 @@
 <template>
   <div class="os-input-text">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
-      <p-textarea v-model="inputValue" rows="2"/>
+      <p-textarea v-model="inputValue" rows="2" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <p-textarea v-model="inputValue" :placeholder="$attrs.placeholder" :rows="$attrs.rows" :cols="$attrs.cols"/>
+      <p-textarea v-model="inputValue" v-bind="$attrs" />
     </div>
   </div>
 </template>

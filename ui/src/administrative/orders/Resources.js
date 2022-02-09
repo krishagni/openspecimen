@@ -7,6 +7,8 @@ class OrderResources {
   deleteOpts    = {resource: 'Order', operations: ['Delete']};
 
   importOpts    = {resource: 'Order', operations: ['Export Import']};
+
+  dpOpts        = {resource: 'DistributionProtocol', operations: ['Read']};
 }
 
 export default new OrderResources();

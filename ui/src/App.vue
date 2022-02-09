@@ -102,7 +102,7 @@ a:focus, a:hover {
 }
 
 .os-app-toast {
-  z-index: 1102!important;
+  z-index: 1200!important;
 }
 
 .os-app-toast .p-toast-message {
