@@ -23,6 +23,24 @@ class Util {
     'js', 'json', 'pdf', 'png', 'tif', 'tiff', 'txt', 'xls', 'xlsx', 'xml', 'zip'
   ];
 
+  mask = null;
+
+
+  setMask(mask) {
+    this.mask = mask;
+  }
+
+  enableMask() {
+    if (this.mask) {
+      this.mask.enable();
+    }
+  }
+
+  disableMask() {
+    if (this.mask) {
+      this.mask.disable();
+    }
+  }
 
   clone(obj) {
     if (obj == null || typeof obj != 'object') {

@@ -12,6 +12,10 @@
       <router-view/>
     </div>
   </div>
+
+  <teleport to="body">
+    <os-mask ref="mask" />
+  </teleport>
 </template>
 
 <script>
@@ -19,8 +23,9 @@ import Toast from "primevue/toast";
 
 import Navbar from '@/common/components/Navbar.vue';
 
-import userSvc from '@/administrative/services/User.js';
+import userSvc   from '@/administrative/services/User.js';
 import routerSvc from '@/common/services/Router.js';
+import util      from '@/common/services/Util.js';
 
 export default {
   name: 'App',
@@ -36,6 +41,7 @@ export default {
   },
 
   mounted() {
+    util.setMask(this.$refs.mask);
   },
 
   methods: {

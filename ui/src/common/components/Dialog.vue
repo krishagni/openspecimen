@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model:visible="showDialog" :style="style" position="top" :modal="true">
+  <Dialog v-model:visible="showDialog" :style="style" position="top" :modal="true" :autoZIndex="false">
     <template #header>
       <slot name="header"></slot>
     </template>

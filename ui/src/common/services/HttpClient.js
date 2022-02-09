@@ -25,20 +25,27 @@ class HttpClient {
     }
   }
 
+  removeListener(listener) {
+    const idx = this.listeners.indexOf(listener);
+    if (idx >= 0) {
+      this.listeners.splice(idx, 1);
+    }
+  }
+
   get(url, params) {
-    return this.promise(() => axios.get(this.getUrl(url), this.config(params)));
+    return this.promise('get', () => axios.get(this.getUrl(url), this.config(params)));
   }
 
   async post(url, data, params) {
-    return this.promise(() => axios.post(this.getUrl(url), data, this.config(params)));
+    return this.promise('post', () => axios.post(this.getUrl(url), data, this.config(params)));
   }
 
   async put(url, data, params) {
-    return this.promise(() => axios.put(this.getUrl(url), data, this.config(params)));
+    return this.promise('put', () => axios.put(this.getUrl(url), data, this.config(params)));
   }
 
   async delete(url, data, params) {
-    return this.promise(() => axios.delete(this.getUrl(url), this.config(params), data));
+    return this.promise('delete', () => axios.delete(this.getUrl(url), this.config(params), data));
   }
 
   getUrl(url, {query = ''} = {}) {
@@ -128,28 +135,28 @@ class HttpClient {
     return {headers: this.headers, params: params};
   }
 
-  notifyStart() {
-    this.listeners.forEach(listener => listener.callStarted());
+  notifyStart(method) {
+    this.listeners.forEach(listener => listener.callStarted({method}));
   }
 
-  notifyComplete() {
-    this.listeners.forEach(listener => listener.callCompleted());
+  notifyComplete(method) {
+    this.listeners.forEach(listener => listener.callCompleted({method}));
   }
 
-  notifyFail() {
-    this.listeners.forEach(listener => listener.callFailed());
+  notifyFail(method) {
+    this.listeners.forEach(listener => listener.callFailed({method}));
   }
 
-  promise(apiCall) {
-    this.notifyStart();
+  promise(method, apiCall) {
+    this.notifyStart(method);
     return new Promise((resolve) => {
       apiCall()
         .then(resp => {
-          this.notifyComplete();
+          this.notifyComplete(method);
           resolve(resp.data);
         })
         .catch(e => {
-          this.notifyFail();
+          this.notifyFail(method);
 
           if (!e.response) {
             alertSvc.error(e.message);

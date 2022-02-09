@@ -36,9 +36,11 @@
 import { reactive } from 'vue';
 import useVuelidate from '@vuelidate/core'
 
-import alertSvc from '@/common/services/Alerts.js';
+import alertSvc     from '@/common/services/Alerts.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
-import exprUtil from '@/common/services/ExpressionUtil.js';
+import http         from '@/common/services/HttpClient.js';
+import exprUtil     from '@/common/services/ExpressionUtil.js';
+import util         from '@/common/services/Util.js';
 
 export default {
    props: ['schema', 'data'],
@@ -74,6 +76,14 @@ export default {
 
    beforeCreate: function() {
      this.ctx._formCache = {};
+   },
+
+   mounted() {
+     http.addListener(this);
+   },
+
+   unmounted() {
+     http.removeListener(this);
    },
 
    methods: {
@@ -134,6 +144,24 @@ export default {
        }
 
        return null;
+     },
+
+     callStarted: function({method}) {
+       if (method == 'post' || method == 'put') {
+         util.enableMask();
+       }
+     },
+
+     callCompleted: function({method}) {
+       if (method == 'post' || method == 'put') {
+         util.disableMask();
+       }
+     },
+
+     callFailed: function({method}) {
+       if (method == 'post' || method == 'put') {
+         util.disableMask();
+       }
      }
    },
 
