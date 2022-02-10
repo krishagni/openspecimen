@@ -972,6 +972,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
               adjustGrpLeader(specimen);
             }
           }
+
+          $scope.autoAlloc.rerun = true;
         };
 
         function adjustGrpLeader(specimen) {
