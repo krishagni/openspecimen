@@ -208,8 +208,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 				.add(Restrictions.eqProperty("cp1.id", "cp.id"))
 				.setProjection(Property.forName("site1.id"));
 
-			query.createAlias("cp.sites", "cpSite").createAlias("cpSite.site", "site");
-			restriction.add(Subqueries.propertyNotIn("site.id", siteCrit));
+			query.createAlias("site", "contSite");
+			restriction.add(Subqueries.propertyNotIn("contSite.id", siteCrit));
 		}
 
 		return query.add(restriction).list();

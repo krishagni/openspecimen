@@ -618,7 +618,6 @@ public class StorageContainer extends BaseExtensionEntity {
 		updateStoreSpecimenEnabled(other);
 		updateCellDisplayProp(other);
 		setExtension(other.getExtension());
-		validateRestrictions();
 	}
 
 	public void moveTo(StorageContainer newContainer) {
