@@ -781,6 +781,12 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		existingUser.update(user);
 		ensureApiUserUpdateByAdmin(existingUser, null);
 
+		if (existingUser.isDisabled()) {
+			AccessCtrlMgr.getInstance().ensureDeleteUserRights(existingUser);
+		} else {
+			AccessCtrlMgr.getInstance().ensureUpdateUserRights(existingUser);
+		}
+
 		if (isActivated(prevStatus, user.getActivityStatus())) {
 			onAccountActivation(user, prevStatus);
 		} else if (isLocked(prevStatus, user.getActivityStatus())) {
@@ -986,18 +992,29 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			return;
 		}
 
-		if (AuthUtil.isInstituteAdmin()) {
-			if (!newUser.isAdmin() && (existingUser == null || !existingUser.isAdmin())) {
-				//
-				// newly created/updated user is not super admin
-				// existing user, if any, is not super admin either
-				//
-				return;
-			}
+		if ((existingUser != null && existingUser.isAdmin()) || newUser.isAdmin()) {
+			//
+			// not super admin but trying to edit super admin user attributes.
+			// not allowed - you need to have super admin rights
+			//
+			throw OpenSpecimenException.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
 		}
 
-		newUser.setType(existingUser != null ? existingUser.getType() : User.Type.NONE);
-		newUser.setManageForms(existingUser != null && existingUser.canManageForms());
+		if (AuthUtil.isInstituteAdmin()) {
+			return;
+		}
+
+		if (existingUser != null && existingUser.isInstituteAdmin()) {
+			//
+			// not super admin or institute admin but attempting to change institute admin user attributes
+			// not allowed - you need to at least have institute admin rights
+			//
+			throw OpenSpecimenException.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, existingUser.getInstitute().getName());
+		}
+
+		if (newUser.isInstituteAdmin()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, newUser.getInstitute().getName());
+		}
 	}
 	
 	private void ensureUniqueEmail(User existingUser, User newUser, OpenSpecimenException ose) {
