@@ -27,7 +27,10 @@ angular.module('openspecimen')
       authenticate: function(loginData) {
         return $http.post(url(), loginData).then(ApiUtil.processResp).then(
           function(resp) {
-            impersonate(null);
+            if (resp.data && !resp.data.resetPasswordToken) {
+              impersonate(null);
+            }
+
             return resp;
           }
         );;
@@ -157,10 +160,12 @@ angular.module('openspecimen')
       $window.location.replace('saml/login');
     }
 
-    function onLogin(result) {
+    function onLogin(loginReq, result) {
       $scope.loginError = false;
 
-      if (result.status == "ok" && result.data) {
+      if (result.status == "ok" && result.data && result.data.resetPasswordToken) {
+        $state.go('reset-password', {token: result.data.resetPasswordToken, loginName: loginReq.loginName});
+      } else if (result.status == "ok" && result.data) {
         $rootScope.currentUser = {
           id: result.data.id,
           firstName: result.data.firstName,
@@ -201,7 +206,10 @@ angular.module('openspecimen')
 
       $scope.errors = [];
       AuthService.authenticate(loginData).then(
-        onLogin,
+        function(resp) {
+          onLogin(loginData, resp);
+        },
+
         function(resp) {
           var errors = $scope.errors = (resp.data || []);
           for (var i = 0; i < errors.length; ++i) {

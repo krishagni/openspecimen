@@ -17,6 +17,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+
+import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserEvent;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
@@ -115,6 +117,22 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			authEventData.put("loginDetail", loginDetail);
 			authEventData.put("user", user);
 			EventPublisher.getInstance().publish(UserEvent.XTRA_AUTH, authEventData);
+
+			if (user.isOpenSpecimenUser() && user.isForcePasswordReset()) {
+				//
+				// OpenSpecimen domain user
+				// doing sign-in for the first time
+				// force him/her to reset the password
+				//
+				ForgotPasswordToken fpToken = daoFactory.getUserDao().getFpTokenByUser(user.getId());
+				if (fpToken != null) {
+					daoFactory.getUserDao().deleteFpToken(fpToken);
+				}
+
+				fpToken = new ForgotPasswordToken(user);
+				daoFactory.getUserDao().saveFpToken(fpToken);
+				return ResponseEvent.response(Collections.singletonMap("resetPasswordToken", fpToken.getToken()));
+			}
 
 			Map<String, Object> authDetail = new HashMap<>();
 			authDetail.put("user", user);

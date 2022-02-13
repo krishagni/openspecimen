@@ -60,6 +60,8 @@
 
     <property name="timeZone" column="TIME_ZONE"/>
 
+    <property name="forcePasswordReset" column="FORCE_PASSWORD_RESET" />
+
     <set name="roles" inverse="true" cascade="none">
       <key column="SUBJECT_ID"/>
       <one-to-many class="com.krishagni.rbac.domain.SubjectRole"/>

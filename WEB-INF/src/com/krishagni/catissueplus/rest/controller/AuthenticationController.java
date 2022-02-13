@@ -70,14 +70,18 @@ public class AuthenticationController {
 
 		User user = (User) resp.getPayload().get("user");
 		Map<String, Object> detail = new HashMap<>();
-		detail.put("id", user.getId());
-		detail.put("firstName", user.getFirstName());
-		detail.put("lastName", user.getLastName());
-		detail.put("loginName", user.getLoginName());
-		detail.put("token", authToken);
-		detail.put("admin", user.isAdmin());
-		detail.put("instituteAdmin", user.isInstituteAdmin());
-		
+		if (user == null) {
+			detail.putAll(resp.getPayload());
+		} else {
+			detail.put("id", user.getId());
+			detail.put("firstName", user.getFirstName());
+			detail.put("lastName", user.getLastName());
+			detail.put("loginName", user.getLoginName());
+			detail.put("token", authToken);
+			detail.put("admin", user.isAdmin());
+			detail.put("instituteAdmin", user.isInstituteAdmin());
+		}
+
 		return detail;
 	}
 

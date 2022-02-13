@@ -89,6 +89,8 @@ public class User extends BaseEntity implements UserDetails {
 
 	private String ipRange;
 
+	private boolean forcePasswordReset;
+
 	private Set<Password> passwords = new HashSet<>();
 
 	private Set<SubjectRole> roles = new HashSet<>();
@@ -284,6 +286,14 @@ public class User extends BaseEntity implements UserDetails {
 		this.ipRange = ipRange;
 	}
 
+	public boolean isForcePasswordReset() {
+		return forcePasswordReset;
+	}
+
+	public void setForcePasswordReset(boolean forcePasswordReset) {
+		this.forcePasswordReset = forcePasswordReset;
+	}
+
 	@NotAudited
 	public Set<Password> getPasswords() {
 		return passwords;
@@ -358,6 +368,15 @@ public class User extends BaseEntity implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return this.activityStatus.equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+	}
+
+	public boolean isOpenSpecimenUser() {
+		AuthDomain authDomain = getAuthDomain();
+		if (authDomain != null) {
+			return authDomain.getName().equals(DEFAULT_AUTH_DOMAIN);
+		}
+
+		return false;
 	}
 
 	public void update(User user) {

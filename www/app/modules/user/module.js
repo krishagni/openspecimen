@@ -47,7 +47,7 @@ angular.module('openspecimen')
         parent: 'default-nav-buttons'
       })
       .state('reset-password', {
-        url: '/reset-password',
+        url: '/reset-password?token&loginName',
         templateUrl: 'modules/user/reset-password.html',
         controller: 'ResetPasswordCtrl',
         parent: 'default-nav-buttons',

@@ -1,5 +1,5 @@
 angular.module('openspecimen')
-  .controller('ResetPasswordCtrl', function($scope, $state, $location, $translate, User, Setting)  {
+  .controller('ResetPasswordCtrl', function($scope, $state, $stateParams, $location, $translate, User, Setting)  {
   
     function init() {
       if (!$location.search().token) {
@@ -8,7 +8,11 @@ angular.module('openspecimen')
       }
 
       $scope.response = {};
-      $scope.passwordDetail = {resetPasswordToken: $location.search().token};
+      $scope.passwordDetail = {
+        loginName: $stateParams.loginName,
+        resetPasswordToken: $location.search().token
+      };
+
       $scope.passwdCtx = {};
       loadPasswdSettings();
     }

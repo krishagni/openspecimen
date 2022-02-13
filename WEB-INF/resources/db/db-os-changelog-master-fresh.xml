@@ -149,6 +149,9 @@
   <include file="db/8.2/schema.xml"/>
   <include file="db/8.2/config.xml"/>
 
+  <include file="db/9.0/schema.xml"/>
+  <include file="db/9.0/audit.xml"/>
+
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
 </databaseChangeLog>
