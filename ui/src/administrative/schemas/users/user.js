@@ -6,11 +6,6 @@ export default {
       "name": "user.type",
       "optionsPerRow": 4,
       "options": (context) => {
-        const currentUser = context.formData.currentUser;
-        if (!currentUser.admin && !currentUser.instituteAdmin) {
-          return [];
-        }
-
         const options = [
           { "caption": "Super Administrator", "value": "SUPER" },
           { "caption": "Institute Administrator", "value": "INSTITUTE" },
@@ -18,13 +13,16 @@ export default {
           { "caption": "Regular", "value": "NONE" }
         ];
 
+        const currentUser = context.formData.currentUser;
         if (currentUser.instituteAdmin) {
           options.splice(0, 1);
+        } else if (!currentUser.admin) {
+          options.splice(0, 2);
         }
 
         return options;
       },
-      "showWhen": "currentUser.admin || (user.type != 'SUPER' && currentUser.instituteAdmin)"
+      "showWhen": "currentUser.admin || (user.type != 'SUPER' && currentUser.instituteAdmin) || (user.type != 'SUPER' && user.type != 'INSTITUTE')"
     },
 
     {

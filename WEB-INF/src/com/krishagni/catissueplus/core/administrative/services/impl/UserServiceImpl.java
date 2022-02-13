@@ -996,6 +996,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		}
 
 		if ((existingUser != null && existingUser.isAdmin()) || newUser.isAdmin()) {
+			//
+			// not super admin but trying to edit super admin user attributes.
+			// not allowed - you need to have super admin rights
+			//
 			throw OpenSpecimenException.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
 		}
 
@@ -1004,6 +1008,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		}
 
 		if (existingUser != null && existingUser.isInstituteAdmin()) {
+			//
+			// not super admin or institute admin but attempting to change institute admin user attributes
+			// not allowed - you need to at least have institute admin rights
+			//
 			throw OpenSpecimenException.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, existingUser.getInstitute().getName());
 		}
 

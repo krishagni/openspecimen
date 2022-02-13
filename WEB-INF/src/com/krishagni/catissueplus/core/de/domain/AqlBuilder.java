@@ -13,8 +13,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.de.domain.Filter.Op;
 import com.krishagni.catissueplus.core.de.domain.QueryExpressionNode.LogicalOp;
@@ -27,6 +28,7 @@ import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.domain.nui.DataType;
 import edu.common.dynamicextensions.domain.nui.LookupControl;
+import edu.common.dynamicextensions.domain.nui.SubFormControl;
 import edu.common.dynamicextensions.query.QuerySpace;
 
 @Configurable
@@ -278,23 +280,59 @@ public class AqlBuilder {
 		Container form = null;
 		String ctrlName = null;
 		Control ctrl = null;
+		int startIdx;
 		if (fieldParts[1].equals("extensions") || fieldParts[1].equals("customFields")) {
 			if (fieldParts.length < 4) {
 				return "";
 			}
 			
 			form = ctx.getContainer(fieldParts[2]);
-			ctrlName = StringUtils.join(fieldParts, ".", 3, fieldParts.length);
+			startIdx = 3;
 		} else {
 			form = ctx.getContainer(fieldParts[0]);
-			ctrlName = StringUtils.join(fieldParts, ".", 1, fieldParts.length);
+			startIdx = 1;
 		}
 
 		if (form == null) {
 			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid field: " + field);
 		}
 
-		ctrl = form.getControlByUdn(ctrlName, "\\.");
+		for (int idx = startIdx; idx < fieldParts.length; ++idx) {
+			ctrl = form.getControlByUdn(fieldParts[idx]);
+			if (ctrl == null) {
+				break;
+			}
+
+			boolean isSf = ctrl instanceof SubFormControl;
+			boolean leaf = idx == fieldParts.length - 1;
+			if ((leaf && isSf) || (!leaf && !isSf)) {
+				// (last field & sub form) or (not last field & not sf)
+				throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid field: " + field);
+			}
+
+			if (fieldParts[idx].equals("extensions") || fieldParts[idx].equals("customFields")) {
+				if (idx >= fieldParts.length - 2) {
+					// does not have custom fields form name and field name
+					throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid field: " + field);
+				}
+
+				form = Container.getContainer(fieldParts[idx + 1]);
+				if (form == null) {
+					throw OpenSpecimenException.userError(
+						SavedQueryErrorCode.MALFORMED,
+						"Invalid field: " + field + "; Form " + fieldParts[idx + 1] + " does not exists!"
+					);
+				}
+
+				++idx;
+			} else if (isSf) {
+				form = ((SubFormControl) ctrl).getSubContainer();
+			}
+		}
+
+		if (ctrl == null) {
+			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid field: " + field);
+		}
 
 		DataType type = ctrl.getDataType();
 		if (ctrl instanceof LookupControl) {
