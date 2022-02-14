@@ -96,7 +96,7 @@ export default {
         params[ls.searchProp || 'query'] = query;
         if (ls.queryParams) {
           if (ls.queryParams.static) {
-            Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.static[name]);
+            Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.queryParams.static[name]);
           }
 
           if (ls.queryParams.dynamic) {
