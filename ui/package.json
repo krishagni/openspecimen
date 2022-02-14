@@ -18,7 +18,7 @@
     "date-fns": "^2.21.3",
     "jsep": "^1.2.0",
     "primeflex": "^2.0.0",
-    "primeicons": "^4.1.0",
+    "primeicons": "^5.0.0",
     "primevue": "^3.9.1",
     "signature_pad": "^3.0.0-beta.4",
     "vue": "^3.0.11",
