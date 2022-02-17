@@ -18,7 +18,9 @@ public class TransactionAwareInterceptor extends EmptyInterceptor implements Int
 	private Set<TransactionEventListener> listeners = new LinkedHashSet<>();
 
 	public void addListener(TransactionEventListener listener) {
-		listeners.add(listener);
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
 	}
 
 	public void removeListener(TransactionEventListener listener) {

@@ -83,6 +83,8 @@ public class ConfigParams {
 
 	public static final String SET_QTY_TO_ZERO           = "zero_disposed_spmn_qty";
 
+	public static final String CP_VERSIONING_ENABLED     = "cp_versioning_enabled";
+
 	public static String getConsentsDirPath() {
 		String path = ConfigUtil.getInstance().getStrSetting(MODULE, CONSENTS_DIR, null);
 		if (StringUtils.isBlank(path)) {

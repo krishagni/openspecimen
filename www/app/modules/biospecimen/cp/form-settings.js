@@ -93,6 +93,7 @@ angular.module('os.biospecimen.cp')
         function() {
           savedForms.pristine = [].concat(savedForms.forms);
           savedForms.modified = false;
+          cp.draftMode = true;
         }
       );
     }

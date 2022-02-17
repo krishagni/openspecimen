@@ -156,7 +156,21 @@
   font-weight: bold;
   border-radius: 4px;
   font-size: 14px;
+  margin-bottom: -0.4px;
+}
+
+.panel .panel-heading .os-status-info,
+.panel .panel-heading .os-status-closed,
+.panel .panel-heading .os-status-reserved {
   margin-bottom: 5px;
+}
+
+.os-breadcrumbs .os-status-pending {
+  background: #f0ad4e;
+  color: #fff;
+  font-weight: bold;
+  padding: 0px 4px;
+  border-radius: 4px;
 }
 
 /** Used in CP events **/
@@ -488,4 +502,14 @@ table .os-md-time table {
 .os-tree-image-icon {
   color: inherit;
   padding-right: 4px;
+}
+
+.os-cp-draft-marker {
+  position: absolute;
+  font-size: 100px;
+  top: 50%;
+  left: calc(50% - 159px);
+  opacity: 0.2;
+  z-index: 1000;
+  transform: rotate(-45deg);
 }

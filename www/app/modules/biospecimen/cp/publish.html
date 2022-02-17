@@ -1,0 +1,47 @@
+<div class="os-modal">
+  <div class="os-modal-header">
+    <span>{{'cp.publish.title_cp' | translate: cp}}</span>
+  </div>
+  <div class="os-modal-body">
+    <form name="publishForm" os-form-validator="publishForm" novalidate>
+      <div class="form-group">
+        <label class="control-label">
+          <span translate="cp.publish.changes">Changes</span>
+        </label>
+        <div>
+          <textarea name="changes" class="form-control" rows="5" ng-model="publishDetails.changes" required>
+          </textarea>
+          <div os-field-error field="publishForm.changes"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label">
+          <span translate="cp.publish.reason">Reason</span>
+        </label>
+        <div>
+          <textarea name="reason" class="form-control" rows="5" ng-model="publishDetails.reason" required>
+          </textarea>
+          <div os-field-error field="publishForm.reason"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label">
+          <span translate="cp.publish.reviewers">Reviewers</span>
+        </label>
+        <div>
+          <os-users name="reviewers" ng-model="publishDetails.reviewers" exclude-contacts required multiple>
+          </os-users>
+          <div os-field-error field="publishForm.reviewers"></div>
+        </div>
+      </div>
+      <div class="os-modal-footer">
+        <button class="btn os-btn-text" ng-click="cancel()">
+          <span translate="common.buttons.cancel">Cancel</span>
+        </button>
+        <button class="btn btn-primary" os-form-submit="publish()">
+          <span translate="cp.publish.title">Publish</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

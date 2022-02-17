@@ -28,16 +28,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
+
 import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolPublishDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ConsentTierOp;
@@ -50,6 +49,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -57,6 +57,7 @@ import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityDeleteResp;
+import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.Resource;
@@ -213,30 +214,15 @@ public class CollectionProtocolsController {
 		CpQueryCriteria crit = new CpQueryCriteria();
 		crit.setId(cpId);
 		crit.setFullObject(true);
-		
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.getCollectionProtocol(request(crit));
-		resp.throwErrorIfUnsuccessful();
-		
-		CollectionProtocolDetail cp = resp.getPayload();
-		cp.setSopDocumentName(null);
-		cp.setSopDocumentUrl(null);
+		crit.param("includeIds", includeIds);
 
-		SimpleFilterProvider filters = new SimpleFilterProvider();
-		if (includeIds) {
-			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept());
-		} else {
-			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "statementId"));
-		}
-
-		ObjectMapper mapper = new ObjectMapper();
-		String def = mapper.writer(filters).withDefaultPrettyPrinter().writeValueAsString(cp);
-
-		httpResp.setContentType("application/json");
-		httpResp.setHeader("Content-Disposition", "attachment;filename=CpDef_" + cpId + ".json");
-
+		String def = ResponseEvent.unwrap(cpSvc.getCollectionProtocolDefinition(RequestEvent.wrap(crit)));
 		InputStream in = null;
 		try {
 			in = new ByteArrayInputStream(def.getBytes());
+
+			httpResp.setContentType("application/json");
+			httpResp.setHeader("Content-Disposition", "attachment;filename=CpDef_" + cpId + ".json");
 			IoUtil.copy(in, httpResp.getOutputStream());
 		} catch (IOException e) {
 			throw new RuntimeException("Error sending file", e);
@@ -622,6 +608,72 @@ public class CollectionProtocolsController {
 		}
 
 		Utility.sendToClient(httpResp, "CpReport" + extn, file);
+	}
+
+	//
+	// Publish APIs
+	//
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/published-events")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<CollectionProtocolPublishDetail> getPublishedEvents(
+		@PathVariable("id")
+		Long cpId,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults
+	) {
+		CpPublishEventListCriteria crit = new CpPublishEventListCriteria();
+		crit.cpId(cpId).startAt(startAt).maxResults(maxResults);
+		return ResponseEvent.unwrap(cpSvc.getPublishEvents(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/{id}/published-events")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public CollectionProtocolPublishDetail publish(
+		@PathVariable("id")
+		Long cpId,
+
+		@RequestBody
+		CollectionProtocolPublishDetail input) {
+
+		input.setCpId(cpId);
+		return ResponseEvent.unwrap(cpSvc.publish(RequestEvent.wrap(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/published-versions/{versionId}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public void getPublishedVersion(
+		@PathVariable("id")
+		Long cpId,
+
+		@PathVariable(value = "versionId")
+		Long versionId,
+
+		HttpServletResponse httpResp)
+	throws JsonProcessingException {
+		EntityQueryCriteria crit = new EntityQueryCriteria(versionId);
+		crit.setParams(Collections.singletonMap("cpId", cpId));
+
+		String def = ResponseEvent.unwrap(cpSvc.getPublishedVersion(RequestEvent.wrap(crit)));
+		InputStream in = null;
+		try {
+			in = new ByteArrayInputStream(def.getBytes());
+
+			httpResp.setContentType("application/json");
+			httpResp.setHeader("Content-Disposition", "attachment;filename=CpDef_" + cpId + ".json");
+			IoUtil.copy(in, httpResp.getOutputStream());
+		} catch (IOException e) {
+			throw new RuntimeException("Error sending file", e);
+		} finally {
+			IoUtil.close(in);
+		}
 	}
 
 	//

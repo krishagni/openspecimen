@@ -58,18 +58,27 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
       return angular.extend(obj, {itemKey: code, displayValue: statement + ' (' + code + ')'});
     }
 
+    function onAddRemove(consentTier) {
+      cp.draftMode = true;
+      if (!consentTier) {
+        return;
+      }
+
+      return initConsentTier(consentTier);
+    }
+
     $scope.loadConsentStmts = loadConsentStmts;
 
     $scope.listChanged = function(action, stmt) {
       if (action == 'add') {
-        return cp.newConsentTier({statementCode: stmt.itemKey}).$saveOrUpdate().then(initConsentTier);
+        return cp.newConsentTier({statementCode: stmt.itemKey}).$saveOrUpdate().then(onAddRemove);
       } else if (action == 'update') {
-        return cp.newConsentTier({id: stmt.id, statementCode: stmt.displayValue}).$saveOrUpdate().then(initConsentTier);
+        return cp.newConsentTier({id: stmt.id, statementCode: stmt.displayValue}).$saveOrUpdate().then(onAddRemove);
       } else if (action == 'remove') {
         var deferred = $q.defer();
         var opts = {
           confirmDelete: 'cp.delete_consent_tier',
-          onDeletion: function() { deferred.resolve(true); },
+          onDeletion: function() { onAddRemove(); deferred.resolve(true); },
           onDeleteFail: function() { deferred.reject(); }
         }
 
@@ -85,6 +94,7 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
       $scope.cp.updateConsentsWaived().then(
         function(result) {
           Alerts.success("cp.consents_waived_updated", {waived: result.consentsWaived});
+          $scope.cp.draftMode = true;
         }
       );
     }

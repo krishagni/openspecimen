@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Enable or disable CP versioning">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'cp_versioning_enabled',
+        'cp_versioning_enabled', 'cp_versioning_enabled_desc',
+        'BOOLEAN', ''
+      );
+    </sql>
+  </changeSet>
+</databaseChangeLog>

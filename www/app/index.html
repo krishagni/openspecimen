@@ -74,7 +74,9 @@
     <!-- Add your site or application content here -->
     <div style="height:100%;" ui-view></div>
 
-    <iframe src="{{logoutUrl}}" style="height: 0; width: 0; display:none;" ng-if="logout"></iframe>
+    <span ng-if="logout">
+      <iframe src="{{logoutUrl}}" style="height: 0; width: 0; display:none;"></iframe>
+    </span>
 
     <script>
       (function initTinyMce() {
@@ -448,6 +450,7 @@
     <script src="modules/biospecimen/cp/consents.js"></script>
     <script src="modules/biospecimen/cp/events.js"></script>
     <script src="modules/biospecimen/cp/specimens.js"></script>
+    <script src="modules/biospecimen/cp/published-versions.js"></script>
     <script src="modules/biospecimen/cp/config.js"></script>
     <script src="modules/biospecimen/cp/settings.js"></script>
     <script src="modules/biospecimen/cp/label-settings.js"></script>

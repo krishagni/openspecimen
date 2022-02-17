@@ -1,0 +1,37 @@
+<div class="os-modal">
+  <div class="os-modal-header">
+    <span>{{'cp.publish.revision_id' | translate: version}}</span>
+  </div>
+  <div class="os-modal-body" style="max-height: 75vh; overflow: auto;">
+    <ul class="os-key-values os-one-col">
+      <li class="item">
+        <strong class="key key-sm" translate="cp.publish.publication_date">Publication Date</strong>
+        <span class="value value-md">{{version.publicationDate | date: global.dateTimeFmt}}</span>
+      </li>
+      <li class="item">
+        <strong class="key key-sm" translate="cp.publish.publisher">Published By</strong>
+        <span class="value value-md">{{version.publishedBy | osUserDisplayName}}</span>
+      </li>
+      <li class="item">
+        <strong class="key key-sm" translate="cp.publish.reviewers">Reviewers</strong>
+        <span class="value value-md">{{version.reviewers | osUserDisplayName}}</span>
+      </li>
+      <li class="item">
+        <strong class="key key-sm" translate="cp.publish.changes">Changes</strong>
+        <span class="value value-md"> <pre>{{version.changes}}</pre> </span>
+      </li>
+      <li class="item">
+        <strong class="key key-sm" translate="cp.publish.reason">Reason</strong>
+        <span class="value value-md"> <pre>{{version.reason}}</pre> </span>
+      </li>
+    </ul>
+  </div>
+  <div class="os-modal-footer">
+    <a class="btn os-btn-text" ng-click="close()">
+      <span translate="common.buttons.close">Close</span>
+    </a>
+    <a class="btn btn-primary" href="{{version.cpDefUrl}}" target="_blank">
+      <span translate="common.buttons.download">Download</span>
+    </a>
+  </div>
+</div>

@@ -101,7 +101,19 @@ public enum CpErrorCode implements ErrorCode {
 
 	OP_NOT_ALLOWED_SC,
 
-	DOES_NOT_EXIST;
+	DOES_NOT_EXIST,
+
+	NOT_IN_DRAFT,
+
+	PUB_CHANGES_REQ,
+
+	PUB_REASON_REQ,
+
+	PUB_REVIEWERS_REQ,
+
+	PUB_INVALID_REVIEWERS,
+
+	INVALID_PUB_ID;
 	
 	@Override
 	public String code() {

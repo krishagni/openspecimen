@@ -12,4 +12,73 @@
         </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Setting to indicate whether the CP is in draft mode or not">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="DRAFT_MODE" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Published version CP definitions">
+    <createTable tableName="OS_PUBLISHED_CP_VERSIONS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="DEFINITION" type="${medium.clob.type}">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Published version CP definition ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_PUBLISHED_CP_VERSIONS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Published CP events">
+    <createTable tableName="OS_PUBLISHED_CP_EVENTS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="COLLECTION_PROTOCOL_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PUBLISHED_EVENT_CP_ID"
+          referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="PUBLISHED_BY" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PUBLISHED_EVENT_USER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="PUBLICATION_DATE" type="${timestamp.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="CHANGES" type="${text.type}(1024)">
+        <constraints nullable="false" />
+      </column>
+      <column name="REASON" type="${text.type}(1024)">
+        <constraints nullable="false" />
+      </column>
+      <column name="VERSION_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PUBLISHED_EVENT_VERSION"
+          referencedTableName="OS_PUBLISHED_CP_VERSIONS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Published CP event ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_PUBLISHED_CP_EVENTS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Published CP reviewers">
+    <createTable tableName="OS_PUBLISHED_CP_REVIEWERS">
+      <column name="PUBLISH_EVENT_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PUBLISHED_CP_EVENT"
+          referencedTableName="OS_PUBLISHED_CP_EVENTS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="USER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PUBLISHED_CP_REVIEWER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

@@ -234,6 +234,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
         function(result) {
           addToSrList(result);
           $scope.view = 'list_sr';
+          cp.draftMode = true;
         }
       );
     };
@@ -244,6 +245,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
         function(result) {
           updateSrList(result);
           $scope.revertEdit();
+          cp.draftMode = true;
         }
       );
     };
@@ -305,6 +307,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
           $scope.childReq = {};
           $scope.parentSr = undefined;
           $scope.view = 'list_sr';
+          cp.draftMode = true;
         }
       );
     };
@@ -335,6 +338,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
           $scope.childReq = {};
           $scope.parentSr = undefined;
           $scope.view = 'list_sr';
+          cp.draftMode = true;
         }
       );
     };
@@ -361,6 +365,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
           $scope.parentSr = undefined;
           $scope.view = 'list_sr';
           $scope.specimenRequirements = Specimen.flatten(specimenRequirements);
+          cp.draftMode = true;
         }
       );
     };
@@ -382,6 +387,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
           } else {
             addToSrList(result);
           }
+          cp.draftMode = true;
         }
       );
     };
@@ -393,6 +399,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
           sr.delete().then(
             function() {
               deleteFromSrList(sr);
+              cp.draftMode = true;
             }
           );
         }
@@ -409,6 +416,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
           removeUiProps(toClose).$saveOrUpdate().then(
             function(result) {
               updateSrList(result);
+              cp.draftMode = true;
             }
           );
         }
@@ -422,6 +430,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
       removeUiProps(toOpen).$saveOrUpdate().then(
         function(result) {
           updateSrList(result);
+          cp.draftMode = true;
         }
       );
     }

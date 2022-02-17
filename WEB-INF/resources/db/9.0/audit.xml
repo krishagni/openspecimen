@@ -11,4 +11,11 @@
       <column name="forcePasswordReset_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Setting to indicate whether the CP is in draft mode or not">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="DRAFT_MODE" type="${boolean.type}" />
+      <column name="draftMode_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

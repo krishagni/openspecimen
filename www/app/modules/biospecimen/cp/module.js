@@ -364,6 +364,12 @@ angular.module('os.biospecimen.cp',
         },
         controller: 'CpSpecimensCtrl'
       })
+      .state('cp-detail.versions', {
+        url: '/published-versions',
+        templateUrl: 'modules/biospecimen/cp/published-versions.html',
+        parent: 'cp-detail',
+        controller: 'CpPublishedVersionsCtrl'
+      })
       .state('cp-detail.settings', {
         url: '/settings',
         abstract: true,

@@ -38,6 +38,8 @@ public class CollectionProtocolSummary extends AttributeModifiedSupport implemen
 
 	private Boolean starred;
 
+	private boolean draftMode;
+
 	public Long getId() {
 		return id;
 	}
@@ -150,6 +152,14 @@ public class CollectionProtocolSummary extends AttributeModifiedSupport implemen
 		this.starred = starred;
 	}
 
+	public boolean isDraftMode() {
+		return draftMode;
+	}
+
+	public void setDraftMode(boolean draftMode) {
+		this.draftMode = draftMode;
+	}
+
 	@Override
 	public int compareTo(CollectionProtocolSummary cpSummary) {
 		return this.shortTitle.toUpperCase().compareTo(cpSummary.getShortTitle().toUpperCase());
@@ -173,5 +183,6 @@ public class CollectionProtocolSummary extends AttributeModifiedSupport implemen
 		detail.setManualPpidEnabled(cp.isManualPpidEnabled());
 		detail.setSpecimenCentric(cp.isSpecimenCentric());
 		detail.setCatalogId(cp.getCatalogId());
+		detail.setDraftMode(cp.isDraftMode());
 	}
 }

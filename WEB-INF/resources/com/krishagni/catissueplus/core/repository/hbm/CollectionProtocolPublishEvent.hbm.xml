@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolPublishEvent" table="OS_PUBLISHED_CP_EVENTS">
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_PUBLISHED_CP_EVENTS_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="cp" column="COLLECTION_PROTOCOL_ID" not-null="true" />
+
+    <many-to-one name="publishedBy" column="PUBLISHED_BY" not-null="true" />
+
+    <property name="publicationDate" column="PUBLICATION_DATE" not-null="true" />
+
+    <property name="changes" column="CHANGES" not-null="true" />
+
+    <property name="reason" column="REASON" not-null="true" />
+
+    <many-to-one name="publishedVersion" column="VERSION_ID" not-null="true" />
+
+    <set name="reviewers" table="OS_PUBLISHED_CP_REVIEWERS" cascade="none">
+      <key column="PUBLISH_EVENT_ID" />
+      <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.User" column="USER_ID"/>
+    </set>
+  </class>
+</hibernate-mapping>

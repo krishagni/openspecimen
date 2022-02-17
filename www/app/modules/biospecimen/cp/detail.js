@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
   .controller('CpDetailCtrl', function(
-    $scope, $q, $translate, cp,
+    $scope, $q, $translate, $modal, cp,
     CollectionProtocol, PvManager, DeleteUtil, CpSettingsReg,
     SettingUtil, Util, Alerts, osExportSvc) {
 
@@ -32,7 +32,14 @@ angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
 
       SettingUtil.getSetting('biospecimen', 'store_spr').then(
         function(setting) {
-          $scope.sysStoreSpr = (setting.value == 'true');
+          $scope.sysStoreSpr = (setting.value == 'true' || setting.value == true);
+        }
+      );
+
+      $scope.cpVersioningEnabled = false;
+      SettingUtil.getSetting('biospecimen', 'cp_versioning_enabled').then(
+        function(setting) {
+          $scope.cpVersioningEnabled = (setting.value == 'true' || setting.value == true);
         }
       );
     }
@@ -78,6 +85,35 @@ angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
 
     $scope.exportReqs = function() {
       osExportSvc.exportRecords({objectType: 'sr', params: {cpId: cp.id}});
+    }
+
+    $scope.confirmPublish = function() {
+      $modal.open({
+        templateUrl: 'modules/biospecimen/cp/publish.html',
+        controller: function($scope, $modalInstance) {
+          var publishDetails = $scope.publishDetails = {};
+
+          $scope.cp = cp;
+
+          $scope.publish = function() {
+            if (!publishDetails.reviewers || publishDetails.reviewers.length == 0) {
+              Alerts.error('cp.publish.reviewers_req');
+              return;
+            }
+
+            cp.publish(publishDetails).then(
+              function() {
+                Alerts.success('cp.publish.published');
+                $modalInstance.close(true);
+              }
+            );
+          }
+
+          $scope.cancel = function() {
+            $modalInstance.dismiss('cancel');
+          }
+        }
+      });
     }
 
     init();

@@ -167,6 +167,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private Set<User> starred = new HashSet<>();
 
+	private boolean draftMode = false;
+
 	private Long catalogId;
 
 	public static String getEntityName() {
@@ -620,6 +622,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	public void setStarred(Set<User> starred) {
 		this.starred = starred;
+	}
+
+	public boolean isDraftMode() {
+		return draftMode;
+	}
+
+	public void setDraftMode(boolean draftMode) {
+		this.draftMode = draftMode;
 	}
 
 	public Long getCatalogId() {

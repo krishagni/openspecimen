@@ -1,0 +1,68 @@
+<div class="clearfix">
+  <div class="col-xs-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <span translate="cp.publish.revisions">Publish Events</span>
+      </div>
+      <div class="panel-body">
+        <div class="os-alert-container inline" ng-if="!lctx.versions || lctx.versions.length == 0">
+          <div class="alert alert-info" translate="cp.publish.no_revisions">No revisions to display</div>
+        </div>
+
+        <table class="os-table" ng-if="lctx.versions.length > 0">
+          <thead class="os-table-head">
+            <tr class="row">
+              <th class="col">
+                <span translate="cp.publish.revision">Event ID</span>
+              </th>
+              <th class="col">
+                <span translate="cp.publish.publication_date">Publication Date</span>
+              </th>
+              <th class="col">
+                <span translate="cp.publish.publisher">Publisher</span>
+              </th>
+              <th class="col">
+                <span translate="cp.publish.reviewers">Reviewers</span>
+              </th>
+              <th class="col">
+                <span>&nbsp;</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="os-table-body">
+            <tr class="row" ng-repeat="version in lctx.versions">
+              <td class="col">
+                <span>#{{version.id}}</span>
+              </td>
+              <td class="col">
+                <span>{{version.publicationDate | date: global.dateTimeFmt}}</span>
+              </td>
+              <td class="col">
+                <span>{{version.publishedBy | osUserDisplayName}}</span>
+              </td>
+              <td class="col">
+                <span>{{version.reviewers | osUserDisplayName}}</span>
+              </td>
+              <td class="col os-click-esc">
+                <button class="btn btn-default btn-xs" ng-click="showVersionDetails(version)"
+                  os-tooltip="{{'cp.publish.view_details' | translate}}">
+                  <span class="fa fa-eye"></span>
+                </button>
+                <div style="display: inline-block; cursor: pointer;"
+                  os-tooltip="{{'cp.publish.download_version' | translate}}">
+                  <a class="btn btn-default btn-xs" href="{{version.cpDefUrl}}" target="_blank">
+                    <span class="fa fa-download"></span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <pager total-items="lctx.totalVersions" items-per-page="lctx.versionsPerPage"
+          ng-model="lctx.currPage" ng-if="lctx.versions.length > 0">
+        </pager>
+      </div>
+    </div>
+  </div>
+</div>

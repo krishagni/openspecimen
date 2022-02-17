@@ -25,8 +25,11 @@ angular.module('os.biospecimen.participant',
     $stateProvider
       .state('cp-view', {
         url: '/cp-view/:cpId',
-        template: '<div ui-view></div>',
-        controller: function($scope, cp, cpViewCtx) {
+        template: '<div> ' +
+                  '  <span ng-if="cp.draftMode && cpViewCtx.versioningEnabled" class="os-cp-draft-marker">DRAFT</span> ' +
+                  '  <div ui-view></div> ' +
+                  '</div>',
+        controller: function($scope, cp, cpViewCtx, SettingUtil) {
           $scope.cp = cp;
           $scope.cpViewCtx = cpViewCtx;
           cpViewCtx.codingEnabled = $scope.global.appProps.cp_coding_enabled;
@@ -65,6 +68,12 @@ angular.module('os.biospecimen.participant',
             resources: ['Specimen', 'PrimarySpecimen'],
             operations: ['Delete']
           };
+
+          SettingUtil.getSetting('biospecimen', 'cp_versioning_enabled').then(
+            function(setting) {
+              cpViewCtx.versioningEnabled = (setting.value == 'true' || setting.value == true);
+            }
+          );
         },
         resolve: {
           cp: function($stateParams, CollectionProtocol) {

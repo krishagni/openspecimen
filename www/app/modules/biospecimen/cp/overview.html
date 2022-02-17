@@ -2,9 +2,14 @@
   <div class="os-page-commands">
     <div class="left">
       <button show-if-allowed="cpResource.updateOpts" class="default" title="{{'cp.tooltip.edit' | translate}}"
-        ui-sref="cp-addedit({cpId:cp.id})">
+        ui-sref="cp-addedit({cpId: cp.id})">
         <span class="fa fa-pencil"></span>
         <span translate="common.buttons.edit">Edit</span>
+      </button>
+      <button show-if-allowed="cpResource.updateOpts" class="default" title="{{'cp.tooltip.publish' | translate}}"
+        ng-click="confirmPublish()" ng-if="cp.draftMode && cpVersioningEnabled">
+        <span class="fa fa-check"></span>
+        <span translate="cp.menu_options.publish">Publish</span>
       </button>
       <button show-if-allowed="cpResource.createOpts" class="default" ui-sref="cp-addedit({cpId:cp.id, mode:'copy'})">
         <span class="fa fa-copy"></span>

@@ -46,11 +46,19 @@
          <span class="os-title" translate="cp.tab.settings">Settings</span>
        </a>
      </li>
+     <li ui-sref-active="active" ng-if="cpVersioningEnabled">
+       <a ui-sref=".versions">
+         <span class="fa fa-history"></span>
+         <span class="os-title" translate="cp.tab.versions">Published Versions</span>
+       </a>
+     </li>
      <os-plugin-hooks view-name="'cp-detail'" sec-name="'side-menu'"></os-plugin-hooks>
    </ul>
   </div>
 
-  <div ng-class="{'os-side-menu-page-content': state.name.indexOf('cp-detail') != -1}" ui-view>
+  <div ng-class="{'os-side-menu-page-content': state.name.indexOf('cp-detail') != -1}">
+    <span ng-if="cp.draftMode && cpVersioningEnabled" class="os-cp-draft-marker">DRAFT</span>
+    <div ui-view></div>
   </div>
 </div>
 

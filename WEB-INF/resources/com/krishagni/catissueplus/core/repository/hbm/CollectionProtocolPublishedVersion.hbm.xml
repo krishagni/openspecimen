@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolPublishedVersion" table="OS_PUBLISHED_CP_VERSIONS">
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_PUBLISHED_CP_VERSIONS_SEQ</param>
+      </generator>
+    </id>
+
+    <property name="definition" column="DEFINITION" not-null="true" />
+  </class>
+</hibernate-mapping>

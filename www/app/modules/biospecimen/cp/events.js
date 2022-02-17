@@ -80,6 +80,7 @@ angular.module('os.biospecimen.cp.events', ['os.biospecimen.models'])
           $scope.event = {};
           $scope.mode = undefined;
           loadSpecimenRequirements(result);
+          cp.draftMode = true;
         }
       );
     };
@@ -95,6 +96,7 @@ angular.module('os.biospecimen.cp.events', ['os.biospecimen.models'])
           }
           $scope.event = {};
           loadSpecimenRequirements(result);
+          cp.draftMode = true;
         }
       );
     };
@@ -111,6 +113,8 @@ angular.module('os.biospecimen.cp.events', ['os.biospecimen.models'])
               if (events.length > 0) {
                 $scope.selectEvent(events[0]);
               }
+
+              cp.draftMode = true;
             }
           );
         }
@@ -129,6 +133,7 @@ angular.module('os.biospecimen.cp.events', ['os.biospecimen.models'])
             function(closedEvt) {
               angular.extend(evt, closedEvt);
               loadSpecimenRequirements(evt, true);
+              cp.draftMode = true;
             }
           );
         }
@@ -143,6 +148,7 @@ angular.module('os.biospecimen.cp.events', ['os.biospecimen.models'])
         function(openedEvt) {
           angular.extend(evt, openedEvt);
           loadSpecimenRequirements(evt, true);
+          cp.draftMode = true;
         }
       );
     }

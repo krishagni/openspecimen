@@ -81,6 +81,7 @@
     "copy_first_to_all": "Copy first to all",
     "closed": "Closed",
     "archived": "Archived",
+    "draft": "Draft",
     "show_all": "Show all",
     "show_only_first": "Show first",
     "confirm_navigation": "You've unsaved form changes. If you navigate away from this page without submitting form, the changes will be lost. Are you sure you want to leave this page?",
@@ -333,20 +334,39 @@
     "hide_site_coding": "Hide Site Code Information",
 
     "view_details": "View CP Details",
+    "publish": {
+      "title": "Publish",
+      "title_cp": "Publish {{shortTitle}}",
+      "changes": "Summary of Changes",
+      "reason": "Reason",
+      "reviewers": "Reviewers",
+      "reviewers_req": "At least one reviewer is required to publish the collection protocol",
+      "published": "Collection protocol published!",
+      "revisions": "Revisions",
+      "revision": "Revision",
+      "revision_id": "Revision ID #{{id}}",
+      "publication_date": "Publication Date",
+      "publisher": "Publisher",
+      "view_details": "View Revision Details",
+      "download_version": "Download Revision (JSON)",
+      "no_revisions": "No revisions to display"
+    },
 
     "tab": {
       "overview": "Overview",
       "consents": "Consents",
       "events": "Events",
       "users": "Users",
-      "settings": "Settings"
+      "settings": "Settings",
+      "versions": "Revisions"
     },
 
     "menu_options": {
       "clone": "Clone",
       "close": "Close",
       "delete": "Delete",
-      "export": "Export"
+      "export": "Export",
+      "publish": "Publish"
     },
 
     "tooltip": {
@@ -3041,7 +3061,10 @@
         "zero_disposed_spmn_qty": "Zero Out Specimen Quantity",
         "zero_disposed_spmn_qty_desc": "Enable to set the available quantity of specimens to zero when they are disposed.",
         "coordinator_role_name": "Coordinator Role",
-        "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state."
+        "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state.",
+
+        "cp_versioning_enabled": "CP Revisions",
+        "cp_versioning_enabled_desc": "All changes to the collection protocols will have to be reviewed and published."
       },
 
       "common": {

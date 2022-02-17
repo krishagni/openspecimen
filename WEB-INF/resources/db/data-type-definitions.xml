@@ -45,6 +45,10 @@
   <property name="clob.type" value="text" dbms="mysql"/>
   <property name="clob.type" value="clob" dbms="oracle"/>
 
+  <property name="medium.clob.type" value="mediumtext" dbms="mysql"/>
+  <property name="medium.clob.type" value="clob" dbms="oracle"/>
+
+
   <property name="blob.type" value="blob" dbms="mysql"/>
   <property name="blob.type" value="blob" dbms="oracle"/>
 

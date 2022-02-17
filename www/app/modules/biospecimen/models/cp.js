@@ -113,7 +113,7 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
       var params = {consentsWaived: this.consentsWaived};
       return $http.put(CollectionProtocol.url() + this.$id() + "/consents-waived", params).then(
         function(resp) {
-          return new CollectionProtocol(result.data);
+          return new CollectionProtocol(resp.data);
         }
       );
     }
@@ -220,6 +220,25 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
 
     CollectionProtocol.prototype.unstar = function() {
       return $http.delete(CollectionProtocol.url() + this.$id() + '/labels').then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
+
+    CollectionProtocol.prototype.publish = function(details) {
+      var self = this;
+      return $http.post(CollectionProtocol.url() + this.$id() + '/published-events', details || {}).then(
+        function(resp) {
+          self.draftMode = false;
+          return resp.data;
+        }
+      );
+    }
+
+    CollectionProtocol.prototype.getPublishedVersions = function(startAt, maxResults) {
+      var qp = {startAt: startAt, maxResults: maxResults};
+      return $http.get(CollectionProtocol.url() + this.$id() + '/published-events', {params: qp}).then(
         function(resp) {
           return resp.data;
         }

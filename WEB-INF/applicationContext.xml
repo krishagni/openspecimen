@@ -213,6 +213,10 @@
     <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
+  <bean id="cpChangeListener" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolChangeListener">
+    <property name="transactionAwareInterceptor" ref="transactionAwareInterceptor"/>
+  </bean>
+
   <bean id="cpGroupFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.CollectionProtocolGroupFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>

@@ -37,6 +37,8 @@ import com.krishagni.catissueplus.core.common.repository.UserNotificationDao;
 public interface DaoFactory {
 	CollectionProtocolDao getCollectionProtocolDao();
 
+	CollectionProtocolPublishEventDao getCollectionProtocolPublishEventDao();
+
 	ParticipantDao getParticipantDao();
 
 	StagedParticipantDao getStagedParticipantDao();

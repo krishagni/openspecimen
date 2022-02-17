@@ -105,8 +105,13 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
 	public User getUserByEmailAddress(String emailAddress) {
 		String hql = String.format(GET_USER_BY_EMAIL_HQL, " and activityStatus != 'Disabled'");
-		List<User> users = executeGetUserByEmailAddressHql(hql, emailAddress);
+		List<User> users = executeGetUserByEmailAddressHql(hql, Collections.singletonList(emailAddress));
 		return users.isEmpty() ? null : users.get(0);
+	}
+
+	public List<User> getUsersByEmailAddress(Collection<String> emailAddresses) {
+		String hql = String.format(GET_USER_BY_EMAIL_HQL, " and activityStatus != 'Disabled'");
+		return executeGetUserByEmailAddressHql(hql, emailAddresses);
 	}
 	
 	public Boolean isUniqueLoginName(String loginName, String domainName) {
@@ -115,8 +120,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
 	public Boolean isUniqueEmailAddress(String emailAddress) {
 		String hql = String.format(GET_USER_BY_EMAIL_HQL, "");
-		List<User> users = executeGetUserByEmailAddressHql(hql, emailAddress);
-		
+		List<User> users = executeGetUserByEmailAddressHql(hql, Collections.singletonList(emailAddress));
 		return users.isEmpty();
 	}
 	
@@ -327,11 +331,10 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<User> executeGetUserByEmailAddressHql(String hql, String emailAddress) {
-		return sessionFactory.getCurrentSession()
-				.createQuery(hql)
-				.setString("emailAddress", emailAddress)
-				.list();
+	private List<User> executeGetUserByEmailAddressHql(String hql, Collection<String> emailAddresses) {
+		return getCurrentSession().createQuery(hql)
+			.setParameterList("emailAddresses", emailAddresses)
+			.list();
 	}
 	
 	private Criteria addSearchConditions(Criteria criteria, UserListCriteria listCrit) {
@@ -602,7 +605,10 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	private static final String GET_USER_BY_EMAIL_HQL =
-			"from com.krishagni.catissueplus.core.administrative.domain.User where emailAddress = :emailAddress %s";
+		"from " +
+		"  com.krishagni.catissueplus.core.administrative.domain.User " +
+		"where " +
+		"  emailAddress in (:emailAddresses) %s";
 	
 	private static final String FQN = User.class.getName();
 

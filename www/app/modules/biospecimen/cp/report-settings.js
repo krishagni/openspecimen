@@ -39,6 +39,7 @@ angular.module('os.biospecimen.cp')
       cp.saveReportSettings(setting).then(
         function(savedSetting) {
           angular.extend(cp.reportSettings, savedSetting);
+          cp.draftMode = true;
           setViewCtx();
         }
       );
@@ -88,6 +89,7 @@ angular.module('os.biospecimen.cp')
       cp.saveReportSettings(setting).then(
         function(savedSetting) {
           angular.extend(cp.reportSettings, savedSetting);
+          cp.draftMode = true;
           setViewCtx();
         }
       );
@@ -105,6 +107,7 @@ angular.module('os.biospecimen.cp')
       cp.deleteReportSettings().then(
         function() {
           cp.reportSettings = {};
+          cp.draftMode = true;
           setViewCtx();
         }
       );

@@ -11,6 +11,7 @@ angular.module('os.biospecimen.cp')
         function(wfDetail) {
           CpConfigSvc.setWorkflows(cp, wfDetail);
           Alerts.success('cp.workflows_imported');
+          cp.draftMode = true;
           $state.go('cp-detail.overview', {cpId: cp.id});
         }
       );
