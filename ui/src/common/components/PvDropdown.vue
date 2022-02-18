@@ -1,11 +1,7 @@
 
 <template>
-  <span v-if="multiple">
-    <MultiSelectDropdown v-model="inputValue" :list-source="listSource" />
-  </span>
-  <span v-else>
-    <Dropdown v-model="inputValue" :list-source="listSource" />
-  </span>
+  <MultiSelectDropdown v-model="inputValue" :list-source="listSource" v-if="multiple" />
+  <Dropdown v-model="inputValue" :list-source="listSource" v-else />
 </template>
 
 <script>
