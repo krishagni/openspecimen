@@ -1,5 +1,6 @@
 <template>
-  <Dialog v-model:visible="showDialog" :style="style" position="top" :modal="true" :autoZIndex="false">
+  <Dialog v-model:visible="showDialog" :style="style" position="top"
+    :modal="true" :autoZIndex="false" :closable="showCloseIcon">
     <template #header>
       <slot name="header"></slot>
     </template>
@@ -18,7 +19,7 @@
 import Dialog from 'primevue/dialog';
 
 export default {
-  props: ['size', 'contentClass'],
+  props: ['size', 'contentClass', 'closable'],
 
   components: {
     Dialog,
@@ -39,6 +40,10 @@ export default {
       } else {
         return {width: '50vw'};
       }
+    },
+
+    showCloseIcon: function() {
+      return this.closable == undefined || this.closable == null || this.closable == 'true' || this.closable == true;
     }
   },
 

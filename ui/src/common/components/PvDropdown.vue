@@ -73,9 +73,6 @@ export default {
         this.$emit('update:modelValue', value);
       }
     }
-  },
-
-  methods: {
   }
 }
 </script>

@@ -355,12 +355,9 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 	}
 	
 	public static List<ParticipantDetail> from(List<Participant> participants, boolean excludePhi) {
-		List<ParticipantDetail> result = new ArrayList<>();
-		for (Participant participant : participants) {
-			result.add(ParticipantDetail.from(participant, excludePhi));
-		}
-		
-		return result;
+		return participants.stream()
+			.map(participant -> ParticipantDetail.from(participant, excludePhi))
+			.collect(Collectors.toList());
 	}
 	
 	public static Set<CprSummary> getCprSummaries(List<CollectionProtocolRegistration> cprs) {
