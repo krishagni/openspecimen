@@ -401,7 +401,7 @@ angular.module('openspecimen')
     HomePageSvc.registerCards(
       [
         {
-          showIf: {resource: 'CollectionProtocol', operations: ['Read']},
+          showIf: {resources: ['ParticipantPhi', 'ParticipantDeid'], operations: ['Read']},
           sref: 'cp-list',
           icon: 'fa fa-calendar',
           title: 'menu.collection_protocols',
@@ -535,7 +535,7 @@ angular.module('openspecimen')
     HomePageSvc.registerUserWidgets(
       [
         {
-          showIf: {resource: 'CollectionProtocol', operations: ['Read']},
+          showIf: {resources: ['ParticipantPhi', 'ParticipantDeid'], operations: ['Read']},
           name: 'collection-protocols',
           icon: 'fa fa-calendar',
           detailedList: 'cp-list',
