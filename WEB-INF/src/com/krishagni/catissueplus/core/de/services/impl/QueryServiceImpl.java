@@ -951,7 +951,10 @@ public class QueryServiceImpl implements QueryService {
 	@Override
 	@PlusTransactional
 	public QueryDataExportResult exportQueryData(final ExecuteQueryEventOp opDetail, final ExportProcessor processor) {
-		ensureReadRights();
+		if (!opDetail.isDisableAccessChecks()) {
+			ensureReadRights();
+		}
+
 		return exportData(opDetail, processor, null);
 	}
 
