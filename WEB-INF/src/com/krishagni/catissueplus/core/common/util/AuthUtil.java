@@ -37,6 +37,20 @@ public class AuthUtil {
 	public static boolean isSignedIn() {
 		return getCurrentUser() != null;
 	}
+
+	public static String getAuthToken() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null) {
+			return null;
+		}
+
+		String encodedToken = (String) auth.getCredentials();
+		if (encodedToken == null) {
+			return null;
+		}
+
+		return decodeToken(encodedToken);
+	}
 	
 	public static User getCurrentUser() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();

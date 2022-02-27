@@ -429,6 +429,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 			user.changePassword(detail.getNewPassword());
 			daoFactory.getUserDao().saveOrUpdate(user);
+			daoFactory.getAuthDao().deleteAuthTokens(user.getId(), AuthUtil.getAuthToken());
 			sendPasswdChangedEmail(user);
 			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
@@ -465,6 +466,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			
 			user.changePassword(detail.getNewPassword());
 			dao.deleteFpToken(token);
+			daoFactory.getAuthDao().deleteAuthTokens(user.getId(), AuthUtil.getAuthToken());
 			sendPasswdChangedEmail(user);
 			return ResponseEvent.response(true);
 		}catch (OpenSpecimenException ose) {
