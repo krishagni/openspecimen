@@ -3,6 +3,9 @@ package com.krishagni.catissueplus.core.auth.repository.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.query.Query;
+
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.auth.domain.AuthProvider;
 import com.krishagni.catissueplus.core.auth.domain.AuthToken;
@@ -91,7 +94,23 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	public void deleteAuthToken(AuthToken token) {
 		sessionFactory.getCurrentSession().delete(token);
 	}
-	
+
+	@Override
+	public void deleteAuthTokens(Long userId, String except) {
+		String sql = DELETE_USER_AUTH_TOKENS_SQL;
+		if (StringUtils.isNotBlank(except)) {
+			sql += " and token != :exceptToken";
+		}
+
+		Query query = getCurrentSession().createSQLQuery(sql);
+		query.setParameter("userId", userId);
+		if (StringUtils.isNotBlank(except)) {
+			query.setParameter("exceptToken", except);
+		}
+
+		query.executeUpdate();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<LoginAuditLog> getLoginAuditLogsByUser(Long userId, int maxResults) {
@@ -168,4 +187,6 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	private static final String DELETE_CREDENTIAL = AuthCredential.class.getName() + ".deleteByToken";
 
 	private static final String DELETE_DANGLING_CREDS = AuthCredential.class.getName() + ".deleteDanglingCredentials";
+
+	private static final String DELETE_USER_AUTH_TOKENS_SQL = "delete from os_auth_tokens where user_id = :userId";
 }

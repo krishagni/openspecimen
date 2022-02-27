@@ -30,6 +30,8 @@ public interface AuthDao extends Dao<AuthDomain> {
 	void deleteInactiveAuthTokens(Date expiresOn);
 	
 	void deleteAuthToken(AuthToken token);
+
+	void deleteAuthTokens(Long userId, String except);
 	
 	List<LoginAuditLog> getLoginAuditLogsByUser(Long userId, int maxResults);
 	
