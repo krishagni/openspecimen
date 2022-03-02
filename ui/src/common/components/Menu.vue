@@ -27,17 +27,24 @@ export default {
     'dropdown-menu': Menu
   },
 
-  methods: {
-    toggle(event) {
-      this.$refs.menu.toggle(event);
+  computed: {
+    items: function() {
+      return this.options.map(
+        ({icon, caption, onSelect}) => ({icon: icon, label: caption, command: (event) => this.exec(event, onSelect)})
+      );
     }
   },
 
-  computed: {
-    items: function() {
-      return this.options.map(({icon, caption, onSelect}) => { return {icon: icon, label: caption, command: onSelect} } );
+  methods: {
+    toggle(event) {
+      this.$refs.menu.toggle(event);
+    },
+
+    exec: function(event, cmd) {
+      this.$refs.menu.hide();
+      cmd(event);
     }
-  }
+  },
 }
 </script>
 

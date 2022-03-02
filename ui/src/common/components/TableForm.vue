@@ -17,7 +17,7 @@
               <span v-show="ctx.sort.direction == 'ASC'"> &uarr; </span>
               <span v-show="ctx.sort.direction == 'DESC'"> &darr; </span>
             </span>
-            <span v-if="field.enableCopyFirstToAll">
+            <span v-if="field.enableCopyFirstToAll && !field.options">
               <a v-if="field.type != 'booleanCheckbox'" @click="copyFirstToAll($event, field)">
                 <span> (Copy first to all) </span>
               </a>
@@ -25,6 +25,9 @@
                 <os-boolean-checkbox v-model="ctx.selects[field.name]" style="margin-bottom: 0"
                   @change="copySelectToAll($event, field)" />
               </div>
+            </span>
+            <span class="more-options" v-if="field.options && field.options.length > 0">
+              <os-menu label="More" :options="field.options" />
             </span>
           </th>
           <th v-if="removeItems == true">
@@ -378,5 +381,9 @@ table th .align-icon {
   margin-left: 3px;
   position: absolute;
   z-index: 10000;
+}
+
+table th .more-options :deep(button) {
+  padding: 2px 4px;
 }
 </style>

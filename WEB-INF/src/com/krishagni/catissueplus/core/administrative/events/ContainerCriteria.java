@@ -12,6 +12,8 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 
 public class ContainerCriteria {
+	private Long cpId;
+
 	private SpecimenDetail specimen;
 
 	private int minFreePositions;
@@ -30,6 +32,23 @@ public class ContainerCriteria {
 
 	public ContainerCriteria() {
 
+	}
+
+	public Long cpId() {
+		return cpId;
+	}
+
+	public Long getCpId() {
+		return cpId;
+	}
+
+	public ContainerCriteria cpId(Long cpId) {
+		this.cpId = cpId;
+		return this;
+	}
+
+	public void setCpId(Long cpId) {
+		this.cpId = cpId;
 	}
 
 	public SpecimenDetail specimen() {

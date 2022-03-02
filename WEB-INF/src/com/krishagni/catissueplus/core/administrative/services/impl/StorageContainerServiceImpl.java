@@ -30,7 +30,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList.Op;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreListItem;
@@ -722,40 +721,60 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			ReservePositionsOp op = req.getPayload();
 			if (StringUtils.isNotBlank(op.getReservationToCancel())) {
-				cancelReservation(new RequestEvent<>(op.getReservationToCancel()));
+				deleteReservations(op.getReservationToCancel());
 			}
 
-			Long cpId = op.getCpId();
-			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
-			if (cp == null) {
-				throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND, cpId);
+			if (op.getCpId() != null && op.getCpId() > 0L) {
+				for (ContainerCriteria criteria : op.getCriteria()) {
+					criteria.setCpId(op.getCpId());
+				}
 			}
 
-			if (StringUtils.isBlank(cp.getContainerSelectionStrategy())) {
-				return ResponseEvent.response(Collections.emptyList());
-			}
-
-			ContainerSelectionStrategy strategy = selectionStrategyFactory.getStrategy(cp.getContainerSelectionStrategy());
-			if (strategy == null) {
-				throw OpenSpecimenException.userError(StorageContainerErrorCode.INV_CONT_SEL_STRATEGY, cp.getContainerSelectionStrategy());
-			}
-
-			Set<SiteCpPair> allowedSiteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps(cpId);
-			if (allowedSiteCps != null && allowedSiteCps.isEmpty()) {
-				return ResponseEvent.response(Collections.emptyList());
-			}
-
-			Set<SiteCpPair> reqSiteCps = getRequiredSiteCps(allowedSiteCps, Collections.singleton(cpId));
-			if (CollectionUtils.isEmpty(reqSiteCps)) {
-				return ResponseEvent.response(Collections.emptyList());
-			}
+			Map<Long, CollectionProtocol> cpCache                   = new HashMap<>();
+			Map<Long, ContainerSelectionStrategy> selectionStrategy = new HashMap<>();
+			Map<Long, Set<SiteCpPair>> cpSites                      = new HashMap<>();
 
 			String reservationId = StorageContainer.getReservationId();
 			Date reservationTime = Calendar.getInstance().getTime();
 			List<StorageContainerPosition> reservedPositions = new ArrayList<>();
-			for (ContainerCriteria criteria : op.getCriteria()) {
-				criteria.siteCps(reqSiteCps);
 
+			for (ContainerCriteria criteria : op.getCriteria()) {
+				CollectionProtocol cp = cpCache.get(criteria.cpId());
+				if (cp == null) {
+					cp = daoFactory.getCollectionProtocolDao().getById(criteria.cpId());
+					if (cp == null) {
+						throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND, criteria.cpId());
+					}
+
+					if (StringUtils.isBlank(cp.getContainerSelectionStrategy())) {
+						reservedPositions.addAll(nullPositions(criteria));
+						continue;
+					}
+
+					ContainerSelectionStrategy strategy = selectionStrategyFactory.getStrategy(cp.getContainerSelectionStrategy());
+					if (strategy == null) {
+						throw OpenSpecimenException.userError(StorageContainerErrorCode.INV_CONT_SEL_STRATEGY, cp.getContainerSelectionStrategy());
+					}
+
+					Set<SiteCpPair> allowedSiteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps(criteria.cpId());
+					if (allowedSiteCps != null && allowedSiteCps.isEmpty()) {
+						reservedPositions.addAll(nullPositions(criteria));
+						continue;
+					}
+
+					Set<SiteCpPair> reqSiteCps = getRequiredSiteCps(allowedSiteCps, Collections.singleton(criteria.cpId()));
+					if (CollectionUtils.isEmpty(reqSiteCps)) {
+						reservedPositions.addAll(nullPositions(criteria));
+						continue;
+					}
+
+					cpCache.put(cp.getId(), cp);
+					selectionStrategy.put(cp.getId(), strategy);
+					cpSites.put(cp.getId(), reqSiteCps);
+				}
+
+
+				criteria.siteCps(cpSites.get(criteria.cpId()));
 				if (StringUtils.isNotBlank(criteria.ruleName())) {
 					ContainerSelectionRule rule = selectionStrategyFactory.getRule(criteria.ruleName());
 					if (rule == null) {
@@ -768,7 +787,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				boolean allAllocated = false;
 				while (!allAllocated) {
 					long t2 = System.currentTimeMillis();
-					StorageContainer container = strategy.getContainer(criteria, cp.getAliquotsInSameContainer());
+					StorageContainer container = selectionStrategy.get(criteria.cpId()).getContainer(criteria, cp.getAliquotsInSameContainer());
 
 					int numPositions = criteria.minFreePositions();
 					if (numPositions <= 0) {
@@ -777,9 +796,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 					List<StorageContainerPosition> positions;
 					if (container == null) {
-						positions = IntStream.range(0, numPositions)
-							.mapToObj(i -> (StorageContainerPosition) null)
-							.collect(Collectors.toList());
+						positions = nullPositions(criteria);
 					} else {
 						positions = container.reservePositions(reservationId, reservationTime, numPositions);
 					}
@@ -814,9 +831,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	public ResponseEvent<Integer> cancelReservation(RequestEvent<String> req) {
 		try {
-			int vacatedPositions = daoFactory.getStorageContainerDao()
-				.deleteReservedPositions(Collections.singletonList(req.getPayload()));
-			return ResponseEvent.response(vacatedPositions);
+			return ResponseEvent.response(deleteReservations(req.getPayload()));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1238,7 +1253,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			}
 			
 			ensureUniqueConstraints(existing, container);
-			existing.update(container);
+			existing.update(container);			
 			daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
 			existing.validateRestrictions();
 			existing.addOrUpdateExtension();
@@ -1588,6 +1603,21 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		
 		position.setOccupyingContainer(container);
 		container.setPosition(position);
+	}
+
+	private List<StorageContainerPosition> nullPositions(ContainerCriteria criteria) {
+		int numPositions = criteria.minFreePositions();
+		if (numPositions <= 0) {
+			numPositions = 1;
+		}
+
+		return IntStream.range(0, numPositions)
+			.mapToObj(i -> (StorageContainerPosition) null)
+			.collect(Collectors.toList());
+	}
+
+	private int deleteReservations(String reservationId) {
+		return daoFactory.getStorageContainerDao().deleteReservedPositions(Collections.singletonList(reservationId));
 	}
 
 	private StorageContainer getContainerCopy(StorageContainer source) {

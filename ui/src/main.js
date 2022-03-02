@@ -37,6 +37,7 @@ import CommonComponents from '@/common/components';
 import CommonServices   from '@/common/services';
 import CommonFilters    from '@/common/filters';
 import AdminServices    from '@/administrative/services';
+import BioSpmnServices  from '@/biospecimen/services';
 
 window['Vue'] = Vue;
 const app = createApp(Root)
@@ -44,7 +45,8 @@ const app = createApp(Root)
   .use(CommonComponents)
   .use(CommonServices)
   .use(CommonFilters)
-  .use(AdminServices);
+  .use(AdminServices)
+  .use(BioSpmnServices);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
