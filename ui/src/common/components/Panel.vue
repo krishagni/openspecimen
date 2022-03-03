@@ -29,12 +29,22 @@ export default {
 
 <style scoped>
 
+.os-panel {
+  height: 100%;
+}
+
 .os-panel :deep(.p-panel-header) {
   padding: 0.5rem 1rem;
 }
 
+.os-panel :deep(.p-toggleable-content) {
+  height: 100%;
+}
+
 .os-panel :deep(.p-panel-content) {
   padding: 1rem;
+  height: calc(100% - 42px);
+  overflow-y: auto;
 }
 
 .os-panel :deep(.p-panel-header .title) {

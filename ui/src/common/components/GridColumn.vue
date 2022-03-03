@@ -1,6 +1,6 @@
 
 <template>
-  <div :class="widthClass">
+  <div class="os-grid-column" :class="widthClass">
     <slot></slot>
   </div>
 </template>
@@ -23,3 +23,9 @@ export default {
 }
 
 </script>
+
+<style scoped>
+.os-grid-column {
+  height: 100%;
+}
+</style>

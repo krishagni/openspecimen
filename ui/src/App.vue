@@ -270,7 +270,7 @@ a:focus, a:hover {
 .os-app-body {
   position: relative;
   height: calc(100% - 40px);
-  height: 100%;
+  /*height: 100%;*/
 }
 
 .os-col-1 {
