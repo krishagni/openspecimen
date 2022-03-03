@@ -782,7 +782,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 
 		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(existing);
-		saveOrUpdate(detail, null, existing, null);
+		existing = saveOrUpdate(detail, null, existing, null);
+		getLabelPrinter().print(getSpecimenPrintItems(Collections.singleton(existing)));
 		return existing;
 	}
 
