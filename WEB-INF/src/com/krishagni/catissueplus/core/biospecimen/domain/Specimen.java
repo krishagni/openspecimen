@@ -1053,12 +1053,16 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void close(User user, Date time, String reason) {
+		close(user, time, reason, null);
+	}
+
+	public void close(User user, Date time, String reason, String comments) {
 		if (!getActivityStatus().equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus())) {
 			return;
 		}
 
 		transferTo(holdingLocation, user, time, reason);
-		addDisposalEvent(user, time, reason);		
+		addDisposalEvent(user, time, reason, comments);
 		setActivityStatus(Status.ACTIVITY_STATUS_CLOSED.getStatus());
 		updateAvailableStatus();
 	}
@@ -1377,11 +1381,12 @@ public class Specimen extends BaseExtensionEntity {
 		getParentEvent().setUser(user);
 	}
 
-	private void addDisposalEvent(User user, Date time, String reason) {
+	private void addDisposalEvent(User user, Date time, String reason, String comments) {
 		SpecimenDisposalEvent event = new SpecimenDisposalEvent(this);
 		event.setReason(reason);
 		event.setUser(user);
 		event.setTime(time);
+		event.setComments(comments);
 		event.saveOrUpdate();
 
 		zeroOutAvailableQty();
@@ -1502,7 +1507,7 @@ public class Specimen extends BaseExtensionEntity {
 
 		pooledEvent.addPoolItem(spmn);
 		spmn.setPoolItem(true);
-		spmn.close(pooledEvent.getUser(), pooledEvent.getTime(), comments);
+		spmn.close(pooledEvent.getUser(), pooledEvent.getTime(), "Pooling", comments);
 	}
 
 	public void addPooledEvent() {
