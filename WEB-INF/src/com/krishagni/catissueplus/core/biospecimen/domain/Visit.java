@@ -238,7 +238,7 @@ public class Visit extends BaseExtensionEntity {
 	}
 	
 	public Set<Specimen> getTopLevelSpecimens() {
-		return Utility.nullSafeStream(getSpecimens()).filter(s -> s.isPrimary() && !s.isPoolSpecimen()).collect(Collectors.toSet());
+		return Utility.nullSafeStream(getSpecimens()).filter(Specimen::isPrimary).collect(Collectors.toSet());
 	}
 
 	public Collection<Specimen> getOrderedTopLevelSpecimens() {
@@ -481,16 +481,6 @@ public class Visit extends BaseExtensionEntity {
 
 		if (Specimen.isMissed(status) || Specimen.isNotCollected(status)) {
 			createSpecimens(status);
-		} else if (Specimen.isPending(status)) {
-			for (Specimen specimen : topLevelSpmns) {
-				if (!specimen.isPooled()) {
-					continue;
-				}
-
-				for (Specimen poolSpmn : specimen.getSpecimensPool()) {
-					poolSpmn.updateCollectionStatus(status);
-				}
-			}
 		}
 	}
 
@@ -631,8 +621,6 @@ public class Visit extends BaseExtensionEntity {
 			if (specimen.getSpecimenRequirement() != null) {
 				anticipated.remove(specimen.getSpecimenRequirement());
 			}
-
-			addOrUpdatePoolSpmns(specimen, status);
 		}
 
 		for (SpecimenRequirement sr : anticipated) {
@@ -640,27 +628,6 @@ public class Visit extends BaseExtensionEntity {
 			specimen.setVisit(this);
 			specimen.updateCollectionStatus(status);
 			addSpecimen(specimen);
-			addOrUpdatePoolSpmns(specimen, status);
-		}
-	}
-
-	private void addOrUpdatePoolSpmns(Specimen specimen, String status) {
-		if (!specimen.isPooled()) {
-			return;
-		}
-
-		SpecimenRequirement sr = specimen.getSpecimenRequirement();
-		Set<SpecimenRequirement> anticipated = new HashSet<>(sr.getSpecimenPoolReqs());
-		for (Specimen poolSpecimen : specimen.getSpecimensPool()) {
-			poolSpecimen.updateCollectionStatus(status);
-			anticipated.remove(poolSpecimen.getSpecimenRequirement());
-		}
-
-		for (SpecimenRequirement poolSpecimenReq : anticipated) {
-			Specimen poolSpecimen = poolSpecimenReq.getSpecimen();
-			poolSpecimen.setVisit(this);
-			specimen.addPoolSpecimen(poolSpecimen);
-			poolSpecimen.updateCollectionStatus(status);
 		}
 	}
 
@@ -679,15 +646,6 @@ public class Visit extends BaseExtensionEntity {
 		addSpecimen(specimen);
 		daoFactory.getSpecimenDao().saveOrUpdate(specimen);
 		EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
-
-		for (SpecimenRequirement poolSr : sr.getOrderedSpecimenPoolReqs()) {
-			Specimen poolSpmn = createPendingSpecimen(poolSr, null);
-			if (poolSpmn == null) {
-				continue;
-			}
-
-			specimen.addPoolSpecimen(poolSpmn);
-		}
 
 		for (SpecimenRequirement childSr : sr.getOrderedChildRequirements()) {
 			Specimen childSpmn = createPendingSpecimen(childSr, specimen);

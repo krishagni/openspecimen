@@ -28,6 +28,7 @@ import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
@@ -394,6 +395,12 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		return getCurrentSession().getNamedQuery(query)
 			.setParameter("specimenId", specimenId)
 			.executeUpdate();
+	}
+
+	@Override
+	public void savedPooledEvent(SpecimenPooledEvent event) {
+		getCurrentSession().saveOrUpdate(event);
+		getCurrentSession().flush();
 	}
 
 	private void addIdsCond(Criteria query, List<Long> ids) {

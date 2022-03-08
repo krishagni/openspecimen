@@ -39,7 +39,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -88,7 +87,6 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.SpecimenPoolRequirements;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolDao;
@@ -933,27 +931,6 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			daoFactory.getCollectionProtocolDao().saveCpe(cpe, true);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cpe.getCollectionProtocol()));
 			return ResponseEvent.response(SpecimenRequirementDetail.from(requirement));
-		} catch (OpenSpecimenException ose) {
-			return ResponseEvent.error(ose);
-		} catch (Exception e) {
-			return ResponseEvent.serverError(e);
-		}
-	}
-
-	@Override
-	@PlusTransactional
-	public ResponseEvent<List<SpecimenRequirementDetail>> addSpecimenPoolReqs(RequestEvent<SpecimenPoolRequirements> req) {
-		try {
-			List<SpecimenRequirement> spmnPoolReqs = srFactory.createSpecimenPoolReqs(req.getPayload());
-
-			SpecimenRequirement pooledReq = spmnPoolReqs.iterator().next().getPooledSpecimenRequirement();
-			AccessCtrlMgr.getInstance().ensureUpdateCpRights(pooledReq.getCollectionProtocol());
-
-			pooledReq.getCollectionProtocolEvent().ensureUniqueSrCodes(spmnPoolReqs);
-			pooledReq.addSpecimenPoolReqs(spmnPoolReqs);
-			daoFactory.getSpecimenRequirementDao().saveOrUpdate(pooledReq, true);
-			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(pooledReq.getCollectionProtocol()));
-			return ResponseEvent.response(SpecimenRequirementDetail.from(spmnPoolReqs));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

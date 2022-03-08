@@ -30,6 +30,12 @@
               <span ng-switch-when="true" translate="specimens.show_pending">Show Pending</span>
             </a>
           </li>
+          <li ng-if="updateAllowed">
+            <a ng-click="poolSpecimens()">
+              <span class="fa fa-flask"></span>
+              <span translate="specimens.pool">Pool</span>
+            </a>
+          </li>
         </ul>
       </div>
     </div>
@@ -60,7 +66,7 @@
           </tr>
         </thead>
         <tbody class="os-table-body" os-imaging>
-          <tr class="row title" ng-class="{'selected': specimen.selected, 'os-pool-specimen': !!specimen.pooledSpecimen}"
+          <tr class="row title" ng-class="{'selected': specimen.selected, 'os-pooled-specimen': !!specimen.pooledSpecimen}"
             ng-repeat="specimen in specimens | openedTreeNodes" ng-if="!specimen.$$hideN">
             <td class="col col-xs-5">
               <div class="clearfix">
@@ -116,7 +122,7 @@
           </tr>
         </thead>
         <tbody class="os-table-body">
-          <tr class="row title" ng-class="{'selected': specimen.selected, 'os-pool-specimen': !!specimen.pooledSpecimen}"
+          <tr class="row title" ng-class="{'selected': specimen.selected, 'os-pooled-specimen': !!specimen.pooledSpecimen}"
             ng-repeat="specimen in specimens | openedTreeNodes" ng-if="!specimen.$$hideN">
             <td class="col os-word-break" ng-repeat="field in specimen.$$treeFields">
               <div class="clearfix" ng-if="$index == 0">

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent" table="OS_POOLED_SPECIMENS">
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_POOLED_SPECIMENS_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="pooledSpecimen" column="SPECIMEN_ID" />
+
+    <many-to-one name="user" column="USER_ID" />
+
+    <property name="time" column="EVENT_TIME" />
+
+    <property name="comments" column="COMMENTS" />
+
+    <set name="poolItems" table="OS_POOLED_SPECIMEN_ITEMS">
+      <key column="POOLED_EVENT_ID"/>
+      <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Specimen" column="SPECIMEN_ID" />
+    </set>
+  </class>
+</hibernate-mapping>

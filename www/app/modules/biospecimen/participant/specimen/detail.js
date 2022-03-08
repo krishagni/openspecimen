@@ -13,13 +13,6 @@ angular.module('os.biospecimen.specimen.detail', [])
 
     function getTreeSpecimens(specimen) {
       var result = [];
-      angular.forEach(specimen.specimensPool,
-        function(poolSpecimen) {
-          poolSpecimen.pooledSpecimen = specimen;
-          result.push(poolSpecimen);
-        }
-      );
-
       return result.concat(specimen.children);
     }
 

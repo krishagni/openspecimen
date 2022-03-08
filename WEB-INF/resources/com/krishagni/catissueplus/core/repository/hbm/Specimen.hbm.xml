@@ -76,14 +76,6 @@
       <filter name="activeEntity"/>
     </set>
 
-    <many-to-one name="pooledSpecimen" column="POOLED_SPECIMEN_ID" cascade="save-update"/>
-
-    <set name="specimensPool" table="CATISSUE_SPECIMEN" inverse="true" cascade="all">
-      <key column="POOLED_SPECIMEN_ID"/>
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Specimen"/>
-      <filter name="activeEntity"/>
-    </set>
-
     <set name="externalIds" table="OS_SPMN_EXTERNAL_IDS" inverse="true" cascade="all-delete-orphan" batch-size="25">
       <key column="SPECIMEN_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenExternalIdentifier"/>
@@ -118,6 +110,15 @@
     </set>
 
     <many-to-one name="reservedEvent" column="RESERVED_EVENT_ID"/>
+
+    <many-to-one name="pooledEvent" column="POOLED_EVENT_ID" />
+
+    <property name="poolItem" column="POOL_ITEM" />
+
+    <set name="poolItemEvents" table="OS_POOLED_SPECIMEN_ITEMS">
+      <key column="SPECIMEN_ID" />
+      <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent" column="POOLED_EVENT_ID" />
+    </set>
 
     <filter name="activeEntity"/>
 

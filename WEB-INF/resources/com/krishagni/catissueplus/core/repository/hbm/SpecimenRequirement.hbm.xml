@@ -71,19 +71,6 @@
       <filter name="activeEntity"/>
     </set>
 
-    <many-to-one
-      name="pooledSpecimenRequirement"
-      class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement"
-      cascade="none"
-      update="true"
-      column="POOLED_SPMN_REQ_ID"/>
-
-    <set name="specimenPoolReqs" table="CATISSUE_CP_REQ_SPECIMEN" inverse="true" cascade="all" order-by="id asc" batch-size="25">
-      <key column="POOLED_SPMN_REQ_ID"/>
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement"/>
-      <filter name="activeEntity"/>
-    </set>
-
     <set name="specimens" inverse="true" cascade="all">
       <key column="REQ_SPECIMEN_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Specimen"/>

@@ -27,11 +27,17 @@
           <div ng-switch-when="true">
             <os-html-template template="fieldsCtx.headers.specimen.leftTitle"></os-html-template>
             <span class="btn" ng-class="statusCss.css">{{specimen.availabilityStatus || 'Pending'}}</span>
+            <span class="btn os-status-pooled" ng-if="specimen.specimensPool.length > 0">
+              <span translate="specimens.pooled">Pooled</span>
+            </span>
           </div>
           <div ng-switch-when="false" ng-switch on="!!specimen.label">
             <span ng-switch-when="true">{{specimen.label}}</span>
             <span ng-switch-default>{{specimen.type}} ({{specimen.specimenClass}})</span>
             <span class="btn" ng-class="statusCss.css">{{specimen.availabilityStatus || 'Pending'}}</span>
+            <span class="btn os-status-pooled" ng-if="specimen.specimensPool.length > 0">
+              <span translate="specimens.pooled">Pooled</span>
+            </span>
           </div>
         </div>
       </h3>

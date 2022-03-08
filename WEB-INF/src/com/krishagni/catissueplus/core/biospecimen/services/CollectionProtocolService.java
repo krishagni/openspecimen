@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-
 import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -26,7 +25,6 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.SpecimenPoolRequirements;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
@@ -111,8 +109,6 @@ public interface CollectionProtocolService {
 	public ResponseEvent<SpecimenRequirementDetail> getSpecimenRequirement(RequestEvent<Long> req);
 
 	public ResponseEvent<SpecimenRequirementDetail> addSpecimenRequirement(RequestEvent<SpecimenRequirementDetail> req);
-
-	public ResponseEvent<List<SpecimenRequirementDetail>> addSpecimenPoolReqs(RequestEvent<SpecimenPoolRequirements> req);
 
 	public ResponseEvent<List<SpecimenRequirementDetail>> createAliquots(RequestEvent<AliquotSpecimensRequirement> req);
 

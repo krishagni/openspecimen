@@ -280,4 +280,14 @@
         cpr.activity_status != 'Disabled'
     </createView>
   </changeSet>
+
+  <changeSet author="vpawar" id="Pooled specimen items view" runOnChange="true">
+    <createView viewName="OS_POOLED_SPECIMEN_ITEMS_VIEW" replaceIfExists="true">
+      select
+        pi.pooled_event_id, s.identifier, s.label, s.barcode, s.specimen_type_id
+      from
+        os_pooled_specimen_items pi
+        inner join catissue_specimen s on s.identifier = pi.specimen_id
+    </createView>
+  </changeSet>
 </databaseChangeLog>

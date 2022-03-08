@@ -10,14 +10,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
@@ -43,11 +44,9 @@ public class SpecimenDetail extends SpecimenInfo {
 	
 	private List<SpecimenDetail> children;
 
-	private Long pooledSpecimenId;
-	
-	private String pooledSpecimenLabel;
+	private List<SpecimenInfo> specimensPool;
 
-	private List<SpecimenDetail> specimensPool;
+	private List<SpecimenInfo> pooledSpecimens;
 
 	//
 	// Properties required for auto-creation of containers
@@ -124,28 +123,20 @@ public class SpecimenDetail extends SpecimenInfo {
 		this.children = children;
 	}
 
-	public Long getPooledSpecimenId() {
-		return pooledSpecimenId;
-	}
-
-	public void setPooledSpecimenId(Long pooledSpecimenId) {
-		this.pooledSpecimenId = pooledSpecimenId;
-	}
-
-	public String getPooledSpecimenLabel() {
-		return pooledSpecimenLabel;
-	}
-
-	public void setPooledSpecimenLabel(String pooledSpecimenLabel) {
-		this.pooledSpecimenLabel = pooledSpecimenLabel;
-	}
-
-	public List<SpecimenDetail> getSpecimensPool() {
+	public List<SpecimenInfo> getSpecimensPool() {
 		return specimensPool;
 	}
 
-	public void setSpecimensPool(List<SpecimenDetail> specimensPool) {
+	public void setSpecimensPool(List<SpecimenInfo> specimensPool) {
 		this.specimensPool = specimensPool;
+	}
+
+	public List<SpecimenInfo> getPooledSpecimens() {
+		return pooledSpecimens;
+	}
+
+	public void setPooledSpecimens(List<SpecimenInfo> pooledSpecimens) {
+		this.pooledSpecimens = pooledSpecimens;
 	}
 
 	@JsonIgnore
@@ -369,6 +360,15 @@ public class SpecimenDetail extends SpecimenInfo {
 	public static SpecimenDetail from(Specimen specimen, boolean partial, boolean excludePhi, boolean excludeChildren) {
 		SpecimenDetail result = new SpecimenDetail();
 		SpecimenInfo.fromTo(specimen, result);
+
+		if (specimen.getPooledEvent() != null) {
+			result.setSpecimensPool(SpecimenInfo.from(new ArrayList<>(specimen.getPooledEvent().getPoolItems())));
+			Collections.sort(result.getSpecimensPool());
+		}
+
+		if (specimen.isPoolItem() && CollectionUtils.isNotEmpty(specimen.getPoolItemEvents())) {
+			result.setPooledSpecimens(specimen.getPoolItemEvents().stream().map(e -> SpecimenInfo.from(e.getPooledSpecimen())).sorted().collect(Collectors.toList()));
+		}
 		
 		SpecimenRequirement sr = specimen.getSpecimenRequirement();
 		if (!excludeChildren) {
@@ -379,16 +379,7 @@ public class SpecimenDetail extends SpecimenInfo {
 				sort(children);
 				result.setChildren(children);
 			} else {
-				if (sr.isPooledSpecimenReq()) {
-					result.setSpecimensPool(getSpecimens(specimen.getVisit(), sr.getSpecimenPoolReqs(), specimen.getSpecimensPool(), partial, excludePhi, excludeChildren));
-				}
-				result.setPoolSpecimen(sr.isSpecimenPoolReq());
 				result.setChildren(getSpecimens(specimen.getVisit(), sr.getChildSpecimenRequirements(), specimen.getChildCollection(), partial, excludePhi, excludeChildren));
-			}
-
-			if (specimen.getPooledSpecimen() != null) {
-				result.setPooledSpecimenId(specimen.getPooledSpecimen().getId());
-				result.setPooledSpecimenLabel(specimen.getPooledSpecimen().getLabel());
 			}
 		}
 
@@ -428,13 +419,6 @@ public class SpecimenDetail extends SpecimenInfo {
 	public static SpecimenDetail from(SpecimenRequirement anticipated, boolean excludeChildren) {
 		SpecimenDetail result = new SpecimenDetail();		
 		SpecimenInfo.fromTo(anticipated, result);
-		
-		if (anticipated.isPooledSpecimenReq()) {
-			result.setSpecimensPool(fromAnticipated(anticipated.getSpecimenPoolReqs(), excludeChildren));
-		}
-		
-		result.setPoolSpecimen(anticipated.isSpecimenPoolReq());
-
 		if (!excludeChildren) {
 			result.setChildren(fromAnticipated(anticipated.getChildSpecimenRequirements(), excludeChildren));
 		}

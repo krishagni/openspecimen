@@ -81,4 +81,58 @@
       </column>
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Pooled specimen events">
+    <createTable tableName="OS_POOLED_SPECIMENS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_POOLED_EVENT_SPMN_ID"
+          referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="USER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_POOLED_EVENT_USER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="EVENT_TIME" type="${timestamp.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="COMMENTS" type="${text.type}(255)" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Pooled specimen event ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_POOLED_SPECIMENS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen pooled event">
+    <addColumn tableName="CATISSUE_SPECIMEN">
+      <column name="POOLED_EVENT_ID" type="${int.type}">
+        <constraints nullable="true" foreignKeyName="FK_SPECIMEN_POOLED_EVENT_ID"
+          referencedTableName="OS_POOLED_SPECIMENS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Pooled specimen items">
+    <createTable tableName="OS_POOLED_SPECIMEN_ITEMS">
+      <column name="POOLED_EVENT_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_POOLED_EVENT_ID"
+          referencedTableName="OS_POOLED_SPECIMENS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_POOLED_ITEM_SPECIMEN_ID"
+          referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen pool item flag">
+    <addColumn tableName="CATISSUE_SPECIMEN">
+      <column name="POOL_ITEM" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -18,4 +18,11 @@
       <column name="draftMode_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen pool item flag">
+    <addColumn tableName="CATISSUE_SPECIMEN_AUD">
+      <column name="POOL_ITEM" type="${boolean.type}" />
+      <column name="poolItem_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

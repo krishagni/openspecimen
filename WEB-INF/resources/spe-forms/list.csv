@@ -11,6 +11,7 @@ fixed-event.xml, false, true
 fluid-event.xml, false, true
 frozen-event.xml, false, true
 molecular-review-event.xml, false, true
+pooled-event.xml, true, true
 procedure-event.xml, false, true
 spun-event.xml, false, true
 thaw-event.xml, false, true

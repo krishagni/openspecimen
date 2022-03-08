@@ -1,15 +1,13 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-
 import com.fasterxml.jackson.annotation.JsonFilter;
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
@@ -64,10 +62,6 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	
 	private List<SpecimenRequirementDetail> children;
 
-	private Long pooledSpecimenReqId;
-
-	private List<SpecimenRequirementDetail> specimensPool;
-	
 	private String cpShortTitle;
 	
 	private String eventLabel;
@@ -252,22 +246,6 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.children = children;
 	}
 
-	public Long getPooledSpecimenReqId() {
-		return pooledSpecimenReqId;
-	}
-
-	public void setPooledSpecimenReqId(Long pooledSpecimenReqId) {
-		this.pooledSpecimenReqId = pooledSpecimenReqId;
-	}
-
-	public List<SpecimenRequirementDetail> getSpecimensPool() {
-		return specimensPool;
-	}
-
-	public void setSpecimensPool(List<SpecimenRequirementDetail> specimensPool) {
-		this.specimensPool = specimensPool;
-	}
-	
 	@JsonIgnore
 	public String getCpShortTitle() {
 		return cpShortTitle;
@@ -372,17 +350,10 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setSortOrder(sr.getSortOrder());
 		detail.setEventId(sr.getCollectionProtocolEvent().getId());
 		detail.setActivityStatus(sr.getActivityStatus());
-		
 		if (incChildren) {
 			detail.setChildren(from(sr.getChildSpecimenRequirements()));
 		}
 		
-		if (sr.getPooledSpecimenRequirement() != null) {
-			detail.setPooledSpecimenReqId(sr.getPooledSpecimenRequirement().getId());
-		} else {
-			detail.setSpecimensPool(from(sr.getOrderedSpecimenPoolReqs()));
-		}
-
 		return detail;
 	}
 	

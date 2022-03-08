@@ -68,20 +68,11 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
 
         specimen.depth = depth || 0;
         specimen.parent = specimen.parent || parent;
-        specimen.pooledSpecimen = specimen.pooledSpecimen || pooledSpecimen;
         if (specimen.parent && (specimen.parent.status == 'Missed Collection' || specimen.parent.status == 'Not Collected')) {
           specimen.status = specimen.parent.status;
         }
 
-        var hasSpecimensPool = false;
-        if (depth == 0) {
-          hasSpecimensPool = !!specimen.specimensPool && specimen.specimensPool.length > 0;
-          if (hasSpecimensPool) {
-            result = result.concat(Specimen.flatten(specimen.specimensPool, specimen, depth + 1, specimen, opts));
-          }
-        }
-
-        specimen.hasChildren = hasSpecimensPool || hasChildren;
+        specimen.hasChildren = hasChildren;
         if (hasChildren) {
           result = result.concat(Specimen.flatten(specimen.children, specimen, depth + depthIncrStep, undefined, opts));
         }
@@ -91,17 +82,11 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
         }
 
         specimen.hasOnlyPendingChildren = hasOnlyPendingChildren(specimen.children);
-        if (specimen.hasOnlyPendingChildren) {
-          specimen.hasOnlyPendingChildren = hasOnlyPendingChildren(specimen.specimensPool);
-        }
-
-        if (hasSpecimensPool) {
-          specimen.$$childrenHaveImg = hasImage(specimen.specimensPool);
-        }
-
         if (!specimen.$$childrenHaveImg && hasChildren) {
           specimen.$$childrenHaveImg = hasImage(specimen.children);
         }
+
+        specimen.pooledSpecimen = specimen.specimensPool && specimen.specimensPool.length > 0;
       });
 
       return result;

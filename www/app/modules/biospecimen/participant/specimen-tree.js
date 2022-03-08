@@ -7,7 +7,7 @@ angular.module('os.biospecimen.participant.specimen-tree',
   .directive('osSpecimenTree', function(
     $state, $stateParams, $modal, $timeout, $rootScope, $q, $injector,
     CpConfigSvc, CollectSpecimensSvc, Visit, Specimen, SpecimenLabelPrinter, SpecimensHolder,
-    ExtensionsUtil, DistributionOrder, DistributionProtocol, Alerts, SpecimenUtil) {
+    ExtensionsUtil, DistributionOrder, DistributionProtocol, Alerts, SpecimenUtil, AuthorizationService) {
 
     var allowedDps = undefined;
 
@@ -292,6 +292,15 @@ angular.module('os.biospecimen.participant.specimen-tree',
       openSpecimenTree(scope.specimens, null, treeCfg);
       scope.hidePendingSpmns = hideOldPendingSpmns(scope.specimens, scope.pendingSpmnsDispInterval);
 
+
+      var sites = scope.cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
+      scope.updateAllowed = AuthorizationService.isAllowed({
+        cp: scope.cp.shortTitle,
+        sites: sites,
+        resources: ['Specimen'],
+        operations: ['Update']
+      });
+
       if ($injector.has('sdeFieldsSvc')) {
         initSdeTreeFields(scope, cpDict, treeCfg);
       } else {
@@ -471,6 +480,23 @@ angular.module('os.biospecimen.participant.specimen-tree',
 
       scope.getSelectedSpecimens = function(anyStatus) {
         return getSelectedSpecimens(scope, '', anyStatus);
+      }
+
+      scope.poolSpecimens = function() {
+        var selectedSpmns = getSelectedSpecimens(scope, '') || [];
+        selectedSpmns = selectedSpmns.filter(
+          function(spmn) {
+            return spmn.status == 'Collected' && spmn.activityStatus == 'Active';
+          }
+        );
+
+        if (selectedSpmns.length < 2) {
+          Alerts.error('specimens.select_min_to_create_pooled');
+          return;
+        }
+
+        SpecimensHolder.setSpecimens(selectedSpmns);
+        $state.go('specimen-create-pooled', {cpId: scope.cp.id, visitId: scope.visit.id, cprId: scope.cpr.id});
       }
 
       scope.initTree = function() {

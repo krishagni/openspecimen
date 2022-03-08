@@ -1,8 +1,6 @@
 
 package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
-import static com.krishagni.catissueplus.core.common.PvAttributes.*;
-
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Collection;
@@ -60,6 +58,15 @@ import com.krishagni.catissueplus.core.common.util.SessionUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.importer.services.impl.ImporterContextHolder;
+
+import static com.krishagni.catissueplus.core.common.PvAttributes.BIOHAZARD;
+import static com.krishagni.catissueplus.core.common.PvAttributes.COLL_PROC;
+import static com.krishagni.catissueplus.core.common.PvAttributes.CONTAINER;
+import static com.krishagni.catissueplus.core.common.PvAttributes.PATH_STATUS;
+import static com.krishagni.catissueplus.core.common.PvAttributes.RECV_QUALITY;
+import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_ANATOMIC_SITE;
+import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_CLASS;
+import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_LATERALITY;
 
 public class SpecimenFactoryImpl implements SpecimenFactory {
 
@@ -170,7 +177,6 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		setReceiveDetail(detail, existing, specimen, ose);
 		setCreatedOn(detail, existing, specimen, ose);
 		setCreatedBy(detail, existing, specimen, ose);
-		setPooledSpecimen(detail, existing, specimen, ose);
 		setExtension(detail, existing, specimen, ose);
 
 		ose.checkAndThrow();
@@ -1103,50 +1109,6 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 
 		return user;
-	}
-
-	private void setPooledSpecimen(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
-		if (!specimen.isPrimary()) {
-			return;
-		}
-
-		SpecimenRequirement sr = specimen.getSpecimenRequirement();
-		if (sr == null || !sr.isSpecimenPoolReq()) {
-			return;
-		}
-
-		Specimen pooledSpecimen = null;
-		Long pooledSpecimenId = detail.getPooledSpecimenId();
-		if (pooledSpecimenId != null) {
-			pooledSpecimen = daoFactory.getSpecimenDao().getById(pooledSpecimenId);
-			if (pooledSpecimen == null) {
-				ose.addError(SpecimenErrorCode.NOT_FOUND, pooledSpecimenId);
-			}
-		} else if (sr != null && sr.getPooledSpecimenRequirement() != null) {
-			Long visitId = specimen.getVisit().getId();
-			Long pooledSpecimenReqId = sr.getPooledSpecimenRequirement().getId();
-			pooledSpecimen = daoFactory.getSpecimenDao().getSpecimenByVisitAndSr(visitId, pooledSpecimenReqId);
-			if (pooledSpecimen == null) {
-				if (specimen.getId() != null) {
-					ose.addError(SpecimenErrorCode.NO_POOLED_SPMN);
-				} else {
-					pooledSpecimen = sr.getPooledSpecimenRequirement().getSpecimen();
-					pooledSpecimen.setCollectionProtocol(specimen.getCollectionProtocol());
-					pooledSpecimen.setVisit(specimen.getVisit());
-					pooledSpecimen.setCollectionStatus(Specimen.PENDING);
-				}
-			}
-		}
-
-		specimen.setPooledSpecimen(pooledSpecimen);
-	}
-
-	private void setPooledSpecimen(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
-		if (existing == null || detail.isAttrModified("pooledSpecimenId")) {
-			setPooledSpecimen(detail, specimen, ose);
-		} else {
-			specimen.setPooledSpecimen(existing.getPooledSpecimen());
-		}
 	}
 
 	private boolean shouldUseParentValue(Specimen specimen, String value, PermissibleValue anticipatedValue) {

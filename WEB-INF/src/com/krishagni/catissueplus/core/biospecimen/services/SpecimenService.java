@@ -52,6 +52,8 @@ public interface SpecimenService {
 
 	public ResponseEvent<SpecimenDetail> createDerivative(RequestEvent<SpecimenDetail> derivedReq);
 
+	public ResponseEvent<SpecimenDetail> createPooledSpecimen(RequestEvent<SpecimenDetail> req);
+
 	public ResponseEvent<Boolean> doesSpecimenExists(RequestEvent<SpecimenQueryCriteria> req);
 	
 	public ResponseEvent<LabelPrintJobSummary> printSpecimenLabels(RequestEvent<PrintSpecimenLabelDetail> req);

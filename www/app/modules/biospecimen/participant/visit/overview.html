@@ -15,12 +15,7 @@
         </button>
       </span>
       <span ng-if="visit.status == 'Complete'" show-if-allowed="specimenResource.updateOpts">
-        <button ng-if="visitCtx.spmnReqs.length == 0" class="default"
-          ui-sref="specimen-addedit({cpId: cp.id, visitId: visit.id, cprId: cpr.id})">
-          <span class="fa fa-plus"></span>
-          <span translate="specimens.buttons.add_specimen">Add Specimen</span>
-        </button>
-        <div class="os-inline-btn" dropdown ng-if="visitCtx.spmnReqs.length > 0">
+        <div class="os-inline-btn" dropdown>
           <button class="default dropdown-toggle">
             <span class="fa fa-plus"></span>
             <span translate="specimens.buttons.add_specimen">Add Specimen</span>
@@ -34,7 +29,12 @@
             <li class="divider"></li>
             <li>
               <a ui-sref="specimen-addedit({cpId: cp.id, visitId: visit.id, cprId: cpr.id})">
-                <span translate="specimens.other">Other</span>
+                <span translate="specimens.regular">Other</span>
+              </a>
+            </li>
+            <li>
+              <a ui-sref="specimen-create-pooled({cpId: cp.id, visitId: visit.id, cprId: cpr.id})">
+                <span translate="specimens.pooled">Pooled</span>
               </a>
             </li>
           </ul>

@@ -1,14 +1,9 @@
 package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
-import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.*;
-import static com.krishagni.catissueplus.core.common.PvAttributes.*;
-import static com.krishagni.catissueplus.core.common.service.PvValidator.isValid;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -24,7 +19,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenRequirementFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
-import com.krishagni.catissueplus.core.biospecimen.events.SpecimenPoolRequirements;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
@@ -36,6 +30,35 @@ import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.ANATOMIC_SITE_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.COLLECTOR_NOT_FOUND;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.COLL_CONT_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.COLL_PROC_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.CONCENTRATION_MUST_BE_POSITIVE;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.CPE_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_ANATOMIC_SITE;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_COLL_CONT;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_COLL_PROC;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_LABEL_FMT;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_LATERALITY;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_PATHOLOGY_STATUS;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_QTY;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_SPECIMEN_CLASS;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.INVALID_SPECIMEN_TYPE;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.LATERALITY_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.PARENT_REQ_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.PATHOLOGY_STATUS_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.RECEIVER_NOT_FOUND;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.SPECIMEN_CLASS_REQUIRED;
+import static com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode.SPECIMEN_TYPE_REQUIRED;
+import static com.krishagni.catissueplus.core.common.PvAttributes.COLL_PROC;
+import static com.krishagni.catissueplus.core.common.PvAttributes.CONTAINER;
+import static com.krishagni.catissueplus.core.common.PvAttributes.PATH_STATUS;
+import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_ANATOMIC_SITE;
+import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_CLASS;
+import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_LATERALITY;
+import static com.krishagni.catissueplus.core.common.service.PvValidator.isValid;
 
 public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactory {
 
@@ -86,7 +109,6 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setCollectionProcedure(detail, requirement, ose);
 		setCollectionContainer(detail, requirement, ose);
 		setReceiver(detail, requirement, ose);
-		setSpecimenPoolReqs(detail, requirement, ose);
 		setActivityStatus(detail, requirement, ose);
 
 		ose.checkAndThrow();
@@ -240,36 +262,6 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		return aliquots;
 	}
 	
-	@Override
-	public List<SpecimenRequirement> createSpecimenPoolReqs(SpecimenPoolRequirements req) {
-		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-
-		Long pooledSpmnReqId = req.getPooledSpecimenReqId();
-		if (pooledSpmnReqId == null) {
-			ose.addError(POOLED_SPMN_REQ);
-			throw ose;
-		}
-
-		SpecimenRequirement pooledSpecimenReq = daoFactory.getSpecimenRequirementDao().getById(pooledSpmnReqId);
-		if (pooledSpecimenReq == null) {
-			ose.addError(POOLED_SPMN_REQ_NOT_FOUND, pooledSpmnReqId);
-			throw ose;
-		}
-
-		if (pooledSpecimenReq.getParentSpecimenRequirement() != null || pooledSpecimenReq.getPooledSpecimenRequirement() != null) {
-			ose.addError(INVALID_POOLED_SPMN, pooledSpmnReqId);
-			throw ose;
-		}
-
-		List<SpecimenRequirement> specimenPoolReqs = new ArrayList<>();
-		for (SpecimenRequirementDetail detail : req.getSpecimenPoolReqs()) {
-			specimenPoolReqs.add(createSpecimenPoolReq(pooledSpecimenReq, detail, ose));
-			ose.checkAndThrow();
-		}
-
-		return specimenPoolReqs;
-	}
-
 	private void setCode(SpecimenRequirementDetail detail, SpecimenRequirement sr, OpenSpecimenException ose) {
 		setCode(detail.getCode(), sr, ose);
 	}
@@ -491,29 +483,6 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		} else {
 			ose.addError(ActivityStatusErrorCode.INVALID, activityStatus);
 		}
-	}
-
-	private void setSpecimenPoolReqs(SpecimenRequirementDetail detail, SpecimenRequirement sr, OpenSpecimenException ose) {
-		if (sr.getParentSpecimenRequirement() != null ||
-			sr.getPooledSpecimenRequirement() != null ||
-			CollectionUtils.isEmpty(detail.getSpecimensPool())) {
-			return;
-		}
-
-		for (SpecimenRequirementDetail specimenPoolReqDetail : detail.getSpecimensPool()) {
-			sr.getSpecimenPoolReqs().add(createSpecimenPoolReq(sr, specimenPoolReqDetail, ose));
-			ose.checkAndThrow();
-		}
-	}
-
-	private SpecimenRequirement createSpecimenPoolReq(SpecimenRequirement pooledSpmnReq, SpecimenRequirementDetail req, OpenSpecimenException ose) {
-		SpecimenRequirement specimenPoolReq = pooledSpmnReq.copy();
-		setInitialQty(req, specimenPoolReq, ose);
-		setCode(req, specimenPoolReq, ose);
-		setLabelAutoPrintMode(req, specimenPoolReq, ose);
-		specimenPoolReq.setLabelPrintCopies(req.getLabelPrintCopies());
-		specimenPoolReq.setPooledSpecimenRequirement(pooledSpmnReq);
-		return specimenPoolReq;
 	}
 
 	private PermissibleValue getPv(String attr, String value, boolean leafNode, ErrorCode req, ErrorCode invalid, OpenSpecimenException ose) {

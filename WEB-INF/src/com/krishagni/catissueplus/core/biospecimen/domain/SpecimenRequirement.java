@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -72,10 +71,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 	private SpecimenRequirement parentSpecimenRequirement;
 	
 	private Set<SpecimenRequirement> childSpecimenRequirements = new LinkedHashSet<>();
-
-	private SpecimenRequirement pooledSpecimenRequirement;
-
-	private Set<SpecimenRequirement> specimenPoolReqs = new LinkedHashSet<>();
 
 	private Set<Specimen> specimens = new HashSet<>();
 
@@ -306,30 +301,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 	}
 
 	@NotAudited
-	public SpecimenRequirement getPooledSpecimenRequirement() {
-		return pooledSpecimenRequirement;
-	}
-
-	public void setPooledSpecimenRequirement(SpecimenRequirement pooledSpecimenRequirement) {
-		this.pooledSpecimenRequirement = pooledSpecimenRequirement;
-	}
-
-	@NotAudited
-	public Set<SpecimenRequirement> getSpecimenPoolReqs() {
-		return specimenPoolReqs;
-	}
-
-	public void setSpecimenPoolReqs(Set<SpecimenRequirement> specimenPoolReqs) {
-		this.specimenPoolReqs = specimenPoolReqs;
-	}
-
-	public List<SpecimenRequirement> getOrderedSpecimenPoolReqs() {
-		List<SpecimenRequirement> pool = new ArrayList<SpecimenRequirement>(getSpecimenPoolReqs());
-		Collections.sort(pool);
-		return pool;
-	}
-
-	@NotAudited
 	public Set<Specimen> getSpecimens() {
 		return specimens;
 	}
@@ -350,20 +321,12 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		return getLineage().equals(Specimen.DERIVED);
 	}
 	
-	public boolean isPooledSpecimenReq() {
-		return CollectionUtils.isNotEmpty(getSpecimenPoolReqs());
-	}
-
-	public boolean isSpecimenPoolReq() {
-		return getPooledSpecimenRequirement() != null;
-	}
-
 	public void update(SpecimenRequirement sr) {
 		if (getActivityStatus().equals(sr.getActivityStatus())) {
 			ensureReqIsNotClosed();
 		}
 
-		if (isPrimary() && !isSpecimenPoolReq()) {
+		if (isPrimary()) {
 			updateRequirementAttrs(sr);
 		}
 
@@ -385,7 +348,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		setLabelAutoPrintMode(sr.getLabelAutoPrintMode());
 		setLabelPrintCopies(sr.getLabelPrintCopies());
 
-		if (!isAliquot() && !isSpecimenPoolReq()) {
+		if (!isAliquot()) {
 			update(sr.getAnatomicSite(), sr.getLaterality(), sr.getConcentration(),
 				sr.getSpecimenClass(), sr.getSpecimenType(), sr.getPathologyStatus());
 		}
@@ -424,12 +387,11 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 			}
 		}
 		
-		return deepCopy(cpe, getParentSpecimenRequirement(), getPooledSpecimenRequirement());
+		return deepCopy(cpe, getParentSpecimenRequirement());
 	}
 
 	public void close() {
 		setActivityStatus(Status.ACTIVITY_STATUS_CLOSED.getStatus());
-		getSpecimenPoolReqs().forEach(SpecimenRequirement::close);
 		getChildSpecimenRequirements().forEach(SpecimenRequirement::close);
 	}
 		
@@ -443,19 +405,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		ensureReqIsNotClosed();
 		for (SpecimenRequirement childReq : children) {
 			addChildRequirement(childReq);
-		}
-	}
-	
-	public void addSpecimenPoolReq(SpecimenRequirement spmnPoolReq) {
-		ensureReqIsNotClosed();
-		spmnPoolReq.setPooledSpecimenRequirement(this);
-		getSpecimenPoolReqs().add(spmnPoolReq);
-	}
-
-	public void addSpecimenPoolReqs(Collection<SpecimenRequirement> spmnPoolReqs) {
-		ensureReqIsNotClosed();
-		for (SpecimenRequirement req : spmnPoolReqs) {
-			addSpecimenPoolReq(req);
 		}
 	}
 
@@ -509,10 +458,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		for (SpecimenRequirement childReq : getChildSpecimenRequirements()) {
 			childReq.delete();
 		}
-		
-		for (SpecimenRequirement poolReq : getSpecimenPoolReqs()) {
-			poolReq.delete();
-		}
 
 		setCode(Utility.getDisabledValue(getCode(), 32));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
@@ -537,12 +482,10 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		}
 	}
 
-	private SpecimenRequirement deepCopy(CollectionProtocolEvent cpe, SpecimenRequirement parent, SpecimenRequirement pooledReq) {
+	private SpecimenRequirement deepCopy(CollectionProtocolEvent cpe, SpecimenRequirement parent) {
 		SpecimenRequirement result = copy();
 		result.setCollectionProtocolEvent(cpe);
 		result.setParentSpecimenRequirement(parent);
-		result.setPooledSpecimenRequirement(pooledReq);
-		
 		if (isSafeToCopyCode(cpe)) {
 			result.setCode(getCode());
 		}
@@ -554,7 +497,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 				continue;
 			}
 
-			SpecimenRequirement copiedSr = childSr.deepCopy(cpe, result, null);
+			SpecimenRequirement copiedSr = childSr.deepCopy(cpe, result);
 			copiedSr.setSortOrder(order++);
 			childSrs.add(copiedSr);
 		}
@@ -565,19 +508,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 			return result;
 		}
 
-		order = 1;
-		Set<SpecimenRequirement> specimenPoolReqs = new LinkedHashSet<>();
-		for (SpecimenRequirement specimenPoolReq : getSpecimenPoolReqs()) {
-			if (specimenPoolReq.isClosed()) {
-				continue;
-			}
-
-			SpecimenRequirement copiedSr = specimenPoolReq.deepCopy(cpe, null, result);			
-			copiedSr.setSortOrder(order++);
-			specimenPoolReqs.add(copiedSr);
-		}
-
-		result.setSpecimenPoolReqs(specimenPoolReqs);
 		return result;
 	}
 	
@@ -610,12 +540,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		for (SpecimenRequirement childSr : getChildSpecimenRequirements()) {
 			childSr.updateRequirementAttrs(sr);
 		}
-		
-		for (SpecimenRequirement poolSr : getSpecimenPoolReqs()) {
-			poolSr.updateRequirementAttrs(sr);
-			poolSr.setStorageType(sr.getStorageType());
-			poolSr.setLabelFormat(sr.getLabelFormat());
-		}
 	}
 	
 	private void update(PermissibleValue anatomicSite, PermissibleValue laterality, BigDecimal concentration,
@@ -632,10 +556,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 			if (childSr.isAliquot()) {
 				childSr.update(anatomicSite, laterality, concentration, specimenClass, specimenType, pathologyStatus);
 			}
-		}
-		
-		for (SpecimenRequirement poolSr : getSpecimenPoolReqs()) {
-			poolSr.update(anatomicSite, laterality, concentration, specimenClass, specimenType, pathologyStatus);
 		}
 	}
 
@@ -662,7 +582,6 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		"code",
 		"parentSpecimenRequirement",
 		"childSpecimenRequirements",
-		"pooledSpecimenRequirement",
 		"specimenPoolReqs",
 		"specimens"		
 	};

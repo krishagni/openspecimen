@@ -104,10 +104,6 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	NOT_COLLECTED,
 	
-	NO_POOL_SPMN_COLLECTED,
-	
-	NO_POOLED_SPMN,
-
 	INVALID_FREEZE_THAW_CYCLES,
 
 	UQ_LBL_CP_CHG_NA,
@@ -144,7 +140,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	PARENT_DELETED,
 
-	PRIMARY_NOT_RCVD;
+	PRIMARY_NOT_RCVD,
+
+	POOL_SAME_CP_REQ;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

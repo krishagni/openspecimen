@@ -236,6 +236,10 @@ angular.module('os.biospecimen.participant',
             );
           },
 
+          hasSde: function($injector) {
+            return $injector.has('sdeFieldsSvc');
+          },
+
           userRole: function(authInit, cp, AuthorizationService) {
             return AuthorizationService.getRole(cp);
           },
@@ -527,10 +531,6 @@ angular.module('os.biospecimen.participant',
         templateUrl: "modules/biospecimen/participant/bulk-edit.html",
         controller: 'BulkEditParticipantsCtrl',
         resolve: {
-          hasSde: function($injector) {
-            return $injector.has('sdeFieldsSvc');
-          },
-
           cpDict: function(cp, hasSde, CpConfigSvc) {
             if (!hasSde) {
               return {cpId: cp.id, fields: []};
@@ -566,10 +566,6 @@ angular.module('os.biospecimen.participant',
               derivativeLabelFmt: cp.derivativeLabelFmt,
               aliquotLabelFmt: cp.aliquotLabelFmtToUse
             });
-          },
-
-          hasSde: function($injector) {
-            return $injector.has('sdeFieldsSvc');
           },
 
           sysDict: function($stateParams, hasSde, CpConfigSvc) {

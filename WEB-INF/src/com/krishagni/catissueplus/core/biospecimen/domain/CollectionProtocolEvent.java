@@ -178,18 +178,9 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 	}
 	
 	public Set<SpecimenRequirement> getTopLevelAnticipatedSpecimens() {
-		Set<SpecimenRequirement> anticipated = new LinkedHashSet<>();
-		if (getSpecimenRequirements() == null) {
-			return anticipated;
-		}
-		
-		for (SpecimenRequirement sr : getSpecimenRequirements()) {
-			if (sr.getParentSpecimenRequirement() == null && sr.getPooledSpecimenRequirement() == null) {
-				anticipated.add(sr);
-			}
-		}
-		
-		return anticipated;
+		return Utility.nullSafeStream(getSpecimenRequirements())
+			.filter(SpecimenRequirement::isPrimary)
+			.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	public List<SpecimenRequirement> getOrderedTopLevelAnticipatedSpecimens() {
@@ -298,7 +289,7 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 	
 	public void delete() {
 		for (SpecimenRequirement sr : getSpecimenRequirements()) {
-			if (sr.isPrimary() && !sr.isSpecimenPoolReq()) {
+			if (sr.isPrimary()) {
 				sr.delete();
 			}
 		}
@@ -311,10 +302,6 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 	public void ensureUniqueSrCode(SpecimenRequirement sr) {
 		if (StringUtils.isNotBlank(sr.getCode()) && getSrByCode(sr.getCode()) != null) {
 			throw OpenSpecimenException.userError(SrErrorCode.DUP_CODE, sr.getCode());
-		}
-
-		if (sr.isPooledSpecimenReq()) {
-			ensureUniqueSrCodes(sr.getSpecimenPoolReqs());
 		}
 	}
 

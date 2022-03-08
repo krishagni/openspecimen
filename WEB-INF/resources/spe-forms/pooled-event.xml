@@ -1,0 +1,67 @@
+#macro(getMessage $code)$messageSource.getMessage($code, null, $locale)#end
+
+<form>
+  <view>
+    <name>SpecimenPooledEvent</name>
+    <caption>#getMessage("pooled_event")</caption>
+    <table>OS_POOLED_SPECIMENS</table>
+    <primaryKey>IDENTIFIER</primaryKey>
+
+    <row>
+      <userField>
+        <name>user</name>
+        <udn>user</udn>
+        <caption>#getMessage("specimen_event_user")</caption>
+        <column>USER_ID</column>
+        <showInGrid>true</showInGrid>
+        <mandatory>true</mandatory>
+      </userField>
+    </row>
+
+    <row>
+      <datePicker>
+        <name>time</name>
+        <udn>time</udn>
+        <caption>#getMessage("specimen_event_date_time")</caption>
+        <column>EVENT_TIME</column>
+        <format>MM-dd-yyyy HH:mm</format>
+        <showInGrid>true</showInGrid>
+        <default>current_date</default>
+        <mandatory>true</mandatory>
+      </datePicker>
+    </row>
+
+    <row>
+      <subForm>
+        <name>items</name>
+        <udn>items</udn>
+        <caption>#getMessage("pooled_event_specimens")</caption>
+        <table>OS_POOLED_SPECIMEN_ITEMS_VIEW</table>
+        <foreignKey>POOLED_EVENT_ID</foreignKey>
+        <parentKey>IDENTIFIER</parentKey>
+        <row>
+          <textField>
+            <name>label</name>
+            <udn>label</udn>
+            <caption>#getMessage("pooled_event_label")</caption>
+            <column>LABEL</column>
+          </textField>
+          <textField>
+            <name>barcode</name>
+            <udn>barcode</udn>
+            <caption>#getMessage("pooled_event_barcode")</caption>
+            <column>BARCODE</column>
+          </textField>
+          <pvField>
+            <name>type</name>
+            <udn>type</udn>
+            <caption>#getMessage("pooled_event_type")</caption>
+            <column>SPECIMEN_TYPE_ID</column>
+            <attribute>specimen_type</attribute>
+            <mandatory>true</mandatory>
+          </pvField>
+        </row>
+      </subForm>
+    </row>
+  </view>
+</form>

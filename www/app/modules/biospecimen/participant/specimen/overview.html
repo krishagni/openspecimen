@@ -208,17 +208,6 @@
         </span>
       </li>
 
-      <li class="item" ng-if="!!specimen.pooledSpecimenId">
-        <strong class="key key-sm" translate="specimens.pooled_specimen">Pooled Specimen</strong>
-        <span class="value value-md">
-          <a ui-sref="specimen-detail.overview(
-            {eventId: visit.eventId, visitId: visit.id, specimenId: specimen.pooledSpecimenId, srId: specimen.reqId})">
-            <span ng-if="!!specimen.pooledSpecimenLabel">{{specimen.pooledSpecimenLabel}}</span>
-            <span ng-if="!specimen.pooledSpecimenLabel" translate="specimens.pooled_specimen">Pooled Specimen</span>
-          </a>
-        </span>
-      </li>
-
       <li class="item">
         <strong class="key key-sm" translate="specimens.pathology">Pathology Status</strong>
         <span class="value value-md">{{specimen.pathology | osNoValue}}</span>
@@ -272,6 +261,40 @@
     </div>
 
     <div ng-include="'modules/biospecimen/participant/specimen/external-ids.html'"></div>
+
+    <div class="os-section" ng-init="opCollapsed=false" ng-if="specimen.specimensPool.length >= 1">
+      <button class="os-btn-section-collapse os-btn-transparent" ng-click="opCollapsed=!opCollapsed">
+        <span ng-if="!opCollapsed" class="fa fa-chevron-circle-down"></span>
+        <span ng-if="opCollapsed" class="fa fa-chevron-circle-right"></span>
+      </button>
+      <h3 class="os-sub-section-title">
+        <span translate="specimens.pooled_from">Pooled From</span>
+      </h3>
+      <div collapse="opCollapsed">
+        <span ng-repeat="p in specimen.specimensPool">
+          <a ui-sref="specimen-detail.overview({cpId: p.cpId, cprId: p.cprId, visitId: p.visitId, specimenId: p.id})">
+            <span>{{p.label}}{{$last ? '' : ','}}</span>
+          </a>
+        </span>
+      </div>
+    </div>
+
+    <div class="os-section" ng-init="opCollapsed=false" ng-if="specimen.pooledSpecimens.length >= 1">
+      <button class="os-btn-section-collapse os-btn-transparent" ng-click="opCollapsed=!opCollapsed">
+        <span ng-if="!opCollapsed" class="fa fa-chevron-circle-down"></span>
+        <span ng-if="opCollapsed" class="fa fa-chevron-circle-right"></span>
+      </button>
+      <h3 class="os-sub-section-title">
+        <span translate="specimens.pooled_in">Pooled In</span>
+      </h3>
+      <div collapse="opCollapsed">
+        <span ng-repeat="p in specimen.pooledSpecimens">
+          <a ui-sref="specimen-detail.overview({cpId: p.cpId, cprId: p.cprId, visitId: p.visitId, specimenId: p.id})">
+            <span>{{p.label}}{{$last ? '' : ','}}</span>
+          </a>
+        </span>
+      </div>
+    </div>
   </div>
 </script>
 

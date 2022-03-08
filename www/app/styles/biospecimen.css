@@ -74,6 +74,11 @@
   padding: 0px 4px;
 }
 
+.fa.os-status-pooled:before {
+  color: #ff69b4;
+  padding: 0px 4px;
+}
+
 .fa.os-status-virtual:before {
   color: #99f;
   padding: 0px 4px;
@@ -139,6 +144,10 @@
   background: #5bc0de!important;
 }
 
+.os-page-header .os-status-pooled {
+  background: #ff69b4!important;
+}
+
 .panel .panel-heading .os-status-info,
 .os-page-header .os-status-info,
 .panel .panel-heading .os-status-closed,
@@ -150,7 +159,8 @@
 .os-page-header .os-status-pending,
 .os-page-header .os-status-virtual,
 .os-page-header .os-status-collected,
-.os-page-header .os-status-distributed {
+.os-page-header .os-status-distributed,
+.os-page-header .os-status-pooled {
   padding: 0px 4px;
   color: #fff;
   font-weight: bold;
@@ -206,6 +216,7 @@
 .os-key-values .value.os-status-shipped,
 .os-key-values .value.os-status-received,
 .os-key-values .value.os-status-distributed,
+.os-key-values .value.os-status-pooled,
 .os-key-values .value.os-status-virtual,
 .os-key-values .value.os-status-part-distributed,
 .os-key-values .value.os-status-returned {
@@ -245,6 +256,10 @@
 
 .os-key-values .value.os-status-distributed {
   background: #5bc0de;
+}
+
+.os-key-values .value.os-status-pooled {
+  background: #ff69b4;
 }
 
 .os-key-values .value.os-status-part-distributed {
@@ -396,8 +411,8 @@ table .os-md-time table {
   font-weight: normal;
 }
 
-.os-pool-specimen {
-  background: #ebf2f9;
+.os-pooled-specimen {
+  background: linear-gradient(45deg, rgba(255,105,180,0.0), rgba(255,105,180,0.4));
 }
 
 .os-inplace-form-edit-po.os-pool-specimen {

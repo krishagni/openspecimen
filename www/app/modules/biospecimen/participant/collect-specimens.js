@@ -156,7 +156,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
     }
 
     function gotoCollectionPage0(visit, wfData, navigateToCollPage) {
-      var params = {cprId: visit.cprId, visitId: visit.id, eventId: visit.eventId};
+      var params = {cpId: visit.cpId, cprId: visit.cprId, visitId: visit.id, eventId: visit.eventId};
       var state = 'tree';
       if (wfData.showCollectionTree == false || wfData.showCollectionTree == 'false') {
         state = 'nth-step';
@@ -1237,7 +1237,6 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
   
               var specimen = getSpecimenToSave(uiSpecimen);
               specimen.children = getSpecimensToSave(cp, uiSpecimen.children, visited);
-              specimen.specimensPool = getSpecimensToSave(cp, uiSpecimen.specimensPool, visited);
               result.push(specimen);
               return result;
             }
@@ -1274,6 +1273,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           if (specimen.lineage == 'New' && specimen.status == 'Collected') {
             var collEvent = specimen.collectionEvent = uiSpecimen.collectionEvent || {};
             var recvEvent = specimen.receivedEvent = uiSpecimen.receivedEvent || {};
+            specimen.specimensPool = uiSpecimen.specimensPool || [];
   
             if ($scope.showCollVisitDetails) {
               var collDetail = $scope.collDetail;

@@ -579,6 +579,121 @@ angular.module('os.biospecimen.specimen',
         },
         parent: 'signed-in'
       })
+      .state('specimen-create-pooled', {
+        url: '/add-pooled-specimen?visitId&cprId',
+        templateUrl: 'modules/biospecimen/participant/specimen/add-pooled.html',
+        controller: 'AddPooledSpecimenCtrl',
+        resolve: {
+          cpr: function($stateParams, cp, Participant, CollectionProtocolRegistration) {
+            if (!!$stateParams.cprId && $stateParams.cprId > 0) {
+              return CollectionProtocolRegistration.getById($stateParams.cprId);
+            } else if (cp.specimenCentric) {
+              var participant = new Participant({source: 'OpenSpecimen'});
+              return new CollectionProtocolRegistration({
+                cpId: cp.id, cpShortTitle: cp.shortTitle,
+                registrationDate: new Date(),
+                specimenLabelFmt: cp.specimenLabelFmt,
+                derivativeLabelFmt: cp.derivativeLabelFmt,
+                aliquotLabelFmt: cp.aliquotLabelFmtToUsecpId,
+                participant: participant
+              });
+            }
+
+            return null;
+          },
+
+          visit: function($stateParams, cp, Visit) {
+            if (!!$stateParams.visitId && $stateParams.visitId > 0) {
+              return Visit.getById($stateParams.visitId);
+            } else if (cp.specimenCentric) {
+              return new Visit({cpId: cp.id});
+            }
+
+            return null;
+          },
+
+          extensionCtxt: function(cp, Specimen) {
+            return Specimen.getExtensionCtxt({cpId: cp.id});
+          },
+
+          cpDict: function($stateParams, hasSde, CpConfigSvc) {
+            if (!hasSde) {
+              return [];
+            }
+
+            return CpConfigSvc.getDictionary($stateParams.cpId, []);
+          },
+
+          layout: function($stateParams, hasSde, CpConfigSvc) {
+            if (!hasSde) {
+              return [];
+            }
+
+            return CpConfigSvc.getLayout($stateParams.cpId, []);
+          },
+
+          onValueChangeCb: function($stateParams, hasSde, CpConfigSvc) {
+            if (!hasSde) {
+              return undefined;
+            }
+
+            return CpConfigSvc.getOnValueChangeCallbacks($stateParams.cpId, ['dictionary']);
+          },
+
+          hasDict: function(hasSde, cpDict) {
+            return hasSde && cpDict.length > 0;
+          },
+
+          barcodingEnabled: function(cp, SettingUtil) {
+            if (cp.barcodingEnabled) {
+              return true;
+            }
+
+            return SettingUtil.getSetting('biospecimen', 'enable_spmn_barcoding').then(
+              function(setting) {
+                return setting.value.toLowerCase() == 'true';
+              }
+            );
+          },
+
+          spmnBarcodesAutoGen: function(cp, SettingUtil) {
+            if (!!cp.specimenBarcodeFmt) {
+              return true;
+            }
+
+            return SettingUtil.getSetting('biospecimen', 'specimen_barcode_format').then(
+              function(setting) {
+                return !!setting.value;
+              }
+            );
+          },
+
+          imagingEnabled: function(SettingUtil) {
+            return SettingUtil.getSetting('biospecimen', 'imaging').then(
+              function(setting) {
+                return setting.value == 'true' || setting.value == true;
+              }
+            );
+          },
+
+          spmnCollFields: function(cp, CpConfigSvc) {
+            return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
+              function(data) {
+                if (data && !angular.equals(data, {})) {
+                  return data;
+                }
+
+                return CpConfigSvc.getWorkflowData(-1, 'specimenCollection').then(
+                  function(data) {
+                    return data || {};
+                  }
+                );
+              }
+            );
+          }
+        },
+        parent: 'cp-view'
+      })
       .state('specimen-bulk-edit', {
         url: '/bulk-edit-specimens',
         templateUrl: "modules/biospecimen/participant/specimen/bulk-edit.html",

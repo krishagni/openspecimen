@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 
-
 import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -686,7 +685,6 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		
 		for (SpecimenDetail specimen : specimens) {
 			specimen.setVisitId(visitId);
-			setVisitId(visitId, specimen.getSpecimensPool());
 			setVisitId(visitId, specimen.getChildren());
 		}
 	}
@@ -783,10 +781,6 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 				}
 			}
 
-			if (CollectionUtils.isNotEmpty(specimenDetail.getSpecimensPool())) {
-				setSpecimenIds(specimenDetail.getSpecimensPool(), reqSpecimenMap);
-			}
-			
 			if (CollectionUtils.isNotEmpty(specimenDetail.getChildren())) {
 				setSpecimenIds(specimenDetail.getChildren(), reqSpecimenMap);
 			}

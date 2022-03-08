@@ -20,6 +20,10 @@ angular.module('openspecimen')
           angular.extend(step, {order: order, selected: $scope.steps.length == 0, finished: false});
           $scope.steps.push(step);
           $scope.steps.sort(function(s1, s2) { return s1.order - s2.order; });
+
+          angular.forEach($scope.steps, function(step) { step.selected = false; });
+          $scope.selectedStep = 0;
+          $scope.steps[0].selected = true;
         };
 
         this.previous = function() {

@@ -394,6 +394,13 @@ public class SpecimensController {
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/pooled")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public SpecimenDetail createPooledSpecimen(@RequestBody SpecimenDetail specimen) {
+		return ResponseEvent.unwrap(specimenSvc.createPooledSpecimen(RequestEvent.wrap(specimen)));
+	}
 	
 	/** API present for UI purpose **/
 	@RequestMapping(method = RequestMethod.GET, value="/{id}/cpr-visit-ids")

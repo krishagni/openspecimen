@@ -1,0 +1,180 @@
+<div>
+  <div os-page-header>
+    <div class="os-page-header-content">
+      <ul os-breadcrumbs>
+        <li> 
+          <a ui-sref="cp-list-view({cpId: ctx.cp.id})">
+            <span>{{ctx.cp.shortTitle}}</span>
+          </a>
+        </li>
+      </ul>
+      <h3>
+        <span translate="specimens.created_pooled">Created Pooled Specimen</span>
+      </h3>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div os-wizard="pooledSpmnWizard" type="classic">
+      <os-wizard-step title="Visit" on-finish="passThrough()" ng-if="ctx.showSelectVisit" order="1">
+        <div ng-include src="'biospecimen/participant/specimen/pooled-select-visit.html'"></div>
+      </os-wizard-step>
+
+      <os-wizard-step title="Specimens" on-finish="validateSpecimens(forward)" order="2">
+        <div ng-include src="'biospecimen/participant/specimen/pooled-select-specimens.html'"></div>
+      </os-wizard-step>
+
+      <os-wizard-step title="Pooled Specimen" order="3">
+        <div ng-include src="'biospecimen/participant/specimen/pooled-specimen-detail.html'"></div>
+      </os-wizard-step>
+    </div>
+  </div>
+</div>
+
+<script type="text/ng-template" id="biospecimen/participant/specimen/pooled-select-visit.html">
+  <form name="visitForm" class="form-horizontal" os-form-validator="visitForm" novalidate>
+    <div class="form-group">
+      <label class="col-xs-3 control-label">
+        <span translate="specimens.select_participant">Select Participant</span>
+      </label>
+      <div class="col-xs-6">
+        <os-select name="cpr" ng-model="ctx.cpr" list="ctx.cprs"
+          display-prop="displayLabel" refresh="searchParticipants" on-select="onCprSelect($item)" required>
+        </os-select>
+        <div os-field-error field="visitForm.cpr"></div>
+      </div>
+    </div>
+
+    <div class="form-group" ng-if="ctx.cpr && ctx.cpr.id">
+      <label class="col-xs-3 control-label">
+        <span translate="specimens.select_visit">Select Visit</span>
+      </label>
+      <div class="col-xs-6">
+        <os-select name="visit" ng-model="ctx.visit" list="ctx.visits" display-prop="displayLabel" required>
+        </os-select>
+        <div os-field-error field="visitForm.visit"></div>
+      </div>
+    </div>
+
+    <div class="os-divider"></div>
+
+    <div class="form-group" style="text-align: right;">
+      <div class="col-xs-offset-3 col-xs-9">
+        <button class="btn os-btn-text" ng-click="back()">
+          <span translate="common.buttons.cancel">Cancel</span>
+        </button>
+        <button class="btn btn-primary" os-form-submit="pooledSpmnWizard.next()">
+          <span translate="common.buttons.next"> Next </span>
+        </button>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script type="text/ng-template" id="biospecimen/participant/specimen/pooled-select-specimens.html">
+  <form name="specimenForm" class="form-horizontal" os-form-validator="specimenForm" novalidate>
+    <div class="alert alert-danger" ng-if="!ctx.poolItems || ctx.poolItems.length == 0">
+      <span translate="specimens.no_items_in_pool">
+        No specimens in the pool. Add at least a couple of specimens to created pooled specimen
+      </span>
+    </div>
+
+    <os-add-specimens on-add="addSpecimens(specimens)" filter-opts="ctx.spmnFilters"
+      placeholder="{{'specimens.add_specimens' | translate}}">
+    </os-add-specimens>
+
+    <table class="os-table" ng-if="ctx.poolItems.length > 0">
+      <thead class="os-table-head">
+        <tr class="row">
+          <th class="col os-mw-140">
+            <span translate="specimens.label">Label</span>
+          </th>
+          <th class="col os-mw-140">
+            <span translate="specimens.description">Description</span>
+          </th>
+          <th class="col os-mw-140">
+            <span translate="specimens.cp">Collection Protocol</span>
+          </th>
+          <th class="col os-mw-100">
+            <span translate="specimens.qty">Quantity</span>
+          </th>
+          <th class="col os-mw-140">
+            <span translate="specimens.location">Location</span>
+          </th>
+          <th class="col">
+            <span>&nbsp;</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="os-table-body">
+        <tr class="row" ng-repeat="item in ctx.poolItems" ng-init="specimen = item">
+          <td class="col">
+            <a ui-sref="specimen({specimenId: specimen.id})">
+              <span>{{specimen.label}}</span>
+              <span ng-if="!!specimen.barcode">({{specimen.barcode}})</span>
+            </a>
+          </td>
+          <td class="col">
+            <a ui-sref="specimen({specimenId: specimen.id})">
+              <os-specimen-desc specimen="specimen" detailed="true"></os-specimen-desc>
+            </a>
+          </td>
+          <td class="col">
+            <span>{{specimen.cpShortTitle}}</span>
+          </td>
+          <td class="col">
+            <os-spmn-measure-val specimen="specimen" value="specimen.availableQty"></os-spmn-measure-val>
+          </td>
+          <td class="col">
+            <os-disp-storage-position position="specimen.storageLocation"></os-disp-storage-position>
+          </td>
+          <td class="col">
+            <button class="btn btn-xs btn-default" ng-click="removeSpecimen(specimen)">
+              <span class="fa fa-remove"></span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="os-divider"></div>
+
+    <div class="form-group" style="text-align: right;">
+      <div class="col-xs-offset-3 col-xs-9">
+        <button class="btn os-btn-text" ng-click="back()">
+          <span translate="common.buttons.cancel">Cancel</span>
+        </button>
+        <button class="btn os-btn-secondary" ng-click="pooledSpmnWizard.previous()">
+          <span translate="common.buttons.previous"> Previous </span>
+        </button>
+        <button class="btn btn-primary" os-form-submit="pooledSpmnWizard.next()">
+          <span translate="common.buttons.next"> Next </span>
+        </button>
+      </div>
+    </div>
+  </form>
+</script>
+
+<script type="text/ng-template" id="biospecimen/participant/specimen/pooled-specimen-detail.html">
+  <form name="pooledSpecimenForm" class="form-horizontal" os-form-validator="pooledSpecimenForm" novalidate
+    ng-if="ctx.visit">
+    <os-specimen-addedit-form specimen="ctx.specimen" ctrl="ctx.form" opts="ctx">
+    </os-specimen-addedit-form>
+
+    <div class="os-divider"></div>
+
+    <div class="form-group" style="text-align: right;">
+      <div class="col-xs-offset-3 col-xs-9">
+        <button class="btn os-btn-text" ng-click="back()">
+          <span translate="common.buttons.cancel">Cancel</span>
+        </button>
+        <button class="btn os-btn-secondary" ng-click="pooledSpmnWizard.previous()">
+          <span translate="common.buttons.previous"> Previous </span>
+        </button>
+        <button class="btn btn-primary" os-form-submit="gotoCollection()">
+          <span translate="common.buttons.next"> Next </span>
+        </button>
+      </div>
+    </div>
+  </form>
+</script>

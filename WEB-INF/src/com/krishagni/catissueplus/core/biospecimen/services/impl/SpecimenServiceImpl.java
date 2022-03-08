@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
@@ -30,8 +28,8 @@ import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
-import com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPreSaveEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenSavedEvent;
@@ -580,6 +578,23 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<SpecimenDetail> createPooledSpecimen(RequestEvent<SpecimenDetail> req) {
+		try {
+			SpecimenDetail input = req.getPayload();
+			input.setLineage(Specimen.NEW);
+			input.setStatus(Specimen.COLLECTED);
+
+			Specimen pooledSpmn = saveOrUpdate(input, null, null, null);
+			return ResponseEvent.response(SpecimenDetail.from(pooledSpmn, false, true));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<Boolean> doesSpecimenExists(RequestEvent<SpecimenQueryCriteria> req) {
 		SpecimenQueryCriteria crit = req.getPayload();
 		return ResponseEvent.response(getSpecimen(crit.getCpShortTitle(), crit.getName()) != null);
@@ -923,14 +938,12 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 		Specimen specimen = existing;
 		if (existing == null || !existing.isCollected()) {
-			existing = collectPoolSpecimens(detail, existing, reqSpmnsMap);
 			specimen = saveOrUpdate(detail, null, existing, parent);
 			if (specimen.getPreCreatedSpmnsMap() != null) {
 				reqSpmnsMap.putAll(specimen.getPreCreatedSpmnsMap());
 			}
 		} else {
 			existing.setUid(detail.getUid());
-			collectPoolSpecimens(detail, existing, reqSpmnsMap);
 		}
 
 		if (CollectionUtils.isNotEmpty(detail.getChildren())) {
@@ -948,25 +961,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 
 		return specimen;
-	}
-
-	private Specimen collectPoolSpecimens(SpecimenDetail detail, Specimen existing, Map<Long, Specimen> reqSpmnsMap) {
-		// If not pooled specimen then return existing specimen
-		if (CollectionUtils.isEmpty(detail.getSpecimensPool())) {
-			return existing;
-		}
-
-		Set<Specimen> specimensPool = new HashSet<>();
-		for (SpecimenDetail poolSpmnDetail : detail.getSpecimensPool()) {
-			specimensPool.add(collectSpecimen(poolSpmnDetail, null, reqSpmnsMap));
-		}
-
-		if (existing == null) {
-			existing = specimensPool.iterator().next().getPooledSpecimen();
-		}
-
-		existing.getSpecimensPool().addAll(specimensPool);
-		return existing;
 	}
 
 	private Specimen initSpecimenIds(SpecimenDetail detail, Map<Long, Specimen> reqSpmnsMap) {
@@ -1032,7 +1026,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.setLabelIfEmpty();
 			specimen.getParentSpecimen().addChildSpecimen(specimen);
 		} else {
-			specimen.checkPoolStatusConstraints();
 			specimen.setLabelIfEmpty();
 			specimen.occupyPosition();
 		}
@@ -1053,10 +1046,16 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.setStatusChanged(true);
 		}
 
+		boolean pooling = specimen.getId() == null && CollectionUtils.isNotEmpty(detail.getSpecimensPool());
 		specimen.updateAvailableStatus();
 		daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
 		specimen.addOrUpdateCollRecvEvents();
 		specimen.addOrUpdateExtension();
+		if (pooling) {
+			Specimen pooledSpmn = specimen;
+			detail.getSpecimensPool().forEach(poolSpmn -> pooledSpmn.addPoolSpecimen(getSpecimen(poolSpmn)));
+			specimen.addPooledEvent();
+		}
 
 		if (specimen.isDeleted()) {
 			DeleteLogUtil.getInstance().log(specimen);
@@ -1130,10 +1129,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					printItems.add(PrintItem.make(specimen, specimen.getCopiesToPrint()));
 				}
 
-				if (CollectionUtils.isNotEmpty(specimen.getSpecimensPool())) {
-					printItems.addAll(getSpecimenPrintItems(specimen.getSpecimensPool()));
-				}
-
 				if (CollectionUtils.isNotEmpty(specimen.getChildCollection())) {
 					printItems.addAll(getSpecimenPrintItems(specimen.getChildCollection()));
 				}
@@ -1149,11 +1144,17 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		List<Specimen> result = new ArrayList<>();
 		for (Specimen specimen : sortedSpecimens) {
 			result.add(specimen);
-			result.addAll(getFlattenedSpecimens(specimen.getSpecimensPool()));
 			result.addAll(getFlattenedSpecimens(specimen.getChildCollection()));
 		}
 
 		return result;
+	}
+
+	private Specimen getSpecimen(SpecimenInfo input) {
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		Specimen specimen = getSpecimen(input.getId(), input.getCpShortTitle(), input.getLabel(), input.getBarcode(), ose);
+		ose.checkAndThrow();
+		return specimen;
 	}
 
 	private Specimen getSpecimen(Long specimenId, String cpShortTitle, String label, String barcode, OpenSpecimenException ose) {
