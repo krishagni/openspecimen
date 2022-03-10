@@ -4,7 +4,7 @@
     <table class="os-table">
       <thead>
         <tr>
-          <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" :style="field.uiStyle" @click="sort(field)">
+          <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" @click="sort(field)">
             <span v-if="field.label">{{field.label}}</span>
             <div v-else-if="field.icon" v-os-tooltip="field.tooltip"
               :class="{'align-icon': field.enableCopyFirstToAll && field.type == 'booleanCheckbox'}">
@@ -38,15 +38,17 @@
       <tbody>
         <tr v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
           <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
-            <component :is="field.component" v-bind="field" :md-type="true"
-              v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
-              :form="{...ctx.items[itemIdx], ...data, _formCache}"
-              :context="{...ctx.items[itemIdx], ...data, _formCache}"
-              @update:model-value="handleInput(itemIdx, field, itemModel)">
-            </component>
-            <div v-if="v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
-              v$.itemModels[itemIdx][field.name].$error">
-              <os-inline-message>{{errorMessages[itemIdx][field.name]}}</os-inline-message>
+            <div :style="field.uiStyle">
+              <component :is="field.component" v-bind="field" :md-type="true"
+                v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
+                :form="{...ctx.items[itemIdx], ...data, _formCache}"
+                :context="{...ctx.items[itemIdx], ...data, _formCache}"
+                @update:model-value="handleInput(itemIdx, field, itemModel)">
+              </component>
+              <div v-if="v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
+                v$.itemModels[itemIdx][field.name].$error">
+                <os-inline-message>{{errorMessages[itemIdx][field.name]}}</os-inline-message>
+              </div>
             </div>
           </td>
           <td v-if="removeItems == true">

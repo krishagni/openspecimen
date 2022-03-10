@@ -288,4 +288,9 @@ export default {
     font-size: 0.75rem;
     margin-top: -0.40rem;
   }
+
+  .os-dropdown :deep(.p-multiselect-label) {
+    white-space: break-spaces;
+    padding: 0;
+  }
 </style>
