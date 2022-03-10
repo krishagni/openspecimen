@@ -44,7 +44,8 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 
 		// <zip>_<uuid>_<userId>_<name>
 		String zipFilename = getZipFileId(container, file.getName());
-		Pair<String, String> zipEntry = Pair.make(file.getAbsolutePath(), container.getName() + ".csv");
+		String entryName = container.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + ".csv";
+		Pair<String, String> zipEntry = Pair.make(file.getAbsolutePath(), entryName);
 		File zipFile = new File(ConfigUtil.getInstance().getReportsDir(), zipFilename + ".zip");
 		Utility.zipFilesWithNames(Collections.singletonList(zipEntry), zipFile.getAbsolutePath());
 		file.delete();

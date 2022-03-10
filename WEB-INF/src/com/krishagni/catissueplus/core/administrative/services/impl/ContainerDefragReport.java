@@ -25,7 +25,8 @@ public class ContainerDefragReport extends AbstractContainerReport implements Co
 		File file = generateReport(container, (ContainerDefragDetail) params[0], uuid);
 
 		String zipFilename = getZipFileId(container, uuid);
-		Pair<String, String> zipEntry = Pair.make(file.getAbsolutePath(), container.getName() + ".csv");
+		String entryName = container.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + ".csv";
+		Pair<String, String> zipEntry = Pair.make(file.getAbsolutePath(), entryName);
 		File zipFile = new File(ConfigUtil.getInstance().getReportsDir(), zipFilename + ".zip");
 		Utility.zipFilesWithNames(Collections.singletonList(zipEntry), zipFile.getAbsolutePath());
 		file.delete();
