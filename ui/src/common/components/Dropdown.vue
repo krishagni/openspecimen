@@ -92,24 +92,9 @@ export default {
       } else if (typeof this.listSource.apiUrl == 'string') {
         let ls = this.listSource;
 
-        let params = {maxResults: 100};
+        const params = {maxResults: 100};
         params[ls.searchProp || 'query'] = query;
-        if (ls.queryParams) {
-          if (ls.queryParams.static) {
-            Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.queryParams.static[name]);
-          }
-
-          if (ls.queryParams.dynamic) {
-            let form = this.form;
-            Object.keys(ls.queryParams.dynamic).forEach(
-              function(name) {
-                let expr = ls.queryParams.dynamic[name];
-                params[name] = exprUtil.eval(form, expr);
-              }
-            );
-          }
-        }
-
+        Object.assign(params, this.queryParams(ls));
         const options = await this.getFromBackend(params);
         this.ctx.options = this.dedup(selectedVal.concat(options));
       }
@@ -125,7 +110,7 @@ export default {
       }
 
       let ls = this.listSource;
-      let searchOpts = {query: this.modelValue};
+      const searchOpts = {query: this.modelValue};
       searchOpts[ls.searchProp || 'value'] = this.modelValue;
 
       let selected = undefined;
@@ -143,10 +128,32 @@ export default {
       } else if (typeof ls.loadFn == 'function') {
         selected = await ls.loadFn({...searchOpts, context: this.context});
       } else if (typeof ls.apiUrl == 'string') {
+        Object.assign(searchOpts, this.queryParams(ls));
         selected = this.getFromBackend(searchOpts);
       }
 
       return selected;
+    },
+
+    queryParams(ls) {
+      const params = {};
+      if (ls.queryParams) {
+        if (ls.queryParams.static) {
+          Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.queryParams.static[name]);
+        }
+
+        if (ls.queryParams.dynamic) {
+          let form = this.form;
+          Object.keys(ls.queryParams.dynamic).forEach(
+            function(name) {
+              let expr = ls.queryParams.dynamic[name];
+              params[name] = exprUtil.eval(form, expr);
+            }
+          );
+        }
+      }
+
+      return params;
     },
 
     async getFromBackend(params) {
