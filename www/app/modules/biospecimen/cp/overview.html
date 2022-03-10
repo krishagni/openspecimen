@@ -215,14 +215,14 @@
           </span>
         </li>
 
-        <li class="item">
+        <li class="item" ng-if="!cp.specimenCentric">
           <strong class="key key-sm" translate="cp.store_sprs">Store Pathology Reports?</strong>
           <span class="value value-md">
             {{cp.storeSprEnabled | osBoolValue: 'common.yes': 'common.no': 'common.use_system_setting'}}
           </span>
         </li>
 
-        <li class="item" ng-if="cp.storeSprEnabled || (cp.storeSprEnabled == undefined && sysStoreSpr)">
+        <li class="item" ng-if="!cp.specimenCentric && (cp.storeSprEnabled || (cp.storeSprEnabled == undefined && sysStoreSpr))">
           <strong class="key key-sm" translate="cp.extract_spr_text">Extract Text from SPR PDF docs?</strong>
           <span class="value value-md" ng-switch on="cp.extractSprText">
             <span ng-switch-when="true" translate="common.yes">Yes</span>

@@ -188,7 +188,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" ng-if="!cp.specimenCentric">
         <label class="control-label col-xs-3" translate="cp.store_sprs"> Store Pathology Reports? </label>
         <div class="col-xs-6">
           <label class="radio-inline">
@@ -206,7 +206,7 @@
         </div>
       </div>
 
-      <div class="form-group" ng-if="cp.storeSprEnabled || (cp.storeSprEnabled == undefined && sysStoreSpr)">
+      <div class="form-group" ng-if="!cp.specimenCentric && (cp.storeSprEnabled || (cp.storeSprEnabled == undefined && sysStoreSpr))">
         <label class="col-xs-3 control-label" translate="cp.extract_spr_text">Extract Text from SPR PDF Docs?</label>
         <div class="col-xs-9">
           <label class="radio-inline"> 
