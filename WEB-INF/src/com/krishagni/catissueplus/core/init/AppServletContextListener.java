@@ -19,10 +19,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
-
 import com.krishagni.catissueplus.core.common.PluginManager;
 import com.krishagni.catissueplus.core.common.util.ClassPathUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class AppServletContextListener implements ServletContextListener {
 
@@ -39,6 +39,17 @@ public class AppServletContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
+			if (Utility.isRootUser()) {
+				System.err.println("****************************************");
+				System.err.println("*        ERROR! ERROR!! ERROR!!!       *");
+				System.err.println("****************************************");
+				System.err.println("OpenSpecimen is started using root user.");
+				System.err.println("Avoid using root user to run OpenSpecimen.");
+				System.err.println("Instead consider using a regular user account.");
+				System.err.println("Exiting");
+				System.exit(1);
+			}
+
 			String rootDir = sce.getServletContext().getResource("/").getPath();
 			String tomcatDir = new File(rootDir).getParentFile().getParentFile().getPath();
 

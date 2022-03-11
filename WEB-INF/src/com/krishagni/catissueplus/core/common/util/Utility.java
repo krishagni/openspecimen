@@ -68,6 +68,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
@@ -1170,6 +1171,29 @@ public class Utility {
 
 	public static boolean isExportOp() {
 		return ExporterContextHolder.getInstance().isExportOp();
+	}
+
+	public static boolean isLinuxLike() {
+		return !SystemUtils.IS_OS_WINDOWS;
+	}
+
+	public static boolean isRootUser() {
+		InputStream in = null;
+		try {
+			if (!isLinuxLike()) {
+				return false;
+			}
+
+			Process process = Runtime.getRuntime().exec("id -u");
+			process.waitFor();
+			in = process.getInputStream();
+			String userId = IOUtils.toString(in);
+			return userId != null && userId.trim().equals("0");
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(in);
+		}
 	}
 
 	private static Integer getPeriodBetween(ChronoUnit unit, Date from, Date to) {
