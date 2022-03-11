@@ -11,7 +11,7 @@ angular.module('openspecimen')
 
     var summarySt = undefined;
 
-    var cpCustomFields = {};
+    var cpCustomFieldsQ = {};
     
     function getRegParticipantTmpl(cpId, cprId) {
       return getTmpl(cpId, cprId, 'registerParticipant', 'modules/biospecimen/participant/addedit.html');
@@ -185,64 +185,59 @@ angular.module('openspecimen')
 
           return Form.getDefinition(ctxt.formId).then(
             function(formDef) {
-              return ExtensionsUtil.toSdeFields(prefix, ctxt.formId, formDef);
+              return ExtensionsUtil.toSdeFields(prefix, ctxt.formId, formDef) || [];
             }
           );
         }
       );
     }
 
-    function hasCustomFields(fields) {
+    //
+    // type is one of 'cpr.participant.extensionDetail.attrsMap',
+    // 'visit.extensionDetail.attrsMap', 'specimen.extensionDetail.attrsMap'
+    //
+    function hasCustomFields(fields, type) {
+      type = type || 'extensionDetail.attrsMap';
       return fields.some(
         function(field) {
-          return field.name && field.name.indexOf('extensionDetail.attrsMap') >= 0;
+          return field.name && field.name.indexOf(type) >= 0;
         }
       );
     }
 
-    function getCustomFields(cpId) {
-      var d = $q.defer();
-      var customFields = cpCustomFields[cpId];
-      if (customFields) {
-        d.resolve(customFields);
-        return d.promise;
+    function getCustomFields(cpId, type) {
+      cpCustomFieldsQ[cpId] = cpCustomFieldsQ[cpId] || {};
+      if (cpCustomFieldsQ[cpId][type]) {
+        return cpCustomFieldsQ[cpId][type];
       }
 
-      var cprQ = getFormFields(
-        CollectionProtocolRegistration.getExtensionCtxt({cpId: cpId}),
-        'cpr.participant.extensionDetail.attrsMap'
-      );
-
-      var visitQ = getFormFields(
-        Visit.getExtensionCtxt({cpId: cpId}),
-        'visit.extensionDetail.attrsMap'
-      );
-
-      var spmnQ = getFormFields(
-        Specimen.getExtensionCtxt({cpId: cpId}),
-        'specimen.extensionDetail.attrsMap'
-      );
-
-      $q.all([cprQ, visitQ, spmnQ]).then(
-        function(fields) {
-          cpCustomFields[cpId] = {
-            cpr: fields[0] || [],
-            visit: fields[1] || [],
-            specimen: fields[2] || []
-          };
-          d.resolve(cpCustomFields[cpId]);
-        }
-      );
-
-      return d.promise;
+      if (type == 'cpr') {
+        var cprQ = cpCustomFieldsQ[cpId][type] = getFormFields(
+          CollectionProtocolRegistration.getExtensionCtxt({cpId: cpId}),
+          'cpr.participant.extensionDetail.attrsMap'
+        );
+        return cprQ;
+      } else if (type == 'visit') {
+        var visitQ = cpCustomFieldsQ[cpId][type] = getFormFields(
+          Visit.getExtensionCtxt({cpId: cpId}),
+          'visit.extensionDetail.attrsMap'
+        );
+        return visitQ;
+      } else if (type == 'specimen') {
+        var spmnQ = cpCustomFieldsQ[cpId][type] = getFormFields(
+          Specimen.getExtensionCtxt({cpId: cpId}),
+          'specimen.extensionDetail.attrsMap'
+        );
+        return spmnQ;
+      } else {
+        var q = $q.defer();
+        q.resolve([]);
+        return q.promise;
+      }
     }
 
     function getEntityCustomFields(cpId, entity) {
-      return getCustomFields(cpId).then(
-        function(customFields) {
-          return customFields[entity] || {};
-        }
-      );
+      return getCustomFields(cpId, entity);
     }
 
     return {
@@ -287,27 +282,53 @@ angular.module('openspecimen')
       },
 
       getDictionary: function(cpId, defValue) {
+        var addCustomFields = function(fields, type) {
+          type = type.split('.')[0];
+          return getCustomFields(cpId, type).then(
+            function(customFields) {
+              Array.prototype.push.apply(fields, customFields);
+              return fields;
+            }
+          );
+        };
+
+        var addCustomFieldsIfAbsent = function(fields) {
+          var types = ['cpr.participant', 'visit', 'specimen'];
+          var promises = [];
+          for (var i = 0; i < types.length; ++i) {
+            if (!hasCustomFields(fields, types[i] + '.extensionDetail.attrsMap')) {
+              promises.push(addCustomFields(fields, types[i]));
+            }
+          }
+
+          if (promises.length == 0) {
+            var d = $q.defer();
+            d.resolve([]);
+            promises.push(d.promise);
+          }
+
+          return $q.all(promises).then(function(result) { return result; });
+        }
+
         return getWorkflowData(cpId, 'dictionary').then(
           function(data) {
-            if (data.fields) {
-              return data.fields;
+            var fields = data.fields;
+            if (cpId == -1 || !cpId) {
+              return fields || [];
             }
 
+            if (fields && fields.length > 0) {
+              return addCustomFieldsIfAbsent(fields).then(function() { return fields; });
+            }
+         
             return getWorkflowData(-1, 'dictionary').then(
               function(sysDict) {
                 var fields = sysDict.fields || defValue || [];
-                if (fields.length == 0 || hasCustomFields(fields) || cpId == -1 || !cpId) {
+                if (fields.length == 0 || cpId == -1 || !cpId) {
                   return fields;
                 }
 
-                return getCustomFields(cpId).then(
-                  function(customFields) {
-                    fields = fields.concat(customFields.cpr)
-                      .concat(customFields.visit)
-                      .concat(customFields.specimen);
-                    return fields;
-                  }
-                );
+                return addCustomFieldsIfAbsent(fields).then(function() { return fields; });
               }
             );
           }
