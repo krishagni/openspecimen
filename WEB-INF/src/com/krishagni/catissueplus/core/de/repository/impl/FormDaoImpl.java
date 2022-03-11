@@ -748,7 +748,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	
 	@Override
 	public void deleteFormContexts(Collection<Long> formIds) {
-		sessionFactory.getCurrentSession()
+		getCurrentSession()
 			.createSQLQuery(SOFT_DELETE_FORM_CONTEXTS_SQL)
 			.setTimestamp("deletedOn", Calendar.getInstance().getTime())
 			.setParameterList("formIds", formIds)

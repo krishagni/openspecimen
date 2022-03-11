@@ -121,6 +121,13 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 		return cpForms;
 	}
 
+	@Override
+	public void deleteForms(Collection<Long> formIds) {
+		getCurrentSession().getNamedQuery(DELETE_GROUP_FORMS)
+			.setParameterList("formIds", formIds)
+			.executeUpdate();
+	}
+
 	private static final String FQN = CollectionProtocolGroup.class.getName();
 
 	private static final String GET_BY_NAME = FQN + ".getByName";
@@ -128,4 +135,6 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 	private static final String GET_GROUP_CPS_COUNT = FQN + ".getGroupCpsCount";
 
 	private static final String GET_CP_FORMS_BY_ENTITY = FQN + ".getEntityFormsByCp";
+
+	private static final String DELETE_GROUP_FORMS = FQN + ".deleteGroupForms";
 }

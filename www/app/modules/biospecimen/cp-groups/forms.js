@@ -35,15 +35,17 @@ angular.module('os.biospecimen.cpgroups')
     }
 
     function addForm(level, showMultiRecord) {
+      var fctx = $scope.fctx;
       $modal.open({
         templateUrl: 'modules/biospecimen/cp-groups/add-form.html',
         controller: function($scope, $modalInstance) {
           var mctx = $scope.mctx = { forms: [], showMultiRecord: showMultiRecord, allowMultipleRecords: false };
 
+          var existingForms = (fctx[level] || []).map(function(form) { return form.formId; });
           $scope.searchForms = function(searchTerm) {
             Form.query({name: searchTerm}).then(
               function(forms) {
-                $scope.mctx.forms = forms;
+                $scope.mctx.forms = forms.filter(function(form) { return existingForms.indexOf(form.formId) == -1; });
               }
             );
           }

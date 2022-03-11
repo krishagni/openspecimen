@@ -20,4 +20,6 @@ public interface CollectionProtocolGroupDao extends Dao<CollectionProtocolGroup>
 
 	// cpId -> [formId]
 	Map<Long, Set<Long>> getCpForms(List<Long> cpIds, String entityType);
+
+	void deleteForms(Collection<Long> formIds);
 }

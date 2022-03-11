@@ -135,4 +135,12 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Remove deleted forms from the CP groups">
+    <sql>
+      delete from os_cp_group_forms where form_id in (
+        select identifier from dyextn_containers where deleted_on is not null
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

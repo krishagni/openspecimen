@@ -368,6 +368,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 			formIds.forEach(formId -> Container.softDeleteContainer(getUserContext(false), formId));
 			formDao.deleteFormContexts(formIds);
+
+			//
+			// TODO: Ideally, this API should have emitted events saying so and so form has been deleted.
+			// TODO: The interested listeners, like CP group listener, would then take appropriate actions
+			//
+			daoFactory.getCpGroupDao().deleteForms(formIds);
 			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
