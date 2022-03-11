@@ -43,7 +43,7 @@ angular.module('os.biospecimen.cpgroups')
 
           var existingForms = (fctx[level] || []).map(function(form) { return form.formId; });
           $scope.searchForms = function(searchTerm) {
-            Form.query({name: searchTerm}).then(
+            Form.query({name: searchTerm, excludeSysForms: true}).then(
               function(forms) {
                 $scope.mctx.forms = forms.filter(function(form) { return existingForms.indexOf(form.formId) == -1; });
               }
