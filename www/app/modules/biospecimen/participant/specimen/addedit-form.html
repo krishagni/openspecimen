@@ -1,7 +1,19 @@
 
 <ng-form name="sform">
   <div>
-    <div ng-switch on="opts.hasDict">
+    <div class="form-group" ng-if="!inputSpmn.id && opts.requirements.length > 0">
+      <label class="col-xs-3 control-label">
+        <span translate="specimens.requirement">Requirement</span>
+      </label>
+      <div class="col-xs-6">
+        <os-select name="reqType" ng-model="inputSpmn.$reqType" list="opts.requirements"
+          display-prop="title" on-select="onReqSelect($item)" required>
+        </os-select>
+        <div os-field-error field="sform.reqType"></div>
+      </div>
+    </div>
+
+    <div ng-switch on="opts.hasDict" ng-if="!opts.requirements || opts.requirements.length == 0 || !!inputSpmn.id || inputSpmn.$reqType">
       <div ng-switch-when="true">
         <sde-form-fields name="spmn" base-fields="opts.sysDict" fields="opts.cpDict"
           obj="spmnCtx.obj" in-objs="spmnCtx.inObjs" ex-objs="spmnCtx.exObjs" opts="spmnCtx.opts">
@@ -16,9 +28,12 @@
       </div>
     </div>
 
-    <div ng-if="!inputSpmn.id && !inputSpmn.reqId">
-      <div ng-if="opts.allSpmnUpdate && opts.showCreateAliquots != false && opts.showCreateAliquots != 'false'">
+    <div ng-if="!inputSpmn.id && (!inputSpmn.reqId || opts.cp.specimenCentric)">
+      <div ng-if="!inputSpmn.reqId && opts.allSpmnUpdate && opts.showCreateAliquots != false && opts.showCreateAliquots != 'false'">
         <div ng-include="'modules/biospecimen/participant/specimen/add-aliquots-tmpl.html'"></div>
+      </div>
+      <div ng-if="inputSpmn.reqId && inputSpmn.children.length > 0 && opts.cp.specimenCentric">
+        <div ng-include="'modules/biospecimen/participant/specimen/add-children-tmpl.html'"></div>
       </div>
 
       <div ng-if="opts.allowMultipleSpecimens != false && opts.allowMultipleSpecimens != 'false'">
@@ -78,7 +93,7 @@
 <script type="text/ng-template" id="modules/biospecimen/participant/specimen/static-addedit.html">
   <div>
     <div class="form-group" ng-if="spmnCtx.manualSpecLabelReq &&
-      (!!inputSpmn.id || !!inputSpmn.reqId ||
+      (!!inputSpmn.id || (!!inputSpmn.reqId && !opts.cp.specimenCentric) ||
        opts.allowMultipleSpecimens == false || opts.allowMultipleSpecimens == 'false')">
 
       <label class="col-xs-3 control-label" translate="specimens.label">Label</label>
@@ -435,6 +450,23 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="modules/biospecimen/participant/specimen/add-children-tmpl.html">
+  <div class="os-section-divider">
+    <span translate="specimens.aliquot_details">Aliquot Details</span>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-9 os-text-checkbox" ng-class="{'col-xs-offset-3': !spmnCtx.opts.verticalLayout}">
+      <div class="checkbox">
+        <os-checkbox ng-model="spmnCtx.createChildren"></os-checkbox>
+      </div>
+      <div class="message os-ctrl-padding-top">
+        <span translate="specimens.create_children_q">Do you want to create child specimens?</span>
+      </div>
     </div>
   </div>
 </script>

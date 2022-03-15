@@ -4,21 +4,25 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelAutoPrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
+import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenRequirementFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
@@ -66,6 +70,8 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 	
 	private LabelGenerator specimenLabelGenerator;
 
+	private CpeFactory cpeFactory;
+
 	public DaoFactory getDaoFactory() {
 		return daoFactory;
 	}
@@ -80,6 +86,10 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 
 	public void setSpecimenLabelGenerator(LabelGenerator specimenLabelGenerator) {
 		this.specimenLabelGenerator = specimenLabelGenerator;
+	}
+
+	public void setCpeFactory(CpeFactory cpeFactory) {
+		this.cpeFactory = cpeFactory;
 	}
 
 	@Override
@@ -454,21 +464,59 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		
 		CollectionProtocolEvent cpe = null;
 		Object key = null;
-		if (eventId != null) {
+		if (eventId != null && eventId > 0) {
 			cpe = daoFactory.getCollectionProtocolDao().getCpe(eventId);
 			key = eventId;
 		} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(eventLabel)) {
 			cpe = daoFactory.getCollectionProtocolDao().getCpeByShortTitleAndEventLabel(cpShortTitle, eventLabel);
 			key = eventLabel;
+		} else {
+			if (detail.getCpId() != null) {
+				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(detail.getCpId());
+				if (cp != null && cp.isSpecimenCentric()) {
+					cpe = getEventFor(cp);
+				}
+			} else if (StringUtils.isNotBlank(detail.getCpShortTitle())) {
+				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(detail.getCpShortTitle());
+				if (cp != null && cp.isSpecimenCentric()) {
+					cpe = getEventFor(cp);
+				}
+			}
 		}
 
-		if (key == null) {
-			ose.addError(CPE_REQUIRED);
-		} else if (cpe == null) {
-			ose.addError(CpeErrorCode.NOT_FOUND, key, 1);
+		if (cpe == null) {
+			if (key == null) {
+				ose.addError(CPE_REQUIRED);
+			} else {
+				ose.addError(CpeErrorCode.NOT_FOUND, key, 1);
+			}
 		}
-		
+
 		sr.setCollectionProtocolEvent(cpe);
+	}
+
+	private CollectionProtocolEvent getEventFor(CollectionProtocol cp) {
+		String eventName = cp.getEventName();
+		CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpeByEventLabel(cp.getShortTitle(), eventName);
+		if (cpe != null) {
+			return cpe;
+		}
+
+		CollectionProtocolEventDetail eventInput = new CollectionProtocolEventDetail();
+		eventInput.setEventLabel(eventName);
+		eventInput.setCode(eventName);
+		eventInput.setCpId(cp.getId());
+		eventInput.setCpShortTitle(cp.getShortTitle());
+		cpe = cpeFactory.createCpe(eventInput);
+		cp.addCpe(cpe);
+		daoFactory.getCollectionProtocolDao().saveOrUpdate(cp, true);
+
+		Visit visit = daoFactory.getVisitsDao().getByName(cp.getVisitName());
+		if (visit != null) {
+			visit.setCpEvent(cpe);
+		}
+
+		return cpe;
 	}
 
 	private void setActivityStatus(SpecimenRequirementDetail detail, SpecimenRequirement sr, OpenSpecimenException ose) {

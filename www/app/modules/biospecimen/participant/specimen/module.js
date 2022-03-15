@@ -120,6 +120,40 @@ angular.module('os.biospecimen.specimen',
             return (spmnReq && (spmnReq.specimens || [])) || [];
           },
 
+          requirements: function($stateParams, $translate, cp, SpecimenRequirement) {
+            if (!cp.specimenCentric || !!$stateParams.reqName) {
+              return [];
+            }
+
+            var processReqs = function processReqs(requirements) {
+              var result = [];
+              for (var i = 0; i < requirements.length; ++i) {
+                var req = requirements[i];
+                if (req.activityStatus != 'Active') {
+                  continue;
+                }
+
+                req.children = processReqs(req.children || []);
+                req.title = req.name || (req.type + (req.code ? ' (' + req.code + ')' : ''));
+                req.hasChildren = (req.children || []).length > 0;
+                result.push(req);
+              }
+
+              return result;
+            }
+
+            return SpecimenRequirement.getByCpId(cp.id).then(
+              function(reqs) {
+                reqs = processReqs(reqs);
+                if (reqs && reqs.length > 0) {
+                  reqs.push({title: $translate.instant('specimens.other'), activityStatus: 'Active'});
+                }
+
+                return reqs;
+              }
+            );
+          },
+
           spmnCollFields: function(cp, CpConfigSvc) {
             return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
               function(data) {

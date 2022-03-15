@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
@@ -17,6 +17,7 @@ import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @JsonFilter("withoutId")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SpecimenRequirementDetail implements Comparable<SpecimenRequirementDetail> {
 	private Long id;
 	
@@ -59,6 +60,8 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	private Integer sortOrder;
 	
 	private Long eventId;
+
+	private Long cpId;
 	
 	private List<SpecimenRequirementDetail> children;
 
@@ -238,6 +241,14 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.eventId = eventId;
 	}
 
+	public Long getCpId() {
+		return cpId;
+	}
+
+	public void setCpId(Long cpId) {
+		this.cpId = cpId;
+	}
+
 	public List<SpecimenRequirementDetail> getChildren() {
 		return children;
 	}
@@ -246,7 +257,6 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.children = children;
 	}
 
-	@JsonIgnore
 	public String getCpShortTitle() {
 		return cpShortTitle;
 	}
@@ -255,7 +265,6 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.cpShortTitle = cpShortTitle;
 	}
 
-	@JsonIgnore
 	public String getEventLabel() {
 		return eventLabel;
 	}
@@ -263,8 +272,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	public void setEventLabel(String eventLabel) {
 		this.eventLabel = eventLabel;
 	}
-	
-	@JsonIgnore
+
 	public String getParentSrCode() {
 		return parentSrCode;
 	}

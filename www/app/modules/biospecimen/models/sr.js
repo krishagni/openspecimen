@@ -38,6 +38,10 @@ angular.module('os.biospecimen.models.sr', ['os.common.models'])
       return Sr.query({eventId: cpeId});
     };
 
+    Sr.getByCpId = function(cpId) {
+      return Sr.query({cpId: cpId});
+    };
+
     Sr.prototype.isAliquot = function() {
       return this.lineage == 'Aliquot';
     };

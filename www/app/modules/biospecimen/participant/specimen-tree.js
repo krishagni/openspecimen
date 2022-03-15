@@ -168,7 +168,7 @@ angular.module('os.biospecimen.participant.specimen-tree',
       return dispCutOff.getTime() < Date.now();
     }
 
-    function hideOldPendingSpmns(specimens, interval) {
+    function hideOldPendingSpmns(cp, specimens, refDate, interval) {
       var result = true, visitsMap = {};
 
       angular.forEach(specimens,
@@ -182,11 +182,16 @@ angular.module('os.biospecimen.participant.specimen-tree',
             return;
           }
 
-          if (!visitsMap.hasOwnProperty(specimen.visitId)) {
-            visitsMap[specimen.visitId] = isOldVisit(specimen.visitDate, interval);
+          if (!cp.specimenCentric) {
+            if (!visitsMap.hasOwnProperty(specimen.visitId)) {
+              visitsMap[specimen.visitId] = isOldVisit(specimen.visitDate, interval);
+            }
+
+            specimen.$$hideN = visitsMap[specimen.visitId];
+          } else {
+            specimen.$$hideN = isOldVisit(refDate, interval);
           }
 
-          specimen.$$hideN = visitsMap[specimen.visitId];
           if (result && (!specimen.status || specimen.status == 'Pending')) {
             result = specimen.$$hideN;
           }
@@ -290,7 +295,8 @@ angular.module('os.biospecimen.participant.specimen-tree',
       scope.specimens = Specimen.flatten(scope.specimenTree, undefined, undefined, undefined, opts);
       scope.showAliquotType = (treeCfg.hideDerivatives == true);
       openSpecimenTree(scope.specimens, null, treeCfg);
-      scope.hidePendingSpmns = hideOldPendingSpmns(scope.specimens, scope.pendingSpmnsDispInterval);
+      scope.hidePendingSpmns = hideOldPendingSpmns(
+        scope.cp, scope.specimens, scope.refDate, scope.pendingSpmnsDispInterval);
 
 
       var sites = scope.cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
@@ -535,6 +541,7 @@ angular.module('os.biospecimen.participant.specimen-tree',
         specimenTree: '=specimens',
         allowedOps: '=',
         reload: '&reload',
+        refDate: '=',
         pendingSpmnsDispInterval: '=?'
       },
 

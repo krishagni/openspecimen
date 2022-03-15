@@ -803,6 +803,10 @@ h4.os-sub-section-title, h5.os-sub-section-title, h6.os-sub-section-title {
   font-size: 11px;
 }
 
+.dropdown-menu {
+  z-index: 2005;
+}
+
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
   background-color: #428bca;
   color: #ffffff;

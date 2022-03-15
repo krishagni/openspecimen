@@ -32,10 +32,11 @@
          <span class="os-title" translate="cp.tab.consents">Consents</span>
        </a>
      </li>
-     <li ui-sref-active="active" ng-if="!cp.specimenCentric">
+     <li ui-sref-active="active">
        <a ui-sref=".specimen-requirements">
          <span class="fa fa-list-alt"></span>
-         <span class="os-title" translate="cp.tab.events">Events</span>
+         <span class="os-title" translate="cp.tab.events" ng-if="!cp.specimenCentric">Events</span>
+         <span class="os-title" translate="cp.tab.requirements" ng-if="cp.specimenCentric">Requirements</span>
        </a>
      </li>
      <li ng-class="{'active': includesState('cp-detail.settings')}">

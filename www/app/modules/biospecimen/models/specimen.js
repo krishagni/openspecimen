@@ -92,6 +92,10 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
       return result;
     };
 
+    Specimen.toSpecimenAttrs = function(sr) {
+      return new Specimen(toSpecimenAttrs(angular.copy(sr)));
+    };
+
     Specimen.save = function(specimens) {
       return $http.post(Specimen.url() + 'collect', specimens).then(Specimen.modelArrayRespTransform);
     };

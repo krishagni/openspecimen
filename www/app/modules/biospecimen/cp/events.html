@@ -1,11 +1,11 @@
 <div class="clearfix os-cpe-container">
-  <div class="col-xs-12">
+  <div class="col-xs-12" ng-if="!cp.specimenCentric">
     <div class="alert alert-warning" ng-if="!events || events.length == 0">
       <span translate="cp.no_cpes">There are no collection protocol events. Please add an event</span>
     </div>
   </div>
 
-  <div class="col-xs-3 os-mw-200 os-full-height-container os-scrollable-container-y">
+  <div class="col-xs-3 os-mw-200 os-full-height-container os-scrollable-container-y" ng-if="!cp.specimenCentric">
     <div class="list-group">
       <div class="list-group-item os-section-hdr">
         <span translate="cp.cpe_list">Events</span>

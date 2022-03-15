@@ -85,7 +85,7 @@
                 </accordion-heading>
                 <div>
                   <os-specimen-addedit-form specimen="spmnCtxt.specimen" aliquots="spmnCtxt.aliquots"
-                    ctrl="spmnCtxt.form" opts="opts">
+                    create-children="spmnCtxt.createChildren" ctrl="spmnCtxt.form" opts="opts">
                   </os-specimen-addedit-form>
                 </div>
               </accordion-group>
@@ -98,7 +98,7 @@
                   <button class="btn os-btn-text" ng-click="addCopyOfLast()">
                     <span translate="common.buttons.copy_last">Copy of Last</span>
                   </button>
-                  <span ng-if="opts.allSpmnUpdate && opts.showCreateAliquots != false && opts.showCreateAliquots != 'false'">
+                  <span ng-if="!inputCtxts[inputCtxts.length - 1].specimen.reqId && opts.allSpmnUpdate && opts.showCreateAliquots != false && opts.showCreateAliquots != 'false'">
                     <button class="btn os-btn-text" ng-click="addCopyOfLast(true)">
                       <span translate="specimens.buttons.copy_last_aliquots">Copy of Last</span>
                     </button>

@@ -1,6 +1,6 @@
 angular.module('os.biospecimen.participant')
   .controller('SpecimensListViewCtrl', function(
-    $scope, $state, currentUser, cp, sdeConfigured, mobileDataEntryEnabled,
+    $scope, $state, currentUser, cp, sdeConfigured, mobileDataEntryEnabled, spmnReqs,
     PluginReg, Specimen, SpecimensHolder, Alerts) {
 
     var ctrl = this;
@@ -34,7 +34,8 @@ angular.module('os.biospecimen.participant')
         headerActionsTmpl: 'modules/biospecimen/participant/specimens-list-pager.html',
         headerButtonsTmpl: 'modules/biospecimen/participant/specimens-list-ops.html',
         showPrimaryBtnDd: !!cp.bulkPartRegEnabled || (PluginReg.getTmpls('participant-list', 'primary-button').length > 0),
-        mobileDataEntryEnabled: mobileDataEntryEnabled
+        mobileDataEntryEnabled: mobileDataEntryEnabled,
+        spmnReqs: spmnReqs
       });
     }
 

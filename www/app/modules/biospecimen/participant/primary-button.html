@@ -52,9 +52,32 @@
   <span translate="participant.buttons.register">Register</span>
 </button>
 
-<button ng-if="cp.specimenCentric && listViewCtx.ctrl.showAddSpmn"
+<button ng-if="cp.specimenCentric && listViewCtx.ctrl.showAddSpmn &&
+  (!listViewCtx.spmnReqs || listViewCtx.spmnReqs.length == 0)"
   show-if-allowed="listViewCtx.ctrl.resourceOpts.specimenUpdateOpts" class="default"
   ui-sref="specimen-addedit({cpId: cp.id, visitId: -1, cprId: -1})">
   <span class="fa fa-plus"></span>
   <span translate="specimens.buttons.add_specimen">Add Specimen</span>
 </button>
+
+<div class="os-inline-btn" dropdown
+  ng-if="cp.specimenCentric && listViewCtx.ctrl.showAddSpmn && listViewCtx.spmnReqs.length > 0"
+  show-if-allowed="listViewCtx.ctrl.resourceOpts.specimenUpdateOpts">
+  <button class="default dropdown-toggle">
+    <span class="fa fa-plus"></span>
+    <span translate="specimens.buttons.add_specimen">Add Specimen</span>
+  </button>
+  <ul class="dropdown-menu">
+    <li ng-repeat="req in listViewCtx.spmnReqs">
+      <a ui-sref="specimen-addedit({cpId: cp.id, visitId: -1, cprId: -1, reqName: req.name})">
+        <span>{{req.title}}</span>
+      </a>
+    </li>
+    <li class="divider"></li>
+    <li>
+      <a ui-sref="specimen-addedit({cpId: cp.id, visitId: -1, cprId: -1})">
+        <span translate="specimens.regular">Other</span>
+      </a>
+    </li>
+  </ul>
+</div>

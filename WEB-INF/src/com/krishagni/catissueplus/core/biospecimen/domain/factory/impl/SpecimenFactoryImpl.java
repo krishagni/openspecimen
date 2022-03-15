@@ -317,6 +317,10 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		visitInput.setName(visitName);
 		visitInput.setVisitDate(Calendar.getInstance().getTime());
 		visitInput.setSite(cp.getRepositories().iterator().next().getName());
+		if (cp.firstEvent() != null) {
+			visitInput.setEventLabel(cp.firstEvent().getEventLabel());
+		}
+
 		cpVisit = visitFactory.createVisit(visitInput);
 		daoFactory.getVisitsDao().saveOrUpdate(cpVisit);
 		return cpVisit;
@@ -433,13 +437,6 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 	}
 
 	private SpecimenRequirement getSpecimenRequirement(SpecimenDetail detail, Specimen existing, Visit visit, OpenSpecimenException ose) {
-		if (visit != null && visit.getCollectionProtocol().isSpecimenCentric()) {
-			//
-			// No anticipated specimens for specimen centric CPs
-			//
-			return null;
-		}
-
 		Long reqId = detail.getReqId();
 		String reqCode = detail.getReqCode();
 

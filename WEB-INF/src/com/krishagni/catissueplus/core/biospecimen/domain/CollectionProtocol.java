@@ -74,6 +74,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private static final String CP_REG_PPID_FMT = "$$cp_reg_%d$$";
 
 	private static final String CP_VISIT_NAME_FMT = "$$cp_visit_%d$$";
+
+	private static final String CP_EVENT_FMT = "$$cp_event_%d$$";
 	
 	private String title;
 
@@ -907,6 +909,10 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	public String getVisitName() {
 		return String.format(CP_VISIT_NAME_FMT, getId());
+	}
+
+	public String getEventName() {
+		return String.format(CP_EVENT_FMT, getId());
 	}
 
 	private CpConsentTier getConsentTierById(Long ctId) {

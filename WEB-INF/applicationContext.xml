@@ -197,6 +197,7 @@
   <bean id="srFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.SpecimenRequirementFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="specimenLabelGenerator" ref="specimenLabelGenerator"/>
+    <property name="cpeFactory" ref="cpeFactory"/>
   </bean>
   
   <bean id="cpSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolServiceImpl">

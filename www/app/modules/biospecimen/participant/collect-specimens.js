@@ -1289,7 +1289,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             }
           }
   
-          if (!!specimen.reqId || specimen.lineage == 'Aliquot') {
+          if (specimen.lineage == 'Aliquot') {
             return specimen;
           }
   

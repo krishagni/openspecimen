@@ -158,31 +158,9 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
 
     $scope.showAddSr = function() {
       $scope.view = 'addedit_sr';
-      $scope.sr = new SpecimenRequirement({eventId: $scope.eventId});
+      $scope.sr = new SpecimenRequirement({eventId: $scope.eventId, cpId: cp.id});
       loadPvs();
     };
-
-    $scope.onCreatePooledSpmnsClick = function(createPooledSpmn) {
-      if (createPooledSpmn) {
-        $scope.sr.specimensPool = [
-          new SpecimenRequirement({eventId: $scope.eventId})
-        ];
-      } else {
-        $scope.sr.specimensPool = undefined;
-      }
-    }
-
-    $scope.addSpecimenPoolReq = function() {
-      $scope.sr.specimensPool.push(new SpecimenRequirement({eventId: $scope.eventId}));
-    }
-
-    $scope.removeSpecimenPoolReq = function(poolSpmn) {
-      var idx = $scope.sr.specimensPool.indexOf(poolSpmn);
-      $scope.sr.specimensPool.splice(idx, 1);
-      if ($scope.sr.specimensPool.length == 0) {
-        $scope.addSpecimenPoolReq();
-      }
-    }
 
     $scope.showEditSr = function(sr) {
       $scope.specimensCount = 0;

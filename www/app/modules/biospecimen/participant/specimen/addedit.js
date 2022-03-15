@@ -4,7 +4,7 @@ angular.module('os.biospecimen.specimen.addedit', [])
     $scope, $state, $parse, userRole, cp, cpr, visit, specimen, extensionCtxt,
     aliquotQtyReq, barcodingEnabled, spmnBarcodesAutoGen, hasDict, sysDict,
     cpDict, layout, onValueChangeCb, spmnReq, defSpmns, spmnCollFields,
-    createDerived, imagingEnabled,
+    createDerived, imagingEnabled, requirements,
     Alerts, CpConfigSvc, PluginReg, Util, ParticipantSpecimensViewState,
     Specimen, CollectSpecimensSvc) {
 
@@ -22,11 +22,15 @@ angular.module('os.biospecimen.specimen.addedit', [])
         createDerived: createDerived, imagingEnabled: imagingEnabled,
         allSpmnUpdate: $scope.specimenAllowedOps.allUpdate,
         storeSpmn: $scope.specimenAllowedOps.store,
-        spmnCollFields: spmnCollFields
+        spmnCollFields: spmnCollFields,
+        requirements: requirements,
+        inputCtxtsFn: getInputCtxts
       }
 
       CpConfigSvc.getCommonCfg(cp.id, 'addSpecimen').then(
         function(cfg) {
+          cfg = angular.copy(cfg);
+          delete cfg.requirements;
           angular.extend($scope.opts, cfg || {});
         }
       );
@@ -101,9 +105,12 @@ angular.module('os.biospecimen.specimen.addedit', [])
     }
 
     $scope.addCopyOfLast = function(reqAliquots) {
-      var lastCtrl = inputCtxts[inputCtxts.length - 1].form.ctrl;
+      var lastCtxt = inputCtxts[inputCtxts.length - 1];
 
-      var lastSpmn = lastCtrl.getSpecimens()[0];
+      var lastCtrl = lastCtxt.form.ctrl;
+
+      var lastSpmn = lastCtrl.getSpecimens(false, true)[0];
+
       if (!!lastSpmn) {
         var spmn = angular.copy(lastSpmn);
         var location = spmn.storageLocation;
@@ -121,7 +128,8 @@ angular.module('os.biospecimen.specimen.addedit', [])
           specimen: spmn,
           aliquots: aliquots,
           form: {},
-          open: true
+          open: true,
+          createChildren: lastCtrl.isCreateChildrenEnabled()
         });
       }
     }
@@ -276,17 +284,18 @@ angular.module('os.biospecimen.specimen.addedit', [])
         opts    : '=',
         specimen: '=',
         aliquots: '=',
+        createChildren: '=',
         ctrl    : '='
       },
 
       controller: function($scope) {
-        this.getSpecimens = function(reqAliquots) {
+        this.getSpecimens = function(reqAliquots, includeChildren) {
           var formCtrl = $scope.deFormCtrl.ctrl;
           if (formCtrl && !formCtrl.validate()) {
             return null;
           }
 
-          var primarySpmn = $scope.inputSpmn;
+          var primarySpmn = angular.copy($scope.inputSpmn);
           if (formCtrl) {
             primarySpmn.extensionDetail = formCtrl.getFormData();
           }
@@ -311,7 +320,19 @@ angular.module('os.biospecimen.specimen.addedit', [])
 
             var tree = getAliquots($scope.opts, primarySpmn, types, typeSpecs);
             Array.prototype.push.apply(result, tree);
-          } else {
+          } else if (spmnCtx.createChildren) {
+            var spmns = [primarySpmn];
+            while(spmns.length > 0) {
+              var spmn = spmns[0];
+              spmn.selected = true;
+              spmn.hasChildren = spmn.isOpened = spmn.children && spmn.children.length > 0;
+
+              spmns.splice(0, 1);
+              Array.prototype.push.apply(spmns, spmn.children || []);
+            }
+
+            result = Specimen.flatten([primarySpmn]);
+          } else if (!includeChildren) {
             primarySpmn.children = [];
           }
 
@@ -321,6 +342,10 @@ angular.module('os.biospecimen.specimen.addedit', [])
         this.getAliquotSpec = function() {
           return ($scope.spmnCtx.createAliquots && $scope.spmnCtx.aliquots) || [];
         }
+
+        this.isCreateChildrenEnabled = function() {
+          return !!$scope.spmnCtx.createChildren;
+        }
       },
 
 
@@ -329,8 +354,6 @@ angular.module('os.biospecimen.specimen.addedit', [])
         scope.ctrl.ctrl = ctrl;
 
         var inputSpmn = scope.inputSpmn = specimen; //angular.copy(specimen);
-        delete inputSpmn.children;
-
         inputSpmn.cpId = inputSpmn.cpId || opts.cp.id;
         inputSpmn.visitId = opts.visit && opts.visit.id;
         inputSpmn.createdOn = inputSpmn.createdOn || new Date();
@@ -391,7 +414,8 @@ angular.module('os.biospecimen.specimen.addedit', [])
           isVirtual: inputSpmn.showVirtual(),
           manualSpecLabelReq: !!inputSpmn.label || !inputSpmn.labelFmt || opts.cp.manualSpecLabelEnabled,
           aliquots: scope.aliquots || [new Specimen({lineage: 'Aliquot'})],
-          createAliquots: (scope.aliquots || []).length > 0
+          createAliquots: (scope.aliquots || []).length > 0,
+          createChildren: !!scope.createChildren
         };
 
         scope.deFormCtrl = {};
@@ -429,6 +453,25 @@ angular.module('os.biospecimen.specimen.addedit', [])
         scope.addIfLastAliquot = function(idx) {
           if (idx == (spmnCtx.aliquots.length - 1)) {
             scope.addAnotherAliquot();
+          }
+        }
+
+        scope.onReqSelect = function(req) {
+          if (!req.id) {
+            return;
+          }
+
+          var spmn = angular.extend(scope.inputSpmn, Specimen.toSpecimenAttrs(req));
+          spmn.availableQty = spmn.availableQty || spmn.initialQty;
+          if (spmn.collectionEvent) {
+            spmn.collectionEvent.user = spmn.collectionEvent.user || $rootScope.currentUser;
+            spmn.collectionEvent.time = spmn.collectionEvent.time || new Date();
+            spmn.collectionContainer = spmn.collectionEvent.container;
+          }
+
+          if (spmn.receivedEvent) {
+            spmn.receivedEvent.user = spmn.receivedEvent.user || $rootScope.currentUser;
+            spmn.receivedEvent.time = spmn.receivedEvent.time || new Date();
           }
         }
       }

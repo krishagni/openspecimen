@@ -391,6 +391,18 @@ angular.module('os.biospecimen.participant',
                 return !!data.singlePatientSamples;
               }
             );
+          },
+
+          spmnReqs: function(cp, CpConfigSvc) {
+            if (!cp.specimenCentric) {
+              return [];
+            }
+
+            return CpConfigSvc.getCommonCfg(cp.id, 'addSpecimen', {}).then(
+              function(data) {
+                return (data && data.requirements) || [];
+              }
+            );
           }
         },
         metaInfo: {

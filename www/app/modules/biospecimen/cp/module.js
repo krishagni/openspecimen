@@ -327,7 +327,15 @@ angular.module('os.biospecimen.cp',
         parent: 'cp-detail',
         resolve: {
           events: function($stateParams, cp, CollectionProtocolEvent) {
-            return CollectionProtocolEvent.listFor(cp.id);
+            return CollectionProtocolEvent.listFor(cp.id).then(
+              function(events) {
+                if (events.length > 0 || !cp.specimenCentric) {
+                  return events;
+                } else {
+                  return [new CollectionProtocolEvent({id: -1, cpId: cp.id})];
+                }
+              }
+            );
           },
 
           mrnAccessRestriction: function(SettingUtil) {
@@ -347,7 +355,7 @@ angular.module('os.biospecimen.cp',
         resolve: {
           specimenRequirements: function($stateParams, SpecimenRequirement) {
             var eventId = $stateParams.eventId;
-            if (!eventId) {
+            if (!eventId || eventId == -1) {
               return [];
             }
 

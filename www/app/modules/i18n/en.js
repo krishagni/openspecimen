@@ -356,6 +356,7 @@
       "overview": "Overview",
       "consents": "Consents",
       "events": "Events",
+      "requirements": "Requirements",
       "users": "Users",
       "settings": "Settings",
       "versions": "Revisions"
@@ -781,6 +782,7 @@
     "single": "Single Specimen",
     "multiple": "Multiple Specimens",
     "num_of_specimens": "No. of Specimens",
+    "requirement": "Protocol Requirement",
     "lineage": "Lineage",
     "label": "Label",
     "new_label": "New Label",
@@ -936,6 +938,7 @@
     "new_aliquot_count": "Number of aliquots",
     "aliquot_details": "Aliquot Details",
     "create_aliquots_q": "Do you want to create aliquots?",
+    "create_children_q": "Do you want to create child specimens?",
     "delete_q": "Delete Specimen?",
     "confirm_q": "Do you really want to delete the specimen?",
 

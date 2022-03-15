@@ -762,14 +762,14 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	@PlusTransactional
 	public ResponseEvent<CollectionProtocolEventDetail> addEvent(RequestEvent<CollectionProtocolEventDetail> req) {
 		try {
-			CollectionProtocolEvent cpe = cpeFactory.createCpe(req.getPayload());			
+			CollectionProtocolEvent cpe = cpeFactory.createCpe(req.getPayload());
 			CollectionProtocol cp = cpe.getCollectionProtocol();
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
 			
-			cp.addCpe(cpe);			
+			cp.addCpe(cpe);
 			daoFactory.getCollectionProtocolDao().saveOrUpdate(cp, true);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cp));
-			return ResponseEvent.response(CollectionProtocolEventDetail.from(cpe));			
+			return ResponseEvent.response(CollectionProtocolEventDetail.from(cpe));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -870,6 +870,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			String cpeLabel = tuple.element(2);
 			boolean includeChildren = tuple.element(3) == null || (Boolean) tuple.element(3);
 
+			List<CollectionProtocolEvent> cpes = null;
 			CollectionProtocolEvent cpe = null;
 			Object key = null;
 			if (cpeId != null) {
@@ -877,21 +878,38 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				key = cpeId;
 			} else if (StringUtils.isNotBlank(cpeLabel)) {
 				if (cpId == null) {
-					throw OpenSpecimenException.userError(CpErrorCode.REQUIRED);
+					return ResponseEvent.userError(CpErrorCode.REQUIRED);
 				}
 
 				cpe = daoFactory.getCollectionProtocolDao().getCpeByEventLabel(cpId, cpeLabel);
 				key = cpeLabel;
+			} else if (cpId != null) {
+				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
+				if (cp == null) {
+					return ResponseEvent.userError(CpErrorCode.NOT_FOUND, cpId);
+				}
+
+				AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
+				cpes = cp.getOrderedCpeList();
 			}
 
-			if (key == null) {
-				return ResponseEvent.response(Collections.emptyList());
-			} else if (cpe == null) {
-				return ResponseEvent.userError(CpeErrorCode.NOT_FOUND, key, 1);
+
+			if (cpes == null) {
+				if (key == null) {
+					return ResponseEvent.response(Collections.emptyList());
+				} else if (cpe == null) {
+					return ResponseEvent.userError(CpeErrorCode.NOT_FOUND, key, 1);
+				}
+
+				AccessCtrlMgr.getInstance().ensureReadCpRights(cpe.getCollectionProtocol());
+				cpes = Collections.singletonList(cpe);
 			}
-			
-			AccessCtrlMgr.getInstance().ensureReadCpRights(cpe.getCollectionProtocol());
-			return ResponseEvent.response(SpecimenRequirementDetail.from(cpe.getTopLevelAnticipatedSpecimens(), includeChildren));
+
+
+			List<SpecimenRequirementDetail> result = result = cpes.stream()
+				.flatMap(e -> SpecimenRequirementDetail.from(e.getTopLevelAnticipatedSpecimens(), includeChildren).stream())
+				.collect(Collectors.toList());
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		}  catch (Exception e) {
