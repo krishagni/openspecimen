@@ -29,9 +29,12 @@ angular.module('os.biospecimen.specimen.addedit', [])
 
       CpConfigSvc.getCommonCfg(cp.id, 'addSpecimen').then(
         function(cfg) {
-          cfg = angular.copy(cfg);
-          delete cfg.requirements;
-          angular.extend($scope.opts, cfg || {});
+          cfg = angular.copy(cfg || {});
+          if (cfg.requirements) {
+            delete cfg.requirements;
+          }
+
+          angular.extend($scope.opts, cfg);
         }
       );
 

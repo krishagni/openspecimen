@@ -135,6 +135,16 @@ angular.module('os.biospecimen.specimen',
 
                 req.children = processReqs(req.children || []);
                 req.title = req.name || (req.type + (req.code ? ' (' + req.code + ')' : ''));
+                if (!req.labelFmt) {
+                  if (req.lineage == 'New') {
+                    req.labelFmt = cp.specimenLabelFmt;
+                  } else if (req.lineage == 'Derived') {
+                    req.labelFmt = cp.derivativeLabelFmt;
+                  } else if (req.lineage == 'Aliquot') {
+                    req.labelFmt = cp.aliquotLabelFmt;
+                  }
+                }
+
                 req.hasChildren = (req.children || []).length > 0;
                 result.push(req);
               }

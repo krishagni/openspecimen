@@ -497,7 +497,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 
 	private CollectionProtocolEvent getEventFor(CollectionProtocol cp) {
 		String eventName = cp.getEventName();
-		CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpeByEventLabel(cp.getShortTitle(), eventName);
+		CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpeByEventLabel(cp.getId(), eventName);
 		if (cpe != null) {
 			return cpe;
 		}
