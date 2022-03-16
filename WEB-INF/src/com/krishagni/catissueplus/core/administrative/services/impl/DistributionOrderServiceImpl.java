@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder.Status;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
@@ -247,10 +246,25 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 	@PlusTransactional
 	public ResponseEvent<DistributionOrderDetail> deleteOrder(RequestEvent<Long> req) {
 		try {
-			DistributionOrder order = getOrder(req.getPayload(), null);
-			AccessCtrlMgr.getInstance().ensureDeleteDistributionOrderRights(order);
-			order.delete();
-			return ResponseEvent.response(DistributionOrderDetail.from(order));
+			User currentUser = AuthUtil.getCurrentUser();
+			Future<ResponseEvent<DistributionOrderDetail>> result = taskExecutor.submit(
+				() -> {
+					long t1 = System.currentTimeMillis();
+					try {
+						AuthUtil.setCurrentUser(currentUser);
+						ResponseEvent<DistributionOrderDetail> resp = deleteOrder(req.getPayload());
+						if (!resp.isSuccessful()) {
+							notifyFailedOrderDelete(req.getPayload(), resp.getError().getMessage());
+						}
+
+						return resp;
+					} finally {
+						AuthUtil.clearCurrentUser();
+					}
+				}
+			);
+
+			return unwrap(result, ASYNC_CALL_TIMEOUT);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -730,6 +744,25 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		);
 
 		return unwrap(result, timeout);
+	}
+
+	@PlusTransactional
+	private ResponseEvent<DistributionOrderDetail> deleteOrder(Long orderId) {
+		try {
+			DistributionOrder order = getOrder(orderId, null);
+			AccessCtrlMgr.getInstance().ensureDeleteDistributionOrderRights(order);
+
+			String name = order.getName();
+			order.delete();
+
+			DistributionOrderDetail result = DistributionOrderDetail.from(order);
+			notifyOrderDeleted(name, order);
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
 	}
 
 	private void notifyOrderListeners(DistributionOrderDetail input, DistributionOrderDetail output, DistributionOrder order) {
@@ -1509,6 +1542,46 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		emailService.sendEmail(ORDER_FAILED_EMAIL_TMPL, new String[] { currentUser.getEmailAddress() }, null, emailProps);
 	}
 
+	private void notifyOrderDeleted(String name, DistributionOrder order) {
+		if (order.getDistributionProtocol().areEmailNotifsDisabled()) {
+			return;
+		}
+
+		Set<User> rcpts = new HashSet<>();
+		rcpts.add(AuthUtil.getCurrentUser());
+		rcpts.add(order.getDistributor());
+		rcpts.add(order.getRequester());
+		rcpts.add(order.getDistributionProtocol().getPrincipalInvestigator());
+		rcpts.addAll(order.getDistributionProtocol().getCoordinators());
+		if (order.getSite() != null && CollectionUtils.isNotEmpty(order.getSite().getCoordinators())) {
+			rcpts.addAll(order.getSite().getCoordinators());
+		}
+
+		Map<String, Object> emailProps = new HashMap<>();
+		emailProps.put("$subject", new Object[] { order.getId(), name });
+		emailProps.put("order", order);
+		emailProps.put("orderName", name);
+		emailProps.put("deletedBy", AuthUtil.getCurrentUser());
+		for (User rcpt : rcpts) {
+			emailProps.put("rcpt", rcpt);
+			emailService.sendEmail(ORDER_DELETED_EMAIL_TMPL, new String[] { rcpt.getEmailAddress() }, null, emailProps);
+		}
+	}
+
+	private void notifyFailedOrderDelete(Long orderId, String errorMessage) {
+		User currentUser = AuthUtil.getCurrentUser();
+		if (currentUser == null || StringUtils.isBlank(currentUser.getEmailAddress())) {
+			return;
+		}
+
+		Map<String, Object> emailProps = new HashMap<>();
+		emailProps.put("$subject", new Object[] { orderId });
+		emailProps.put("errorMsg", errorMessage);
+		emailProps.put("orderId", orderId);
+		emailProps.put("rcpt", currentUser);
+		emailService.sendEmail(ORDER_DELETE_FAILED_EMAIL_TMPL, new String[] { currentUser.getEmailAddress() }, null, emailProps);
+	}
+
 	private DistributionOrder getOrder(Long orderId, String orderName) {
 		DistributionOrder order = null;
 		Object key = null;
@@ -1762,4 +1835,8 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 	private static final String ORDER_DISTRIBUTED_EMAIL_TMPL = "order_distributed";
 
 	private static final String ORDER_FAILED_EMAIL_TMPL = "order_failed";
+
+	private static final String ORDER_DELETED_EMAIL_TMPL = "order_deleted";
+
+	private static final String ORDER_DELETE_FAILED_EMAIL_TMPL = "order_delete_failed";
 }

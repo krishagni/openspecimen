@@ -7,7 +7,7 @@
       <os-button left-icon="download" label="Download Report" @click="downloadReport" />
 
       <os-button v-show-if-allowed="orderResources.deleteOpts"
-        left-icon="trash" label="Delete" @click="deleteOrder" v-if="order.status == 'PENDING'" />
+        left-icon="trash" label="Delete" @click="deleteOrder" />
 
       <os-plugin-views page="order-detail" view="more-menu" :view-props="{order: ctx.order}" />
     </template>
@@ -35,6 +35,7 @@ import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
 import orderSvc   from '@/administrative/services/Order.js';
+import alertsSvc  from '@/common/services/Alerts.js';
 import routerSvc  from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
 import util       from '@/common/services/Util.js';
@@ -108,7 +109,13 @@ export default {
             return;
           }
 
-          await orderSvc.delete(this.order);
+          const result = await orderSvc.delete(this.order);
+          if (!result.completed) {
+            alertsSvc.info('Deletion of order is taking more time than anticipated. An email notification will be sent to you on deletion.');
+          } else {
+            alertsSvc.success('Order #' + this.order.id + ': ' + this.order.name + ' deleted!');
+          }
+
           routerSvc.goto('OrdersList', {orderId: -2}, this.ctx.routeQuery);
         }
       );

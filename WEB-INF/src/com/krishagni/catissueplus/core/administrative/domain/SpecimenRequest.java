@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -242,6 +244,36 @@ public class SpecimenRequest extends BaseExtensionEntity {
 		setDateOfProcessing(Calendar.getInstance().getTime());
 		setComments(comments);
 		setActivityStatus(Status.ACTIVITY_STATUS_CLOSED.getStatus());
+	}
+
+	public void reopenIfNotFulfilled() {
+		if (!isClosed()) {
+			return;
+		}
+
+		boolean anyPending = getItems().stream().anyMatch(SpecimenRequestItem::isPending);
+		if (anyPending) {
+			reopen("Automatic reopening of request");
+		}
+	}
+
+	public void reopen(String comments) {
+		if (!isClosed()) {
+			return;
+		}
+
+		setProcessedBy(null);
+		setDateOfProcessing(null);
+		setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+
+		if (StringUtils.isNotBlank(comments)) {
+			comments = comments;
+			if (StringUtils.isNotBlank(getComments())) {
+				comments += "\n\n" + getComments();
+			}
+
+			setComments(comments);
+		}
 	}
 
 	public void delete() {

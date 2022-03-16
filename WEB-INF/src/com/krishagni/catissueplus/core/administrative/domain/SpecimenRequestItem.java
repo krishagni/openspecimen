@@ -70,6 +70,12 @@ public class SpecimenRequestItem extends BaseEntity {
 		setDistribution(distribution);
 	}
 
+	public void undoProcessing() {
+		setStatus(Status.PENDING);
+		setDistribution(null);
+		setShipment(null);
+	}
+
 	public void ship(Shipment shipment) {
 		setStatus(Status.SHIPPED);
 		setShipment(shipment);

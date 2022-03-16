@@ -215,6 +215,14 @@ public class DistributionOrderItem extends BaseEntity {
 		}
 	}
 
+	public void undoDistribution() {
+		if (requestItem != null) {
+			requestItem.undoProcessing();
+		}
+
+		specimen.undoDistribution(this);
+	}
+
 	public void returnSpecimen() {
 		specimen.returnSpecimen(this);
 		setStatus(Status.RETURNED);

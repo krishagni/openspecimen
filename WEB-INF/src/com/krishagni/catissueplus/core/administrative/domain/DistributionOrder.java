@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.administrative.domain;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,8 +14,11 @@ import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionOrderErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.DistributionOrderItemListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -285,12 +289,32 @@ public class DistributionOrder extends BaseExtensionEntity {
 	}
 
 	public void delete() {
-		if (isOrderExecuted()) {
-			throw OpenSpecimenException.userError(DistributionOrderErrorCode.CANT_DELETE_EXEC_ORDER, getName());
-		}
-
 		setName(Utility.getDisabledValue(getName(), 255));
 		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
+
+		Map<Long, SpecimenRequestItem> reqItemsMap = Collections.emptyMap();
+		if (getRequest() != null) {
+			reqItemsMap = getRequest().getSpecimenIdRequestItemMap();
+		}
+
+		DaoFactory daoFactory = OpenSpecimenAppCtxProvider.getBean("biospecimenDaoFactory");
+		DistributionOrderItemListCriteria crit = new DistributionOrderItemListCriteria().orderId(getId()).maxResults(50);
+		int startAt = 0;
+		boolean endOfItems = false;
+		while (!endOfItems) {
+			List<DistributionOrderItem> items = daoFactory.getDistributionOrderDao().getOrderItems(crit.startAt(startAt));
+			for (DistributionOrderItem item : items) {
+				item.setRequestItem(reqItemsMap.get(item.getSpecimen().getId()));
+				item.undoDistribution();
+			}
+
+			endOfItems = items.size() < 50;
+			startAt += items.size();
+		}
+
+		if (getRequest() != null) {
+			getRequest().reopenIfNotFulfilled();
+		}
 	}
 
 	public boolean isOrderExecuted() {

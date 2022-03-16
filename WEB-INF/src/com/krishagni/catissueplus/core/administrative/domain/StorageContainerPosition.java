@@ -126,6 +126,10 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 		return blocked != null && blocked;
 	}
 
+	public boolean isHoldingLocation() {
+		return getContainer() != null && getContainer().isDistributionContainer();
+	}
+
 	public boolean isSupressAccessChecks() {
 		return supressAccessChecks;
 	}
