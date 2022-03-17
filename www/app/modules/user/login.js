@@ -171,7 +171,8 @@ angular.module('openspecimen')
           firstName: result.data.firstName,
           lastName: result.data.lastName,
           loginName: result.data.loginName,
-          admin: result.data.admin
+          admin: result.data.admin,
+          daysBeforeExpiry: result.data.daysBeforeExpiry
         };
         $rootScope.loggedIn = true;
         AuthService.saveToken(result.data.token);

@@ -1,7 +1,11 @@
 
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import java.util.Calendar;
 import java.util.Date;
+
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class Password implements Comparable<Password>{
 
@@ -50,4 +54,18 @@ public class Password implements Comparable<Password>{
 		return passwd.getId().compareTo(this.getId());
 	}
 
+	public int daysBeforeExpiry() {
+		int passwdExpiryDays = ConfigUtil.getInstance().getIntSetting("auth", "password_expiry_days", 0);
+		if (passwdExpiryDays == 0) {
+			return -1;
+		}
+
+		Calendar cal = Calendar.getInstance();
+		Date presentDate = Utility.chopTime(cal.getTime());
+
+		cal.setTime(getUpdationDate());
+		cal.add(Calendar.DATE, passwdExpiryDays);
+		Date passwdExpiryDate = Utility.getEndOfDay(cal.getTime());
+		return Utility.daysBetween(presentDate, passwdExpiryDate);
+	}
 }

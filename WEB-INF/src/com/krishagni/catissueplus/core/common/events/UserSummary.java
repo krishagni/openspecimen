@@ -57,6 +57,8 @@ public class UserSummary implements Serializable {
 
 	private Boolean impersonated;
 
+	private Integer daysBeforePasswordExpiry;
+
 	public Long getId() {
 		return id;
 	}
@@ -199,6 +201,14 @@ public class UserSummary implements Serializable {
 
 	public void setImpersonated(Boolean impersonated) {
 		this.impersonated = Boolean.TRUE.equals(impersonated) ? true : null;
+	}
+
+	public Integer getDaysBeforePasswordExpiry() {
+		return daysBeforePasswordExpiry;
+	}
+
+	public void setDaysBeforePasswordExpiry(Integer daysBeforePasswordExpiry) {
+		this.daysBeforePasswordExpiry = daysBeforePasswordExpiry;
 	}
 
 	public String formattedName() {

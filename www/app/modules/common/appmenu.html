@@ -81,6 +81,14 @@
     </ul>
   </div>
 
+  <div class="os-user-impersonate-warn" ng-if="!global.impersonate &&
+    currentUser.daysBeforePasswordExpiry >= 0 && currentUser.daysBeforePasswordExpiry <= 5">
+    <div class="text">
+      <span>{{'user.password_expiry_warning' | translate: currentUser}}</span>
+      <a href="{{userCtx.resetPasswdUrl}}"><span translate="common.buttons.reset_password">Reset Password</span></a>
+    </div>
+  </div>
+
   <div class="os-user-impersonate-warn" ng-if="global.impersonate">
     <div class="text">
       <span>{{'user.impersonate_warning' | translate: {user: currentUser} }}</span>

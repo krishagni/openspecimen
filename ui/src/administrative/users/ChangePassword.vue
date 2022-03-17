@@ -46,7 +46,7 @@ export default {
       user: {},
 
       bcrumb: [
-        {url: routerSvc.getUrl('UsersList'), label: 'Users'}
+        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: 'Users'}
       ],
 
       chgPasswdFs: {rows: []},
@@ -99,8 +99,9 @@ export default {
       }
 
       userSvc.updatePassword(payload).then(
-        function() {
+        () => {
           alertsSvc.success('Password updated!');
+          this.$ui.currentUser.daysBeforePasswordExpiry = -1;
           routerSvc.back();
         }
       );

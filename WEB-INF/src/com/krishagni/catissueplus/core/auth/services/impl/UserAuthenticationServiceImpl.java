@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
+import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserEvent;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
@@ -207,7 +208,15 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	public ResponseEvent<UserSummary> getCurrentLoggedInUser() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		User user = (User)auth.getPrincipal();
-		return ResponseEvent.response(UserSummary.from(user));
+
+		UserSummary result = UserSummary.from(user);
+		result.setDaysBeforePasswordExpiry(-1);
+		if (user.isOpenSpecimenUser()) {
+			Password password = daoFactory.getUserDao().getLatestPassword(user.getId());
+			result.setDaysBeforePasswordExpiry(password != null ? password.daysBeforeExpiry() : 0);
+		}
+
+		return ResponseEvent.response(result);
 	}
 
 	@PlusTransactional

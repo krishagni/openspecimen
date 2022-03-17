@@ -173,7 +173,17 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.setTimestamp("endDate", endDate)
 			.list();
 	}
-	
+
+	@Override
+	public Password getLatestPassword(Long userId) {
+		return (Password) getCurrentSession().createCriteria(Password.class, "p")
+			.createAlias("p.user", "user")
+			.add(Restrictions.eq("user.id", userId))
+			.addOrder(Order.desc("p.updationDate"))
+			.setMaxResults(1)
+			.uniqueResult();
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Password> getPasswordsUpdatedBefore(Date updateDate) {

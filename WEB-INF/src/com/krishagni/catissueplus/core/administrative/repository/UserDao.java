@@ -49,6 +49,8 @@ public interface UserDao extends Dao<User> {
 	void deleteFpToken(ForgotPasswordToken token);
 
 	List<String> getActiveUsersEmailIds(Date startDate, Date endDate);
+
+	Password getLatestPassword(Long userId);
 	
 	List<Password> getPasswordsUpdatedBefore(Date updateDate);
 	
