@@ -225,6 +225,20 @@ public class DistributionOrderController {
 		return ResponseEvent.unwrap(distributionService.getOrderItems(RequestEvent.wrap(crit)));
 	}
 
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/items")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Integer> deleteOrderItems(
+		@PathVariable("id")
+		Long orderId,
+
+		@RequestParam(value = "itemId", required = true)
+		List<Long> itemIds) {
+
+		int deleted = ResponseEvent.unwrap(distributionService.deleteOrderItems(orderId, null, itemIds));
+		return Collections.singletonMap("deleted", deleted);
+	}
+
 	@RequestMapping(method =  RequestMethod.POST, value = "/{id}/retrieve")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

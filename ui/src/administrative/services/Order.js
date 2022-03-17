@@ -151,6 +151,10 @@ class Order {
     return http.post('distribution-label-printer', {orderId, itemIds});
   }
 
+  async deleteOrderItems(orderId, itemIds) {
+    return http.delete('distribution-orders/' + orderId + '/items', null, {itemId: itemIds});
+  }
+
   async downloadLabelsFile(jobId, outputFilename) {
     let url = 'distribution-label-printer/output-file?jobId=' + jobId;
     if (outputFilename) {

@@ -31,4 +31,6 @@ public interface DistributionOrderDao extends Dao<DistributionOrder> {
 	DistributionOrderItem getOrderItem(Long orderId, String spmnLabel);
 
 	void saveOrUpdateOrderItem(DistributionOrderItem item);
+
+	void deleteOrderItem(DistributionOrderItem item);
 }

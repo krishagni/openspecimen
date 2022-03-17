@@ -3,8 +3,14 @@
   <os-page-toolbar>
     <template #default>
       <os-button left-icon="print" label="Print" @click="printLabels" />
-      <os-button left-icon="reply" label="Retrieve" @click="retrieveSpecimens" v-if="showRetrieveSpmns" />
+
+      <os-button left-icon="trash" label="Delete" @click="deleteItems"
+        v-show-if-allowed="orderResources.updateOpts" />
+
+      <os-button left-icon="reply" label="Retrieve" @click="retrieveSpecimens"
+        v-if="showRetrieveSpmns && selectedSpecimens.length == 0" />
     </template>
+
     <template #right v-if="$refs.specimensList && $refs.specimensList.list && $refs.specimensList.list.rows">
       <os-list-size
         :list="$refs.specimensList.list.rows"
@@ -40,6 +46,12 @@
       <os-button primary label="Retrieve" @click="submitRetrieveSpecimens" />
     </template>
   </os-dialog>
+
+  <os-confirm-delete ref="deleteDialog" :captcha="false">
+    <template #message>
+      <span>Are you sure you want to remove the selected specimens from the order?</span>
+    </template>
+  </os-confirm-delete>
 </template>
 
 <script>
@@ -48,6 +60,8 @@ import orderSvc   from '@/administrative/services/Order.js';
 import alertSvc   from '@/common/services/Alerts.js';
 import routerSvc  from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
+
+import orderResources from './Resources.js'
 
 export default {
   props: ['order'],
@@ -62,7 +76,9 @@ export default {
 
       retrieveSpmnsReason: '',
 
-      includeCount: false
+      includeCount: false,
+
+      orderResources
     }
   },
 
@@ -104,6 +120,25 @@ export default {
       const downloadEnabled = await settingSvc.getSetting('administrative', 'download_labels_print_file');
       if (downloadEnabled[0].value == 'true' || downloadEnabled[0].value == true) {
         orderSvc.downloadLabelsFile(printJob.id, this.order.name + '.csv');
+      }
+    },
+
+    deleteItems: async function() {
+      if (this.selectedSpecimens.length == 0) {
+        alertSvc.error('No specimens selected.');
+        return;
+      }
+
+      const resp = await this.$refs.deleteDialog.open();
+      if (resp != 'proceed') {
+        return;
+      }
+
+      const result = await orderSvc.deleteOrderItems(this.order.id, this.selectedSpecimens);
+      const subject = result.deleted == 1 ? ' specimen ' : ' specimens ';
+      alertSvc.success(result.deleted + subject + ' deleted from the order!');
+      if (result.deleted > 0) {
+        this.$refs.specimensList.reload();
       }
     },
 

@@ -314,7 +314,25 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Integer> deleteOrderItems(Long orderId, String orderName, List<Long> itemIds) {
+		try {
+			DistributionOrder order = getOrder(orderId, orderName);
+			AccessCtrlMgr.getInstance().ensureUpdateDistributionOrderRights(order);
+			if (CollectionUtils.isEmpty(itemIds)) {
+				return ResponseEvent.response(0);
+			}
+
+			return ResponseEvent.response(order.deleteItems(itemIds));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<DistributionOrderItemDetail>> getDistributedSpecimens(RequestEvent<SpecimenListCriteria> req) {

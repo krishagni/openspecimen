@@ -161,6 +161,11 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 		getCurrentSession().saveOrUpdate(item);
 	}
 
+	@Override
+	public void deleteOrderItem(DistributionOrderItem item) {
+		getCurrentSession().delete(item);
+	}
+
 	@SuppressWarnings("unchecked")
 	private Criteria getOrderListQuery(DistributionOrderListCriteria crit) {
 		Criteria query = getCurrentSession().createCriteria(DistributionOrder.class)

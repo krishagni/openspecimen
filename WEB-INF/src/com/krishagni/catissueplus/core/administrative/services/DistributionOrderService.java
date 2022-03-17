@@ -39,6 +39,8 @@ public interface DistributionOrderService {
 	public ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req);
 
 	ResponseEvent<List<DistributionOrderItemDetail>> getOrderItems(RequestEvent<DistributionOrderItemListCriteria> req);
+
+	ResponseEvent<Integer> deleteOrderItems(Long orderId, String orderName, List<Long> itemIds);
 	
 	public ResponseEvent<List<DistributionOrderItemDetail>> getDistributedSpecimens(RequestEvent<SpecimenListCriteria> req);
 

@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -315,6 +316,38 @@ public class DistributionOrder extends BaseExtensionEntity {
 		if (getRequest() != null) {
 			getRequest().reopenIfNotFulfilled();
 		}
+	}
+
+	public int deleteItems(List<Long> itemIds) {
+		Map<Long, SpecimenRequestItem> reqItemsMap = Collections.emptyMap();
+		if (getRequest() != null) {
+			reqItemsMap = getRequest().getSpecimenIdRequestItemMap();
+		}
+
+		DaoFactory daoFactory = OpenSpecimenAppCtxProvider.getBean("biospecimenDaoFactory");
+		DistributionOrderItemListCriteria crit = new DistributionOrderItemListCriteria().orderId(getId());
+		int itemIdx = 0, deleted = 0;
+		while (itemIdx < itemIds.size()) {
+			crit.ids(itemIds.subList(itemIdx, Math.min(itemIdx + 50, itemIds.size())));
+			itemIdx += 50;
+
+			List<DistributionOrderItem> items = daoFactory.getDistributionOrderDao().getOrderItems(crit);
+			for (DistributionOrderItem item : items) {
+				if (isOrderExecuted()) {
+					item.setRequestItem(reqItemsMap.get(item.getSpecimen().getId()));
+					item.undoDistribution();
+				}
+
+				daoFactory.getDistributionOrderDao().deleteOrderItem(item);
+				++deleted;
+			}
+		}
+
+		if (getRequest() != null) {
+			getRequest().reopenIfNotFulfilled();
+		}
+
+		return deleted;
 	}
 
 	public boolean isOrderExecuted() {
