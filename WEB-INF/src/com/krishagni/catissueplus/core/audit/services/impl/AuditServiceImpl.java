@@ -606,13 +606,14 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	}
 
 	private void writeExportHeader(CsvWriter writer, RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> revisionUsers) {
+		writeRow(writer, toMsg("common_server_url"), ConfigUtil.getInstance().getAppUrl());
+		writeRow(writer, toMsg("common_server_env"), ConfigUtil.getInstance().getDeployEnv());
 		writeRow(writer, toMsg("audit_rev_exported_by"), exportedBy.formattedName(true));
 		writeRow(writer, toMsg("audit_rev_exported_on"), getDateTimeString(exportedOn));
 
 		if (CollectionUtils.isNotEmpty(revisionUsers)) {
-			List<String> userNames = revisionUsers.stream().map(User::formattedName).collect(Collectors.toList());
+			List<String> userNames = revisionUsers.stream().map(u -> u.formattedName(true)).collect(Collectors.toList());
 			userNames.add(0, toMsg("audit_rev_audited_users"));
-
 			writeRow(writer, userNames.toArray(new String[0]));
 		}
 

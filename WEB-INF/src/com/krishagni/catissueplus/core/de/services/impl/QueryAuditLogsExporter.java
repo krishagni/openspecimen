@@ -146,11 +146,13 @@ public class QueryAuditLogsExporter implements Runnable {
 	}
 
 	private void writeHeader0(CsvWriter writer, Date exportedOn) {
+		writeRow(writer, toMsg("common_server_url"), ConfigUtil.getInstance().getAppUrl());
+		writeRow(writer, toMsg("common_server_env"), ConfigUtil.getInstance().getDeployEnv());
 		writeRow(writer, toMsg("query_audit_logs_exported_by"), exportedBy.formattedName(true));
 		writeRow(writer, toMsg("query_audit_logs_exported_on"), Utility.getDateTimeString(exportedOn));
 
 		if (CollectionUtils.isNotEmpty(runBy)) {
-			List<String> userNames = runBy.stream().map(User::formattedName).collect(Collectors.toList());
+			List<String> userNames = runBy.stream().map(u -> u.formattedName(true)).collect(Collectors.toList());
 			userNames.add(0, toMsg("query_audit_logs_run_by"));
 			writeRow(writer, userNames.toArray(new String[0]));
 		}

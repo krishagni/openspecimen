@@ -30,6 +30,10 @@ public class ConfigUtil {
 	public String getAppUrl() {
 		return cfgSvc.getStrSetting("common", "app_url", "");
 	}
+
+	public String getDeployEnv() {
+		return ConfigUtil.getInstance().getStrSetting("common", "deploy_env", "");
+	}
 	
 	public String getDataDir() {
 		return cfgSvc.getDataDir();
