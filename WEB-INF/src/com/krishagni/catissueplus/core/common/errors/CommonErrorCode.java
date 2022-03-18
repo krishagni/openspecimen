@@ -23,7 +23,11 @@ public enum CommonErrorCode implements ErrorCode {
 
 	INVALID_TZ,
 
-	FORM_ERROR;
+	FORM_ERROR,
+
+	DATE_GT_TODAY,
+
+	INTERVAL_EXCEEDS_ALLOWED;
 
 	@Override
 	public String code() {

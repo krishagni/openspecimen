@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
+import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
@@ -14,7 +15,7 @@ import com.krishagni.catissueplus.core.de.events.ExecuteSavedQueryOp;
 import com.krishagni.catissueplus.core.de.events.FacetDetail;
 import com.krishagni.catissueplus.core.de.events.GetFacetValuesOp;
 import com.krishagni.catissueplus.core.de.events.ListFolderQueriesCriteria;
-import com.krishagni.catissueplus.core.de.events.ListQueryAuditLogsCriteria;
+import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
 import com.krishagni.catissueplus.core.de.events.ListSavedQueriesCriteria;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogDetail;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogSummary;
@@ -82,11 +83,15 @@ public interface QueryService {
 	//
 	// query audit logs related APIs
 	//
-	ResponseEvent<Long> getAuditLogsCount(RequestEvent<ListQueryAuditLogsCriteria> req);
+	ResponseEvent<Long> getAuditLogsCount(RequestEvent<QueryAuditLogsListCriteria> req);
 
-	ResponseEvent<List<QueryAuditLogSummary>> getAuditLogs(RequestEvent<ListQueryAuditLogsCriteria> req);
+	ResponseEvent<List<QueryAuditLogSummary>> getAuditLogs(RequestEvent<QueryAuditLogsListCriteria> req);
 
 	ResponseEvent<QueryAuditLogDetail> getAuditLog(RequestEvent<Long> req);
+
+	ResponseEvent<ExportedFileDetail> exportAuditLogs(RequestEvent<QueryAuditLogsListCriteria> req);
+
+	ResponseEvent<File> getExportedAuditLogsFile(RequestEvent<String> req);
 
 	//
 	// query export APIs

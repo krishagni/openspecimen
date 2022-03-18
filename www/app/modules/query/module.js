@@ -114,6 +114,12 @@ angular.module('os.query',
        templateUrl: 'modules/query/audit-logs.html',
        controller: 'QueryAuditLogsCtrl',
        parent: 'signed-in'
+     })
+     .state('export-query-audit-logs', {
+       url: '/export-query-audit-logs',
+       templateUrl: 'modules/query/export-audit-logs.html',
+       controller: 'QueryAuditLogsExportCtrl',
+       parent: 'signed-in'
      });
   }).run(function(UrlResolver) {
     UrlResolver.regUrlState('folder-queries', 'query-list', 'folderId');

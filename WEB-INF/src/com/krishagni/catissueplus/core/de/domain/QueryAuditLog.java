@@ -16,6 +16,8 @@ public class QueryAuditLog {
 	private Long timeToFinish;
 	
 	private String runType;
+
+	private String aql;
 	
 	private Long recordCount;
 	
@@ -59,6 +61,14 @@ public class QueryAuditLog {
 
 	public void setTimeToFinish(Long timeToFinish) {
 		this.timeToFinish = timeToFinish;
+	}
+
+	public String getAql() {
+		return aql;
+	}
+
+	public void setAql(String aql) {
+		this.aql = aql;
 	}
 
 	public String getRunType() {

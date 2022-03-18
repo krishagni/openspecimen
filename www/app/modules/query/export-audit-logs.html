@@ -1,0 +1,49 @@
+<div>
+  <div os-page-header>
+    <div class="os-page-header-content">
+      <h3>
+        <span translate="queries.audit_logs.export_report"> Export Audit Logs Report </span>
+      </h3>
+    </div>
+  </div>
+
+  <div class="container">
+    <form name="expForm" os-form-validator="expForm" class="form-horizontal" novalidate>
+      <div class="form-group os-multi-parts-control">
+        <label class="control-label col-xs-3">
+          <span translate="queries.audit_logs.report_interval">Report Interval</span>
+        </label>
+        <div class="col-xs-3">
+          <label class="part-label" translate="queries.audit_logs.report_start_date">Start Date</label>
+          <os-date-picker name="startDate" date="input.startDate"> </os-date-picker>
+        </div>
+        <div class="col-xs-3">
+          <label class="part-label" translate="queries.audit_logs.report_end_date">End Date</label>
+          <os-date-picker name="endDate" date="input.endDate"> </os-date-picker>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-xs-3">
+          <span translate="queries.audit_logs.executed_by">Run By</span>
+        </label>
+        <div class="col-xs-6">
+          <os-users name="user" ng-model="input.userId" select-prop="id" include-archived exclude-contacts> </os-users>
+        </div>
+      </div>
+
+      <div class="os-divider"></div>
+
+      <div class="form-group">
+        <div class="col-xs-offset-3 col-xs-6">
+          <button class="btn btn-primary" os-form-submit="exportReport()"> 
+            <span translate="common.buttons.export">Export</span>
+          </button>
+          <button class="btn os-btn-text" ng-click="back()">
+            <span translate="common.buttons.discard">Discard</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

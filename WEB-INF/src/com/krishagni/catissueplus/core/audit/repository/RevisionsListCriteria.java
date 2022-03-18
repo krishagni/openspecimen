@@ -13,8 +13,6 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 
 	private Date endDate;
 
-	private Long userId;
-
 	private List<Long> userIds;
 
 	private boolean includeModifiedProps;

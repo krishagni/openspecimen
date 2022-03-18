@@ -27,7 +27,7 @@ import com.google.gson.Gson;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.de.domain.SelectField;
-import com.krishagni.catissueplus.core.de.events.ListQueryAuditLogsCriteria;
+import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
 import com.krishagni.catissueplus.core.de.events.ListSavedQueriesCriteria;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogSummary;
 import com.krishagni.catissueplus.core.de.events.SavedQueriesList;
@@ -170,7 +170,7 @@ public class SavedQueriesController {
 			@RequestParam(value = "maxResults", required = false, defaultValue = "25")
 			int maxResults) {
 		
-		ListQueryAuditLogsCriteria crit = new ListQueryAuditLogsCriteria()
+		QueryAuditLogsListCriteria crit = new QueryAuditLogsListCriteria()
 			.query(savedQueryId.toString()).startAt(startAt).maxResults(maxResults);
 		return response(querySvc.getAuditLogs(request(crit)));
 	}

@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +42,9 @@ import org.springframework.dao.QueryTimeoutException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
@@ -53,6 +56,7 @@ import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
+import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
@@ -78,10 +82,10 @@ import com.krishagni.catissueplus.core.de.events.ExecuteSavedQueryOp;
 import com.krishagni.catissueplus.core.de.events.FacetDetail;
 import com.krishagni.catissueplus.core.de.events.GetFacetValuesOp;
 import com.krishagni.catissueplus.core.de.events.ListFolderQueriesCriteria;
-import com.krishagni.catissueplus.core.de.events.ListQueryAuditLogsCriteria;
 import com.krishagni.catissueplus.core.de.events.ListSavedQueriesCriteria;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogDetail;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogSummary;
+import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.events.QueryExecResult;
 import com.krishagni.catissueplus.core.de.events.QueryFolderDetails;
@@ -867,9 +871,9 @@ public class QueryServiceImpl implements QueryService {
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<Long> getAuditLogsCount(RequestEvent<ListQueryAuditLogsCriteria> req) {
+	public ResponseEvent<Long> getAuditLogsCount(RequestEvent<QueryAuditLogsListCriteria> req) {
 		try {
-			ListQueryAuditLogsCriteria crit = req.getPayload();
+			QueryAuditLogsListCriteria crit = req.getPayload();
 			if (!AuthUtil.isAdmin() && !AuthUtil.isInstituteAdmin()) {
 				crit.userId(AuthUtil.getCurrentUser().getId());
 			} else if (AuthUtil.isInstituteAdmin()) {
@@ -886,9 +890,9 @@ public class QueryServiceImpl implements QueryService {
 
 	@Override
     @PlusTransactional
-    public ResponseEvent<List<QueryAuditLogSummary>> getAuditLogs(RequestEvent<ListQueryAuditLogsCriteria> req){
+    public ResponseEvent<List<QueryAuditLogSummary>> getAuditLogs(RequestEvent<QueryAuditLogsListCriteria> req){
 		try {
-			ListQueryAuditLogsCriteria crit = req.getPayload();
+			QueryAuditLogsListCriteria crit = req.getPayload();
 			if (!AuthUtil.isAdmin() && !AuthUtil.isInstituteAdmin()) {
 				crit.userId(AuthUtil.getCurrentUser().getId());
 			} else if (AuthUtil.isInstituteAdmin()) {
@@ -921,7 +925,95 @@ public class QueryServiceImpl implements QueryService {
 			return ResponseEvent.serverError(e);
 		}
     }
-    
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ExportedFileDetail> exportAuditLogs(RequestEvent<QueryAuditLogsListCriteria> req) {
+		if (!AuthUtil.isAdmin()) {
+			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		QueryAuditLogsListCriteria crit = req.getPayload();
+
+		List<User> users = null;
+		if (CollectionUtils.isNotEmpty(crit.userIds())) {
+			users = userDao.getByIds(crit.userIds());
+			if (users.size() != crit.userIds().size()) {
+				Set<Long> foundIds = users.stream().map(User::getId).collect(Collectors.toSet());
+				String notFoundIds = crit.userIds().stream()
+					.filter(id -> !foundIds.contains(id))
+					.map(String::valueOf)
+					.collect(Collectors.joining(", "));
+				return ResponseEvent.userError(UserErrorCode.ONE_OR_MORE_NOT_FOUND, notFoundIds);
+			}
+		}
+
+		Date startDate = Utility.chopSeconds(crit.startDate());
+		Date endDate   = Utility.chopSeconds(crit.endDate());
+		Date endOfDay  = Utility.getEndOfDay(Calendar.getInstance().getTime());
+		if (startDate != null && startDate.after(endOfDay)) {
+			return ResponseEvent.userError(CommonErrorCode.DATE_GT_TODAY, Utility.getDateTimeString(startDate));
+		}
+
+		if (endDate != null && endDate.after(endOfDay)) {
+			return ResponseEvent.userError(CommonErrorCode.DATE_GT_TODAY, Utility.getDateTimeString(endDate));
+		}
+
+		if (startDate != null && endDate != null) {
+			long days = Utility.daysBetween(startDate, endDate);
+			if (days > 30L) {
+				return ResponseEvent.userError(CommonErrorCode.INTERVAL_EXCEEDS_ALLOWED, 30);
+			}
+		} else if (startDate != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(startDate);
+			cal.add(Calendar.MONTH, 1);
+			endDate = cal.getTime().after(endOfDay) ? endOfDay : Utility.getEndOfDay(cal.getTime());
+		} else {
+			endDate = endDate != null ? endDate : endOfDay;
+
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(endDate);
+			cal.add(Calendar.MONTH, -1);
+			startDate = Utility.chopTime(cal.getTime());
+		}
+
+		crit.startDate(startDate).endDate(endDate).asc(true);
+
+		logger.info("Initiating query audit logs export: " + crit);
+		User currentUser = AuthUtil.getCurrentUser();
+		List<User> revisionsByUsers = users;
+		File revisionsFile = null;
+		Future<File> result = exportThreadPool.submit(() -> exportAuditLogs(crit, currentUser, revisionsByUsers));
+		try {
+			logger.info("Waiting for the export query audit logs to finish ...");
+			revisionsFile = result.get(ONLINE_EXPORT_TIMEOUT_SECS, TimeUnit.SECONDS);
+			logger.info("Export query audit logs finished within " + ONLINE_EXPORT_TIMEOUT_SECS + " seconds.");
+		} catch (TimeoutException te) {
+			// timed out waiting for the response
+			logger.info("Export query audit logs is taking more time to finish.");
+		} catch (OpenSpecimenException ose) {
+			logger.error("Encountered error exporting query audit logs.", ose);
+			throw ose;
+		} catch (Exception ie) {
+			logger.error("Encountered error exporting query audit logs.", ie);
+			throw OpenSpecimenException.serverError(ie);
+		}
+
+		String fileId = null;
+		if (revisionsFile != null) {
+			fileId = revisionsFile.getName().substring(0, revisionsFile.getName().lastIndexOf("_"));
+		}
+		return ResponseEvent.response(new ExportedFileDetail(fileId, revisionsFile));
+	}
+
+	@Override
+	public ResponseEvent<File> getExportedAuditLogsFile(RequestEvent<String> req) {
+		String filename = req.getPayload() + "_" + AuthUtil.getCurrentUser().getId();
+		Path path = Paths.get(ConfigUtil.getInstance().getDataDir(), "audit", filename);
+		return ResponseEvent.response(path.toFile());
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<String> getQueryDef(RequestEvent<Long> req) {
@@ -1114,6 +1206,7 @@ public class QueryServiceImpl implements QueryService {
 		}
 
 		query.compile(rootForm, aql, getRestriction(user, op.getCpId(), op.getCpGroupId()));
+		op.setAql(aql);
 		return query;
 	}
 
@@ -1244,6 +1337,10 @@ public class QueryServiceImpl implements QueryService {
 	}
 
 	private void insertAuditLog(User user, ExecuteQueryEventOp opDetail, QueryResponse resp) {
+		if (opDetail.isDisableAuditing()) {
+			return;
+		}
+
 		SavedQuery query = null;
 		if (opDetail.getSavedQueryId() != null) {
 			query = new SavedQuery();
@@ -1256,6 +1353,8 @@ public class QueryServiceImpl implements QueryService {
 		auditLog.setTimeOfExecution(resp.getTimeOfExecution());
 		auditLog.setTimeToFinish(resp.getExecutionTime());
 		auditLog.setRunType(opDetail.getRunType());
+		auditLog.setAql(opDetail.getAql());
+		auditLog.setRecordCount(Long.valueOf(resp.getResultData().getDbRowsCount()));
 		auditLog.setSql(resp.getSql());
 		daoFactory.getQueryAuditLogDao().saveOrUpdate(auditLog);
 	}
@@ -1607,6 +1706,13 @@ public class QueryServiceImpl implements QueryService {
 		return SavedQueryErrorCode.MALFORMED;
 	}
 
+	@PlusTransactional
+	private File exportAuditLogs(QueryAuditLogsListCriteria crit, User exportedBy, List<User> runBy) {
+		QueryAuditLogsExporter exporter = new QueryAuditLogsExporter(crit, exportedBy, runBy);
+		exporter.run();
+		return exporter.getExportedFile();
+	}
+
 	private QueryDataExportResult exportData(ExecuteQueryEventOp op, ExportProcessor proc, BiConsumer<QueryResultData, OutputStream> procFn) {
 		OutputStream out = null;
 
@@ -1616,6 +1722,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 
 			op.setTimeout(-1);
+			op.setRunType("Export");
 			ExportQueryDataTask task = new ExportQueryDataTask();
 			task.op = op;
 			task.auth = AuthUtil.getAuth();

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -479,6 +479,33 @@ public class User extends BaseEntity implements UserDetails {
 		}
 
 		return name.toString();
+	}
+
+	public String formattedName(boolean includeEmailLoginId) {
+		String result = formattedName();
+		if (!includeEmailLoginId) {
+			return result;
+		}
+
+		StringBuilder emailLoginId = new StringBuilder();
+		if (StringUtils.isNotBlank(getEmailAddress())) {
+			emailLoginId.append(getEmailAddress());
+			if (StringUtils.isNotBlank(getLoginName())) {
+				emailLoginId.append(" / ");
+			}
+		}
+
+		if (StringUtils.isNotBlank(getLoginName())) {
+			emailLoginId.append(getLoginName());
+		}
+
+		if (result.isEmpty()) {
+			result = emailLoginId.toString();
+		} else if (emailLoginId.length() > 0) {
+			result = result + " (" + emailLoginId.toString() + ")";
+		}
+
+		return result;
 	}
 
 	public boolean isSysUser() {

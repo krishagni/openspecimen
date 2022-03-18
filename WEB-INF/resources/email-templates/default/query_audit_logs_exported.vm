@@ -1,0 +1,81 @@
+#set ( $apiUrl = "$appUrl/rest/ng/query-audit-logs/exported-file?fileId=$fileId" )
+#set ( $downloadUrl = "$appUrl/#/file-download?downloadUrl=$urlEncoder.encode($apiUrl)" )
+
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
+  <tbody>
+  <tr>
+    <td style="border-collapse:collapse;">
+      <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;line-height:20px">
+        <tbody>
+        <tr>
+          <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
+            <p style="margin:10px 0 0 0">
+              Hello $rcpt,
+              <br><br>
+              The requested query audit report is available for download.
+              <br>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table>
+              <tr>
+                <td> Run By </td>
+                <td> :
+                  #if ( $users )
+                  $users
+                  #else
+                  Not Specified
+                  #end
+                </td>
+              </tr>
+              <tr>
+                <td> Start Date </td>
+                <td> :
+                  #if ( $startDate )
+                  $startDate
+                  #else
+                  Not Specified
+                  #end
+                </td>
+              </tr>
+              <tr>
+                <td> End Date </td>
+                <td> :
+                  #if ( $endDate )
+                  $endDate
+                  #else
+                  Not Specified
+                  #end
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a style="display: inline-block; text-decoration: none; padding: 10px; border: 1px solid #357ebd; border-radius: 5px; background-color: #428bca; color: #fff; margin: 10px auto;" href="$downloadUrl">
+              Download Report
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Please note the link will be valid for 30 days
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="height:5px;line-height:5px;">&nbsp;</td>
+  </tr>
+  <tr>
+    <td>
+      #parse( $footer )
+    </td>
+  </tr>
+  </tbody>
+</table>

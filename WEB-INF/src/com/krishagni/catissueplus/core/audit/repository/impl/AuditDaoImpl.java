@@ -141,6 +141,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			user.setFirstName((String) row[idx++]);
 			user.setLastName((String) row[idx++]);
 			user.setEmailAddress((String) row[idx++]);
+			user.setLoginName((String) row[idx++]);
 			detail.setUser(user);
 
 			result.add(detail);
@@ -206,6 +207,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		user.setFirstName((String)row[idx++]);
 		user.setLastName((String)row[idx++]);
 		user.setEmailAddress((String)row[idx++]);
+		user.setLoginName((String)row[idx++]);
 		detail.setChangedBy(user);
 		return detail;
 	}
@@ -267,6 +269,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 				.add(Projections.property("u.firstName"))
 				.add(Projections.property("u.lastName"))
 				.add(Projections.property("u.emailAddress"))
+				.add(Projections.property("u.loginName"))
 				.add(Projections.property("re.id"))
 				.add(Projections.property("re.type"))
 				.add(Projections.property("re.entityName"))
@@ -288,7 +291,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 				revisions.add(lastRevision);
 			}
 
-			RevisionEntityRecordDetail entity = getRevisionEntityInfo(row, 6);
+			RevisionEntityRecordDetail entity = getRevisionEntityInfo(row, 7);
 			lastRevision.addRecord(entity);
 		}
 
@@ -308,7 +311,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("user_id", LongType.INSTANCE)
 			.addScalar("first_name", StringType.INSTANCE)
 			.addScalar("last_name", StringType.INSTANCE)
-			.addScalar("email_address", StringType.INSTANCE);
+			.addScalar("email_address", StringType.INSTANCE)
+			.addScalar("login_name", StringType.INSTANCE);
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
 			query.setParameterList("userIds", criteria.userIds());
@@ -486,7 +490,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		"select" +
 		"  t.identifier, t.event_timestamp, t.event_type, fre.object_id, t.record_id, " +
 		"  fc.entity_type, f.caption, " +
-		"  t.user_id, u.first_name, u.last_name, u.email_address " +
+		"  t.user_id, u.first_name, u.last_name, u.email_address, u.login_name " +
 		"from " +
 		"  (%s) t " +
 		"  inner join dyextn_containers f on f.identifier = t.form_id " +

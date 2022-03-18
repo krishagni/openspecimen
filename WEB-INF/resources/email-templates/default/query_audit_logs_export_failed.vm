@@ -1,0 +1,88 @@
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
+  <tbody>
+  <tr>
+    <td style="border-collapse:collapse;">
+      <table cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;line-height:20px">
+        <tbody>
+        <tr>
+          <td style="border-collapse:collapse;padding-bottom:10px">
+            <p style="margin:10px 0 0 0">
+              Hello $rcpt,
+              <br><br>
+              Encountered error while generating the query audit report. Please review the error and report it to the system administrator.
+              <br>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table>
+              <tr>
+                <td> <b> Report Criteria </b> </td>
+                <td> &nbsp; </td>
+              </tr>
+              <tr>
+                <td> Run By </td>
+                <td> :
+                  #if ( $users )
+                  $users
+                  #else
+                  Not Specified
+                  #end
+                </td>
+              </tr>
+              <tr>
+                <td> Start Date </td>
+                <td> :
+                  #if ( $startDate )
+                  $startDate
+                  #else
+                  Not Specified
+                  #end
+                </td>
+              </tr>
+              <tr>
+                <td> End Date </td>
+                <td> :
+                  #if ( $endDate )
+                  $endDate
+                  #else
+                  Not Specified
+                  #end
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table border="1" style="margin-top: 20px; border-collapse: collapse" cellpadding="10">
+              <tr>
+                <td> <b> Error </b> </td>
+              </tr>
+              <tr>
+                <td> $errorMsg </td>
+              </tr>
+              <tr>
+                <td> <pre> $errorStack </pre> </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="height:5px;line-height:5px;">&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td>
+      #parse( $footer )
+    </td>
+  </tr>
+  </tbody>
+</table>
+

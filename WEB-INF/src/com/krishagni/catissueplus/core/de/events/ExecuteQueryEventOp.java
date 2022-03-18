@@ -31,7 +31,15 @@ public class ExecuteQueryEventOp  {
 
 	private boolean synchronous;
 
+	//
+	// mostly used by the list generator API
+	//
 	private boolean disableAccessChecks;
+
+	//
+	// mostly used by the list generator API
+	//
+	private boolean disableAuditing;
 
 	private int timeoutInSeconds = 55;
 
@@ -145,6 +153,14 @@ public class ExecuteQueryEventOp  {
 
 	public void setDisableAccessChecks(boolean disableAccessChecks) {
 		this.disableAccessChecks = disableAccessChecks;
+	}
+
+	public boolean isDisableAuditing() {
+		return disableAuditing;
+	}
+
+	public void setDisableAuditing(boolean disableAuditing) {
+		this.disableAuditing = disableAuditing;
 	}
 
 	public int getTimeout() {

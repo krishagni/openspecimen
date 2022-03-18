@@ -2218,7 +2218,14 @@
       "loading": "Loading audit logs. Please wait for a moment...",
       "no_logs": "No audit logs to show",
       "unsaved_query": "Unsaved Query",
-      "filter": "Audit Logs Filter"
+      "filter": "Audit Logs Filter",
+      "export_report": "Export Query Audit Report",
+      "report_start_date": "Start Date",
+      "report_end_date": "End Date",
+      "report_interval": "Report Interval",
+      "preparing_report": "Generating audit log report. Please wait for a moment...",
+      "downloading_report": "Downloading audit log report.",
+      "report_will_be_emailed": "Audit log report generation is taking more time than anticipated. The report will be sent to you by email."
     },
 
     "catalogs": "Catalogs",

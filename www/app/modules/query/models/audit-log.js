@@ -10,5 +10,13 @@ angular.module('os.query.models.auditlog', ['os.common.models'])
       return QueryAuditLog.query(filterOpts);
     }
 
+    QueryAuditLog.exportLogs = function(criteria) {
+      return $http.post(QueryAuditLog.url() + 'export', criteria).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+    }
+
     return QueryAuditLog;
   });

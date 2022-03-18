@@ -11,18 +11,20 @@
       </generator>
     </id>
 
-    <many-to-one name="query" column="QUERY_ID"/>
+    <many-to-one name="query" column="QUERY_ID" />
 
-    <many-to-one name="runBy" column="RUN_BY"/>
+    <many-to-one name="runBy" column="RUN_BY" />
 
-    <property name="timeOfExecution" column="TIME_OF_EXEC" type="timestamp"/>
+    <property name="timeOfExecution" column="TIME_OF_EXEC" />
      
-    <property name="timeToFinish" column="TIME_TO_FINISH" type="long"/>
+    <property name="timeToFinish" column="TIME_TO_FINISH" />
      
-    <property name="runType" column="RUN_TYPE" type="string"/>
+    <property name="runType" column="RUN_TYPE" />
      
-    <property name="recordCount" column="RECORD_COUNT" type="long"/>
+    <property name="recordCount" column="RECORD_COUNT" />
       
-    <property name="sql" column="QUERY_SQL"/>
+    <property name="sql" column="QUERY_SQL" />
+
+    <property name="aql" column="AQL" />
   </class>
 </hibernate-mapping>

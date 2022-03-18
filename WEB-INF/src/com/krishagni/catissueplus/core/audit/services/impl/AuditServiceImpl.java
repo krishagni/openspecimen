@@ -393,7 +393,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			writeExportHeader(writer, criteria, exportedBy, exportedOn, revisionsBy);
 
 			String[] keys = {
-				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
+				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
 				"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_entity_id",
 				"audit_rev_change_log"
 			};
@@ -411,9 +411,11 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 			String user      = null;
 			String userEmail = null;
+			String userLogin = null;
 			if (revision.getChangedBy() != null) {
 				user      = revision.getChangedBy().formattedName();
 				userEmail = revision.getChangedBy().getEmailAddress();
+				userLogin = revision.getChangedBy().getLoginName();
 			}
 
 			Function<String, String> toMsg = AuditServiceImpl.this::toMsg;
@@ -446,7 +448,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				String opDisplay  = context.computeIfAbsent(op, toMsg);
 				String entityName = context.computeIfAbsent("audit_entity_" + record.getEntityName(), toMsg);
 				String entityId   = record.getEntityId().toString();
-				String[] line     = {revId, dateTime, user, userEmail, opDisplay, entityName, entityId, record.getModifiedProps()};
+				String[] line     = {revId, dateTime, user, userEmail, userLogin, opDisplay, entityName, entityId, record.getModifiedProps()};
 
 				writer.writeNext(line);
 				if (logger.isDebugEnabled()) {
@@ -536,7 +538,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			writeExportHeader(writer, criteria, exportedBy, exportedOn, revisionsBy);
 
 			String[] keys = {
-				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
+				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
 				"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_form_name",
 				"audit_rev_parent_entity_id", "audit_rev_entity_id"
 			};
@@ -549,9 +551,11 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 			String user      = null;
 			String userEmail = null;
+			String userLogin = null;
 			if (revision.getUser() != null) {
 				user      = revision.getUser().formattedName();
 				userEmail = revision.getUser().getEmailAddress();
+				userLogin = revision.getUser().getLoginName();
 			}
 
 			Function<String, String> toMsg = AuditServiceImpl.this::toMsg;
@@ -566,7 +570,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			String recordId = revision.getRecordId().toString();
 
 			writer.writeNext(new String[] {
-				revId, dateTime, user, userEmail,
+				revId, dateTime, user, userEmail, userLogin,
 				opDisplay, entityType, formName, entityId, recordId
 			});
 		}
@@ -602,7 +606,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	}
 
 	private void writeExportHeader(CsvWriter writer, RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> revisionUsers) {
-		writeRow(writer, toMsg("audit_rev_exported_by"), exportedBy.formattedName());
+		writeRow(writer, toMsg("audit_rev_exported_by"), exportedBy.formattedName(true));
 		writeRow(writer, toMsg("audit_rev_exported_on"), getDateTimeString(exportedOn));
 
 		if (CollectionUtils.isNotEmpty(revisionUsers)) {

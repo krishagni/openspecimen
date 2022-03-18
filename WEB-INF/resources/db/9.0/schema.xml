@@ -143,4 +143,10 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Record the AQL used to query the data">
+    <addColumn tableName="CATISSUE_QUERY_AUDIT_LOGS">
+      <column name="AQL" type="${clob.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>
