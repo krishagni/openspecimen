@@ -16,3 +16,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-tag :deep(.p-tag.p-tag-warning) {
+  background-color: #f59e0b;
+  color: #fff;
+}
+</style>

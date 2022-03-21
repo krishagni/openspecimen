@@ -173,6 +173,7 @@ export default {
   .os-page-header .content-wrapper .content .left :deep(.os-title .os-tag) {
     position: absolute;
     padding-left: 0.5rem;
+    white-space: nowrap;
   }
 
   .os-page-header .content-wrapper .content .right {

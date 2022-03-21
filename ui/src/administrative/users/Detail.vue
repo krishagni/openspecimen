@@ -5,8 +5,9 @@
         <os-breadcrumb :items="ctx.bcrumb" v-show-if-allowed="userResources.readOpts" />
       </template>
 
-      <span>
+      <span class="os-title">
         <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
+        <os-tag v-if="status.caption" :value="status.caption" :rounded="true" :type="status.type" />
       </span>
     </os-page-head>
     <os-page-body>
@@ -111,6 +112,30 @@ export default {
       }
 
       this.loadUser();
+    }
+  },
+
+  computed: {
+    status: function() {
+      if (!this.ctx.user || this.ctx.user.activityStatus == 'Active') {
+        return {caption: undefined};
+      }
+
+      switch (this.ctx.user.activityStatus) {
+        case 'Closed':
+          return {caption: 'Archived', type: 'danger'};
+
+        case 'Expired':
+          return {caption: 'Password Expired', type: 'danger'};
+
+        case 'Locked':
+          return {caption: 'Locked', type: 'danger'};
+
+        case 'Pending':
+          return {caption: 'Pending', type: 'warning'};
+      }
+
+      return {caption: undefined};
     }
   },
 

@@ -67,12 +67,6 @@
 
   <os-grid>
     <os-grid-column width="8">
-      <div v-if="ctx.user.activityStatus == 'Locked'">
-        <os-message type="info">
-          <span>User account has been locked.</span>
-        </os-message>
-      </div>
-
       <os-overview :schema="userSchema.fields" :object="ctx" />
     </os-grid-column>
 
