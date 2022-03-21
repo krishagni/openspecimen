@@ -199,6 +199,11 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	private transient Date transferDate;
 
+	//
+	// position assignment changes
+	//
+	private transient Map<StorageContainerPosition, Pair<Integer, Integer>> newPositions;
+
 	public StorageContainer() {
 		ancestorContainers.add(this);
 	}
@@ -618,6 +623,25 @@ public class StorageContainer extends BaseExtensionEntity {
 		updateStoreSpecimenEnabled(other);
 		updateCellDisplayProp(other);
 		setExtension(other.getExtension());
+	}
+
+	public void updatePositionsIfChanged() {
+		if (newPositions == null || newPositions.isEmpty()) {
+			return;
+		}
+
+		for (Map.Entry<StorageContainerPosition, Pair<Integer, Integer>> me : newPositions.entrySet()) {
+			StorageContainerPosition pos = me.getKey();
+			Integer row = me.getValue().first();
+			Integer col = me.getValue().second();
+
+			pos.setPosTwoOrdinal(row);
+			pos.setPosTwo(fromOrdinal(getRowLabelingScheme(), row));
+			pos.setPosOneOrdinal(col);
+			pos.setPosOne(fromOrdinal(getColumnLabelingScheme(), col));
+		}
+
+		newPositions = null;
 	}
 
 	public void moveTo(StorageContainer newContainer) {
@@ -1449,14 +1473,16 @@ public class StorageContainer extends BaseExtensionEntity {
 			return;
 		}
 
+		newPositions = new HashMap<>();
 		for (StorageContainerPosition pos : getOccupiedPositions()) {
 			Pair<Integer, Integer> mapIdx = getPositionAssigner().getMapIdx(this, pos.getPosTwoOrdinal(), pos.getPosOneOrdinal());
 			Pair<Integer, Integer> rowCol = other.getPositionAssigner().fromMapIdx(other, mapIdx.first(), mapIdx.second());
+			newPositions.put(pos, rowCol);
 
-			pos.setPosTwoOrdinal(rowCol.first());
-			pos.setPosTwo(fromOrdinal(getRowLabelingScheme(), pos.getPosTwoOrdinal()));
-			pos.setPosOneOrdinal(rowCol.second());
-			pos.setPosOne(fromOrdinal(getColumnLabelingScheme(), pos.getPosOneOrdinal()));
+			pos.setPosTwoOrdinal(null);
+			pos.setPosOneOrdinal(null);
+			pos.setPosTwo(null);
+			pos.setPosOne(null);
 		}
 
 		setPositionAssignment(other.getPositionAssignment());

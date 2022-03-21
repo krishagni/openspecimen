@@ -1253,8 +1253,9 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			}
 			
 			ensureUniqueConstraints(existing, container);
-			existing.update(container);			
+			existing.update(container);
 			daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
+			existing.updatePositionsIfChanged();
 			existing.validateRestrictions();
 			existing.addOrUpdateExtension();
 			return ResponseEvent.response(StorageContainerDetail.from(existing));			
