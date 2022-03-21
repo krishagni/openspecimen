@@ -36,4 +36,8 @@
   border-bottom: 4px solid #428bca;
   margin: 0rem -1rem;
 }
+
+.os-tab-menu + :deep(div) {
+  height: calc(100% - 45px);
+}
 </style>

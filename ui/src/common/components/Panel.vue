@@ -41,9 +41,13 @@ export default {
   height: 100%;
 }
 
+.os-panel :deep(.p-panel-header + .p-toggleable-content) {
+  height: calc(100% - 2.375rem);
+}
+
 .os-panel :deep(.p-panel-content) {
   padding: 1rem;
-  height: calc(100% - 42px);
+  height: 100%;
   overflow-y: auto;
 }
 
