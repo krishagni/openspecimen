@@ -85,6 +85,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("firstName", StringType.INSTANCE)
 			.addScalar("lastName", StringType.INSTANCE)
 			.addScalar("emailAddr", StringType.INSTANCE)
+			.addScalar("loginName", StringType.INSTANCE)
 			.setParameter("objectId", objectId)
 			.list();
 
@@ -185,6 +186,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("firstName", StringType.INSTANCE)
 			.addScalar("lastName", StringType.INSTANCE)
 			.addScalar("emailAddr", StringType.INSTANCE)
+			.addScalar("loginName", StringType.INSTANCE)
 			.setParameter("objectId", objectId)
 			.setParameter("revType", revType)
 			.setMaxResults(1)
@@ -461,7 +463,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	private static final String GET_REV_INFO_SQL =
 		"select " +
 		"  r.rev as rev, r.revtstmp as revTime, r.user_id as userId, " +
-		"  u.first_name as firstName, u.last_name as lastName, u.email_address as emailAddr " +
+		"  u.first_name as firstName, u.last_name as lastName, " +
+		"  u.email_address as emailAddr, u.login_name as loginName " +
 		"from " +
 		"  os_revisions r " +
 		"  inner join %s a on a.rev = r.rev " +
