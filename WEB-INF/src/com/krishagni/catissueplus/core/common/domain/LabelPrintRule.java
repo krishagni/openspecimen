@@ -274,13 +274,13 @@ public abstract class LabelPrintRule {
 		return result.toString();
 	}
 
-	public Map<String, String> toDefMap() {
+	public Map<String, Object> toDefMap() {
 		return toDefMap(false);
 	}
 
-	public Map<String, String> toDefMap(boolean ufn) {
+	public Map<String, Object> toDefMap(boolean ufn) {
 		try {
-			Map<String, String> rule = new HashMap<>();
+			Map<String, Object> rule = new HashMap<>();
 			rule.put("labelType", getLabelType());
 			rule.put("ipAddressMatcher", getIpAddressRange(getIpAddressMatcher()));
 			rule.put("users", getUsersList(ufn));
@@ -301,7 +301,7 @@ public abstract class LabelPrintRule {
 		}
 	}
 
-	protected abstract Map<String, String> getDefMap(boolean ufn);
+	protected abstract Map<String, Object> getDefMap(boolean ufn);
 
 	protected boolean isWildCard(String str) {
 		return StringUtils.isBlank(str) || str.trim().equals("*");
@@ -348,9 +348,9 @@ public abstract class LabelPrintRule {
 		return (T)ReflectionUtils.getField(field, obj);
 	}
 
-	private String getUsersList(boolean ufn) {
+	private List<String> getUsersList(boolean ufn) {
 		Function<User, String> mapper = ufn ? (u) -> u.getLoginName() : (u) -> u.getId().toString();
-		return Utility.nullSafeStream(getUsers()).map(mapper).collect(Collectors.joining(","));
+		return Utility.nullSafeStream(getUsers()).map(mapper).collect(Collectors.toList());
 	}
 
 	private String getUsersListJson() {
@@ -364,9 +364,9 @@ public abstract class LabelPrintRule {
 			).collect(Collectors.joining(", ")) + "]";
 	}
 
-	private String getUserGroupsList(boolean ufn) {
+	private List<String> getUserGroupsList(boolean ufn) {
 		Function<UserGroup, String> mapper = ufn ? (g) -> g.getName() : (g) -> g.getId().toString();
-		return Utility.nullSafeStream(getUserGroups()).map(mapper).collect(Collectors.joining(","));
+		return Utility.nullSafeStream(getUserGroups()).map(mapper).collect(Collectors.toList());
 	}
 
 	private String getUserGroupsListJson() {

@@ -107,7 +107,7 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 	}
 
 	private void setRule(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
-		Map<String, String> ruleMap = detail.getRule();
+		Map<String, Object> ruleMap = detail.getRule();
 		if (ruleMap == null || ruleMap.isEmpty()) {
 			ose.addError(PrintRuleConfigErrorCode.RULES_REQ);
 			return;

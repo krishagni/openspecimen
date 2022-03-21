@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
@@ -94,9 +95,9 @@ public class PrintRuleConfig extends BaseEntity {
 	}
 
 	public void setRuleDefJson(String ruleDefJson) {
-		Map<String, String> rule;
+		Map<String, Object> rule;
 		try {
-			rule = getReadMapper().readValue(ruleDefJson, new TypeReference<HashMap<String,String>>() {});
+			rule = getReadMapper().readValue(ruleDefJson, new TypeReference<HashMap<String, Object>>() {});
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling JSON to print rule", e);
 		}
@@ -104,15 +105,15 @@ public class PrintRuleConfig extends BaseEntity {
 		setRuleDef(rule);
 	}
 
-	public Map<String, String> getRuleDef() {
+	public Map<String, Object> getRuleDef() {
 		return getRuleDef(false);
 	}
 
-	public Map<String, String> getRuleDef(boolean ufn) {
+	public Map<String, Object> getRuleDef(boolean ufn) {
 		return getRule().toDefMap(ufn);
 	}
 
-	public void setRuleDef(Map<String, String> rule) {
+	public void setRuleDef(Map<String, Object> rule) {
 		LabelPrintRuleFactory factory = LabelPrintRuleFactoryRegistrar.getInstance().getFactory(objectType);
 		if (factory != null) {
 			setRule(factory.createLabelPrintRule(rule, false));

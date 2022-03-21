@@ -28,7 +28,7 @@ public class PrintRuleConfigDetail {
 
 	private String description;
 
-	private Map<String, String> rule;
+	private Map<String, Object> rule;
 
 	public Long getId() {
 		return id;
@@ -94,11 +94,11 @@ public class PrintRuleConfigDetail {
 		this.description = description;
 	}
 
-	public Map<String, String> getRule() {
+	public Map<String, Object> getRule() {
 		return rule;
 	}
 
-	public void setRule(Map<String, String> rule) {
+	public void setRule(Map<String, Object> rule) {
 		this.rule = rule;
 	}
 

@@ -46,12 +46,12 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 	}
 
 	@Override
-	public LabelPrintRule createLabelPrintRule(Map<String, String> ruleDef) {
+	public LabelPrintRule createLabelPrintRule(Map<String, Object> ruleDef) {
 		return createLabelPrintRule(ruleDef, true);
 	}
 
 	@Override
-	public LabelPrintRule createLabelPrintRule(Map<String, String> ruleDef, boolean failOnError) {
+	public LabelPrintRule createLabelPrintRule(Map<String, Object> ruleDef, boolean failOnError) {
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 
 		LabelPrintRule rule = fromRuleDef(ruleDef, failOnError, ose);
@@ -71,7 +71,7 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		return rule;
 	}
 
-	public abstract LabelPrintRule fromRuleDef(Map<String, String> ruleDef, boolean failOnError, OpenSpecimenException ose);
+	public abstract LabelPrintRule fromRuleDef(Map<String, Object> ruleDef, boolean failOnError, OpenSpecimenException ose);
 
 	protected Pair<List<Long>, List<String>> getIdsAndNames(List<String> inputList) {
 		List<Long> ids = new ArrayList<>();
@@ -106,25 +106,44 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		return objects;
 	}
 
-	private void setLabelType(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(input.get("labelType"))) {
+	protected boolean isEmptyString(Object input) {
+		return input == null || !(input instanceof String) || input.toString().trim().isEmpty();
+	}
+
+	protected List<String> objToList(Object input) {
+		List<String> inputList;
+		if (input instanceof String) {
+			inputList = Utility.csvToStringList((String) input);
+		} else if (input instanceof List) {
+			inputList = (List<String>) input;
+		} else {
+			inputList = new ArrayList<>();
+		}
+
+		return inputList;
+	}
+
+	private void setLabelType(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		Object labelType = input.get("labelType");
+		if (isEmptyString(labelType)) {
 			rule.setLabelType("Std");
+		}
+
+		rule.setLabelType(labelType.toString());
+	}
+
+	private void setLabelDesign(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		Object labelDesign = input.get("labelDesign");
+		if (isEmptyString(labelDesign)) {
 			return;
 		}
 
-		rule.setLabelType(input.get("labelType"));
+		rule.setLabelDesign(labelDesign.toString());
 	}
 
-	private void setLabelDesign(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(input.get("labelDesign"))) {
-			return;
-		}
-
-		rule.setLabelDesign(input.get("labelDesign"));
-	}
-
-	private void setDataTokens(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(input.get("dataTokens"))) {
+	private void setDataTokens(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		Object tokensStr = input.get("dataTokens");
+		if (isEmptyString(tokensStr)) {
 			ose.addError(PrintRuleConfigErrorCode.LABEL_TOKENS_REQ);
 			return;
 		}
@@ -132,7 +151,7 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		List<String> invalidTokenNames = new ArrayList<>();
 		List<Pair<LabelTmplToken, List<String>>> dataTokens = new ArrayList<>();
 
-		List<String> tokenNames = parseTokens(input.get("dataTokens"));
+		List<String> tokenNames = parseTokens(tokensStr.toString());
 		for (String key : tokenNames) {
 			Pair<String, List<String>> tokenArgs = parseFunctionToken(key);
 			LabelTmplToken token = printLabelTokensRegistrar.getToken(tokenArgs.first());
@@ -150,13 +169,13 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		rule.setDataTokens(dataTokens);
 	}
 
-	private void setCmdFilesDir(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		String dirPath = input.get("cmdFilesDir");
-		if (StringUtils.isBlank(dirPath)) {
+	private void setCmdFilesDir(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		if (isEmptyString(input.get("cmdFilesDir"))) {
 			ose.addError(PrintRuleConfigErrorCode.CMD_FILES_DIR_REQ);
 			return;
 		}
 
+		String dirPath = input.get("cmdFilesDir").toString();
 		if (dirPath.equals("*")) {
 			dirPath = getDefaultPrintLabelsDir();
 		}
@@ -179,12 +198,12 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		return ConfigUtil.getInstance().getDataDir() + File.separator + "print-labels";
 	}
 
-	private void setCmdFileFmt(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		String cmdFileFmt = input.get("cmdFileFmt");
-		if (StringUtils.isBlank(cmdFileFmt)) {
+	private void setCmdFileFmt(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		if (isEmptyString(input.get("cmdFileFmt"))) {
 			return;
 		}
 
+		String cmdFileFmt = input.get("cmdFileFmt").toString();
 		if (LabelPrintRule.CmdFileFmt.get(cmdFileFmt) == null) {
 			ose.addError(PrintRuleConfigErrorCode.INVALID_CMD_FILE_FMT, cmdFileFmt);
 		}
@@ -192,39 +211,37 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		rule.setCmdFileFmt(cmdFileFmt);
 	}
 
-	private void setFileLineEnding(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		String lineEnding = input.get("lineEnding");
-		if (StringUtils.isBlank(lineEnding)) {
+	private void setFileLineEnding(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		if (isEmptyString(input.get("lineEnding"))) {
 			return;
 		}
 
-		rule.setLineEnding(lineEnding);
+		rule.setLineEnding(input.get("lineEnding").toString());
 	}
 
-	private void setFileExtn(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		String fileExtn = input.get("fileExtn");
-		if (StringUtils.isBlank(fileExtn)) {
+	private void setFileExtn(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		if (isEmptyString(input.get("fileExtn"))) {
 			return;
 		}
 
-		rule.setFileExtn(fileExtn);
+		rule.setFileExtn(input.get("fileExtn").toString());
 	}
 
-	private void setPrinterName(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(input.get("printerName"))) {
+	private void setPrinterName(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		if (isEmptyString(input.get("printerName"))) {
 			rule.setPrinterName("default");
 			return;
 		}
 
-		rule.setPrinterName(input.get("printerName"));
+		rule.setPrinterName(input.get("printerName").toString());
 	}
 
-	private void setIpAddressMatcher(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		String ipRange = input.get("ipAddressMatcher");
-		if (StringUtils.isBlank(ipRange)) {
+	private void setIpAddressMatcher(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		if (isEmptyString(input.get("ipAddressMatcher"))) {
 			return;
 		}
 
+		String ipRange = input.get("ipAddressMatcher").toString();
 		IpAddressMatcher ipAddressMatcher = null;
 		try {
 			ipAddressMatcher = new IpAddressMatcher(ipRange);
@@ -236,10 +253,10 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		rule.setIpAddressMatcher(ipAddressMatcher);
 	}
 
-	private void setUsers(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		List<String> userLogins = Utility.csvToStringList(input.get("users"));
+	private void setUsers(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		List<String> userLogins = objToList(input.get("users"));
 		if (userLogins.isEmpty()) {
-			userLogins = Utility.csvToStringList(input.get("userLogin")); // backward compatibility
+			userLogins = objToList(input.get("userLogin")); // backward compatibility
 		}
 
 		if (userLogins.isEmpty()) {
@@ -268,8 +285,8 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		rule.setUsers(result);
 	}
 
-	private void setUserGroups(Map<String, String> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
-		List<String> groupIdsList = Utility.csvToStringList(input.get("userGroups"));
+	private void setUserGroups(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		List<String> groupIdsList = objToList(input.get("userGroups"));
 		if (groupIdsList.isEmpty()) {
 			return;
 		}

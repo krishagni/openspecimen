@@ -13,19 +13,18 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 public class ContainerLabelPrintRuleFactoryImpl extends AbstractLabelPrintRuleFactory {
 	@Override
-	public LabelPrintRule fromRuleDef(Map<String, String> ruleDef, boolean failOnError, OpenSpecimenException ose) {
+	public LabelPrintRule fromRuleDef(Map<String, Object> ruleDef, boolean failOnError, OpenSpecimenException ose) {
 		ContainerLabelPrintRule rule = new ContainerLabelPrintRule();
-
 		setSite(ruleDef, failOnError, rule, ose);
 		return rule;
 	}
 
-	private void setSite(Map<String, String> ruleDef, boolean failOnError, ContainerLabelPrintRule rule, OpenSpecimenException ose) {
-		String input = ruleDef.get("site");
-		if (StringUtils.isBlank(input)) {
+	private void setSite(Map<String, Object> ruleDef, boolean failOnError, ContainerLabelPrintRule rule, OpenSpecimenException ose) {
+		if (isEmptyString(ruleDef.get("site"))) {
 			return;
 		}
 
+		String input = ruleDef.get("site").toString();
 		Site site = null;
 		try {
 			site = daoFactory.getSiteDao().getById(Long.parseLong(input));

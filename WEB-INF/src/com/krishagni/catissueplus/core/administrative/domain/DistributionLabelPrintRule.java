@@ -32,9 +32,8 @@ public class DistributionLabelPrintRule extends LabelPrintRule {
 	}
 
 	@Override
-	protected Map<String, String> getDefMap(boolean ufn) {
-		Map<String, String> ruleDef = new HashMap<>();
-
+	protected Map<String, Object> getDefMap(boolean ufn) {
+		Map<String, Object> ruleDef = new HashMap<>();
 		ruleDef.put("dps", getDps(ufn));
 		return ruleDef;
 	}
@@ -43,8 +42,8 @@ public class DistributionLabelPrintRule extends LabelPrintRule {
 		return super.toString() + ", dp = " + getDps(true);
 	}
 
-	private String getDps(boolean ufn) {
+	private List<String> getDps(boolean ufn) {
 		Function<DistributionProtocol, String> dpMapper = ufn ? DistributionProtocol::getShortTitle : (dp) -> dp.getId().toString();
-		return Utility.nullSafeStream(dps).map(dpMapper).collect(Collectors.joining(","));
+		return Utility.nullSafeStream(dps).map(dpMapper).collect(Collectors.toList());
 	}
 }

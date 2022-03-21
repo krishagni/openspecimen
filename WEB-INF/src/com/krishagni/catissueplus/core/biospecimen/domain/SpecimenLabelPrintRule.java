@@ -110,8 +110,8 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 	}
 
 	@Override
-	protected Map<String, String> getDefMap(boolean ufn) {
-		Map<String, String> ruleDef = new HashMap<>();
+	protected Map<String, Object> getDefMap(boolean ufn) {
+		Map<String, Object> ruleDef = new HashMap<>();
 
 		ruleDef.put("cps", getCpList(ufn));
 		ruleDef.put("visitSite", getSite(ufn, getVisitSite()));
@@ -135,17 +135,17 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 		return isWildCard(lineage) || Specimen.isValidLineage(lineage);
 	}
 
-	private String getCpList(boolean ufn) {
+	private List<String> getCpList(boolean ufn) {
 		Function<CollectionProtocol, String> cpMapper = ufn ? (cp) -> cp.getShortTitle() : (cp) -> cp.getId().toString();
-		return Utility.nullSafeStream(getCps()).map(cpMapper).collect(Collectors.joining(","));
+		return Utility.nullSafeStream(getCps()).map(cpMapper).collect(Collectors.toList());
 	}
 
-	private String getClassesList() {
-		return Utility.join(getSpecimenClasses(), (c) -> c, ", ");
+	private List<String> getClassesList() {
+		return getSpecimenClasses();
 	}
 
-	private String getTypesList() {
-		return Utility.join(getSpecimenTypes(), (t) -> t, ", ");
+	private List<String> getTypesList() {
+		return getSpecimenTypes();
 	}
 
 	private String getSite(boolean ufn, Site site) {

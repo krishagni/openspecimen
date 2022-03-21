@@ -25,9 +25,8 @@ public class ContainerLabelPrintRule extends LabelPrintRule {
 	}
 
 	@Override
-	protected Map<String, String> getDefMap(boolean ufn) {
-		Map<String, String> ruleDef = new HashMap<>();
-
+	protected Map<String, Object> getDefMap(boolean ufn) {
+		Map<String, Object> ruleDef = new HashMap<>();
 		ruleDef.put("site", getSite() != null ? (ufn ? getSite().getName() : getSite().getId().toString()) : null);
 		return ruleDef;
 	}
