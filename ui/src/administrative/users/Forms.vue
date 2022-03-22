@@ -40,8 +40,6 @@ export default {
     });
 
     const loadFormsAndRecords =  () => {
-      alert(props.entityType);
-
       ctx.entity = {
         isActive: props.user.activityStatus == 'Active',
         isUpdateAllowed: props.entityType == 'UserProfile' ?

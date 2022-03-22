@@ -125,7 +125,6 @@ export default {
 
     const router = useRouter();
     const loadRecord = () => {
-      alert('loadRecord');
       if (props.formCtxtId) {
         ctx.selectedForm = props.forms.find((form) => form.formCtxtId == props.formCtxtId);
         if (props.recordId) {
