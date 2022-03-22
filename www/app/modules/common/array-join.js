@@ -9,13 +9,31 @@ angular.module('openspecimen')
         return collection;
       }
 
-      if (!fun) {
+      var transformer = undefined;
+      if (typeof fun == 'function') {
+        transformer = fun;
+      } else if (typeof fun == 'string') {
+        transformer = function(obj) {
+          var parts = fun.split('.');
+          for (var i = 0; i < parts.length; ++i) {
+            if (!obj || typeof obj != 'object') {
+              break;
+            }
+
+            obj = obj[parts[i]];
+          }
+
+          return obj;
+        }
+      }
+
+      if (!transformer) {
          return collection.join(", ");
       }
 
       var result = [];
       angular.forEach(collection, function(item) {
-        var value = fun(item);
+        var value = transformer(item);
         if (value) {
           result.push(value);
         }
