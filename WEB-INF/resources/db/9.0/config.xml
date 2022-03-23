@@ -14,4 +14,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="From email ID to use when sending email notifications">
+    <sql>
+      call add_cfg_prop(
+        'email', 'from_email_id',
+        'from_email_id', 'from_email_id_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

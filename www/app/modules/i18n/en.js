@@ -3159,6 +3159,8 @@
         "account_id_desc": "Email account ID that the OpenSpecimen uses to send and receive email messages. E.g. openspecimen@mycenter.edu.",
         "account_password": "Account Password",
         "account_password_desc": "Password of the OpenSpecimen email account.",
+        "from_email_id": "From Email Address",
+        "from_email_id_desc": "Address to use in the From header of the emails sent by OpenSpecimen. If not specified, then the email account ID setting is used.",
         "admin_email_id": "Administrator Email Address",
         "admin_email_id_desc": "Email address of the OpenSpecimen administrator. Will be used to CC all emails.",
         "it_admin_email_id": "IT Administrator Email Address",

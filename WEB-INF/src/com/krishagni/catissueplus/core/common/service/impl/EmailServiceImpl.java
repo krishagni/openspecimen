@@ -361,7 +361,7 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		}
 
 		message.setText(mail.getBody(), true); // true = isHtml
-		message.setFrom(getAccountId());
+		message.setFrom(getFromEmailId());
 
 		String fromDisplayName = (String) props.getOrDefault("$fromDisplayName", null);
 		String fromId = (String) props.getOrDefault("$fromEmailId", null);
@@ -373,8 +373,8 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 			message.setFrom(new InternetAddress(fromId, fromDisplayName));
 			message.setReplyTo(new InternetAddress(fromId, fromDisplayName));
 		} else if (StringUtils.isNotBlank(fromDisplayName)) {
-			message.setFrom(new InternetAddress(getAccountId(), fromDisplayName));
-			message.setReplyTo(new InternetAddress(getAccountId(), fromDisplayName));
+			message.setFrom(new InternetAddress(getFromEmailId(), fromDisplayName));
+			message.setReplyTo(new InternetAddress(getFromEmailId(), fromDisplayName));
 		}
 
 		if (mail.getAttachments() != null) {
@@ -611,6 +611,10 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 	
 	private String getAccountPassword() {
 		return cfgSvc.getStrSetting(MODULE, "account_password");
+	}
+
+	private String getFromEmailId() {
+		return cfgSvc.getStrSetting(MODULE, "from_email_id", getAccountId());
 	}
 	
 	private String getSmtpHost() {
