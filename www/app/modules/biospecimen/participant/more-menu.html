@@ -17,13 +17,6 @@
     <os-plugin-hooks view-name="'participant-list'" sec-name="'more-menu-top'"></os-plugin-hooks>
 
     <li ng-if="!cpViewCtx.isCoordinator" show-if-allowed="specimenUpdateOpts">
-      <a ui-sref="specimen-create-pooled({cpId: cp.id})">
-        <span class="fa fa-flask"></span>
-        <span translate="specimens.pool_specimens">Pool Specimens</span>
-      </a>
-    </li>
-
-    <li ng-if="!cpViewCtx.isCoordinator" show-if-allowed="specimenUpdateOpts">
       <a ng-click="receiveSpecimens()">
         <span class="fa fa-check-square-o"></span>
         <span translate="specimen_list.receive">Receive</span>

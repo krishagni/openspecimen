@@ -5,7 +5,8 @@
   <table ng-switch-when="false" class="os-table os-table-hover os-table-tree os-table-muted-hdr">
     <tbody class="os-table-body" os-imaging>
       <tr id="specimen-{{specimen.id || 'na'}}-{{specimen.reqId || 'na'}}" class="row"
-        ng-class="{'selected': (!!specimen.id && specimen.id == viewState.selectedSpmn.id) || (!specimen.id && specimen.reqId == viewState.selectedSpmn.reqId)}" ng-repeat="specimen in ctx.specimens | openedTreeNodes"
+        ng-class="{'selected': (!!specimen.id && specimen.id == viewState.selectedSpmn.id) || (!specimen.id && specimen.reqId == viewState.selectedSpmn.reqId), 'os-pooled-specimen': !!specimen.pooledSpecimen}"
+        ng-repeat="specimen in ctx.specimens | openedTreeNodes"
         ng-if="!specimen.$$hideN">
         <td class="col os-word-break" style="border: none;">
           <div ng-style="{'padding-left': (specimen.hasChildren ? specimen.depth * 20 : specimen.depth * 20 + 16) + 'px'}">

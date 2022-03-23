@@ -488,23 +488,6 @@ angular.module('os.biospecimen.participant.specimen-tree',
         return getSelectedSpecimens(scope, '', anyStatus);
       }
 
-      scope.poolSpecimens = function() {
-        var selectedSpmns = getSelectedSpecimens(scope, '') || [];
-        selectedSpmns = selectedSpmns.filter(
-          function(spmn) {
-            return spmn.status == 'Collected' && spmn.activityStatus == 'Active';
-          }
-        );
-
-        if (selectedSpmns.length < 2) {
-          Alerts.error('specimens.select_min_to_create_pooled');
-          return;
-        }
-
-        SpecimensHolder.setSpecimens(selectedSpmns);
-        $state.go('specimen-create-pooled', {cpId: scope.cp.id, visitId: scope.visit.id, cprId: scope.cpr.id});
-      }
-
       scope.initTree = function() {
         if (!scope.reload) {
           return;

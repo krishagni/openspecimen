@@ -13,7 +13,7 @@
       <os-assign-to-spmn-list ng-if="selection.any" on-add-to-list="addSpecimensToSpecimenList(list)">
       </os-assign-to-spmn-list>
 
-      <os-specimen-ops ng-if="selection.any" cp="cp" cpr="cpr" specimens="getSelectedSpecimens(anyStatus)"
+      <os-specimen-ops ng-if="selection.any" cp="cp" cpr="cpr" visit="visit" specimens="getSelectedSpecimens(anyStatus)"
         init-list="initTree()" dropdown-right>
       </os-specimen-ops>
 
@@ -28,12 +28,6 @@
               <span class="fa fa-circle os-status-pending"></span>
               <span ng-switch-when="false" translate="specimens.hide_pending">Hide Pending</span>
               <span ng-switch-when="true" translate="specimens.show_pending">Show Pending</span>
-            </a>
-          </li>
-          <li ng-if="updateAllowed">
-            <a ng-click="poolSpecimens()">
-              <span class="fa fa-flask"></span>
-              <span translate="specimens.pool">Pool</span>
             </a>
           </li>
         </ul>

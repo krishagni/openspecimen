@@ -13,6 +13,9 @@
             <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
+            <span v-if="field.tooltip && field.label">
+              <os-icon name="question-circle" v-os-tooltip="field.tooltip"/>
+            </span>
             <span v-show="ctx.sort.field == field.name">
               <span v-show="ctx.sort.direction == 'ASC'"> &uarr; </span>
               <span v-show="ctx.sort.direction == 'DESC'"> &darr; </span>

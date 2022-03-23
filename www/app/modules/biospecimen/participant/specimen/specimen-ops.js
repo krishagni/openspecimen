@@ -310,6 +310,7 @@ angular.module('os.biospecimen.specimen')
       scope: {
         cp: '=?',
         cpr: '=?',
+        visit: '=?',
         specimens: '&',
         initList: '&',
         resourceOpts: '=?',
@@ -501,6 +502,46 @@ angular.module('os.biospecimen.specimen')
 
         scope.createDerivatives = function() {
           gotoView('specimen-bulk-create-derivatives', {}, 'no_specimens_to_create_derivatives');
+        }
+
+        scope.poolSpecimens = function() {
+          var selectedSpmns = scope.specimens({anyStatus: false});
+          var specimenIds   = selectedSpmns.map(function(spmn) {return spmn.id});
+          if (specimenIds.length < 2) {
+            Alerts.error('specimens.select_min_to_create_pooled');
+            return;
+          }
+
+          Specimen.getByIds(specimenIds, false).then(
+            function(spmns) {
+              spmns = spmns.filter(
+                function(spmn) {
+                  return spmn.status == 'Collected' && spmn.activityStatus == 'Active';
+                }
+              );
+
+              if (spmns.length < 2) {
+                Alerts.error('specimens.select_min_to_create_pooled');
+                return;
+              }
+
+              var cpId = spmns[0].cpId;
+              if (spmns.some(function(spmn) { return spmn.cpId != cpId; })) {
+                Alerts.error('specimens.select_same_cp_specimens');
+                return;
+              }
+
+              SpecimensHolder.setSpecimens(spmns);
+              $state.go(
+                'specimen-create-pooled',
+                {
+                  cpId: cpId,
+                  visitId: scope.visit && scope.visit.id,
+                  cprId: scope.cpr && scope.cpr.id
+                }
+              );
+            }
+          );
         }
 
         scope.addEvent = function() {

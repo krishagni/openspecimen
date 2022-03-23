@@ -54,6 +54,12 @@
       </a>
     </li>
     <li show-if-allowed="resourceOpts.allSpecimenUpdateOpts">
+      <a ng-click="poolSpecimens()">
+        <span class="fa fa-flask"></span>
+        <span translate="specimens.pool">Pool</span>
+      </a>
+    </li>
+    <li show-if-allowed="resourceOpts.allSpecimenUpdateOpts">
       <a ng-click="createAliquots()">
         <span class="fa fa-share-alt"></span>
         <span translate="specimen_list.create_aliquots">Create Aliquots</span>
