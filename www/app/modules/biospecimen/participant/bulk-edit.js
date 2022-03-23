@@ -76,7 +76,7 @@ angular.module('os.biospecimen.participant')
         ctx.editedFields[idx].field = undefined;
         $timeout(
           function() {
-            ctx.editedFields[idx].field = field
+            ctx.editedFields[idx] = {field: field, obj: {cp: cp, cpr: {}}, opts: {}};
             $parse(field.name).assign(ctx.editedFields[idx].obj, null);
 
             var len = ctx.editedFields.length;
