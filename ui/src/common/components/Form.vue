@@ -105,6 +105,10 @@ export default {
          for (let field of formRow) {
            if (field.type == 'subform') {
              let sf = this.$refs['osField-' + field.name];
+             if (sf instanceof Array && sf.length > 0) {
+               sf = sf[0];
+             }
+
              if (!sf.validate()) {
                invalid = true;
              }
@@ -138,7 +142,11 @@ export default {
      },
 
      uploadFile: async function(fieldName) {
-       const fieldRef = this.$refs['osField-' + fieldName];
+       let fieldRef = this.$refs['osField-' + fieldName];
+       if (fieldRef instanceof Array && fieldRef.length > 0) {
+         fieldRef = fieldRef[0];
+       }
+
        if (fieldRef) {
          return fieldRef.upload();
        }
