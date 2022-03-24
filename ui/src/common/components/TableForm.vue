@@ -381,11 +381,13 @@ table th .required-indicator {
   margin-right: 0.5rem;
 }
 
+table th {
+  padding-top: 20px!important;
+}
+
 table th .align-icon {
   margin-top: -20px;
   margin-left: 3px;
-  position: absolute;
-  z-index: 10000;
 }
 
 table th .more-options :deep(button) {
