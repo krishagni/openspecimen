@@ -502,15 +502,19 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	public static SpecimenInfo fromTo(Specimen specimen, SpecimenInfo result) {
 		result.setId(specimen.getId());
 		
-		SpecimenRequirement sr= specimen.getSpecimenRequirement();
-		result.setReqId(sr != null ? sr.getId() : null);
-		result.setReqLabel(sr != null ? sr.getName() : null);
-		result.setSortOrder(sr != null ? sr.getSortOrder() : null);
+		SpecimenRequirement sr = specimen.getSpecimenRequirement();
+		if (sr != null) {
+			result.setReqId(sr.getId());
+			result.setReqLabel(sr.getName());
+			result.setSortOrder(sr.getSortOrder());
+		}
 
-		CollectionProtocolEvent cpe = sr != null ? sr.getCollectionProtocolEvent() : null;
-		result.setEventId(cpe != null ? cpe.getId() : null);
-		result.setEventCode(cpe != null ? cpe.getCode() : null);
-		result.setEventLabel(cpe != null ? cpe.getEventLabel() : null);
+		CollectionProtocolEvent cpe = specimen.getVisit().getCpEvent();
+		if (cpe != null) {
+			result.setEventId(cpe.getId());
+			result.setEventCode(cpe.getCode());
+			result.setEventLabel(cpe.getEventLabel());
+		}
 
 		result.setLabel(specimen.getLabel());
 		result.setBarcode(specimen.getBarcode());
