@@ -342,7 +342,7 @@
       "reviewers_req": "At least one reviewer is required to publish the collection protocol",
       "published": "Collection protocol published!",
       "revisions": "Revisions",
-      "revision": "Revision",
+      "revision": "Revision ID",
       "revision_id": "Revision ID #{{id}}",
       "publication_date": "Publication Date",
       "publisher": "Publisher",

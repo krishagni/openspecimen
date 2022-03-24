@@ -50,6 +50,7 @@ angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
       toUpdate.$saveOrUpdate().then(
         function(savedCp) {
           $scope.cp.activityStatus = savedCp.activityStatus;
+          $scope.cp.draftMode = savedCp.draftMode;
           Alerts.success(successMsg);
         }
       );
