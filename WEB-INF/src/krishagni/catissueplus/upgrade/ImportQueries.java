@@ -1,8 +1,9 @@
 package krishagni.catissueplus.upgrade;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -16,7 +17,6 @@ import javax.sql.DataSource;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -80,14 +80,27 @@ public class ImportQueries {
 			logger.error("Error creating query folder. Exiting import queries.");
 			return;
 		}		
-		
-		File dir = new File(queriesDir);				
-		for (String file : dir.list()) {			
-			String filename = queriesDir + File.separator + file;			
+
+		Path queriesPath = Paths.get(queriesDir);
+		if (!queriesPath.isAbsolute()) {
+			logger.error("Queries directory must be absolute directory path");
+			return;
+		}
+
+
+		queriesPath = queriesPath.normalize();
+		for (String file : queriesPath.toFile().list()) {
+			Path filepath = queriesPath.resolve(file).normalize();
+			if (!filepath.startsWith(queriesPath)) {
+				logger.error("Possible path traversal problem: " + file);
+				continue;
+			}
+
+			String filename = filepath.toString();
 			logger.info("Importing query from file: " + filename);
-			
-			Object[] row = getQueryIdAndMd5Digest(filename);			
-			byte[] content = getFileContent(filename); 
+
+			Object[] row = getQueryIdAndMd5Digest(filepath);
+			byte[] content = getFileContent(filepath);
 			String digest = Utility.getDigest(content);
 			
 			if (row == null) {
@@ -123,11 +136,11 @@ public class ImportQueries {
 	}
 				
 	
-	private static Object[] getQueryIdAndMd5Digest(String filename) {
+	private static Object[] getQueryIdAndMd5Digest(Path file) {
 		JdbcDao jdbcDao = JdbcDaoFactory.getJdbcDao();
-		List<Object> params = new ArrayList<Object>();
-		params.add(filename);
-		params.add(filename);
+		List<Object> params = new ArrayList<>();
+		params.add(file.toString());
+		params.add(file.toString());
 		
 		return jdbcDao.getResultSet(GET_QUERY_ID_AND_MD5_SQL, params, new ResultExtractor<Object[]>() {
 			@Override
@@ -188,12 +201,12 @@ public class ImportQueries {
 		}
 	}
 	
-	private static byte[] getFileContent(String filename) 
+	private static byte[] getFileContent(Path filepath)
 	throws Exception {
 		FileInputStream fin = null;
 		ByteArrayOutputStream bout = null;
 		try {
-			fin = new FileInputStream(filename);
+			fin = new FileInputStream(filepath.toFile());
 			bout = new ByteArrayOutputStream();
 			IoUtil.copy(fin, bout);
 			return bout.toByteArray();

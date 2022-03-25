@@ -63,7 +63,7 @@ public class DeleteDbObjectsUtil implements CustomTaskChange {
 		try {
 			JdbcConnection conn = (JdbcConnection) database.getConnection();
 
-			in = resourceAccessor.getResourcesAsStream(file).iterator().next();
+			in = resourceAccessor.getClass().getResourceAsStream(file);
 			reader = new BufferedReader(new InputStreamReader(in));
 
 			String line;
