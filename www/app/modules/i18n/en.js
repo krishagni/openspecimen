@@ -963,6 +963,8 @@
     "specimen_not_found": "Specimen {{label}} does not exist.",
     "specimen_m_not_found": "Specimens {{label}} do not exist.",
     "specimen_not_found_at_send_site": "Specimen {{label}} either does not exist or not stored at {{sendingSite}} site.",
+    "specimen_not_found_cp": "Specimen {{label}} does not exist in the collection protocol {{cpShortTitle}}.",
+    "specimen_m_not_found_cp": "Specimens {{label}} do not exist in the collection protocol {{cpShortTitle}}.",
     "too_many_specimens": "Too many specimen labels/barcodes provided. Please try by removing some labels/barcodes.",
     "hide_pending":"Hide Pending",
     "show_pending": "Show Pending",

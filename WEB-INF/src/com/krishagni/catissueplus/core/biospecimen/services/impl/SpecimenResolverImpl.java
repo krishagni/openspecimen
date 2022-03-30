@@ -8,6 +8,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
+import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 
@@ -50,6 +51,7 @@ public class SpecimenResolverImpl implements SpecimenResolver {
 	public Specimen getSpecimen(Long specimenId, String cpShortTitle, String label, String barcode) {
 		Specimen specimen = null;
 		Object key = null;
+		ErrorCode notFoundError = SpecimenErrorCode.NOT_FOUND;
 
 		if (specimenId != null) {
 			key = specimenId;
@@ -57,15 +59,21 @@ public class SpecimenResolverImpl implements SpecimenResolver {
 		} else if (StringUtils.isNotBlank(label)) {
 			key = label;
 			specimen = getSpecimen(cpShortTitle, label);
+			if (areLabelsUniquePerCp()) {
+				notFoundError = SpecimenErrorCode.NOT_FOUND_IN_CP;
+			}
 		} else if (StringUtils.isNotBlank(barcode)) {
 			key = barcode;
 			specimen = getSpecimenByBarcode(cpShortTitle, barcode);
+			if (areBarcodesUniquePerCp()) {
+				notFoundError = SpecimenErrorCode.NOT_FOUND_IN_CP;
+			}
 		}
 
 		if (key == null) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.LABEL_REQUIRED);
 		} else if (specimen == null) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_FOUND, key);
+			throw OpenSpecimenException.userError(notFoundError, key, cpShortTitle);
 		}
 
 		return specimen;

@@ -19,7 +19,7 @@ angular.module('os.biospecimen.specimen')
       );
 
       var sites = cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
-      ctx = $scope.ctx = { 
+      ctx = $scope.ctx = {
         cp: cp,
         defCprs: undefined,
         cprs: [],
@@ -28,7 +28,12 @@ angular.module('os.biospecimen.specimen')
         visit: visit,
         extensionCtxt: extensionCtxt,
         spmnFilters: {
-          cpId: cp.id, collectionStatus: ['Collected'], exactMatch: true
+          cpId: cp.id, cpShortTitle: cp.shortTitle, collectionStatus: ['Collected'], exactMatch: true
+        },
+        spmnErrorOpts: {
+          code: 'specimens.specimen_not_found_cp',
+          code_m: 'specimens.specimen_m_not_found_cp',
+          params: {cpShortTitle: cp.shortTitle}
         },
         poolItems: specimens || [],
         specimen: new Specimen({lineage: 'New', pooledSpecimen: true, status: 'Collected'}),
@@ -53,6 +58,20 @@ angular.module('os.biospecimen.specimen')
           ctx.inited = true;
         }
       );
+
+      if (ctx.showSelectVisit && cpr) {
+        addCprDisplayLabel(cpr);
+        $scope.onCprSelect(cpr);
+      }
+    }
+
+    function addCprDisplayLabel(cpr) {
+      cpr.displayLabel = cpr.ppid;
+
+      var p = cpr.participant;
+      if (p.firstName || p.lastName) {
+        cpr.displayLabel += ' (' + p.firstName + (p.firstName && ' ') + p.lastName + ')';
+      }
     }
 
     $scope.searchParticipants = function(searchTerm) {
@@ -67,17 +86,7 @@ angular.module('os.biospecimen.specimen')
       CollectionProtocolRegistration.query({cpId: ctx.cp.id, searchStr: searchTerm}).then(
         function(cprs) {
           ctx.cprs = cprs;
-          angular.forEach(cprs,
-            function(cpr) {
-              cpr.displayLabel = cpr.ppid;
-
-              var p = cpr.participant;
-              if (p.firstName || p.lastName) {
-                cpr.displayLabel += ' (' + p.firstName + (p.firstName && ' ') + p.lastName + ')';
-              }
-            }
-          );
-
+          angular.forEach(cprs, function(cpr) { addCprDisplayLabel(cpr); });
           if (!searchTerm && !ctx.defCprs) {
             ctx.defCprs = cprs;
           }

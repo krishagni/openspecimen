@@ -7,6 +7,8 @@ public enum SpecimenErrorCode implements ErrorCode {
 	ACCESS_DENIED,
 	
 	NOT_FOUND,
+
+	NOT_FOUND_IN_CP,
 	
 	INVALID_SPECIMEN_CLASS,
 	
