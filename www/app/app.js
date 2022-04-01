@@ -98,6 +98,13 @@ osApp.config(function(
             if (userUiState.authToken) {
               AuthService.saveToken(userUiState.authToken);
             }
+          },
+          translationsReady: function($translate) {
+            return $translate.onReady().then(
+              function() {
+                return $translate.isReady();
+              }
+            );
           }
         },
         controller: 'SignedInCtrl'

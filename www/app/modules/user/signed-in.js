@@ -1,6 +1,7 @@
 angular.module('openspecimen')
   .controller('SignedInCtrl', function(
-     $scope, $rootScope, $state, $timeout, $sce, $modal, $filter, currentUser, userUiState, videoSettings,
+     $scope, $rootScope, $state, $timeout, $sce, $modal, $filter,
+     currentUser, userUiState, videoSettings, translationsReady,
      AuthService, Alerts, AuthorizationService, SettingUtil, User, VueApp) {
 
      function init() {
@@ -10,6 +11,7 @@ angular.module('openspecimen')
        ui.os.global.impersonate = !!currentUser.impersonated;
 
        var ctx = $scope.userCtx = {
+         translationsReady: translationsReady,
          hasPhiAccess: AuthorizationService.hasPhiAccess(),
          state: userUiState,
          showNewStuff: true,
