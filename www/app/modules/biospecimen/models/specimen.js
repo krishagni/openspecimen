@@ -328,6 +328,7 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
     function toSpecimenAttrs(sr) {
       sr.reqId = sr.id;
       sr.reqLabel = sr.name;
+      sr.reqCode = sr.code;
       sr.poolSpecimen = !!sr.pooledSpecimenReqId;
 
       if (sr.lineage == 'New' && !sr.poolSpecimen) {
