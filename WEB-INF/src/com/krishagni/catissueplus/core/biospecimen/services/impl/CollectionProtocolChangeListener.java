@@ -73,12 +73,14 @@ public class CollectionProtocolChangeListener implements InitializingBean, Appli
 	}
 
 	private void notifyCpMovedToDraft(CollectionProtocolDetail cp) {
+		UserSummary user = UserSummary.from(AuthUtil.getCurrentUser());
 		Map<String, Object> emailProps = new HashMap<>();
 		emailProps.put("cp", cp);
-		emailProps.put("user", AuthUtil.getCurrentUser());
+		emailProps.put("user", user);
 		emailProps.put("$subject", new Object[] { cp.getShortTitle() });
 
 		List<UserSummary> users = new ArrayList<>();
+		users.add(user);
 		users.add(cp.getPrincipalInvestigator());
 		users.addAll(cp.getCoordinators());
 
