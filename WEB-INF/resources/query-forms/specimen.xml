@@ -294,7 +294,15 @@
             <caption>#getMessage("specimen_spec_position_container_name")</caption>
             <column>CONTAINER_NAME</column>
             <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
-          </textField>              
+          </textField>
+
+          <textField>
+            <name>containerBarcode</name>
+            <udn>containerBarcode</udn>
+            <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
+            <column>CONTAINER_BARCODE</column>
+            <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
+          </textField>
 
           <textField>
             <name>positionDimensionTwoString</name>
