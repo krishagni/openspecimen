@@ -42,6 +42,10 @@ export default {
        },
 
        {
+         "fields": [ { "name": "user.manageWfs" } ]
+       },
+
+       {
          "fields": [ { "name": "user.dnd" } ]
        },
 

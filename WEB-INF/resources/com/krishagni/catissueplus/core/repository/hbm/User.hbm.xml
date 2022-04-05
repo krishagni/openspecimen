@@ -52,6 +52,8 @@
  
     <property name="manageForms" column="MANAGE_FORMS"/>
 
+    <property name="manageWfs" column="MANAGE_WFS"/>
+
     <property name="dnd" column="DND"/>
 
     <property name="apiUser" column="API_USER"/>

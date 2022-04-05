@@ -81,6 +81,8 @@ public class User extends BaseEntity implements UserDetails {
 
 	private Boolean manageForms;
 
+	private Boolean manageWfs;
+
 	private String timeZone;
 
 	private Boolean dnd;
@@ -239,7 +241,7 @@ public class User extends BaseEntity implements UserDetails {
 	}
 	
 	public boolean canManageForms() {
-		return manageForms != null ? manageForms : false;
+		return isAdmin() || isInstituteAdmin() || (!isContact() && Boolean.TRUE.equals(manageForms));
 	}
 
 	public Boolean getManageForms() {
@@ -248,6 +250,18 @@ public class User extends BaseEntity implements UserDetails {
 
 	public void setManageForms(Boolean manageForms) {
 		this.manageForms = manageForms;
+	}
+
+	public boolean canManageWfs() {
+		return isAdmin() || isInstituteAdmin() || (!isContact() && Boolean.TRUE.equals(manageWfs));
+	}
+
+	public Boolean getManageWfs() {
+		return manageWfs;
+	}
+
+	public void setManageWfs(Boolean manageWfs) {
+		this.manageWfs = manageWfs;
 	}
 
 	public String getTimeZone() {
@@ -402,6 +416,7 @@ public class User extends BaseEntity implements UserDetails {
 			setAuthDomain(user.getAuthDomain());
 			setLoginName(user.getLoginName());
 			setManageForms(user.canManageForms());
+			setManageWfs(user.canManageWfs());
 			setApiUser(user.isApiUser());
 			setIpRange(user.getIpRange());
 		}

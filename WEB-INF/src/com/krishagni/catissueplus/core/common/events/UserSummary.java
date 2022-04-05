@@ -49,6 +49,8 @@ public class UserSummary implements Serializable {
 	
 	private Boolean manageForms;
 
+	private Boolean manageWfs;
+
 	private int cpCount;
 
 	private Date creationDate;
@@ -171,6 +173,14 @@ public class UserSummary implements Serializable {
 		this.manageForms = manageForms;
 	}
 
+	public Boolean getManageWfs() {
+		return manageWfs;
+	}
+
+	public void setManageWfs(Boolean manageWfs) {
+		this.manageWfs = manageWfs;
+	}
+
 	public int getCpCount() {
 		return cpCount;
 	}
@@ -246,6 +256,7 @@ public class UserSummary implements Serializable {
 		result.setCreationDate(user.getCreationDate());
 		result.setPhoneNumber(user.getPhoneNumber());
 		result.setManageForms(user.getManageForms());
+		result.setManageWfs(user.canManageWfs());
 		result.setActivityStatus(user.getActivityStatus());
 		result.setImpersonated(user.isImpersonated());
 

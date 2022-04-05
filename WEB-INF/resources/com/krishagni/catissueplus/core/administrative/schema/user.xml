@@ -70,5 +70,17 @@
       <caption>#getMessage("user_dnd")</caption>
       <attribute>dnd</attribute>
     </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("user_manage_forms")</caption>
+      <attribute>manageForms</attribute>
+    </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("user_manage_wfs")</caption>
+      <attribute>manageWfs</attribute>
+    </field>
   </record>
 </object-schema>

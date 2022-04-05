@@ -149,4 +149,10 @@
       <column name="AQL" type="${clob.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Manage workflows">
+    <addColumn tableName="CATISSUE_USER">
+      <column name="MANAGE_WFS" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

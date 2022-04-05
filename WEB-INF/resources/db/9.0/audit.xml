@@ -25,4 +25,11 @@
       <column name="poolItem_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Manage workflows">
+    <addColumn tableName="CATISSUE_USER_AUD">
+      <column name="MANAGE_WFS" type="${boolean.type}" />
+      <column name="manageWfs_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -159,6 +159,18 @@ export default {
 
     {
       "type": "radio",
+      "label": "Manage Workflows?",
+      "name": "user.manageWfs",
+      "optionsPerRow": 2,
+      "options": [
+        { "caption": "Yes", "value": true },
+        { "caption": "No", "value": false }
+      ],
+      "showWhen": "!user.type || user.type == 'NONE'"
+    },
+
+    {
+      "type": "radio",
       "label": "Disable Notifications?",
       "name": "user.dnd",
       "optionsPerRow": 2,

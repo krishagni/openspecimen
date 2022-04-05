@@ -54,6 +54,7 @@ public class UserFactoryImpl implements UserFactory {
 		setAddress(detail, user, ose);
 		setAuthDomain(detail, user, ose);
 		setManageForms(detail, user, ose);
+		setManageWfs(detail, user, ose);
 		setDnd(detail, user, ose);
 		setApiUser(detail, user, ose);
 		setIpRange(detail, user, ose);
@@ -81,6 +82,7 @@ public class UserFactoryImpl implements UserFactory {
 		setAddress(detail, existing, user, ose);
 		setAuthDomain(detail, existing, user, ose);
 		setManageForms(detail, existing, user, ose);
+		setManageWfs(detail, existing, user, ose);
 		setDnd(detail, existing, user, ose);
 		setApiUser(detail, existing, user, ose);
 		setIpRange(detail, existing, user, ose);
@@ -336,6 +338,7 @@ public class UserFactoryImpl implements UserFactory {
 
 			default:
 				user.setManageForms(detail.getManageForms());
+				break;
 		}
 	}
 
@@ -344,6 +347,31 @@ public class UserFactoryImpl implements UserFactory {
 			setManageForms(detail, user, ose);
 		} else {
 			user.setManageForms(existing.getManageForms());
+		}
+	}
+
+	private void setManageWfs(UserDetail detail, User user, OpenSpecimenException ose) {
+		switch (user.getType()) {
+			case SUPER:
+			case INSTITUTE:
+				user.setManageWfs(true);
+				break;
+
+			case CONTACT:
+				user.setManageWfs(false);
+				break;
+
+			default:
+				user.setManageWfs(detail.isManageWfs());
+				break;
+		}
+	}
+
+	private void setManageWfs(UserDetail detail, User existing, User user, OpenSpecimenException ose) {
+		if (detail.isAttrModified("manageWfs")) {
+			setManageWfs(detail, user, ose);
+		} else {
+			user.setManageWfs(existing.getManageWfs());
 		}
 	}
 
