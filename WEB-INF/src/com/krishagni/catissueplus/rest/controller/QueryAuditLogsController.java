@@ -46,7 +46,10 @@ public class QueryAuditLogsController {
 
 		@RequestParam(value = "userId", required = false)
 		Long userId,
-			
+
+		@RequestParam(value = "orderDirection", required = false, defaultValue = "desc")
+		String orderDirection,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 			
@@ -55,6 +58,7 @@ public class QueryAuditLogsController {
 		
 		QueryAuditLogsListCriteria crit = new QueryAuditLogsListCriteria()
 			.query(query).userId(userId)
+			.asc("asc".equalsIgnoreCase(orderDirection))
 			.startAt(startAt).maxResults(maxResults);
 		return ResponseEvent.unwrap(querySvc.getAuditLogs(RequestEvent.wrap(crit)));
 	}
