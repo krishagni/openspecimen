@@ -25,12 +25,13 @@ import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.saml2.metadata.provider.ResourceBackedMetadataProvider;
 import org.opensaml.util.resource.FilesystemResource;
 import org.opensaml.util.resource.ResourceException;
-import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
 import org.opensaml.xml.parse.XMLParserException;
+import org.opensaml.xml.security.BasicSecurityConfiguration;
 import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
+import org.opensaml.xml.signature.SignatureConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -81,11 +82,15 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.rest.filter.SamlFilter;
 
 @Configurable
 public class SamlBootstrap {
+	private static final LogUtil logger = LogUtil.getLogger(SamlBootstrap.class);
+
 	private static final String LOGIN_URL = "/saml/login/**";
 
 	private static final String SSO_URL = "/saml/SSO/**";
@@ -121,14 +126,45 @@ public class SamlBootstrap {
 	public void initialize() {
 		try {
 			PaosBootstrap.bootstrap();
+			setSignatureMethod();
+			setDigestMethod();
 			setMetadataKeyInfoGenerator();
 			setupSamlFilterChain();
 			authManager.getProviders().add(getSamlAuthenticationProvider());
-		} catch (ConfigurationException e) {
-			throw new RuntimeException("Error invoking OpenSAML bootstrap", e);
 		} catch (Exception e) {
-			throw new RuntimeException("Error initializing saml filter", e);
+			logger.error("Error configuring SAML authentication provider - " + e.getMessage(), e);
+			throw new RuntimeException("Error configuring SAML authentication provider - " + e.getMessage(), e);
 		}
+	}
+
+	private void setSignatureMethod() {
+		String signature = samlProps.get("signature");
+		if (StringUtils.isBlank(signature)) {
+			return;
+		}
+
+		Pair<String, String> method = SIGNATURE_ALGOS.get(signature.toLowerCase());
+		if (method == null) {
+			throw new RuntimeException("Unknown signature method - " + signature.toLowerCase());
+		}
+
+		BasicSecurityConfiguration config = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
+		config.registerSignatureAlgorithmURI(method.first(), method.second());
+	}
+
+	private void setDigestMethod() {
+		String digest = samlProps.get("digest");
+		if (StringUtils.isBlank(digest)) {
+			return;
+		}
+
+		String method = DIGEST_ALGOS.get(digest.toLowerCase());
+		if (method == null) {
+			throw new RuntimeException("Unknown digest method - " + digest.toLowerCase());
+		}
+
+		BasicSecurityConfiguration config = (BasicSecurityConfiguration) Configuration.getGlobalSecurityConfiguration();
+		config.setSignatureReferenceDigestMethod(method);
 	}
 
 	private void setMetadataKeyInfoGenerator() {
@@ -545,4 +581,27 @@ public class SamlBootstrap {
 
 		return appUrl;
 	}
+
+	private static final Map<String, Pair<String, String>> SIGNATURE_ALGOS = new HashMap<String, Pair<String, String>>() {
+		{
+			put("dsa-sha1",     Pair.make("DSA", SignatureConstants.ALGO_ID_SIGNATURE_DSA_SHA1));
+			put("rsa-sha1",     Pair.make("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA1));
+			put("rsa-sha256",   Pair.make("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256));
+			put("rsa-sha384",   Pair.make("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA384));
+			put("rsa-sha512",   Pair.make("RSA", SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA512));
+			put("ecdsa-sha1",   Pair.make("EC", SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA1));
+			put("ecdsa-sha256", Pair.make("EC", SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA256));
+			put("ecdsa-sha384", Pair.make("EC", SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA384));
+			put("ecdsa-sha512", Pair.make("EC", SignatureConstants.ALGO_ID_SIGNATURE_ECDSA_SHA512));
+		}
+	};
+
+	private static final Map<String, String> DIGEST_ALGOS = new HashMap<String, String>() {
+		{
+			put("sha1", SignatureConstants.ALGO_ID_DIGEST_SHA1);
+			put("sha256", SignatureConstants.ALGO_ID_DIGEST_SHA256);
+			put("sha384", SignatureConstants.ALGO_ID_DIGEST_SHA384);
+			put("sha512", SignatureConstants.ALGO_ID_DIGEST_SHA512);
+		}
+	};
 }

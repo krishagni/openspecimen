@@ -63,7 +63,7 @@ public class DomainRegistrationFactoryImpl implements DomainRegistrationFactory 
 		}
 
 		if (!isValidImplClass(implClass)) {
-			ose.addError(AuthProviderErrorCode.INVALID_AUTH_IMPL, implClass);
+			ose.addError(AuthProviderErrorCode.INVALID_AUTH_IMPL, "Invalid class: " + implClass);
 			return null;
 		}
 		

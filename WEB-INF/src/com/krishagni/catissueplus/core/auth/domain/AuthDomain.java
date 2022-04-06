@@ -107,8 +107,8 @@ public class AuthDomain {
 			
 			return authService;
 		} catch (Exception e) {
-			logger.error("Error obtaining an instance of auth provider", e);
-			throw OpenSpecimenException.userError(AuthProviderErrorCode.INVALID_AUTH_IMPL);
+			logger.error("Error obtaining an instance of auth provider - " + e.getMessage(), e);
+			throw OpenSpecimenException.userError(AuthProviderErrorCode.INVALID_AUTH_IMPL, e.getMessage());
 		}
 	}
 }
