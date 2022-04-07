@@ -38,6 +38,15 @@
     </row>
     <row>
       <textField>
+        <name>code</name>
+        <udn>code</udn>
+        <caption>#getMessage(cp_code")</caption>
+        <column>CODE</column>
+        <recordUrl>#/object-state-params-resolver?stateName=cp-detail.overview&amp;objectName=collection_protocol&amp;key=title&amp;value={{$value}}</recordUrl>
+      </textField>
+    </row>
+    <row>
+      <textField>
         <name>irbIdentifier</name>
         <udn>irbIdentifier</udn>
         <caption>#getMessage("cp_irb_id")</caption>
