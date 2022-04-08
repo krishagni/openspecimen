@@ -52,6 +52,8 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 
 	private boolean copyItemsFromExistingOrder;
 
+	private boolean distributeAvailableQty;
+
 	public UserSummary getDistributor() {
 		return distributor;
 	}
@@ -179,6 +181,15 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	public void setCopyItemsFromExistingOrder(boolean copyItemsFromExistingOrder) {
 		this.copyItemsFromExistingOrder = copyItemsFromExistingOrder;
+	}
+
+	public boolean isDistributeAvailableQty() {
+		return distributeAvailableQty;
+	}
+
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	public void setDistributeAvailableQty(boolean distributeAvailableQty) {
+		this.distributeAvailableQty = distributeAvailableQty;
 	}
 
 	public static DistributionOrderDetail from(DistributionOrder order) {

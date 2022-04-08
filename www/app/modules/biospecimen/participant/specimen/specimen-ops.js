@@ -244,6 +244,7 @@ angular.module('os.biospecimen.specimen')
         specimenList: {id: specimenListId},
         clearListId: details.clearListId,
         clearListMode: details.clearListMode,
+        distributeAvailableQty: true,
         orderItems: getOrderItems(specimens, details.printLabels),
         comments: details.comments,
         status: 'EXECUTED'

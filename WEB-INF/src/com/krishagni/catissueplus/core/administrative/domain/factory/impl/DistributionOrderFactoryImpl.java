@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.domain.factory.impl;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -284,7 +285,7 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 				continue;
 			}
 
-			DistributionOrderItem item = getOrderItem(oid, order, requestedSpmns, ose);
+			DistributionOrderItem item = getOrderItem(detail, oid, order, requestedSpmns, ose);
 			if (item == null) {
 				error = true;
 				break;
@@ -386,12 +387,13 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 	}
 	
 	private DistributionOrderItem getOrderItem(
-			DistributionOrderItemDetail detail,
-			DistributionOrder order,
-			Set<Long> requestedSpmns,
-			OpenSpecimenException ose) {
+		DistributionOrderDetail orderDetail,
+		DistributionOrderItemDetail itemDetail,
+		DistributionOrder order,
+		Set<Long> requestedSpmns,
+		OpenSpecimenException ose) {
 
-		Specimen specimen = getSpecimen(detail.getSpecimen(), ose);
+		Specimen specimen = getSpecimen(itemDetail.getSpecimen(), ose);
 		if (specimen == null) {
 			return null;
 		}
@@ -402,44 +404,47 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 			return null;
 		}
 
-		if (detail.getQuantity() == null) {
-			if (specimen.getAvailableQuantity() != null) {
+		BigDecimal distQty = itemDetail.getQuantity();
+		if (distQty == null) {
+			if (orderDetail.isDistributeAvailableQty()) {
+				distQty = specimen.getAvailableQuantity();
+			} else if (specimen.getAvailableQuantity() != null) {
 				ose.addError(DistributionOrderErrorCode.ITEM_QTY_REQ, specimen.getLabel());
 				return null;
 			}
-		} else if (NumUtil.lessThanZero(detail.getQuantity())) {
+		} else if (NumUtil.lessThanZero(distQty)) {
 			ose.addError(DistributionOrderErrorCode.ITEM_INVALID_QTY, specimen.getLabel());
 			return null;
 		}
 
-		if (NumUtil.lessThanZero(detail.getCost())) {
-			ose.addError(DistributionOrderErrorCode.INVALID_COST, specimen.getLabel(), detail.getCost());
+		if (NumUtil.lessThanZero(itemDetail.getCost())) {
+			ose.addError(DistributionOrderErrorCode.INVALID_COST, specimen.getLabel(), itemDetail.getCost());
 		}
 
-		if (detail.getHoldingLocation() != null && StringUtils.isNotBlank(detail.getHoldingLocation().getName())) {
+		if (itemDetail.getHoldingLocation() != null && StringUtils.isNotBlank(itemDetail.getHoldingLocation().getName())) {
 			try {
 				SpecimenDetail spmnDetail = new SpecimenDetail();
 				spmnDetail.setId(specimen.getId());
 				spmnDetail.setDpId(order.getDistributionProtocol() != null ? order.getDistributionProtocol().getId() : null);
-				spmnDetail.setHoldingLocation(detail.getHoldingLocation());
+				spmnDetail.setHoldingLocation(itemDetail.getHoldingLocation());
 
 				Specimen newSpmn = specimenFactory.createSpecimen(specimen, spmnDetail, null);
 				specimen.setDp(newSpmn.getDp());
 				specimen.setHoldingLocation(newSpmn.getHoldingLocation());
-				detail.setStatus(DistributionOrderItem.Status.DISTRIBUTED_AND_CLOSED.name());
+				itemDetail.setStatus(DistributionOrderItem.Status.DISTRIBUTED_AND_CLOSED.name());
 			} catch (OpenSpecimenException se) {
 				ose.addErrors(se.getErrors());
 			}
 		}
 
 		DistributionOrderItem orderItem = new DistributionOrderItem();
-		orderItem.setQuantity(detail.getQuantity());
-		orderItem.setCost(detail.getCost());
+		orderItem.setQuantity(distQty);
+		orderItem.setCost(itemDetail.getCost());
 		orderItem.setSpecimen(specimen);
 		orderItem.setOrder(order);
-		orderItem.setPrintLabel(detail.isPrintLabel());
+		orderItem.setPrintLabel(itemDetail.isPrintLabel());
 
-		setOrderItemStatus(detail, orderItem, ose);
+		setOrderItemStatus(itemDetail, orderItem, ose);
 		return orderItem;
 	}
 	
