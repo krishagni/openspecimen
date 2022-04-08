@@ -79,6 +79,12 @@
       <caption>#getMessage("cp_irb_id")</caption>
       <attribute>irbId</attribute>
     </field>
+
+    <field>
+      <caption>#getMessage("cp_specimen_centric")</caption>
+      <attribute>specimenCentric</attribute>
+      <type>boolean</type>
+    </field>
     
     <field>
       <caption>#getMessage("cp_anticipated_participants_cnt")</caption>
