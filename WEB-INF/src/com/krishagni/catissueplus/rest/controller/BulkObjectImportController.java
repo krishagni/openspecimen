@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -204,5 +205,17 @@ public class BulkObjectImportController {
 		resp.throwErrorIfUnsuccessful();
 
 		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "schedule")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Integer> scheduleJobs(@PathVariable("file") MultipartFile file)
+	throws IOException {
+		FileDetail input = new FileDetail();
+		input.setFilename(file.getOriginalFilename());
+		input.setFileIn(file.getInputStream());
+		Integer scheduled = ResponseEvent.unwrap(importSvc.scheduleImportJobs(RequestEvent.wrap(input)));
+		return Collections.singletonMap("scheduled", scheduled);
 	}
 }

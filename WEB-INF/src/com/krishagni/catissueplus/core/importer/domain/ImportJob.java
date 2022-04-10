@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
 
 public class ImportJob extends BaseEntity {
 	public enum Status {
@@ -220,5 +221,17 @@ public class ImportJob extends BaseEntity {
 
 	public boolean isFailed() {
 		return getStatus() == Status.FAILED;
+	}
+
+	public String getDisplayName() {
+		return new StringBuilder()
+			.append("#" + getId()).append(" ")
+			.append(getMsg("bulk_import_ops_" + getType().name())).append(" ")
+			.append(getMsg("bulk_import_entities_" + getName()))
+			.toString();
+	}
+
+	private String getMsg(String key) {
+		return MessageUtil.getInstance().getMessage(key);
 	}
 }

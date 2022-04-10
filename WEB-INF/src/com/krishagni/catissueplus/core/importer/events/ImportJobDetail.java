@@ -29,6 +29,8 @@ public class ImportJobDetail {
 	
 	private Map<String, String> params;
 
+	private String displayName;
+
 	public Long getId() {
 		return id;
 	}
@@ -109,6 +111,14 @@ public class ImportJobDetail {
 		this.params = params;
 	}
 
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
 	public static ImportJobDetail from(ImportJob job) {
 		ImportJobDetail detail = new ImportJobDetail();
 		detail.setId(job.getId());
@@ -121,6 +131,7 @@ public class ImportJobDetail {
 		detail.setTotalRecords(job.getTotalRecords());
 		detail.setFailedRecords(job.getFailedRecords());
 		detail.setParams(job.getParams());
+		detail.setDisplayName(job.getDisplayName());
 		return detail;
 	}
 	

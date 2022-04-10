@@ -541,6 +541,10 @@ export default {
   height: 100%;
 }
 
+.os-list .results :deep(.os-pager) {
+  margin-top: 1.25rem;
+}
+
 .os-list .results .results-inner .p-inline-message {
   width: 100%;
 }

@@ -7,15 +7,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
@@ -38,9 +43,9 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.events.MergedObject;
+import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
@@ -79,6 +84,7 @@ import com.krishagni.catissueplus.core.importer.services.ObjectImporterLifecycle
 import com.krishagni.catissueplus.core.importer.services.ObjectReader;
 import com.krishagni.catissueplus.core.importer.services.ObjectSchemaFactory;
 import com.krishagni.catissueplus.core.init.AppProperties;
+import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.cachestore.LinkedEhCacheMap;
 
@@ -88,6 +94,8 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	private static final int MAX_RECS_PER_TXN = 5000;
 
 	private static final String CFG_MAX_TXN_SIZE = "import_max_records_per_txn";
+
+	private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
 	private ConfigurationService cfgSvc;
 
@@ -333,6 +341,77 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	}
 
 	@Override
+	@PlusTransactional
+	public ResponseEvent<Integer> scheduleImportJobs(RequestEvent<FileDetail> req) {
+		File workDir = null;
+
+		try {
+			if (!AuthUtil.isAdmin()) {
+				return ResponseEvent.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
+			}
+
+			workDir = new File(getImportDir(), UUID.randomUUID().toString());
+			workDir.mkdirs();
+
+			FileDetail input = req.getPayload();
+			File importFile = new File(workDir, input.getFilename());
+			if (!importFile.getCanonicalPath().startsWith(workDir.getCanonicalPath())) {
+				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Path traversal attempt");
+			}
+
+			try (OutputStream out = new FileOutputStream(importFile)) {
+				IOUtils.copy(input.getFileIn(), out);
+			}
+
+			List<File> files = Collections.emptyList();
+			if (isZipFile(importFile)) {
+				File inflateDir = new File(workDir, "inflated");
+				try (InputStream zipIn = new FileInputStream(importFile)) {
+					Utility.inflateZip(zipIn, inflateDir.getAbsolutePath());
+				}
+
+				TreeMap<Date, File> sortedFiles = new TreeMap<>();
+				for (File csv : inflateDir.listFiles()) {
+					Date tstmp = getTimestamp(csv);
+					if (tstmp == null) {
+						return ResponseEvent.userError(ImportJobErrorCode.INV_FILENAME, csv.getName());
+					}
+
+					sortedFiles.put(tstmp, csv);
+				}
+
+				files = new ArrayList<>(sortedFiles.values());
+			} else {
+				Date tstmp = getTimestamp(importFile);
+				if (tstmp == null) {
+					return ResponseEvent.userError(ImportJobErrorCode.INV_FILENAME, importFile.getName());
+				}
+
+				files = Collections.singletonList(importFile);
+			}
+
+			File scheduledDir = new File(getDataDir(), "scheduled-bulk-import");
+			for (File file : files) {
+				FileUtils.moveFileToDirectory(file, scheduledDir, true);
+			}
+
+			return ResponseEvent.response(files.size());
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		} finally {
+			if (workDir != null) {
+				try {
+					FileUtils.deleteDirectory(workDir);
+				} catch (Exception e) {
+					logger.error("Error deleting the directory: " + workDir.getAbsolutePath());
+				}
+			}
+		}
+	}
+
+	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		boolean startScheduler = (lastRefreshTime == 0L);
 		lastRefreshTime = System.currentTimeMillis();
@@ -359,9 +438,13 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	}
 
 	private boolean isZipFile(String zipFilename) {
+		return isZipFile(new File(zipFilename));
+	}
+
+	private boolean isZipFile(File file) {
 		ZipFile zipFile = null;
 		try {
-			zipFile = new ZipFile(zipFilename);
+			zipFile = new ZipFile(file);
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -726,6 +809,29 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 				return importJobDao.setActiveImportRunnerNode("none");
 			}
 		);
+	}
+
+	private Date getTimestamp(File file) {
+		String filename = file.getName();
+		String[] tokens = filename.split("_");
+
+		if (tokens.length < 3) {
+			logger.info(String.format("Filename '%s' is not in correct format", filename));
+			return null;
+		}
+
+		String timestampStr = tokens[2];
+		if ("extensions".equals(tokens[0]) && tokens.length == 5) {
+			timestampStr = tokens[4];
+		}
+
+		try {
+			return DATE_FMT.parse(timestampStr);
+		} catch (ParseException e) {
+			logger.error("Appended timestamp in filename is not in correct format: " + timestampStr, e);
+		}
+
+		return null;
 	}
 
 	private class ImporterTask implements Runnable {

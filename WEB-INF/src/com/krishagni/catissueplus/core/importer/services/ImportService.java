@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.importer.events.FileRecordsDetail;
@@ -28,4 +29,6 @@ public interface ImportService {
 	public ResponseEvent<List<Map<String, Object>>> processFileRecords(RequestEvent<FileRecordsDetail> req);
 
 	public ResponseEvent<ImportJobDetail> stopJob(RequestEvent<Long> req);
+
+	public ResponseEvent<Integer> scheduleImportJobs(RequestEvent<FileDetail> req);
 }
