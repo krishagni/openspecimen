@@ -1343,14 +1343,17 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void undoDistribution(DistributionOrderItem item) {
 		if (isClosed()) {
-			setAvailableQuantity(item.getQuantity());
 			activate();
-		} else {
-			if (getAvailableQuantity() == null) {
-				setAvailableQuantity(item.getQuantity());
-			} else if (item.getQuantity() != null) {
-				setAvailableQuantity(getAvailableQuantity().add(item.getQuantity()));
-			}
+		}
+
+		if (getAvailableQuantity() == null) {
+			setAvailableQuantity(item.getQuantity());
+		} else if (item.getQuantity() != null) {
+			setAvailableQuantity(getAvailableQuantity().add(item.getQuantity()));
+		}
+
+		if (NumUtil.greaterThan(getAvailableQuantity(), getInitialQuantity())) {
+			setAvailableQuantity(getInitialQuantity());
 		}
 
 		SpecimenDistributionEvent.createForDistributionOrderItem(item).delete();
