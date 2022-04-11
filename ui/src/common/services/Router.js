@@ -7,6 +7,10 @@ class Router {
   // baseUrl = 'http://localhost:9000/#/';
 
   ngGoto(state, params) {
+    window.location.href = this.ngUrl(state, params);
+  }
+
+  ngUrl(state, params) {
     let url   = this.baseUrl + state;
     let query = '';
     Object.keys(params || {}).forEach(
@@ -26,7 +30,7 @@ class Router {
       url += '?' + query;
     }
 
-    window.location.href = url;
+    return url
   }
 
   goto(name, params, query) {

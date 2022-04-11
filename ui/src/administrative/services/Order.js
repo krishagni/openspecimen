@@ -1,6 +1,7 @@
 
 import formUtil from '@/common/services/FormUtil.js';
 import http     from '@/common/services/HttpClient.js';
+import util     from '@/common/services/Util.js';
 import formSvc  from '@/forms/services/Form.js';
 
 import addEditLayout  from '@/administrative/schemas/orders/addedit.js';
@@ -104,7 +105,7 @@ class Order {
   }
 
   async getDict(dp) {
-    const result  = JSON.parse(JSON.stringify(orderSchema.fields)); // copy
+    const result  = util.clone(orderSchema.fields);
     const formDef = await this.getCustomFieldsForm(dp);
     const customFields = formUtil.deFormToDict(formDef, 'order.extensionDetail.attrsMap.');
     return result.concat(customFields);

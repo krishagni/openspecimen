@@ -7,6 +7,7 @@
 
       <span class="os-title">
         <h3>{{ctx.order.name}}</h3>
+        <os-tag :value="status" :rounded="true" :type="tagType" />
       </span>
     </os-page-head>
     <os-page-body>
@@ -91,6 +92,30 @@ export default {
       if (oldVal != newVal) {
         this.loadOrder();
       }
+    }
+  },
+
+  computed: {
+    tagType: function() {
+      switch (this.ctx.order.status) {
+        case 'PENDING':
+          return 'warning';
+        case 'EXECUTED':
+          return 'info';
+      }
+
+      return '';
+    },
+
+    status: function() {
+      switch (this.ctx.order.status) {
+        case 'PENDING':
+          return 'Pending';
+        case 'EXECUTED':
+          return 'Executed';
+      }
+
+      return '';
     }
   },
 

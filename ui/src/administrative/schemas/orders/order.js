@@ -1,10 +1,20 @@
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   fields:  [
     {
       "type": "span",
       "label": "Request",
       "name": "order.request.id",
-      "showWhen": "!!order.request.id"
+      "showWhen": "!!order.request.id",
+      "href": (data) => {
+        const request = data.order.request;
+        if (request && request.id) {
+          return routerSvc.ngUrl('specimen-requests/' + request.id + '/overview', {catalogId: request.catalogId});
+        }
+
+        return null;
+      }
     },
     {
       "type": "dropdown",
@@ -20,7 +30,8 @@ export default {
         "required": {
           "message": "Distribution protocol is mandatory"
         }
-      }
+      },
+      "href": (data) => routerSvc.getUrl('DpDetail.Overview', {dpId: data.order.distributionProtocol.id})
     },
     {
       "type": "text",

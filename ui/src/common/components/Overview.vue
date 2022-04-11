@@ -16,6 +16,11 @@
           <span v-else-if="field.type == 'signature'">
             <img :src="field.value.url">
           </span>
+          <span v-else-if="field.hrefLink">
+            <a :href="field.hrefLink" target="_blank" rel="noopener">
+              <span>{{field.value}}</span>
+            </a>
+          </span>
           <span v-else-if="field.type == 'text'">
             <span v-html="field.value"></span>
           </span>
@@ -128,7 +133,9 @@ export default {
             item.value = util.linkify(item.value);
             textAreaFields.push(item);
           } else {
-            if (item.type == 'text') {
+            if (typeof item.href == 'function') {
+              item.hrefLink = item.href(this.object);
+            } else if (item.type == 'text') {
               item.value = util.linkify(item.value);
             }
 
