@@ -318,7 +318,7 @@ public class DistributionOrder extends BaseExtensionEntity {
 		}
 	}
 
-	public int deleteItems(List<Long> itemIds) {
+	public List<DistributionOrderItem> deleteItems(List<Long> itemIds) {
 		Map<Long, SpecimenRequestItem> reqItemsMap = Collections.emptyMap();
 		if (getRequest() != null) {
 			reqItemsMap = getRequest().getSpecimenIdRequestItemMap();
@@ -326,7 +326,8 @@ public class DistributionOrder extends BaseExtensionEntity {
 
 		DaoFactory daoFactory = OpenSpecimenAppCtxProvider.getBean("biospecimenDaoFactory");
 		DistributionOrderItemListCriteria crit = new DistributionOrderItemListCriteria().orderId(getId());
-		int itemIdx = 0, deleted = 0;
+		int itemIdx = 0;
+		List<DistributionOrderItem> deletedItems = new ArrayList<>();
 		while (itemIdx < itemIds.size()) {
 			crit.ids(itemIds.subList(itemIdx, Math.min(itemIdx + 50, itemIds.size())));
 			itemIdx += 50;
@@ -339,7 +340,9 @@ public class DistributionOrder extends BaseExtensionEntity {
 				}
 
 				daoFactory.getDistributionOrderDao().deleteOrderItem(item);
-				++deleted;
+				if (deletedItems.size() < 100) {
+					deletedItems.add(item);
+				}
 			}
 		}
 
@@ -347,7 +350,7 @@ public class DistributionOrder extends BaseExtensionEntity {
 			getRequest().reopenIfNotFulfilled();
 		}
 
-		return deleted;
+		return deletedItems;
 	}
 
 	public boolean isOrderExecuted() {

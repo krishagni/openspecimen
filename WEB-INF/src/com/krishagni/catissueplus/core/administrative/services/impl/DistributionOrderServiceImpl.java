@@ -325,7 +325,9 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 				return ResponseEvent.response(0);
 			}
 
-			return ResponseEvent.response(order.deleteItems(itemIds));
+			List<DistributionOrderItem> deletedItems = order.deleteItems(itemIds);
+			notifyOrderItemsDeleted(order, deletedItems);
+			return ResponseEvent.response(deletedItems.size());
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1600,6 +1602,32 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		emailService.sendEmail(ORDER_DELETE_FAILED_EMAIL_TMPL, new String[] { currentUser.getEmailAddress() }, null, emailProps);
 	}
 
+	private void notifyOrderItemsDeleted(DistributionOrder order, List<DistributionOrderItem> deletedItems) {
+		if (order.getDistributionProtocol().areEmailNotifsDisabled()) {
+			return;
+		}
+
+		Set<User> rcpts = new HashSet<>();
+		rcpts.add(AuthUtil.getCurrentUser());
+		rcpts.add(order.getDistributor());
+		rcpts.add(order.getRequester());
+		rcpts.add(order.getDistributionProtocol().getPrincipalInvestigator());
+		rcpts.addAll(order.getDistributionProtocol().getCoordinators());
+		if (order.getSite() != null && CollectionUtils.isNotEmpty(order.getSite().getCoordinators())) {
+			rcpts.addAll(order.getSite().getCoordinators());
+		}
+
+		Map<String, Object> emailProps = new HashMap<>();
+		emailProps.put("$subject", new Object[] { order.getId(), order.getName() });
+		emailProps.put("order", order);
+		emailProps.put("deletedItems", deletedItems);
+		emailProps.put("deletedBy", AuthUtil.getCurrentUser());
+		for (User rcpt : rcpts) {
+			emailProps.put("rcpt", rcpt);
+			emailService.sendEmail(ORDER_ITEMS_DELETED_EMAIL_TMPL, new String[] { rcpt.getEmailAddress() }, null, emailProps);
+		}
+	}
+
 	private DistributionOrder getOrder(Long orderId, String orderName) {
 		DistributionOrder order = null;
 		Object key = null;
@@ -1855,6 +1883,8 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 	private static final String ORDER_FAILED_EMAIL_TMPL = "order_failed";
 
 	private static final String ORDER_DELETED_EMAIL_TMPL = "order_deleted";
+
+	private static final String ORDER_ITEMS_DELETED_EMAIL_TMPL = "order_items_deleted";
 
 	private static final String ORDER_DELETE_FAILED_EMAIL_TMPL = "order_delete_failed";
 }
