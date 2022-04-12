@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -1025,6 +1024,15 @@ public class Specimen extends BaseExtensionEntity {
 					return;
 				}
 				break;
+
+			default:
+				//
+				// the other values - on registration and on visit means the labels
+				// were pre-printed when pending visits and specimens got created.
+				// none means no pre-printing.
+				// therefore returning from this point is the right thing to do.
+				//
+				return;
 		}
 
 		if (getCollectionProtocol().isManualSpecLabelEnabled()) {
