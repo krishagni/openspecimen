@@ -561,7 +561,7 @@ edu.common.de.Form = function(args) {
 
     var labelEl = undefined;
     if (field.type != 'label' && field.type != 'heading') {
-      labelEl = this.fieldLabel(id, field.caption);
+      labelEl = this.fieldLabel(id, field.caption, field);
     }
 
     var fieldObj = edu.common.de.FieldFactory.getField(field, undefined, args);
@@ -601,7 +601,7 @@ edu.common.de.Form = function(args) {
     el.attr('disabled', true);
   };
 
-  this.fieldLabel = function(name, label) {
+  this.fieldLabel = function(name, label, field) {
     var labelEl = $("<span/>");
     if (args.allowHtmlCaptions != false && args.allowHtmlCaptions != 'false') {
       labelEl.append(label);
@@ -609,7 +609,13 @@ edu.common.de.Form = function(args) {
       labelEl.text(label);
     }
 
-    return $("<label/>").addClass("control-label").prop('for', name).append(labelEl);
+    labelEl = $("<label/>").addClass("control-label").prop('for', name).append(labelEl);
+    if (field.toolTip) {
+      labelEl.attr('help', field.toolTip);
+      labelEl.append('<span class="fa fa-question-circle" style="display: inline-block; margin-left: 5px;"/>');
+    }
+
+    return labelEl;
   };
 
   this.getActionButtons = function() {
@@ -1848,7 +1854,7 @@ edu.common.de.SubFormField = function(id, sfField, args) {
   };
 
   this.getAddButton = function() {
-    var addBtn = edu.common.de.Utility.iconButton({btnClass: 'btn btn-default btn-xs form-inline', icon: 'plus'});
+    var addBtn = $("<a/>").css('text-decoration', 'none').text("Add Another");
     var that = this;
     addBtn.on("click", function() { that.addSubFormFieldsRow(); });
     return $("<div/>").addClass("form-group clearfix").append(addBtn);

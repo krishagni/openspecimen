@@ -99,6 +99,11 @@ angular.module('openspecimen')
           .addClass('os-md-input-label')
           .append(tAttrs.placeholder);
 
+        if (tAttrs.help && tAttrs.placeholder) {
+          label.attr('help', tAttrs.help);
+          label.append('<span class="fa fa-question-circle" style="display: inline-block; margin-left: 5px;"></span>');
+        }
+
         inputDiv.append(label);
         inputDiv.append(tElem.clone().removeAttr('os-md-input').removeAttr('edit-when'));
         

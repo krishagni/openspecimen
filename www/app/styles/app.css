@@ -1563,3 +1563,27 @@ form .form-group:empty {
 .ui-select-bootstrap .ui-select-toggle > a.btn {
   margin-top: -8px;
 }
+
+.os-md-input-label[help]:hover {
+  position: absolute;
+}
+
+[help]:hover {
+  position: relative;
+}
+
+[help]:hover:before {
+  content: attr(help);
+  position: absolute;
+  background: rgba(0,0,0,0.8);
+  display: inline-block;
+  color: #fff;
+  border-radius: 4px;
+  padding: 8px;
+  z-index: 100;
+  margin-top: 24px;
+  font-size: 85%;
+  text-align: left;
+  min-width: 150px;
+  font-weight: normal;
+}

@@ -250,6 +250,7 @@ angular.module('os.biospecimen.extensions.util', [])
       var sdeField = {
         name: prefix ? prefix + '.' + deField.name : deField.name,
         caption: deField.caption,
+        tooltip: deField.tooltip || deField.toolTip,
         optional: (deField.validationRules || []).every(function(r) { return r.name != 'required'; })
       };
 
@@ -310,6 +311,10 @@ angular.module('os.biospecimen.extensions.util', [])
         if (!sdeField.fields || sdeField.fields.length == 0) {
           sdeField = null;
         }
+      } else if (deField.type == 'label') {
+        sdeField.type = 'note';
+        sdeField.note = deField.heading || deField.caption;
+        sdeField.caption = '';
       } else {
         sdeField = null;
       }

@@ -288,6 +288,7 @@ angular.module('openspecimen')
           'ng-model'      : tAttrs.ngModel,
           'select-prop'   : tAttrs.selectProp,
           'display-prop'  : tAttrs.displayProp,
+          'help'          : tAttrs.help,
           'append-to-body': (tAttrs.appendToBody == true || tAttrs.appendToBody == 'true'),
           'list'          : 'list',
           'on-open'       : 'onOpen'
