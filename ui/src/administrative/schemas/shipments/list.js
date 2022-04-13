@@ -8,7 +8,7 @@ export default {
     title: {
       icon: (ro) => ro.shipment.type == 'SPECIMEN' ? 'flask' : 'box-open',
       text: (ro) => '#' + ro.shipment.id + ' ' + ro.shipment.name,
-      url:  (ro) => routerSvc.getUrl('ShipmentDetail.Overview', {shipmentId: ro.shipment.id}),
+      url:  (ro, query) => routerSvc.getUrl('ShipmentsListItemDetail.Overview', {shipmentId: ro.shipment.id}, query),
     },
 
     descriptions: [
@@ -36,7 +36,7 @@ export default {
     {
       "name": "shipment.name",
       "caption": "Name",
-      "href": (row) => routerSvc.getUrl('ShipmentDetail.Overview', {shipmentId: row.rowObject.shipment.id}),
+      "href": (row, query) => routerSvc.getUrl('ShipmentsListItemDetail.Overview', {shipmentId: row.rowObject.shipment.id, query}),
       "value": (rowObject) => '#' + rowObject.shipment.id + ' ' + rowObject.shipment.name
     },
     {

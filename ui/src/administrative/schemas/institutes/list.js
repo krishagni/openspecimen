@@ -5,7 +5,7 @@ export default {
   summary: {
     title: {
       text: "institute.name",
-      url:  (ro) => routerSvc.getUrl('InstituteDetail.Overview', {instituteId: ro.institute.id}),
+      url:  (ro, query) => routerSvc.getUrl('InstitutesListItemDetail.Overview', {instituteId: ro.institute.id}, query),
     }
   },
 
@@ -13,7 +13,7 @@ export default {
     {
       "name": "institute.name",
       "caption": "Name",
-      "href": (row) => routerSvc.getUrl('InstituteDetail.Overview', {instituteId: row.rowObject.institute.id})
+      "href": (row, query) => routerSvc.getUrl('InstitutesListItemDetail.Overview', {instituteId: row.rowObject.institute.id}, query)
     },
     {
       "name": "institute.usersCount",

@@ -7,7 +7,11 @@
 
       <span class="os-title">
         <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
-        <os-tag v-if="status.caption" :value="status.caption" :rounded="true" :type="status.type" />
+        <div class="accessories" v-if="ctx.user && ctx.user.id > 0">
+          <os-tag v-if="status.caption" :value="status.caption" :rounded="true" :type="status.type" />
+          <os-copy-link size="small" :route="{name: 'UserDetail.Overview', params: {userId: ctx.user.id}}" />
+          <os-new-tab size="small" :route="{name: 'UserDetail.Overview', params: {userId: ctx.user.id}}" />
+        </div>
       </span>
     </os-page-head>
     <os-page-body>

@@ -5,7 +5,7 @@ export default {
   summary: {
     title: {
       text: (ro) => ro.dp.shortTitle,
-      url:  (ro) => routerSvc.getUrl('DpDetail.Overview', {dpId: ro.dp.id}),
+      url:  (ro, query) => routerSvc.getUrl('DpsListItemDetail.Overview', {dpId: ro.dp.id}, query),
     },
 
     descriptions: [
@@ -19,7 +19,7 @@ export default {
     {
       "name": "dp.shortTitle",
       "caption": "Short Title",
-      "href": (row) => routerSvc.getUrl('DpDetail.Overview', {dpId: row.rowObject.dp.id})
+      "href": (row, query) => routerSvc.getUrl('DpsListItemDetail.Overview', {dpId: row.rowObject.dp.id}, query)
     },
     {
       "name": "dp.instituteName",

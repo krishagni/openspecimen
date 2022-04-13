@@ -6,7 +6,7 @@ export default {
   summary: {
     "title": {
       "text": "site.name",
-      "url": (ro) => routerSvc.getUrl('SiteDetail.Overview', {siteId: ro.site.id})
+      "url": (ro, query) => routerSvc.getUrl('SitesListItemDetail.Overview', {siteId: ro.site.id}, query)
     },
 
     "descriptions": [
@@ -19,7 +19,7 @@ export default {
     {
       "name": "site.name",
       "caption": "Name",
-      "href": (row) => routerSvc.getUrl('SiteDetail.Overview', {siteId: row.rowObject.site.id})
+      "href": (row, query) => routerSvc.getUrl('SitesListItemDetail.Overview', {siteId: row.rowObject.site.id}, query)
     },
     {
       "name": "site.type",

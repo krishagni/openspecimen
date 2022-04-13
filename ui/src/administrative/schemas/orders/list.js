@@ -5,7 +5,7 @@ export default {
   summary: {
     title: {
       text: (ro) => '#' + ro.order.id + ' ' + ro.order.name,
-      "url": (ro) => routerSvc.getUrl('OrderDetail.Overview', {orderId: ro.order.id})
+      url: (ro, query) => routerSvc.getUrl('OrdersListItemDetail.Overview', {orderId: ro.order.id}, query)
     },
 
     descriptions: [
@@ -27,7 +27,7 @@ export default {
     {
       name: "order.name",
       caption: "Name",
-      href: (row) => routerSvc.getUrl('OrderDetail.Overview', {orderId: row.rowObject.order.id}),
+      href: (row, query) => routerSvc.getUrl('OrdersListItemDetail.Overview', {orderId: row.rowObject.order.id}, query),
       value: (rowObject) => '#' + rowObject.order.id + ' ' + rowObject.order.name
     },
     {

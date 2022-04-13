@@ -170,10 +170,19 @@ export default {
     display: inline-block;
   }
 
-  .os-page-header .content-wrapper .content .left :deep(.os-title .os-tag) {
+  .os-page-header .content-wrapper .content .left :deep(.os-title .accessories) {
     position: absolute;
+    display: inline-block;
+    width: 250px;
+  }
+
+  .os-page-header .content-wrapper .content .left :deep(.os-title .os-tag) {
     padding-left: 0.5rem;
     white-space: nowrap;
+  }
+
+  .os-page-header .content-wrapper .content .left :deep(.os-title .accessories .btn) {
+    margin-left: 0.5rem;
   }
 
   .os-page-header .content-wrapper .content .right {

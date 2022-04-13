@@ -21,7 +21,7 @@
             :style="column.uiStyle" :sortable="column.sortable">
             <template #body="slotProps">
               <span v-if="column.href">
-                <a :href="column.href(slotProps.data)" :target="column.hrefTarget">
+                <a :href="column.href(slotProps.data, $route.query)" :target="column.hrefTarget">
                   <span>{{columnValue(slotProps.data, column)}}</span>
                 </a>
               </span>
@@ -140,7 +140,7 @@
       :class="{active: selectedItem && item.rowObject == selectedItem}">
       <div class="header">
         <os-icon :name="item.$summary.icon" v-if="item.$summary.icon" />
-        <a class="os-click-esc" :href="item.$summary.url" v-if="item.$summary.url" target="_blank">
+        <a class="os-click-esc" :href="item.$summary.url" v-if="item.$summary.url">
           <span>{{item.$summary.title}}</span>
         </a>
       </div>
@@ -444,7 +444,7 @@ export default {
           row.$summary = {
             icon:         summaryFns.icon(row.rowObject),
             title:        summaryFns.titleText(row.rowObject),
-            url:          summaryFns.url(row.rowObject),
+            url:          summaryFns.url(row.rowObject, this.$route.query),
             descriptions: summaryFns.descriptions.map(desc => desc(row.rowObject))
           };
         }
@@ -492,7 +492,11 @@ export default {
           const idx = this.list.findIndex(item => item.rowObject == this.selectedItem);
           if (idx >= 0) {
             setTimeout(() => {
-              const el = this.$refs['item' + idx];
+              let el = this.$refs['item' + idx];
+              if (el instanceof Array && el.length > 0) {
+                el = el[0];
+              }
+
               if (el) {
                 el.scrollIntoView({behaviour: 'smooth'});
               }

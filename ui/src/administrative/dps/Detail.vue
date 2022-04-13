@@ -7,8 +7,11 @@
 
       <span class="os-title">
         <h3>{{ctx.dp.shortTitle}}</h3>
-        <os-tag value="Closed" :rounded="true" type="danger"
-          v-if="ctx.dp.activityStatus == 'Closed'" />
+        <div class="accessories" v-if="ctx.dp && ctx.dp.id > 0">
+          <os-tag value="Closed" :rounded="true" type="danger" v-if="ctx.dp.activityStatus == 'Closed'" />
+          <os-copy-link size="small" :route="{name: 'DpDetail.Overview', params: {dpId: ctx.dp.id}}" />
+          <os-new-tab size="small" :route="{name: 'DpDetail.Overview', params: {dpId: ctx.dp.id}}" />
+        </div>
       </span>
     </os-page-head>
 

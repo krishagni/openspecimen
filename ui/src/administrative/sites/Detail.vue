@@ -7,6 +7,10 @@
 
       <span class="os-title">
         <h3>{{ctx.site.name}}</h3>
+        <div class="accessories" v-if="ctx.site && ctx.site.id > 0">
+          <os-copy-link size="small" :route="{name: 'SiteDetail.Overview', params: {siteId: ctx.site.id}}" />
+          <os-new-tab size="small" :route="{name: 'SiteDetail.Overview', params: {siteId: ctx.site.id}}" />
+        </div>
       </span>
     </os-page-head>
     <os-page-body>

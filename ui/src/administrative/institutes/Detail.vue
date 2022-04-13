@@ -5,8 +5,14 @@
         <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
-      <span>
+      <span class="os-title">
         <h3>{{ctx.institute.name}}</h3>
+        <div class="accessories" v-if="ctx.institute && ctx.institute.id > 0">
+          <os-copy-link size="small"
+            :route="{name: 'InstituteDetail.Overview', params: {instituteId: ctx.institute.id}}" />
+          <os-new-tab size="small"
+            :route="{name: 'InstituteDetail.Overview', params: {instituteId: ctx.institute.id}}" />
+        </div>
       </span>
     </os-page-head>
     <os-page-body>

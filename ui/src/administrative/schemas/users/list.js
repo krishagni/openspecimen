@@ -7,7 +7,7 @@ export default {
   summary: {
     title: {
       text: (ro) => ro.user.firstName + ' ' + ro.user.lastName,
-      url:  (ro) => routerSvc.getUrl('UserDetail.Overview', {userId: ro.user.id}),
+      url:  (ro, query) => routerSvc.getUrl('UsersListItemDetail.Overview', {userId: ro.user.id}, query),
     },
 
     descriptions: [
@@ -22,7 +22,7 @@ export default {
       name: 'user.name',
       caption: 'Name',
       value: (rowObject) => rowObject.user.firstName + ' ' + rowObject.user.lastName,
-      href: (row) => routerSvc.getUrl('UserDetail.Overview', {userId: row.rowObject.user.id})
+      href: (row, query) => routerSvc.getUrl('UsersListItemDetail.Overview', {userId: row.rowObject.user.id}, query)
     },
     {
       name: 'user.emailAddress',

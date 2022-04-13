@@ -7,7 +7,11 @@
 
       <span class="os-title">
         <h3>{{ctx.shipment.name}}</h3>
-        <os-tag :value="ctx.shipment.status" :rounded="true" :type="tagType" />
+        <div class="accessories" v-if="ctx.shipment && ctx.shipment.id > 0">
+          <os-tag :value="ctx.shipment.status" :rounded="true" :type="tagType" />
+          <os-copy-link size="small" :route="{name: 'ShipmentDetail.Overview', params: {shipmentId: ctx.shipment.id}}" />
+          <os-new-tab size="small" :route="{name: 'ShipmentDetail.Overview', params: {shipmentId: ctx.shipment.id}}" />
+        </div>
       </span>
     </os-page-head>
     <os-page-body>
