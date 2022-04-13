@@ -58,13 +58,10 @@ angular.module('os.administrative.site',
       })
       .state('site-detail', {
         url: '/sites/:siteId',
-        templateUrl: 'modules/administrative/site/detail.html',
-        resolve: {
-          site: function($stateParams, Site) {
-            return Site.getById($stateParams.siteId);
-          }
+        template: '<div>New UI</div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('sites/' + $stateParams.siteId + '/detail/overview');
         },
-        controller: 'SiteDetailCtrl',
         parent: 'signed-in'
       })
       .state('site-detail.overview', {

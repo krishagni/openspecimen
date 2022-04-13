@@ -208,12 +208,9 @@ angular.module('os.administrative.order',
       })
       .state('order-detail', {
         url: '/orders/:orderId',
-        templateUrl: 'modules/administrative/order/detail.html',
-        controller: 'OrderDetailCtrl',
-        resolve: {
-          order: function($stateParams , DistributionOrder) {
-            return DistributionOrder.getById($stateParams.orderId);
-          }
+        template: '<div>New UI</div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('orders/' + $stateParams.orderId + '/detail/overview');
         },
         parent: 'order-root'
       })

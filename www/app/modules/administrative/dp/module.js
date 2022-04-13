@@ -100,13 +100,10 @@ angular.module('os.administrative.dp',
       })
       .state('dp-detail', {
         url: '/dps/:dpId',
-        templateUrl: 'modules/administrative/dp/detail.html',
-        resolve: {
-          distributionProtocol: function($stateParams , DistributionProtocol) {
-            return DistributionProtocol.getById($stateParams.dpId);
-          }
+        template: '<div>New UI</div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('dps/' + $stateParams.dpId + '/detail/overview');
         },
-        controller: 'DpDetailCtrl',
         parent: 'dp-root'
       })
       .state('dp-detail.overview', {

@@ -64,13 +64,10 @@ angular.module('os.administrative.institute',
       })
       .state('institute-detail', {
         url: '/institutes/:instituteId',
-        templateUrl: 'modules/administrative/institute/detail.html',
-        resolve: {
-          institute: function($stateParams, Institute) {
-            return Institute.getById($stateParams.instituteId);
-          }
+        template: '<div>New UI</div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('institutes/' + $stateParams.instituteId + '/detail/overview');
         },
-        controller: 'InstituteDetailCtrl',
         parent: 'signed-in'
       })
       .state('institute-detail.overview', {

@@ -275,13 +275,10 @@ angular.module('os.administrative.user',
       })
       .state('user-detail', {
         url: '/users/:userId',
-        templateUrl: 'modules/administrative/user/detail.html',
-        resolve: {
-          user: function($stateParams, User) {
-            return User.getById($stateParams.userId);
-          }
+        template: '<div>New UI</div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('users/' + $stateParams.userId + '/detail/overview');
         },
-        controller: 'UserDetailCtrl',
         parent: 'user-root'
       })
       .state('user-detail.overview', {

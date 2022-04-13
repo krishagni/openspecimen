@@ -74,8 +74,8 @@ angular.module('os.administrative.shipment',
       .state('shipment-detail', {
         url: '/shipments/:shipmentId',
         template: '<div></div>',
-        controller: function($state, $window, VueApp) {
-          VueApp.setVueView($state.href($state.current.name, $state.params).substring(2));
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('shipments/' + $stateParams.shipmentId + '/detail/overview');
         },
         parent: 'shipment-root'
       })

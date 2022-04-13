@@ -49,7 +49,7 @@ class QuickSearch {
     'institute': {
       caption: 'Institute',
       ngView: false,
-      viewName: 'InstituteOverview',
+      viewName: 'InstituteDetail.Overview',
       params: {entityId: 'instituteId'}
     },
 
@@ -73,28 +73,22 @@ class QuickSearch {
     'site': {
       caption: 'Site',
       ngView: false,
-      viewName: 'SiteOverview',
+      viewName: 'SiteDetail.Overview',
       params: {entityId: 'siteId'}
     },
 
     'distribution_protocol': {
       caption: 'Distribution Protocol',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=dp-detail.overview&' +
-           'objectName=distribution_protocol&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'DpDetail.Overview',
+      params: {entityId: 'dpId'}
     },
 
     'distribution_order': {
       caption: 'Order',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=order-detail.overview&' +
-           'objectName=distribution_order&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'OrderDetail.Overview',
+      params: {entityId: 'orderId'}
     },
 
     'shipment': {
