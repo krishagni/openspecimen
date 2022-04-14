@@ -8,6 +8,8 @@ public enum FormErrorCode implements ErrorCode {
 	INVALID_REQ,
 	
 	NAME_REQUIRED,
+
+	DUP_NAME,
 	
 	ENTITY_TYPE_REQUIRED,
 	

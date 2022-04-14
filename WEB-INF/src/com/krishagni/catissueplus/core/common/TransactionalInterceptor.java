@@ -134,6 +134,10 @@ public class TransactionalInterceptor {
 					status.setRollbackOnly();
 					throw ose;
 				} catch (FormException fe) {
+					if (fe.getCause() != null && fe.getCause() != fe) {
+						logger.error("Error encountered when doing form ops: " + fe.getMessage(), fe);
+					}
+
 					status.setRollbackOnly();
 					throw OpenSpecimenException.userError(CommonErrorCode.FORM_ERROR, fe.getError());
 				} catch (Throwable t) {

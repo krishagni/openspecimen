@@ -24,7 +24,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.FormDataDeleteEvent;
 import com.krishagni.catissueplus.core.administrative.domain.FormDataSavedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
@@ -332,15 +331,28 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		Form form = null;
 		if (input.getId() != null) {
 			form = formDao.getFormById(input.getId());
-		} else if (StringUtils.isNotBlank(input.getName())) {
-			form = formDao.getFormByName(input.getName());
-		}
-
-		if (form == null) {
-			if (input.getId() != null) {
+			if (form == null) {
 				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getId());
 			}
-		} else {
+		}
+
+		if (StringUtils.isBlank(input.getName())) {
+			return ResponseEvent.userError(FormErrorCode.NAME_REQUIRED);
+		}
+
+		if (form == null || !form.getName().equals(input.getName())) {
+			//
+			// Either a new form is being created or the form name has been modified, in which case,
+			// we need to ensure the form name doesn't conflict with the existing forms
+			// i.e. there should be no form in the DB with the same name
+			//
+			Form dbForm = formDao.getFormByName(input.getName());
+			if (dbForm != null) {
+				return ResponseEvent.userError(FormErrorCode.DUP_NAME, input.getName());
+			}
+		}
+
+		if (form != null) {
 			for (FormContextBean formCtxt : form.getAssociations()) {
 				ensureUpdateAllowed(formCtxt);
 			}

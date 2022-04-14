@@ -206,7 +206,6 @@ public class FormsController {
 		@RequestBody
 		Map<String, Object> props
 	) {
-
 		if (formId != null && !formId.equals(-1L)) {
 			props.put("id", formId);
 		} else {
