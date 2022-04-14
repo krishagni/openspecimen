@@ -116,7 +116,7 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 			cprDetail.setCpShortTitle(detail.getCpShortTitle());
 		}
 
-		if (detail.isAttrModified("registrationDate")) {
+		if (cpr == null || detail.isAttrModified("registrationDate")) {
 			cprDetail.setRegistrationDate(detail.getRegistrationDate());
 		}
 
