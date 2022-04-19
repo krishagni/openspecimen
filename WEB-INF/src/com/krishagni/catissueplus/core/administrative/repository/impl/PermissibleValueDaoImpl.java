@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
@@ -14,7 +14,8 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
-
+import org.hibernate.type.StringType;
+import org.hibernate.type.Type;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
@@ -73,14 +74,12 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<PermissibleValue> getByPropertyKeyValue(String attribute, String propName, String propValue) {
-		List<PermissibleValue> pvs = getSessionFactory().getCurrentSession()
-				.getNamedQuery(GET_BY_PROP_KEY_VALUE)
-				.setString("attribute", attribute)
-				.setString("key", propName)
-				.setString("value", propValue)
-				.list();
-
-		return pvs;
+		Object[] bindValues = { propName, propValue, propValue + "^%", "%^" + propValue + "^%", "%^" + propValue};
+		Type[] bindTypes = {StringType.INSTANCE, StringType.INSTANCE, StringType.INSTANCE, StringType.INSTANCE, StringType.INSTANCE};
+		return (List<PermissibleValue>) getCurrentSession().createCriteria(PermissibleValue.class, "pv")
+			.add(Restrictions.eq("pv.attribute", attribute))
+			.add(Restrictions.sqlRestriction(PV_PROP_VALUE_MATCH_SQL, bindValues, bindTypes))
+			.list();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -260,11 +259,21 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 
 	private static final String GET_BY_VALUE = FQN + ".getByValue";
 
-	private static final String GET_BY_PROP_KEY_VALUE = FQN + ".getByPropertyKeyValue";
-
 	private static final String GET_SPECIMEN_CLASSES = FQN + ".getSpecimenClasses";
 
 	private static final String GET_SPECIMEN_TYPES = FQN + ".getSpecimenTypes";
 
 	private static final String GET_SPECIMEN_CLASS = FQN + ".getSpecimenClass";
+
+	private static final String PV_PROP_VALUE_MATCH_SQL =
+		"exists (" +
+		"  select " +
+		"    pv_id " +
+		"  from" +
+		"    os_pv_props " +
+		"  where " +
+		"    pv_id = {alias}.identifier and " +
+		"    name = ? and " +
+		"    (value = ? or value like ? or value like ? or value like ?)" +
+		")";
 }

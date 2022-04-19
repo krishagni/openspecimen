@@ -74,15 +74,5 @@
         pv.attribute = :attribute and
         pv.value = :value
     </query>
-
-    <query name="getByPropertyKeyValue">
-      from
-        com.krishagni.catissueplus.core.administrative.domain.PermissibleValue pv
-        join pv.props props
-      where
-        pv.attribute = :attribute and
-        index(props) = :key and
-        :value in elements(props)
-    </query>
   </class>
 </hibernate-mapping>
