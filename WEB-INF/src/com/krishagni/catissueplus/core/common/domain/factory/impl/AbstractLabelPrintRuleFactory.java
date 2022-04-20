@@ -127,6 +127,7 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		Object labelType = input.get("labelType");
 		if (isEmptyString(labelType)) {
 			rule.setLabelType("Std");
+			return;
 		}
 
 		rule.setLabelType(labelType.toString());
