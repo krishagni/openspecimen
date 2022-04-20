@@ -106,17 +106,15 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Visit> getByName(Collection<String> names) {
-		return sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_VISIT_BY_NAME)
-			.setParameterList("names", toUpper(names))
+		return getCurrentSession().getNamedQuery(GET_VISIT_BY_NAME)
+			.setParameterList("names", names)
 			.list();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Visit> getByIds(Collection<Long> ids) {
-		return sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_VISITS_BY_IDS)
+		return getCurrentSession().getNamedQuery(GET_VISITS_BY_IDS)
 			.setParameterList("ids", ids)
 			.list();
 	}
@@ -125,7 +123,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	@SuppressWarnings("unchecked")
 	public List<Visit> getBySpr(String sprNumber) {
 		return getCurrentSession().getNamedQuery(GET_VISIT_BY_SPR)
-			.setParameter("sprNumber", sprNumber.toUpperCase())
+			.setParameter("sprNumber", sprNumber)
 			.list();
 	}
 

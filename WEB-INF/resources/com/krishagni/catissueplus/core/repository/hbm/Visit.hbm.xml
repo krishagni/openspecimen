@@ -75,14 +75,14 @@
       from 
         com.krishagni.catissueplus.core.biospecimen.domain.Visit 
       where 
-        upper(name) in (:names)
+        name in (:names)
     </query>
 
     <query name="getVisitBySpr">
       from
         com.krishagni.catissueplus.core.biospecimen.domain.Visit
       where
-        upper(surgicalPathologyNumber) = :sprNumber
+        surgicalPathologyNumber = :sprNumber
     </query>
 
     <query name="getLatestVisitByCprId">
