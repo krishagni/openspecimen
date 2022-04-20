@@ -38,7 +38,7 @@
 .os-new-stuff .content {
   padding: 10px 0px;
   border-bottom: 1px solid #ddd;
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
 }
 
