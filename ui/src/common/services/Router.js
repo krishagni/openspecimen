@@ -6,8 +6,13 @@ class Router {
   baseUrl = ui.ngServer + '#/';
   // baseUrl = 'http://localhost:9000/#/';
 
-  ngGoto(state, params) {
-    window.location.href = this.ngUrl(state, params);
+  ngGoto(state, params, newTab) {
+    const url = this.ngUrl(state, params);
+    if (newTab) {
+      window.open(url, '_blank');
+    } else {
+      window.location.href = url;
+    }
   }
 
   ngUrl(state, params) {
