@@ -161,12 +161,12 @@ export default {
       cache = cache['dropdown'] = cache['dropdown'] || {};
 
       const qs = util.queryString(Object.assign({url: this.listSource.apiUrl}, params || {}));
-      let options = cache[qs];
-      if (!options) {
-        options = cache[qs] = await http.get(this.listSource.apiUrl, params);
+      let promise = cache[qs];
+      if (!promise) {
+        promise = cache[qs] = http.get(this.listSource.apiUrl, params);
       }
 
-      return options;
+      return promise.then(options => options);
     },
 
     dedup(options) {

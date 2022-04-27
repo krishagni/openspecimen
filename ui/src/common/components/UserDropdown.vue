@@ -37,11 +37,12 @@ export default {
           if (opts.value || opts.value == 0) {
             let id = parseInt(opts.value);
             if (!isNaN(id)) {
-              if (!cache[id]) {
-                cache[id] = await http.get('users/' + id);
+              let promise = cache[id];
+              if (!promise) {
+                promise = cache[id] = http.get('users/' + id);
               }
 
-              return [cache[id]];
+              return promise.then(user => [user]);
             }
           }
 
@@ -61,11 +62,12 @@ export default {
           }
 
           const qs = util.queryString(params);
-          if (!cache[qs]) {
-            cache[qs] = await http.get('users', params);
+          let promise = cache[qs];
+          if (!promise) {
+            promise = cache[qs] = http.get('users', params);
           }
 
-          return cache[qs];
+          return promise.then(users => users);
         },
         selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
         displayProp: (user) => user.firstName + ' ' + user.lastName
@@ -78,6 +80,15 @@ export default {
       get() {
         if (this.modelValue != null && !isNaN(this.modelValue)) {
           return +this.modelValue;
+        } else if (this.modelValue == 'current_user') {
+          const selectProp = this.selectProp || (this.listSource && this.listSource.selectProp);
+          let value = this.$ui.currentUser;
+          if (value && selectProp) {
+            value = value[selectProp];
+          }
+
+          this.$emit('update:modelValue', value);
+          return value;
         }
 
         return this.modelValue;

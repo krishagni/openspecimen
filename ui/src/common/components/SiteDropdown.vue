@@ -37,11 +37,12 @@ export default {
           if (selectProp == 'id' && (opts.name || opts.name == 0)) {
             const id = parseInt(opts.name);
             if (!isNaN(id)) {
-              if (!cache[id]) {
-                cache[id] = await http.get('sites/' + id);
+              let promise = cache[id];
+              if (!promise) {
+                promise = cache[id] = http.get('sites/' + id);
               }
 
-              return [cache[id]];
+              return promise.then(site => [site]);
             }
           }
 
@@ -61,11 +62,12 @@ export default {
           }
 
           const qs = util.queryString(params);
-          if (!cache[qs]) {
-            cache[qs] = await http.get('sites', params);
+          let promise = cache[qs];
+          if (!promise) {
+            promise = cache[qs] = http.get('sites', params);
           }
 
-          return cache[qs];
+          return promise.then(sites => sites);
         },
         selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
         displayProp: 'name',
