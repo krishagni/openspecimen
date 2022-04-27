@@ -1505,7 +1505,7 @@ public class Specimen extends BaseExtensionEntity {
 		addToChildrenEvent(specimen);
 	}
 
-	public void addPoolSpecimen(Specimen spmn) {
+	public void addPoolSpecimen(Specimen spmn, boolean close) {
 		if (!isCollected()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_COLLECTED, getLabel());
 		}
@@ -1541,7 +1541,9 @@ public class Specimen extends BaseExtensionEntity {
 
 		pooledEvent.addPoolItem(spmn);
 		spmn.setPoolItem(true);
-		spmn.close(pooledEvent.getUser(), pooledEvent.getTime(), "Pooling", comments);
+		if (close) {
+			spmn.close(pooledEvent.getUser(), pooledEvent.getTime(), "Pooling", comments);
+		}
 	}
 
 	public void addPooledEvent() {

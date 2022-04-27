@@ -29,7 +29,6 @@ import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPreSaveEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenSavedEvent;
@@ -1046,14 +1045,17 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.setStatusChanged(true);
 		}
 
-		boolean pooling = specimen.getId() == null && CollectionUtils.isNotEmpty(detail.getSpecimensPool());
+		boolean pooling = specimen.getId() == null && detail != null && CollectionUtils.isNotEmpty(detail.getSpecimensPool());
 		specimen.updateAvailableStatus();
 		daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
 		specimen.addOrUpdateCollRecvEvents();
 		specimen.addOrUpdateExtension();
 		if (pooling) {
-			Specimen pooledSpmn = specimen;
-			detail.getSpecimensPool().forEach(poolSpmn -> pooledSpmn.addPoolSpecimen(getSpecimen(poolSpmn)));
+			for (SpecimenInfo poolSpmn : detail.getSpecimensPool()) {
+				boolean close = poolSpmn.getCloseAfterPooledCreation() == null || poolSpmn.getCloseAfterPooledCreation();
+				specimen.addPoolSpecimen(getSpecimen(poolSpmn), close);
+			}
+
 			specimen.addPooledEvent();
 		}
 

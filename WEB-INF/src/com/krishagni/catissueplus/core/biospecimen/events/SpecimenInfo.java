@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
@@ -119,6 +120,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private List<NameValuePair> externalIds;
 
 	private String labelAutoPrintMode;
+
+	private Boolean closeAfterPooledCreation;
 
 	public Long getId() {
 		return id;
@@ -478,6 +481,16 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 
 	public void setLabelAutoPrintMode(String labelAutoPrintMode) {
 		this.labelAutoPrintMode = labelAutoPrintMode;
+	}
+
+	@JsonIgnore
+	public Boolean getCloseAfterPooledCreation() {
+		return closeAfterPooledCreation;
+	}
+
+	@JsonProperty
+	public void setCloseAfterPooledCreation(Boolean closeAfterPooledCreation) {
+		this.closeAfterPooledCreation = closeAfterPooledCreation;
 	}
 
 	// requires transactions
