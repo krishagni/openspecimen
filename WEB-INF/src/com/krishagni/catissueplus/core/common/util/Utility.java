@@ -78,7 +78,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
@@ -728,6 +727,22 @@ public class Utility {
 			return om.get().readValue(json, new TypeReference<HashMap<String, Object>>() {});
 		} catch (Exception e) {
 			throw new RuntimeException("Error parsing JSON to map:\n" + json, e);
+		}
+	}
+
+	public static <T> Map<String, Object> objectToMap(T object) {
+		try {
+			return om.get().convertValue(object, new TypeReference<Map<String, Object>>() {});
+		} catch (Exception e) {
+			throw new RuntimeException("Error converting the input object to Map", e);
+		}
+	}
+
+	public static <T> String objectToJson(T object) {
+		try {
+			return om.get().writeValueAsString(object);
+		} catch (Exception e) {
+			throw new RuntimeException("Error converting the input object to JSON string", e);
 		}
 	}
 
