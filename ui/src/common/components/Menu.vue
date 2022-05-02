@@ -1,16 +1,14 @@
 
 <template>
-  <span>
-    <Button :label="label" right-icon="caret-down" @click="toggle" />
-    <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
-      <template #item="{item}">
-        <a class="p-menuitem-link" @click="item.command">
-          <Icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon"></Icon>
-          <span>{{item.label}}</span>
-        </a>
-      </template>
-    </dropdown-menu>
-  </span>
+  <Button :label="label" right-icon="caret-down" @click="toggle" />
+  <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
+    <template #item="{item}">
+      <a class="p-menuitem-link" @click="item.command">
+        <Icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon"></Icon>
+        <span>{{item.label}}</span>
+      </a>
+    </template>
+  </dropdown-menu>
 </template>
 
 <script>

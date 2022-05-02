@@ -77,6 +77,11 @@
                   :list-source="filter.listSource">
                 </dropdown>
               </span>
+              <span v-else-if="filter.type == 'pv'">
+                <os-pv-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                  :attribute="filter.attribute" :leafValue="filter.leafValue" :selectProp="filter.selectProp">
+                </os-pv-dropdown>
+              </span>
               <span v-else-if="filter.type == 'site'">
                 <os-site-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
                   :list-source="filter.listSource" :context="filtersContext">
