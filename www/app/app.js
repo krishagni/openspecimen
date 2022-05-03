@@ -170,6 +170,18 @@ osApp.config(function(
           }
         },
         parent: 'signed-in'
+      })
+      .state('vue-view', {
+        url: '/vue-view?url',
+        template: '<div ui-view></div>',
+        controller: function($state, $stateParams, $sce, $rootScope) {
+          if (!$stateParams.url) {
+            $state.go('home');
+          } else {
+            window.location.href = $rootScope.vueUrl = $sce.trustAsResourceUrl($stateParams.url);
+          }
+        },
+        parent: 'signed-in'
       });
 
     $urlRouterProvider.otherwise('/');
@@ -385,8 +397,8 @@ osApp.config(function(
     }
   })
   .factory('VueApp', function($sce, $rootScope, $window) {
-    var baseUrl = 'ui-app/#/';
-    // var baseUrl = 'http://localhost:8081/#/';
+    // var baseUrl = 'ui-app/#/';
+    var baseUrl = 'http://localhost:8081/#/';
 
     function getVueViewUrl(state, params) {
       var url = baseUrl + state;
