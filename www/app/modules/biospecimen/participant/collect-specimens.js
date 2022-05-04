@@ -1256,7 +1256,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             reqId: uiSpecimen.reqId,
             visitId: $scope.visit.id,
             storageLocation: uiSpecimen.storageLocation,
-            parentId: angular.isDefined(uiSpecimen.parent) ? uiSpecimen.parent.id : undefined,
+            parentId: angular.isDefined(uiSpecimen.parent) ? uiSpecimen.parent.id : uiSpecimen.parentId,
             lineage: uiSpecimen.lineage,
             concentration: uiSpecimen.concentration,
             status: uiSpecimen.status,
