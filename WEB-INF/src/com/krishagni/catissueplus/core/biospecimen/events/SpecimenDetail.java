@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
@@ -379,7 +378,16 @@ public class SpecimenDetail extends SpecimenInfo {
 				sort(children);
 				result.setChildren(children);
 			} else {
-				result.setChildren(getSpecimens(specimen.getVisit(), sr.getChildSpecimenRequirements(), specimen.getChildCollection(), partial, excludePhi, excludeChildren));
+				List<SpecimenDetail> children = getSpecimens(
+					specimen.getVisit(), sr.getChildSpecimenRequirements(),
+					specimen.getChildCollection(),
+					partial, excludePhi, excludeChildren);
+				for (SpecimenDetail child : children) {
+					child.setParentId(result.getId());
+					child.setParentLabel(result.getLabel());
+				}
+
+				result.setChildren(children);
 			}
 		}
 
