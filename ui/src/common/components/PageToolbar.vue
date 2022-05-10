@@ -25,6 +25,15 @@
     margin-right: 4px;
   }
 
+  .os-page-toolbar :deep(.os-btn-group) {
+    display: inline-block;
+    margin-right: 4px;
+  }
+
+  .os-page-toolbar :deep(.os-btn-group button) {
+    margin: 0;
+  }
+
   .os-page-toolbar .left {
     float: left;
     margin-right: 10px;

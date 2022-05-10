@@ -28,7 +28,7 @@ angular.module('os.biospecimen.specimenlist',
         template: '<div ui-view></div>',
         resolve: {
           list: function($stateParams, SpecimenList) {
-            if (!!$stateParams.listId || $stateParams.listId === 0) {
+            if ($stateParams.listId >= 0) {
               return SpecimenList.getById($stateParams.listId, {includeSpecimens: false});
             }
 
@@ -39,7 +39,7 @@ angular.module('os.biospecimen.specimenlist',
         parent: 'signed-in'
       })
       .state('specimen-list', {
-        url: '/?filters',
+        url: '/specimens?filters',
         params: {
           breadcrumbs: [
             {state: 'specimen-lists', params: {}, captionKey: 'specimen_list.lists'}
@@ -50,7 +50,7 @@ angular.module('os.biospecimen.specimenlist',
         parent: 'specimen-list-root'
       })
       .state('specimen-list-addedit', {
-        url: '/specimen-list/:listId/addedit',
+        url: '/addedit',
         templateUrl: 'modules/biospecimen/specimen-list/addedit.html',
         controller: 'AddEditSpecimenListCtrl',
         resolve: {

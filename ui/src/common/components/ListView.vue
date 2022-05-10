@@ -25,9 +25,8 @@
                   <span>{{columnValue(slotProps.data, column)}}</span>
                 </a>
               </span>
-              <span v-else-if="column.type == 'component'">
-                <component :is="column.component" v-bind="column.data(slotProps.data.rowObject)" />
-              </span>
+              <component v-else-if="column.type == 'component'" :is="column.component"
+                v-bind="column.data(slotProps.data.rowObject)" @star-toggled="rowStarToggled(slotProps.data)" />
               <span v-else>
                 <span>{{columnValue(slotProps.data, column)}}</span>
               </span>
@@ -187,7 +186,7 @@ export default {
     'showRowActions'
   ],
 
-  emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked', 'sort'],
+  emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked', 'sort', 'rowStarToggled'],
 
   components: {
     'data-table': DataTable,
@@ -405,6 +404,10 @@ export default {
 
     sort: function(event) {
       this.$emit('sort', event);
+    },
+
+    rowStarToggled: function(event) {
+      this.$emit('rowStarToggled', event.rowObject);
     }
   },
 

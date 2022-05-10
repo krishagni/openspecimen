@@ -11,6 +11,7 @@ class FieldFactory {
   fieldTypes = {
     dropdown: 'os-dropdown',
     multiselect: 'os-multi-select-dropdown',
+    groupselect: 'os-multi-select-group-dropdown',
     radio: 'os-radio-button',
     checkbox: 'os-checkbox',
     booleanCheckbox: 'os-boolean-checkbox',

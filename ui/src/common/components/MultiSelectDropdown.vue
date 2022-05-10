@@ -78,7 +78,7 @@ export default {
         this.ctx.options = this.dedup(selectedVals.concat(this.listSource.options));
       } else if (typeof this.listSource.loadFn == 'function') {
         let self = this;
-        this.listSource.loadFn({query: query, maxResults: 100}).then(
+        this.listSource.loadFn({context: this.context, query: query, maxResults: 100}).then(
           function(options) {
             self.ctx.options = self.dedup(selectedVals.concat(options));
           }
@@ -144,7 +144,7 @@ export default {
         let selectProp = ls.selectProp || 'id';
         selected = ls.options.filter((option) => toGet.some((testItem) => option[selectProp] == testItem));
       } else if (typeof ls.loadFn == 'function') {
-        selected = await ls.loadFn(searchOpts);
+        selected = await ls.loadFn({...searchOpts, context: this.context});
       } else if (typeof ls.apiUrl == 'string') {
         selected = await http.get(ls.apiUrl, searchOpts);
       }
@@ -289,7 +289,7 @@ export default {
     margin-top: -0.40rem;
   }
 
-  .os-dropdown :deep(.p-multiselect-label) {
+  .os-dropdown .p-float-label :deep(.p-multiselect-label) {
     white-space: break-spaces;
     padding: 0;
   }

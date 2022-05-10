@@ -52,13 +52,18 @@ export default {
   padding-right: 15px;
 }
 
+.os-menu .p-menuitem-link {
+  min-width: 12rem;
+  padding: 0.5rem 1rem;
+}
 </style>
 
 <style>
-
 .os-menu {
   width: auto;
   max-width: 32rem;
+  max-height: 35rem;
+  overflow: auto;
 }
 
 </style>

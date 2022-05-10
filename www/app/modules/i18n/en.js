@@ -2493,7 +2493,8 @@
     "downloading_report": "Downloading cart specimens report...",
     "report_will_be_emailed": "Generating cart specimens report is taking more time than anticipated. Link to download report will be sent to you by email",
     "loading_list": "Loading carts, please wait for a moment...",
-    "empty_list": "No carts to show!"
+    "empty_list": "No carts to show!",
+    "no_default_cart": "Default cart is not created yet. Add one or more specimens to your cart before viewing it."
   },
 
   "orders": {

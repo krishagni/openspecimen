@@ -176,15 +176,20 @@ class Util {
   }
 
   async loadSpecimenTypeProps() {
-    let resp = await http.get('specimen-type-props');
+    const qp = {attribute: 'specimen_type', includeParentValue: true, includeProps: true};
+    const resp = await http.get('permissible-values', qp);
     this.spmnTypeProps = resp.reduce(
-      (acc, typeProps) => {
-        acc[typeProps.specimenClass + ':' + typeProps.specimenType] = typeProps.props;
-        return acc;
-      },
-      {}
-    );
+      (acc, type) => {
+        if (type.parentValue) {
+          acc[type.parentValue + ':' + type.value] = type.props;
+        } else {
+          acc[type.value + ':*'] = type.props;
+        }
 
+        return acc;
+      }
+    );
+        
     return this.spmnTypeProps;
   }
 
@@ -194,16 +199,67 @@ class Util {
       return '-';
     }
 
-    const props = this.spmnTypeProps[specimenClass + ':' + type] || {};
-    switch (measure) {
-      case 'quantity':
-        return props.qtyHtmlDisplayCode || props.qtyUnit || '-';
-
-      case 'concentration':
-        return props.concHtmlDisplayCode || props.concUnit || '-';
+    let props = this.spmnTypeProps[specimenClass + ':' + type] || {};
+    let unit = this.getUnit(props, measure);
+    if (!unit) {
+      props = this.spmnTypeProps[specimenClass + ':*'] || {};
+      unit = this.getUnit(props, measure);
     }
 
-    return '-';
+    return unit || '-';
+  }
+
+  getUnit(props, measure) {
+    let unit = null;
+
+    switch (measure) {
+      case 'quantity':
+        unit = props.qtyHtmlDisplayCode || props.quantity_display_unit || props.qtyUnit || props.quantity_unit;
+        break;
+
+      case 'concentration':
+        unit = props.concHtmlDisplayCode || props.concentration_display_unit || props.concUnit || props.concentration_unit;
+        break;
+    }
+
+    return unit;
+  }
+
+  getContainerColorCode({specimenClass, type, specimenType}) {
+    type = type || specimenType;
+    if (!specimenClass || !type) {
+      return {};
+    }
+
+    let props = this.spmnTypeProps[specimenClass + ':' + type] || {};
+    if (!props['container_color_code']) {
+      props = this.spmnTypeProps[specimenClass + ':*'] || {};
+    }
+
+    if (props['container_color_code']) {
+      try {
+        return JSON.parse(props['container_color_code']);
+      } catch (e) {
+        console.log('Could not parse the following string into JSON: ' + props['container_color_code']);
+
+        const kvList = props['container_color_code'].split(',');
+        const style = {};
+        kvList.forEach(
+          (kv) => {
+            const kvPair = kv.split('=');
+            if (!kvPair || kvPair.length <= 1) {
+              return;
+            }
+
+            style[kvPair[0].trim()] = kvPair[1].trim();
+          }
+        );
+
+        return style;
+      }
+    }
+
+    return {};
   }
 
   isBool(value) {
@@ -244,6 +300,95 @@ class Util {
     }
 
     return format(date, pattern);
+  }
+
+  splitStr(str, re, returnEmpty) {
+    const result = [];
+    const map = this._getEscapeMap(str);
+
+    let token = '', escUntil = undefined;
+    for (let i = 0; i < str.length; ++i) {
+      if (escUntil == undefined) {
+        escUntil = map[i];
+      }
+
+      if (i <= escUntil) {
+        token += str[i];
+        if (i == escUntil) {
+          escUntil = undefined;
+        }
+      } else {
+        if (re.exec(str[i]) == null) {
+          token += str[i];
+        } else {
+          token = this._getToken(token);
+          if (token.length > 0 || !!returnEmpty) {
+            result.push(token);
+          }
+          token = '';
+        }
+      }
+    }
+
+    token = this._getToken(token);
+    if (token.length > 0) {
+      result.push(token);
+    }
+
+    return result;
+  }
+
+  getDupItems(stringItems) {
+    const itemsMap = {}, result = [];
+    for (let item of stringItems) {
+      let instance = itemsMap[item] || 0;
+      if (instance == 1) {
+        result.push(item);
+      }
+
+      itemsMap[item] = ++instance;
+    }
+
+    return result;
+  }
+
+  _getEscapeMap(str) {
+    let map = {}, insideSgl = false, insideDbl = false;
+    let lastIdx = -1;
+
+    for (let i = 0; i < str.length; ++i) {
+      if (str[i] == "'" && !insideDbl) {
+        if (insideSgl) {
+          map[lastIdx] = i;
+        } else {
+          lastIdx = i;
+        }
+
+        insideSgl = !insideSgl;
+      } else if (str[i] == '"' && !insideSgl) {
+        if (insideDbl) {
+          map[lastIdx] = i;
+        } else {
+          lastIdx = i;
+        }
+
+        insideDbl = !insideDbl;
+      }
+    }
+
+    return map;
+  }
+
+  _getToken(token) {
+    token = token.trim();
+    if (token.length != 0) {
+      if ((token[0] == "'" && token[token.length - 1] == "'") ||
+        (token[0] == '"' && token[token.length - 1] == '"')) {
+        token = token.substring(1, token.length - 1);
+      }
+    }
+
+    return token;
   }
 }
 

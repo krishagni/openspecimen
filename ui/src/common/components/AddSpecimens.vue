@@ -1,14 +1,16 @@
 
 <template>
-  <div>
-    <div v-if="barcodingEnabled">
-      <os-boolean-checkbox name="useBarcode" v-model="useBarcode">
+  <div class="os-add-specimens" :class="{'bottom-options': optionsAtBottom == true}">
+    <div class="options">
+      <os-boolean-checkbox name="useBarcode" v-model="useBarcode" v-if="barcodingEnabled">
         <label>Use Specimen Barcode</label>
       </os-boolean-checkbox>
+
+      <slot name="options"></slot>
     </div>
 
-    <div class="os-add-specimens">
-      <os-textarea :placeholder="label" v-model="input" />
+    <div class="input-group">
+      <os-textarea :placeholder="label" v-model="input" @update:modelValue="$emit('labels-scanned', $event)" />
 
       <span class="buttons">
         <os-button primary label="Add" @click="addSpecimens" />
@@ -62,12 +64,13 @@
 
 import http   from '@/common/services/HttpClient.js';
 import alerts from '@/common/services/Alerts.js';
+import util   from '@/common/services/Util.js';
 
 export default {
 
-  props: ['criteria', 'errorOpts', 'label'],
+  props: ['criteria', 'errorOpts', 'label', 'optionsAtBottom'],
 
-  emits: ['on-add'],
+  emits: ['on-add', 'labels-scanned'],
 
   data() {
     return {
@@ -92,10 +95,40 @@ export default {
         .filter(function(label) { return label.length != 0; });
     },
 
-    addSpecimens: function() {
-      let labels = this.getLabels();
+    addSpecimens: async function() {
+      const {specimens, useBarcode} = await this.getSpecimens();
+      if (specimens && specimens.length > 0) {
+        this.clearInput();
+        this.$emit('on-add', {specimens, useBarcode});
+      } else if (specimens) {
+        const opts = this.errorOpts || {};
+        alerts.error(opts.no_match || 'No specimens match the input criteria.');
+      }
+    },
+
+    clearInput: function() {
+      this.input = '';
+    },
+
+    getSpecimens: async function() {
+      const labels = util.splitStr(this.input, /,|\t|\n/, false);
       if (labels.length == 0) {
-        return;
+        return [];
+      }
+
+      return this.getSpecimensByLabel(labels);
+    },
+
+    getSpecimensByLabel: async function(labels) {
+      labels = labels || [];
+      if (labels.length == 0) {
+        return [];
+      }
+
+      const dupLabels = util.getDupItems(labels);
+      if (dupLabels.length > 0) {
+        alerts.error('Duplicate labels entered: ' + dupLabels.join(', '));
+        return [];
       }
 
       let searchReq = Object.assign({exactMatch: true}, this.criteria || {});
@@ -106,18 +139,10 @@ export default {
       }
 
       searchReq.maxResults = 1000;
-      http.post('specimens/search', searchReq).then(
+      return http.post('specimens/search', searchReq).then(
         specimens => {
-          this.resolveSpecimens(searchReq.labels, searchReq.barcodes, specimens).then(
-            resolvedSpmns => {
-              if (resolvedSpmns && resolvedSpmns.length > 0) {
-                this.input = '';
-                this.$emit('on-add', {specimens: resolvedSpmns, useBarcode: this.useBarcode});
-              } else if (resolvedSpmns) {
-                const opts = this.errorOpts || {};
-                alerts.error(opts.no_match || 'No specimens match the input criteria.');
-              }
-            }
+          return this.resolveSpecimens(searchReq.labels, searchReq.barcodes, specimens).then(
+            resolvedSpmns => ({specimens: resolvedSpmns, useBarcode: this.useBarcode})
           );
         }
       );
@@ -226,36 +251,55 @@ export default {
 <style scoped>
 
 .os-add-specimens {
-  display: flex;
   margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.os-add-specimens.bottom-options {
+  flex-direction: column-reverse;
+}
+
+.os-add-specimens .input-group {
+  display: flex;
 }
 
 /* Make the text area consume as much free space available */
-.os-add-specimens :deep(.os-input-text) {
+.os-add-specimens .input-group :deep(.os-input-text) {
   flex: 1;
 }
 
-.os-add-specimens :deep(.os-input-text textarea) {
+.os-add-specimens .input-group :deep(.os-input-text textarea) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.os-add-specimens :deep(.os-input-text textarea:focus) {
+.os-add-specimens .input-group :deep(.os-input-text textarea:focus) {
   border-color: #ced4da;
 }
 
-.os-add-specimens .buttons :deep(button) {
-  height: calc(100% - 1.75px);
-  border-radius: 0;
+.os-add-specimens .input-group .buttons {
+  height: 58px;
 }
 
-.os-add-specimens .buttons :deep(button) {
+.os-add-specimens .input-group .buttons :deep(button) {
+  height: 100%;
+  border-radius: 0;
   border-left: 0;
 }
 
-.os-add-specimens .buttons :deep(button:last-child) {
+.os-add-specimens .input-group .buttons :deep(button:last-child) {
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
+}
+
+.os-add-specimens .options {
+  display: flex;
+  flex-direction: row;
+}
+
+.os-add-specimens .options > div {
+  margin-right: 1.25rem;
 }
 
 </style>

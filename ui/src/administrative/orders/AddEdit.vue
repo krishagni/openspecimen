@@ -332,7 +332,8 @@ export default {
         order.siteName      = dp.defReceivingSiteName;
         order.requester     = order.requester || dp.principalInvestigator;
         if (!order.id) {
-          order.name = dp.shortTitle + '_' + this.$filters.dateTime(new Date());
+          const dateFmt = this.$ui.global.locale.shortDateFmt;
+          order.name = dp.shortTitle + '_' + util.formatDate(new Date(), dateFmt + '_HH:mm:ss');
         }
 
         const {schema, defaultValues} = await orderSvc.getAddEditFormSchema(dp);

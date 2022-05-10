@@ -18,7 +18,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import http     from '@/common/services/HttpClient.js';
 
 export default {
-  props: ['name', 'objectId', 'url', 'allowSelection'],
+  props: ['name', 'objectId', 'url', 'newTab', 'allowSelection'],
 
   emits: ['selectedRows', 'rowClicked', 'listLoaded'],
 
@@ -92,6 +92,15 @@ export default {
     );
   },
 
+  watch: {
+    'objectId': function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this.listId.objectId = newVal;
+        this.reload();
+      }
+    }
+  },
+
   methods: {
     searchReq: function(filters) {
       const rangeFilters = {};
@@ -161,6 +170,9 @@ export default {
               result.entity = 'hidden';
             } else if (mi.showLink == 'true' && this.url) {
               result.href = (row) => ui.ngServer + exprUtil.eval(row.rowObject, this.url)
+              if (this.newTab) {
+                result.hrefTarget = '_blank';
+              }
             }
           }
 

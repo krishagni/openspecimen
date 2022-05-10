@@ -11,6 +11,7 @@ import 'primeicons/primeicons.css';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
 
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
@@ -194,6 +195,7 @@ app.config.globalProperties.$goback = () => routerSvc.back();
 
 alerts.toastSvc = app.config.globalProperties.$toast;
 library.add(fas);
+library.add(far);
 
 let url = window.location.href;
 let urlParts = url.split('?')

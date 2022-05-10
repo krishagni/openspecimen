@@ -575,6 +575,132 @@ const routes = [
         component: () => import(/* webpackChunkName: "dps" */ '../administrative/dps/AddEdit.vue'),
         props: (route) => ({dpId: route.params && route.params.dpId})
       },
+
+      /*****************************
+       *****************************
+       * Containers module         *
+       *****************************
+       *****************************/
+      {
+        path: 'containers',
+        name: 'ContainersList',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/List.vue'),
+        props: (route) => ({filters: route.query.filters}),
+      },
+      {
+        path: 'containers/:containerId/detail',
+        name: 'ContainerDetail',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Detail.vue'),
+        props: (route) => ({containerId: route.params && route.params.containerId}),
+        children: [
+          {
+            path: 'overview',
+            name: 'ContainerDetail.Overview',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Overview.vue')
+          },
+          {
+            path: 'locations',
+            name: 'ContainerDetail.Locations',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Locations.vue')
+          },
+          {
+            path: 'specimens',
+            name: 'ContainerDetail.Specimens',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Specimens.vue')
+          },
+          {
+            path: 'transfer-events',
+            name: 'ContainerDetail.TransferEvents',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/TransferEvents.vue')
+          },
+          {
+            path: 'maintenance',
+            name: 'ContainerDetail.Maintenance',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Maintenance.vue')
+          }
+        ]
+      },
+      {
+        path: 'container-addedit/:containerId',
+        name: 'ContainerAddEdit',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/AddEdit.vue'),
+        props: ({params, query}) => {
+          if (!params) {
+            return {}
+          }
+
+          query = query || {};
+          return {
+            containerId: params.containerId, parentContainerName: query.parentContainerName,
+            row: query.row, column: query.column, position: query.position
+          };
+        }
+      },
+
+      /**********************************
+       **********************************
+       * Container tasks module         *
+       **********************************
+       **********************************/
+      {
+        path: 'container-tasks',
+        name: 'ContainerTasksList',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-tasks/List.vue'),
+        props: (route) => ({filters: route.query.filters}),
+      },
+
+      {
+        path: 'container-task-addedit/:taskId',
+        name: 'ContainerTaskAddEdit',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-tasks/AddEdit.vue'),
+        props: (route) => ({taskId: route.params && route.params.taskId})
+      },
+
+      /***********************************
+       ***********************************
+       * Containers types module         *
+       ***********************************
+       ***********************************/
+      {
+        path: 'container-types/:typeId',
+        name: 'ContainerTypesList',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-types/List.vue'),
+        props: (route) => ({typeId: route.params && route.params.typeId, filters: route.query.filters}),
+        children: [
+          {
+            path: '',
+            name: 'ContainerTypesListItemDetail',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-types/Detail.vue'),
+            props: (route) => ({typeId: route.params && route.params.typeId, listItemDetailView: true}),
+            children: [
+              {
+                path: 'overview',
+                name: 'ContainerTypesListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-types/Overview.vue')
+              },
+            ]
+          }
+        ]
+      },
+      {
+        path: 'container-types/:typeId/detail',
+        name: 'ContainerTypeDetail',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-types/Detail.vue'),
+        props: (route) => ({typeId: route.params && route.params.typeId, listItemDetailView: false}),
+        children: [
+          {
+            path: 'overview',
+            name: 'ContainerTypeDetail.Overview',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-types/Overview.vue')
+          },
+        ]
+      },
+      {
+        path: 'container-type-addedit/:typeId',
+        name: 'ContainerTypeAddEdit',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-types/AddEdit.vue'),
+        props: (route) => ({typeId: route.params && route.params.typeId})
+      },
     ]
   }
 ]

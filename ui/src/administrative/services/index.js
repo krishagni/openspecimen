@@ -1,4 +1,5 @@
 
+import containerSvc from './Container.js';
 import instituteSvc from './Institute.js';
 import roleSvc      from './Role.js';
 import siteSvc      from './Site.js';
@@ -9,6 +10,7 @@ export default {
   install(app) {
     let osSvc = app.config.globalProperties.$osSvc = app.config.globalProperties.$osSvc || {};
     Object.assign(osSvc, {
+      containerSvc: containerSvc,
       instituteSvc: instituteSvc,
       roleSvc:      roleSvc,
       siteSvc:      siteSvc,

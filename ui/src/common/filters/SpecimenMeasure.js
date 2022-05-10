@@ -17,7 +17,12 @@ export default {
       obj = exprUtil.eval(context, metadata.entity);
     }
 
-    if (!obj || (!obj.specimenClass && !obj.type)) {
+    if (!obj) {
+      return value;
+    }
+
+    const type = obj.type || obj.specimenType;
+    if (!obj.specimenClass && !type) {
       return value;
     }
 

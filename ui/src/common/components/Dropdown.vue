@@ -3,6 +3,7 @@
   <div class="os-dropdown">
     <div class="p-float-label" v-if="$attrs['md-type']" :class="!$attrs.placeholder && 'no-label'">
       <Dropdown
+        ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
         :option-label="displayProp"
@@ -18,6 +19,7 @@
     </div>
     <div v-else>
       <Dropdown
+        ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
         :option-label="displayProp"
@@ -188,6 +190,19 @@ export default {
 
     onChange: function(event) {
       this.optionSelected = !!event.value;
+    },
+
+    getSelectedOption: function() {
+      if (!this.modelValue) {
+        return null;
+      }
+
+      if (typeof this.modelValue == 'object') {
+        return this.modelValue;
+      }
+
+      const fieldRef = this.$refs.selectWidget;
+      return (fieldRef.options || []).find(option => option[this.selectProp] == this.modelValue);
     }
   },
 
@@ -231,7 +246,7 @@ export default {
 
   mounted() {
     if (this.modelValue) {
-      this.selectedValue().then((val) => this.ctx.options = val);
+      this.selectedValue().then(val => this.ctx.options = val);
     }
   }
 }

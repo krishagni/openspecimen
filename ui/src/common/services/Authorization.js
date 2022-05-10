@@ -73,6 +73,30 @@ class Authorization {
 
     return false;
   }
+
+  getRole(cp) {
+    if (ui.currentUser.admin) {
+      return 'system-admin';
+    }
+
+    if (!ui.currentUser.roles || ui.currentUser.roles.length == 0) {
+      return null;
+    }
+
+    for (let sr of ui.currentUser.roles) {
+      if (!sr.site && !sr.collectionProtocol) {
+        return sr.role.name;
+      } else if (sr.collectionProtocol && sr.collectionProtocol.id == cp.id) {
+        return sr.role.name;
+      } else if (sr.site && !sr.collectionProtocol) {
+        if (cp.cpSites.some(s => s.siteId == sr.site.id)) {
+          return sr.role.name;
+        }
+      }
+    }
+
+    return null;
+  }
 }
 
 export default new Authorization();

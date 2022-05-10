@@ -89,7 +89,7 @@ export default {
         let container = this.entity;
         Object.assign(qp, {
           site: container.siteName,
-          usageMode: container.userFor || 'STORAGE'
+          usageMode: container.usedFor || 'STORAGE'
         });
       } else if (this.entityType == 'order_item') {
         let dp = exprUtil.eval(this.context || {}, this.dynamicParams.dp || 'distributionProtocol');

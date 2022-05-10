@@ -17,6 +17,13 @@
           <os-input-text v-model="input" />
         </os-cell>
       </os-form-group>
+
+      <os-form-group dense v-if="collectReason == true">
+        <os-cell :width="12">
+          <div>Specify the reason, at least 10 characters in length, for deletion:</div>
+          <os-textarea v-model="reason" :rows="3" />
+        </os-cell>
+      </os-form-group>
     </template>
 
     <template #footer>
@@ -35,7 +42,7 @@ import FormGroup from '@/common/components/FormGroup.vue';
 import InputText from '@/common/components/InputText.vue';
 
 export default {
-  props: ['captcha'],
+  props: ['captcha', 'collectReason'],
 
   components: {
     'os-button': Button,
@@ -47,13 +54,21 @@ export default {
 
   data() {
     return {
-      input: ''
+      input: '',
+
+      reason: ''
     }
   },
 
   computed: {
     disabled: function() {
-      return this.captcha != false && this.input != 'DELETE ANYWAY'
+      if (this.captcha != false && this.input != 'DELETE ANYWAY') {
+        return true;
+      } else if (this.collectReason == true && (!this.reason || this.reason.length < 10)) {
+        return true;
+      }
+
+      return false;
     }
   },
 
@@ -67,14 +82,14 @@ export default {
     },
 
     cancel: function() {
-      this.input = '';
+      this.input = this.reason = '';
       this.$refs.dialogInstance.close();
       this.resolve = null;
     },
 
     proceed: function() {
-      this.resolve('proceed');
-      this.input = '';
+      this.resolve(this.collectReason ? {reason: this.reason} : 'proceed');
+      this.input = this.reason = '';
       this.$refs.dialogInstance.close();
       this.resolve = null;
     }

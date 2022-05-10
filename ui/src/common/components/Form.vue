@@ -84,12 +84,16 @@ export default {
 
    unmounted() {
      http.removeListener(this);
+     if (this.masked) {
+       util.disableMask();
+     }
    },
 
    methods: {
      handleInput: function(field) {
+       const oldValue = exprUtil.getValue(this.ctx.formData, field.name);
        exprUtil.setValue(this.ctx.formData, field.name, this.formModel[field.name]);
-       this.$emit('input', {field: field, value: this.formModel[field.name], data: this.ctx.formData})
+       this.$emit('input', {field: field, value: this.formModel[field.name], data: this.ctx.formData, oldValue})
        if (this.v$.formModel[field.name]) {
          this.v$.formModel[field.name].$touch();
        }
@@ -156,18 +160,21 @@ export default {
 
      callStarted: function({method}) {
        if (method == 'post' || method == 'put') {
+         this.masked = true;
          util.enableMask();
        }
      },
 
      callCompleted: function({method}) {
        if (method == 'post' || method == 'put') {
+         this.masked = false;
          util.disableMask();
        }
      },
 
      callFailed: function({method}) {
        if (method == 'post' || method == 'put') {
+         this.masked = false;
          util.disableMask();
        }
      }
@@ -211,9 +218,9 @@ export default {
 
            const fv = field.validations;
            if (fv && (fv.requiredIf || fv.required)) {
-             field.required = !!fv.required || exprUtil.eval(fv.requiredIf.expr);
+             field.required = !!fv.required || exprUtil.eval(this, fv.requiredIf.expr);
              if (field.required) {
-               field.requiredTooltip = (fv.required || field.requiredIf).message || 'Mandatory field'
+               field.requiredTooltip = (fv.required || fv.requiredIf).message || 'Mandatory field'
              }
            }
 

@@ -31,9 +31,11 @@ angular.module('os.administrative.container',
       })
       .state('container-list', {
         url: '/containers?filters',
-        templateUrl: 'modules/administrative/container/list.html',
-        controller: 'ContainerListCtrl',
-        parent: 'container-root'
+        template: '<div>Discontinued</div>',
+        controller: function(VueApp) {
+          VueApp.setVueView('containers');
+        },
+        parent: 'signed-in'
       })
       .state('container-addedit', {
         url: '/container-addedit/:containerId?posOne&posTwo&pos&siteName&parentContainerId&parentContainerName&mode&containerTypeId',

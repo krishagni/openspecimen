@@ -131,6 +131,7 @@ public class ContainerTransferEventDetail {
 			fromLocation.setPositionY(event.getFromRow());
 			fromLocation.setPositionX(event.getFromColumn());
 			fromLocation.setPosition(event.getFromPosition());
+			fromLocation.setMode(event.getFromContainer().getPositionLabelingMode().name());
 			result.setFromLocation(fromLocation);
 		}
 
@@ -141,6 +142,7 @@ public class ContainerTransferEventDetail {
 			toLocation.setPositionY(event.getToRow());
 			toLocation.setPositionX(event.getToColumn());
 			toLocation.setPosition(event.getToPosition());
+			toLocation.setMode(event.getToContainer().getPositionLabelingMode().name());
 			result.setToLocation(toLocation);
 		}
 

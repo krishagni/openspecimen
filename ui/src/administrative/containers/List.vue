@@ -1,0 +1,192 @@
+<template>
+  <os-page>
+    <os-page-head>
+      <span>
+        <h3>Containers</h3>
+      </span>
+
+      <template #right>
+        <os-list-size
+          :list="ctx.containers"
+          :page-size="ctx.pageSize"
+          :list-size="ctx.containersCount"
+          @updateListSize="getContainersCount"
+        />
+      </template>
+    </os-page-head>
+
+    <os-page-body>
+      <os-page-toolbar>
+        <template #default v-if="ctx.selectedContainers && ctx.selectedContainers.length > 0">
+          <os-button left-icon="trash" label="Delete" @click="deleteContainers"
+            v-show-if-allowed="containerResources.deleteOpts" />
+
+          <os-button left-icon="download" label="Export" @click="exportContainers"
+            v-show-if-allowed="containerResources.importOpts" />
+        </template>
+
+        <template #default v-else>
+          <os-button left-icon="plus" label="Create" @click="createContainer"
+            v-show-if-allowed="containerResources.createOpts" />
+
+          <os-button left-icon="cubes" label="Types" @click="viewContainerTypes" />
+
+          <os-button left-icon="tasks" label="Tasks" @click="viewContainerTasks" />
+
+          <os-menu label="Import" :options="importOpts"
+            v-show-if-allowed="containerResources.importOpts" />
+
+          <os-button left-icon="download" label="Export" @click="exportContainers"
+            v-show-if-allowed="containerResources.importOpts" />
+
+          <os-button-link left-icon="question-circle" label="Help"
+            url="https://help.openspecimen.org/containers" new-tab="true" />
+        </template>
+
+        <template #right>
+          <os-button left-icon="search" label="Search" @click="openSearch" />
+        </template>
+      </os-page-toolbar>
+
+      <os-list-view
+        :data="ctx.containers"
+        :schema="listSchema"
+        :query="ctx.query"
+        :allowSelection="true"
+        :loading="ctx.loading"
+        @filtersUpdated="loadContainers"
+        @rowClicked="onContainerRowClick"
+        @selectedRows="onContainersSelection"
+        @rowStarToggled="onToggleStar"
+        ref="listView"
+      />
+
+      <os-confirm-delete ref="deleteDialog">
+        <template #message>
+          <span>Are you sure you want to delete the selected containers?</span>
+        </template>
+      </os-confirm-delete>
+    </os-page-body>
+  </os-page>
+</template>
+
+<script>
+
+import listSchema   from '@/administrative/schemas/containers/list.js';
+
+import containerSvc from '@/administrative/services/Container.js';
+import alertsSvc    from '@/common/services/Alerts.js';
+import exportSvc    from '@/common/services/ExportService.js';
+import routerSvc    from '@/common/services/Router.js';
+
+import containerResources from './Resources.js';
+
+export default {
+  props: ['filters'],
+
+  data() {
+    return {
+      ctx: {
+        containers: [],
+        containersCount: -1,
+        loading: true,
+        query: this.filters,
+        selectedContainers: []
+      },
+
+      listSchema,
+
+      importOpts: [
+        {
+          icon: 'box-open',
+          caption: 'Containers',
+          onSelect: () => routerSvc.ngGoto('containers-import')
+        },
+        {
+          icon: 'table',
+          caption: 'View Past Imports',
+          onSelect: () => routerSvc.ngGoto('containers-import-jobs')
+        }
+      ],
+
+      containerResources
+    };
+  },
+
+  methods: {
+    openSearch: function() {
+      this.$refs.listView.toggleShowFilters();
+    },
+
+    loadContainers: async function({filters, uriEncoding, pageSize}) {
+      this.ctx.filterValues = filters;
+      this.ctx.pageSize     = pageSize;
+
+      await this.reloadContainers();
+      routerSvc.goto('ContainersList', {}, {filters: uriEncoding});
+    },
+
+    reloadContainers: async function() {
+      this.ctx.loading = true;
+      const opts = {orderByStarred: true, includeStats: true, topLevelContainers: true, maxResults: this.ctx.pageSize};
+      const containers = await containerSvc.getContainers(Object.assign(opts, this.ctx.filterValues || {}));
+      this.ctx.containers = containers.map(container => ({ container }));
+      this.ctx.loading = false;
+      this.ctx.selectedContainers = [];
+      return this.ctx.containers;
+    },
+
+    getContainersCount: async function() {
+      const opts = Object.assign({topLevelContainers: true}, this.ctx.filterValues);
+      const resp = await containerSvc.getContainersCount(opts);
+      this.ctx.containersCount = resp.count;
+    },
+
+    onContainerRowClick: function({container}) {
+      routerSvc.goto('ContainerDetail.Overview', {containerId: container.id}, {filters: this.filters});
+    },
+
+    onContainersSelection: function(selection) {
+      this.ctx.selectedContainers = selection;
+    },
+
+    onToggleStar: async function({container}) {
+      let resp;
+      if (container.starred) {
+        resp = await containerSvc.unstar(container.id);
+      } else {
+        resp = await containerSvc.star(container.id);
+      }
+
+      if (resp.status) {
+        container.starred = !container.starred;
+      }
+    },
+
+    exportContainers: function() {
+      const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
+      exportSvc.exportRecords({objectType: 'storageContainer', recordIds: containerIds});
+    },
+
+    deleteContainers: async function() {
+      const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
+      await this.$refs.deleteDialog.open();
+      await containerSvc.bulkDelete(containerIds, true);
+      alertsSvc.success('Containers deleted successfully!');
+      this.$refs.listView.reload();
+    },
+
+    createContainer: function() {
+      routerSvc.goto('ContainerAddEdit', {containerId: -1});
+    },
+
+    viewContainerTypes: function() {
+      routerSvc.goto('ContainerTypesList', {typeId: -1});
+    },
+
+    viewContainerTasks: function() {
+      routerSvc.goto('ContainerTasksList');
+    }
+  }
+}
+</script>

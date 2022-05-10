@@ -46,8 +46,7 @@ angular.module('os.biospecimen.specimen')
           return;
         }
 
-        SpecimensHolder.setSpecimens(null);
-
+        SpecimensHolder.clear();
         if (spmnFields.length == 0) {
           loadPvs();
         }

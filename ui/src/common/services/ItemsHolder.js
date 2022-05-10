@@ -38,12 +38,13 @@ class ItemsHolder {
   }
       
   ngSetItems(type, items) {
-    let payload = { type: type, items: items };
-    window.parent.postMessage({
-      op: 'addItems',
-      payload: payload,
-      requestor: 'vueapp'
-    }, '*');
+    if (!items) {
+      delete this.itemsMap[type];
+      localStorage.removeItem('os.' + type);
+    } else {
+      this.itemsMap[type] = items;
+      localStorage.setItem('os.' + type, JSON.stringify(items));
+    }
   }
 }
 

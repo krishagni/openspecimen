@@ -1,6 +1,6 @@
 
 <template>
-  <ul class="os-key-values os-two-cols">
+  <ul class="os-key-values" :class="{'os-one-col': columns == 1, 'os-two-cols': columns != 1}">
     <li class="item" v-for="(field, idx) of fields.simple" :key="idx">
       <strong class="key key-sm">{{field.label}}</strong>
       <span class="value value-md">
@@ -23,6 +23,9 @@
           </span>
           <span v-else-if="field.type == 'text'">
             <span v-html="field.value"></span>
+          </span>
+          <span v-else-if="field.type == 'component'">
+            <component :is="field.component" v-bind="field.value" />
           </span>
           <span v-else>
             <span>{{field.value}}</span>
@@ -97,7 +100,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['object', 'schema'],
+  props: ['object', 'schema', 'columns'],
 
   components: {
     Section
@@ -107,6 +110,10 @@ export default {
     fields: function() {
       let simpleFields = [], textAreaFields = [], subformFields = [];
       for (let field of this.schema) {
+        if (field.dataEntry) {
+          continue;
+        }
+
         if (field.type == 'subform') {
           // convert into 2-d array of values: [ [1, "abc"], [2, "xyz"], [3, "abcxyz"] ]
           let values = this.getValue(this.object, field) || [];
@@ -168,6 +175,8 @@ export default {
         } else {
           value = '-';
         }
+      } else if (typeof field.value == 'function') {
+        value = field.value(object);
       } else {
         value = exprUtil.getValue(object, field.name); // props.object[field.name];
         if (field.displayValues) {
@@ -201,13 +210,36 @@ export default {
             value = option.caption || option.name;
           }
         } else if (field.type == 'dropdown') {
+          const ls = field.listSource || {};
           if (typeof value == 'object') {
-            const ls = field.listSource || {};
             if (ls.displayProp) {
               value = value[ls.displayProp];
             }
+          } else if (ls.options && ls.options.length > 0 && typeof ls.options[0] == 'object') {
+            for (let option of ls.options) {
+              if (option[ls.selectProp] == value) {
+                value = option[ls.displayProp];
+                break;
+              }
+            }
           }
+        } else if (field.type == 'storage-position') {
+          if (value && typeof value == 'object') {
+            let position = value;
+            value = position.name;
+            if (position.mode == 'TWO_D') {
+              value += ' (' + position.positionY + ', ' + position.positionX + ')';
+            } else if (position.mode == 'LINEAR') {
+              value += ' (' + position.position + ')';
+            }
+          }
+
+          value = value || 'Not Stored';
         }
+      }
+
+      if (value === null || value === undefined || value === '') {
+        value = '-';
       }
 
       return value;

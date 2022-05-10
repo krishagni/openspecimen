@@ -27,7 +27,7 @@
   </div>
 
   <div class="os-page-commands">
-    <div class="left">
+    <div class="left" ng-if="ctx.list.id > 0">
       <os-specimen-ops specimens="getSelectedSpecimens()" init-list="loadSpecimens()" cart="ctx.list">
       </os-specimen-ops>
 
@@ -75,12 +75,20 @@
     </div>
   </div>
 
-  <div class="os-container-wrapper">
+  <div class="os-container-wrapper" ng-if="ctx.list.id > 0">
     <div>
       <os-list params="ctx.params" item-sref="specimen({specimenId: row.hidden.specimenId})"
         enable-selection="true" show-item="showSpecimen(row)" init-ctrl="setListCtrl($list)"
         empty-state="ctx.emptyState">
       </os-list>
+    </div>
+  </div>
+
+  <div class="container" ng-if="!ctx.list.id">
+    <div class="os-alert-container show inline">
+      <div class="alert alert-info">
+        <span translate="specimen_list.no_default_cart"></span>
+      </div>
     </div>
   </div>
 </div>

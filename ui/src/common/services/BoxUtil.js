@@ -1,5 +1,6 @@
 
 import numConvUtil from '@/common/services/NumberConverterUtil.js';
+import util from '@/common/services/Util.js';
 
 class BoxUtil {
 
@@ -190,6 +191,163 @@ class BoxUtil {
     }
 
     return matrix;
+  }
+
+  //
+  // opts: {
+  //   positionAssignerType,
+  //   positionLabelingMode
+  //   rowLabelingScheme,
+  //   columnLabelingScheme,
+  //   numberOfRows,
+  //   numberOfColumns,
+  //   occupiedPositions - linear positions,
+  //   occupants
+  //   isVacatable: input <- occupant, output -> true/falseboolean fn
+  //   occupantName: input <- occupant, output -> occupant name
+  //   createCell: (label, row, column, existing) => cell
+  // }
+  //
+  assignPositions(opts, inputLabels, vacateOccupants) {
+    const assignerType = opts.positionAssignerType || 'HZ_TOP_DOWN_LEFT_RIGHT';
+    const assigner     = this.getPositionAssigner(assignerType);
+    const occupants    = opts.occupants || [];
+
+    //  
+    // Below regular expression will break (A, B) x, y, z into following parts
+    // match[0] = '"(A, B)" x, y, z' ; entire matched string
+    // match[1] = '"(A, B)"'; starting cell in parenthesis
+    // match[2] = '(A, B)'; starting cell without parenthesis
+    // match[3] = 'x, y, z'; labels to scan or parse
+    //  
+    const re = /("([^"]+)")?\s*([^"]+)/g;
+    inputLabels = (inputLabels && inputLabels.trim()) || ''; 
+
+    const input = [];
+    let match = null;
+    while ((match = re.exec(inputLabels)) != null) {
+      let startCell = match[2] && match[2].trim();
+      if (startCell && startCell.charAt(0) == '(' && startCell.charAt(startCell.length - 1) == ')') {
+        startCell = startCell.substr(1, startCell.length - 2); 
+      }   
+
+      input.push({startCell: startCell, labels: util.splitStr(match[3], /,|\t|\n/, true)});
+    }
+
+    let noFreeLocs = false
+    for (let i = 0; i < input.length; ++i) {
+      let startRow = 1, startColumn = 1;
+      let mapIdx = 0, labelIdx = 0;
+
+      let labels = input[i].labels;
+      if (input[i].startCell) {
+        //
+        // Explicit starting cell specified
+        //
+        let startCell = input[i].startCell.trim().split(',');
+        if (opts.positionLabelingMode == 'LINEAR') {
+          let {row, column} = assigner.fromPos({pos: +startCell, nr: opts.numberOfRows, nc: opts.numberOfColumns});
+          startRow    = row
+          startColumn = column;
+        } else {
+          if (startCell.length != 2) {
+            alert("Invalid start position: " + input[i].startCell);
+            return;
+          }
+
+          startRow    = numConvUtil.toNumber(opts.rowLabelingScheme,    startCell[0].trim());
+          startColumn = numConvUtil.toNumber(opts.columnLabelingScheme, startCell[1].trim());
+        }
+
+        //
+        // fast forward map index to point to first occupant in cell (row, column)
+        // such that row > startRow or row == startRow and column > startColumn
+        //
+        while (mapIdx < opts.occupants.length) {
+          let row    = opts.occupants[mapIdx][opts.rowProp];
+          let column = opts.occupants[mapIdx][opts.colProp];
+          if (row < startRow || (row == startRow && column < startColumn)) {
+            ++mapIdx;
+          } else {
+            break;
+          }
+
+          ++mapIdx;
+        }
+      }
+
+      const yLimit = assigner.rowMajor() ? opts.numberOfRows : opts.numberOfColumns;
+      const xLimit = assigner.rowMajor() ? opts.numberOfColumns : opts.numberOfRows;
+      let done = false;
+      for (let y = startRow; y <= yLimit; ++y) {
+        for (let x = startColumn; x <= xLimit; ++x) {
+          if (labelIdx >= labels.length) {
+            //  
+            // we are done with probing/iterating through all input labels
+            //  
+            done = true;
+            break;
+          }   
+
+          let existing = undefined;
+          if (mapIdx < occupants.length && occupants[mapIdx][opts.rowProp] == y && occupants[mapIdx][opts.colProp] == x) {
+            //  
+            // current cell is occupied
+            //  
+            if (!vacateOccupants || !opts.isVacatable(occupants[mapIdx])) {
+              //  
+              // When asked not to vacate existing occupants or present occupant
+              // is not vacatable, then examine next cell
+              //  
+              mapIdx++;
+              continue;
+            }   
+
+            existing = occupants[mapIdx];
+            occupants.splice(mapIdx, 1); 
+          }   
+ 
+          var label = labels[labelIdx++];
+          if ((!label || label.trim().length == 0) && (!vacateOccupants || !existing)) {
+            //
+            // Label is empty. Either asked not to vacate existing occupants or
+            // present cell is empty
+            //
+            continue;
+          }
+
+          let cell = undefined;
+          if (!!existing && opts.occupantName(existing).toLowerCase() == label.toLowerCase()) {
+            cell = existing;
+          } else {
+            cell = opts.createCell(label, y, x, existing);
+          }
+
+          occupants.splice(mapIdx, 0, cell);
+          mapIdx++;
+        }
+
+        //
+        // start of next row
+        //
+        startColumn = 1;
+
+        if (done) {
+          break;
+        }
+      }
+
+      while (labelIdx < labels.length) {
+        if (!!labels[labelIdx] && labels[labelIdx].trim().length > 0) {
+          noFreeLocs = true;
+          break;
+        }
+
+        labelIdx++;
+      }
+    }
+
+    return {occupants: occupants, noFreeLocs: noFreeLocs};
   }
 }
 

@@ -1,5 +1,6 @@
 import AddItems from './AddItems.vue';
 import AddSpecimens from './AddSpecimens.vue';
+import AddToCart from './AddToCart.vue';
 import AuditOverview from './AuditOverview.vue';
 import Avatar from './Avatar.vue';
 import BooleanCheckbox from './BooleanCheckbox.vue';
@@ -7,7 +8,9 @@ import Breadcrumb from './Breadcrumb.vue';
 import Button from './Button.vue';
 import ButtonGroup from './ButtonGroup.vue';
 import ButtonLink from './ButtonLink.vue';
+import Chart from './Chart.vue';
 import Checkbox from './Checkbox.vue';
+import CloseSpecimen from './CloseSpecimen.vue';
 import Col from './Col.vue';
 import Confirm from './Confirm.vue';
 import ConfirmDelete from './ConfirmDelete.vue';
@@ -39,6 +42,7 @@ import Mask from './Mask.vue';
 import Menu from './Menu.vue';
 import Message from './Message.vue';
 import MultiSelectDropdown from './MultiSelectDropdown.vue';
+import MultiSelectGroupDropdown from './MultiSelectGroupDropdown.vue';
 import NewTab from './NewTab.vue';
 import Note from './Note.vue';
 import Overlay from './Overlay.vue';
@@ -62,7 +66,9 @@ import SideMenu from './SideMenu.vue';
 import SignaturePad from './SignaturePad.vue';
 import SiteDropdown from './SiteDropdown.vue';
 import Span from './Span.vue';
+import SpecimenActions from './SpecimenActions.vue';
 import SpecimenMeasure from './SpecimenMeasure.vue';
+import Star from './Star.vue';
 import Steps from './Steps.vue';
 import Step from './Step.vue';
 import StorageContainerDropdown from './StorageContainerDropdown.vue';
@@ -77,11 +83,13 @@ import TabView from './TabView.vue';
 import TabPanel from './TabPanel.vue';
 import UserDropdown from './UserDropdown.vue';
 import UsernameAvatar from './UsernameAvatar.vue';
+import UtilisationBar from './UtilisationBar.vue';
 
 export default {
   install(app) {
     app.component('os-add-items',        AddItems);
     app.component('os-add-specimens',    AddSpecimens);
+    app.component('os-add-to-cart',      AddToCart);
     app.component('os-audit-overview',   AuditOverview);
     app.component('os-avatar',           Avatar);
     app.component('os-boolean-checkbox', BooleanCheckbox);
@@ -89,7 +97,9 @@ export default {
     app.component('os-button',           Button);
     app.component('os-button-group',     ButtonGroup);
     app.component('os-button-link',      ButtonLink);
+    app.component('os-chart',            Chart);
     app.component('os-checkbox',         Checkbox);
+    app.component('os-close-specimen',   CloseSpecimen);
     app.component('os-column',           Col);
     app.component('os-confirm',          Confirm);
     app.component('os-container-selector', ContainerSelector);
@@ -121,6 +131,7 @@ export default {
     app.component('os-menu',             Menu);
     app.component('os-message',          Message);
     app.component('os-multi-select-dropdown', MultiSelectDropdown);
+    app.component('os-multi-select-group-dropdown', MultiSelectGroupDropdown);
     app.component('os-new-tab',          NewTab);
     app.component('os-note',             Note);
     app.component('os-overlay',          Overlay);
@@ -144,6 +155,7 @@ export default {
     app.component('os-signature-pad',    SignaturePad);
     app.component('os-site-dropdown',    SiteDropdown);
     app.component('os-span',             Span);
+    app.component('os-specimen-actions', SpecimenActions);
     app.component('os-specimen-measure', SpecimenMeasure);
     app.component('os-containers-dropdown', StorageContainerDropdown);
     app.component('os-storage-position', StoragePosition);
@@ -157,7 +169,9 @@ export default {
     app.component('os-tab',              TabPanel);
     app.component('os-username-avatar',  UsernameAvatar);
     app.component('os-user-dropdown',    UserDropdown);
+    app.component('os-star',             Star);
     app.component('os-steps',            Steps);
     app.component('os-step',             Step);
+    app.component('os-utilisation-bar',  UtilisationBar);
   }
 }
