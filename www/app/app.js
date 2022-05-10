@@ -397,8 +397,8 @@ osApp.config(function(
     }
   })
   .factory('VueApp', function($sce, $rootScope, $window) {
-    // var baseUrl = 'ui-app/#/';
-    var baseUrl = 'http://localhost:8081/#/';
+    var baseUrl = 'ui-app/#/';
+    // var baseUrl = 'http://localhost:8081/#/';
 
     function getVueViewUrl(state, params) {
       var url = baseUrl + state;
