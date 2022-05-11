@@ -75,7 +75,7 @@ export default {
       this.$refs.specimensList.loadListSize();
     },
 
-    onListLoad: function(list) {
+    onListLoad: function() {
       this.showListSize = true;
       this.selectedSpecimens.length = 0;
     },
