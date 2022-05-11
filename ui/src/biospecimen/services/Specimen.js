@@ -1,4 +1,3 @@
-
 import alertsSvc   from '@/common/services/Alerts.js';
 import http        from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';

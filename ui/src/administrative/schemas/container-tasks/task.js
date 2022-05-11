@@ -1,5 +1,5 @@
 export default {
-  fields:  [
+  "fields":  [
     {
       "type": "text",
       "label": "Name",

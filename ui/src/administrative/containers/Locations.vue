@@ -13,7 +13,7 @@
             v-if="ctx.hasBlockedSlots" />
         </span>
 
-        <span v-if="anySelected">
+        <span v-if="isSpecimenContainer && anySelected">
           <os-button left-icon="ban" label="Block" @click="block" />
 
           <os-button left-icon="undo" label="Unblock" @click="unblock" />
@@ -106,7 +106,7 @@
             :columns="1" v-if="ctx.containerDict.length > 0" />
         </div>
 
-        <div v-if="ctx.occupant.specimen">
+        <div v-else-if="ctx.occupant.specimen">
           <h4 class="title">
             <span>Specimen</span>
           </h4>
@@ -565,7 +565,7 @@ export default {
     confirmTransfer: async function(useBarcode, specimens) {
       const storedSpmns = this.ctx.toTransferSpmns = specimens
         .filter(spmn => spmn.storageLocation && spmn.storageLocation.id > 0)
-        .map(spmn => useBarcode && spmn.barcode || spmn.label);
+        .map(spmn => (useBarcode && spmn.barcode) || spmn.label);
       if (storedSpmns.length == 0) {
         return true;
       }

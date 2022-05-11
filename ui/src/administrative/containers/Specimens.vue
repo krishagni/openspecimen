@@ -1,4 +1,3 @@
-
 <template>
   <os-page-toolbar>
     <template #default>
@@ -38,8 +37,8 @@
 <script>
 
 import containerSvc from '@/administrative/services/Container.js';
-import routerSvc  from '@/common/services/Router.js';
-import util       from '@/common/services/Util.js';
+import routerSvc    from '@/common/services/Router.js';
+import util         from '@/common/services/Util.js';
 
 export default {
   props: ['container'],
@@ -50,9 +49,7 @@ export default {
 
       includeCount: false,
 
-      showListSize: false,
-
-      hasRows: false
+      showListSize: false
     }
   },
 
@@ -81,7 +78,6 @@ export default {
     onListLoad: function(list) {
       this.showListSize = true;
       this.selectedSpecimens.length = 0;
-      this.hasRows = list.rows && list.rows.length > 0;
     },
 
     downloadReport: function() {

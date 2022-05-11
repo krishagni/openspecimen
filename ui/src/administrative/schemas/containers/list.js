@@ -1,5 +1,4 @@
-
-// import routerSvc from '@/common/services/Router.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   columns: [
@@ -13,8 +12,7 @@ export default {
     {
       name: "container.name",
       caption: "Name",
-      /*href: (row) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.id})*/
-      href: (row) => '#/containers-detail/' + row.rowObject.container.id
+      href: (row) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.id})
     },
     {
       name: "container.siteName",

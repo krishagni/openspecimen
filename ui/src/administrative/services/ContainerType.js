@@ -1,7 +1,7 @@
 
 import formUtil from '@/common/services/FormUtil.js';
-import http from '@/common/services/HttpClient.js';
-import util from '@/common/services/Util.js';
+import http     from '@/common/services/HttpClient.js';
+import util     from '@/common/services/Util.js';
 
 import addEditLayout  from '@/administrative/schemas/container-types/addedit.js';
 import typeSchema     from '@/administrative/schemas/container-types/type.js';

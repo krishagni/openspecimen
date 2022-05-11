@@ -1,4 +1,3 @@
-
 import routerSvc from '@/common/services/Router.js';
 
 export default {

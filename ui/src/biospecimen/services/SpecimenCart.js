@@ -1,4 +1,3 @@
-
 import http from '@/common/services/HttpClient.js';
 
 class SpecimenCart {

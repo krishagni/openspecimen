@@ -1,4 +1,3 @@
-
 <template>
   <os-tabs @tabChanged="onTabChange">
     <os-tab name="schedule">
@@ -10,10 +9,8 @@
         <os-button left-icon="plus" label="Create" @click="showAddEditScheduledActivityForm({activity: {}})" />
       </div>
 
-      <os-list-view :data="activities"
-        :schema="scheduledActivitiesSchema"
-        :loading="loadingScheduledActivities"
-        :showRowActions="allowEdits">
+      <os-list-view :data="activities" :schema="scheduledActivitiesSchema"
+        :loading="loadingScheduledActivities" :showRowActions="allowEdits">
 
         <template #rowActions="slotProps">
           <os-button-group>
@@ -24,7 +21,6 @@
               @click="confirmArchiveScheduledActivity(slotProps.rowObject)" />
           </os-button-group>
         </template>
-
       </os-list-view>
     </os-tab>
 
@@ -40,10 +36,8 @@
         <os-button left-icon="download" label="Export" @click="downloadActivityLogs()" />
       </div>
 
-      <os-list-view :data="activityLogs"
-        :schema="activityLogsSchema"
-        :loading="loadingActivityLogs"
-        :showRowActions="allowEdits">
+      <os-list-view :data="activityLogs" :schema="activityLogsSchema"
+        :loading="loadingActivityLogs" :showRowActions="allowEdits">
 
         <template #rowActions="slotProps">
           <os-button-group>
@@ -54,7 +48,6 @@
               @click="confirmArchiveActivity(slotProps.rowObject)" />
           </os-button-group>
         </template>
-
       </os-list-view>
     </os-tab>
   </os-tabs>
@@ -118,9 +111,9 @@ import routerSvc    from '@/common/services/Router.js';
 import util         from '@/common/services/Util.js';
 
 import scheduledActivitiesSchema from '@/administrative/schemas/containers/scheduled-activities.js';
-import scheduledActivitySchema from '@/administrative/schemas/containers/scheduled-activity.js';
-import activityLogsSchema from '@/administrative/schemas/containers/activity-logs.js';
-import activityLogSchema from '@/administrative/schemas/containers/activity-log.js';
+import scheduledActivitySchema   from '@/administrative/schemas/containers/scheduled-activity.js';
+import activityLogsSchema        from '@/administrative/schemas/containers/activity-logs.js';
+import activityLogSchema         from '@/administrative/schemas/containers/activity-log.js';
 
 export default {
   props: ['container'],

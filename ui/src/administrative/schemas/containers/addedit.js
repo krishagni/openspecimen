@@ -1,6 +1,5 @@
-
 export default {
-  layout: {
+  "layout": {
     "rows": [
       {
         "fields": [
@@ -9,7 +8,7 @@ export default {
             "name": "createType",
             "label": "Create",
             "options": [
-              { "caption": "Single Container", "value": "single" },
+              { "caption": "Single Container",    "value": "single" },
               { "caption": "Multiple Containers", "value": "multiple" },
               { "caption": "Container Hierarchy", "value": "hierarchy" }
             ],

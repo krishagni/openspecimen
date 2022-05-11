@@ -90,11 +90,11 @@ import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
 import containerSvc from '@/administrative/services/Container.js';
-import alertsSvc from '@/common/services/Alerts.js';
-import http      from '@/common/services/HttpClient.js';
-import routerSvc from '@/common/services/Router.js';
-import settingsSvc from '@/common/services/Setting.js';
-import util from '@/common/services/Util.js';
+import alertsSvc    from '@/common/services/Alerts.js';
+import http         from '@/common/services/HttpClient.js';
+import routerSvc    from '@/common/services/Router.js';
+import settingsSvc  from '@/common/services/Setting.js';
+import util         from '@/common/services/Util.js';
 
 import containerResources from './Resources.js';
 

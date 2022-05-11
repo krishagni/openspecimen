@@ -1,6 +1,5 @@
-
 export default {
-  layout: {
+  "layout": {
     "rows": [
       {
         "fields": [ { "name": "task.name" } ]

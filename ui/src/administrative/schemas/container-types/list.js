@@ -1,4 +1,3 @@
-
 import routerSvc from '@/common/services/Router.js';
 
 export default {
@@ -25,7 +24,7 @@ export default {
     {
       name: "type.name",
       caption: "Name",
-      href: (row) => "#/container-types/" + row.rowObject.type.name
+      href: (row, query) =>  routerSvc.getUrl('ContainerTypesListItemDetail.Overview', {typeId: row.rowObject.type.id}, query)
     },
     {
       name: "type.nameFormat",

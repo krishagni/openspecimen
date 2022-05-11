@@ -11,8 +11,8 @@ import transferFormSchema from '@/administrative/schemas/containers/transfer.js'
 import defragFormSchema   from '@/administrative/schemas/containers/defragment.js';
 import locationsSchema    from '@/administrative/schemas/containers/locations.js';
 
-import taskAddEditLayout from '@/administrative/schemas/container-tasks/addedit.js';
-import taskSchema        from '@/administrative/schemas/container-tasks/task.js';
+import taskAddEditLayout  from '@/administrative/schemas/container-tasks/addedit.js';
+import taskSchema         from '@/administrative/schemas/container-tasks/task.js';
 
 class Container {
   async getContainers(filterOpts) {

@@ -1,6 +1,5 @@
-
 export default {
-  layout: {
+  "layout": {
     "rows": [
       {
         "fields": [
@@ -125,7 +124,7 @@ export default {
             "rows": "3"
           }
         ]
-      },
+      }
     ]
   }
 }

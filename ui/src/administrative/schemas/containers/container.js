@@ -1,7 +1,7 @@
 import routerSvc from '@/common/services/Router.js';
 
 export default {
-  fields:  [
+  "fields":  [
     {
       "type": "radio",
       "label": "Used For",
@@ -227,7 +227,7 @@ export default {
       "showWhen": "container.positionLabelingMode == 'TWO_D'",
       "validations": {
         "required": {
-          "message": "Row Labeling Scheme is mandatory"
+          "message": "Column Labeling Scheme is mandatory"
         }
       },
       "dataEntry": true
@@ -238,14 +238,14 @@ export default {
       "name": "container.positionAssignment",
       "listSource": {
         "options": [
-          {"name": "HZ_TOP_DOWN_LEFT_RIGHT",  "value": "Horizontal, top down, left to right"},
+          {"name": "HZ_TOP_DOWN_LEFT_RIGHT",  "value": "Horizontal, top to down, left to right"},
           {"name": "HZ_TOP_DOWN_RIGHT_LEFT",  "value": "Horizontal, top to down, right to left"},
-          {"name": "HZ_BOTTOM_UP_LEFT_RIGHT", "value": "Horizontal, bottom up, left to right"},
-          {"name": "HZ_BOTTOM_UP_RIGHT_LEFT", "value": "Horizontal, bottom up, right to left"},
-          {"name": "VT_TOP_DOWN_LEFT_RIGHT",  "value": "Vertical, top down, left to right"},
+          {"name": "HZ_BOTTOM_UP_LEFT_RIGHT", "value": "Horizontal, bottom to top, left to right"},
+          {"name": "HZ_BOTTOM_UP_RIGHT_LEFT", "value": "Horizontal, bottom to top, right to left"},
+          {"name": "VT_TOP_DOWN_LEFT_RIGHT",  "value": "Vertical, top to down, left to right"},
           {"name": "VT_TOP_DOWN_RIGHT_LEFT",  "value": "Vertical, top to down, right to left"},
-          {"name": "VT_BOTTOM_UP_LEFT_RIGHT", "value": "Vertical, bottom up, left to right"},
-          {"name": "VT_BOTTOM_UP_RIGHT_LEFT", "value": "Vertical, bottom up, right to left"}
+          {"name": "VT_BOTTOM_UP_LEFT_RIGHT", "value": "Vertical, bottom to top, left to right"},
+          {"name": "VT_BOTTOM_UP_RIGHT_LEFT", "value": "Vertical, bottom to top, right to left"}
         ],
         "selectProp": "name",
         "displayProp": "value"

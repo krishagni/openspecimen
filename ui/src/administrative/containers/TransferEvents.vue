@@ -1,4 +1,3 @@
-
 <template>
   <os-list-view
     :data="events"
@@ -10,7 +9,7 @@
 
 <script>
 
-import listSchema from '@/administrative/schemas/containers/transfer-events.js';
+import listSchema   from '@/administrative/schemas/containers/transfer-events.js';
 import containerSvc from '@/administrative/services/Container.js';
 
 export default {

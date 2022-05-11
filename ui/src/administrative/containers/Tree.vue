@@ -1,4 +1,3 @@
-
 <template>
   <Tree class="os-container-tree"
     :value="containerTree"
