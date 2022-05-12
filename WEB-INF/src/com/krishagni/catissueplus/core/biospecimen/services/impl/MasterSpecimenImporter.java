@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -140,6 +140,13 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 
 		resp.throwErrorIfUnsuccessful();
 		detail.setPpid(resp.getPayload().getPpid());
+
+		if (cpr != null) {
+			cpr.getVisits().stream()
+				.filter(visit -> isVisitOfSameEvent(visit, detail.getEventLabel()))
+				.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), detail.getVisitDate()))
+				.findAny().ifPresent(matchedVisit -> detail.setVisitId(matchedVisit.getId()));
+		}
 	}
 
 	private CollectionProtocolRegistration getCprByPmis(String cpShortTitle, List<PmiDetail> pmis) {
@@ -151,12 +158,17 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		return cprs.isEmpty() ? null : cprs.iterator().next();
 	}
 
+	private boolean isVisitOfSameEvent(Visit visit, String eventLabel) {
+		return StringUtils.isBlank(eventLabel) || visit.isOfEvent(eventLabel);
+	}
+
 	private void upsertVisit(MasterSpecimenDetail detail) {
 		if (!isPrimarySpecimen(detail)) {
 			return;
 		}
 		
 		VisitDetail visitDetail = new VisitDetail();
+		visitDetail.setId(detail.getVisitId());
 		visitDetail.setCpShortTitle(detail.getCpShortTitle());
 		visitDetail.setPpid(detail.getPpid());
 
