@@ -432,6 +432,7 @@
       "ON_VISIT": "On Visit Collection",
       "ON_PRIMARY_COLL": "On Primary Collection",
       "ON_PRIMARY_RECV": "On Primary Receive",
+      "ON_SHIPMENT_RECV": "On Shipment Receive",
       "NONE": "None"
     },
 
@@ -3086,9 +3087,10 @@
         "zero_disposed_spmn_qty_desc": "Enable to set the available quantity of specimens to zero when they are disposed.",
         "coordinator_role_name": "Coordinator Role",
         "coordinator_role_name_desc": "Name of the role that is assigned to coordinators. When specified, coordinators cannot update participants, visits, and specimens if any of specimens of underneath them are in received state.",
-
         "cp_versioning_enabled": "CP Revisions",
-        "cp_versioning_enabled_desc": "All changes to the collection protocols will have to be reviewed and published."
+        "cp_versioning_enabled_desc": "All changes to the collection protocols will have to be reviewed and published.",
+        "pre_print_ship_recv_quality": "Shipment Received Quality",
+        "pre_print_ship_recv_quality_desc": "Regular expression for acceptable shipment received qualities."
       },
 
       "common": {

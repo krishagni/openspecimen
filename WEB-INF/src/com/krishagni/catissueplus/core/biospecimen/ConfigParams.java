@@ -85,6 +85,8 @@ public class ConfigParams {
 
 	public static final String CP_VERSIONING_ENABLED     = "cp_versioning_enabled";
 
+	public static final String PP_SHIPMENT_RECV_QUALITY  = "pre_print_ship_recv_quality";
+
 	public static String getConsentsDirPath() {
 		String path = ConfigUtil.getInstance().getStrSetting(MODULE, CONSENTS_DIR, null);
 		if (StringUtils.isBlank(path)) {
