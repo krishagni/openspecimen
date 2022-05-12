@@ -174,7 +174,7 @@ export default {
             "label": "Specimen Types",
             "listSource": {
               "displayProp": "type",
-              "groupDisplayProp": "specimenClass",
+              "groupNameProp": "specimenClass",
               "groupItemsProp": "types",
               "loadFn": ({context}) => context.formData.getAllowedTypes()
             },

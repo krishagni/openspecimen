@@ -202,7 +202,13 @@ export default {
       }
 
       const fieldRef = this.$refs.selectWidget;
-      return (fieldRef.options || []).find(option => option[this.selectProp] == this.modelValue);
+      let selectedOption = (fieldRef.options || []).find(option => option[this.selectProp] == this.modelValue);
+      if (!selectedOption) {
+        selectedOption = {};
+        selectedOption[this.selectProp] = this.modelValue;
+      }
+
+      return selectedOption;
     }
   },
 

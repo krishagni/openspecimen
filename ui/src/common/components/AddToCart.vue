@@ -1,4 +1,3 @@
-
 <template>
   <os-button-group>
     <os-button left-icon="cart-plus" label="Add to Cart" @click="addToMyDefaultCart" />
@@ -6,7 +5,7 @@
   </os-button-group>
 
   <os-overlay class="os-carts" ref="cartOptions" style="margin-left: -112px;">
-    <ul>
+    <ul class="search">
       <li>
         <os-input-text v-model="searchTerm" @update:modelValue="searchCarts" />
       </li>
@@ -30,11 +29,11 @@
 
 <script>
 
+import cartsSvc  from '@/biospecimen/services/SpecimenCart.js';
 import alertsSvc from '@/common/services/Alerts.js';
-import http from '@/common/services/HttpClient.js';
-import itemsSvc from '@/common/services/ItemsHolder.js';
+import http      from '@/common/services/HttpClient.js';
+import itemsSvc  from '@/common/services/ItemsHolder.js';
 import routerSvc from '@/common/services/Router.js';
-import cartsSvc from '@/biospecimen/services/SpecimenCart.js';
 
 export default {
   props: ['specimens'],
@@ -55,32 +54,38 @@ export default {
       }
 
       this.cartsLoaded = true;
-      this.getCarts().then(carts => this.carts = this.defCarts = carts);
+      this.searchCarts(null);
     },
 
     searchCarts: function(searchTerm) {
-      if (this.timer) {
-        clearTimeout(this.timer);
-        this.timer = null;
+      if (this.searchTimer) {
+        clearTimeout(this.searchTimer);
+        this.searchTimer = null;
       }
 
-      if (!searchTerm) {
-        if (this.defCarts) {
-          this.carts = this.defCarts;
-        }
-      } else {
-        this.timer = setTimeout(
-          () => {
-            if (this.defCarts && this.defCarts.length < 100) {
-              searchTerm = searchTerm.toLowerCase();
-              this.carts = this.defCarts.filter(cart => cart.name.toLowerCase().indexOf(searchTerm) != -1);
-            } else {
-              this.getCarts(searchTerm).then(carts => this.carts = carts);
-            }
-          },
-          500
-        );
+      if (!searchTerm && this.defCarts) {
+        this.carts = this.defCarts;
+        return;
       }
+
+      this.searchTimer = setTimeout(
+        () => {
+          if (this.defCarts && this.defCarts.length < 100) {
+            searchTerm = searchTerm.toLowerCase();
+            this.carts = this.defCarts.filter(cart => cart.name.toLowerCase().indexOf(searchTerm) != -1);
+          } else {
+            this.getCarts(searchTerm).then(
+              carts => {
+                this.carts = carts;
+                if (!searchTerm) {
+                  this.defCarts = carts;
+                }
+              }
+            );
+          }
+        },
+        searchTerm ? 500 : 0
+      );
     },
 
     getCarts: function(searchTerm) {

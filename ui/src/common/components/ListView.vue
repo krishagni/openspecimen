@@ -406,8 +406,8 @@ export default {
       this.$emit('sort', event);
     },
 
-    rowStarToggled: function(event) {
-      this.$emit('rowStarToggled', event.rowObject);
+    rowStarToggled: function({rowObject}) {
+      this.$emit('rowStarToggled', rowObject);
     }
   },
 

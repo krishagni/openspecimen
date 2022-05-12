@@ -1,4 +1,3 @@
-
 <template>
   <div class="os-dropdown">
     <div class="p-float-label" v-if="$attrs['md-type']">
@@ -8,12 +7,11 @@
         :options="options"
         :option-label="listSource.displayProp"
         :option-value="listSource.selectProp"
-        :option-group-label="listSource.groupDisplayProp"
+        :option-group-label="listSource.groupNameProp"
         :option-group-children="listSource.groupItemsProp"
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
-        @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)">
         <template #value> {{selectedString}} </template>
@@ -28,12 +26,11 @@
         :options="options"
         :option-label="listSource.displayProp"
         :option-value="listSource.selectProp"
-        :option-group-label="listSource.groupDisplayProp"
+        :option-group-label="listSource.groupNameProp"
         :option-group-children="listSource.groupItemsProp"
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
-        @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)">
         <template #value> {{selectedString}} </template>
@@ -62,13 +59,13 @@ export default {
 
   methods: {
     async filterOptions({value}) {
-      if (this.filterTimeout) {
-        clearTimeout(this.filterTimeout);
-        this.filterTimeout = null;
+      if (this.filterTimer) {
+        clearTimeout(this.filterTimer);
+        this.filterTimer = null;
       }
 
       const self = this;
-      this.filterTimeout = setTimeout(
+      this.filterTimer = setTimeout(
         () => {
           if (!self.allOptions || !value) {
             self.options = self.allOptions || [];
@@ -79,7 +76,7 @@ export default {
           value = value.toLowerCase();
           for (let group of self.allOptions) {
             const matchedGroup = { }
-            matchedGroup[self.listSource.groupDisplayProp] = group[self.listSource.groupDisplayProp];
+            matchedGroup[self.listSource.groupNameProp] = group[self.listSource.groupNameProp];
 
             const matches = matchedGroup[self.listSource.groupItemsProp] = [];
             for (let item of group[self.listSource.groupItemsProp]) {
@@ -108,17 +105,8 @@ export default {
       if (this.listSource.options) {
         this.allOptions = this.options = this.listSource.options;
       } else if (typeof this.listSource.loadFn == 'function') {
-        this.listSource.loadFn({context: this.context}).then(
-          options => {
-            this.allOptions = this.options = options;
-            console.log(options);
-          }
-        );
+        this.listSource.loadFn({context: this.context}).then(options => this.allOptions = this.options = options);
       }
-    },
-
-    onChange: function(event) {
-      console.log(event);
     }
   },
 
@@ -144,17 +132,6 @@ export default {
     showClear: function() {
       return true;
     }
-  },
-
-  watch: {
-    selected: function() {
-    },
-  },
-
-  mounted() {
-    /*if (this.modelValue) {
-      this.loadOptions();
-    }*/
   }
 }
 </script>

@@ -1,4 +1,3 @@
-
 <template>
   <os-menu label="Actions" :options="options" />
 
@@ -18,8 +17,8 @@
       <os-form ref="distDetailsForm" :data="ctx.distDetails" :schema="ctx.distFormSchema" />
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="closeDistributionDialog" />
-      <os-button primary label="Reserve" @click="reserveSpecimens" />
+      <os-button text    label="Cancel"     @click="closeDistributionDialog" />
+      <os-button primary label="Reserve"    @click="reserveSpecimens" />
       <os-button primary label="Distribute" @click="showDistributeOptions" right-icon="caret-down" />
     </template>
   </os-dialog>
@@ -49,7 +48,7 @@
       <os-form ref="pickSpmnsForm" :data="ctx.retrieveDetails" :schema="ctx.pickSpmnsFormSchema" />
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="closeRetrieveSpecimensDialog" />
+      <os-button text    label="Cancel"   @click="closeRetrieveSpecimensDialog" />
       <os-button primary label="Retrieve" @click="retrieveSpecimens" />
     </template>
   </os-dialog>
@@ -60,18 +59,17 @@
 <script>
 
 import specimenSvc from '@/biospecimen/services/Specimen.js';
-import alertsSvc from '@/common/services/Alerts.js';
-import authSvc   from '@/common/services/Authorization.js';
-import extnsUtil from '@/common/services/ExtensionsUtil.js';
-import http      from '@/common/services/HttpClient.js';
-import itemsSvc  from '@/common/services/ItemsHolder.js';
-import pluginReg from '@/common/services/PluginViewsRegistry.js';
-import routerSvc from '@/common/services/Router.js';
+import alertsSvc   from '@/common/services/Alerts.js';
+import authSvc     from '@/common/services/Authorization.js';
+import extnsUtil   from '@/common/services/ExtensionsUtil.js';
+import http        from '@/common/services/HttpClient.js';
+import itemsSvc    from '@/common/services/ItemsHolder.js';
+import pluginReg   from '@/common/services/PluginViewsRegistry.js';
+import routerSvc   from '@/common/services/Router.js';
 import settingsSvc from '@/common/services/Setting.js';
-import util      from '@/common/services/Util.js';
+import util        from '@/common/services/Util.js';
 
 export default {
-
   props: ['cp', 'cpr', 'visit', 'specimens'],
 
   emits: ['reloadSpecimens'],
@@ -123,7 +121,7 @@ export default {
                   name: 'printLabel',
                   options: [
                     {caption: 'Yes', value: true},
-                    {caption: 'No', value: false},
+                    {caption: 'No',  value: false},
                   ],
                   optionsPerRow: 2
                 }
@@ -190,7 +188,6 @@ export default {
         this.ctx.isDistAllowed = true;
       }
     }
-
   },
 
   computed: {
@@ -418,7 +415,7 @@ export default {
     },
 
     poolSpecimens: async function() {
-      const ids = this.specimens.map(spmn => spmn.id);
+      const ids = (this.specimens || []).map(spmn => spmn.id);
       if (ids.length < 2) { 
         alertsSvc.error('Select two or more available specimens to create a pooled specimen.');
         return;

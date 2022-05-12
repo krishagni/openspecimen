@@ -1,4 +1,3 @@
-
 <template>
   <os-dialog ref="dialogInstance">
     <template #header>
@@ -102,9 +101,9 @@ export default {
         return;
       }
 
-      const cs = this.closeDetail;
-      const specs = (this.specimens || []).map((specimen) => ({id: specimen.id, status: 'Closed', ...cs}));
-      specimenSvc.bulkUpdateStatus(specs).then(
+      const cs      = this.closeDetail;
+      const payload = (this.specimens || []).map((specimen) => ({id: specimen.id, status: 'Closed', ...cs}));
+      specimenSvc.bulkUpdateStatus(payload).then(
         () => {
           this.$refs.dialogInstance.close();
           this.resolve('closed');

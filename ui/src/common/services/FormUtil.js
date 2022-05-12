@@ -14,7 +14,7 @@ class FormUtil {
     for (let row of layoutSchema.rows) {
       let fields = [];
       for (let field of row.fields) {
-        if (!field.name) { // || !dict[field.name]) {
+        if (!field.name) {
           continue;
         }
 

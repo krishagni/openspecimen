@@ -1,4 +1,3 @@
-
 class ExtensionsUtil {
   createExtensionFieldMap(entity, sdeMode) {
     const extensionDetail = entity.extensionDetail;
