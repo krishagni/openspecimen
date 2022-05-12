@@ -60,4 +60,14 @@
         module_id in (select identifier from os_modules where name = 'biospecimen')
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Shipment received quality regex for pre-printing child specimen labels">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'pre_print_ship_recv_quality',
+        'pre_print_ship_recv_quality', 'pre_print_ship_recv_quality_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

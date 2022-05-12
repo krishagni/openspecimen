@@ -1,17 +1,16 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenShipmentReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenShipmentShippedEvent;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
-import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 @Configurable
 @Audited
@@ -106,6 +105,10 @@ public class ShipmentSpecimen extends BaseEntity {
 	private void updateSpecimen(ShipmentSpecimen other) {
 		if (!getShipment().isSpecimenShipment()) {
 			return;
+		}
+
+		if (other.getReceivedQuality() != null && StringUtils.isNotBlank(other.getReceivedQuality().getValue())) {
+			other.getSpecimen().setShipmentReceiveQuality(other.getReceivedQuality().getValue());
 		}
 
 		spmnSvc.updateSpecimen(getSpecimen(), other.getSpecimen());
