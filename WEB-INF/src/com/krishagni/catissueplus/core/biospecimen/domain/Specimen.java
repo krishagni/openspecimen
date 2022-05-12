@@ -16,11 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
@@ -216,6 +217,8 @@ public class Specimen extends BaseExtensionEntity {
 	private transient String parentUid;
 
 	private transient User createdBy;
+
+	private transient String shipmentReceiveQuality;
 
 	//
 	// holdingLocation and dp are used during distribution to record the location
@@ -766,6 +769,14 @@ public class Specimen extends BaseExtensionEntity {
 		this.createdBy = createdBy;
 	}
 
+	public String getShipmentReceiveQuality() {
+		return shipmentReceiveQuality;
+	}
+
+	public void setShipmentReceiveQuality(String shipmentReceiveQuality) {
+		this.shipmentReceiveQuality = shipmentReceiveQuality;
+	}
+
 	public StorageContainerPosition getHoldingLocation() {
 		return holdingLocation;
 	}
@@ -999,6 +1010,17 @@ public class Specimen extends BaseExtensionEntity {
 				}
 				break;
 
+			case ON_SHIPMENT_RECV:
+				if (StringUtils.isBlank(getShipmentReceiveQuality())) {
+					return;
+				}
+
+				String recvQuality = ConfigUtil.getInstance().getStrSetting(ConfigParams.MODULE, ConfigParams.PP_SHIPMENT_RECV_QUALITY);
+				if (StringUtils.isNotBlank(recvQuality) && !Pattern.matches(recvQuality, getShipmentReceiveQuality())) {
+					return;
+				}
+				break;
+
 			default:
 				//
 				// the other values - on registration and on visit means the labels
@@ -1190,6 +1212,7 @@ public class Specimen extends BaseExtensionEntity {
 		setExtension(specimen.getExtension());
 		setPrintLabel(specimen.isPrintLabel());
 		setFreezeThawCycles(specimen.getFreezeThawCycles());
+		setShipmentReceiveQuality(specimen.getShipmentReceiveQuality());
 		setUpdated(true);
 	}
 	

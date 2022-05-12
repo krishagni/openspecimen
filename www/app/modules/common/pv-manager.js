@@ -73,6 +73,7 @@ angular.module('openspecimen')
       {name: 'ON_VISIT',        displayKey: 'cp.spmn_label_pre_print_modes.ON_VISIT'},
       {name: 'ON_PRIMARY_COLL', displayKey: 'cp.spmn_label_pre_print_modes.ON_PRIMARY_COLL'},
       {name: 'ON_PRIMARY_RECV', displayKey: 'cp.spmn_label_pre_print_modes.ON_PRIMARY_RECV'},
+      {name: 'ON_SHIPMENT_RECV',displayKey: 'cp.spmn_label_pre_print_modes.ON_SHIPMENT_RECV'},
       {name: 'NONE',            displayKey: 'cp.spmn_label_pre_print_modes.NONE'}
     ];
 

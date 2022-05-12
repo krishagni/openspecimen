@@ -40,6 +40,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		ON_VISIT,
 		ON_PRIMARY_COLL,
 		ON_PRIMARY_RECV,
+		ON_SHIPMENT_RECV,
 		NONE
 	}
 
