@@ -51,7 +51,7 @@
         <template #occupant_container="slotProps">
           <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
             <os-icon class="container-icon" name="box-open" />
-            <span class="name" v-os-tooltip="slotProps.occupant.displayName">
+            <span class="name" v-os-tooltip="slotProps.occupant.tooltip">
               <span>{{slotProps.occupant.displayName}}</span>
             </span>
           </a>
@@ -287,7 +287,14 @@ export default {
             occupant.colorCode = colorCoding[specimenClass + ':' + type];
             occupant.tooltip   = specimenClass + ', ' + type;
           } else {
-            occupant.displayName = occupant.occupyingEntityName;
+            const name = occupant.occupyingEntityName;
+            const displayName = occupant.occupantProps && occupant.occupantProps.displayName;
+            if (displayName) {
+              occupant.displayName = displayName;
+              occupant.tooltip = displayName + ' (' + name + ')';
+            } else {
+              occupant.tooltip = occupant.displayName = name;
+            }
           }
         }
       ); 

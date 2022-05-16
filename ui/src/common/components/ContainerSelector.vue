@@ -29,7 +29,9 @@
                 <os-icon name="chevron-circle-right" v-show="cont.hasChildren && !cont.isOpened" />
                 <os-icon name="chevron-circle-down"  v-show="cont.hasChildren && cont.isOpened" />
               </span>
-              <span :style="{'padding-left': cont.namePadding}"> {{cont.name}} </span>
+              <span :style="{'padding-left': cont.namePadding}">
+                {{cont.displayName ? cont.displayName + ' (' + cont.name + ')' : cont.name}}
+              </span>
             </td>
             <td>
               <span v-if="!cont.positionLabelingMode || cont.positionLabelingMode == 'NONE'"> - </span>

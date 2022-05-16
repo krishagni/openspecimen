@@ -10,8 +10,15 @@ export default {
       data: (rowObject) => ({starred: rowObject.container.starred})
     },
     {
-      name: "container.name",
+      name: "containerName",
       caption: "Name",
+      value: function({container}) {
+        if (container.displayName) {
+          return container.displayName + ' (' + container.name + ')';
+        }
+
+        return container.name;
+      },
       href: (row) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.id})
     },
     {

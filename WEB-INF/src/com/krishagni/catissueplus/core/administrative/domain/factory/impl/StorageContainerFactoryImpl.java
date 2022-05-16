@@ -69,6 +69,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 
 		setName(detail, existing, container, ose);
 		setBarcode(detail, existing, container, ose);
+		setDisplayName(detail, existing, container, ose);
 		setUsageMode(detail, existing, container, ose);
 		setType(detail, existing, container, ose);
 		setTemperature(detail, existing, container, ose);
@@ -197,6 +198,22 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 			setBarcode(detail, container, ose);
 		} else {
 			container.setBarcode(existing.getBarcode());
+		}
+	}
+
+	private void setDisplayName(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(detail.getDisplayName())) {
+			return;
+		}
+
+		container.setDisplayName(detail.getDisplayName());
+	}
+
+	private void setDisplayName(StorageContainerDetail detail, StorageContainer existing, StorageContainer container, OpenSpecimenException ose) {
+		if (detail.isAttrModified("displayName") || existing == null) {
+			setDisplayName(detail, container, ose);
+		} else {
+			container.setDisplayName(existing.getDisplayName());
 		}
 	}
 

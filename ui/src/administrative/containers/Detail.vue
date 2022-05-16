@@ -6,7 +6,7 @@
       </template>
 
       <span class="os-title">
-        <h3>{{ctx.container.name}}</h3>
+        <h3>{{displayTitle}}</h3>
         <div class="accessories" v-if="ctx.container && ctx.container.id > 0">
           <os-copy-link size="small"
             :route="{name: 'ContainerDetail.Overview', params: {containerId: ctx.container.id}}" />
@@ -112,6 +112,17 @@ export default {
 
     '$route': function(currRoute) {
       this.ctx.showTree = (currRoute.name != 'ContainerDetail.Maintenance');
+    }
+  },
+
+  computed: {
+    displayTitle: function() {
+      let title = this.ctx.container.name;
+      if (this.ctx.container.displayName) {
+        title = this.ctx.container.displayName + ' (' + title + ')';
+      }
+
+      return title;
     }
   },
 

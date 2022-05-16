@@ -4,7 +4,6 @@ import http from '@/common/services/HttpClient.js';
 import routerSvc from '@/common/services/Router.js';
 
 class QuickSearch {
-
   searchEntities = {
     'collection_protocol': {
       caption: 'Collection Protocol',
@@ -62,12 +61,9 @@ class QuickSearch {
 
     'storage_container': {
       caption: 'Container',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=container-detail.overview&' +
-           'objectName=storage_container&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'ContainerDetail.Locations',
+      params: {entityId: 'containerId'}
     },
 
     'site': {

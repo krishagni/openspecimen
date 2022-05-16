@@ -9,6 +9,11 @@
       <caption>#getMessage("container_identifier")</caption>
       <attribute>id</attribute>
     </field>
+
+    <field>
+      <caption>#getMessage("container_display_name")</caption>
+      <attribute>displayName</attribute>
+    </field>
     
     <field>
       <caption>#getMessage("container_name")</caption>

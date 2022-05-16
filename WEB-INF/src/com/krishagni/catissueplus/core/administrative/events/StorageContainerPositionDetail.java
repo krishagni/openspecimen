@@ -1,10 +1,13 @@
 package com.krishagni.catissueplus.core.administrative.events;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
@@ -221,9 +224,13 @@ public class StorageContainerPositionDetail implements Comparable<StorageContain
 			result.setOccupyingEntityName(specimen.getLabel());
 			result.setOccupantProps(props);
 		} else if (position.getOccupyingContainer() != null) {
+			StorageContainer container = position.getOccupyingContainer();
 			result.setOccuypingEntity("container");
-			result.setOccupyingEntityId(position.getOccupyingContainer().getId());
-			result.setOccupyingEntityName(position.getOccupyingContainer().getName());
+			result.setOccupyingEntityId(container.getId());
+			result.setOccupyingEntityName(container.getName());
+			if (StringUtils.isNotBlank(container.getDisplayName())) {
+				result.setOccupantProps(Collections.singletonMap("displayName", container.getDisplayName()));
+			}
 		}
 		
 		return result;

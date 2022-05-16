@@ -109,6 +109,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 			exportContainerSummary(container, writer);
 			writer.writeNext(new String[] {
 				message(CONTAINER_NAME),
+				message(CONTAINER_DISPLAY_NAME),
 				message(CONTAINER_HIERARCHY),
 				message(CONTAINER_TYPE),
 				message(STORES_SPMN),
@@ -134,6 +135,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 			);
 
 		String name = container.getName();
+		String displayName = container.getDisplayName();
 		String hierarchy = container.getStringifiedAncestors();
 		String type = container.getType() != null ? container.getType().getName() : null;
 		String storesSpmn = container.isStoreSpecimenEnabled() ? message(YES) : message(NO);
@@ -148,7 +150,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 
 				String row    = container.toRowLabelingScheme(rowMajor ? cood.first() : cood.second());
 				String column = container.toColumnLabelingScheme(rowMajor ? cood.second() : cood.first());
-				writer.writeNext(new String[] { name, hierarchy, type, storesSpmn, row, column, pos.toString()});
+				writer.writeNext(new String[] { name, displayName, hierarchy, type, storesSpmn, row, column, pos.toString()});
 			}
 		}
 	}

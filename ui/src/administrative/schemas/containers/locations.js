@@ -2,19 +2,19 @@ export default {
   columns: [
     {
       "name": "autoContainerName",
-      "label": "Name",
+      "label": "Unique Name",
       "type": "span",
       "value": () => 'Auto',
       "showWhen": "container.typeName"
     },
     {
       "name": "container.name",
-      "label": "Name",
+      "label": "Unique Name",
       "type": "text",
       "showWhen": "!container.typeName",
       "validations": {
         "required": {
-          "message": "Name is mandatory"
+          "message": "Unique Name is mandatory"
         }
       }
     },

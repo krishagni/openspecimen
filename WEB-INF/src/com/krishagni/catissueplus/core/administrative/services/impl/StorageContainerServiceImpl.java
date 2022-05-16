@@ -894,6 +894,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				summary = new StorageContainerSummary();
 				summary.setId(container.getId());
 				summary.setName(container.getName());
+				summary.setDisplayName(container.getDisplayName());
 				summary.setNoOfRows(container.getNoOfRows());
 				summary.setNoOfColumns(container.getNoOfColumns());
 			} else {
@@ -2077,13 +2078,20 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		}
 
 		report = MessageUtil.getInstance().getMessage(report);
+
+		String displayTitle = container.getName();
+		if (StringUtils.isNotBlank(container.getDisplayName())) {
+			displayTitle = container.getDisplayName() + " (" + container.getName() + ")";
+		}
+
 		Map<String, Object> props = new HashMap<>();
-		props.put("$subject", new String[] { report.toLowerCase(), container.getName() });
+		props.put("$subject", new String[] { report.toLowerCase(), displayTitle });
 		props.put("report", report.toLowerCase());
 		props.put("fileId", fileId);
 		props.put("error", error);
 		props.put("rcpt", user);
 		props.put("container", container);
+		props.put("displayTitle", displayTitle);
 		EmailUtil.getInstance().sendEmail(RPT_EMAIL_TMPL, new String[] { user.getEmailAddress() }, null, props);
 	}
 

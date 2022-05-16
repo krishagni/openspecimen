@@ -15,6 +15,8 @@
 
     <property name="barcode" column="BARCODE"/>
 
+    <property name="displayName" column="DISPLAY_NAME" />
+
     <property name="usedFor" column="USED_FOR">
       <type name="org.hibernate.type.EnumType">
         <param name="enumClass">com.krishagni.catissueplus.core.administrative.domain.StorageContainer$UsageMode</param>
@@ -232,6 +234,7 @@
     <sql-query name="getRootAndChildContainers">
       <return-scalar column="containerId"   type="long"/>
       <return-scalar column="containerName" type="string"/>
+      <return-scalar column="displayName"   type="string"/>
       <return-scalar column="noOfRows"      type="int"/>
       <return-scalar column="noOfColumns"   type="int"/>
       <return-scalar column="posAssignment" type="string"/>
@@ -242,7 +245,7 @@
       <return-scalar column="colStr"        type="string"/>
 
       select
-        s.identifier as containerId, s.name as containerName,
+        s.identifier as containerId, s.name as containerName, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, s.pos_assignment as posAssignment,
         s.parent_container_id as parentId, p.pos_two as rowNo, p.pos_one as colNo,
         p.pos_two_str as rowStr, p.pos_one_str as colStr
@@ -255,7 +258,7 @@
       union all
 
       select
-        s.identifier as containerId, s.name as containerName,
+        s.identifier as containerId, s.name as containerName, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, s.pos_assignment as posAssignment,
         null as parentId, null as rowNo, null as colNo, null as rowStr, null as colStr
       from
@@ -267,6 +270,7 @@
     <sql-query name="getChildContainers">
       <return-scalar column="containerId"   type="long"/>
       <return-scalar column="containerName" type="string"/>
+      <return-scalar column="displayName"   type="string"/>
       <return-scalar column="noOfRows"      type="int"/>
       <return-scalar column="noOfColumns"   type="int"/>
       <return-scalar column="posAssignment" type="string"/>
@@ -277,7 +281,7 @@
       <return-scalar column="colStr"        type="string"/>
 
       select
-        s.identifier as containerId, s.name as containerName,
+        s.identifier as containerId, s.name as containerName, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, null as posAssignment,
         s.parent_container_id as parentId, p.pos_two as rowNo, p.pos_one as colNo,
         p.pos_two_str as rowStr, p.pos_one_str as colStr

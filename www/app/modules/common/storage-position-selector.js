@@ -41,9 +41,15 @@ angular.module('openspecimen')
       $scope.toggleContainerSelection = function(wizard, container) {
         $scope.showGrid = false;
         if (container.selected) {
-          $scope.selectedPos = {id: container.id, name: container.name, mode: container.positionLabelingMode};
-          $scope.selectedContainer = container;
+          $scope.selectedPos = {
+            id: container.id,
+            name: container.name,
+            displayName: container.displayName,
+            mode: container.positionLabelingMode,
+            displayTitle: container.displayName ? (container.displayName + ' (' + container.name + ')') : container.name
+          };
 
+          $scope.selectedContainer = container;
           if (container.positionLabelingMode == 'NONE') {
             $modalInstance.close($scope.selectedPos);
           } else {

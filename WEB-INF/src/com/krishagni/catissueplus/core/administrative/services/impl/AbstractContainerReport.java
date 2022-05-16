@@ -25,6 +25,7 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 	protected void exportContainerSummary(StorageContainer container, CsvWriter writer) {
 		writer.writeNext(new String[] { message(CONTAINER_DETAILS) });
 		writer.writeNext(new String[] { message(CONTAINER_NAME), container.getName() });
+		writer.writeNext(new String[] { message(CONTAINER_DISPLAY_NAME), container.getDisplayName() });
 		writer.writeNext(new String[] { message(CONTAINER_HIERARCHY), container.getStringifiedAncestors() });
 
 		writer.writeNext(new String[] { message(CONTAINER_RESTRICTIONS) });
@@ -87,6 +88,8 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 	protected static final String CONTAINER_DETAILS        = "storage_container_details";
 
 	protected static final String CONTAINER_NAME           = "storage_container_name";
+
+	protected static final String CONTAINER_DISPLAY_NAME   = "storage_container_display_name";
 
 	protected static final String CONTAINER_HIERARCHY      = "storage_container_hierarchy";
 

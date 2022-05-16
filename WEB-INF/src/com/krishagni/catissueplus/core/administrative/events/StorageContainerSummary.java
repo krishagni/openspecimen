@@ -24,6 +24,8 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 
 	private String barcode;
 
+	private String displayName;
+
 	private Long typeId;
 	
 	private String typeName;
@@ -90,6 +92,14 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 
 	public void setBarcode(String barcode) {
 		this.barcode = barcode;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public Long getTypeId() {
@@ -279,6 +289,7 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		result.setId(container.getId());
 		result.setName(container.getName());
 		result.setBarcode(container.getBarcode());
+		result.setDisplayName(container.getDisplayName());
 		result.setUsedFor(container.getUsedFor().name());
 		result.setActivityStatus(container.getActivityStatus());
 		result.setCreatedBy(UserSummary.from(container.getCreatedBy()));

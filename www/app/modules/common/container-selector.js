@@ -35,6 +35,7 @@ angular.module('openspecimen')
             scope.containers = containers;
           }
 
+          addDisplayTitle(scope.containers);
           scope.initList = true;
         }
       );
@@ -91,6 +92,8 @@ angular.module('openspecimen')
             if (containers.length == 0) {
               container.hasChildren = false;
             }
+
+            addDisplayTitle(scope.containers);
           }
         );
       };
@@ -111,6 +114,18 @@ angular.module('openspecimen')
       Container.query(extend({name: scope.filterOpts.name}, criteria)).then(
         function(containers) {
           scope.containers = containers;
+          addDisplayTitle(scope.containers);
+        }
+      );
+    }
+
+    function addDisplayTitle(containers) {
+      angular.forEach(containers,
+        function(container) {
+          container.displayTitle = container.name;
+          if (container.displayName) {
+            container.displayTitle = container.displayName + ' (' + container.name + ')';
+          }
         }
       );
     }

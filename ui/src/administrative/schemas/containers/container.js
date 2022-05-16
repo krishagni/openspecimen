@@ -39,11 +39,18 @@ export default {
     },
     {
       "type": "text",
-      "label": "Name",
+      "label": "Display Name",
+      "name": "container.displayName",
+      "href": (data) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: data.container.id}),
+      "summary": true
+    },
+    {
+      "type": "text",
+      "label": "Unique Name",
       "name": "container.name",
       "validations": {
         "required": {
-          "message": "Container name is mandatory"
+          "message": "Container unique name is mandatory"
         }
       },
       "href": (data) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: data.container.id}),
@@ -115,7 +122,9 @@ export default {
       "label": "Rows",
       "name": "container.noOfRows",
       "validations": {
-        "required": "Rows is mandatory"
+        "required": {
+          "message": "Rows is mandatory"
+        }
       },
       "dataEntry": true
     },
@@ -124,7 +133,9 @@ export default {
       "label": "Columns",
       "name": "container.noOfColumns",
       "validations": {
-        "required": "Columns is mandatory"
+        "required": {
+          "message": "Columns is mandatory"
+        }
       },
       "dataEntry": true
     },

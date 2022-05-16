@@ -1,9 +1,6 @@
 
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +45,9 @@ import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> implements StorageContainerDao {
 
@@ -553,6 +553,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		StorageContainerSummary container = new StorageContainerSummary();
 		container.setId((Long)row[idx++]);
 		container.setName((String)row[idx++]);
+		container.setDisplayName((String)row[idx++]);
 		container.setNoOfRows((Integer)row[idx++]);
 		container.setNoOfColumns((Integer)row[idx++]);
 		container.setPositionAssignment((String)row[idx++]);
@@ -788,8 +789,9 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		private void addNameRestriction() {
 			if (StringUtils.isNotBlank(crit.query())) {
 				addAnd();
-				where.append("upper(c.name) like :name");
+				where.append("(upper(c.name) like :name or upper(c.displayName) like :displayName)");
 				params.put("name", "%" + crit.query().toUpperCase() + "%");
+				params.put("displayName", "%" + crit.query().toUpperCase() + "%");
 			}
 
 			if (CollectionUtils.isNotEmpty(crit.names())) {

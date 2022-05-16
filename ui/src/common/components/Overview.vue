@@ -227,6 +227,10 @@ export default {
           if (value && typeof value == 'object') {
             let position = value;
             value = position.name;
+            if (position.displayName) {
+              value = position.displayName + ' (' + position.name + ')';
+            }
+
             if (position.mode == 'TWO_D') {
               value += ' (' + position.positionY + ', ' + position.positionX + ')';
             } else if (position.mode == 'LINEAR') {

@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +42,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
@@ -588,6 +590,21 @@ public class Utility {
 
 	public static <T> Stream<T> nullSafeStream(Collection<T> collection) {
 		return collection != null ? collection.stream() : Stream.empty();
+	}
+
+	public static <T, K, V> Map<K, V> toLinkedMap(Collection<T> collection, Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+		return Utility.nullSafeStream(collection).collect(toLinkedMap(keyMapper, valueMapper));
+	}
+
+	public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+		return Collectors.toMap(
+			keyMapper,
+			valueMapper,
+			(u, v) -> {
+				throw new IllegalStateException(String.format("Duplicate key %s", u));
+			},
+			LinkedHashMap::new
+		);
 	}
 
 	public static <T> boolean isEmptyOrSameAs(Collection<T> collection, T element) {

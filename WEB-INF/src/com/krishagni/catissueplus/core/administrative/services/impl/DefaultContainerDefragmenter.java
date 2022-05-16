@@ -64,7 +64,7 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 	@Override
 	public int defragment(StorageContainer container) {
 		try {
-			createWriter(container.getName());
+			createWriter(container);
 
 			List<Long> leafContainers = getLeafContainers(container.getId());
 			for (Long leafContainerId : leafContainers) {
@@ -322,24 +322,30 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 		return positions.stream().map(StorageContainerPosition::getOccupyingSpecimen).allMatch(container::canContain);
 	}
 
-	private void createWriter(String containerName) {
-		String currLocation = msg("specimen_current_location");
-		String location = msg("specimen_location");
-		String container = msg("container");
-		String row = msg("specimen_location_row");
-		String col = msg("specimen_location_column");
-		String pos = msg("specimen_location_position");
+	private void createWriter(StorageContainer container) {
+		String nameLabel         = msg("storage_container_name");
+		String displayNameLabel  = msg("storage_container_display_name");
+
+		String currLocationLabel = msg("specimen_current_location");
+		String locationLabel     = msg("specimen_location");
+		String containerLabel    = msg("container");
+		String rowLabel          = msg("specimen_location_row");
+		String colLabel          = msg("specimen_location_column");
+		String posLabel          = msg("specimen_location_position");
 
 		writer = CsvFileWriter.createCsvFileWriter(outputFile);
 		writer.writeNext(new String[] { "#" + msg("common_exported_by"), AuthUtil.getCurrentUser().formattedName() });
 		writer.writeNext(new String[] { "#" + msg("common_exported_on"), Utility.getDateTimeString(Calendar.getInstance().getTime())});
-		writer.writeNext(new String[] { "#" + container, containerName });
+		writer.writeNext(new String[] { "#" + nameLabel, container.getName() });
+		writer.writeNext(new String[] { "#" + displayNameLabel, container.getDisplayName() });
 		writer.writeNext(new String[] { "#" });
 
 		writer.writeNext(new String[] {
 			msg("specimen_identifier"), msg("specimen_label"), msg("specimen_barcode"),
-			currLocation + "#" + container, currLocation + "#" + row, currLocation + "#" + col, currLocation + "#" + pos,
-			location + "#" + container, location + "#" + row, location + "#" + col, location + "#" + pos
+			currLocationLabel + "#" + displayNameLabel, currLocationLabel + "#" + containerLabel,
+			currLocationLabel + "#" + rowLabel, currLocationLabel + "#" + colLabel, currLocationLabel + "#" + posLabel,
+			locationLabel + "#" + displayNameLabel, locationLabel + "#" + containerLabel,
+			locationLabel + "#" + rowLabel, locationLabel + "#" + colLabel, locationLabel + "#" + posLabel
 		});
 	}
 
@@ -352,11 +358,12 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 		++movedSpmnsCnt;
 		writer.writeNext(new String[] {
 			spmn.getId().toString(), spmn.getLabel(), spmn.getBarcode(),
-			srcContainer.getName(), srcPos.getPosTwo(), srcPos.getPosOne(), srcPos.getPosition().toString(),
-			tgtContainer.getName(), tgtRow, tgtCol, String.valueOf(tgtPos)
+			srcContainer.getDisplayName(), srcContainer.getName(),
+			srcPos.getPosTwo(), srcPos.getPosOne(), srcPos.getPosition().toString(),
+			tgtContainer.getDisplayName(), tgtContainer.getName(),
+			tgtRow, tgtCol, String.valueOf(tgtPos)
 		});
 		flush();
-
 	}
 
 	private void flush() {

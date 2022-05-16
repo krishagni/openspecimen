@@ -107,10 +107,17 @@ export default {
       return {
         searchProp: 'name',
         selectProp: 'name',
-        displayProp: 'name',
+        displayProp: 'displayTitle',
         loadFn: (opts) => {
           return self.getContainers(opts).then(
             (containers) => {
+              containers.forEach(container => {
+                container.displayTitle = container.name;
+                if (container.displayName) {
+                  container.displayTitle = container.displayName + ' (' + container.name + ')';
+                }
+              });
+
               self.containers = containers;
               return containers;
             }

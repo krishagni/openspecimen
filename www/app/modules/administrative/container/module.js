@@ -129,44 +129,10 @@ angular.module('os.administrative.container',
       })
       .state('container-detail', {
         url: '/:containerId',
-        templateUrl: 'modules/administrative/container/detail.html',
-        resolve: {
-          rootId: function($stateParams, containerViewState, Container) {
-            if (containerViewState.getRootContainerId() == -1) {
-              return Container.getAncestorsHierarchy($stateParams.containerId).then(
-                function(hierarchy) {
-                  return containerViewState.setHierarchy(hierarchy);
-                }
-              );
-            } else {
-              return containerViewState.getRootContainerId();
-            }
-          },
-
-          //
-          // explicit dependency on rootId to ensure containerViewState
-          // is initialized with hierarchy...
-          //
-          container: function($stateParams, rootId, containerViewState) {
-            return containerViewState.getContainer($stateParams.containerId);
-          },
-
-          containerTree: function($stateParams, container, rootId, containerViewState) {
-            if (container && container.id == rootId && !container.childContainersLoaded &&
-                containerViewState.getHierarchy().length == 1) {
-              return container.getChildContainers().then(
-                function(childContainers) {
-                  container.childContainers = childContainers;
-                  containerViewState.setHierarchy(container);
-                  return containerViewState.getHierarchy();
-                }
-              );
-            } else {
-              return containerViewState.getHierarchy();
-            }
-          }
+        template: '<div>Unused</div>',
+        controller: function($state, $stateParams, VueApp) {
+          VueApp.setVueView('containers/' + $stateParams.containerId + '/detail/locations');
         },
-        controller: 'ContainerDetailCtrl',
         parent: 'container-detail-root'
       })
       .state('container-detail.overview', {

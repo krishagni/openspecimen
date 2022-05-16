@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.PositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.RowMajorPositionAssigner;
@@ -106,7 +107,13 @@ public class ContainerMapReport extends AbstractContainerReport implements Conta
 				StorageContainerPosition occupant = occupantsMap.get(pos);
 				if (occupant != null) {
 					if (occupant.getOccupyingContainer() != null) {
-						cells.add(occupant.getOccupyingContainer().getName());
+						StorageContainer occupantContainer = occupant.getOccupyingContainer();
+						String name = occupantContainer.getName();
+						if (StringUtils.isNotBlank(occupantContainer.getDisplayName())) {
+							name = occupantContainer.getDisplayName() + " (" + name + ") ";
+						}
+
+						cells.add(name);
 					} else if (occupant.getOccupyingSpecimen() != null) {
 						cells.add(occupant.getOccupyingSpecimen().getLabel());
 					} else if (occupant.isBlocked()) {

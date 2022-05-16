@@ -297,6 +297,13 @@
           </textField>
 
           <textField>
+            <name>containerDisplayName</name>
+            <udn>containerDisplayName</udn>
+            <caption>#getMessage("specimen_spec_position_container_display_name")</caption>
+            <column>CONTAINER_DISPLAY_NAME</column>
+          </textField>
+
+          <textField>
             <name>containerBarcode</name>
             <udn>containerBarcode</udn>
             <caption>#getMessage("specimen_spec_position_container_barcode")</caption>

@@ -118,6 +118,8 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	private String barcode;
 
+	private String displayName;
+
 	private ContainerType type;
 
 	private UsageMode usedFor;
@@ -222,6 +224,14 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void setBarcode(String barcode) {
 		this.barcode = barcode;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public ContainerType getType() {
@@ -609,6 +619,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		
 		setName(other.getName());
 		setBarcode(other.getBarcode());
+		setDisplayName(other.getDisplayName());
 		setType(other.getType());
 		setTemperature(other.getTemperature());
 		updateCapacity(other);

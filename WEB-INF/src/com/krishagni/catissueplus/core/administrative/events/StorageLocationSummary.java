@@ -17,6 +17,8 @@ public class StorageLocationSummary implements Serializable {
 	
 	private String name;
 
+	private String displayName;
+
 	private String barcode;
 
 	private String mode;
@@ -43,6 +45,14 @@ public class StorageLocationSummary implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public String getBarcode() {
@@ -102,6 +112,7 @@ public class StorageLocationSummary implements Serializable {
 		storageLocation.setId(position.getContainer().getId());
 		storageLocation.setName(position.getContainer().getName());
 		storageLocation.setBarcode(position.getContainer().getBarcode());
+		storageLocation.setDisplayName(position.getContainer().getDisplayName());
 		storageLocation.setMode(position.getContainer().getPositionLabelingMode().name());
 		storageLocation.setPositionX(position.getPosOne());
 		storageLocation.setPositionY(position.getPosTwo());

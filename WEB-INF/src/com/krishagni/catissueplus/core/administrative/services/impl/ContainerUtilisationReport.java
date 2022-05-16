@@ -8,11 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
@@ -63,6 +61,8 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 			exportHeaders(container, writer);
 
 			List<StorageContainerSummary> utilisations = getUtilisations(Collections.singletonList(container.getId()));
+			utilisations.get(0).setDisplayName(container.getDisplayName());
+
 			Map<Long, StorageContainerSummary> containersMap = new HashMap<>();
 			containersMap.put(container.getId(), utilisations.get(0));
 
@@ -79,13 +79,16 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 					writer.flush();
 				}
 
-				List<Long> childContainerIds = getChildContainers(containerId, readAccessSites);
-				if (!childContainerIds.isEmpty()) {
-					utilisations = getUtilisations(childContainerIds);
-					utilisations.forEach(s -> containersMap.put(s.getId(), s));
+				Map<Long, String> childIdNameMap = getChildContainers(containerId, readAccessSites);
+				if (!childIdNameMap.isEmpty()) {
+					utilisations = getUtilisations(new ArrayList<>(childIdNameMap.keySet()));
+					for (StorageContainerSummary s : utilisations) {
+						s.setDisplayName(childIdNameMap.get(s.getId()));
+						containersMap.put(s.getId(), s);
+					}
 				}
 
-				containersList.addAll(0, childContainerIds);
+				containersList.addAll(0, childIdNameMap.keySet());
 			}
 		} catch (OpenSpecimenException ose) {
 			if (writer != null) {
@@ -112,6 +115,7 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 		exportContainerSummary(container, writer);
 		writer.writeNext(new String[] {
 			message(CONTAINER_NAME),
+			message(CONTAINER_DISPLAY_NAME),
 			message(CONTAINER_ROWS),
 			message(CONTAINER_COLS),
 			message(CONTAINER_UTILISED_POS),
@@ -135,6 +139,7 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 		Integer freePositions = dimensionless ? null : container.getNoOfRows() * container.getNoOfColumns() - container.getUsedPositions();
 		writer.writeNext(new String[] {
 			container.getName(),
+			container.getDisplayName(),
 			dimensionless ? null : container.getNoOfRows().toString(),
 			dimensionless ? null : container.getNoOfColumns().toString(),
 			container.getUsedPositions().toString(),
@@ -143,7 +148,7 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 	}
 
 	@PlusTransactional
-	private List<Long> getChildContainers(Long containerId, Set<SiteCpPair> readAccessSites) {
+	private Map<Long, String> getChildContainers(Long containerId, Set<SiteCpPair> readAccessSites) {
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
 			.parentContainerId(containerId)
 			.siteCps(readAccessSites)
@@ -152,13 +157,15 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 
 		List<StorageContainer> childContainers = daoFactory.getStorageContainerDao().getStorageContainers(crit);
 		if (childContainers.isEmpty()) {
-			return Collections.emptyList();
+			return Collections.emptyMap();
 		}
 
 		StorageContainer container = daoFactory.getStorageContainerDao().getById(containerId);
-		return StorageContainer.sort(container, childContainers).stream()
-			.map(StorageContainer::getId)
-			.collect(Collectors.toList());
+		return Utility.toLinkedMap(
+			StorageContainer.sort(container, childContainers),
+			StorageContainer::getId,
+			StorageContainer::getDisplayName
+		);
 	}
 
 	private static final String CONTAINER_ROWS = "container_no_of_rows";

@@ -47,6 +47,19 @@ export default {
     this.setupTree();
   },
 
+  watch: {
+    'container.id': function(newVal, oldVal) {
+      if (newVal == oldVal) {
+        return;
+      }
+
+      if (!this.selectedNodes[newVal]) {
+        this.selectedNodes = {};
+        this.selectedNodes[newVal] = true;
+      }
+    }
+  },
+
   methods: {
     setupTree: async function() {
       const container = this.container;
@@ -55,12 +68,12 @@ export default {
       if (!container.storageLocation || !container.storageLocation.id || container.storageLocation.id <= 0) {
         // freezer
         children = await containerSvc.getChildContainers(container);
-        root = {key: container.id, label: container.name, data: {parent: null, container}};
+        root = {key: container.id, label: container.displayName || container.name, data: {parent: null, container}};
       } else {
         // intermediate container
         const hierarchy = await containerSvc.getAncestorsHierarchy(container);
         children = hierarchy.childContainers;
-        root = {key: hierarchy.id, label: hierarchy.name, data: {parent: null, container: hierarchy}};
+        root = {key: hierarchy.id, label: hierarchy.displayName || hierarchy.name, data: {parent: null, container: hierarchy}};
       }
 
       this.addTreeNodes(root, children);
@@ -124,7 +137,7 @@ export default {
     addTreeNodes(parent, children) {
       parent.children = [];
       for (let child of children) {
-        const node = {key: child.id, label: child.name, data: {parent: parent, container: child}, leaf: false};
+        const node = {key: child.id, label: child.displayName || child.name, data: {parent: parent, container: child}, leaf: false};
         parent.children.push(node);
         if (child.childContainers instanceof Array) {
           this.addTreeNodes(node, child.childContainers);

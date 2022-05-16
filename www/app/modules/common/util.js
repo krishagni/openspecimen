@@ -713,7 +713,7 @@ angular.module('openspecimen')
     }
 
     function linkify(text) {
-      if (!text) {
+      if (!text || typeof text != 'string') {
         return text;
       }
 

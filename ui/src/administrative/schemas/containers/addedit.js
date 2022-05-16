@@ -57,6 +57,14 @@ export default {
       {
         "fields": [
           {
+            "name": "container.displayName",
+            "showWhen": "createType == 'single'"
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
             "name": "container.name",
             "showWhen": "createType == 'single'"
           }

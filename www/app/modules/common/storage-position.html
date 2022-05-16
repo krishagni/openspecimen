@@ -9,7 +9,7 @@
     </div>
     <div ng-switch-when="false" class="os-storage-position clearfix"> 
       <div class="pos" ng-class="{true: 'os-col-60', false: 'os-col-90'}[entity[locationAttr].mode != 'NONE']">
-        <os-select ng-model="entity[locationAttr].name" append-to-body="true" list="containerNames"
+        <os-select ng-model="entity[locationAttr]" append-to-body="true" list="containers" display-prop="displayTitle"
           refresh="searchContainer" on-select="onContainerChange()" placeholder="{{'container.container' | translate}}">
         </os-select>
       </div>

@@ -104,7 +104,14 @@ angular.module('openspecimen')
       return q.then(
         function(containers) {
           scope.containers     = containers;
-          scope.containerNames = containers.map(function(c) { return c.name; });
+          containers.forEach(
+            function(c) {
+              c.displayTitle  = c.name;
+              if (c.displayName) {
+                c.displayTitle = c.displayName + ' (' + c.name + ')';
+              }
+            }
+          );
         }
       );
     };
@@ -138,12 +145,25 @@ angular.module('openspecimen')
       }
     }
 
+    function addDisplayTitle(location) {
+      if (!location) {
+        return;
+      }
+
+      location.displayTitle = location.name;
+      if (location.displayName) {
+        location.displayTitle = location.displayName + ' (' + location.name + ')';
+      }
+
+    }
+
     function linker(scope, element, attrs, ctrl) {
       scope.containerListCache = scope.containerListCache || {};
 
-      var entity = scope.entity;
+      var entity = scope.entity || {};
       var entityType = scope.entityType = attrs.entityType || entity.getType();
       var locationAttr = scope.locationAttr = attrs.locationAttr || 'storageLocation';
+      addDisplayTitle(entity[locationAttr]);
 
       if (!!ctrl) {
         ctrl.addEntity(entity);
@@ -160,7 +180,12 @@ angular.module('openspecimen')
         var containers = scope.containers;
         for (var i = 0; i < containers.length; ++i) {
           if (containers[i].name == entity[locationAttr].name) {
-            entity[locationAttr] = {name: containers[i].name, mode: containers[i].positionLabelingMode};
+            var location = entity[locationAttr] = {
+              name: containers[i].name,
+              mode: containers[i].positionLabelingMode,
+              displayName: containers[i].displayName
+            };
+            addDisplayTitle(entity[locationAttr]);
             break;
           }
         }
@@ -299,7 +324,8 @@ angular.module('openspecimen')
       template:
         '<span ng-switch on="!!position.name"> ' +
           '<span ng-switch-when="true"> ' +
-            '<span>{{position.name}}</span> ' +
+            '<span ng-show="!position.displayName">{{position.name}}</span> ' +
+            '<span ng-show="position.displayName">{{position.displayName}} ({{position.name}})</span> ' +
             '<span ng-show="position.mode == \'LINEAR\'">({{position.position}})</span> ' +
             '<span ng-show="position.mode == \'TWO_D\'">({{position.positionY}} x {{position.positionX}})</span> ' +
             '<span ng-show="position.mode == \'ALL\' && !!position.position"> ' +
