@@ -712,6 +712,20 @@ const routes = [
         name: 'SpecimenCartsList',
         component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/List.vue'),
         props: (route) => ({cartId: route.params && route.params.cartId, filters: route.query.filters}),
+        children: [
+          {
+            path: 'specimens',
+            name: 'CartSpecimensList',
+            component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/Specimens.vue'),
+            props: (route) => (
+              {
+                cartId: route.params && route.params.cartId,
+                query: route.query && route.query.specimenFilters,
+                listItemDetailView: true
+              }
+            ),
+          }
+        ]
       },
     ]
   }

@@ -10,6 +10,10 @@ class SpecimenCart {
     return http.get('specimen-lists/count', filterOpts || {});
   }
 
+  async getCart(cartId) {
+    return http.get('specimen-lists/' + cartId);
+  }
+
   async addToCart(cart, specimens) {
     const ids = (specimens || []).map(spmn => spmn.id);
     if (ids.length == 0) {
@@ -28,7 +32,7 @@ class SpecimenCart {
   }
 
   getDisplayName(cart) {
-    if (cart.name.indexOf('$$$$user_') != 0) {
+    if (!cart.name || cart.name.indexOf('$$$$user_') != 0) {
       return cart.name;
     }
 

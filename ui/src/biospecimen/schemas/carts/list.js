@@ -1,6 +1,26 @@
-import cartSvc from '@/biospecimen/services/SpecimenCart.js';
+import cartSvc   from '@/biospecimen/services/SpecimenCart.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
+  summary: {
+    title: {
+      text: ({cart}) => cartSvc.getDisplayName(cart),
+      url: ({cart}, query) => routerSvc.getUrl('SpecimenCartsList', {cartId: cart.id}, query)
+    },
+
+    descriptions: [
+      ({cart}) => {
+        const filters = window.osUiApp.config.globalProperties.$filters || {};
+        return filters.username(cart.owner);
+      },
+
+      ({cart}) => {
+        const filters = window.osUiApp.config.globalProperties.$filters || {};
+        return filters.date(cart.createdOn) + ' | ' + filters.date(cart.lastUpdatedOn) + ' | ' + cart.specimenCount;
+      }
+    ]
+  },
+
   columns: [
     {
       name: "cart.starred",

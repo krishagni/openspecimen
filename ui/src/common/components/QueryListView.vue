@@ -3,6 +3,7 @@
     :schema="schema"
     :data="data"
     :allowSelection="allowSelection"
+    :query="query"
     @filtersUpdated="loadList"
     @selectedRows="onRowsSelection"
     @rowClicked="rowClicked"
@@ -16,9 +17,10 @@
 import ui       from '@/global.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import http     from '@/common/services/HttpClient.js';
+import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['name', 'objectId', 'url', 'newTab', 'allowSelection'],
+  props: ['name', 'objectId', 'url', 'newTab', 'allowSelection', 'query'],
 
   emits: ['selectedRows', 'rowClicked', 'listLoaded'],
 
@@ -205,7 +207,8 @@ export default {
         );
       }
 
-      this.$emit('listLoaded', {list: this.list});
+      const fb = util.uriEncode(filters || {});
+      this.$emit('listLoaded', {widget: this, list: this.list, filters: fb});
     },
 
     reload: function() {

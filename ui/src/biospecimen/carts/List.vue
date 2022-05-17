@@ -56,7 +56,7 @@
     </os-screen-panel>
 
     <os-screen-panel :width="9" v-if="$route.params && $route.params.cartId > 0 && ctx.selectedCart">
-      <router-view :cartId="ctx.selectedCart.cart.id" :key="$route.params.cartId" />
+      <router-view :cartId="ctx.selectedCart.cart.id" />
     </os-screen-panel>
   </os-screen>
 </template>
@@ -147,8 +147,7 @@ export default {
     },
 
     onCartRowClick: function({cart}) {
-      console.log(cart);
-      alertSvc.underDev();
+      routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters});
     },
 
     showDetails: function(rowObject) {
