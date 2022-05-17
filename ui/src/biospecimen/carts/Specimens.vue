@@ -12,7 +12,9 @@
 
     <os-page-body>
       <os-page-toolbar>
-        <template #default> </template>
+        <template #default>
+          <os-specimen-actions :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
+        </template>
 
         <template #right>
           <os-list-size
@@ -56,10 +58,12 @@ export default {
 
         bcrumb: [
           {url: routerSvc.getUrl('SpecimenCartsList', {cartId: -1}), label: 'Carts'}
-        ]
+        ],
       },
 
-      listInfo: { rows: [], size: 0, pageSize: 0 }
+      listInfo: { rows: [], size: 0, pageSize: 0 },
+
+      selectedSpecimens: []
     };
   },
 
@@ -95,7 +99,16 @@ export default {
 
       const query = {...this.$route.query, specimenFilters: filters};
       routerSvc.goto(this.$route.name, this.$route.params, query);
-    }
+    },
+
+    reloadList: function() {
+      this.$refs.specimensList.reload();
+    },
+
+    onSpecimenSelection: function(specimens) {
+      this.selectedSpecimens = specimens.map(({rowObject}) => ({id: +rowObject.hidden.specimenId, cpId: +rowObject.hidden.cpId}));
+    },
+
   }
 }
 </script>

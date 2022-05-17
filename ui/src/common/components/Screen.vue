@@ -14,6 +14,10 @@ export default {
 
 <style scoped>
 
+.os-screen {
+  margin-right: -1.5rem;
+}
+
 .os-screen :deep(> div:not(:last-child) .os-page) {
   border-right: 1px solid #ddd;
 }
