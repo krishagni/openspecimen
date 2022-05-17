@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
@@ -9,7 +10,7 @@ import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 @ListenAttributeChanges
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SpecimenListSummary extends AttributeModifiedSupport {
 	private Long id;
 	

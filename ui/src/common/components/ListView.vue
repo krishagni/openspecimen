@@ -124,7 +124,7 @@
 
             <cell :width="12">
               <os-radio-button v-show="pageSizeOpts.pageSize" name="pageSize" class="inline"
-                :options="pageSizeOpts.sizes" v-model="pageSizeOpts.pageSize"
+                :options="pageSizeOpts.sizes" :optionsPerRow="4" v-model="pageSizeOpts.pageSize"
                 @change="changePageSize" />
 
               <div class="input-group" v-show="!pageSizeOpts.pageSize">

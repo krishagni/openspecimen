@@ -1,13 +1,53 @@
 import http from '@/common/services/HttpClient.js';
+import ui   from '@/global.js';
 
 class SpecimenCart {
-  addToCart(cart, specimens) {
+  async getCarts(filterOpts) {
+    return http.get('specimen-lists', filterOpts || {});
+  }
+
+  async getCartsCount(filterOpts) {
+    return http.get('specimen-lists/count', filterOpts || {});
+  }
+
+  async addToCart(cart, specimens) {
     const ids = (specimens || []).map(spmn => spmn.id);
     if (ids.length == 0) {
-      return;
+      return {count: 0};
     }
 
     return http.put('specimen-lists/' + cart.id + '/specimens', ids, {operation: 'ADD'});
+  }
+
+  async star(cart) {
+    return http.post('specimen-lists/' + cart.id + '/labels');
+  }
+
+  async unstar(cart) {
+    return http.delete('specimen-lists/' + cart.id + '/labels');
+  }
+
+  getDisplayName(cart) {
+    if (cart.name.indexOf('$$$$user_') != 0) {
+      return cart.name;
+    }
+
+    const {owner} = cart;
+    if (owner.id == ui.currentUser.id) {
+      return 'My Default Cart';
+    } else {
+      let displayName = owner.firstName || '';
+      if (owner.lastName) {
+        if (displayName) {
+          displayName += ' ';
+        }
+
+        displayName += owner.lastName;
+      }
+
+      displayName += (displayName && '\'s ') || '';
+      return displayName + 'Default Cart';
+    }
   }
 }
 

@@ -216,9 +216,12 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 			.setProjection(Projections.distinct(Projections.property("l.id")))
 			.add(Restrictions.isNull("l.deletedOn"));
 
+		if (crit.userId() != null || StringUtils.isNotBlank(crit.query())) {
+			query.createAlias("l.owner", "owner");
+		}
+
 		if (crit.userId() != null) {
-			query.createAlias("l.owner", "owner")
-				.createAlias("l.sharedWith", "sharedUser", JoinType.LEFT_OUTER_JOIN)
+			query.createAlias("l.sharedWith", "sharedUser", JoinType.LEFT_OUTER_JOIN)
 				.createAlias("l.sharedWithGroups", "sharedGroup", JoinType.LEFT_OUTER_JOIN)
 				.createAlias("sharedGroup.users", "sharedGroupUser", JoinType.LEFT_OUTER_JOIN)
 				.add(
@@ -232,9 +235,21 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 		if (StringUtils.isNotBlank(crit.query())) {
 			if (isMySQL()) {
-				query.add(Restrictions.like("l.name", crit.query(), MatchMode.ANYWHERE));
+				query.add(
+					Restrictions.disjunction(
+						Restrictions.like("l.name", crit.query(), MatchMode.ANYWHERE),
+						Restrictions.like("owner.firstName", crit.query(), MatchMode.ANYWHERE),
+						Restrictions.like("owner.lastName", crit.query(), MatchMode.ANYWHERE)
+					)
+				);
 			} else {
-				query.add(Restrictions.like("l.name", crit.query(), MatchMode.ANYWHERE).ignoreCase());
+				query.add(
+					Restrictions.disjunction(
+						Restrictions.like("l.name", crit.query(), MatchMode.ANYWHERE).ignoreCase(),
+						Restrictions.like("owner.firstName", crit.query(), MatchMode.ANYWHERE).ignoreCase(),
+						Restrictions.like("owner.lastName", crit.query(), MatchMode.ANYWHERE).ignoreCase()
+					)
+				);
 			}
 		}
 

@@ -701,6 +701,18 @@ const routes = [
         component: () => import(/* webpackChunkName: "containers" */ '../administrative/container-types/AddEdit.vue'),
         props: (route) => ({typeId: route.params && route.params.typeId})
       },
+
+      /*****************************
+       *****************************
+       * Specimen carts module     *
+       *****************************
+       *****************************/
+      {
+        path: 'carts/:cartId',
+        name: 'SpecimenCartsList',
+        component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/List.vue'),
+        props: (route) => ({cartId: route.params && route.params.cartId, filters: route.query.filters}),
+      },
     ]
   }
 ]
