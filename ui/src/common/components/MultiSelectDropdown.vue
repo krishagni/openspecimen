@@ -104,7 +104,7 @@ export default {
           }
         }
 
-        const options = this.getFromBackend(params);
+        const options = await this.getFromBackend(params);
         this.ctx.options = this.dedup(selectedVals.concat(options));
       }
     },

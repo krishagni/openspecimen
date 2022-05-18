@@ -3,7 +3,15 @@ class ItemsHolder {
   itemsMap = {};
 
   getItems(type) {
-    return this.itemsMap[type] || [];
+    let result = this.itemsMap[type];
+    if (!result) {
+      const json = localStorage.getItem('os.' + type);
+      if (json) {
+        result = JSON.parse(json);
+      }
+    }
+
+    return result || [];
   }
 
   setItems(type, items) {
@@ -12,6 +20,7 @@ class ItemsHolder {
 
   clearItems(type) {
     this.itemsMap[type] = undefined;
+    localStorage.removeItem('os.' + type);
   }
 
   ngGetItems(type) {

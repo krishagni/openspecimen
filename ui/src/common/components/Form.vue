@@ -177,6 +177,15 @@ export default {
          this.masked = false;
          util.disableMask();
        }
+     },
+
+     getFieldRef(fieldName, instance = 0) {
+       let fieldRef = this.$refs['osField-' + fieldName];
+       if (fieldRef instanceof Array && fieldRef.length > 0) {
+         fieldRef = fieldRef[instance];
+       }
+
+       return fieldRef;
      }
    },
 

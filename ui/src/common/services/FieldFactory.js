@@ -30,7 +30,8 @@ class FieldFactory {
     storageContainer: 'os-containers-dropdown',
     subform: 'os-subform',
     'storage-position': 'os-storage-position',
-    note: 'os-note'
+    note: 'os-note',
+    'add-specimens': 'os-add-specimens'
   };
 
   getComponent(fieldType) {

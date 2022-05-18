@@ -727,6 +727,12 @@ const routes = [
           }
         ]
       },
+      {
+        path: 'cart-addedit/:cartId',
+        name: 'SpecimenCartAddEdit',
+        component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/AddEdit.vue'),
+        props: (route) => ({cartId: route.params && route.params.cartId})
+      },
     ]
   }
 ]

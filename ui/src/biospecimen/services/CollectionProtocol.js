@@ -36,6 +36,10 @@ class CollectionProtocol {
 
     return workflow[wfName];
   }
+
+  async isBarcodingEnabled() {
+    return http.get('collection-protocols/barcoding-enabled').then(resp => resp == true || resp == 'true');
+  }
 }
 
 export default new CollectionProtocol();

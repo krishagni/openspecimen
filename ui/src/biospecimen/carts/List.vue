@@ -168,11 +168,19 @@ export default {
     },
 
     createCart: function() {
-      alertSvc.underDev();
+      routerSvc.goto('SpecimenCartAddEdit', {cartId: -1});
     },
 
     viewDefaultCart: function() {
-      alertSvc.underDev();
+      cartSvc.getCart(0).then(
+        (cart) => {
+          if (cart.id) {
+            routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters});
+          } else {
+            alertSvc.error('You do not have a default cart.');
+          }
+        }
+      );
     },
 
     onToggleStar: async function({cart}) {

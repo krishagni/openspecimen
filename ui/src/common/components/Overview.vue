@@ -223,6 +223,15 @@ export default {
               }
             }
           }
+        } else if (field.type == 'multiselect') {
+          const ls = field.listSource || {};
+          if (value instanceof Array) {
+            if (value.length == 0) {
+              value = null;
+            } else {
+              value = value.map((e) => typeof e == 'object' ? e[ls.displayProp] : e).join(', ');
+            }
+          }
         } else if (field.type == 'storage-position') {
           if (value && typeof value == 'object') {
             let position = value;

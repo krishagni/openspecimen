@@ -10,9 +10,10 @@
     </div>
 
     <div class="input-group">
-      <os-textarea :placeholder="label" v-model="input" @update:modelValue="$emit('labels-scanned', $event)" />
+      <os-textarea :placeholder="placeholder || label" v-model="inputValue"
+        @update:modelValue="$emit('labels-scanned', $event)" />
 
-      <span class="buttons">
+      <span class="buttons" v-if="!hideButtons">
         <os-button primary label="Add" @click="addSpecimens" />
         <slot></slot>
       </span>
@@ -68,15 +69,13 @@ import util   from '@/common/services/Util.js';
 
 export default {
 
-  props: ['criteria', 'errorOpts', 'label', 'optionsAtBottom'],
+  props: ['criteria', 'errorOpts', 'placeholder', 'label', 'optionsAtBottom', 'hideButtons', 'modelValue'],
 
-  emits: ['on-add', 'labels-scanned'],
+  emits: ['on-add', 'labels-scanned', 'update:modelValue'],
 
   data() {
     return {
       useBarcode: false,
-
-      input: '',
 
       dupLabels: [],
 
@@ -88,9 +87,21 @@ export default {
     this.barcodingEnabled = await http.get('collection-protocols/barcoding-enabled');
   },
 
+  computed: {
+    inputValue: {
+      get() {
+        return this.modelValue || '';
+      },
+
+      set(value) {
+        this.$emit('update:modelValue', value);
+      }
+    }
+  },
+
   methods: {
     getLabels: function() {
-      return this.input.split(/,|\t|\n/)
+      return this.inputValue.split(/,|\t|\n/)
         .map(function(label) { return label.trim(); })
         .filter(function(label) { return label.length != 0; });
     },
@@ -107,13 +118,14 @@ export default {
     },
 
     clearInput: function() {
-      this.input = '';
+      this.inputValue = '';
+      // this.input = '';
     },
 
     getSpecimens: async function() {
-      const labels = util.splitStr(this.input, /,|\t|\n/, false);
+      const labels = util.splitStr(this.inputValue, /,|\t|\n/, false);
       if (labels.length == 0) {
-        return [];
+        return {specimens: [], useBarcode: this.useBarcode};
       }
 
       return this.getSpecimensByLabel(labels);
@@ -122,13 +134,13 @@ export default {
     getSpecimensByLabel: async function(labels) {
       labels = labels || [];
       if (labels.length == 0) {
-        return [];
+        return {specimens: [], useBarcode: this.useBarcode};
       }
 
       const dupLabels = util.getDupItems(labels);
       if (dupLabels.length > 0) {
         alerts.error('Duplicate labels entered: ' + dupLabels.join(', '));
-        return [];
+        return {specimens: [], useBarcode: this.useBarcode};
       }
 
       let searchReq = Object.assign({exactMatch: true}, this.criteria || {});
