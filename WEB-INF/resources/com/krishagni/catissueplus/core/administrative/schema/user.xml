@@ -82,5 +82,11 @@
       <caption>#getMessage("user_manage_wfs")</caption>
       <attribute>manageWfs</attribute>
     </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("user_download_labels_print_file")</caption>
+      <attribute>downloadLabelsPrintFile</attribute>
+    </field>
   </record>
 </object-schema>

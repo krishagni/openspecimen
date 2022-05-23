@@ -64,6 +64,8 @@
 
     <property name="forcePasswordReset" column="FORCE_PASSWORD_RESET" />
 
+    <property name="downloadLabelsPrintFile" column="DOWNLOAD_LABELS_PRINT_FILE" />
+
     <set name="roles" inverse="true" cascade="none">
       <key column="SUBJECT_ID"/>
       <one-to-many class="com.krishagni.rbac.domain.SubjectRole"/>

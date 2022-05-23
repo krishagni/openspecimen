@@ -9,9 +9,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -50,6 +50,8 @@ public class UserSummary implements Serializable {
 	private Boolean manageForms;
 
 	private Boolean manageWfs;
+
+	private Boolean downloadLabelsPrintFile;
 
 	private int cpCount;
 
@@ -181,6 +183,14 @@ public class UserSummary implements Serializable {
 		this.manageWfs = manageWfs;
 	}
 
+	public Boolean getDownloadLabelsPrintFile() {
+		return downloadLabelsPrintFile;
+	}
+
+	public void setDownloadLabelsPrintFile(Boolean downloadLabelsPrintFile) {
+		this.downloadLabelsPrintFile = downloadLabelsPrintFile;
+	}
+
 	public int getCpCount() {
 		return cpCount;
 	}
@@ -259,6 +269,7 @@ public class UserSummary implements Serializable {
 		result.setManageWfs(user.canManageWfs());
 		result.setActivityStatus(user.getActivityStatus());
 		result.setImpersonated(user.isImpersonated());
+		result.setDownloadLabelsPrintFile(user.isDownloadLabelsPrintFile());
 
 		if (user.getInstitute() != null) {
 			result.setInstituteId(user.getInstitute().getId());

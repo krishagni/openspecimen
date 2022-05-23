@@ -145,7 +145,7 @@ export default {
       Object.keys(this.ctx.user).forEach(
         function(prop) {
           if (Object.prototype.hasOwnProperty.call(self.ctx.user, prop)) {
-            if (self.ctx.user[prop]) {
+            if (self.ctx.user[prop] != null && self.ctx.user[prop] != undefined) {
               detail[prop] = self.ctx.user[prop];
             }
           }

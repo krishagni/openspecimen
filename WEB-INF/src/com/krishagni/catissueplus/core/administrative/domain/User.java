@@ -93,6 +93,8 @@ public class User extends BaseEntity implements UserDetails {
 
 	private boolean forcePasswordReset;
 
+	private boolean downloadLabelsPrintFile;
+
 	private Set<Password> passwords = new HashSet<>();
 
 	private Set<SubjectRole> roles = new HashSet<>();
@@ -308,6 +310,14 @@ public class User extends BaseEntity implements UserDetails {
 		this.forcePasswordReset = forcePasswordReset;
 	}
 
+	public boolean isDownloadLabelsPrintFile() {
+		return downloadLabelsPrintFile;
+	}
+
+	public void setDownloadLabelsPrintFile(boolean downloadLabelsPrintFile) {
+		this.downloadLabelsPrintFile = downloadLabelsPrintFile;
+	}
+
 	@NotAudited
 	public Set<Password> getPasswords() {
 		return passwords;
@@ -419,6 +429,7 @@ public class User extends BaseEntity implements UserDetails {
 			setManageWfs(user.canManageWfs());
 			setApiUser(user.isApiUser());
 			setIpRange(user.getIpRange());
+			setDownloadLabelsPrintFile(user.isDownloadLabelsPrintFile());
 		}
 	}
 

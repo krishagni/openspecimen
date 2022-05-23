@@ -117,9 +117,16 @@ export default {
       }
 
       const printJob = await orderSvc.printLabels(this.order.id, this.selectedSpecimens);
-      const downloadEnabled = await settingSvc.getSetting('administrative', 'download_labels_print_file');
-      if (downloadEnabled[0].value == 'true' || downloadEnabled[0].value == true) {
+      let downloadEnabled = this.$ui.currentUser.downloadLabelsPrintFile;
+      if (!downloadEnabled) {
+        const setting = await settingSvc.getSetting('administrative', 'download_labels_print_file');
+        downloadEnabled = setting[0].value == 'true' || setting[0].value == true;
+      }
+
+      if (downloadEnabled) {
         orderSvc.downloadLabelsFile(printJob.id, this.order.name + '.csv');
+      } else {
+        alertSvc.success('Distribution labels print job ' + printJob.id + ' created.');
       }
     },
 

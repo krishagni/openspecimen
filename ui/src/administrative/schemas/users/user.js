@@ -147,7 +147,7 @@ export default {
   
     {
       "type": "radio",
-      "label": "Manage Forms?",
+      "label": "Manage Forms",
       "name": "user.manageForms",
       "optionsPerRow": 2,
       "options": [
@@ -159,7 +159,7 @@ export default {
 
     {
       "type": "radio",
-      "label": "Manage Workflows?",
+      "label": "Manage Workflows",
       "name": "user.manageWfs",
       "optionsPerRow": 2,
       "options": [
@@ -171,7 +171,7 @@ export default {
 
     {
       "type": "radio",
-      "label": "Disable Notifications?",
+      "label": "Disable Notifications",
       "name": "user.dnd",
       "optionsPerRow": 2,
       "options": [
@@ -182,7 +182,7 @@ export default {
 
     {
       "type": "radio",
-      "label": "API User?",
+      "label": "API User",
       "name": "user.apiUser",
       "showWhen": "user.type != 'CONTACT'",
       "optionsPerRow": 2,
@@ -202,6 +202,19 @@ export default {
           "message": "IP address is mandatory"
         }
       }
+    },
+
+    {
+      "type": "radio",
+      "label": "Download Labels Print File",
+      "name": "user.downloadLabelsPrintFile",
+      "showWhen": "user.type != 'CONTACT'",
+      "optionsPerRow": 2,
+      "tooltip": "Download CSV files for printing labels",
+      "options": [
+        { "caption": "Yes", "value": true },
+        { "caption": "No", "value": false }
+      ]
     },
 
     {

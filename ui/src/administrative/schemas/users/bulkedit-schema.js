@@ -23,6 +23,14 @@ export default {
 
        {
          "fields": [ { "name": "user.dnd" } ]
+       },
+
+       {
+         "fields": [ { "name": "user.manageWfs" } ]
+       },
+
+       {
+         "fields": [ { "name": "user.downloadLabelsPrintFile" } ]
        }
     ]
   }

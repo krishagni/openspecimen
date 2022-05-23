@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,8 +62,12 @@ public class LabelPrintJob extends BaseEntity {
 	}
 
 	public void generateLabelsDataFile() {
-		boolean downloadPrintLabelsFile = ConfigUtil.getInstance().getBoolSetting(
-			"administrative", "download_labels_print_file", false);
+		boolean downloadPrintLabelsFile = Objects.requireNonNull(AuthUtil.getCurrentUser()).isDownloadLabelsPrintFile();
+		if (!downloadPrintLabelsFile) {
+			downloadPrintLabelsFile = ConfigUtil.getInstance().getBoolSetting(
+				"administrative", "download_labels_print_file", false);
+		}
+
 		if (!downloadPrintLabelsFile) {
 			return;
 		}

@@ -9,10 +9,12 @@
             <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
+            <span class="help" v-if="field.tooltip">
+              <os-icon name="question-circle" v-os-tooltip.bottom="field.tooltip"/>
+            </span>
           </os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
-            v-model="formModel[field.name]" v-os-tooltip.bottom="field.tooltip"
-            :form="ctx" :context="ctx" @update:model-value="handleInput(field)">
+            v-model="formModel[field.name]" :form="ctx" :context="ctx" @update:model-value="handleInput(field)">
           </component>
           <div v-if="v$.formModel[field.name] && v$.formModel[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
@@ -328,5 +330,10 @@ form {
   padding: 0.25rem;
   color: red;
   cursor: help;
+}
+
+.row .field .help {
+  display: inline-block;
+  padding: 0.25rem;
 }
 </style>
