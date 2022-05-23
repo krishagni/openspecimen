@@ -8,7 +8,6 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -59,6 +58,7 @@ public class UserFactoryImpl implements UserFactory {
 		setApiUser(detail, user, ose);
 		setIpRange(detail, user, ose);
 		setTimeZone(detail, user, ose);
+		setDownloadLabelsPrintFile(detail, user, ose);
 		user.setCreationDate(Calendar.getInstance().getTime());
 		ose.checkAndThrow();
 		return user;
@@ -87,6 +87,7 @@ public class UserFactoryImpl implements UserFactory {
 		setApiUser(detail, existing, user, ose);
 		setIpRange(detail, existing, user, ose);
 		setTimeZone(detail, existing, user, ose);
+		setDownloadLabelsPrintFile(detail, existing, user, ose);
 		ose.checkAndThrow();
 		return user;		
 	}
@@ -451,6 +452,18 @@ public class UserFactoryImpl implements UserFactory {
 			setTimeZone(detail, user, ose);
 		} else {
 			user.setTimeZone(existing.getTimeZone());
+		}
+	}
+
+	private void setDownloadLabelsPrintFile(UserDetail detail, User user, OpenSpecimenException ose) {
+		user.setDownloadLabelsPrintFile(detail.isDownloadLabelsPrintFile());
+	}
+
+	private void setDownloadLabelsPrintFile(UserDetail detail, User existing, User user, OpenSpecimenException ose) {
+		if (detail.isAttrModified("downloadLabelsPrintFile")) {
+			setDownloadLabelsPrintFile(detail, user, ose);
+		} else {
+			user.setDownloadLabelsPrintFile(existing.isDownloadLabelsPrintFile());
 		}
 	}
 }

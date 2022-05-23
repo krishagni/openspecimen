@@ -155,4 +155,10 @@
       <column name="MANAGE_WFS" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Download labels print file user profile setting">
+    <addColumn tableName="CATISSUE_USER">
+      <column name="DOWNLOAD_LABELS_PRINT_FILE" type="${boolean.type}" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

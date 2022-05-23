@@ -32,4 +32,11 @@
       <column name="manageWfs_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Download labels print file user profile setting">
+    <addColumn tableName="CATISSUE_USER_AUD">
+      <column name="DOWNLOAD_LABELS_PRINT_FILE" type="${boolean.type}" />
+      <column name="downloadLabelsPrintFile_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

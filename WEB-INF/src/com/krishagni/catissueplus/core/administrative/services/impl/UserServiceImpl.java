@@ -1216,6 +1216,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			detail.setManageWfs(input.isManageWfs());
 		}
 
+		if (input.isAttrModified("downloadLabelsPrintFile")) {
+			detail.setDownloadLabelsPrintFile(input.isDownloadLabelsPrintFile());
+		}
+
 		if (input.isAttrModified("dnd")) {
 			detail.setDnd(input.getDnd());
 		}
