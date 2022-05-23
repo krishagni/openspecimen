@@ -1,6 +1,6 @@
 
 angular.module('os.biospecimen.specimenlist.assignto',[])
-  .directive('osAssignToSpmnList', function(SpecimenList, $rootScope, Util) {
+  .directive('osAssignToSpmnList', function(SpecimenList, $rootScope, Util, VueApp) {
 
     function filterLists(scope) {
       return function(filterOpts) { loadSpecimenLists(scope, filterOpts); };
@@ -26,6 +26,7 @@ angular.module('os.biospecimen.specimenlist.assignto',[])
       templateUrl: 'modules/biospecimen/specimen-list/assign-to-spmn-list.html',
 
       link: function(scope, element, attrs) {
+        scope.cartsListUrl = VueApp.getVueViewUrl('carts/-1', {});
         scope.leftAlign = (attrs.menuAlign == 'left');
         scope.filterOpts = {};
         loadSpecimenLists(scope);

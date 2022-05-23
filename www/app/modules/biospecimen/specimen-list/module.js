@@ -10,55 +10,32 @@ angular.module('os.biospecimen.specimenlist',
     $stateProvider
       .state('specimen-lists', {
         url: '/specimen-lists?filters',
-        templateUrl: 'modules/biospecimen/specimen-list/lists.html',
-        controller: 'SpecimenListsCtrl',
-        resolve: {
-          pagerOpts: function(ListPagerOpts) {
-            return new ListPagerOpts({recordsPerPage: 50});
-          },
-          lists: function($stateParams, pagerOpts, SpecimenList, Util) {
-            var defOpts = {includeStats: true, orderByStarred: true, maxResults: pagerOpts.recordsPerPage + 1};
-            return SpecimenList.query(Util.filterOpts(defOpts, $stateParams.filters));
-          }
+        template: '<div>Unused</div>',
+        controller: function(VueApp) {
+          VueApp.setVueView('carts/-1', {});
         },
-        parent: 'signed-in'
-      })
-      .state('specimen-list-root', {
-        url: '/specimen-lists/:listId',
-        template: '<div ui-view></div>',
-        resolve: {
-          list: function($stateParams, SpecimenList) {
-            if ($stateParams.listId >= 0) {
-              return SpecimenList.getById($stateParams.listId, {includeSpecimens: false});
-            }
-
-            return new SpecimenList();
-          }
-        },
-        abstract: true,
         parent: 'signed-in'
       })
       .state('specimen-list', {
-        url: '/specimens?filters',
-        params: {
-          breadcrumbs: [
-            {state: 'specimen-lists', params: {}, captionKey: 'specimen_list.lists'}
-          ]
+        url: '/specimen-lists/:listId/specimens?filters',
+        template: '<div>Unused</div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('carts/' + $stateParams.listId + '/specimens');
         },
-        templateUrl: 'modules/biospecimen/specimen-list/specimens.html',
-        controller: 'SpecimenListSpecimensCtrl',
-        parent: 'specimen-list-root'
+        parent: 'signed-in'
       })
       .state('specimen-list-addedit', {
-        url: '/addedit',
-        templateUrl: 'modules/biospecimen/specimen-list/addedit.html',
-        controller: 'AddEditSpecimenListCtrl',
-        resolve: {
-          barcodingEnabled: function(CollectionProtocol) {
-            return CollectionProtocol.getBarcodingEnabled();
+        url: '/specimen-lists/:listId/addedit',
+        template: '<div>Unused</div>',
+        controller: function($stateParams, VueApp) {
+          var listId = $stateParams.listId;
+          if (!listId || listId < 0) {
+            listId = -1;
           }
+
+          VueApp.setVueView('cart-addedit/' + listId, {});
         },
-        parent: 'specimen-list-root'
+        parent: 'signed-in'
       });
   })
 

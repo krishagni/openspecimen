@@ -52,6 +52,7 @@ export default {
           "message": "Specimen labels is mandatory"
         }
       },
+      "showWhen": "noInputSpecimens",
       "dataEntry": true
     }
   ]

@@ -158,8 +158,8 @@ export default {
         return;
       }
 
-      itemsSvc.ngSetItems('specimens', this.specimens);
-      routerSvc.ngGoto('specimen-lists/-1/addedit');
+      itemsSvc.setItems('specimens', this.specimens);
+      routerSvc.goto('SpecimenCartAddEdit', {cartId: -1});
     },
 
     viewCarts: function() {

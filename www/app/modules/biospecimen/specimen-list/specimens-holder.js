@@ -27,6 +27,9 @@ angular.module('os.biospecimen.specimenlist.specimensholder', [])
          this.extra = extra;
          if (!this.specimens) {
            localStorage.removeItem('os.specimens');
+         } else {
+           var json = JSON.stringify(specimens.map(function(spmn) { return {id: spmn.id}; }));
+           localStorage.setItem('os.specimens', json);
          }
        },
 

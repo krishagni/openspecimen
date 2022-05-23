@@ -55,7 +55,7 @@
       </os-page>
     </os-screen-panel>
 
-    <os-screen-panel :width="9" v-if="$route.params && $route.params.cartId > 0 && ctx.selectedCart">
+    <os-screen-panel :width="9" v-if="$route.params && $route.params.cartId >= 0 && ctx.selectedCart">
       <router-view :cartId="ctx.selectedCart.cart.id" />
     </os-screen-panel>
   </os-screen>
@@ -66,7 +66,7 @@
 import listSchema from  '@/biospecimen/schemas/carts/list.js';
 
 import cartSvc     from '@/biospecimen/services/SpecimenCart.js';
-import alertSvc    from '@/common/services/Alerts.js';
+// import alertSvc    from '@/common/services/Alerts.js';
 import routerSvc   from '@/common/services/Router.js';
 
 export default {
@@ -93,8 +93,8 @@ export default {
         return;
       }
 
-      if (newCartId > 0) {
-        let selectedRow = this.ctx.carts.find(({cart}) => cart.id == newCartId);
+      if (newCartId >= 0) {
+        let selectedRow = this.findCart(this.ctx.carts, newCartId);
         if (!selectedRow) {
           selectedRow = {cart: {id: newCartId}};
         }
@@ -116,16 +116,21 @@ export default {
       this.ctx.pageSize     = pageSize;
 
       const carts = await this.reloadCarts();
-      if (this.cartId <= 0) {
+      if (this.cartId < 0) {
         routerSvc.goto('SpecimenCartsList', {cartId: -1}, {filters: uriEncoding});
       } else {
-        let selectedRow = carts.find(({cart}) => cart.id == this.cartId);
+        let selectedRow = this.findCart(carts, this.cartId);
         if (!selectedRow) {
           selectedRow = {cart: {id: this.cartId}};
         }
 
         this.showDetails(selectedRow);
       }
+    },
+
+    findCart: function(carts, cartId) {
+      const defCartName = '$$$$user_' + this.$ui.currentUser.id;
+      return carts.find(({cart}) => cart.id == cartId || (cartId == 0 && cart.name == defCartName));
     },
 
     reloadCarts: async function() {
@@ -172,7 +177,8 @@ export default {
     },
 
     viewDefaultCart: function() {
-      cartSvc.getCart(0).then(
+      routerSvc.goto('CartSpecimensList', {cartId: 0}, {filters: this.filters});
+      /*cartSvc.getCart(0).then(
         (cart) => {
           if (cart.id) {
             routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters});
@@ -180,7 +186,7 @@ export default {
             alertSvc.error('You do not have a default cart.');
           }
         }
-      );
+      );*/
     },
 
     onToggleStar: async function({cart}) {

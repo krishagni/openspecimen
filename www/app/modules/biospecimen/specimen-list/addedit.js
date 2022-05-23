@@ -13,9 +13,10 @@ angular.module('os.biospecimen.specimenlist.addedit', ['os.biospecimen.models'])
         useBarcode: false
       };
 
-      if (SpecimensHolder.getSpecimens() != undefined) {
+      var inputSpmns = SpecimensHolder.getSpecimens();
+      if (inputSpmns instanceof Array && inputSpmns.length > 0) {
         $scope.isQueryOrSpecimenPage =  true;
-        $scope.input.specimenIds = SpecimensHolder.getSpecimens().map(function(spmn) { return spmn.id; });
+        $scope.input.specimenIds = inputSpmns.map(function(spmn) { return spmn.id; });
         SpecimensHolder.setSpecimens(undefined);
       }
 

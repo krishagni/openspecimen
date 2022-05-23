@@ -6,8 +6,8 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.cart.id">Create Cart</h3>
-        <h3 v-else>Update {{ctx.cartDisplayName}}</h3>
+        <h3 v-if="dataCtx.cart.id >= 0">Update {{ctx.cartDisplayName}}</h3>
+        <h3 v-else>Create Cart</h3>
       </span>
     </os-page-head>
 
@@ -64,7 +64,7 @@ export default {
     const { schema } = cartSvc.getAddEditFormSchema();
     ctx.addEditFs = schema;
 
-    if (props.cartId && +props.cartId > 0) {
+    if (props.cartId && +props.cartId >= 0) {
       cartSvc.getCart(props.cartId).then(
         cart => {
           dataCtx.cart        = cart;
@@ -99,8 +99,12 @@ export default {
         return;
       }
 
-      const fieldRef      = this.$refs.cartForm.getFieldRef('cart.specimenLabels');
-      const { specimens } = await fieldRef.getSpecimens();
+      let specimens = this.ctx.inputSpmns || [];
+      if (specimens.length == 0) {
+        const fieldRef = this.$refs.cartForm.getFieldRef('cart.specimenLabels');
+        const value    = await fieldRef.getSpecimens();
+        specimens = value.specimens || [];
+      }
 
       const toSave = util.clone(this.dataCtx.cart);
       toSave.specimenIds = specimens.map(spmn => spmn.id);
