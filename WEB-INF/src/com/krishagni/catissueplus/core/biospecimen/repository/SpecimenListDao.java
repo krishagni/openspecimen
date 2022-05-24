@@ -26,6 +26,8 @@ public interface SpecimenListDao extends Dao<SpecimenList> {
 
 	boolean isListSharedWithUser(Long listId, Long userId);
 
+	List<Long> getListsSharedWithUser(List<Long> listIds, Long userId);
+
 	//
 	// APIs to save specimen list items
 	//

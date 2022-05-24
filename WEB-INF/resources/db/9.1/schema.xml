@@ -10,4 +10,66 @@
       <column name="DISPLAY_NAME" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen cart folders">
+    <createTable tableName="OS_SPECIMEN_CART_FOLDERS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="NAME" type="${text.type}(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="DESCRIPTION" type="${text.type}(255)" />
+      <column name="OWNER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CART_FOLDER_OWNER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CREATION_TIME" type="${timestamp.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen cart folder ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_SPECIMEN_CART_FOLDERS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen cart folder user groups">
+    <createTable tableName="OS_CART_FOLDER_USER_GROUPS">
+      <column name="FOLDER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CART_FOLDER_UG_FOLDER"
+          referencedTableName="OS_SPECIMEN_CART_FOLDERS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="GROUP_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CART_FOLDER_UG_GROUP"
+          referencedTableName="OS_USER_GROUPS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on cart folder, user group tuple">
+    <addUniqueConstraint constraintName="OS_CART_FOLDER_USER_GROUP_UQ"
+      tableName="OS_CART_FOLDER_USER_GROUPS" columnNames="FOLDER_ID, GROUP_ID" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen cart folder carts">
+    <createTable tableName="OS_CART_FOLDER_CARTS">
+      <column name="FOLDER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CART_FOLDER_CARTS_FOLDER"
+          referencedTableName="OS_SPECIMEN_CART_FOLDERS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CART_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CART_FOLDER_CARTS_CART"
+          referencedTableName="CATISSUE_SPECIMENLIST_TAGS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on cart folder, cart tuple">
+    <addUniqueConstraint constraintName="OS_CART_FOLDER_CART_UQ"
+      tableName="OS_CART_FOLDER_CARTS" columnNames="FOLDER_ID, CART_ID" />
+  </changeSet>
 </databaseChangeLog>

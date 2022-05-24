@@ -27,16 +27,23 @@ import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListsFolder;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListsFolderFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.SpecimenListsFolderErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.UpdateFolderCartsOp;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsFoldersCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenListService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -87,6 +94,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 	private StarredItemService starredItemSvc;
 
+	private SpecimenListsFolderFactory folderFactory;
+
 	public SpecimenListFactory getSpecimenListFactory() {
 		return specimenListFactory;
 	}
@@ -117,6 +126,10 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 	public void setStarredItemSvc(StarredItemService starredItemSvc) {
 		this.starredItemSvc = starredItemSvc;
+	}
+
+	public void setFolderFactory(SpecimenListsFolderFactory folderFactory) {
+		this.folderFactory = folderFactory;
 	}
 
 	@Override
@@ -388,6 +401,160 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 	public ResponseEvent<QueryDataExportResult> exportSpecimenList(RequestEvent<SpecimenListCriteria> req) {
 		try {
 			return ResponseEvent.response(exportSpecimenList0(req.getPayload(), null));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	//
+	// Specimen Lists Folder APIs
+	//
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<SpecimenListsFolderSummary>> getFolders(RequestEvent<SpecimenListsFoldersCriteria> req) {
+		try {
+			List<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			SpecimenListsFoldersCriteria criteria = req.getPayload();
+			if (!AuthUtil.isAdmin()) {
+				criteria.userId(AuthUtil.getCurrentUser().getId());
+			}
+
+			List<SpecimenListsFolder> folders = daoFactory.getSpecimenListsFolderDao().getFolders(criteria);
+			List<SpecimenListsFolderSummary> result = SpecimenListsFolderSummary.from(folders);
+			if (criteria.includeStat() && !folders.isEmpty()) {
+				List<Long> folderIds = folders.stream().map(SpecimenListsFolder::getId).collect(Collectors.toList());
+				Map<Long, Integer> counts = daoFactory.getSpecimenListsFolderDao().getFolderCartsCount(folderIds);
+				result.forEach(folder -> folder.setCartsCount(counts.getOrDefault(folder.getId(), 0)));
+			}
+
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Long> getFoldersCount(RequestEvent<SpecimenListsFoldersCriteria> req) {
+		try {
+			List<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			SpecimenListsFoldersCriteria criteria = req.getPayload();
+			if (!AuthUtil.isAdmin()) {
+				criteria.userId(AuthUtil.getCurrentUser().getId());
+			}
+
+			return ResponseEvent.response(daoFactory.getSpecimenListsFolderDao().getFoldersCount(criteria));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimenListsFolderDetail> getFolder(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			SpecimenListsFolder folder = getFolder(req.getPayload().getId(), true);
+			return ResponseEvent.response(SpecimenListsFolderDetail.from(folder));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimenListsFolderDetail> createFolder(RequestEvent<SpecimenListsFolderDetail> req) {
+		try {
+			List<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			SpecimenListsFolder folder = folderFactory.createFolder(req.getPayload());
+			daoFactory.getSpecimenListsFolderDao().saveOrUpdate(folder);
+			return ResponseEvent.response(SpecimenListsFolderDetail.from(folder));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimenListsFolderDetail> updateFolder(RequestEvent<SpecimenListsFolderDetail> req) {
+		try {
+			SpecimenListsFolderDetail input = req.getPayload();
+			SpecimenListsFolder existing = getFolder(input.getId(), false);
+			SpecimenListsFolder folder = folderFactory.createFolder(input);
+			existing.update(folder);
+			return ResponseEvent.response(SpecimenListsFolderDetail.from(existing));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimenListsFolderDetail> deleteFolder(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			SpecimenListsFolder folder = getFolder(req.getPayload().getId(), false);
+			folder.delete();
+			return ResponseEvent.response(SpecimenListsFolderDetail.from(folder));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Integer> updateFolderCarts(RequestEvent<UpdateFolderCartsOp> req) {
+		try {
+			UpdateFolderCartsOp op = req.getPayload();
+			SpecimenListsFolder folder = getFolder(op.getFolderId(), true);
+
+			int count = 0;
+			List<Long> cartIds = CollectionUtils.isEmpty(op.getCartIds()) ? Collections.emptyList() : op.getCartIds();
+			List<Long> accessibleCartIds = cartIds;
+			if (!AuthUtil.isAdmin()) {
+				accessibleCartIds = daoFactory.getSpecimenListDao().getListsSharedWithUser(cartIds, AuthUtil.getCurrentUser().getId());
+			}
+
+			if (accessibleCartIds.size() != cartIds.size()) {
+				return ResponseEvent.userError(SpecimenListErrorCode.ACCESS_NOT_ALLOWED);
+			}
+
+			switch (op.getOp()) {
+				case ADD:
+					count = daoFactory.getSpecimenListsFolderDao().addCarts(folder.getId(), accessibleCartIds);
+					break;
+
+				case REMOVE:
+					count = daoFactory.getSpecimenListsFolderDao().removeCarts(folder.getId(), accessibleCartIds);
+					break;
+			}
+
+			return ResponseEvent.response(count);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -833,6 +1000,27 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		cfg.setDistinct(true);
 		cfg.setOrderBy(Collections.singletonList(orderBy));
 		return ListUtil.setListLimit(cfg, listReq);
+	}
+
+	private SpecimenListsFolder getFolder(Long folderId, boolean shared) {
+		if (folderId == null) {
+			throw OpenSpecimenException.userError(SpecimenListsFolderErrorCode.ID_REQ);
+		}
+
+		SpecimenListsFolder folder = daoFactory.getSpecimenListsFolderDao().getById(folderId);
+		if (folder == null) {
+			throw OpenSpecimenException.userError(SpecimenListsFolderErrorCode.NOT_FOUND, folderId);
+		}
+
+		if (AuthUtil.isAdmin() || folder.getOwner().equals(AuthUtil.getCurrentUser())) {
+			return folder;
+		}
+
+		if (shared && daoFactory.getSpecimenListsFolderDao().isAccessible(folder.getId(), AuthUtil.getCurrentUser().getId())) {
+			return folder;
+		}
+
+		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 	}
 
 	private String msg(String code, Object ... params) {

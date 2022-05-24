@@ -33,7 +33,14 @@
         <filter name="activeEntity" condition="activity_status != 'Disabled'"/>
       </many-to-many>
     </set>
-	
+
+    <set name="folders" table="OS_CART_FOLDER_CARTS" inverse="true">
+      <key column="CART_ID" />
+      <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListsFolder" column="FOLDER_ID">
+        <filter name="activeEntity" condition="activity_status != 'Disabled'"/>
+      </many-to-many>
+    </set>
+
     <set name="specimens" table="CATISSUE_SPEC_TAG_ITEMS" inverse="true">
       <key column="TAG_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem"/>
@@ -105,8 +112,9 @@
       from
         catissue_specimenlist_tags l
       where
-        l.identifier = :listId and
+        l.identifier in (:listIds) and
         (
+          l.user_id = :userId or
           exists (
             select
               u.tag_id
@@ -125,6 +133,21 @@
               inner join os_user_group_users gu on gu.group_id = g.identifier
             where
               lg.list_id = l.identifier and
+              g.activity_status != 'Disabled' and
+              gu.user_id = :userId
+          ) or
+          exists (
+            select
+              c.cart_id
+            from
+              os_specimen_cart_folders f
+              inner join os_cart_folder_carts c on c.folder_id = f.identifier
+              inner join os_cart_folder_user_groups fg on fg.folder_id = f.identifier
+              inner join os_user_groups g on g.identifier = fg.group_id
+              inner join os_user_group_users gu on gu.group_id = g.identifier
+            where
+              f.activity_status != 'Disabled' and
+              c.cart_id = l.identifier and
               g.activity_status != 'Disabled' and
               gu.user_id = :userId
           )

@@ -83,6 +83,8 @@ public interface DaoFactory {
 
 	SpecimenListDao getSpecimenListDao();
 
+	SpecimenListsFolderDao getSpecimenListsFolderDao();
+
 	SpecimenKitDao getSpecimenKitDao();
 
 	PermissibleValueDao getPermissibleValueDao();

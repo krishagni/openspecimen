@@ -15,4 +15,6 @@ public interface UserGroupDao extends Dao<UserGroup> {
 	Map<Long, Integer> getGroupUsersCount(Collection<Long> groupIds);
 
 	UserGroup getByName(String name);
+
+	List<UserGroup> getByNames(Collection<String> names);
 }

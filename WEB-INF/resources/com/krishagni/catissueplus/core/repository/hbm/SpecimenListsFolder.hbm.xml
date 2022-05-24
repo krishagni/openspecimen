@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListsFolder" table="OS_SPECIMEN_CART_FOLDERS">
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_SPECIMEN_CART_FOLDERS_SEQ</param>
+      </generator>
+    </id>
+
+    <property name="name" column="NAME" />
+
+    <property name="description" column="DESCRIPTION" />
+
+    <many-to-one name="owner" column="OWNER_ID" />
+
+    <property name="creationTime" column="CREATION_TIME" />
+
+    <property name="activityStatus" column="ACTIVITY_STATUS" />
+
+    <set name="userGroups" table="OS_CART_FOLDER_USER_GROUPS">
+      <key column="FOLDER_ID"/>
+      <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.UserGroup" column="GROUP_ID">
+        <filter name="activeEntity" condition="activity_status != 'Disabled'" />
+      </many-to-many>
+    </set>
+
+    <set name="lists" table="OS_CART_FOLDER_CARTS">
+      <key column="FOLDER_ID"/>
+      <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList" column="CART_ID">
+        <filter name="activeEntity" condition="deleted_on is null" />
+      </many-to-many>
+    </set>
+
+    <filter name="activeEntity" />
+
+    <sql-query name="getFolderCartsCount">
+      <return-scalar column="folderId" type="long" />
+      <return-scalar column="cartCount" type="integer" />
+
+      select
+        f.identifier as folderId, count(c.identifier) as cartCount
+      from
+        os_specimen_cart_folders f
+        inner join os_cart_folder_carts fc on fc.folder_id = f.identifier
+        inner join catissue_specimenlist_tags c on c.identifier = fc.cart_id
+      where
+        f.identifier in (:folderIds) and
+        c.deleted_on is null
+      group by
+        f.identifier
+    </sql-query>
+  </class>
+</hibernate-mapping>

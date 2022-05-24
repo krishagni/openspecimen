@@ -42,6 +42,8 @@ public class SpecimenList extends BaseEntity {
 	private Set<UserGroup> sharedWithGroups = new HashSet<>();
 	
 	private Set<SpecimenListItem> specimens = new HashSet<>();
+
+	private Set<SpecimenListsFolder> folders = new HashSet<>();
 	
 	private Date deletedOn;
 
@@ -124,7 +126,16 @@ public class SpecimenList extends BaseEntity {
 	public void setSpecimens(Set<SpecimenListItem> specimens) {
 		this.specimens = specimens;
 	}
-	
+
+	@NotAudited
+	public Set<SpecimenListsFolder> getFolders() {
+		return folders;
+	}
+
+	public void setFolders(Set<SpecimenListsFolder> folders) {
+		this.folders = folders;
+	}
+
 	public Date getDeletedOn() {
 		return deletedOn;
 	}

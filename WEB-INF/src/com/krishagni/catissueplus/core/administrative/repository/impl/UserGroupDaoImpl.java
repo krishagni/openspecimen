@@ -80,14 +80,20 @@ public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGrou
 
 	@Override
 	public UserGroup getByName(String name) {
-		return (UserGroup) getCurrentSession().getNamedQuery(GET_BY_NAME)
-			.setParameter("name", name)
-			.uniqueResult();
+		List<UserGroup> groups = getByNames(Collections.singleton(name));
+		return groups.isEmpty() ? null : groups.iterator().next();
+	}
+
+	@Override
+	public List<UserGroup> getByNames(Collection<String> names) {
+		return getCurrentSession().getNamedQuery(GET_BY_NAMES)
+			.setParameterList("names", names)
+			.list();
 	}
 
 	private static final String FQN = UserGroup.class.getName();
 
-	private static final String GET_BY_NAME = FQN + ".getByName";
+	private static final String GET_BY_NAMES = FQN + ".getByNames";
 
 	private static final String GET_USERS_COUNT = FQN + ".getUsersCount";
 }

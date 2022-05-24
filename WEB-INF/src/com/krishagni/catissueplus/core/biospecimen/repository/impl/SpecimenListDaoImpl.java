@@ -119,12 +119,15 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public boolean isListSharedWithUser(Long listId, Long userId) {
-		Long sharedListId = (Long) getCurrentSession().getNamedQuery(SHARED_WITH_USER)
-			.setParameter("listId", listId)
+		List<Long> sharedLists = getListsSharedWithUser(Collections.singletonList(listId), userId);
+		return !sharedLists.isEmpty() && sharedLists.get(0).equals(listId);
+	}
+
+	public List<Long> getListsSharedWithUser(List<Long> listIds, Long userId) {
+		return getCurrentSession().getNamedQuery(SHARED_WITH_USER)
+			.setParameterList("listIds", listIds)
 			.setParameter("userId", userId)
-			.setMaxResults(1)
-			.uniqueResult();
-		return listId.equals(sharedListId);
+			.list();
 	}
 
 	//
@@ -231,6 +234,23 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 						Restrictions.eq("sharedGroupUser.id", crit.userId())
 					)
 				);
+		}
+
+		if (crit.folderId() != null) {
+			query.createAlias("l.folders", "folder")
+				.add(Restrictions.eq("folder.id", crit.folderId()));
+
+			if (crit.userId() != null) {
+				query.createAlias("folder.owner", "folderOwner", JoinType.LEFT_OUTER_JOIN)
+					.createAlias("folder.userGroups", "folderUserGroup", JoinType.LEFT_OUTER_JOIN)
+					.createAlias("folderUserGroup.users", "folderUser", JoinType.LEFT_OUTER_JOIN)
+					.add(
+						Restrictions.disjunction(
+							Restrictions.eq("folderOwner.id", crit.userId()),
+							Restrictions.eq("folderUser.id", crit.userId())
+						)
+					);
+			}
 		}
 
 		if (StringUtils.isNotBlank(crit.query())) {

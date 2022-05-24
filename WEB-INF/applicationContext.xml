@@ -445,6 +445,10 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
+  <bean id="specimenListsFolderFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.SpecimenListsFolderFactoryImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+  </bean>
+
   <bean id="specimenListSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenListServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="specimenListFactory" ref="specimenListFactory"/>
@@ -452,6 +456,7 @@
     <property name="deDaoFactory" ref="deDaoFactory"/>
     <property name="querySvc" ref="querySvc"/>
     <property name="starredItemSvc" ref="starredItemSvc"/>
+    <property name="folderFactory" ref="specimenListsFolderFactory" />
   </bean>
 
   <bean id="specimenKitFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.SpecimenKitFactoryImpl">

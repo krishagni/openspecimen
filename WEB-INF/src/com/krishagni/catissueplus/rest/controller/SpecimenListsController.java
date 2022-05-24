@@ -49,6 +49,9 @@ public class SpecimenListsController {
 		@RequestParam(value = "name", required = false)
 		String name,
 
+		@RequestParam(value = "folderId", required = false)
+		Long folderId,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -63,6 +66,7 @@ public class SpecimenListsController {
 
 		SpecimenListsCriteria crit = new SpecimenListsCriteria()
 			.query(name)
+			.folderId(folderId)
 			.includeStat(includeStats)
 			.orderByStarred(orderByStarred)
 			.startAt(startAt < 0 ? 0 : startAt)
@@ -73,8 +77,13 @@ public class SpecimenListsController {
 	@RequestMapping(method = RequestMethod.GET, value = "/count")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, Long> getSpecimenListsCount(@RequestParam(value = "name", required = false) String name) {
-		SpecimenListsCriteria crit = new SpecimenListsCriteria().query(name);
+	public Map<String, Long> getSpecimenListsCount(
+		@RequestParam(value = "name", required = false)
+		String name,
+
+		@RequestParam(value = "folderId", required = false)
+		Long folderId) {
+		SpecimenListsCriteria crit = new SpecimenListsCriteria().query(name).folderId(folderId);
 		return Collections.singletonMap("count", response(specimenListSvc.getSpecimenListsCount(request(crit))));
 	}
 	

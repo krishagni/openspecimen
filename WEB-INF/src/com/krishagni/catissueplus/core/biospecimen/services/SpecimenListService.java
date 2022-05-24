@@ -8,9 +8,13 @@ import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.UpdateFolderCartsOp;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsFoldersCriteria;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -47,6 +51,23 @@ public interface SpecimenListService {
 	ResponseEvent<Boolean> addChildSpecimens(RequestEvent<Long> req);
 
 	ResponseEvent<QueryDataExportResult> exportSpecimenList(RequestEvent<SpecimenListCriteria> req);
+
+	//
+	// Specimen List Folder APIs
+	//
+	ResponseEvent<List<SpecimenListsFolderSummary>> getFolders(RequestEvent<SpecimenListsFoldersCriteria> req);
+
+	ResponseEvent<Long> getFoldersCount(RequestEvent<SpecimenListsFoldersCriteria> req);
+
+	ResponseEvent<SpecimenListsFolderDetail> getFolder(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<SpecimenListsFolderDetail> createFolder(RequestEvent<SpecimenListsFolderDetail> req);
+
+	ResponseEvent<SpecimenListsFolderDetail> updateFolder(RequestEvent<SpecimenListsFolderDetail> req);
+
+	ResponseEvent<SpecimenListsFolderDetail> deleteFolder(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<Integer> updateFolderCarts(RequestEvent<UpdateFolderCartsOp> req);
 
 	//
 	// Used for internal consumption purpose.

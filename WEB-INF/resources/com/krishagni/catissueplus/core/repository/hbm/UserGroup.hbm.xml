@@ -29,13 +29,13 @@
 
     <filter name="activeEntity"/>
 
-    <query name="getByName">
+    <query name="getByNames">
       select
         g
       from
         com.krishagni.catissueplus.core.administrative.domain.UserGroup g
       where
-        g.name = :name
+        g.name in (:names)
     </query>
 
     <sql-query name="getUsersCount">
