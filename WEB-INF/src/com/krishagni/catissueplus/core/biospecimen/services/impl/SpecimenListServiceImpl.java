@@ -488,6 +488,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 			SpecimenListsFolder folder = folderFactory.createFolder(req.getPayload());
 			daoFactory.getSpecimenListsFolderDao().saveOrUpdate(folder);
+			updateFolderCarts(folder, UpdateFolderCartsOp.Operation.ADD, req.getPayload().getCartIds());
 			return ResponseEvent.response(SpecimenListsFolderDetail.from(folder));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -532,29 +533,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		try {
 			UpdateFolderCartsOp op = req.getPayload();
 			SpecimenListsFolder folder = getFolder(op.getFolderId(), true);
-
-			int count = 0;
-			List<Long> cartIds = CollectionUtils.isEmpty(op.getCartIds()) ? Collections.emptyList() : op.getCartIds();
-			List<Long> accessibleCartIds = cartIds;
-			if (!AuthUtil.isAdmin()) {
-				accessibleCartIds = daoFactory.getSpecimenListDao().getListsSharedWithUser(cartIds, AuthUtil.getCurrentUser().getId());
-			}
-
-			if (accessibleCartIds.size() != cartIds.size()) {
-				return ResponseEvent.userError(SpecimenListErrorCode.ACCESS_NOT_ALLOWED);
-			}
-
-			switch (op.getOp()) {
-				case ADD:
-					count = daoFactory.getSpecimenListsFolderDao().addCarts(folder.getId(), accessibleCartIds);
-					break;
-
-				case REMOVE:
-					count = daoFactory.getSpecimenListsFolderDao().removeCarts(folder.getId(), accessibleCartIds);
-					break;
-			}
-
-			return ResponseEvent.response(count);
+			return ResponseEvent.response(updateFolderCarts(folder, op.getOp(), op.getCartIds()));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -888,8 +867,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 		ExecuteQueryEventOp op = new ExecuteQueryEventOp();
 		op.setDrivingForm("Participant");
-		op.setAql(query.getAql(restriction));
-		op.setWideRowMode(WideRowMode.DEEP.name());
+		op.setAql(query.getAql(restriction, "Specimen.specimenCarts.itemId asc"));
+		op.setWideRowMode(WideRowMode.OFF.name());
 		op.setRunType("Export");
 		if (qdConsumer != null) {
 			return querySvc.exportQueryData(op, qdConsumer);
@@ -1021,6 +1000,34 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		}
 
 		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+	}
+
+	private Integer updateFolderCarts(SpecimenListsFolder folder, UpdateFolderCartsOp.Operation operation, List<Long> cartIds) {
+		if (CollectionUtils.isEmpty(cartIds)) {
+			return 0;
+		}
+
+		int count = 0;
+		List<Long> accessibleCartIds = cartIds;
+		if (!AuthUtil.isAdmin()) {
+			accessibleCartIds = daoFactory.getSpecimenListDao().getListsSharedWithUser(cartIds, AuthUtil.getCurrentUser().getId());
+		}
+
+		if (accessibleCartIds.size() != cartIds.size()) {
+			throw OpenSpecimenException.userError(SpecimenListErrorCode.ACCESS_NOT_ALLOWED);
+		}
+
+		switch (operation) {
+			case ADD:
+				count = daoFactory.getSpecimenListsFolderDao().addCarts(folder.getId(), accessibleCartIds);
+				break;
+
+			case REMOVE:
+				count = daoFactory.getSpecimenListsFolderDao().removeCarts(folder.getId(), accessibleCartIds);
+				break;
+		}
+
+		return count;
 	}
 
 	private String msg(String code, Object ... params) {

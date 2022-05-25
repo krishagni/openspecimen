@@ -3,8 +3,13 @@
     <os-screen-panel :width="ctx.detailView ? 3 : 12">
       <os-page>
         <os-page-head>
+          <template #breadcrumb v-if="ctx.folder && !ctx.detailView">
+            <os-breadcrumb :items="ctx.bcrumb" />
+          </template>
+
           <span>
-            <h3>Carts</h3>
+            <h3 v-if="ctx.folder">{{ctx.folder.name}}</h3>
+            <h3 v-else>Carts</h3>
           </span>
 
           <template #right>
@@ -26,9 +31,24 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <os-button left-icon="plus" label="Create" @click="createCart" />
+              <span v-if="!ctx.folder">
+                <span v-if="ctx.selectedCarts.length == 0">
+                  <os-button left-icon="plus" label="Create" @click="createCart" />
 
-              <os-button label="View My Default Cart" @click="viewDefaultCart" />
+                  <os-button label="View My Default Cart" @click="viewDefaultCart" />
+                </span>
+
+                <os-button left-icon="folder" label="View Folders" @click="viewFolders" />
+
+                <AssignCart :carts="ctx.selectedCarts" />
+              </span>
+
+              <span v-else>
+                <span v-if="ctx.selectedCarts.length > 0">
+                  <os-button left-icon="times" label="Remove" v-os-tooltip.right="'Remove from folder'"
+                    @click="removeFromFolder" />
+                </span>
+              </span>
 
               <os-button-link left-icon="question-circle" label="Help"
                 url="https://help.openspecimen.org/specimen-list" new-tab="true" />
@@ -43,10 +63,11 @@
             :data="ctx.carts"
             :schema="listSchema"
             :query="ctx.query"
-            :allowSelection="false"
+            :allowSelection="true"
             :loading="ctx.loading"
             :selected="ctx.selectedCart"
             @filtersUpdated="loadCarts"
+            @selectedRows="onCartsSelection"
             @rowClicked="onCartRowClick"
             @rowStarToggled="onToggleStar"
             ref="listView"
@@ -65,29 +86,71 @@
 
 import listSchema from  '@/biospecimen/schemas/carts/list.js';
 
+import alertSvc    from '@/common/services/Alerts.js';
 import cartSvc     from '@/biospecimen/services/SpecimenCart.js';
-// import alertSvc    from '@/common/services/Alerts.js';
+import folderSvc   from '@/biospecimen/services/SpecimenCartsFolder.js';
 import routerSvc   from '@/common/services/Router.js';
+import util        from '@/common/services/Util.js';
+
+import AssignCart  from '@/biospecimen/carts/AssignCart.vue';
 
 export default {
-  props: ['cartId', 'filters'],
+  props: ['cartId', 'folderId', 'filters'],
+
+  components: {
+    AssignCart
+  },
 
   data() {
     return {
       ctx: {
         carts: [],
+
         cartsCount: -1,
+
         loading: true,
+
         query: this.filters,
+
         detailView: false,
-        selectedCart: null
+
+        selectedCart: null,
+
+        selectedCarts: [],
+
+        folder: null,
+
+        bcrumb: [ { url: routerSvc.getUrl('SpecimenCartsFoldersList'), label: 'Cart Folders' } ]
       },
 
       listSchema,
     };
   },
 
+  created() {
+    if (this.folderId > 0) {
+      folderSvc.getFolder(this.folderId).then(folder => this.ctx.folder = folder);
+
+      const ls = this.listSchema = util.clone(this.listSchema);
+      ls.filters = ls.filters.filter(f => f.name != 'folderId');
+    }
+  },
+
   watch: {
+    'folderId': function(newFolderId, oldFolderId) {
+      if (newFolderId == oldFolderId) {
+        return;
+      }
+
+      if (newFolderId > 0) {
+        folderSvc.getFolder(newFolderId).then(folder => this.ctx.folder = folder);
+      } else {
+        this.ctx.folder = null;
+      }
+
+      this.$refs.listView.reload();
+    },
+
     'cartId': function(newCartId, oldCartId) {
       if (newCartId == oldCartId) {
         return;
@@ -117,7 +180,7 @@ export default {
 
       const carts = await this.reloadCarts();
       if (this.cartId < 0) {
-        routerSvc.goto('SpecimenCartsList', {cartId: -1}, {filters: uriEncoding});
+        routerSvc.goto('SpecimenCartsList', {cartId: -1}, {filters: uriEncoding, folderId: this.folderId});
       } else {
         let selectedRow = this.findCart(carts, this.cartId);
         if (!selectedRow) {
@@ -136,12 +199,17 @@ export default {
     reloadCarts: async function() {
       this.ctx.loading = true;
 
-      const defOpts = {orderByStarred: true, includeStats: true, maxResults: this.ctx.pageSize}; 
-      const opts    = Object.assign(defOpts, this.ctx.filterValues || {});
+      const opts = Object.assign({
+        orderByStarred: true,
+        includeStats: true,
+        maxResults: this.ctx.pageSize,
+        folderId: this.folderId
+      }, this.ctx.filterValues || {});
       const carts   = await cartSvc.getCarts(opts);
 
       this.ctx.loading = false;
       this.ctx.carts = carts.map(cart => ({cart: cart}));
+      this.ctx.selectedCarts = [];
       return this.ctx.carts;
     },
 
@@ -152,7 +220,7 @@ export default {
     },
 
     onCartRowClick: function({cart}) {
-      routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters});
+      routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters, folderId: this.folderId});
     },
 
     showDetails: function(rowObject) {
@@ -166,7 +234,7 @@ export default {
     showTable: function(reload) {
       this.ctx.detailView = false;
       this.$refs.listView.switchToTableView();
-      routerSvc.goto('SpecimenCartsList', {cartId: -1}, {filters: this.filters});
+      routerSvc.goto('SpecimenCartsList', {cartId: -1}, {filters: this.filters, folderId: this.folderId});
       if (reload) {
         this.$refs.listView.reload();
       }
@@ -177,11 +245,11 @@ export default {
     },
 
     viewDefaultCart: function() {
-      routerSvc.goto('CartSpecimensList', {cartId: 0}, {filters: this.filters});
+      routerSvc.goto('CartSpecimensList', {cartId: 0}, {filters: this.filters, folderId: this.folderId});
       /*cartSvc.getCart(0).then(
         (cart) => {
           if (cart.id) {
-            routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters});
+            routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters, folderId: this.folderId});
           } else {
             alertSvc.error('You do not have a default cart.');
           }
@@ -201,6 +269,32 @@ export default {
         cart.starred = !cart.starred;
       }
     },
+
+    onCartsSelection: function(carts) {
+      this.ctx.selectedCarts = carts.map(({rowObject}) => ({id: +rowObject.cart.id}));
+    },
+
+    viewFolders: function() {
+      routerSvc.goto('SpecimenCartsFoldersList');
+    },
+
+    removeFromFolder: function() {
+      folderSvc.removeCarts(this.ctx.folder, this.ctx.selectedCarts).then(
+        ({count}) => {
+          if (count == 0) {
+            alertSvc.info('No carts removed from the folder: ' + this.ctx.folder.name);
+          } else {
+            if (count == 1) {
+              alertSvc.success('One cart removed from the folder: ' + this.ctx.folder.name);
+            } else {
+              alertSvc.success(count + ' carts removed from the folder: ' + this.ctx.folder.name);
+            }
+
+            this.$refs.listView.reload();
+          }
+        }
+      );
+    }
   }
 }
 </script>

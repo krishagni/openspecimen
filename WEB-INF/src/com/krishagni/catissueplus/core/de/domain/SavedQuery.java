@@ -339,6 +339,10 @@ public class SavedQuery {
 	public String getAql(String conjunction) {
 		return AqlBuilder.getInstance().getQuery(this, conjunction);
 	}
+
+	public String getAql(String conjunction, String orderBy) {
+		return AqlBuilder.getInstance().getQuery(this, conjunction, orderBy);
+	}
 	
 	public void update(SavedQuery query) {
 		setTitle(query.getTitle());

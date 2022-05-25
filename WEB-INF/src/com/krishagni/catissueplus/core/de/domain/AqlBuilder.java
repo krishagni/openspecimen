@@ -59,7 +59,7 @@ public class AqlBuilder {
 
 	public String getQuery(Object[] selectList, Filter[] filters, Filter[] conjunctionFilters, QueryExpressionNode[] queryExprNodes, String havingClause, ReportSpec rptSpec) {
 		Context ctx = new Context();
-		return getQuery(ctx, selectList, filters, getConjunction(ctx, conjunctionFilters), queryExprNodes, havingClause, rptSpec);
+		return getQuery(ctx, selectList, filters, getConjunction(ctx, conjunctionFilters), queryExprNodes, havingClause, null, rptSpec);
 	}
 
 	public String getQuery(Object[] selectList, Filter[] filters, String conjunction, QueryExpressionNode[] queryExprNodes, String havingClause) {
@@ -67,19 +67,23 @@ public class AqlBuilder {
 	}
 
 	public String getQuery(Object[] selectList, Filter[] filters, String conjunction, QueryExpressionNode[] queryExprNodes, String havingClause, ReportSpec rptSpec) {
-		return getQuery(new Context(), selectList, filters, conjunction, queryExprNodes, havingClause, rptSpec);
+		return getQuery(new Context(), selectList, filters, conjunction, queryExprNodes, havingClause, null, rptSpec);
 	}
 
 	public String getQuery(SavedQuery query, Filter[] conjunctions) {
 		Context ctx = new Context();
 		ctx.qs = query.getQuerySpace();
-		return getQuery(ctx, query.getSelectList(), query.getFilters(), getConjunction(ctx, conjunctions), query.getQueryExpression(), query.getHavingClause(), query.getReporting());
+		return getQuery(ctx, query.getSelectList(), query.getFilters(), getConjunction(ctx, conjunctions), query.getQueryExpression(), query.getHavingClause(), null, query.getReporting());
 	}
 
 	public String getQuery(SavedQuery query, String conjunction) {
+		return getQuery(query, conjunction, null);
+	}
+
+	public String getQuery(SavedQuery query, String conjunction, String orderBy) {
 		Context ctx = new Context();
 		ctx.qs = query.getQuerySpace();
-		return getQuery(ctx, query.getSelectList(), query.getFilters(), conjunction, query.getQueryExpression(), query.getHavingClause(), query.getReporting());
+		return getQuery(ctx, query.getSelectList(), query.getFilters(), conjunction, query.getQueryExpression(), query.getHavingClause(), orderBy, query.getReporting());
 	}
 
 	private String getConjunction(Context ctx, Filter[] filters) {
@@ -97,7 +101,7 @@ public class AqlBuilder {
 		return conjunctionExpr.toString();
 	}
 
-	private String getQuery(Context ctx, Object[] selectList, Filter[] filters, String conjunction, QueryExpressionNode[] queryExprNodes, String havingClause, ReportSpec rptSpec) {
+	private String getQuery(Context ctx, Object[] selectList, Filter[] filters, String conjunction, QueryExpressionNode[] queryExprNodes, String havingClause, String orderClause, ReportSpec rptSpec) {
 		Map<Integer, Filter> filterMap = new HashMap<>();
 		for (Filter filter : filters) {
 			filterMap.put(filter.getId(), filter);
@@ -119,6 +123,10 @@ public class AqlBuilder {
 			havingClause = havingClause.replaceAll("count\\s*\\(", "count(distinct ");
 			havingClause = havingClause.replaceAll("c_count\\s*\\(", "c_count(distinct ");
 			query += " having " + havingClause;
+		}
+
+		if (StringUtils.isNotBlank(orderClause)) {
+			query += " order by " + orderClause;
 		}
 
 		query += " " + buildReportExpr(selectList, rptSpec);
@@ -272,7 +280,7 @@ public class AqlBuilder {
 			}
 
 			ctx.addActiveQuery(filter.getSubQueryId());
-			String subAql = getQuery(ctx, new Object[] { field }, query.getFilters(), null, query.getQueryExpression(), query.getHavingClause(), null);
+			String subAql = getQuery(ctx, new Object[] { field }, query.getFilters(), null, query.getQueryExpression(), query.getHavingClause(), null, null);
 			ctx.removeActiveQuery(filter.getSubQueryId());
 			return filterExpr.append("(").append(subAql).append(")").toString();
 		}

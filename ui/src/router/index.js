@@ -711,7 +711,11 @@ const routes = [
         path: 'carts/:cartId',
         name: 'SpecimenCartsList',
         component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/List.vue'),
-        props: (route) => ({cartId: route.params && route.params.cartId, filters: route.query.filters}),
+        props: (route) => ({
+          cartId: route.params && route.params.cartId,
+          folderId: route.query.folderId,
+          filters: route.query.filters
+        }),
         children: [
           {
             path: 'specimens',
@@ -733,6 +737,20 @@ const routes = [
         component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/AddEdit.vue'),
         props: (route) => ({cartId: route.params && route.params.cartId})
       },
+
+      {
+        path: 'cart-folders',
+        name: 'SpecimenCartsFoldersList',
+        component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/cart-folders/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+
+      {
+        path: 'cart-folder-addedit/:folderId',
+        name: 'SpecimenCartsFolderAddEdit',
+        component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/cart-folders/AddEdit.vue'),
+        props: (route) => ({folderId: route.params && route.params.folderId})
+      }
     ]
   }
 ]

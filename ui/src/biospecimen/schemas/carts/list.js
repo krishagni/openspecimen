@@ -61,6 +61,16 @@ export default {
       name: "name",
       type: "text",
       caption: "Name"
-    }
+    },
+    {
+      name: 'folderId',
+      type: 'dropdown',
+      caption: 'Folder',
+      listSource: {
+        apiUrl: 'specimen-list-folders',
+        displayProp: 'name',
+        selectProp: 'id'
+      }
+    },
   ]
 }

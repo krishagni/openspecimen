@@ -7,7 +7,7 @@
   <os-overlay class="os-carts" ref="cartOptions" style="margin-left: -112px;">
     <ul class="search">
       <li>
-        <os-input-text v-model="searchTerm" @update:modelValue="searchCarts" />
+        <os-input-text v-model="searchTerm" placeholder="Search Cart" @update:modelValue="searchCarts" />
       </li>
     </ul>
     <ul class="carts">
@@ -176,13 +176,13 @@ export default {
 
 .os-carts ul {
   margin: 0.5rem -1.25rem;
-  padding: 0;
+  padding: 0rem 0rem 0.5rem 0rem;
   list-style: none;
   border-bottom: 1px solid #ddd;
 }
 
 .os-carts ul.carts {
-  max-height: 200px;
+  max-height: 190px;
   overflow: scroll;
 }
 
