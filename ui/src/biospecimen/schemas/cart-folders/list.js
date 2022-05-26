@@ -1,10 +1,12 @@
 
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   columns: [
     {
       name: "folder.name",
       caption: "Name",
-      href: (row) => '#/placeholder/' + row.rowObject.folder.id
+      href: (row) => routerSvc.getUrl('SpecimenCartsList', {cartId: -1}, {folderId: row.rowObject.folder.id})
     },
     {
       name: "folder.description",

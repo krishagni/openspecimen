@@ -5,7 +5,7 @@ export default {
   summary: {
     title: {
       text: ({cart}) => cartSvc.getDisplayName(cart),
-      url: ({cart}, query) => routerSvc.getUrl('SpecimenCartsList', {cartId: cart.id}, query)
+      url: ({cart}, query) => routerSvc.getUrl('CartSpecimensList', {cartId: cart.id}, query)
     },
 
     descriptions: [
@@ -33,7 +33,7 @@ export default {
       name: "cartDisplayName",
       caption: "Name",
       value: ({cart}) => cartSvc.getDisplayName(cart),
-      href: (row) => '#/placeholder/' + row.rowObject.cart.id
+      href: (row, query) => routerSvc.getUrl('CartSpecimensList', {cartId: row.rowObject.cart.id}, query)
     },
     {
       name: "cart.owner",
