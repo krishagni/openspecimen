@@ -227,30 +227,27 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 			query.createAlias("l.sharedWith", "sharedUser", JoinType.LEFT_OUTER_JOIN)
 				.createAlias("l.sharedWithGroups", "sharedGroup", JoinType.LEFT_OUTER_JOIN)
 				.createAlias("sharedGroup.users", "sharedGroupUser", JoinType.LEFT_OUTER_JOIN)
+				.createAlias("l.folders", "folder", JoinType.LEFT_OUTER_JOIN)
+				.createAlias("folder.owner", "folderOwner", JoinType.LEFT_OUTER_JOIN)
+				.createAlias("folder.userGroups", "folderUserGroup", JoinType.LEFT_OUTER_JOIN)
+				.createAlias("folderUserGroup.users", "folderUser", JoinType.LEFT_OUTER_JOIN)
 				.add(
 					Restrictions.disjunction(
 						Restrictions.eq("owner.id", crit.userId()),
 						Restrictions.eq("sharedUser.id", crit.userId()),
-						Restrictions.eq("sharedGroupUser.id", crit.userId())
+						Restrictions.eq("sharedGroupUser.id", crit.userId()),
+						Restrictions.eq("folderOwner.id", crit.userId()),
+						Restrictions.eq("folderUser.id", crit.userId())
 					)
 				);
 		}
 
 		if (crit.folderId() != null) {
-			query.createAlias("l.folders", "folder")
-				.add(Restrictions.eq("folder.id", crit.folderId()));
-
-			if (crit.userId() != null) {
-				query.createAlias("folder.owner", "folderOwner", JoinType.LEFT_OUTER_JOIN)
-					.createAlias("folder.userGroups", "folderUserGroup", JoinType.LEFT_OUTER_JOIN)
-					.createAlias("folderUserGroup.users", "folderUser", JoinType.LEFT_OUTER_JOIN)
-					.add(
-						Restrictions.disjunction(
-							Restrictions.eq("folderOwner.id", crit.userId()),
-							Restrictions.eq("folderUser.id", crit.userId())
-						)
-					);
+			if (crit.userId() == null) {
+				query.createAlias("l.folders", "folder");
 			}
+
+			query.add(Restrictions.eq("folder.id", crit.folderId()));
 		}
 
 		if (StringUtils.isNotBlank(crit.query())) {
