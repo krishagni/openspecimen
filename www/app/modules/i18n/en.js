@@ -96,6 +96,7 @@
     "items_selected_info": "{{count}} {{count > 1 ? 'records' : 'record'}} selected",
     "loading_list": "Loading records, please wait for a moment...",
     "empty_list": "No records to show!",
+    "audit_disabled": "Auditing is disabled. Ensure auditing is enabled in the live environment.",
 
     "clear_field_values_q": "Clear Field Values?",
     "confirm_clear_field_values": "One or more fields values are blank. Are you sure you want to proceed with clearing values of such fields?",

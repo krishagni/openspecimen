@@ -81,20 +81,21 @@
     </ul>
   </div>
 
-  <div class="os-user-impersonate-warn" ng-if="!global.impersonate &&
-    currentUser.daysBeforePasswordExpiry >= 0 && currentUser.daysBeforePasswordExpiry <= 5">
-    <div class="text">
-      <span>{{'user.password_expiry_warning' | translate: currentUser}}</span>
-      <a href="{{userCtx.resetPasswdUrl}}"><span translate="common.buttons.reset_password">Reset Password</span></a>
-    </div>
-  </div>
-
-  <div class="os-user-impersonate-warn" ng-if="global.impersonate">
-    <div class="text">
+  <div class="os-user-impersonate-warn" ng-if="global.impersonate ||
+    (global.appProps.auditEnabled == false || global.appProps.auditEnabled == 'false') ||
+    (currentUser.daysBeforePasswordExpiry >= 0 && currentUser.daysBeforePasswordExpiry <= 5)">
+    <div class="text" ng-if="global.impersonate">
       <span>{{'user.impersonate_warning' | translate: {user: currentUser} }}</span>
       <a ng-click="returnToAccount()">
         <span translate="user.return_back_to_account">Return back to your account.</span>
       </a>
+    </div>
+    <div class="text" ng-if="currentUser.daysBeforePasswordExpiry >= 0 && currentUser.daysBeforePasswordExpiry <= 5">
+      <span>{{'user.password_expiry_warning' | translate: currentUser}}</span>
+      <a href="{{userCtx.resetPasswdUrl}}"><span translate="common.buttons.reset_password">Reset Password</span></a>
+    </div>
+    <div class="text" ng-if="global.appProps.auditEnabled == false || global.appProps.auditEnabled == 'false'">
+      <span translate="common.audit_disabled">Auditing is disabled.</span>
     </div>
   </div>
 

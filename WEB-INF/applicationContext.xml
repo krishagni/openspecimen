@@ -50,6 +50,7 @@
         <prop key="hibernate.dialect">${datasource.dialect}</prop>
         <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
         <prop key="hibernate.id.new_generator_mappings">false</prop>
+        <prop key="hibernate.integration.envers.enabled">${app.audit_enabled}</prop>
         <prop key="org.hibernate.envers.track_entities_changed_in_revision">true</prop>
         <prop key="org.hibernate.envers.global_with_modified_flag">true</prop>
       </props>
@@ -471,7 +472,7 @@
   </bean>
   
   <bean id="formDataMgr" class="edu.common.dynamicextensions.napi.impl.FormDataManagerImpl">
-    <constructor-arg type="boolean" value="true"/>
+    <constructor-arg type="boolean" value="${app.audit_enabled}"/>
   </bean>
 
   <bean id="formDao" class="com.krishagni.catissueplus.core.de.repository.impl.FormDaoImpl">

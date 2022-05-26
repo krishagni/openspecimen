@@ -2,18 +2,22 @@
   <div class="os-root">
     <os-navbar />
 
-    <div class="os-user-impersonate-warn"
-      v-if="ui.currentUser && !ui.currentUser.impersonated &&
-            ui.currentUser.daysBeforePasswordExpiry >= 0 && ui.currentUser.daysBeforePasswordExpiry <= 5">
-      <span>Your password will expire in {{ui.currentUser.daysBeforePasswordExpiry}} {{ui.currentUser.daysBeforePasswordExpiry != 1 ? 'days' : 'day'}}. </span>
-      <router-link :to="{name: 'UserChangePassword', params: {userId: ui.currentUser.id}}">
-        <span>Reset Password</span>
-      </router-link>
-    </div>
-
-    <div class="os-user-impersonate-warn" v-if="ui.currentUser && ui.currentUser.impersonated">
-      <span>You are viewing {{$filters.username(ui.currentUser)}}'s account.
-      <a @click="returnToMyAccount">Return back to your account.</a></span>
+    <div class="os-user-impersonate-warn" v-if="(ui.currentUser && (ui.currentUser.impersonated || (ui.currentUser.daysBeforePasswordExpiry >= 0 && ui.currentUser.daysBeforePasswordExpiry <= 5))) || ui.global.appProps.auditEnabled == 'false' || ui.global.appProps.auditEnabled == false">
+      <div class="text" v-if="ui.currentUser && ui.currentUser.impersonated">
+        <span>You are viewing {{$filters.username(ui.currentUser)}}'s account.
+        <a @click="returnToMyAccount">Return back to your account.</a></span>
+      </div>
+      <div class="text" v-if="ui.currentUser && ui.currentUser.daysBeforePasswordExpiry >= 0 && ui.currentUser.daysBeforePasswordExpiry <= 5">
+        <span>Your password will expire in {{ui.currentUser.daysBeforePasswordExpiry}} {{ui.currentUser.daysBeforePasswordExpiry != 1 ? 'days' : 'day'}}. </span>
+        <router-link :to="{name: 'UserChangePassword', params: {userId: ui.currentUser.id}}">
+          <span>Reset Password</span>
+        </router-link>
+      </div>
+      <div class="text" v-if="ui.global.appProps.auditEnabled == 'false' || ui.global.appProps.auditEnabled == false">
+        <div class="text">
+          <span>Auditing is disabled. Ensure auditing is enabled in the live environment.</span>
+        </div>
+      </div>
     </div>
 
     <div class="os-app-body">
