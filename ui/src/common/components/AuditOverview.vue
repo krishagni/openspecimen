@@ -39,41 +39,10 @@
     </template>
   </Section>
 
-  <Dialog ref="revsDialog">
-    <template #header>
-      <span>Revisions</span>
-    </template>
-
-    <template #content>
-      <table class="os-table" v-if="ctx.revisions && ctx.revisions.length > 0">
-        <thead>
-          <tr>
-            <th>Updated On</th>
-            <th>Updated By</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(rev, idx) of ctx.revisions" :key="idx">
-            <td>{{$filters.dateTime(rev.changedOn)}}</td>
-            <td>{{$filters.username(rev.changedBy)}}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div v-else>
-        <span>No revisions to show!</span>
-      </div>
-    </template>
-
-    <template #footer>
-      <Button label="Done" type="primary" @click="closeRevs" />
-    </template>
-  </Dialog>
+  <os-audit-revisions ref="revisionsList" />
 </template>
 
 <script>
-
-import Button  from '@/common/components/Button.vue';
-import Dialog  from '@/common/components/Dialog.vue';
 import Section from '@/common/components/Section.vue';
 
 import auditLogSvc from '@/common/services/AuditLogs.js';
@@ -82,8 +51,6 @@ export default {
   props: ['objects'],
 
   components: {
-    Button,
-    Dialog,
     Section
   },
 
@@ -145,16 +112,7 @@ export default {
     },
 
     showRevs: function() {
-      auditLogSvc.getRevisions(this.objects).then(
-        (revisions) => {
-          this.ctx.revisions = revisions;
-          this.$refs.revsDialog.open();
-        }
-      );
-    },
-
-    closeRevs: function() {
-      this.$refs.revsDialog.close();
+      this.$refs.revisionsList.showRevs(this.objects);
     }
   }
 }

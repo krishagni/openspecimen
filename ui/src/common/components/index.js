@@ -2,6 +2,7 @@ import AddItems from './AddItems.vue';
 import AddSpecimens from './AddSpecimens.vue';
 import AddToCart from './AddToCart.vue';
 import AuditOverview from './AuditOverview.vue';
+import AuditRevisions from './AuditRevisions.vue';
 import Avatar from './Avatar.vue';
 import BooleanCheckbox from './BooleanCheckbox.vue';
 import Breadcrumb from './Breadcrumb.vue';
@@ -91,6 +92,7 @@ export default {
     app.component('os-add-specimens',    AddSpecimens);
     app.component('os-add-to-cart',      AddToCart);
     app.component('os-audit-overview',   AuditOverview);
+    app.component('os-audit-revisions',  AuditRevisions);
     app.component('os-avatar',           Avatar);
     app.component('os-boolean-checkbox', BooleanCheckbox);
     app.component('os-breadcrumb',       Breadcrumb);

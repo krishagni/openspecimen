@@ -4,23 +4,18 @@ angular.module('os.biospecimen.consentstatement', ['os.biospecimen.models'])
     $stateProvider
       .state('consent-statement-list', {
         url: '/consent-statements?filters',
-        templateUrl: 'modules/biospecimen/consent-statement/list.html',
-        controller: 'ConsentStatementListCtrl',
+        template: '<div>Unused</div>',
+        controller: function(VueApp) {
+          VueApp.setVueView('consent-statements');
+        },
         parent: 'signed-in'
       })
       .state('consent-statement-addedit', {
         url: '/consent-statement-addedit/:stmtId',
-        templateUrl: 'modules/biospecimen/consent-statement/addedit.html',
-        resolve: {
-          consentStatement: function($stateParams, ConsentStatement) {
-            if ($stateParams.stmtId) {
-              return ConsentStatement.getById($stateParams.stmtId);
-            }
-
-            return new ConsentStatement();
-          }
+        template: '<div>Unused</div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('consent-statement-addedit/' + $stateParams.stmtId, {});
         },
-        controller: 'ConsentStatementAddEditCtrl',
         parent: 'signed-in'
       });
   });

@@ -750,6 +750,20 @@ const routes = [
         name: 'SpecimenCartsFolderAddEdit',
         component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/cart-folders/AddEdit.vue'),
         props: (route) => ({folderId: route.params && route.params.folderId})
+      },
+
+      {
+        path: 'consent-statements',
+        name: 'ConsentStatementsList',
+        component: () => import(/* webpackChunkName: "consents" */ '../biospecimen/consents/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+
+      {
+        path: 'consent-statement-addedit/:statementId',
+        name: 'ConsentStatementAddEdit',
+        component: () => import(/* webpackChunkName: "consents" */ '../biospecimen/consents/AddEdit.vue'),
+        props: (route) => ({statementId: route.params && route.params.statementId})
       }
     ]
   }
