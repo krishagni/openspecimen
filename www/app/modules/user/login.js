@@ -45,7 +45,7 @@ angular.module('openspecimen')
           function(resp) {
             var q;
             if (resp[0].value == 'true' && resp[1].value == 'true') {
-              $rootScope.logoutUrl = ApiUrls.getServerUrl() + 'saml/logout';
+              $rootScope.logoutUrl = ApiUrls.getServerUrl() + 'saml/logout?_nonce=' + Date.now();
               $rootScope.logout = true;
               q = $q.defer();
               q.resolve({data: {}});
@@ -157,7 +157,7 @@ angular.module('openspecimen')
         $window.localStorage['osReqState'] = JSON.stringify(angular.extend({time: new Date().getTime}, $rootScope.reqState));
       }
 
-      $window.location.replace('saml/login');
+      $window.location.replace('saml/login?_nonce=' + Date.now());
     }
 
     function onLogin(loginReq, result) {
