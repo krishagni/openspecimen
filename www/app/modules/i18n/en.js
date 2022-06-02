@@ -759,7 +759,8 @@
     "menu": {
       "overview": "Overview",
       "extensions": "Forms",
-      "spr_report": "Path Report"
+      "spr_report": "Path Report",
+      "consents": "Consents"
     }
   },
 

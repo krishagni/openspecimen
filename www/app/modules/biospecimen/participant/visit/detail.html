@@ -57,6 +57,12 @@
           <span class="os-title" translate="visits.menu.spr_report">Surgical Pathology Report</span>
         </a>
       </li>
+      <li ui-sref-active="active" ng-if="visit.id > 0 && !cp.consentsWaived && cpViewCtx.visitLevelConsents && cpViewCtx.consentsReadAllowed">
+        <a ui-sref=".consents">
+          <span class="fa fa-pencil-square-o"></span>
+          <span class="os-title" translate="visits.menu.consents">Consents</span>
+        </a>
+      </li>
       <li ui-sref-active="active" ng-if="!!visit.id">
         <a ui-sref=".extensions.list">
           <span class="fa fa-files-o"></span>

@@ -175,6 +175,7 @@ angular.module('os.biospecimen.participant',
               consentsReadAllowed: consentsReadAllowed,
               consentsUpdateAllowed: consentsUpdateAllowed,
               consentsEximAllowed: consentsEximAllowed,
+              visitLevelConsents: cp.visitLevelConsents == true && $injector.has('ecCpDocument'),
               queryReadAllowed: queryReadAllowed,
               getSurveys: function() {
                 if (surveys || !$injector.has('Survey')) {
@@ -716,8 +717,8 @@ angular.module('os.biospecimen.participant',
             return st;
           },
 
-          hasConsented: function($injector, cpr) {
-            if (!$injector.has('ecValidation') || cpr.id <= 0 || !cpr.id) {
+          hasConsented: function($injector, cpr, cp) {
+            if (!$injector.has('ecValidation') || cpr.id <= 0 || !cpr.id || cp.visitLevelConsents) {
               cpr.hasConsented = true;
               return true;
             }

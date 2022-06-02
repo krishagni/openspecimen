@@ -72,4 +72,10 @@
     <addUniqueConstraint constraintName="OS_CART_FOLDER_CART_UQ"
       tableName="OS_CART_FOLDER_CARTS" columnNames="FOLDER_ID, CART_ID" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Setting to enable visit level consents">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="VISIT_CONSENTS" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

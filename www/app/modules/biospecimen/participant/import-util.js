@@ -39,11 +39,11 @@ angular.module('os.biospecimen.participant')
       return importTypes;
     }
 
-    function getParticipantTypes(entityForms, cpId, addConsent) {
+    function getParticipantTypes(entityForms, cp, addConsent) {
       var group = $translate.instant('participant.title');
 
       var importTypes = [];
-      if (cpId == -1) {
+      if (cp.id == -1) {
         importTypes = [
           {
             group: group, type: 'cprMultiple', title: 'participant.registrations',
@@ -59,7 +59,7 @@ angular.module('os.biospecimen.participant')
       }
 
       if (addConsent) {
-        importTypes = importTypes.concat(getConsentTypes(cpId));
+        importTypes = importTypes.concat(getConsentTypes(cp, true));
       }
 
       addPluginTypes(importTypes, group, 'Participant');
@@ -67,14 +67,22 @@ angular.module('os.biospecimen.participant')
       return addForms(importTypes, group, 'Participant', entityForms['Participant']);
     } 
 
-    function getConsentTypes(cpId) {
-      var group = $translate.instant('participant.title');
+    function getConsentTypes(cp, participantLevel) {
+      var group = $translate.instant(participantLevel ? 'participant.title' : 'visits.title');
       if ($injector.has('ecDocument')) {
+        if (cp.id != -1) {
+          if (cp.visitLevelConsents && participantLevel) {
+            return [];
+          } else if (!cp.visitLevelConsents && !participantLevel) {
+            return [];
+          }
+        }
+
         return [{
           group: group, type: 'econsentsDocumentResponse', title: 'participant.consents',
           showImportType: false, importType: 'UPDATE'
         }];
-      } else {
+      } else if (participantLevel) {
         return [{
           group: group, type: 'consent', title: 'participant.consents',
           showImportType: false, csvType: 'MULTIPLE_ROWS_PER_OBJ', importType: 'UPDATE'
@@ -82,9 +90,14 @@ angular.module('os.biospecimen.participant')
       }
     }
 
-    function getVisitTypes(entityForms) {
+    function getVisitTypes(entityForms, cp, addConsent) {
       var group = $translate.instant('visits.title');
       var importTypes = [{ group: group, type: 'visit', title: 'visits.list', showUpsert: true }];
+
+      if (addConsent) {
+        importTypes = importTypes.concat(getConsentTypes(cp, false));
+      }
+
       addPluginTypes(importTypes, group, 'SpecimenCollectionGroup');
       return addForms(importTypes, group, 'SpecimenCollectionGroup', entityForms['SpecimenCollectionGroup']);
     }
@@ -180,13 +193,13 @@ angular.module('os.biospecimen.participant')
 
       var importTypes = [];
       if (!cp.specimenCentric && allowedEntityTypes.indexOf('Participant') >= 0) {
-        importTypes = importTypes.concat(getParticipantTypes(entityForms, cp.id, allowedEntityTypes.indexOf('Consent') >= 0));
+        importTypes = importTypes.concat(getParticipantTypes(entityForms, cp, allowedEntityTypes.indexOf('Consent') >= 0));
       } else if (!cp.specimenCentric && allowedEntityTypes.indexOf('Consent') >= 0) {
-        importTypes = importTypes.concat(getConsentTypes(cp.id));
+        importTypes = importTypes.concat(getConsentTypes(cp, true));
       }
 
       if (!cp.specimenCentric && allowedEntityTypes.indexOf('SpecimenCollectionGroup') >= 0) {
-        importTypes = importTypes.concat(getVisitTypes(entityForms));
+        importTypes = importTypes.concat(getVisitTypes(entityForms, cp, allowedEntityTypes.indexOf('Consent') >= 0));
       }
 
       if (allowedEntityTypes.indexOf('Specimen') >= 0) {

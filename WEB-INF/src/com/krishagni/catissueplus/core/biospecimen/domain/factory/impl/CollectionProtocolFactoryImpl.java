@@ -107,6 +107,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		cp.setExtractSprText(input.getExtractSprText());
 		cp.setDescriptionURL(input.getDescriptionUrl());
 		cp.setConsentsWaived(input.getConsentsWaived());
+		cp.setVisitLevelConsents(input.getVisitLevelConsents());
 		cp.setBulkPartRegEnabled(input.getBulkPartRegEnabled());
 		cp.setSpecimenCentric(input.isSpecimenCentric());
 		if (!cp.isSpecimenCentric()) {

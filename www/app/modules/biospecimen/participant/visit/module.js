@@ -160,6 +160,12 @@ angular.module('os.biospecimen.visit', [
         },
         parent: 'visit-detail'
       })
+      .state('visit-detail.consents', {
+        url: '/consents',
+        templateUrl: 'modules/biospecimen/participant/visit/consents.html',
+        controller: function() {
+        }
+      })
       .state('visit-detail.extensions', {
         url: '/extensions',
         template: '<div ui-view></div>',

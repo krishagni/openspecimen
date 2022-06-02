@@ -47,7 +47,7 @@
           <span class="os-title" translate="participant.menu.overview">Overview</span>
         </a>
       </li>
-      <li ui-sref-active="active" ng-if="!cp.consentsWaived && cpViewCtx.consentsReadAllowed">
+      <li ui-sref-active="active" ng-if="!cp.consentsWaived && !cpViewCtx.visitLevelConsents && cpViewCtx.consentsReadAllowed">
         <a ui-sref=".consents">
           <span class="fa fa-pencil-square-o"></span>
           <span class="os-title" translate="participant.menu.consents">Consents</span>

@@ -11,4 +11,11 @@
       <column name="displayName_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Visit level consents">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="VISIT_CONSENTS" type="${boolean.type}" />
+      <column name="visitLevelConsents_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -112,6 +112,8 @@
 
     <property name="consentsWaived" column="CONSENTS_WAIVED"/>
 
+    <property name="visitLevelConsents" column="VISIT_CONSENTS"/>
+
     <property name="draftMode" column="DRAFT_MODE" />
 
     <set name="consentTier" table="CATISSUE_CONSENT_TIER" inverse="true" cascade="all-delete-orphan" order-by="id">
