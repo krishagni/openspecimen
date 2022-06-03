@@ -40,6 +40,8 @@ angular.module('os.biospecimen.participant',
           $scope.orderCreateOpts = {cp: cp.shortTitle, sites: sites, resource: 'Order', operations: ['Create']};
           $scope.shipmentCreateOpts = {cp: cp.shortTitle, sites: sites, resource: 'ShippingAndTracking', operations: ['Create']};
           $scope.consentUpdateOpts = {cp: cp.shortTitle, sites: sites, resource: 'Consent', operations: ['Update']};
+          $scope.consentLockOpts = {cp: cp.shortTitle, sites: sites, resource: 'Consent', operations: ['Lock']};
+          $scope.consentUnlockOpts = {cp: cp.shortTitle, sites: sites, resource: 'Consent', operations: ['Unlock']};
           $scope.visitUpdateOpts = {cp: cp.shortTitle, sites: sites, resource: 'Visit', operations: ['Update']};
           $scope.specimenReadOpts = {
             cp: cp.shortTitle,

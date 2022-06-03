@@ -1,8 +1,10 @@
 
 angular.module('os.administrative.role.addedit', ['os.administrative.models'])
   .controller('RoleAddEditCtrl', function(
-    $scope, $state, $translate, role,
+    $scope, $state, $translate, $injector, role,
     Operation, Resource) {
+
+    var hasEc = $injector.has('ecDocument');
 
     function init() {
       $scope.role = role;
@@ -60,9 +62,10 @@ angular.module('os.administrative.role.addedit', ['os.administrative.models'])
             }
 
             var show = true;
-            if (acl.resourceName != 'SurgicalPathologyReport' &&
-                 (operation.name == 'Lock' || operation.name == 'Unlock')) {
-              show = false;
+            if (operation.name == 'Lock' || operation.name == 'Unlock') {
+              if (acl.resourceName != 'SurgicalPathologyReport' && (!hasEc || acl.resourceName != 'Consent')) {
+                show = false;
+              }
             }
 
             return {name: operation.name, selected: selected, disabled: disabled, show: show};
@@ -96,9 +99,10 @@ angular.module('os.administrative.role.addedit', ['os.administrative.models'])
     };
 
     $scope.onResourceSelect = function(ac) {
-      if (ac.resourceName != 'SurgicalPathologyReport') {
+      if (ac.resourceName != 'SurgicalPathologyReport' && (!hasEc || ac.resourceName != 'Consent')) {
         return;
       }
+
       $scope.sprExists = true;
       angular.forEach(ac.operations, function(operation) {
         if (operation.name == 'Lock' || operation.name == 'Unlock') {
@@ -110,7 +114,8 @@ angular.module('os.administrative.role.addedit', ['os.administrative.models'])
     function sprExists() {
       $scope.sprExists = false;
       for (var key in $scope.role.acl) {
-        if ($scope.role.acl[key].resourceName == 'SurgicalPathologyReport') {
+        if ($scope.role.acl[key].resourceName == 'SurgicalPathologyReport' ||
+            (hasEc && $scope.role.acl[key].resourceName == 'Consent')) {
           $scope.sprExists = true;
           break;
         }

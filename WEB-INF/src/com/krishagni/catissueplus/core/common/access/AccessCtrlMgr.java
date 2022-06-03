@@ -706,6 +706,18 @@ public class AccessCtrlMgr {
 		return true;
 	}
 
+	public boolean ensureLockConsentRights(CollectionProtocolRegistration cpr) {
+		ensureConsentRights(cpr, Arrays.asList(Operation.LOCK));
+		ensureConsentEximRights(cpr);
+		return true;
+	}
+
+	public boolean ensureUnlockLockConsentRights(CollectionProtocolRegistration cpr) {
+		ensureConsentRights(cpr, Arrays.asList(Operation.UNLOCK));
+		ensureConsentEximRights(cpr);
+		return true;
+	}
+
 	private boolean ensureConsentRights(CollectionProtocolRegistration cpr, List<Operation> ops) {
 		if (AuthUtil.isAdmin()) {
 			return true;
