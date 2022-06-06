@@ -877,6 +877,7 @@
             <value>/config-settings/password</value>
             <value>/config-settings/deployment-site-assets</value>
             <value>/config-settings/deployment-site-logo</value>
+            <value>/config-settings/i18n-messages</value>
             <value>/auth-domains/</value>
             <value>/forms/data-entry-tokens/**</value>
           </list>

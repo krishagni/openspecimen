@@ -735,6 +735,14 @@ public class Utility {
 				(input.charAt(0) == '\'' && input.charAt(input.length() - 1) == '\'');
 	}
 
+	public static Map<String, Object> toMap(InputStream in) {
+		try {
+			return om.get().readValue(in, new TypeReference<HashMap<String, Object>>() {});
+		} catch (Exception e) {
+			throw new RuntimeException("Error parsing input stream JSON to map:", e);
+		}
+	}
+
 	public static Map<String, Object> jsonToMap(String json) {
 		try {
 			if (StringUtils.isBlank(json)) {

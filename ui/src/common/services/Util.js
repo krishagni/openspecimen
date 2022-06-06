@@ -302,6 +302,10 @@ class Util {
     return format(date, pattern);
   }
 
+  i18n(msg, args) {
+    return window.osI18n.global.t(msg, args);
+  }
+
   splitStr(str, re, returnEmpty) {
     const result = [];
     const map = this._getEscapeMap(str);

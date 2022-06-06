@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createI18n } from 'vue-i18n'
 import * as Vue from 'vue';
 import PrimeVue from 'primevue/config';
 
@@ -222,15 +223,22 @@ if (params.get('token')) {
 
 let settingsQ  = settingSvc.getAppProps();
 let localeQ    = settingSvc.getLocale();
+let messagesQ  = settingSvc.getI18nMessages();
 let currUserQ  = userSvc.getCurrentUser();
 let usrStateQ  = userSvc.getUiState();
 let usrRightsQ = authSvc.loadUserRights();
 let spmnPropsQ = util.loadSpecimenTypeProps();
-Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ]).then(
+
+
+Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ]).then(
   (resp) => {
     let appProps = resp[0];
     let locale   = resp[1];
-    let currUser = resp[2];
+    let messages = resp[2];
+    let currUser = resp[3];
+
+    const i18n = window.osI18n = createI18n({locale: locale, messages: messages});
+    app.use(i18n);
 
     ui.global = {
       defaultDomain: 'openspecimen',
@@ -245,7 +253,7 @@ Promise.all([settingsQ, localeQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ]).
         locale: locale.locale,
         utcOffset: locale.utcOffset
       },
-      state: resp[4]
+      state: resp[5]
     };
 
     let osSvc = window.osSvc = app.config.globalProperties.$osSvc;

@@ -1,8 +1,10 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,16 +27,21 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
+import com.krishagni.catissueplus.core.common.PluginManager;
 import com.krishagni.catissueplus.core.common.events.ConfigSettingDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Controller
 @RequestMapping("/config-settings")
 public class ConfigurationController {
+
+	private static final LogUtil logger = LogUtil.getLogger(ConfigurationController.class);
 	
 	@Autowired
 	private ConfigurationService cfgSvc;
@@ -148,6 +157,60 @@ public class ConfigurationController {
 		}
 
 		Utility.sendToClient(httpResp, detail.getFilename(), detail.getContentType(), detail.getFileIn());
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/i18n-messages")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> getMessages()
+	throws Exception {
+		Resource[] resources = OpenSpecimenAppCtxProvider.getAppCtx().getResources("ui-app/i18n/*.json");
+		Map<String, Object> result = new HashMap<>();
+		for (Resource resource : resources) {
+			Map<String, Object> langI18n = getI18nMap(resource);
+			merge(langI18n, result);
+		}
+
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		for (String plugin : PluginManager.getInstance().getPluginNames()) {
+			try {
+				Resource[] pluginResources = resolver.getResources("META-INF/resources/ui/" + plugin + "/i18n/**.json");
+				for (Resource resource : pluginResources) {
+					Map<String, Object> langI18n = getI18nMap(resource);
+					merge(langI18n, result);
+				}
+			} catch (FileNotFoundException fnfe) {
+				logger.info("No i18n resources in the plugin: " + plugin + ". " + fnfe.getMessage());
+			}
+		}
+
+		return result;
+	}
+
+	private Map<String, Object> getI18nMap(Resource resource)
+	throws Exception {
+		Map<String, Object> langI18n = Utility.toMap(resource.getInputStream());
+		String filename = resource.getFilename();
+		String lang = filename.substring(0, filename.lastIndexOf("."));
+		return Collections.singletonMap(lang, langI18n);
+	}
+
+	private Map<String, Object> merge(Map<String, Object> source, Map<String, Object> dest) {
+		for (Map.Entry<String, Object> kv : source.entrySet()) {
+			Object destObj = dest.get(kv.getKey());
+			if (!(kv.getValue() instanceof Map) || !(destObj instanceof Map)) {
+				Object value =  kv.getValue();
+				if (value instanceof Map) {
+					value = new HashMap<>((Map<String, Object>) value);
+				}
+
+				dest.put(kv.getKey(), value);
+			} else {
+				merge((Map<String, Object>) kv.getValue(), (Map<String, Object>) destObj);
+			}
+		}
+
+		return dest;
 	}
 
 	private static <T> RequestEvent<T> request(T payload) {

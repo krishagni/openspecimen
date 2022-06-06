@@ -12,6 +12,10 @@ class Setting {
     return http.get('config-settings/locale');
   }
 
+  async getI18nMessages() {
+    return http.get('config-settings/i18n-messages');
+  }
+
   async getPasswordRules() {
     return http.get('config-settings/password');
   }
