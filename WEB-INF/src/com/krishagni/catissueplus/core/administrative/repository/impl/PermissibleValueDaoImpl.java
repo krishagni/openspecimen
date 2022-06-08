@@ -1,16 +1,24 @@
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
@@ -20,7 +28,6 @@ import org.hibernate.type.Type;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.PermissibleValueDao;
-import com.krishagni.catissueplus.core.common.OrderBySubstringMatch;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.util.Status;
 
@@ -40,22 +47,9 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<PermissibleValue> getPvs(ListPvCriteria crit) {
-		Criteria query = getPvQuery(crit);		
-		if (StringUtils.isNotBlank(crit.query())) {
-			query.add(
-				Restrictions.or(
-					Restrictions.ilike("value", crit.query(), MatchMode.ANYWHERE), 
-					Restrictions.ilike("conceptCode", crit.query(), MatchMode.ANYWHERE)
-				)
-			).addOrder(
-				OrderBySubstringMatch.asc("value", crit.query()).ignoreCase()
-			);
-		}
-
-		return query.setFirstResult(crit.startAt())
+		return getCurrentSession().createQuery(getPvQuery(crit))
+			.setFirstResult(crit.startAt())
 			.setMaxResults(crit.maxResults())
-			.addOrder(Order.asc("sortOrder"))
-			.addOrder(Order.asc("value"))
 			.list();
 	}
 
@@ -213,46 +207,67 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 		return count.intValue() == values.size();
 	}
 	
-	private Criteria getPvQuery(ListPvCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(PermissibleValue.class);
+	private CriteriaQuery<PermissibleValue> getPvQuery(ListPvCriteria crit) {
+		CriteriaBuilder builder            = getCurrentSession().getCriteriaBuilder();
+		CriteriaQuery<PermissibleValue> cr = builder.createQuery(PermissibleValue.class);
+		Root<PermissibleValue> pv          = cr.from(PermissibleValue.class);
+
+		List<Predicate> predicates = new ArrayList<>();
 		if (crit.values() != null) {
 			List<String> values = crit.values().stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
 			if (!values.isEmpty()) {
-				query.add(Restrictions.in("value", values));
+				predicates.add(pv.get("value").in(values));
 			}
 		}
 
+		Map<String, Join> joins = new HashMap<>();
 		if (StringUtils.isNotBlank(crit.parentAttribute()) || StringUtils.isNotBlank(crit.parentValue())) {
-			query.createAlias("parent", "p");
+			Join<PermissibleValue, PermissibleValue> parent = pv.join("parent");
+			joins.put("p", parent);
 		}
-				
+
 		if (StringUtils.isNotBlank(crit.attribute())) {
-			query.add(Restrictions.eq("attribute", crit.attribute()));
+			predicates.add(builder.equal(pv.get("attribute"), crit.attribute()));
 		} else if (StringUtils.isNotBlank(crit.parentAttribute())) {
-			query.add(Restrictions.eq("p.attribute", crit.parentAttribute()));
+			predicates.add(builder.equal(joins.get("p").get("attribute"), crit.parentAttribute()));
 		}
-		
+
 		if (StringUtils.isNotBlank(crit.parentValue())) {
-			query.add(Restrictions.eq("p.value", crit.parentValue()));
+			predicates.add(builder.equal(joins.get("p").get("value"), crit.parentValue()));
 		}
-		
+
 		if (crit.includeOnlyLeafValue()) {
-			query.createAlias("children", "c", JoinType.LEFT_OUTER_JOIN)
-				.add(Restrictions.isNull("c.id"));			
+			SetJoin<PermissibleValue, PermissibleValue> children = pv.joinSet("children", javax.persistence.criteria.JoinType.LEFT);
+			predicates.add(builder.isNull(children.get("id")));
 		}
 
 		if (crit.includeOnlyRootValue()) {
-			query.createAlias("parent", "root", JoinType.LEFT_OUTER_JOIN)
-				.add(Restrictions.isNull("root.id"));
+			Join<PermissibleValue, PermissibleValue> rootPv = pv.join("parent", javax.persistence.criteria.JoinType.LEFT);
+			predicates.add(builder.isNull(rootPv.get("id")));
 		}
 
 		if (StringUtils.isBlank(crit.activityStatus())) {
-			query.add(Restrictions.eq("activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()));
+			predicates.add(builder.equal(pv.get("activityStatus"), Status.ACTIVITY_STATUS_ACTIVE.getStatus()));
 		} else if (!crit.activityStatus().equalsIgnoreCase("all")) {
-			query.add(Restrictions.eq("activityStatus", crit.activityStatus()));
+			predicates.add(builder.equal(pv.get("activityStatus"), crit.activityStatus()));
 		}
 
-		return query;
+		List<javax.persistence.criteria.Order> orderList = new ArrayList<>();
+		if (StringUtils.isNotBlank(crit.query())) {
+			predicates.add(
+				builder.or(
+					builder.like(builder.lower(pv.get("value")), "%" + crit.query().toLowerCase() + "%"),
+					builder.like(builder.lower(pv.get("conceptCode")), "%" + crit.query().toLowerCase() + "%")
+				)
+			);
+
+			orderList.add(builder.asc(builder.locate(builder.lower(pv.get("value")), crit.query().toLowerCase())));
+		}
+
+		orderList.add(builder.asc(pv.get("sortOrder")));
+		orderList.add(builder.asc(pv.get("value")));
+		cr.select(pv).where(predicates.toArray(new Predicate[0])).orderBy(orderList);
+		return cr;
 	}
 
 	private static final String FQN = PermissibleValue.class.getName();
