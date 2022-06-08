@@ -22,7 +22,7 @@
 
     <property name="barcode" column="BARCODE"/>
 
-    <property name="registrationDate" column="REGISTRATION_DATE"/>
+    <property name="registrationDate" column="REGISTRATION_DATE" type="date" />
 
     <property name="externalSubjectId" column="EXTERNAL_SUBJECT_ID"/>
 
