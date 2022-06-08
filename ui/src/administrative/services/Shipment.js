@@ -52,8 +52,8 @@ class Shipment {
     return http.post('specimens/search', {ids: spmnIds, maxResults: spmnIds.length});
   }
 
-  async getContainers(shipmentId) {
-    return http.get('shipments/' + shipmentId + '/containers');
+  async getContainers(shipmentId, params) {
+    return http.get('shipments/' + shipmentId + '/containers', params || {startAt: 0, maxResults: 25});
   }
 
   async searchContainers(sendingSite, receivingSite, names) {

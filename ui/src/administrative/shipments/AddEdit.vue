@@ -204,9 +204,9 @@ export default {
         promises.push(shipmentSvc.getShipment(+this.shipmentId));
 
         if (this.shipmentType == 'SPECIMEN') {
-          promises.push(shipmentSvc.getSpecimens(+this.shipmentId));
+          promises.push(shipmentSvc.getSpecimens(+this.shipmentId, {startAt: 0, maxResults: 10000}));
         } else {
-          promises.push(shipmentSvc.getContainers(+this.shipmentId));
+          promises.push(shipmentSvc.getContainers(+this.shipmentId, {startAt: 0, maxResults: 10000}));
         }
       } else {
         const shipment = dataCtx.shipment = {
