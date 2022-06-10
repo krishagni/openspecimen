@@ -18,4 +18,23 @@
       <column name="visitLevelConsents_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Form save/delete notification settings">
+    <addColumn tableName="CATISSUE_FORM_CONTEXT_AUD">
+      <column name="NOTIFS_ENABLED" type="${boolean.type}" />
+      <column name="notifEnabled_MOD" type="${boolean.type}" />
+      <column name="DATA_IN_NOTIF" type="${boolean.type}" />
+      <column name="dataInNotif_MOD" type="${boolean.type}" />
+      <column name="notifUserGroups_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Form save/delete notification user groups">
+    <createTable tableName="OS_FORM_NOTIF_USER_GRPS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="FORM_CTXT_ID" type="${int.type}" />
+      <column name="USER_GROUP_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

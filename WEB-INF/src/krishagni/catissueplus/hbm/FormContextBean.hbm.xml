@@ -22,7 +22,18 @@
     <property name="sortOrder" column="SORT_ORDER"/>
 
     <property name="multiRecord" column="IS_MULTIRECORD"/>
-        
+
+    <property name="notifEnabled" column="NOTIFS_ENABLED" />
+
+    <property name="dataInNotif" column="DATA_IN_NOTIF" />
+
+    <set name="notifUserGroups" table="OS_FORM_NOTIF_USER_GRPS">
+      <key column="FORM_CTXT_ID"/>
+      <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.UserGroup" column="USER_GROUP_ID">
+        <filter name="activeEntity" condition="activity_status != 'Disabled'"/>
+      </many-to-many>
+    </set>
+
     <property name="sysForm" column="IS_SYS_FORM" type="boolean"/>
 
     <property name="deletedOn" column="DELETED_ON" type="timestamp"/>
@@ -105,6 +116,8 @@
       <return-scalar column="entityId"      type="long"/>
       <return-scalar column="multirecord"   type="boolean"/>
       <return-scalar column="sysForm"       type="boolean"/>
+      <return-scalar column="notifsEnabled" type="boolean"/>
+      <return-scalar column="dataInNotif"   type="boolean"/>
       <return-scalar column="cpId"          type="long"/>
       <return-scalar column="shortTitle"    type="string"/>
       <return-scalar column="title"         type="string"/>
@@ -112,6 +125,7 @@
       select
         fctxt.identifier as ctxtId, fctxt.container_id as formId, fctxt.entity_type as entityLevel, 
         fctxt.entity_id as entityId, fctxt.is_multirecord as multirecord, fctxt.is_sys_form as sysForm,
+        fctxt.notifs_enabled as notifsEnabled, fctxt.data_in_notif as dataInNotif,
         cp.identifier as cpId, cp.short_title as shortTitle, cp.title as title
       from
         catissue_form_context fctxt
@@ -122,6 +136,23 @@
         (cp.activity_status != 'Disabled' or fctxt.cp_id = -1) and
         fctxt.deleted_on is null and
         fctxt.container_id = :formId
+    </sql-query>
+
+    <sql-query name="getNotifUsers">
+      <return-scalar column="ctxtId"    type="long" />
+      <return-scalar column="groupId"   type="long" />
+      <return-scalar column="groupName" type="string" />
+
+      select
+        fc.identifier as ctxtId, ug.identifier as groupId, ug.name as groupName
+      from
+        catissue_form_context fc
+        inner join os_form_notif_user_grps fug on fug.form_ctxt_id = fc.identifier
+        inner join os_user_groups ug on ug.identifier = fug.user_group_id
+      where
+        fc.identifier in (:contextIds) and
+        fc.deleted_on is null and
+        ug.activity_status != 'Disabled'
     </sql-query>
 
     <query name="getFormContext">

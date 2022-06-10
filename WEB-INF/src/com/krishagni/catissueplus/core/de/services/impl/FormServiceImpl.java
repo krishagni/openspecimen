@@ -28,7 +28,10 @@ import com.krishagni.catissueplus.core.administrative.domain.FormDataDeleteEvent
 import com.krishagni.catissueplus.core.administrative.domain.FormDataSavedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
@@ -62,7 +65,10 @@ import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.Form;
@@ -94,6 +100,8 @@ import com.krishagni.catissueplus.core.de.services.FormContextProcessor;
 import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
+import com.krishagni.catissueplus.core.importer.services.impl.ImporterContextHolder;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.domain.nui.Container;
@@ -419,7 +427,14 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<FormContextDetail>> getFormContexts(RequestEvent<Long> req) {
-		return ResponseEvent.response(formDao.getFormContexts(req.getPayload()));
+		List<FormContextDetail> contexts = formDao.getFormContexts(req.getPayload());
+		Map<Long, FormContextDetail> contextsMap = Utility.toLinkedMap(contexts, FormContextDetail::getFormCtxtId, fc -> fc);
+		if (!contextsMap.isEmpty()) {
+			Map<Long, List<UserGroupSummary>> notifUsers = formDao.getNotifUsers(contextsMap.keySet());
+			notifUsers.forEach((fcId, groups) -> contextsMap.get(fcId).setNotifUserGroups(groups));
+		}
+
+		return ResponseEvent.response(contexts);
 	}
 	
 	@Override
@@ -428,7 +443,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		try {
 			Map<Long, Form> forms = new HashMap<>();
 
-			List<FormContextDetail> formCtxts = req.getPayload();
+			List<FormContextDetail> result = new ArrayList<>();
 			for (FormContextDetail formCtxtDetail : req.getPayload()) {
 				Long formId = formCtxtDetail.getFormId();
 				Form form = forms.get(formCtxtDetail.getFormId());
@@ -442,19 +457,17 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				}
 
 				form.getAssociations().forEach(this::ensureUpdateAllowed);
-
-				Long cpId = formCtxtDetail.getCollectionProtocol().getId();
 				String entity = formCtxtDetail.getLevel();
-				Long entityId = formCtxtDetail.getEntityId();
 				if (StringUtils.isBlank(entity)) {
 					return ResponseEvent.userError(FormErrorCode.ENTITY_TYPE_REQUIRED);
 				}
 
 				ensureUpdateAllowed(formCtxtDetail);
 				addFormContext(formCtxtDetail);
+				result.add(formCtxtDetail);
 			}
 			
-			return ResponseEvent.response(formCtxts);
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -633,7 +646,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			List<FormData> savedFormDataList = new ArrayList<>();
 			for (FormData formData : req.getPayload()) {
 				FormData savedFormData = saveOrUpdateFormData(formData.getRecordId(), formData, true);
-				Object obj = savedFormData.getAppData().remove("object");
+				savedFormData.getAppData().remove("object");
 				savedFormDataList.add(savedFormData);
 			}
 
@@ -784,6 +797,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				EventPublisher.getInstance().publish(new FormDataDeleteEvent(entityType, object, recEntry));
 			}
 
+			notifFormDeleted(object, recEntry);
 			return  ResponseEvent.response(crit.getRecordId());
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1165,6 +1179,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		if (fc != null && fc.getDeletedOn() == null) {
 			fc.setMultiRecord(input.isMultiRecord());
 			fc.setSortOrder(input.getSortOrder());
+			addNotifSettings(input, fc);
 			input.setFormCtxtId(fc.getIdentifier());
 			notifyContextSaved(fc);
 			return fc;
@@ -1175,6 +1190,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				fc = addFormContext0(input);
 			} else if (fc.getDeletedOn() != null) {
 				fc.setDeletedOn(null);
+				addNotifSettings(input, fc);
 				notifyContextSaved(fc);
 			} else {
 				throw OpenSpecimenException.userError(FormErrorCode.MULTIPLE_CTXS_NOT_ALLOWED);
@@ -1192,6 +1208,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				}
 			} else if (fc.getDeletedOn() != null) {
 				fc.setDeletedOn(null);
+				addNotifSettings(input, fc);
 				if (allFc != null) {
 					moveRecords(cpId, input.getLevel(), allFc, fc);
 				}
@@ -1230,11 +1247,49 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		formCtxt.setMultiRecord(input.isMultiRecord());
 		formCtxt.setSortOrder(input.getSortOrder());
+		addNotifSettings(input, formCtxt);
 
 		notifyContextSaved(formCtxt);
 		formDao.saveOrUpdate(formCtxt, true);
 		input.setFormCtxtId(formCtxt.getIdentifier());
 		return formCtxt;
+	}
+
+	private void addNotifSettings(FormContextDetail input, FormContextBean fc) {
+		fc.setNotifEnabled(input.isNotifEnabled());
+		if (!fc.isNotifEnabled()) {
+			fc.setDataInNotif(false);
+			fc.getNotifUserGroups().clear();
+			return;
+		}
+
+		fc.setDataInNotif(input.isDataInNotif());
+		if (CollectionUtils.isEmpty(input.getNotifUserGroups())) {
+			fc.getNotifUserGroups().clear();
+			return;
+		}
+
+		Set<UserGroup> userGroups = new HashSet<>();
+		for (UserGroupSummary inputUg : input.getNotifUserGroups()) {
+			Object key = null;
+			UserGroup userGroup = null;
+			if (inputUg.getId() != null) {
+				userGroup = daoFactory.getUserGroupDao().getById(inputUg.getId());
+				key = inputUg.getId();
+			} else if (StringUtils.isNotBlank(inputUg.getName())) {
+				userGroup = daoFactory.getUserGroupDao().getByName(inputUg.getName());
+				key = inputUg.getName();
+			}
+
+			if (key != null && userGroup == null) {
+				throw OpenSpecimenException.userError(UserGroupErrorCode.NOT_FOUND, key);
+			} else if (userGroup != null) {
+				userGroups.add(userGroup);
+			}
+		}
+
+		fc.getNotifUserGroups().retainAll(userGroups);
+		fc.getNotifUserGroups().addAll(userGroups);
 	}
 
 	private FormData saveOrUpdateFormData(Long recordId, FormData formData, boolean isPartial) {
@@ -1403,7 +1458,212 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			savePdeAuditLog(recordEntry.getIdentifier(), isInsert);
 		}
 
+		notifyFormSave(object, formContext, recordEntry, formData, isInsert);
 		return formData;
+	}
+
+	private void notifyFormSave(Object object, FormContextBean ctxt, FormRecordEntryBean fre, FormData formData, boolean added) {
+		if (!ctxt.isNotifEnabled() || ImporterContextHolder.getInstance().isImportOp() || ExporterContextHolder.getInstance().isExportOp()) {
+			return;
+		}
+
+		Runnable accessChecker = null;
+		Map<String, Object> props = new HashMap<>();
+		props.put("user", AuthUtil.getCurrentUser());
+		props.put("form", ctxt.getForm().getCaption());
+		props.put("recordId", fre.getRecordId());
+		props.put("added", added ? 1 : 0);
+		if (object instanceof CollectionProtocolRegistration) {
+			addEntityProps((CollectionProtocolRegistration) object, ctxt, fre, props);
+			accessChecker = () -> AccessCtrlMgr.getInstance().ensureReadCprRights((CollectionProtocolRegistration) object);
+		} else if (object instanceof Visit) {
+			addEntityProps((Visit) object, ctxt, fre, props);
+			accessChecker = () -> AccessCtrlMgr.getInstance().ensureReadVisitRights((Visit) object);
+		} else if (object instanceof Specimen) {
+			addEntityProps((Specimen) object, ctxt, fre, props);
+			accessChecker = () -> AccessCtrlMgr.getInstance().ensureReadSpecimenRights((Specimen) object);
+		} else if (object instanceof User) {
+			addEntityProps((User) object, ctxt, fre, props);
+			accessChecker = () -> AccessCtrlMgr.getInstance().ensureUpdateUserRights((User) object, false);
+		} else {
+			return;
+		}
+
+		props.put("$subject", new Object[] { props.get("entityType"), props.get("entityName"), props.get("form"), added ? 1 : 0} );
+		List<User> dataRcpts = Collections.emptyList();
+		if (ctxt.isDataInNotif()) {
+			dataRcpts = filterByAccess(ctxt, accessChecker).stream()
+				.filter(user -> !user.isDndEnabled() && user.isActive())
+				.collect(Collectors.toList());
+			if (CollectionUtils.isNotEmpty(dataRcpts)) {
+				//
+				// form data is refetched to ensure the field UI values are init'ed correctly.
+				// PHI fields are always masked irrespective of the user access
+				//
+				formData = formDataMgr.getFormData(formData.getContainer(), formData.getRecordId());
+				formData.maskPhiFieldValues();
+				props.put("formData", formData.getFieldValueMap());
+			}
+		}
+
+		List<User> linkRcpts = new ArrayList<>();
+		for (UserGroup group : ctxt.getNotifUserGroups()) {
+			for (User user : group.getUsers()) {
+				if (!dataRcpts.contains(user) && !linkRcpts.contains(user) && !user.isDndEnabled() && user.isActive()) {
+					linkRcpts.add(user);
+				}
+			}
+		}
+
+		for (User rcpt : dataRcpts) {
+			props.put("rcpt", rcpt);
+			EmailUtil.getInstance().sendEmail(FORM_SAVE_NOTIF_TMPL, new String[] { rcpt.getEmailAddress() }, null, props);
+		}
+
+		props.remove("formData");
+		for (User rcpt : linkRcpts) {
+			props.put("rcpt", rcpt);
+			EmailUtil.getInstance().sendEmail(FORM_SAVE_NOTIF_TMPL, new String[] { rcpt.getEmailAddress() }, null, props);
+		}
+	}
+
+	private void notifFormDeleted(Object object, FormRecordEntryBean fre) {
+		FormContextBean ctxt = fre.getFormCtxt();
+		if (!ctxt.isNotifEnabled() || ImporterContextHolder.getInstance().isImportOp()) {
+			return;
+		}
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("user", AuthUtil.getCurrentUser());
+		props.put("form", ctxt.getForm().getCaption());
+		props.put("recordId", fre.getRecordId());
+		if (object instanceof CollectionProtocolRegistration) {
+			addEntityProps((CollectionProtocolRegistration) object, ctxt, fre, props);
+		} else if (object instanceof Visit) {
+			addEntityProps((Visit) object, ctxt, fre, props);
+		} else if (object instanceof Specimen) {
+			addEntityProps((Specimen) object, ctxt, fre, props);
+		} else if (object instanceof User) {
+			addEntityProps((User) object, ctxt, fre, props);
+		} else {
+			return;
+		}
+
+		props.put("$subject", new Object[] { props.get("entityType"), props.get("entityName"), props.get("form") });
+		Set<User> sent = new HashSet<>();
+		for (UserGroup group : ctxt.getNotifUserGroups()) {
+			for (User user : group.getUsers()) {
+				if (!sent.contains(user) && !user.isDndEnabled() && user.isActive()) {
+					props.put("rcpt", user);
+					EmailUtil.getInstance().sendEmail(FORM_DELETE_NOTIF_TMPL, new String[] { user.getEmailAddress() }, null, props);
+					sent.add(user);
+				}
+			}
+		}
+	}
+
+	private void addEntityProps(CollectionProtocolRegistration cpr, FormContextBean ctxt, FormRecordEntryBean fre, Map<String, Object> props) {
+		props.put("entityType", MessageUtil.getInstance().getMessage("form_entity_Participant"));
+		props.put("entityName", cpr.getPpid());
+		props.put("cp", cpr.getCpShortTitle());
+		props.put("url", getCprRecordUrl(cpr, ctxt, fre));
+	}
+
+	private void addEntityProps(Visit visit, FormContextBean ctxt, FormRecordEntryBean fre, Map<String, Object> props) {
+		String title = visit.getName();
+		if (visit.getCpEvent() != null) {
+			title += " (" + visit.getCpEvent().getEventLabel() + ")";
+		}
+
+		props.put("entityType", MessageUtil.getInstance().getMessage("form_entity_SpecimenCollectionGroup"));
+		props.put("entityName", title);
+		props.put("cp", visit.getCollectionProtocol().getShortTitle());
+		props.put("url", getVisitRecordUrl(visit, ctxt, fre));
+	}
+
+	private void addEntityProps(Specimen specimen, FormContextBean ctxt, FormRecordEntryBean fre, Map<String, Object> props) {
+		String title = specimen.getLabel();
+		if (StringUtils.isNotBlank(specimen.getBarcode())) {
+			title += " (" + specimen.getBarcode() + ")";
+		}
+
+		props.put("entityType", MessageUtil.getInstance().getMessage("form_entity_Specimen"));
+		props.put("entityName", title);
+		props.put("cp", specimen.getCpShortTitle());
+		props.put("url", getSpecimenRecordUrl(specimen, ctxt, fre));
+	}
+
+	private void addEntityProps(User user, FormContextBean ctxt, FormRecordEntryBean fre, Map<String, Object> props) {
+		props.put("entityType", MessageUtil.getInstance().getMessage("form_entity_User"));
+		props.put("entityName", user.formattedName());
+		props.put("url", getUserRecordUrl(user, ctxt, fre));
+	}
+
+	private List<User> filterByAccess(FormContextBean ctxt, Runnable accessChecker) {
+		List<User> result = new ArrayList<>();
+		Set<User> seen = new HashSet<>();
+
+		User currentUser = AuthUtil.getCurrentUser();
+		try {
+			for (UserGroup ug : ctxt.getNotifUserGroups()) {
+				for (User user : ug.getUsers()) {
+					if (seen.contains(user)) {
+						continue;
+					}
+
+					try {
+						seen.add(user);
+						AuthUtil.setCurrentUser(currentUser);
+						accessChecker.run();
+						result.add(user);
+					} catch (Exception e) {
+						// the set user has no access
+					}
+				}
+			}
+		} finally {
+			AuthUtil.setCurrentUser(currentUser);
+		}
+
+		return result;
+	}
+
+	private String getCprRecordUrl(CollectionProtocolRegistration cpr, FormContextBean fc, FormRecordEntryBean fre) {
+		String url = "#/cp-view/%d/participants/%d/detail/extensions/list?formId=%d&formCtxtId=%d&recordId=%d";
+		return getUrl(String.format(url, cpr.getCollectionProtocol().getId(), cpr.getId(), fc.getContainerId(), fc.getIdentifier(), fre.getRecordId()));
+	}
+
+	private String getVisitRecordUrl(Visit visit, FormContextBean fc, FormRecordEntryBean fre) {
+		String url = "#/cp-view/%d/participants/%d/visits/detail/extensions/list?visitId=%d&formId=%d&formCtxtId=%d&recordId=%d";
+		return getUrl(String.format(url, visit.getCollectionProtocol().getId(), visit.getRegistration().getId(), visit.getId(), fc.getContainerId(), fc.getIdentifier(), fre.getRecordId()));
+	}
+
+	private String getSpecimenRecordUrl(Specimen specimen, FormContextBean fc, FormRecordEntryBean fre) {
+		if ("SpecimenEvent".equals(fc.getEntityType())) {
+			return getEventRecordUrl(specimen, fc, fre);
+		}
+
+		String url = "#/cp-view/%d/participants/%d/visits/specimens/detail/extensions/list?visitId=%d&specimenId=%d&formId=%d&formCtxtId=%d&recordId=%d";
+		return getUrl(String.format(url, specimen.getCollectionProtocol().getId(), specimen.getRegistration().getId(), specimen.getVisit().getId(), specimen.getId(), fc.getContainerId(), fc.getIdentifier(), fre.getRecordId()));
+	}
+
+	private String getEventRecordUrl(Specimen specimen, FormContextBean fc, FormRecordEntryBean fre) {
+		String url = "#/cp-view/%d/participants/%d/visits/specimens/detail/event-overview?visitId=%d&specimenId=%d&formId=%d&recordId=%d";
+		return getUrl(String.format(url, specimen.getCollectionProtocol().getId(), specimen.getRegistration().getId(), specimen.getVisit().getId(), specimen.getId(), fc.getContainerId(), fre.getRecordId()));
+	}
+
+	private String getUserRecordUrl(User user, FormContextBean fc, FormRecordEntryBean fre) {
+		String url = "ui-app/#/users/%d/forms/list?formId=%d&formCtxtId=%d&recordId=%d";
+		return getUrl(String.format(url, user.getId(), fc.getContainerId(), fc.getIdentifier(), fre.getRecordId()));
+	}
+
+	private String getUrl(String path) {
+		String appUrl = ConfigUtil.getInstance().getAppUrl();
+		if (!appUrl.endsWith("/")) {
+			appUrl += "/";
+		}
+
+		return appUrl + path;
 	}
 
 	private boolean getBoolean(Object input) {
@@ -2134,4 +2394,8 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			AuthUtil.getCurrentUserInstitute().getId().equals(formCtxt.getEntityId()) &&
 			AuthUtil.getCurrentUser().isInstituteAdmin();
 	};
+
+	private static final String FORM_SAVE_NOTIF_TMPL = "form_data_save_notif";
+
+	private static final String FORM_DELETE_NOTIF_TMPL = "form_data_delete_notif";
 }

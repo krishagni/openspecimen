@@ -51,7 +51,14 @@ angular.module('os.biospecimen.cpgroups')
           }
 
           $scope.submit = function() {
-            var forms = [{formId: mctx.form.formId, multipleRecords: mctx.allowMultipleRecords}];
+            var forms = [{
+              formId: mctx.form.formId,
+              multipleRecords: mctx.allowMultipleRecords,
+              notifEnabled: mctx.notifEnabled,
+              dataInNotif: mctx.dataInNotif,
+              notifUserGroups: mctx.notifUserGroups
+            }];
+
             group.addForms({level: level, forms: forms}).then(
               function(resp) {
                 if (resp.status == true) {

@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
-import com.krishagni.catissueplus.core.de.domain.Form;
+import com.krishagni.catissueplus.core.biospecimen.domain.CpGroupForm;
 import com.krishagni.catissueplus.core.de.events.FormSummary;
 
 public class CpGroupFormsDetail {
@@ -49,12 +50,21 @@ public class CpGroupFormsDetail {
 		this.forms = forms;
 	}
 
-	public static CpGroupFormsDetail from(CollectionProtocolGroup group, String level, Collection<Form> forms) {
+	public static CpGroupFormsDetail from(CollectionProtocolGroup group, String level, Collection<CpGroupForm> forms) {
 		CpGroupFormsDetail result = new CpGroupFormsDetail();
 		result.setGroupId(group.getId());
 		result.setGroupName(group.getName());
 		result.setLevel(level);
-		result.setForms(forms.stream().map(FormSummary::from).collect(Collectors.toList()));
+		result.setForms(forms.stream().map(
+			grpForm -> {
+				FormSummary form = FormSummary.from(grpForm.getForm());
+				form.setMultipleRecords(grpForm.isMultipleRecords());
+				form.setNotifEnabled(grpForm.isNotifEnabled());
+				form.setDataInNotif(grpForm.isDataInNotif());
+				form.setNotifUserGroups(UserGroupSummary.from(grpForm.getNotifUserGroups()));
+				return form;
+			}
+		).collect(Collectors.toList()));
 		return result;
 	}
 }

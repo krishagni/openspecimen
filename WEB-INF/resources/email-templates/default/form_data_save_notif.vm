@@ -1,0 +1,136 @@
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
+  <tbody>
+    <tr>
+      <td style="border-collapse:collapse;">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;line-height:20px">
+          <tbody>
+            <tr>
+              <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
+                <p style="margin:10px 0 0 0">
+                  Hello $rcpt.formattedName(),
+                  <br><br>
+                  <b>$user.formattedName()</b> ($user.emailAddress) #if($added == 1)added#{else}updated#end <b>$form</b> (#$recordId) for the $entityType.toLowerCase() <b>$entityName</b>#if($cp) in collection protocol <b>$cp</b>#end.
+                  <br>
+                </p>
+              </td>
+            </tr>
+            #if ($formData && $formData.fields.size() > 0)
+            <tr>
+              <td>
+                <table>
+                  #foreach ($field in $formData.fields)
+                  #if ($field.type != 'subForm' && $field.type != 'label')
+                  <tr>
+                    <td style="font-weight: bold; color: #707070; padding: 4px;">$field.caption</td>
+                    <td style="padding: 4px;">:</td>
+                    <td style="padding: 4px;">
+                    #if ($field.value)
+                      #if ($field.displayValue)
+                        <span>$field.displayValue</span>
+                      #elseif($field.type == 'fileUpload')
+                        <span>$field.value.filename</span>
+                      #elseif($field.type == 'signature')
+                        <span>Signature cannot be displayed</span>
+                      #elseif($field.type == 'datePicker')
+                        #if($field.format.contains('HH:mm'))
+                          <span>$dateFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($field.value))))</span>
+                        #else
+                          <span>$dateOnlyFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($field.value))))</span>
+                        #end
+                      #elseif($field.type == 'checkbox' || $field.type == 'multiSelectListbox')
+                        <span>$String.join(", ", $field.value)</span>
+                      #elseif($field.type == 'textArea')
+                        <pre style="font: inherit; font-size: inherit; padding: 0; margin: 0; white-space: pre-wrap; border: none;">$field.value</pre>
+                      #else
+                        <span>$field.value</span>
+                      #end
+                    #else
+                      <span>-</span>
+                    #end
+                    </td>
+                  </tr>
+                  #end
+                  #end
+                </table>
+              </td>
+            </tr>
+
+            #foreach ($field in $formData.fields)
+            #if ($field.type == 'subForm' && $field.value && $field.value.size() > 0)
+            <tr>
+              <td>
+                <h3>$field.caption</h3>
+                <table style="width: 100%; overflow-x: auto; margin-bottom: 20px; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      #foreach($sfField in $field.value[0].fields)
+                        <th style="min-width: 150px; text-align: left; padding: 8px; background: #f5f5f5; color: #707070; font-size: 12px; border-bottom: 0px">$sfField.caption</th>
+                      #end
+                    </tr>
+                  </thead>
+                  <tbody>
+                    #foreach($sfRow in $field.value)
+                      <tr>
+                        #foreach($sfField in $sfRow.fields)
+                        <td style="padding: 8px; text-align: left; border-top: 1px solid #ddd; vertical-align: top;">
+                          #if ($sfField.value)
+                            #if ($sfField.displayValue)
+                              <span>$sfField.displayValue</span>
+                            #elseif($sfField.type == 'fileUpload')
+                              <span>$sfField.value.filename</span>
+                            #elseif($sfField.type == 'signature')
+                              <span>Signature cannot be displayed</span>
+                            #elseif($sfField.type == 'datePicker')
+                              #if($sfField.format.contains('HH:mm'))
+                                <span>$dateFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($sfField.value))))</span>
+                              #else
+                                <span>$dateOnlyFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($sfField.value))))</span>
+                              #end
+                            #elseif($sfField.type == 'checkbox' || $sfField.type == 'multiSelectListbox')
+                              <span>$String.join(", ", $sfField.value)</span>
+                            #elseif($sfField.type == 'textArea')
+                              <pre style="font: inherit; font-size: inherit; padding: 0; margin: 0; white-space: pre-wrap; border: none;">$sfField.value</pre>
+                            #else
+                              <span>$sfField.value</span>
+                            #end
+                          #else
+                            <span>-</span>
+                          #end
+                        </td>
+                        #end
+                      </tr>
+                    #end
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            #end
+            #end
+            #end
+            <tr>
+              <td style="border-collapse:collapse;padding: 10px 0px;">
+                <table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;color:#333">
+                  <tbody>
+                    <tr>
+                      <td style="background:#3068a2;background:-moz-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:-webkit-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:-o-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:-ms-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:linear-gradient(top,#4687ce 0%,#3068a2 100%);padding:0px;border-collapse:collapse;border-radius:3px;padding:5px;margin:0px">
+                        <a style="color:#3b73af;text-decoration:none;color:#fff;font-weight:bold;padding:6px;font-size:14px;line-height:1.429;font-family:Arial,sans-serif" href="$url" target="_blank">View Record</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="height:5px;line-height:5px;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        #parse( $footer )
+      </td>
+    </tr>
+  </tbody>
+</table>

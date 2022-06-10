@@ -4,7 +4,7 @@ import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 
 import edu.common.dynamicextensions.napi.FormData;
 
-public class FormDataSavedEvent extends OpenSpecimenEvent {
+public class FormDataSavedEvent extends OpenSpecimenEvent<FormData> {
 
 	private static final long serialVersionUID = 5255220925616156515L;
 

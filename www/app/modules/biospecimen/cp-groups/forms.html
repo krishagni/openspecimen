@@ -71,6 +71,18 @@
                   </div>
                   <span style="margin-left: 12px;" translate="cp_groups.name">Name</span>
                 </th>
+                <th class="col">
+                  <span translate="cp_groups.multiple_recs_allowed">Multiple Records</span>
+                </th>
+                <th class="col">
+                  <span translate="cp_groups.form_notifs_enabled">Notifications Enabled</span>
+                </th>
+                <th class="col">
+                  <span translate="cp_groups.include_form_data_in_notif">Include Form Data</span>
+                </th>
+                <th class="col">
+                  <span translate="cp_groups.form_notif_user_groups">Notification Recipients</span>
+                </th>
               </tr>
             </thead>
             <tbody class="os-table-body">
@@ -82,6 +94,18 @@
                     </os-checkbox>
                   </div>
                   <span style="margin-left: 12px;">{{form.caption}}</span>
+                </td>
+                <td class="col">
+                  <span>{{form.multipleRecords | osBoolValue: 'common.yes': 'common.no'}}</span>
+                </td>
+                <td class="col">
+                  <span>{{form.notifEnabled | osBoolValue: 'common.yes': 'common.no'}}</span>
+                </td>
+                <td class="col">
+                  <span>{{form.dataInNotif | osBoolValue: 'common.yes': 'common.no'}}</span>
+                </td>
+                <td class="col">
+                  <span>{{form.notifUserGroups | osArrayJoin: 'name' | osNoValue}}</span>
                 </td>
               </tr>
             </tbody>

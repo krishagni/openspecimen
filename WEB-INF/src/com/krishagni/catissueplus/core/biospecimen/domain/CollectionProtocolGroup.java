@@ -8,16 +8,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
 import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Form;
+import com.krishagni.catissueplus.core.de.events.FormSummary;
 
+@Configurable
 public class CollectionProtocolGroup extends BaseEntity {
 	private String name;
 
@@ -28,6 +35,9 @@ public class CollectionProtocolGroup extends BaseEntity {
 	private Set<CpGroupForm> forms = new HashSet<>();
 
 	private Map<String, CpWorkflowConfig.Workflow> workflows = new HashMap<>();
+
+	@Autowired
+	private DaoFactory daoFactory;
 
 	private transient Map<String, Set<Form>> formsMap;
 
@@ -142,17 +152,44 @@ public class CollectionProtocolGroup extends BaseEntity {
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 
-	public void addForms(String level, List<Pair<Form, Boolean>> formsToAdd) {
-		for (Pair<Form, Boolean> form : formsToAdd) {
+	public void addForms(String level, List<Pair<Form, FormSummary>> formsToAdd) {
+		for (Pair<Form, FormSummary> form : formsToAdd) {
 			if (containsForm(level, form.first())) {
 				continue;
 			}
 
+			FormSummary input = form.second();
 			CpGroupForm groupForm = new CpGroupForm();
 			groupForm.setGroup(this);
 			groupForm.setLevel(level);
 			groupForm.setForm(form.first());
-			groupForm.setMultipleRecords(form.second());
+			groupForm.setMultipleRecords(input.isMultipleRecords());
+			groupForm.setNotifEnabled(input.isNotifEnabled());
+			if (groupForm.isNotifEnabled()) {
+				groupForm.setDataInNotif(input.isDataInNotif());
+				Utility.nullSafeStream(input.getNotifUserGroups()).forEach(
+					(iug) -> {
+						Object key = null;
+						UserGroup ug = null;
+						if (iug.getId() != null) {
+							ug = daoFactory.getUserGroupDao().getById(iug.getId());
+							key = iug.getId();
+						} else if (StringUtils.isNotBlank(iug.getName())) {
+							ug = daoFactory.getUserGroupDao().getByName(iug.getName());
+							key = iug.getName();
+						}
+
+						if (key != null && ug == null) {
+							throw OpenSpecimenException.userError(UserGroupErrorCode.NOT_FOUND, key);
+						}
+
+						if (ug != null) {
+							groupForm.getNotifUserGroups().add(ug);
+						}
+					}
+				);
+			}
+
 			forms.add(groupForm);
 		}
 	}

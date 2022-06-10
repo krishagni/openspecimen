@@ -3,6 +3,9 @@ package com.krishagni.catissueplus.core.common.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -65,6 +68,12 @@ public class TemplateServiceImpl implements TemplateService {
 			props.put("messageSource", messageSource);
 			props.put("dateFmt", dateFmt);
 			props.put("dateOnlyFmt", dateOnlyFmt);
+			props.put("Integer", Integer.class);
+			props.put("Long", Long.class);
+			props.put("String", String.class);
+			props.put("Date", Date.class);
+			props.put("Instant", Instant.class);
+			props.put("Calendar", Calendar.class);
 			props.put("barcodeGenerator", barcodeGenerator);
 			return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, templateName, props);
 		} catch (VelocityException ex) {

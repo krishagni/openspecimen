@@ -31,6 +31,7 @@ import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.TimestampType;
 
+import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -230,7 +231,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<FormContextDetail> getFormContexts(Long formId) {
-		Query query = sessionFactory.getCurrentSession().getNamedQuery(GET_FORM_CTXTS);
+		Query query = getCurrentSession().getNamedQuery(GET_FORM_CTXTS);
 		List<Object[]> rows = query.setLong("formId", formId).list();
 		
 		List<FormContextDetail> formCtxts = new ArrayList<>();
@@ -243,6 +244,8 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			formCtxt.setEntityId((Long)row[++idx]);
 			formCtxt.setMultiRecord((Boolean)row[++idx]);
 			formCtxt.setSysForm((Boolean)row[++idx]);
+			formCtxt.setNotifEnabled((Boolean)row[++idx]);
+			formCtxt.setDataInNotif((Boolean)row[++idx]);
 
 			CollectionProtocolSummary cp = new CollectionProtocolSummary();
 			cp.setId((Long)row[++idx]);
@@ -255,7 +258,26 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		
 		return formCtxts;
 	}
-	
+
+	@Override
+	public Map<Long, List<UserGroupSummary>> getNotifUsers(Collection<Long> contextIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_NOTIF_USERS)
+			.setParameterList("contextIds", contextIds)
+			.list();
+
+		Map<Long, List<UserGroupSummary>> result = new HashMap<>();
+		for (Object[] row : rows) {
+			int idx = -1;
+			List<UserGroupSummary> groups = result.computeIfAbsent((Long) row[++idx], (k) -> new ArrayList<>());
+			UserGroupSummary group = new UserGroupSummary();
+			group.setId((Long) row[++idx]);
+			group.setName((String) row[++idx]);
+			groups.add(group);
+		}
+
+		return result;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public FormContextBean getQueryFormContext(Long formId) {
@@ -1287,6 +1309,8 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	private static final String GET_ASSOCIATIONS_CNT = FQN + ".getAssociationsCount";
 	
 	private static final String GET_FORM_CTXTS = FQN + ".getFormContexts";
+
+	private static final String GET_NOTIF_USERS = FQN + ".getNotifUsers";
 	
 	private static final String GET_FORM_CTXT = FQN + ".getFormContext";
 	

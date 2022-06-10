@@ -19,7 +19,10 @@ angular.module('os.biospecimen.models.form', ['os.common.models'])
             formId: form.$id(),
             collectionProtocol: {id: this.cpIds[i]},
             level: this.entity,
-            multiRecord: this.isMultiRecord
+            multiRecord: this.isMultiRecord,
+            notifEnabled: this.notifEnabled,
+            dataInNotif: this.dataInNotif,
+            notifUserGroups: this.notifUserGroups
         });
       }
 
@@ -29,7 +32,10 @@ angular.module('os.biospecimen.models.form', ['os.common.models'])
           collectionProtocol: {id: -1},
           entityId: this.entityIds[j],
           level: this.entity,
-          multiRecord: this.isMultiRecord
+          multiRecord: this.isMultiRecord,
+          notifEnabled: this.notifEnabled,
+          dataInNotif: this.dataInNotif,
+          notifUserGroups: this.notifUserGroups
         });
       }
 

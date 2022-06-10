@@ -13,7 +13,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
-import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
+import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpGroupForm;
@@ -205,7 +205,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			List<CpGroupFormsDetail> result = new ArrayList<>();
 			for (Map.Entry<String, Set<CpGroupForm>> gfEntry : groupFormsByLevel.entrySet()) {
 				List<Form> forms = gfEntry.getValue().stream().map(CpGroupForm::getForm).collect(Collectors.toList());
-				result.add(CpGroupFormsDetail.from(group, gfEntry.getKey(), forms));
+				result.add(CpGroupFormsDetail.from(group, gfEntry.getKey(), gfEntry.getValue()));
 			}
 
 			return ResponseEvent.response(result);
@@ -228,14 +228,14 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = getGroup(input.getGroupId(), input.getGroupName());
 			ensureUpdateAccess(group);
 
-			List<Pair<Form, Boolean>> forms = new ArrayList<>();
+			List<Pair<Form, FormSummary>> forms = new ArrayList<>();
 			for (FormSummary inputForm : input.getForms()) {
 				Form form = getForm(inputForm.getFormId(), inputForm.getName());
 				if (group.containsForm(input.getLevel(), form)) {
 					continue;
 				}
 
-				forms.add(Pair.make(form, inputForm.isMultipleRecords()));
+				forms.add(Pair.make(form, inputForm));
 			}
 
 			if (!isMultipleFormsLevel(input.getLevel())) {
@@ -409,7 +409,22 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			for (CollectionProtocol cp : cps) {
 				Set<Long> formIds = getCpFormIds(cpForms, cp.getId());
 				for (CpGroupForm form : levelForms.getValue()) {
-					addForm(cp, levelForms.getKey(), form.getForm(), form.isMultipleRecords(), formIds);
+					FormSummary input = new FormSummary();
+					input.setMultipleRecords(form.isMultipleRecords());
+					input.setNotifEnabled(form.isNotifEnabled());
+					input.setDataInNotif(form.isDataInNotif());
+					if (form.isNotifEnabled()) {
+						input.setNotifUserGroups(form.getNotifUserGroups().stream()
+							.map(ug -> {
+								UserGroupSummary result = new UserGroupSummary();
+								result.setId(ug.getId());
+								return result;
+							})
+							.collect(Collectors.toList())
+						);
+					}
+
+					addForm(cp, levelForms.getKey(), form.getForm(), input, formIds);
 				}
 			}
 		}
@@ -428,17 +443,17 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		}
 	}
 
-	private void addForms(CollectionProtocolGroup group, String level, List<Pair<Form, Boolean>> inputForms) {
+	private void addForms(CollectionProtocolGroup group, String level, List<Pair<Form, FormSummary>> inputForms) {
 		Map<Long, Set<Long>> cpForms = daoFactory.getCpGroupDao().getCpForms(group.getCpIds(), level);
 		for (CollectionProtocol cp : group.getCps()) {
 			Set<Long> formIds = getCpFormIds(cpForms, cp.getId());
-			for (Pair<Form, Boolean> form : inputForms) {
+			for (Pair<Form, FormSummary> form : inputForms) {
 				addForm(cp, level, form.first(), form.second(), formIds);
 			}
 		}
 	}
 
-	private void addForm(CollectionProtocol cp, String level, Form form, boolean multipleRecords, Set<Long> formIds) {
+	private void addForm(CollectionProtocol cp, String level, Form form, FormSummary input, Set<Long> formIds) {
 		boolean multipleForms = isMultipleFormsLevel(level);
 		if (CollectionUtils.isNotEmpty(formIds)) {
 			if (formIds.contains(form.getId())) {
@@ -454,13 +469,17 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		cpSummary.setId(cp.getId());
 
 		FormContextDetail formCtxt = new FormContextDetail();
+		formCtxt.setCollectionProtocol(cpSummary);
 		formCtxt.setFormId(form.getId());
 		formCtxt.setLevel(level);
-		formCtxt.setMultiRecord(multipleForms && multipleRecords);
-		formCtxt.setCollectionProtocol(cpSummary);
+		formCtxt.setMultiRecord(multipleForms && input.isMultipleRecords());
+		formCtxt.setNotifEnabled(multipleForms && input.isNotifEnabled());
+		if (formCtxt.isNotifEnabled()) {
+			formCtxt.setDataInNotif(input.isDataInNotif());
+			formCtxt.setNotifUserGroups(input.getNotifUserGroups());
+		}
 
-		ResponseEvent<List<FormContextDetail>> resp = formSvc.addFormContexts(new RequestEvent<>(Collections.singletonList(formCtxt)));
-		resp.throwErrorIfUnsuccessful();
+		ResponseEvent.unwrap(formSvc.addFormContexts( RequestEvent.wrap(Collections.singletonList(formCtxt))));
 	}
 
 	private Set<Long> getCpFormIds(Map<Long, Set<Long>> cpForms, Long cpId) {

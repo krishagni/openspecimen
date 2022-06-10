@@ -18,5 +18,16 @@
     <many-to-one name="form" column="FORM_ID" fetch="join"/>
 
     <property name="multipleRecords" column="MULTIPLE_RECORDS"/>
+
+    <property name="notifEnabled" column="NOTIFS_ENABLED"/>
+
+    <property name="dataInNotif" column="DATA_IN_NOTIF"/>
+
+    <set name="notifUserGroups" table="OS_CP_GROUP_FORM_NOTIF_USERS">
+      <key column="CP_GROUP_FORM_ID"/>
+      <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.UserGroup" column="USER_GROUP_ID">
+        <filter name="activeEntity" condition="activity_status != 'Disabled'"/>
+      </many-to-many>
+    </set>
   </class>
 </hibernate-mapping>

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -47,6 +48,8 @@ public interface FormDao extends Dao<FormContextBean> {
 	public List<FormSummary> getQueryForms();
 			
 	public List<FormContextDetail> getFormContexts(Long formId);
+
+	Map<Long, List<UserGroupSummary>> getNotifUsers(Collection<Long> contextIds);
 	
 	public List<FormCtxtSummary> getCprForms(Long cprId);
 

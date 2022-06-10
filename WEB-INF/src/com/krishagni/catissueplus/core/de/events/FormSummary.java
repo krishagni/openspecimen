@@ -1,11 +1,14 @@
 package com.krishagni.catissueplus.core.de.events;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Form;
@@ -31,6 +34,12 @@ public class FormSummary {
 	private String entityType;
 
 	private boolean multipleRecords;
+
+	private boolean notifEnabled;
+
+	private boolean dataInNotif;
+
+	private List<UserGroupSummary> notifUserGroups = new ArrayList<>();
 
 	private Long formCtxtId;
 
@@ -114,6 +123,30 @@ public class FormSummary {
 
 	public void setMultipleRecords(boolean multipleRecords) {
 		this.multipleRecords = multipleRecords;
+	}
+
+	public boolean isNotifEnabled() {
+		return notifEnabled;
+	}
+
+	public void setNotifEnabled(boolean notifEnabled) {
+		this.notifEnabled = notifEnabled;
+	}
+
+	public boolean isDataInNotif() {
+		return dataInNotif;
+	}
+
+	public void setDataInNotif(boolean dataInNotif) {
+		this.dataInNotif = dataInNotif;
+	}
+
+	public List<UserGroupSummary> getNotifUserGroups() {
+		return notifUserGroups;
+	}
+
+	public void setNotifUserGroups(List<UserGroupSummary> notifUserGroups) {
+		this.notifUserGroups = notifUserGroups;
 	}
 
 	public Long getFormCtxtId() {

@@ -22,6 +22,33 @@
           </div>
         </div>
       </div>
+      <div class="form-group">
+        <div class="col-xs-12 os-text-checkbox">
+          <div class="checkbox">
+            <os-checkbox ng-model="mctx.notifEnabled" ng-true-value="true" ng-false-value="false"></os-checkbox>
+          </div>
+          <div class="message os-ctrl-padding-top">
+            <span translate="cp_groups.form_notifs_enabled">Enable Notifications</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" ng-if="mctx.notifEnabled">
+        <div class="col-xs-12 os-text-checkbox">
+          <div class="checkbox">
+            <os-checkbox ng-model="mctx.dataInNotif" ng-true-value="true" ng-false-value="false"></os-checkbox>
+          </div>
+          <div class="message os-ctrl-padding-top">
+            <span translate="cp_groups.include_form_data_in_notif">Include Form Data in Notification</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" ng-if="mctx.notifEnabled">
+        <div class="col-xs-12">
+          <os-user-groups multiple ng-model="mctx.notifUserGroups"
+            placeholder="{{'cp_groups.form_notif_user_groups' | translate}}" append-to-body="true">
+          </os-user-groups>
+        </div>
+      </div>
     </div>
     <div class="os-modal-footer">
       <button class="btn os-btn-text" ng-click="cancel()">

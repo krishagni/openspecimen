@@ -99,6 +99,24 @@
               <span translate="form.multiple_records_allowed">Multiple records allowed</span>
             </label>
           </div>
+
+          <div class="checkbox" ng-if="['Participant', 'CommonParticipant', 'SpecimenCollectionGroup', 'Specimen', 'SpecimenEvent', 'User', 'UserProfile'].indexOf(cpFormCtxt.selectedEntity.name) != -1">
+            <label>
+              <input type="checkbox" ng-checked="cpFormCtxt.notifEnabled" ng-model="cpFormCtxt.notifEnabled"/>
+              <span translate="form.enable_notifs">Notifications Enabled</span>
+            </label>
+          </div>
+          <div class="checkbox" ng-if="cpFormCtxt.notifEnabled">
+            <label>
+              <input type="checkbox" ng-checked="cpFormCtxt.dataInNotif" ng-model="cpFormCtxt.dataInNotif"/>
+              <span translate="form.notif_data_in_email">Include Form Data in Notification</span>
+            </label>
+          </div>
+          <div ng-if="cpFormCtxt.notifEnabled">
+            <os-user-groups multiple ng-model="cpFormCtxt.notifUserGroups"
+              placeholder="{{'form.notif_user_groups' | translate}}" append-to-body="true">
+            </os-user-groups>
+          </div>
         </div>
       </os-tab>
       <os-tab title="{{'audit.revisions' | translate}}" on-select="loadRevisions()">
@@ -223,6 +241,50 @@
             <input type="radio" name="multiRecord" ng-model="editCtxData.ctx.multiRecord" ng-value="false">
             <span translate="common.no">No</span>
           </label>
+        </div>
+      </div>
+      <div class="form-group" ng-if="['Participant', 'CommonParticipant', 'SpecimenCollectionGroup', 'Specimen', 'SpecimenEvent', 'User', 'UserProfile'].indexOf(editCtxData.ctx.level.name) != -1">
+        <div class="col-xs-4 control-label">
+          <label>
+            <span translate="form.enable_notifs">Enable Notifications?</span>
+          </label>
+        </div>
+        <div class="col-xs-8">
+          <label class="radio-inline">
+            <input type="radio" name="notifEnabled" ng-model="editCtxData.ctx.notifEnabled" ng-value="true">
+            <span translate="common.yes">Yes</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="notifEnabled" ng-model="editCtxData.ctx.notifEnabled" ng-value="false">
+            <span translate="common.no">No</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-group" ng-if="editCtxData.ctx.notifEnabled">
+        <div class="col-xs-4 control-label">
+          <label>
+            <span translate="form.notif_data_in_email">Data in Email?</span>
+          </label>
+        </div>
+        <div class="col-xs-8">
+          <label class="radio-inline">
+            <input type="radio" name="dataInNotif" ng-model="editCtxData.ctx.dataInNotif" ng-value="true">
+            <span translate="common.yes">Yes</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="dataInNotif" ng-model="editCtxData.ctx.dataInNotif" ng-value="false">
+            <span translate="common.no">No</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-group" ng-if="editCtxData.ctx.notifEnabled">
+        <div class="col-xs-4 control-label">
+          <label>
+            <span translate="form.notif_user_groups">User Groups</span>
+          </label>
+        </div>
+        <div class="col-xs-8">
+          <os-user-groups multiple ng-model="editCtxData.ctx.notifUserGroups"></os-user-groups>
         </div>
       </div>
     </div>

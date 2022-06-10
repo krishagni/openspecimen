@@ -78,4 +78,52 @@
       <column name="VISIT_CONSENTS" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Form save/delete notification settings">
+    <addColumn tableName="CATISSUE_FORM_CONTEXT">
+      <column name="NOTIFS_ENABLED" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="DATA_IN_NOTIF" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Form save/delete notification user groups">
+    <createTable tableName="OS_FORM_NOTIF_USER_GRPS">
+      <column name="FORM_CTXT_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_FORM_NOTIF_CTXT"
+          referencedTableName="CATISSUE_FORM_CONTEXT" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="USER_GROUP_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_FORM_NOTIF_USER_GRP"
+          referencedTableName="OS_USER_GROUPS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP group form save/delete notification settings">
+    <addColumn tableName="OS_CP_GROUP_FORMS">
+      <column name="NOTIFS_ENABLED" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="DATA_IN_NOTIF" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP group form save/delete notification user groups">
+    <createTable tableName="OS_CP_GROUP_FORM_NOTIF_USERS">
+      <column name="CP_GROUP_FORM_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CPG_FORM_NOTIF_FORM"
+          referencedTableName="OS_CP_GROUP_FORMS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="USER_GROUP_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CPG_FORM_NOTIF_USER_GROUP"
+          referencedTableName="OS_USER_GROUPS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

@@ -137,16 +137,19 @@ angular.module('os.administrative.form.formctxts', ['os.administrative.models'])
         multipleRecs = formCtxt.isMultiRecord;
       }
 
-      var formContext = {
+      var toSave = {
         form: $scope.form,
         cpIds: cpIds,
         entityIds: entityIds,
         entity: formCtxt.selectedEntity.name,
-        isMultiRecord: multipleRecs
+        isMultiRecord: multipleRecs,
+        notifEnabled: formCtxt.notifEnabled,
+        dataInNotif: formCtxt.dataInNotif,
+        notifUserGroups: formCtxt.notifUserGroups
       }
 
-      formContext = $scope.form.newFormContext(formContext); 
-      formContext.$saveOrUpdate().then(
+      toSave = $scope.form.newFormContext(toSave);
+      toSave.$saveOrUpdate().then(
         function(data) {
           Alerts.success("form.attached");
           $modalInstance.close(true);
@@ -207,12 +210,20 @@ angular.module('os.administrative.form.formctxts', ['os.administrative.models'])
         cpIds: cpIds,
         entity: ctx.level.name,
         entityIds: entityIds,
-        isMultiRecord: ctx.multiRecord
+        isMultiRecord: ctx.multiRecord,
+        notifEnabled: ctx.notifEnabled,
+        dataInNotif: ctx.dataInNotif,
+        notifUserGroups: ctx.notifUserGroups
       });
 
       fc.$saveOrUpdate().then(
         function(data) {
-          $scope.cpFormCtxts[$scope.editCtxData.idx].multiRecord =  data[0].multiRecord;
+          var cpFc = $scope.cpFormCtxts[$scope.editCtxData.idx];
+          cpFc.multiRecord =  data[0].multiRecord;
+          cpFc.notifEnabled = data[0].notifEnabled;
+          cpFc.dataInNotif = data[0].dataInNotif;
+          cpFc.notifUserGroups = data[0].notifUserGroups;
+
           $scope.cancelEditCtx();
           $scope.revisions = undefined;
         }

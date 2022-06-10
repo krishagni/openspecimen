@@ -515,7 +515,10 @@
     "no_forms": "No Forms",
     "add_form": "Add Form",
     "select_form": "Select Form",
-    "multiple_recs_allowed": "Multiple records allowed",
+    "multiple_recs_allowed": "Multiple Records",
+    "form_notifs_enabled": "Notifications Enabled",
+    "include_form_data_in_notif": "Include Form Data in Notification",
+    "form_notif_user_groups": "Notification Recipients",
     "remove_forms": "Remove {{forms.length > 1 ? 'forms' : 'form'}}",
     "remove_forms_q": "You will lose data if you remove the selected {{forms.length > 1 ? 'forms' : 'form'}}. Do you want to continue?",
 
@@ -1912,7 +1915,7 @@
     "last_updated": "Last Updated",
     "not_used": "This form is not used for data entry at any level. Start by selecting the level.",
     "na": "Not Applicable",
-    "multiple_records": "Multiple Records?",
+    "multiple_records": "Multiple Records",
     "single_record": "Single Record",
     "collection_protocol": "Collection Protocol",
     "level": "Level",
@@ -1943,6 +1946,9 @@
     "preview_form": "Preview: {{caption}}",
 
     "associations": "Associations",
+    "enable_notifs": "Enable Notifications",
+    "notif_data_in_email": "Include Form Data in Notification",
+    "notif_user_groups": "Notification Recipients",
 
     "tooltip": {
       "add": "Add new form",
