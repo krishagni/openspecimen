@@ -39,6 +39,7 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
+import org.springframework.security.saml.SAMLAuthenticationToken;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.SAMLDiscovery;
 import org.springframework.security.saml.SAMLEntryPoint;
@@ -130,6 +131,8 @@ public class SamlBootstrap {
 			setDigestMethod();
 			setMetadataKeyInfoGenerator();
 			setupSamlFilterChain();
+
+			authManager.getProviders().removeIf(provider -> provider.supports(SAMLAuthenticationToken.class));
 			authManager.getProviders().add(getSamlAuthenticationProvider());
 		} catch (Exception e) {
 			logger.error("Error configuring SAML authentication provider - " + e.getMessage(), e);
@@ -387,8 +390,19 @@ public class SamlBootstrap {
 	 * SAML 2.0 WebSSO Assertion Consumer
 	 */
 	private WebSSOProfileConsumer getWebSSOprofileConsumer() {
+		long maxAuthAge = 24;
+		if (samlProps != null) {
+			String maxAuthAgeStr = samlProps.getOrDefault("maxAuthAge", "24");
+
+			try {
+				maxAuthAge = Long.parseLong(maxAuthAgeStr);
+			} catch (Exception e) {
+				logger.error("Invalid max. authentication age: " + maxAuthAgeStr + ". Defaulting to 24 hours", e);
+			}
+		}
+
 		WebSSOProfileConsumerImpl consumer = new WebSSOProfileConsumerImpl();
-		consumer.setMaxAuthenticationAge(24 * 60 * 60);
+		consumer.setMaxAuthenticationAge(maxAuthAge * 60 * 60);
 		return consumer;
 	}
 
