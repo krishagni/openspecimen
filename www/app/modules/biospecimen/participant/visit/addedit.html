@@ -68,6 +68,10 @@
             <span ng-switch-when="true" translate="common.buttons.update">Update</span>
             <span ng-switch-default translate="common.buttons.create">Create</span>
           </button>
+          <button class="btn btn-primary" os-form-submit="saveVisit(false, true)"
+            show-if-allowed="consentUpdateOpts" ng-show="visitCtx.documentsCount > 0">
+            <span translate="visits.add_n_consent">Proceed to Consents</span>
+          </button>
           <button class="btn btn-primary" os-form-submit="saveVisit(true)"
             show-if-allowed="specimenResource.updateOpts"
             ng-show="visitCtx.pendingToStart && currVisit.status == 'Complete'">

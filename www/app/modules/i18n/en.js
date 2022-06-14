@@ -723,6 +723,7 @@
     "add": "Add",
     "update": "Update",
     "add_n_collect": "Proceed to Collection",
+    "add_n_consent": "Proceed to Consents",
 
     "names_print_job_created": "Visit names print job {{jobId}} created successfully",
 

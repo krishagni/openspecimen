@@ -84,7 +84,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     };
 
     function loadDocuments() {
-      if (!$injector.has('ecDocument') || !!cpr.id) {
+      if (!$injector.has('ecDocument') || !!cpr.id || cp.visitLevelConsents) {
         return;
       }
 

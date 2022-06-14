@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.visit.addedit', [])
   .controller('AddEditVisitCtrl', function(
-    $scope, $state, $stateParams, userRole, cp, cpr, visit, latestVisit,
+    $scope, $state, $stateParams, $injector, userRole, cp, cpr, visit, latestVisit,
     extensionCtxt, hasDict, layout, onValueChangeCb, mrnAccessRestriction,
     ParticipantSpecimensViewState, PvManager, ExtensionsUtil, CollectSpecimensSvc, Alerts) {
 
@@ -18,7 +18,8 @@ angular.module('os.biospecimen.visit.addedit', [])
         obj: {visit: $scope.currVisit, cpr: cpr, cp: cp, userRole: userRole},
         opts: {viewCtx: $scope, layout: layout, onValueChange: onValueChangeCb, mdInput: false},
         inObjs: ['visit'],
-        mrnAccessRestriction: mrnAccessRestriction
+        mrnAccessRestriction: mrnAccessRestriction,
+        documentsCount: 0
       }
 
       if (!currVisit.id) {
@@ -50,6 +51,8 @@ angular.module('os.biospecimen.visit.addedit', [])
       if (!hasDict) {
         loadPvs();
       }
+
+      loadDocuments();
     }
 
     function getVisitSite(cpr, latestVisit, currVisit) {
@@ -65,7 +68,19 @@ angular.module('os.biospecimen.visit.addedit', [])
       return site;
     }
 
-    $scope.saveVisit = function(gotoSpmnCollection) {
+    function loadDocuments() {
+      if (!$injector.has('ecDocument') || !!$scope.visit.id || !cp.visitLevelConsents) {
+        return;
+      }
+
+      return $injector.get('ecDocument').getCount({cpId: cp.id}).then(
+        function(resp) {
+          $scope.visitCtx.documentsCount = resp.count;
+        }
+      );
+    }
+
+    $scope.saveVisit = function(gotoSpmnCollection, gotoConsents) {
       var formCtrl = $scope.deFormCtrl.ctrl;
       if (formCtrl && !formCtrl.validate()) {
         return;
@@ -88,6 +103,8 @@ angular.module('os.biospecimen.visit.addedit', [])
           if (gotoSpmnCollection) {
             var state = $state.get('visit-detail.overview');
             CollectSpecimensSvc.collectVisit({state: state, params: {cprId: cpr.id}}, cp, cpr.id, $scope.visit);
+          } else if (gotoConsents) {
+            $state.go('visit-detail.consents', {visitId: result.id, eventId: result.eventId});
           } else {
             $state.go('visit-detail.overview', {visitId: result.id, eventId: result.eventId});
           }
