@@ -299,7 +299,12 @@
         p.identifier as position_identifier, p.pos_one_str, p.pos_two_str,
         case when c.pos_labeling_mode = 'LINEAR'
         then
-          concat('', (p.pos_two - 1) * c.no_of_cols + p.pos_one)
+          case when c.pos_assignment like 'HZ_%'
+          then
+              concat('', ((p.pos_two - 1) * c.no_of_cols) + p.pos_one)
+          else
+              concat('', ((p.pos_two - 1) * c.no_of_rows) + p.pos_one)
+          end
         else
           concat(p.pos_two_str, concat(', ', p.pos_one_str))
         end as formatted_position,
