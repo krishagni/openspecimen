@@ -23,7 +23,7 @@ angular.module('os.administrative.job.addedit', ['os.administrative.models'])
         {name: 'THURSDAY'}, {name: 'FRIDAY'}, {name: 'SATURDAY'}
       ];
 
-      $translate('job.week_days.SUNDAY').then(
+      $translate('jobs.week_days.SUNDAY').then(
         function(wd) {
           angular.forEach(weekDays,
             function(wd) {
