@@ -825,6 +825,10 @@ public class Utility {
 		return fields.stream().filter(field -> !equals(obj1, obj2, field)).collect(Collectors.toList());
 	}
 
+	public static String sanitizeFilename(String filename) {
+		return filename.replaceAll("[^\\w.]+", "_").replaceAll("__+", "_");
+	}
+
 	public static File zipFiles(List<String> files, String zipFilePath) {
 		return zipFilesWithNames(files.stream().map((f) -> Pair.make(f, "")).collect(Collectors.toList()), zipFilePath);
 	}

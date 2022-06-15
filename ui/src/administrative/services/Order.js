@@ -159,7 +159,7 @@ class Order {
   async downloadLabelsFile(jobId, outputFilename) {
     let url = 'distribution-label-printer/output-file?jobId=' + jobId;
     if (outputFilename) {
-      outputFilename = outputFilename.replace(/\/|\\/g, '_');
+      outputFilename = outputFilename.replace(/[^\w.]+/g, '_').replace(/__+/g, '_');
       url += '&filename=' + outputFilename;
     }
 

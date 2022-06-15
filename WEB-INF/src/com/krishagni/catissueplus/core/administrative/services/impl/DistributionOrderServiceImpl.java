@@ -1421,7 +1421,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 
 				String name = (attachment != null) ? attachment.second().getName() : null;
 				String extn = (attachment != null) ? "." + attachment.first() : "";
-				emailProps.put("$attachments", Collections.singletonMap(name, order.getName() + extn));
+				emailProps.put("$attachments", Collections.singletonMap(name, Utility.sanitizeFilename(order.getName()) + extn));
 			}
 
 			//
@@ -1458,6 +1458,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			return null;
 		}
 
+		String filename = Utility.sanitizeFilename(order.getName());
 		switch (attachType) {
 			case CSV_REPORT:
 				File dataFile = getCsvReport(order);
@@ -1466,7 +1467,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 				}
 
 				if (isFileLargerThan1MB(dataFile)) {
-					String name = MimeUtility.encodeText(order.getName() + ".csv");
+					String name = MimeUtility.encodeText(filename + ".csv");
 					return Pair.make("zip", zipFile(name, dataFile));
 				} else {
 					return Pair.make("csv", dataFile);
@@ -1479,7 +1480,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 				}
 
 				if (isFileLargerThan1MB(manifest)) {
-					String name = MimeUtility.encodeText(order.getName() + ".pdf");
+					String name = MimeUtility.encodeText(filename + ".pdf");
 					return Pair.make("zip", zipFile(name, manifest));
 				} else {
 					return Pair.make("pdf", manifest);
@@ -1491,20 +1492,20 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 
 				File csvFile = getCsvReport(order);
 				if (csvFile != null) {
-					String name = MimeUtility.encodeText(order.getName() + ".csv");
+					String name = MimeUtility.encodeText(filename + ".csv");
 					inputFiles.add(Pair.make(csvFile.getAbsolutePath(), name));
 					zipPath = csvFile.getParent();
 				}
 
 				File pdfFile = getManifest(order);
 				if (pdfFile != null) {
-					String name = MimeUtility.encodeText(order.getName() + ".pdf");
+					String name = MimeUtility.encodeText(filename + ".pdf");
 					inputFiles.add(Pair.make(pdfFile.getAbsolutePath(), name));
 					zipPath = pdfFile.getParent();
 				}
 
 				if (!inputFiles.isEmpty()) {
-					zipPath = new File(zipPath, order.getName() + ".zip").getAbsolutePath();
+					zipPath = new File(zipPath, filename + ".zip").getAbsolutePath();
 					return Pair.make("zip", Utility.zipFilesWithNames(inputFiles, zipPath));
 				}
 		}

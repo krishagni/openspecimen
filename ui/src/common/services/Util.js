@@ -288,6 +288,7 @@ class Util {
         filename += '.csv';
       }
 
+      filename = (filename || 'report.csv').replace(/[^\w.]+/g, '_').replace(/__+/g, '_');
       http.downloadFile(http.getUrl('query/export', {query: {fileId: result.dataFile, filename: filename}}));
     } else if (result.dataFile) {
       alertSvc.info(msgs.emailed || 'Report generation is taking more time than anticipated. Report will be emailed');

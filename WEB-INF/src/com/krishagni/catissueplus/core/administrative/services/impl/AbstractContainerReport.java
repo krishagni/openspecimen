@@ -82,7 +82,7 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 			type,
 			uuid,
 			AuthUtil.getCurrentUser().getId().toString(),
-			container.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
+			Utility.sanitizeFilename(container.getName()));
 	}
 
 	protected static final String CONTAINER_DETAILS        = "storage_container_details";

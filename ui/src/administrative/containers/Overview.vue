@@ -276,7 +276,7 @@ export default {
 
       const settings = await settingsSvc.getSetting('administrative', 'download_labels_print_file');
       if (util.isTrue(settings[0].value)) {
-        const filename = this.ctx.container.name.replace(/\/|\\/g, '_') + '.csv';
+        const filename = this.ctx.container.name.replace(/[^\w.]+/g, '_').replace(/__+/g, '_') + '.csv';
         const query    = {jobId: job.id, filename};
         http.downloadFile(http.getUrl('container-label-printer/output-file', {query}));
       } else {
