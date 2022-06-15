@@ -71,7 +71,7 @@ export default {
 
   props: ['criteria', 'errorOpts', 'placeholder', 'label', 'optionsAtBottom', 'hideButtons', 'modelValue'],
 
-  emits: ['on-add', 'labels-scanned', 'update:modelValue'],
+  emits: ['on-add', 'labels-scanned'],
 
   data() {
     return {
@@ -79,24 +79,14 @@ export default {
 
       dupLabels: [],
 
+      inputValue: '',
+
       barcodingEnabled: false,
     }
   },
 
   async created() {
     this.barcodingEnabled = await http.get('collection-protocols/barcoding-enabled');
-  },
-
-  computed: {
-    inputValue: {
-      get() {
-        return this.modelValue || '';
-      },
-
-      set(value) {
-        this.$emit('update:modelValue', value);
-      }
-    }
   },
 
   methods: {
