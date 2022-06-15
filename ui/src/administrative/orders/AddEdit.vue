@@ -396,6 +396,9 @@ export default {
           quantity: specimen.availableQty,
           dispose: true
         }));
+      if (specimens.length != orderItems.length) {
+        alertSvc.error('One or more specimens not added to the order, as they are already distributed or disposed.');
+      }
 
       const limit    = this.ctx.maxSpmnsLimit;
       const newItems = util.getAbsentItems(this.dataCtx.orderItems, orderItems, 'specimen.id');
@@ -485,6 +488,7 @@ export default {
       }
 
       if (this.$refs.specimenDetails && !this.$refs.specimenDetails.validate()) {
+        alertSvc.error('There are validation errors in the specimens step. Please correct them.');
         return;
       }
 

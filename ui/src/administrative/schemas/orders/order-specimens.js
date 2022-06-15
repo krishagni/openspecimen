@@ -59,9 +59,6 @@ export default {
         "min-width": "100px"
       },
       "validations": {
-        "nz": {
-          "message": "Distributed quantity cannot be zero"
-        },
         "le": {
           "message": "Distributed quantity cannot be greater than the available quantity",
           "expr": "specimen.availableQty",

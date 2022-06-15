@@ -18,9 +18,6 @@ export default {
       "measure": "quantity",
       "entity": "item.specimen",
       "validations": {
-        "nz": {
-          "message": "Return quantity cannot be zero"
-        },
         "le": {
           "message": "Return quantity cannot be greater than the distributed quantity",
           "expr": "item.distributedQty",
