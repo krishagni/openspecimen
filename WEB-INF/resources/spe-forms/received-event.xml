@@ -25,7 +25,7 @@
         <caption>#getMessage("specimen_event_user")</caption>
         <column>USER_ID</column>
         <showInGrid>true</showInGrid>
-        <mandatory>true</mandatory>
+        <showWhen>quality != To be Received</showWhen>
       </userField>
     </row>
 
@@ -38,7 +38,7 @@
         <format>MM-dd-yyyy HH:mm</format>
         <showInGrid>true</showInGrid>
         <default>current_date</default>
-        <mandatory>true</mandatory>
+        <showWhen>quality != To be Received</showWhen>
       </datePicker>
     </row>
 

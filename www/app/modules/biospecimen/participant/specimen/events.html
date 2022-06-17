@@ -50,10 +50,10 @@
                 </a>
               </td>
               <td class="col col-xs-3">
-                <span>{{event.user}}</span>
+                <span>{{event.user | osNoValue}}</span>
               </td>
               <td class="col col-xs-3">
-                <span>{{event.time | date: global.dateTimeFmt}}</span>
+                <span>{{event.time | date: global.dateTimeFmt | osNoValue}}</span>
               </td>
               <td class="col col-xs-1 os-click-esc">
                 <span ng-show="specimen.activityStatus == 'Active' && event.isEditable"

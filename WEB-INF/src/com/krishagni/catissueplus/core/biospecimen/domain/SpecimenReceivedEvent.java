@@ -17,6 +17,8 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 public class SpecimenReceivedEvent extends SpecimenEvent {
 	public static final String FORM_NAME = "SpecimenReceivedEvent";
 
+	public static final String TO_BE_RECEIVED = "To be Received";
+
 	private PermissibleValue quality;
 
 	public SpecimenReceivedEvent(Specimen specimen) {
@@ -55,6 +57,14 @@ public class SpecimenReceivedEvent extends SpecimenEvent {
 	public void update(SpecimenEvent other) {
 		update((SpecimenReceivedEvent)other);
 	}
+
+	public boolean isReceived() {
+		return isReceived(getQuality());
+	}
+
+	public static boolean isReceived(PermissibleValue recvQuality) {
+		return recvQuality != null && !recvQuality.getValue().equals(TO_BE_RECEIVED);
+	}
 	
 	public static SpecimenReceivedEvent getFor(Specimen specimen) {
 		if (specimen.getId() == null) {
@@ -85,6 +95,10 @@ public class SpecimenReceivedEvent extends SpecimenEvent {
 		}
 
 		event.setQuality(event.daoFactory.getPermissibleValueDao().getPv(PvAttributes.RECV_QUALITY, defRecvQuality));
+		if (!isReceived(event.getQuality())) {
+			return event;
+		}
+
 		SpecimenRequirement sr = specimen.getSpecimenRequirement();
 		if (sr != null) {
 			event.setUser(sr.getReceiver());

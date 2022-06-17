@@ -975,7 +975,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 		
 		SpecimenCollectionEvent event = SpecimenCollectionEvent.getFor(specimen);
-		setEventAttrs(collDetail, event, ose);
+		setEventAttrs(collDetail, false, event, ose);
 
 		String collCont = collDetail.getContainer();
 		if (StringUtils.isNotBlank(collCont)) {
@@ -1020,8 +1020,6 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 		
 		SpecimenReceivedEvent event = SpecimenReceivedEvent.getFor(specimen);
-		setEventAttrs(recvDetail, event, ose);
-		
 		String recvQuality = recvDetail.getReceivedQuality();
 		if (StringUtils.isNotBlank(recvQuality)) {
 			PermissibleValue recvPv = getPv(RECV_QUALITY, recvQuality, false);
@@ -1032,6 +1030,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			}
 		}
 
+		setEventAttrs(recvDetail, !event.isReceived(), event, ose);
 		specimen.setReceivedEvent(event);
 	}
 	
@@ -1043,19 +1042,24 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 	}
 	
-	private void setEventAttrs(SpecimenEventDetail detail, SpecimenEvent event, OpenSpecimenException ose) {
-		User user = getUser(detail, ose);
-		if (user != null) {
-			event.setUser(user);
-		}
-		
-		if (detail.getTime() != null) {
-			event.setTime(detail.getTime());
-		}
-		
+	private void setEventAttrs(SpecimenEventDetail detail, boolean skipUserTime, SpecimenEvent event, OpenSpecimenException ose) {
 		if (StringUtils.isNotBlank(detail.getComments())) {
 			event.setComments(detail.getComments());
-		}		
+		}
+
+		if (skipUserTime) {
+			event.setUser(null);
+			event.setTime(null);
+		} else {
+			User user = getUser(detail, ose);
+			if (user != null) {
+				event.setUser(user);
+			}
+
+			if (detail.getTime() != null) {
+				event.setTime(detail.getTime());
+			}
+		}
 	}
 	
 	private void setExtension(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {

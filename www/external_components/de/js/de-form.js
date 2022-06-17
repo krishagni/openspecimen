@@ -2396,7 +2396,7 @@ edu.common.de.LookupField = function(params, callback) {
 
       $.when(dd).done(
         function(result) {
-          that.value = result.id;
+          field.defaultValue = that.value = result.id;
           that.control.setValue(result.id);
           callback(result);
         }

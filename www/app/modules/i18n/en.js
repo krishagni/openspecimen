@@ -866,7 +866,7 @@
     "activity_full_info": "{{user}} created {{name}} on {{time | date: global.dateTimeFmt}}",
     "activity_user_info": "{{user}} created {{name}}",
     "activity_time_info": "{{name}} created on {{time | date: global.dateTimeFmt}}",
-    "activity_info": "{{name}} created",
+    "activity_info": "{{name}}",
     "activity_status": "Activity Status",
     "location" : "Location",
     "search_results": "Specimen Search Result for {{key}}",

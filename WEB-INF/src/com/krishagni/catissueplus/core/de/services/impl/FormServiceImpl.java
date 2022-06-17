@@ -38,6 +38,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGrou
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
@@ -1384,6 +1385,8 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					if (specimen.getReceivedEvent() != null && specimen.getReceivedEvent().getQuality() != null) {
 						prevRecv = specimen.getReceivedEvent().getQuality().getValue();
 					}
+
+					setReceivedEventUserTime(formData);
 				}
 
 				specimen.setUpdated(true);
@@ -1460,6 +1463,40 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		notifyFormSave(object, formContext, recordEntry, formData, isInsert);
 		return formData;
+	}
+
+	private void setReceivedEventUserTime(FormData formData) {
+		ControlValue qualityCv = formData.getFieldValue("quality");
+		String quality = null;
+		if (qualityCv != null && qualityCv.getValue() != null && StringUtils.isNotBlank(qualityCv.getValue().toString())) {
+			quality = qualityCv.getControl().toDisplayValue(qualityCv.getValue());
+		}
+
+		ControlValue userCv = formData.getFieldValue("user");
+		ControlValue timeCv = formData.getFieldValue("time");
+		if (StringUtils.isBlank(quality) || quality.equals(SpecimenReceivedEvent.TO_BE_RECEIVED)) {
+			if (userCv != null) {
+				userCv.setValue(null);
+			}
+
+			if (timeCv != null) {
+				timeCv.setValue(null);
+			}
+		} else {
+			if (userCv != null) {
+				Object user = userCv.getValue();
+				if (user == null || StringUtils.isBlank(user.toString())) {
+					userCv.setValue(AuthUtil.getCurrentUser().getId().toString());
+				}
+			}
+
+			if (timeCv != null) {
+				Object time = timeCv.getValue();
+				if (time == null || StringUtils.isBlank(time.toString())) {
+					timeCv.setValue(String.valueOf(Calendar.getInstance().getTimeInMillis()));
+				}
+			}
+		}
 	}
 
 	private void notifyFormSave(Object object, FormContextBean ctxt, FormRecordEntryBean fre, FormData formData, boolean added) {

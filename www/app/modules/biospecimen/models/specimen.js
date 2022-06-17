@@ -313,7 +313,7 @@ angular.module('os.biospecimen.models.specimen', ['os.common.models', 'os.biospe
 
       if (this.receivedEvent.user && this.receivedEvent.user.id == eventData.user.id) {
         eventData.user = this.receivedEvent.user;
-      } else {
+      } else if (eventData.user && eventData.user.id > 0) {
         var that = this;
         User.getById(eventData.user.id).then(
           function(user) {

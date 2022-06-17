@@ -866,7 +866,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public boolean isReceived() {
-		return isPrimary() && isCollected() && !getReceivedEvent().getQuality().getValue().equals(TO_BE_RECEIVED);
+		return isPrimary() && isCollected() && getReceivedEvent() != null && getReceivedEvent().isReceived();
 	}
 
 	public void disable() {
@@ -2087,7 +2087,7 @@ public class Specimen extends BaseExtensionEntity {
 
 			Date createdOn = childSpmn.getCreatedOn();
 			if (parentSpmn.isPrimary()) {
-				parentSpmn.setCreatedOn(createdOn != null ? createdOn : getReceivedEvent().getTime());
+				parentSpmn.setCreatedOn(createdOn != null ? createdOn : parentSpmn.getReceivedEvent().getTime());
 				parentSpmn.addOrUpdateCollRecvEvents();
 			} else {
 				parentSpmn.setCreatedOn(createdOn != null ? createdOn : Calendar.getInstance().getTime());
