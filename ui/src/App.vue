@@ -219,6 +219,7 @@ a:focus, a:hover {
   line-height: 24px;
   width: 100%;
   float: left;
+  word-break: break-all;
 }
 
 .os-key-values .item .value img {
