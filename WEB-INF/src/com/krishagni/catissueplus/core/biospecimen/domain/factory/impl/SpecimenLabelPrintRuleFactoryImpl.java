@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -96,31 +97,50 @@ public class SpecimenLabelPrintRuleFactoryImpl extends AbstractLabelPrintRuleFac
 	}
 
 	private void setSpecimenClasses(Map<String, Object> inputMap, boolean failOnError, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		List<String> specimenClasses = objToList(inputMap.get("specimenClasses"));
-		rule.setSpecimenClasses(specimenClasses);
-		if (specimenClasses.isEmpty() || !failOnError) {
-			return;
+		List<String> inputList = objToList(inputMap.get("specimenClasses"));
+
+		List<PermissibleValue> result = new ArrayList<>();
+		Pair<List<Long>, List<String>> idsAndValues = getIdsAndNames(inputList);
+		if (!idsAndValues.first().isEmpty()) {
+			List<PermissibleValue> classPvs = getList(
+				(ids) -> daoFactory.getPermissibleValueDao().getByIds(ids),
+				idsAndValues.first(), (pv) -> pv.getId(),
+				failOnError ? ose : null, failOnError ? SpecimenErrorCode.INVALID_SPECIMEN_CLASS : null);
+			result.addAll(classPvs);
 		}
 
-		if (!PvValidator.areValid("specimen_type", specimenClasses)) {
-			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_CLASS, specimenClasses);
+		if (!idsAndValues.second().isEmpty()) {
+			List<PermissibleValue> classPvs = getList(
+				(values) -> daoFactory.getPermissibleValueDao().getPvs("specimen_type", idsAndValues.second()),
+				idsAndValues.second(), (pv) -> pv.getValue(),
+				failOnError ? ose : null, failOnError ? SpecimenErrorCode.INVALID_SPECIMEN_CLASS : null);
+			result.addAll(classPvs);
 		}
+
+		rule.setSpecimenClasses(result);
 	}
 
 	private void setSpecimenTypes(Map<String, Object> input, boolean failOnError, SpecimenLabelPrintRule rule, OpenSpecimenException ose) {
-		List<String> types = objToList(input.get("specimenTypes"));
-		rule.setSpecimenTypes(types);
-		if (types.isEmpty() || !failOnError) {
-			if (isEmptyString(input.get("specimenType"))) {
-				return;
-			}
+		List<String> inputList = objToList(input.get("specimenTypes"));
 
-			types = Collections.singletonList(input.get("specimenType").toString());
-			rule.setSpecimenTypes(types);
+		List<PermissibleValue> result = new ArrayList<>();
+		Pair<List<Long>, List<String>> idsAndValues = getIdsAndNames(inputList);
+		if (!idsAndValues.first().isEmpty()) {
+			List<PermissibleValue> typePvs = getList(
+				(ids) -> daoFactory.getPermissibleValueDao().getByIds(ids),
+				idsAndValues.first(), (pv) -> pv.getId(),
+				failOnError ? ose : null, failOnError ? SpecimenErrorCode.INVALID_SPECIMEN_TYPE : null);
+			result.addAll(typePvs);
 		}
 
-		if (!PvValidator.areValid("specimen_type", types)) {
-			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE, types);
+		if (!idsAndValues.second().isEmpty()) {
+			List<PermissibleValue> typePvs = getList(
+				(values) -> daoFactory.getPermissibleValueDao().getPvs("specimen_type", idsAndValues.second()),
+				idsAndValues.second(), (pv) -> pv.getValue(),
+				failOnError ? ose : null, failOnError ? SpecimenErrorCode.INVALID_SPECIMEN_TYPE : null);
+			result.addAll(typePvs);
 		}
+
+		rule.setSpecimenTypes(result);
 	}
 }

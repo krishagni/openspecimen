@@ -14,7 +14,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
-
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -150,7 +150,7 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 		rule.setCps(getCps(ruleLineFields[idx++]));
 		rule.setVisitSite(getSite(ruleLineFields[idx++]));
 		idx++;
-		rule.setSpecimenTypes(Collections.singletonList(ruleLineFields[idx++]));
+		rule.setSpecimenTypes(getSpecimenTypes(ruleLineFields[idx++]));
 		rule.setUsers(getUsers(ruleLineFields[idx++]));
 
 		if (!ruleLineFields[idx++].equals("*")) {
@@ -223,6 +223,14 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 		return daoFactory.getSiteDao().getSiteByName(siteName);
 	}
 
+	private List<PermissibleValue> getSpecimenTypes(String typesList) {
+		if (StringUtils.isBlank(typesList) || typesList.trim().equals("*")) {
+			return Collections.emptyList();
+		}
+
+		return daoFactory.getPermissibleValueDao().getPvs("specimen_type", Utility.csvToStringList(typesList));
+	}
+
 	private List<User> getUsers(String usersList) {
 		if (StringUtils.isBlank(usersList) || usersList.trim().equals("*")) {
 			return Collections.emptyList();
@@ -233,7 +241,6 @@ public class DefaultSpecimenLabelPrinter extends AbstractLabelPrinter<Specimen> 
 
 	private SpecimenLabelPrintRule replaceWildcardsWithNull(SpecimenLabelPrintRule rule) {
 		rule.setLineage(replaceWildcardWithNull(rule.getLineage()));
-		rule.setSpecimenTypes(replaceWildcardWithNull(rule.getSpecimenTypes()));
 		rule.setLabelType(replaceWildcardWithNull(rule.getLabelType()));
 		rule.setLabelDesign(replaceWildcardWithNull(rule.getLabelDesign()));
 		rule.setPrinterName(replaceWildcardWithNull(rule.getPrinterName()));

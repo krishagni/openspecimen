@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
@@ -20,9 +21,9 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 
 	private Site visitSite;
 
-	private List<String> specimenClasses;
+	private List<PermissibleValue> specimenClasses;
 	
-	private List<String> specimenTypes;
+	private List<PermissibleValue> specimenTypes;
 
 	private String lineage;
 
@@ -47,19 +48,19 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 		this.visitSite = visitSite;
 	}
 
-	public List<String> getSpecimenClasses() {
+	public List<PermissibleValue> getSpecimenClasses() {
 		return specimenClasses;
 	}
 
-	public void setSpecimenClasses(List<String> specimenClasses) {
+	public void setSpecimenClasses(List<PermissibleValue> specimenClasses) {
 		this.specimenClasses = specimenClasses;
 	}
 
-	public List<String> getSpecimenTypes() {
+	public List<PermissibleValue> getSpecimenTypes() {
 		return specimenTypes;
 	}
 
-	public void setSpecimenTypes(List<String> specimenTypes) {
+	public void setSpecimenTypes(List<PermissibleValue> specimenTypes) {
 		this.specimenTypes = specimenTypes;
 	}
 
@@ -89,13 +90,11 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 			return false;
 		}
 
-		String spmnClass = specimen.getSpecimenClass().getValue();
-		String spmnType  = specimen.getSpecimenType().getValue();
 		if (CollectionUtils.isNotEmpty(specimenClasses) || CollectionUtils.isNotEmpty(specimenTypes)) {
 			// either one of - specimen classes or specimen types is configured
-			if (specimenClasses == null || !specimenClasses.contains(spmnClass)) {
+			if (specimenClasses == null || !specimenClasses.contains(specimen.getSpecimenClass())) {
 				// input specimen class is not present in configured classes, if any
-				if (specimenTypes == null || !specimenTypes.contains(spmnType)) {
+				if (specimenTypes == null || !specimenTypes.contains(specimen.getSpecimenType())) {
 					//input specimen type is not present in configured types, if any
 					return false;
 				}
@@ -115,8 +114,8 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 
 		ruleDef.put("cps", getCpList(ufn));
 		ruleDef.put("visitSite", getSite(ufn, getVisitSite()));
-		ruleDef.put("specimenClasses", getClassesList());
-		ruleDef.put("specimenTypes", getTypesList());
+		ruleDef.put("specimenClasses", getClassesList(ufn));
+		ruleDef.put("specimenTypes", getTypesList(ufn));
 		ruleDef.put("lineage", getLineage());
 		return ruleDef;
 	}
@@ -126,8 +125,8 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 			.append(", cp = ").append(getCpList(true))
 			.append(", lineage = ").append(getLineage())
 			.append(", visit site = ").append(getSite(true, getVisitSite()))
-			.append(", specimen classes = ").append(getClassesList())
-			.append(", specimen types = ").append(getTypesList())
+			.append(", specimen classes = ").append(getClassesList(true))
+			.append(", specimen types = ").append(getTypesList(true))
 			.toString();
 	}
 
@@ -140,15 +139,19 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 		return Utility.nullSafeStream(getCps()).map(cpMapper).collect(Collectors.toList());
 	}
 
-	private List<String> getClassesList() {
-		return getSpecimenClasses();
+	private List<String> getClassesList(boolean ufn) {
+		return Utility.nullSafeStream(getSpecimenClasses()).map(getPvMapper(ufn)).collect(Collectors.toList());
 	}
 
-	private List<String> getTypesList() {
-		return getSpecimenTypes();
+	private List<String> getTypesList(boolean ufn) {
+		return Utility.nullSafeStream(getSpecimenTypes()).map(getPvMapper(ufn)).collect(Collectors.toList());
 	}
 
 	private String getSite(boolean ufn, Site site) {
 		return site != null ? (ufn ? site.getName() : site.getId().toString()) : null;
+	}
+
+	private Function<PermissibleValue, String> getPvMapper(boolean ufn) {
+		return ufn ? (pv) -> pv.getValue() : (pv) -> pv.getId().toString();
 	}
 }
