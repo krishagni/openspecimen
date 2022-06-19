@@ -142,10 +142,16 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		detail.setPpid(resp.getPayload().getPpid());
 
 		if (cpr != null) {
-			cpr.getVisits().stream()
-				.filter(visit -> isVisitOfSameEvent(visit, detail.getEventLabel()))
-				.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), detail.getVisitDate()))
-				.findAny().ifPresent(matchedVisit -> detail.setVisitId(matchedVisit.getId()));
+			if (StringUtils.isBlank(detail.getVisitName())) {
+				cpr.getVisits().stream()
+					.filter(visit -> isVisitOfSameEvent(visit, detail.getEventLabel()))
+					.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), detail.getVisitDate()))
+					.findAny().ifPresent(matchedVisit -> detail.setVisitId(matchedVisit.getId()));
+			} else {
+				cpr.getVisits().stream()
+					.filter(visit -> detail.getVisitName().equals(visit.getName()))
+					.findAny().ifPresent(matchedVisit -> detail.setVisitId(matchedVisit.getId()));
+			}
 		}
 	}
 
@@ -204,13 +210,6 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 			visitDetail.setComments(detail.getVisitComments());
 		}
 
-		if (StringUtils.isNotBlank(visitDetail.getName())) {
-			Visit visit = daoFactory.getVisitsDao().getByName(visitDetail.getName());
-			if (visit != null) {
-				visitDetail.setId(visit.getId());
-			}
-		}
-		
 		ResponseEvent<VisitDetail> resp;
 		if (visitDetail.getId() != null) {
 			if (detail.isAttrModified("visitDate")) {
