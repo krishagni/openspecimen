@@ -2087,8 +2087,17 @@ public class Specimen extends BaseExtensionEntity {
 
 			Date createdOn = childSpmn.getCreatedOn();
 			if (parentSpmn.isPrimary()) {
-				parentSpmn.setCreatedOn(createdOn != null ? createdOn : parentSpmn.getReceivedEvent().getTime());
 				parentSpmn.addOrUpdateCollRecvEvents();
+
+				if (createdOn == null) {
+					createdOn = parentSpmn.getReceivedEvent().getTime();
+				}
+
+				if (createdOn == null) {
+					createdOn = Calendar.getInstance().getTime();
+				}
+
+				parentSpmn.setCreatedOn(createdOn);
 			} else {
 				parentSpmn.setCreatedOn(createdOn != null ? createdOn : Calendar.getInstance().getTime());
 			}

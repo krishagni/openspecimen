@@ -123,5 +123,14 @@ public class SpecimenReceivedEvent extends SpecimenEvent {
 	private void update(SpecimenReceivedEvent other) {
 		super.update(other);
 		setQuality(other.getQuality());
+		if (isReceived()) {
+			if (getUser() == null) {
+				setUser(AuthUtil.getCurrentUser());
+			}
+
+			if (getTime() == null) {
+				setTime(Calendar.getInstance().getTime());
+			}
+		}
 	}
 }
