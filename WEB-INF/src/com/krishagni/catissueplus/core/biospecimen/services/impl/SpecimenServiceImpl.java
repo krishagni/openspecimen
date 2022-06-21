@@ -1216,6 +1216,27 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	}
 
 	private SpecimenDetail getDerivedSpecimen(Specimen parentSpecimen, SpecimenAliquotsSpec spec) {
+		if (spec.useExistingDerived()) {
+			Specimen existing = parentSpecimen.getChildCollection().stream()
+				.filter(spmn -> {
+					if (!spmn.isDerivative() || !spmn.isCollected() || !spmn.isActive()) {
+						return false;
+					}
+
+					if (StringUtils.isBlank(spec.getSpecimenClass()) || spec.getSpecimenClass().equals(spmn.getSpecimenClass().getValue())) {
+						return spmn.getSpecimenType().getValue().equals(spec.getType());
+					}
+
+					return false;
+				})
+				.findFirst().orElse(null);
+			if (existing != null) {
+				SpecimenDetail derived = SpecimenDetail.from(existing, true, false, true);
+				derived.setCloseAfterChildrenCreation(!spec.keepDerivedOpen());
+				return derived;
+			}
+		}
+
 		SpecimenDetail derived = new SpecimenDetail();
 		derived.setLineage(Specimen.DERIVED);
 		derived.setParentId(parentSpecimen.getId());
@@ -1225,11 +1246,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		derived.setType(spec.getType());
 		derived.setStatus(Specimen.COLLECTED);
 		derived.setIncrParentFreezeThaw(spec.getIncrParentFreezeThaw());
-		derived.setCloseAfterChildrenCreation(true);
-
-		Integer count = spec.getNoOfAliquots();
-		BigDecimal qtyPerAliquot = spec.getQtyPerAliquot();
-		derived.setInitialQty(count != null && qtyPerAliquot != null ? qtyPerAliquot.multiply(new BigDecimal(count)) : null);
+		derived.setCloseAfterChildrenCreation(!spec.keepDerivedOpen());
 		return derived;
 	}
 

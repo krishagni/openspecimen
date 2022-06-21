@@ -57,6 +57,10 @@ public class SpecimenAliquotsSpec {
 
 	private Boolean createDerived;
 
+	private Boolean keepDerivedOpen;
+
+	private Boolean useExistingDerived;
+
 	private Boolean printLabel;
 
 	private String comments;
@@ -262,6 +266,30 @@ public class SpecimenAliquotsSpec {
 	}
 
 	public boolean createDerived() { return createDerived != null && createDerived; }
+
+	public Boolean getKeepDerivedOpen() {
+		return keepDerivedOpen;
+	}
+
+	public void setKeepDerivedOpen(Boolean keepDerivedOpen) {
+		this.keepDerivedOpen = keepDerivedOpen;
+	}
+
+	public boolean keepDerivedOpen() {
+		return keepDerivedOpen != null && keepDerivedOpen;
+	}
+
+	public Boolean getUseExistingDerived() {
+		return useExistingDerived;
+	}
+
+	public void setUseExistingDerived(Boolean useExistingDerived) {
+		this.useExistingDerived = useExistingDerived;
+	}
+
+	public boolean useExistingDerived() {
+		return useExistingDerived != null && useExistingDerived;
+	}
 
 	public Boolean getPrintLabel() {
 		return printLabel;

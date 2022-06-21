@@ -104,11 +104,12 @@ class FormUtil {
   createCustomFieldsMap(object, useDisplayValue) {
     let extnDetail = object.extensionDetail;
     if (!extnDetail || !extnDetail.attrs) {
-      return;
+      return object;
     }
 
     let valueMap = this._createCustomFieldsMap(extnDetail.attrs, useDisplayValue);
     extnDetail.attrsMap = Object.assign(valueMap, {id: extnDetail.id, containerId: extnDetail.formId});
+    return object;
   }
 
   _createCustomFieldsMap(attrs, useDisplayValue) {
