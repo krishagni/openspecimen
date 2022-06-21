@@ -4,6 +4,7 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.Properties;
 
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 import edu.common.dynamicextensions.domain.nui.AbstractLookupControl;
@@ -54,6 +55,15 @@ public class UserControl extends AbstractLookupControl {
 		}
 
 		return ALT_KEY;
+	}
+
+	@Override
+	public Long fromString(String value) {
+		if ("current_user".equals(value)) {
+			return AuthUtil.getCurrentUser() != null ? AuthUtil.getCurrentUser().getId() : null;
+		}
+
+		return super.fromString(value);
 	}
 	
 	private static Properties initPvSourceProps() {
