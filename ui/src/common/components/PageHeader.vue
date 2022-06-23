@@ -82,7 +82,11 @@ export default {
         .map(card => {
           let item = {label: card.title};
           if (typeof card.href == 'string') {
-            item.url = this.ui.ngServer + card.href;
+            if (card.href.indexOf('http://') == 0 || card.href.indexOf('https://') == 0) {
+              item.url = card.href;
+            } else {
+              item.url = this.ui.ngServer + card.href;
+            }
           } else if (typeof card.href == 'function') {
             item.command = () => {
               Promise.resolve(card.href()).then(

@@ -6,6 +6,9 @@ class Router {
   baseUrl = ui.ngServer + '#/';
   // baseUrl = 'http://localhost:9000/#/';
 
+  uiUrl = 'ui-app/';
+  // uiUrl = 'http://localhost:8081/';
+
   ngGoto(state, params, newTab) {
     const url = this.ngUrl(state, params);
     if (newTab) {
@@ -53,6 +56,11 @@ class Router {
   getUrl(name, params, query) {
     let route = router.resolve({name: name, params: params, query: query});
     return route && route.href;
+  }
+
+  getFullUrl(name, params, query) {
+    const url = this.getUrl(name, params, query);
+    return this.uiUrl + url;
   }
 }
 
