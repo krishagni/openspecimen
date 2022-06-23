@@ -229,7 +229,6 @@ let usrStateQ  = userSvc.getUiState();
 let usrRightsQ = authSvc.loadUserRights();
 let spmnPropsQ = util.loadSpecimenTypeProps();
 
-
 Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ]).then(
   (resp) => {
     let appProps = resp[0];
