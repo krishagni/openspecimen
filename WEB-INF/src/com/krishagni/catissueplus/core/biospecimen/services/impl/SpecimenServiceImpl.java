@@ -328,6 +328,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					DeleteLogUtil.getInstance().log(specimen);
 				}
 
+				specimen.setUpdated(true);
 				EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 				result.add(SpecimenDetail.from(specimen));
 			}
