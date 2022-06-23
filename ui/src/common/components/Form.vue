@@ -1,6 +1,12 @@
 
 <template>
   <form novalidate>
+    <div class="row" v-if="$slots.message && $slots.message().length > 0">
+      <div class="field">
+        <slot name="message"></slot>
+      </div>
+    </div>
+
     <div class="row" v-for="(formRow, rowIdx) of formRows" :key="rowIdx">
       <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
