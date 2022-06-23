@@ -87,6 +87,8 @@ angular.module('os.biospecimen.participant')
           group: group, type: 'consent', title: 'participant.consents',
           showImportType: false, csvType: 'MULTIPLE_ROWS_PER_OBJ', importType: 'UPDATE'
         }];
+      } else {
+        return [];
       }
     }
 
