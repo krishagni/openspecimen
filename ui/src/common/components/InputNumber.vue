@@ -3,7 +3,7 @@
   <div class="os-input-number">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <InputNumber v-model="inputValue" :mode="'decimal'"
-        :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits" />
+        :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits" @input="handleInput" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
@@ -41,6 +41,9 @@ export default {
   },
 
   methods: {
+    handleInput: function(event) {
+      this.inputValue = event.value;
+    }
   }
 }
 </script>
