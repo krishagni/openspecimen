@@ -1,6 +1,9 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.envers.Audited;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +44,10 @@ public class CpConsentTier extends ConsentTier {
 		result.setStatement(getStatement());
 		result.setActivityStatus(getActivityStatus());
 		return result;
+	}
+
+	protected Set<String> getAuditStringInclusionProps() {
+		return Arrays.stream(new String[] { "id", "collectionProtocol", "statement", "activityStatus" })
+			.collect(Collectors.toSet());
 	}
 }

@@ -37,4 +37,51 @@
       <column name="USER_GROUP_ID" type="${int.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail of CP workflows">
+    <createTable tableName="OS_CP_WORKFLOWS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="CP_ID" type="${int.type}" />
+      <column name="cp_MOD" type="${boolean.type}" />
+      <column name="WORKFLOWS" type="${clob.type}" />
+      <column name="workflowsJson_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: CP consent tier collection">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="consentTier_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: CP report settings">
+    <createTable tableName="OS_CP_REPORT_SETTINGS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="CP_ID" type="${int.type}" />
+      <column name="cp_MOD" type="${boolean.type}" />
+      <column name="ENABLED" type="${boolean.type}" />
+      <column name="enabled_MOD" type="${boolean.type}" />
+      <column name="DATA_QUERY_ID" type="${int.type}" />
+      <column name="dataQuery_MOD" type="${boolean.type}" />
+      <column name="CONFIG" type="${clob.type}" />
+      <column name="configJson_MOD" type="${boolean.type}" />
+      <column name="EMAIL_TMPL" type="${clob.type}" />
+      <column name="emailTmpl_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+      <column name="recipients_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: CP report email recipients">
+    <createTable tableName="OS_CP_REPORT_RCPTS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="REPORT_ID" type="${int.type}" />
+      <column name="USER_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

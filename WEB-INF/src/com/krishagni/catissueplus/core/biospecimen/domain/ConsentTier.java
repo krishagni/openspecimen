@@ -1,5 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
+import org.hibernate.envers.Audited;
+
+@Audited
 public class ConsentTier extends BaseEntity {
 	private ConsentStatement statement;
 	

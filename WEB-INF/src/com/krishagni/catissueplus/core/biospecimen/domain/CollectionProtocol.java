@@ -550,7 +550,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.visitLevelConsents = visitLevelConsents;
 	}
 
-	@NotAudited
 	public Set<CpConsentTier> getConsentTier() {
 		return consentTier;
 	}

@@ -1,12 +1,11 @@
 <div>
   <div class="os-page-commands">
     <div class="left">
-      <button show-if-allowed="cpResource.updateOpts" class="default" title="{{'cp.tooltip.edit' | translate}}"
-        ui-sref="cp-addedit({cpId: cp.id})">
+      <button show-if-allowed="cpResource.updateOpts" class="default" ui-sref="cp-addedit({cpId: cp.id})">
         <span class="fa fa-pencil"></span>
         <span translate="common.buttons.edit">Edit</span>
       </button>
-      <button show-if-allowed="cpResource.updateOpts" class="default" title="{{'cp.tooltip.publish' | translate}}"
+      <button show-if-allowed="cpResource.updateOpts" class="default"
         ng-click="confirmPublish()" ng-if="cp.draftMode && cpVersioningEnabled">
         <span class="fa fa-check"></span>
         <span translate="cp.menu_options.publish">Publish</span>
@@ -31,13 +30,11 @@
         <span class="fa fa-trash"></span>
         <span translate="cp.menu_options.delete">Delete</span>
       </button>
-      <button class="default" title="{{'cp.view_participants' | translate}}"
-        ui-sref="participant-list({cpId: cp.id})" ng-if="!cp.specimenCentric">
+      <button class="default" ui-sref="participant-list({cpId: cp.id})" ng-if="!cp.specimenCentric">
         <span class="fa fa-group"></span>
         <span translate="cp.view_participants">View Participants</span>
       </button>
-      <button class="default" title="{{'cp.view_specimens' | translate}}"
-        ui-sref="cp-specimens({cpId: cp.id})" ng-if="cp.specimenCentric">
+      <button class="default" ui-sref="cp-specimens({cpId: cp.id})" ng-if="cp.specimenCentric">
         <span class="fa fa-flask"></span>
         <span translate="cp.view_specimens">View Specimens</span>
       </button>

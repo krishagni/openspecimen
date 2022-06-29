@@ -1,12 +1,18 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.hibernate.envers.Audited;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
+@Audited
 public class CpWorkflowConfig extends BaseEntity {
 	private CollectionProtocol cp;
 	
@@ -46,6 +52,10 @@ public class CpWorkflowConfig extends BaseEntity {
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		}
+	}
+
+	protected Set<String> getAuditStringInclusionProps() {
+		return Arrays.stream(new String[] { "cp", "workflowsJson" }).collect(Collectors.toSet());
 	}
 
 	private ObjectMapper getReadMapper() {

@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -12,6 +14,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 
+@Audited
 public class ReportSettings extends BaseEntity {
 	private boolean enabled = true;
 
@@ -39,6 +42,7 @@ public class ReportSettings extends BaseEntity {
 		this.enabled = enabled;
 	}
 
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public SavedQuery getDataQuery() {
 		return dataQuery;
 	}

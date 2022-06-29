@@ -47,6 +47,10 @@ public class FormContextBean {
 		this.identifier = identifier;
 	}
 
+	public Long getId() {
+		return identifier;
+	}
+
 	public Long getContainerId() {
 		return containerId;
 	}

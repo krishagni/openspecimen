@@ -23,6 +23,8 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class BaseEntity {
 	private static final Map<String, Set<String>> entityProperties = new ConcurrentHashMap<>();
@@ -253,8 +255,10 @@ public class BaseEntity {
 			result = toCollectionString((Iterable) obj);
 		} else if (isAssignableFrom(BaseEntity.class, obj)) {
 			result = "{id=" + getObjId(obj) + "}";
+		} else if (obj instanceof Map) {
+			result = Utility.mapToJson((Map) obj);
 		} else if (obj != null) {
-			result = "Unknown object type: " + obj.getClass().getName();
+			result = "{id=" + getObjId(obj) + "}";
 		}
 
 		return result;
@@ -275,6 +279,10 @@ public class BaseEntity {
 		try {
 			StringBuilder collStr = new StringBuilder();
 			for (Object element : collection) {
+				if (isDeleted(element)) {
+					continue;
+				}
+
 				collStr.append(toObjectString(element)).append(",");
 			}
 
@@ -289,6 +297,20 @@ public class BaseEntity {
 		}
 	}
 
+	private boolean isDeleted(Object obj) {
+		if (!isAssignableFrom(BaseEntity.class, obj)) {
+			return false;
+		}
+
+		try {
+			Object status = PropertyAccessorFactory.forBeanPropertyAccess(obj).getPropertyValue("activityStatus");
+			return status != null && status.toString().equals(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		} catch (Exception e) {
+		}
+
+		return false;
+	}
+
 	private boolean isAssignableFrom(Class<?> superClass, Object value) {
 		return value != null && superClass.isAssignableFrom(value.getClass());
 	}
@@ -298,8 +320,7 @@ public class BaseEntity {
 			Object id = PropertyAccessorFactory.forBeanPropertyAccess(value).getPropertyValue("id");
 			return id == null ? StringUtils.EMPTY : id;
 		} catch (Exception e) {
-			e.getMessage();
-			return e.getMessage();
+			return "Unknown object type: " + value.getClass().getName() + ": " + e.getMessage();
 		}
 	}
 }
