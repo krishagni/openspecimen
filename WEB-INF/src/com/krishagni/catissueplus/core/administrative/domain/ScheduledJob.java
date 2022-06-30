@@ -5,8 +5,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.springframework.beans.BeanUtils;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.ScheduledJobErrorCode;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
@@ -19,6 +22,7 @@ import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 
+@Audited
 public class ScheduledJob extends BaseEntity {
 	private static final LogUtil logger = LogUtil.getLogger(ScheduledJob.class);
 
@@ -236,6 +240,7 @@ public class ScheduledJob extends BaseEntity {
 		this.fixedArgs = fixedArgs;
 	}
 
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public SavedQuery getSavedQuery() {
 		return savedQuery;
 	}
@@ -252,6 +257,7 @@ public class ScheduledJob extends BaseEntity {
 		this.runAs = runAs;
 	}
 
+	@NotAudited
 	public String getRunByNode() {
 		return runByNode;
 	}
@@ -260,6 +266,7 @@ public class ScheduledJob extends BaseEntity {
 		this.runByNode = runByNode;
 	}
 
+	@AuditJoinTable(name = "OS_SCHED_JOBS_NOTIF_RCPTS_AUD")
 	public Set<User> getRecipients() {
 		return recipients;
 	}
@@ -268,6 +275,7 @@ public class ScheduledJob extends BaseEntity {
 		this.recipients = recipients;
 	}
 
+	@AuditJoinTable(name = "OS_SCHED_JOB_SHARED_USERS_AUD")
 	public Set<User> getSharedWith() {
 		return sharedWith;
 	}

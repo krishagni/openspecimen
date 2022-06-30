@@ -148,4 +148,72 @@
       <column name="activityStatus_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Scheduled jobs">
+    <createTable tableName="OS_SCHEDULED_JOBS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="NAME" type="${text.type}(255)" />
+      <column name="name_MOD" type="${boolean.type}" />
+      <column name="CREATED_BY" type="${int.type}" />
+      <column name="createdBy_MOD" type="${boolean.type}" />
+      <column name="START_DATE" type="${nullable.ts.type}" />
+      <column name="startDate_MOD" type="${boolean.type}" />
+      <column name="END_DATE" type="${nullable.ts.type}" />
+      <column name="endDate_MOD" type="${boolean.type}" />
+      <column name="HOURLY_INTERVAL" type="${smallint.type}" />
+      <column name="hourlyInterval_MOD" type="${boolean.type}" />
+      <column name="MINUTELY_INTERVAL" type="${smallint.type}" />
+      <column name="minutelyInterval_MOD" type="${boolean.type}" />
+      <column name="SCHEDULED_HOUR" type="${smallint.type}" />
+      <column name="scheduledHour_MOD" type="${boolean.type}" />
+      <column name="SCHEDULED_MINUTE" type="${smallint.type}" />
+      <column name="scheduledMinute_MOD" type="${boolean.type}" />
+      <column name="SCHEDULED_DAY_OF_WEEK" type="${text.type}(16)" />
+      <column name="scheduledDayOfWeek_MOD" type="${boolean.type}" />
+      <column name="SCHEDULED_DAY_OF_MONTH" type="${smallint.type}" />
+      <column name="scheduledDayOfMonth_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+      <column name="REPEAT_SCHEDULE" type="${text.type}(16)" />
+      <column name="repeatSchedule_MOD" type="${boolean.type}" />
+      <column name="TYPE" type="${text.type}(16)" />
+      <column name="type_MOD" type="${boolean.type}" />
+      <column name="COMMAND" type="${text.type}(255)" />
+      <column name="command_MOD" type="${boolean.type}" />
+      <column name="FIXED_ARGS" type="${clob.type}" />
+      <column name="fixedArgs_MOD" type="${boolean.type}" />
+      <column name="TASK_IMPL_FQN" type="${text.type}(255)" />
+      <column name="taskImplfqn_MOD" type="${boolean.type}" />
+      <column name="QUERY_ID" type="${int.type}" />
+      <column name="savedQuery_MOD" type="${boolean.type}" />
+      <column name="RUN_AS_USER_ID" type="${int.type}" />
+      <column name="runAs_MOD" type="${boolean.type}" />
+      <column name="RT_ARGS_PROVIDED" type="${boolean.type}" />
+      <column name="rtArgsProvided_MOD" type="${boolean.type}" />
+      <column name="RT_ARGS_HELP_TEXT" type="${text.type}(255)" />
+      <column name="rtArgsHelpText_MOD" type="${boolean.type}" />
+      <column name="recipients_MOD" type="${boolean.type}" />
+      <column name="sharedWith_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Job run status notification recipients">
+    <createTable tableName="OS_SCHED_JOBS_NOTIF_RCPTS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="SCHEDULED_JOB_ID" type="${int.type}" />
+      <column name="USER_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Users with whom the scheduled job is shared">
+    <createTable tableName="OS_SCHED_JOB_SHARED_USERS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="SCHEDULED_JOB_ID" type="${int.type}" />
+      <column name="USER_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>
