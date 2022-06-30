@@ -331,7 +331,9 @@ public class BaseEntity {
 			Object idObj = bean.getPropertyValue("id");
 			id = idObj == null ? StringUtils.EMPTY : idObj.toString();
 		} catch (Exception e) {
-			id = "Unknown property: " + value.getClass().getName() + ".id: " + e.getMessage();
+			if (isAssignableFrom(BaseEntity.class, value)) {
+				id = "Unknown property: " + value.getClass().getName() + ".id: " + e.getMessage();
+			}
 		}
 
 		try {
@@ -349,9 +351,17 @@ public class BaseEntity {
 			// name = "Unknown property: " + value.getClass().getName() + ".name: " + e.getMessage();
 		}
 
-		String result = "{id=" + id;
+		String result = "{";
+		if (id != null) {
+			result += "id=" + id;
+		}
+
 		if (name != null) {
-			result += ", name=" + name;
+			if (id != null) {
+				result += ", ";
+			}
+
+			result += "name=" + name;
 		}
 
 		result += "}";
