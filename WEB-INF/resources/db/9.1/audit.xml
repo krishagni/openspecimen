@@ -84,4 +84,48 @@
       <column name="USER_ID" type="${int.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Change password update time field data type to timestamp">
+    <modifyDataType tableName="CATISSUE_PASSWORD" columnName="UPDATE_DATE" newDataType="${timestamp.type}" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Config settings">
+    <createTable tableName="OS_CFG_SETTINGS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="PROPERTY_ID" type="${int.type}" />
+      <column name="property_MOD" type="${boolean.type}" />
+      <column name="VALUE" type="${text.type}(255)" />
+      <column name="value_MOD" type="${boolean.type}" />
+      <column name="ACTIVATED_BY" type="${int.type}" />
+      <column name="activatedBy_MOD" type="${boolean.type}" />
+      <column name="ACTIVATION_DATE" type="${timestamp.type}" />
+      <column name="activationDate_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: print rules">
+    <createTable tableName="OS_PRINT_RULES_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="DESCRIPTION" type="${text.type}(255)" />
+      <column name="description_MOD" type="${boolean.type}" />
+      <column name="OBJECT_TYPE" type="${text.type}(32)" />
+      <column name="objectType_MOD" type="${boolean.type}" />
+      <column name="INSTITUTE_ID" type="${int.type}" />
+      <column name="institute_MOD" type="${boolean.type}" />
+      <column name="UPDATED_BY" type="${int.type}" />
+      <column name="updatedBy_MOD" type="${boolean.type}" />
+      <column name="UPDATED_ON" type="${timestamp.type}" />
+      <column name="updatedOn_MOD" type="${boolean.type}" />
+      <column name="RULE_DEF" type="${clob.type}" />
+      <column name="ruleDefJson_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

@@ -43,7 +43,7 @@ import org.hibernate.persister.entity.EntityPersister;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-
+import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
@@ -283,10 +283,13 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		logger.info("Exporting form data revisions ...");
 		File formsDataRevs   = new FormsDataRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
 
+		logger.info("Export user password revisions ...");
+		File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+
 		logger.info("Creating revisions ZIP file ...");
 		File result = new File(getAuditDir(), baseDir + "_" + getTs(exportedOn) + "_" + exportedBy.getId());
-		List<String> inputFiles = Arrays.asList(coreObjectsRevs.getAbsolutePath(), formsDataRevs.getAbsolutePath());
-		Utility.zipFiles(inputFiles, result.getAbsolutePath());
+		List<File> inputFiles = Arrays.asList(coreObjectsRevs, formsDataRevs, passwordRevs);
+		Utility.zipFiles(inputFiles, result);
 
 		logger.info("Cleaning up revisions directory: " + baseDir);
 		cleanupRevisionsDir(baseDir);
@@ -343,7 +346,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				File outputFile = getOutputFile(dir);
 				csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
 
-				writeHeader(csvWriter);
+				writeHeader(criteria, exportedBy, exportedOn, revisionsBy, csvWriter);
 
 				long lastRecId = 0, totalRecords = 0, lastChunk = 0;
 				Map<String, String> context = new HashMap<>();
@@ -387,17 +390,6 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 		private File getOutputFile(String dir) {
 			return new File(getAuditDir(dir), "os_core_objects_revisions_" + getTs(exportedOn) + ".csv");
-		}
-
-		private void writeHeader(CsvWriter writer) {
-			writeExportHeader(writer, criteria, exportedBy, exportedOn, revisionsBy);
-
-			String[] keys = {
-				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
-				"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_entity_id",
-				"audit_rev_change_log"
-			};
-			writer.writeNext(Stream.of(keys).map(MessageUtil.getInstance()::getMessage).toArray(String[]::new));
 		}
 
 		//
@@ -487,7 +479,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			CsvFileWriter csvWriter = null;
 
 			try {
-				File outputFile = getOutputFile(dir);
+				File outputFile = getOutputFile(dir, "os_forms_data_revisions", this.exportedOn);
 				csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
 
 				writeHeader(csvWriter);
@@ -530,10 +522,6 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			}
 		}
 
-		private File getOutputFile(String dir) {
-			return new File(getAuditDir(dir), "os_forms_data_revisions_" + getTs(exportedOn) + ".csv");
-		}
-
 		private void writeHeader(CsvWriter writer) {
 			writeExportHeader(writer, criteria, exportedBy, exportedOn, revisionsBy);
 
@@ -574,6 +562,78 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				opDisplay, entityType, formName, entityId, recordId
 			});
 		}
+	}
+
+	private File exportPasswordsData(RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> revisionsBy, String baseDir) {
+		long startTime = System.currentTimeMillis();
+		CsvFileWriter csvWriter = null;
+
+		try {
+			File outputFile = getOutputFile(baseDir, "os_password_revisions", exportedOn);
+			csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
+			writeHeader(criteria, exportedBy, exportedOn, revisionsBy, csvWriter);
+
+			String editOp = MessageUtil.getInstance().getMessage("audit_op_update");
+			String entity = MessageUtil.getInstance().getMessage("audit_entity_" + Password.class.getName());
+			long lastRevId = Long.MAX_VALUE, totalRecords = 0;
+			while (true) {
+				long t1 = System.currentTimeMillis();
+
+				List<Password> passwords = daoFactory.getUserDao()
+					.getPasswords(criteria.startDate(), criteria.endDate(), lastRevId, revisionsBy);
+				if (passwords.isEmpty()) {
+					break;
+				}
+
+				for (Password password : passwords) {
+					String user      = null;
+					String userEmail = null;
+					String userLogin = null;
+					if (password.getUpdatedBy() != null) {
+						user      = password.getUpdatedBy().formattedName();
+						userEmail = password.getUpdatedBy().getEmailAddress();
+						userLogin = password.getUpdatedBy().getLoginName();
+					}
+
+					csvWriter.writeNext(new String[] {
+						password.getId().toString(),
+						Utility.getDateTimeString(password.getUpdationDate()),
+						user, userEmail, userLogin,
+						editOp, entity, password.getUser().getId().toString(), "###"
+					});
+
+					lastRevId = password.getId();
+					++totalRecords;
+					if (totalRecords % 25 == 0) {
+						csvWriter.flush();
+					}
+				}
+			}
+
+			csvWriter.flush();
+			return outputFile;
+		} catch (Exception e) {
+			logger.error("Error exporting password revisions", e);
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(csvWriter);
+			logger.info("Password revisions export finished in " +  (System.currentTimeMillis() - startTime) + " ms");
+		}
+	}
+
+	private File getOutputFile(String dir, String filename, Date exportedOn) {
+		return new File(getAuditDir(dir), filename + "_" + getTs(exportedOn) + ".csv");
+	}
+
+	private void writeHeader(RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> revisionsBy, CsvWriter writer) {
+		writeExportHeader(writer, criteria, exportedBy, exportedOn, revisionsBy);
+
+		String[] keys = {
+			"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
+			"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_entity_id",
+			"audit_rev_change_log"
+		};
+		writer.writeNext(Stream.of(keys).map(MessageUtil.getInstance()::getMessage).toArray(String[]::new));
 	}
 
 	private void sendEmailNotif(RevisionsListCriteria criteria, User exportedBy, List<User> revsBy, File revisionsFile) {

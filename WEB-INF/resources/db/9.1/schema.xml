@@ -126,4 +126,13 @@
       </column>
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track users who effected the password change">
+    <addColumn tableName="CATISSUE_PASSWORD">
+      <column name="UPDATED_BY" type="${int.type}">
+        <constraints foreignKeyName="FK_PASSWORD_UPDATED_BY"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

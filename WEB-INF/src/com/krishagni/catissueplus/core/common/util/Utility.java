@@ -829,6 +829,10 @@ public class Utility {
 		return filename.replaceAll("[^\\w.]+", "_").replaceAll("__+", "_");
 	}
 
+	public static File zipFiles(List<File> files, File zipFile) {
+		return zipFiles(files.stream().map(File::getAbsolutePath).collect(Collectors.toList()), zipFile.getAbsolutePath());
+	}
+
 	public static File zipFiles(List<String> files, String zipFilePath) {
 		return zipFilesWithNames(files.stream().map((f) -> Pair.make(f, "")).collect(Collectors.toList()), zipFilePath);
 	}

@@ -1,10 +1,12 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -28,6 +30,8 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class BaseEntity {
 	private static final Map<String, Set<String>> entityProperties = new ConcurrentHashMap<>();
+
+	private static final Map<String, Boolean> entityNameProperties = new ConcurrentHashMap<>();
 
 	protected Long id;
 
@@ -180,7 +184,8 @@ public class BaseEntity {
 	}
 
 	private Set<String> getProperties() {
-		Set<String> properties = entityProperties.get(getClass().getName());
+		Class<?> klass = HibernateProxyHelper.getClassWithoutInitializingProxy(this);
+		Set<String> properties = entityProperties.get(klass.getName());
 		if (properties != null) {
 			return properties;
 		}
@@ -208,7 +213,7 @@ public class BaseEntity {
 				properties.add(name);
 			}
 
-			entityProperties.put(getClass().getName(), properties);
+			entityProperties.put(klass.getName(), properties);
 			return properties;
 		} catch (Exception e) {
 			throw new RuntimeException("Error querying entity properties", e);
@@ -254,11 +259,11 @@ public class BaseEntity {
 		} else if (obj instanceof Iterable) {
 			result = toCollectionString((Iterable) obj);
 		} else if (isAssignableFrom(BaseEntity.class, obj)) {
-			result = "{id=" + getObjId(obj) + "}";
+			result = getObjId(obj);
 		} else if (obj instanceof Map) {
 			result = Utility.mapToJson((Map) obj);
 		} else if (obj != null) {
-			result = "{id=" + getObjId(obj) + "}";
+			result = getObjId(obj);
 		}
 
 		return result;
@@ -315,12 +320,41 @@ public class BaseEntity {
 		return value != null && superClass.isAssignableFrom(value.getClass());
 	}
 
-	private Object getObjId(Object value) {
-		try {
-			Object id = PropertyAccessorFactory.forBeanPropertyAccess(value).getPropertyValue("id");
-			return id == null ? StringUtils.EMPTY : id;
-		} catch (Exception e) {
-			return "Unknown object type: " + value.getClass().getName() + ": " + e.getMessage();
+	private String getObjId(Object value) {
+		if (value == null) {
+			return StringUtils.EMPTY;
 		}
+
+		BeanWrapper bean = PropertyAccessorFactory.forBeanPropertyAccess(value);
+		String id = null, name = null;
+		try {
+			Object idObj = bean.getPropertyValue("id");
+			id = idObj == null ? StringUtils.EMPTY : idObj.toString();
+		} catch (Exception e) {
+			id = "Unknown property: " + value.getClass().getName() + ".id: " + e.getMessage();
+		}
+
+		try {
+			String className = HibernateProxyHelper.getClassWithoutInitializingProxy(value).getName();
+			if (!entityNameProperties.containsKey(className)) {
+				PropertyDescriptor[] descriptors = bean.getPropertyDescriptors();
+				entityNameProperties.put(className, Arrays.stream(descriptors).anyMatch(d -> d.getName().equals("name")));
+			}
+
+			if (entityNameProperties.get(className)) {
+				Object nameObj = bean.getPropertyValue("name");
+				name = nameObj == null ? StringUtils.EMPTY : nameObj.toString();
+			}
+		} catch (Exception e) {
+			// name = "Unknown property: " + value.getClass().getName() + ".name: " + e.getMessage();
+		}
+
+		String result = "{id=" + id;
+		if (name != null) {
+			result += ", name=" + name;
+		}
+
+		result += "}";
+		return result;
 	}
 }

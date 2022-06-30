@@ -208,7 +208,34 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 		}).collect(Collectors.toList());
 	}
-	
+
+	@Override
+	public List<Password> getPasswords(Date fromDate, Date toDate, Long lastId, List<User> updatedBy) {
+		Criteria query = getCurrentSession().createCriteria(Password.class, "password")
+			.createAlias("password.updatedBy", "updatedBy", JoinType.LEFT_OUTER_JOIN)
+			.addOrder(Order.desc("password.updationDate"))
+			.addOrder(Order.desc("password.id"))
+			.setMaxResults(100);
+
+		if (fromDate != null) {
+			query.add(Restrictions.ge("password.updationDate", fromDate));
+		}
+
+		if (toDate != null) {
+			query.add(Restrictions.le("password.updationDate", toDate));
+		}
+
+		if (CollectionUtils.isNotEmpty(updatedBy)) {
+			query.add(Restrictions.in("updatedBy.id", updatedBy.stream().map(User::getId).collect(Collectors.toList())));
+		}
+
+		if (lastId != null) {
+			query.add(Restrictions.lt("password.id", lastId));
+		}
+
+		return query.list();
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<User> getInactiveUsers(Date lastLoginTime) {

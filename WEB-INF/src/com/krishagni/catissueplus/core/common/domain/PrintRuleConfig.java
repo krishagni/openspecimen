@@ -1,9 +1,13 @@
 package com.krishagni.catissueplus.core.common.domain;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.hibernate.envers.Audited;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +19,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.domain.factory.LabelPrintRuleFactory;
 import com.krishagni.catissueplus.core.common.util.Status;
 
+@Audited
 public class PrintRuleConfig extends BaseEntity {
 	private String objectType;
 
@@ -132,6 +137,16 @@ public class PrintRuleConfig extends BaseEntity {
 
 	public void delete() {
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+	}
+
+	@Override
+	protected Set<String> getAuditStringInclusionProps() {
+		return Arrays.stream(
+			new String[] {
+				"id", "objectType", "description", "institute",
+				"updatedBy", "updatedOn", "ruleDefJson", "activityStatus"
+			}
+		).collect(Collectors.toSet());
 	}
 
 	private ObjectMapper getReadMapper() {

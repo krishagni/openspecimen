@@ -428,7 +428,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				}
 			}
 
-			user.changePassword(detail.getNewPassword());
+			user.changePassword(detail.getNewPassword(), currentUser);
 			user.setForcePasswordReset(!currentUser.equals(user));
 			daoFactory.getUserDao().saveOrUpdate(user);
 			daoFactory.getAuthDao().deleteAuthTokens(user.getId(), AuthUtil.getAuthToken());
@@ -466,7 +466,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				return ResponseEvent.userError(UserErrorCode.INVALID_PASSWD_TOKEN, true);
 			}
 			
-			user.changePassword(detail.getNewPassword());
+			user.changePassword(detail.getNewPassword(), user);
 			dao.deleteFpToken(token);
 			user.setForcePasswordReset(false);
 			daoFactory.getAuthDao().deleteAuthTokens(user.getId(), AuthUtil.getAuthToken());

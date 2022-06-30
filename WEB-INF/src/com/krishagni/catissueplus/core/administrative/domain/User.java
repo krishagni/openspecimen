@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -27,6 +28,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -433,7 +435,7 @@ public class User extends BaseEntity implements UserDetails {
 		}
 	}
 
-	public void changePassword(String newPassword) {
+	public void changePassword(String newPassword, User changedBy) {
 		if (isContact()) {
 			return;
 		}
@@ -453,7 +455,8 @@ public class User extends BaseEntity implements UserDetails {
 		}
 
 		Password password = new Password();
-		password.setUpdationDate(new Date());
+		password.setUpdationDate(Calendar.getInstance().getTime());
+		password.setUpdatedBy(changedBy);
 		password.setUser(this);
 		password.setPassword(getPassword());
 		getPasswords().add(password);

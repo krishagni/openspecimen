@@ -10,7 +10,6 @@ import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken
 import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserUiState;
-import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 import com.krishagni.catissueplus.core.de.events.FormCtxtSummary;
@@ -53,6 +52,8 @@ public interface UserDao extends Dao<User> {
 	Password getLatestPassword(Long userId);
 	
 	List<Password> getPasswordsUpdatedBefore(Date updateDate);
+
+	List<Password> getPasswords(Date fromDate, Date toDate, Long lastId, List<User> updatedBy);
 	
 	List<User> getInactiveUsers(Date lastLoginTime);
 	

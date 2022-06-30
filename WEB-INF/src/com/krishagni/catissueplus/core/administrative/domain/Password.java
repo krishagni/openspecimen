@@ -13,6 +13,8 @@ public class Password implements Comparable<Password>{
 
 	private String password;
 
+	private User updatedBy;
+
 	private Date updationDate;
 
 	private User user;
@@ -31,6 +33,14 @@ public class Password implements Comparable<Password>{
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public User getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(User updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 
 	public Date getUpdationDate() {
