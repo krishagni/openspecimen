@@ -1,20 +1,21 @@
 package com.krishagni.rbac.service.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
+import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -24,11 +25,11 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
+import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
-import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
@@ -323,7 +324,7 @@ public class RbacServiceImpl implements RbacService {
 			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
 			Role role = createRole(req.getPayload());
 			ensureUniqueName(role, null);
-			daoFactory.getRoleDao().saveOrUpdate(role);
+			daoFactory.getRoleDao().saveOrUpdate(role, true);
 			return ResponseEvent.response(RoleDetail.from(role));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -347,7 +348,7 @@ public class RbacServiceImpl implements RbacService {
 			Role newRole = createRole(detail);
 			ensureUniqueName(newRole, existing);
 			existing.updateRole(newRole);
-			daoFactory.getRoleDao().saveOrUpdate(existing);
+			daoFactory.getRoleDao().saveOrUpdate(existing, true);
 			return ResponseEvent.response(RoleDetail.from(existing));
 		} catch(OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -694,46 +695,36 @@ public class RbacServiceImpl implements RbacService {
 	}
 	
 	private Set<RoleAccessControl> getAcl(RoleDetail detail, Role role) {
-		Set<RoleAccessControl> result = new HashSet<RoleAccessControl>();
-		Map<Long, RoleAccessControl> racMap = new HashMap<Long, RoleAccessControl>();
-		
-		if (detail.getId() != null) {
-			Role existingRole  = daoFactory.getRoleDao().getById(detail.getId());
-			for (RoleAccessControl rac : existingRole.getAcl()) {
-				racMap.put(rac.getId(), rac);
-			}
-		}
-		
-		for (RoleAccessControlDetails rd : detail.getAcl()) {
-			RoleAccessControl rac = racMap.get(rd.getId());
-			
-			if(rac == null) {
-				rac = new RoleAccessControl();
-				rac.setRole(role);
-			}
-			
-			Resource resource = daoFactory.getResourceDao().getResourceByName(rd.getResourceName());
+		Map<Resource, RoleAccessControl> aclMap = new LinkedHashMap<>();
+
+		for (RoleAccessControlDetails inputAcl : detail.getAcl()) {
+			RoleAccessControl acl = new RoleAccessControl();
+			acl.setRole(role);
+
+			Resource resource = daoFactory.getResourceDao().getResourceByName(inputAcl.getResourceName());
+			acl.setResource(resource);
 			if (resource == null) {
-				throw OpenSpecimenException.userError(RbacErrorCode.RESOURCE_NOT_FOUND);
+				throw OpenSpecimenException.userError(RbacErrorCode.RESOURCE_NOT_FOUND, inputAcl.getResourceName());
 			}
-			rac.setResource(resource);
-			rac.getOperations().clear(); 
-			for (ResourceInstanceOpDetails riod  : rd.getOperations()) {
-				Operation operation = daoFactory.getOperationDao().getOperationByName(riod.getOperationName());
+
+			Map<Operation, ResourceInstanceOp> opsMap = new LinkedHashMap<>();
+			for (ResourceInstanceOpDetails inputOp  : inputAcl.getOperations()) {
+				Operation operation = daoFactory.getOperationDao().getOperationByName(inputOp.getOperationName());
 				if (operation == null) {
-					throw OpenSpecimenException.userError(RbacErrorCode.OPERATION_NOT_FOUND);
+					throw OpenSpecimenException.userError(RbacErrorCode.OPERATION_NOT_FOUND, inputOp.getOperationName());
 				}
 				
 				ResourceInstanceOp op = new ResourceInstanceOp();
-				op.setAccessControl(rac);
 				op.setOperation(operation);
-				rac.getOperations().add(op);
+				op.setAccessControl(acl);
+				opsMap.put(op.getOperation(), op);
 			}
-			
-			result.add(rac);
+
+			acl.setOperations(new LinkedHashSet<>(opsMap.values()));
+			aclMap.put(acl.getResource(), acl);
 		}
 		
-		return result;
+		return new LinkedHashSet<>(aclMap.values());
 	}
 	
 	private SubjectRole createSubjectRole(Subject subject, SubjectRoleDetail srd) {

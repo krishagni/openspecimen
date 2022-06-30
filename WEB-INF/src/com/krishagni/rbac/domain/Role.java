@@ -1,13 +1,14 @@
 package com.krishagni.rbac.domain;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.envers.Audited;
-import org.hibernate.proxy.HibernateProxyHelper;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
-import com.krishagni.catissueplus.core.common.CollectionUpdater;
 
 @Audited
 public class Role extends BaseEntity {
@@ -41,6 +42,20 @@ public class Role extends BaseEntity {
 		this.acl = acl;
 	}
 
+	public void addAcl(RoleAccessControl rac) {
+		RoleAccessControl newAcl = new RoleAccessControl();
+		newAcl.setRole(this);
+		newAcl.setResource(rac.getResource());
+		newAcl.setOperations(rac.getOperations().stream().map(op -> {
+			ResourceInstanceOp newOp = new ResourceInstanceOp();
+			newOp.setAccessControl(newAcl);
+			newOp.setOperation(op.getOperation());
+			return newOp;
+		}).collect(Collectors.toSet()));
+
+		acl.add(newAcl);
+	}
+
 	public void updateRole(Role other) {
 		setName(other.getName());
 		setDescription(other.getDescription());
@@ -48,9 +63,20 @@ public class Role extends BaseEntity {
 	}
 
 	private void updateAcl(Role other) {
-		CollectionUpdater.update(getAcl(), other.getAcl());
+		Map<Resource, RoleAccessControl> existingAclMap = new HashMap<>();
 		for (RoleAccessControl rac : getAcl()) {
-			rac.setRole(this);
+			existingAclMap.put(rac.getResource(), rac);
 		}
+
+		for (RoleAccessControl otherRac : other.getAcl()) {
+			RoleAccessControl existing = existingAclMap.remove(otherRac.getResource());
+			if (existing == null) {
+				addAcl(otherRac);
+			} else {
+				existing.update(otherRac);
+			}
+		}
+
+		getAcl().removeAll(existingAclMap.values());
 	}
 }
