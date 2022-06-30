@@ -128,4 +128,24 @@
       <column name="activityStatus_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: DP consents modified or not">
+    <addColumn tableName="CAT_DISTRIBUTION_PROTOCOL_AUD">
+      <column name="consentTiers_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: DP consents">
+    <createTable tableName="OS_DP_CONSENT_TIERS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="DP_ID" type="${int.type}" />
+      <column name="distributionProtocol_MOD" type="${boolean.type}" />
+      <column name="CONSENT_STMT_ID" type="${int.type}" />
+      <column name="statement_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

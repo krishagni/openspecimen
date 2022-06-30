@@ -266,7 +266,6 @@ public class DistributionProtocol extends BaseExtensionEntity {
 		this.requirements = requirements;
 	}
 
-	@NotAudited
 	public Set<DpConsentTier> getConsentTiers() {
 		return consentTiers;
 	}

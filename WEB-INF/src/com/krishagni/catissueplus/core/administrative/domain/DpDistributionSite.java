@@ -49,9 +49,13 @@ public class DpDistributionSite extends BaseEntity {
 	@Override
 	public int hashCode() {
 		int prime = 31;
-		return prime + 
-			getDistributionProtocol().hashCode() + 
-			getInstitute().hashCode() +
+		if (getDistributionProtocol() == null && getInstitute() == null && getSite() == null) {
+			return super.hashCode();
+		}
+
+		return prime +
+			(getDistributionProtocol() == null ? 0 : getDistributionProtocol().hashCode()) +
+			(getInstitute() == null ? 0 : getInstitute().hashCode()) +
 			(getSite() == null ? 0 : getSite().hashCode());
 	}
 	
