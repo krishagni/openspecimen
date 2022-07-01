@@ -104,7 +104,7 @@ public class QueryFolderFactoryImpl implements QueryFolderFactory {
 	}
 	
 	private void setSharedUsers(QueryFolder folder, Long ownerId, List<UserSummary> users, OpenSpecimenException ose) {
-		if (!folder.isSharedWithAll() && CollectionUtils.isNotEmpty(users)) {
+		if (!folder.getSharedWithAll() && CollectionUtils.isNotEmpty(users)) {
 			List<Long> userIds = users.stream()
 				.filter(u -> !u.getId().equals(ownerId))
 				.map(UserSummary::getId)
@@ -123,7 +123,7 @@ public class QueryFolderFactoryImpl implements QueryFolderFactory {
 
 	private void setSharedUserGroups(QueryFolder folder, List<UserGroupSummary> userGroups, OpenSpecimenException ose) {
 		Set<Long> groupIds = Utility.nullSafeStream(userGroups).map(UserGroupSummary::getId).collect(Collectors.toSet());
-		if (!folder.isSharedWithAll() && CollectionUtils.isNotEmpty(groupIds)) {
+		if (!folder.getSharedWithAll() && CollectionUtils.isNotEmpty(groupIds)) {
 			List<UserGroup> sharedGroups = bioSpmnDaoFactory.getUserGroupDao().getByIds(groupIds);
 			if (sharedGroups.size() != groupIds.size()) {
 				ose.addError(SavedQueryErrorCode.INVALID_GROUPS_LIST);

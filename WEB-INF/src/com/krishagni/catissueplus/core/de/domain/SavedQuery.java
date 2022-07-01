@@ -1,22 +1,25 @@
 package com.krishagni.catissueplus.core.de.domain;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 
 import edu.common.dynamicextensions.query.QuerySpace;
 
-public class SavedQuery {
-	private Long id;
-
+@Audited
+public class SavedQuery extends BaseEntity {
 	private String title;
 
 	private User createdBy;
@@ -63,14 +66,6 @@ public class SavedQuery {
 
 	private Date deletedOn;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
 	public String getTitle() {
 		return title;
 	}
@@ -79,6 +74,7 @@ public class SavedQuery {
 		this.title = title;
 	}
 
+	@NotAudited
 	public Date getLastRunOn() {
 		return lastRunOn;
 	}
@@ -87,6 +83,7 @@ public class SavedQuery {
 		this.lastRunOn = lastRunOn;
 	}
 
+	@NotAudited
 	public Date getLastUpdated() {
 		return lastUpdated;
 	}
@@ -95,6 +92,7 @@ public class SavedQuery {
 		this.lastUpdated = lastUpdated;
 	}
 
+	@NotAudited
 	public User getCreatedBy() {
 		return createdBy;
 	}
@@ -103,6 +101,7 @@ public class SavedQuery {
 		this.createdBy = createdBy;
 	}
 
+	@NotAudited
 	public User getLastUpdatedBy() {
 		return lastUpdatedBy;
 	}
@@ -111,6 +110,7 @@ public class SavedQuery {
 		this.lastUpdatedBy = lastUpdatedBy;
 	}
 
+	@NotAudited
 	public Long getLastRunCount() {
 		return lastRunCount;
 	}
@@ -194,7 +194,6 @@ public class SavedQuery {
 		this.reporting = reporting;
 	}
 
-	@NotAudited
 	public Set<Long> getSubQueries() {
 		return subQueries;
 	}
@@ -397,6 +396,13 @@ public class SavedQuery {
 		copy.setQueryDefJson(getQueryDefJson(true), true);
 		copy.selectList = curateSelectList(copy.selectList);
 		return copy;
+	}
+
+	@Override
+	protected Set<String> getAuditStringInclusionProps() {
+		return Arrays.stream(new String[] {
+			"id", "title", "cpId", "cpGroupId", "queryDefJson", "deletedOn", "subQueries", "dependentQueries"
+		}).collect(Collectors.toSet());
 	}
 		
 	private ObjectMapper getReadMapper() {

@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.Audited;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -15,6 +17,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
 
 @Configurable
+@Audited
 public class QueryFolder extends BaseEntity {
 	private String name;
 
@@ -43,7 +46,7 @@ public class QueryFolder extends BaseEntity {
 		this.name = name;
 	}
 
-	public Boolean isSharedWithAll() {
+	public Boolean getSharedWithAll() {
 		return sharedWithAll != null && sharedWithAll.equals(true);
 	}
 
@@ -51,6 +54,7 @@ public class QueryFolder extends BaseEntity {
 		this.sharedWithAll = sharedWithAll;
 	}
 	
+	@AuditJoinTable(name = "OS_QUERY_FOLDER_USERS_AUD")
 	public Set<User> getSharedWith() {
 		return sharedWith;
 	}
@@ -59,6 +63,7 @@ public class QueryFolder extends BaseEntity {
 		this.sharedWith = sharedWith;
 	}
 
+	@AuditJoinTable(name = "OS_QUERY_FOLDER_USER_GRPS_AUD")
 	public Set<UserGroup> getSharedWithGroups() {
 		return sharedWithGroups;
 	}
@@ -73,6 +78,7 @@ public class QueryFolder extends BaseEntity {
 		return users;
 	}
 
+	@AuditJoinTable(name = "OS_QUERY_FOLDER_QUERIES_AUD")
 	public Set<SavedQuery> getSavedQueries() {
 		return savedQueries;
 	}
@@ -171,14 +177,20 @@ public class QueryFolder extends BaseEntity {
 		
 	public void update(QueryFolder folder) {
 		setName(folder.getName());
-		setSavedQueries(folder.getSavedQueries());
-		setSharedWithAll(folder.isSharedWithAll());
-		if (folder.isSharedWithAll()) {
-			sharedWith.clear();
-			sharedWithGroups.clear();
+
+		getSavedQueries().retainAll(folder.getSavedQueries());
+		getSavedQueries().addAll(folder.getSavedQueries());
+
+		setSharedWithAll(folder.getSharedWithAll());
+		if (folder.getSharedWithAll()) {
+			getSharedWith().clear();
+			getSharedWithGroups().clear();
 		} else {
-			setSharedWith(folder.getSharedWith());
-			setSharedWithGroups(folder.getSharedWithGroups());
+			getSharedWith().retainAll(folder.getSharedWith());
+			getSharedWith().addAll(folder.getSharedWith());
+
+			getSharedWithGroups().retainAll(folder.getSharedWithGroups());
+			getSharedWithGroups().addAll(folder.getSharedWithGroups());
 		}		
 	}
 }

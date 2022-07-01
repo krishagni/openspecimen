@@ -242,4 +242,77 @@
       <column name="USER_ID" type="${int.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Saved queries">
+    <createTable tableName="CATISSUE_SAVED_QUERIES_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="TITLE" type="${text.type}(128)" />
+      <column name="title_MOD" type="${boolean.type}" />
+      <column name="CP_ID" type="${int.type}" />
+      <column name="cpId_MOD" type="${boolean.type}" />
+      <column name="CP_GROUP_ID" type="${int.type}" />
+      <column name="cpGroupId_MOD" type="${boolean.type}" />
+      <column name="QUERY_DEF" type="${clob.type}" />
+      <column name="queryDefJson_MOD" type="${boolean.type}" />
+      <column name="DELETED_ON" type="${nullable.ts.type}" />
+      <column name="deletedOn_MOD" type="${boolean.type}" />
+      <column name="subQueries_MOD" type="${boolean.type}" />
+      <column name="dependentQueries_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Saved query - sub queries">
+    <createTable tableName="OS_SAVED_QUERY_DEPS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="QUERY_ID" type="${int.type}" />
+      <column name="SUB_QUERY_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Query folders">
+    <createTable tableName="CATISSUE_QUERY_FOLDERS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="NAME" type="${text.type}(64)" />
+      <column name="name_MOD" type="${boolean.type}" />
+      <column name="OWNER" type="${int.type}" />
+      <column name="owner_MOD" type="${boolean.type}" />
+      <column name="SHARED_WITH_ALL" type="${boolean.type}" />
+      <column name="sharedWithAll_MOD" type="${boolean.type}" />
+      <column name="sharedWith_MOD" type="${boolean.type}" />
+      <column name="sharedWithGroups_MOD" type="${boolean.type}" />
+      <column name="savedQueries_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Query folder users">
+    <createTable tableName="OS_QUERY_FOLDER_USERS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="FOLDER_ID" type="${int.type}" />
+      <column name="USER_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Query folder user groups">
+    <createTable tableName="OS_QUERY_FOLDER_USER_GRPS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="FOLDER_ID" type="${int.type}" />
+      <column name="GROUP_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Query folder queries">
+    <createTable tableName="OS_QUERY_FOLDER_QUERIES_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="FOLDER_ID" type="${int.type}" />
+      <column name="QUERY_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>
