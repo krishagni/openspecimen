@@ -277,18 +277,22 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		String baseDir = UUID.randomUUID().toString();
 		Date exportedOn = Calendar.getInstance().getTime();
 
-		logger.info("Exporting core objects' revisions ...");
+		logger.info("Exporting core objects' revisions... ");
 		File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
 
-		logger.info("Exporting form data revisions ...");
-		File formsDataRevs   = new FormsDataRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
+		FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
+		logger.info("Exporting form revisions... ");
+		File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
 
-		logger.info("Export user password revisions ...");
+		logger.info("Exporting form data revisions... ");
+		File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
+
+		logger.info("Export user password revisions... ");
 		File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
 
-		logger.info("Creating revisions ZIP file ...");
+		logger.info("Creating revisions ZIP file... ");
 		File result = new File(getAuditDir(), baseDir + "_" + getTs(exportedOn) + "_" + exportedBy.getId());
-		List<File> inputFiles = Arrays.asList(coreObjectsRevs, formsDataRevs, passwordRevs);
+		List<File> inputFiles = Arrays.asList(coreObjectsRevs, formsRevs, formsDataRevs, passwordRevs);
 		Utility.zipFiles(inputFiles, result);
 
 		logger.info("Cleaning up revisions directory: " + baseDir);
@@ -458,7 +462,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		}
 	}
 
-	private class FormsDataRevisionExporter {
+	private class FormsRevisionExporter {
 		private RevisionsListCriteria criteria;
 
 		private User exportedBy;
@@ -467,14 +471,62 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 		private List<User> revisionsBy;
 
-		public FormsDataRevisionExporter(RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> revisionsBy) {
+		public FormsRevisionExporter(RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> revisionsBy) {
 			this.criteria = criteria;
 			this.exportedBy = exportedBy;
 			this.exportedOn = exportedOn;
 			this.revisionsBy = revisionsBy;
 		}
 
-		public File export(String dir) {
+		public File exportMetadataRevisions(String dir) {
+			long startTime = System.currentTimeMillis();
+			CsvFileWriter csvWriter = null;
+
+			try {
+				File outputFile = getOutputFile(dir, "os_forms_revisions", this.exportedOn);
+				csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
+
+				String[] headerColumns = {
+					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
+					"audit_rev_entity_op", "audit_rev_form_name", "audit_rev_entity_id"
+				};
+				writeHeader(csvWriter, headerColumns);
+
+				long lastRevId = 0, totalRecords = 0;
+				Map<String, String> context = new HashMap<>();
+
+				criteria.lastId(null);
+				while (true) {
+					List<FormDataRevisionDetail> revisions = daoFactory.getAuditDao().getFormRevisions(criteria);
+					if (revisions.isEmpty()) {
+						break;
+					}
+
+					for (FormDataRevisionDetail revision : revisions) {
+						writeRow(context, revision, csvWriter);
+						lastRevId = revision.getId();
+						++totalRecords;
+
+						if (totalRecords % 25 == 0) {
+							csvWriter.flush();
+						}
+					}
+
+					criteria.lastId(lastRevId);
+				}
+
+				csvWriter.flush();
+				return outputFile;
+			} catch (Exception e) {
+				logger.error("Error exporting forms revisions", e);
+				throw OpenSpecimenException.serverError(e);
+			} finally {
+				IOUtils.closeQuietly(csvWriter);
+				logger.info("Forms revisions export finished in " +  (System.currentTimeMillis() - startTime) + " ms");
+			}
+		}
+
+		public File exportDataRevisions(String dir) {
 			long startTime = System.currentTimeMillis();
 			CsvFileWriter csvWriter = null;
 
@@ -482,7 +534,12 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				File outputFile = getOutputFile(dir, "os_forms_data_revisions", this.exportedOn);
 				csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
 
-				writeHeader(csvWriter);
+				String[] headerColumns = {
+					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
+					"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_form_name",
+					"audit_rev_parent_entity_id", "audit_rev_entity_id"
+				};
+				writeHeader(csvWriter, headerColumns);
 
 				long lastRevId = 0, totalRecords = 0;
 				Map<String, String> context = new HashMap<>();
@@ -522,15 +579,9 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			}
 		}
 
-		private void writeHeader(CsvWriter writer) {
+		private void writeHeader(CsvWriter writer, String[] headerColumns) {
 			writeExportHeader(writer, criteria, exportedBy, exportedOn, revisionsBy);
-
-			String[] keys = {
-				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
-				"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_form_name",
-				"audit_rev_parent_entity_id", "audit_rev_entity_id"
-			};
-			writer.writeNext(Stream.of(keys).map(MessageUtil.getInstance()::getMessage).toArray(String[]::new));
+			writer.writeNext(Stream.of(headerColumns).map(MessageUtil.getInstance()::getMessage).toArray(String[]::new));
 		}
 
 		private void writeRow(Map<String, String> context, FormDataRevisionDetail revision, CsvWriter writer) {
@@ -551,16 +602,25 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			String op = "audit_op_" + revision.getOp().toLowerCase();
 			String opDisplay = context.computeIfAbsent(op, toMsg);
 
-			String entityType = context.computeIfAbsent("form_entity_" + revision.getEntityType(), toMsg);
+			String entityType = null;
 			String entityId = revision.getEntityId() != null ? revision.getEntityId().toString() : null;
+			if (StringUtils.isNotBlank(revision.getEntityType())) {
+				entityType = context.computeIfAbsent("form_entity_" + revision.getEntityType(), toMsg);
+			}
 
 			String formName = revision.getFormName();
 			String recordId = revision.getRecordId().toString();
 
-			writer.writeNext(new String[] {
-				revId, dateTime, user, userEmail, userLogin,
-				opDisplay, entityType, formName, entityId, recordId
-			});
+			String[] headerColumns = {
+				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
+				"audit_rev_entity_op", "audit_rev_form_name", "audit_rev_entity_id"
+			};
+
+			if (entityType != null) {
+				writer.writeNext(new String[] {revId, dateTime, user, userEmail, userLogin, opDisplay, entityType, formName, entityId, recordId});
+			} else {
+				writer.writeNext(new String[] {revId, dateTime, user, userEmail, userLogin, opDisplay, formName, recordId});
+			}
 		}
 	}
 

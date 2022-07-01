@@ -9,10 +9,11 @@ import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.de.domain.Form;
 
 @Audited
-public class FormContextBean {
+public class FormContextBean extends BaseEntity {
 	private Long identifier;
 	
 	private Long containerId;
@@ -49,6 +50,10 @@ public class FormContextBean {
 
 	public Long getId() {
 		return identifier;
+	}
+
+	public void setId(Long id) {
+		this.identifier = id;
 	}
 
 	public Long getContainerId() {
@@ -115,7 +120,6 @@ public class FormContextBean {
 		this.dataInNotif = dataInNotif;
 	}
 
-	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public Set<UserGroup> getNotifUserGroups() {
 		return notifUserGroups;
 	}

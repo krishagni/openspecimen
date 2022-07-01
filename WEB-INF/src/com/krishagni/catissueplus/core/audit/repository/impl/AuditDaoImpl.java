@@ -152,6 +152,36 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	@Override
+	public List<FormDataRevisionDetail> getFormRevisions(RevisionsListCriteria criteria) {
+		List<Object[]> rows = buildFormRevisionsQuery(criteria).list();
+
+		List<FormDataRevisionDetail> result = new ArrayList<>();
+		for (Object[] row : rows) {
+			int idx = -1;
+			FormDataRevisionDetail detail = new FormDataRevisionDetail();
+			detail.setId((Long) row[++idx]);
+			detail.setTime((Date) row[++idx]);
+
+			Integer opType = (Integer) row[++idx];
+			detail.setOp(opType == 0 ? "INSERT" : opType == 1 ? "UPDATE" : "DELETE");
+
+			detail.setRecordId((Long) row[++idx]);
+			detail.setFormName((String) row[++idx]);
+
+			UserSummary user = new UserSummary();
+			user.setId((Long) row[++idx]);
+			user.setFirstName((String) row[++idx]);
+			user.setLastName((String) row[++idx]);
+			user.setEmailAddress((String) row[++idx]);
+			user.setLoginName((String) row[++idx]);
+			detail.setUser(user);
+			result.add(detail);
+		}
+
+		return result;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public Date getLatestApiCallTime(Long userId, String token) {
 		List<Date> result = getCurrentSession().getNamedQuery(GET_LATEST_API_CALL_TIME)
@@ -310,6 +340,67 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("record_id", LongType.INSTANCE)
 			.addScalar("entity_type", StringType.INSTANCE)
 			.addScalar("caption", StringType.INSTANCE)
+			.addScalar("user_id", LongType.INSTANCE)
+			.addScalar("first_name", StringType.INSTANCE)
+			.addScalar("last_name", StringType.INSTANCE)
+			.addScalar("email_address", StringType.INSTANCE)
+			.addScalar("login_name", StringType.INSTANCE);
+
+		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
+			query.setParameterList("userIds", criteria.userIds());
+		}
+
+		if (criteria.startDate() != null) {
+			query.setParameter("startDate", criteria.startDate());
+		}
+
+		if (criteria.endDate() != null) {
+			query.setParameter("endDate", criteria.endDate());
+		}
+
+		if (criteria.lastId() != null) {
+			query.setParameter("lastId", criteria.lastId());
+		}
+
+		if (CollectionUtils.isNotEmpty(criteria.entities())) {
+			query.setParameterList("entities", criteria.entities());
+		}
+
+		return query;
+	}
+
+	private Query buildFormRevisionsQuery(RevisionsListCriteria criteria) {
+		List<String> whereClauses = new ArrayList<>();
+
+		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
+			whereClauses.add("u.identifier in (:userIds)");
+		}
+
+		if (criteria.startDate() != null) {
+			whereClauses.add("r.rev_time >= :startDate");
+		}
+
+		if (criteria.endDate() != null) {
+			whereClauses.add("r.rev_time <= :endDate");
+		}
+
+		if (criteria.lastId() != null) {
+			whereClauses.add("r.rev < :lastId");
+		}
+
+		String result = GET_FORM_REVISIONS_SQL;
+		if (!whereClauses.isEmpty()) {
+			result += " where " + StringUtils.join(whereClauses, " and ");
+		}
+
+		result += " order by r.rev desc ";
+		String sql = getLimitSql(result, criteria.startAt(), criteria.maxResults(), DbSettingsFactory.isOracle());
+		Query query = getCurrentSession().createSQLQuery(sql)
+			.addScalar("rev", LongType.INSTANCE)
+			.addScalar("rev_time", TimestampType.INSTANCE)
+			.addScalar("rev_type", IntegerType.INSTANCE)
+			.addScalar("form_id", LongType.INSTANCE)
+			.addScalar("form_name", StringType.INSTANCE)
 			.addScalar("user_id", LongType.INSTANCE)
 			.addScalar("first_name", StringType.INSTANCE)
 			.addScalar("last_name", StringType.INSTANCE)
@@ -503,6 +594,14 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		"%s " +
 		"order by " +
 		" t.identifier desc";
+
+	private static final String GET_FORM_REVISIONS_SQL =
+		"select" +
+		"  r.rev, r.rev_time, r.rev_type, r.identifier as form_id, r.name as form_name, " +
+		"  r.rev_by as user_id, u.first_name, u.last_name, u.email_address, u.login_name " +
+		"from " +
+		"  dyextn_containers_aud r" +
+		"  inner join catissue_user u on u.identifier = r.rev_by ";
 
 	private static final String GET_LATEST_API_CALL_TIME = FQN + ".getLatestApiCallTime";
 }

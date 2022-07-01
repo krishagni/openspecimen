@@ -19,6 +19,8 @@ public interface AuditDao extends Dao<UserApiCallLog> {
 
 	List<FormDataRevisionDetail> getFormDataRevisions(RevisionsListCriteria criteria);
 
+	List<FormDataRevisionDetail> getFormRevisions(RevisionsListCriteria criteria);
+
 	Date getLatestApiCallTime(Long userId, String token);
 
 	void saveOrUpdate(DeleteLog log);
