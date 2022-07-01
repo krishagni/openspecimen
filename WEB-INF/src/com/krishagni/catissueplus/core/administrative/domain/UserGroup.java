@@ -4,12 +4,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@Audited
 public class UserGroup extends BaseEntity {
 	private String name;
 

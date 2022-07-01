@@ -216,4 +216,30 @@
       <column name="USER_ID" type="${int.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: User groups">
+    <createTable tableName="OS_USER_GROUPS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="NAME" type="${text.type}(64)" />
+      <column name="name_MOD" type="${boolean.type}" />
+      <column name="DESCRIPTION" type="${text.type}(255)" />
+      <column name="description_MOD" type="${boolean.type}" />
+      <column name="INSTITUTE_ID" type="${int.type}" />
+      <column name="institute_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+      <column name="users_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: User group users">
+    <createTable tableName="OS_USER_GROUP_USERS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="GROUP_ID" type="${int.type}" />
+      <column name="USER_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>
