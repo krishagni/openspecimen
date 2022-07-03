@@ -315,4 +315,35 @@
       <column name="QUERY_ID" type="${int.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Permissible values">
+    <createTable tableName="CATISSUE_PERMISSIBLE_VALUE_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="PUBLIC_ID" type="${text.type}(32)" />
+      <column name="attribute_MOD" type="${boolean.type}" />
+      <column name="VALUE" type="${text.type}(255)" />
+      <column name="value_MOD" type="${boolean.type}" />
+      <column name="CONCEPT_CODE" type="${text.type}(32)" />
+      <column name="conceptCode_MOD" type="${boolean.type}" />
+      <column name="SORTORDER" type="${int.type}" />
+      <column name="sortOrder_MOD" type="${boolean.type}" />
+      <column name="PARENT_IDENTIFIER" type="${int.type}" />
+      <column name="parent_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+      <column name="props_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Permissible value props">
+    <createTable tableName="OS_PV_PROPS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="PV_ID" type="${int.type}" />
+      <column name="NAME" type="${text.type}(32)" />
+      <column name="VALUE" type="${text.type}(255)" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

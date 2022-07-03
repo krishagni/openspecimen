@@ -9,9 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@Audited
 public class PermissibleValue extends BaseEntity {
 	private String value;
 
@@ -73,6 +77,7 @@ public class PermissibleValue extends BaseEntity {
 		this.sortOrder = sortOrder;
 	}
 
+	@NotAudited
 	public Set<PermissibleValue> getChildren() {
 		return children;
 	}

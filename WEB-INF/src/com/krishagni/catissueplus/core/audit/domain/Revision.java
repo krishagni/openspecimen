@@ -84,8 +84,8 @@ public class Revision {
 			.findFirst().orElse(null);
 		if (existing == null) {
 			entityRecords.add(record);
-		} else if (record.getType() == 0) {
-			existing.setType(0);
+		} else if (record.getType() == 0 || record.getType() == 2) {
+			existing.setType(record.getType());
 		}
 	}
 }
