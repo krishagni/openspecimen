@@ -3,11 +3,14 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@Audited
 public class SpecimenListsFolder extends BaseEntity {
 	private String name;
 

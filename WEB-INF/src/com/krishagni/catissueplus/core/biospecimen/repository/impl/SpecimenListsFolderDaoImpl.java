@@ -73,51 +73,6 @@ public class SpecimenListsFolderDaoImpl extends AbstractDao<SpecimenListsFolder>
 			.list().isEmpty();
 	}
 
-	@Override
-	public List<Long> getCartIds(Long folderId) {
-		return getCurrentSession().createCriteria(SpecimenListsFolder.class, "f")
-			.createAlias("f.lists", "list")
-			.setProjection(Projections.property("list.id"))
-			.add(Restrictions.eq("f.id", folderId))
-			.list();
-	}
-
-	@Override
-	public int addCarts(Long folderId, List<Long> cartIds) {
-		List<Long> existingCartIds = getCartIds(folderId);
-		List<Long> toAdd = Utility.nullSafeStream(cartIds)
-			.filter(cartId -> !existingCartIds.contains(cartId))
-			.collect(Collectors.toList());
-
-		getCurrentSession().doWork(connection -> {
-			try (PreparedStatement pstmt = connection.prepareStatement(INSERT_FOLDER_CART_SQL)) {
-				int count = 0;
-				for (Long cartId : toAdd) {
-					pstmt.setLong(1, folderId);
-					pstmt.setLong(2, cartId);
-					pstmt.addBatch();
-
-					++count;
-					if (count % 25 == 0) {
-						pstmt.executeBatch();
-					}
-				}
-
-				pstmt.executeBatch();
-			}
-		});
-
-		return toAdd.size();
-	}
-
-	@Override
-	public int removeCarts(Long folderId, List<Long> cartIds) {
-		return getCurrentSession().createSQLQuery(REMOVE_FOLDER_CARTS_SQL)
-			.setParameter("folderId", folderId)
-			.setParameterList("cartIds", cartIds)
-			.executeUpdate();
-	}
-
 	private DetachedCriteria getListQuery(SpecimenListsFoldersCriteria criteria) {
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(SpecimenListsFolder.class, "f")
 			.setProjection(Projections.distinct(Projections.property("f.id")));
@@ -149,10 +104,4 @@ public class SpecimenListsFolderDaoImpl extends AbstractDao<SpecimenListsFolder>
 	private static final String FQN = SpecimenListsFolder.class.getName();
 
 	private static final String GET_FOLDER_CARTS_COUNT = FQN + ".getFolderCartsCount";
-
-	private static final String INSERT_FOLDER_CART_SQL =
-		"insert into os_cart_folder_carts (folder_id, cart_id) values (?, ?)";
-
-	private static final String REMOVE_FOLDER_CARTS_SQL =
-		"delete from os_cart_folder_carts where folder_id = :folderId and cart_id in (:cartIds)";
 }

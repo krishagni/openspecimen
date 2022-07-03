@@ -134,6 +134,16 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	// specimen list items
 	//
 	@Override
+	public List<SpecimenListItem> getListItems(Long listId, List<Long> specimenIds) {
+		return getCurrentSession().createCriteria(SpecimenListItem.class, "li")
+			.createAlias("li.list", "list")
+			.createAlias("li.specimen", "specimen")
+			.add(Restrictions.eq("list.id", listId))
+			.add(Restrictions.in("specimen.id", specimenIds))
+			.list();
+	}
+
+	@Override
 	public void saveListItems(List<SpecimenListItem> items) {
 		int i = 0;
 		for (SpecimenListItem item : items) {
@@ -149,17 +159,30 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public int deleteListItems(Long listId, List<Long> specimenIds) {
-		return getCurrentSession().getNamedQuery(DELETE_LIST_SPECIMENS)
-			.setParameter("listId", listId)
-			.setParameterList("specimenIds", specimenIds)
-			.executeUpdate();
+		List<SpecimenListItem> items = getListItems(listId, specimenIds);
+		items.forEach(item -> getCurrentSession().delete(item));
+		return items.size();
 	}
 
 	@Override
 	public int clearList(Long listId) {
-		return getCurrentSession().getNamedQuery(CLEAR_LIST)
-			.setParameter("listId", listId)
-			.executeUpdate();
+		Criteria query = getCurrentSession().createCriteria(SpecimenListItem.class, "li")
+			.createAlias("li.list", "list")
+			.addOrder(Order.asc("li.id"))
+			.setMaxResults(50);
+
+		int startAt = 0;
+		while (true) {
+			List<SpecimenListItem> items = query.setFirstResult(startAt).list();
+			items.forEach(item -> getCurrentSession().delete(item));
+			if (items.size() < 50) {
+				break;
+			}
+
+			startAt += items.size();
+		}
+
+		return startAt;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -290,10 +313,6 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	private static final String GET_SPECIMEN_LIST_BY_NAME = FQN + ".getSpecimenListByName";
 
 	private static final String GET_LIST_SPECIMENS_COUNT = FQN + ".getListSpecimensCount";
-
-	private static final String DELETE_LIST_SPECIMENS = FQN + ".deleteListSpecimens";
-
-	private static final String CLEAR_LIST = FQN + ".clearList";
 
 	private static final String SHARED_WITH_USER = FQN + ".sharedWithUser";
 

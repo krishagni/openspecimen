@@ -96,14 +96,6 @@
         l.deletedOn is null
     </query>
 
-    <sql-query name="deleteListSpecimens">
-      delete from catissue_spec_tag_items where tag_id = :listId and obj_id in (:specimenIds)
-    </sql-query>
-
-    <sql-query name="clearList">
-      delete from catissue_spec_tag_items where tag_id = :listId
-    </sql-query>
-
     <sql-query name="sharedWithUser">
       <return-scalar column="listId" type="long"/>
 

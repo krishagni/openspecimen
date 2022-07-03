@@ -346,4 +346,79 @@
       <column name="VALUE" type="${text.type}(255)" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen lists shared groups and folders">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS_AUD">
+      <column name="sharedWithGroups_MOD" type="${boolean.type}" />
+      <column name="folders_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen lists - shared users">
+    <createTable tableName="SHARED_SPECIMENLIST_TAGS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="TAG_ID" type="${int.type}" />
+      <column name="USER_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen lists - shared user groups">
+    <createTable tableName="OS_SPMN_LIST_SHARED_GRPS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="LIST_ID" type="${int.type}" />
+      <column name="GROUP_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen lists - specimens">
+    <createTable tableName="CATISSUE_SPEC_TAG_ITEMS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="OBJ_ID" type="${int.type}" />
+      <column name="specimen_MOD" type="${boolean.type}" />
+      <column name="TAG_ID" type="${int.type}" />
+      <column name="list_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen lists - folders" >
+    <createTable tableName="OS_SPECIMEN_CART_FOLDERS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="NAME" type="${text.type}(128)" />
+      <column name="name_MOD" type="${boolean.type}" />
+      <column name="DESCRIPTION" type="${text.type}(255)" />
+      <column name="description_MOD" type="${boolean.type}" />
+      <column name="OWNER_ID" type="${int.type}" />
+      <column name="owner_MOD" type="${boolean.type}" />
+      <column name="CREATION_TIME" type="${nullable.ts.type}" />
+      <column name="creationTime_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+      <column name="userGroups_MOD" type="${boolean.type}" />
+      <column name="lists_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen lists - folder user groups">
+    <createTable tableName="OS_CART_FOLDER_USER_GROUPS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="FOLDER_ID" type="${int.type}" />
+      <column name="GROUP_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen lists - folder lists">
+    <createTable tableName="OS_CART_FOLDER_CARTS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="FOLDER_ID" type="${int.type}" />
+      <column name="CART_ID" type="${int.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

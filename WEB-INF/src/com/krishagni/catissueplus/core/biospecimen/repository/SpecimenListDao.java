@@ -31,6 +31,9 @@ public interface SpecimenListDao extends Dao<SpecimenList> {
 	//
 	// APIs to save specimen list items
 	//
+
+	List<SpecimenListItem> getListItems(Long listId, List<Long> specimenIds);
+
 	void saveListItems(List<SpecimenListItem> items);
 
 	int deleteListItems(Long listId, List<Long> specimenIds);

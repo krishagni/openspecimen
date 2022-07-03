@@ -15,10 +15,4 @@ public interface SpecimenListsFolderDao extends Dao<SpecimenListsFolder> {
 	Map<Long, Integer> getFolderCartsCount(Collection<Long> folderIds);
 
 	boolean isAccessible(Long folderId, Long userId);
-
-	List<Long> getCartIds(Long folderId);
-
-	int addCarts(Long folderId, List<Long> cartIds);
-
-	int removeCarts(Long folderId, List<Long> cartIds);
 }

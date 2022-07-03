@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,6 @@ public class SpecimenList extends BaseEntity {
 		this.lastUpdatedOn = lastUpdatedOn;
 	}
 
-	@NotAudited
 	public Set<User> getSharedWith() {
 		return sharedWith;
 	}
@@ -103,7 +103,7 @@ public class SpecimenList extends BaseEntity {
 		this.sharedWith = sharedWith;
 	}
 
-	@NotAudited
+	@AuditJoinTable(name = "OS_SPMN_LIST_SHARED_GRPS_AUD")
 	public Set<UserGroup> getSharedWithGroups() {
 		return sharedWithGroups;
 	}
@@ -118,7 +118,6 @@ public class SpecimenList extends BaseEntity {
 		return users;
 	}
 
-	@NotAudited
 	public Set<SpecimenListItem> getSpecimens() {
 		return specimens;
 	}
@@ -127,7 +126,6 @@ public class SpecimenList extends BaseEntity {
 		this.specimens = specimens;
 	}
 
-	@NotAudited
 	public Set<SpecimenListsFolder> getFolders() {
 		return folders;
 	}

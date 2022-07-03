@@ -208,8 +208,12 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			ensureValidSpecimensAndUsers(listDetails, specimenList, siteCps);
 
 			daoFactory.getSpecimenListDao().saveOrUpdate(specimenList);
+
+			// init the shared users collection. otherwise, lazy exception is generated when large
+			// number of cart items are saved.
+			Collection<User> allSharedUsers = specimenList.getAllSharedUsers();
 			saveListItems(specimenList, listDetails.getSpecimenIds(), true);
-			notifyUsersOnCreate(specimenList);
+			notifyUsersOnCreate(specimenList, allSharedUsers);
 			return ResponseEvent.response(SpecimenListDetail.from(specimenList));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -892,8 +896,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		});
 	}
 
-	private void notifyUsersOnCreate(SpecimenList specimenList) {
-		notifyUsersOnListOp(specimenList, specimenList.getAllSharedUsers(), "ADD");
+	private void notifyUsersOnCreate(SpecimenList specimenList, Collection<User> users) {
+		notifyUsersOnListOp(specimenList, users, "ADD");
 	}
 
 	private void notifyUsersOnUpdate(SpecimenList existing, Collection<User> addedUsers, Collection<User> removedUsers) {
@@ -1017,17 +1021,18 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			throw OpenSpecimenException.userError(SpecimenListErrorCode.ACCESS_NOT_ALLOWED);
 		}
 
+		List<SpecimenList> carts = daoFactory.getSpecimenListDao().getByIds(accessibleCartIds);
 		switch (operation) {
 			case ADD:
-				count = daoFactory.getSpecimenListsFolderDao().addCarts(folder.getId(), accessibleCartIds);
+				folder.getLists().addAll(carts);
 				break;
 
 			case REMOVE:
-				count = daoFactory.getSpecimenListsFolderDao().removeCarts(folder.getId(), accessibleCartIds);
+				folder.getLists().removeAll(carts);
 				break;
 		}
 
-		return count;
+		return carts.size();
 	}
 
 	private String msg(String code, Object ... params) {
