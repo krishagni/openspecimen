@@ -421,4 +421,91 @@
       <column name="CART_ID" type="${int.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Participant consent tier responses">
+    <addColumn tableName="CAT_CONSENT_TIER_RESPONSE_AUD">
+      <column name="CONSENT_TIER_ID" type="${int.type}" />
+      <column name="consentTier_MOD" type="${boolean.type}" />
+      <column name="COLL_PROT_REG_ID" type="${int.type}" />
+      <column name="cpr_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Drop the older specimen request audit table">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="OS_SPECIMEN_REQUESTS_AUD" />
+    </preConditions>
+
+    <dropTable tableName="OS_SPECIMEN_REQUESTS_AUD" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen requests">
+    <createTable tableName="OS_SPECIMEN_REQUESTS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="CATALOG_ID" type="${int.type}" />
+      <column name="catalogId_MOD" type="${boolean.type}" />
+      <column name="CATALOG_QUERY_DEF" type="${clob.type}" />
+      <column name="catalogQueryDef_MOD" type="${boolean.type}" />
+      <column name="REQUESTOR_ID" type="${int.type}" />
+      <column name="requestor_MOD" type="${boolean.type}" />
+      <column name="REQUESTOR_EMAIL_ID" type="${text.type}(255)" />
+      <column name="requestorEmailId_MOD" type="${boolean.type}" />
+      <column name="IRB_ID" type="${text.type}(255)" />
+      <column name="irbId_MOD" type="${boolean.type}" />
+      <column name="REQUEST_DATE" type="${nullable.ts.type}" />
+      <column name="dateOfRequest_MOD" type="${boolean.type}" />
+      <column name="SCREENING_STATUS" type="${text.type}(16)" />
+      <column name="screeningStatus_MOD" type="${boolean.type}" />
+      <column name="SCREENED_BY" type="${int.type}" />
+      <column name="screenedBy_MOD" type="${boolean.type}" />
+      <column name="SCREENING_DATE" type="${nullable.ts.type}" />
+      <column name="dateOfScreening_MOD" type="${boolean.type}" />
+      <column name="SCREENING_COMMENTS" type="${text.type}(255)" />
+      <column name="screeningComments_MOD" type="${boolean.type}" />
+      <column name="PROCESSOR_ID" type="${int.type}" />
+      <column name="processedBy_MOD" type="${boolean.type}" />
+      <column name="PROCESSING_DATE" type="${nullable.ts.type}" />
+      <column name="dateOfProcessing_MOD" type="${boolean.type}" />
+      <column name="CP_ID" type="${int.type}" />
+      <column name="cp_MOD" type="${boolean.type}" />
+      <column name="DP_ID" type="${int.type}" />
+      <column name="dp_MOD" type="${boolean.type}" />
+      <column name="COMMENTS" type="${text.type}(255)" />
+      <column name="comments_MOD" type="${boolean.type}" />
+      <column name="ITEMS_CRIT_JSON" type="${clob.type}" />
+      <column name="itemsCriteriaJson_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+      <column name="items_MOD" type="${boolean.type}" />
+      <column name="orders_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Drop the older specimen request item audit table">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="OS_SPECIMEN_REQUEST_ITEMS_AUD" />
+    </preConditions>
+
+    <dropTable tableName="OS_SPECIMEN_REQUEST_ITEMS_AUD" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Specimen request items">
+    <createTable tableName="OS_SPECIMEN_REQUEST_ITEMS_AUD">
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${tinyint.type}" />
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="REQUEST_ID" type="${int.type}" />
+      <column name="request_MOD" type="${boolean.type}" />
+      <column name="SPECIMEN_ID" type="${int.type}" />
+      <column name="specimen_MOD" type="${boolean.type}" />
+      <column name="STATUS" type="${text.type}(32)" />
+      <column name="status_MOD" type="${boolean.type}" />
+      <column name="DISTRIBUTION_ID" type="${int.type}" />
+      <column name="distribution_MOD" type="${boolean.type}" />
+      <column name="SHIPMENT_ID" type="${int.type}" />
+      <column name="shipment_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

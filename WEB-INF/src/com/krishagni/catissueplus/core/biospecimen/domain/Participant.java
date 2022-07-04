@@ -134,7 +134,6 @@ public class Participant extends BaseExtensionEntity {
 		}
 	}
 
-	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public PermissibleValue getGender() {
 		return gender;
 	}
@@ -151,7 +150,6 @@ public class Participant extends BaseExtensionEntity {
 		this.sexGenotype = sexGenotype;
 	}
 
-	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public Set<PermissibleValue> getRaces() {
 		return races;
 	}
@@ -160,7 +158,6 @@ public class Participant extends BaseExtensionEntity {
 		this.races = races;
 	}
 
-	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public Set<PermissibleValue> getEthnicities() {
 		return ethnicities;
 	}
@@ -205,7 +202,6 @@ public class Participant extends BaseExtensionEntity {
 		this.deathDate = deathDate;
 	}
 
-	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public PermissibleValue getVitalStatus() {
 		return vitalStatus;
 	}

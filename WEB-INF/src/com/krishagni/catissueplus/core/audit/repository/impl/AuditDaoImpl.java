@@ -20,6 +20,7 @@ import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.query.Query;
+import org.hibernate.sql.JoinType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
@@ -96,7 +97,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	public List<RevisionDetail> getRevisions(RevisionsListCriteria criteria) {
 		Criteria query = getCurrentSession().createCriteria(RevisionEntityRecord.class, "re")
 			.createAlias("re.revision", "r")
-			.createAlias("r.user", "u");
+			.createAlias("r.user", "u", JoinType.LEFT_OUTER_JOIN);
 
 		buildRevisionsListQuery(query, criteria);
 		setRevisionsListFields(query);

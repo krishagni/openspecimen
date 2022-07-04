@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
@@ -17,6 +19,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
+@Audited
 public class SpecimenRequest extends BaseExtensionEntity {
 	private static final String ENTITY_NAME = "specimen_request";
 
@@ -208,6 +211,7 @@ public class SpecimenRequest extends BaseExtensionEntity {
 		this.comments = comments;
 	}
 
+	@NotAudited
 	public Set<DistributionOrder> getOrders() {
 		return orders;
 	}

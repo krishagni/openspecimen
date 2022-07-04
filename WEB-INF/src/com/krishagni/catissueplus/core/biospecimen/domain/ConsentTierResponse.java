@@ -2,23 +2,19 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.hibernate.envers.RelationTargetAuditMode;
 import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 
 @Audited
 @AuditTable(value="CAT_CONSENT_TIER_RESPONSE_AUD")
-public class ConsentTierResponse {
+public class ConsentTierResponse extends BaseEntity {
 
 	private static final String ENTITY_NAME = "consent_response";
 
-	private Long id;
-
 	private PermissibleValue response;
 
-	private ConsentTier consentTier;
+	private CpConsentTier consentTier;
 
 	private CollectionProtocolRegistration cpr;
 	
@@ -26,15 +22,6 @@ public class ConsentTierResponse {
 		return ENTITY_NAME;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public PermissibleValue getResponse() {
 		return response;
 	}
@@ -43,16 +30,14 @@ public class ConsentTierResponse {
 		this.response = response;
 	}
 
-	@NotAudited
-	public ConsentTier getConsentTier() {
+	public CpConsentTier getConsentTier() {
 		return consentTier;
 	}
 
-	public void setConsentTier(ConsentTier consentTier) {
+	public void setConsentTier(CpConsentTier consentTier) {
 		this.consentTier = consentTier;
 	}
 
-	@NotAudited
 	public CollectionProtocolRegistration getCpr() {
 		return cpr;
 	}

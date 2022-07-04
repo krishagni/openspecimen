@@ -13,9 +13,7 @@
 
     <many-to-one name="response" column="RESPONSE_ID" fetch="join"/>
 
-    <many-to-one name="consentTier"
-      class="com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier"
-      column="CONSENT_TIER_ID" fetch="join"/>
+    <many-to-one name="consentTier" column="CONSENT_TIER_ID" fetch="join"/>
 
     <many-to-one name="cpr" column="COLL_PROT_REG_ID"/>
   </class>
