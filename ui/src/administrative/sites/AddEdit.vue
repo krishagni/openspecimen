@@ -6,16 +6,21 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.site.id">Create Site</h3>
-        <h3 v-else>Update {{dataCtx.site.name}}</h3>
+        <h3 v-if="!dataCtx.site.id">
+          <span v-t="'sites.create'">Create Site</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'common.update', args: dataCtx.site}"></span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <os-form ref="siteForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <div>
-          <os-button primary :label="!dataCtx.site.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-          <os-button text label="Cancel" @click="cancel" />
+          <os-button primary :label="$t(!dataCtx.site.id ? 'common.buttons.create' : 'common.buttons.update')"
+            @click="saveOrUpdate" />
+          <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
         </div>
       </os-form>
     </os-page-body>
@@ -26,6 +31,7 @@
 import { reactive, inject } from 'vue';
 
 import alertSvc  from '@/common/services/Alerts.js';
+import i18n      from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
 import formUtil  from '@/common/services/FormUtil.js';
 
@@ -41,7 +47,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('SitesList', {siteId: -1}), label: 'Sites'}
+        {url: routerSvc.getUrl('SitesList', {siteId: -1}), label: i18n.msg('sites.list')}
       ],
 
       addEditFs: {rows: []}
@@ -92,7 +98,7 @@ export default {
       }
 
       const savedSite = await siteSvc.saveOrUpdate(this.dataCtx.site);
-      alertSvc.success('Site ' + savedSite.name + ' saved!');
+      alertSvc.success({code: 'sites.saved', args: savedSite});
       if (!this.dataCtx.site.id) {
         routerSvc.goto('SiteDetail.Overview', {siteId: savedSite.id});
       } else {

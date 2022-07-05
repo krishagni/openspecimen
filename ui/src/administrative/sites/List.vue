@@ -4,13 +4,13 @@
       <os-page>
         <os-page-head>
           <span>
-            <h3>Sites</h3>
+            <h3 v-t="'sites.list'">Sites</h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -28,25 +28,26 @@
             <template #default>
               <span v-show-if-allowed="'institute-admin'">
                 <span v-if="!ctx.selectedSites || ctx.selectedSites.length == 0">
-                  <os-button left-icon="plus" label="Create" @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
+                  <os-button left-icon="plus" :label="$t('common.buttons.create')"
+                    @click="$goto('SiteAddEdit', {siteId: -1}, {})" />
 
-                  <os-menu label="Import" :options="importOpts" />
+                  <os-menu :label="$t('common.buttons.import')" :options="importOpts" />
 
-                  <os-button left-icon="download" label="Export" @click="exportSites" />
+                  <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportSites" />
                 </span>
                 <span v-else>
-                  <os-button left-icon="trash"    label="Delete" @click="deleteSites" />
+                  <os-button left-icon="trash"    :label="$t('common.buttons.delete')" @click="deleteSites" />
 
-                  <os-button left-icon="download" label="Export" @click="exportSites" />
+                  <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportSites" />
                 </span>
               </span>
 
-              <os-button-link left-icon="question-circle" label="Help"
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/sites" new-tab="true" />
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -65,7 +66,7 @@
 
           <os-confirm-delete ref="deleteDialog">
             <template #message>
-              <span>Are you sure you want to delete the selected sites?</span>
+              <span v-t="'sites.confirm_delete_selected'">Are you sure you want to delete the selected sites?</span>
             </template>
           </os-confirm-delete>
         </os-page-body>
@@ -105,8 +106,16 @@ export default {
       listSchema,
 
       importOpts: [
-        { icon: 'hospital', caption: 'Sites',             onSelect: () => routerSvc.ngGoto('sites-import') },
-        { icon: 'table',    caption: 'View Past Imports', onSelect: () => routerSvc.ngGoto('sites-import-jobs') }
+        {
+          icon: 'hospital',
+          caption: this.$t('sites.list'),
+          onSelect: () => routerSvc.ngGoto('sites-import')
+        },
+        {
+          icon: 'table',
+          caption: this.$t('bulk_imports.view_jobs'),
+          onSelect: () => routerSvc.ngGoto('sites-import-jobs')
+        }
       ]
     };
   },
@@ -204,7 +213,7 @@ export default {
         () => {
           siteSvc.bulkUpdate({detail: {activityStatus: 'Disabled'}, ids: siteIds}).then(
             (saved) => {
-              alertSvc.success(saved.length + (saved.length != 1 ? ' sites ' : ' site ') + ' deleted');
+              alertSvc.success({code: 'sites.deleted', args: {count: saved.length}});
               self.$refs.listView.reload();
             }
           );

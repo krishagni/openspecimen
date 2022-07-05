@@ -1,4 +1,6 @@
 
+import i18n from '@/common/services/I18n.js';
+
 class Alerts {
 
   toastSvc = undefined;
@@ -20,6 +22,10 @@ class Alerts {
   }
 
   add(type, message, timeout, id) {
+    if (typeof message == 'object') {
+      message = i18n.msg(message.code, message.args || {});
+    }
+
     this.toastSvc.add({severity: type, detail: message, life: timeout < 0 ? undefined : (timeout || 5000), group: id});
   }
 

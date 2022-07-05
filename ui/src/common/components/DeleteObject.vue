@@ -2,25 +2,25 @@
   <Dialog ref="dialogInstance">
     <template #header>
       <div v-if="ctx.dependents.length > 0">
-        <span>Error: Cannot delete {{input.title}}</span>
+        <span v-t="{path: 'common.delete_na', args: input}"></span>
       </div>
       <div v-else>
-        <span>Delete Confirmation</span>
+        <span v-t="'common.delete_confirmation'">Delete Confirmation</span>
       </div>
     </template>
 
     <template #content>
       <div v-if="ctx.dependents.length > 0">
         <div class="message">
-          <span>Cannot delete {{input.type}} <b>{{input.title}}</b> because of the following dependent objects:</span>
+          <span v-t="{path: 'common.delete_na_reason', args: input}"></span>
         </div>
 
         <div class="dependents">
           <table class="os-table muted-header os-border">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Count</th>
+                <th v-t="'common.name'">Name</th>
+                <th v-t="'common.count'">Count</th>
               </tr>
             </thead>
             <tbody>
@@ -35,19 +35,19 @@
 
       <div v-else>
         <div class="message">
-          <span>{{input.type}} <b>{{input.title}}</b> and any dependent data will be deleted. Are you sure you want to proceed?</span>
+          <span v-t="{path: 'common.confirm_delete', args: input}">{{input.type}} <b>{{input.title}}</b> and any dependent data will be deleted. Are you sure you want to proceed?</span>
         </div>
       </div>
     </template>
 
     <template #footer>
       <div v-if="ctx.dependents.length > 0">
-        <Button primary label="Ok" @click="cancel" />
+        <Button primary :label="$t('common.buttons.ok')" @click="cancel" />
       </div>
       <div v-else>
-        <Button text label="Cancel" @click="cancel" />
+        <Button text :label="$t('common.buttons.cancel')" @click="cancel" />
 
-        <Button danger label="Yes" @click="proceed" />
+        <Button danger :label="$t('common.buttons.yes')" @click="proceed" />
       </div>
     </template>
   </Dialog>
@@ -96,7 +96,7 @@ export default {
       let self = this;
       if (typeof this.input.deleteObj == 'function') {
         this.input.deleteObj().then(() => {
-          alertSvc.success(self.input.type + ' ' + self.input.title + ' deleted!');
+          alertSvc.success({code: 'common.record_deleted', args: self.input});
           self.close('deleted');
         });
       } else {

@@ -2,7 +2,7 @@ export default {
   fields:  [
     {
       "type": "dropdown",
-      "label": "Institute",
+      "labelCode": "sites.institute",
       "name": "site.instituteName",
       "listSource": {
         "apiUrl": "institutes",
@@ -12,7 +12,7 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Institute is mandatory"
+          "messageCode": "sites.institute_required"
         }
       },
       "showWhen": "currentUser.admin == true"
@@ -20,24 +20,24 @@ export default {
 
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "sites.name",
       "name": "site.name",
       "validations": {
         "required": {
-          "message": "Site name is mandatory"
+          "messageCode": "sites.name_required"
         }
       }
     },
 
     {
       "type": "text",
-      "label": "Code",
+      "labelCode": "sites.code",
       "name": "site.code"
     },
 
     {
       "type": "user",
-      "label": "Coordinators",
+      "labelCode": "sites.coordinators",
       "name": "site.coordinators",
       "multiple": true,
       "listSource": {
@@ -51,20 +51,20 @@ export default {
 
     {
       "type": "pv",
-      "label": "Type",
+      "labelCode": "sites.type",
       "name": "site.type",
       "attribute": "site_type",
       "selectProp": "value",
       "validations": {
         "required": {
-          "message": "Site type is mandatory"
+          "messageCode": "sites.type_required"
         }
       }
     },
 
     {
       "type": "textarea",
-      "label": "Address",
+      "labelCode": "sites.address",
       "name": "site.address",
       "rows": 2
     }

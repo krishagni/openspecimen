@@ -63,7 +63,7 @@ export default {
       const ctx = this.ctx;
       ctx.site = this.site;
       ctx.deleteOpts = {
-        type: 'Site',
+        type: this.$t('sites.singular'),
         title: this.site.name,
         dependents: () => siteSvc.getDependents(this.site),
         deleteObj: () => siteSvc.delete(this.site)

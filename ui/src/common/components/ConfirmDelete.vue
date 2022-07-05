@@ -1,7 +1,7 @@
 <template>
   <os-dialog ref="dialogInstance">
     <template #header>
-      <span>Delete Confirmation</span>
+      <span v-t="'common.delete_confirmation'">Delete Confirmation</span>
     </template>
 
     <template #content>
@@ -13,22 +13,22 @@
 
       <os-form-group dense v-if="captcha != false">
         <os-cell :width="12">
-          <div>Type 'DELETE ANYWAY' to continue.</div>
+          <div v-t="'common.enter_delete_captcha'">Type 'DELETE ANYWAY' to continue.</div>
           <os-input-text v-model="input" />
         </os-cell>
       </os-form-group>
 
       <os-form-group dense v-if="collectReason == true">
         <os-cell :width="12">
-          <div>Specify the reason, at least 10 characters in length, for deletion:</div>
+          <div v-t="'common.enter_delete_reason'">Specify the reason, at least 10 characters in length, for deletion:</div>
           <os-textarea v-model="reason" :rows="3" />
         </os-cell>
       </os-form-group>
     </template>
 
     <template #footer>
-      <os-button text label="Cancel" @click="cancel" />
-      <os-button danger label="Yes" @click="proceed" :disabled="disabled" />
+      <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
+      <os-button danger :label="$t('common.buttons.yes')" @click="proceed" :disabled="disabled" />
     </template>
   </os-dialog>
 </template>

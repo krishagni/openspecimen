@@ -18,24 +18,24 @@ export default {
   columns: [
     {
       "name": "site.name",
-      "caption": "Name",
+      "captionCode": "sites.name",
       "href": (row, query) => routerSvc.getUrl('SitesListItemDetail.Overview', {siteId: row.rowObject.site.id}, query)
     },
     {
       "name": "site.type",
-      "caption": "Type",
+      "captionCode": "sites.type",
     },
     {
       "name": "site.code",
-      "caption": "Code",
+      "captionCode": "sites.code",
     },
     {
       "name": "site.instituteName",
-      "caption": "Institute",
+      "captionCode": "sites.institute",
     },
     {
       "name": "site.cpCount",
-      "caption": "Collection Protocols"
+      "captionCode": "sites.collection_protocols"
     }
   ],
 
@@ -43,12 +43,12 @@ export default {
     {
       name: 'name',
       type: 'text',
-      caption: 'Name'
+      captionCode: 'sites.name'
     },
     {
       name: 'institute',
       type: 'dropdown',
-      caption: 'Institute',
+      captionCode: 'sites.institute',
       listSource: {
         displayProp: 'name',
         selectProp: 'name',

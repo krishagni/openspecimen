@@ -26,11 +26,20 @@
       "export": "Export",
       "help":   "Help",
       "import": "Import",
+      "ok":     "Ok",
       "search": "Search",
-      "update": "Update"
+      "update": "Update",
+      "yes":    "Yes"
     },
 
+    "confirm_delete": "{type} '{title}' and any dependent data will be deleted. Are you sure you want to proceed?",
     "copy_record_url": "Copy Record URL",
+    "count": "Count",
+    "delete_confirmation": "Delete Confirmation",
+    "delete_na": "Error: Cannot delete {title}",
+    "delete_na_reason": "Cannot delete {type} '{title}' because of the following dependent objects:",
+    "enter_delete_captcha": "Type 'DELETE ANYWAY' to continue.",
+    "enter_delete_reason": "Specify the reason, at least 10 characters in length, for deletion:",
 
     "lists": {
       "clear_filters": "Clear Filters",
@@ -43,8 +52,10 @@
       "records_to_display": "Records to Display"
     },
 
+    "name": "Name",
     "open_in_new_tab": "Open in New Tab",
     "overview": "Overview",
+    "record_deleted": "{type} '{title}' deleted!",
     "switch_to_table_view": "Switch to table view",
     "update": "Update {name}",
     "url_copied": "URL copied."
@@ -64,5 +75,24 @@
 
   "orders": {
     "name": "Name"
+  },
+
+  "sites": {
+    "address": "Address",
+    "code": "Code",
+    "collection_protocols": "Collection Protocols",
+    "confirm_delete_selected": "Are you sure you want to delete the selected sites?",
+    "coordinators": "Coordinators",
+    "create": "Create Site",
+    "deleted": "One site deleted. | {count} sites deleted.",
+    "institute": "Institute",
+    "institute_required": "Institute is mandatory",
+    "list": "Sites",
+    "name": "Name",
+    "name_required": "Name is mandatory",
+    "saved": "Site {name} saved.",
+    "singular": "Site",
+    "type": "Type",
+    "type_required": "Type is mandatory"
   }
 }
