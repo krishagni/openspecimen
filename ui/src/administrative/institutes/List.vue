@@ -4,13 +4,13 @@
       <os-page>
         <os-page-head>
           <span>
-            <h3>Institutes</h3>
+            <h3>{{$t("institutes.list")}}</h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -28,23 +28,24 @@
             <template #default>
               <span v-show-if-allowed="'admin'">
                 <span v-if="!ctx.selectedInstitutes || ctx.selectedInstitutes.length == 0">
-                  <os-button left-icon="plus" label="Create" @click="$goto('InstituteAddEdit', {instituteId: -1})" />
+                  <os-button left-icon="plus" :label="$t('common.buttons.create')"
+                    @click="$goto('InstituteAddEdit', {instituteId: -1})" />
 
-                  <os-menu label="Import" :options="importOpts" />
+                  <os-menu :label="$t('common.buttons.import')" :options="importOpts" />
                 </span>
                 <span v-else>
-                  <os-button left-icon="trash" label="Delete" @click="deleteInstitutes" />
+                  <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteInstitutes" />
                 </span>
               </span>
 
-              <os-button left-icon="download" label="Export" @click="exportInstitutes" />
+              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportInstitutes" />
 
-              <os-button-link left-icon="question-circle" label="Help"
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/institute" new-tab="true" />
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -63,7 +64,9 @@
 
           <os-confirm-delete ref="deleteDialog">
             <template #message>
-              <span>Are you sure you want to delete the selected institutes?</span>
+              <span v-t="'institutes.confirm_delete_selected'">
+                Are you sure you want to delete the selected institutes?
+              </span>
             </template>
           </os-confirm-delete>
         </os-page-body>
@@ -101,8 +104,16 @@ export default {
       listSchema: { columns: [] },
 
       importOpts: [
-        { icon: 'university', caption: 'Institutes',        onSelect: () => routerSvc.ngGoto('institutes-import') },
-        { icon: 'table',      caption: 'View Past Imports', onSelect: () => routerSvc.ngGoto('institutes-import-jobs') }
+        {
+          icon: 'university',
+          caption: this.$t('institutes.list'),
+          onSelect: () => routerSvc.ngGoto('institutes-import')
+        },
+        {
+          icon: 'table',
+          caption: this.$t('bulk_imports.view_jobs'),
+          onSelect: () => routerSvc.ngGoto('institutes-import-jobs')
+        }
       ]
     };
   },
@@ -213,7 +224,7 @@ export default {
         () => {
           instituteSvc.deleteInstitutes(instituteIds).then(
             (deleted) => {
-              alertSvc.success(deleted.length + (deleted.length != 1 ? ' institutes ' : ' institute ') + ' deleted');
+              alertSvc.success(this.$t('institutes.deleted', deleted.length, {count: deleted.length}));
               self.$refs.listView.reload();
             }
           );

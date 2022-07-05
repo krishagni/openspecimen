@@ -1,12 +1,13 @@
+
 export default {
   fields:  [
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "institutes.name",
       "name": "institute.name",
       "validations": {
         "required": {
-          "message": "Institute name is mandatory"
+          "messageCode": "institutes.name_is_mandatory"
         }
       }
     }

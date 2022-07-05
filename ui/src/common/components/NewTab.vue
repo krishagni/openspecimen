@@ -1,5 +1,5 @@
 <template>
-  <a :class="buttonClass" :href="link" target="_blank" v-os-tooltip.bottom="'Open record in a new tab'">
+  <a :class="buttonClass" :href="link" target="_blank" v-os-tooltip.bottom="$t('common.open_in_new_tab')">
     <os-icon name="external-link-alt" :size="iconSize" />
   </a>
 </template>

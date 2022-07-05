@@ -2,9 +2,10 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="'admin'">
-        <os-button left-icon="edit" label="Edit" @click="$goto('InstituteAddEdit', {instituteId: ctx.institute.id})" />
+        <os-button left-icon="edit" :label="$t('common.buttons.edit')"
+          @click="$goto('InstituteAddEdit', {instituteId: ctx.institute.id})" />
 
-        <os-button left-icon="trash" label="Delete" @click="deleteInstitute" />
+        <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteInstitute" />
       </span>
     </template>
   </os-page-toolbar>
@@ -49,7 +50,7 @@ export default {
     let setup = () => {
       this.ctx.institute = this.institute;
       this.ctx.deleteOpts = {
-        type: 'Institute',
+        type: this.$t('institutes.singular'),
         title: this.institute.name,
         dependents: () => instituteSvc.getDependents(this.institute),
         deleteObj: () => instituteSvc.delete(this.institute)

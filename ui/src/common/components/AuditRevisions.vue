@@ -1,15 +1,15 @@
 <template>
   <os-dialog ref="revsDialog">
     <template #header>
-      <span>Revisions</span>
+      <span v-t="'audit.revs_list'">Revisions</span>
     </template>
 
     <template #content>
       <table class="os-table" v-if="ctx.revisions && ctx.revisions.length > 0">
         <thead>
           <tr>
-            <th>Updated On</th>
-            <th>Updated By</th>
+            <th v-t="'audit.updated_on'">Updated On</th>
+            <th v-t="'audit.updated_by'">Updated By</th>
           </tr>
         </thead>
         <tbody>
@@ -20,12 +20,12 @@
         </tbody>
       </table>
       <div v-else>
-        <span>No revisions to show!</span>
+        <span v-t="'audit.no_revs'">No revisions to show!</span>
       </div>
     </template>
 
     <template #footer>
-      <os-button primary label="Done" @click="closeRevs" />
+      <os-button primary :label="$t('common.buttons.done')" @click="closeRevs" />
     </template>
   </os-dialog>
 </template>

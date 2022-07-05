@@ -12,20 +12,20 @@ export default {
   columns: [
     {
       "name": "institute.name",
-      "caption": "Name",
+      "captionCode": "institutes.name",
       "href": (row, query) => routerSvc.getUrl('InstitutesListItemDetail.Overview', {instituteId: row.rowObject.institute.id}, query)
     },
     {
       "name": "institute.usersCount",
-      "caption": "Users"
+      "captionCode": "institutes.users"
     }
   ],
 
   filters: [
     {
-      name: 'name',
-      type: 'text',
-      caption: 'Name'
+      "name": "name",
+      "type": "text",
+      "captionCode": "institutes.name"
     }
   ]
 }

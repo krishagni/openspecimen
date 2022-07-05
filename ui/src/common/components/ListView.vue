@@ -3,21 +3,24 @@
     <div class="results">
       <div class="info" v-if="loading || list.length == 0">
         <div v-show="loading">
-          <os-message type="info"><span>Loading records, please wait for a moment...</span></os-message>
+          <os-message type="info">
+            <span v-t="'common.lists.loading'">Loading records, please wait for a moment...</span>
+          </os-message>
         </div>
         <div v-show="!loading && list.length == 0">
-          <os-message type="info"><span>No records to show</span></os-message>
+          <os-message type="info">
+            <span v-t="'common.lists.no_records'">No records to show</span>
+          </os-message>
         </div>
       </div>
 
       <div v-else class="results-inner">
         <div v-if="selectedRows.length > 0" class="p-inline-message p-inline-message-info">
-          <span v-show="selectedRows.length == 1">1 record selected</span>
-          <span v-show="selectedRows.length > 1">{{selectedRows.length}} records selected</span>
+          <span v-t="{path: 'common.lists.records_selected', args: {count: selectedRows.length}}"></span>
         </div>
         <data-table :value="list" v-model:selection="selectedRows" @row-click="rowClick($event)" @sort="sort($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
-          <column v-for="column of schema.columns" :header="column.caption" :key="column.name" :field="column.name"
+          <column v-for="column of schema.columns" :header="caption(column)" :key="column.name" :field="column.name"
             :style="column.uiStyle" :sortable="column.sortable">
             <template #body="slotProps">
               <span v-if="column.href">
@@ -51,59 +54,59 @@
     <div class="filters">
       <div class="filters-inner">
         <div class="title">
-          <span>Filters</span>
+          <span v-t="'common.lists.filters'">Filters</span>
         </div>
         <div class="body">
           <form-group dense v-for="filter of searchFilters" :key="filter.name">
             <cell :width="12">
               <span v-if="filter.type == 'text'">
-                <os-input-text md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]" />
+                <os-input-text md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]" />
               </span>
               <span v-else-if="filter.type == 'number'">
                 <div class="range" v-if="filter.range">
-                  <os-input-number md-type="true" :placeholder="'Min. ' + filter.caption"
+                  <os-input-number md-type="true" :placeholder="'Min. ' + caption(filter)"
                     v-model="filterValues[filter.name + '.$min']" :max-fraction-digits="filter.maxFractionDigits" />
-                  <os-input-number md-type="true" :placeholder="'Max. ' + filter.caption"
+                  <os-input-number md-type="true" :placeholder="'Max. ' + caption(filter)"
                     v-model="filterValues[filter.name + '.$max']" :max-fraction-digits="filter.maxFractionDigits" />
                 </div>
                 <div v-else>
-                  <os-input-number md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                  <os-input-number md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
                     :max-fraction-digits="filter.maxFractionDigits" />
                 </div>
               </span>
               <span v-else-if="filter.type == 'dropdown'">
-                <dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                <dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
                   :list-source="filter.listSource">
                 </dropdown>
               </span>
               <span v-else-if="filter.type == 'pv'">
-                <os-pv-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                <os-pv-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
                   :attribute="filter.attribute" :leafValue="filter.leafValue" :selectProp="filter.selectProp">
                 </os-pv-dropdown>
               </span>
               <span v-else-if="filter.type == 'site'">
-                <os-site-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                <os-site-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
                   :list-source="filter.listSource" :context="filtersContext">
                 </os-site-dropdown>
               </span>
               <span v-else-if="filter.type == 'user'">
-                <os-user-dropdown md-type="true" :placeholder="filter.caption" v-model="filterValues[filter.name]"
+                <os-user-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
                   :select-prop="filter.selectProp" :context="filtersContext">
                 </os-user-dropdown>
               </span>
               <span v-else-if="filter.type == 'date'">
                 <div class="range" v-if="filter.range">
-                  <os-date-picker md-type="true" :placeholder="'Min. ' + filter.caption"
+                  <os-date-picker md-type="true" :placeholder="'Min. ' + caption(filter)"
                     v-model="filterValues[filter.name + '.$min']"
                     @update:model-value="handleDateInput(filter, filter.name + '.$min')">
                   </os-date-picker>
-                  <os-date-picker md-type="true" :placeholder="'Max. ' + filter.caption"
+                  <os-date-picker md-type="true" :placeholder="'Max. ' + caption(filter)"
                     v-model="filterValues[filter.name + '.$max']"
                     @update:model-value="handleDateInput(filter, filter.name + '.$max')">
                   </os-date-picker>
                 </div>
                 <div v-else>
-                  <os-date-picker md-type="true" :placeholder="filter.caption"
+                  <os-date-picker md-type="true" :placeholder="caption(filter)"
                     v-model="filterValues[filter.name]" @update:model-value="handleDateInput(filter)">
                   </os-date-picker>
                 </div>
@@ -113,13 +116,15 @@
 
           <form-group>
             <cell :width="12">
-              <Button style="width: 100%" label="Clear Filters" @click="clearFilters"/>
+              <Button style="width: 100%" :label="$t('common.lists.clear_filters')" @click="clearFilters"/>
             </cell>
           </form-group>
 
           <form-group>
             <cell :width="12">
-              <os-label class="underlined">Records to Display</os-label>
+              <os-label class="underlined">
+                <span v-t="'common.lists.records_to_display'">Records to Display</span>
+              </os-label>
             </cell>
 
             <cell :width="12">
@@ -128,8 +133,10 @@
                 @change="changePageSize" />
 
               <div class="input-group" v-show="!pageSizeOpts.pageSize">
-                <input-text md-type="true" v-model="pageSizeOpts.customPageSize" placeholder="Custom value" />
-                <Button label="Go" @click="updatePageSize"/>
+                <input-text md-type="true" v-model="pageSizeOpts.customPageSize"
+                  :placeholder="$t('common.lists.custom_value')" />
+
+                <Button :label="$t('common.lists.go')" @click="updatePageSize"/>
                 <Button left-icon="times" @click="clearPageSize"/>
               </div>
             </cell>
@@ -236,7 +243,7 @@ export default {
           {caption: '100', value: 100},
           {caption: '200', value: 200},
           {caption: '500', value: 500},
-          {caption: 'Custom', value: ''},
+          {caption: this.$t('common.lists.custom_value'), value: ''},
         ]
       }
     }
@@ -347,6 +354,16 @@ export default {
       }
 
       this.$emit('rowClicked', row.data.rowObject);
+    },
+
+    caption: function({caption, captionCode}) {
+      if (captionCode) {
+        return this.$t(captionCode);
+      } else if (caption) {
+        return caption;
+      }
+
+      return 'Unknown';
     },
 
     columnValue: function(data, column) {

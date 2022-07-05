@@ -6,16 +6,21 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.institute.id">Create Institute</h3>
-        <h3 v-else>Update {{dataCtx.institute.name}}</h3>
+        <h3 v-if="!dataCtx.institute.id">
+          <span v-t="'institutes.create'">Create Institute</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'common.update', args: {name: dataCtx.institute.name}}"></span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <os-form ref="instituteForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <div>
-          <os-button primary :label="!dataCtx.institute.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-          <os-button text label="Cancel" @click="cancel" />
+          <os-button primary :label="$t(!dataCtx.institute.id ? 'common.buttons.create' : 'common.buttons.update')"
+            @click="saveOrUpdate" />
+          <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
         </div>
       </os-form>
     </os-page-body>
@@ -80,7 +85,7 @@ export default {
       }
 
       const savedInstitute = await instituteSvc.saveOrUpdate(this.dataCtx.institute);
-      alertSvc.success('Institute ' + savedInstitute.name + ' saved!');
+      alertSvc.success(this.$t('institutes.saved', savedInstitute));
 
       if (!this.dataCtx.institute.id) {
         routerSvc.goto('InstituteDetail.Overview', {instituteId: savedInstitute.id});

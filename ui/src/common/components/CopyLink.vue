@@ -1,5 +1,5 @@
 <template>
-  <os-button left-icon="link" :size="size" @click="copyLink" v-os-tooltip.bottom="'Copy the record URL'" />
+  <os-button left-icon="link" :size="size" @click="copyLink" v-os-tooltip.bottom="$t('common.copy_record_url')" />
 </template>
 
 <script>
@@ -24,7 +24,7 @@ export default {
       }
 
       util.toClipboard(appUrl + 'ui-app/' + href);
-      alertSvc.success('Link copied');
+      alertSvc.success(this.$t('common.url_copied'));
     }
   }
 }

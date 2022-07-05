@@ -2,7 +2,9 @@
 <template>
   <ul class="os-key-values" :class="{'os-one-col': columns == 1, 'os-two-cols': columns != 1}">
     <li class="item" v-for="(field, idx) of fields.simple" :key="idx">
-      <strong class="key key-sm">{{field.label}}</strong>
+      <strong class="key key-sm">
+        <span>{{label(field)}}</span>
+      </strong>
       <span class="value value-md">
         <span v-if="(!field.value && field.value != 0) || field.value == '-'">
           <span>-</span>
@@ -38,7 +40,7 @@
   <template v-for="(field, idx) of fields.textArea" :key="idx">
     <Section>
       <template #title>
-        <span>{{field.label}}</span>
+        <span>{{label(field)}}></span>
       </template>
       <template #content>
         <span v-if="field.value" v-html="field.value"></span>
@@ -49,7 +51,7 @@
   <template v-for="(field, idx) of fields.subform" :key="idx">
     <Section>
       <template #title>
-        <span>{{field.label}}</span>
+        <span>{{label(field)}}></span>
       </template>
       <template #content>
         <div class="os-sf-table">
@@ -156,6 +158,16 @@ export default {
   },
 
   methods: {
+    label: function(field) {
+      if (field.labelCode) {
+        return this.$t(field.labelCode);
+      } else if (field.label) {
+        return field.label;
+      } else {
+        return 'Unknown';
+      }
+    },
+
     getValue: function(object, field) {
       let value = undefined;
 

@@ -10,8 +10,8 @@
     <div class="row" v-for="(formRow, rowIdx) of formRows" :key="rowIdx">
       <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
-          <os-label v-show="field.label">
-            <span>{{field.label}}</span>
+          <os-label v-show="field.label || field.labelCode">
+            <span>{{label(field)}}</span>
             <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
@@ -45,9 +45,10 @@ import { reactive } from 'vue';
 import useVuelidate from '@vuelidate/core'
 
 import alertSvc     from '@/common/services/Alerts.js';
+import exprUtil     from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 import http         from '@/common/services/HttpClient.js';
-import exprUtil     from '@/common/services/ExpressionUtil.js';
+import i18n         from '@/common/services/I18n.js';
 import util         from '@/common/services/Util.js';
 
 export default {
@@ -107,6 +108,16 @@ export default {
        }
 
        this.$emit('form-validity', {invalid: this.v$.$invalid});
+     },
+
+     label: function(field) {
+       if (field.labelCode) {
+         return this.$t(field.labelCode);
+       } else if (field.label) {
+         return field.label;
+       } else {
+         return 'Unknown';
+       }
      },
 
      validate: function() {
@@ -278,7 +289,13 @@ export default {
 
            for (let rule in field.validations) {
              if (validators[rule] && validators[rule].$invalid) {
-               result[field.name] = field.validations[rule].message;
+               if (field.validations[rule].messageCode) {
+                 result[field.name] = i18n.msg(field.validations[rule].messageCode);
+               } else if (typeof field.validations[rule].message == 'function') {
+                 result[field.name] = field.validations[rule].message();
+               } else {
+                 result[field.name] = field.validations[rule].message;
+               }
                break;
              }
            }

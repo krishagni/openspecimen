@@ -10,6 +10,7 @@ import formUtil       from './FormUtil.js';
 import homePageSvc    from './HomePageService.js';
 import http           from './HttpClient.js';
 import itemsSvc       from './ItemsHolder.js';
+import i18nSvc        from './I18n.js';
 import notifSvc       from './Notif.js';
 import numConvUtil    from './NumberConverterUtil.js';
 import pluginLoader   from './PluginLoader.js';
@@ -34,6 +35,7 @@ export default {
       homePageSvc:  homePageSvc,
       http:         http,
       itemsSvc:     itemsSvc,
+      i18nSvc:      i18nSvc,
       notifSvc:     notifSvc,
       numConvUtil:  numConvUtil,
       pluginLoader: pluginLoader,

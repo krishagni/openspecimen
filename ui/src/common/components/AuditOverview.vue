@@ -2,39 +2,39 @@
 <template>
   <Section>
     <template #title>
-      <span>Audit Trail</span>
+      <span v-t="'audit.trail'">Audit Trail</span>
     </template>
 
     <template #content>
       <ul class="os-key-values os-one-col" v-if="ctx.auditTrail.createdBy || ctx.auditTrail.lastUpdatedBy">
         <li class="item" v-if="ctx.auditTrail.createdBy">
-          <strong class="key key-sm">Entered By</strong>
+          <strong class="key key-sm" v-t="'audit.entered_by'">Entered By</strong>
           <span class="value value-md">{{$filters.username(ctx.auditTrail.createdBy)}}</span>
         </li>
         <li class="item" v-if="ctx.auditTrail.createdOn">
-          <strong class="key key-sm">Entered On</strong>
+          <strong class="key key-sm" v-t="'audit.entered_on'">Entered On</strong>
           <span class="value value-md">{{$filters.dateTime(ctx.auditTrail.createdOn)}}</span>
         </li>
         <li class="item" v-if="ctx.auditTrail.lastUpdatedBy">
-          <strong class="key key-sm">Updated By</strong>
+          <strong class="key key-sm" v-t="'audit.updated_by'">Updated By</strong>
           <span class="value value-md">{{$filters.username(ctx.auditTrail.lastUpdatedBy)}}</span>
         </li>
         <li class="item" v-if="ctx.auditTrail.lastUpdatedOn">
-          <strong class="key key-sm">Updated On</strong>
+          <strong class="key key-sm" v-t="'audit.updated_on'">Updated On</strong>
           <span class="value value-md">{{$filters.dateTime(ctx.auditTrail.lastUpdatedOn)}}</span>
         </li>
         <li class="item">
-          <strong class="key key-sm">Number of Revisions</strong>
+          <strong class="key key-sm" v-t="'audit.no_of_revs'">Number of Revisions</strong>
           <span class="value value-md">
             <span>{{ctx.auditTrail.revisionsCount}}</span>
             <a @click="showRevs" v-if="ctx.auditTrail.revisionsCount > 0">
-              <span>(View All)</span>
+              <span v-t="'audit.view_revisions'">(View All)</span>
             </a>
           </span>
         </li>
       </ul>
       <span v-else>
-        <span>No trail to show!</span>
+        <span v-t="'audit.no_trail'">No trail to show!</span>
       </span>
     </template>
   </Section>

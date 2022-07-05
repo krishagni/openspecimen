@@ -1,4 +1,67 @@
 {
+  "audit": {
+    "entered_by": "Entered By",
+    "entered_on": "Entered On",
+    "no_of_revs": "Number of Revisions",
+    "no_revs": "No revisions to show!",
+    "no_trail": "No trail to show!",
+    "revs_list": "Revisions",
+    "trail": "Audit Trail",
+    "updated_by": "Updated By",
+    "updated_on": "Updated On",
+    "view_revisions": "(View All)"
+  },
+
+  "bulk_imports": {
+    "view_jobs": "View Past Imports"
+  },
+
+  "common": {
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create",
+      "delete": "Delete",
+      "done":   "Done",
+      "edit":   "Edit",
+      "export": "Export",
+      "help":   "Help",
+      "import": "Import",
+      "search": "Search",
+      "update": "Update"
+    },
+
+    "copy_record_url": "Copy Record URL",
+
+    "lists": {
+      "clear_filters": "Clear Filters",
+      "custom_value": "Custom",
+      "filters": "Filters",
+      "go": "Go",
+      "loading": "Loading records. Please wait for a moment...",
+      "no_records": "No records to display.",
+      "records_selected": "One record selected... | {count} records selected...",
+      "records_to_display": "Records to Display"
+    },
+
+    "open_in_new_tab": "Open in New Tab",
+    "overview": "Overview",
+    "switch_to_table_view": "Switch to table view",
+    "update": "Update {name}",
+    "url_copied": "URL copied."
+  },
+
+  "institutes": {
+    "confirm_delete_selected": "Are you sure you want to delete the selected institutes?",
+    "create": "Create Institute",
+    "deleted": "One institute deleted. | {count} institutes deleted.",
+    "list": "Institutes",
+    "name": "Name",
+    "name_is_mandatory": "Institute name is mandatory",
+    "saved": "Institute {name} saved.",
+    "singular": "Institute",
+    "users": "Users"
+  },
+
   "orders": {
     "name": "Name"
   }
