@@ -508,4 +508,44 @@
       <column name="shipment_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Populate the PVs so that they appear in the audit log string">
+    <sql>
+      insert into
+        catissue_permissible_value_aud (rev, revtype, identifier, public_id, attribute_mod, value, value_mod,
+        concept_code, conceptcode_mod, sortorder, sortorder_mod, parent_identifier, parent_mod,
+        activity_status, activitystatus_mod, props_mod)
+      select
+        -1, 0, p.identifier, p.public_id, 1, p.value, 1, p.concept_code, 1, p.sortorder, 1, p.parent_identifier, 1,
+        p.activity_status, 1, 1
+      from
+        catissue_permissible_value p
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Index on PV audit trail">
+    <createIndex tableName="CATISSUE_PERMISSIBLE_VALUE_AUD" indexName="OS_PVS_AUD_IDS_IDX">
+      <column name="IDENTIFIER" />
+      <column name="REV" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: User groups that were created before audit">
+    <sql>
+      insert into
+        os_user_groups_aud (rev, revtype, identifier, name, name_mod, description, description_mod,
+        institute_id, institute_mod, activity_status, activitystatus_mod, users_mod)
+      select
+        -1, 0, g.identifier, g.name, 1, g.description, 1, g.institute_id, 1, g.activity_status, 1, 1
+      from
+        os_user_groups g
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Audit trail: Index on user groups">
+    <createIndex tableName="OS_USER_GROUPS_AUD" indexName="OS_UG_AUD_IDS_IDX">
+      <column name="IDENTIFIER" />
+      <column name="REV" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
