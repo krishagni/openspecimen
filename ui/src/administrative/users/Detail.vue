@@ -6,11 +6,11 @@
       </template>
 
       <span class="os-title">
-        <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
+        <h3>{{$filters.username(ctx.user)}}</h3>
         <div class="accessories" v-if="ctx.user && ctx.user.id > 0">
           <os-tag v-if="status.caption" :value="status.caption" :rounded="true" :type="status.type" />
           <os-copy-link size="small" :route="{name: 'UserDetail.Overview', params: {userId: ctx.user.id}}" />
-          <os-new-tab size="small" :route="{name: 'UserDetail.Overview', params: {userId: ctx.user.id}}" />
+          <os-new-tab   size="small" :route="{name: 'UserDetail.Overview', params: {userId: ctx.user.id}}" />
         </div>
       </span>
     </os-page-head>
@@ -20,22 +20,22 @@
           <ul>
             <li>
               <router-link :to="getRoute('Overview')">
-                <span>Overview</span>
+                <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
             <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'">
               <router-link :to="getRoute('Roles')">
-                <span>Roles</span>
+                <span v-t="'users.roles'">Roles</span>
               </router-link>
             </li>
             <li v-if="ctx.isUpdateAllowed">
               <router-link :to="getRoute('Forms.List')">
-                <span>Forms</span>
+                <span v-t="'users.forms'">Forms</span>
               </router-link>
             </li>
             <li v-if="ctx.pfuAllowed">
               <router-link :to="getRoute('ProfileForms.List')">
-                <span>Profile Forms</span>
+                <span v-t="'users.profile_forms'">Profile Forms</span>
               </router-link>
             </li>
 
@@ -44,22 +44,22 @@
         </os-tab-menu>
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="'Overview'">
+            <li v-os-tooltip.right="$t('common.overview')">
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
               </router-link>
             </li>
-            <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'" v-os-tooltip.right="'Roles'">
+            <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'" v-os-tooltip.right="$t('users.roles')">
               <router-link :to="getRoute('Roles')">
                 <os-icon name="users" />
               </router-link>
             </li>
-            <li v-if="ctx.isUpdateAllowed" v-os-tooltip.right="'Forms'">
+            <li v-if="ctx.isUpdateAllowed" v-os-tooltip.right="$t('users.forms')">
               <router-link :to="getRoute('Forms.List')">
                 <os-icon name="copy" />
               </router-link>
             </li>
-            <li v-if="ctx.pfuAllowed" v-os-tooltip.right="'Profile Forms'">
+            <li v-if="ctx.pfuAllowed" v-os-tooltip.right="$t('users.profile_forms')">
               <router-link :to="getRoute('ProfileForms.List')">
                 <os-icon name="user" />
               </router-link>
@@ -78,8 +78,9 @@
 <script>
 import { reactive } from 'vue';
 
-import routerSvc from '@/common/services/Router.js';
-import userSvc from '@/administrative/services/User.js';
+import i18n          from '@/common/services/I18n.js';
+import routerSvc     from '@/common/services/Router.js';
+import userSvc       from '@/administrative/services/User.js';
 import userResources from '@/administrative/users/Resources.js';
 
 export default {
@@ -91,7 +92,7 @@ export default {
     const ctx = reactive({
       user: {},
       bcrumb: [
-        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: 'Users'}
+        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: i18n.msg('users.list')}
       ]
     });
 
@@ -127,16 +128,16 @@ export default {
 
       switch (this.ctx.user.activityStatus) {
         case 'Closed':
-          return {caption: 'Archived', type: 'danger'};
+          return {caption: i18n.msg('users.status.archived'), type: 'danger'};
 
         case 'Expired':
-          return {caption: 'Password Expired', type: 'danger'};
+          return {caption: i18n.msg('users.status.password_expired'), type: 'danger'};
 
         case 'Locked':
-          return {caption: 'Locked', type: 'danger'};
+          return {caption: i18n.msg('users.status.locked'), type: 'danger'};
 
         case 'Pending':
-          return {caption: 'Pending', type: 'warning'};
+          return {caption: i18n.msg('users.status.pending'), type: 'warning'};
       }
 
       return {caption: undefined};

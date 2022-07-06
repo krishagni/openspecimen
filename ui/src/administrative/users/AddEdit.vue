@@ -7,12 +7,16 @@
 
       <span v-if="!ctx.bulkUpdate">
         <span v-if="!!ctx.user">
-          <h3 v-if="!ctx.user.id">Create User</h3>
-          <h3 v-else>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
+          <h3 v-if="!ctx.user.id">
+            <span v-t="'users.create'">Create User</span>
+          </h3>
+          <h3 v-else>
+            <span>{{$filters.username(ctx.user)}}</span>
+          </h3>
         </span>
       </span>
       <span v-else>
-        <h3>Bulk Update Users</h3>
+        <h3 v-t="'users.bulk_update'">Bulk Update Users</h3>
       </span>
     </os-page-head>
 
@@ -20,17 +24,17 @@
       <div v-if="!ctx.bulkUpdate && ctx.user">
         <os-form ref="userForm" :schema="ctx.addEditFs" :data="ctx" @input="handleUserChange($event)">
           <div>
-            <os-button primary label="Create" v-if="!ctx.user.id" @click="saveOrUpdate" />
-            <os-button primary label="Update" v-else @click="saveOrUpdate" />
-            <os-button text label="Cancel" @click="cancel" />
+            <os-button primary :label="$t('common.buttons.create')" v-if="!ctx.user.id" @click="saveOrUpdate" />
+            <os-button primary :label="$t('common.buttons.update')" v-else @click="saveOrUpdate" />
+            <os-button text    :label="$t('common.buttons.cancel')" @click="cancel" />
           </div>
         </os-form>
       </div>
       <div v-if="ctx.bulkUpdate">
         <os-form ref="userForm" :schema="ctx.bulkEditFs" :data="ctx" @input="handleUserChange($event)">
           <div>
-            <os-button primary label="Update" @click="bulkUpdate" />
-            <os-button text label="Cancel" @click="cancel" />
+            <os-button primary :label="$t('common.buttons.update')" @click="bulkUpdate" />
+            <os-button text    :label="$t('common.buttons.cancel')" @click="cancel" />
           </div>
         </os-form>
       </div>
@@ -48,9 +52,10 @@ import editProfileSchema from '@/administrative/schemas/users/edit-profile-schem
 
 import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
-import itemsSvc from '@/common/services/ItemsHolder.js';
-import userSvc from '@/administrative/services/User.js';
-import formUtil from '@/common/services/FormUtil.js';
+import itemsSvc  from '@/common/services/ItemsHolder.js';
+import i18n      from '@/common/services/I18n.js';
+import userSvc   from '@/administrative/services/User.js';
+import formUtil  from '@/common/services/FormUtil.js';
 
 export default {
   name: 'UserAddEdit',
@@ -66,7 +71,7 @@ export default {
       user: null,
 
       bcrumb: [
-        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: 'Users'}
+        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: i18n.msg('users.list')}
       ],
 
       addEditFs: {rows: []},
@@ -154,8 +159,7 @@ export default {
 
       userSvc.bulkUpdate({ids: this.ctx.users.map(u => u.id), detail: detail}).then(
         function() {
-          let count = self.ctx.users.length;
-          alertsSvc.info('Updated ' + count + (count > 1 ? ' users' : ' user'));
+          alertsSvc.success({code: 'users.updated', args: {count: self.ctx.users.length}});
           routerSvc.back();
         }
       );

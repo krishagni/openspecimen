@@ -2,7 +2,7 @@ export default {
   fields: [
     {
       "type": "radio",
-      "label": "Type",
+      "labelCode": "users.type",
       "name": "user.type",
       "optionsPerRow": 4,
       "options": (context) => {
@@ -27,49 +27,49 @@ export default {
 
     {
       "type": "text",
-      "label": "First Name",
+      "labelCode": "users.first_name",
       "name": "user.firstName",
       "validations": {
         "required": {
-          "message": "First name is mandatory"
+          "messageCode": "users.first_name_required"
         }
       }
     },
 
     {
       "type": "text",
-      "label": "Last Name",
+      "labelCode": "users.last_name",
       "name": "user.lastName",
       "validations": {
         "required": {
-          "message": "Last name is mandatory"
+          "messageCode": "users.last_name_required"
         }
       }
     },
 
     {
       "type": "text",
-      "label": "Email Address",
+      "labelCode": "users.email_address",
       "name": "user.emailAddress",
       "validations": {
         "required": {
-          "message": "Email address is mandatory"
+          "messageCode": "users.email_address_required"
         },
         "email": {
-          "message": "Email address is invalid"
+          "messageCode": "users.email_address_invalid"
         }
       }
     },
 
     {
       "type": "text",
-      "label": "Phone Number",
+      "labelCode": "users.phone_number",
       "name": "user.phoneNumber"
     },
 
     {
       "type": "dropdown",
-      "label": "Domain Name",
+      "labelCode": "users.domain_name",
       "name": "user.domainName",
       "listSource": {
         "apiUrl": "auth-domains",
@@ -79,26 +79,26 @@ export default {
       "showWhen": "user.type != 'CONTACT'",
       "validations": {
         "required": {
-          "message": "Domain name is mandatory"
+          "messageCode": "users.domain_name_required"
         }
       }
     },
 
     {
       "type": "text",
-      "label": "Login Name",
+      "labelCode": "users.login_name",
       "name": "user.loginName",
       "showWhen": "user.type != 'CONTACT'",
       "validations": {
         "required": {
-          "message": "Login name is mandatory"
+          "messageCode": "users.login_name_required"
         }
       }
     },
 
     {
       "type": "dropdown",
-      "label": "Institute",
+      "labelCode": "users.institute",
       "name": "user.instituteName",
       "listSource": {
         "apiUrl": "institutes",
@@ -108,14 +108,14 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Institute is mandatory"
+          "messageCode": "users.institute_required"
         }
       }
     },
 
     {
       "type": "dropdown",
-      "label": "Primary Site",
+      "labelCode": "users.primary_site",
       "name": "user.primarySite",
       "showWhen": "!!user.instituteName",
       "listSource": {
@@ -136,7 +136,7 @@ export default {
 
     {
       "type": "dropdown",
-      "label": "Time Zone",
+      "labelCode": "users.time_zone",
       "name": "user.timeZone",
       "listSource": {
         "apiUrl": "time-zones",
@@ -147,7 +147,7 @@ export default {
   
     {
       "type": "radio",
-      "label": "Manage Forms",
+      "labelCode": "users.manage_forms",
       "name": "user.manageForms",
       "optionsPerRow": 2,
       "options": [
@@ -159,7 +159,7 @@ export default {
 
     {
       "type": "radio",
-      "label": "Manage Workflows",
+      "labelCode": "users.manage_workflows",
       "name": "user.manageWfs",
       "optionsPerRow": 2,
       "options": [
@@ -171,7 +171,7 @@ export default {
 
     {
       "type": "radio",
-      "label": "Disable Notifications",
+      "labelCode": "users.disable_notifs",
       "name": "user.dnd",
       "optionsPerRow": 2,
       "options": [
@@ -182,7 +182,7 @@ export default {
 
     {
       "type": "radio",
-      "label": "API User",
+      "labelCode": "users.api_user",
       "name": "user.apiUser",
       "showWhen": "user.type != 'CONTACT'",
       "optionsPerRow": 2,
@@ -194,19 +194,19 @@ export default {
 
     {
       "type": "text",
-      "label": "IP Address",
+      "labelCode": "users.ip_address",
       "name": "user.ipRange",
       "showWhen": "user.type != 'CONTACT' && user.apiUser == true",
       "validations": {
         "required": {
-          "message": "IP address is mandatory"
+          "messageCode": "users.ip_address_required"
         }
       }
     },
 
     {
       "type": "radio",
-      "label": "Download Labels Print File",
+      "labelCode": "users.download_labels",
       "name": "user.downloadLabelsPrintFile",
       "showWhen": "user.type != 'CONTACT'",
       "optionsPerRow": 2,
@@ -219,7 +219,7 @@ export default {
 
     {
       "type": "textarea",
-      "label": "Address",
+      "labelCode": "users.address",
       "name": "user.address",
       "rows": 2
     }

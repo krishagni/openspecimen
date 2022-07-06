@@ -3,17 +3,17 @@
     <template #default>
       <div v-if="(ui.currentUser.admin || !ctx.user.admin) && ctx.user.activityStatus != 'Pending'">
         <os-button left-icon="edit"
-          label="Edit" @click="goto('UserAddEdit', {userId: ctx.user.id})"
+          :label="$t('common.buttons.edit')" @click="goto('UserAddEdit', {userId: ctx.user.id})"
           v-if="updateAllowed"
         />
 
         <os-button left-icon="edit"
-          label="Edit" @click="goto('UserEditProfile', {userId: ctx.user.id})"
+          :label="$t('common.buttons.edit')" @click="goto('UserEditProfile', {userId: ctx.user.id})"
           v-if="!updateAllowed && ui.currentUser.id == ctx.user.id"
         />
 
         <os-button left-icon="lock"
-          label="Lock" @click="lock"
+          :label="$t('users.lock')" @click="lock"
           v-if="updateAllowed &&
             ctx.user.activityStatus != 'Locked' &&
             ctx.user.activityStatus != 'Closed' &&
@@ -21,47 +21,46 @@
         />
 
         <os-button left-icon="lock-open"
-          label="Unlock" @click="activate"
+          :label="$t('users.unlock')" @click="activate"
           v-if="updateAllowed && ctx.user.activityStatus == 'Locked'"
         />
 
         <os-button left-icon="archive"
-          label="Archive" @click="archive"
+          :label="$t('common.buttons.archive')" @click="archive"
           v-if="updateAllowed && ctx.user.activityStatus != 'Closed'"
         />
 
         <os-button left-icon="check"
-          label="Reactivate" @click="activate"
+          :label="$t('common.buttons.reactivate')" @click="activate"
           v-if="updateAllowed && ctx.user.activityStatus == 'Closed'"
         />
 
         <os-button left-icon="trash"
-          label="Delete" @click="deleteUser"
+          :label="$t('common.buttons.delete')" @click="deleteUser"
           v-show-if-allowed="userResources.deleteOpts"
         />
 
         <os-button left-icon="key"
-          label="Reset Password" @click="goto('UserChangePassword', {userId: ctx.user.id})"
+          :label="$t('users.change_password')" @click="goto('UserChangePassword', {userId: ctx.user.id})"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.domainName == 'openspecimen' &&
             (ui.currentUser.id == ctx.user.id || ui.currentUser.admin || ui.currentUser.instituteAdmin) &&
             (ctx.user.activityStatus == 'Active' || ctx.user.activityStatus == 'Expired')"
         />
 
         <os-button left-icon="user-secret"
-          label="Impersonate" @click="impersonate"
+          :label="$t('users.impersonate')" @click="impersonate"
           v-if="ctx.user.type != 'CONTACT' && ctx.user.activityStatus == 'Active' &&
             ui.currentUser.id != ctx.user.id && ui.currentUser.admin"
         />
       </div>
       <div v-else-if="ctx.user.activityStatus == 'Pending' && ui.currentUser.admin">
         <os-button left-icon="check"
-          label="Approve User" @click="activate"
+          :label="$t('users.approve')" @click="activate"
         />
         <os-button left-icon="times"
-          label="Reject User" @click="deleteUser"
+          :label="$t('users.reject')" @click="deleteUser"
         />
       </div>
-
     </template>
   </os-page-toolbar>
 
@@ -77,11 +76,11 @@
 
   <os-confirm ref="confirmImpersonate">
     <template #title>
-      <span>Sign-in as {{ctx.user.firstName}} {{ctx.user.lastName}}...</span>
+      <span v-t="{path: 'users.impersonate_as', args: ctx.user}">Sign-in as...</span>
     </template>
 
     <template #message>
-      <span>An email will be sent to <b>{{ctx.user.firstName}} {{ctx.user.lastName}}</b> to let them know you've signed-in to their account. The email will include details like your name, email address, and device IP address. Do you want to proceed?</span>
+      <span v-t="{path: 'users.impersonate_tnc', args: ctx.user}">An email will be sent to user to let them know you've signed-in to their account. The email will include details like your name, email address, and device IP address. Do you want to proceed?</span>
     </template>
   </os-confirm>
 
@@ -145,7 +144,7 @@ export default {
       const ctx = this.ctx;
       ctx.user = this.user;
       ctx.deleteOpts = {
-        type: 'User',
+        type: this.$t('users.singular'),
         title: this.user.firstName + ' ' + this.user.lastName,
         dependents: () => userSvc.getDependents(this.user),
         deleteObj: () => userSvc.delete(this.user)
@@ -162,25 +161,23 @@ export default {
         (savedUser) => {
           self.ctx.user = savedUser;
           Object.assign(this.user, savedUser); // OPSMN-5800: switch between tabs
-          alertSvc.success(msg);
+          alertSvc.success({code: msg, args: {count: 1}});
         }
       );
     },
 
     lock: function() {
-      this.updateStatus('Locked', 'User locked!');
+      this.updateStatus('Locked', 'users.locked');
     },
 
     activate: function() {
-      let status = this.ctx.user.activityStatus;
-      let message = status == 'Locked' ?
-        'User unlocked!' :
-        (status == 'Closed' ? 'User reactivated!' : 'User request approved!');
-      this.updateStatus('Active', message);
+      const status = this.ctx.user.activityStatus;
+      const msg = status == 'Locked' ? 'users.unlocked' : (status == 'Closed' ? 'users.reactivated' : 'users.approved');
+      this.updateStatus('Active', msg);
     },
 
     archive: function() {
-      this.updateStatus('Closed', 'User archived!');
+      this.updateStatus('Closed', 'users.archived');
     },
 
     deleteUser: function() {

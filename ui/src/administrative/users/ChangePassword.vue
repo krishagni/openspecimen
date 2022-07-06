@@ -6,15 +6,15 @@
       </template>
 
       <span>
-        <h3>{{ctx.user.firstName}} {{ctx.user.lastName}}</h3>
+        <h3>{{$filters.username(ctx.user)}}</h3>
       </span>
     </os-page-head>
     <os-page-body>
       <div>
         <os-form ref="userForm" :schema="ctx.chgPasswdFs" :data="ctx.passwdDetail">
           <div>
-            <os-button primary label="Update" @click="updatePassword" />
-            <os-button text label="Cancel" @click="cancel" />
+            <os-button primary :label="$t('common.buttons.update')" @click="updatePassword" />
+            <os-button text    :label="$t('common.buttons.cancel')" @click="cancel" />
           </div>
         </os-form>
       </div>
@@ -27,10 +27,11 @@ import { reactive, inject } from 'vue';
 
 import chgPasswdFs from '@/administrative/schemas/users/change-password-schema.json';
 
-import alertsSvc from '@/common/services/Alerts.js';
-import routerSvc from '@/common/services/Router.js';
+import alertsSvc   from '@/common/services/Alerts.js';
+import i18n        from '@/common/services/I18n.js';
+import routerSvc   from '@/common/services/Router.js';
 import settingsSvc from '@/common/services/Setting.js';
-import userSvc from '@/administrative/services/User.js';
+import userSvc     from '@/administrative/services/User.js';
 
 export default {
   name: 'UserChangePassword',
@@ -46,7 +47,7 @@ export default {
       user: {},
 
       bcrumb: [
-        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: 'Users'}
+        {url: routerSvc.getUrl('UsersList', {userId: -1}), label: i18n.msg('users.list')}
       ],
 
       chgPasswdFs: {rows: []},
@@ -100,7 +101,7 @@ export default {
 
       userSvc.updatePassword(payload).then(
         () => {
-          alertsSvc.success('Password updated!');
+          alertsSvc.success({code: 'users.password_updated'});
           this.$ui.currentUser.daysBeforePasswordExpiry = -1;
           routerSvc.back();
         }

@@ -8,14 +8,16 @@
           </template>
 
           <span>
-            <h3 v-if="!ctx.group">Users</h3>
+            <h3 v-if="!ctx.group">
+              <span v-t="'users.list'">Users</span>
+            </h3>
             <h3 v-else>{{ctx.group.name}}</h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -31,54 +33,59 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
               <span v-if="ctx.selectedUsers.length == 0 && !ctx.group">
-                <os-button left-icon="plus" label="Create"
+                <os-button left-icon="plus" :label="$t('common.buttons.create')"
                   @click="goto('UserAddEdit', {userId: -1})"
                   v-show-if-allowed="userResources.createOpts" />
 
-                <os-button left-icon="users" label="User Groups" @click="goto('UserGroupsList')" />
+                <os-button left-icon="users" :label="$t('users.groups')" @click="goto('UserGroupsList')" />
 
-                <os-menu label="Import" :options="importOpts" v-show-if-allowed="userResources.importOpts" />
+                <os-menu :label="$t('common.buttons.import')" :options="importOpts"
+                  v-show-if-allowed="userResources.importOpts" />
 
-                <os-menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts"/>
+                <os-menu :label="$t('common.buttons.export')" :options="exportOpts"
+                  v-show-if-allowed="userResources.importOpts"/>
 
-                <os-menu label="More" :options="moreOpts" v-show-if-allowed="institute" />
+                <os-menu :label="$t('common.buttons.more')" :options="moreOpts" v-show-if-allowed="institute" />
 
-                <os-button left-icon="question-circle" label="Help" @click="help" />
+                <os-button left-icon="question-circle" :label="$t('common.buttons.help')" @click="help" />
               </span>
 
               <span v-if="ctx.selectedUsers.length > 0">
-                <os-button left-icon="edit" label="Edit" @click="bulkEdit" v-show-if-allowed="userResources.updateOpts" />
+                <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="bulkEdit"
+                  v-show-if-allowed="userResources.updateOpts" />
 
                 <AssignGroup v-if="!ctx.group" @addToGroup="addToGroup"
                   v-show-if-allowed="userResources.updateOpts" />
 
-                <os-button v-if="ctx.group" left-icon="times" label="Remove from Group" @click="removeFromGroup"
+                <os-button v-if="ctx.group" left-icon="times"
+                  :label="$t('users.rm_from_group')" @click="removeFromGroup"
                   v-show-if-allowed="userResources.updateOpts" />
 
-                <os-button left-icon="archive" label="Archive" @click="archiveUsers"
+                <os-button left-icon="archive" :label="$t('common.buttons.archive')" @click="archiveUsers"
                   v-show-if-allowed="userResources.updateOpts" />
 
-                <os-button left-icon="check" label="Reactivate" @click="reactivateUsers"
+                <os-button left-icon="check" :label="$t('common.buttons.reactivate')" @click="reactivateUsers"
                   v-show-if-allowed="userResources.updateOpts" />
 
-                <os-button left-icon="trash" label="Delete" @click="deleteUsers"
+                <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteUsers"
                   v-show-if-allowed="userResources.deleteOpts" />
 
-                <os-button left-icon="lock" label="Lock" @click="lockUsers"
+                <os-button left-icon="lock" :label="$t('users.lock')" @click="lockUsers"
                   v-show-if-allowed="userResources.updateOpts" />
 
-                <os-button left-icon="unlock" label="Unlock" @click="unlockUsers"
+                <os-button left-icon="unlock" :label="$t('users.unlock')" @click="unlockUsers"
                   v-show-if-allowed="userResources.updateOpts" />
 
-                <os-button left-icon="thumbs-up" label="Approve" @click="approveUsers"
+                <os-button left-icon="thumbs-up" :label="$t('users.approve')" @click="approveUsers"
                   v-show-if-allowed="userResources.updateOpts" />
 
-                <os-menu label="Export" :options="exportOpts" v-show-if-allowed="userResources.importOpts" />
+                <os-menu :label="$t('common.buttons.export')" :options="exportOpts"
+                  v-show-if-allowed="userResources.importOpts" />
               </span>
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -97,7 +104,7 @@
 
           <os-confirm-delete ref="deleteDialog">
             <template #message>
-              <span>Are you sure you want to delete the selected users?</span>
+              <span v-t="'users.confirm_delete_selected'">Are you sure you want to delete the selected users?</span>
             </template>
           </os-confirm-delete>
 
@@ -118,11 +125,12 @@ import { reactive } from 'vue';
 import userGrpSvc from '@/administrative/services/UserGroup.js';
 import userSvc from '@/administrative/services/User.js';
 
-import alertSvc from '@/common/services/Alerts.js';
-import authSvc from '@/common/services/Authorization.js';
-import exportSvc from '@/common/services/ExportService.js';
-import itemsSvc from '@/common/services/ItemsHolder.js';
-import routerSvc from '@/common/services/Router.js';
+import alertSvc     from '@/common/services/Alerts.js';
+import authSvc      from '@/common/services/Authorization.js';
+import exportSvc    from '@/common/services/ExportService.js';
+import itemsSvc     from '@/common/services/ItemsHolder.js';
+import i18n         from '@/common/services/I18n.js';
+import routerSvc    from '@/common/services/Router.js';
 import userGroupSvc from '@/administrative/services/UserGroup.js';
 
 import AssignGroup from '@/administrative/user-groups/AssignGroup.vue';
@@ -160,7 +168,7 @@ export default {
 
       usersCount: -1,
 
-      ugCrumb: [ { url: routerSvc.getUrl('UserGroupsList'), label: 'User Groups' } ]
+      ugCrumb: [ { url: routerSvc.getUrl('UserGroupsList'), label: i18n.msg('users.groups') } ]
     });
 
     if (props.groupId) {
@@ -313,7 +321,7 @@ export default {
       let self = this;
       userSvc.bulkUpdate({detail: {activityStatus: toStatus}, ids: Object.keys(usersMap)}).then(
         function(saved) {
-          alertSvc.success(saved.length + (saved.length != 1 ? ' users ' : ' user ') + msg);
+          alertSvc.success({code: msg, args: {count: saved.length}});
           self.$refs.listView.reload();
         }
       );
@@ -328,13 +336,13 @@ export default {
       const instituteId = users[0].instituteId;
       for (let user of users) {
         if (user.instituteId != instituteId) {
-          alertSvc.error('Users of multiple institutes cannot be added to the group.');
+          alertSvc.error({code: 'users.multi_institute_add_group_na'});
           return;
         }
       }
 
       if (group) {
-        userGroupSvc.addUsers(group, users).then(() => alertSvc.success('Users added to the group ' + group.name));
+        userGroupSvc.addUsers(group, users).then(() => alertSvc.success({code: 'users.added_to_group', args: group}));
       } else {
         itemsSvc.setItems('users', users);
         routerSvc.goto('UserGroupAddEdit', {groupId: -1});
@@ -350,30 +358,30 @@ export default {
       const self = this;
       userGrpSvc.removeUsers(this.ctx.group, users).then(
         function() {
-          alertSvc.success('Users removed from the group!');
+          alertSvc.success({code: 'users.removed_from_group', args: self.ctx.group});
           self.$refs.listView.reload();
         }
       );
     },
 
     archiveUsers: function() {
-      this.updateStatus(['Locked', 'Active', 'Expired'], 'Closed', 'archived');
+      this.updateStatus(['Locked', 'Active', 'Expired'], 'Closed', 'users.archived');
     },
 
     reactivateUsers: function() {
-      this.updateStatus(['Closed'], 'Active', 'reactivated');
+      this.updateStatus(['Closed'], 'Active', 'users.reactivated');
     },
 
     lockUsers: function() {
-      this.updateStatus(['Active'], 'Locked', 'locked');
+      this.updateStatus(['Active'], 'Locked', 'users.locked');
     },
 
     unlockUsers: function() {
-      this.updateStatus(['Locked'], 'Active', 'unlocked');
+      this.updateStatus(['Locked'], 'Active', 'users.unlocked');
     },
 
     approveUsers: function() {
-      this.updateStatus(['Pending'], 'Active', 'sign-up request approved');
+      this.updateStatus(['Pending'], 'Active', 'users.approved');
     },
 
     deleteUsers: function() {
@@ -385,12 +393,12 @@ export default {
           .join(',');
 
         if (admins.length > 0) {
-          alertSvc.error('Super administrator rights required to delete admin users: ' + admins);
+          alertSvc.error({code: 'users.admin_req_to_delete', args: {users: admins}});
           return;
         }
       }
 
-      this.$refs.deleteDialog.open().then(() => this.updateStatus([], 'Disabled', 'deleted'));
+      this.$refs.deleteDialog.open().then(() => this.updateStatus([], 'Disabled', 'users.deleted'));
     },
 
     exportRecords: function(type) {
@@ -413,38 +421,65 @@ export default {
 
     help: function() {
       window.open('http://help.openspecimen.org/user', '_blank').focus();
-    },
+    }
   },
 
   computed: {
     importOpts: function() {
       return [
-        { icon: 'user', caption: 'Users', onSelect: () => this.ngGoto('users-import', {objectType: 'user'}) },
-        { icon: 'lock', caption: 'User Roles', onSelect: () => this.ngGoto('users-import', {objectType: 'userRoles'}) },
-        { icon: 'copy', caption: 'Forms', onSelect: () => this.ngGoto('users-import', {objectType: 'extensions'}) },
-        { icon: 'table', caption: 'View Past Imports', onSelect: () => this.ngGoto('users-import-jobs') }
+        {
+          icon: 'user',
+          caption: this.$t('users.list'),
+          onSelect: () => this.ngGoto('users-import', {objectType: 'user'})
+        },
+        {
+          icon: 'lock',
+          caption: this.$t('users.user_roles'),
+          onSelect: () => this.ngGoto('users-import', {objectType: 'userRoles'})
+        },
+        {
+          icon: 'copy',
+          caption: this.$t('users.user_forms'),
+          onSelect: () => this.ngGoto('users-import', {objectType: 'extensions'})
+        },
+        {
+          icon: 'table',
+          caption: this.$t('bulk_imports.view_jobs'),
+          onSelect: () => this.ngGoto('users-import-jobs')
+        }
       ]
     },
 
     exportOpts: function() {
       return [
-        { icon: 'user', caption: 'Users', onSelect: () => this.exportRecords('user') },
-        { icon: 'lock', caption: 'User Roles', onSelect: () => this.exportRecords('userRoles') },
-        { icon: 'copy', caption: 'User Forms', onSelect: () => this.exportForms() }
+        { icon: 'user', caption: this.$t('users.list'),       onSelect: () => this.exportRecords('user') },
+        { icon: 'lock', caption: this.$t('users.user_roles'), onSelect: () => this.exportRecords('userRoles') },
+        { icon: 'copy', caption: this.$t('users.user_forms'), onSelect: () => this.exportForms() }
       ]
     },
 
     moreOpts: function() {
-      let opts = [
-        { icon: 'bullhorn', caption: 'New Announcement', onSelect: () => this.$refs.announcementDialog.open() }
-      ];
+      let opts = [{
+        icon: 'bullhorn',
+        caption: this.$t('users.new_announcement'),
+        onSelect: () => this.$refs.announcementDialog.open()
+      }];
 
       if (this.$ui.global.appProps.plugins.indexOf('os-extras') && authSvc.isAllowed('institute-admin')) {
         //
         // temporary. will go away when first class support for plugin views is implemented
         //
-        opts.push({ icon: 'download', caption: 'Export Login Activity', onSelect: () => this.ngGoto('export-login-audit') });
-        opts.push({ icon: 'tachometer-alt', caption: 'Active Users', onSelect: () => this.ngGoto('active-users-report') });
+        opts.push({
+          icon: 'download',
+          caption: this.$t('users.export_login_activity'),
+          onSelect: () => this.ngGoto('export-login-audit')
+        });
+
+        opts.push({
+          icon: 'tachometer-alt',
+          caption: this.$t('users.active_users'),
+          onSelect: () => this.ngGoto('active-users-report')
+        });
       }
 
       return opts;

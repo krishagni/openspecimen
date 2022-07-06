@@ -1,31 +1,35 @@
-
 <template>
   <div>
     <os-panel>
       <template #header>
         <span>
-          <span class="title">Roles</span>
-          <os-button left-icon="plus" label="Add Role" @click="showAddEditRole" v-if="!hideAddRole && updateAllowed" />
+          <span class="title" v-t="'users.roles'">Roles</span>
+          <os-button left-icon="plus" :label="$t('users.add_role')"
+            @click="showAddEditRole" v-if="!hideAddRole && updateAllowed" />
         </span>
       </template>
 
       <table class="os-table" v-if="ctx.userRoles && ctx.userRoles.length > 0">
         <thead>
           <tr>
-            <th>Site</th>
-            <th>Collection Protocol</th>
-            <th>Role</th>
+            <th v-t="'users.role_site'">Site</th>
+            <th v-t="'users.role_cp'">Collection Protocol</th>
+            <th v-t="'users.role_name'">Role</th>
             <th>&nbsp;</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="userRole of ctx.userRoles" :key="userRole.id">
             <td>
-              <span v-if="!userRole.site">All Current and Future</span>
+              <span v-if="!userRole.site">
+                <span v-t="'common.all_current_n_future'"> </span>
+              </span>
               <span v-else>{{userRole.site.name}}</span>
             </td>
             <td>
-              <span v-if="!userRole.collectionProtocol">All Current and Future</span>
+              <span v-if="!userRole.collectionProtocol">
+                <span v-t="'common.all_current_n_future'"> </span>
+              </span>
               <span v-else>{{userRole.collectionProtocol.shortTitle}}</span>
             </td>
             <td>
@@ -43,23 +47,27 @@
 
       <div v-else>
         <os-message type="info">
-          <span>No roles to display. Add a new role by clicking on Add Role button.</span>
+          <span v-t="'users.no_roles'">No roles to display. Add a new role by clicking on Add Role button.</span>
         </os-message>
       </div>
     </os-panel>
 
     <os-dialog ref="roleFormDialog">
       <template #header>
-        <span v-if="!ctx.role.id">Add Role</span>
-        <span v-else>Update Role</span>
+        <span v-if="!ctx.role.id">
+          <span v-t="'users.add_role'">Add Role</span>
+        </span>
+        <span v-else>
+          <span v-t="'users.update_role'">Update Role</span>
+        </span>
       </template>
       <template #content>
         <os-form ref="roleForm" :schema="ctx.roleFs" :data="ctx.role" @input="handleRoleChange($event)" />
       </template>
       <template #footer>
-        <os-button text label="Cancel" @click="cancelAddEditRole" />
-        <os-button primary label="Add" @click="saveRole" v-if="!ctx.role.id" />
-        <os-button primary label="Update" @click="saveRole" v-else />
+        <os-button text    :label="$t('common.buttons.cancel')" @click="cancelAddEditRole" />
+        <os-button primary :label="$t('common.buttons.add')" @click="saveRole" v-if="!ctx.role.id" />
+        <os-button primary :label="$t('common.buttons.update')" @click="saveRole" v-else />
       </template>
     </os-dialog>
   </div>
@@ -92,14 +100,14 @@ export default {
             {
               fields: [
                 {
-                  type: "dropdown", name: "site", label: "Site",
+                  type: "dropdown", name: "site", label: this.$t('users.role_site'),
                   listSource: {
                     displayProp: 'name', selectProp: 'name',
                     loadFn: (opts) => self.loadSites(opts)
                   },
                   validations: {
                     required: {
-                      message: "Site is mandatory"
+                      messageCode: "users.role_site_required"
                     }
                   }
                 }
@@ -108,14 +116,14 @@ export default {
             {
               fields: [
                 {
-                  type: "dropdown", name: "cp", label: "Collection Protocol",
+                  type: "dropdown", name: "cp", label: this.$t('users.role_cp'),
                   listSource: {
                     displayProp: 'shortTitle', selectProp: 'shortTitle',
                     loadFn: (opts) => self.loadCps(opts)
                   },
                   validations: {
                     required: {
-                      message: "Collection Protocol is mandatory"
+                      messageCode: "users.role_cp_required"
                     }
                   }
                 }
@@ -124,14 +132,14 @@ export default {
             {
               fields: [
                 {
-                  type: "dropdown", name: "role", label: "Role",
+                  type: "dropdown", name: "role", label: this.$t('users.role_name'),
                   listSource: {
                     displayProp: 'name', selectProp: 'name',
                     loadFn: (opts) => self.loadRoles(opts)
                   },
                   validations: {
                     required: {
-                      message: "Role is mandatory"
+                      messageCode: "users.role_name_required"
                     }
                   }
                 }

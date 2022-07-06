@@ -20,30 +20,30 @@ export default {
   columns: [
     {
       name: 'user.name',
-      caption: 'Name',
+      captionCode: 'users.name',
       value: (rowObject) => rowObject.user.firstName + ' ' + rowObject.user.lastName,
       href: (row, query) => routerSvc.getUrl('UsersListItemDetail.Overview', {userId: row.rowObject.user.id}, query)
     },
     {
       name: 'user.emailAddress',
-      caption: 'Email Address'
+      captionCode: 'users.email_address'
     },
     {
       name: 'user.loginName',
-      caption: 'Login Name',
+      captionCode: 'users.login_name',
       value: (rowObject) => rowObject.user.type == 'CONTACT' ?  '-' : rowObject.user.loginName
     },
     {
       name: 'user.instituteName',
-      caption: 'Institute'
+      captionCode: 'users.institute'
     },
     {
       name: 'user.primarySite',
-      caption: 'Primary Site'
+      captionCode: 'users.primary_site'
     },
     {
       name: 'user.creationDate',
-      caption: 'Active Since',
+      captionCode: 'users.active_since',
       type: 'date'
     }
   ],
@@ -52,17 +52,17 @@ export default {
     {
       name: 'name',
       type: 'text',
-      caption: 'Name'
+      captionCode: 'users.name'
     },
     {
       name: 'loginName',
       type: 'text',
-      caption: 'Login Name'
+      captionCode: 'users.login_name'
     },
     {
       name: 'institute',
       type: 'dropdown',
-      caption: 'Institute',
+      captionCode: 'users.institute',
       listSource: {
         apiUrl: 'institutes',
         displayProp: 'name',
@@ -73,7 +73,7 @@ export default {
     {
       name: 'group',
       type: 'dropdown',
-      caption: 'User Group',
+      captionCode: 'users.user_group',
       listSource: {
         apiUrl: 'user-groups',
         displayProp: 'name',
@@ -83,7 +83,7 @@ export default {
     {
       name: 'activityStatus',
       type: 'dropdown',
-      caption: 'Activity Status',
+      captionCode: 'users.activity_status',
       listSource: {
         selectProp: 'value',
         displayProp: 'value',
@@ -99,7 +99,7 @@ export default {
     {
       name: 'type',
       type: 'dropdown',
-      caption: 'Type',
+      captionCode: 'users.type',
       listSource: {
         selectProp: 'name',
         displayProp: 'caption',

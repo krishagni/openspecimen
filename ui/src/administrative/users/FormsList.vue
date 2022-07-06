@@ -4,7 +4,7 @@
       <os-grid-column width="3">
         <os-list-group :list="forms" :selected="ctx.selectedForm" @on-item-select="onFormSelect($event)">
           <template #header>
-            <span>Forms</span>
+            <span v-t="'users.forms'">Forms</span>
           </template>
           <template #default="{item}">
             <div class="heading">
@@ -32,17 +32,17 @@
               <span class="title">{{ctx.selectedForm.formCaption}}</span>
               <span v-if="entity.isActive && entity.isUpdateAllowed">
                 <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
-                  <os-button left-icon="plus" label="Add" @click="addRecord" />
+                  <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addRecord" />
                 </span>
                 <span v-else>
                   <os-button primary left-icon="edit"
-                    label="Edit" @click="editRecord(ctx.selectedRecord)" />
+                    :label="$t('common.buttons.add')" @click="editRecord(ctx.selectedRecord)" />
 
                   <os-button danger left-icon="trash"
-                    label="Delete" @click="deleteRecord(ctx.selectedRecord)" />
+                    :label="$t('common.buttons.delete')" @click="deleteRecord(ctx.selectedRecord)" />
 
                   <os-button v-if="ctx.selectedForm.multiRecord" left-icon="plus"
-                    label="Add Another" @click="addRecord" />
+                    :label="$t('common.buttons.add_another')" @click="addRecord" />
                 </span>
               </span>
             </span>
@@ -50,15 +50,15 @@
 
           <span v-if="!ctx.selectedRecord || !ctx.selectedRecord.recordId">
             <span v-if="!ctx.selectedForm.records || ctx.selectedForm.records.length == 0">
-              <span>No records to display</span>
+              <span v-t="'users.no_form_records'">No records to display</span>
             </span>
             <span v-else-if="ctx.selectedForm.records.length > 0">
               <table class="os-table os-table-hover">
                 <thead>
                   <tr>
-                    <th>Record</th>
-                    <th>Updated By</th>
-                    <th>Update Time</th>
+                    <th v-t="'users.record'">Record</th>
+                    <th v-t="'common.updated_by'">Updated By</th>
+                    <th v-t="'common.update_time'">Update Time</th>
                     <th>&nbsp;</th>
                   </tr>
                 </thead>
@@ -80,7 +80,7 @@
                     </td>
                     <td>
                       <os-button-group v-if="entity.isActive && entity.isUpdateAllowed">
-                        <os-button left-icon="edit" size="small" @click="editRecord(record)" />
+                        <os-button left-icon="edit"  size="small" @click="editRecord(record)" />
                         <os-button left-icon="trash" size="small" @click="deleteRecord(record)" />
                       </os-button-group>
                     </td>
@@ -232,7 +232,6 @@ export default {
     }
   }
 }
-
 </script>
 
 <style scoped>

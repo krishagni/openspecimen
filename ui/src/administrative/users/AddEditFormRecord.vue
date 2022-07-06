@@ -6,17 +6,17 @@
     </template>
 
     <os-form ref="deForm" :schema="ctx.formSchema" :data="ctx.record" @input="handleChange($event)">
-      <os-button primary label="Save"   @click="saveRecord" />
-      <os-button text label="Cancel" @click="cancel" />
+      <os-button primary :label="$t('common.buttons.save')"   @click="saveRecord" />
+      <os-button text    :label="$t('common.buttons.cancel')" @click="cancel" />
     </os-form>
   </os-panel>
 </template>
 
 <script>
 
-import formUtil from '@/common/services/FormUtil.js';
+import formUtil  from '@/common/services/FormUtil.js';
 import routerSvc from '@/common/services/Router.js';
-import formSvc from '@/forms/services/Form.js';
+import formSvc   from '@/forms/services/Form.js';
 
 export default {
   props: ['entity', 'formId', 'formCtxtId', 'recordId', 'listView', 'routeQuery'],
@@ -102,5 +102,4 @@ export default {
     }
   }
 }
-
 </script>

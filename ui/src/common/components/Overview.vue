@@ -40,7 +40,7 @@
   <template v-for="(field, idx) of fields.textArea" :key="idx">
     <Section>
       <template #title>
-        <span>{{label(field)}}></span>
+        <span>{{label(field)}}</span>
       </template>
       <template #content>
         <span v-if="field.value" v-html="field.value"></span>

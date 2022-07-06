@@ -1,12 +1,11 @@
-
 <template>
   <div>
     <os-message v-if="ctx.loading">
-      <span>Loading forms and records. Please wait for a moment...</span>
+      <span v-t="'users.loading_forms'">Loading forms and records. Please wait for a moment...</span>
     </os-message>
 
     <os-message v-if="!ctx.loading && ctx.forms && ctx.forms.length == 0">
-      <span>No forms to show!</span>
+      <span v-t="'users.no_forms'">No forms to show!</span>
     </os-message>
 
     <router-view :entity="ctx.entity"
@@ -36,6 +35,7 @@ export default {
   setup(props) {
     const route = useRoute();
     let ctx = reactive({
+      loading: true,
       routeQuery: route.query
     });
 
@@ -52,6 +52,7 @@ export default {
 
       ctx.forms   = [];
       ctx.records = []
+      ctx.loading = true;
       const formsQ = userSvc.getForms(props.user, props.entityType);
       const recsQ  = userSvc.getFormRecords(props.user, props.entityType);
       Promise.all([formsQ, recsQ]).then(
@@ -81,5 +82,4 @@ export default {
     }
   }
 }
-
 </script>
