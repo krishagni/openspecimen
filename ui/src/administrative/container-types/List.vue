@@ -27,7 +27,7 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default v-if="ctx.selectedTypes && ctx.selectedTypes.length > 0">
               <os-button left-icon="trash" label="Delete" @click="confirmDelete"
-                v-show-if-allowed="typeResources.deleteOpts" />
+                v-show-if-allowed="'institute-admin'" />
 
               <os-button left-icon="download" label="Export" @click="exportTypes"
                 v-show-if-allowed="typeResources.importOpts" />
@@ -35,12 +35,12 @@
 
             <template #default v-else>
               <os-button left-icon="plus" label="Create" @click="createType"
-                v-show-if-allowed="typeResources.createOpts" />
+                v-show-if-allowed="'institute-admin'" />
 
               <os-button left-icon="box-open" label="Containers" @click="viewContainers" />
 
               <os-menu label="Import" :options="importOpts"
-                v-show-if-allowed="typeResources.importOpts" />
+                v-show-if-allowed="'institute-admin'" />
 
               <os-button left-icon="download" label="Export" @click="exportTypes"
                 v-show-if-allowed="typeResources.importOpts" />

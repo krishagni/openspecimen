@@ -4,10 +4,10 @@
       <os-button v-show-if-allowed="typeResources.createOpts"
         left-icon="box-open" label="Create Container" @click="createContainer" />
 
-      <os-button v-show-if-allowed="typeResources.updateOpts"
+      <os-button v-show-if-allowed="'institute-admin'"
         left-icon="edit" label="Edit" @click="editType" />
 
-      <os-button v-show-if-allowed="typeResources.deleteOpts"
+      <os-button v-show-if-allowed="'institute-admin'"
         left-icon="trash" label="Delete" @click="deleteType" />
     </template>
   </os-page-toolbar>
