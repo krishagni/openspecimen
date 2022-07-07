@@ -22,16 +22,11 @@
     </os-grid-column>
   </os-grid>
 
-  <os-confirm-delete ref="deleteDialog" :captcha="false">
-    <template #message>
-      <span>Container type '{{ctx.type.name}}' and any dependent data will be deleted. Are you sure you want to proceed?</span>
-    </template>
-  </os-confirm-delete>
+  <os-delete-object ref="deleteObj" :input="ctx.deleteOpts" />
 </template>
 
 <script>
 
-import alertsSvc  from '@/common/services/Alerts.js';
 import routerSvc  from '@/common/services/Router.js';
 import typesSvc   from '@/administrative/services/ContainerType.js';
 
@@ -76,6 +71,12 @@ export default {
     setupView: async function() {
       this.ctx.type = this.type;
       this.ctx.typeObjs = [{objectName: 'container_type', objectId: this.type.id}];
+      this.ctx.deleteOpts = {
+        type: 'Container Type',
+        title: this.type.name,
+        dependents: () => typesSvc.getDependents(this.type),
+        deleteObj: () => typesSvc.delete(this.type)
+      };
     },
 
     createContainer: function() {
@@ -87,13 +88,12 @@ export default {
     },
 
     deleteType: function() {
-      this.$refs.deleteDialog.open().then(
-        () => typesSvc.delete(this.type).then(
-          () => {
-            alertsSvc.success('Container type ' + this.type.name + ' deleted!');
-            routerSvc.goto('ContainerTypesList', {typeId: -2});
+      this.$refs.deleteObj.execute().then(
+        (resp) => {
+          if (resp == 'deleted') {
+            routerSvc.goto('ContainerTypesList', {typeId: -2}, this.$route.query);
           }
-        )
+        }
       );
     }
   }

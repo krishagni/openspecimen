@@ -27,6 +27,10 @@ class ContainerType {
     }
   }
 
+  async getDependents(type) {
+    return http.get('container-types/' + type.id + '/dependent-entities');
+  }
+
   async delete(type) {
     return http.delete('container-types/' + type.id, {}, {});
   }

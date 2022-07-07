@@ -8,13 +8,20 @@ export default {
         "fields": [ { "name": "type.nameFormat" } ]
       },
       {
+        "label": "Dimension",
+
         "fields": [ { "name": "type.noOfRows" }, { "name": "type.noOfColumns" } ]
       },
       {
         "fields": [ { "name": "type.positionLabelingMode" } ]
       },
       {
-        "fields": [ { "name": "type.rowLabelingScheme" }, { "name": "type.columnLabelingScheme" } ]
+        "label": "Labeling Scheme",
+
+        "fields": [
+          { "label": "Rows",    "name": "type.rowLabelingScheme" },
+          { "label": "Columns", "name": "type.columnLabelingScheme" }
+        ]
       },
       {
         "fields": [ { "name": "type.positionAssignment" } ]
