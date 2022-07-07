@@ -1,6 +1,9 @@
 <template>
   <os-page-toolbar>
     <template #default>
+      <os-button v-show-if-allowed="typeResources.createOpts"
+        left-icon="box-open" label="Create Container" @click="createContainer" />
+
       <os-button v-show-if-allowed="typeResources.updateOpts"
         left-icon="edit" label="Edit" @click="editType" />
 
@@ -73,6 +76,10 @@ export default {
     setupView: async function() {
       this.ctx.type = this.type;
       this.ctx.typeObjs = [{objectName: 'container_type', objectId: this.type.id}];
+    },
+
+    createContainer: function() {
+      routerSvc.goto('ContainerAddEdit', {containerId: -1}, {typeId: this.type.id, mode: 'hierarchy'});
     },
 
     editType: function() {

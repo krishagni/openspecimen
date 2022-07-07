@@ -51,11 +51,12 @@ import http          from '@/common/services/HttpClient.js';
 import routerSvc     from '@/common/services/Router.js';
 import util          from '@/common/services/Util.js';
 import containerSvc  from '@/administrative/services/Container.js';
+import typeSvc       from '@/administrative/services/ContainerType.js';
 import dpSvc         from '@/administrative/services/DistributionProtocol.js';
 import cpSvc         from '@/biospecimen/services/CollectionProtocol.js';
 
 export default {
-  props: ['containerId', 'parentContainerName', 'row', 'column', 'position'],
+  props: ['containerId', 'parentContainerName', 'row', 'column', 'position', 'mode', 'typeId'],
 
   inject: ['ui'],
 
@@ -154,6 +155,14 @@ export default {
             id: parentContainer.id, name: parentContainer.name,
             positionY: this.row, positionX: this.column, position: this.position
           }
+        } else {
+          dataCtx.container.usedFor = 'STORAGE';
+        }
+
+        dataCtx.createType = this.mode || 'single';
+        if (this.typeId && +this.typeId > 0) {
+          const type = await typeSvc.getType(+this.typeId);
+          this.setTypeProps(type);
         }
       }
 
