@@ -61,12 +61,20 @@ export default {
   display: table;
 }
 
+.os-checkboxes :deep(.p-field-checkbox) {
+  margin-bottom: 0rem;
+}
+
 .os-checkboxes .options-row {
   display: table-row;
 }
 
 .os-checkboxes .options-row .option {
   display: table-cell;
+}
+
+.os-checkboxes .options-row:not(:last-child) :deep(.p-field-checkbox) {
+  margin-bottom: 1rem;
 }
 
 .os-checkboxes label {

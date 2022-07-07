@@ -71,6 +71,10 @@ export default {
   display: table;
 }
 
+.os-radio-buttons :deep(.p-field-radiobutton) {
+  margin-bottom: 0rem;
+}
+
 .os-radio-buttons .options-row {
   display: table-row;
 }
@@ -90,4 +94,7 @@ export default {
   margin-right: 0.75rem;
 }
 
+.os-radio-buttons .options-row:not(:last-child) :deep(.p-field-radiobutton) {
+  margin-bottom: 1rem;
+}
 </style>

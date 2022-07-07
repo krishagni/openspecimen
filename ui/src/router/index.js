@@ -632,7 +632,8 @@ const routes = [
           query = query || {};
           return {
             containerId: params.containerId, parentContainerName: query.parentContainerName,
-            row: query.row, column: query.column, position: query.position
+            row: query.row, column: query.column, position: query.position,
+            mode: query.mode, typeId: query.typeId
           };
         }
       },

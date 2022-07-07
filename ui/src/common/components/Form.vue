@@ -350,7 +350,7 @@ form {
 
 .row .field .required-indicator {
   display: inline-block;
-  padding: 0.25rem;
+  padding: 0rem 0.25rem;
   color: red;
   cursor: help;
 }

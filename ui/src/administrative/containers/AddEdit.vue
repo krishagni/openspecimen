@@ -170,7 +170,7 @@ export default {
     },
 
     handleInput: async function({field, oldValue, value, data}) {
-      if (oldValue == value) {
+      if (oldValue == value || !this.$refs.containerForm) {
         return;
       }
 
