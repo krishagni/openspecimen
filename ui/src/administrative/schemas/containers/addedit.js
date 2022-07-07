@@ -212,6 +212,7 @@ export default {
             "listSource": {
               "displayProp": "shortTitle",
               "selectProp": "shortTitle",
+              "initUsingSelectProp": true,
               "loadFn": ({context, query, maxResults}) => context.formData.getAllowedDps({query, maxResults})
             },
             "showWhen": "container.usedFor == 'DISTRIBUTION'"

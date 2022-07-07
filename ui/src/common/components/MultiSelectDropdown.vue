@@ -143,9 +143,25 @@ export default {
       if (ls.options) {
         let selectProp = ls.selectProp || 'id';
         selected = ls.options.filter((option) => toGet.some((testItem) => option[selectProp] == testItem));
+      } else if (ls.initUsingSelectProp && ls.selectProp) {
+        selected = toGet.map(
+          e => {
+            const ret = {};
+            ret[ls.selectProp] = e;
+            return ret;
+          }
+        );
       } else if (typeof ls.loadFn == 'function') {
+        //
+        // requires support for multi valued query
+        // get /records?value=v1&value=v2...
+        //
         selected = await ls.loadFn({...searchOpts, context: this.context});
       } else if (typeof ls.apiUrl == 'string') {
+        //
+        // requires support for multi valued query
+        // get /records?value=v1&value=v2...
+        //
         selected = await http.get(ls.apiUrl, searchOpts);
       }
 

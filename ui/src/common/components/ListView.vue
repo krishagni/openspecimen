@@ -363,7 +363,7 @@ export default {
         return caption;
       }
 
-      return 'Unknown';
+      return '';
     },
 
     columnValue: function(data, column) {
