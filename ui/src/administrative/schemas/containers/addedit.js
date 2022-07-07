@@ -110,14 +110,46 @@ export default {
         ]
       },
       {
+        "label": "Dimension",
+
         "fields": [
           {
             "name": "container.noOfRows",
-            "showWhen": "dimensionLess != true"
+            "showWhen": "dimensionLess == false"
           },
           {
             "name": "container.noOfColumns",
-            "showWhen": "dimensionLess != true"
+            "showWhen": "dimensionLess == false"
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
+            "name": "container.positionLabelingMode",
+            "showWhen": "dimensionLess == false"
+          }
+        ]
+      },
+      {
+        "label": "Labeling Scheme",
+
+        "fields": [
+          {
+            "name": "container.rowLabelingScheme",
+            "label": "Rows"
+          },
+          {
+            "name": "container.columnLabelingScheme",
+            "label": "Columns"
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
+            "name": "container.positionAssignment",
+            "showWhen": "dimensionLess == false"
           }
         ]
       },
@@ -128,25 +160,6 @@ export default {
             "name": "container.capacity",
             "label": "Approximate Capacity (Specimens)",
             "showWhen": "!container.storageLocation || !container.storageLocation.name"
-          }
-        ]
-      },
-      {
-        "fields": [
-          {
-            "name": "container.positionLabelingMode",
-            "showWhen": "dimensionLess != true"
-          }
-        ]
-      },
-      {
-        "fields": [ { "name": "container.rowLabelingScheme" }, { "name": "container.columnLabelingScheme" } ]
-      },
-      {
-        "fields": [
-          {
-            "name": "container.positionAssignment",
-            "showWhen": "dimensionLess != true"
           }
         ]
       },

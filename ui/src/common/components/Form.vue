@@ -8,7 +8,13 @@
     </div>
 
     <div class="row" v-for="(formRow, rowIdx) of formRows" :key="rowIdx">
-      <template v-for="(field, fieldIdx) of formRow" :key="rowIdx + '_' + fieldIdx">
+      <div class="title" v-if="formRow.label || formRow.labelCode">
+        <os-label>
+          <span>{{label(formRow)}}</span>
+        </os-label>
+      </div>
+
+      <template v-for="(field, fieldIdx) of formRow.fields" :key="rowIdx + '_' + fieldIdx">
         <div class="field">
           <os-label v-show="field.label || field.labelCode">
             <span>{{label(field)}}</span>
@@ -125,7 +131,7 @@ export default {
 
        let invalid = this.v$.$invalid;
        for (let formRow of this.formRows) {
-         for (let field of formRow) {
+         for (let field of formRow.fields) {
            if (field.type == 'subform') {
              let sf = this.$refs['osField-' + field.name];
              if (sf instanceof Array && sf.length > 0) {
@@ -256,7 +262,7 @@ export default {
          }
 
          if (formRow.length > 0) {
-           result.push(formRow);
+           result.push({label: row.label, labelCode: row.labelCode, fields: formRow});
          }
        }
 
@@ -336,12 +342,27 @@ form {
 
 .row {
   display: flex;
+  flex-wrap: wrap;
+}
+
+.row .title {
+  flex: 1 1 100%;
+  padding: 0.5rem 1rem 0rem 1rem;
 }
 
 .row .field {
   flex: 1 1 0;
   padding: 0.5rem 1rem;
   overflow-x: auto;
+}
+
+.row .title ~ .field {
+  padding-top: 0rem;
+}
+
+.row .title ~ .field label {
+  font-size: 85%;
+  font-weight: normal;
 }
 
 .row .field :deep(.btn) {
