@@ -73,10 +73,18 @@
           </a>
         </template>
         <template #occupant_empty="slotProps">
-          <os-boolean-checkbox class="position-selector" v-model="ctx.selectedPositions[slotProps.position.position]" />
-          <a class="occupant" v-os-tooltip="'Blocked'" v-if="slotProps.occupant.blocked">
-            <os-icon class="blocked" name="ban" />
-          </a>
+          <div v-if="slotProps.occupant.blocked">
+            <os-boolean-checkbox class="position-selector"
+              v-model="ctx.selectedPositions[slotProps.position.position]" />
+            <a class="occupant" v-os-tooltip="'Blocked'">
+              <os-icon class="blocked" name="ban" />
+            </a>
+          </div>
+          <div v-else>
+            <a class="occupant" v-os-tooltip="'Blocked for auto allocation'">
+              <os-icon class="blocked" name="cogs" />
+            </a>
+          </div>
         </template>
         <template #empty="slotProps">
           <div v-if="!ctx.container.storeSpecimensEnabled">
