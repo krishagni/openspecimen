@@ -143,6 +143,10 @@ export default {
 
 .os-dropdown .p-float-label :deep(label) {
   left: 0rem;
+  right: 0rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .os-dropdown .p-float-label :deep(.p-multiselect) {

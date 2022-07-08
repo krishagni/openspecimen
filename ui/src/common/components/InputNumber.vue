@@ -67,6 +67,10 @@ export default {
 
 .os-input-number .p-float-label :deep(label) {
   left: 0rem;
+  right: 0rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .os-input-number .p-float-label :deep(.p-inputtext:not(:enabled:focus) ~ label) {

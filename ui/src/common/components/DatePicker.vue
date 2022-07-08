@@ -114,6 +114,10 @@ export default {
 
 .os-date-picker .p-float-label :deep(label) {
   left: 0rem;
+  right: 0rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .os-date-picker .p-float-label :deep(.p-inputtext:not(:enabled:focus) ~ label) {
