@@ -239,12 +239,14 @@ export default {
       const dataCtx   = this.dataCtx;
       const container = dataCtx.container;
       if (dataCtx.createType == 'single') {
+        const isUpdateOp     = container.id > 0;
         const savedContainer = await containerSvc.saveOrUpdate(container);
         alertsSvc.success('Container ' + savedContainer.name + (container.id ? ' updated!' : ' created!')); 
         if (dataCtx.parentContainer) {
           routerSvc.goto('ContainerDetail.Locations', {containerId: dataCtx.parentContainer.id});
         } else {
-          routerSvc.goto('ContainerDetail.Locations', {containerId: savedContainer.id});
+          const view = isUpdateOp ? 'ContainerDetail.Overview' : 'ContainerDetail.Locations';
+          routerSvc.goto(view, {containerId: savedContainer.id});
         }
       } else if (dataCtx.createType == 'multiple') {
         const position = container.storageLocation;
