@@ -116,6 +116,12 @@ export default {
           continue;
         }
 
+        if (field.showWhen || field.showInOverviewWhen) {
+          if (!exprUtil.eval(this.object, field.showInOverviewWhen || field.showWhen)) {
+            continue;
+          }
+        }
+
         if (field.type == 'subform') {
           // convert into 2-d array of values: [ [1, "abc"], [2, "xyz"], [3, "abcxyz"] ]
           let values = this.getValue(this.object, field) || [];

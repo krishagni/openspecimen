@@ -21,6 +21,7 @@ export default {
       "type": "dropdown",
       "label": "Type",
       "name": "container.typeName",
+      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "href": (data) => {
         const container = data.container;
         if (container.typeId > 0) {
@@ -89,8 +90,9 @@ export default {
     },
     {
       "type": "storage-position",
-      "name": "container.storageLocation",
       "label": "Location",
+      "name": "container.storageLocation",
+      "showInOverviewWhen": "container.storageLocation && container.storageLocation.name",
       "listSource": {
         "queryParams": {
           "static": {
@@ -102,12 +104,13 @@ export default {
             "usageMode": "container.usedFor"
           }
         }
-      },
+      }
     },
     {
       "type": "text",
       "label": "Dimension",
       "name": "container.uiDimension",
+      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "value": ({container}) => {
         if (container.noOfRows > 0 && container.noOfColumns > 0) {
           return container.noOfRows + ' x ' + container.noOfColumns;
@@ -143,6 +146,7 @@ export default {
       "type": "text",
       "label": "Stored",
       "name": "container.uiStored",
+      "showInOverviewWhen": "!container.storageLocation || !container.storageLocation.name",
       "value": ({container}) => {
         if (container.storageLocation && container.storageLocation.name) {
           return null;
@@ -161,6 +165,7 @@ export default {
       "component": "os-utilisation-bar",
       "label": "Utilisation",
       "name": "container.uiUtilisation",
+      "showInOverviewWhen": "!container.storageLocation || !container.storageLocation.name",
       "value": ({container}) => {
         if (container.capacity > 0 && (!container.storageLocation || !container.storageLocation.name)) {
           return {utilisation: Math.round(container.storedSpecimens / container.capacity * 100)};
@@ -173,6 +178,7 @@ export default {
       "type": "radio",
       "label": "Position Labeling",
       "name": "container.positionLabelingMode",
+      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "options": [
         { "caption": "Linear", "value": "LINEAR" },
         { "caption": "Row and Column", "value": "TWO_D" }
@@ -188,6 +194,7 @@ export default {
       "type": "text",
       "label": "Labeling Scheme",
       "name": "container.uiLabelingScheme",
+      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "value": ({container}) => {
         if (container.positionLabelingMode == 'TWO_D') {
           return container.rowLabelingScheme + ' x ' + container.columnLabelingScheme;
@@ -247,6 +254,7 @@ export default {
       "type": "dropdown",
       "label": "Position Assignment",
       "name": "container.positionAssignment",
+      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "listSource": {
         "options": [
           {"name": "HZ_TOP_DOWN_LEFT_RIGHT",  "value": "Horizontal, top to down, left to right"},
@@ -280,6 +288,7 @@ export default {
       "type": "radio",
       "label": "Display in Map",
       "name": "container.cellDisplayProp",
+      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "options": [
         { caption: "Specimen Label", value: "SPECIMEN_LABEL" },
         { caption: "Specimen Barcode", value: "SPECIMEN_BARCODE" },
@@ -291,6 +300,7 @@ export default {
       "type": "text",
       "label": "Collection Protocols",
       "name": "contaner.uiCps",
+      "showInOverviewWhen": "container.usedFor == 'STORAGE'",
       "value": ({container}) => {
         if (container.usedFor == 'STORAGE') {
           if (container.calcAllowedCollectionProtocols.length > 0) {
@@ -307,6 +317,7 @@ export default {
       "type": "text",
       "label": "Specimen Types",
       "name": "contaner.uiSpecimenTypes",
+      "showInOverviewWhen": "container.usedFor == 'STORAGE'",
       "value": ({container}) => {
         if (container.usedFor == 'STORAGE') {
           let types = [];
@@ -330,6 +341,7 @@ export default {
       "type": "text",
       "label": "Distribution Protocols",
       "name": "contaner.uiDps",
+      "showInOverviewWhen": "container.usedFor == 'DISTRIBUTION'",
       "value": ({container}) => {
         if (container.usedFor == 'DISTRIBUTION') {
           if (container.calcAllowedDistributionProtocols.length > 0) {
@@ -346,6 +358,7 @@ export default {
       "type": "number",
       "label": "Free Locations",
       "name": "container.freePositions",
+      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "summary": true
     }
   ]
