@@ -90,9 +90,13 @@
         </template>
       </Layout>
 
-      <os-message v-else type="info">
-        <span>The map view is not available for dimensionless container.</span>
-      </os-message>
+      <div v-else>
+        <os-message type="info">
+          <span>The map view is not available for dimensionless container.</span>
+        </os-message>
+
+        <os-button primary label="View Specimens" @click="viewSpecimens" />
+      </div>
     </os-grid-column>
 
     <os-overlay ref="occupantDetails">
@@ -579,6 +583,10 @@ export default {
 
       const resp = await this.$refs.confirmTransferDialog.open();
       return resp == 'proceed';
+    },
+
+    viewSpecimens: function() {
+      routerSvc.goto('ContainerDetail.Specimens', {containerId: this.ctx.container.id});
     }
   }
 }
