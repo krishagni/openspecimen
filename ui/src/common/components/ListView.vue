@@ -557,7 +557,7 @@ export default {
 }
 
 .os-list.show-filters .results {
-  width: 75%;
+  width: calc(100% - 300px);
 }
 
 .os-list .results .info {
@@ -584,7 +584,7 @@ export default {
 }
 
 .os-list .filters {
-  width: 25%;
+  width: 300px;
   display: none;
   flex-direction: column;
 }
