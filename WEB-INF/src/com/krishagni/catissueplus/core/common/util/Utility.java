@@ -593,7 +593,16 @@ public class Utility {
 	}
 
 	public static <T, K, V> Map<K, V> toLinkedMap(Collection<T> collection, Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
-		return Utility.nullSafeStream(collection).collect(toLinkedMap(keyMapper, valueMapper));
+		Map<K, V> map = new LinkedHashMap<>();
+		if (CollectionUtils.isEmpty(collection)) {
+			return map;
+		}
+
+		for (T element : collection) {
+			map.put(keyMapper.apply(element), valueMapper.apply(element));
+		}
+
+		return map;
 	}
 
 	public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
