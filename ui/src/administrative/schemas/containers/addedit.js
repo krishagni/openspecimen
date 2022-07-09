@@ -13,7 +13,7 @@ export default {
               { "caption": "Container Hierarchy", "value": "hierarchy" }
             ],
             "optionsPerRow": 3,
-            "showWhen": "showCreateType && !parentContainer"
+            "showWhen": "showCreateType"
           }
         ]
       },

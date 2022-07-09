@@ -192,7 +192,7 @@ export default {
         setTimeout(() => this.setTypeProps(fieldRef.getSelectedOption()), 100);
       } else if (field.name == 'createType') {
         if (value != 'single') {
-          container.name = container.barcode = null;
+          container.name = container.barcode = container.displayName = null;
         } else {
           this.dataCtx.numOfContainers = null;
         }
