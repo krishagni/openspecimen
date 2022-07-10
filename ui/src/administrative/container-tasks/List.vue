@@ -2,7 +2,7 @@
   <os-page>
     <os-page-head>
       <span>
-        <h3>Container Tasks</h3>
+        <h3 v-t="'container_tasks.list'">Container Tasks</h3>
       </span>
 
       <template #right>
@@ -18,13 +18,13 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="plus" label="Create" @click="createTask" v-if="ctx.allowEdits" />
+          <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createTask" v-if="ctx.allowEdits" />
 
-          <os-button left-icon="box-open" label="Containers" @click="viewContainers" />
+          <os-button left-icon="box-open" :label="$t('container_tasks.view_containers')" @click="viewContainers" />
         </template>
 
         <template #right>
-          <os-button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
         </template>
       </os-page-toolbar>
 
@@ -41,7 +41,7 @@
 
         <template #rowActions="slotProps">
           <os-button-group>
-            <os-button size="small" left-icon="archive" v-os-tooltip.bottom="'Archive'"
+            <os-button size="small" left-icon="archive" v-os-tooltip.bottom="$t('common.buttons.archive')"
               @click="confirmArchiveTask(slotProps.rowObject)" />
           </os-button-group>
         </template>
@@ -51,10 +51,10 @@
 
   <os-confirm ref="confirmArchiveTaskDialog">
     <template #title>
-      <span>Confirm Archive Task</span>
+      <span v-t="'container_tasks.confirm_archive'">Confirm Archive Task</span>
     </template>
     <template #message>
-      <span>Are you sure you want to archive the container maintenance task: <b>{{ctx.toArchive.name}}</b>?</span>
+      <span v-t="{path: 'container_tasks.confirm_archive_task', args: ctx.toArchive}">Are you sure you want to archive the container maintenance task: <b>{{ctx.toArchive.name}}</b>?</span>
     </template>
   </os-confirm>
 </template>

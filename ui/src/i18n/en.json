@@ -80,6 +80,20 @@
     "yes": "Yes"
   },
 
+  "container_tasks": {
+    "confirm_archive": "Confirm Archive Task",
+    "confirm_archive_task": "Are you sure you want to archive the container maintenance task: '{name}'?",
+    "create": "Create Container Task",
+    "created": "Container task '{name}' created.",
+    "description": "Description",
+    "description_required": "Description is mandatory",
+    "list": "Container Tasks",
+    "name": "Name",
+    "name_required": "Name is mandatory",
+    "updated": "Container task '{name}' updated.",
+    "view_containers": "Containers"
+  },
+
   "containers": {
     "activities_log": "Activities Log",
     "activity": "Activity",

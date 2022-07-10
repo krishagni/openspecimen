@@ -2,11 +2,11 @@ export default {
   columns: [
     {
       name: "task.name",
-      caption: "Name",
+      captionCode: "container_tasks.name",
     },
     {
       name: "task.description",
-      caption: "Description",
+      captionCode: "container_tasks.description",
     }
   ],
 
@@ -14,7 +14,7 @@ export default {
     {
       name: "name",
       type: "text",
-      caption: "Name"
+      captionCode: "container_tasks.name"
     }
   ]
 }

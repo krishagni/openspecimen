@@ -6,24 +6,28 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.task.id">Create Container Task</h3>
-        <h3 v-else>Update {{dataCtx.task.name}}</h3>
+        <h3 v-if="!dataCtx.task.id">
+          <span v-t="'container_tasks.create'">Create Container Task</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'common.update', args: dataCtx.task}">Update {{dataCtx.task.name}}</span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <div v-if="ctx.loading">
         <os-message type="info">
-          <span>Loading the form. Please wait for a moment...</span>
+          <span v-t="'common.loading_form'">Loading the form. Please wait for a moment...</span>
         </os-message>
       </div>
       <div v-else>
         <os-form ref="taskForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
           <div>
-            <os-button primary :label="!dataCtx.task.id ? 'Create' : 'Update'" @click="saveOrUpdate"
-              v-show-if-allowed="'institute-admin'" />
+            <os-button primary :label="$t(!dataCtx.task.id ? 'common.buttons.create' : 'common.buttons.update')"
+              @click="saveOrUpdate" v-show-if-allowed="'institute-admin'" />
 
-            <os-button text label="Cancel"  @click="cancel" />
+            <os-button text :label="$t('common.buttons.cancel')"  @click="cancel" />
           </div>
         </os-form>
       </div>
@@ -35,6 +39,7 @@
 import { reactive, inject } from 'vue';
 
 import alertsSvc     from '@/common/services/Alerts.js';
+import i18n          from '@/common/services/I18n.js';
 import routerSvc     from '@/common/services/Router.js';
 import containerSvc  from '@/administrative/services/Container.js';
 
@@ -48,7 +53,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('ContainerTasksList', {}), label: 'Container Types'}
+        {url: routerSvc.getUrl('ContainerTasksList', {}), label: i18n.msg('container_tasks.list')}
       ],
 
       addEditFs: {rows: []},
@@ -106,7 +111,7 @@ export default {
       }
 
       const savedTask = await containerSvc.saveOrUpdateTask(task);
-      alertsSvc.success('Container task ' + savedTask.name + (task.id ? ' updated!' : ' created!')); 
+      alertsSvc.success({code: task.id ? 'container_tasks.updated' : 'container_tasks.created', args: savedTask});
       routerSvc.goto('ContainerTasksList');
     },
 

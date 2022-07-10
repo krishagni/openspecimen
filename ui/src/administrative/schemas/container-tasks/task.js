@@ -2,22 +2,22 @@ export default {
   "fields":  [
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "container_tasks.name",
       "name": "task.name",
       "validations": {
         "required": {
-          "message": "Container task name is mandatory"
+          "messageCode": "container_tasks.name_required"
         }
       }
     },
     {
       "type": "textarea",
-      "label": "Description",
+      "labelCode": "container_tasks.description",
       "name": "task.description",
       "rows": 5,
       "validations": {
         "required": {
-          "message": "Container task description is mandatory"
+          "messageCode": "container_tasks.description_required"
         }
       }
     }
