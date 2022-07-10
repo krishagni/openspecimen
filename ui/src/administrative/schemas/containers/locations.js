@@ -2,25 +2,25 @@ export default {
   columns: [
     {
       "name": "autoContainerName",
-      "label": "Unique Name",
+      "labelCode": "containers.unique_name",
       "type": "span",
       "value": () => 'Auto',
       "showWhen": "container.typeName"
     },
     {
       "name": "container.name",
-      "label": "Unique Name",
+      "labelCode": "containers.unique_name",
       "type": "text",
       "showWhen": "!container.typeName",
       "validations": {
         "required": {
-          "message": "Unique Name is mandatory"
+          "messageCode": "containers.unique_name_required"
         }
       }
     },
     {
       "name": "container.siteName",
-      "label": "Site",
+      "labelCode": "containers.site",
       "type": "site",
       "selectProp": "name",
       "listSource": {
@@ -34,14 +34,14 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Site is mandatory"
+          "messageCode": "containers.site_required"
         }
       },
       "enableCopyFirstToAll": true
     },
     {
       "name": "container.storageLocation",
-      "label": "Parent Container",
+      "labelCode": "containers.parent_container",
       "type": "storage-position",
       "listSource": {
         "queryParams": {

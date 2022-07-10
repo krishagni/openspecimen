@@ -5,11 +5,11 @@ export default {
         "fields": [
           {
             "name": "defrag.aliquotsInSameContainer",
-            "label": "Do you want aliquots of the same specimen to be moved together?",
+            "labelCode": "containers.move_aliquots_together",
             "type": "radio",
             "options": [
-              { "value": true, caption: "Yes" },
-              { "value": false, caption: "No" }
+              { "value": true,  captionCode: "common.yes" },
+              { "value": false, captionCode: "common.no" }
             ],
             "optionsPerRow": 2
           }

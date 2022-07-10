@@ -2,30 +2,30 @@ export default {
   columns: [
     {
       name: "activity.name",
-      caption: "Activity",
+      captionCode: "containers.activity",
     },
     {
       name: "activity.startDate",
-      caption: "Start Date",
+      captionCode: "containers.start_date",
       type: "date"
     },
     {
       name: "activity.cycleInterval",
-      caption: "Cycle Interval",
+      captionCode: "containers.cycle_interval",
       value: ({activity}) => {
         return activity.cycleInterval + ' ' + activity.cycleIntervalUnit.charAt(0).toLowerCase();
       }
     },
     {
       name: "activity.reminderInterval",
-      caption: "Remind Before",
+      captionCode: "containers.remind_before",
       value: ({activity}) => {
         return activity.reminderInterval + ' ' + activity.reminderIntervalUnit.charAt(0).toLowerCase();
       }
     },
     {
       name: "activity.assignedUsers",
-      caption: "Assigned Users",
+      captionCode: "containers.assigned_users",
       value: ({activity}) => {
         let result = [];
         for (let user of activity.assignedUsers) {

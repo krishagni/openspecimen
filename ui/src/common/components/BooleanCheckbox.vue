@@ -2,7 +2,7 @@
 <template>
   <div class="p-field-checkbox">
     <Checkbox :name="name" v-model="inputValue" :binary="true" />
-    <span class="inline-message" v-if="inlineLabel"> {{ inlineLabel }} </span>
+    <span class="inline-message" v-if="displayLabel"> {{ displayLabel }} </span>
     <slot></slot>
   </div>
 </template>
@@ -12,7 +12,7 @@
 import Checkbox from 'primevue/checkbox';
 
 export default {
-  props: ['name', 'modelValue', 'inlineLabel'],
+  props: ['name', 'modelValue', 'inlineLabel', 'inlineLabelCode'],
 
   emits: ['change', 'update:modelValue'],
 
@@ -29,6 +29,14 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
         this.$emit('change',  value);
+      }
+    },
+
+    displayLabel: function() {
+      if (this.inlineLabelCode) {
+        return this.$t(this.inlineLabelCode);
+      } else {
+        return this.inlineLabel;
       }
     }
   }

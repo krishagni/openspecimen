@@ -5,16 +5,16 @@ export default {
         "fields": [
           {
             "name": "activityLog.type",
-            "label": "Type",
+            "labelCode": "containers.type",
             "type": "radio",
             "options": [
-              { "caption": "Ad-hoc", value: "adhoc" },
-              { "caption": "Scheduled", value: "scheduled" }
+              { "captionCode": "containers.activity_type_ad_hoc",    value: "adhoc" },
+              { "captionCode": "containers.activity_type_scheduled", value: "scheduled" }
             ],
             "optionsPerRow": 2,
             "validations": {
               "required": {
-                "message": "Type is mandatory"
+                "messageCode": "containers.type_required"
               }
             },
             "showWhen": "!activityLog.id"
@@ -25,7 +25,7 @@ export default {
         "fields": [
           {
             "name": "activityLog.taskName",
-            "label": "Activity",
+            "labelCode": "containers.activity",
             "type": "dropdown",
             "listSource": {
               "apiUrl": "container-tasks",
@@ -35,7 +35,7 @@ export default {
             },
             "validations": {
               "required": {
-                "message": "Activity is mandatory"
+                "messageCode": "containers.activity_required"
               }
             },
             "showWhen": "!activityLog.id && activityLog.type == 'adhoc'"
@@ -46,7 +46,7 @@ export default {
         "fields": [
           {
             "name": "activityLog.scheduledActivityId",
-            "label": "Activity",
+            "labelCode": "containers.activity",
             "type": "dropdown",
             "listSource": {
               "apiUrl": "scheduled-container-activities",
@@ -61,7 +61,7 @@ export default {
             },
             "validations": {
               "required": {
-                "message": "Activity is mandatory"
+                "messageCode": "containers.activity_required"
               }
             },
             "showWhen": "!activityLog.id && activityLog.type == 'scheduled'"
@@ -72,7 +72,7 @@ export default {
         "fields": [
           {
             "name": "activityLog.activity",
-            "label": "Activity",
+            "labelCode": "containers.activity",
             "type": "span",
             "showWhen": "!!activityLog.id"
           }
@@ -82,11 +82,11 @@ export default {
         "fields": [
           {
             "name": "activityLog.performedBy",
-            "label": "Performed By",
+            "labelCode": "containers.performed_by",
             "type": "user",
             "validations": {
               "required": {
-                "message": "Performed By is mandatory"
+                "messageCode": "containers.performed_by_required"
               }
             }
           }
@@ -96,11 +96,11 @@ export default {
         "fields": [
           {
             "name": "activityLog.activityDate",
-            "label": "Activity Date",
+            "labelCode": "containers.activity_date",
             "type": "datePicker",
             "validations": {
               "required": {
-                "message": "Activity date is mandatory"
+                "messageCode": "containers.activity_date_required"
               }
             }
           }
@@ -110,7 +110,7 @@ export default {
         "fields": [
           {
             "name": "activityLog.timeTaken",
-            "label": "Time Taken (mins)",
+            "labelCode": "containers.activity_time_taken",
             "type": "number"
           }
         ]
@@ -119,7 +119,7 @@ export default {
         "fields": [
           {
             "name": "activityLog.comments",
-            "label": "Comments",
+            "labelCode": "common.comments",
             "type": "textarea",
             "rows": "3"
           }

@@ -5,7 +5,7 @@
 
       <os-add-to-cart :specimens="selectedSpecimens" />
 
-      <os-button left-icon="download" label="Download Report" @click="downloadReport" />
+      <os-button left-icon="download" :label="$t('containers.download_report')" @click="downloadReport" />
     </template>
 
     <template #right v-if="showListSize">
@@ -16,7 +16,7 @@
         @updateListSize="getSpecimensCount"
       />
 
-      <os-button left-icon="search" label="Search" @click="toggleSearch" />
+      <os-button left-icon="search" :label="$t('common.buttons.search')" @click="toggleSearch" />
     </template>
   </os-page-toolbar>
 

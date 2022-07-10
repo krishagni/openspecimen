@@ -6,11 +6,11 @@ export default {
           {
             "type": "radio",
             "name": "createType",
-            "label": "Create",
+            "labelCode": "containers.create_type",
             "options": [
-              { "caption": "Single Container",    "value": "single" },
-              { "caption": "Multiple Containers", "value": "multiple" },
-              { "caption": "Container Hierarchy", "value": "hierarchy" }
+              { "captionCode": "containers.single_container",    "value": "single" },
+              { "captionCode": "containers.multiple_containers", "value": "multiple" },
+              { "captionCode": "containers.container_hierarchy", "value": "hierarchy" }
             ],
             "optionsPerRow": 3,
             "showWhen": "showCreateType"
@@ -22,11 +22,11 @@ export default {
           {
             "type": "number",
             "name": "numOfContainers",
-            "label": "Number of Containers",
+            "labelCode": "containers.num_containers",
             "showWhen": "createType == 'multiple' || createType == 'hierarchy'",
             "validations": {
               "required": {
-                "message": "Number of Containers is mandatory"
+                "messageCode": "containers.num_containers_required"
               }
             }
           }
@@ -101,8 +101,8 @@ export default {
             "name": "dimensionLess",
             "label": "Dimensionless?",
             "options": [
-              { "caption": "Yes", "value": true },
-              { "caption": "No",  "value": false }
+              { "captionCode": "common.yes", "value": true },
+              { "captionCode": "common.no",  "value": false }
             ],
             "optionsPerRow": 2,
             "showWhen": "!container.id && createType != 'hierarchy'"
@@ -110,7 +110,7 @@ export default {
         ]
       },
       {
-        "label": "Dimension",
+        "labelCode": "containers.dimension",
 
         "fields": [
           {
@@ -132,7 +132,7 @@ export default {
         ]
       },
       {
-        "label": "Labeling Scheme",
+        "labelCode": "containers.labeling_scheme",
 
         "fields": [
           {
@@ -158,7 +158,7 @@ export default {
           {
             "type": "number",
             "name": "container.capacity",
-            "label": "Approximate Capacity (Specimens)",
+            "labelCode": "containers.approx_capacity",
             "showWhen": "!container.storageLocation || !container.storageLocation.name"
           }
         ]
@@ -177,7 +177,7 @@ export default {
           {
             "type": "multiselect",
             "name": "container.allowedCollectionProtocols",
-            "label": "Collection Protocols",
+            "labelCode": "containers.collection_protocols",
             "listSource": {
               "displayProp": "shortTitle",
               "selectProp": "shortTitle",
@@ -192,7 +192,7 @@ export default {
           {
             "type": "groupselect",
             "name": "container.allowedTypes",
-            "label": "Specimen Types",
+            "labelCode": "containers.specimen_types",
             "listSource": {
               "displayProp": "type",
               "groupNameProp": "specimenClass",
@@ -208,7 +208,7 @@ export default {
           {
             "type": "multiselect",
             "name": "container.allowedDistributionProtocols",
-            "label": "Distribution Protocols",
+            "labelCode": "containers.distribution_protocols",
             "listSource": {
               "displayProp": "shortTitle",
               "selectProp": "shortTitle",
@@ -224,7 +224,7 @@ export default {
           {
             "type": "booleanCheckbox",
             "name": "container.printLabels",
-            "inlineLabel": "Print Labels",
+            "inlineLabelCode": "containers.print_labels",
             "showWhen": "!container.id"
           }
         ]

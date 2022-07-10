@@ -5,7 +5,7 @@ export default {
         "fields": [
           {
             "name": "container.siteName",
-            "label": "Parent Site",
+            "labelCode": "containers.site",
             "type": "site",
             "listSource": {
               "queryParams": {
@@ -19,7 +19,7 @@ export default {
             },
             "validations": {
               "required": {
-                "message": "Parent Site is mandatory"
+                "messageCode": "containers.site_required"
               }
             }
           }
@@ -30,7 +30,7 @@ export default {
         "fields": [
           {
             "name": "container.storageLocation",
-            "label": "Parent Container",
+            "labelCode": "containers.parent_container",
             "type": "storage-position",
             "listSource": {
               "queryParams": {
@@ -52,11 +52,11 @@ export default {
         "fields": [
           {
             "name": "container.transferredBy",
-            "label": "Transferred By",
+            "labelCode": "containers.transferred_by",
             "type": "user",
             "validations": {
               "required": {
-                "message": "Transferred By is mandatory"
+                "messageCode": "containers.transferred_by_required"
               }
             }
           }
@@ -67,12 +67,12 @@ export default {
         "fields": [
           {
             "name": "container.transferDate",
-            "label": "Date and Time",
+            "labelCode": "containers.transfer_date_time",
             "type": "datePicker",
             "showTime": true,
             "validations": {
               "required": {
-                "message": "Date and Time is mandatory"
+                "messageCode": "containers.transfer_date_time_required"
               }
             }
           }
@@ -83,12 +83,12 @@ export default {
         "fields": [
           {
             "name": "container.transferComments",
-            "label": "Reasons",
+            "labelCode": "containers.transfer_reasons",
             "type": "textarea",
             "rows": "5",
             "validations": {
               "required": {
-                "message": "Reasons is mandatory"
+                "messageCode": "containers.transfer_reasons_required"
               }
             }
           }

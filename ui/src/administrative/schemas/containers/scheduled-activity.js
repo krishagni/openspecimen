@@ -5,11 +5,11 @@ export default {
         "fields": [
           {
             "name": "activity.name",
-            "label": "Name",
+            "labelCode": "containers.name",
             "type": "text",
             "validations": {
               "required": {
-                "message": "Name is mandatory"
+                "messageCode": "containers.name_required"
               }
             }
           }
@@ -19,7 +19,7 @@ export default {
         "fields": [
           {
             "name": "activity.taskName",
-            "label": "Task",
+            "labelCode": "containers.task",
             "type": "dropdown",
             "listSource": {
               "apiUrl": "container-tasks",
@@ -29,7 +29,7 @@ export default {
             },
             "validations": {
               "required": {
-                "message": "Task is mandatory"
+                "messageCode": "containers.task_required"
               }
             }
           }
@@ -39,11 +39,11 @@ export default {
         "fields": [
           {
             "name": "activity.startDate",
-            "label": "Start Date",
+            "labelCode": "containers.start_date",
             "type": "datePicker",
             "validations": {
               "required": {
-                "message": "Start date is mandatory"
+                "messageCode": "containers.start_date_required"
               }
             }
           }
@@ -53,17 +53,17 @@ export default {
         "fields": [
           {
             "name": "activity.cycleInterval",
-            "label": "Cycle Interval",
+            "labelCode": "containers.cycle_interval",
             "type": "number",
             "validations": {
               "required": {
-                "message": "Cycle interval is mandatory"
+                "messageCode": "containers.cycle_interval_required"
               }
             }
           },
           {
             "name": "activity.cycleIntervalUnit",
-            "label": "Unit",
+            "labelCode": "containers.interval_unit",
             "type": "dropdown",
             "listSource": {
               "options": [
@@ -77,7 +77,7 @@ export default {
             },
             "validations": {
               "required": {
-                "message": "Cycle interval unit is mandatory"
+                "messageCode": "containers.cycle_interval_unit_required"
               }
             }
           }
@@ -87,17 +87,17 @@ export default {
         "fields": [
           {
             "name": "activity.reminderInterval",
-            "label": "Remind Before",
+            "labelCode": "containers.remind_before",
             "type": "number",
             "validations": {
               "required": {
-                "message": "Remind before is mandatory"
+                "messageCode": "containers.remind_before_required"
               }
             }
           },
           {
             "name": "activity.reminderIntervalUnit",
-            "label": "Unit",
+            "labelCode": "containers.interval_unit",
             "type": "dropdown",
             "listSource": {
               "options": [
@@ -111,7 +111,7 @@ export default {
             },
             "validations": {
               "required": {
-                "message": "Remind before unit is mandatory"
+                "messageCode": "containers.remind_before_interval_unit_required"
               }
             }
           }
@@ -121,12 +121,12 @@ export default {
         "fields": [
           {
             "name": "activity.assignedUsers",
-            "label": "Assigned Users",
+            "labelCode": "containers.assigned_users",
             "type": "user",
             "multiple": true,
             "validations": {
               "required": {
-                "message": "Assigned users is mandatory"
+                "messageCode": "containers.assigned_users_required"
               }
             }
           }

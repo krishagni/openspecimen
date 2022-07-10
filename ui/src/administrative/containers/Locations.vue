@@ -1,30 +1,30 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="download" label="Export Map" @click="exportMap"
+      <os-button left-icon="download" :label="$t('containers.export_map')" @click="exportMap"
         v-if="!anySelected && !isDimensionless" />
 
       <span v-show-if-allowed="containerResources.updateOpts">
         <span v-if="isSpecimenContainer && !anySelected && (ctx.hasFreeSlots || ctx.hasBlockedSlots)">
-          <os-button left-icon="ban" label="Block All" @click="blockAll"
+          <os-button left-icon="ban" :label="$t('containers.block_all')" @click="blockAll"
             v-if="ctx.hasFreeSlots" />
 
-          <os-button left-icon="undo" label="Unblock All" @click="unblockAll"
+          <os-button left-icon="undo" :label="$t('containers.unblock_all')" @click="unblockAll"
             v-if="ctx.hasBlockedSlots" />
         </span>
 
         <span v-if="isSpecimenContainer && anySelected">
-          <os-button left-icon="ban" label="Block" @click="block" />
+          <os-button left-icon="ban" :label="$t('containers.block')" @click="block" />
 
-          <os-button left-icon="undo" label="Unblock" @click="unblock" />
+          <os-button left-icon="undo" :label="$t('containers.unblock')" @click="unblock" />
         </span>
 
         <span v-if="isSpecimenContainer && !anySelected && !ctx.showLabelsScanArea">
-          <os-button left-icon="save" label="Store Specimens" @click="showLabelsScanArea" />
+          <os-button left-icon="save" :label="$t('containers.store_specimens')" @click="showLabelsScanArea" />
         </span>
       </span>
 
-      <os-button left-icon="palette" label="View Color Coding" @click="showColorCoding" 
+      <os-button left-icon="palette" :label="$t('containers.view_color_coding')" @click="showColorCoding"
         v-if="ctx.occupants.length > 0 && Object.keys(ctx.colorCoding).length > 0" />
     </template>
   </os-page-toolbar>
@@ -33,13 +33,13 @@
     <os-grid-column class="os-container-locations" :width="12">
       <div class="labels-scan-area" v-if="isSpecimenContainer && !anySelected && ctx.showLabelsScanArea">
         <os-add-specimens ref="specimensScanner" @labels-scanned="updateMap" :optionsAtBottom="true">
-          <os-button primary label="Store" @click="assignPositions" />
+          <os-button primary :label="$t('containers.store')" @click="assignPositions" />
 
-          <os-button label="Cancel" @click="hideLabelsScanArea" />
+          <os-button :label="$t('common.buttons.cancel')" @click="hideLabelsScanArea" />
 
           <template #options v-if="!isDimensionless">
             <os-boolean-checkbox v-model="ctx.vacateOccupant" @change="updateMap(ctx.labels)">
-              <label>Vacate existing specimens</label>
+              <label v-t="'containers.vacate_existing_specimens'">Vacate existing specimens</label>
             </os-boolean-checkbox>
           </template>
         </os-add-specimens>
@@ -64,7 +64,7 @@
             <os-icon class="specimen-icon" name="vial" :style="slotProps.occupant.colorCode" 
               v-show="slotProps.occupant.displayName" v-os-tooltip="slotProps.occupant.tooltip" />
 
-            <os-icon class="specimen-reserved" name="ban" v-os-tooltip="'Reserved Specimen'"
+            <os-icon class="specimen-reserved" name="ban" v-os-tooltip="$t('containers.reserved_specimen')"
               v-if="slotProps.occupant.occupantProps && slotProps.occupant.occupantProps.reserved" />
 
             <span class="name" v-os-tooltip="slotProps.occupant.displayName">
@@ -76,19 +76,19 @@
           <div v-if="slotProps.occupant.blocked">
             <os-boolean-checkbox class="position-selector"
               v-model="ctx.selectedPositions[slotProps.position.position]" />
-            <a class="occupant" v-os-tooltip="'Blocked'">
+            <a class="occupant" v-os-tooltip="$t('containers.blocked')">
               <os-icon class="blocked" name="ban" />
             </a>
           </div>
           <div v-else>
-            <a class="occupant" v-os-tooltip="'Blocked for auto allocation'">
+            <a class="occupant" v-os-tooltip="$t('containers.blocked_for_auto_alloc')">
               <os-icon class="blocked" name="cogs" />
             </a>
           </div>
         </template>
         <template #empty="slotProps">
           <div v-if="!ctx.container.storeSpecimensEnabled">
-            <os-button text left-icon="plus" v-os-tooltip="'Click to add container'"
+            <os-button text left-icon="plus" v-os-tooltip="$t('containers.click_to_add_container')"
               @click="createContainer(slotProps)" /> 
           </div>
           <div v-else>
@@ -100,10 +100,10 @@
 
       <div v-else>
         <os-message type="info">
-          <span>The map view is not available for dimensionless container.</span>
+          <span v-t="'containers.no_map_for_dimless'">The map view is not available for dimensionless container.</span>
         </os-message>
 
-        <os-button primary label="View Specimens" @click="viewSpecimens" />
+        <os-button primary :label="$t('containers.view_specimens')" @click="viewSpecimens" />
       </div>
     </os-grid-column>
 
@@ -111,7 +111,7 @@
       <div class="os-container-occupant">
         <div v-if="ctx.occupant.container">
           <h4 class="title">
-            <span>Container</span>
+            <span v-t="'containers.singular'">Container</span>
           </h4>
 
           <os-overview :schema="ctx.containerDict" :object="ctx.occupant"
@@ -120,7 +120,7 @@
 
         <div v-else-if="ctx.occupant.specimen">
           <h4 class="title">
-            <span>Specimen</span>
+            <span v-t="'containers.specimen.singular'">Specimen</span>
           </h4>
 
           <os-overview :schema="ctx.specimenDict" :object="ctx.occupant"
@@ -131,14 +131,14 @@
 
     <os-dialog ref="colorCoding">
       <template #header>
-        <span>Color Coding</span>
+        <span v-t="'containers.color_coding'">Color Coding</span>
       </template>
       <template #content>
         <table class="os-specimen-color-coding">
           <thead>
             <tr>
-              <th>Color</th>
-              <th>Specimen Type</th>
+              <th v-t="'containers.color'">Color</th>
+              <th v-t="'containers.specimen_types'">Specimen Type</th>
             </tr>
           </thead>
           <tbody>
@@ -154,16 +154,16 @@
         </table>
       </template>
       <template #footer>
-        <os-button primary label="Done" @click="closeColorCoding" />
+        <os-button primary :label="$t('common.buttons.done')" @click="closeColorCoding" />
       </template>
     </os-dialog>
 
     <os-confirm ref="confirmTransferDialog">
       <template #title>
-        <span>Transfer Specimens</span>
+        <span v-t="'containers.transfer_specimens'">Transfer Specimens</span>
       </template>
       <template #message>
-        <span>{{ctx.toTransferSpmns.length == 1 ? 'Specimen' : 'Specimens'}} {{ctx.toTransferSpmns.join(', ')}} {{ctx.toTransferSpmns.length == 1 ? 'is' : 'are'}} already stored in a container. Do you really want to move {{ctx.toTransferSpmns.length == 1 ? 'it' : 'them'}} to a new location?</span>
+        <span v-t="{path: 'containers.confirm_transfer', args: {count: ctx.toTransferSpmns.length, labels: ctx.toTransferSpmns.join(', ')}}">Do you really want to move to a new location?</span>
       </template>
     </os-confirm>
   </os-grid>
@@ -356,13 +356,13 @@ export default {
     },
 
     exportMap: async function() {
-      alertsSvc.info('Generating container map...');
+      alertsSvc.info({code: 'containers.generating_map'});
       const resp = await containerSvc.exportMap(this.ctx.container);
       if (resp.fileId) {
-        alertsSvc.info('Downloading the container map...');
+        alertsSvc.info({code: 'containers.downloading_map'});
         containerSvc.downloadReport(resp.fileId);
       } else {
-        alertsSvc.info('Container map generation is taking more time than anticipated. Link to download the map will be sent to you by email.');
+        alertsSvc.info({code: 'containers.map_will_be_emailed'});
       }
     },
 
@@ -370,14 +370,14 @@ export default {
       const occupants = await containerSvc.blockPositions(this.ctx.container, []);
       this.ctx.pOccupants = null;
       this.setupMap(occupants);
-      alertsSvc.success('All free positions blocked!');
+      alertsSvc.success({code: 'containers.all_free_pos_blocked'});
     },
 
     unblockAll: async function() {
       const occupants = await containerSvc.unblockPositions(this.ctx.container, []);
       this.ctx.pOccupants = null;
       this.setupMap(occupants);
-      alertsSvc.success('All blocked positions freed!');
+      alertsSvc.success({code: 'containers.all_blocked_pos_freed'});
     },
 
     block: async function() {
@@ -389,7 +389,7 @@ export default {
 
       for (const position of selectedPositions) {
         if (position.occupied) {
-          alertsSvc.error('Only free positions can be blocked!');
+          alertsSvc.error({code: 'containers.only_free_can_blocked'});
           return;
         }
       }
@@ -405,7 +405,7 @@ export default {
       const occupants = await containerSvc.blockPositions(this.ctx.container, toBlock);
       this.ctx.pOccupants = null;
       this.setupMap(occupants);
-      alertsSvc.success('Blocked ' + toBlock.length + ' positions!');
+      alertsSvc.success({code: 'containers.n_pos_blocked', args: {count: toBlock.length}});
     },
 
     unblock: async function() {
@@ -417,7 +417,7 @@ export default {
 
       for (const position of selectedPositions) {
         if (!position.occupied || !position.occupied.blocked) {
-          alertsSvc.error('Only blocked positions can be freed!');
+          alertsSvc.error({code: 'containers.only_blocked_can_freed'});
           return;
         }
       }
@@ -433,7 +433,7 @@ export default {
       const occupants = await containerSvc.unblockPositions(this.ctx.container, toUnblock);
       this.ctx.pOccupants = null;
       this.setupMap(occupants);
-      alertsSvc.success('Unblocked ' + toUnblock.length + ' positions!');
+      alertsSvc.success({code: 'containers.n_pos_unblocked', args: {count: toUnblock.length}});
     },
 
     showColorCoding: function() {
@@ -495,7 +495,7 @@ export default {
           const cOccupants = util.clone(ctx.pOccupants);
           const {occupants, noFreeLocs} = this.$refs.layout.assignPositions(cOccupants, labels, ctx.vacateOccupant);
           if (noFreeLocs) {
-            alertsSvc.error('Container does not have enough free locations to accommodate input specimen labels');
+            alertsSvc.error({code: 'containers.no_free_positions'});
           }
 
           ctx.noFreeLocs = noFreeLocs;
@@ -519,13 +519,13 @@ export default {
 
         const positions = specimens.map(spmn => ({occuypingEntity: 'specimen', occupyingEntityId: spmn.id}));
         await containerSvc.assignPositions(container, {positions});
-        alertsSvc.success('Successfully added ' + positions.length + ' specimens to the container!');
+        alertsSvc.success({code: 'containers.specimens_stored', args: {count: positions.length}});
         this.$refs.specimensScanner.clearInput();
         return;
       }
 
       if (this.ctx.noFreeLocs) {
-        alertsSvc.error('Container does not have enough free locations to accommodate input specimen labels');
+        alertsSvc.error({code: 'containers.no_free_positions'});
         return;
       }
 
@@ -549,7 +549,7 @@ export default {
       const addedLabels = addedEntities.map(pos => pos.occupyingEntityName);
       const {useBarcode, specimens} = await this.$refs.specimensScanner.getSpecimensByLabel(addedLabels);
       if (!specimens || specimens.length < addedLabels.length) {
-        alertsSvc.error('One or more specimens not found!');
+        alertsSvc.error({code: 'containers.specimens_not_found'});
         return;
       }
 

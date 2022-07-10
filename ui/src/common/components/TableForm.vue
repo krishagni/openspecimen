@@ -5,7 +5,7 @@
       <thead>
         <tr>
           <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" @click="sort(field)">
-            <span v-if="field.label">{{field.label}}</span>
+            <span v-if="field.displayLabel">{{field.displayLabel}}</span>
             <div v-else-if="field.icon" v-os-tooltip="field.tooltip"
               :class="{'align-icon': field.enableCopyFirstToAll && field.type == 'booleanCheckbox'}">
               <os-icon :name="field.icon" />
@@ -130,10 +130,18 @@ export default {
           }
         }
 
+        field.displayLabel = field.label;
+        if (field.labelCode) {
+          field.displayLabel = this.$t(field.labelCode);
+        }
+
         const fv = field.validations;
         if (fv && fv.required) {
           field.required = true;
           field.requiredTooltip = fv.required.message || 'Mandatory field'
+          if (fv.required.messageCode) {
+            field.requiredTooltip = this.$t(fv.required.messageCode);
+          }
         }
 
         field.uiStyle = field.uiStyle || {'min-width': '150px'};

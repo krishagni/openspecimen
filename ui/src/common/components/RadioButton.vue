@@ -6,7 +6,7 @@
         <span class="p-field-radiobutton">
           <label>
             <RadioButton :name="name" :value="option.value" v-model="inputValue" />
-            <span>{{option.caption}}</span>
+            <span>{{option.displayLabel}}</span>
           </label>
         </span>
       </div>
@@ -56,6 +56,16 @@ export default {
 
       for (let i = 0; i < optionsList.length; i += numOptions) {
         result.push(optionsList.slice(i, i + numOptions));
+      }
+
+      for (let row of result) {
+        for (let option of row) {
+          if (option.captionCode) {
+            option.displayLabel = this.$t(option.captionCode);
+          } else {
+            option.displayLabel = option.caption;
+          }
+        }
       }
 
       return result;

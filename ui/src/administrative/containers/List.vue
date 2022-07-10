@@ -1,9 +1,9 @@
 <template>
   <os-page>
     <os-page-head>
-      <span>
-        <h3>Containers</h3>
-      </span>
+      <h3>
+        <span v-t="'containers.list'">Containers</span>
+      </h3>
 
       <template #right>
         <os-list-size
@@ -18,33 +18,33 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default v-if="ctx.selectedContainers && ctx.selectedContainers.length > 0">
-          <os-button left-icon="trash" label="Delete" @click="deleteContainers"
+          <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainers"
             v-show-if-allowed="containerResources.deleteOpts" />
 
-          <os-button left-icon="download" label="Export" @click="exportContainers"
+          <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
             v-show-if-allowed="containerResources.importOpts" />
         </template>
 
         <template #default v-else>
-          <os-button left-icon="plus" label="Create" @click="createContainer"
+          <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createContainer"
             v-show-if-allowed="containerResources.createOpts" />
 
-          <os-button left-icon="cubes" label="Types" @click="viewContainerTypes" />
+          <os-button left-icon="cubes" :label="$t('containers.types')" @click="viewContainerTypes" />
 
-          <os-button left-icon="tasks" label="Tasks" @click="viewContainerTasks" />
+          <os-button left-icon="tasks" :label="$t('containers.tasks')" @click="viewContainerTasks" />
 
-          <os-menu label="Import" :options="importOpts"
+          <os-menu :label="$t('common.buttons.import')" :options="importOpts"
             v-show-if-allowed="containerResources.importOpts" />
 
-          <os-button left-icon="download" label="Export" @click="exportContainers"
+          <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
             v-show-if-allowed="containerResources.importOpts" />
 
-          <os-button-link left-icon="question-circle" label="Help"
+          <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
             url="https://help.openspecimen.org/containers" new-tab="true" />
         </template>
 
         <template #right>
-          <os-button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
         </template>
       </os-page-toolbar>
 
@@ -63,7 +63,9 @@
 
       <os-confirm-delete ref="deleteDialog">
         <template #message>
-          <span>Are you sure you want to delete the selected containers?</span>
+          <span v-t="'containers.confirm_delete_selected'">
+            Are you sure you want to delete the selected containers?
+          </span>
         </template>
       </os-confirm-delete>
     </os-page-body>
@@ -99,12 +101,12 @@ export default {
       importOpts: [
         {
           icon: 'box-open',
-          caption: 'Containers',
+          caption: this.$t('containers.list'),
           onSelect: () => routerSvc.ngGoto('containers-import')
         },
         {
           icon: 'table',
-          caption: 'View Past Imports',
+          caption: this.$t('bulk_imports.view_jobs'),
           onSelect: () => routerSvc.ngGoto('containers-import-jobs')
         }
       ],
@@ -172,7 +174,7 @@ export default {
       const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
       await this.$refs.deleteDialog.open();
       await containerSvc.bulkDelete(containerIds, true);
-      alertsSvc.success('Containers deleted successfully!');
+      alertsSvc.success({code: 'containers.bulk_deleted'});
       this.$refs.listView.reload();
     },
 

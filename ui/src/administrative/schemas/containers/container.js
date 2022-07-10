@@ -4,22 +4,22 @@ export default {
   "fields":  [
     {
       "type": "radio",
-      "label": "Used For",
+      "labelCode": "containers.used_for",
       "name": "container.usedFor",
       "options": [
-        { "caption": "Storage", "value": "STORAGE" },
-        { "caption": "Distribution", "value": "DISTRIBUTION" }
+        { "captionCode": "containers.used_for_storage",      "value": "STORAGE" },
+        { "captionCode": "containers.used_for_distribution", "value": "DISTRIBUTION" }
       ],
       "optionsPerRow": 2,
       "validations": {
         "required": {
-          "message": "Used for is mandatory"
+          "messageCode": "containers.used_for_required"
         }
       }
     },
     {
       "type": "dropdown",
-      "label": "Type",
+      "labelCode": "containers.type",
       "name": "container.typeName",
       "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "href": (data) => {
@@ -40,18 +40,18 @@ export default {
     },
     {
       "type": "text",
-      "label": "Display Name",
+      "labelCode": "containers.display_name",
       "name": "container.displayName",
       "href": (data) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: data.container.id}),
       "summary": true
     },
     {
       "type": "text",
-      "label": "Unique Name",
+      "labelCode": "containers.unique_name",
       "name": "container.name",
       "validations": {
         "required": {
-          "message": "Container unique name is mandatory"
+          "messageCode": "containers.unique_name_required"
         }
       },
       "href": (data) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: data.container.id}),
@@ -59,18 +59,18 @@ export default {
     },
     {
       "type": "text",
-      "label": "Barcode",
+      "labelCode": "containers.barcode",
       "name": "container.barcode",
       "summary": true
     },
     {
       "type": "number",
-      "label": "Temperature (Celsius)",
+      "labelCode": "containers.temperature",
       "name": "container.temperature"
     },
     {
       "type": "site",
-      "label": "Parent Site",
+      "labelCode": "containers.site",
       "name": "container.siteName",
       "selectProp": "name",
       "listSource": {
@@ -84,13 +84,13 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Parent Site is mandatory"
+          "messageCode": "containers.site_required"
         }
       }
     },
     {
       "type": "storage-position",
-      "label": "Location",
+      "labelCode": "containers.parent_container",
       "name": "container.storageLocation",
       "showInOverviewWhen": "container.storageLocation && container.storageLocation.name",
       "listSource": {
@@ -108,7 +108,7 @@ export default {
     },
     {
       "type": "text",
-      "label": "Dimension",
+      "labelCode": "containers.dimension",
       "name": "container.uiDimension",
       "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "value": ({container}) => {
@@ -122,29 +122,29 @@ export default {
     },
     {
       "type": "number",
-      "label": "Rows",
+      "labelCode": "containers.rows",
       "name": "container.noOfRows",
       "validations": {
         "required": {
-          "message": "Rows is mandatory"
+          "messageCode": "containers.rows_required"
         }
       },
       "dataEntry": true
     },
     {
       "type": "number",
-      "label": "Columns",
+      "labelCode": "containers.columns",
       "name": "container.noOfColumns",
       "validations": {
         "required": {
-          "message": "Columns is mandatory"
+          "messageCode": "containers.columns_required"
         }
       },
       "dataEntry": true
     },
     {
       "type": "text",
-      "label": "Stored",
+      "labelCode": "containers.stored_specimens",
       "name": "container.uiStored",
       "showInOverviewWhen": "!container.storageLocation || !container.storageLocation.name",
       "value": ({container}) => {
@@ -163,7 +163,7 @@ export default {
     {
       "type": "component",
       "component": "os-utilisation-bar",
-      "label": "Utilisation",
+      "labelCode": "containers.utilisation",
       "name": "container.uiUtilisation",
       "showInOverviewWhen": "!container.storageLocation || !container.storageLocation.name",
       "value": ({container}) => {
@@ -176,23 +176,23 @@ export default {
     },
     {
       "type": "radio",
-      "label": "Position Labeling",
+      "labelCode": "containers.position_labeling",
       "name": "container.positionLabelingMode",
       "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "options": [
-        { "caption": "Linear", "value": "LINEAR" },
-        { "caption": "Row and Column", "value": "TWO_D" }
+        { "captionCode": "containers.position_labeling_linear", "value": "LINEAR" },
+        { "captionCode": "containers.position_labeling_two_d", "value": "TWO_D" }
       ],
       "optionsPerRow": 2,
       "validations": {
         "required": {
-          "message": "Position Labeling is mandatory"
+          "messageCode": "containers.position_labeling_required"
         }
       }
     },
     {
       "type": "text",
-      "label": "Labeling Scheme",
+      "labelCode": "containers.labeling_scheme",
       "name": "container.uiLabelingScheme",
       "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "value": ({container}) => {
@@ -206,7 +206,7 @@ export default {
     },
     {
       "type": "dropdown",
-      "label": "Row Labeling Scheme",
+      "labelCode": "containers.row_labeling_scheme",
       "name": "container.rowLabelingScheme",
       "listSource": {
         "options": [
@@ -222,14 +222,14 @@ export default {
       "showWhen": "container.positionLabelingMode == 'TWO_D'",
       "validations": {
         "required": {
-          "message": "Row Labeling Scheme is mandatory"
+          "messageCode": "containers.row_labeling_scheme_required"
         }
       },
       "dataEntry": true
     },
     {
       "type": "dropdown",
-      "label": "Column Labeling Scheme",
+      "labelCode": "containers.column_labeling_scheme",
       "name": "container.columnLabelingScheme",
       "listSource": {
         "options": [
@@ -245,14 +245,14 @@ export default {
       "showWhen": "container.positionLabelingMode == 'TWO_D'",
       "validations": {
         "required": {
-          "message": "Column Labeling Scheme is mandatory"
+          "messageCode": "containers.column_labeling_scheme_required"
         }
       },
       "dataEntry": true
     },
     {
       "type": "dropdown",
-      "label": "Position Assignment",
+      "labelCode": "containers.position_assignment",
       "name": "container.positionAssignment",
       "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "listSource": {
@@ -270,35 +270,37 @@ export default {
         "displayProp": "value"
       },
       "validations": {
-        "required": "Position Assignment is mandatory"
+        "required": {
+          "messageCode": "containers.position_assignment_required"
+        }
       }
     },
     {
       "type": "radio",
-      "label": "Store Specimens?",
+      "labelCode": "containers.store_specimens_q",
       "name": "container.storeSpecimensEnabled",
       "options": [
-        { caption: 'Yes', value: true },
-        { caption: 'No', value: false }
+        { captionCode: 'common.yes', value: true },
+        { captionCode: 'common.no', value: false }
       ],
       "optionsPerRow": 2,
       "summary": true
     },
     {
       "type": "radio",
-      "label": "Display in Map",
+      "labelCode": "containers.display_in_map",
       "name": "container.cellDisplayProp",
       "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "options": [
-        { caption: "Specimen Label", value: "SPECIMEN_LABEL" },
-        { caption: "Specimen Barcode", value: "SPECIMEN_BARCODE" },
-        { caption: "PPID", value: "SPECIMEN_PPID" }
+        { captionCode: "containers.specimen_label", value: "SPECIMEN_LABEL" },
+        { captionCode: "containers.specimen_barcode", value: "SPECIMEN_BARCODE" },
+        { captionCode: "containers.ppid", value: "SPECIMEN_PPID" }
       ],
       "optionsPerRow": 3,
     },
     {
       "type": "text",
-      "label": "Collection Protocols",
+      "labelCode": "containers.collection_protocols",
       "name": "contaner.uiCps",
       "showInOverviewWhen": "container.usedFor == 'STORAGE'",
       "value": ({container}) => {
@@ -315,7 +317,7 @@ export default {
     },
     {
       "type": "text",
-      "label": "Specimen Types",
+      "labelCode": "containers.specimen_types",
       "name": "contaner.uiSpecimenTypes",
       "showInOverviewWhen": "container.usedFor == 'STORAGE'",
       "value": ({container}) => {
@@ -339,7 +341,7 @@ export default {
     },
     {
       "type": "text",
-      "label": "Distribution Protocols",
+      "labelCode": "containers.distribution_protocols",
       "name": "contaner.uiDps",
       "showInOverviewWhen": "container.usedFor == 'DISTRIBUTION'",
       "value": ({container}) => {
@@ -356,7 +358,7 @@ export default {
     },
     {
       "type": "number",
-      "label": "Free Locations",
+      "labelCode": "containers.free_locations",
       "name": "container.freePositions",
       "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "summary": true

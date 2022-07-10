@@ -6,25 +6,31 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.container.id">Create Container</h3>
-        <h3 v-else>Update {{dataCtx.container.name}}</h3>
+        <h3 v-if="!dataCtx.container.id">
+          <span v-t="'containers.create'">Create Container</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'common.update', args: dataCtx.container}"></span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <div v-if="ctx.loading">
         <os-message type="info">
-          <span>Loading the form. Please wait for a moment...</span>
+          <span v-t="'common.loading_form'">Loading the form. Please wait for a moment...</span>
         </os-message>
       </div>
       <div v-else-if="ctx.view == 'basic_detail'">
         <os-form ref="containerForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
           <div>
-            <os-button primary label="Next" v-if="dataCtx.createType == 'multiple'" @click="saveOrUpdate" />
+            <os-button primary :label="$t('common.buttons.next')"
+              v-if="dataCtx.createType == 'multiple'" @click="saveOrUpdate" />
 
-            <os-button primary :label="!dataCtx.container.id ? 'Create' : 'Update'" v-else @click="saveOrUpdate" />
+            <os-button primary :label="$t(!dataCtx.container.id ? 'common.buttons.create' : 'common.buttons.update')"
+              v-else @click="saveOrUpdate" />
 
-            <os-button text label="Cancel"  @click="cancel" />
+            <os-button text :label="$t('common.buttons.cancel')"  @click="cancel" />
           </div>
         </os-form>
       </div>
@@ -33,9 +39,9 @@
           :data="dataCtx" :items="dataCtx.containers" :schema="ctx.locationsSchema"
           :remove-items="true" @remove-item="removeContainer($event)">
 
-          <os-button primary label="Create" @click="saveMultipleContainers" />
+          <os-button primary :label="$t('common.buttons.create')" @click="saveMultipleContainers" />
 
-          <os-button text label="Back" @click="ctx.view = 'basic_detail'" />
+          <os-button text :label="$t('common.buttons.back')" @click="ctx.view = 'basic_detail'" />
         </os-table-form>
       </div>
     </os-page-body>
@@ -48,6 +54,7 @@ import { reactive, inject } from 'vue';
 import alertsSvc     from '@/common/services/Alerts.js';
 import formUtil      from '@/common/services/FormUtil.js';
 import http          from '@/common/services/HttpClient.js';
+import i18n          from '@/common/services/I18n.js';
 import routerSvc     from '@/common/services/Router.js';
 import util          from '@/common/services/Util.js';
 import containerSvc  from '@/administrative/services/Container.js';
@@ -65,7 +72,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('ContainersList', {containerId: -1}), label: 'Containers'}
+        {url: routerSvc.getUrl('ContainersList', {containerId: -1}), label: i18n.msg('containers.list')}
       ],
 
       addEditFs: {rows: []},
@@ -241,7 +248,7 @@ export default {
       if (dataCtx.createType == 'single') {
         const isUpdateOp     = container.id > 0;
         const savedContainer = await containerSvc.saveOrUpdate(container);
-        alertsSvc.success('Container ' + savedContainer.name + (container.id ? ' updated!' : ' created!')); 
+        alertsSvc.success({code: container.id ? 'containers.updated' : 'containers.created', args: savedContainer});
         if (dataCtx.parentContainer) {
           routerSvc.goto('ContainerDetail.Locations', {containerId: dataCtx.parentContainer.id});
         } else {
@@ -292,7 +299,7 @@ export default {
 
       containerSvc.createContainers(this.dataCtx.containers.map(({container}) => container)).then(
         (saved) => {
-          alertsSvc.success((saved.length == 1 ? 'One container ' : saved.length + ' containers ') + 'created');
+          alertsSvc.success({code: 'containers.multiple_created', args: {count: saved.length}});
           if (saved.length > 0) {
             const parentId = saved[0].storageLocation && saved[0].storageLocation.id;
             if (saved.every(c => c.storageLocation && c.storageLocation.id == parentId)) {
@@ -325,7 +332,7 @@ export default {
             //
             // hierarchy created for top-level container. go to list view with success message
             //
-            alertsSvc.success('Container hierarchy of type ' + containers[0].typeName + ' created');
+            alertsSvc.success({code: 'containers.hierarchy_created', args: containers[0]});
             routerSvc.goto('ContainersList');
           }
         }

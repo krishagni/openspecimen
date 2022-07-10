@@ -4,7 +4,7 @@ export default {
   fields:  [
     {
       "type": "text",
-      "label": "Collection Protocol",
+      "labelCode": "containers.specimen.cp",
       "name": "specimen.cpShortTitle",
       "href": (data) => {
         const specimen = data.specimen || {};
@@ -13,7 +13,7 @@ export default {
     },
     {
       "type": "text",
-      "label": "Label",
+      "labelCode": "containers.specimen.label",
       "name": "specimen.label",
       "href": (data) => {
         const specimen = data.specimen || {};
@@ -22,7 +22,7 @@ export default {
     },
     {
       "type": "text",
-      "label": "Barcode",
+      "labelCode": "containers.specimen.barcode",
       "name": "specimen.barcode",
       "href": (data) => {
         const specimen = data.specimen || {};
@@ -31,7 +31,7 @@ export default {
     },
     {
       "type": "text",
-      "label": "Parent Specimen",
+      "labelCode": "containers.specimen.parent",
       "name": "specimen.parentLabel",
       "href": (data) => {
         const specimen = data.specimen || {};
@@ -40,7 +40,7 @@ export default {
     },
     {
       "type": "text",
-      "label": "PPID",
+      "labelCode": "containers.specimen.ppid",
       "name": "specimen.ppid",
       "href": (data) => {
         const specimen = data.specimen || {};
@@ -50,7 +50,7 @@ export default {
     },
     {
       "type": "storage-position",
-      "label": "Location",
+      "labelCode": "containers.specimen.location",
       "name": "specimen.storageLocation",
       "href": (data) => {
         const specimen = data.specimen || {};
@@ -60,13 +60,13 @@ export default {
     },
     {
       "type": "text",
-      "label": "Type",
+      "labelCode": "containers.specimen.type",
       "name": "specimen.type"
     },
     {
       "type": "component",
       "component": "os-specimen-measure",
-      "label": "Quantity",
+      "labelCode": "containers.specimen.available_qty",
       "name": "specimen.availableQty",
       "value": (data) => {
         const specimen = data.specimen || {};
@@ -75,17 +75,17 @@ export default {
     },
     {
       "type": "text",
-      "label": "Pathology",
+      "labelCode": "containers.specimen.pathology_status",
       "name": "specimen.pathology"
     },
     {
       "type": "text",
-      "label": "Anatomic Site",
+      "labelCode": "containers.specimen.anatomic_site",
       "name": "specimen.anatomicSite"
     },
     {
       "type": "text",
-      "label": "Collection Container",
+      "labelCode": "containers.specimen.collection_container",
       "name": "specimen.collectionContainer"
     }
   ]

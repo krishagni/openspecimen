@@ -4,18 +4,18 @@ export default {
   columns: [
     {
       name: "event.id",
-      caption: "Event ID",
+      captionCode: "containers.event_id",
       value: function(rowObject) {
         return '#' + rowObject.event.id;
       }
     },
     {
       name: "event.fromSite",
-      caption: "From Site",
+      captionCode: "containers.from_site",
     },
     {
       name: "event.fromLocation",
-      caption: "From Location",
+      captionCode: "containers.from_location",
       type: "storage-position",
       href: (row) => {
         const location = row.rowObject.event.fromLocation;
@@ -28,11 +28,11 @@ export default {
     },
     {
       name: "event.toSite",
-      caption: "To Site",
+      captionCode: "containers.to_site",
     },
     {
       name: "event.toLocation",
-      caption: "To Location",
+      captionCode: "containers.to_location",
       type: "storage-position",
       href: (row) => {
         const location = row.rowObject.event.toLocation;
@@ -45,12 +45,12 @@ export default {
     },
     {
       name: "event.user",
-      caption: "User",
+      captionCode: "containers.user",
       type: "user"
     },
     {
       name: "event.time",
-      caption: "Time",
+      captionCode: "containers.transfer_date_time",
       type: "date-time"
     }
   ]

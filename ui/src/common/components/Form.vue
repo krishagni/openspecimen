@@ -254,7 +254,12 @@ export default {
            if (fv && (fv.requiredIf || fv.required)) {
              field.required = !!fv.required || exprUtil.eval(this, fv.requiredIf.expr);
              if (field.required) {
-               field.requiredTooltip = (fv.required || fv.requiredIf).message || 'Mandatory field'
+               const validator = fv.required || fv.requiredIf;
+               if (validator.messageCode) {
+                 field.requiredTooltip = this.$t(validator.messageCode);
+               } else {
+                 field.requiredTooltip = validator.message || 'Mandatory field'
+               }
              }
            }
 

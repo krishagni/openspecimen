@@ -225,7 +225,11 @@ export default {
         } else if (field.options instanceof Array) {
           let option = field.options.find((option) => option.value == value);
           if (option) {
-            value = option.caption || option.name;
+            if (option.captionCode) {
+              value = this.$t(option.captionCode);
+            } else {
+              value = option.caption || option.name;
+            }
           }
         } else if (field.type == 'dropdown') {
           const ls = field.listSource || {};

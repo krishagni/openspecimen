@@ -11,7 +11,7 @@ export default {
     },
     {
       name: "containerName",
-      caption: "Name",
+      captionCode: "containers.name",
       value: function({container}) {
         if (container.displayName) {
           return container.displayName + ' (' + container.name + ')';
@@ -23,16 +23,16 @@ export default {
     },
     {
       name: "container.siteName",
-      caption: "Site",
+      captionCode: "containers.site",
     },
     {
       name: "container.createdBy",
-      caption: "Created By",
+      captionCode: "common.created_by",
       type: "user"
     },
     {
       name: "container.dimension",
-      caption: "Dimension",
+      captionCode: "containers.dimension",
       value: function(rowObject) {
         if (rowObject.container.positionLabelingMode != 'NONE') {
           return rowObject.container.noOfRows + ' x ' + rowObject.container.noOfColumns;
@@ -43,15 +43,15 @@ export default {
     },
     {
       name: "container.storedSpecimens",
-      caption: "Stored Specimens"
+      captionCode: "containers.stored_specimens"
     },
     {
       name: "container.capacity",
-      caption: "Approximate Capacity"
+      captionCode: "containers.capacity"
     },
     {
       name: "container.utilisation",
-      caption: "Utilisation",
+      captionCode: "containers.utilisation",
       type: "component",
       component: "os-utilisation-bar",
       data: function(rowObject) {
@@ -69,12 +69,12 @@ export default {
     {
       name: "name",
       type: "text",
-      caption: "Name"
+      captionCode: "containers.name"
     },
     {
       name: 'site',
       type: 'site',
-      caption: 'Site',
+      captionCode: 'containers.site',
       listSource: {
         selectProp: 'name',
         queryParams: {

@@ -2,26 +2,26 @@ export default {
   columns: [
     {
       name: "activityName",
-      caption: "Activity",
+      captionCode: "containers.activity",
       value: ({activityLog}) => activityLog.scheduledActivityName || activityLog.taskName
     },
     {
       name: "activityLog.performedBy",
-      caption: "Performed By",
+      captionCode: "containers.performed_by",
       type: "user"
     },
     {
       name: "activityLog.activityDate",
-      caption: "Activity Date",
+      captionCode: "containers.activity_date",
       type: "date"
     },
     {
       name: "activityLog.timeTaken",
-      caption: "Time Taken (mins)"
+      captionCode: "containers.activity_time_taken"
     },
     {
       name: "activityLog.comments",
-      caption: "Comments"
+      captionCode: "common.comments"
     }
   ]
 }

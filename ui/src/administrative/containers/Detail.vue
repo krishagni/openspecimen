@@ -19,27 +19,27 @@
       <div>
         <os-side-menu>
           <ul>
-            <li v-os-tooltip.right="'Overview'">
+            <li v-os-tooltip.right="$t('common.overview')">
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="'Locations'">
+            <li v-os-tooltip.right="$t('containers.locations')">
               <router-link :to="getRoute('Locations')">
                 <os-icon name="map" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="'Specimens'">
+            <li v-os-tooltip.right="$t('containers.specimens')">
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="'Transfer Events'">
+            <li v-os-tooltip.right="$t('containers.transfer_events')">
               <router-link :to="getRoute('TransferEvents')">
                 <os-icon name="arrows-alt-h" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="'Maintenance'"
+            <li v-os-tooltip.right="$t('containers.maintenance')"
               v-if="!ctx.container.storageLocation || !ctx.container.storageLocation.id">
               <router-link :to="getRoute('Maintenance')">
                 <os-icon name="calendar" />
@@ -64,6 +64,7 @@
 <script>
 import { reactive } from 'vue';
 
+import i18n         from '@/common/services/I18n.js';
 import routerSvc    from '@/common/services/Router.js';
 import formUtil     from '@/common/services/FormUtil.js';
 import containerSvc from '@/administrative/services/Container.js';
@@ -82,7 +83,7 @@ export default {
       container: {},
 
       bcrumb: [
-        {url: routerSvc.getUrl('ContainersList', {containerId: -1}), label: 'Containers'}
+        {url: routerSvc.getUrl('ContainersList', {containerId: -1}), label: i18n.msg('containers.list')}
       ],
 
       showTree: true

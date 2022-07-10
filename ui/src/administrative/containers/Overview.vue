@@ -1,18 +1,18 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" label="Edit" @click="editContainer"
+      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editContainer"
         v-show-if-allowed="containerResources.updateOpts" />
 
-      <os-button left-icon="arrows-alt-h" label="Transfer" @click="showTransferForm"
+      <os-button left-icon="arrows-alt-h" :label="$t('containers.transfer')" @click="showTransferForm"
         v-show-if-allowed="containerResources.updateOpts" />
 
-      <os-button left-icon="trash" label="Delete" @click="deleteContainer"
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainer"
         v-show-if-allowed="containerResources.deleteOpts" />
 
-      <os-button left-icon="print" label="Print" @click="printLabels" />
+      <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" />
 
-      <os-menu label="Export" :options="ctx.reportOpts" />
+      <os-menu :label="$t('common.buttons.export')" :options="ctx.reportOpts" />
     </template>
   </os-page-toolbar>
 
@@ -26,7 +26,7 @@
 
       <os-section v-if="ctx.storedSpmns > 0">
         <template #title>
-          <span>Top 5 specimen types</span>
+          <span v-t="'containers.top_5_specimen_types'">Top 5 specimen types</span>
         </template>
         <template #content>
           <os-chart type="doughnut" :data="ctx.spmnTypesStorage" />
@@ -37,28 +37,28 @@
 
   <os-dialog ref="transferFormDialog">
     <template #header>
-      <span>Transfer {{ctx.container.name}} to ...</span>
+      <span v-t="{path: 'containers.transfer_to', args: ctx.container}">Transfer {{ctx.container.name}} to ...</span>
     </template>
     <template #content>
       <os-form ref="transferForm" :schema="ctx.transferFs.layout" :data="trCtx" @input="handleTransferInput($event)" />
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="closeTransferForm" />
-      <os-button primary label="Transfer" @click="transfer" />
+      <os-button text    :label="$t('common.buttons.cancel')" @click="closeTransferForm" />
+      <os-button primary :label="$t('containers.transfer')" @click="transfer" />
     </template>
   </os-dialog>
 
   <os-confirm-delete ref="deleteDialog">
     <template #message>
       <div>
-        <span>Container <b>{{ctx.container.name}}</b> and its child containers will be deleted forever. Are you sure you want to proceed?</span>
+        <span v-t="{path: 'containers.confirm_delete', args: ctx.container}">Container <b>{{ctx.container.name}}</b> and its child containers will be deleted forever. Are you sure you want to proceed?</span>
       </div>
 
       <table class="os-table muted-header os-border" v-if="ctx.dependents.length > 0" style="margin-top: 1.25rem;">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Count</th>
+            <th v-t="'common.name'">Name</th>
+            <th v-t="'common.count'">Count</th>
           </tr>
         </thead>
         <tbody>
@@ -73,14 +73,14 @@
 
   <os-dialog ref="defragDialog">
     <template #header>
-      <span>Defragment {{ctx.container.name}}</span>
+      <span v-t="{path: 'containers.defrag_container', args: ctx.container}">Defragment {{ctx.container.name}}</span>
     </template>
     <template #content>
       <os-form ref="defragForm" :schema="ctx.defragFs.layout" :data="dfCtx" />
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="closeDefragForm" />
-      <os-button primary label="Defragment" @click="defragment" />
+      <os-button text    :label="$t('common.buttons.cancel')" @click="closeDefragForm" />
+      <os-button primary :label="$t('containers.defragment')" @click="defragment" />
     </template>
   </os-dialog>
 </template>
@@ -159,19 +159,19 @@ export default {
 
       ctx.reportOpts = [
         {
-          caption: 'Map',
+          caption: this.$t('containers.map'),
           onSelect: () => this.exportMap()
         },
         {
-          caption: 'Defragment',
+          caption: this.$t('containers.defragment'),
           onSelect: () => this.showDefragForm()
         },
         {
-          caption: 'Empty Positions',
+          caption: this.$t('containers.empty_positions'),
           onSelect: () => this.exportEmptyPositions()
         },
         {
-          caption: 'Utilisation',
+          caption: this.$t('containers.utilisation'),
           onSelect: () => this.exportUtilisation()
         }
       ];
@@ -246,7 +246,7 @@ export default {
         (olLocation.positionY != newLocation.positionY) ||
         (olLocation.positionX != newLocation.positionX);
       if (!locationChanged) {
-        alertsSvc.info('No change in location detected. Container not transferred!');
+        alertsSvc.info({code: 'containers.no_change_not_transferred'});
         this.closeTransferForm();
         return;
       }
@@ -262,7 +262,7 @@ export default {
       await this.$refs.deleteDialog.open();
 
       await containerSvc.delete(container, true);
-      alertsSvc.success('Container ' + container.name + ' deleted!');
+      alertsSvc.success({code: 'containers.deleted', args: container});
 
       if (container.storageLocation && container.storageLocation.id) {
         routerSvc.goto('ContainerDetail.Overview', {containerId: container.storageLocation.id});
@@ -280,40 +280,40 @@ export default {
         const query    = {jobId: job.id, filename};
         http.downloadFile(http.getUrl('container-label-printer/output-file', {query}));
       } else {
-        alertsSvc.success('Container labels print job ' + job.id + ' created!');
+        alertsSvc.success({code: 'containers.print_job_created', args: job});
       }
     },
 
     exportMap: async function() {
-      alertsSvc.info('Generating container map...');
+      alertsSvc.info({code: 'containers.generating_map'});
       const resp = await containerSvc.exportMap(this.ctx.container);
       if (resp.fileId) {
-        alertsSvc.info('Downloading the container map...');
+        alertsSvc.info({code: 'containers.downloading_map'});
         containerSvc.downloadReport(resp.fileId);
       } else {
-        alertsSvc.info('Container map generation is taking more time than anticipated. Link to download the map will be sent to you by email.');
+        alertsSvc.info({code: 'containers.map_will_be_emailed'});
       }
     },
 
     exportEmptyPositions: async function() {
-      alertsSvc.info('Generating empty positions report...');
+      alertsSvc.info({code: 'containers.generating_empty_pos_report'});
       const resp = await containerSvc.exportEmptyPositions(this.ctx.container);
       if (resp.fileId) {
-        alertsSvc.info('Downloading the empty positions report...');
+        alertsSvc.info({code: 'containers.downloading_empty_pos_report'});
         containerSvc.downloadReport(resp.fileId);
       } else {
-        alertsSvc.info('Empty positions report generation is taking more time than anticipated. Link to download the report will be sent to you by email.');
+        alertsSvc.info({code: 'containers.empty_pos_report_by_email'});
       }
     },
 
     exportUtilisation: async function() {
-      alertsSvc.info('Generating utilisation report...');
+      alertsSvc.info({code: 'containers.generating_utilisation_report'});
       const resp = await containerSvc.exportUtilisation(this.ctx.container);
       if (resp.fileId) {
-        alertsSvc.info('Downloading the utilisation report...');
+        alertsSvc.info({code: 'containers.downloading_utilisation_report'});
         containerSvc.downloadReport(resp.fileId);
       } else {
-        alertsSvc.info('Utilisation report generation is taking more time than anticipated. Link to download the report will be sent to you by email.');
+        alertsSvc.info({code: 'containers.utilisation_report_by_email'});
       }
     },
 
@@ -326,13 +326,13 @@ export default {
     },
 
     defragment: async function() {
-      alertsSvc.info('Generating defragmentation report...');
+      alertsSvc.info({code: 'containers.generating_defrag_report'});
       const resp = await containerSvc.exportDefragReport(this.ctx.container, this.dfCtx.defrag);
       if (resp.fileId) {
-        alertsSvc.info('Downloading the defragmentation report...');
+        alertsSvc.info({code: 'containers.downloading_defrag_report'});
         containerSvc.downloadReport(resp.fileId);
       } else {
-        alertsSvc.info('Defragmentation report generation is taking more time than anticipated. Link to download the report will be sent to you by email.');
+        alertsSvc.info({code: 'containers.defrag_report_by_email'});
       }
 
       this.closeDefragForm();
