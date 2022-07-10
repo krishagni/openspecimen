@@ -2,13 +2,13 @@
   <os-page-toolbar>
     <template #default>
       <os-button v-show-if-allowed="typeResources.createOpts"
-        left-icon="box-open" label="Create Container" @click="createContainer" />
+        left-icon="box-open" :label="$t('container_types.create_container')" @click="createContainer" />
 
       <os-button v-show-if-allowed="'institute-admin'"
-        left-icon="edit" label="Edit" @click="editType" />
+        left-icon="edit" :label="$t('common.buttons.edit')" @click="editType" />
 
       <os-button v-show-if-allowed="'institute-admin'"
-        left-icon="trash" label="Delete" @click="deleteType" />
+        left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteType" />
     </template>
   </os-page-toolbar>
 
@@ -72,7 +72,7 @@ export default {
       this.ctx.type = this.type;
       this.ctx.typeObjs = [{objectName: 'container_type', objectId: this.type.id}];
       this.ctx.deleteOpts = {
-        type: 'Container Type',
+        type: this.$t('container_types.singular'),
         title: this.type.name,
         dependents: () => typesSvc.getDependents(this.type),
         deleteObj: () => typesSvc.delete(this.type)

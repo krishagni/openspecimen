@@ -6,23 +6,28 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.type.id">Create Container Type</h3>
-        <h3 v-else>Update {{dataCtx.type.name}}</h3>
+        <h3 v-if="!dataCtx.type.id">
+          <span v-t="'container_types.create'">Create Container Type</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'common.update', args: dataCtx.type}">Update {{dataCtx.type.name}}</span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <div v-if="ctx.loading">
         <os-message type="info">
-          <span>Loading the form. Please wait for a moment...</span>
+          <span v-t="'common.loading_form'">Loading the form. Please wait for a moment...</span>
         </os-message>
       </div>
       <div v-else>
         <os-form ref="typeForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
           <div>
-            <os-button primary :label="!dataCtx.type.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
+            <os-button primary :label="$t(!dataCtx.type.id ? 'common.buttons.create' : 'common.buttons.update')"
+              @click="saveOrUpdate" />
 
-            <os-button text label="Cancel"  @click="cancel" />
+            <os-button text :label="$t('common.buttons.cancel')"  @click="cancel" />
           </div>
         </os-form>
       </div>
@@ -33,6 +38,7 @@
 <script>
 import { reactive, inject } from 'vue';
 
+import i18n        from '@/common/services/I18n.js';
 import routerSvc   from '@/common/services/Router.js';
 import typesSvc    from '@/administrative/services/ContainerType.js';
 
@@ -46,7 +52,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('ContainerTypesList', {typeId: -1}), label: 'Container Types'}
+        {url: routerSvc.getUrl('ContainerTypesList', {typeId: -1}), label: i18n.msg('container_types.list')}
       ],
 
       addEditFs: {rows: []},

@@ -8,7 +8,7 @@ export default {
         "fields": [ { "name": "type.nameFormat" } ]
       },
       {
-        "label": "Dimension",
+        "labelCode": "container_types.dimension",
 
         "fields": [ { "name": "type.noOfRows" }, { "name": "type.noOfColumns" } ]
       },
@@ -16,11 +16,11 @@ export default {
         "fields": [ { "name": "type.positionLabelingMode" } ]
       },
       {
-        "label": "Labeling Scheme",
+        "labelCode": "container_types.labeling_scheme",
 
         "fields": [
-          { "label": "Rows",    "name": "type.rowLabelingScheme" },
-          { "label": "Columns", "name": "type.columnLabelingScheme" }
+          { "labelCode": "container_types.rows",    "name": "type.rowLabelingScheme" },
+          { "labelCode": "container_types.columns", "name": "type.columnLabelingScheme" }
         ]
       },
       {

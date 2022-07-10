@@ -4,13 +4,13 @@
       <os-page>
         <os-page-head>
           <span>
-            <h3>Container Types</h3>
+            <h3 v-t="'container_types.list'">Container Types</h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -26,31 +26,31 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default v-if="ctx.selectedTypes && ctx.selectedTypes.length > 0">
-              <os-button left-icon="trash" label="Delete" @click="confirmDelete"
+              <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="confirmDelete"
                 v-show-if-allowed="'institute-admin'" />
 
-              <os-button left-icon="download" label="Export" @click="exportTypes"
+              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportTypes"
                 v-show-if-allowed="typeResources.importOpts" />
             </template>
 
             <template #default v-else>
-              <os-button left-icon="plus" label="Create" @click="createType"
+              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createType"
                 v-show-if-allowed="'institute-admin'" />
 
-              <os-button left-icon="box-open" label="Containers" @click="viewContainers" />
+              <os-button left-icon="box-open" :label="$t('container_types.view_containers')" @click="viewContainers" />
 
-              <os-menu label="Import" :options="importOpts"
+              <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                 v-show-if-allowed="'institute-admin'" />
 
-              <os-button left-icon="download" label="Export" @click="exportTypes"
+              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportTypes"
                 v-show-if-allowed="typeResources.importOpts" />
 
-              <os-button-link left-icon="question-circle" label="Help"
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://openspecimen.atlassian.net/wiki/x/ioDIBg" new-tab="true" />
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -78,7 +78,7 @@
 
   <os-confirm-delete :captcha="true" ref="confirmDeleteDialog">
     <template #message>
-      <span>Are you sure you want to delete the selected container types?</span>
+      <span v-t="'container_types.confirm_delete_selected'">Are you sure you want to delete the selected container types?</span>
     </template>
   </os-confirm-delete>
 </template>
@@ -114,12 +114,12 @@ export default {
       importOpts: [
         {
           icon: 'cubes',
-          caption: 'Types',
+          caption: this.$t('container_types.list'),
           onSelect: () => routerSvc.ngGoto('container-types-import')
         },
         {
           icon: 'table',
-          caption: 'View Past Imports',
+          caption: this.$t('bulk_imports.view_jobs'),
           onSelect: () => routerSvc.ngGoto('container-types-import-jobs')
         }
       ],
@@ -227,7 +227,7 @@ export default {
           const typeIds = this.ctx.selectedTypes.map(item => item.rowObject.type.id);
           typesSvc.bulkDelete(typeIds).then(
             () => {
-              alertsSvc.success('Container types deleted successfully!');
+              alertsSvc.success({code: 'container_types.bulk_deleted'});
               this.$refs.listView.reload();
             }
           );

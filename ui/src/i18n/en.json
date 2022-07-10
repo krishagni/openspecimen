@@ -94,6 +94,38 @@
     "view_containers": "Containers"
   },
 
+  "container_types": {
+    "bulk_deleted": "Container types deleted successfully!",
+    "can_hold": "Can Hold",
+    "column_labeling_scheme_required": "Column Labeling Scheme is mandatory",
+    "columns": "Columns",
+    "columns_required": "Columns is mandatory",
+    "confirm_delete_selected": "Are you sure you want to delete the selected container types?",
+    "create": "Create Container Type",
+    "create_container": "Create Container",
+    "dimension": "Dimension",
+    "labeling_scheme": "Labeling Scheme",
+    "list": "Container Types",
+    "name": "Name",
+    "name_required": "Name is mandatory",
+    "name_format": "Name Format",
+    "name_format_required": "Name Format is mandatory",
+    "position_assignment": "Position Assignment",
+    "position_assignment_required": "Position Assignment is mandatory",
+    "position_labeling": "Position Labeling",
+    "position_labeling_linear": "Linear",
+    "position_labeling_required": "Position Labeling is mandatory",
+    "position_labeling_two_d": "Rows and Columns",
+    "row_labeling_scheme_required": "Row Labeling Scheme is mandatory",
+    "rows": "Rows",
+    "rows_required": "Rows is mandatory",
+    "singular": "Container Type",
+    "store_specimens_q": "Store Specimens?",
+    "store_specimens_q_required": "Store Specimens is mandatory",
+    "temperature": "Temperature (°C)",
+    "view_containers": "Containers"
+  },
+
   "containers": {
     "activities_log": "Activities Log",
     "activity": "Activity",

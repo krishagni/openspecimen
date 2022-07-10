@@ -4,33 +4,33 @@ export default {
   fields:  [
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "container_types.name",
       "name": "type.name",
       "validations": {
         "required": {
-          "message": "Container type name is mandatory"
+          "messageCode": "container_types.name_required"
         }
       },
       "summary": true
     },
     {
       "type": "text",
-      "label": "Name Format",
+      "labelCode": "container_types.name_format",
       "name": "type.nameFormat",
       "validations": {
         "required": {
-          "message": "Container type name format is mandatory"
+          "messageCode": "container_types.name_format_required"
         }
       }
     },
     {
       "type": "number",
-      "label": "Temperature (Celsius)",
+      "labelCode": "container_types.temperature",
       "name": "type.temperature",
     },
     {
       "type": "text",
-      "label": "Dimension",
+      "labelCode": "container_types.dimension",
       "name": "type.uiDimension",
       "value": ({type}) => {
         if (type.noOfRows > 0 && type.noOfColumns > 0) {
@@ -43,10 +43,10 @@ export default {
     {
       "type": "number",
       "name": "type.noOfRows",
-      "label": "Rows",
+      "labelCode": "container_types.rows",
       "validations": {
         "required": {
-          "message": "Rows is mandatory"
+          "messageCode": "container_types.rows_required"
         }
       },
       "dataEntry": true
@@ -54,33 +54,33 @@ export default {
     {
       "type": "number",
       "name": "type.noOfColumns",
-      "label": "Columns",
+      "labelCode": "container_types.columns",
       "validations": {
         "required": {
-          "message": "Columns is mandatory"
+          "messageCode": "container_types.columns_required"
         }
       },
       "dataEntry": true
     },
     {
       "type": "radio",
-      "label": "Position Labeling",
+      "labelCode": "container_types.position_labeling",
       "name": "type.positionLabelingMode",
       "options": [
-        { "caption": "Linear", "value": "LINEAR" },
-        { "caption": "Row and Column", "value": "TWO_D" }
+        { "captionCode": "container_types.position_labeling_linear", "value": "LINEAR" },
+        { "captionCode": "container_types.position_labeling_two_d",  "value": "TWO_D" }
       ],
       "optionsPerRow": 2,
       "validations": {
         "required": {
-          "message": "Position Labeling is mandatory"
+          "messageCode": "container_types.position_labeling_required"
         }
       },
       "summary": true
     },
     {
       "type": "text",
-      "label": "Labeling Scheme",
+      "labelCode": "container_types.labeling_scheme",
       "name": "type.uiLabelingScheme",
       "value": ({type}) => {
         if (type.positionLabelingMode == 'TWO_D') {
@@ -93,7 +93,7 @@ export default {
     },
     {
       "type": "dropdown",
-      "label": "Row Labeling Scheme",
+      "labelCode": "container_types.row_labeling_scheme",
       "name": "type.rowLabelingScheme",
       "listSource": {
         "options": [
@@ -109,14 +109,14 @@ export default {
       "showWhen": "type.positionLabelingMode == 'TWO_D'",
       "validations": {
         "required": {
-          "message": "Row Labeling Scheme is mandatory"
+          "messageCode": "container_types.row_labeling_scheme_required"
         }
       },
       "dataEntry": true
     },
     {
       "type": "dropdown",
-      "label": "Column Labeling Scheme",
+      "labelCode": "container_types.column_labeling_scheme",
       "name": "type.columnLabelingScheme",
       "listSource": {
         "options": [
@@ -132,14 +132,14 @@ export default {
       "showWhen": "type.positionLabelingMode == 'TWO_D'",
       "validations": {
         "required": {
-          "message": "Column Labeling Scheme is mandatory"
+          "messageCode": "container_types.column_labeling_scheme_required"
         }
       },
       "dataEntry": true
     },
     {
       "type": "dropdown",
-      "label": "Position Assignment",
+      "labelCode": "container_types.position_assignment",
       "name": "type.positionAssignment",
       "listSource": {
         "options": [
@@ -157,29 +157,29 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Position Assignment is mandatory"
+          "messageCode": "container_types.position_assignment_required"
         }
       }
     },
     {
       "type": "radio",
-      "label": "Store Specimens?",
+      "labelCode": "container_types.store_specimens_q",
       "name": "type.storeSpecimenEnabled",
       "options": [
-        { caption: 'Yes', value: true },
-        { caption: 'No', value: false }
+        { captionCode: 'common.yes', value: true },
+        { captionCode: 'common.no',  value: false }
       ],
       "optionsPerRow": 2,
       "validations": {
         "required": {
-          "message": "Store Specimens? is mandatory"
+          "messageCode": "container_types.store_specimens_q_required"
         }
       },
       "summary": true
     },
     {
       "type": "dropdown",
-      "label": "Can Hold",
+      "labelCode": "container_types.can_hold",
       "name": "type.canHold",
       "listSource": {
         "apiUrl": "container-types",

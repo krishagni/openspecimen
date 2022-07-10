@@ -19,7 +19,7 @@
           <ul>
             <li>
               <router-link :to="getRoute('Overview')">
-                <span>Overview</span>
+                <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
           </ul>
@@ -27,7 +27,7 @@
 
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="'Overview'">
+            <li v-os-tooltip.right="$t('common.overview')">
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
               </router-link>
@@ -42,6 +42,7 @@
 </template>
 
 <script>
+import i18n        from '@/common/services/I18n.js';
 import routerSvc   from '@/common/services/Router.js';
 import typesSvc    from '@/administrative/services/ContainerType.js';
 
@@ -54,7 +55,7 @@ export default {
         type: {},
 
         bcrumb: [
-          {url: routerSvc.getUrl('ContainerTypesList', {typeId: -1}), label: 'Container Types'}
+          {url: routerSvc.getUrl('ContainerTypesList', {typeId: -1}), label: i18n.msg('container_types.list')}
         ]
       }
     };

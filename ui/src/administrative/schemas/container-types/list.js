@@ -23,16 +23,16 @@ export default {
   columns: [
     {
       name: "type.name",
-      caption: "Name",
+      captionCode: "container_types.name",
       href: (row, query) =>  routerSvc.getUrl('ContainerTypesListItemDetail.Overview', {typeId: row.rowObject.type.id}, query)
     },
     {
       name: "type.nameFormat",
-      caption: "Name Format",
+      captionCode: "container_types.name_format"
     },
     {
       name: "type.dimension",
-      caption: "Dimension",
+      captionCode: "container_types.dimension",
       value: function({type}) {
         if (type.positionLabelingMode != 'NONE') {
           return type.noOfRows + ' x ' + type.noOfColumns;
@@ -47,12 +47,12 @@ export default {
     {
       name: "name",
       type: "text",
-      caption: "Name"
+      captionCode: "container_types.name"
     },
     {
       name: 'canHold',
       type: 'dropdown',
-      caption: 'Can Hold',
+      captionCode: 'container_types.can_hold',
       listSource: {
         apiUrl: 'container-types',
         selectProp: 'name',
