@@ -85,6 +85,10 @@
                 {
                     "expr": "Participant.regDate",
                     "direction": "desc"
+                },
+                {
+                    "expr": "Participant.id",
+                    "direction": "desc"
                 }
             ],
             "filters": [
