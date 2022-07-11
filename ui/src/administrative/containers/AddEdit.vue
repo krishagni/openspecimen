@@ -173,6 +173,7 @@ export default {
         }
       }
 
+      ctx.bcrumb  = this._getBcrumbs();
       ctx.loading = false;
     },
 
@@ -341,6 +342,25 @@ export default {
 
     cancel: function() {
       routerSvc.back();
+    },
+
+    _getBcrumbs: function() {
+      const { parentContainer } = this.dataCtx;
+      const bcrumbs = [
+        {url: routerSvc.getUrl('ContainersList', {containerId: -1}), label: this.$t('containers.list')}
+      ];
+
+      if (parentContainer && parentContainer.name) {
+        const {id, name, displayName} = parentContainer;
+        let label = name;
+        if (displayName) {
+          label = displayName + ' (' + name + ')';
+        }
+
+        bcrumbs.push({url: routerSvc.getUrl('ContainerDetail.Overview', {containerId: id}), label: label});
+      }
+
+      return bcrumbs;
     },
 
     _getAllowedTypes: async function() {
