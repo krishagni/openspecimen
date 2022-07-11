@@ -2,12 +2,13 @@
 <template>
   <div class="os-input-password">
     <div class="p-float-label" v-if="$attrs['md-type']">
-      <p-password v-model="inputValue" :medium-regex="pattern" :strong-regex="pattern" toggleMask :feedback="false"/>
+      <p-password v-model="inputValue" :medium-regex="pattern" :strong-regex="pattern"
+        :tabindex="tabOrder" toggleMask :feedback="false"/>
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <p-password v-model="inputValue" :placeholder="$attrs.placeholder"
-        :medium-regex="pattern" :strong-regex="pattern" toggleMask :feedback="false"/>
+      <p-password v-model="inputValue" :placeholder="$attrs.placeholder" :medium-regex="pattern" :strong-regex="pattern"
+        :tabindex="tabOrder" toggleMask :feedback="false"/>
     </div>
   </div>
 </template>
@@ -16,7 +17,7 @@
 import Password from 'primevue/password';
 
 export default {
-  props: ['modelValue', 'pattern'],
+  props: ['modelValue', 'pattern', 'tabOrder'],
 
   components: {
     'p-password': Password

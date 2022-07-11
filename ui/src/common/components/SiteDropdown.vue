@@ -2,11 +2,11 @@
 <template>
   <span v-if="multiple">
     <MultiSelectDropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
-      :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
+      :tabOrder="tabOrder" :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
   </span>
   <span v-else>
     <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
-      :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
+      :tabOrder="tabOrder" :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
   </span>
 </template>
 
@@ -19,7 +19,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'listSource', 'context', 'multiple', 'disabled'],
+  props: ['modelValue', 'selectProp', 'listSource', 'context', 'multiple', 'disabled', 'tabOrder'],
 
   components: {
     Dropdown,

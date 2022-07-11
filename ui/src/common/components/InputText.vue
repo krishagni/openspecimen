@@ -2,11 +2,11 @@
 <template>
   <div class="os-input-text">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
-      <p-input-text type="text" v-model="inputValue" />
+      <p-input-text type="text" v-model="inputValue" :tabindex="tabOrder" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <p-input-text type="text" v-model="inputValue" :placeholder="$attrs.placeholder"/>
+      <p-input-text type="text" v-model="inputValue" :tabindex="tabOrder" :placeholder="$attrs.placeholder"/>
     </div>
   </div>
 </template>
@@ -15,7 +15,7 @@
 import InputText from 'primevue/inputtext';
 
 export default {
-  props: ['modelValue'],
+  props: ['modelValue', 'tabOrder'],
 
   components: {
     'p-input-text': InputText

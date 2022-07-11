@@ -2,13 +2,13 @@
 <template>
   <div class="os-date-picker">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
-      <Calendar v-model="inputValue" :show-time="showTime" :date-format="format"
+      <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <Calendar v-model="inputValue" :show-time="showTime" :date-format="format"
+      <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true" :placeholder="$attrs.placeholder" />
     </div>
@@ -19,7 +19,7 @@
 import Calendar from 'primevue/calendar';
 
 export default {
-  props: ['modelValue', 'showTime'],
+  props: ['modelValue', 'showTime', 'tabOrder'],
 
   inject: ['ui'],
 

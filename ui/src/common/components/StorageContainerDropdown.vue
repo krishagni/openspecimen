@@ -1,6 +1,6 @@
 
 <template>
-  <Dropdown v-model="inputValue" :list-source="listSource" />
+  <Dropdown v-model="inputValue" :list-source="listSource" :tab-order="tabOrder" />
 </template>
 
 <script>
@@ -10,7 +10,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'context'],
+  props: ['modelValue', 'selectProp', 'context', 'tabOrder'],
 
   components: {
     Dropdown

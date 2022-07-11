@@ -12,6 +12,7 @@
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
+        :tabindex="tabOrder"
         @show="loadOptions"
         @filter="filterOptions($event)">
         <template #value> {{selectedString}} </template>
@@ -31,6 +32,7 @@
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
+        :tabindex="tabOrder"
         @show="loadOptions"
         @filter="filterOptions($event)">
         <template #value> {{selectedString}} </template>
@@ -43,7 +45,7 @@
 import MultiSelect from 'primevue/multiselect';
 
 export default {
-  props: ['modelValue', 'listSource', 'placeholder', 'form', 'disabled', 'context'],
+  props: ['modelValue', 'listSource', 'placeholder', 'form', 'disabled', 'context', 'tabOrder'],
 
   emits: ['update:modelValue'],
 

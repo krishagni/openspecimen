@@ -5,7 +5,8 @@
       <div class="option" v-for="(option, idx) of optionsRow" :key="idx">
         <span class="p-field-checkbox">
           <div>
-            <Checkbox :id="name + '.' + rowIdx + '.' + idx" :name="name" :value="option.value" v-model="inputValue" />
+            <Checkbox :id="name + '.' + rowIdx + '.' + idx" :name="name" :value="option.value" v-model="inputValue"
+              :tabindex="tabOrder" />
             <label :for="name + '.' + rowIdx + '.' + idx">
               <span>{{option.caption}}</span>
             </label>
@@ -21,7 +22,7 @@
 import Checkbox from 'primevue/checkbox';
 
 export default {
-  props: ['name', 'options', 'modelValue', 'optionsPerRow'],
+  props: ['name', 'options', 'modelValue', 'optionsPerRow', 'tabOrder'],
 
   emits: ['change', 'update:modelValue'],
 

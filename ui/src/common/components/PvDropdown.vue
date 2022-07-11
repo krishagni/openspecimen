@@ -1,7 +1,7 @@
 
 <template>
-  <MultiSelectDropdown v-model="inputValue" :list-source="listSource" v-if="multiple" />
-  <Dropdown v-model="inputValue" :list-source="listSource" v-else />
+  <MultiSelectDropdown v-model="inputValue" :list-source="listSource" :tab-order="tabOrder" v-if="multiple" />
+  <Dropdown v-model="inputValue" :list-source="listSource" :tab-order="tabOrder" v-else />
 </template>
 
 <script>
@@ -12,7 +12,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'attribute', 'leafValue', 'context', 'multiple'],
+  props: ['modelValue', 'selectProp', 'attribute', 'leafValue', 'context', 'multiple', 'tabOrder'],
 
   components: {
     Dropdown,

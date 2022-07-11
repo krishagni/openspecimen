@@ -10,6 +10,7 @@
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
+        :tabindex="tabOrder"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -25,6 +26,7 @@
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
+        :tabindex="tabOrder"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -41,7 +43,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form', 'disabled', 'context'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder'],
 
   emits: ['update:modelValue'],
 

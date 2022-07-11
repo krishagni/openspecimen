@@ -5,7 +5,7 @@
       <div class="option" v-for="(option, optionIdx) of optionsRow" :key="optionIdx">
         <span class="p-field-radiobutton">
           <label>
-            <RadioButton :name="name" :value="option.value" v-model="inputValue" />
+            <RadioButton :name="name" :value="option.value" v-model="inputValue" :tabindex="tabOrder" />
             <span>{{option.displayLabel}}</span>
           </label>
         </span>
@@ -19,7 +19,7 @@
 import RadioButton from 'primevue/radiobutton';
 
 export default {
-  props: ['name', 'options', 'modelValue', 'optionsPerRow', 'context'],
+  props: ['name', 'options', 'modelValue', 'optionsPerRow', 'context', 'tabOrder'],
 
   emits: ['change', 'update:modelValue'],
 

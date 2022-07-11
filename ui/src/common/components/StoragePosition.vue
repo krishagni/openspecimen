@@ -3,22 +3,22 @@
   <div class="os-storage-position" :class="$attrs['md-type'] && 'md-type'">
     <div class="container">
       <os-dropdown :md-type="$attrs['md-type']" v-model="position.name" :form="context"
-        :list-source="containersLs" @update:model-value="handlePositionInput " />
+        :tab-order="tabOrder" :list-source="containersLs" @update:model-value="handlePositionInput " />
     </div>
 
     <div class="position" v-if="!position.mode || position.mode == 'TWO_D'">
       <os-input-text :md-type="$attrs['md-type']" v-model="position.positionY"
-        @update:model-value="handlePositionInput" />
+        :tab-order="tabOrder" @update:model-value="handlePositionInput" />
     </div>
 
     <div class="position" v-if="!position.mode || position.mode == 'TWO_D'">
       <os-input-text :md-type="$attrs['md-type']" v-model="position.positionX"
-        @update:model-value="handlePositionInput" />
+        :tab-order="tabOrder" @update:model-value="handlePositionInput" />
     </div>
 
     <div class="position" v-if="position.mode == 'LINEAR'">
       <os-input-text :md-type="$attrs['md-type']" v-model="position.position"
-        @update:model-value="handlePositionInput" />
+        :tab-order="tabOrder" @update:model-value="handlePositionInput" />
     </div>
 
     <div class="search">
@@ -38,7 +38,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'context', 'listSource'],
+  props: ['modelValue', 'context', 'listSource', 'tabOrder'],
 
   computed: {
     position: {

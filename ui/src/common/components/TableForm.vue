@@ -44,6 +44,7 @@
             <div :style="field.uiStyle">
               <component :is="field.component" v-bind="field" :md-type="true"
                 v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
+                :tab-order="tabDirection == 'column' ? (itemIdx + numRows * fieldIdx) : (itemIdx * numCols + fieldIdx)"
                 :form="{...ctx.items[itemIdx], ...data, _formCache}"
                 :context="{...ctx.items[itemIdx], ...data, _formCache}"
                 @update:model-value="handleInput(itemIdx, field, itemModel)">
@@ -82,7 +83,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 
 export default {
-  props: ['schema', 'data', 'items', 'removeItems'],
+  props: ['schema', 'data', 'items', 'tab-direction', 'removeItems'],
 
   emits: ['input', 'form-validity', 'remove-item'],
 
@@ -111,7 +112,6 @@ export default {
   computed: {
     fields: function() {
       let result = [];
-
       for (let field of this.schema.columns) {
         if (field.showWhen) {
           if (typeof field.showWhen == 'function') {
@@ -173,6 +173,14 @@ export default {
       }
 
       return models;
+    },
+
+    numRows: function() {
+      return this.itemModels.length;
+    },
+
+    numCols: function() {
+      return this.fields.length;
     },
 
     errorMessages: function() {

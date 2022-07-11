@@ -2,11 +2,11 @@
 <template>
   <div class="os-input-text">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
-      <p-textarea v-model="inputValue" rows="2" />
+      <p-textarea v-model="inputValue" rows="2" :tabindex="tabOrder" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <p-textarea v-model="inputValue" v-bind="$attrs" />
+      <p-textarea v-model="inputValue" v-bind="$attrs" :tabindex="tabOrder" />
     </div>
   </div>
 </template>
@@ -15,7 +15,7 @@
 import Textarea from 'primevue/textarea';
 
 export default {
-  props: ['modelValue'],
+  props: ['modelValue', 'tabOrder'],
 
   components: {
     'p-textarea': Textarea

@@ -11,6 +11,7 @@
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
+        :tabindex="tabOrder"
         @change="onChange"
         @focus="loadOptions"
         @filter="filterOptions($event)"
@@ -27,6 +28,7 @@
         :filter="true"
         :show-clear="showClear"
         :disabled="disabled"
+        :tabindex="tabOrder"
         @change="onChange"
         @focus="loadOptions"
         @filter="filterOptions($event)"
@@ -44,7 +46,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form', 'disabled', 'context'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder'],
 
   emits: ['update:modelValue'],
 

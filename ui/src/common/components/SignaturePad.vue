@@ -2,11 +2,11 @@
 <template>
   <div>
     <div class="os-signature" v-show="editMode || imageData || imageSrc">
-      <canvas ref="canvasEl" v-show="editMode"></canvas>
+      <canvas ref="canvasEl" :tabindex="tabOrder" v-show="editMode"></canvas>
 
       <div class="read" v-if="!editMode">
-        <img :src="imageData" v-if="imageData" />
-        <img :src="imageSrc"  v-else-if="imageSrc" />
+        <img :src="imageData" :tabindex="tabOrder" v-if="imageData" />
+        <img :src="imageSrc"  :tabindex="tabOrder" v-else-if="imageSrc" />
       </div>
 
       <div class="actions" v-if="editMode">
@@ -20,7 +20,7 @@
       </div>
     </div>
     <div class="os-signature-add" v-show="!editMode && !imageData && !imageSrc" >
-      <Button left-icon="plus" label="Add" @click="edit" /> 
+      <Button left-icon="plus" label="Add" :tabindex="tabOrder" @click="edit" />
     </div>
   </div>
 </template>
@@ -33,7 +33,7 @@ import Button from '@/common/components/Button.vue';
 import alertSvc from '@/common/services/Alerts.js';
 
 export default {
-  props: ['name', 'modelValue', 'headers', 'uploader', 'imageUrl'],
+  props: ['name', 'modelValue', 'headers', 'uploader', 'imageUrl', 'tabOrder'],
 
   components: {
     Button
