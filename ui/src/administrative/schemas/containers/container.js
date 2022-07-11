@@ -104,6 +104,13 @@ export default {
             "usageMode": "container.usedFor"
           }
         }
+      },
+      "href": ({container}) => {
+        if (container.storageLocation && container.storageLocation.id > 0) {
+          return routerSvc.getUrl('ContainerDetail.Overview', {containerId: container.storageLocation.id});
+        }
+
+        return null;
       }
     },
     {
