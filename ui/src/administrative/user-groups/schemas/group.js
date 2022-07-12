@@ -3,30 +3,30 @@ export default {
   fields: [
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "user_groups.name",
       "name": "name",
       "validations": {
         "required": {
-          "message": "Name is mandatory"
+          "messageCode": "user_groups.name_required"
         }
       }
     },
 
     {
       "type": "textarea",
-      "label": "Description",
+      "labelCode": "user_groups.description",
       "name": "description",
       "rows": 2,
       "validations": {
         "required": {
-          "message": "Description is mandatory"
+          "messageCode": "user_groups.description_required"
         }
       }
     },
 
     {
       "type": "dropdown",
-      "label": "Institute",
+      "labelCode": "user_groups.institute",
       "name": "institute",
       "listSource": {
         "apiUrl": "institutes",
@@ -35,7 +35,7 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Institute is mandatory"
+          "messageCode": "user_groups.institute_required"
         }
       },
       "showWhen": "showInstitute == true"

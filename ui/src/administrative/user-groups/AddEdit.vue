@@ -6,15 +6,20 @@
       </template>
 
       <span>
-        <h3 v-if="!ctx.group.id">Create User Group</h3>
-        <h3 v-else>Update {{ctx.group.name}}</h3>
+        <h3 v-if="!ctx.group.id">
+          <span v-t="'user_groups.create'">Create User Group</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'common.update', args: ctx.group}">Update {{ctx.group.name}}</span>
+        </h3>
       </span>
     </os-page-head>
     <os-page-body>
       <os-form ref="groupForm" :schema="ctx.addEditFs" :data="ctx.group" @input="handleInput($event)">
         <div>
-          <os-button primary :label="!ctx.group.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-          <os-button text label="Cancel" @click="cancel" />
+          <os-button primary :label="$t(!ctx.group.id ? 'common.buttons.create' : 'common.buttons.update')"
+            @click="saveOrUpdate" />
+          <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
         </div>
       </os-form>
     </os-page-body>
@@ -27,11 +32,12 @@ import { reactive, inject } from 'vue';
 import groupSchema from '@/administrative/user-groups/schemas/group.js';
 import addEditSchema from '@/administrative/user-groups/schemas/addedit.js';
 
-import alertSvc from '@/common/services/Alerts.js';
-import routerSvc from '@/common/services/Router.js';
-import itemsSvc from '@/common/services/ItemsHolder.js';
+import alertSvc   from '@/common/services/Alerts.js';
+import i18n       from '@/common/services/I18n.js';
+import routerSvc  from '@/common/services/Router.js';
+import itemsSvc   from '@/common/services/ItemsHolder.js';
 import userGrpSvc from '@/administrative/services/UserGroup.js';
-import formUtil from '@/common/services/FormUtil.js';
+import formUtil   from '@/common/services/FormUtil.js';
 
 export default {
   props: ['groupId'],
@@ -45,7 +51,7 @@ export default {
       group: {},
 
       bcrumb: [
-        {url: routerSvc.getUrl('UserGroupsList'), label: 'User Groups'}
+        {url: routerSvc.getUrl('UserGroupsList'), label: i18n.msg('user_groups.list')}
       ],
 
       addEditFs: {rows: []}
@@ -60,7 +66,7 @@ export default {
         let instituteId = users[0].instituteId;
         for (let user of users) {
           if (user.instituteId != instituteId) {
-            alertSvc.error('Users of multiple institutes cannot be added to the group.');
+            alertSvc.error({code: 'user_groups.multi_institute_users_na'});
             routerSvc.back();
             return;
           }
@@ -97,8 +103,7 @@ export default {
       let toSave = this.ctx.group;
       userGrpSvc.saveOrUpdate(toSave).then(
         (savedGroup) => {
-          let action  = !toSave.id ? ' created!' : ' updated!'
-          alertSvc.success('User group ' + savedGroup.name + action);
+          alertSvc.success({code: !toSave.id ? 'user_groups.created' : 'user_groups.updated', args: savedGroup});
           routerSvc.back();
         }
       );

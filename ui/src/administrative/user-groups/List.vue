@@ -2,7 +2,7 @@
   <os-page>
     <os-page-head>
       <span>
-        <h3>User Groups</h3>
+        <h3 v-t="'user_groups.list'">User Groups</h3>
       </span>
 
       <template #right>
@@ -17,11 +17,11 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="user" label="Users" @click="$goto('UsersList', {userId: -1})" />
+          <os-button left-icon="user" :label="$t('user_groups.users')" @click="$goto('UsersList', {userId: -1})" />
         </template>
 
         <template #right>
-          <os-button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
         </template>
       </os-page-toolbar>
 
@@ -115,7 +115,7 @@ export default {
       Object.assign(
         this.ctx.deleteGroupOpts,
         {
-          type: 'User Group',
+          type: this.$t('user_groups.singular'),
           title: group.name,
           dependents: () => new Promise((resolve) => resolve([])),
           deleteObj: () => userGrpSvc.deleteGroup(group)

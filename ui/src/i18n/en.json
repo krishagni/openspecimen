@@ -347,6 +347,26 @@
     "type_required": "Type is mandatory"
   },
 
+  "user_groups": {
+    "add_to_group": "Add to Group",
+    "create": "Create User Group",
+    "create_new": "Create New",
+    "created": "User group '{name}' created.",
+    "description": "Description",
+    "description_required": "Description is mandatory",
+    "institute": "Institute",
+    "institute_required": "Institute is mandatory",
+    "list": "User Groups",
+    "manage_groups": "Manage Groups",
+    "multi_institute_users_na": "Users of multiple institutes cannot be added to the same group.",
+    "name": "Name",
+    "name_required": "Name is mandatory",
+    "search_group": "Search Group",
+    "singular": "User Group",
+    "updated": "User group '{name}' updated.",
+    "users": "Users"
+  },
+
   "users": {
     "active_since": "Active Since",
     "activity_status": "Activity Status",

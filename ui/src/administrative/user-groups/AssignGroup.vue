@@ -1,12 +1,12 @@
 
 <template>
   <span>
-    <os-button left-icon="users" label="Add to Group" right-icon="caret-down" @click="toggle" />
+    <os-button left-icon="users" :label="$t('user_groups.add_to_group')" right-icon="caret-down" @click="toggle" />
 
     <dropdown-menu class="os-assign-user-group" ref="menu" :model="ctx.items" :popup="true">
       <template #item="{item}">
         <span v-if="item.search">
-          <os-input-text v-model="ctx.search" placeholder="Search Group" />
+          <os-input-text v-model="ctx.search" :placeholder="$t('user_groups.search_group')" />
         </span>
         <span v-else-if="item.items && item.items.length > 0">
           <dropdown-menu :model="item.items" :popup="false" />
@@ -20,7 +20,8 @@
 import { reactive, ref } from 'vue';
 import Menu from 'primevue/menu';
 
-import routerSvc from '@/common/services/Router.js';
+import i18n         from '@/common/services/I18n.js';
+import routerSvc    from '@/common/services/Router.js';
 import userGroupSvc from '@/administrative/services/UserGroup.js';
 
 export default {
@@ -43,14 +44,14 @@ export default {
         label: '',
         items: [ 
           {
-            label: 'Create New',
+            label: i18n.msg('user_groups.create_new'),
             command: () => {
               menu.value.toggle();
               emit('addToGroup')
             }
           },
           {
-            label: 'Manage Groups',
+            label: i18n.msg('user_groups.manage_groups'),
             command: () => routerSvc.goto('UserGroupsList')
           }
         ]

@@ -6,20 +6,20 @@ export default {
   columns: [
     {
       "name": "name",
-      "caption": "Name",
+      "captionCode": "user_groups.name",
       "href": (row) => routerSvc.getUrl('UsersList', {userId: -1}, {groupId: row.rowObject.id})
     },
     {
       "name": "description",
-      "caption": "Description",
+      "captionCode": "user_groups.description",
     },
     {
       "name": "institute",
-      "caption": "Institute",
+      "captionCode": "user_groups.institute",
     },
     {
       "name": "noOfUsers",
-      "caption": "Users"
+      "captionCode": "user_groups.users"
     }
   ],
 
@@ -27,12 +27,12 @@ export default {
     {
       name: 'query',
       type: 'text',
-      caption: 'Name'
+      captionCode: 'user_groups.name'
     },
     {
       name: 'institute',
       type: 'dropdown',
-      caption: 'Institute',
+      captionCode: 'user_groups.institute',
       listSource: {
         displayProp: 'name',
         selectProp: 'name',
