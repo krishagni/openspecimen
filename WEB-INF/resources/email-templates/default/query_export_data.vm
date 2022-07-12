@@ -20,7 +20,7 @@
                   #end
 
                   <br>
-                  <a href="$downloadUrl">$apiUrl</a>
+                  <a href="$downloadUrl">$downloadUrl</a>
                   <br/><br/>
                   The link will be valid for 30 days
                   <br/><br/>
@@ -38,6 +38,6 @@
       <td>
         #parse( $footer )
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>
