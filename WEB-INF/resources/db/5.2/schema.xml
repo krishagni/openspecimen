@@ -524,4 +524,40 @@
       baseTableName="CATISSUE_CP_REQ_SPECIMEN" baseColumnNames="POOLED_SPMN_REQ_ID"
       referencedTableName="CATISSUE_CP_REQ_SPECIMEN" referencedColumnNames="IDENTIFIER"/>
   </changeSet>
+
+  <changeSet author="vpawar" id="Revision entity records">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="OS_REVISION_ENTITY_RECORDS" />
+      </not>
+    </preConditions>
+
+    <createTable tableName="OS_REVISION_ENTITY_RECORDS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="REV" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="REV_TYPE" type="${tinyint.type}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ENTITY_NAME" type="${text.type}(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ENTITY_ID" type="${int.type}">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Entity audit revision details sequence" dbms="oracle">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <sequenceExists sequenceName="OS_REV_ENTITY_RECS_SEQ" />
+      </not>
+    </preConditions>
+
+    <createSequence sequenceName="OS_REV_ENTITY_RECS_SEQ" startValue="1" incrementBy="1" ordered="true"/>
+  </changeSet>
 </databaseChangeLog>
