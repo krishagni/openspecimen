@@ -4,12 +4,12 @@ export default {
   columns: [
     {
       "name": "container.name",
-      "caption": "Name",
+      "captionCode": "shipments.container_name",
       "href": (row) => ui.ngServer + '#/containers/' + row.rowObject.container.id + '/overview'
     },
     {
       "name": "containerDimension",
-      "caption": "Dimension",
+      "captionCode": "shipments.container_dimension",
       "value": (rowObject) => {
         let container = rowObject.container;
         if (container.positionLabelingMode != 'NONE') {
@@ -21,16 +21,16 @@ export default {
     },
     {
       "name": "container.storageLocation",
-      "caption": "Parent Container",
+      "captionCode": "shipments.container_parent",
       "type": "storage-position"
     },
     {
       "name": "specimensCount",
-      "caption": "Specimens"
+      "captionCode": "shipments.specimens"
     },
     {
       "name": "receivedQuality",
-      "caption": "Quality"
+      "captionCode": "shipments.received_quality"
     }
   ]
 }

@@ -2,48 +2,48 @@ export default {
   fields:  [
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "shipments.name",
       "name": "shipment.name",
       "validations": {
         "required": {
-          "message": "Shipment name is mandatory"
+          "messageCode": "shipments.name_required"
         }
       }
     },
     {
       "type": "text",
-      "label": "Courier Name",
+      "labelCode": "shipments.courier_name",
       "name": "shipment.courierName"
     },
     {
       "type": "text",
-      "label": "Tracking Number",
+      "labelCode": "shipments.tracking_number",
       "name": "shipment.trackingNumber"
     },
     {
       "type": "text",
-      "label": "Tracking URL",
+      "labelCode": "shipments.tracking_url",
       "name": "shipment.trackingUrl"
     },
     {
       "type": "user",
-      "label": "Sender",
+      "labelCode": "shipments.sender",
       "name": "shipment.sender"
     },
     {
       "type": "site",
-      "label": "Sending Site",
+      "labelCode": "shipments.sending_site",
       "name": "shipment.sendingSite",
       "selectProp": "name",
       "validations": {
         "required": {
-          "message": "Sending site is mandatory"
+          "messageCode": "shipments.sending_site_required"
         }
       }
     },
     {
       "type": "dropdown",
-      "label": "Receiving Institute",
+      "labelCode": "shipments.receiving_institute",
       "name": "shipment.receivingInstitute",
       "listSource": {
         "apiUrl": "institutes",
@@ -53,18 +53,18 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Receiving institute is mandatory"
+          "messageCode": "shipments.receiving_institute_required"
         }
       }
     },
     {
       "type": "user",
-      "label": "Receiver",
+      "labelCode": "shipments.receiver",
       "name": "shipment.receiver"
     },
     {
       "type": "site",
-      "label": "Receiving Site",
+      "labelCode": "shipments.receiving_site",
       "name": "shipment.receivingSite",
       "selectProp": "name",
       "listSource": {
@@ -80,13 +80,13 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Receiving site is mandatory"
+          "messageCode": "shipments.receiving_site_required"
         }
       }
     },
     {
       "type": "user",
-      "label": "Notify Users",
+      "labelCode": "shipments.notify_users",
       "name": "shipment.notifyUsers",
       "multiple": true,
       "listSource": {
@@ -102,34 +102,34 @@ export default {
     },
     {
       "type": "datePicker",
-      "label": "Shipped Date",
+      "labelCode": "shipments.shipped_date",
       "name": "shipment.shippedDate",
       "showTime": true,
       "validations": {
         "required": {
-          "message": "Shipped date is mandatory"
+          "messageCode": "shipments.shipped_date_required"
         }
       }
     },
     {
       "type": "textarea",
-      "label": "Sender Comments",
+      "labelCode": "shipments.sender_comments",
       "name": "shipment.senderComments"
     },
     {
       "type": "datePicker",
-      "label": "Received Date",
+      "labelCode": "shipments.received_date",
       "name": "shipment.receivedDate",
       "showTime": true,
       "validations": {
         "required": {
-          "message": "Received date is mandatory"
+          "messageCode": "shipments.received_date_required"
         }
       }
     },
     {
       "type": "textarea",
-      "label": "Receiver Comments",
+      "labelCode": "shipments.receiver_comments",
       "name": "shipment.receiverComments"
     }
   ]

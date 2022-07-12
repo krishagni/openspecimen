@@ -1,4 +1,3 @@
-
 <template>
   <div>
     <os-grid>
@@ -20,7 +19,7 @@
 
 import { reactive } from 'vue';
 
-import listSchema from '@/administrative/schemas/shipments/containers.js';
+import listSchema  from '@/administrative/schemas/shipments/containers.js';
 import shipmentSvc from '@/administrative/services/Shipment.js';
 
 export default {

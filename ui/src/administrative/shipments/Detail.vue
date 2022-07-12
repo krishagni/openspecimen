@@ -20,17 +20,17 @@
           <ul>
             <li>
               <router-link :to="getRoute('Overview')">
-                <span>Overview</span>
+                <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
             <li v-show="ctx.shipment.type == 'CONTAINER'">
               <router-link :to="getRoute('Containers')">
-                <span>Containers</span>
+                <span v-t="'shipments.containers'">Containers</span>
               </router-link>
             </li>
             <li>
               <router-link :to="getRoute('Specimens')">
-                <span>Specimens</span>
+                <span v-t="'shipments.specimens'">Specimens</span>
               </router-link>
             </li>
 
@@ -40,19 +40,19 @@
 
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="'Overview'">
+            <li v-os-tooltip.right="$t('common.overview')">
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
               </router-link>
             </li>
 
-            <li v-if="ctx.shipment.type == 'CONTAINER'" v-os-tooltip.right="'Containers'">
+            <li v-if="ctx.shipment.type == 'CONTAINER'" v-os-tooltip.right="$t('shipments.containers')">
               <router-link :to="getRoute('Containers')">
                 <os-icon name="box-open" />
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="'Specimens'">
+            <li v-os-tooltip.right="$t('shipments.specimens')">
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
               </router-link>
@@ -69,6 +69,7 @@
 </template>
 
 <script>
+import i18n         from '@/common/services/I18n.js';
 import routerSvc    from '@/common/services/Router.js';
 import shipmentSvc  from '@/administrative/services/Shipment.js';
 
@@ -81,7 +82,7 @@ export default {
         shipment: {},
 
         bcrumb: [
-          {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: 'Shipments'}
+          {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: i18n.msg('shipments.list')}
         ]
       }
     };

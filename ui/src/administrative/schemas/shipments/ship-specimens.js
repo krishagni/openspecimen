@@ -5,7 +5,7 @@ export default {
   columns: [
     {
       "name": "specimenLabel",
-      "label": "Label",
+      "labelCode": "shipments.specimen.label",
       "type": "span",
       "showWhen": "!receive || !allowSpecimenRelabeling",
       "href": (rowObject) => ui.ngServer + '#/specimens/' + rowObject.specimen.id,
@@ -22,19 +22,19 @@ export default {
     },
     {
       "name": "specimen.label",
-      "label": "Label",
+      "labelCode": "shipments.specimen.label",
       "type": "text",
       "showWhen": "receive && allowSpecimenRelabeling",
       "validations": {
         "required": {
-          "message": "Specimen label is mandatory"
+          "messageCode": "shipments.specimen.label_required"
         }
       },
       "sortable": true
     },
     {
       "name": "specimen.externalIds",
-      "label": "External ID",
+      "labelCode": "shipments.specimen.external_id",
       "type": "span",
       "value": (rowObject) => {
         let externalIds = rowObject.specimen.externalIds;
@@ -51,25 +51,25 @@ export default {
     },
     {
       "name": "specimen.type",
-      "label": "Type",
+      "labelCode": "shipments.specimen.type",
       "type": "span"
     },
     {
       "name": "specimen.cpShortTitle",
-      "label": "Collection Protocol",
+      "labelCode": "shipments.specimen.cp",
       "type": "span",
       "sortable": true
     },
     {
       "name": "specimen.ppid",
-      "label": "PPID",
+      "labelCode": "shipments.specimen.ppid",
       "type": "span",
       "showWhen": (context) => context.specimenItems.some(item => typeof item.specimen.ppid == 'string'),
       "sortable": true
     },
     {
       "name": "specimen.availableQty",
-      "label": "Quantity",
+      "labelCode": "shipments.specimen.quantity",
       "type": "specimen-measure",
       "entity": "specimen",
       "measure": "quantity",
@@ -77,14 +77,14 @@ export default {
     },
     {
       "name": "specimen.storageLocation",
-      "label": "Location",
+      "labelCode": "shipments.specimen.location",
       "type": "span",
       "displayType": "storage-position",
       "showWhen": "!receive"
     },
     {
       "name": "specimen.storageLocation",
-      "label": "Location",
+      "labelCode": "shipments.specimen.location",
       "type": "storage-position",
       "listSource": {
         "queryParams": {
@@ -105,14 +105,14 @@ export default {
     },
     {
       "name": "receivedQuality",
-      "label": "Quality",
+      "labelCode": "shipments.received_quality",
       "type": "pv",
       "attribute": "shipment_item_received_quality",
       "selectProp": "value",
       "showWhen": "receive || shipment.status == 'Received'",
       "validations": {
         "required": {
-          "message": "Received quality is mandatory"
+          "messageCode": "shipments.received_quality_required"
         }
       },
       "uiStyle": {

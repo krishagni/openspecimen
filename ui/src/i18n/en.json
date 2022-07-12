@@ -35,6 +35,7 @@
       "more":   "More",
       "next":   "Next",
       "ok":     "Ok",
+      "previous": "Previous",
       "print":  "Print",
       "reactivate": "Reactivate",
       "save":   "Save",
@@ -54,6 +55,7 @@
     "delete_na_reason": "Cannot delete {type} '{title}' because of the following dependent objects:",
     "enter_delete_captcha": "Type 'DELETE ANYWAY' to continue.",
     "enter_delete_reason": "Specify the reason, at least 10 characters in length, for deletion:",
+    "error": "Error",
 
     "lists": {
       "clear_filters": "Clear Filters",
@@ -328,6 +330,70 @@
     "name": "Name"
   },
 
+  "shipments": {
+    "container_name": "Name",
+    "container_dimension": "Dimension",
+    "container_parent": "Parent Container",
+    "container_shipments": "Container Shipments",
+    "containers": "Containers",
+    "courier_name": "Courier Name",
+    "create": "Create Shipment",
+    "details": "Shipment Details",
+    "download_report": "Download Report",
+    "draft_saved": "Draft shipment '{name}' saved.",
+    "extra_specimens": "Failed: Additional specimens present in the shipment",
+    "list": "Shipments",
+    "name": "Name",
+    "name_required": "Name is mandatory",
+    "notify_users": "Notify Users",
+    "no_containers_add_one": "No containers in the shipment. Add at least one container.",
+    "no_specimens_add_one": "No specimens in the shipment. Add at least one specimen.",
+    "passed": "Passed",
+    "receive": "Receive",
+    "received": "Shipment '{name}' received.",
+    "received_date": "Received Date",
+    "received_date_required": "Received Date is mandatory",
+    "received_quality": "Received Quality",
+    "received_quality_required": "Received Quality is mandatory",
+    "receiver": "Receiver",
+    "receiver_comments": "Receiver Comments",
+    "receiving_institute": "Receiving Institute",
+    "receiving_institute_required": "Receiving Institute is mandatory",
+    "receiving_site": "Receiving Site",
+    "receiving_site_required": "Receiving Site is mandatory",
+    "save_draft": "Save Draft",
+    "scan_container_names": "Add containers by scanning names separated by a comma, tab, or newline.",
+    "scan_specimen_labels": "Add specimens by scanning labels or barcodes separated by a comma, tab, or newline.",
+    "sender": "Sender",
+    "sender_comments": "Sender Comments",
+    "sending_site": "Sending Site",
+    "sending_site_required": "Sending Site is mandatory",
+    "ship": "Ship",
+    "shipped": "Shipment '{name}' shipped.",
+    "shipped_date": "Shipped Date",
+    "shipped_date_required": "Shipped Date is mandatory",
+    "specimen": {
+      "cp": "Collection Protocol",
+      "external_id": "External ID",
+      "label": "Label",
+      "label_required": "Label is mandatory",
+      "location": "Location",
+      "ppid": "PPID",
+      "quantity": "Quantity",
+      "type": "Type"
+    },
+    "specimen_shipments": "Specimen Shipments",
+    "specimens": "Specimens",
+    "specimens_not_present": "Failed: Specimens not present in the shipment",
+    "specimens_validation_report": "Specimens Validation Report",
+    "status": "Status",
+    "tracking_number": "Tracking Number",
+    "tracking_url": "Tracking URL",
+    "update": "Update Shipment #{id} {name}",
+    "updated": "Shipment '{name}' updated.",
+    "validate": "Validate"
+  },
+
   "sites": {
     "address": "Address",
     "code": "Code",
@@ -345,6 +411,11 @@
     "singular": "Site",
     "type": "Type",
     "type_required": "Type is mandatory"
+  },
+
+  "specimens": {
+    "barcode": "Barcode",
+    "label": "Label"
   },
 
   "user_groups": {
@@ -392,6 +463,7 @@
     "domain_name_required": "Domain Name is mandatory",
     "download_labels": "Download Labels Print File",
     "email_address": "Email Address",
+    "email_address_invalid": "Email Address is not valid",
     "email_address_required": "Email Address is mandatory",
     "export_login_activity": "Export Login Activity",
     "first_name": "First Name",

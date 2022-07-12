@@ -4,7 +4,7 @@ export default {
   columns: [
     {
       "name": "specimen.label",
-      "caption": "Label",
+      "captionCode": "shipments.specimen.label",
       "href": (row) => ui.ngServer + '#/specimens/' + row.rowObject.specimen.id,
       "value": (rowObject) => {
         let spmn = rowObject.specimen;
@@ -18,7 +18,7 @@ export default {
     },
     {
       "name": "specimen.externalIds",
-      "caption": "External ID",
+      "captionCode": "shipments.specimen.external_id",
       "value": (rowObject) => {
         let externalIds = rowObject.specimen.externalIds;
         if (!externalIds || externalIds.length == 0) {
@@ -31,32 +31,32 @@ export default {
     },
     {
       "name": "specimen.type",
-      "caption": "Type"
+      "captionCode": "shipments.specimen.type"
     },
     {
       "name": "specimen.cpShortTitle",
-      "caption": "Collection Protocol"
+      "captionCode": "shipments.specimen.cp"
     },
     {
       "name": "specimen.ppid",
-      "caption": "PPID",
+      "captionCode": "shipments.specimen.ppid",
       "showIf": (context) => context.specimens.some(spmn => typeof spmn.ppid == 'string')
     },
     {
       "name": "specimen.availableQty",
-      "caption": "Quantity",
+      "captionCode": "shipments.specimen.quantity",
       "type": "specimen-measure",
       "entity": "specimen",
       "measure": "quantity"
     },
     {
       "name": "specimen.storageLocation",
-      "caption": "Location",
+      "captionCode": "shipments.specimen.location",
       "type": "storage-position"
     },
     {
       "name": "receivedQuality",
-      "caption": "Quality"
+      "captionCode": "shipments.received_quality"
     }
   ]
 }

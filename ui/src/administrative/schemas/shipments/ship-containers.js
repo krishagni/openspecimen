@@ -5,13 +5,13 @@ export default {
   columns: [
     {
       "name": "container.name",
-      "label": "Name",
+      "labelCode": "shipments.container_name",
       "type": "span",
       "href": (rowObject) => ui.ngServer + '#/containers/' + rowObject.container.id + '/overview'
     },
     {
       "name": "containerDimension",
-      "label": "Dimension",
+      "labelCode": "shipments.container_dimension",
       "type": "span",
       "value": (rowObject) => {
         let container = rowObject.container;
@@ -24,7 +24,7 @@ export default {
     },
     {
       "name": "storedSpecimens",
-      "label": "Specimens",
+      "labelCode": "shipments.specimens",
       "type": "span",
       "value": (rowObject) => {
         if (rowObject.container.storedSpecimens != null) {
@@ -38,14 +38,14 @@ export default {
     },
     {
       "name": "container.storageLocation",
-      "label": "Parent Container",
+      "labelCode": "shipments.container_parent",
       "type": "span",
       "displayType": "storage-position",
       "showWhen": "!receive"
     },
     {
       "name": "container.storageLocation",
-      "label": "Parent Container",
+      "labelCode": "shipments.container_parent",
       "type": "storage-position",
       "listSource": {
         "queryParams": {
@@ -66,14 +66,14 @@ export default {
     },
     {
       "name": "receivedQuality",
-      "label": "Quality",
+      "labelCode": "shipments.received_quality",
       "type": "pv",
       "attribute": "shipment_item_received_quality",
       "selectProp": "value",
       "showWhen": "receive || shipment.status == 'Received'",
       "validations": {
         "required": {
-          "message": "Received quality is mandatory"
+          "messageCode": "shipments.received_quality_required"
         }
       },
       "uiStyle": {

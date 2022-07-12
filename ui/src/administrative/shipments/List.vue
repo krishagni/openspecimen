@@ -4,13 +4,13 @@
       <os-page>
         <os-page-head>
           <span>
-            <h3>Shipments</h3>
+            <h3 v-t="'shipments.list'">Shipments</h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -26,16 +26,18 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <os-menu label="Create" :options="createOptions" v-show-if-allowed="shipmentResources.createOpts" />
+              <os-menu :label="$t('common.buttons.create')" :options="createOptions"
+                v-show-if-allowed="shipmentResources.createOpts" />
 
-              <os-menu label="Import" :options="importOpts" v-show-if-allowed="shipmentResources.importOpts" />
+              <os-menu :label="$t('common.buttons.import')" :options="importOpts"
+                v-show-if-allowed="shipmentResources.importOpts" />
 
-              <os-button-link left-icon="question-circle" label="Help"
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/shipment" new-tab="true" />
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -86,13 +88,13 @@ export default {
       createOptions: [
         {
           icon: 'flask',
-          caption: 'Specimens',
+          caption: this.$t('shipments.specimens'),
           onSelect: () => routerSvc.goto('ShipmentAddEdit', {shipmentId: -1})
         },
 
         {
           icon: 'box-open',
-          caption: 'Containers',
+          caption: this.$t('shipments.containers'),
           onSelect: () => routerSvc.goto('ShipmentAddEdit', {shipmentId: -1}, {shipmentType: 'CONTAINER'})
         }
       ],
@@ -100,17 +102,17 @@ export default {
       importOpts: [
         {
           icon: 'flask',
-          caption: 'Specimen Shipments',
+          caption: this.$t('shipments.specimen_shipments'),
           onSelect: () => routerSvc.ngGoto('shipment-import')
         },
         {
           icon: 'box-open',
-          caption: 'Container Shipments',
+          caption: this.$t('shipments.container_shipments'),
           onSelect: () => routerSvc.ngGoto('shipment-import', {type: 'containerShipment'})
         },
         {
           icon: 'table',
-          caption: 'View Past Imports',
+          caption: this.$t('bulk_imports.view_jobs'),
           onSelect: () => routerSvc.ngGoto('shipment-import-jobs')
         }
       ],

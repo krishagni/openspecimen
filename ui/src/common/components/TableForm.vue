@@ -203,7 +203,12 @@ export default {
 
           for (let rule in field.validations) {
             if (validators[rule] && validators[rule].$invalid) {
-              result[itemIdx][field.name] = field.validations[rule].message;
+              let message = field.validations[rule].message;
+              if (field.validations[rule].messageCode) {
+                message = this.$t(field.validations[rule].messageCode);
+              }
+
+              result[itemIdx][field.name] = message;
               break;
             }
           }

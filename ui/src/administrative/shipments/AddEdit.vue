@@ -6,40 +6,45 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.shipment.id">Create Shipment</h3>
-        <h3 v-else>Update #{{dataCtx.shipment.id}} {{dataCtx.shipment.name}}</h3>
+        <h3 v-if="!dataCtx.shipment.id">
+          <span v-t="'shipments.create'">Create Shipment</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'shipments.update', args: dataCtx.shipment}">Update #{{dataCtx.shipment.id}} {{dataCtx.shipment.name}}</span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <div v-if="ctx.loading">
         <os-message type="info">
-          <span>Loading the form. Please wait for a moment...</span>
+          <span v-t="'common.loading_form'">Loading the form. Please wait for a moment...</span>
         </os-message>
       </div>
       <div v-else>
         <os-steps ref="shipmentWizard">
-          <os-step title="Shipment Details" :validate="validateDetails">
+          <os-step :title="$t('shipments.details')" :validate="validateDetails">
             <os-form ref="shipmentDetails" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
               <div>
-                <os-button primary label="Next" @click="next" />
-                <os-button text label="Cancel" @click="cancel" />
+                <os-button primary :label="$t('common.buttons.next')" @click="next" />
+                <os-button text    :label="$t('common.buttons.cancel')" @click="cancel" />
               </div>
             </os-form>
           </os-step>
 
-          <os-step title="Specimens" :validate="validateSpecimenDetails" v-if="dataCtx.shipment.type == 'SPECIMEN'">
+          <os-step :title="$t('shipments.specimens')" :validate="validateSpecimenDetails"
+            v-if="dataCtx.shipment.type == 'SPECIMEN'">
+
             <span v-if="dataCtx.shipment.status == 'Pending'">
               <os-add-specimens ref="addSpmns" :criteria="ctx.criteria" :error-opts="ctx.errorOpts"
-                label="Add specimens by scanning labels or barcodes separated by a comma, tab, or newline"
-                @on-add="addSpecimens">
-                <os-button label="Validate" @click="validateSpecimenLabels" />
+                :label="$t('shipments.scan_specimen_labels')" @on-add="addSpecimens">
+                <os-button :label="$t('shipments.validate')" @click="validateSpecimenLabels" />
               </os-add-specimens>
             </span>
 
             <div v-if="ctx.specimensSchema.columns.length > 0">
               <os-message type="error" v-if="!dataCtx.specimenItems || dataCtx.specimenItems.length == 0">
-                <span>No specimens in the shipment. Add at least one specimen.</span>
+                <span v-t="'shipments.no_specimens_add_one'">No specimens in the shipment. Add at least one specimen.</span>
               </os-message>
 
               <os-table-form ref="specimenDetails" v-else
@@ -51,41 +56,42 @@
               <os-divider />
 
               <div class="os-form-footer">
-                <os-button secondary label="Previous" @click="previous" />
-                <os-button primary label="Save Draft" @click="saveDraft" v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button primary label="Ship" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button primary label="Receive" @click="receiveShipment" v-if="dataCtx.receive" />
-                <os-button primary label="Update" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
-                <os-button text label="Cancel" @click="cancel" />
+                <os-button secondary :label="$t('common.buttons.previous')" @click="previous" />
+                <os-button primary :label="$t('shipments.save_draft')" @click="saveDraft" v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary :label="$t('shipments.ship')" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary :label="$t('shipments.receive')" @click="receiveShipment" v-if="dataCtx.receive" />
+                <os-button primary :label="$t('common.buttons.update')" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
+                <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
               </div>
 
               <os-items-validation ref="validationsDialog" :report-messages="validationReportMsgs">
                 <template #title>
-                  <span>Specimens Validation Report</span>
+                  <span v-t="'shipments.specimens_validation_report'">Specimens Validation Report</span>
                 </template>
                 <template #found>
-                  <span>Passed</span>
+                  <span v-t="'shipments.passed'">Passed</span>
                 </template>
                 <template #notFound>
-                  <span>Failed: Specimens not present in the shipment</span>
+                  <span v-t="'shipments.specimens_not_present'">Failed: Specimens not present in the shipment</span>
                 </template>
                 <template #extras>
-                  <span>Failed: Additional specimens present in the shipment</span>
+                  <span v-t="'shipments.extra_specimens'">Failed: Additional specimens present in the shipment</span>
                 </template>
               </os-items-validation>
             </div>
           </os-step>
 
-          <os-step title="Containers" :validate="validateContainerDetails" v-if="dataCtx.shipment.type == 'CONTAINER'">
+          <os-step :title="$t('shipments.containers')" :validate="validateContainerDetails"
+            v-if="dataCtx.shipment.type == 'CONTAINER'">
             <span v-if="dataCtx.shipment.status == 'Pending'">
               <os-add-items ref="addContainers" @on-add="getAndAddContainers($event)"
-                placeholder="Add containers by scanning names separated by a comma, tab, or newline">
+                :placeholder="$t('shipments.scan_container_names')">
               </os-add-items>
             </span>
 
             <div v-if="ctx.containersSchema.columns.length > 0">
               <os-message type="error" v-if="!dataCtx.containerItems || dataCtx.containerItems.length == 0">
-                <span>No containers in the shipment. Add at least one container.</span>
+                <span v-t="'shipments.no_containers_add_one'">No containers in the shipment. Add at least one container.</span>
               </os-message>
 
               <os-table-form ref="containerDetails" v-else
@@ -97,12 +103,16 @@
               <os-divider />
 
               <div class="os-form-footer">
-                <os-button secondary label="Previous" @click="previous" />
-                <os-button primary label="Save Draft" @click="saveDraft" v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button primary label="Ship" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button primary label="Receive" @click="receiveShipment" v-if="dataCtx.receive" />
-                <os-button primary label="Update" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
-                <os-button text label="Cancel" @click="cancel" />
+                <os-button secondary :label="$t('common.buttons.previous')" @click="previous" />
+                <os-button primary :label="$t('shipments.save_draft')" @click="saveDraft"
+                  v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary :label="$t('shipments.ship')" @click="ship"
+                  v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary :label="$t('shipments.receive')" @click="receiveShipment"
+                  v-if="dataCtx.receive" />
+                <os-button primary :label="$t('common.buttons.update')" @click="updateShipment"
+                  v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
+                <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
               </div>
             </div>
           </os-step>
@@ -116,6 +126,7 @@
 import { reactive, inject } from 'vue';
 
 import alertSvc    from '@/common/services/Alerts.js';
+import i18n        from '@/common/services/I18n.js';
 import routerSvc   from '@/common/services/Router.js';
 import util        from '@/common/services/Util.js';
 import settingsSvc from '@/common/services/Setting.js';
@@ -135,7 +146,7 @@ export default {
 
     const ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: 'Shipments'}
+        {url: routerSvc.getUrl('ShipmentsList', {shipmentId: -1}), label: i18n.msg('shipments.list')}
       ],
 
       addEditFs: {rows: []},
@@ -171,10 +182,10 @@ export default {
   computed: {
     validationReportMsgs: function() {
       return {
-        label: this.$refs.addSpmns && this.$refs.addSpmns.useBarcode ? 'Barcode' : 'Label',
-        error: 'Error',
-        notFound: 'Not present in the shipment',
-        extra: 'Additional specimen present in the shipment'
+        label: i18n.msg(this.$refs.addSpmns && this.$refs.addSpmns.useBarcode ? 'specimens.barcode' : 'specimens.label'),
+        error: i18n.msg('common.error'),
+        notFound: i18n.msg('shipments.specimens_not_present'),
+        extra: i18n.msg('shipments.extra_specimens')
       }
     },
 
@@ -186,7 +197,6 @@ export default {
   watch: {
     loadKey: function(newVal, oldVal) {
       if (newVal != oldVal) {
-        alert(oldVal + ' => ' + newVal);
         this.loadShipment();
       }
     }
@@ -338,25 +348,33 @@ export default {
     },
 
     saveDraft: function() {
-      this.saveOrUpdate('Pending').then(shipment => alertSvc.success('Draft shipment "' + shipment.name + '" saved!'));
+      this.saveOrUpdate('Pending').then(
+        shipment => shipment && alertSvc.success({code: 'shipments.draft_saved', args: shipment})
+      );
     },
 
     ship: function() {
-      this.saveOrUpdate('Shipped').then(shipment => alertSvc.success('Shipment "' + shipment.name + '" shipped!'));
+      this.saveOrUpdate('Shipped').then(
+        shipment => shipment && alertSvc.success({code: 'shipments.shipped', args: shipment})
+      );
     },
 
     receiveShipment: function() {
-      this.saveOrUpdate('Received').then(shipment => alertSvc.success('Shipment "' + shipment.name + '" received!'));
+      this.saveOrUpdate('Received').then(
+        shipment => shipment && alertSvc.success({code: 'shipments.received', args: shipment})
+      );
     },
 
     updateShipment: function() {
-      this.saveOrUpdate(null).then(shipment => alertSvc.success('Shipment "' + shipment.name + '" updated!'));
+      this.saveOrUpdate(null).then(
+        shipment => shipment && alertSvc.success({code: 'shipments.updated', args: shipment})
+      );
     },
 
     saveOrUpdate: async function(status) {
       if (this.dataCtx.shipment.type == 'SPECIMEN') {
         if (!this.dataCtx.specimenItems || this.dataCtx.specimenItems.length == 0) {
-          alertSvc.error('No specimens in the shipment. Add at least one specimen.');
+          alertSvc.error({code: 'shipments.no_specimens_add_one'});
           return;
         }
 
@@ -365,7 +383,7 @@ export default {
         }
       } else {
         if (!this.dataCtx.containerItems || this.dataCtx.containerItems.length == 0) {
-          alertSvc.error('No containers in the shipment. Add at least one container.');
+          alertSvc.error({code: 'shipments.no_containers_add_one'});
           return;
         }
 

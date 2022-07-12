@@ -1,4 +1,3 @@
-
 import routerSvc    from '@/common/services/Router.js';
 
 export default {
@@ -35,48 +34,48 @@ export default {
     },
     {
       "name": "shipment.name",
-      "caption": "Name",
+      "captionCode": "shipments.name",
       "href": (row, query) => routerSvc.getUrl('ShipmentsListItemDetail.Overview', {shipmentId: row.rowObject.shipment.id, query}),
       "value": (rowObject) => '#' + rowObject.shipment.id + ' ' + rowObject.shipment.name
     },
     {
       "name": "shipment.sendingSite",
-      "caption": "Sending Site"
+      "captionCode": "shipments.sending_site"
     },
     {
       "name": "shipment.sender",
-      "caption": "Sender",
+      "captionCode": "shipments.sender",
       "type": "user"
     },
     {
       "name": "shipment.shippedDate",
-      "caption": "Shipped Date",
+      "captionCode": "shipments.shipped_date",
       "type": "date"
     },
     {
       "name": "shipment.receivingSite",
-      "caption": "Receiving Site"
+      "captionCode": "shipments.receiving_site"
     },
     {
       "name": "shipment.receiver",
-      "caption": "Receiver",
+      "captionCode": "shipments.receiver",
       "type": "user"
     },
     {
       "name": "shipment.receivedDate",
-      "caption": "Received Date",
+      "captionCode": "shipments.received_date",
       "type": "date"
     },
     {
       "name": "shipment.status",
-      "caption": "Status",
+      "captionCode": "shipments.status",
       "uiStyle": {
         "min-width": "80px"
       }
     },
     {
       "name": "shipment.specimensCount",
-      "caption": "Specimens"
+      "captionCode": "shipments.specimens"
     }
   ],
 
@@ -84,12 +83,12 @@ export default {
     {
       name: 'name',
       type: 'text',
-      caption: 'Name'
+      captionCode: 'shipments.name'
     },
     {
       name: 'sendingSite',
       type: 'site',
-      caption: 'Sending Site',
+      captionCode: 'shipments.sending_site',
       listSource: {
         queryParams: {
           static: {
@@ -102,7 +101,7 @@ export default {
     {
       name: 'recvInstitute',
       type: 'dropdown',
-      caption: 'Receiving Institute',
+      captionCode: 'shipments.receiving_institute',
       listSource: {
         apiUrl: 'institutes',
         displayProp: 'name',
@@ -113,7 +112,7 @@ export default {
     {
       name: 'recvSite',
       type: 'site',
-      caption: 'Receiving Site',
+      captionCode: 'shipments.receiving_site',
       listSource: {
         queryParams: {
           static: {
@@ -129,7 +128,7 @@ export default {
     {
       name: 'status',
       type: 'dropdown',
-      caption: 'Status',
+      captionCode: 'shipments.status',
       listSource: {
         selectProp: 'value',
         displayProp: 'value',

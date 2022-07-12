@@ -1,14 +1,14 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" label="Edit" v-show-if-allowed="shipmentResources.updateOpts"
+      <os-button left-icon="edit" :label="$t('common.buttons.edit')" v-show-if-allowed="shipmentResources.updateOpts"
         @click="$goto('ShipmentAddEdit', {shipmentId: ctx.shipment.id}, {shipmentType: ctx.shipment.type})" />
 
-      <os-button left-icon="inbox" label="Receive" v-if="ctx.shipment.status == 'Shipped'"
+      <os-button left-icon="inbox" :label="$t('shipments.receive')" v-if="ctx.shipment.status == 'Shipped'"
         v-show-if-allowed="shipmentResources.updateOpts"
         @click="$goto('ShipmentReceive', {shipmentId: ctx.shipment.id}, {shipmentType: ctx.shipment.type})" />
 
-      <os-button left-icon="download" label="Download Report" @click="downloadReport" />
+      <os-button left-icon="download" :label="$t('shipments.download_report')" @click="downloadReport" />
     </template>
   </os-page-toolbar>
 
