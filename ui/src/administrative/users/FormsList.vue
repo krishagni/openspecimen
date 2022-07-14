@@ -36,7 +36,7 @@
                 </span>
                 <span v-else>
                   <os-button primary left-icon="edit"
-                    :label="$t('common.buttons.add')" @click="editRecord(ctx.selectedRecord)" />
+                    :label="$t('common.buttons.edit')" @click="editRecord(ctx.selectedRecord)" />
 
                   <os-button danger left-icon="trash"
                     :label="$t('common.buttons.delete')" @click="deleteRecord(ctx.selectedRecord)" />
