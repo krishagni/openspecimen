@@ -1258,9 +1258,16 @@ public class Utility {
 			return null;
 		}
 
+		//
+		// to ensure "from" date is of type java.util.Date and not java.sql.Date
+		// java.sql.Date does not have toInstant() method
+		//
+		from = new Date(from.getTime());
+
 		LocalDate startDt = LocalDate.from(from.toInstant().atZone(ZoneId.systemDefault()));
 		LocalDate endDt = LocalDate.now();
 		if (to != null) {
+			to = new Date(to.getTime());
 			endDt = LocalDate.from(to.toInstant().atZone(ZoneId.systemDefault()));
 		}
 
