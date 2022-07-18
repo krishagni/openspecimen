@@ -1,12 +1,14 @@
 <template>
   <os-button-group>
-    <os-button left-icon="folder" label="Assign" right-icon="caret-down" @click="toggleFolderOptions" />
+    <os-button left-icon="folder" :label="$t('carts.assign_folder')" right-icon="caret-down"
+      @click="toggleFolderOptions" />
   </os-button-group>
 
   <os-overlay class="os-cart-folders" ref="folderOptions">
     <ul class="search">
       <li>
-        <os-input-text v-model="searchTerm" placeholder="Search Folder" @update:modelValue="searchFolders" />
+        <os-input-text v-model="searchTerm" :placeholder="$t('carts.search_folder')"
+          @update:modelValue="searchFolders" />
       </li>
     </ul>
     <ul class="folders">
@@ -15,12 +17,20 @@
       </li>
 
       <li v-if="folders.length == 0">
-        <a class="no-click"> No folders to show </a>
+        <a class="no-click" v-t="'carts.no_folders'"> No folders to show </a>
       </li>
     </ul>
     <ul class="actions">
-      <li> <a @click="createNewFolder"> Create New </a></li>
-      <li> <a @click="viewFolders" v-if="folders.length > 0"> Manage Folders </a> </li>
+      <li>
+        <a @click="createNewFolder">
+          <span v-t="'carts.create_new'">Create New </span>
+        </a>
+      </li>
+      <li>
+        <a @click="viewFolders" v-if="folders.length > 0">
+          <span v-t="'carts.manage_folders'">Manage Folders </span>
+        </a>
+      </li>
     </ul>
   </os-overlay>
 </template>
@@ -95,18 +105,17 @@ export default {
       }
 
       if (!this.carts || this.carts.length == 0) {
-        alertsSvc.error('Select at least one cart to add to the folder');
+        alertsSvc.error({code: 'carts.folder_min_one_cart_required'});
+        // alertsSvc.error('Select at least one cart to add to the folder');
         return;
       }
 
       folderSvc.addCarts(folder, this.carts).then(
         ({count}) => {
           if (count == 0) {
-            alertsSvc.info('No carts added to the folder: ' + folder.name);
-          } else if (count == 1) {
-            alertsSvc.success('One cart added to the folder: ' + folder.name);
+            alertsSvc.info({code: 'carts.folder_no_carts_added', args: folder});
           } else {
-            alertsSvc.success(count + ' carts added to the folder: ' + folder.name);
+            alertsSvc.info({code: 'carts.folder_carts_added', args: {count: count, name: folder.name}});
           }
         }
       );
@@ -115,7 +124,7 @@ export default {
     createNewFolder: function(event) {
       this.$refs.folderOptions.toggle(event);
       if (!this.carts || this.carts.length == 0) {
-        alertsSvc.error('Select at least one cart to add to the folder');
+        alertsSvc.error({code: 'carts.folder_min_one_cart_required'});
         return;
       }
 

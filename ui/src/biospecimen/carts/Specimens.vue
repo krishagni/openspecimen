@@ -18,7 +18,7 @@
         <template #default>
           <os-specimen-actions :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
 
-          <os-menu label="More" :options="moreOpts" />
+          <os-menu :label="$t('common.buttons.more')" :options="moreOpts" />
         </template>
 
         <template #right>
@@ -29,7 +29,7 @@
             @updateListSize="getSpecimensCount"
           />
 
-          <os-button left-icon="search" label="Search" @click="toggleSearch" />
+          <os-button left-icon="search" :label="$t('common.buttons.search')" @click="toggleSearch" />
         </template>
       </os-page-toolbar>
 
@@ -48,11 +48,11 @@
 
     <os-confirm ref="rmSpecimensConfirm">
       <template #title>
-        <span>Remove specimens from the cart...</span>
+        <span v-t="'carts.remove_specimens_q'">Remove specimens from the cart...</span>
       </template>
 
       <template #message>
-        <span>Are you sure you want to remove the selected specimens from the cart <b>{{displayName}}</b>?</span>
+        <span v-t="{path: 'carts.confirm_remove_specimens', args: {name: displayName}}">Are you sure you want to remove the selected specimens from the cart <b>{{displayName}}</b>?</span>
       </template>
     </os-confirm>
 
@@ -78,7 +78,7 @@ export default {
         cart: {},
 
         bcrumb: [
-          {url: routerSvc.getUrl('SpecimenCartsList', {cartId: -1}), label: 'Carts'}
+          {url: routerSvc.getUrl('SpecimenCartsList', {cartId: -1}), label: this.$t('carts.list')}
         ],
 
         dict: cartSvc.getDict(),
@@ -91,22 +91,22 @@ export default {
       moreOpts: [
         {
           icon: 'edit',
-          caption: 'Edit or Delete Cart',
+          caption: this.$t('carts.edit_or_delete'),
           onSelect: () => routerSvc.goto('SpecimenCartAddEdit', {cartId: this.cartId})
         },
         {
           icon: 'plus',
-          caption: 'Include Child Specimens',
+          caption: this.$t('carts.include_child_specimens'),
           onSelect: () => this.addChildSpecimens()
         },
         {
           icon: 'download',
-          caption: 'Download Report',
+          caption: this.$t('carts.download_report'),
           onSelect: () => this.downloadReport()
         },
         {
           icon: 'trash',
-          caption: 'Remove from Cart',
+          caption: this.$t('carts.remove_from_cart'),
           onSelect: () => this.removeFromCart()
         }
       ],
@@ -166,7 +166,7 @@ export default {
     addChildSpecimens: function() {
       cartSvc.addChildSpecimens(this.ctx.cart).then(
         () => {
-          alertSvc.success('Child specimens added to the cart.');
+          alertSvc.success({code: 'carts.child_specimens_added'});
           this.reloadList();
         }
       );
@@ -185,7 +185,7 @@ export default {
 
     removeFromCart: async function() {
       if (!this.selectedSpecimens || this.selectedSpecimens.length == 0) {
-        alertSvc.error('Select at least one specimen to remove from the cart!');
+        alertSvc.error({code: 'carts.select_one_spmn_to_rm'});
         return;
       }
 
@@ -196,16 +196,11 @@ export default {
 
       cartSvc.removeFromCart(this.ctx.cart, this.selectedSpecimens).then(
         ({count}) => {
-          if (count == 1) {
-            alertSvc.success('One specimen removed from the cart.');
-          } else {
-            alertSvc.success(count + ' specimens removed from the cart.');
-          }
-
+          alertSvc.success({code: 'carts.specimens_removed', args: {count: count, name: this.displayName}});
           this.reloadList();
         }
       );
-    },
+    }
   }
 }
 </script>

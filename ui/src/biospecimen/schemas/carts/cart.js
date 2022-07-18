@@ -2,11 +2,11 @@ export default {
   fields:  [
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "carts.name",
       "name": "cart.name",
       "validations": {
         "required": {
-          "message": "Name is mandatory"
+          "messageCode": "carts.name_required"
         }
       },
       "showWhen": "!defaultCart",
@@ -14,7 +14,7 @@ export default {
     },
     {
       "type": "user",
-      "label": "Share with users",
+      "labelCode": "carts.share_with_users",
       "name": "cart.sharedWith",
       "multiple": true,
       "listSource": {
@@ -27,7 +27,7 @@ export default {
     },
     {
       "type": "multiselect",
-      "label": "Share with user groups",
+      "labelCode": "carts.share_with_user_groups",
       "name": "cart.sharedWithGroups",
       "listSource": {
         "apiUrl": "user-groups",
@@ -37,21 +37,15 @@ export default {
     },
     {
       "type": "textarea",
-      "label": "Description",
+      "labelCode": "carts.description",
       "name": "cart.description"
     },
     {
       "type": "add-specimens",
-      "label": "Specimens",
+      "labelCode": "carts.specimens",
       "name": "cart.specimenLabels",
       "hideButtons": true,
       "placeholder": "Add specimens to the cart by scanning labels or barcodes separated by comma, tab, or newline",
-      "validations": {
-        "requiredIf": {
-          "expr": "!cart.id && noInputSpecimens",
-          "message": "Specimen labels is mandatory"
-        }
-      },
       "showWhen": "noInputSpecimens",
       "dataEntry": true
     }

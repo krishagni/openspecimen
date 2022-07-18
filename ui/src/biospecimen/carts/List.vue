@@ -9,13 +9,15 @@
 
           <span>
             <h3 v-if="ctx.folder">{{ctx.folder.name}}</h3>
-            <h3 v-else>Carts</h3>
+            <h3 v-else>
+              <span v-t="'carts.list'">Carts</span>
+            </h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -33,29 +35,30 @@
             <template #default>
               <span v-if="!ctx.folder">
                 <span v-if="ctx.selectedCarts.length == 0">
-                  <os-button left-icon="plus" label="Create" @click="createCart" />
+                  <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createCart" />
 
-                  <os-button label="View My Default Cart" @click="viewDefaultCart" />
+                  <os-button :label="$t('carts.view_my_def_cart')" @click="viewDefaultCart" />
                 </span>
 
-                <os-button left-icon="folder" label="View Folders" @click="viewFolders" />
+                <os-button left-icon="folder" :label="$t('carts.view_folders')" @click="viewFolders" />
 
                 <AssignCart :carts="ctx.selectedCarts" />
               </span>
 
               <span v-else>
                 <span v-if="ctx.selectedCarts.length > 0">
-                  <os-button left-icon="times" label="Remove" v-os-tooltip.right="'Remove from folder'"
+                  <os-button left-icon="times" :label="$t('common.buttons.remove')"
+                    v-os-tooltip.right="$t('carts.remove_from_folder')"
                     @click="removeFromFolder" />
                 </span>
               </span>
 
-              <os-button-link left-icon="question-circle" label="Help"
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/specimen-list" new-tab="true" />
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -120,7 +123,7 @@ export default {
 
         folder: null,
 
-        bcrumb: [ { url: routerSvc.getUrl('SpecimenCartsFoldersList'), label: 'Cart Folders' } ]
+        bcrumb: [ { url: routerSvc.getUrl('SpecimenCartsFoldersList'), label: this.$t('carts.folders') } ]
       },
 
       listSchema,
@@ -246,15 +249,6 @@ export default {
 
     viewDefaultCart: function() {
       routerSvc.goto('CartSpecimensList', {cartId: 0}, {filters: this.filters, folderId: this.folderId});
-      /*cartSvc.getCart(0).then(
-        (cart) => {
-          if (cart.id) {
-            routerSvc.goto('CartSpecimensList', {cartId: cart.id}, {filters: this.filters, folderId: this.folderId});
-          } else {
-            alertSvc.error('You do not have a default cart.');
-          }
-        }
-      );*/
     },
 
     onToggleStar: async function({cart}) {
@@ -282,14 +276,9 @@ export default {
       folderSvc.removeCarts(this.ctx.folder, this.ctx.selectedCarts).then(
         ({count}) => {
           if (count == 0) {
-            alertSvc.info('No carts removed from the folder: ' + this.ctx.folder.name);
+            alertSvc.info({code: 'carts.folder_no_carts_removed', args: this.ctx.folder});
           } else {
-            if (count == 1) {
-              alertSvc.success('One cart removed from the folder: ' + this.ctx.folder.name);
-            } else {
-              alertSvc.success(count + ' carts removed from the folder: ' + this.ctx.folder.name);
-            }
-
+            alertSvc.success({code: 'carts.folder_carts_removed', args: {count: count, name: this.ctx.folder.name}});
             this.$refs.listView.reload();
           }
         }

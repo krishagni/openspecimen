@@ -31,28 +31,28 @@ export default {
     },
     {
       name: "cartDisplayName",
-      caption: "Name",
+      captionCode: "carts.name",
       value: ({cart}) => cartSvc.getDisplayName(cart),
       href: (row, query) => routerSvc.getUrl('CartSpecimensList', {cartId: row.rowObject.cart.id}, query)
     },
     {
       name: "cart.owner",
-      caption: "Created By",
+      captionCode: "common.created_by",
       type: "user"
     },
     {
       name: "cart.createdOn",
-      caption: "Creation Date",
+      captionCode: "common.creation_date",
       type: "date"
     },
     {
       name: "cart.lastUpdatedOn",
-      caption: "Last Updated",
+      captionCode: "common.last_updated",
       type: "date"
     },
     {
       name: "cart.specimenCount",
-      caption: "Specimens"
+      captionCode: "carts.specimens"
     }
   ],
 
@@ -60,12 +60,12 @@ export default {
     {
       name: "name",
       type: "text",
-      caption: "Name"
+      captionCode: "carts.name"
     },
     {
       name: 'folderId',
       type: 'dropdown',
-      caption: 'Folder',
+      captionCode: 'carts.folder',
       listSource: {
         apiUrl: 'specimen-list-folders',
         displayProp: 'name',

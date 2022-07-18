@@ -18,11 +18,11 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="shopping-cart" label="View Carts" @click="viewCarts" />
+          <os-button left-icon="shopping-cart" :label="$t('carts.view_carts')" @click="viewCarts" />
         </template>
 
         <template #right>
-          <os-button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
         </template>
       </os-page-toolbar>
 
@@ -38,9 +38,9 @@
 
         <template #rowActions="slotProps">
           <os-button-group v-if="slotProps.rowObject.editAllowed">
-            <os-button size="small" left-icon="edit" v-os-tooltip.bottom="'Edit'"
+            <os-button size="small" left-icon="edit" v-os-tooltip.bottom="$t('common.buttons.edit')"
               @click="editFolder(slotProps.rowObject)" />
-            <os-button size="small" left-icon="trash" v-os-tooltip.bottom="'Delete'"
+            <os-button size="small" left-icon="trash" v-os-tooltip.bottom="$t('common.buttons.delete')"
               @click="deleteFolder(slotProps.rowObject)" />
           </os-button-group>
         </template>
@@ -50,7 +50,7 @@
 
   <os-confirm-delete ref="confirmDeleteFolder" :captcha="false">
     <template #message>
-      <span>Are you sure you want to delete the specimen carts folder - <b>{{ctx.toDelete.name}}</b>?</span>
+      <span v-t="{path: 'carts.confirm_folder_delete', args: ctx.toDelete}"> </span>
     </template>
   </os-confirm-delete>
 </template>
@@ -140,7 +140,7 @@ export default {
 
           folderSvc.delete(folder).then(
             () => {
-              alertSvc.success('Folder ' + folder.name + ' deleted.');
+              alertSvc.success({code: 'carts.folder_deleted', args: folder});
               self.reloadFolders();
             }
           );

@@ -6,24 +6,29 @@
       </template>
 
       <span>
-        <h3 v-if="dataCtx.cart.id >= 0">Update {{ctx.cartDisplayName}}</h3>
-        <h3 v-else>Create Cart</h3>
+        <h3 v-if="dataCtx.cart.id >= 0">
+          <span v-t="{path: 'common.update', args: {name: ctx.cartDisplayName}}">Update {{ctx.cartDisplayName}}</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="'carts.create'"></span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <os-form ref="cartForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <div>
-          <os-button primary :label="!dataCtx.cart.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-          <os-button danger  label="Delete" v-if="deleteAllowed" @click="deleteCart" />
-          <os-button text label="Cancel" @click="cancel" />
+          <os-button primary :label="$t(!dataCtx.cart.id ? 'common.buttons.create' : 'common.buttons.update')"
+            @click="saveOrUpdate" />
+          <os-button danger  :label="$t('common.buttons.delete')" v-if="deleteAllowed" @click="deleteCart" />
+          <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
         </div>
       </os-form>
     </os-page-body>
 
     <os-confirm-delete ref="deleteConfirm" :captcha="false">
       <template #message>
-        <span>Cart <b>{{dataCtx.cart.name}}</b> and any dependent data will be deleted. Are you sure you want to proceed?</span>
+        <span v-t="{path: 'carts.confirm_delete', args: dataCtx.cart}"> </span>
       </template>
     </os-confirm-delete>
   </os-page>
@@ -36,6 +41,7 @@ import alertSvc  from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
 
 import cartSvc   from '@/biospecimen/services/SpecimenCart.js';
+import i18n      from '@/common/services/I18n.js';
 import itemsSvc  from '@/common/services/ItemsHolder.js';
 import util      from '@/common/services/Util.js';
 
@@ -49,7 +55,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('SpecimenCartsList', {cartId: -1}), label: 'Carts'}
+        {url: routerSvc.getUrl('SpecimenCartsList', {cartId: -1}), label: i18n.msg('carts.list')}
       ],
 
       addEditFs: {rows: []}
@@ -110,8 +116,8 @@ export default {
       toSave.specimenIds = specimens.map(spmn => spmn.id);
       cartSvc.saveOrUpdate(toSave).then(
         (savedCart) => {
-          routerSvc.goto('CartSpecimensList', {cartId: savedCart.id})
-          alertSvc.success('Cart ' + savedCart.name + (toSave.id ? ' updated.' : ' created.'));
+          routerSvc.goto('CartSpecimensList', {cartId: savedCart.id});
+          alertSvc.success({code: toSave.id ? 'carts.updated' : 'carts.created', args: savedCart});
         }
       );
     },
@@ -124,7 +130,7 @@ export default {
 
       cartSvc.delete(this.dataCtx.cart).then(
         () => {
-          alertSvc.success('Cart ' + this.dataCtx.cart.name + ' deleted.');
+          alertSvc.success({code: 'carts.deleted', args: this.dataCtx.cart});
           routerSvc.goto('CartSpecimensList', {cartId: -2});
         }
       );

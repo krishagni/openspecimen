@@ -2,22 +2,22 @@ export default {
   fields:  [
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "carts.name",
       "name": "folder.name",
       "validations": {
         "required": {
-          "message": "Name is mandatory"
+          "messageCode": "carts.name_required"
         }
       }
     },
     {
       "type": "textarea",
-      "label": "Description",
+      "labelCode": "carts.description",
       "name": "folder.description"
     },
     {
       "type": "multiselect",
-      "label": "Share with user groups",
+      "labelCode": "carts.share_with_user_groups",
       "name": "folder.userGroups",
       "listSource": {
         "apiUrl": "user-groups",
