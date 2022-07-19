@@ -53,7 +53,8 @@
     </template>
   </os-dialog>
 
-  <os-plugin-views page="specimen-actions" view="menu" :viewProps="{cp: cp, cpr: cpr, visit: visit}" />
+  <os-plugin-views ref="pluginViews" page="specimen-actions" view="menu"
+    :viewProps="{cp: cp, cpr: cpr, visit: visit}" />
 </template>
 
 <script>
@@ -70,7 +71,7 @@ import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'cpr', 'visit', 'specimens'],
+  props: ['cp', 'cpr', 'visit', 'specimens', 'cartId'],
 
   emits: ['reloadSpecimens'],
 
@@ -81,7 +82,10 @@ export default {
 
         isDistAllowed: false,
 
-        distDetails: {},
+        distDetails: {
+          clearListId: this.cartId,
+          clearListMode: 'NONE'
+        },
 
         distFormSchema: {
           rows: [
@@ -97,7 +101,7 @@ export default {
                   },
                   validations: {
                     required: {
-                      message: 'Distribution protocol is mandatory'
+                      message: 'Distribution Protocol is mandatory'
                     }
                   }
                 }
@@ -110,6 +114,27 @@ export default {
                   label: 'Comments',
                   name: 'comments',
                   rows: 5
+                }
+              ]
+            },
+            {
+              fields: [
+                {
+                  type: 'radio',
+                  label: 'Remove From Cart',
+                  name: 'clearListMode',
+                  options: [
+                    {caption: 'Distributed Specimens', value: 'DISTRIBUTED'},
+                    {caption: 'All Specimens', value: 'ALL'},
+                    {caption: 'None', value: 'NONE'}
+                  ],
+                  optionsPerRow: 3,
+                  validations: {
+                    required: {
+                      message: 'Remove From Cart is mandatory'
+                    }
+                  },
+                  showWhen: 'clearListId != undefined && clearListId != null'
                 }
               ]
             },
@@ -261,7 +286,7 @@ export default {
       const ctxt = {
         cp: this.cp, cpr: this.cpr, visit: this.visit,
         isSpmnUpdateAllowed, isAllSpmnUpdateAllowed, isSpmnDeleteAllowed,
-        isCoordinator: this.ctx.isCoordinator
+        isCoordinator: this.ctx.isCoordinator, menu: this
       };
 
       for (let option of pluginOptions) {
@@ -269,7 +294,13 @@ export default {
           continue;
         }
 
-        options.push({ icon: option.icon, caption: option.caption, onSelect: () => option.exec(ctxt, this.specimens) });
+        options.push({
+          icon: option.icon,
+          caption: option.caption,
+          onSelect: () => {
+            option.exec(this.wrapRefs(ctxt), this.specimens)
+          }
+        });
       }
 
       return options;
@@ -277,6 +308,10 @@ export default {
   },
 
   methods: {
+    wrapRefs: function(ctxt) {
+      return {...ctxt, pluginViews: this.$refs.pluginViews};
+    },
+
     getSites: function(cp, cpr) {
       let sites = [];
       if (cp) {
@@ -453,7 +488,7 @@ export default {
         return;
       }
 
-      this.ctx.distDetails = {};
+      this.ctx.distDetails = { clearListId: this.cartId, clearListMode: 'NONE' };
       this.$refs.distributeDialog.open();
     },
 
@@ -495,6 +530,10 @@ export default {
     },
 
     distributeNow: function() {
+      if (!this.$refs.distDetailsForm.validate()) {
+        return;
+      }
+
       this.$refs.distributeOptions.toggle(event);
 
       const userInput = this.ctx.distDetails;
@@ -507,6 +546,8 @@ export default {
         distributeAvailableQty: true,
         orderItems: this.getOrderItems(this.specimens, userInput.printLabel),
         comments: userInput.comments,
+        clearListId: userInput.clearListId,
+        clearListMode: userInput.clearListMode,
         status: 'EXECUTED'
       };
 
@@ -525,6 +566,10 @@ export default {
     },
 
     addDistributionDetails: function(event) {
+      if (!this.$refs.distDetailsForm.validate()) {
+        return;
+      }
+
       this.$refs.distributeOptions.toggle(event);
 
       const userInput = this.ctx.distDetails;
@@ -532,6 +577,8 @@ export default {
         dp: userInput.dp,
         specimenIds: this.specimens && this.specimens.map(spmn => spmn.id),
         printLabel: userInput.printLabel,
+        clearListId: userInput.clearListId,
+        clearListMode: userInput.clearListMode,
         comments: userInput.comments
       });
 

@@ -42,7 +42,7 @@ class ExpressionUtil {
         op = '||';
       }
 
-      return left + ' ' + op + ' ' + right;
+      return '(' + left + ') ' + op + ' (' + right + ')';
     } else if (exprTree.type == 'UnaryExpression') {
       let arg = this.decorate(exprTree.argument);
       if (exprTree.prefix) {

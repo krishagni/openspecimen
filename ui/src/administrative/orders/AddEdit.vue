@@ -213,6 +213,8 @@ export default {
           dp: order.distributionProtocol,
           comments: order.comments,
           specimenListId: order.specimenList && order.specimenList.id,
+          clearListId: order.clearListId,
+          clearListMode: order.clearListMode,
           allReserved: !!order.allReservedSpmns
         };
       }
@@ -271,8 +273,8 @@ export default {
           promises.push(orderSvc.getOrderItems(this.orderId, {maxResults: this.ctx.maxSpmnsLimit + 1}));
         }
 
-        order.clearListId   = input.clearFromCart;
-        order.clearListMode = input.clearCart;
+        order.clearListId   = input.clearFromCart || input.clearListId;
+        order.clearListMode = input.clearCart || input.clearListMode;
         order.distributionProtocol = input.dp;
         order.comments      = input.comments;
       } else {

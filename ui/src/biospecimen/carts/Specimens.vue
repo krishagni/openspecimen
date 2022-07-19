@@ -16,7 +16,7 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-specimen-actions :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
+          <os-specimen-actions :cart-id="ctx.cart.id" :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
 
           <os-menu :label="$t('common.buttons.more')" :options="moreOpts" />
         </template>
