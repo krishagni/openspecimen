@@ -8,6 +8,7 @@
     v-bind="viewProps"
     v-for="pluginView of views"
     :key="pluginView.name"
+    :ref="pluginView.name"
   />
 </template>
 
