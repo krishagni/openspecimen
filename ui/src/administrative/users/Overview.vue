@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { inject, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
 import alertSvc from '@/common/services/Alerts.js';
@@ -108,8 +108,11 @@ export default {
 
   setup() {
     const route = useRoute();
+    const ui = inject('ui');
 
     const ctx = reactive({
+      hasWf: (ui.global.appProps.plugins || []).indexOf('task-manager') > -1,
+
       user: {},          // details of user being displayed
 
       deleteOpts: {},    // delete dialog details

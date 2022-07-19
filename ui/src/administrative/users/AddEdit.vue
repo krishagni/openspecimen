@@ -68,6 +68,8 @@ export default {
     const ui = inject('ui');
 
     const ctx = reactive({
+      hasWf: (ui.global.appProps.plugins || []).indexOf('task-manager') > -1,
+
       user: null,
 
       bcrumb: [

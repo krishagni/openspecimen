@@ -166,7 +166,7 @@ export default {
         { "caption": "Yes", "value": true },
         { "caption": "No", "value": false }
       ],
-      "showWhen": "!user.type || user.type == 'NONE'"
+      "showWhen": "hasWf && (!user.type || user.type == 'NONE')",
     },
 
     {
