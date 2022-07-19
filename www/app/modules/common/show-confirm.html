@@ -6,7 +6,7 @@
     <div translate="{{confirmMsg}}" translate-values="input"></div>
   </div>
   <div class="os-modal-footer">
-    <button class="btn os-btn-text" ng-click="cancel()">
+    <button class="btn os-btn-text" ng-click="cancel()" ng-hide="hideCancel">
       <span translate="{{!!cancelBtn ? cancelBtn : 'common.no'}}">Cancel</span>
     </button>
     <button class="btn btn-primary" ng-click="ok()">
