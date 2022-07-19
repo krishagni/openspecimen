@@ -176,18 +176,15 @@ export default {
     dedup(options) {
       let ls = this.listSource;
       let selectProp = ls.selectProp || ls.idProp || 'id';
-      let optionsMap = options.reduce(
-        (acc, option) => {
-          if (!acc[option[selectProp]]) {
-            acc[option[selectProp]] = option;
-          }
+      let seen = [], result = [];
+      for (let option of options) {
+        if (seen.indexOf(option[selectProp]) == -1) {
+          result.push(option);
+          seen.push(option[selectProp]);
+        }
+      }
 
-          return acc;
-        },
-        {}
-      );
-
-      return Object.keys(optionsMap).map((key) => optionsMap[key]);
+      return result;
     },
 
     onChange: function(event) {
