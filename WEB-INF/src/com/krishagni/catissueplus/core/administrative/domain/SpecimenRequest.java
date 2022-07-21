@@ -16,6 +16,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenReq
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
@@ -240,7 +241,7 @@ public class SpecimenRequest extends BaseExtensionEntity {
 			return;
 		}
 
-		close("Automatic closure of request");
+		close("Automatic closure on request fulfillment.");
 	}
 
 	public void close(String comments) {
@@ -248,6 +249,7 @@ public class SpecimenRequest extends BaseExtensionEntity {
 		setDateOfProcessing(Calendar.getInstance().getTime());
 		setComments(comments);
 		setActivityStatus(Status.ACTIVITY_STATUS_CLOSED.getStatus());
+		EventPublisher.getInstance().publish(SpecimenRequestEvent.closed(this));
 	}
 
 	public void reopenIfNotFulfilled() {
@@ -257,7 +259,7 @@ public class SpecimenRequest extends BaseExtensionEntity {
 
 		boolean anyPending = getItems().stream().anyMatch(SpecimenRequestItem::isPending);
 		if (anyPending) {
-			reopen("Automatic reopening of request");
+			reopen("Automatic reopening of request.");
 		}
 	}
 

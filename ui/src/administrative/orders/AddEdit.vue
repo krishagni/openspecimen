@@ -231,7 +231,7 @@ export default {
             //
             // specimens were selected from catalog request
             //
-            order.request = {id: input.requestId};
+            order.request = {id: input.requestId, catalogId: input.catalogId};
             order.requester = input.requestor;
           }
         } else if (input.specimenListId) {
@@ -261,7 +261,7 @@ export default {
             promises.push(orderSvc.createOrderItemsFromReservedSpecimens(input.dp.id, input.printLabel));
           }
         } else if (input.requestId) {
-          order.request = {id: input.requestId};
+          order.request = {id: input.requestId, catalogId: input.catalogId};
           order.requester = input.requestor;
           if (!input.specimenIds || input.specimenIds.length == 0) {
             //
