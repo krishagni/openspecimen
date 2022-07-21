@@ -98,6 +98,8 @@ public class MasterSpecimenDetail extends AttributeModifiedSupport {
 	private String pathology;
 	
 	private BigDecimal initialQty;
+
+	private BigDecimal availableQty;
 	
 	private BigDecimal concentration;
 
@@ -485,6 +487,14 @@ public class MasterSpecimenDetail extends AttributeModifiedSupport {
 
 	public void setInitialQty(BigDecimal initialQty) {
 		this.initialQty = initialQty;
+	}
+
+	public BigDecimal getAvailableQty() {
+		return availableQty;
+	}
+
+	public void setAvailableQty(BigDecimal availableQty) {
+		this.availableQty = availableQty;
 	}
 
 	public BigDecimal getConcentration() {

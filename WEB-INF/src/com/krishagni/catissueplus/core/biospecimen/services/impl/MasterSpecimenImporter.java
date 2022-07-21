@@ -280,6 +280,10 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 			specimenDetail.setInitialQty(detail.getInitialQty());
 		}
 
+		if (detail.isAttrModified("availableQty")) {
+			specimenDetail.setAvailableQty(detail.getAvailableQty());
+		}
+
 		if (detail.isAttrModified("concentration")) {
 			specimenDetail.setConcentration(detail.getConcentration());
 		}

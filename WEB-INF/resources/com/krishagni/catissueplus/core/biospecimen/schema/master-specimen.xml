@@ -132,8 +132,13 @@
     </field>  
 
     <field>
-      <caption>#getMessage("specimen_quantity")</caption>
+      <caption>#getMessage("specimen_initial_quantity")</caption>
       <attribute>initialQty</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_available_quantity")</caption>
+      <attribute>availableQty</attribute>
     </field>
 
     <field>
