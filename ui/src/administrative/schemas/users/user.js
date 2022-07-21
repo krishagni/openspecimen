@@ -208,7 +208,7 @@ export default {
       "type": "pv",
       "labelCode": "users.printer",
       "name": "user.defaultPrinter",
-      "attribute": "system_printer_name",
+      "attribute": "label_printer_name",
       "selectProp": "value",
       "showWhen": "user.type != 'CONTACT'",
       "tooltip": "Printer to use for printing labels"

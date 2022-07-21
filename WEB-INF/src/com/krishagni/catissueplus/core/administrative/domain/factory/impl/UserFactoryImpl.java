@@ -464,7 +464,7 @@ public class UserFactoryImpl implements UserFactory {
 			return;
 		}
 
-		PermissibleValue pv = daoFactory.getPermissibleValueDao().getByValue("system_printer_name", detail.getDefaultPrinter());
+		PermissibleValue pv = daoFactory.getPermissibleValueDao().getByValue("label_printer_name", detail.getDefaultPrinter());
 		if (pv == null) {
 			ose.addError(UserErrorCode.INVALID_PRINTER_NAME, detail.getDefaultPrinter());
 		}
