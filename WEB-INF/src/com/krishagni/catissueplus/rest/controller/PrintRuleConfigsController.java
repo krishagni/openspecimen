@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -116,6 +117,13 @@ public class PrintRuleConfigsController {
 	public void getCommandFile(@PathVariable("id") Long ruleId, @PathVariable("filename") String filename, HttpServletResponse httpResp) {
 		File cmdFile = ResponseEvent.unwrap(printRuleConfigSvc.getCommandFile(RequestEvent.wrap(Pair.make(ruleId, filename))));
 		Utility.sendToClient(httpResp, filename, cmdFile);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/command-files")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Map<String, Integer> clearCommandFiles(@PathVariable("id") Long ruleId) {
+		return Collections.singletonMap("count", ResponseEvent.unwrap(printRuleConfigSvc.clearCommandFiles(RequestEvent.wrap(ruleId))));
 	}
 
 	private <T> RequestEvent<T> request(T payload) {

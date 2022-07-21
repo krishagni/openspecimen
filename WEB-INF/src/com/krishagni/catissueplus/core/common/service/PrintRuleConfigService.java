@@ -25,4 +25,6 @@ public interface PrintRuleConfigService {
 	ResponseEvent<List<FileEntry>> getCommandFiles(RequestEvent<Long> req);
 
 	ResponseEvent<File> getCommandFile(RequestEvent<Pair<Long, String>> req);
+
+	ResponseEvent<Integer> clearCommandFiles(RequestEvent<Long> req);
 }

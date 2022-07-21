@@ -1,16 +1,14 @@
 package com.krishagni.catissueplus.core.common.service.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -164,42 +162,34 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<FileEntry>> getCommandFiles(RequestEvent<Long> req) {
-		try {
-			if (!AuthUtil.isAdmin()) {
-				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
-			}
+		List<FileEntry> cmdFiles = new ArrayList<>();
+		try (Stream<Path> files = getFiles(req.getPayload())) {
+			files.forEach(
+				filePath -> {
+					File file = filePath.toFile();
+					int i = 0;
+					for (FileEntry e : cmdFiles) {
+						if (e.getMtime() < file.lastModified()) {
+							break;
+						} else if (e.getMtime() == file.lastModified()) {
+							if (e.getName().compareTo(file.getName()) < 0) {
+								break;
+							}
+						}
 
-			Long ruleId = req.getPayload();
-			if (ruleId == null) {
-				return ResponseEvent.userError(PrintRuleConfigErrorCode.ID_REQ);
-			}
+						++i;
+					}
 
-			PrintRuleConfig printRuleConfig = daoFactory.getPrintRuleConfigDao().getById(ruleId);
-			if (printRuleConfig == null) {
-				return ResponseEvent.userError(PrintRuleConfigErrorCode.NOT_FOUND, ruleId);
-			}
+					if (i <= 499) {
+						cmdFiles.add(i, FileEntry.from(file));
+						if (cmdFiles.size() > 500) {
+							cmdFiles.remove(500);
+						}
+					}
+				}
+			);
 
-			LabelPrintRule rule = printRuleConfig.getRule();
-			if (StringUtils.isBlank(rule.getCmdFilesDir()) || rule.getCmdFilesDir().equals("*")) {
-				return ResponseEvent.response(Collections.emptyList());
-			}
-
-			Path path = Paths.get(rule.getCmdFilesDir());
-			if (!path.toFile().getCanonicalPath().equals(path.toFile().getAbsolutePath())) {
-				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Print labels directory path is not absolute: " + rule.getCmdFilesDir());
-			}
-
-			String prefix = labelPrintRuleFactoryRegistrar.getFactory(printRuleConfig.getObjectType()).getItemType();
-			BiPredicate<Path, BasicFileAttributes> fileSelector = (file, attrs) -> attrs.isRegularFile() &&
-					file.getFileName().startsWith(prefix) && file.getFileName().endsWith(rule.getFileExtn());
-			try (Stream<Path> files = Files.find(path, 1, fileSelector)) {
-				List<FileEntry> cmdFiles = files.limit(500)
-					.map(Path::toFile)
-					.map(FileEntry::from)
-					.sorted(Comparator.comparing(FileEntry::getMtime).reversed())
-					.collect(Collectors.toList());
-				return ResponseEvent.response(cmdFiles);
-			}
+			return ResponseEvent.response(cmdFiles);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -247,6 +237,66 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Integer> clearCommandFiles(RequestEvent<Long> req) {
+		AtomicInteger count = new AtomicInteger(0);
+		try (Stream<Path> files = getFiles(req.getPayload())) {
+			files.forEach(
+				file -> {
+					file.toFile().delete();
+					count.incrementAndGet();
+				}
+			);
+
+			return ResponseEvent.response(count.get());
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	private Stream<Path> getFiles(Long ruleId)
+	throws IOException  {
+		if (!AuthUtil.isAdmin()) {
+			throw  OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		if (ruleId == null) {
+			throw  OpenSpecimenException.userError(PrintRuleConfigErrorCode.ID_REQ);
+		}
+
+		PrintRuleConfig printRuleConfig = daoFactory.getPrintRuleConfigDao().getById(ruleId);
+		if (printRuleConfig == null) {
+			throw  OpenSpecimenException.userError(PrintRuleConfigErrorCode.NOT_FOUND, ruleId);
+		}
+
+		LabelPrintRule rule = printRuleConfig.getRule();
+		if (StringUtils.isBlank(rule.getCmdFilesDir()) || rule.getCmdFilesDir().equals("*")) {
+			return Stream.empty();
+		}
+
+		Path path = Paths.get(rule.getCmdFilesDir());
+		if (!path.toFile().getCanonicalPath().equals(path.toFile().getAbsolutePath())) {
+			throw  OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Print labels directory path is not absolute: " + rule.getCmdFilesDir());
+		}
+
+		String prefix = labelPrintRuleFactoryRegistrar.getFactory(printRuleConfig.getObjectType()).getItemType();
+		return Files.find(
+			path,
+			1,
+			(file, attrs) -> {
+				if (!attrs.isRegularFile()) {
+					return false;
+				}
+
+				String filename = file.toFile().getName();
+				return filename.startsWith(prefix) && filename.endsWith(rule.getFileExtn());
+			}
+		);
 	}
 
 	private void deleteRule(PrintRuleConfig rule) {
