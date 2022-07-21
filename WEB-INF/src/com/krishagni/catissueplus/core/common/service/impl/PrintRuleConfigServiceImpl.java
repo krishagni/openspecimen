@@ -1,15 +1,17 @@
 package com.krishagni.catissueplus.core.common.service.impl;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -183,22 +185,21 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 			}
 
 			Path path = Paths.get(rule.getCmdFilesDir());
-			if (!path.isAbsolute()) {
+			if (!path.toFile().getCanonicalPath().equals(path.toFile().getAbsolutePath())) {
 				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Print labels directory path is not absolute: " + rule.getCmdFilesDir());
 			}
 
 			String prefix = labelPrintRuleFactoryRegistrar.getFactory(printRuleConfig.getObjectType()).getItemType();
-			List<FileEntry> cmdFiles = Arrays.stream(path.toFile().listFiles(new FilenameFilter() {
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.startsWith(prefix) && name.endsWith(rule.getFileExtn());
-					}
-				}))
-				.sorted(Comparator.comparing(File::lastModified).reversed())
-				.map(FileEntry::from)
-				.collect(Collectors.toList());
-
-			return ResponseEvent.response(cmdFiles);
+			BiPredicate<Path, BasicFileAttributes> fileSelector = (file, attrs) -> attrs.isRegularFile() &&
+					file.getFileName().startsWith(prefix) && file.getFileName().endsWith(rule.getFileExtn());
+			try (Stream<Path> files = Files.find(path, 1, fileSelector)) {
+				List<FileEntry> cmdFiles = files.limit(500)
+					.map(Path::toFile)
+					.map(FileEntry::from)
+					.sorted(Comparator.comparing(FileEntry::getMtime).reversed())
+					.collect(Collectors.toList());
+				return ResponseEvent.response(cmdFiles);
+			}
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
