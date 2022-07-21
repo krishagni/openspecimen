@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionLabelPrintRule;
+import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -13,6 +14,12 @@ import com.krishagni.catissueplus.core.common.domain.factory.impl.AbstractLabelP
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 public class DistributionLabelPrintRuleFactoryImpl extends AbstractLabelPrintRuleFactory {
+
+	@Override
+	public String getItemType() {
+		return DistributionOrderItem.getEntityName();
+	}
+
 	@Override
 	public LabelPrintRule fromRuleDef(Map<String, Object> ruleDef, boolean failOnError, OpenSpecimenException ose) {
 		DistributionLabelPrintRule rule = new DistributionLabelPrintRule();

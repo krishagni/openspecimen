@@ -58,6 +58,10 @@ export default {
        },
 
        {
+         "fields": [ { "name": "user.defaultPrinter" } ]
+       },
+
+       {
          "fields": [ { "name": "user.downloadLabelsPrintFile" } ]
        },
 

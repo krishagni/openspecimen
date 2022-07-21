@@ -14,9 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
@@ -115,6 +114,10 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 			String ipAddr = AuthUtil.getRemoteAddr();
 			User currentUser = AuthUtil.getCurrentUser();
+			String userPrinter = null;
+			if (currentUser.getDefaultPrinter() != null) {
+				userPrinter = currentUser.getDefaultPrinter().getValue();
+			}
 
 			LabelPrintJob job = new LabelPrintJob();
 			job.setSubmissionDate(Calendar.getInstance().getTime());
@@ -134,7 +137,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 					LabelPrintJobItem item = new LabelPrintJobItem();
 					item.setJob(job);
-					item.setPrinterName(rule.getPrinterName());
+					item.setPrinterName(userPrinter != null ? userPrinter : rule.getPrinterName());
 					item.setItemLabel(getItemLabel(obj));
 					item.setItemId(getItemId(obj));
 					item.setCopies(printItem.getCopies());

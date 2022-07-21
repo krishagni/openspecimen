@@ -548,4 +548,11 @@
       <column name="REV" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="User default printer">
+    <addColumn tableName="CATISSUE_USER_AUD">
+      <column name="DEFAULT_PRINTER_ID" type="${int.type}" />
+      <column name="defaultPrinter_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

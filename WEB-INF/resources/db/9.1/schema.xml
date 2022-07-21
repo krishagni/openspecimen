@@ -135,4 +135,13 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="User default printer">
+    <addColumn tableName="CATISSUE_USER">
+      <column name="DEFAULT_PRINTER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_USER_PRINTER" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -6,12 +6,19 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.ContainerLabelPrintRule;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.factory.impl.AbstractLabelPrintRuleFactory;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 public class ContainerLabelPrintRuleFactoryImpl extends AbstractLabelPrintRuleFactory {
+
+	@Override
+	public String getItemType() {
+		return StorageContainer.getEntityName();
+	}
+
 	@Override
 	public LabelPrintRule fromRuleDef(Map<String, Object> ruleDef, boolean failOnError, OpenSpecimenException ose) {
 		ContainerLabelPrintRule rule = new ContainerLabelPrintRule();

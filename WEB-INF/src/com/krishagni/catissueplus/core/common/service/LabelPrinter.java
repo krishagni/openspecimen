@@ -5,7 +5,6 @@ import java.util.List;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
-import com.krishagni.catissueplus.core.common.events.LabelTokenDetail;
 
 public interface LabelPrinter<T> {
 	List<LabelTmplToken> getTokens();

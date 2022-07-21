@@ -140,6 +140,7 @@
     "buttons": {
       "actions": "Actions",
       "add": "Add",
+      "clone": "Clone",
       "save": "Save",
       "export": "Export",
       "update": "Update",

@@ -65,7 +65,9 @@ public enum UserErrorCode implements ErrorCode {
 
 	INVALID_IP,
 
-	IP_REQ;
+	IP_REQ,
+
+	INVALID_PRINTER_NAME;
 	
 	public String code() {
 		return "USER_" + this.name();

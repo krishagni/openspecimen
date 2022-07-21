@@ -22,6 +22,11 @@ import com.krishagni.catissueplus.core.common.service.PvValidator;
 public class SpecimenLabelPrintRuleFactoryImpl extends AbstractLabelPrintRuleFactory {
 
 	@Override
+	public String getItemType() {
+		return Specimen.getEntityName();
+	}
+
+	@Override
 	public LabelPrintRule fromRuleDef(Map<String, Object> ruleDef, boolean failOnError, OpenSpecimenException ose) {
 		SpecimenLabelPrintRule rule = new SpecimenLabelPrintRule();
 

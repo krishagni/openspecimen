@@ -205,6 +205,16 @@ export default {
     },
 
     {
+      "type": "pv",
+      "labelCode": "users.printer",
+      "name": "user.defaultPrinter",
+      "attribute": "system_printer_name",
+      "selectProp": "value",
+      "showWhen": "user.type != 'CONTACT'",
+      "tooltip": "Printer to use for printing labels"
+    },
+
+    {
       "type": "radio",
       "labelCode": "users.download_labels",
       "name": "user.downloadLabelsPrintFile",

@@ -1,9 +1,12 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
+import com.krishagni.catissueplus.core.common.events.FileEntry;
 import com.krishagni.catissueplus.core.common.events.PrintRuleConfigDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
 import com.krishagni.catissueplus.core.common.service.PrintRuleConfigService;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Controller
 @RequestMapping("/print-rules")
@@ -95,6 +101,21 @@ public class PrintRuleConfigsController {
 		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
 		op.setIds(new HashSet<>(Arrays.asList(ids)));
 		return response(printRuleConfigSvc.deletePrintRuleConfigs(request(op)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/command-files")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<FileEntry> getCommandFiles(@PathVariable("id") Long ruleId) {
+		return ResponseEvent.unwrap(printRuleConfigSvc.getCommandFiles(RequestEvent.wrap(ruleId)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/command-files/{filename:.+}")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public void getCommandFile(@PathVariable("id") Long ruleId, @PathVariable("filename") String filename, HttpServletResponse httpResp) {
+		File cmdFile = ResponseEvent.unwrap(printRuleConfigSvc.getCommandFile(RequestEvent.wrap(Pair.make(ruleId, filename))));
+		Utility.sendToClient(httpResp, filename, cmdFile);
 	}
 
 	private <T> RequestEvent<T> request(T payload) {

@@ -991,6 +991,7 @@
   <bean id="printRuleConfigSvc" class="com.krishagni.catissueplus.core.common.service.impl.PrintRuleConfigServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="printRuleConfigFactory" ref="printRuleConfigFactory"/>
+    <property name="labelPrintRuleFactoryRegistrar" ref="labelPrintRuleFactoryRegistrar"/>
   </bean>
 
   <bean id="labelPrintRuleFactoryRegistrar" class="com.krishagni.catissueplus.core.common.domain.LabelPrintRuleFactoryRegistrar" factory-method="getInstance">

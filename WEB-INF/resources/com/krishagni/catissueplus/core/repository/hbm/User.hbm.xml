@@ -64,6 +64,8 @@
 
     <property name="forcePasswordReset" column="FORCE_PASSWORD_RESET" />
 
+    <many-to-one name="defaultPrinter" column="DEFAULT_PRINTER_ID" fetch="join" />
+
     <property name="downloadLabelsPrintFile" column="DOWNLOAD_LABELS_PRINT_FILE" />
 
     <set name="roles" inverse="true" cascade="none">

@@ -757,7 +757,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				// User is not an admin and trying update his/her profile.
 				//
 				UserDetail newDetail = UserDetail.from(existingUser);
-				List<String> allowedAttrs = Arrays.asList("phoneNumber", "timeZone", "dnd", "address");
+				List<String> allowedAttrs = Arrays.asList("phoneNumber", "timeZone", "dnd", "defaultPrinter", "downloadLabelsPrintFile", "address");
 				for (String attr : allowedAttrs) {
 					if (input.isAttrModified(attr)) {
 						Utility.setProperty(newDetail, attr, Utility.getProperty(input, attr));

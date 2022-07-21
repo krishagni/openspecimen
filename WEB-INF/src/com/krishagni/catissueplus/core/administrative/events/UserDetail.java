@@ -54,6 +54,8 @@ public class UserDetail extends AttributeModifiedSupport {
 
 	private String ipRange;
 
+	private String defaultPrinter;
+
 	private boolean downloadLabelsPrintFile;
 
 	private String address;
@@ -195,6 +197,14 @@ public class UserDetail extends AttributeModifiedSupport {
 		this.ipRange = ipRange;
 	}
 
+	public String getDefaultPrinter() {
+		return defaultPrinter;
+	}
+
+	public void setDefaultPrinter(String defaultPrinter) {
+		this.defaultPrinter = defaultPrinter;
+	}
+
 	public boolean isDownloadLabelsPrintFile() {
 		return downloadLabelsPrintFile;
 	}
@@ -257,6 +267,7 @@ public class UserDetail extends AttributeModifiedSupport {
 		detail.setDnd(user.getDnd());
 		detail.setApiUser(user.isApiUser());
 		detail.setIpRange(user.getIpRange());
+		detail.setDefaultPrinter(user.getDefaultPrinter() != null ? user.getDefaultPrinter().getValue() : null);
 		detail.setDownloadLabelsPrintFile(user.isDownloadLabelsPrintFile());
 		detail.setTimeZone(user.getTimeZone());
 		detail.setAddress(user.getAddress());

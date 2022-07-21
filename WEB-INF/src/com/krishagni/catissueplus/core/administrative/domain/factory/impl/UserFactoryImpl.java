@@ -5,10 +5,11 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.InstituteErrorCode;
@@ -58,6 +59,7 @@ public class UserFactoryImpl implements UserFactory {
 		setApiUser(detail, user, ose);
 		setIpRange(detail, user, ose);
 		setTimeZone(detail, user, ose);
+		setDefaultPrinter(detail, user, ose);
 		setDownloadLabelsPrintFile(detail, user, ose);
 		user.setCreationDate(Calendar.getInstance().getTime());
 		ose.checkAndThrow();
@@ -87,6 +89,7 @@ public class UserFactoryImpl implements UserFactory {
 		setApiUser(detail, existing, user, ose);
 		setIpRange(detail, existing, user, ose);
 		setTimeZone(detail, existing, user, ose);
+		setDefaultPrinter(detail, existing, user, ose);
 		setDownloadLabelsPrintFile(detail, existing, user, ose);
 		ose.checkAndThrow();
 		return user;		
@@ -452,6 +455,28 @@ public class UserFactoryImpl implements UserFactory {
 			setTimeZone(detail, user, ose);
 		} else {
 			user.setTimeZone(existing.getTimeZone());
+		}
+	}
+
+	private void setDefaultPrinter(UserDetail detail, User user, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(detail.getDefaultPrinter())) {
+			user.setDefaultPrinter(null);
+			return;
+		}
+
+		PermissibleValue pv = daoFactory.getPermissibleValueDao().getByValue("system_printer_name", detail.getDefaultPrinter());
+		if (pv == null) {
+			ose.addError(UserErrorCode.INVALID_PRINTER_NAME, detail.getDefaultPrinter());
+		}
+
+		user.setDefaultPrinter(pv);
+	}
+
+	private void setDefaultPrinter(UserDetail detail, User existing, User user, OpenSpecimenException ose) {
+		if (detail.isAttrModified("defaultPrinter")) {
+			setDefaultPrinter(detail, user, ose);
+		} else {
+			user.setDefaultPrinter(existing.getDefaultPrinter());
 		}
 	}
 

@@ -17,6 +17,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -231,8 +232,13 @@ public abstract class LabelPrintRule {
 				dataItems.put(getMessageStr("LABELTYPE"), labelType);
 			}
 
-			if (!isWildCard(printerName)) {
-				dataItems.put(getMessageStr("PRINTER"), printerName);
+			String userPrinter = printerName;
+			if (AuthUtil.getCurrentUser() != null && AuthUtil.getCurrentUser().getDefaultPrinter() != null) {
+				userPrinter = AuthUtil.getCurrentUser().getDefaultPrinter().getValue();
+			}
+
+			if (!isWildCard(userPrinter)) {
+				dataItems.put(getMessageStr("PRINTER"), userPrinter);
 			}
 			
 			for (Pair<LabelTmplToken, List<String>> tokenArgs : dataTokens) {

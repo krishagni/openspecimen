@@ -95,6 +95,8 @@ public class User extends BaseEntity implements UserDetails {
 
 	private boolean forcePasswordReset;
 
+	private PermissibleValue defaultPrinter;
+
 	private boolean downloadLabelsPrintFile;
 
 	private Set<Password> passwords = new HashSet<>();
@@ -312,6 +314,14 @@ public class User extends BaseEntity implements UserDetails {
 		this.forcePasswordReset = forcePasswordReset;
 	}
 
+	public PermissibleValue getDefaultPrinter() {
+		return defaultPrinter;
+	}
+
+	public void setDefaultPrinter(PermissibleValue defaultPrinter) {
+		this.defaultPrinter = defaultPrinter;
+	}
+
 	public boolean isDownloadLabelsPrintFile() {
 		return downloadLabelsPrintFile;
 	}
@@ -431,6 +441,7 @@ public class User extends BaseEntity implements UserDetails {
 			setManageWfs(user.canManageWfs());
 			setApiUser(user.isApiUser());
 			setIpRange(user.getIpRange());
+			setDefaultPrinter(user.getDefaultPrinter());
 			setDownloadLabelsPrintFile(user.isDownloadLabelsPrintFile());
 		}
 	}
