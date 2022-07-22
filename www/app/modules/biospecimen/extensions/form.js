@@ -144,7 +144,9 @@ angular.module('os.biospecimen.extensions', ['os.biospecimen.models'])
             }
           );
 
-          element.find('.de-sf-content').closest('.col-xs-6').removeClass('col-xs-6').addClass('col-xs-9');
+          element.find('.de-sf-content').closest('.col-xs-6')
+            .removeClass('col-xs-6').addClass('col-xs-9')
+            .css({'padding-left': '30px'});
         }
       }
     }
