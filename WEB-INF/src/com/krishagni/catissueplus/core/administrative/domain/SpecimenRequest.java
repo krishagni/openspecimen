@@ -318,12 +318,12 @@ public class SpecimenRequest extends BaseExtensionEntity {
 		close(comments);
 	}
 
-	public void resetScreeningStatus() {
+	public void resetScreeningStatus(String comments) {
 		if (isApproved()) {
 			ensureReqIsNotUsedInOrder();
 		}
 
-		updateScreeningStatus(ScreeningStatus.PENDING, null, null, null);
+		updateScreeningStatus(ScreeningStatus.PENDING, null, null, comments);
 	}
 
 	public static String getEntityName() {
@@ -343,15 +343,30 @@ public class SpecimenRequest extends BaseExtensionEntity {
 			time = Calendar.getInstance().getTime();
 		}
 
+		if (StringUtils.isNotBlank(comments)) {
+			if (StringUtils.isNotBlank(getScreeningComments())) {
+				comments += "\n\n" + getScreeningComments();
+			}
+		} else {
+			comments = getScreeningComments();
+		}
+
 		setScreeningStatus(inputStatus);
 		setScreenedBy(user);
 		setDateOfScreening(time);
 		setScreeningComments(comments);
+		if (inputStatus == ScreeningStatus.PENDING) {
+			setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+		}
 	}
 
 	private void ensureReqIsNotUsedInOrder() {
-		if (!getOrders().isEmpty()) {
-			String names = getOrders().stream().map(DistributionOrder::getName).collect(Collectors.joining(", "));
+		Set<String> reqOrders = getOrders().stream()
+			.filter(o -> !Status.isDisabledStatus(o.getActivityStatus()))
+			.map(DistributionOrder::getName)
+			.collect(Collectors.toSet());
+		if (!reqOrders.isEmpty()) {
+			String names = StringUtils.join(reqOrders, ", ");
 			throw OpenSpecimenException.userError(SpecimenRequestErrorCode.USED_IN_ORDER, getId(), names);
 		}
 	}
