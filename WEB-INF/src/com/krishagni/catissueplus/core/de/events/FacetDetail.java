@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FacetDetail {
 	private String expr;
 
 	private String caption;
 
-	private Collection<Object> values = new ArrayList<Object>();
+	private Collection<Object> values = new ArrayList<>();
+
+	private Integer dbRows;
 
 	public String getExpr() {
 		return expr;
@@ -33,5 +38,13 @@ public class FacetDetail {
 
 	public void setValues(Collection<Object> values) {
 		this.values = values;
+	}
+
+	public Integer getDbRows() {
+		return dbRows;
+	}
+
+	public void setDbRows(Integer dbRows) {
+		this.dbRows = dbRows;
 	}
 }

@@ -1635,8 +1635,10 @@ public class QueryServiceImpl implements QueryService {
 			queryResult = queryResp.getResultData();
 			queryResult.setScreener(screener);
 
+			int dbRows = 0;
 			Collection<Object> values = new TreeSet<>();
 			for (Object[] row : queryResult.getRows()) {
+				++dbRows;
 				if (row[0] != null && !row[0].toString().isEmpty()) {
 					values.add(row[0]);
 				}
@@ -1647,6 +1649,7 @@ public class QueryServiceImpl implements QueryService {
 			result.setExpr(facet);
 			result.setCaption(columnLabels[columnLabels.length - 1]);
 			result.setValues(values);
+			result.setDbRows(dbRows);
 			return result;
 		} finally {
 			if (queryResult != null) {

@@ -848,7 +848,8 @@ angular.module('os.query.results', ['os.query.models'])
     }
 
     $scope.searchFacetValue = function(facet) {
-      if (facet.values.length < 500 && !facet.searchValues) {
+      var valuesCount = (facet.dbRows != null && facet.dbRows != undefined) ? facet.dbRows : facet.values.length;
+      if (valuesCount < 500 && !facet.searchValues) {
         return;
       }
 
