@@ -343,14 +343,6 @@ public class SpecimenRequest extends BaseExtensionEntity {
 			time = Calendar.getInstance().getTime();
 		}
 
-		if (StringUtils.isNotBlank(comments)) {
-			if (StringUtils.isNotBlank(getScreeningComments())) {
-				comments += "\n\n" + getScreeningComments();
-			}
-		} else {
-			comments = getScreeningComments();
-		}
-
 		setScreeningStatus(inputStatus);
 		setScreenedBy(user);
 		setDateOfScreening(time);
