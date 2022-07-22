@@ -7,6 +7,11 @@
   white-space: normal!important;
 }
 
+.ui-select-bootstrap .ui-select-choices-row > span {
+  white-space: initial;
+  word-break: break-word;
+}
+
 .ui-select-bootstrap .form-control.ui-select-toggle,
 .ui-select-bootstrap .form-control.ui-select-match {
   height: auto!important;
