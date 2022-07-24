@@ -5,7 +5,7 @@
         <thead>
           <tr>
             <th v-for="(field, idx) of sfFields" :key="idx">
-              <span v-html="field.label"></span>
+              <span v-html="label(field)"></span>
               <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
                 <span>*</span>
               </span>
@@ -92,6 +92,10 @@ export default {
         if (fv && fv.required) {
           field.required = true;
           field.requiredTooltip = (fv.required && fv.required.message) || 'Mandatory field';
+          const validator = fv.required || fv.requiredIf;
+          if (validator && validator.messageCode) {
+            field.requiredTooltip = this.$t(validator.messageCode);
+          }
         }
 
         result.push(field);
@@ -136,6 +140,16 @@ export default {
       this.$emit('input', {field: field, data: sfRowData})
       if (this.v$.inputValue[sfRdIdx][field.name]) {
         this.v$.inputValue[sfRdIdx][field.name].$touch();
+      }
+    },
+
+    label: function(field) {
+      if (field.labelCode) {
+        return this.$t(field.labelCode);
+      } else if (field.label) {
+        return field.label;
+      } else {
+        return 'Unknown';
       }
     },
 

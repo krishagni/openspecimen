@@ -2,19 +2,19 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="dpResources.updateOpts">
-        <os-button left-icon="edit" label="Edit" @click="edit" />
+        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="edit" />
 
-        <os-button left-icon="times" label="Close" @click="confirmClose"
+        <os-button left-icon="times" :label="$t('common.buttons.close')" @click="confirmClose"
           v-if="ctx.dp.activityStatus == 'Active'" />
 
-        <os-button left-icon="check" label="Reopen" @click="reopen"
+        <os-button left-icon="check" :label="$t('common.buttons.reopen')" @click="reopen"
           v-if="ctx.dp.activityStatus == 'Closed'" />
       </span>
 
-      <os-button left-icon="trash" label="Delete" @click="deleteDp"
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteDp"
         v-show-if-allowed="dpResources.deleteOpts" />
 
-      <os-button left-icon="share" label="View Orders" @click="viewOrders"
+      <os-button left-icon="share" :label="$t('dps.view_orders')" @click="viewOrders"
         v-show-if-allowed="dpResources.orderOpts" />
 
       <os-plugin-views page="dp-overview" view="more-menu" :view-props="{dp: ctx.dp}" />
@@ -32,14 +32,14 @@
 
     <os-dialog ref="closeConfirmDialog">
       <template #header>
-        <span>Confirm Close</span>
+        <span v-t="'dps.confirm_close'">Confirm Close</span>
       </template>
       <template #content>
-        <span>Are you sure you want to close the distribution protocol - <b>{{ctx.dp.shortTitle}}</b>?</span>
+        <span v-t="{path: 'dps.confirm_close_msg', args: ctx.dp}">Are you sure you want to close the distribution protocol - <b>{{ctx.dp.shortTitle}}</b>?</span>
       </template>
       <template #footer>
-        <os-button text label="Cancel" @click="cancelClose" />
-        <os-button primary label="Yes, close" @click="close" />
+        <os-button text    :label="$t('common.buttons.cancel')" @click="cancelClose" />
+        <os-button primary :label="$t('common.buttons.close')" @click="close" />
       </template>
     </os-dialog>
 
@@ -100,7 +100,7 @@ export default {
       this.ctx.dpObjs = [{objectName: 'distribution_protocol', objectId: this.dp.id}];
 
       this.ctx.deleteOpts = {
-        type: 'Distribution Protocol',
+        type: this.$t('dps.singular'),
         title: this.dp.shortTitle,
         dependents: () => dpSvc.getDependents(this.dp),
         deleteObj: () => dpSvc.delete(this.dp)
@@ -124,13 +124,13 @@ export default {
       this.ctx.dp.activityStatus = savedDp.activityStatus;
 
       this.$refs.closeConfirmDialog.close();
-      alertsSvc.success('Distribution protocol ' + this.ctx.dp.shortTitle + ' closed!');
+      alertsSvc.success({code: 'dps.closed', args: this.ctx.dp});
     },
 
     reopen: async function() {
       const savedDp = await dpSvc.updateStatus(this.ctx.dp, 'Active');
       this.ctx.dp.activityStatus = savedDp.activityStatus;
-      alertsSvc.success('Distribution protocol ' + this.ctx.dp.shortTitle + ' reopened!');
+      alertsSvc.success({code: 'dps.reopened', args: this.ctx.dp});
     },
 
     deleteDp: async function() {

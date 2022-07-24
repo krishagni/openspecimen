@@ -18,30 +18,30 @@ export default {
   columns: [
     {
       "name": "dp.shortTitle",
-      "caption": "Short Title",
+      "captionCode": "dps.short_title",
       "href": (row, query) => routerSvc.getUrl('DpsListItemDetail.Overview', {dpId: row.rowObject.dp.id}, query)
     },
     {
       "name": "dp.instituteName",
-      "caption": "Receiving Institute"
+      "captionCode": "dps.receiving_institute",
     },
     {
       "name": "dp.defReceivingSiteName",
-      "caption": "Receiving Site"
+      "captionCode": "dps.receiving_site",
     },
     {
       "name": "dp.principalInvestigator",
-      "caption": "Principal Investigator",
+      "captionCode": "dps.principal_investigator",
       "type": "user"
     },
     {
       "name": "dp.startDate",
-      "caption": "Start Date",
+      "captionCode": "dps.start_date",
       "type": "date"
     },
     {
       "name": "dp.distributedSpecimensCount",
-      "caption": "Distributed Specimens"
+      "captionCode": "dps.distributed_specimens"
     }
   ],
 
@@ -49,17 +49,17 @@ export default {
     {
       name: 'title',
       type: 'text',
-      caption: 'Title'
+      captionCode: 'dps.title'
     },
     {
       name: 'irbId',
       type: 'text',
-      caption: 'IRB ID'
+      captionCode: 'dps.ethics_id',
     },
     {
       name: 'receivingInstitute',
       type: 'dropdown',
-      caption: 'Receiving Institute',
+      captionCode: 'dps.receiving_institute',
       listSource: {
         apiUrl: 'institutes',
         displayProp: 'name',
@@ -70,7 +70,7 @@ export default {
     {
       name: 'receivingSite',
       type: 'site',
-      caption: 'Receiving Site',
+      captionCode: 'dps.receiving_site',
       listSource: {
         selectProp: 'name',
         queryParams: {
@@ -83,7 +83,7 @@ export default {
     {
       name: 'piId',
       type: 'user',
-      caption: 'Principal Investigator',
+      captionCode: 'dps.principal_investigator',
       selectProp: 'id',
       listSource: {
         queryParams: {
@@ -96,7 +96,7 @@ export default {
     {
       name: 'activityStatus',
       type: 'dropdown',
-      caption: 'Status',
+      captionCode: 'dps.status',
       listSource: {
         selectProp: 'value',
         displayProp: 'value',

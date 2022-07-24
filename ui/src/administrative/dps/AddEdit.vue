@@ -6,16 +6,21 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.dp.id">Create Distribution Protocol</h3>
-        <h3 v-else>Update {{dataCtx.dp.shortTitle}}</h3>
+        <h3 v-if="!dataCtx.dp.id">
+          <span v-t="'dps.create'">Create Distribution Protocol</span>
+        </h3>
+        <h3 v-else>
+          <span v-t="{path: 'common.update', args: {name: dataCtx.dp.shortTitle}}"></span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <os-form ref="dpForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <div>
-          <os-button primary :label="!dataCtx.dp.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-          <os-button text label="Cancel" @click="cancel" />
+          <os-button primary :label="$t(!dataCtx.dp.id ? 'common.buttons.create' : 'common.buttons.update')"
+            @click="saveOrUpdate" />
+          <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
         </div>
       </os-form>
     </os-page-body>
@@ -26,6 +31,7 @@
 import { reactive, inject } from 'vue';
 
 import alertSvc  from '@/common/services/Alerts.js';
+import i18n      from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
 import formUtil  from '@/common/services/FormUtil.js';
 import util      from '@/common/services/Util.js';
@@ -42,7 +48,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('DpsList', {dpId: -1}), label: 'Distribution Protocols'}
+        {url: routerSvc.getUrl('DpsList', {dpId: -1}), label: i18n.msg('dps.list')}
       ],
 
       addEditFs: {rows: []}
@@ -73,7 +79,7 @@ export default {
             .map(institute => ({institute: institute, sites: sites[institute].map(site => ({name: site}))}));
 
           if (!ui.currentUser.admin && dp.distributingSites.length > 1) {
-            alertSvc.error('The distribution protocol can be edited only by the super admin');
+            alertSvc.error({code: 'dps.admin_rights_req_to_edit'});
             routerSvc.back();
           }
         } else {
@@ -116,7 +122,7 @@ export default {
       );
 
       const savedDp = await dpSvc.saveOrUpdate(toSave);
-      alertSvc.success('Distribution protocol ' + savedDp.shortTitle + ' saved!');
+      alertSvc.success({code: 'dps.saved', args: savedDp});
       if (!this.dataCtx.dp.id) {
         routerSvc.goto('DpDetail.Overview', {dpId: savedDp.id});
       } else {

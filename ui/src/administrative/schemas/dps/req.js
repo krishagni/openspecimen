@@ -4,7 +4,7 @@ export default {
     {
       "type": "pv",
       "name": "requirement.specimenType",
-      "label": "Specimen Type",
+      "labelCode": "dps.specimen_type",
       "attribute": "specimen_type",
       "leafValue": true,
       "selectProp": "value"
@@ -12,7 +12,7 @@ export default {
     {
       "type": "pv",
       "name": "requirement.anatomicSite",
-      "label": "Anatomic Site",
+      "labelCode": "dps.specimen_anatomic_site",
       "attribute": "anatomic_site",
       "leafValue": true,
       "selectProp": "value"
@@ -20,7 +20,7 @@ export default {
     {
       "type": "pv",
       "name": "requirement.pathologyStatuses",
-      "label": "Pathology Status",
+      "labelCode": "dps.specimen_pathology_status",
       "attribute": "pathology_status",
       "leafValue": true,
       "selectProp": "value",
@@ -29,32 +29,32 @@ export default {
     {
       "type": "pv",
       "name": "requirement.clinicalDiagnosis",
-      "label": "Clinical Diagnosis",
+      "labelCode": "dps.visit_clinical_diagnosis",
       "attribute": "clinical_diagnosis",
       "selectProp": "value"
     },
     {
       "type": "number",
       "name": "requirement.specimenCount",
-      "label": "Specimen Count",
+      "labelCode": "dps.specimens_count",
       "maxFractionDigits": 0
     },
     {
       "type": "specimen-measure",
       "name": "requirement.quantity",
-      "label": "Quantity Per Specimen"
+      "labelCode": "dps.qty_per_specimen"
     },
     {
       "type": "number",
       "name": "requirement.cost",
-      "label": "Cost",
+      "labelCode": "dps.cost",
       "maxFractionDigits": 2,
       "showWhen": "invoicingEnabled"
     },
     {
       "type": "textarea",
       "name": "requirement.comments",
-      "label": "Comments"
+      "labelCode": "dps.comments"
     }
   ]
 }

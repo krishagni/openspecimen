@@ -1,29 +1,35 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="plus" label="Add Rule" @click="showAddRule" />
+      <os-button left-icon="plus" :label="$t('dps.econsents.add_rule')" @click="showAddRule" />
     </template>
   </os-page-toolbar>
 
   <div v-if="ctx.loading">
     <os-message type="info">
-      <span>Loading consent validation rules. Please wait for a moment...</span>
+      <span v-t="'dps.econsents.loading_rules'">Loading consent validation rules. Please wait for a moment...</span>
     </os-message>
   </div>
 
   <div v-else-if="!ctx.rules || !ctx.rules.rules || ctx.rules.rules.length == 0">
     <os-message type="info">
-      <span>No consent validation rules to show.</span>
+      <span v-t="'dps.econsents.no_rules'">No consent validation rules to show.</span>
     </os-message>
   </div>
 
   <div v-else>
     <div class="os-econsent-rules-type">
-      <div class="label">Match: </div>
+      <div class="label" v-t="'dps.econsents.match'">Match: </div>
       <div class="type">
-        <span :class="ctx.rules.type == 'ALL' && 'active'"      @click="changeRuleType('ALL')">All</span> 
-        <span :class="ctx.rules.type == 'ANY' && 'active'"      @click="changeRuleType('ANY')">Any</span> 
-        <span :class="ctx.rules.type == 'ADVANCED' && 'active'" @click="changeRuleType('ADVANCED')">Advanced</span> 
+        <span :class="ctx.rules.type == 'ALL' && 'active'"      @click="changeRuleType('ALL')">
+          <span v-t="'dps.econsents.all'">All</span>
+        </span>
+        <span :class="ctx.rules.type == 'ANY' && 'active'"      @click="changeRuleType('ANY')">
+          <span v-t="'dps.econsents.any'">Any</span>
+        </span>
+        <span :class="ctx.rules.type == 'ADVANCED' && 'active'" @click="changeRuleType('ADVANCED')">
+          <span v-t="'dps.econsents.advanced'">Advanced</span>
+        </span>
       </div>
     </div>
 
@@ -31,9 +37,9 @@
       <os-textarea :disabled="!ctx.allowExprEdit" class="text" v-model="ctx.rules.expr" />
 
       <span class="buttons">
-        <os-button primary label="Edit" @click="editRulesExpr" v-if="!ctx.allowExprEdit" />
-        <os-button primary label="Save" @click="saveRules"     v-if="ctx.allowExprEdit"  />
-        <os-button label="Cancel" @click="cancelEditRulesExpr" v-if="ctx.allowExprEdit"  />
+        <os-button primary :label="$t('common.buttons.edit')" @click="editRulesExpr" v-if="!ctx.allowExprEdit" />
+        <os-button primary :label="$t('common.buttons.save')" @click="saveRules"     v-if="ctx.allowExprEdit"  />
+        <os-button :label="$t('common.buttons.cancel')" @click="cancelEditRulesExpr" v-if="ctx.allowExprEdit"  />
       </span>
     </div>
 
@@ -61,24 +67,31 @@
 
   <os-dialog ref="addRuleDialog">
     <template #header>
-      <span v-if="!ctx.rule.id">Add Rule</span>
-      <span v-else>Edit Rule</span>
+      <span v-if="!ctx.rule.id">
+        <span v-t="'dps.econsents.add_rule'">Add Rule</span>
+      </span>
+      <span v-else>
+        <span v-t="'dps.econsents.edit_rule'">Edit Rule</span>
+      </span>
     </template>
     <template #content>
       <os-form ref="addEditRuleForm" :schema="ctx.addEditRuleSchema" :data="ctx" @input="handleInput($event)" />
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="cancelAddOrUpdateRule" />
-      <os-button primary :label="!ctx.rule.id ? 'Add' : 'Update'" @click="addOrUpdateRule" />
+      <os-button text :label="$t('common.buttons.cancel')" @click="cancelAddOrUpdateRule" />
+      <os-button primary :label="$t(!ctx.rule.id ? 'common.buttons.add' : 'common.buttons.update')"
+        @click="addOrUpdateRule" />
     </template>
   </os-dialog>
 
   <os-dialog ref="confirmDeleteRuleDialog">
     <template #header>
-      <span>Delete Rule?</span>
+      <span v-t="'dps.econsents.delete_rule'">Delete Rule?</span>
     </template>
     <template #content>
-      <div style="margin-bottom: 1.25rem;">Are you sure you want to delete the rule?</div>
+      <div style="margin-bottom: 1.25rem;">
+        <span v-t="'dps.econsents.confirm_delete_rule'">Are you sure you want to delete the rule?</span>
+      </div>
       <div style="display: flex;">
         <div><i>{{ctx.toDelete.statement.statement}} ({{ctx.toDelete.statement.code}})</i></div>
         <div style="margin-left: 0.5rem;"><b>{{opDesc(ctx.toDelete.op)}}</b></div>
@@ -86,8 +99,8 @@
       </div>
     </template>
     <template #footer>
-      <os-button text   label="Cancel"      @click="cancelDeleteRule" />
-      <os-button danger label="Yes, delete" @click="deleteRule" />
+      <os-button text   :label="$t('common.buttons.cancel')" @click="cancelDeleteRule" />
+      <os-button danger :label="$t('common.buttons.delete')" @click="deleteRule" />
     </template>
   </os-dialog>
 </template>
@@ -123,11 +136,12 @@ export default {
     },
 
     opDesc: function(op) {
+      const t = this.$t;
       switch (op) {
-        case 'EQ': return 'is';
-        case 'NE': return 'is not';
-        case 'IN': return 'in';
-        case 'NOT_IN': return 'not in';
+        case 'EQ': return t('dps.econsents.is');
+        case 'NE': return t('dps.econsents.is_not');
+        case 'IN': return t('dps.econsents.in');
+        case 'NOT_IN': return t('dps.econsents.not_in');
       }
     },
 
@@ -230,7 +244,7 @@ export default {
       }
 
       await this.saveRules();
-      this.$osSvc.alertsSvc.success('Rule saved');
+      this.$osSvc.alertsSvc.success({code: 'dps.econsents.rule_saved'});
       this.cancelAddOrUpdateRule();
     },
 
@@ -255,7 +269,7 @@ export default {
       rules.rules.splice(idx, 1);
       await this.saveRules();
 
-      this.$osSvc.alertsSvc.success('Rule deleted');
+      this.$osSvc.alertsSvc.success({code: 'dps.econsents.rule_deleted'});
       this.cancelDeleteRule();
     },
 
@@ -285,6 +299,7 @@ export default {
     },
 
     getAddEditRuleSchema: function() {
+      const t = this.$t;
       return {
         rows: [
           {
@@ -292,14 +307,14 @@ export default {
               {
                 name: 'rule.statement',
                 type: 'dropdown',
-                label: 'Statement',
+                labelCode: 'dps.econsents.statement',
                 listSource: {
                   loadFn: ({searchTerm}) => this.loadStatements(searchTerm),
                   displayProp: 'caption'
                 },
                 validations: {
                   required: {
-                    message: 'Statement is mandatory'
+                    messageCode: 'dps.econsents.statement_req'
                   }
                 }
               }
@@ -310,20 +325,20 @@ export default {
               {
                 name: 'rule.op',
                 type: 'dropdown',
-                label: 'Match',
+                labelCode: 'dps.econsents.match',
                 listSource: {
                   options: [
-                    { name: 'EQ', caption: 'is' },
-                    { name: 'NE', caption: 'is not' },
-                    { name: 'IN', caption: 'in' },
-                    { name: 'NOT_IN', caption: 'not in' }
+                    { name: 'EQ',     caption: t('dps.econsents.is') },
+                    { name: 'NE',     caption: t('dps.econsents.is_not') },
+                    { name: 'IN',     caption: t('dps.econsents.in') },
+                    { name: 'NOT_IN', caption: t('dps.econsents.not_in') }
                   ],
                   displayProp: 'caption',
                   selectProp: 'name'
                 },
                 validations: {
                   required: {
-                    message: 'Match is mandatory'
+                    messageCode: 'dps.econsents.match_req'
                   }
                 }
               }
@@ -334,13 +349,13 @@ export default {
               {
                 name: 'rule.values',
                 type: 'pv',
-                label: 'Response',
+                labelCode: 'dps.econsents.response',
                 attribute: 'consent_response',
                 selectProp: 'value',
                 multiple: false,
                 validations: {
                   required: {
-                    message: 'Response is mandatory'
+                    messageCode: 'dps.econsents.response_req'
                   }
                 },
                 showWhen: "rule.op == 'EQ' || rule.op == 'NE' || !rule.op"
@@ -348,13 +363,13 @@ export default {
               {
                 name: 'rule.values',
                 type: 'pv',
-                label: 'Response',
+                labelCode: 'dps.econsents.response',
                 attribute: 'consent_response',
                 selectProp: 'value',
                 multiple: true,
                 validations: {
                   required: {
-                    message: 'Response is mandatory'
+                    messageCode: 'dps.econsents.response_req'
                   }
                 },
                 showWhen: "rule.op == 'IN' || rule.op == 'NOT_IN'"
@@ -386,19 +401,19 @@ export default {
   flex-direction: row;
 }
 
-.os-econsent-rules-type .type span {
+.os-econsent-rules-type .type > span {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-right: 0;
   cursor: pointer;
 }
 
-.os-econsent-rules-type .type span.active {
+.os-econsent-rules-type .type > span.active {
   background: #e6e6e6;
   box-shadow: inset 0 3px 5px rgb(0 0 0 / 13%);
 }
 
-.os-econsent-rules-type .type span:last-child {
+.os-econsent-rules-type .type > span:last-child {
   border-right: 1px solid #ddd;
 }
 

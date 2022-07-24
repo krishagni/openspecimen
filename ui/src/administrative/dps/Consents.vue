@@ -2,19 +2,19 @@
   <div v-if="!ctx.hasEc">
     <os-page-toolbar>
       <template #default>
-        <os-button left-icon="plus" label="Add" @click="showAddConsent" />
+        <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddConsent" />
       </template>
     </os-page-toolbar>
 
     <div v-if="ctx.loading">
       <os-message type="info">
-        <span>Loading consents. Please wait for a moment...</span>
+        <span v-t="'dps.consents.loading'">Loading consents. Please wait for a moment...</span>
       </os-message>
     </div>
 
     <div v-else-if="!ctx.consents || ctx.consents.length == 0">
       <os-message type="info">
-        <span>No consents to display</span>
+        <span v-t="'dps.consents.no_consents'">No consents to display</span>
       </os-message>
     </div>
     
@@ -22,7 +22,7 @@
       <div class="item" v-for="consent of ctx.consents" :key="consent.id">
         <span class="left">{{consent.statement}} ({{consent.statementCode}})</span>
         <span class="right">
-          <os-button left-icon="trash" size="small" v-os-tooltip.bottom="'Delete'"
+          <os-button left-icon="trash" size="small" v-os-tooltip.bottom="$t('common.buttons.delete')"
             @click="confirmDeleteConsent(consent)" />
         </span>
       </div>
@@ -30,32 +30,32 @@
 
     <os-dialog ref="addConsentDialog">
       <template #header>
-        <span>Add Consent</span>
+        <span v-t="'dps.consents.add_consent'">Add Consent</span>
       </template>
       <template #content>
         <os-label>
-          <span>Select the consent to add:</span>
+          <span v-t="'dps.consents.select_to_add'">Select the consent to add:</span>
         </os-label>
         <os-dropdown v-model="ctx.toAdd" :context="ctx" :listSource="consentsDdLs" />
       </template>
       <template #footer>
-        <os-button text label="Cancel" @click="hideAddConsent" />
-        <os-button primary label="Add" @click="addConsent" />
+        <os-button text    :label="$t('common.buttons.cancel')" @click="hideAddConsent" />
+        <os-button primary :label="$t('common.buttons.add')" @click="addConsent" />
       </template>
     </os-dialog>
 
     <os-dialog ref="deleteConsentDialog">
       <template #header> 
-        <span>Delete confirmation</span>
+        <span v-t="'dps.consents.delete'">Delete confirmation</span>
       </template>
       <template #content>
-        <span>
+        <span v-t="{path: 'dps.consents.confirm_delete', args: ctx.toDelete}">
           Are you sure you want to delete the consent - <b>{{ctx.toDelete.statement}} ({{ctx.toDelete.statementCode}})</b>?
         </span>
       </template>
       <template #footer>
-        <os-button text label="Cancel" @click="cancelDeleteConsent" />
-        <os-button danger label="Yes, remove" @click="deleteConsent" />
+        <os-button text   :label="$t('common.buttons.cancel')" @click="cancelDeleteConsent" />
+        <os-button danger :label="$t('common.buttons.delete')" @click="deleteConsent" />
       </template>
     </os-dialog>
   </div>
@@ -120,14 +120,14 @@ export default {
 
     addConsent: async function() {
       if (!this.ctx.toAdd || !this.ctx.toAdd.id) {
-        alertsSvc.error('Select the consent to add...');
+        alertsSvc.error({code: 'dps.consents.select_to_add'});
         return;
       }
 
       const consent = await dpSvc.addConsent(this.dp, this.ctx.toAdd);
       this.ctx.consents.push(consent);
       this.hideAddConsent();
-      alertsSvc.success('Consent added!');
+      alertsSvc.success({code: 'dps.consents.added'});
     },
 
     confirmDeleteConsent: function(consent) {
@@ -139,7 +139,7 @@ export default {
       const deleted = await dpSvc.deleteConsent(this.dp, this.ctx.toDelete);
       const idx = this.ctx.consents.findIndex(consent => consent.id == deleted.id);
       this.ctx.consents.splice(idx, 1);
-      alertsSvc.success('Consent deleted!');
+      alertsSvc.success({code: 'dps.consents.deleted'});
       this.cancelDeleteConsent();
     },
 
@@ -173,7 +173,6 @@ export default {
     }
   }
 }
-
 </script>
 
 <style scoped>

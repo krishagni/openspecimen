@@ -2,12 +2,13 @@
   <os-page-toolbar v-if="hasRows">
     <template #default>
       <span v-if="allowOrderCreation">
-        <os-button left-icon="share" label="Distribute All" @click="distributeAll" />
+        <os-button left-icon="share" :label="$t('dps.distribute_all')" @click="distributeAll"
+          v-if="!selectedSpecimens || selectedSpecimens.length == 0" />
 
-        <os-button left-icon="share" label="Distribute" @click="distribute"
+        <os-button left-icon="share" :label="$t('dps.distribute')" @click="distribute"
           v-if="selectedSpecimens.length > 0" />
 
-        <os-button left-icon="times" label="Cancel Reservation" @click="cancelReservation"
+        <os-button left-icon="times" :label="$t('dps.cancel_reservation')" @click="cancelReservation"
           v-if="selectedSpecimens.length > 0" />
       </span>
     </template>
@@ -20,7 +21,7 @@
         @updateListSize="getSpecimensCount"
       />
 
-      <os-button left-icon="search" label="Search" @click="toggleSearch" />
+      <os-button left-icon="search" :label="$t('common.buttons.search')" @click="toggleSearch" />
     </template>
   </os-page-toolbar>
 

@@ -2,27 +2,27 @@ export default {
   fields:  [
     {
       "type": "text",
-      "label": "Title",
+      "labelCode": "dps.title",
       "name": "dp.title",
       "validations": {
         "required": {
-          "message": "Title is mandatory"
+          "messageCode": "dps.title_req"
         }
       }
     },
     {
       "type": "text",
-      "label": "Short Title",
+      "labelCode": "dps.short_title",
       "name": "dp.shortTitle",
       "validations": {
         "required": {
-          "message": "Short title is mandatory"
+          "messageCode": "dps.short_title_req"
         }
       }
     },
     {
       "type": "dropdown",
-      "label": "Receiving Institute",
+      "labelCode": "dps.receiving_institute",
       "name": "dp.instituteName",
       "listSource": {
         "apiUrl": "institutes",
@@ -32,13 +32,13 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Receiving institute is mandatory"
+          "messageCode": "dps.receiving_institute_req"
         }
       }
     },
     {
       "type": "site",
-      "label": "Receiving Site",
+      "labelCode": "dps.receiving_site",
       "name": "dp.defReceivingSiteName",
       "listSource": {
         "selectProp": "name",
@@ -54,7 +54,7 @@ export default {
     },
     {
       "type": "user",
-      "label": "Principal Investigator",
+      "labelCode": "dps.principal_investigator",
       "name": "dp.principalInvestigator",
       "listSource": {
         "queryParams": {
@@ -65,13 +65,13 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Principal Investigator is mandatory"
+          "messageCode": "dps.principal_investigator_req"
         }
       }
     },
     {
       "type": "user",
-      "label": "Coordinators",
+      "labelCode": "dps.coordinators",
       "name": "dp.coordinators",
       "multiple": true,
       "listSource": {
@@ -84,24 +84,24 @@ export default {
     },
     {
       "type": "datePicker",
-      "label": "Start Date",
+      "labelCode": "dps.start_date",
       "name": "dp.startDate",
       "showTime": false
     },
     {
       "type": "datePicker",
-      "label": "End Date",
+      "labelCode": "dps.end_date",
       "name": "dp.endDate",
       "showTime": false
     },
     {
       "type": "text",
-      "label": "Ethics ID",
+      "labelCode": "dps.ethics_id",
       "name": "dp.irbId"
     },
     {
       "type": "dropdown",
-      "label": "Order Custom Fields",
+      "labelCode": "dps.order_custom_fields",
       "name": "dp.orderExtnForm",
       "listSource": {
         "apiUrl": "forms",
@@ -112,7 +112,7 @@ export default {
     },
     {
       "type": "dropdown",
-      "label": "Order Report Query",
+      "labelCode": "dps.order_report_query",
       "name": "dp.report",
       "listSource": {
         "apiUrl": "saved-queries",
@@ -127,16 +127,16 @@ export default {
     },
     {
       "type": "radio",
-      "label": "Email Notifications",
+      "labelCode": "dps.email_notifs",
       "name": "dp.disableEmailNotifs",
       "options": [
-        { caption: 'Enabled', value: false },
-        { caption: 'Disabled', value: true }
+        { captionCode: 'common.enabled', value: false },
+        { captionCode: 'common.disabled', value: true }
       ]
     },
     {
       "type": "dropdown",
-      "label": "Order Attachment",
+      "labelCode": "dps.order_attachment",
       "name": "dp.attachmentType",
       "listSource": {
         "selectProp": "name",
@@ -157,18 +157,18 @@ export default {
     },
     {
       "type": "text",
-      "label": "Label Format",
+      "labelCode": "dps.label_format",
       "name": "dp.orderItemLabelFormat"
     },
     {
       "type": "subform",
-      "label": "Distributing Sites",
+      "labelCode": "dps.distributing_sites",
       "name": "dp.distributingSites",
       "showWhen": "currentUser.admin",
       "fields": [
         {
           "type": "dropdown",
-          "label": "Institute",
+          "labelCode": "dps.institute",
           "name": "institute",
           "listSource": {
             "apiUrl": "institutes",
@@ -179,7 +179,7 @@ export default {
         },
         {
           "type": "site",
-          "label": "Sites",
+          "labelCode": "dps.sites",
           "name": "sites",
           "multiple": true,
           "listSource": {
@@ -196,7 +196,7 @@ export default {
     },
     {
       "type": "site",
-      "label": "Distributing Sites",
+      "labelCode": "dps.distributing_sites",
       "name": "dp.distributingSites.0.sites",
       "multiple": true,
       "showWhen": "!currentUser.admin",

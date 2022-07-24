@@ -8,7 +8,8 @@
       <span class="os-title">
         <h3>{{ctx.dp.shortTitle}}</h3>
         <div class="accessories" v-if="ctx.dp && ctx.dp.id > 0">
-          <os-tag value="Closed" :rounded="true" type="danger" v-if="ctx.dp.activityStatus == 'Closed'" />
+          <os-tag :value="$t('common.status.closed')" :rounded="true" type="danger"
+            v-if="ctx.dp.activityStatus == 'Closed'" />
           <os-copy-link size="small" :route="{name: 'DpDetail.Overview', params: {dpId: ctx.dp.id}}" />
           <os-new-tab size="small" :route="{name: 'DpDetail.Overview', params: {dpId: ctx.dp.id}}" />
         </div>
@@ -21,25 +22,25 @@
           <ul>
             <li>
               <router-link :to="getRoute('Overview')">
-                <span>Overview</span>
+                <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
 
             <li>
               <router-link :to="getRoute('Consents')">
-                <span>Consents</span>
+                <span v-t="'dps.consents.list'">Consents</span>
               </router-link>
             </li>
 
             <li>
               <router-link :to="getRoute('ReservedSpecimens')">
-                <span>Reserved Specimens</span>
+                <span v-t="'dps.reserved_specimens'">Reserved Specimens</span>
               </router-link>
             </li>
 
             <li>
               <router-link :to="getRoute('Requirements')">
-                <span>Requirements</span>
+                <span v-t="'dps.requirements'">Requirements</span>
               </router-link>
             </li>
 
@@ -49,25 +50,25 @@
 
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="'Overview'">
+            <li v-os-tooltip.right="$t('common.overview')">
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="'Consents'">
+            <li v-os-tooltip.right="$t('dps.consents.list')">
               <router-link :to="getRoute('Consents')">
                 <os-icon name="check-square" />
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="'Reserved Specimens'">
+            <li v-os-tooltip.right="$t('dps.reserved_specimens')">
               <router-link :to="getRoute('ReservedSpecimens')">
                 <os-icon name="flask" />
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="'Requirements'">
+            <li v-os-tooltip.right="$t('dps.requirements')">
               <router-link :to="getRoute('Requirements')">
                 <os-icon name="list-ol" />
               </router-link>
@@ -97,7 +98,7 @@ export default {
         dp: {},
 
         bcrumb: [
-          {url: routerSvc.getUrl('DpsList', {dpId: -1}), label: 'Distribution Protocols'}
+          {url: routerSvc.getUrl('DpsList', {dpId: -1}), label: this.$t('dps.list')}
         ]
       }
     };

@@ -4,13 +4,13 @@
       <os-page>
         <os-page-head>
           <span>
-            <h3>Distribution Protocols</h3>
+            <h3 v-t="'dps.list'">Distribution Protocols</h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -27,32 +27,33 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
               <span v-if="!ctx.selectedDps || ctx.selectedDps.length == 0">
-                <os-button left-icon="plus" label="Create" @click="createDp"
+                <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createDp"
                   v-show-if-allowed="dpResources.createOpts" />
 
-                <os-menu label="Import" :options="importOpts" v-show-if-allowed="dpResources.importOpts" />
-
-                <os-button left-icon="download" label="Export" @click="exportDps"
+                <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                   v-show-if-allowed="dpResources.importOpts" />
 
-                <os-button left-icon="share" label="View Orders" @click="viewOrders"
+                <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportDps"
+                  v-show-if-allowed="dpResources.importOpts" />
+
+                <os-button left-icon="share" :label="$t('dps.view_orders')" @click="viewOrders"
                   v-show-if-allowed="dpResources.orderOpts" />
 
-                <os-button-link left-icon="question-circle" label="Help"
+                <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                   url="https://help.openspecimen.org/distribution" new-tab="true" />
               </span>
 
               <span v-else>
-                <os-button left-icon="trash" label="Delete" @click="deleteDps"
+                <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteDps"
                   v-show-if-allowed="dpResources.deleteOpts" />
 
-                <os-button left-icon="download" label="Export" @click="exportDps"
+                <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportDps"
                   v-show-if-allowed="dpResources.importOpts" />
               </span>
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -71,7 +72,7 @@
 
           <os-confirm-delete ref="deleteDialog">
             <template #message>
-              <span>Are you sure you want to delete the selected distribution protocols?</span>
+              <span v-t="'dps.confirm_delete_selected'">Are you sure you want to delete the selected distribution protocols?</span>
             </template>
           </os-confirm-delete>
         </os-page-body>
@@ -111,17 +112,17 @@ export default {
       importOpts: [
         {
           icon: 'truck',
-          caption: 'Distribution Protocols',
+          caption: this.$t('dps.list'),
           onSelect: () => routerSvc.ngGoto('dp-import')
         },
         {
           icon: 'list-ol',
-          caption: 'Requirements',
+          caption: this.$t('dps.requirements'),
           onSelect: () => routerSvc.ngGoto('dp-req-import')
         },
         {
           icon: 'table',
-          caption: 'View Past Imports',
+          caption: this.$t('bulk_imports.view_jobs'),
           onSelect: () => routerSvc.ngGoto('dp-import-jobs')
         }
       ],
@@ -234,12 +235,7 @@ export default {
         async () => {
           const dpIds = this.ctx.selectedDps.map(dp => dp.id);
           const deletedDps = await dpSvc.bulkDelete(dpIds);
-          if (deletedDps.length == 1) {
-            alertsSvc.success('1 distribution protocol deleted');
-          } else {
-            alertsSvc.success(deletedDps.length + ' distribution protocols deleted');
-          }
-
+          alertsSvc.success({code: 'dps.deleted', args: {count: deletedDps.length}});
           this.$refs.listView.reload();
         }
       );

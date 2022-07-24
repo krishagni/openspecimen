@@ -1,9 +1,9 @@
-
 <template>
   <os-form ref="reqForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
     <div>
-      <os-button primary :label="!dataCtx.requirement.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-      <os-button text label="Cancel" @click="cancel" />
+      <os-button primary :label="$t(!dataCtx.requirement.id ? 'common.buttons.create' : 'common.buttons.update')"
+        @click="saveOrUpdate" />
+      <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
     </div>
   </os-form>
 </template>
@@ -69,7 +69,7 @@ export default {
       }
 
       await dpSvc.saveOrUpdateReq(this.dataCtx.requirement);
-      alertsSvc.success('Requirement saved');
+      alertsSvc.success({code: 'dps.req_saved'});
       this.cancel();
     },
 

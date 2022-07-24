@@ -2,27 +2,27 @@ export default {
   columns: [
     {
       "name": "requirement.specimenType",
-      "caption": "Specimen Type",
+      "captionCode": "dps.specimen_type",
     },
     {
       "name": "requirement.anatomicSite",
-      "caption": "Anatomic Site",
+      "captionCode": "dps.specimen_anatomic_site",
     },
     {
       "name": "requirement.pathologyStatuses",
-      "caption": "Pathology Status",
+      "captionCode": "dps.specimen_pathology_status"
     },
     {
       "name": "requirement.clinicalDiagnosis",
-      "caption": "Clinical Diagnosis",
+      "captionCode": "dps.visit_clinical_diagnosis"
     },
     {
       "name": "requirement.cost",
-      "caption": "Cost",
+      "captionCode": "dps.cost",
     },
     {
       "name": "requirement.target",
-      "caption": "Target Quantity",
+      "captionCode": "dps.target_quantity",
       "value": function({requirement}) {
         if (requirement.specimenCount != null && requirement.specimenCount != undefined &&
             requirement.quantity != null && requirement.quantity != undefined) {
@@ -34,11 +34,11 @@ export default {
     },
     {
       "name": "requirement.distributedCnt",
-      "caption": "Distributed Specimens"
+      "captionCode": "dps.distributed_specimens"
     },
     {
       "name": "requirement.distributedQty",
-      "caption": "Distributed Quantity"
+      "captionCode": "dps.distributed_qty"
     }
   ]
 }

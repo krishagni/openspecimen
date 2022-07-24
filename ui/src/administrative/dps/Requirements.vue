@@ -1,4 +1,3 @@
-
 <template>
   <router-view :dp="dp" v-if="dp.id" />
 </template>

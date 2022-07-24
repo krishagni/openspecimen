@@ -1,7 +1,7 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="plus" label="Add" @click="addRequirement" />
+      <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addRequirement" />
     </template>
   </os-page-toolbar>
 
@@ -22,14 +22,14 @@
 
   <os-dialog ref="deleteReqDialog">
     <template #header>
-      <span>Confirm requirement deletion...</span>
+      <span v-t="'dps.confirm_req_delete'">Confirm requirement deletion...</span>
     </template>
     <template #content>
-      <span>Are you sure you want to delete the distribution protocol requirement?</span>
+      <span v-t="'dps.confirm_req_delete_msg'">Are you sure you want to delete the distribution protocol requirement?</span>
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="cancelDeleteReq" />
-      <os-button danger label="Yes, delete" @click="deleteRequirement" />
+      <os-button text   :label="$t('common.buttons.cancel')" @click="cancelDeleteReq" />
+      <os-button danger :label="$t('common.buttons.delete')" @click="deleteRequirement" />
     </template>
   </os-dialog>
 </template>
@@ -95,11 +95,10 @@ export default {
 
     deleteRequirement: async function() {
       await dpSvc.deleteRequirement(this.ctx.toDeleteReq);
-      alertsSvc.success('Requirement deleted');
+      alertsSvc.success({code: 'dps.req_deleted'});
       this.cancelDeleteReq();
       this.loadRequirements();
     }
   }
 }
-
 </script>
