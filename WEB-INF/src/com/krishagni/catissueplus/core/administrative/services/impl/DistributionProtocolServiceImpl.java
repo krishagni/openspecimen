@@ -418,7 +418,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		try {
 			Long dpId = req.getPayload();
 			DistributionProtocol dp = getDistributionProtocol(dpId);
-			AccessCtrlMgr.getInstance().ensureCreateUpdateDpRights(dp);
+			AccessCtrlMgr.getInstance().ensureReadDpRights(dp);
 			
 			List<DpRequirementDetail> reqDetails = DpRequirementDetail.from(dp.getRequirements());
 			Map<Long, DprStat> distributionStat = getDprDao().getDistributionStatByDp(dpId);
@@ -450,7 +450,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 				return ResponseEvent.userError(DpRequirementErrorCode.NOT_FOUND);
 			}
 
-			AccessCtrlMgr.getInstance().ensureCreateUpdateDpRights(existing.getDistributionProtocol());
+			AccessCtrlMgr.getInstance().ensureReadDpRights(existing.getDistributionProtocol());
 			return ResponseEvent.response(DpRequirementDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
