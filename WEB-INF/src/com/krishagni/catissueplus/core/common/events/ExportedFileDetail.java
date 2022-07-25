@@ -6,10 +6,17 @@ public class ExportedFileDetail {
 	private String name;
 	
 	private File file;
+
+	private boolean completed;
 	
 	public ExportedFileDetail(String name, File file) {
 		this.name = name;
 		this.file = file;
+		this.completed = true;
+	}
+
+	public ExportedFileDetail(boolean completed) {
+		this.completed = false;
 	}
 
 	public String getName() {
@@ -26,5 +33,13 @@ public class ExportedFileDetail {
 
 	public void setFile(File file) {
 		this.file = file;
+	}
+
+	public boolean isCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(boolean completed) {
+		this.completed = completed;
 	}
 }

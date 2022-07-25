@@ -5,7 +5,6 @@ import java.io.FilenameFilter;
 import java.util.Calendar;
 import java.util.Date;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
@@ -28,6 +27,7 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		cleanupOlderFiles(getQueryExportDataDir(), period, null);
 		cleanupOlderFiles(getLogFilesDir(), getLogFilesRetainPeriod(), null);
 		cleanupOlderFiles(getAuditFilesDir(), period, null);
+		cleanupOlderFiles(getLoginActivityReportsDir(), period, null);
 		cleanupOlderFiles(getDataDir(), period, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"));
 	}
 
@@ -45,6 +45,10 @@ public class FilesBacklogCleaner implements ScheduledTask {
 
 	private String getAuditFilesDir() {
 		return new File(getDataDir(), AUDIT_FILES_DIR).getAbsolutePath();
+	}
+
+	private String getLoginActivityReportsDir() {
+		return new File(getDataDir(), "login-activity-reports").getAbsolutePath();
 	}
 
 	private int getLogFilesRetainPeriod() {
