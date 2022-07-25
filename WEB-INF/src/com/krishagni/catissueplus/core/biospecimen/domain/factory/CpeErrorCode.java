@@ -25,7 +25,9 @@ public enum CpeErrorCode implements ErrorCode {
 
 	IDS_OR_LABELS_REQUIRED,
 
-	CLOSED;
+	CLOSED,
+
+	HAS_VISITS;
 
 	@Override
 	public String code() {

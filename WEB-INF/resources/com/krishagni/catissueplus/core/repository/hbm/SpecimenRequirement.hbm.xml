@@ -86,7 +86,7 @@
         sr.code = :code
     </query>
     
-    <query name="getSpecimensCount">
+    <query name="getCollectedSpecimensCount">
       select 
         count(spec.id) 
       from 
@@ -95,6 +95,16 @@
       where
         spec.collectionStatus = 'Collected'
         and sr.id = :srId
+    </query>
+
+    <query name="getAllSpecimensCount">
+      select
+        count(spmn.id)
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement sr
+        join sr.specimens spmn
+      where
+        sr.id = :srId
     </query>
     
     <query name="getByCpEventLabelAndSrCode">

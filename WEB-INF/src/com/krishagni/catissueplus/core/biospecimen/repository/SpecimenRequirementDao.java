@@ -8,6 +8,8 @@ public interface SpecimenRequirementDao extends Dao<SpecimenRequirement> {
 
 	int getSpecimensCount(Long srId);
 
+	int getAllSpecimensCount(Long srId);
+
 	SpecimenRequirement getByCpEventLabelAndSrCode(String cpShortTitle, String eventLabel, String code);
 
 	SpecimenRequirement getByCpEventLabelAndSrCode(Long cpId, String eventLabel, String code);

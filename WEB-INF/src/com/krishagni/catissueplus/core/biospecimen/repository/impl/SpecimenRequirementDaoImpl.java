@@ -22,6 +22,13 @@ public class SpecimenRequirementDaoImpl extends AbstractDao<SpecimenRequirement>
 			.setParameter("srId", srId)
 			.uniqueResult()).intValue();
 	}
+	@Override
+	public int getAllSpecimensCount(Long srId) {
+		Number count = (Number) getCurrentSession().getNamedQuery(GET_ALL_SPECIMENS_COUNT)
+			.setParameter("srId", srId)
+			.uniqueResult();
+		return count != null ? count.intValue() : 0;
+	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
@@ -44,7 +51,9 @@ public class SpecimenRequirementDaoImpl extends AbstractDao<SpecimenRequirement>
 
 	private static final String FQN = SpecimenRequirement.class.getName();
 	
-	private static final String GET_SPECIMENS_COUNT = FQN + ".getSpecimensCount";
+	private static final String GET_SPECIMENS_COUNT = FQN + ".getCollectedSpecimensCount";
+
+	private static final String GET_ALL_SPECIMENS_COUNT = FQN + ".getAllSpecimensCount";
 	
 	private static final String GET_SR_BY_CP_EVENT_AND_SR_CODE = FQN + ".getByCpEventLabelAndSrCode";
 

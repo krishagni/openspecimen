@@ -64,6 +64,8 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 	
 	public void saveCpe(CollectionProtocolEvent cpe, boolean flush);
 
+	public int getAllVisitsCount(Long cpeId);
+
 	public SpecimenRequirement getSpecimenRequirement(Long requirementId);
 	
 	public SpecimenRequirement getSrByCode(String code);

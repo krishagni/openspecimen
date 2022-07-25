@@ -67,7 +67,9 @@ public enum SrErrorCode implements ErrorCode {
 	
 	INVALID_LINEAGE,
 
-	CLOSED;
+	CLOSED,
+
+	HAS_SPECIMENS;
 	
 	@Override
 	public String code() {

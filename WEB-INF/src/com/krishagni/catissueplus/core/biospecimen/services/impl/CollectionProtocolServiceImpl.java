@@ -843,12 +843,17 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			Long cpeId = req.getPayload();
 			CollectionProtocolEvent cpe = daoFactory.getCollectionProtocolDao().getCpe(cpeId);
 			if (cpe == null) {
-				throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, cpeId, 1);
+				return ResponseEvent.userError(CpeErrorCode.NOT_FOUND, cpeId, 1);
 			}
 			
 			CollectionProtocol cp = cpe.getCollectionProtocol();
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
-			
+
+			int count = daoFactory.getCollectionProtocolDao().getAllVisitsCount(cpe.getId());
+			if (count > 0) {
+				return ResponseEvent.userError(CpeErrorCode.HAS_VISITS, cpe.getEventLabel(), count);
+			}
+
 			cpe.delete();
 			daoFactory.getCollectionProtocolDao().saveCpe(cpe);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cp));
@@ -1050,10 +1055,21 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			Long srId = req.getPayload();
 			SpecimenRequirement sr = daoFactory.getSpecimenRequirementDao().getById(srId);
 			if (sr == null) {
-				throw OpenSpecimenException.userError(SrErrorCode.NOT_FOUND);
+				return ResponseEvent.userError(SrErrorCode.NOT_FOUND);
 			}
-			
+
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(sr.getCollectionProtocol());
+
+			int count = daoFactory.getSpecimenRequirementDao().getAllSpecimensCount(sr.getId());
+			if (count > 0) {
+				String code = sr.getCode();
+				if (StringUtils.isBlank(code)) {
+					code = sr.getSpecimenType().getValue() + " (" + sr.getId() + ")";
+				}
+
+				return ResponseEvent.userError(SrErrorCode.HAS_SPECIMENS, code, count);
+			}
+
 			sr.delete();
 			daoFactory.getSpecimenRequirementDao().saveOrUpdate(sr);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(sr.getCollectionProtocol()));
@@ -1075,8 +1091,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				throw OpenSpecimenException.userError(SrErrorCode.NOT_FOUND);
 			}
 			
-			return ResponseEvent.response(
-					daoFactory.getSpecimenRequirementDao().getSpecimensCount(srId));
+			return ResponseEvent.response(daoFactory.getSpecimenRequirementDao().getSpecimensCount(srId));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

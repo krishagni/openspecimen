@@ -74,6 +74,7 @@
       cascade="save-update">
       <key column="COLLECTION_PROTOCOL_EVENT_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Visit"/>
+      <filter name="activeEntity"/>
     </set>
 
     <filter name="activeEntity"/>
@@ -94,6 +95,16 @@
       where
         cp.shortTitle = :shortTitle and
         cpe.code = :code
+    </query>
+
+    <query name="getAllVisitsCount">
+      select
+        count(visit.id)
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent cpe
+        join cpe.specimenCollectionGroups visit
+      where
+        cpe.id = :cpeId
     </query>
   </class>
 </hibernate-mapping>

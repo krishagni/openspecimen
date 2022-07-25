@@ -284,7 +284,15 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 			getSessionFactory().getCurrentSession().flush();
 		}		
 	}
-	
+
+	@Override
+	public int getAllVisitsCount(Long cpeId) {
+		Number count = (Number) getCurrentSession().getNamedQuery(GET_ALL_VISITS_COUNT_BY_CPE)
+			.setParameter("cpeId", cpeId)
+			.uniqueResult();
+		return count != null ? count.intValue() : 0;
+	}
+
 	@Override
 	public SpecimenRequirement getSpecimenRequirement(Long requirementId) {
 		return (SpecimenRequirement) sessionFactory.getCurrentSession()
@@ -540,6 +548,8 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	private static final String GET_CPE_BY_CODE = CPE_FQN + ".getByCode";
 
 	private static final String GET_MIN_CPE_CAL_POINT = CPE_FQN + ".getMinEventPoint";
+
+	private static final String GET_ALL_VISITS_COUNT_BY_CPE = CPE_FQN + ".getAllVisitsCount";
 	
 	private static final String SR_FQN = SpecimenRequirement.class.getName();
 	
