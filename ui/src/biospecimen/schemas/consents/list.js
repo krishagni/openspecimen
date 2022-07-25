@@ -4,12 +4,12 @@ export default {
   columns: [
     {
       name: "statement.code",
-      caption: "Code",
+      captionCode: "consents.statement_code",
       href: ({rowObject}) => routerSvc.getUrl('ConsentStatementAddEdit', {statementId: rowObject.statement.id})
     },
     {
       name: "statement.statement",
-      caption: "Statement"
+      captionCode: "consents.statement"
     },
   ],
 
@@ -17,12 +17,12 @@ export default {
     {
       name: "code",
       type: "text",
-      caption: "Code"
+      captionCode: "consents.statement_code"
     },
     {
       name: "statement",
       type: "text",
-      caption: "Statement"
+      captionCode: "consents.statement"
     }
   ]
 }

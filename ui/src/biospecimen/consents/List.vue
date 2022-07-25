@@ -2,7 +2,7 @@
   <os-page>
     <os-page-head>
       <span>
-        <h3>Consent Statements</h3>
+        <h3 v-t="'consents.list'">Consent Statements</h3>
       </span>
 
       <template #right>
@@ -18,13 +18,14 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="plus" label="Create" @click="$goto('ConsentStatementAddEdit', {statementId: -1})" />
+          <os-button left-icon="plus" :label="$t('common.buttons.create')"
+            @click="$goto('ConsentStatementAddEdit', {statementId: -1})" />
 
           <os-plugin-views page="consent-statements" view="toolbar" />
         </template>
 
         <template #right>
-          <os-button left-icon="search" label="Search" @click="openSearch" />
+          <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
         </template>
       </os-page-toolbar>
 

@@ -6,16 +6,21 @@
       </template>
 
       <span>
-        <h3 v-if="dataCtx.statement.id >= 0">{{dataCtx.statement.statement}} ({{dataCtx.statement.code}})</h3>
-        <h3 v-else>Create Consent</h3>
+        <h3 v-if="dataCtx.statement.id >= 0">
+          <span v-t="{path: 'common.update', args: {name: dataCtx.statement.statement + ' (' + dataCtx.statement.code + ')'}}"></span>
+        </h3>
+        <h3 v-else>
+          <span v-t="'consents.create'"></span>
+        </h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <os-form ref="stmtForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <div>
-          <os-button primary :label="!dataCtx.statement.id ? 'Create' : 'Update'" @click="saveOrUpdate" />
-          <os-button text label="Cancel" @click="cancel" />
+          <os-button primary :label="$t(!dataCtx.statement.id ? 'common.buttons.create' : 'common.buttons.update')"
+            @click="saveOrUpdate" />
+          <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
         </div>
       </os-form>
     </os-page-body>
@@ -27,6 +32,7 @@ import { reactive, inject } from 'vue';
 
 import alertSvc       from '@/common/services/Alerts.js';
 import consentStmtSvc from '@/biospecimen/services/ConsentStatement.js';
+import i18n           from '@/common/services/I18n.js';
 import routerSvc      from '@/common/services/Router.js';
 import util           from '@/common/services/Util.js';
 
@@ -40,7 +46,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('ConsentStatementsList', {}), label: 'Consents'}
+        {url: routerSvc.getUrl('ConsentStatementsList', {}), label: i18n.msg('consents.list')}
       ],
 
       addEditFs: {rows: []}
@@ -76,7 +82,7 @@ export default {
       consentStmtSvc.saveOrUpdate(toSave).then(
         (statement) => {
           routerSvc.goto('ConsentStatementsList', {})
-          alertSvc.success('Consent ' + statement.code + (toSave.id ? ' updated.' : ' created.'));
+          alertSvc.success({code: toSave.id ? 'consents.updated' : 'consents.created', args: statement});
         }
       );
     },

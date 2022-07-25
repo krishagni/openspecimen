@@ -139,6 +139,17 @@
     "yes": "Yes"
   },
 
+  "consents": {
+    "create": "Create Consent",
+    "created": "Consent '{code}' created.",
+    "list": "Consent Statements",
+    "statement": "Statement",
+    "statement_req": "Statement is mandatory",
+    "statement_code": "Code",
+    "statement_code_req": "Code is mandatory",
+    "updated": "Consent '{code}' updated."
+  },
+
   "container_tasks": {
     "confirm_archive": "Confirm Archive Task",
     "confirm_archive_task": "Are you sure you want to archive the container maintenance task: '{name}'?",

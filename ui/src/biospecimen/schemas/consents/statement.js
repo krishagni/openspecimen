@@ -2,21 +2,21 @@ export default {
   fields:  [
     {
       "type": "text",
-      "label": "Code",
+      "labelCode": "consents.statement_code",
       "name": "statement.code",
       "validations": {
         "required": {
-          "message": "Code is mandatory"
+          "messageCode": "consents.statement_code_req"
         }
       }
     },
     {
       "type": "text",
-      "label": "Statement",
+      "labelCode": "consents.statement",
       "name": "statement.statement",
       "validations": {
         "required": {
-          "message": "Statement is mandatory"
+          "messageCode": "consents.statement_req"
         }
       }
     }
