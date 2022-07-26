@@ -1379,6 +1379,9 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 				}};
 
 				Utility.writeKeyValuesToCsv(out, headers);
+				if (order.getExtension() != null) {
+					order.getExtension().writeSubForms(out);
+				}
 			}
 		});
 	}

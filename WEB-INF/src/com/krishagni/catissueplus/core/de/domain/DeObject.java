@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.de.domain;
 
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -13,12 +15,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.dao.DataAccessException;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
@@ -26,6 +28,8 @@ import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
+import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -272,13 +276,62 @@ public abstract class DeObject {
 
 	public Map<String, String> getLabelValueMap() {
 		String notSpecified = MessageUtil.getInstance().getMessage("common_not_specified");
-		return getAttrs().stream().collect(
-			Collectors.toMap(
-				attr -> attr.getCaption(),
-				attr -> attr.getDisplayValue(notSpecified),
-				(v1, v2) -> {throw new IllegalStateException("Duplicate key");},
-				LinkedHashMap::new)
-		);
+		return getAttrs().stream()
+			.filter(attr -> !attr.getType().equals("subForm"))
+			.collect(
+				Collectors.toMap(
+					attr -> attr.getCaption(),
+					attr -> attr.getDisplayValue(notSpecified),
+					(v1, v2) -> {throw new IllegalStateException("Duplicate key");},
+					LinkedHashMap::new)
+			);
+	}
+
+	public void writeSubForms(OutputStream out) {
+		List<DeObject.Attr> subForms = getAttrs().stream()
+			.filter(attr -> attr.getType().equals("subForm"))
+			.collect(Collectors.toList());
+
+		StringWriter stringWriter = new StringWriter();
+		CsvWriter csvWriter = null;
+		try {
+			csvWriter = CsvFileWriter.createCsvFileWriter(stringWriter);
+			for (DeObject.Attr subForm : subForms) {
+				List<String> headers = new ArrayList<>();
+				List<List<DeObject.Attr>> sfRows = (List<List<DeObject.Attr>>) subForm.getValue();
+				if (CollectionUtils.isNotEmpty(sfRows)) {
+					List<DeObject.Attr> sfRow = sfRows.iterator().next();
+					for (DeObject.Attr sfAttr : sfRow) {
+						headers.add(sfAttr.getCaption());
+					}
+				}
+
+				if (headers.isEmpty()) {
+					continue;
+				}
+
+				csvWriter.writeNext(new String[] { subForm.getCaption() });
+				csvWriter.writeNext(headers.toArray(new String[0]));
+				for (List<DeObject.Attr> sfRow : sfRows) {
+					List<String> values = new ArrayList<>();
+					for (DeObject.Attr sfAttr : sfRow) {
+						values.add(sfAttr.getDisplayValue());
+					}
+
+					csvWriter.writeNext(values.toArray(new String[0]));
+				}
+
+				csvWriter.writeNext(new String[] {" "});
+				csvWriter.flush();
+			}
+
+			out.write(stringWriter.toString().getBytes());
+		} catch (Exception e) {
+			throw new RuntimeException("Error generating the sub forms CSV", e);
+		} finally {
+			IOUtils.closeQuietly(csvWriter);
+			IOUtils.closeQuietly(stringWriter);
+		}
 	}
 
 	//
