@@ -492,6 +492,10 @@
     "users": "Users"
   },
 
+  "pvs": {
+    "not_specified": "Not Specified"
+  },
+
   "orders": {
     "name": "Name"
   },
@@ -581,6 +585,8 @@
 
   "specimens": {
     "barcode": "Barcode",
+    "collected_in": "collected in {container}",
+    "extracted_from": "from {anatomicSite}",
     "label": "Label"
   },
 

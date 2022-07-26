@@ -18,6 +18,7 @@ import pluginViews    from './PluginViewsRegistry.js';
 import routerSvc      from './Router.js';
 import settingsSvc    from './Setting.js';
 import util           from './Util.js';
+import workflowSvc    from './Workflow.js';
 
 export default {
   install(app) {
@@ -42,7 +43,8 @@ export default {
       pluginViews:  pluginViews,
       routerSvc:    routerSvc,
       settingsSvc:  settingsSvc,
-      util:         util
+      util:         util,
+      workflowSvc:  workflowSvc
     });
   }
 }

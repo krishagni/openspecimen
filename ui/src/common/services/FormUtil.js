@@ -112,6 +112,30 @@ class FormUtil {
     return object;
   }
 
+  //
+  // for now, meant only for readOnly in the Order specimens step
+  //
+  fromSde(fields, readOnly) {
+    return fields.map(
+      field => {
+        field.label = field.caption;
+        field.type = this._fromSdeType(field.type).type;
+        field.formatType = this._fromSdeType(field.formatType).type;
+        if (readOnly) {
+          field.displayType = field.formatType || field.type;
+          field.type = 'span';
+        }
+
+        const uiStyle = field.uiStyle = field.uiStyle || {};
+        if (field.width) {
+          uiStyle['min-width'] = field.width;
+        }
+
+        return field;
+      }
+    );
+  }
+
   _createCustomFieldsMap(attrs, useDisplayValue) {
     let valueMap = {};
 
@@ -133,6 +157,19 @@ class FormUtil {
     }
 
     return valueMap;
+  }
+
+  _fromSdeType(type) {
+    switch (type) {
+      case 'pvs':
+        return {type: 'pv'};
+
+      case 'specimen-quantity':
+        return {type: 'specimen-measure'};
+
+    }
+
+    return {type};
   }
 }
 

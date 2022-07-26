@@ -2,6 +2,7 @@
 import formUtil from '@/common/services/FormUtil.js';
 import http     from '@/common/services/HttpClient.js';
 import util     from '@/common/services/Util.js';
+import wfSvc    from '@/common/services/Workflow.js';
 import formSvc  from '@/forms/services/Form.js';
 
 import addEditLayout  from '@/administrative/schemas/orders/addedit.js';
@@ -164,6 +165,24 @@ class Order {
     }
 
     http.downloadFile(http.getUrl(url));
+  }
+
+  async getCustomFields() {
+    const ui = window.osUi || {};
+    const plugins = ui.global.appProps.plugins || [];
+    if (plugins.indexOf('sde') == -1) {
+      return [];
+    }
+
+    const dictQ   = wfSvc.getDictionary(-1)
+    const fieldsQ = wfSvc.getWorkflow(-1, 'order-addedit-specimens');
+    return Promise.all([dictQ, fieldsQ]).then(
+      (resps) => {
+        const dict = resps[0];
+        const columns = (resps[1] && resps[1].columns) || [];
+        return wfSvc.overrideFields(dict, columns);
+      }
+    );
   }
 }
 

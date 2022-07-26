@@ -9,6 +9,9 @@
 </template>
 
 <script>
+import exprUtil from '@/common/services/ExpressionUtil.js';
+import util from '@/common/services/Util.js';
+
 export default {
   props: ['modelValue', 'displayType', 'href', 'form', 'context'],
 
@@ -24,23 +27,28 @@ export default {
     },
 
     displayText: function() {
-      if (this.displayType == 'storage-position') {
-        let result = this.inputValue;
+      switch (this.displayType) {
+        case 'storage-position':
+          return this._getStorageLocation(this.inputValue);
 
-        if (this.inputValue && typeof this.inputValue == 'object') {
-          let position = this.inputValue;
-          result = position.name;
-          if (position.mode == 'TWO_D') {
-            result += ' (' + position.positionY + ', ' + position.positionX + ')';
-          } else if (position.mode == 'LINEAR') {
-            result += ' (' + position.position + ')';
-          }
-        }
+        case 'user':
+          return this._getUser(this.inputValue);
 
-        return result || 'Not Stored';
+        case 'specimen-quantity':
+          return this._getSpecimenMeasure(this.inputValue, this.$attrs, 'quantity');
+
+        case 'specimen-description':
+          return this._getSpecimenDescription(this.inputValue);
+
+        case 'date':
+        case 'datePicker':
+          return this._getDate(this.inputValue);
+
+        case 'datetime':
+          return this._getDate(this.inputValue, true);
       }
 
-      return this.inputValue;
+      return this.inputValue || '-';
     },
 
     link: function() {
@@ -59,6 +67,81 @@ export default {
       }
 
       return this.href;
+    }
+  },
+
+  methods: {
+    _getStorageLocation: function(value) {
+      let result = value;
+
+      if (value && typeof value == 'object') {
+        let position = value;
+        result = position.name;
+        if (position.mode == 'TWO_D') {
+          result += ' (' + position.positionY + ', ' + position.positionX + ')';
+        } else if (position.mode == 'LINEAR') {
+          result += ' (' + position.position + ')';
+        }
+      }
+
+      return result || 'Not Stored';
+    },
+
+    _getUser: function(value) {
+      let result = value;
+      if (value && typeof value == 'object') {
+        let user = value;
+        result = user.firstName;
+        if (user.lastName) {
+          if (result) {
+            result += ' ';
+          }
+
+          result += user.lastName;
+        }
+      }
+
+      return result || '-';
+    },
+
+    _getSpecimenMeasure: function(value, attrs, measure) {
+      if (value == null || value == undefined) {
+        return '-';
+      }
+
+      const specimen = exprUtil.eval(this.form || this.context || {}, attrs.specimen || 'specimen');
+      const unit = util.getSpecimenMeasureUnit(specimen, measure || 'quantity');
+      return value + ' ' + unit;
+    },
+
+    _getSpecimenDescription: function(value) {
+      const ns = this.$t('pvs.not_specified');
+      const specimen = value || {};
+
+      let result = '';
+      if (specimen.pathology && specimen.pathology != ns) {
+        result += specimen.pathology + ' ';
+      }
+
+      result += specimen.type;
+
+      if (specimen.specimenClass == 'Tissue' && specimen.anatomicSite && specimen.anatomicSite != ns) {
+        result += ' ' + this.$t('specimens.extracted_from', {anatomicSite: specimen.anatomicSite});
+      }
+
+      if (specimen.specimenClass == 'Fluid' && specimen.collectionContainer && specimen.collectionContainer != ns) {
+        result += ' ' + this.$t('specimens.collected_in', {container: specimen.collectionContainer});
+      }
+
+      return result;
+    },
+
+    _getDate: function(value, showTime) {
+      if (value instanceof Date || typeof value == 'number') {
+        return showTime ? this.$filters.dateTime(value) : this.$filters.date(value);
+      }
+
+      return value;
     }
   }
 }

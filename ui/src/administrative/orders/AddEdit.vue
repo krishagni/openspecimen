@@ -158,6 +158,17 @@ export default {
     const setting = await settingsSvc.getSetting('administrative', 'max_order_spmns_ui_limit');
     this.ctx.maxSpmnsLimit = +setting[0].value || 100;
 
+    let columns = specimensSchema.columns;
+    const customFields = await orderSvc.getCustomFields();
+    if (customFields && customFields.length > 0) {
+      columns = columns.filter(column => column.name.indexOf('specimen.') != 0);
+      columns.splice(0, 0, ...formUtil.fromSde(customFields, true));
+      columns[0].href = (rowObject) => this.$ui.ngServer + '#/specimens/' + rowObject.specimen.id;
+      this.ctx.hasCustomSpecimenFields = true;
+      this.ctx.specimensCriteria.includeExtensions = true;
+    }
+
+    this.ctx.specimensSchema = { columns };
     this.loadOrder();
   },
 
@@ -283,9 +294,8 @@ export default {
 
       localStorage.removeItem('os.orderDetails');
       Promise.all(promises).then(
-        (result) => {
+        async (result) => {
           ctx.loading = false;
-          ctx.specimensSchema = specimensSchema;
 
           let idx = 0;
           const {schema, defaultValues} = result[idx++];
@@ -304,6 +314,20 @@ export default {
                 dataCtx.orderItems = [];
                 order.copyItemsFromExistingOrder = true;
               }
+            }
+
+            if (this.ctx.hasCustomSpecimenFields) {
+              const specimenIds = [];
+              const itemsMap = {};
+              items.forEach(item => {
+                itemsMap[item.specimen.id] = item;
+                specimenIds.push(item.specimen.id);
+              });
+
+              const specimens = await this.$osSvc.specimenSvc.getByIds(specimenIds, true);
+              specimens.forEach(specimen => {
+                itemsMap[specimen.id].specimen = formUtil.createCustomFieldsMap(specimen, true);
+              });
             }
           }
 
@@ -394,7 +418,7 @@ export default {
     addSpecimens: async function({specimens}) {
       const orderItems = specimens.filter(specimen => specimen.activityStatus == 'Active')
         .map((specimen) => ({
-          specimen: specimen,
+          specimen: formUtil.createCustomFieldsMap(specimen, true),
           quantity: specimen.availableQty,
           dispose: true
         }));
