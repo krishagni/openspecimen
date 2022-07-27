@@ -1295,7 +1295,9 @@ public class Utility {
 				String canonicalPath = dataDir.getCanonicalPath();
 				String absolutePath  = dataDir.getAbsolutePath();
 				if (!StringUtils.equals(canonicalPath, absolutePath)) {
-					throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Data directory has path traversal. Always use absolute path");
+					throw OpenSpecimenException.userError(
+						CommonErrorCode.INVALID_INPUT,
+						String.format("Data directory has path traversal. Always use absolute path. Canonical: %s; Absolute: %s;", canonicalPath, absolutePath));
 				}
 			} catch (IOException ioe) {
 				throw new RuntimeException("Error checking whether data directory path is absolute or not", ioe);
