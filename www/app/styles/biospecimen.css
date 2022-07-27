@@ -519,12 +519,27 @@ table .os-md-time table {
   padding-right: 4px;
 }
 
-.os-cp-draft-marker {
-  position: absolute;
+/*.os-cp-draft-marker {
+  position: fixed;
   font-size: 100px;
   top: 50%;
   left: calc(50% - 159px);
   opacity: 0.2;
   z-index: 1000;
   transform: rotate(-45deg);
+}*/
+
+.os-cp-draft-marker {
+  position: fixed;
+  font-size: 20px;
+  top: 50px;
+  left: 25%;
+  border-radius: 20px;
+  color: red;
+  padding: 5px 10px;
+  border: 5px solid red;
+  opacity: 50%;
+  z-index: 0;
+  transform: rotate(-10deg);
+  background: transparent;
 }
