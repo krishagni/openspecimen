@@ -39,7 +39,13 @@ angular.module('os.biospecimen.visit.addedit', [])
       if ($stateParams.missedVisit == 'true') {
         angular.extend(currVisit, {status: 'Missed Collection'});
       } else if ($stateParams.newVisit == 'true') {
-        angular.extend(currVisit, {id: undefined, name: undefined, status: 'Complete', visitDate: new Date()});
+        var presetValues = {
+          id: undefined, name: undefined,
+          status: 'Complete', visitDate: new Date(),
+          surgicalPathologyNumber: null, sprName: null, sprLocked: false
+        };
+
+        angular.extend(currVisit, presetValues);
         $scope.visit = currVisit;
         ctx.pendingToStart = true;
       }

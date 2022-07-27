@@ -711,6 +711,7 @@ public class Utility {
 			byte[] decodedValue = Base64.getDecoder().decode(value.getBytes());
 			return new String(cipher.doFinal(decodedValue));
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException("Error decrypting the value: " + e.getMessage(), e);
 		}
 	}
