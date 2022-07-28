@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.CsvException;
 import com.krishagni.catissueplus.core.common.util.CsvFileReader;
@@ -392,35 +394,44 @@ public class ObjectReader implements Closeable {
 	}
 	
 	private Long parseDateTime(String value)
-	throws ParseException {
+	throws ParseException, DateTimeParseException {
+		String format = dateFmt + " " + timeFmt;
 		try {
 			if (value.endsWith("Z")) {
+				format = ISO_FMT;
 				return parseDate(value, ISO_FMT, TimeZone.getTimeZone("UTC"), false);
 			}
 
-			return parseDate(value, dateFmt + " " + timeFmt);
-		} catch (ParseException e) {
-			return parseDate(value, dateFmt);
+			return parseDate(value, format);
+		} catch (ParseException | DateTimeParseException e) {
+			try {
+				return parseDate(value, dateFmt);
+			} catch (ParseException | DateTimeParseException e1) {
+				throw OpenSpecimenException.userError(CommonErrorCode.DATE_PARSE_ERROR, value, format, e.getMessage());
+			}
 		}
 	}
 
-	private Long parseDate(String value, boolean dateOnly)
-	throws ParseException {
-		return parseDate(value, dateFmt, dateOnly);
+	private Long parseDate(String value, boolean dateOnly) {
+		try {
+			return parseDate(value, dateFmt, dateOnly);
+		} catch (ParseException | DateTimeParseException e) {
+			throw OpenSpecimenException.userError(CommonErrorCode.DATE_PARSE_ERROR, value, dateFmt, e.getMessage());
+		}
 	}
 
 	private Long parseDate(String value, String fmt)
-	throws ParseException {
+	throws ParseException, DateTimeParseException {
 		return parseDate(value, fmt, false);
 	}
 
 	private Long parseDate(String value, String fmt, boolean dateOnly)
-	throws ParseException {
+	throws ParseException, DateTimeParseException {
 		return parseDate(value, fmt, timeZone, dateOnly);
 	}
 
 	private Long parseDate(String value, String fmt, TimeZone tz, boolean dateOnly)
-	throws ParseException {
+	throws ParseException, DateTimeParseException {
 		DateTimeFormatter formatter = dateTimeFormatterMap.get(fmt);
 		if (formatter == null) {
 			formatter = DateTimeFormatter.ofPattern(fmt);

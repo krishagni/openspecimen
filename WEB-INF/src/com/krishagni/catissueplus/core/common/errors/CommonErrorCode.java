@@ -27,7 +27,9 @@ public enum CommonErrorCode implements ErrorCode {
 
 	DATE_GT_TODAY,
 
-	INTERVAL_EXCEEDS_ALLOWED;
+	INTERVAL_EXCEEDS_ALLOWED,
+
+	DATE_PARSE_ERROR;
 
 	@Override
 	public String code() {
