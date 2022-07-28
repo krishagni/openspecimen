@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.CsvException;
@@ -58,6 +58,8 @@ public class ObjectReader implements Closeable {
 	private boolean trimTimeOfAllDates = false;
 
 	private boolean ignoreId = false;
+
+	private Map<String, DateTimeFormatter> dateTimeFormatterMap = new HashMap<>();
 
 	public ObjectReader(String filePath, ObjectSchema schema, String dateFmt, String timeFmt) {
 		this(filePath, schema, dateFmt, timeFmt, null);
@@ -419,6 +421,15 @@ public class ObjectReader implements Closeable {
 
 	private Long parseDate(String value, String fmt, TimeZone tz, boolean dateOnly)
 	throws ParseException {
+		DateTimeFormatter formatter = dateTimeFormatterMap.get(fmt);
+		if (formatter == null) {
+			formatter = DateTimeFormatter.ofPattern(fmt);
+			dateTimeFormatterMap.put(fmt, formatter);
+		}
+
+		// validate
+		formatter.parse(value);
+
 		SimpleDateFormat sdf = new SimpleDateFormat(fmt);
 		sdf.setLenient(false);
 		if (!dateOnly && tz != null) {
