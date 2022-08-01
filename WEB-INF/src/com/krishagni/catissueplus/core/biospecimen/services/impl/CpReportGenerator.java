@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService.DataSource;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -77,7 +78,7 @@ public class CpReportGenerator {
 		Map<String, Object> emailCtxt = new HashMap<>();
 		emailCtxt.putAll(getMetrics(cp, sysSettings, rptSettings));
 		emailCtxt.put("dataFile", getDataFile(cp, sysSettings, rptSettings));
-		emailCtxt.put("cp", cp); // introduced in v4.0
+		emailCtxt.put("cp", CollectionProtocolDetail.from(cp)); // introduced in v4.0
 		emailCtxt.put("cpId", cp.getId()); // retaining this for backward compatibility
 		emailCtxt.put("cpShortTitle", cp.getShortTitle()); // retaining this for backward compatibility
 		emailCtxt.put("$subject", new String[] { cp.getShortTitle() });
