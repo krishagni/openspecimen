@@ -507,7 +507,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		props.put("forgot_password",         getBoolSetting("auth", "forgot_password", true));
 		props.put("toast_disp_time",         getIntSetting("common", "toast_disp_time", 5));
 		props.put("default_domain",          getStrSetting("auth", "default_domain"));
-		props.put("data_dir",                getDataDir());
 		props.put("not_specified",           getStrSetting("common", "not_specified_text"));
 		props.put("searchDelay",             getIntSetting("common", "search_delay", 1000));
 		props.put("allowHtmlMarkup",         getBoolSetting("common", "de_form_html_markup", true));
