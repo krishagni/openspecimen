@@ -464,7 +464,7 @@ public class ScheduledJob extends BaseEntity {
 	
 	public ScheduledTask newTask() {
 		if (getType() == Type.EXTERNAL) {
-			return new ExternalScheduledTask();
+			throw OpenSpecimenException.userError(ScheduledJobErrorCode.EXT_TASK_FORBIDDEN);
 		}
 		
 		try {

@@ -240,22 +240,12 @@ public class ScheduledJobFactoryImpl implements ScheduledJobFactory {
 		job.setType(type);
 		
 		if (type == Type.EXTERNAL) {
-			setCommand(detail, job, ose);
+			ose.addError(ScheduledJobErrorCode.EXT_TASK_FORBIDDEN);
 		} else {
 			setTaskImplFqn(detail, job, ose);
 		}
 	}
-	
-	private void setCommand(ScheduledJobDetail detail, ScheduledJob job, OpenSpecimenException ose) {
-		String command = detail.getCommand();
-		if (StringUtils.isBlank(command)) {
-			ose.addError(ScheduledJobErrorCode.EXTERNAL_COMMAND_REQUIRED);
-			return;
-		}
-		
-		job.setCommand(command);
-	}
-	
+
 	private void setTaskImplFqn(ScheduledJobDetail detail, ScheduledJob job, OpenSpecimenException ose) {
 		if (job.getType() == Type.QUERY) {
 			job.setTaskImplfqn(ScheduledQueryTask.class.getName());

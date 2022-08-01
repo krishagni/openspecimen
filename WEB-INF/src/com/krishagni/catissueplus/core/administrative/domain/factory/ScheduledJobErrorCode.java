@@ -37,7 +37,9 @@ public enum ScheduledJobErrorCode implements ErrorCode {
 
 	QUERY_REQ,
 
-	OP_NOT_ALLOWED;
+	OP_NOT_ALLOWED,
+
+	EXT_TASK_FORBIDDEN;
 	
 	@Override
 	public String code() {
