@@ -586,8 +586,13 @@
   "specimens": {
     "barcode": "Barcode",
     "collected_in": "collected in {container}",
+    "cp": "Collection Protocol",
     "extracted_from": "from {anatomicSite}",
-    "label": "Label"
+    "label": "Label",
+    "location": "Location",
+    "ppid": "PPID",
+    "quantity": "Quantity",
+    "type": "Type"
   },
 
   "user_groups": {
