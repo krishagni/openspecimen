@@ -893,7 +893,7 @@
     "warn_large_no_derivatives": "The UI is not designed for creation of such large number of derived specimens. You might notice slowness in page rendering. In such a scenario, we recommend you to use bulk import option.",
     "no_read_access": "You do not have rights to view specimens of the CP: {{cp.shortTitle}}",
     "aliquots_count_req_auto_alloc": "Aliquots count is required for auto-allocation!",
-    "edit_limit_maxed": "{{count}} specimens selected. Only 100 specimens can be edited in bulk!",
+    "edit_limit_maxed": "{{count}} specimens selected. Only {{limit}} specimens can be edited at a time!",
 
     "non_primary_receive_na": "One or more specimens are not primary specimens. Non-primary specimens: {{specimens}}",
     "closed_edit_na": "Closed specimens cannot be edited. Closed specimens: {{specimens}}",
@@ -1053,6 +1053,7 @@
     },
 
     "bulk_update": "Bulk Edit Specimens",
+    "bulk_edit_pending": "Your request to bulk update specimens is taking more time than anticipated. You will be notified by email on completion of the request.",
 
     "bulk_events": {
       "add_edit": "Bulk Events",
@@ -3103,7 +3104,9 @@
         "cp_versioning_enabled": "CP Revisions",
         "cp_versioning_enabled_desc": "All changes to the collection protocols will have to be reviewed and published.",
         "pre_print_ship_recv_quality": "Shipment Received Quality",
-        "pre_print_ship_recv_quality_desc": "Regular expression for acceptable shipment received qualities."
+        "pre_print_ship_recv_quality_desc": "Regular expression for acceptable shipment received qualities.",
+        "max_spmns_update_limit": "Specimens Update UI Limit",
+        "max_spmns_update_limit_desc": "Maximum number of specimens that can be updated at a time using UI. The default value is 100."
       },
 
       "common": {

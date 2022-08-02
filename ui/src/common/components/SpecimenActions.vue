@@ -326,15 +326,17 @@ export default {
       return sites;
     },
 
-    editSpecimens: function() {
+    editSpecimens: async function() {
       const specimens = this.specimens;
       if (!specimens || specimens.length == 0) {
         alertsSvc.error('Please select at least one existing specimen to edit');
         return;
       }
 
-      if (specimens.length > 100) {
-        alertsSvc.error(specimens.length + ' specimens selected. Only 100 specimens can be edited in bulk!');
+      const settings = await settingsSvc.getSetting('biospecimen', 'max_spmns_update_limit')
+      const limit = +(settings[0].value || 100);
+      if (specimens.length > limit) {
+        alertsSvc.error(specimens.length + ' specimens selected. Only ' + limit + ' specimens can be edited at a time!');
         return;
       }
 

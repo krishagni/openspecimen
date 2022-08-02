@@ -144,7 +144,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	PRIMARY_NOT_RCVD,
 
-	POOL_SAME_CP_REQ;
+	POOL_SAME_CP_REQ,
+
+	UPDATE_LIMIT_MAXED;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

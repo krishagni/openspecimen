@@ -361,13 +361,18 @@ angular.module('os.biospecimen.specimen')
             return;
           }
 
-          if (spmns.length > 100) {
-            Alerts.error('specimens.edit_limit_maxed', {count: spmns.length});
-            return;
-          }
+          SettingUtil.getSetting('biospecimen', 'max_spmns_update_limit').then(
+            function(setting) {
+              var limit = +(setting.value || 100);
+              if (spmns.length > limit) {
+                Alerts.error('specimens.edit_limit_maxed', {count: spmns.length, limit: limit});
+                return;
+              }
 
-          SpecimensHolder.setSpecimens(spmns);
-          navTo(scope, 'specimen-bulk-edit');
+              SpecimensHolder.setSpecimens(spmns);
+              navTo(scope, 'specimen-bulk-edit');
+            }
+          );
         }
 
         scope.printSpecimenLabels = function() {

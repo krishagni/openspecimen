@@ -13,13 +13,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
@@ -75,6 +80,7 @@ import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -87,6 +93,10 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, ConfigChangeListener, InitializingBean {
 
 	private static final LogUtil logger = LogUtil.getLogger(SpecimenServiceImpl.class);
+
+	private static final String SPMNS_UPDATED_TMPL = "specimens_bulk_updated";
+
+	private static final String SPMNS_UPDATE_FAILED_TMPL = "specimens_bulk_update_failed";
 
 	private DaoFactory daoFactory;
 
@@ -101,6 +111,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	private LabelGenerator specimenBarcodeGenerator;
 
 	private ExportService exportSvc;
+
+	private AsyncTaskExecutor taskExecutor;
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -128,6 +140,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	public void setExportSvc(ExportService exportSvc) {
 		this.exportSvc = exportSvc;
+	}
+
+	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
 	}
 
 	@Override
@@ -288,18 +304,43 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenInfo>> bulkUpdateSpecimens(RequestEvent<BulkEntityDetail<SpecimenDetail>> req) {
 		try {
-			BulkEntityDetail<SpecimenDetail> buDetail = req.getPayload();
-			SpecimenDetail spmn = buDetail.getDetail();
+			User currentUser = AuthUtil.getCurrentUser();
+			Future<List<SpecimenInfo>> result = taskExecutor.submit(
+				() ->  {
+					Map<String, Object> props = new HashMap<>();
+					props.put("rcpt", currentUser);
+					props.put("specimensCount", req.getPayload().getIds().size());
 
-			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-			List<Specimen> savedSpmns = new ArrayList<>();
-			for (Long id : buDetail.getIds()) {
-				spmn.setId(id);
-				savedSpmns.add(updateSpecimen(spmn, ose));
-			}
+					try {
+						List<SpecimenInfo> updateSpecimens = bulkUpdateSpecimens(req.getPayload(), currentUser);
+						EmailUtil.getInstance().sendEmail(
+							SPMNS_UPDATED_TMPL,
+							new String[] { currentUser.getEmailAddress() },
+							null,
+							props);
+						return updateSpecimens;
+					} catch (Exception e) {
+						String stackTrace = ExceptionUtils.getStackTrace(e);
+						props.put("error", stackTrace);
+						EmailUtil.getInstance().sendEmail(
+							SPMNS_UPDATE_FAILED_TMPL,
+							new String[] { currentUser.getEmailAddress() },
+							null,
+							props
+						);
 
-			ose.checkAndThrow();
-			return ResponseEvent.response(SpecimenDetail.from(savedSpmns));
+						if (e instanceof OpenSpecimenException) {
+							throw (OpenSpecimenException) e;
+						} else {
+							throw OpenSpecimenException.serverError(e);
+						}
+					}
+				}
+			);
+
+			return ResponseEvent.response(result.get(30000, TimeUnit.MILLISECONDS));
+		} catch (TimeoutException te) {
+			return ResponseEvent.response(null);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -788,6 +829,31 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		crit.siteCps(siteCps);
 		crit.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
 		return daoFactory.getSpecimenDao().getSpecimens(crit);
+	}
+
+	@PlusTransactional
+	private List<SpecimenInfo> bulkUpdateSpecimens(BulkEntityDetail<SpecimenDetail> buDetail, User currentUser)
+	throws Exception {
+		try {
+			AuthUtil.setCurrentUser(currentUser);
+			SpecimenDetail spmn = buDetail.getDetail();
+			int limit = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.MAX_SPMNS_UPDATE_LIMIT, 100);
+			if (buDetail.getIds().size() > limit) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.UPDATE_LIMIT_MAXED, buDetail.getIds().size(), limit);
+			}
+
+			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+			List<Specimen> savedSpmns = new ArrayList<>();
+			for (Long id : buDetail.getIds()) {
+				spmn.setId(id);
+				savedSpmns.add(updateSpecimen(spmn, ose));
+			}
+
+			ose.checkAndThrow();
+			return SpecimenDetail.from(savedSpmns);
+		} finally {
+			AuthUtil.clearCurrentUser();
+		}
 	}
 
 	private Specimen updateSpecimen(SpecimenDetail detail, OpenSpecimenException ose) {

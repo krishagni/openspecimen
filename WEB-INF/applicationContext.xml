@@ -373,6 +373,7 @@
     <property name="labelGenerator" ref="specimenLabelGenerator"/>
     <property name="specimenBarcodeGenerator" ref="specimenBarcodeGenerator"/>
     <property name="exportSvc" ref="exportSvc"/>
+    <property name="taskExecutor" ref="taskExecutor"/>
   </bean>
 
   <bean id="spmnTypePropsSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenTypePropsServiceImpl">

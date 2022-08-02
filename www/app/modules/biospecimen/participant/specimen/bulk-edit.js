@@ -57,10 +57,24 @@ angular.module('os.biospecimen.specimen')
         $scope.specimenStatuses = PvManager.getPvs('specimen-status');
       }
 
+      function goBack() {
+        $scope.back();
+      }
+
       function updateSpecimens(toSave) {
         Specimen.bulkEdit(toSave).then(
           function(result) {
-            $scope.back();
+            if (result == null) {
+              Util.showConfirm({
+                title: 'specimens.bulk_update',
+                confirmMsg: 'specimens.bulk_edit_pending',
+                hideCancel: true,
+                okBtn: 'common.buttons.ok'
+              }).then(goBack, goBack);
+              return;
+            }
+
+            goBack();
           }
         );
       };
