@@ -512,7 +512,11 @@ export default {
           return;
         }
 
-        const {useBarcode, specimens} = await this.$refs.specimensScanner.getSpecimensByLabel(labels);
+        const {useBarcode, specimens, error} = await this.$refs.specimensScanner.getSpecimensByLabel(labels);
+        if (error) {
+          return;
+        }
+
         if (!await this.confirmTransfer(useBarcode, specimens)) {
           return;
         }
@@ -547,9 +551,8 @@ export default {
       }
 
       const addedLabels = addedEntities.map(pos => pos.occupyingEntityName);
-      const {useBarcode, specimens} = await this.$refs.specimensScanner.getSpecimensByLabel(addedLabels);
-      if (!specimens || specimens.length < addedLabels.length) {
-        alertsSvc.error({code: 'containers.specimens_not_found'});
+      const {useBarcode, specimens, error} = await this.$refs.specimensScanner.getSpecimensByLabel(addedLabels);
+      if (error) {
         return;
       }
 
@@ -557,7 +560,9 @@ export default {
         return;
       }
 
-      const specimensMap = specimens.reduce((acc, spmn) => { acc[spmn.id] = spmn; return spmn }, {});
+      const attr = useBarcode ? 'barcode' : 'label';
+      const specimensByName = specimens.reduce((acc, spmn) => {acc[spmn[attr].toLowerCase()] = spmn; return acc;}, {});
+      const specimensMap = specimens.reduce((acc, spmn) => { acc[spmn.id] = spmn; return acc; }, {});
       const positions = [];
       for (let entity of vacatedEntities) {
         if (!specimensMap[entity.occupyingEntityId]) {
@@ -568,8 +573,13 @@ export default {
         }
       }
 
-      addedEntities.forEach((pos, idx) => {
-        const toAdd = {...pos, occupyingEntityId: specimens[idx].id};
+      addedEntities.forEach((pos) => {
+        const occupant = specimensByName[pos.occupyingEntityName.toLowerCase()];
+        if (!occupant) {
+          return;
+        }
+
+        const toAdd = {...pos, occupyingEntityId: occupant.id};
         delete toAdd.oldOccupant;
         positions.push(toAdd);
       });

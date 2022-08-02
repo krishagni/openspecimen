@@ -109,6 +109,10 @@ export default {
       if (specimens.length == 0) {
         const fieldRef = this.$refs.cartForm.getFieldRef('cart.specimenLabels');
         const value    = await fieldRef.getSpecimens();
+        if (value.error) {
+          return;
+        }
+
         specimens = value.specimens || [];
       }
 

@@ -40,7 +40,12 @@ angular.module('os.biospecimen.specimen')
           }
 
           return SpecimenUtil.getSpecimens(labels, filterOpts, errorOpts).then(
-            function (specimens) {
+            function (resp) {
+              if (resp.error) {
+                return false;
+              }
+
+              var specimens = resp.specimens;
               if (!specimens) {
                 return false;
               }

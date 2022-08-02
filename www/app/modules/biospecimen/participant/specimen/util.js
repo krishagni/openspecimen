@@ -258,7 +258,7 @@ angular.module('os.biospecimen.specimen')
     //
     // labels could be either specimen label or barcode
     //
-    function resolveSpecimens1(labels, attr, specimens, errorOpts) {
+    async function resolveSpecimens1(labels, attr, specimens, errorOpts) {
       var specimensMap = {};
       angular.forEach(specimens, function(spmn) {
         var key = spmn[attr];
@@ -298,14 +298,22 @@ angular.module('os.biospecimen.specimen')
       });
 
       if (notFoundLabels.length != 0) {
-        showError(notFoundLabels, errorOpts);
-        if (!specimens || specimens.length == 0) {
-          return deferred(undefined);
+        var resp = await showError(notFoundLabels, errorOpts).then(
+          function() {
+            return {specimens: specimens};
+          },
+          function() {
+            return {specimens: specimens, error: true};
+          }
+        );
+
+        if (resp.error) {
+          return deferred(resp);
         }
       }
 
       if (dupLabels.length == 0) {
-        return deferred(specimens);
+        return deferred({specimens: specimens});
       }
 
       return $modal.open({
@@ -326,26 +334,17 @@ angular.module('os.biospecimen.specimen')
           // therefore any updates/selection done in modal are visible in labelsInfo
           // list as well
           //
-          return labelsInfo.map(
-            function(labelInfo) {
-              return labelInfo.selected;
-            }
-          );
+          return { specimens: labelsInfo.map(function(labelInfo) { return labelInfo.selected; }) };
         }
       );
     }
 
     function showError(notFoundLabels, errorOpts) {
-      errorOpts = errorOpts || {};
-
-      var code = errorOpts.code || 'specimens.specimen_not_found';
-      if (notFoundLabels.length > 1) {
-        code = errorOpts.code_m || 'specimens.specimen_m_not_found';
-      }
-
-      var params = angular.extend({}, errorOpts.params || {});
-      params.label = notFoundLabels.join(', ');
-      Alerts.error(code, params);
+      return Util.showConfirm({
+        title: 'specimens.not_found',
+        confirmMsg: 'specimens.proceed_with_not_found',
+        input: {notFoundLabels: notFoundLabels.join(', ')}
+      });
     }
 
     function showInsufficientQtyWarning(opts) {

@@ -58,6 +58,20 @@
         <os-button primary label="Done" @click="resolved" />
       </template>
     </os-dialog>
+
+    <os-confirm class="os-not-found-confirm" ref="notFoundConfirm">
+      <template #title>
+        <span>Specimens not found</span>
+      </template>
+
+      <template #message>
+        <div class="message">
+          <div>Following specimens were not found: <br> <br> <i> {{notFoundLabels.join(', ')}} </i> </div>
+
+          <div>Do you want to proceed?</div>
+        </div>
+      </template>
+    </os-confirm>
   </div>
 </template>
 
@@ -82,6 +96,8 @@ export default {
       inputValue: '',
 
       barcodingEnabled: false,
+
+      notFoundLabels: []
     }
   },
 
@@ -97,7 +113,11 @@ export default {
     },
 
     addSpecimens: async function() {
-      const {specimens, useBarcode} = await this.getSpecimens();
+      const {specimens, useBarcode, error} = await this.getSpecimens();
+      if (error) {
+        return;
+      }
+
       if (specimens && specimens.length > 0) {
         this.clearInput();
         this.$emit('on-add', {specimens, useBarcode});
@@ -130,7 +150,7 @@ export default {
       const dupLabels = util.getDupItems(labels);
       if (dupLabels.length > 0) {
         alerts.error('Duplicate labels entered: ' + dupLabels.join(', '));
-        return {specimens: [], useBarcode: this.useBarcode};
+        return {specimens: [], useBarcode: this.useBarcode, error: true};
       }
 
       let searchReq = Object.assign({exactMatch: true}, this.criteria || {});
@@ -142,11 +162,9 @@ export default {
 
       searchReq.maxResults = 1000;
       return http.post('specimens/search', searchReq).then(
-        specimens => {
-          return this.resolveSpecimens(searchReq.labels, searchReq.barcodes, specimens).then(
-            resolvedSpmns => ({specimens: resolvedSpmns, useBarcode: this.useBarcode})
-          );
-        }
+        specimens => this.resolveSpecimens(searchReq.labels, searchReq.barcodes, specimens).then(
+          resolvedSpmns => ({...resolvedSpmns, useBarcode: this.useBarcode})
+        )
       );
     },
 
@@ -200,14 +218,14 @@ export default {
       );
 
       if (notFoundLabels.length != 0) {
-        this.showError(notFoundLabels);
-        if (!specimens || specimens.length == 0) {
-          return undefined;
+        const resp = await this.showError(notFoundLabels);
+        if (resp != 'proceed') {
+          return {specimens, error: true};
         }
       }
 
       if (dupLabels.length == 0) {
-        return specimens;
+        return { specimens };
       }
 
       this.labelsInfo = labelsInfo;
@@ -217,16 +235,8 @@ export default {
     },
 
     showError: function(notFoundLabels) {
-      let opts = this.errorOpts || {};
-      let msg = '';
-
-      if (notFoundLabels.length > 1) {
-        msg = opts.m_not_found || 'Specimens not found';
-      } else {
-        msg = opts.not_found || 'Specimen not found';
-      }
-
-      alerts.error(msg + ': ' + notFoundLabels.join(', '));
+      this.notFoundLabels = notFoundLabels;
+      return this.$refs.notFoundConfirm.open();
     },
 
     resolved: function() {
@@ -238,7 +248,7 @@ export default {
         return;
       }
 
-      this.specimensResolver(this.labelsInfo.map(labelInfo => labelInfo.selected));
+      this.specimensResolver({specimens: this.labelsInfo.map(labelInfo => labelInfo.selected)});
       this.closeResolver();
     },
 
@@ -304,4 +314,7 @@ export default {
   margin-right: 1.25rem;
 }
 
+.os-not-found-confirm .message > div {
+  padding: 0.5rem 0.25rem;
+}
 </style>

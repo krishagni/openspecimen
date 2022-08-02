@@ -974,6 +974,8 @@
     "specimen_not_found_cp": "Specimen {{label}} does not exist in the collection protocol {{cpShortTitle}}.",
     "specimen_m_not_found_cp": "Specimens {{label}} do not exist in the collection protocol {{cpShortTitle}}.",
     "too_many_specimens": "Too many specimen labels/barcodes provided. Please try by removing some labels/barcodes.",
+    "not_found": "Specimens not found",
+    "proceed_with_not_found": "Following specimens were not found: <br> <br> <i> {{notFoundLabels}} </i> <br> <br> Do you want to proceed?",
     "hide_pending":"Hide Pending",
     "show_pending": "Show Pending",
 
