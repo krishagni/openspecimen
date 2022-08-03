@@ -258,7 +258,7 @@ angular.module('os.biospecimen.specimen')
     //
     // labels could be either specimen label or barcode
     //
-    async function resolveSpecimens1(labels, attr, specimens, errorOpts) {
+    function resolveSpecimens1(labels, attr, specimens, errorOpts) {
       var specimensMap = {};
       angular.forEach(specimens, function(spmn) {
         var key = spmn[attr];
@@ -298,9 +298,9 @@ angular.module('os.biospecimen.specimen')
       });
 
       if (notFoundLabels.length != 0) {
-        var resp = await showError(notFoundLabels, errorOpts).then(
+        return showError(notFoundLabels, errorOpts).then(
           function() {
-            return {specimens: specimens};
+            return resolveSpecimens2(labelsInfo, dupLabels, attr, specimens);
           },
           function() {
             return {specimens: specimens, error: true};
@@ -312,6 +312,10 @@ angular.module('os.biospecimen.specimen')
         }
       }
 
+      return resolveSpecimens2(labelsInfo, dupLabels, attr, specimens);
+    }
+
+    function resolveSpecimens2(labelsInfo, dupLabels, attr, specimens) {
       if (dupLabels.length == 0) {
         return deferred({specimens: specimens});
       }
