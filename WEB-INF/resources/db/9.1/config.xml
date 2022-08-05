@@ -14,4 +14,15 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Max. audit report period">
+    <sql>
+      call add_cfg_prop(
+        'common', 'max_audit_report_period',
+        'max_audit_report_period', 'max_audit_report_period_desc',
+        'INT', ''
+      );
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>

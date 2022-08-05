@@ -155,7 +155,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		}
 
 		Date startDate = Utility.chopSeconds(criteria.startDate());
-		Date endDate   = Utility.chopSeconds(criteria.endDate());
+		Date endDate   = Utility.getEndOfDay(criteria.endDate());
 		Date endOfDay  = Utility.getEndOfDay(Calendar.getInstance().getTime());
 		if (startDate != null && startDate.after(endOfDay)) {
 			return ResponseEvent.userError(AuditErrorCode.DATE_GT_TODAY, Utility.getDateTimeString(startDate));
@@ -165,23 +165,32 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			return ResponseEvent.userError(AuditErrorCode.DATE_GT_TODAY, Utility.getDateTimeString(endDate));
 		}
 
+		int maxLimit = ConfigUtil.getInstance().getIntSetting("common", "max_audit_report_period", 90);
 		if (startDate != null && endDate != null) {
-			long days = Utility.daysBetween(startDate, endDate);
-			if (days > 30L) {
-				return ResponseEvent.userError(AuditErrorCode.DATE_INTERVAL_GT_ALLOWED);
+			int days = Utility.daysBetween(startDate, endDate);
+			if (days > maxLimit) {
+				return ResponseEvent.userError(AuditErrorCode.DATE_INTERVAL_GT_ALLOWED, maxLimit);
 			}
 		} else if (startDate != null) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(startDate);
-			cal.add(Calendar.MONTH, 1);
+			cal.add(Calendar.DAY_OF_MONTH, maxLimit);
 			endDate = cal.getTime().after(endOfDay) ? endOfDay : Utility.getEndOfDay(cal.getTime());
 		} else {
 			endDate = endDate != null ? endDate : endOfDay;
 
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(endDate);
-			cal.add(Calendar.MONTH, -1);
+			cal.add(Calendar.DAY_OF_MONTH, -maxLimit);
 			startDate = Utility.chopTime(cal.getTime());
+		}
+
+		if (startDate.after(endDate)) {
+			return ResponseEvent.userError(
+				AuditErrorCode.FROM_DT_GT_TO_DATE,
+				Utility.getDateTimeString(startDate),
+				Utility.getDateTimeString(endDate)
+			);
 		}
 
 		criteria.startDate(startDate).endDate(endDate);

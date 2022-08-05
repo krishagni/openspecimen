@@ -3171,7 +3171,10 @@
         "de_date_format": "Short Date Format",
         "de_date_format_desc": "Date format for parsing date field values in the data entry forms.",
         "time_format": "Time Format",
-        "time_format_desc": "Time format for displaying and parsing time component of the date-time fields."
+        "time_format_desc": "Time format for displaying and parsing time component of the date-time fields.",
+
+        "max_audit_report_period": "Audit Report Period",
+        "max_audit_report_period_desc": "Maximum period, in number of days, for which the audit reports can be generated. When not specified, the period of 90 days is used."
       },
 
       "email": {
