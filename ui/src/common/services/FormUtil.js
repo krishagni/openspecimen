@@ -154,6 +154,9 @@ class FormUtil {
       }
 
       valueMap[attr.name] = value;
+      if (!useDisplayValue && attr.displayValue) {
+        valueMap[attr.name + '$displayValue'] = attr.displayValue;
+      }
     }
 
     return valueMap;

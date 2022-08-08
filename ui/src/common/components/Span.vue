@@ -15,6 +15,10 @@ import util from '@/common/services/Util.js';
 export default {
   props: ['modelValue', 'displayType', 'href', 'form', 'context'],
 
+  created() {
+    this.customField = this.$attrs.name && this.$attrs.name.indexOf('.extensionDetail.attrsMap.');
+  },
+
   computed: {
     inputValue: {
       get() {
@@ -46,6 +50,13 @@ export default {
 
         case 'datetime':
           return this._getDate(this.inputValue, true);
+      }
+
+      if (this.customField) {
+        const displayValue = exprUtil.eval(this.form, this.$attrs.name + '$displayValue');
+        if (displayValue) {
+          return displayValue;
+        }
       }
 
       return this.inputValue || '-';
