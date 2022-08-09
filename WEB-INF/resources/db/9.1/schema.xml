@@ -144,4 +144,16 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track IP address of the query user">
+    <addColumn tableName="CATISSUE_QUERY_AUDIT_LOGS">
+      <column name="IP_ADDRESS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Track IP address of the user who effected the password change">
+    <addColumn tableName="CATISSUE_PASSWORD">
+      <column name="IP_ADDRESS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

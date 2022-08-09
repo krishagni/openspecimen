@@ -10,6 +10,8 @@ public class QueryAuditLog {
 	private SavedQuery query;
 	
 	private User runBy;
+
+	private String ipAddress;
 	
 	private Date timeOfExecution;
 	
@@ -45,6 +47,14 @@ public class QueryAuditLog {
 
 	public void setRunBy(User runBy) {
 		this.runBy = runBy;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	public Date getTimeOfExecution() {

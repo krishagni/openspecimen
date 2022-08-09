@@ -9,6 +9,8 @@ public class FormDataRevisionDetail {
 
 	private Date time;
 
+	private String ipAddress;
+
 	private UserSummary user;
 
 	private String op;
@@ -35,6 +37,14 @@ public class FormDataRevisionDetail {
 
 	public void setTime(Date time) {
 		this.time = time;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	public UserSummary getUser() {

@@ -82,11 +82,14 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		List<Object[]> rows = getCurrentSession().createSQLQuery(String.format(GET_REV_INFO_SQL, auditTable, idColumn, ""))
 			.addScalar("rev", LongType.INSTANCE)
 			.addScalar("revTime", TimestampType.INSTANCE)
+			.addScalar("ipAddress", StringType.INSTANCE)
 			.addScalar("userId", LongType.INSTANCE)
 			.addScalar("firstName", StringType.INSTANCE)
 			.addScalar("lastName", StringType.INSTANCE)
 			.addScalar("emailAddr", StringType.INSTANCE)
 			.addScalar("loginName", StringType.INSTANCE)
+			.addScalar("instituteName", StringType.INSTANCE)
+			.addScalar("domainName", StringType.INSTANCE)
 			.setParameter("objectId", objectId)
 			.list();
 
@@ -97,7 +100,9 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	public List<RevisionDetail> getRevisions(RevisionsListCriteria criteria) {
 		Criteria query = getCurrentSession().createCriteria(RevisionEntityRecord.class, "re")
 			.createAlias("re.revision", "r")
-			.createAlias("r.user", "u", JoinType.LEFT_OUTER_JOIN);
+			.createAlias("r.user", "u", JoinType.LEFT_OUTER_JOIN)
+			.createAlias("u.institute", "i", JoinType.LEFT_OUTER_JOIN)
+			.createAlias("u.authDomain", "d", JoinType.LEFT_OUTER_JOIN);
 
 		buildRevisionsListQuery(query, criteria);
 		setRevisionsListFields(query);
@@ -133,6 +138,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			detail.setId((Long) row[idx++]);
 			detail.setTime((Date) row[idx++]);
 			detail.setOp((String) row[idx++]);
+			detail.setIpAddress((String) row[idx++]);
 			detail.setEntityId((Long) row[idx++]);
 			detail.setRecordId((Long) row[idx++]);
 			detail.setEntityType((String) row[idx++]);
@@ -144,6 +150,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			user.setLastName((String) row[idx++]);
 			user.setEmailAddress((String) row[idx++]);
 			user.setLoginName((String) row[idx++]);
+			user.setInstituteName((String) row[idx++]);
+			user.setDomain((String) row[idx++]);
 			detail.setUser(user);
 
 			result.add(detail);
@@ -162,6 +170,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			FormDataRevisionDetail detail = new FormDataRevisionDetail();
 			detail.setId((Long) row[++idx]);
 			detail.setTime((Date) row[++idx]);
+			detail.setIpAddress((String) row[++idx]);
 
 			Integer opType = (Integer) row[++idx];
 			detail.setOp(opType == 0 ? "INSERT" : opType == 1 ? "UPDATE" : "DELETE");
@@ -175,6 +184,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			user.setLastName((String) row[++idx]);
 			user.setEmailAddress((String) row[++idx]);
 			user.setLoginName((String) row[++idx]);
+			user.setInstituteName((String) row[++idx]);
+			user.setDomain((String) row[++idx]);
 			detail.setUser(user);
 			result.add(detail);
 		}
@@ -213,11 +224,14 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		List<Object[]> rows = getCurrentSession().createSQLQuery(sql)
 			.addScalar("rev", LongType.INSTANCE)
 			.addScalar("revTime", TimestampType.INSTANCE)
+			.addScalar("ipAddress", StringType.INSTANCE)
 			.addScalar("userId", LongType.INSTANCE)
 			.addScalar("firstName", StringType.INSTANCE)
 			.addScalar("lastName", StringType.INSTANCE)
 			.addScalar("emailAddr", StringType.INSTANCE)
 			.addScalar("loginName", StringType.INSTANCE)
+			.addScalar("instituteName", StringType.INSTANCE)
+			.addScalar("domainName", StringType.INSTANCE)
 			.setParameter("objectId", objectId)
 			.setParameter("revType", revType)
 			.setMaxResults(1)
@@ -234,6 +248,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		int idx = 0;
 		detail.setRevisionId((Long) row[idx++]);
 		detail.setChangedOn((Date) row[idx++]);
+		detail.setIpAddress((String) row[idx++]);
 
 		UserSummary user = new UserSummary();
 		user.setId((Long)row[idx++]);
@@ -241,6 +256,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		user.setLastName((String)row[idx++]);
 		user.setEmailAddress((String)row[idx++]);
 		user.setLoginName((String)row[idx++]);
+		user.setInstituteName((String)row[idx++]);
+		user.setDomain((String)row[idx++]);
 		detail.setChangedBy(user);
 		return detail;
 	}
@@ -298,11 +315,14 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			Projections.projectionList()
 				.add(Projections.property("r.id"))
 				.add(Projections.property("r.revtstmp"))
+				.add(Projections.property("r.ipAddress"))
 				.add(Projections.property("u.id"))
 				.add(Projections.property("u.firstName"))
 				.add(Projections.property("u.lastName"))
 				.add(Projections.property("u.emailAddress"))
 				.add(Projections.property("u.loginName"))
+				.add(Projections.property("i.name"))
+				.add(Projections.property("d.name"))
 				.add(Projections.property("re.id"))
 				.add(Projections.property("re.type"))
 				.add(Projections.property("re.entityName"))
@@ -324,7 +344,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 				revisions.add(lastRevision);
 			}
 
-			RevisionEntityRecordDetail entity = getRevisionEntityInfo(row, 7);
+			RevisionEntityRecordDetail entity = getRevisionEntityInfo(row, 10);
 			lastRevision.addRecord(entity);
 		}
 
@@ -337,6 +357,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("identifier", LongType.INSTANCE)
 			.addScalar("event_timestamp", TimestampType.INSTANCE)
 			.addScalar("event_type", StringType.INSTANCE)
+			.addScalar("ip_address", StringType.INSTANCE)
 			.addScalar("object_id", LongType.INSTANCE)
 			.addScalar("record_id", LongType.INSTANCE)
 			.addScalar("entity_type", StringType.INSTANCE)
@@ -345,7 +366,9 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("first_name", StringType.INSTANCE)
 			.addScalar("last_name", StringType.INSTANCE)
 			.addScalar("email_address", StringType.INSTANCE)
-			.addScalar("login_name", StringType.INSTANCE);
+			.addScalar("login_name", StringType.INSTANCE)
+			.addScalar("name", StringType.INSTANCE)
+			.addScalar("domain_name", StringType.INSTANCE);
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
 			query.setParameterList("userIds", criteria.userIds());
@@ -399,6 +422,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		Query query = getCurrentSession().createSQLQuery(sql)
 			.addScalar("rev", LongType.INSTANCE)
 			.addScalar("rev_time", TimestampType.INSTANCE)
+			.addScalar("ip_address", StringType.INSTANCE)
 			.addScalar("rev_type", IntegerType.INSTANCE)
 			.addScalar("form_id", LongType.INSTANCE)
 			.addScalar("form_name", StringType.INSTANCE)
@@ -406,7 +430,9 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("first_name", StringType.INSTANCE)
 			.addScalar("last_name", StringType.INSTANCE)
 			.addScalar("email_address", StringType.INSTANCE)
-			.addScalar("login_name", StringType.INSTANCE);
+			.addScalar("login_name", StringType.INSTANCE)
+			.addScalar("name", StringType.INSTANCE)
+			.addScalar("domain_name", StringType.INSTANCE);
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
 			query.setParameterList("userIds", criteria.userIds());
@@ -554,13 +580,16 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	private static final String GET_REV_INFO_SQL =
 		"select " +
-		"  r.rev as rev, r.revtstmp as revTime, r.user_id as userId, " +
+		"  r.rev as rev, r.revtstmp as revTime, r.ip_address as ipAddress, r.user_id as userId, " +
 		"  u.first_name as firstName, u.last_name as lastName, " +
-		"  u.email_address as emailAddr, u.login_name as loginName " +
+		"  u.email_address as emailAddr, u.login_name as loginName, " +
+		"  i.name as instituteName, d.domain_name as domainName " +
 		"from " +
 		"  os_revisions r " +
 		"  inner join %s a on a.rev = r.rev " +
 		"  inner join catissue_user u on u.identifier = r.user_id " +
+		"  inner join catissue_institution i on i.identifier = u.institute_id " +
+		"  inner join os_auth_domains d on d.identifier = u.domain_id " +
 		"where " +
 		"  a.%s = :objectId " +
 		"  %s " +	// for additional constraints if any
@@ -577,32 +606,37 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	private static final String GET_FORM_DATA_AUD_EVENTS_BASE_SQL =
 		"select" +
-		"  e.identifier, e.event_timestamp, e.user_id, e.event_type, e.record_id, e.form_id " +
+		"  e.identifier, e.event_timestamp, e.ip_address, e.user_id, e.event_type, e.record_id, e.form_id " +
 		"from " +
 		"  dyextn_audit_events e";
 
 	private static final String GET_FORM_DATA_AUD_EVENTS_SQL =
 		"select" +
-		"  t.identifier, t.event_timestamp, t.event_type, fre.object_id, t.record_id, " +
+		"  t.identifier, t.event_timestamp, t.event_type, t.ip_address, fre.object_id, t.record_id, " +
 		"  fc.entity_type, f.caption, " +
-		"  t.user_id, u.first_name, u.last_name, u.email_address, u.login_name " +
+		"  t.user_id, u.first_name, u.last_name, u.email_address, u.login_name, i.name, d.domain_name " +
 		"from " +
 		"  (%s) t " +
 		"  inner join dyextn_containers f on f.identifier = t.form_id " +
 		"  inner join catissue_form_context fc on fc.container_id = f.identifier " +
 		"  inner join catissue_form_record_entry fre on fre.record_id = t.record_id and fre.form_ctxt_id = fc.identifier " +
 		"  inner join catissue_user u on u.identifier = t.user_id " +
+		"  inner join catissue_institution i on i.identifier = u.institute_id " +
+		"  inner join os_auth_domains d on d.identifier = u.domain_id " +
 		"%s " +
 		"order by " +
 		" t.identifier desc";
 
 	private static final String GET_FORM_REVISIONS_SQL =
 		"select" +
-		"  r.rev, r.rev_time, r.rev_type, r.identifier as form_id, r.name as form_name, " +
-		"  r.rev_by as user_id, u.first_name, u.last_name, u.email_address, u.login_name " +
+		"  r.rev, r.rev_time, r.ip_address, r.rev_type, r.identifier as form_id, r.name as form_name, " +
+		"  r.rev_by as user_id, u.first_name, u.last_name, u.email_address, u.login_name, " +
+		"  i.name, d.domain_name " +
 		"from " +
 		"  dyextn_containers_aud r" +
-		"  inner join catissue_user u on u.identifier = r.rev_by ";
+		"  inner join catissue_user u on u.identifier = r.rev_by " +
+		"  inner join catissue_institution i on i.identifier = u.institute_id " +
+		"  inner join os_auth_domains d on d.identifier = u.domain_id";
 
 	private static final String GET_LATEST_API_CALL_TIME = FQN + ".getLatestApiCallTime";
 }

@@ -446,7 +446,7 @@ public class User extends BaseEntity implements UserDetails {
 		}
 	}
 
-	public void changePassword(String newPassword, User changedBy) {
+	public void changePassword(String newPassword, User changedBy, String ipAddress) {
 		if (isContact()) {
 			return;
 		}
@@ -470,6 +470,7 @@ public class User extends BaseEntity implements UserDetails {
 		password.setUpdatedBy(changedBy);
 		password.setUser(this);
 		password.setPassword(getPassword());
+		password.setIpAddress(ipAddress);
 		getPasswords().add(password);
 		if (isExpired()) {
 			setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());

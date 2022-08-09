@@ -39,6 +39,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.EntityFormRecords;
 import com.krishagni.catissueplus.core.de.events.FormCtxtSummary;
 import com.krishagni.catissueplus.core.de.events.FormRecordsList;
@@ -353,6 +354,7 @@ public class UserController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Boolean resetPassword(@RequestBody PasswordDetails passwordDetails) {
+		passwordDetails.setIpAddress(Utility.getRemoteAddress(httpServletRequest));
 		return ResponseEvent.unwrap(userService.resetPassword(RequestEvent.wrap(passwordDetails)));
 	}
 

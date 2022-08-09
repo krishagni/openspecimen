@@ -441,11 +441,15 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 			String user      = null;
 			String userEmail = null;
+			String domain    = null;
 			String userLogin = null;
+			String institute = null;
 			if (revision.getChangedBy() != null) {
 				user      = revision.getChangedBy().formattedName();
 				userEmail = revision.getChangedBy().getEmailAddress();
+				domain    = revision.getChangedBy().getDomain();
 				userLogin = revision.getChangedBy().getLoginName();
+				institute = revision.getChangedBy().getInstituteName();
 			}
 
 			Function<String, String> toMsg = AuditServiceImpl.this::toMsg;
@@ -478,7 +482,8 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				String opDisplay  = context.computeIfAbsent(op, toMsg);
 				String entityName = context.computeIfAbsent("audit_entity_" + record.getEntityName(), toMsg);
 				String entityId   = record.getEntityId().toString();
-				String[] line     = {revId, dateTime, user, userEmail, userLogin, opDisplay, entityName, entityId, record.getModifiedProps()};
+				String ipAddress  = revision.getIpAddress();
+				String[] line     = {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, entityName, entityId, record.getModifiedProps()};
 
 				writer.writeNext(line);
 				if (logger.isDebugEnabled()) {
@@ -521,7 +526,8 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
 
 				String[] headerColumns = {
-					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
+					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
+					"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
 					"audit_rev_entity_op", "audit_rev_form_name", "audit_rev_entity_id"
 				};
 				writeHeader(csvWriter, headerColumns);
@@ -569,7 +575,8 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
 
 				String[] headerColumns = {
-					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
+					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
+					"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
 					"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_form_name",
 					"audit_rev_parent_entity_id", "audit_rev_entity_id"
 				};
@@ -624,11 +631,15 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 			String user      = null;
 			String userEmail = null;
+			String domain    = null;
 			String userLogin = null;
+			String institute = null;
 			if (revision.getUser() != null) {
 				user      = revision.getUser().formattedName();
 				userEmail = revision.getUser().getEmailAddress();
+				domain    = revision.getUser().getDomain();
 				userLogin = revision.getUser().getLoginName();
+				institute = revision.getUser().getInstituteName();
 			}
 
 			Function<String, String> toMsg = AuditServiceImpl.this::toMsg;
@@ -644,16 +655,12 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 			String formName = revision.getFormName();
 			String recordId = revision.getRecordId().toString();
-
-			String[] headerColumns = {
-				"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
-				"audit_rev_entity_op", "audit_rev_form_name", "audit_rev_entity_id"
-			};
+			String ipAddress = revision.getIpAddress();
 
 			if (entityType != null) {
-				writer.writeNext(new String[] {revId, dateTime, user, userEmail, userLogin, opDisplay, entityType, formName, entityId, recordId});
+				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, entityType, formName, entityId, recordId});
 			} else {
-				writer.writeNext(new String[] {revId, dateTime, user, userEmail, userLogin, opDisplay, formName, recordId});
+				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, formName, recordId});
 			}
 		}
 	}
@@ -683,16 +690,20 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 					String user      = null;
 					String userEmail = null;
 					String userLogin = null;
+					String institute = null;
+					String domain    = null;
 					if (password.getUpdatedBy() != null) {
 						user      = password.getUpdatedBy().formattedName();
 						userEmail = password.getUpdatedBy().getEmailAddress();
 						userLogin = password.getUpdatedBy().getLoginName();
+						institute = password.getUpdatedBy().getInstitute().getName();
+						domain    = password.getUpdatedBy().getAuthDomain().getName();
 					}
 
 					csvWriter.writeNext(new String[] {
 						password.getId().toString(),
 						Utility.getDateTimeString(password.getUpdationDate()),
-						user, userEmail, userLogin,
+						user, userEmail, domain, userLogin, institute, password.getIpAddress(),
 						editOp, entity, password.getUser().getId().toString(), "###"
 					});
 
@@ -721,6 +732,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		QueryAuditLogsListCriteria crit = new QueryAuditLogsListCriteria()
 			.startDate(criteria.startDate())
 			.endDate(criteria.endDate())
+			.asc(false)
 			.userIds(Utility.nullSafeStream(revisionsBy).map(User::getId).collect(Collectors.toList()));
 		return new QueryAuditLogsExporter(crit, exportedBy, revisionsBy).exportAuditLogs(outputFile, exportedOn);
 	}
@@ -733,7 +745,8 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		writeExportHeader(writer, criteria, exportedBy, exportedOn, revisionsBy);
 
 		String[] keys = {
-			"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email", "audit_rev_user_login",
+			"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
+			"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
 			"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_entity_id",
 			"audit_rev_change_log"
 		};

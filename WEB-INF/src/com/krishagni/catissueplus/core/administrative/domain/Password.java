@@ -19,6 +19,8 @@ public class Password implements Comparable<Password>{
 
 	private User user;
 
+	private String ipAddress;
+
 	public Long getId() {
 		return id;
 	}
@@ -57,6 +59,14 @@ public class Password implements Comparable<Password>{
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	@Override

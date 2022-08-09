@@ -560,7 +560,7 @@ public abstract class DeObject {
 			
 			@Override
 			public String getIpAddress() {
-				return null;
+				return AuthUtil.getRemoteAddr();
 			}
 		};
 	}

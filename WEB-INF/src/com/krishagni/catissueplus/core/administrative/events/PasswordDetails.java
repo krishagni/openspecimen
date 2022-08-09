@@ -12,6 +12,8 @@ public class PasswordDetails {
 	
 	private String resetPasswordToken;
 
+	private String ipAddress;
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -52,4 +54,11 @@ public class PasswordDetails {
 		this.resetPasswordToken = resetPasswordToken;
 	}
 
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
 }

@@ -104,7 +104,7 @@ public class QueryAuditLogsExporter implements Runnable {
 			writeHeader(csvWriter, exportedOn);
 
 			long lastId = 0;
-			crit.startAt(0).asc(true).maxResults(50);
+			crit.startAt(0).asc(false).maxResults(50);
 
 			int count = 0;
 			boolean endOfLogs = false;
@@ -139,33 +139,33 @@ public class QueryAuditLogsExporter implements Runnable {
 		writeHeader0(writer, exportedOn);
 
 		String[] keys = {
-			"query_audit_logs_id", "query_audit_logs_tstmp",
-			"query_audit_logs_user", "query_audit_logs_user_email", "query_audit_logs_user_login",
-			"query_audit_logs_run_type", "query_audit_logs_exec_time", "query_audit_logs_records_count",
+			"audit_rev_id", "audit_rev_tstmp",
+			"audit_rev_user", "audit_rev_user_email", "audit_rev_domain", "audit_rev_user_login",
+			"audit_rev_institute", "audit_rev_ip_address", "audit_rev_entity_op",
+			"query_audit_logs_exec_time", "query_audit_logs_records_count",
 			"query_audit_logs_aql", "query_audit_logs_sql"
 		};
-
 		writer.writeNext(Stream.of(keys).map(MessageUtil.getInstance()::getMessage).toArray(String[]::new));
 	}
 
 	private void writeHeader0(CsvWriter writer, Date exportedOn) {
 		writeRow(writer, toMsg("common_server_url"), ConfigUtil.getInstance().getAppUrl());
 		writeRow(writer, toMsg("common_server_env"), ConfigUtil.getInstance().getDeployEnv());
-		writeRow(writer, toMsg("query_audit_logs_exported_by"), exportedBy.formattedName(true));
-		writeRow(writer, toMsg("query_audit_logs_exported_on"), Utility.getDateTimeString(exportedOn));
+		writeRow(writer, toMsg("audit_rev_exported_by"), exportedBy.formattedName(true));
+		writeRow(writer, toMsg("audit_rev_exported_on"), Utility.getDateTimeString(exportedOn));
 
 		if (CollectionUtils.isNotEmpty(runBy)) {
 			List<String> userNames = runBy.stream().map(u -> u.formattedName(true)).collect(Collectors.toList());
-			userNames.add(0, toMsg("query_audit_logs_run_by"));
+			userNames.add(0, toMsg("audit_rev_audited_users"));
 			writeRow(writer, userNames.toArray(new String[0]));
 		}
 
 		if (crit.startDate() != null) {
-			writeRow(writer, toMsg("query_audit_logs_start_date"), Utility.getDateTimeString(crit.startDate()));
+			writeRow(writer, toMsg("audit_rev_start_date"), Utility.getDateTimeString(crit.startDate()));
 		}
 
 		if (crit.endDate() != null) {
-			writeRow(writer, toMsg("query_audit_logs_end_date"), Utility.getDateTimeString(crit.endDate()));
+			writeRow(writer, toMsg("audit_rev_end_date"), Utility.getDateTimeString(crit.endDate()));
 		}
 
 		writeRow(writer, "");
@@ -176,11 +176,15 @@ public class QueryAuditLogsExporter implements Runnable {
 		String dateTime  = Utility.getDateTimeString(log.getTimeOfExecution());
 		String user      = null;
 		String emailId   = null;
+		String domain    = null;
 		String loginId   = null;
+		String institute = null;
 		if (log.getRunBy() != null) {
 			user = log.getRunBy().formattedName();
 			emailId = log.getRunBy().getEmailAddress();
+			domain = log.getRunBy().getAuthDomain().getName();
 			loginId = log.getRunBy().getLoginName();
+			institute = log.getRunBy().getInstitute().getName();
 		}
 
 		String timeToFinish = "N/A";
@@ -190,7 +194,7 @@ public class QueryAuditLogsExporter implements Runnable {
 
 		String recordsCount = log.getRecordCount() != null ? log.getRecordCount().toString() : "N/A";
 		writer.writeNext(new String[] {
-			id, dateTime, user, emailId, loginId,
+			id, dateTime, user, emailId, domain, loginId, institute, log.getIpAddress(),
 			log.getRunType(), timeToFinish, recordsCount,
 			log.getAql(), log.getSql()
 		});

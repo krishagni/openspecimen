@@ -13,6 +13,8 @@ public class RevisionDetail {
 
 	private Date changedOn;
 
+	private String ipAddress;
+
 	private List<RevisionEntityRecordDetail> records;
 
 	public Long getRevisionId() {
@@ -37,6 +39,14 @@ public class RevisionDetail {
 
 	public void setChangedOn(Date changedOn) {
 		this.changedOn = changedOn;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	public List<RevisionEntityRecordDetail> getRecords() {

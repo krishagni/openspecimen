@@ -435,7 +435,7 @@ public class QueryServiceImpl implements QueryService {
 
 			Query query = getQuery(opDetail);
 			QueryResponse resp = query.getData();
-			insertAuditLog(AuthUtil.getCurrentUser(), opDetail, resp);
+			insertAuditLog(AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, resp);
 			
 			queryResult = resp.getResultData();
 			queryResult.setScreener(getResultScreener(query));
@@ -978,7 +978,7 @@ public class QueryServiceImpl implements QueryService {
 			startDate = Utility.chopTime(cal.getTime());
 		}
 
-		crit.startDate(startDate).endDate(endDate).asc(true);
+		crit.startDate(startDate).endDate(endDate).asc(false);
 
 		logger.info("Initiating query audit logs export: " + crit);
 		User currentUser = AuthUtil.getCurrentUser();
@@ -1336,7 +1336,7 @@ public class QueryServiceImpl implements QueryService {
 		return dir;
 	}
 
-	private void insertAuditLog(User user, ExecuteQueryEventOp opDetail, QueryResponse resp) {
+	private void insertAuditLog(User user, String ipAddress, ExecuteQueryEventOp opDetail, QueryResponse resp) {
 		if (opDetail.isDisableAuditing()) {
 			return;
 		}
@@ -1350,6 +1350,7 @@ public class QueryServiceImpl implements QueryService {
 		QueryAuditLog auditLog = new QueryAuditLog();
 		auditLog.setQuery(query);
 		auditLog.setRunBy(user);
+		auditLog.setIpAddress(ipAddress);
 		auditLog.setTimeOfExecution(resp.getTimeOfExecution());
 		auditLog.setTimeToFinish(resp.getExecutionTime());
 		auditLog.setRunType(opDetail.getRunType());
@@ -1730,6 +1731,7 @@ public class QueryServiceImpl implements QueryService {
 			task.op = op;
 			task.auth = AuthUtil.getAuth();
 			task.user = AuthUtil.getCurrentUser();
+			task.ipAddress = AuthUtil.getRemoteAddr();
 			task.filename = getExportFilename(op, procFn == null ? proc : null);
 			task.query = getQuery(op);
 			task.procFn = procFn;
@@ -1772,6 +1774,8 @@ public class QueryServiceImpl implements QueryService {
 
 		private User user;
 
+		private String ipAddress;
+
 		private String filename;
 
 		private OutputStream fout;
@@ -1800,7 +1804,7 @@ public class QueryServiceImpl implements QueryService {
 					procFn.accept(data, fout);
 				}
 
-				insertAuditLog(user, op, resp);
+				insertAuditLog(user, ipAddress, op, resp);
 				notifyExportCompleted();
 			} catch (Exception e) {
 				logger.error("Error exporting query data", e);
