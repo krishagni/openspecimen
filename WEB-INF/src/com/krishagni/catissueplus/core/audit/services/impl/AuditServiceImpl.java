@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.audit.services.impl;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -54,6 +54,7 @@ import com.krishagni.catissueplus.core.audit.events.FormDataRevisionDetail;
 import com.krishagni.catissueplus.core.audit.events.RevisionDetail;
 import com.krishagni.catissueplus.core.audit.events.RevisionEntityRecordDetail;
 import com.krishagni.catissueplus.core.audit.repository.RevisionsListCriteria;
+import com.krishagni.catissueplus.core.audit.services.AuditLogExporter;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -73,6 +74,8 @@ import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
+import com.krishagni.catissueplus.core.de.services.impl.QueryAuditLogsExporter;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class AuditServiceImpl implements AuditService, InitializingBean {
@@ -90,6 +93,8 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	private ObjectAccessorFactory objectAccessorFactory;
 
 	private ThreadPoolTaskExecutor taskExecutor;
+
+	private List<AuditLogExporter> exporters = new ArrayList<>();
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -241,6 +246,11 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	}
 
 	@Override
+	public void registerExporter(AuditLogExporter exporter) {
+		exporters.add(exporter);
+	}
+
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		EventListenerRegistry reg = ((SessionFactoryImpl) sessionFactory).getServiceRegistry().getService(EventListenerRegistry.class);
 
@@ -281,37 +291,52 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 	@PlusTransactional
 	private File exportRevisions(RevisionsListCriteria criteria, User exportedBy, List<User> revisionsBy) {
-		AuthUtil.setCurrentUser(exportedBy);
+		try {
+			List<File> inputFiles = new ArrayList<>();
+			AuthUtil.setCurrentUser(exportedBy);
 
-		String baseDir = UUID.randomUUID().toString();
-		Date exportedOn = Calendar.getInstance().getTime();
+			String baseDir = UUID.randomUUID().toString();
+			Date exportedOn = Calendar.getInstance().getTime();
 
-		logger.info("Exporting core objects' revisions... ");
-		File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
+			logger.info("Exporting core objects' revisions... ");
+			File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
+			inputFiles.add(coreObjectsRevs);
 
-		FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
-		logger.info("Exporting form revisions... ");
-		File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
+			FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
+			logger.info("Exporting form revisions... ");
+			File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
+			inputFiles.add(formsRevs);
 
-		logger.info("Exporting form data revisions... ");
-		File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
+			logger.info("Exporting form data revisions... ");
+			File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
+			inputFiles.add(formsDataRevs);
 
-		logger.info("Export user password revisions... ");
-		File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+			logger.info("Export user password revisions... ");
+			File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+			inputFiles.add(passwordRevs);
 
-		logger.info("Creating revisions ZIP file... ");
-		File result = new File(getAuditDir(), baseDir + "_" + getTs(exportedOn) + "_" + exportedBy.getId());
-		List<File> inputFiles = Arrays.asList(coreObjectsRevs, formsRevs, formsDataRevs, passwordRevs);
-		Utility.zipFiles(inputFiles, result);
+			logger.info("Export query run logs...");
+			File queryRuns = exportQueryAudit(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+			inputFiles.add(queryRuns);
 
-		logger.info("Cleaning up revisions directory: " + baseDir);
-		cleanupRevisionsDir(baseDir);
+			for (AuditLogExporter exporter : exporters) {
+				inputFiles.add(exporter.export(baseDir, exportedBy, exportedOn, revisionsBy, criteria));
+			}
 
-		logger.info("Sending audit revisions email to " + exportedBy.formattedName() + " (" + exportedBy.getEmailAddress() + ")");
-		sendEmailNotif(criteria, exportedBy, revisionsBy, result);
-		return result;
+			logger.info("Creating revisions ZIP file... ");
+			File result = new File(getAuditDir(), baseDir + "_" + getTs(exportedOn) + "_" + exportedBy.getId());
+			Utility.zipFiles(inputFiles, result);
+
+			logger.info("Cleaning up revisions directory: " + baseDir);
+			cleanupRevisionsDir(baseDir);
+
+			logger.info("Sending audit revisions email to " + exportedBy.formattedName() + " (" + exportedBy.getEmailAddress() + ")");
+			sendEmailNotif(criteria, exportedBy, revisionsBy, result);
+			return result;
+		} finally {
+			AuthUtil.clearCurrentUser();
+		}
 	}
-
 
 	private File getAuditDir() {
 		return new File(ConfigUtil.getInstance().getDataDir(), "audit");
@@ -688,6 +713,16 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			IOUtils.closeQuietly(csvWriter);
 			logger.info("Password revisions export finished in " +  (System.currentTimeMillis() - startTime) + " ms");
 		}
+	}
+
+	private File exportQueryAudit(RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> revisionsBy, String baseDir) {
+		File outputFile = getOutputFile(baseDir, "os_query_audit_logs", exportedOn);
+
+		QueryAuditLogsListCriteria crit = new QueryAuditLogsListCriteria()
+			.startDate(criteria.startDate())
+			.endDate(criteria.endDate())
+			.userIds(Utility.nullSafeStream(revisionsBy).map(User::getId).collect(Collectors.toList()));
+		return new QueryAuditLogsExporter(crit, exportedBy, revisionsBy).exportAuditLogs(outputFile, exportedOn);
 	}
 
 	private File getOutputFile(String dir, String filename, Date exportedOn) {

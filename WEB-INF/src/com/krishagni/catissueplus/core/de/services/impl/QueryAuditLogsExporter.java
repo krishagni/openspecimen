@@ -90,12 +90,15 @@ public class QueryAuditLogsExporter implements Runnable {
 		return exportedFile;
 	}
 
-	private File exportAuditLogs(String dir, Date exportedOn) {
+	public File exportAuditLogs(String dir, Date exportedOn) {
+		return exportAuditLogs(getOutputFile(dir, exportedOn), exportedOn);
+	}
+
+	public File exportAuditLogs(File outputFile, Date exportedOn) {
 		long startTime = System.currentTimeMillis();
 		CsvFileWriter csvWriter = null;
 
 		try {
-			File outputFile = getOutputFile(dir, exportedOn);
 			csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
 
 			writeHeader(csvWriter, exportedOn);

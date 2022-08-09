@@ -26,4 +26,6 @@ public interface AuditService {
 	void insertApiCallLog(UserApiCallLog userAuditLog);
 	
 	long getTimeSinceLastApiCall(Long userId, String token);
+
+	void registerExporter(AuditLogExporter exporter);
 }
