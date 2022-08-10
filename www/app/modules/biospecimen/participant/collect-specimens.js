@@ -1518,7 +1518,12 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           for (var i = 0; i < $scope.specimens.length; ++i) {
             var spmn = $scope.specimens[i];
             if (spmn.existingStatus != 'Collected' && !spmn.isVirtual) {
-              location = {name: spmn.storageLocation.name, mode: spmn.storageLocation.mode};
+              location = {
+                name: spmn.storageLocation.name,
+                mode: spmn.storageLocation.mode,
+                displayName: spmn.storageLocation.displayName,
+                displayTitle: spmn.storageLocation.displayTitle
+              };
               firstIdx = i;
               break;
             }
