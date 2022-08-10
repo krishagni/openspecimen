@@ -959,22 +959,23 @@ public class QueryServiceImpl implements QueryService {
 			return ResponseEvent.userError(CommonErrorCode.DATE_GT_TODAY, Utility.getDateTimeString(endDate));
 		}
 
+		int maxLimit = ConfigUtil.getInstance().getIntSetting("common", "max_audit_report_period", 90);
 		if (startDate != null && endDate != null) {
-			long days = Utility.daysBetween(startDate, endDate);
-			if (days > 30L) {
-				return ResponseEvent.userError(CommonErrorCode.INTERVAL_EXCEEDS_ALLOWED, 30);
+			int days = Utility.daysBetween(startDate, endDate);
+			if (days > maxLimit) {
+				return ResponseEvent.userError(CommonErrorCode.INTERVAL_EXCEEDS_ALLOWED, maxLimit);
 			}
 		} else if (startDate != null) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(startDate);
-			cal.add(Calendar.MONTH, 1);
+			cal.add(Calendar.DAY_OF_MONTH, maxLimit);
 			endDate = cal.getTime().after(endOfDay) ? endOfDay : Utility.getEndOfDay(cal.getTime());
 		} else {
 			endDate = endDate != null ? endDate : endOfDay;
 
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(endDate);
-			cal.add(Calendar.MONTH, -1);
+			cal.add(Calendar.DAY_OF_MONTH, -maxLimit);
 			startDate = Utility.chopTime(cal.getTime());
 		}
 
