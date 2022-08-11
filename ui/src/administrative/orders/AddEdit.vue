@@ -533,6 +533,7 @@ export default {
         toSave.status = status;
       }
 
+      delete toSave.siteId;
       const savedOrder = await orderSvc.saveOrUpdate(toSave);
       if (!toSave.id) {
         routerSvc.goto('OrderDetail.Overview', {orderId: savedOrder.id});
