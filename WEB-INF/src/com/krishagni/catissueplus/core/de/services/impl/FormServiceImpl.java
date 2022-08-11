@@ -2046,6 +2046,11 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	private void ensureUpdateAllowed(FormContextBean formCtxt) {
+		if (formCtxt.getDeletedOn() != null) {
+			// ignore deleted associations
+			return;
+		}
+
 		String[] entityType = formCtxt.getEntityType().split("-");
 		Function<FormContextBean, Boolean> checker = formAccessCheckers.get(entityType[0]);
 		if (checker == null || !checker.apply(formCtxt)) {
