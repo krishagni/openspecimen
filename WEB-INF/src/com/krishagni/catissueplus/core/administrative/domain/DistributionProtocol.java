@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -17,7 +18,6 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -31,6 +31,8 @@ import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
+
+import krishagni.catissueplus.beans.FormContextBean;
 
 @Configurable
 @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
@@ -330,6 +332,14 @@ public class DistributionProtocol extends BaseExtensionEntity {
 		setShortTitle(Utility.getDisabledValue(getShortTitle(), 50));
 		setTitle(Utility.getDisabledValue(getTitle(), 255));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		if (getOrderExtnForm() != null) {
+			FormContextBean  orderExtnFc = getOrderExtnForm().getAssociations().stream()
+				.filter(fc -> fc.getDeletedOn() == null && "OrderExtension".equals(fc.getEntityType()) && getId().equals(fc.getEntityId()))
+				.findFirst().orElse(null);
+			if (orderExtnFc != null) {
+				orderExtnFc.setDeletedOn(Calendar.getInstance().getTime());
+			}
+		}
 	}
 	
 	public Set<Institute> getDistributingInstitutes() {
