@@ -39,7 +39,24 @@
                 max(call_end_time) < :latestCallTime
             ) td
           )
-      ]]>    
+      ]]>
+    </sql-query>
+
+    <sql-query name="getUserTokens">
+      <return-scalar column="token" type="string" />
+      <return-scalar column="last_active_time" type="timestamp" />
+
+      <![CDATA[
+        select
+          t.token as token, max(l.call_end_time) as last_active_time
+        from
+          os_user_api_calls_log l
+          inner join os_auth_tokens t on t.login_audit_log_id = l.login_audit_log_id
+        where
+          t.user_id = :userId
+        group by
+          t.token
+      ]]>
     </sql-query>
     
     <query name="deleteAuthTokensByUserId">
@@ -48,6 +65,13 @@
         com.krishagni.catissueplus.core.auth.domain.AuthToken t
       where
         t.user.id in (:ids)
+    </query>
+
+    <query name="deleteAuthTokens">
+      delete from
+        com.krishagni.catissueplus.core.auth.domain.AuthToken t
+      where
+        t.token in (:tokens)
     </query>
   </class>
 </hibernate-mapping>

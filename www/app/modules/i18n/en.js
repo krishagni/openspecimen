@@ -2969,7 +2969,10 @@
         "enable_device_verification_desc": "Enable device verification using OTP.",
 
         "notify_failed_logins": "Notify Failed Logins",
-        "notify_failed_logins_desc": "Enable to notify users and admins whenever an unsuccessful login attempt is made."
+        "notify_failed_logins_desc": "Enable to notify users and admins whenever an unsuccessful login attempt is made.",
+
+        "max_login_sessions": "Concurrent Logins Limit",
+        "max_login_sessions_desc": "Maximum number of concurrent login sessions allowed per user. When not specified or zero, unlimited concurrent login sessions are allowed."
       },
       
       "administrative": {

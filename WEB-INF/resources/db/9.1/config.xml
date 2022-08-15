@@ -25,4 +25,13 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Max. concurrent login sessions">
+    <sql>
+      call add_cfg_prop(
+        'auth', 'max_login_sessions',
+        'max_login_sessions', 'max_login_sessions_desc',
+        'INT', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

@@ -1,11 +1,13 @@
 
 package com.krishagni.catissueplus.core.auth.services.impl;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Password;
@@ -34,6 +35,7 @@ import com.krishagni.catissueplus.core.auth.events.TokenDetail;
 import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.domain.Notification;
@@ -327,6 +329,11 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	}
 
 	private AuthToken createToken(User user, LoginDetail loginDetail) {
+		int maxSessions = AuthConfig.getInstance().maxConcurrentLoginSessions();
+		if (maxSessions > 0) {
+			deleteOlderSessions(user, maxSessions);
+		}
+
 		LoginAuditLog loginAuditLog = insertLoginAudit(user, loginDetail.getIpAddress(), true);
 
 		AuthToken authToken = new AuthToken();
@@ -343,6 +350,37 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		daoFactory.getAuthDao().saveAuthToken(authToken);
 		insertApiCallLog(loginDetail, user, loginAuditLog);
 		return authToken;
+	}
+
+	private int deleteOlderSessions(User user, int maxSessions) {
+		List<Pair<String, Date>> tokens = daoFactory.getAuthDao().getUserTokens(user.getId());
+
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, -AuthConfig.getInstance().getTokenInactiveIntervalInMinutes());
+		Date cutOffTime = cal.getTime();
+		List<String> toDelete = new ArrayList<>();
+		for (Iterator<Pair<String, Date>> iter = tokens.iterator(); iter.hasNext(); ) {
+			Pair<String, Date> token = iter.next();
+			if (token.second().before(cutOffTime)) {
+				toDelete.add(token.first());
+				iter.remove();
+			}
+		}
+
+		Iterator<Pair<String, Date>> iter = tokens.iterator();
+		int killCount = tokens.size() - maxSessions;
+		for (int i = 0; i <= killCount; ++i) {
+			if (iter.hasNext()) {
+				toDelete.add(iter.next().first());
+			}
+		}
+
+		int deleted = 0;
+		if (!toDelete.isEmpty()) {
+			deleted = daoFactory.getAuthDao().deleteAuthTokens(toDelete);
+		}
+
+		return deleted;
 	}
 
 	private LoginAuditLog insertLoginAudit(User user, String ipAddress, boolean loginSuccessful) {

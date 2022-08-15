@@ -16,6 +16,8 @@ public class AuthConfig {
 	public static final String TOKEN_INACTIVE_INTERVAL = "token_inactive_interval";
 
 	public static final String NOTIFY_FAILED_LOGINS = "notify_failed_logins";
+
+	public static final String MAX_CONCURRENT_LOGIN_SESSIONS = "max_login_sessions";
 	
 	private static AuthConfig instance = null;
 	
@@ -48,5 +50,9 @@ public class AuthConfig {
 
 	public boolean isFailedLoginNotifEnabled() {
 		return cfgSvc.getBoolSetting(MODULE, NOTIFY_FAILED_LOGINS, false);
+	}
+
+	public int maxConcurrentLoginSessions() {
+		return cfgSvc.getIntSetting(MODULE, MAX_CONCURRENT_LOGIN_SESSIONS, 0);
 	}
 }

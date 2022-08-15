@@ -1,17 +1,21 @@
 package com.krishagni.catissueplus.core.auth.repository.impl;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.Query;
 
+import com.krishagni.catissueplus.core.auth.domain.AuthCredential;
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.auth.domain.AuthProvider;
 import com.krishagni.catissueplus.core.auth.domain.AuthToken;
 import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
-import com.krishagni.catissueplus.core.auth.domain.AuthCredential;
 import com.krishagni.catissueplus.core.auth.repository.AuthDao;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 
 public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
@@ -96,7 +100,7 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	}
 
 	@Override
-	public void deleteAuthTokens(Long userId, String except) {
+	public int deleteAuthTokens(Long userId, String except) {
 		String sql = DELETE_USER_AUTH_TOKENS_SQL;
 		if (StringUtils.isNotBlank(except)) {
 			sql += " and token != :exceptToken";
@@ -108,7 +112,34 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 			query.setParameter("exceptToken", except);
 		}
 
-		query.executeUpdate();
+		return query.executeUpdate();
+	}
+
+	@Override
+	public int deleteAuthTokens(List<String> tokens) {
+		return getCurrentSession().getNamedQuery(DELETE_AUTH_TOKENS)
+			.setParameter("tokens", tokens)
+			.executeUpdate();
+	}
+
+	@Override
+	public List<Pair<String, Date>> getUserTokens(Long userId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_USER_TOKENS)
+			.setParameter("userId", userId)
+			.list();
+
+		List<Pair<String, Date>> tokens = new ArrayList<>();
+		for (Object[] row : rows) {
+			String token = (String) row[0];
+			Date lastActiveTime = (Date) row[1];
+			if (lastActiveTime == null) {
+				lastActiveTime = Calendar.getInstance().getTime();
+			}
+
+			tokens.add(Pair.make(token, lastActiveTime));
+		}
+
+		return tokens.stream().sorted((t1, t2) -> t1.second().compareTo(t2.second())).collect(Collectors.toList());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -178,9 +209,13 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	
 	private static final String DELETE_INACTIVE_AUTH_TOKENS = AuthToken.class.getName() + ".deleteInactiveAuthTokens";
 
+	private static final String GET_USER_TOKENS = AuthToken.class.getName() + ".getUserTokens";
+
 	private static final String GET_LOGIN_AUDIT_LOGS_BY_USER_ID = LoginAuditLog.class.getName() + ".getLogsByUserId";
 	
 	private static final String DELETE_AUTH_TOKENS_BY_USER_ID = AuthToken.class.getName() + ".deleteAuthTokensByUserId";
+
+	private static final String DELETE_AUTH_TOKENS = AuthToken.class.getName() + ".deleteAuthTokens";
 
 	private static final String GET_CREDENTIAL = AuthCredential.class.getName() + ".getByToken";
 
