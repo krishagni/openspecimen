@@ -184,7 +184,7 @@ public class QueryAuditLogsExporter implements Runnable {
 			emailId = log.getRunBy().getEmailAddress();
 			domain = log.getRunBy().getAuthDomain().getName();
 			loginId = log.getRunBy().getLoginName();
-			institute = log.getRunBy().getInstitute().getName();
+			institute = log.getRunBy().getInstitute() != null ? log.getRunBy().getInstitute().getName() : null;
 		}
 
 		String timeToFinish = "N/A";
