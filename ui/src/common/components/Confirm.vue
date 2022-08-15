@@ -30,11 +30,11 @@ export default {
 
   computed: {
     yesButtonLabel: function() {
-      return this.yesButton || 'Yes';
+      return this.yesButton || this.$t('common.buttons.yes');
     },
 
     noButtonLabel: function() {
-      return this.noButton || 'No';
+      return this.noButton || this.$t('common.buttons.no');
     }
   },
 

@@ -24,7 +24,7 @@ export default {
       }
 
       util.toClipboard(appUrl + 'ui-app/' + href);
-      alertSvc.success(this.$t('common.url_copied'));
+      alertSvc.success({code: 'common.url_copied'});
     }
   }
 }

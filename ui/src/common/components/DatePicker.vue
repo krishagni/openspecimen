@@ -76,9 +76,6 @@ export default {
 
       return fmt;
     }
-  },
-
-  methods: {
   }
 }
 </script>

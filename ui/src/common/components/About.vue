@@ -1,6 +1,5 @@
-
 <template>
-  <div class="os-help" v-os-tooltip.bottom="'Online Help'">
+  <div class="os-help" v-os-tooltip.bottom="$t('common.about.online_help')">
     <button @click="toggleHelpMenu">
       <os-icon name="question-circle" />
     </button>
@@ -9,12 +8,12 @@
       <ul class="help-options">
         <li>
           <a href="https://help.openspecimen.org" target="_blank" rel="noopener">
-            <span>Online Help</span>
+            <span v-t="'common.about.online_help'">Online Help</span>
           </a>
         </li>
         <li>
           <a href="https://forums.openspecimen.org" target="_blank" rel="noopener">
-            <span>Q & A Forums</span>
+            <span v-t="'common.about.qna_forums'">Q & A Forums</span>
           </a>
         </li>
         <li class="divider">
@@ -22,7 +21,7 @@
         </li>
         <li>
           <a @click="showAboutDialog()">
-            <span>About OpenSpecimen</span>
+            <span v-t="'common.about.openspecimen'">About OpenSpecimen</span>
           </a>
         </li>
       </ul>
@@ -30,26 +29,26 @@
 
     <os-dialog ref="aboutDialog">
       <template #header>
-        <span>About OpenSpecimen</span>
+        <span v-t="'common.about.openspecimen'">About OpenSpecimen</span>
       </template>
       <template #content>
         <os-tabs>
           <os-tab>
             <template #header>
-              <os-icon-title icon="eye" title="Overview" />
+              <os-icon-title icon="eye" :title="$t('common.overview')" />
             </template>
 
             <ul class="os-key-values">
               <li class="item">
-                <strong class="key key-sm">Version</strong>
+                <strong class="key key-sm" v-t="'common.about.version'">Version</strong>
                 <span class="value">{{$ui.global.appProps.build_version}}</span>
               </li>
               <li class="item">
-                <strong class="key key-sm">Build Date</strong>
+                <strong class="key key-sm" v-t="'common.about.build_date'">Build Date</strong>
                 <span class="value">{{$filters.date(+$ui.global.appProps.build_date)}}</span>
               </li>
               <li class="item">
-                <strong class="key key-sm">Revision</strong>
+                <strong class="key key-sm" v-t="'common.about.revision'">Revision</strong>
                 <span class="value">{{$ui.global.appProps.build_commit_revision}}</span>
               </li>
             </ul>
@@ -57,16 +56,16 @@
 
           <os-tab>
             <template #header>
-              <os-icon-title icon="list" title="Plugins" />
+              <os-icon-title icon="list" :title="$t('common.about.plugins')" />
             </template>
 
             <table class="os-table">
               <thead>
                 <tr>
-                  <th>Plugin</th>
-                  <th>Version</th>
-                  <th>Build Date</th>
-                  <th>Revision</th>
+                  <th v-t="'common.about.plugin'">Plugin</th>
+                  <th v-t="'common.about.version'">Version</th>
+                  <th v-t="'common.about.build_date'">Build Date</th>
+                  <th v-t="'common.about.revision'">Revision</th>
                 </tr>
               </thead>
               <tbody>

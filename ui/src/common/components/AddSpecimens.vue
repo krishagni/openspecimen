@@ -3,7 +3,7 @@
   <div class="os-add-specimens" :class="{'bottom-options': optionsAtBottom == true}">
     <div class="options">
       <os-boolean-checkbox name="useBarcode" v-model="useBarcode" v-if="barcodingEnabled">
-        <label>Use Specimen Barcode</label>
+        <label v-t="'common.add_specimens.use_barcode'">Use Specimen Barcode</label>
       </os-boolean-checkbox>
 
       <slot name="options"></slot>
@@ -14,18 +14,18 @@
         @update:modelValue="$emit('labels-scanned', $event)" />
 
       <span class="buttons" v-if="!hideButtons">
-        <os-button primary label="Add" @click="addSpecimens" />
+        <os-button primary :label="$t('common.buttons.add')" @click="addSpecimens" />
         <slot></slot>
       </span>
     </div>
 
     <os-dialog ref="resolveSpmns">
       <template #header>
-        <span>Specimens in multiple protocols</span>
+        <span v-t="'common.add_specimens.multi_cp_specimens'">Specimens in multiple protocols</span>
       </template>
 
       <template #content>
-        <span>
+        <span v-t="'common.add_specimens.select_specimen_cp'">
           Following specimens are present in multiple collection protocols. Select the right collection protocol before proceeding.
         </span>
 
@@ -33,11 +33,15 @@
           <thead>
             <tr>
               <th class="os-col-4">
-                <span v-if="useBarcode">Barcode</span>
-                <span v-else>Label</span>
+                <span v-if="useBarcode">
+                  <span v-t="'specimens.barcode'">Barcode</span>
+                </span>
+                <span v-else>
+                  <span v-t="'specimens.label'">Label</span>
+                </span>
               </th>
               <th class="os-col-8">
-                <span>Collection Protocol</span>
+                <span v-t="'specimens.cp'">Collection Protocol</span>
               </th>
             </tr>
           </thead>
@@ -54,21 +58,23 @@
       </template>
 
       <template #footer>
-        <os-button text label="Cancel" @click="closeResolver" />
-        <os-button primary label="Done" @click="resolved" />
+        <os-button text :label="$t('common.buttons.cancel')" @click="closeResolver" />
+        <os-button primary :label="$t('common.buttons.done')" @click="resolved" />
       </template>
     </os-dialog>
 
     <os-confirm class="os-not-found-confirm" ref="notFoundConfirm">
       <template #title>
-        <span>Specimens not found</span>
+        <span v-t="'common.add_specimens.not_found'">Specimens not found</span>
       </template>
 
       <template #message>
         <div class="message">
-          <div>Following specimens were not found: <br> <br> <i> {{notFoundLabels.join(', ')}} </i> </div>
+          <div v-t="'common.add_specimens.not_found_msg'">Following specimens were not found: </div>
 
-          <div>Do you want to proceed?</div>
+          <div><i>{{notFoundLabels.join(', ')}}</i></div>
+
+          <div v-t="'common.add_specimens.proceed_q'">Do you want to proceed?</div>
         </div>
       </template>
     </os-confirm>
@@ -123,7 +129,7 @@ export default {
         this.$emit('on-add', {specimens, useBarcode});
       } else if (specimens) {
         const opts = this.errorOpts || {};
-        alerts.error(opts.no_match || 'No specimens match the input criteria.');
+        alerts.error(opts.no_match || {code: 'common.add_specimens.no_matching_specimens'});
       }
     },
 
@@ -149,7 +155,7 @@ export default {
 
       const dupLabels = util.getDupItems(labels);
       if (dupLabels.length > 0) {
-        alerts.error('Duplicate labels entered: ' + dupLabels.join(', '));
+        alerts.error({code: 'common.add_specimens.dup_labels', args: {labels: dupLabels.join(', ')}});
         return {specimens: [], useBarcode: this.useBarcode, error: true};
       }
 
@@ -244,7 +250,7 @@ export default {
         .filter(labelInfo => !labelInfo.selected)
         .map(labelInfo => labelInfo.label);
       if (unresolved.length > 0) {
-        alerts.error('One or more specimens not resolved: ' + unresolved.join(', '));
+        alerts.error({code: 'common.add_specimens.unresolved_specimens', args: {labels: unresolved.join(', ')}});
         return;
       }
 

@@ -1,10 +1,9 @@
-
 <template>
   <div class="os-add-items">
     <os-textarea :placeholder="placeholder" v-model="input" />
 
     <span class="buttons">
-      <os-button primary label="Add" @click="addItems" />
+      <os-button primary :label="$t('common.buttons.add')" @click="addItems" />
       <slot></slot>
     </span>
   </div>

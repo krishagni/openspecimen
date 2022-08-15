@@ -1,13 +1,14 @@
 <template>
   <os-button-group>
-    <os-button left-icon="cart-plus" label="Add to Cart" @click="addToMyDefaultCart" />
+    <os-button left-icon="cart-plus" :label="$t('common.add_to_cart.title')" @click="addToMyDefaultCart" />
     <os-button left-icon="caret-down" @click="toggleCartOptions" />
   </os-button-group>
 
   <os-overlay class="os-carts" ref="cartOptions" style="margin-left: -112px;">
     <ul class="search">
       <li>
-        <os-input-text v-model="searchTerm" placeholder="Search Cart" @update:modelValue="searchCarts" />
+        <os-input-text v-model="searchTerm" :placeholder="$t('common.add_to_cart.search_cart')"
+          @update:modelValue="searchCarts" />
       </li>
     </ul>
     <ul class="carts">
@@ -16,13 +17,21 @@
       </li>
 
       <li v-if="carts.length == 0">
-        <a class="no-click"> No carts to show </a>
+        <a class="no-click" v-t="'common.add_to_cart.no_carts'"> No carts to show </a>
       </li>
     </ul>
     <ul class="actions">
-      <li> <a @click="viewDefaultCart" > View My Default Cart </a> </li>
-      <li> <a @click="createNewCart"> Create New </a></li>
-      <li> <a @click="viewCarts" v-if="carts.length > 0"> Manage Carts </a> </li>
+      <li>
+        <a @click="viewDefaultCart"  v-t="'common.add_to_cart.view_my_def_cart'"> View My Default Cart </a>
+      </li>
+      <li>
+        <a @click="createNewCart" v-t="'common.add_to_cart.create_new'"> Create New </a>
+      </li>
+      <li>
+        <a @click="viewCarts" v-if="carts.length > 0">
+          <span v-t="'common.add_to_cart.manage_carts'"> Manage Carts </span>
+        </a>
+      </li>
     </ul>
   </os-overlay>
 </template>
@@ -130,18 +139,16 @@ export default {
       }
 
       if (!this.specimens || this.specimens.length == 0) {
-        alertsSvc.error('Select at least one specimen to add to cart');
+        alertsSvc.error({code: 'common.add_to_cart.select_specimen'});
         return;
       }
 
       cartsSvc.addToCart(cart, this.specimens).then(
         ({count}) => {
           if (count == 0) {
-            alertsSvc.info('No specimens added to the cart: ' + cart.displayName);
-          } else if (count == 1) {
-            alertsSvc.success('One specimen added to the cart: ' + cart.displayName);
+            alertsSvc.info({code: 'common.add_to_cart.no_specimens_added', args: {name: cart.displayName}});
           } else {
-            alertsSvc.success(count + ' specimens added to the cart: ' + cart.displayName);
+            alertsSvc.info({code: 'common.add_to_cart.specimens_added', args: {name: cart.displayName, count: count}});
           }
         }
       );
@@ -154,7 +161,7 @@ export default {
     createNewCart: function(event) {
       this.$refs.cartOptions.toggle(event);
       if (!this.specimens || this.specimens.length == 0) {
-        alertsSvc.error('Select at least one specimen to add to cart');
+        alertsSvc.error({code: 'common.add_to_cart.select_specimen'});
         return;
       }
 

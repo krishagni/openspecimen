@@ -62,6 +62,41 @@
   },
 
   "common": {
+    "about": {
+      "build_date": "Build Date",
+      "online_help": "Online Help",
+      "openspecimen": "About OpenSpecimen",
+      "qna_forums": "Q & A Forums",
+      "plugin": "Plugin",
+      "plugins": "Plugins",
+      "revision": "Revision",
+      "version": "Version"
+    },
+
+    "add_specimens": {
+      "dup_labels": "Duplicate labels scanned: {labels}",
+      "multi_cp_specimens": "Specimens found in multiple protocols",
+      "no_matching_specimens": "No specimens match the input criteria.",
+      "not_found": "Specimens not found",
+      "not_found_msg": "Following specimens were not found:",
+      "proceed_q": "Do you want to proceed?",
+      "select_specimen_cp": "Following specimens are present in multiple collection protocols. Select the right collection protocol before proceeding.",
+      "unresolved_specimens": "One or more specimens not resolved: {labels}.",
+      "use_barcode": "Use Barcode"
+    },
+
+    "add_to_cart": {
+      "create_new": "Create New",
+      "manage_carts": "Manage Carts",
+      "no_carts": "No carts to show.",
+      "no_specimens_added": "No specimens added to the cart: {name}",
+      "search_cart": "Search Cart",
+      "select_specimen": "Select at least one specimen to add to cart.",
+      "specimens_added": "One specimen added to the cart: {name}.|{count} specimens added to the cart: {name}.",
+      "title": "Add to Cart",
+      "view_my_def_cart": "View My Default Cart"
+    },
+
     "all_current_n_future": "All Current and Future",
 
     "buttons": {
@@ -80,6 +115,7 @@
       "import": "Import",
       "more":   "More",
       "next":   "Next",
+      "no":     "No",
       "ok":     "Ok",
       "previous": "Previous",
       "print":  "Print",
@@ -89,8 +125,19 @@
       "save":   "Save",
       "search": "Search",
       "send":   "Send",
+      "submit": "Submit",
       "update": "Update",
       "yes":    "Yes"
+    },
+
+    "close_specimen": {
+      "date_time": "Date and Time",
+      "date_time_req": "Date and Time is mandatory",
+      "reason": "Reason",
+      "reason_req": "Reason is mandatory",
+      "user": "User",
+      "user_req": "User is mandatory",
+      "title": "Close Specimen"
     },
 
     "comments": "Comments",
@@ -107,6 +154,23 @@
     "enter_delete_captcha": "Type 'DELETE ANYWAY' to continue.",
     "enter_delete_reason": "Specify the reason, at least 10 characters in length, for deletion:",
     "error": "Error",
+
+    "feedback": {
+      "failed_to_send": "Failed to send the feedback. Contact system administrator for further help!",
+      "feedback": "Feedback",
+      "feedback_req": "Feedback is mandatory",
+      "let_us_know": "Please let us know what you think of OpenSpecimen. Your feedback to improve the product is most welcome.",
+      "sent": "Feedback sent!",
+      "subject": "Subject",
+      "subject_req": "Subject is mandatory",
+      "submit": "Submit Feedback",
+      "title": "Your feedback counts!"
+    },
+
+    "file_not_selected": "File not selected.",
+    "file_upload_error": "Error uploading the file.",
+    "file_uploaded": "File uploaded.",
+
     "last_updated": "Last Updated",
 
     "lists": {
@@ -269,6 +333,7 @@
     "hierarchy_created": "Container hierarchy of type '{typeName}' created.",
     "interval_unit": "Unit",
     "labeling_scheme": "Labeling Scheme",
+    "loading": "Loading containers. Please wait for a moment...",
     "locations": "Locations",
     "log_activity": "Log an Activity",
     "list": "Containers",
@@ -283,6 +348,7 @@
     "name": "Name",
     "name_required": "Name is mandatory",
     "no_change_not_transferred": "No change in location detected. Container not transferred!",
+    "no_containers_match_criteria": "No containers match the criteria.",
     "no_free_positions": "Container does not have enough free positions to store input specimens.",
     "no_map_for_dimless": "The map view is not available for dimensionless container.",
     "num_containers": "No. of Containers",
@@ -314,6 +380,7 @@
     "scheduled_activity_archived": "Scheduled activity '{name}' archived.",
     "scheduled_activity_created": "Scheduled activity '{name}' created.",
     "scheduled_activity_updated": "Scheduled activity '{name}' updated.",
+    "search_by_name": "Search containers by name...",
     "single_container": "Single Container",
     "singular": "Container",
     "site": "Site",

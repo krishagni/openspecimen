@@ -40,7 +40,7 @@ export default {
   methods: {
     upload: function() {
       if (!this.$refs.uploader.hasFiles) {
-        alertSvc.error('File not selected');
+        alertSvc.error({code: 'common.file_not_selected'});
         return;
       }
 
@@ -71,7 +71,7 @@ export default {
       }
 
       if (this.auto != false) {
-        alertSvc.success('File uploaded!');
+        alertSvc.success({code: 'common.file_uploaded'});
       }
     },
 
@@ -89,7 +89,7 @@ export default {
         } else if (errors) {
           alertSvc.error(errors);
         } else {
-          alertSvc.error('Error uploading the file');
+          alertSvc.error({code: 'common.file_upload_error'});
         }
       } catch {
         alertSvc.error(xhr.status + ': ' + xhr.responseText);

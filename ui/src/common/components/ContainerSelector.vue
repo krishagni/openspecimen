@@ -1,25 +1,25 @@
 <template>
   <div class="os-container-selector">
     <div class="search">
-      <os-input-text v-model="ctx.name" placeholder="Search containers by name..." />
+      <os-input-text v-model="ctx.name" :placeholder="$t('containers.search_by_name')" />
     </div>
 
     <div class="containers">
       <div v-if="ctx.loading">
         <os-message type="info">
-          <span>Loading containers. Please wait for a moment...</span>
+          <span v-t="'containers.loading'">Loading containers. Please wait for a moment...</span>
         </os-message>
       </div>
       <div v-else-if="!containerTree || containerTree.length == 0">
         <os-message type="warn">
-          <span>No containers match the criteria.</span>
+          <span v-t="'containers.no_containers_match_criteria'">No containers match the criteria.</span>
         </os-message>
       </div>
       <table v-else class="os-table os-boxed">
         <thead>
-          <th>Name</th>
-          <th>Dimension</th>
-          <th>Free Locations</th>
+          <th v-t="'containers.name'">Name</th>
+          <th v-t="'containers.dimension'">Dimension</th>
+          <th v-t="'containers.free_locations'">Free Locations</th>
           <th>&nbsp;</th>
         </thead>
         <tbody>

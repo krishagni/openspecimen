@@ -1,15 +1,15 @@
 <template>
   <os-dialog ref="dialogInstance">
     <template #header>
-      <span>Close Specimen</span>
+      <span v-t="'common.close_specimen.title'">Close Specimen</span>
     </template>
     <template #content>
       <os-form ref="form" :data="closeDetail" :schema="formSchema" @input="handleInput($event)" />
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="cancel" />
+      <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
 
-      <os-button primary label="Close" @click="close" />
+      <os-button primary :label="$t('common.buttons.close')" @click="close" />
     </template>
   </os-dialog>
 </template>
@@ -21,6 +21,8 @@ export default {
   props: ['specimens'],
 
   data() {
+    const i18n = this.$t;
+
     return {
       closeDetail: { },
 
@@ -30,11 +32,11 @@ export default {
             fields: [
               {
                 type: "user",
-                label: "User",
+                label: i18n("common.close_specimen.user"),
                 name: "user",
                 validations: {
                   required: {
-                    message: "User is mandatory"
+                    message: i18n("common.close_specimen.user_req")
                   }
                 }
               }
@@ -44,12 +46,12 @@ export default {
             fields: [
               {
                 type: "datePicker",
-                label: "Date and Time",
+                label: i18n("common.close_specimen.date_time"),
                 name: "date",
                 showTime: true,
                 validations: {
                   required: {
-                    message: "Date and time is mandatory"
+                    message: i18n("common.close_specimen.date_time_req")
                   }
                 }
               }
@@ -59,12 +61,12 @@ export default {
             fields: [
               {
                 type: "textarea",
-                label: "Reason",
+                label: i18n("common.close_specimen.reason"),
                 name: "reason",
                 rows: 5,
                 validations: {
                   required: {
-                    message: "Reason is mandatory"
+                    message: i18n("common.close_specimen.reason_req"),
                   }
                 }
               }
