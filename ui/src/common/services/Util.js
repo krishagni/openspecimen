@@ -12,7 +12,7 @@ class Util {
 
   wwwRe   = /(^|[^/])(www\.[\S]+(\b|$))/gim;
 
-  mailRe  = /(([a-zA-Z0-9-_.])+@[a-zA-Z_]+?(\.[a-zA-Z]{2,6})+)/gim;
+  mailRe  = /(([a-zA-Z0-9-_.])+@[a-zA-Z_]+?(\.[a-zA-Z]+)+)/gim;
 
   toClipboard = useClipboard().toClipboard;
 
