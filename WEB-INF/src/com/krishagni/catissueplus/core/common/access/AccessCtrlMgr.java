@@ -706,6 +706,12 @@ public class AccessCtrlMgr {
 		return true;
 	}
 
+	public boolean ensureDeleteConsentRights(CollectionProtocolRegistration cpr) {
+		ensureConsentRights(cpr, Arrays.asList(Operation.DELETE));
+		ensureConsentEximRights(cpr);
+		return true;
+	}
+
 	public boolean ensureLockConsentRights(CollectionProtocolRegistration cpr) {
 		ensureConsentRights(cpr, Arrays.asList(Operation.LOCK));
 		ensureConsentEximRights(cpr);
