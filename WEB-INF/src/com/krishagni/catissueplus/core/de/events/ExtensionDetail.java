@@ -103,7 +103,7 @@ public class ExtensionDetail implements Serializable {
 	}
 
 	public static ExtensionDetail from(DeObject extension) {
-		return from(extension, true);
+		return from(extension, false);
 	}
 
 	public static ExtensionDetail from(DeObject extension, boolean excludePhi) {
@@ -242,8 +242,8 @@ public class ExtensionDetail implements Serializable {
 					}
 				}
 			} else if (excludePhi && attr.isPhi()) {
-				detail.setValue("###");
-				detail.setDisplayValue("###");
+//				detail.setValue("###");
+//				detail.setDisplayValue("###");
 			} else {
 				detail.setValue(attr.getValue());
 				detail.setDisplayValue(attr.getDisplayValue());
