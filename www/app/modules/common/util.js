@@ -15,7 +15,7 @@ angular.module('openspecimen')
 
     var wwwRe   = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
 
-    var mailRe  = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    var mailRe  = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]+)+)/gim;
 
     function clear(input) {
       input.splice(0, input.length);
