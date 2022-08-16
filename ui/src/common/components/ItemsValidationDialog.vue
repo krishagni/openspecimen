@@ -25,8 +25,8 @@
       </template>
 
       <template #footer>
-        <os-button primary label="Copy to Clipboard" @click="generateReport" v-if="isReportAvailable" />
-        <os-button primary label="Ok" @click="dismiss" />
+        <os-button primary :label="$t('common.copy_to_clipboard')" @click="generateReport" v-if="isReportAvailable" />
+        <os-button primary :label="$t('common.buttons.ok')" @click="dismiss" />
       </template>
     </os-dialog>
 
@@ -75,10 +75,10 @@ export default {
 
       try {
         await util.copyToClipboard(report)
-        alertSvc.success('Report copied to the clipboard!');
+        alertSvc.success({code: 'common.copied_to_clipboard'});
       } catch (e) {
         console.log(e);
-        alertSvc.error('Error copying to the clipboard!');
+        alertSvc.success({code: 'common.copy_to_clipboard_failed'});
       }
     },
 

@@ -27,7 +27,7 @@
 
         <os-notifs-overlay />
 
-        <div class="user-profile" v-os-tooltip.bottom="'User Profile'">
+        <div class="user-profile" v-os-tooltip.bottom="$t('common.user_profile')">
           <button @click="toggleProfileMenu">
             <os-username-avatar :name="username" />
           </button>
@@ -43,8 +43,12 @@
                 <os-divider />
               </li>
               <li>
-                <a v-if="ssoLogout" :href="ssoLogoutUrl">Log Out</a>
-                <a v-else :href="$ui.ngServer + '#/?logout=true'">Log Out</a>
+                <a v-if="ssoLogout" :href="ssoLogoutUrl">
+                  <span v-t="'common.logout'">Log Out</span>
+                </a>
+                <a v-else :href="$ui.ngServer + '#/?logout=true'">
+                  <span v-t="'common.logout'">Log Out</span>
+                </a>
               </li>
             </ul>
           </os-overlay>

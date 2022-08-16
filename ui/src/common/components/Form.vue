@@ -147,7 +147,7 @@ export default {
 
        this.$emit('form-validity', {invalid: invalid});
        if (invalid) {
-         alertSvc.error('There are validation errors as highlighted below. Please correct them.');
+         alertSvc.error({code: 'common.form_validation_error'});
        }
 
        return !invalid;

@@ -1,17 +1,17 @@
 
 <template>
   <span class="os-list-size">
-    <span>Showing {{viewSize}}</span>
+    <span v-t="{path: 'common.list_size.showing', args: {size: viewSize}}">Showing {{viewSize}}</span>
 
     <span v-show="hasMore">
-      <span> of </span>
+      <span v-t="'common.list_size.of'"> of </span>
 
-      <a v-show="!showListSize" @click="loadListSize"><span> many more </span></a>
+      <a v-show="!showListSize" @click="loadListSize"><span v-t="'common.list_size.many_more'"> many more </span></a>
 
-      <span v-show="showListSize"> {{listSize == -1 ? '...' : listSize}} </span>
+      <span v-show="showListSize">{{listSize == -1 ? '...' : listSize}}&nbsp;</span>
     </span>
 
-    <span> records </span>
+    <span v-t="'common.list_size.records'"> records </span>
   </span>
 </template>
 
