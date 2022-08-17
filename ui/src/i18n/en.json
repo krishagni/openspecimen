@@ -105,6 +105,7 @@
       "archive": "Archive",
       "back":   "Back",
       "cancel": "Cancel",
+      "clear": "Clear",
       "close": "Close",
       "create": "Create",
       "delete": "Delete",
@@ -198,10 +199,81 @@
     "loading_form": "Loading the form. Please wait for a moment...",
     "logout": "Log Out",
     "name": "Name",
+    "navigate_to": "Navigate To",
+
+    "new_stuff": {
+      "announcements": "Announcements",
+      "read_more": "Read More...",
+      "whats_new_q": "What's New?"
+    },
+
     "no": "No",
+
+    "notifs": {
+      "loading": "Loading notifications. Please wait for a moment..",
+      "no_notifs": "No notifications to show.",
+      "title": "Notifications",
+      "view_all": "View All Notifications"
+    },
+
     "open_in_new_tab": "Open in New Tab",
     "overview": "Overview",
+
+    "quick_search": {
+      "many_matches": "Many matches found. Keep typing...",
+      "search": "Search..."
+    },
+
     "record_deleted": "{type} '{title}' deleted!",
+
+    "signature": {
+      "no_signature": "No signature was detected.",
+      "saved": "Signature saved."
+    },
+
+    "specimen_actions": {
+      "add_edit_event": "Add/Edit Event",
+      "add_more_details": "Add More Details",
+      "already_received": "One or more specimens have been already received. Received specimens: {labels}",
+      "already_reserved_for_dp": "Specimens are already reserved for distribution to the selected DP.",
+      "cannot_edit_closed": "Closed specimens cannot be edited. Closed specimens: {labels}",
+      "closed": "Selected specimens successfully closed.",
+      "create_aliquots": "Create Aliquots",
+      "create_derivatives": "Create Derivatives",
+      "delete_selected": "Are you sure you want to delete the selected specimens and all its children?",
+      "deleted": "Selected specimens and their children successfully deleted.",
+      "distribute": "Distribute",
+      "distribute_now": "Distribute Now",
+      "distribution_details": "Distribution Details",
+      "edit_max_limit": "{count} specimens selected. Only {limit} specimens can be edited at a time.",
+      "not_collected": "One or more specimens are not collected. Not collected specimens: {labels}",
+      "not_primary": "One or more specimens are not primary specimens. Non-primary specimens: {labels}",
+      "order_created": "Distribution order {name} created.",
+      "order_taking_time": "Creating distribution order is taking more time than anticipated. An email notification will be sent to you on successful distribution of specimens.",
+      "pool": "Pool",
+      "receive": "Receive",
+      "reserve": "Reserve",
+      "reserved": "Specimen reserved.|{count} specimens reserved.",
+      "retrieve": "Retrieve",
+      "select_for_add_edit_event": "Select at least one collected specimen to add/edit event.",
+      "select_for_aliquots": "Select at least one collected specimen to create aliquots.",
+      "select_for_close": "Select at least one collected specimen to close.",
+      "select_for_delete": "Select at least one existing specimen to delete.",
+      "select_for_derived": "Select at least one collected specimen to create derived specimens.",
+      "select_for_distribution": "Select at least one collected specimen to distribute.",
+      "select_for_edit": "Select at least one existing specimen to edit.",
+      "select_for_pooling": "Select two or more available specimens to create a pooled specimen.",
+      "select_for_print": "Select at least one existing specimen for label printing.",
+      "select_for_retrieve": "Select at least one collected specimen to retrieve.",
+      "select_for_shipment": "Select at least one collected specimen to create shipment.",
+      "select_for_transfer": "Select at least one specimen to transfer.",
+      "select_same_cp_specimens": "Select specimens of the same collection protocol.",
+      "ship": "Ship",
+      "title": "Actions",
+      "transfer": "Transfer",
+      "transfer_time": "Transfer Time",
+      "transfer_time_req": "Transfer Time is mandatory"
+    },
 
     "status": {
       "closed": "Closed"
@@ -464,6 +536,7 @@
 
   "dps": {
     "admin_rights_req_to_edit": "Super admin rights required to edit the distribution protocol.",
+    "all_specimens": "All Specimens",
 
     "closed": "Distribution protocol '{shortTitle}' closed.",
     "confirm_delete_selected": "Are you sure you want to delete the selected distribution protocols?",
@@ -497,6 +570,7 @@
     "distributed_qty": "Distributed Quantity",
     "distributed_specimens": "Distributed Specimens",
     "distributing_sites": "Distributing Sites",
+    "dp_req": "Distribution protocol is mandatory",
 
     "econsents": {
       "add_rule": "Add Rule",
@@ -528,16 +602,20 @@
     "institute": "Institute",
     "label_format": "Label Format",
     "list": "Distribution Protocols",
+    "none": "None",
     "order_attachment": "Order Attachment",
     "order_custom_fields": "Order Custom Fields",
     "order_report_query": "Order Report Query",
     "principal_investigator": "Principal Investigator",
     "principal_investigator_req": "Principal Investigator is mandatory",
+    "print_labels": "Print Labels",
     "qty_per_specimen": "Quantity Per Specimen",
     "receiving_institute": "Receiving Institute",
     "receiving_institute_req": "Receiving Institute is mandatory",
     "reopened": "Distribution protocol '{shortTitle}' reopened.",
     "receiving_site": "Receiving Site",
+    "remove_from_cart": "Remove from Cart",
+    "remove_from_cart_req": "Remove from Cart is mandatory",
     "req_deleted": "Requirement deleted.",
     "req_saved": "Requirement saved.",
     "requirements": "Requirements",
@@ -670,6 +748,7 @@
     "extracted_from": "from {anatomicSite}",
     "label": "Label",
     "location": "Location",
+    "not_stored": "Not Stored",
     "ppid": "PPID",
     "quantity": "Quantity",
     "type": "Type"

@@ -1,11 +1,15 @@
 <template>
   <ul class="os-notifs-list">
     <li class="title">
-      <span>Notifications</span>
+      <span v-t="'common.notifs.title'">Notifications</span>
     </li>
     <li class="info" v-if="loading || notifs.length == 0">
-      <span v-if="loading">Loading notifications. Please wait for a moment...</span>
-      <span v-else-if="notifs.length == 0">No notifications to show.</span>
+      <span v-if="loading">
+        <span v-t="'common.notifs.loading'">Loading notifications. Please wait for a moment...</span>
+      </span>
+      <span v-else-if="notifs.length == 0">
+        <span v-t="'common.notifs.no_notifs'">No notifications to show.</span>
+      </span>
     </li>
     <li class="notif" v-for="(notif, idx) of notifs" :key="idx" @click="visitNotif(notif)">
       <div class="notif-unread" v-if="notif.status == 'UNREAD'"> </div>
@@ -32,7 +36,7 @@
     </li>
     <li class="footer" v-if="!loading && notifs.length > 0">
       <a :href="$ui.ngServer + '#/notifications'">
-        <span>View All Notifications</span>
+        <span v-t="'common.notifs.view_all'">View All Notifications</span>
       </a>
     </li>
   </ul>

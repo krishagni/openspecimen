@@ -1,19 +1,21 @@
 
 <template>
   <div class="os-new-stuff">
-    <os-button label="What's New?" @click="toggleOverlay($event)"
+    <os-button :label="$t('common.new_stuff.whats_new_q')" @click="toggleOverlay($event)"
       v-if="uiState.notesRead != $ui.global.appProps.build_commit_revision" />
 
     <os-overlay ref="overlay" :dismissable="false" @hide="overlayClosed">
       <div class="os-new-stuff-overlay">
         <div class="header">
-          <span>Announcements</span>
+          <span v-t="'common.new_stuff.announcements'">Announcements</span>
         </div>
         <div class="content">
           <span v-html="releaseNotes"></span>
         </div>
         <div class="footer">
-          <a :href="releaseNotesLink" target="_blank" rel="noopener">Read more...</a>
+          <a :href="releaseNotesLink" target="_blank" rel="noopener">
+            <span v-t="'common.new_stuff.read_more'">Read more...</span>
+          </a>
         </div>
       </div>
     </os-overlay>

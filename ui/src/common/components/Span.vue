@@ -95,7 +95,7 @@ export default {
         }
       }
 
-      return result || 'Not Stored';
+      return result || this.$t('specimens.not_stored');
     },
 
     _getUser: function(value) {

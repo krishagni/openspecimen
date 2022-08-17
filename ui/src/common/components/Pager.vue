@@ -1,8 +1,10 @@
 
 <template>
   <div class="os-pager">
-    <os-button left-icon="angle-double-left" label="Previous" :disabled="firstPage" @click="previous" />
-    <os-button label="Next" right-icon="angle-double-right" :disabled="lastPage" @click="next" />
+    <os-button left-icon="angle-double-left" :label="$t('common.buttons.previous')"
+      :disabled="firstPage" @click="previous" />
+    <os-button :label="$t('common.buttons.next')" right-icon="angle-double-right"
+      :disabled="lastPage" @click="next" />
   </div>
 </template>
 

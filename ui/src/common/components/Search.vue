@@ -1,12 +1,14 @@
 
 <template>
   <div class="os-search">
-    <AutoComplete ref="searchOverlay" placeholder=" &#xE908; Search..." v-model="selectedResult"
+    <AutoComplete ref="searchOverlay" :placeholder="'&#xE908; ' + $t('common.quick_search.search')" v-model="selectedResult"
       :suggestions="searchResults" :delay="searchDelay" @complete="search"
       @item-select="goto($event.originalEvent, $event.value)">
 
       <template #header v-if="searchResults.length > 20">
-        <span class="os-search-many-matches">Many matches found. Keep typing...</span>
+        <span class="os-search-many-matches">
+          <span v-t="'common.quick_search.many_matches'">Many matches found. Keep typing...</span>
+        </span>
       </template>
 
       <template #item="slotProps">

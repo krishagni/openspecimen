@@ -10,17 +10,17 @@
       </div>
 
       <div class="actions" v-if="editMode">
-        <input type="button" value="Save"   @click="save" />
-        <input type="button" value="Clear"  @click="clear" />
-        <input type="button" value="Cancel" @click="cancel" />
+        <input type="button" :value="$t('common.buttons.save')"   @click="save" />
+        <input type="button" :value="$t('common.buttons.clear')"  @click="clear" />
+        <input type="button" :value="$t('common.buttons.cancel')" @click="cancel" />
       </div>
       <div class="actions" v-else>
-        <input type="button" value="Edit" @click="edit" />
-        <input type="button" value="Remove" @click="remove"/>
+        <input type="button" :value="$t('common.buttons.edit')" @click="edit" />
+        <input type="button" :value="$t('common.buttons.remove')" @click="remove"/>
       </div>
     </div>
     <div class="os-signature-add" v-show="!editMode && !imageData && !imageSrc" >
-      <Button left-icon="plus" label="Add" :tabindex="tabOrder" @click="edit" />
+      <Button left-icon="plus" :label="$t('common.buttons.add')" :tabindex="tabOrder" @click="edit" />
     </div>
   </div>
 </template>
@@ -85,7 +85,7 @@ export default {
 
     save: async function() {
       if (this.signaturePad.isEmpty()) {
-        alertSvc.error('No signature was detected');
+        alertSvc.error({code: 'common.signature.no_signature'});
         return;
       }
 
@@ -94,7 +94,7 @@ export default {
         let value = await this.uploader(data);
         this.$emit('update:modelValue', value);
         this.imageData = data;
-        alertSvc.success('Signature saved!');
+        alertSvc.success({code: 'common.signature.saved'});
       }
 
       this.editMode = false;

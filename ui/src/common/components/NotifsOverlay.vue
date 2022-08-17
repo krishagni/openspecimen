@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-notifs" v-os-tooltip.bottom="'Notifications'">
+  <div class="os-notifs" v-os-tooltip.bottom="$t('common.notifs.title')">
     <button @click="toggleOverlay">
       <os-icon name="bell" v-os-badge.danger="unreadNotifCount" v-if="unreadNotifCount > 0" />
       <os-icon name="bell" v-else />

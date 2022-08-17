@@ -1,9 +1,9 @@
 <template>
-  <os-menu label="Actions" :options="options" />
+  <os-menu :label="$t('common.specimen_actions.title')" :options="options" />
 
   <os-confirm-delete ref="deleteSpecimensDialog" :captcha="false" :collectReason="true">
     <template #message>
-      <span>Are you sure you want to delete the selected specimens and all its children?</span>
+      <span v-t="'common.specimen_actions.delete_selected'">Are you sure you want to delete the selected specimens and all its children?</span>
     </template>
   </os-confirm-delete>
 
@@ -11,15 +11,15 @@
 
   <os-dialog ref="distributeDialog">
     <template #header>
-      <span>Distribution Details</span>
+      <span v-t="'common.specimen_actions.distribution_details'">Distribution Details</span>
     </template>
     <template #content>
       <os-form ref="distDetailsForm" :data="ctx.distDetails" :schema="ctx.distFormSchema" />
     </template>
     <template #footer>
-      <os-button text    label="Cancel"     @click="closeDistributionDialog" />
-      <os-button primary label="Reserve"    @click="reserveSpecimens" />
-      <os-button primary label="Distribute" @click="showDistributeOptions" right-icon="caret-down" />
+      <os-button text    :label="$t('common.buttons.cancel')"     @click="closeDistributionDialog" />
+      <os-button primary :label="$t('common.specimen_actions.reserve')"    @click="reserveSpecimens" />
+      <os-button primary :label="$t('common.specimen_actions.distribute')" @click="showDistributeOptions" right-icon="caret-down" />
     </template>
   </os-dialog>
 
@@ -28,12 +28,12 @@
       <ul>
         <li>
           <a @click="distributeNow($event)">
-            <span>Distribute Now</span>
+            <span v-t="'common.specimen_actions.distribute_now'">Distribute Now</span>
           </a>
         </li>
         <li>
           <a @click="addDistributionDetails($event)">
-            <span>Add More Details</span>
+            <span v-t="'common.specimen_actions.add_more_details'">Add More Details</span>
           </a>
         </li>
       </ul>
@@ -42,14 +42,14 @@
 
   <os-dialog ref="retrieveSpmnsDialog">
     <template #header>
-      <span>Retrieve</span>
+      <span v-t="'common.specimen_actions.retrieve'">Retrieve</span>
     </template>
     <template #content>
       <os-form ref="pickSpmnsForm" :data="ctx.retrieveDetails" :schema="ctx.pickSpmnsFormSchema" />
     </template>
     <template #footer>
-      <os-button text    label="Cancel"   @click="closeRetrieveSpecimensDialog" />
-      <os-button primary label="Retrieve" @click="retrieveSpecimens" />
+      <os-button text    :label="$t('common.buttons.cancel')"   @click="closeRetrieveSpecimensDialog" />
+      <os-button primary :label="$t('common.specimen_actions.retrieve')" @click="retrieveSpecimens" />
     </template>
   </os-dialog>
 
@@ -93,7 +93,7 @@ export default {
               fields: [
                 {
                   type: 'dropdown',
-                  label: 'Distribution Protocol',
+                  labelCode: 'dps.singular',
                   name: 'dp',
                   listSource: {
                     loadFn: ({query, maxResults}) => this.loadDps(query, maxResults),
@@ -101,7 +101,7 @@ export default {
                   },
                   validations: {
                     required: {
-                      message: 'Distribution Protocol is mandatory'
+                      messageCode: 'dps.dp_req'
                     }
                   }
                 }
@@ -111,7 +111,7 @@ export default {
               fields: [
                 {
                   type: 'textarea',
-                  label: 'Comments',
+                  labelCode: 'dps.comments',
                   name: 'comments',
                   rows: 5
                 }
@@ -121,17 +121,17 @@ export default {
               fields: [
                 {
                   type: 'radio',
-                  label: 'Remove From Cart',
+                  labelCode: 'dps.remove_from_cart',
                   name: 'clearListMode',
                   options: [
-                    {caption: 'Distributed Specimens', value: 'DISTRIBUTED'},
-                    {caption: 'All Specimens', value: 'ALL'},
-                    {caption: 'None', value: 'NONE'}
+                    {caption: this.$t('dps.distributed_specimens'), value: 'DISTRIBUTED'},
+                    {caption: this.$t('dps.all_specimens'), value: 'ALL'},
+                    {caption: this.$t('dps.none'), value: 'NONE'}
                   ],
                   optionsPerRow: 3,
                   validations: {
                     required: {
-                      message: 'Remove From Cart is mandatory'
+                      messageCode: 'dps.remove_from_cart_req'
                     }
                   },
                   showWhen: 'clearListId != undefined && clearListId != null'
@@ -142,11 +142,11 @@ export default {
               fields: [
                 {
                   type: 'radio',
-                  label: 'Print Labels',
+                  labelCode: 'dps.print_labels',
                   name: 'printLabel',
                   options: [
-                    {caption: 'Yes', value: true},
-                    {caption: 'No',  value: false},
+                    {caption: this.$t('common.yes'), value: true},
+                    {caption: this.$t('common.no'),  value: false},
                   ],
                   optionsPerRow: 2
                 }
@@ -163,12 +163,12 @@ export default {
               fields: [
                 {
                   type: 'datePicker',
-                  label: 'Transfer Time',
+                  labelCode: 'common.specimen_actions.transfer_time',
                   showTime: true,
                   name: 'transferTime',
-                  validation: {
+                  validations: {
                     required: {
-                      message: 'Transfer time is mandatory'
+                      messageCode: 'common.specimen_actions.transfer_time_req'
                     }
                   }
                 }
@@ -178,7 +178,7 @@ export default {
               fields: [
                 {
                   type: 'textarea',
-                  label: 'Comments',
+                  labelCode: 'common.comments',
                   name: 'comments'
                 }
               ]
@@ -238,48 +238,49 @@ export default {
         operations: ['Delete']
       });
 
+      const i18n = this.$t;
       const options = [];
       if (isSpmnUpdateAllowed) {
-        options.push({ icon: 'edit', caption: 'Edit', onSelect: () => this.editSpecimens() });
+        options.push({ icon: 'edit', caption: i18n('common.buttons.edit'), onSelect: () => this.editSpecimens() });
 
         if (!this.ctx.isCoordinator) {
-          options.push({ icon: 'print', caption: 'Print', onSelect: () => this.printLabels() });
+          options.push({ icon: 'print', caption: i18n('common.buttons.print'), onSelect: () => this.printLabels() });
         }
       }
 
       if (isSpmnDeleteAllowed) {
-        options.push({ icon: 'trash', caption: 'Delete', onSelect: () => this.deleteSpecimens() });
+        options.push({ icon: 'trash', caption: i18n('common.buttons.delete'), onSelect: () => this.deleteSpecimens() });
       }
 
       if (isSpmnUpdateAllowed) {
-        options.push({ icon: 'times', caption: 'Close', onSelect: () => this.closeSpecimens() });
+        options.push({ icon: 'times', caption: i18n('common.buttons.close'), onSelect: () => this.closeSpecimens() });
       }
 
       if (this.ctx.isDistAllowed) {
-        options.push({ icon: 'share', caption: 'Distribute', onSelect: () => this.showDistributionDialog() });
+        options.push({ icon: 'share', caption: i18n('common.specimen_actions.distribute'), onSelect: () => this.showDistributionDialog() });
       }
 
       if (authSvc.isAllowed({resource: 'ShippingAndTracking', operations: ['Create']})) {
-        options.push({ icon: 'paper-plane', caption: 'Ship', onSelect: () => this.shipSpecimens() });
+        options.push({ icon: 'paper-plane', caption: i18n('common.specimen_actions.ship'), onSelect: () => this.shipSpecimens() });
       }
 
       if (isSpmnUpdateAllowed && !this.ctx.isCoordinator) {
-        options.push({ icon: 'check-square', caption: 'Receive', onSelect: () => this.receiveSpecimens() });
+        options.push({ icon: 'check-square', caption: i18n('common.specimen_actions.receive'), onSelect: () => this.receiveSpecimens() });
       }
 
       if (isAllSpmnUpdateAllowed) {
-        options.push({ icon: 'flask', caption: 'Pool', onSelect: () => this.poolSpecimens() });
-        options.push({ icon: 'share-alt', caption: 'Create Aliquots', onSelect: () => this.createAliquots() });
-        options.push({ icon: 'flask', caption: 'Create Derivatives', onSelect: () => this.createDerivatives() });
+        options.push({ icon: 'flask', caption: i18n('common.specimen_actions.pool'), onSelect: () => this.poolSpecimens() });
+        options.push({ icon: 'share-alt', caption: i18n('common.specimen_actions.create_aliquots'), onSelect: () => this.createAliquots() });
+        options.push({ icon: 'flask', caption: i18n('common.specimen_actions.create_derivatives'), onSelect: () => this.createDerivatives() });
       }
 
       if (isSpmnUpdateAllowed && !this.ctx.isCoordinator) {
-        options.push({ icon: 'calendar', caption: 'Add/Edit Event', onSelect: () => this.addEditEvent() });
+        options.push({ icon: 'calendar', caption: i18n('common.specimen_actions.add_edit_event'), onSelect: () => this.addEditEvent() });
       }
 
       if (isSpmnUpdateAllowed && authSvc.isAllowed({resource: 'StorageContainer', operations: ['Read']})) {
-        options.push({ icon: 'arrows-alt-h', caption: 'Transfer', onSelect: () => this.transferSpecimens() });
-        options.push({ icon: 'reply', caption: 'Retrieve', onSelect: () => this.showRetrieveSpecimensDialog() });
+        options.push({ icon: 'arrows-alt-h', caption: i18n('common.specimen_actions.transfer'), onSelect: () => this.transferSpecimens() });
+        options.push({ icon: 'reply', caption: i18n('common.specimen_actions.retrieve'), onSelect: () => this.showRetrieveSpecimensDialog() });
       }
 
       const pluginOptions = pluginReg.getOptions('specimen-actions', 'menu');
@@ -329,14 +330,14 @@ export default {
     editSpecimens: async function() {
       const specimens = this.specimens;
       if (!specimens || specimens.length == 0) {
-        alertsSvc.error('Please select at least one existing specimen to edit');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_edit'});
         return;
       }
 
       const settings = await settingsSvc.getSetting('biospecimen', 'max_spmns_update_limit')
       const limit = +(settings[0].value || 100);
       if (specimens.length > limit) {
-        alertsSvc.error(specimens.length + ' specimens selected. Only ' + limit + ' specimens can be edited at a time!');
+        alertsSvc.error({code: 'common.specimen_actions.edit_max_limit', args: {count: specimens.length, limit}});
         return;
       }
 
@@ -347,7 +348,7 @@ export default {
     printLabels: function() {
       const specimens = this.specimens;
       if (!specimens || specimens.length == 0) {
-        alertsSvc.error('Please select at least one existing specimen for label printing');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_print'});
         return;
       }
 
@@ -367,7 +368,7 @@ export default {
     deleteSpecimens: function() {
       const specimens = this.specimens;
       if (!specimens || specimens.length == 0) {
-        alertsSvc.error('Please select at least one existing specimen to delete');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_delete'});
         return;
       }
 
@@ -375,7 +376,7 @@ export default {
         ({reason}) => {
           specimenSvc.bulkDelete(specimens.map(({id}) => id), reason).then(
             () => {
-              alertsSvc.success('Selected specimens and their children successfully deleted');
+              alertsSvc.error({code: 'common.specimen_actions.deleted'});
               this.$emit('reloadSpecimens');
             }
           );
@@ -386,13 +387,13 @@ export default {
     closeSpecimens: function() {
       const specimens = this.specimens;
       if (!specimens || specimens.length == 0) {
-        alertsSvc.error('Please select at least one collected specimen to close');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_close'});
         return;
       }
 
       this.$refs.closeSpecimensDialog.open().then(
         () => {
-          alertsSvc.success('Selected specimens successfully closed');
+          alertsSvc.error({code: 'common.specimen_actions.closed'});
           this.$emit('reloadSpecimens');
         }
       );
@@ -401,7 +402,7 @@ export default {
     shipSpecimens: function() {
       const specimens = this.specimens;
       if (!specimens || specimens.length == 0) {
-        alertsSvc.error('Please select at least one collected specimen to create shipment');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_shipment'});
         return;
       }
 
@@ -421,25 +422,25 @@ export default {
 
       const nonPrimarySpmns = dbSpmns.filter(spmn => spmn.lineage != 'New');
       if (nonPrimarySpmns.length > 0) {
-        this.showError('One or more specimens are not primary specimens. Non-primary specimens:', nonPrimarySpmns);
+        this.showError('common.specimen_actions.not_primary', nonPrimarySpmns);
         return;
       }
 
       const closedSpmns = dbSpmns.filter(spmn => spmn.activityStatus != 'Active');
       if (closedSpmns.length > 0) {
-        this.showError('Closed specimens cannot be edited. Closed specimens:', closedSpmns);
+        this.showError('common.specimen_actions.cannot_edit_closed', closedSpmns);
         return;
       }
 
       const ncSpmns = dbSpmns.filter(spmn => spmn.status != 'Collected');
       if (ncSpmns.length > 0) {
-        this.showError('One or more specimens are not collected. Not collected specimens:', ncSpmns);
+        this.showError('common.specimen_actions.not_collected', ncSpmns);
         return;
       }
 
       const rcvdSpmns = dbSpmns.filter(spmn => spmn.receivedEvent.receivedQuality != 'To be Received');
       if (rcvdSpmns.length > 0) {
-        this.showError('One or more specimens have been already received. Received specimens:', rcvdSpmns);
+        this.showError('common.specimen_actions.already_received', rcvdSpmns);
         return;
       }
 
@@ -454,7 +455,7 @@ export default {
     poolSpecimens: async function() {
       const ids = (this.specimens || []).map(spmn => spmn.id);
       if (ids.length < 2) { 
-        alertsSvc.error('Select two or more available specimens to create a pooled specimen.');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_pooling'});
         return;
       }
 
@@ -462,19 +463,19 @@ export default {
 
       const ncSpmns = dbSpmns.filter(spmn => spmn.status != 'Collected');
       if (ncSpmns.length > 0) {
-        this.showError('One or more specimens are not collected. Not collected specimens:', ncSpmns);
+        this.showError('common.specimen_actions.not_collected', ncSpmns);
         return;
       } 
 
       const closedSpmns = dbSpmns.filter(spmn => spmn.activityStatus != 'Active');
       if (closedSpmns.length > 0) {
-        this.showError('Closed specimens cannot be edited. Closed specimens:', closedSpmns);
+        this.showError('common.specimen_actions.cannot_edit_closed', closedSpmns);
         return;
       }
 
       const cpId = dbSpmns[0].cpId;
       if (dbSpmns.some(spmn => spmn.cpId != cpId)) {
-        alertsSvc.error('Select specimens of the same collection protocol.');
+        alertsSvc.error({code: 'common.specimen_actions.select_same_cp_specimens'});
         return;
       }
 
@@ -486,7 +487,7 @@ export default {
 
     showDistributionDialog: function() {
       if (!this.specimens || this.specimens.length == 0) {
-        alertsSvc.error('Please select at least one collected specimen to distribute');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_distribution'});
         return;
       }
 
@@ -514,11 +515,9 @@ export default {
       http.put('distribution-protocols/' + userInput.dp.id + '/reserved-specimens', request).then(
         ({updated}) => {
           if (updated == 0) {
-            alertsSvc.info('Specimens are already reserved for distribution to the selected DP');
-          } else if (updated == 1) {
-            alertsSvc.success('Specimen reserved');
+            alertsSvc.error({code: 'common.specimen_actions.already_reserved_for_dp'});
           } else {
-            alertsSvc.success(updated + ' specimens reserved');
+            alertsSvc.success({code: 'common.specimen_actions.reserved', args: {count: updated}});
           }
 
           this.closeDistributionDialog();
@@ -556,9 +555,9 @@ export default {
       http.post('distribution-orders', order).then(
         (createdOrder) => {
           if (createdOrder.completed) {
-            alertsSvc.success('Distribution order ' + createdOrder.name + ' created successfully');
+            alertsSvc.success({code: 'common.specimen_actions.order_created', args: createdOrder});
           } else {
-            alertsSvc.info('Saving distribution order is taking more time than anticipated. An email notification will be sent to you on successful distribution of specimens');
+            alertsSvc.info({code: 'common.specimen_actions.order_taking_time'});
           }
 
           this.$emit('reloadSpecimens');
@@ -636,24 +635,24 @@ export default {
     },
 
     createAliquots: function() {
-      this.gotoNgView('bulk-create-aliquots', {}, 'Select at least one collected parent specimen to create aliquots');
+      this.gotoNgView('bulk-create-aliquots', {}, 'common.specimen_actions.select_for_aliquots');
     },
 
     createDerivatives: function() {
-      this.gotoNgView('bulk-create-derivatives', {}, 'Select at least one collected parent specimen to create derived specimens');
+      this.gotoNgView('bulk-create-derivatives', {}, 'common.specimen_actions.select_for_derived');
     },
 
     addEditEvent: function() {
-      this.gotoNgView('bulk-add-event', {}, 'Select at least one collected specimen to add/edit event');
+      this.gotoNgView('bulk-add-event', {}, 'common.specimen_actions.select_for_add_edit_event');
     },
 
     transferSpecimens: function() {
-      this.gotoNgView('bulk-transfer-specimens', {}, 'Select at least one specimen to transfer');
+      this.gotoNgView('bulk-transfer-specimens', {}, 'common.specimen_actions.select_for_transfer');
     },
 
     showRetrieveSpecimensDialog: function() {
       if (!this.specimens || this.specimens.length == 0) {
-        alertsSvc.error('Select at least one collected specimen to retrieve');
+        alertsSvc.error({code: 'common.specimen_actions.select_for_retrieve'});
         return;
       }
 
@@ -687,12 +686,12 @@ export default {
     },
 
     showError: function(error, spmns) {
-      alertsSvc.error(error + ' ' + spmns.map(s => !s.label ? s.id : s.label).join(', '));
+      alertsSvc.error({code: error, args: {labels: spmns.map(s => !s.label ? s.id : s.label).join(', ')}});
     },
 
     gotoNgView: async function(url, params, msg, anyStatus, excludeExtensions) {
       if (!this.specimens || this.specimens.length == 0) {
-        alertsSvc.error(msg);
+        alertsSvc.error({code: msg});
         return;
       }
 
@@ -702,13 +701,13 @@ export default {
       if (!anyStatus) {
         const ncSpmns = dbSpmns.filter(spmn => spmn.status != 'Collected');
         if (ncSpmns.length > 0) {
-          this.showError('One or more specimens are not collected. Not collected specimens:', ncSpmns);
+          this.showError('common.specimen_actions.not_collected', ncSpmns);
           return;
         }
 
         const closedSpmns = dbSpmns.filter(spmn => spmn.activityStatus != 'Active');
         if (closedSpmns.length > 0) {
-          this.showError('Closed specimens cannot be edited. Closed specimens:', closedSpmns);
+          this.showError('common.specimen_actions.cannot_edit_closed', closedSpmns);
           return;
         }
       }

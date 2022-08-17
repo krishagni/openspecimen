@@ -10,7 +10,7 @@
         </div>
 
         <div class="title">
-          <h3>Navigate To</h3>
+          <h3 v-t="'common.navigate_to'">Navigate To</h3>
         </div>
       </div>
 
