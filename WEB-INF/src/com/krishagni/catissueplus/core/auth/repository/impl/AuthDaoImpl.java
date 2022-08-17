@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import com.krishagni.catissueplus.core.auth.domain.AuthCredential;
@@ -88,7 +89,15 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 		return tokens.isEmpty() ? null : tokens.get(0);
 	}
-	
+
+	@Override
+	public List<AuthToken> getAuthTokensByKey(List<String> keys) {
+		return getCurrentSession().createCriteria(AuthToken.class, "t")
+			.createAlias("t.loginAuditLog", "l")
+			.add(Restrictions.in("t.token", keys))
+			.list();
+	}
+
 	@Override
 	public void saveAuthToken(AuthToken token) {
 		sessionFactory.getCurrentSession().saveOrUpdate(token);

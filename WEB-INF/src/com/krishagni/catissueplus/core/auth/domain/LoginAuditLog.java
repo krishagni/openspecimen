@@ -77,5 +77,4 @@ public class LoginAuditLog {
 	public void setApiLogs(Set<UserApiCallLog> apiLogs) {
 		this.apiLogs = apiLogs;
 	}
-	
 }

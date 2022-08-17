@@ -26,6 +26,8 @@ public interface AuthDao extends Dao<AuthDomain> {
 	AuthProvider getAuthProviderByType(String authType);
 	
 	AuthToken getAuthTokenByKey(String key);
+
+	List<AuthToken> getAuthTokensByKey(List<String> keys);
 	
 	void saveAuthToken(AuthToken token);
 	

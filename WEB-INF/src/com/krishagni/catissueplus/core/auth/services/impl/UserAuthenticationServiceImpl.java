@@ -61,6 +61,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
 	private static final String IMPERSONATE_USER_TMPL = "impersonate_user";
 
+	private static final String KILLED_SESSIONS_TMPL = "killed_sessions_notif";
+
 	private DaoFactory daoFactory;
 
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
@@ -368,16 +370,33 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		}
 
 		Iterator<Pair<String, Date>> iter = tokens.iterator();
+		List<String> killedTokens = new ArrayList<>();
 		int killCount = tokens.size() - maxSessions;
 		for (int i = 0; i <= killCount; ++i) {
 			if (iter.hasNext()) {
-				toDelete.add(iter.next().first());
+				String token = iter.next().first();
+				killedTokens.add(token);
+				toDelete.add(token);
 			}
 		}
 
 		int deleted = 0;
+		List<AuthToken> killedSessions = null;
 		if (!toDelete.isEmpty()) {
+			if (!killedTokens.isEmpty()) {
+				killedSessions = daoFactory.getAuthDao().getAuthTokensByKey(killedTokens);
+			}
+
 			deleted = daoFactory.getAuthDao().deleteAuthTokens(toDelete);
+		}
+
+		if (!killedTokens.isEmpty()) {
+			Map<String, Object> props = new HashMap<>();
+			props.put("$subject", new Object[] { killedTokens.size(), killedSessions.size() == 1 ? 1 : 2 });
+			props.put("killedSessions", killedSessions);
+			props.put("rcpt", user);
+			props.put("maxLoginSessions", maxSessions);
+			EmailUtil.getInstance().sendEmail(KILLED_SESSIONS_TMPL, new String[] { user.getEmailAddress() }, null, props);
 		}
 
 		return deleted;

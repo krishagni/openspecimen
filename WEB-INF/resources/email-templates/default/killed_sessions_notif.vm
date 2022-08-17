@@ -1,0 +1,50 @@
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
+  <tbody>
+    <tr>
+      <td style="border-collapse:collapse;">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;line-height:20px">
+          <tbody>
+            <tr>
+              <td style="padding:0px; border-collapse:collapse; padding:0px; padding-bottom:10px">
+                <p style="margin:10px 0 0 0">
+                  Hello $rcpt.formattedName(),
+                  <br><br>
+                  One or more of your login sessions were terminated, as you breached the limit of maximum active login sessions (= $maxLoginSessions) allowed by the system.
+                  <br><br>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table cellspacing="0" cellpadding="0" border="0" style="width: 400px; border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;line-height:20px">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; border-bottom: 2px solid #ddd; padding: 5px">Login Time</th>
+                      <th style="text-align: left; border-bottom: 2px solid #ddd; padding: 5px">IP Address</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    #foreach ($session in $killedSessions)
+                    <tr>
+                      <td style="text-align: left; border-bottom: 1px solid #ddd; padding: 5px">$dateFmt.format($session.loginAuditLog.loginTime)</td>
+                      <td style="text-align: left; border-bottom: 1px solid #ddd; padding: 5px">$session.loginAuditLog.ipAddress</td>
+                    </tr>
+                    #end
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="height:5px;line-height:5px;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        #parse( $footer )
+      </td>
+    </tr>
+  </tbody>
+</table>
