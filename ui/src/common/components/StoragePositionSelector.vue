@@ -1,17 +1,21 @@
 <template>
   <os-dialog ref="selectorDialog" size="lg">
     <template #header>
-      <span v-if="entityType == 'storage_container'">Container Position Selector</span>
-      <span v-else>Specimen Position Selector</span>
+      <span v-if="entityType == 'storage_container'">
+        <span v-t="'containers.container_position_selector'">Container Position Selector</span>
+      </span>
+      <span v-else>
+        <span v-t="'containers.specimen_position_selector'">Specimen Position Selector</span>
+      </span>
     </template>
     <template #content>
       <os-steps ref="selectorWizard">
-        <os-step title="Select Container">
+        <os-step :title="$t('containers.select_container')">
           <os-container-selector :entity-type="entityType" :criteria="criteria" :query="query"
             @container-selected="onContainerSelection($event)" />
         </os-step>
 
-        <os-step title="Select Position">
+        <os-step :title="$t('containers.select_position')">
           <span v-if="selectedContainer">
             <os-container-position-selector :container="selectedContainer"
               @position-selected="onPositionSelection($event)" />
@@ -20,9 +24,9 @@
       </os-steps>
     </template>
     <template #footer>
-      <os-button text label="Cancel" @click="close" />
-      <os-button secondary label="Previous" v-if="step == 'position_selection'" @click="previous" />
-      <os-button primary label="Done" @click="done" />
+      <os-button text :label="$t('common.buttons.cancel')" @click="close" />
+      <os-button secondary :label="$t('common.buttons.previous')" v-if="step == 'position_selection'" @click="previous" />
+      <os-button primary :label="$t('common.buttons.done')" @click="done" />
     </template>
   </os-dialog>
 </template>

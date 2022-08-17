@@ -22,7 +22,7 @@
             </span>
             <span v-if="field.enableCopyFirstToAll && !field.options">
               <a v-if="field.type != 'booleanCheckbox'" @click="copyFirstToAll($event, field)">
-                <span> (Copy first to all) </span>
+                <span v-t="'common.copy_first_to_all'"> (Copy first to all) </span>
               </a>
               <div v-else>
                 <os-boolean-checkbox v-model="ctx.selects[field.name]" style="margin-bottom: 0"
@@ -30,7 +30,7 @@
               </div>
             </span>
             <span class="more-options" v-if="field.options && field.options.length > 0">
-              <os-menu label="More" :options="field.options" />
+              <os-menu :label="$t('common.buttons.more')" :options="field.options" />
             </span>
           </th>
           <th v-if="removeItems == true">
@@ -261,7 +261,7 @@ export default {
       let invalid = this.v$.$invalid;
       this.$emit('form-validity', {invalid: invalid});
       if (invalid) {
-        alertSvc.error('There are validation errors as highlighted below. Please correct them.');
+        alertSvc.error({code: 'common.form_validation_error'});
       }
 
       return !invalid;
