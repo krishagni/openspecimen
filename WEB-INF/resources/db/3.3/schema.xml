@@ -240,9 +240,9 @@
     <dropTable tableName="OS_SPECIMEN_UNITS"/>
   </changeSet>
   
-  <changeSet author="nmarwaha" id="Drop foreign key constraint from institution_id column in catissue_user table">
+  <changeSet author="vpawar" id="Drop FK constraint on user institute ID if exists">
     <preConditions onFail="MARK_RAN">
-      <foreignKeyConstraintExists foreignKeyName="FKB025CFC71792AD22"/>
+      <foreignKeyConstraintExists foreignKeyTableName="CATISSUE_USER" foreignKeyName="FKB025CFC71792AD22"/>
     </preConditions>
     
     <dropForeignKeyConstraint baseTableName="CATISSUE_USER" constraintName="FKB025CFC71792AD22"/>
