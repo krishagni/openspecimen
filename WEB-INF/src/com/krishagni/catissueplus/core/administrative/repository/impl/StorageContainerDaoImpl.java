@@ -17,6 +17,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Junction;
@@ -190,13 +191,20 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			.add(Restrictions.eq("id", crit.containerId()))
 			.setProjection(Projections.distinct(Projections.property("spmn.label")));
 
-		Disjunction restriction = Restrictions.disjunction();
+		Conjunction notInTypes = Restrictions.conjunction();
 		if (isNotEmpty(crit.specimenClasses())) {
-			restriction.add(Restrictions.not(Restrictions.in("spmn.specimenClass", crit.specimenClasses())));
+			query.createAlias("spmn.specimenClass", "spmnClass");
+			notInTypes.add(Restrictions.not(Restrictions.in("spmnClass.id", getPvIds(crit.specimenClasses()))));
 		}
 
 		if (isNotEmpty(crit.specimenTypes())) {
-			restriction.add(Restrictions.not(Restrictions.in("spmn.specimenType", crit.specimenTypes())));
+			query.createAlias("spmn.specimenType", "spmnType");
+			notInTypes.add(Restrictions.not(Restrictions.in("spmnType.id", getPvIds(crit.specimenTypes()))));
+		}
+
+		Disjunction restriction = Restrictions.disjunction();
+		if (isNotEmpty(crit.specimenClasses()) || isNotEmpty(crit.specimenTypes())) {
+			restriction.add(notInTypes);
 		}
 
 		if (isNotEmpty(crit.collectionProtocols())) {
