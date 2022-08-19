@@ -134,6 +134,7 @@ dependencies {
 
   implementation group: 'quartz', name: 'quartz', version:'1.5.2'
 
+  implementation group: 'org.springframework', name: 'spring-aspects', version: '4.3.19.RELEASE'
   implementation group: 'org.springframework', name: 'spring-aop', version: '4.3.30.RELEASE'
   implementation group: 'org.springframework', name: 'spring-beans', version: '4.3.30.RELEASE'
   implementation group: 'org.springframework', name: 'spring-context', version: '4.3.30.RELEASE'
@@ -248,7 +249,7 @@ def getBranch() {
 }
 
 processResources {
-  duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+  duplicatesStrategy(DuplicatesStrategy.INCLUDE)
 
   from(sourceSets.main.resources.srcDirs) {
     include 'application.properties'
