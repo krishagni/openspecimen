@@ -428,7 +428,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 					reqDetail.setDistributedCnt(stat.getDistributedCnt());
 					reqDetail.setDistributedQty(stat.getDistributedQty());
 				} else {
-					reqDetail.setDistributedCnt(new Long(0));
+					reqDetail.setDistributedCnt(0L);
 					reqDetail.setDistributedQty(BigDecimal.ZERO);
 				}
 			}

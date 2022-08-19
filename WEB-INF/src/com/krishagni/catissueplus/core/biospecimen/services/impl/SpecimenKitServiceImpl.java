@@ -126,7 +126,7 @@ public class SpecimenKitServiceImpl implements SpecimenKitService, ObjectAccesso
 			return ResponseEvent.userError(SpecimenKitErrorCode.RPT_TMPL_NOT_CONF);
 		}
 
-		SavedQuery query = deDaoFactory.getSavedQueryDao().getQuery(new Long(queryId));
+		SavedQuery query = deDaoFactory.getSavedQueryDao().getQuery(queryId.longValue());
 		if (query == null) {
 			return ResponseEvent.userError(SavedQueryErrorCode.NOT_FOUND, queryId);
 		}

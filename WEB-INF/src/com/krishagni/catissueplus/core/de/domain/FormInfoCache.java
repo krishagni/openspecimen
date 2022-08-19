@@ -6,9 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.common.Pair;
@@ -27,7 +26,7 @@ import krishagni.catissueplus.beans.FormContextBean;
 // DeObject works.
 //
 
-public class FormInfoCache implements FormContextProcessor, FormEventsListener {
+public class FormInfoCache implements FormContextProcessor, FormEventsListener, InitializingBean {
 	private FormService formSvc;
 
 	private DaoFactory daoFactory;
@@ -49,8 +48,8 @@ public class FormInfoCache implements FormContextProcessor, FormEventsListener {
 
 	}
 
-	@PostConstruct
-	public void registerListeners() {
+	@Override
+	public void afterPropertiesSet() throws Exception {
 		FormEventsNotifier.getInstance().addListener(this);
 		getFormService().addFormContextProc("*", this);
 	}

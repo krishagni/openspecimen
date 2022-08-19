@@ -282,7 +282,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			return ResponseEvent.userError(ShipmentErrorCode.RPT_TMPL_NOT_CONF);
 		}
 		
-		SavedQuery query = deDaoFactory.getSavedQueryDao().getQuery(new Long(queryId));
+		SavedQuery query = deDaoFactory.getSavedQueryDao().getQuery(queryId.longValue());
 		if (query == null) {
 			return ResponseEvent.userError(SavedQueryErrorCode.NOT_FOUND, queryId);
 		}

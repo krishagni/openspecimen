@@ -59,7 +59,7 @@ public class SpecimenReturnEvent extends SpecimenEvent {
 	@Override
 	protected void setEventAttrs(Map<String, Object> attrValues) {
 		this.quantity = new BigDecimal(attrValues.get("quantity").toString());
-		Long containerId = new Long(attrValues.get("container").toString());
+		Long containerId = Long.parseLong(attrValues.get("container").toString());
 		this.container = daoFactory.getStorageContainerDao().getById(containerId);
 	}
 

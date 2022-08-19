@@ -147,7 +147,7 @@ public class ImportJobDetail {
 	public static ImportJobDetail txnSizeExceeded(int inputRecordsCnt) {
 		ImportJobDetail detail = new ImportJobDetail();
 		detail.setStatus(ImportJob.Status.TXN_SIZE_EXCEEDED.name());
-		detail.setTotalRecords(new Long(inputRecordsCnt));
+		detail.setTotalRecords((long) inputRecordsCnt);
 		return detail;
 	}
 }
