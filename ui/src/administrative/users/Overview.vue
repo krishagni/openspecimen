@@ -195,7 +195,11 @@ export default {
 
     impersonate: function() {
       this.$refs.confirmImpersonate.open().then(
-        () => userSvc.impersonate(this.ctx.user).then(() => routerSvc.ngGoto(''))
+        (resp) => {
+          if (resp == 'proceed') {
+            userSvc.impersonate(this.ctx.user).then(() => routerSvc.ngGoto(''));
+          }
+        }
       );
     }
   }
