@@ -112,6 +112,7 @@
       "done":   "Done",
       "edit":   "Edit",
       "export": "Export",
+      "download": "Download",
       "help":   "Help",
       "import": "Import",
       "more":   "More",
@@ -127,6 +128,7 @@
       "search": "Search",
       "send":   "Send",
       "submit": "Submit",
+      "unarchive": "Unarchive",
       "update": "Update",
       "yes":    "Yes"
     },

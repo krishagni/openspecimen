@@ -133,7 +133,7 @@ angular.module('os.administrative.user',
             }
 
             var entityId = currentUser.admin ? undefined : currentUser.instituteId;
-            return Form.listForms(['User', 'UserProfile'], {entityId: entityId}).then(
+            return Form.listForms(['User'], {entityId: entityId}).then(
               function(forms) {
                 if (forms.length > 0) {
                   return forms;
@@ -227,7 +227,7 @@ angular.module('os.administrative.user',
               }
             }
 
-            return Form.listForms(['User', 'UserProfile'], {entityId: entityId}).then(
+            return Form.listForms(['User'], {entityId: entityId}).then(
               function(forms) {
                 if (forms.length > 0) {
                   return forms;
