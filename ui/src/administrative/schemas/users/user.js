@@ -22,7 +22,14 @@ export default {
 
         return options;
       },
-      "showWhen": "currentUser.admin || (user.type != 'SUPER' && currentUser.instituteAdmin) || (user.type != 'SUPER' && user.type != 'INSTITUTE')"
+      "displayValues": {
+        "SUPER": "Super Administrator",
+        "INSTITUTE":" Institute Administrator",
+        "CONTACT": "Contact",
+        "NONE": "Regular"
+      },
+      "showWhen": "currentUser.admin || (user.type != 'SUPER' && currentUser.instituteAdmin) || (user.type != 'SUPER' && user.type != 'INSTITUTE')",
+      "showInOverviewWhen": true
     },
 
     {
