@@ -263,6 +263,10 @@ Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, sp
     app.provide('osSvc', osSvc);
 
     let count = appProps.plugins.length;
+    if (count <= 0) {
+      app.use(router).use(PrimeVue).mount('#app');
+    }
+
     appProps.plugins.forEach(
       (pluginName) => {
         pluginLoader.load(pluginName).then(
