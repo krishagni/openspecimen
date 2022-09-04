@@ -890,19 +890,19 @@
     </property>
   </bean>
 
-  <util:properties id="velocityProps">
-    <prop key="resource.loader">jar,class,file</prop>
-    <prop key="jar.resource.loader.class">com.krishagni.catissueplus.core.common.JarDirectoryResourceLoader</prop>
-    <prop key="jar.resource.loader.path">${plugin.dir}</prop>
-    <prop key="class.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
-    <prop key="file.resource.loader.class">org.apache.velocity.runtime.resource.loader.FileResourceLoader</prop>
-    <prop key="file.resource.loader.path"/>
-    <prop key="input.encoding">utf-8</prop>
-    <prop key="output.encoding">utf-8</prop>
-  </util:properties>
-
   <bean id="velocityEngine" class="org.apache.velocity.app.VelocityEngine">
-    <constructor-arg ref="velocityProps" />
+    <constructor-arg>
+      <util:properties id="velocityProps">
+        <prop key="resource.loaders">jar,class,file</prop>
+        <prop key="resource.loader.jar.class">com.krishagni.catissueplus.core.common.JarDirectoryResourceLoader</prop>
+        <prop key="resource.loader.jar.path">${plugin.dir}</prop>
+        <prop key="resource.loader.class.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
+        <prop key="resource.loader.file.class">org.apache.velocity.runtime.resource.loader.FileResourceLoader</prop>
+        <prop key="resource.loader.file.path"/>
+        <prop key="resource.default_encoding">utf-8</prop>
+        <prop key="output.encoding">utf-8</prop>
+      </util:properties>
+    </constructor-arg>
   </bean>
 
   <bean id="barcodeGenerator" class="com.krishagni.catissueplus.core.common.barcodes.BarcodeGeneratorImpl"/>
