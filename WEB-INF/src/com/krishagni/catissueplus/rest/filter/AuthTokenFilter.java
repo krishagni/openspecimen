@@ -2,8 +2,8 @@ package com.krishagni.catissueplus.rest.filter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -24,12 +25,11 @@ import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.GenericFilterBean;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
@@ -264,8 +264,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 			return null;
 		}
 
-		byte[] base64Token = header.substring(BASIC_AUTH.length()).getBytes();
-		String[] parts = new String(Base64.decode(base64Token)).split(":");
+		String basicAuth = new String(Base64.getDecoder().decode(header.substring(BASIC_AUTH.length())));
+		String[] parts = basicAuth.split(":");
 		if (parts.length != 2) {
 			return null;
 		}
@@ -385,7 +385,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	}
 
 	private User getUser(User user, String userIpAddress, String userString) {
-		String result = new String(Base64.decode(userString.getBytes(StandardCharsets.UTF_8)));
+		String result = new String(Base64.getDecoder().decode(userString));
 		result = Utility.decrypt(result);
 		String[] parts = result.split("/");
 

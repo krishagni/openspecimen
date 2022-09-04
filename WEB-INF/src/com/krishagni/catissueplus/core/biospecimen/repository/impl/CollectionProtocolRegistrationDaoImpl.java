@@ -14,19 +14,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Junction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projection;
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -37,7 +24,15 @@ import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolRegistrationDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
+import com.krishagni.catissueplus.core.common.repository.Junction;
+import com.krishagni.catissueplus.core.common.repository.Property;
+import com.krishagni.catissueplus.core.common.repository.PropertyBuilder;
+import com.krishagni.catissueplus.core.common.repository.Restriction;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<CollectionProtocolRegistration> implements CollectionProtocolRegistrationDao {
@@ -46,22 +41,18 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 	public Class<CollectionProtocolRegistration> getType() {
 		return CollectionProtocolRegistration.class;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public List<CprSummary> getCprList(CprListCriteria crit) {
-		Criteria query = getCprListQuery(crit)
-			.addOrder(Order.desc("registrationDate"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.setProjection(getCprSummaryFields(crit));
-		
+		Criteria<Object[]> query = getCprListQuery(crit);
+		query.distinct().select(getCprSummaryFields(crit, query))
+			.addOrder(query.desc("cpr.registrationDate"));
+
 		List<CprSummary> cprs = new ArrayList<>();
 		Map<Long, CprSummary> cprMap = new HashMap<>();
-
 		boolean allCpsAccess = CollectionUtils.isEmpty(crit.siteCps());
 		Set<Long> phiCps = getPhiCps(crit.phiSiteCps());
-		for (Object[] row : (List<Object[]>)query.list()) {
+		for (Object[] row : query.list(crit.startAt(), crit.maxResults())) {
 			CprSummary cpr = getCprSummary(row, allCpsAccess, phiCps);
 			if (crit.includeStat()) {
 				cprMap.put(cpr.getCprId(), cpr);
@@ -86,97 +77,80 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	@Override
 	public Long getCprCount(CprListCriteria cprCrit) {
-		Number count = (Number) getCprIdsQuery(cprCrit).getExecutableCriteria(getCurrentSession())
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		Criteria<CollectionProtocolRegistration> query = createCriteria(CollectionProtocolRegistration.class, "cpr");
+		return query.add(query.in("cpr.id", getCprIdsQuery(cprCrit, query))).getCount("cpr.id");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<CollectionProtocolRegistration> getCprs(CprListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(CollectionProtocolRegistration.class, "cpr")
-			.add(Subqueries.propertyIn("cpr.id", getCprIdsQuery(crit)));
+		Criteria<CollectionProtocolRegistration> query = createCriteria(CollectionProtocolRegistration.class, "cpr");
+		query.add(query.in("cpr.id", getCprIdsQuery(crit, query)));
+
+		String orderBy = StringUtils.isNotBlank(crit.orderBy()) ? crit.orderBy() : "cpr.id";
+		query.addOrder(crit.asc() ? query.asc(orderBy) : query.desc(orderBy));
 
 		if (CollectionUtils.isEmpty(crit.ppids())) {
-			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
+			return query.list(crit.startAt(), crit.maxResults());
 		}
 
-		String orderBy = StringUtils.isNotBlank(crit.orderBy()) ? crit.orderBy() : "id";
-		return query.addOrder(crit.asc() ? Order.asc(orderBy) : Order.desc(orderBy)).list();
+		return query.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<CollectionProtocolRegistration> getCprsByCpId(Long cpId, int startAt, int maxResults) {
-		return sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_BY_CP_ID)
-			.setLong("cpId", cpId)
-			.setFirstResult(startAt < 0 ? 0 : startAt)
+		return createNamedQuery(GET_BY_CP_ID, CollectionProtocolRegistration.class)
+			.setParameter("cpId", cpId)
+			.setFirstResult(Math.max(startAt, 0))
 			.setMaxResults(maxResults < 0 ? 100 : maxResults)
 			.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public CollectionProtocolRegistration getCprByBarcode(String barcode) {
-		List<CollectionProtocolRegistration> result = sessionFactory.getCurrentSession()
-				.createCriteria(CollectionProtocolRegistration.class)
-				.add(Restrictions.eq("barcode", barcode))
-				.list();
-		
-		return result.isEmpty() ? null : result.iterator().next();
+		Criteria<CollectionProtocolRegistration> query = createCriteria(CollectionProtocolRegistration.class, "cpr");
+		List<CollectionProtocolRegistration> cprs = query.add(query.eq("cpr.barcode", barcode)).list();
+		return cprs.isEmpty() ? null : cprs.iterator().next();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public CollectionProtocolRegistration getCprByPpid(Long cpId, String ppid) {
-		List<CollectionProtocolRegistration> result = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_BY_CP_ID_AND_PPID)
-			.setLong("cpId", cpId)
-			.setString("ppid", ppid)
+		List<CollectionProtocolRegistration> result = createNamedQuery(GET_BY_CP_ID_AND_PPID, CollectionProtocolRegistration.class)
+			.setParameter("cpId", cpId)
+			.setParameter("ppid", ppid)
 			.list();
-		
 		return CollectionUtils.isEmpty(result) ? null : result.iterator().next();
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public CollectionProtocolRegistration getCprByPpid(String cpTitle, String ppid) {
-		List<CollectionProtocolRegistration> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_BY_CP_TITLE_AND_PPID)
-				.setString("title", cpTitle)
-				.setString("ppid", ppid)
-				.list();
-		
+		List<CollectionProtocolRegistration> result = createNamedQuery(GET_BY_CP_TITLE_AND_PPID, CollectionProtocolRegistration.class)
+			.setParameter("title", cpTitle)
+			.setParameter("ppid", ppid)
+			.list();
 		return CollectionUtils.isEmpty(result) ? null : result.iterator().next();
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public CollectionProtocolRegistration getCprByCpShortTitleAndPpid(String cpShortTitle, String ppid) {
-		List<CollectionProtocolRegistration> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_BY_CP_SHORT_TITLE_AND_PPID)
-				.setString("shortTitle", cpShortTitle)
-				.setString("ppid", ppid)
-				.list();
+		List<CollectionProtocolRegistration> result = createNamedQuery(GET_BY_CP_SHORT_TITLE_AND_PPID, CollectionProtocolRegistration.class)
+			.setParameter("shortTitle", cpShortTitle)
+			.setParameter("ppid", ppid)
+			.list();
 		return CollectionUtils.isEmpty(result) ? null : result.iterator().next();
 	}
 
 	@Override
 	public CollectionProtocolRegistration getCprByEmpi(String cpShortTitle, String empi) {
-		List<CollectionProtocolRegistration> result = getCurrentSession()
-				.getNamedQuery(GET_BY_CP_SHORT_TITLE_AND_EMPI)
-				.setParameter("shortTitle", cpShortTitle)
-				.setParameter("empi", empi)
-				.list();
+		List<CollectionProtocolRegistration> result = createNamedQuery(GET_BY_CP_SHORT_TITLE_AND_EMPI, CollectionProtocolRegistration.class)
+			.setParameter("shortTitle", cpShortTitle)
+			.setParameter("empi", empi)
+			.list();
 		return CollectionUtils.isEmpty(result) ? null : result.iterator().next();
 	}
 
 	@Override
 	public CollectionProtocolRegistration getCprByUid(String cpShortTitle, String uid) {
-		List<CollectionProtocolRegistration> result = getCurrentSession()
-			.getNamedQuery(GET_BY_CP_SHORT_TITLE_AND_UID)
+		List<CollectionProtocolRegistration> result = createNamedQuery(GET_BY_CP_SHORT_TITLE_AND_UID, CollectionProtocolRegistration.class)
 			.setParameter("shortTitle", cpShortTitle)
 			.setParameter("uid", uid)
 			.list();
@@ -185,7 +159,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	@Override
 	public List<CollectionProtocolRegistration> getCprsByPmis(String cpShortTitle, List<PmiDetail> pmis) {
-		Criteria query = getByCpShortTitleAndPmisQuery(cpShortTitle, pmis);
+		Criteria<CollectionProtocolRegistration> query = getByCpShortTitleAndPmisQuery(cpShortTitle, pmis);
 		if (query == null) {
 			return Collections.emptyList();
 		}
@@ -193,24 +167,24 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		return query.list();
 	}
 
-	private Criteria getByCpShortTitleAndPmisQuery(String cpShortTitle, List<PmiDetail> pmis) {
-		Criteria query = getCurrentSession().createCriteria(CollectionProtocolRegistration.class, "cpr")
-			.createAlias("cpr.participant", "p")
-			.createAlias("cpr.collectionProtocol", "cp")
-			.createAlias("p.pmis", "pmi")
-			.createAlias("pmi.site", "site");
+	private Criteria<CollectionProtocolRegistration> getByCpShortTitleAndPmisQuery(String cpShortTitle, List<PmiDetail> pmis) {
+		Criteria<CollectionProtocolRegistration> query = createCriteria(CollectionProtocolRegistration.class, "cpr");
+		query.join("cpr.participant", "p")
+			.join("cpr.collectionProtocol", "cp")
+			.join("p.pmis", "pmi")
+			.join("pmi.site", "site");
 
 		boolean added = false;
-		Disjunction disjunction = Restrictions.disjunction();
+		Disjunction disjunction = query.disjunction();
 		for (PmiDetail pmi : pmis) {
 			if (StringUtils.isBlank(pmi.getSiteName()) || StringUtils.isBlank(pmi.getMrn())) {
 				continue;
 			}
 
 			disjunction.add(
-				Restrictions.and(
-					Restrictions.eq("site.name", pmi.getSiteName()),
-					Restrictions.eq("pmi.medicalRecordNumber", pmi.getMrn())
+				query.and(
+					query.eq("site.name", pmi.getSiteName()),
+					query.eq("pmi.medicalRecordNumber", pmi.getMrn())
 				)
 			);
 
@@ -221,30 +195,24 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 			return null;
 		}
 
-		return query.add(disjunction).add(Restrictions.eq("cp.shortTitle", cpShortTitle));
+		return query.add(disjunction).add(query.eq("cp.shortTitle", cpShortTitle));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public CollectionProtocolRegistration getCprByParticipantId(Long cpId, Long participantId) {
-		List<CollectionProtocolRegistration> result =  sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_BY_CP_ID_AND_PID)
-				.setLong("cpId", cpId)
-				.setLong("participantId", participantId)
-				.list();
-		
+		List<CollectionProtocolRegistration> result =  createNamedQuery(GET_BY_CP_ID_AND_PID, CollectionProtocolRegistration.class)
+			.setParameter("cpId", cpId)
+			.setParameter("participantId", participantId)
+			.list();
 		return result.isEmpty() ? null : result.iterator().next();
 	}
 
 	@Override
 	public Map<String, Object> getCprIds(String key, Object value) {
-		List<Object[]> rows = getCurrentSession().createCriteria(CollectionProtocolRegistration.class)
-			.createAlias("collectionProtocol", "cp")
-			.setProjection(
-				Projections.projectionList()
-					.add(Projections.property("id"))
-					.add(Projections.property("cp.id")))
-			.add(Restrictions.eq(key, value))
+		Criteria<Object[]> query = createCriteria(CollectionProtocolRegistration.class, Object[].class, "cpr");
+		List<Object[]> rows = query.join("cpr.collectionProtocol", "cp")
+			.select("cpr.id", "cp.id")
+			.add(query.eq(key, value))
 			.list();
 
 		if (CollectionUtils.isEmpty(rows)) {
@@ -259,33 +227,30 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Integer> getParticipantsBySite(Long cpId, Collection<Long> siteIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_COUNTS_BY_SITE)
+		List<Object[]> rows = createNamedQuery(GET_COUNTS_BY_SITE, Object[].class)
 			.setParameter("cpId", cpId)
 			.setParameterList("siteIds", siteIds)
 			.list();
-
 		return rows.stream().collect(Collectors.toMap(row -> (String)row[0], row -> ((Number)row[1]).intValue()));
 	}
 
 	@Override
 	public List<CollectionProtocolRegistration> getByPpids(String cpShortTitle, List<String> ppids) {
-		return getCurrentSession().getNamedQuery(GET_BY_PPIDS)
+		return createNamedQuery(GET_BY_PPIDS, CollectionProtocolRegistration.class)
 			.setParameter("cpShortTitle", cpShortTitle)
 			.setParameterList("ppids", ppids)
 			.list();
 	}
 
-	private Criteria getCprListQuery(CprListCriteria cprCrit) {
-		Criteria query = getSessionFactory().getCurrentSession()
-			.createCriteria(CollectionProtocolRegistration.class)
-			.createAlias("collectionProtocol", "cp")
-			.createAlias("participant", "participant")
-			.createAlias("participant.pmis", "pmi", JoinType.LEFT_OUTER_JOIN)
-			.add(Restrictions.ne("activityStatus", "Disabled"))
-			.add(Restrictions.ne("cp.activityStatus", "Disabled"))
-			.add(Restrictions.ne("participant.activityStatus", "Disabled"));
+	private Criteria<Object[]> getCprListQuery(CprListCriteria cprCrit) {
+		Criteria<Object[]> query = createCriteria(CollectionProtocolRegistration.class, Object[].class, "cpr");
+		query.join("collectionProtocol", "cp")
+			.join("participant", "participant")
+			.leftJoin("participant.pmis", "pmi")
+			.add(query.ne("activityStatus", "Disabled"))
+			.add(query.ne("cp.activityStatus", "Disabled"))
+			.add(query.ne("participant.activityStatus", "Disabled"));
 
 		addCpRestrictions(query, cprCrit);
 		addRegDateCondition(query, cprCrit);
@@ -299,48 +264,47 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		return query;		
 	}
 
-	private void addCpRestrictions(Criteria query, CprListCriteria cprCrit) {
+	private void addCpRestrictions(AbstractCriteria<?, ?> query, CprListCriteria cprCrit) {
 		if (cprCrit.cpId() == null || cprCrit.cpId() == -1) {
 			return;
 		}
 
-		query.add(Restrictions.eq("cp.id", cprCrit.cpId()));
+		query.add(query.eq("cp.id", cprCrit.cpId()));
 	}
 
-	private void addRegDateCondition(Criteria query, CprListCriteria crit) {
+	private void addRegDateCondition(AbstractCriteria<?, ?> query, CprListCriteria crit) {
 		if (crit.registrationDate() == null) {
 			return;
 		}
 
 		Date from = Utility.chopTime(crit.registrationDate());
 		Date to = Utility.getEndOfDay(crit.registrationDate());
-		query.add(Restrictions.between("registrationDate", from, to));
+		query.add(query.between("cpr.registrationDate", from, to));
 	}
 	
-	private void addMrnEmpiUidCondition(Criteria query, CprListCriteria crit) {
+	private void addMrnEmpiUidCondition(AbstractCriteria<?, ?> query, CprListCriteria crit) {
 		if (!crit.includePhi() || StringUtils.isBlank(crit.participantId())) {
 			return;
 		}
 
 		query.add(
-			Restrictions.disjunction()
-				.add(Restrictions.ilike("pmi.medicalRecordNumber", crit.participantId(), MatchMode.ANYWHERE))
-				.add(Restrictions.ilike("participant.empi", crit.participantId(), MatchMode.ANYWHERE))
-				.add(Restrictions.ilike("participant.uid", crit.participantId(), MatchMode.ANYWHERE))
+			query.disjunction()
+				.add(query.ilike("pmi.medicalRecordNumber", crit.participantId()))
+				.add(query.ilike("participant.empi", crit.participantId()))
+				.add(query.ilike("participant.uid", crit.participantId()))
 		);
 	}
 	
-	private void addNamePpidAndUidCondition(Criteria query, CprListCriteria crit) {
+	private void addNamePpidAndUidCondition(AbstractCriteria<?, ?> query, CprListCriteria crit) {
 		if (StringUtils.isNotBlank(crit.query())) {
-			Junction cond = Restrictions.disjunction()
-				.add(Restrictions.ilike("ppid", crit.query(), MatchMode.ANYWHERE));
+			Junction cond = query.disjunction().add(query.ilike("cpr.ppid", crit.query()));
 
 			if (crit.includePhi()) {
-				cond.add(Restrictions.ilike("participant.firstName", crit.query(), MatchMode.ANYWHERE));
-				cond.add(Restrictions.ilike("participant.lastName", crit.query(), MatchMode.ANYWHERE));
-				cond.add(Restrictions.ilike("participant.uid", crit.query(), MatchMode.ANYWHERE));
-				cond.add(Restrictions.ilike("participant.empi", crit.query(), MatchMode.ANYWHERE));
-				cond.add(Restrictions.ilike("pmi.medicalRecordNumber", crit.query(), MatchMode.ANYWHERE));
+				cond.add(query.ilike("participant.firstName", crit.query()));
+				cond.add(query.ilike("participant.lastName", crit.query()));
+				cond.add(query.ilike("participant.uid", crit.query()));
+				cond.add(query.ilike("participant.empi", crit.query()));
+				cond.add(query.ilike("pmi.medicalRecordNumber", crit.query()));
 			}
 			
 			query.add(cond);
@@ -348,7 +312,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		}
 
 		if (StringUtils.isNotBlank(crit.ppid())) {
-			query.add(Restrictions.ilike("ppid", crit.ppid(), crit.matchMode()));
+			query.add(query.ilike("cpr.ppid", crit.ppid()));
 		}
 
 		if (!crit.includePhi()) {
@@ -356,54 +320,54 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		}
 
 		if (StringUtils.isNotBlank(crit.uid())) {
-			query.add(Restrictions.ilike("participant.uid", crit.uid(), crit.matchMode()));
+			query.add(query.ilike("participant.uid", crit.uid()));
 		}
 		
 		if (StringUtils.isNotBlank(crit.name())) {
-			query.add(Restrictions.disjunction()
-				.add(Restrictions.ilike("participant.firstName", crit.name(), MatchMode.ANYWHERE))
-				.add(Restrictions.ilike("participant.lastName", crit.name(), MatchMode.ANYWHERE))
+			query.add(query.disjunction()
+				.add(query.ilike("participant.firstName", crit.name()))
+				.add(query.ilike("participant.lastName", crit.name()))
 			);
 		}
 	}
 	
-	private void addDobCondition(Criteria query, CprListCriteria crit) {
+	private void addDobCondition(AbstractCriteria<?, ?> query, CprListCriteria crit) {
 		if (!crit.includePhi() || crit.dob() == null) {
 			return;
 		}
 
 		Date from = Utility.chopTime(crit.dob());
 		Date to = Utility.getEndOfDay(crit.dob());
-		query.add(Restrictions.between("participant.birthDate", from, to));
+		query.add(query.between("participant.birthDate", from, to));
 	}
 	
-	private void addSpecimenCondition(Criteria query, CprListCriteria crit) {
+	private void addSpecimenCondition(AbstractCriteria<?, ?> query, CprListCriteria crit) {
 		if (StringUtils.isBlank(crit.specimen())) {
 			return;
 		}
 		
-		query.createAlias("visits", "visit")
-			.createAlias("visit.specimens", "specimen")
-			.add(Restrictions.disjunction()
-					.add(Restrictions.ilike("specimen.label", crit.specimen(), MatchMode.ANYWHERE))
-					.add(Restrictions.ilike("specimen.barcode", crit.specimen(), MatchMode.ANYWHERE)))
-			.add(Restrictions.ne("specimen.activityStatus", "Disabled"))
-			.add(Restrictions.ne("visit.activityStatus", "Disabled"));
+		query.join("cpr.visits", "visit")
+			.join("visit.specimens", "specimen")
+			.add(query.disjunction()
+					.add(query.ilike("specimen.label", crit.specimen()))
+					.add(query.ilike("specimen.barcode", crit.specimen())))
+			.add(query.ne("specimen.activityStatus", "Disabled"))
+			.add(query.ne("visit.activityStatus", "Disabled"));
 	}
 
-	private void addPpidsCond(Criteria query, CprListCriteria crit) {
+	private void addPpidsCond(Criteria<Object[]> query, CprListCriteria crit) {
 		if (CollectionUtils.isNotEmpty(crit.ppids())) {
-			query.add(Restrictions.in("ppid", crit.ppids()));
+			query.add(query.in("cpr.ppid", crit.ppids()));
 		}
 	}
 
-	private void addIdsCond(Criteria query, CprListCriteria crit) {
+	private void addIdsCond(Criteria<Object[]> query, CprListCriteria crit) {
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
-			applyIdsFilter(query, "id", crit.ids());
+			applyIdsFilter(query, "cpr.id", crit.ids());
 		}
 	}
 
-	private void addSiteCpsCond(Criteria query, CprListCriteria crit) {
+	private void addSiteCpsCond(Criteria<Object[]> query, CprListCriteria crit) {
 		if (CollectionUtils.isEmpty(crit.siteCps())) {
 			return;
 		}
@@ -419,44 +383,44 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 			siteCps = crit.siteCps();
 		}
 
-		query.createAlias("cp.sites", "cpSite").createAlias("cpSite.site", "site");
+		query.join("cp.sites", "cpSite").join("cpSite.site", "site");
 		if (crit.useMrnSites()) {
 			if (StringUtils.isBlank(crit.participantId())) {
-				query.createAlias("participant.pmis", "pmi", JoinType.LEFT_OUTER_JOIN);
+				query.leftJoin("participant.pmis", "pmi");
 			}
 
-			query.createAlias("pmi.site", "mrnSite", JoinType.LEFT_OUTER_JOIN);
+			query.leftJoin("pmi.site", "mrnSite");
 		}
 
-		Disjunction cpSitesCond = Restrictions.disjunction();
+		Disjunction cpSitesCond = query.disjunction();
 		for (SiteCpPair siteCp : siteCps) {
-			Junction siteCond = Restrictions.disjunction();
+			Junction siteCond = query.disjunction();
 			if (crit.useMrnSites()) {
 				//
 				// When MRNs exist, site ID should be one of the MRN site
 				//
-				Junction mrnSite = Restrictions.conjunction()
-					.add(Restrictions.isNotNull("pmi.id"))
-					.add(getSiteIdRestriction("mrnSite.id", siteCp));
+				Junction mrnSite = query.conjunction()
+					.add(query.isNotNull("pmi.id"))
+					.add(getSiteIdRestriction(query, "mrnSite.id", siteCp));
 
 				//
 				// When no MRNs exist, site ID should be one of CP site
 				//
-				Junction cpSite = Restrictions.conjunction()
-					.add(Restrictions.isNull("pmi.id"))
-					.add(getSiteIdRestriction("site.id", siteCp));
+				Junction cpSite = query.conjunction()
+					.add(query.isNull("pmi.id"))
+					.add(getSiteIdRestriction(query, "site.id", siteCp));
 
 				siteCond.add(mrnSite).add(cpSite);
 			} else {
 				//
 				// Site ID should be CP site
 				//
-				siteCond.add(getSiteIdRestriction("site.id", siteCp));
+				siteCond.add(getSiteIdRestriction(query, "site.id", siteCp));
 			}
 
-			Junction cond = Restrictions.conjunction().add(siteCond);
+			Junction cond = query.conjunction().add(siteCond);
 			if (siteCp.getCpId() != null && !siteCp.getCpId().equals(crit.cpId())) {
-				cond.add(Restrictions.eq("cp.id", siteCp.getCpId()));
+				cond.add(query.eq("cp.id", siteCp.getCpId()));
 			}
 
 			cpSitesCond.add(cond);
@@ -465,155 +429,146 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		query.add(cpSitesCond);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Set<Long> getPhiCps(Collection<SiteCpPair> siteCps) {
 		Set<Long> result = new HashSet<>();
 		if (CollectionUtils.isEmpty(siteCps)) {
 			return result;
 		}
 
-		Disjunction criteria = Restrictions.disjunction();
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp");
+		query.join("cp.sites", "cpSite")
+			.join("cpSite.site", "site")
+			.join("site.institute", "institute")
+			.distinct().select("cp.id");
+
+		Disjunction siteCond = query.disjunction();
 		for (SiteCpPair siteCp : siteCps) {
 			if (siteCp.getCpId() != null) {
 				result.add(siteCp.getCpId());
 			} else if (siteCp.getSiteId() != null) {
-				criteria.add(Restrictions.eq("site.id", siteCp.getSiteId()));
+				siteCond.add(query.eq("site.id", siteCp.getSiteId()));
 			} else if (siteCp.getInstituteId() != null) {
-				criteria.add(Restrictions.eq("institute.id", siteCp.getInstituteId()));
+				siteCond.add(query.eq("institute.id", siteCp.getInstituteId()));
 			}
 		}
 
-		if (!criteria.conditions().iterator().hasNext()) {
-			return result;
+		if (siteCond.hasConditions()) {
+			result.addAll(query.add(siteCond).list());
 		}
 
-		List<Long> cpIds = (List<Long>) getCurrentSession().createCriteria(CollectionProtocol.class, "cp")
-			.createAlias("cp.sites", "cpSite")
-			.createAlias("cpSite.site", "site")
-			.createAlias("site.institute", "institute")
-			.setProjection(Projections.distinct(Projections.property("cp.id")))
-			.add(criteria)
-			.list();
-		result.addAll(cpIds);
 		return result;
 	}
 
-	private Projection getCprSummaryFields(CprListCriteria cprCrit) {
-		ProjectionList projs = Projections.projectionList()
-			.add(Projections.property("id"))
-			.add(Projections.property("ppid"))
-			.add(Projections.property("registrationDate"))
-			.add(Projections.property("cp.id"))
-			.add(Projections.property("cp.shortTitle"))
-			.add(Projections.property("participant.id"))
-			.add(Projections.property("participant.source"));
+	private List<Property> getCprSummaryFields(CprListCriteria cprCrit, Criteria<Object[]> query) {
+		PropertyBuilder pb = query.propertyBuilder();
+		List<Property> props = new ArrayList<>();
+		props.add(pb.property("cpr.id"));
+		props.add(pb.property("cpr.ppid"));
+		props.add(pb.property("cpr.registrationDate"));
+		props.add(pb.property("cp.id"));
+		props.add(pb.property("cp.shortTitle"));
+		props.add(pb.property("participant.id"));
+		props.add(pb.property("participant.source"));
 
 		if (cprCrit.includePhi()) {
-			projs.add(Projections.property("participant.firstName"))
-				.add(Projections.property("participant.lastName"))
-				.add(Projections.property("participant.empi"))
-				.add(Projections.property("participant.uid"))
-				.add(Projections.property("participant.emailAddress"));
+			props.add(pb.property("participant.firstName"));
+			props.add(pb.property("participant.lastName"));
+			props.add(pb.property("participant.empi"));
+			props.add(pb.property("participant.uid"));
+			props.add(pb.property("participant.emailAddress"));
 		}
 
-		return Projections.distinct(projs);
+		return props;
 	}
 	
 	private CprSummary getCprSummary(Object[] row, boolean allCpsAccess, Set<Long> phiCps) {
-		int idx = 0;
+		int idx = -1;
 		CprSummary cpr = new CprSummary();
-		cpr.setCprId((Long)row[idx++]);
-		cpr.setPpid((String)row[idx++]);
-		cpr.setRegistrationDate((Date)row[idx++]);
-		cpr.setCpId((Long)row[idx++]);
-		cpr.setCpShortTitle((String)row[idx++]);
+		cpr.setCprId((Long)row[++idx]);
+		cpr.setPpid((String)row[++idx]);
+		cpr.setRegistrationDate((Date)row[++idx]);
+		cpr.setCpId((Long)row[++idx]);
+		cpr.setCpShortTitle((String)row[++idx]);
 
 		ParticipantSummary participant = new ParticipantSummary();
 		cpr.setParticipant(participant);
-		participant.setId((Long)row[idx++]);
-		participant.setSource((String)row[idx++]);
-		if (row.length > idx && (allCpsAccess || (phiCps != null && phiCps.contains(cpr.getCpId())))) {
-			participant.setFirstName((String)row[idx++]);
-			participant.setLastName((String) row[idx++]);
-			participant.setEmpi((String) row[idx++]);
-			participant.setUid((String) row[idx++]);
-			participant.setEmailAddress((String) row[idx++]);
+		participant.setId((Long)row[++idx]);
+		participant.setSource((String)row[++idx]);
+		if (row.length > (idx + 1) && (allCpsAccess || (phiCps != null && phiCps.contains(cpr.getCpId())))) {
+			participant.setFirstName((String)row[++idx]);
+			participant.setLastName((String) row[++idx]);
+			participant.setEmpi((String) row[++idx]);
+			participant.setUid((String) row[++idx]);
+			participant.setEmailAddress((String) row[++idx]);
 		}
 		
 		return cpr;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	private List<Object[]> getScgAndSpecimenCounts(CprListCriteria cprCrit) {
-		Criteria countQuery = getCprListQuery(cprCrit)
-				.addOrder(Order.asc("id"))
-				.setFirstResult(cprCrit.startAt())
-				.setMaxResults(cprCrit.maxResults());
-		
+		Criteria<Object[]> query = getCprListQuery(cprCrit);
+		query.addOrder(query.asc("cpr.id"));
+
 		if (StringUtils.isBlank(cprCrit.specimen())) {
-			countQuery
-				.createAlias("visits", "visit",
-					JoinType.LEFT_OUTER_JOIN, Restrictions.eq("visit.status", "Complete"))
-				.createAlias("visit.specimens", "specimen",
-					JoinType.LEFT_OUTER_JOIN, Restrictions.eq("specimen.collectionStatus", "Collected"));
+			query
+				.leftJoin("visits", "visit",
+					() -> query.eq("visit.status", "Complete"))
+				.leftJoin("visit.specimens", "specimen",
+					() -> query.eq("specimen.collectionStatus", "Collected"));
 		}
-		
-		return countQuery.setProjection(Projections.projectionList()
-				.add(Projections.property("id"))
-				.add(Projections.countDistinct("visit.id"))
-				.add(Projections.countDistinct("specimen.id"))
-				.add(Projections.groupProperty("id")))
-				.list();
+
+		return query.select(
+			query.column("cpr.id"),
+			query.distinctCount("visit.id"),
+			query.distinctCount("specimen.id")
+		).groupBy("cpr.id").list(cprCrit.startAt(), cprCrit.maxResults());
 	}
 
-	private DetachedCriteria getCprIdsQuery(CprListCriteria crit) {
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(CollectionProtocolRegistration.class, "cpr")
-			.setProjection(Projections.distinct(Projections.property("cpr.id")));
-		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
+	private SubQuery<Long> getCprIdsQuery(CprListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
+		SubQuery<Long> subQuery = mainQuery.createSubQuery(CollectionProtocolRegistration.class, "cpr")
+			.distinct().select("cpr.id");
 
 		if (crit.lastId() != null && crit.lastId() >= 0L) {
-			query.add(Restrictions.gt("id", crit.lastId()));
+			subQuery.add(subQuery.gt("cpr.id", crit.lastId()));
 		}
 
-		String startAlias = "cp";
 		if (crit.cpId() != null) {
-			startAlias = "cpSite";
-			query.createAlias("cpr.collectionProtocol", "cp")
-				.add(Restrictions.eq("cp.id", crit.cpId()));
+			subQuery.join("cpr.collectionProtocol", "cp")
+				.add(subQuery.eq("cp.id", crit.cpId()));
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
-			applyIdsFilter(query, "cpr.id", crit.ids());
+			applyIdsFilter(subQuery, "cpr.id", crit.ids());
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.ppids())) {
-			query.add(Restrictions.in("ppid", crit.ppids()));
+			subQuery.add(subQuery.in("cpr.ppid", crit.ppids()));
 		}
 
-		BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), startAlias, false);
+		BiospecimenDaoHelper.getInstance().addSiteCpsCond(subQuery, crit.siteCps(), crit.useMrnSites(), false);
 		if (CollectionUtils.isEmpty(crit.siteCps()) && crit.includePhi()) {
-			query.createAlias("cpr.participant", "participant")
-				.createAlias("participant.pmis", "pmi", JoinType.LEFT_OUTER_JOIN);
+			subQuery.join("cpr.participant", "participant")
+				.leftJoin("participant.pmis", "pmi");
 		}
 
-		addCpRestrictions(query, crit);
-		addRegDateCondition(query, crit);
-		addMrnEmpiUidCondition(query, crit);
-		addNamePpidAndUidCondition(query, crit);
-		addDobCondition(query, crit);
-		addSpecimenCondition(query, crit);
-		return detachedCriteria;
+		addCpRestrictions(subQuery, crit);
+		addRegDateCondition(subQuery, crit);
+		addMrnEmpiUidCondition(subQuery, crit);
+		addNamePpidAndUidCondition(subQuery, crit);
+		addDobCondition(subQuery, crit);
+		addSpecimenCondition(subQuery, crit);
+		return subQuery;
 	}
 
-	private Criterion getSiteIdRestriction(String property, SiteCpPair siteCp) {
+	private Restriction getSiteIdRestriction(AbstractCriteria<?, ?> query, String property, SiteCpPair siteCp) {
 		if (siteCp.getSiteId() != null) {
-			return Restrictions.eq(property, siteCp.getSiteId());
+			return query.eq(property, siteCp.getSiteId());
 		}
 
-		DetachedCriteria subQuery = DetachedCriteria.forClass(Site.class)
-			.add(Restrictions.eq("institute.id", siteCp.getInstituteId()))
-			.setProjection(Projections.property("id"));
-		return Subqueries.propertyIn(property, subQuery);
+		SubQuery<Long> subQuery = query.createSubQuery(Site.class, "site")
+			.join("site.institute", "institute")
+			.select("site.id");
+		return query.in(property, subQuery.eq("institute.id", siteCp.getInstituteId()));
 	}
 	
 	private static final String FQN = CollectionProtocolRegistration.class.getName();

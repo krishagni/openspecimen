@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.AutoFreezerProvider" table="OS_AUTO_FREEZER_PROVIDERS">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.AutoFreezerProvider" table="OS_AUTO_FREEZER_PROVIDERS"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.AutoFreezerProvider">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">OS_AUTO_FREEZER_PROVIDERS_SEQ</param>

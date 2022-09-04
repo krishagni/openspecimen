@@ -9,12 +9,15 @@ import java.util.stream.Collectors;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 
 import edu.common.dynamicextensions.query.QuerySpace;
 
@@ -34,7 +37,11 @@ public class SavedQuery extends BaseEntity {
 	
 	private Long cpId;
 
+	private CollectionProtocol cp;
+
 	private Long cpGroupId;
+
+	private CollectionProtocolGroup cpGroup;
 	
 	private String drivingForm;
 
@@ -131,6 +138,15 @@ public class SavedQuery extends BaseEntity {
 		this.cpId = cpId;
 	}
 
+	@NotAudited
+	public CollectionProtocol getCp() {
+		return cp;
+	}
+
+	public void setCp(CollectionProtocol cp) {
+		this.cp = cp;
+	}
+
 	public Long getCpGroupId() {
 		return cpGroupId;
 	}
@@ -141,6 +157,15 @@ public class SavedQuery extends BaseEntity {
 		}
 
 		this.cpGroupId = cpGroupId;
+	}
+
+	@NotAudited
+	public CollectionProtocolGroup getCpGroup() {
+		return cpGroup;
+	}
+
+	public void setCpGroup(CollectionProtocolGroup cpGroup) {
+		this.cpGroup = cpGroup;
 	}
 
 	public String getDrivingForm() {

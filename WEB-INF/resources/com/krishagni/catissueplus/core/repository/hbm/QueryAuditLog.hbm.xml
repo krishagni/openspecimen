@@ -4,7 +4,9 @@
  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd"> 
 
 <hibernate-mapping>
-  <class name="com.krishagni.catissueplus.core.de.domain.QueryAuditLog" table="CATISSUE_QUERY_AUDIT_LOGS">
+  <class name="com.krishagni.catissueplus.core.de.domain.QueryAuditLog" table="CATISSUE_QUERY_AUDIT_LOGS"
+    entity-name="com.krishagni.catissueplus.core.de.domain.QueryAuditLog">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">CATISSUE_QUERY_AUDIT_LOGS_SEQ</param>

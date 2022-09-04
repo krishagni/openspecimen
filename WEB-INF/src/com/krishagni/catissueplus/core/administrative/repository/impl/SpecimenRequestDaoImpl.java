@@ -11,15 +11,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.SpecimenRequest;
@@ -31,6 +22,9 @@ import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> implements SpecimenRequestDao {
@@ -38,23 +32,21 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		return SpecimenRequest.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<SpecimenRequestSummary> getSpecimenRequests(SpecimenRequestListCriteria crit) {
-		Criteria query = addSummaryFields(getListQuery(crit), CollectionUtils.isNotEmpty(crit.sites()));
-		return ((List<Object[]>)query.list()).stream().map(this::getRequest).collect(Collectors.toList());
+		Criteria<Object[]> query = addSummaryFields(getListQuery(crit), CollectionUtils.isNotEmpty(crit.sites()));
+		return query.orderBy(query.desc("req.id"))
+			.list(crit.startAt(), crit.maxResults())
+			.stream().map(this::getRequest).collect(Collectors.toList());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getRequestIds(String key, Object value) {
-		List<Object[]> rows = getCurrentSession().createCriteria(SpecimenRequest.class)
-			.add(Restrictions.eq(key, value))
-			.setProjection(Projections.projectionList()
-				.add(Projections.property("id"))
-				.add(Projections.property("catalogId")))
-			.list();
+		Criteria<Object[]> query = createCriteria(SpecimenRequest.class, Object[].class, "req");
 
+		List<Object[]> rows = query.add(query.eq("req." + key, value))
+			.select("req.id", "req.catalogId")
+			.list();
 		if (CollectionUtils.isEmpty(rows)) {
 			return Collections.emptyMap();
 		}
@@ -66,43 +58,38 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		return ids;
 	}
 
-	private Criteria getListQuery(SpecimenRequestListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(SpecimenRequest.class)
-			.createAlias("dp", "dp", JoinType.LEFT_OUTER_JOIN)
-			.createAlias("requestor", "requestor", JoinType.LEFT_OUTER_JOIN)
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.addOrder(Order.desc("id"));
-
+	private Criteria<Object[]> getListQuery(SpecimenRequestListCriteria crit) {
+		Criteria<Object[]> query = createCriteria(SpecimenRequest.class, Object[].class, "req")
+			.leftJoin("req.dp", "dp")
+			.leftJoin("req.requestor", "requestor");
 		addCatalogCond(query, crit);
 		addDateConds(query, crit);
 		addStatusConds(query, crit);
 		return addUserRestrictions(query, crit);
 	}
 
-	private Criteria addCatalogCond(Criteria query, SpecimenRequestListCriteria crit) {
+	private Criteria<Object[]> addCatalogCond(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
 		if (crit.catalogId() == null) {
 			return query;
 		}
 
-		query.add(Restrictions.eq("catalogId", crit.catalogId()));
-		return query;
+		return query.add(query.eq("req.catalogId", crit.catalogId()));
 	}
 
 
-	private Criteria addDateConds(Criteria query, SpecimenRequestListCriteria crit) {
+	private Criteria<Object[]> addDateConds(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
 		if (crit.fromReqDate() != null) {
-			query.add(Restrictions.ge("dateOfRequest", Utility.chopTime(crit.fromReqDate())));
+			query.add(query.ge("req.dateOfRequest", Utility.chopTime(crit.fromReqDate())));
 		}
 
 		if (crit.toReqDate() != null) {
-			query.add(Restrictions.le("dateOfRequest", Utility.getEndOfDay(crit.toReqDate())));
+			query.add(query.le("req.dateOfRequest", Utility.getEndOfDay(crit.toReqDate())));
 		}
 
 		return query;
 	}
 
-	private Criteria addStatusConds(Criteria query, SpecimenRequestListCriteria crit) {
+	private Criteria<Object[]> addStatusConds(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
 		if (StringUtils.isBlank(crit.status())) {
 			return query;
 		}
@@ -111,8 +98,8 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 			//
 			// processed requests are those that are approved and closed
 			//
-			query.add(Restrictions.eq("screeningStatus", SpecimenRequest.ScreeningStatus.APPROVED))
-				.add(Restrictions.eq("activityStatus", "Closed"));
+			query.add(query.eq("req.screeningStatus", SpecimenRequest.ScreeningStatus.APPROVED))
+				.add(query.eq("req.activityStatus", "Closed"));
 		} else {
 			try {
 				SpecimenRequest.ScreeningStatus status = SpecimenRequest.ScreeningStatus.valueOf(crit.status());
@@ -121,10 +108,10 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 					// we need to add this condition to filter out the processed requests
 					// as they are also approved requests
 					//
-					query.add(Restrictions.eq("activityStatus", "Active"));
+					query.add(query.eq("req.activityStatus", "Active"));
 				}
 
-				query.add(Restrictions.eq("screeningStatus", status));
+				query.add(query.eq("req.screeningStatus", status));
 			} catch (Exception e) {
 				throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, crit.status());
 			}
@@ -133,8 +120,8 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		return query;
 	}
 
-	private Criteria addUserRestrictions(Criteria query, SpecimenRequestListCriteria crit) {
-		Disjunction orCond = Restrictions.disjunction();
+	private Criteria<Object[]> addUserRestrictions(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
+		Disjunction orCond = query.disjunction();
 
 		if (CollectionUtils.isNotEmpty(crit.sites())) {
 			Set<Long> instituteIds = new HashSet<>();
@@ -147,69 +134,58 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 				}
 			}
 
-			query.createAlias("dp.distributingSites", "distSites", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("distSites.site", "distSite", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("distSites.institute", "distInst", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("distInst.sites", "instSite", JoinType.LEFT_OUTER_JOIN);
+			query.leftJoin("dp.distributingSites", "distSites")
+				.leftJoin("distSites.site", "distSite")
+				.leftJoin("distSites.institute", "distInst")
+				.leftJoin("distInst.sites", "instSite");
 
-			Disjunction instituteConds = Restrictions.disjunction();
+			Disjunction instituteConds = query.disjunction();
 			if (!siteIds.isEmpty()) {
-				instituteConds.add(Restrictions.in("instSite.id", siteIds));
+				instituteConds.add(query.in("instSite.id", siteIds));
 			}
 
 			if (!instituteIds.isEmpty()) {
-				instituteConds.add(Restrictions.in("distInst.id", instituteIds));
+				instituteConds.add(query.in("distInst.id", instituteIds));
 			}
 
-			Disjunction siteConds = Restrictions.disjunction();
+			Disjunction siteConds = query.disjunction();
 			if (!siteIds.isEmpty()) {
-				siteConds.add(Restrictions.in("distSite.id", siteIds));
+				siteConds.add(query.in("distSite.id", siteIds));
 			}
 
 			if (!instituteIds.isEmpty()) {
-				DetachedCriteria instituteSites = DetachedCriteria.forClass(Site.class)
-					.add(Restrictions.in("institute.id", instituteIds))
-					.setProjection(Projections.property("id"));
-				siteConds.add(Subqueries.propertyIn("distSite.id", instituteSites));
+				SubQuery<Long> instituteSites = query.createSubQuery(Site.class, "site")
+					.join("site.institute", "institute");
+				instituteSites.add(instituteSites.in("institute.id", instituteIds))
+					.select("site.id");
+				siteConds.add(query.in("distSite.id", instituteSites));
 			}
 
 			orCond.add(
-				Restrictions.and(
-					Restrictions.or(
-						Restrictions.and(Restrictions.isNull("distSites.site"), instituteConds),
-						Restrictions.and(Restrictions.isNotNull("distSites.site"), siteConds)
+				query.and(
+					query.or(
+						query.and(query.isNull("distSites.site"), instituteConds.getRestriction()),
+						query.and(query.isNotNull("distSites.site"), siteConds.getRestriction())
 					),
-					Restrictions.eq("screeningStatus", SpecimenRequest.ScreeningStatus.APPROVED)
+					query.eq("req.screeningStatus", SpecimenRequest.ScreeningStatus.APPROVED)
 				)
 			);
 		}
 
 		if (crit.requestorId() != null) {
-			orCond.add(Restrictions.eq("requestor.id", crit.requestorId()));
+			orCond.add(query.eq("requestor.id", crit.requestorId()));
 		}
 
 		return query.add(orCond);
 	}
 
-	private Criteria addSummaryFields(Criteria query, boolean distinct) {
-		ProjectionList projs = Projections.projectionList()
-			.add(Projections.property("id"))
-			.add(Projections.property("catalogId"))
-			.add(Projections.property("requestor.id"))
-			.add(Projections.property("requestor.firstName"))
-			.add(Projections.property("requestor.lastName"))
-			.add(Projections.property("requestor.emailAddress"))
-			.add(Projections.property("requestorEmailId"))
-			.add(Projections.property("irbId"))
-			.add(Projections.property("dp.id"))
-			.add(Projections.property("dp.shortTitle"))
-			.add(Projections.property("dateOfRequest"))
-			.add(Projections.property("dateOfScreening"))
-			.add(Projections.property("screeningStatus"))
-			.add(Projections.property("activityStatus"));
-
-		query.setProjection(distinct ? Projections.distinct(projs) : projs);
-		return query;
+	private Criteria<Object[]> addSummaryFields(Criteria<Object[]> query, boolean distinct) {
+		return query.select(
+			"req.id", "req.catalogId",
+			"requestor.id", "requestor.firstName", "requestor.lastName", "requestor.emailAddress", "req.requestorEmailId",
+			"req.irbId", "dp.id", "dp.shortTitle",
+			"req.dateOfRequest", "req.dateOfScreening", "req.screeningStatus", "req.activityStatus"
+		).distinct(distinct);
 	}
 
 	private SpecimenRequestSummary getRequest(Object[] row) {

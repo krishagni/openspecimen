@@ -6,16 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.LockMode;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.importer.domain.ImportJob;
 import com.krishagni.catissueplus.core.importer.repository.ImportJobDao;
 import com.krishagni.catissueplus.core.importer.repository.ListImportJobsCriteria;
@@ -28,78 +24,73 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 
 	@Override
 	public ImportJob getJobForUpdate(Long jobId) {
-		return (ImportJob) getCurrentSession().createCriteria(ImportJob.class, "job")
-			.add(Restrictions.eq("job.id", jobId))
-			.setFetchMode("job.createdBy", FetchMode.SELECT)
-			.setLockMode(LockMode.PESSIMISTIC_WRITE)
+		String hql = "from " + ImportJob.class.getName() + " where id = :jobId";
+		return createQuery(hql, ImportJob.class)
+			.setParameter("jobId", jobId)
+			.acquirePessimisticWriteLock()
 			.uniqueResult();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<ImportJob> getImportJobs(ListImportJobsCriteria crit) {
-		int startAt = crit.startAt() <= 0 ? 0 : crit.startAt();
-		int maxResults = crit.maxResults() <= 0 || crit.maxResults() > 100 ? 100 : crit.maxResults();
-		
-		Criteria query = getCurrentSession().createCriteria(ImportJob.class)
-			.createAlias("createdBy", "createdBy")
-			.setFetchMode("createdBy", FetchMode.JOIN)
-			.setFirstResult(startAt)
-			.setMaxResults(maxResults)
-			.addOrder(Order.desc("id"));
+		Criteria<ImportJob> query = createCriteria(ImportJob.class, "job");
+		query.join("job.createdBy", "createdBy")
+			.orderBy(query.desc("job.id"));
 
 		if (StringUtils.isNotBlank(crit.status())) {
 			try {
-				query.add(Restrictions.eq("status", ImportJob.Status.valueOf(crit.status())));
+				query.add(query.eq("job.status", ImportJob.Status.valueOf(crit.status())));
 			} catch (Exception e) {
 				throw OpenSpecimenException.userError(CommonErrorCode.INVALID_REQUEST, e.getMessage());
 			}
 		}
 
 		if (crit.instituteId() != null) {
-			query.createAlias("createdBy.institute", "institute")
-				.add(Restrictions.eq("institute.id", crit.instituteId()));
+			query.join("createdBy.institute", "institute")
+				.add(query.eq("institute.id", crit.instituteId()));
 		} else if (crit.userId() != null) {
-			query.add(Restrictions.eq("createdBy.id", crit.userId()));
+			query.add(query.eq("createdBy.id", crit.userId()));
 		}
 		
 		if (CollectionUtils.isNotEmpty(crit.objectTypes())) {
-			query.add(Restrictions.in("name", crit.objectTypes()));
+			query.add(query.in("job.name", crit.objectTypes()));
 		}
 
 		if (crit.params() != null && !crit.params().isEmpty()) {
-			query.createAlias("params", "params");
+			query.join("job.params", "params");
 
-			Disjunction orCond = Restrictions.disjunction();
+			Disjunction orCond = query.disjunction();
 			query.add(orCond);
 
 			for (Map.Entry<String, String> kv : crit.params().entrySet()) {
-				orCond.add(Restrictions.and(
-					Restrictions.eq("params.indices", kv.getKey()),
-					Restrictions.eq("params.elements", kv.getValue())
+				orCond.add(query.and(
+					query.eq("params.indices", kv.getKey()),
+					query.eq("params.elements", kv.getValue())
 				));
 			}
 		}
-						
-		return query.list();
+
+		int startAt = crit.startAt() <= 0 ? 0 : crit.startAt();
+		int maxResults = crit.maxResults() <= 0 || crit.maxResults() > 100 ? 100 : crit.maxResults();
+		return query.list(startAt, maxResults);
 	}
 
 	@Override
 	public int markInProgressJobsAsFailed(String node) {
-		return getCurrentSession().createSQLQuery(MARK_IN_PROGRESS_JOBS_AS_FAILED_SQL)
+		return createNativeQuery(MARK_IN_PROGRESS_JOBS_AS_FAILED_SQL)
 			.setParameter("node", node)
 			.executeUpdate();
 	}
 
 	@Override
 	public String getActiveImportRunnerNode() {
-		Object[] row = (Object [])getCurrentSession().getNamedQuery(GET_ACTIVE_IMPORT_RUNNER_NODE).uniqueResult();
+		Object[] row = createNamedQuery(GET_ACTIVE_IMPORT_RUNNER_NODE, Object[].class).uniqueResult();
 		return (String) row[0];
 	}
 
 	@Override
 	public boolean setActiveImportRunnerNode(String node) {
-		return getCurrentSession().getNamedQuery(SET_ACTIVE_IMPORT_RUNNER_NODE)
+		return createNamedQuery(SET_ACTIVE_IMPORT_RUNNER_NODE)
 			.setParameter("node", node)
 			.setParameter("ts", Calendar.getInstance().getTime())
 			.executeUpdate() > 0;

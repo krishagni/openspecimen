@@ -4,7 +4,9 @@
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="krishagni.catissueplus.beans.FormContextBean" table="CATISSUE_FORM_CONTEXT">
+  <class name="krishagni.catissueplus.beans.FormContextBean" table="CATISSUE_FORM_CONTEXT"
+    entity-name="krishagni.catissueplus.beans.FormContextBean">
+
     <id name="identifier" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">CATISSUE_FORM_CONTEXT_SEQ</param>
@@ -178,14 +180,16 @@
         f.deletedOn is null
     </query>
                 
-    <query name="getFormContextsById"> <!-- TODO used in data entry-->
+    <!-- query name="getFormContextsById"> TODO used in data entry / delete it after v9.2
       from
         FormContextBean as f 
       where
         f.identifier in (:ids) and f.deletedOn is null
-    </query>
+    </query -->
         
     <query name="getQueryFormCtxtByContainerId"> <!-- TODO used in aq forms import-->
+      select
+        f
       from
         FormContextBean as f
       where

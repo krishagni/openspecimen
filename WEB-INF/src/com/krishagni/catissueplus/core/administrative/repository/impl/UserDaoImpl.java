@@ -14,16 +14,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Property;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Password;
@@ -35,7 +25,11 @@ import com.krishagni.catissueplus.core.administrative.repository.UserListCriteri
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Query;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.FormCtxtSummary;
@@ -46,39 +40,31 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	public Class<?> getType() {
 		return User.class;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public List<User> getUsers(UserListCriteria listCrit) {
-		return getUsersListQuery(listCrit)
-			.setFirstResult(listCrit.startAt())
-			.setMaxResults(listCrit.maxResults())
-			.addOrder(Order.asc("u.firstName"))
-			.addOrder(Order.asc("u.lastName"))
-			.list();
+		Criteria<User> query = getUsersListQuery(listCrit);
+		return query.orderBy(query.asc("u.firstName"), query.asc("u.lastName"))
+			.list(listCrit.startAt(), listCrit.maxResults());
 	}
 	
 	public Long getUsersCount(UserListCriteria listCrit) {
-		Number count = (Number) getUsersListQuery(listCrit)
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		return getUsersListQuery(listCrit).getCount("u.id");
 	}
 
 	public List<User> getUsersByIds(Collection<Long> userIds) {
 		return getUsersByIdsAndInstitute(userIds, null);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public List<User> getUsersByIdsAndInstitute(Collection<Long> userIds, Long instituteId) {
-		Criteria criteria = getCurrentSession().createCriteria(User.class, "u")
-			.add(Restrictions.in("u.id", userIds));
+		Criteria<User> query = createCriteria(User.class, "u");
+		query.add(query.in("u.id", userIds));
 		
 		if (instituteId != null) {
-			criteria.createAlias("u.institute", "inst")
-				.add(Restrictions.eq("inst.id", instituteId));
+			query.join("u.institute", "inst")
+				.add(query.eq("inst.id", instituteId));
 		}
 		
-		return criteria.list();
+		return query.list();
 	}
 
 	public User getUser(String loginName, String domainName) {
@@ -87,12 +73,12 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	public List<User> getUsers(Collection<String> loginNames, String domainName) {
-		Criteria query = getCurrentSession().createCriteria(User.class, "u")
-			.add(Restrictions.in("u.loginName", loginNames));
+		Criteria<User> query = createCriteria(User.class, "u");
+		query.add(query.in("u.loginName", loginNames));
 
 		if (StringUtils.isNotBlank(domainName)) {
-			query.createAlias("u.authDomain", "domain")
-				.add(Restrictions.eq("domain.name", domainName));
+			query.join("u.authDomain", "domain")
+				.add(query.eq("domain.name", domainName));
 		}
 
 		return query.list();
@@ -123,72 +109,60 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		List<User> users = executeGetUserByEmailAddressHql(hql, Collections.singletonList(emailAddress));
 		return users.isEmpty();
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public List<DependentEntityDetail> getDependentEntities(Long userId) {
-		List<Object[]> rows = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_DEPENDENT_ENTITIES)
-				.setLong("userId", userId)
-				.list();
-		
+		List<Object[]> rows = createNamedQuery(GET_DEPENDENT_ENTITIES, Object[].class)
+			.setParameter("userId", userId)
+			.list();
 		return getDependentEntities(rows);
 	}
 
-	@SuppressWarnings("unchecked")
 	public ForgotPasswordToken getFpToken(String token) {
-		List<ForgotPasswordToken> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_FP_TOKEN)
-				.setString("token", token)
-				.list();
-		
+		List<ForgotPasswordToken> result = createNamedQuery(GET_FP_TOKEN, ForgotPasswordToken.class)
+			.setParameter("token", token)
+			.list();
 		return result.isEmpty() ? null : result.get(0);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public ForgotPasswordToken getFpTokenByUser(Long userId) {
-		List<ForgotPasswordToken> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_FP_TOKEN_BY_USER)
-				.setLong("userId", userId)
-				.list();
-		
+		List<ForgotPasswordToken> result = createNamedQuery(GET_FP_TOKEN_BY_USER, ForgotPasswordToken.class)
+			.setParameter("userId", userId)
+			.list();
 		return result.isEmpty() ? null : result.get(0);
 	}
 	
 	@Override
 	public void saveFpToken(ForgotPasswordToken token) {
-		sessionFactory.getCurrentSession().saveOrUpdate(token);
-	};
+		getCurrentSession().saveOrUpdate(token);
+	}
 	
 	@Override
 	public void deleteFpToken(ForgotPasswordToken token) {
-		getCurrentSession().delete(token);
+		super.delete(token);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<String> getActiveUsersEmailIds(Date startDate, Date endDate) {
-		return sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_ACTIVE_USERS_EMAIL_IDS)
-			.setTimestamp("startDate", startDate)
-			.setTimestamp("endDate", endDate)
+		return createNamedQuery(GET_ACTIVE_USERS_EMAIL_IDS, String.class)
+			.setParameter("startDate", startDate)
+			.setParameter("endDate", endDate)
 			.list();
 	}
 
 	@Override
 	public Password getLatestPassword(Long userId) {
-		return (Password) getCurrentSession().createCriteria(Password.class, "p")
-			.createAlias("p.user", "user")
-			.add(Restrictions.eq("user.id", userId))
-			.addOrder(Order.desc("p.updationDate"))
-			.setMaxResults(1)
-			.uniqueResult();
+		Criteria<Password> query = createCriteria(Password.class, "p");
+		List<Password> passwords = query.join("p.user", "user")
+			.add(query.eq("user.id", userId))
+			.addOrder(query.desc("p.updationDate"))
+			.list(0, 1);
+		return passwords.isEmpty() ? null : passwords.get(0);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Password> getPasswordsUpdatedBefore(Date updateDate) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_PASSWDS_UPDATED_BEFORE)
-			.setDate("updateDate", updateDate)
+		List<Object[]> rows = createNamedQuery(GET_PASSWDS_UPDATED_BEFORE, Object[].class)
+			.setParameter("updateDate", updateDate)
 			.list();
 
 		return rows.stream().map(row -> {
@@ -211,36 +185,34 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 	@Override
 	public List<Password> getPasswords(Date fromDate, Date toDate, Long lastId, List<User> updatedBy) {
-		Criteria query = getCurrentSession().createCriteria(Password.class, "password")
-			.createAlias("password.updatedBy", "updatedBy", JoinType.LEFT_OUTER_JOIN)
-			.addOrder(Order.desc("password.updationDate"))
-			.addOrder(Order.desc("password.id"))
-			.setMaxResults(100);
+		Criteria<Password> query = createCriteria(Password.class, "password");
+		query.leftJoin("password.updatedBy", "updatedBy")
+			.addOrder(query.desc("password.updationDate"))
+			.addOrder(query.desc("password.id"));
 
 		if (fromDate != null) {
-			query.add(Restrictions.ge("password.updationDate", fromDate));
+			query.add(query.ge("password.updationDate", fromDate));
 		}
 
 		if (toDate != null) {
-			query.add(Restrictions.le("password.updationDate", toDate));
+			query.add(query.le("password.updationDate", toDate));
 		}
 
 		if (CollectionUtils.isNotEmpty(updatedBy)) {
-			query.add(Restrictions.in("updatedBy.id", updatedBy.stream().map(User::getId).collect(Collectors.toList())));
+			query.add(query.in("updatedBy.id", updatedBy.stream().map(User::getId).collect(Collectors.toList())));
 		}
 
 		if (lastId != null) {
-			query.add(Restrictions.lt("password.id", lastId));
+			query.add(query.lt("password.id", lastId));
 		}
 
-		return query.list();
+		return query.list(0, 100);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<User> getInactiveUsers(Date lastLoginTime) {
-		return getCurrentSession().getNamedQuery(GET_INACTIVE_USERS)
-			.setDate("lastLoginTime", lastLoginTime)
+		return createNamedQuery(GET_INACTIVE_USERS, User.class)
+			.setParameter("lastLoginTime", lastLoginTime)
 			.list();
 	}
 
@@ -250,9 +222,9 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			return 0;
 		}
 
-		return getCurrentSession().getNamedQuery(UPDATE_STATUS)
+		return createNamedQuery(UPDATE_STATUS)
 			.setParameter("activityStatus", status)
-			.setParameterList("userIds", users.stream().map(u -> u.getId()).collect(Collectors.toList()))
+			.setParameterList("userIds", users.stream().map(User::getId).collect(Collectors.toList()))
 			.executeUpdate();
 	}
 
@@ -268,9 +240,8 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Boolean> getEmailIdDnds(Collection<String> emailIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_EMAIL_ID_DNDS)
+		List<Object[]> rows = createNamedQuery(GET_EMAIL_ID_DNDS, Object[].class)
 			.setParameterList("emailIds", emailIds)
 			.list();
 
@@ -284,15 +255,14 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 	@Override
 	public UserUiState getState(Long userId) {
-		return (UserUiState) getCurrentSession().getNamedQuery(GET_STATE)
+		return createNamedQuery(GET_STATE, UserUiState.class)
 			.setParameter("userId", userId)
 			.uniqueResult();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<FormCtxtSummary> getForms(String entityType, Long userId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_FORMS)
+		List<Object[]> rows = createNamedQuery(GET_FORMS, Object[].class)
 			.setParameter("entityType", entityType)
 			.setParameter("userId", userId)
 			.list();
@@ -312,7 +282,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			sql = sql.substring(0, orderByIdx) + " and institute.identifier = " + instituteId + " " + sql.substring(orderByIdx);
 		}
 
-		Query query = getCurrentSession().createSQLQuery(sql)
+		Query<Object[]> query = createNativeQuery(sql, Object[].class)
 			.setParameter("formId", formId)
 			.setFirstResult(startAt)
 			.setMaxResults(maxResults);
@@ -320,7 +290,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			query.setParameterList("emailIds", emailIds);
 		}
 
-		return ((List<Object[]>)query.list()).stream()
+		return query.list().stream()
 			.map(
 				(row) -> {
 					int idx = -1;
@@ -336,19 +306,19 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.collect(Collectors.toList());
 	}
 
-	private Criteria getUsersListQuery(UserListCriteria crit) {
-		Criteria criteria = getCurrentSession().createCriteria(User.class, "u");
+	private Criteria<User> getUsersListQuery(UserListCriteria crit) {
+		Criteria<User> query = createCriteria(User.class, "u");
 
 		if (hasRoleRestrictions(crit) || hasResourceRestrictions(crit)) {
-			DetachedCriteria subQuery = DetachedCriteria.forClass(User.class, "u")
-				.setProjection(Projections.distinct(Projections.property("u.id")));
-			addSearchConditions(subQuery.getExecutableCriteria(getCurrentSession()), crit);
-			criteria.add(Subqueries.propertyIn("u.id", subQuery));
+			SubQuery<Long> subQuery = query.createSubQuery(User.class, "u")
+				.distinct().select("u.id");
+			addSearchConditions(subQuery, crit);
+			query.add(query.in("u.id", subQuery));
 		} else {
-			addSearchConditions(criteria, crit);
+			addSearchConditions(query, crit);
 		}
 
-		return criteria;
+		return query;
 	}
 
 	private List<String> excludeUsersList(boolean includeSysUser) {
@@ -359,227 +329,229 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<User> executeGetUserByLoginNameHql(String hql, Collection<String> loginNames, String domainName) {
-		return sessionFactory.getCurrentSession().createQuery(hql)
-			.setParameterList("loginNames", loginNames)
-			.setString("domainName", domainName)
-			.list();
-	}
-	
-	@SuppressWarnings("unchecked")
+//	private List<User> executeGetUserByLoginNameHql(String hql, Collection<String> loginNames, String domainName) {
+//		return createQuery(hql, User.class)
+//			.setParameterList("loginNames", loginNames)
+//			.setParameter("domainName", domainName)
+//			.list();
+//	}
+
 	private List<User> executeGetUserByEmailAddressHql(String hql, Collection<String> emailAddresses) {
-		return getCurrentSession().createQuery(hql)
+		return createQuery(hql, User.class)
 			.setParameterList("emailAddresses", emailAddresses)
 			.list();
 	}
 	
-	private Criteria addSearchConditions(Criteria criteria, UserListCriteria listCrit) {
-		addNonSystemUserRestriction(criteria, listCrit.includeSysUser());
+	private void addSearchConditions(AbstractCriteria<?, ?> query, UserListCriteria listCrit) {
+		addNonSystemUserRestriction(query, listCrit.includeSysUser());
 
 		String searchString = listCrit.query();
 		if (StringUtils.isBlank(searchString)) {
-			addNameRestriction(criteria, listCrit.name());
-			addLoginNameRestriction(criteria, listCrit.loginName());
+			addNameRestriction(query, listCrit.name());
+			addLoginNameRestriction(query, listCrit.loginName());
 		} else {
-			criteria.add(
-				Restrictions.or(
-					Restrictions.ilike("u.firstName", searchString, MatchMode.ANYWHERE),
-					Restrictions.ilike("u.lastName",  searchString, MatchMode.ANYWHERE)
+			query.add(
+				query.or(
+					query.ilike("u.firstName", searchString),
+					query.ilike("u.lastName",  searchString)
 				)
 			);
 		}
 
-		applyIdsFilter(criteria, "u.id", listCrit.ids());
-		addActivityStatusRestriction(criteria, listCrit.activityStatus());
-		addInstituteRestriction(criteria, listCrit.instituteName());
-		addDomainRestriction(criteria, listCrit.domainName());
-		addTypeRestriction(criteria, listCrit.type());
-		addExcludeTypesRestriction(criteria, listCrit.excludeTypes());
-		addActiveSinceRestriction(criteria, listCrit.activeSince());
-		addRoleRestrictions(criteria, listCrit);
-		addResourceRestrictions(criteria, listCrit);
-		addGroupRestrictions(criteria, listCrit);
-		return criteria;
+		applyIdsFilter(query, "u.id", listCrit.ids());
+		addActivityStatusRestriction(query, listCrit.activityStatus());
+		addInstituteRestriction(query, listCrit.instituteName());
+		addDomainRestriction(query, listCrit.domainName());
+		addTypeRestriction(query, listCrit.type());
+		addExcludeTypesRestriction(query, listCrit.excludeTypes());
+		addActiveSinceRestriction(query, listCrit.activeSince());
+		addRoleRestrictions(query, listCrit);
+		addResourceRestrictions(query, listCrit);
+		addGroupRestrictions(query, listCrit);
 	}
 
-	private void addNonSystemUserRestriction(Criteria criteria, boolean includeSysUser) {
-		criteria.createAlias("u.authDomain", "domain")
+	private void addNonSystemUserRestriction(AbstractCriteria<?, ?> query, boolean includeSysUser) {
+		query.join("u.authDomain", "domain")
 			.add( // not system user
-				Restrictions.not(Restrictions.conjunction()
-					.add(Restrictions.in("u.loginName", excludeUsersList(includeSysUser)))
-					.add(Restrictions.eq("domain.name", User.DEFAULT_AUTH_DOMAIN))
-			)
-		);
+				query.not(query.conjunction()
+					.add(query.in("u.loginName", excludeUsersList(includeSysUser)))
+					.add(query.eq("domain.name", User.DEFAULT_AUTH_DOMAIN))
+					.getRestriction()
+				)
+			);
 	}
 
-	private void addNameRestriction(Criteria criteria, String name) {
+	private void addNameRestriction(AbstractCriteria<?, ?> query, String name) {
 		if (StringUtils.isBlank(name)) {
 			return;
 		}
 		
-		criteria.add(
-			Restrictions.disjunction()
-				.add(Restrictions.ilike("u.firstName", name, MatchMode.ANYWHERE))
-				.add(Restrictions.ilike("u.lastName", name, MatchMode.ANYWHERE))
+		query.add(
+			query.disjunction()
+				.add(query.ilike("u.firstName", name))
+				.add(query.ilike("u.lastName", name))
 		);
 	}
 	
-	private void addLoginNameRestriction(Criteria criteria, String loginName) {
+	private void addLoginNameRestriction(AbstractCriteria<?, ?> query, String loginName) {
 		if (StringUtils.isBlank(loginName)) {
 			return;
 		}
 		
-		criteria.add(Restrictions.ilike("u.loginName", loginName, MatchMode.ANYWHERE));
+		query.add(query.ilike("u.loginName", loginName));
 	}
 	
-	private void addActivityStatusRestriction(Criteria criteria, String activityStatus) {
+	private void addActivityStatusRestriction(AbstractCriteria<?, ?> query, String activityStatus) {
 		if (StringUtils.isBlank(activityStatus)) {
-			criteria.add(Restrictions.ne("u.activityStatus", Status.ACTIVITY_STATUS_CLOSED.getStatus()));
+			query.add(query.ne("u.activityStatus", Status.ACTIVITY_STATUS_CLOSED.getStatus()));
 		} else if (!activityStatus.equalsIgnoreCase("all")) {
-			criteria.add(Restrictions.eq("u.activityStatus", activityStatus));
+			query.add(query.eq("u.activityStatus", activityStatus));
 		}
 	}
 
-	private void addTypeRestriction(Criteria criteria, String type) {
+	private void addTypeRestriction(AbstractCriteria<?, ?> query, String type) {
 		if (StringUtils.isBlank(type)) {
 			return;
 		}
 
-		criteria.add(Restrictions.eq("u.type", User.Type.valueOf(type)));
+		query.add(query.eq("u.type", User.Type.valueOf(type)));
 	}
 
-	private void addExcludeTypesRestriction(Criteria criteria, List<String> excludeTypes) {
+	private void addExcludeTypesRestriction(AbstractCriteria<?, ?> query, List<String> excludeTypes) {
 		if (CollectionUtils.isEmpty(excludeTypes)) {
 			return;
 		}
 
 		List<User.Type> types = excludeTypes.stream().map(User.Type::valueOf).collect(Collectors.toList());
-		criteria.add(Restrictions.not(Restrictions.in("u.type", types)));
+		query.add(query.not(query.in("u.type", types)));
 	}
 	
-	private void addInstituteRestriction(Criteria criteria, String instituteName) {
+	private void addInstituteRestriction(AbstractCriteria<?, ?> query, String instituteName) {
 		if (StringUtils.isBlank(instituteName)) {
 			return;
 		}
 		
-		criteria.createAlias("u.institute", "institute")
-			.add(Restrictions.eq("institute.name", instituteName));
+		query.createAlias("u.institute", "institute")
+			.add(query.eq("institute.name", instituteName));
 	}
 	
-	private void addDomainRestriction(Criteria criteria, String domainName) {
+	private void addDomainRestriction(AbstractCriteria<?, ?> query, String domainName) {
 		if (StringUtils.isBlank(domainName)) {
 			return;
 		}
 
-		criteria.add(Restrictions.eq("domain.name", domainName));
+		query.add(query.eq("domain.name", domainName));
 	}
 
-	private void addActiveSinceRestriction(Criteria criteria, Date activeSince) {
+	private void addActiveSinceRestriction(AbstractCriteria<?, ?> query, Date activeSince) {
 		if (activeSince == null) {
 			return;
 		}
 
-		criteria.add(Restrictions.ge("u.creationDate", Utility.chopTime(activeSince)));
+		query.add(query.ge("u.creationDate", Utility.chopTime(activeSince)));
 	}
 
-	private void addRoleRestrictions(Criteria criteria, UserListCriteria listCrit) {
+	private void addRoleRestrictions(AbstractCriteria<?, ?> query, UserListCriteria listCrit) {
 		if (!hasRoleRestrictions(listCrit)) {
 			return;
 		}
 
-		criteria.createAlias("u.roles", "sr");
+		query.join("u.roles", "sr");
 
 		if (CollectionUtils.isNotEmpty(listCrit.roleNames())) {
-			criteria.createAlias("sr.role", "role")
-				.add(Restrictions.in("role.name", listCrit.roleNames()));
+			query.join("sr.role", "role")
+				.add(query.in("role.name", listCrit.roleNames()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.siteName())) {
-			addSiteRestriction(criteria, "sr", listCrit.siteName());
+			addSiteRestriction(query, "sr", listCrit.siteName());
 		}
 
 		if (StringUtils.isNotBlank(listCrit.cpShortTitle())) {
-			addCpRestriction(criteria, "sr", listCrit.cpShortTitle());
+			addCpRestriction(query, "sr", listCrit.cpShortTitle());
 		}
 	}
 
-	private void addResourceRestrictions(Criteria criteria, UserListCriteria listCrit) {
+	private void addResourceRestrictions(AbstractCriteria<?, ?> query, UserListCriteria listCrit) {
 		if (!hasResourceRestrictions(listCrit)) {
 			return;
 		}
 
-		criteria.createAlias("u.acl", "acl")
-			.add(Restrictions.eq("acl.resource", listCrit.resourceName()));
+		query.join("u.acl", "acl")
+			.add(query.eq("acl.resource", listCrit.resourceName()));
 
 		if (CollectionUtils.isNotEmpty(listCrit.opNames())) {
-			criteria.add(Restrictions.in("acl.operation", listCrit.opNames()));
+			query.add(query.in("acl.operation", listCrit.opNames()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.siteName())) {
-			addSiteRestriction(criteria, "acl", listCrit.siteName());
+			addSiteRestriction(query, "acl", listCrit.siteName());
 		}
 
 		if (StringUtils.isNotBlank(listCrit.cpShortTitle())) {
-			addCpRestriction(criteria, "acl", listCrit.cpShortTitle());
+			addCpRestriction(query, "acl", listCrit.cpShortTitle());
 		}
 	}
 
-	private void addGroupRestrictions(Criteria criteria, UserListCriteria listCrit) {
+	private void addGroupRestrictions(AbstractCriteria<?, ?> query, UserListCriteria listCrit) {
 		if (StringUtils.isBlank(listCrit.group())) {
 			return;
 		}
 
-		criteria.createAlias("u.groups", "group")
-			.add(Restrictions.eq("group.name", listCrit.group()));
+		query.join("u.groups", "group")
+			.add(query.eq("group.name", listCrit.group()));
 	}
 
-	private void addSiteRestriction(Criteria criteria, String alias, String siteName) {
-		criteria.createAlias(alias + ".site", "rs", JoinType.LEFT_OUTER_JOIN);
+	private void addSiteRestriction(AbstractCriteria<?, ?> query, String alias, String siteName) {
+		query.leftJoin(alias + ".site", "rs");
 
-		DetachedCriteria userInstituteSite = DetachedCriteria.forClass(Site.class, "uis")
-			.createAlias("uis.institute", "uii")
-			.add(Property.forName("u.institute.id").eqProperty("uii.id"))
-			.add(Restrictions.eq("uis.name", siteName));
-		userInstituteSite.setProjection(Projections.property("uis.id"));
+		SubQuery<Long> userInstituteSite = query.createSubQuery(Site.class, "uis")
+			.join("uis.institute", "uii");
 
-		criteria.add(Restrictions.or(
-			Restrictions.and(
-				Restrictions.isNull("rs.id"),
-				Subqueries.exists(userInstituteSite)
+		userInstituteSite.add(userInstituteSite.eq(query.getProperty("institute.id"), userInstituteSite.getProperty("uii.id")))
+			.add(userInstituteSite.eq("uis.name", siteName))
+			.select("uis.id");
+
+		query.add(query.or(
+			query.and(
+				query.isNull("rs.id"),
+				query.exists(userInstituteSite)
 			),
-			Restrictions.eq("rs.name", siteName)
+			query.eq("rs.name", siteName)
 		));
 	}
 
-	private void addCpRestriction(Criteria criteria, String alias, String cpShortTitle) {
-		criteria.createAlias(alias + ".collectionProtocol", "rcp", JoinType.LEFT_OUTER_JOIN);
+	private void addCpRestriction(AbstractCriteria<?, ?> query, String alias, String cpShortTitle) {
+		query.leftJoin(alias + ".collectionProtocol", "rcp")
+			.leftJoin(alias + ".site", "rsite");
 
-		DetachedCriteria userInstituteCp = DetachedCriteria.forClass(CollectionProtocol.class, "uicp")
-			.createAlias("uicp.sites", "uicps")
-			.createAlias("uicps.site", "uicpss")
-			.createAlias("uicpss.institute", "uicpi")
+		SubQuery<Long> userInstituteCp = query.createSubQuery(CollectionProtocol.class, "uicp")
+			.join("uicp.sites", "uicps")
+			.join("uicps.site", "uicpss")
+			.join("uicpss.institute", "uicpi");
+
+		userInstituteCp
 			.add(
-				Restrictions.or(
-					Restrictions.and(
-						Property.forName(alias + ".site.id").isNull(),
-						Property.forName("u.institute.id").eqProperty("uicpi.id")
+				userInstituteCp.or(
+					userInstituteCp.and(
+						query.isNull("rsite.id"),
+						userInstituteCp.eq(query.getProperty("institute.id"), userInstituteCp.getProperty("uicpi.id"))
 					),
-					Restrictions.and(
-						Property.forName(alias + ".site.id").isNotNull(),
-						Property.forName(alias + ".site.id").eqProperty("uicpss.id")
+					userInstituteCp.and(
+						query.isNotNull("rsite.id"),
+						userInstituteCp.eq(query.getProperty("rsite.id"), userInstituteCp.getProperty("uicpss.id"))
 					)
 				)
 			)
-			.add(Restrictions.eq("uicp.shortTitle", cpShortTitle));
-		userInstituteCp.setProjection(Projections.property("uicp.id"));
+			.add(userInstituteCp.eq("uicp.shortTitle", cpShortTitle))
+			.select("uicp.id");
 
-		criteria.add(Restrictions.or(
-			Restrictions.and(
-				Restrictions.isNull("rcp.id"),
-				Subqueries.exists(userInstituteCp)
+		query.add(query.or(
+			query.and(
+				query.isNull("rcp.id"),
+				query.exists(userInstituteCp)
 			),
-			Restrictions.eq("rcp.shortTitle", cpShortTitle)
+			query.eq("rcp.shortTitle", cpShortTitle)
 		));
 	}
 
@@ -594,7 +566,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	private List<DependentEntityDetail> getDependentEntities(List<Object[]> rows) {
-		List<DependentEntityDetail> dependentEntities = new ArrayList<DependentEntityDetail>();
+		List<DependentEntityDetail> dependentEntities = new ArrayList<>();
 		
 		for (Object[] row: rows) {
 			String name = (String)row[0];

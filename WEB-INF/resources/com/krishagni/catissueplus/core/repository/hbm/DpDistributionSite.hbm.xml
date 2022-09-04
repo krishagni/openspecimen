@@ -4,8 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.DpDistributionSite"
-    table="OS_DISTRIBUTION_PROTOCOL_SITES">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.DpDistributionSite" table="OS_DISTRIBUTION_PROTOCOL_SITES"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.DpDistributionSite">
     
     <id name="id" column="IDENTIFIER">
       <generator class="native">

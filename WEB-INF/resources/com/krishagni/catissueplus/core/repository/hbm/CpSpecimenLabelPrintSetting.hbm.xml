@@ -4,8 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting"
-    table="OS_CP_SPMN_LBL_PRINT_SETTINGS">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting" table="OS_CP_SPMN_LBL_PRINT_SETTINGS"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting">
 	
     <id name="id" column="IDENTIFIER">
       <generator class="native">

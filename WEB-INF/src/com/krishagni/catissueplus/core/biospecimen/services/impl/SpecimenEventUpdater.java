@@ -1,22 +1,20 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.hibernate.type.StandardBasicTypes;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
-import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -50,18 +48,27 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 				return ResponseEvent.userError(SpecimenErrorCode.EVT_ID_REQ);
 			}
 
-			if (eventName.equals("specimenDisposalEvent")) {
-				updateDisposeEvent(event);
-			} else if (eventName.equals("specimenReturnEvent")) {
-				updateReturnEvent(event);
-			} else if (eventName.equals("specimenReservedEvent")) {
-				updateReservedEvent(event, false);
-			} else if (eventName.equals("specimenReservationCancelEvent")) {
-				updateReservedEvent(event, true);
-			} else if (eventName.equals("specimenTransferEvent")) {
-				updateTransferEvent(event);
-			} else if (eventName.equals("containerTransferEvent")) {
-				updateContainerTransferEvent(event);
+			switch (eventName) {
+				case "specimenDisposalEvent":
+					updateDisposeEvent(event);
+					break;
+
+				case "specimenReturnEvent":
+					updateReturnEvent(event);
+					break;
+
+				case "specimenReservedEvent":
+				case "specimenReservationCancelEvent":
+					updateReservedEvent(event);
+					break;
+
+				case "specimenTransferEvent":
+					updateTransferEvent(event);
+					break;
+
+				case "containerTransferEvent":
+					updateContainerTransferEvent(event);
+					break;
 			}
 
 			return ResponseEvent.response(event);
@@ -73,7 +80,6 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 	}
 
 	private void updateDisposeEvent(SpecimenEventDetail event) {
-		Specimen spmn = getDisposedSpecimen(event.getId());
 		Map<String, Object> params = new HashMap<>();
 
 		if (event.isAttrModified("reason")) {
@@ -101,7 +107,6 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 	}
 
 	private void updateReturnEvent(SpecimenEventDetail event) {
-		Specimen spmn = getReturnedSpecimen(event.getId());
 		Map<String, Object> params = new HashMap<>();
 
 		if (event.isAttrModified("comments")) {
@@ -124,8 +129,7 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 		updateEventParams(RETURN_EVENT_TABLE, EVENT_ID_COL, event.getId(), params);
 	}
 
-	private void updateReservedEvent(SpecimenEventDetail event, boolean cancelledEvent) {
-		Specimen spmn = getReservedSpecimen(event.getId(), cancelledEvent);
+	private void updateReservedEvent(SpecimenEventDetail event) {
 		Map<String, Object> params = new HashMap<>();
 
 		if (event.isAttrModified("comments")) {
@@ -149,7 +153,6 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 	}
 
 	private void updateTransferEvent(SpecimenEventDetail event) {
-		Specimen spmn = getTransferredSpecimen(event.getId());
 		Map<String, Object> params = new HashMap<>();
 
 		Long userId = getUserId(event.getUser());
@@ -173,9 +176,9 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 	}
 
 	private void updateContainerTransferEvent(SpecimenEventDetail event) {
-		Specimen spmn = getContainerTransferSpecimen(event.getId());
-		Number containerEventId = (Number) sessionFactory.getCurrentSession()
-			.createSQLQuery(GET_CONTAINER_TRANSFER_EVENT_ID_SQL)
+		Long containerEventId = (Long) sessionFactory.getCurrentSession()
+			.createNativeQuery(GET_CONTAINER_TRANSFER_EVENT_ID_SQL)
+			.addScalar("event_id", StandardBasicTypes.LONG)
 			.setParameter("eventId", event.getId())
 			.uniqueResult();
 
@@ -198,7 +201,7 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 			return;
 		}
 
-		updateEventParams(CONT_TRANSFER_EVENT_TABLE, EVENT_ID_COL, containerEventId.longValue(), params);
+		updateEventParams(CONT_TRANSFER_EVENT_TABLE, EVENT_ID_COL, containerEventId, params);
 	}
 
 	private void updateEventParams(String eventTable, String eventIdCol, Long eventId, Map<String, Object> params) {
@@ -207,55 +210,50 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 			.collect(Collectors.joining(","));
 
 		String updateSql = String.format(UPDATE_EVENT_SQL, eventTable, setter, eventIdCol);
-		Query query = sessionFactory.getCurrentSession().createSQLQuery(updateSql)
-			.setParameter("eventId", eventId);
-		params.forEach((name, value) -> query.setParameter(name, value));
+		Query<?> query = sessionFactory.getCurrentSession().createNativeQuery(updateSql).setParameter("eventId", eventId);
+		params.forEach(query::setParameter);
 		query.executeUpdate();
 	}
 
-	private Specimen getDisposedSpecimen(Long eventId) {
-		return getSpecimen(DISPOSAL_EVENT_NAME, eventId, DISPOSAL_EVENT_TABLE);
-	}
+//	private Specimen getDisposedSpecimen(Long eventId) {
+//		return getSpecimen(DISPOSAL_EVENT_NAME, eventId, DISPOSAL_EVENT_TABLE);
+//	}
+//
+//	private Specimen getReturnedSpecimen(Long eventId) {
+//		return getSpecimen(RETURN_EVENT_NAME, eventId, RETURN_EVENT_TABLE);
+//	}
+//
+//	private Specimen getReservedSpecimen(Long eventId, boolean cancelledEvent) {
+//		return getSpecimen(cancelledEvent ? CANCEL_RESERVATION_EVENT_NAME : RESERVED_EVENT_NAME, eventId, RESERVED_EVENT_TABLE);
+//	}
+//
+//	private Specimen getTransferredSpecimen(Long eventId) {
+//		return getSpecimen(TRANSFER_EVENT_NAME, eventId, TRANSFER_EVENT_TABLE);
+//	}
 
-	private Specimen getReturnedSpecimen(Long eventId) {
-		return getSpecimen(RETURN_EVENT_NAME, eventId, RETURN_EVENT_TABLE);
-	}
+//	private Specimen getSpecimen(String formName, Long eventId, String eventTable) {
+//		return getSpecimen(formName, eventId, eventTable, EVENT_ID_COL);
+//	}
 
-	private Specimen getReservedSpecimen(Long eventId, boolean cancelledEvent) {
-		return getSpecimen(cancelledEvent ? CANCEL_RESERVATION_EVENT_NAME : RESERVED_EVENT_NAME, eventId, RESERVED_EVENT_TABLE);
-	}
-
-	private Specimen getTransferredSpecimen(Long eventId) {
-		return getSpecimen(TRANSFER_EVENT_NAME, eventId, TRANSFER_EVENT_TABLE);
-	}
-
-	private Specimen getContainerTransferSpecimen(Long eventId) {
-		return getSpecimen(CONT_TRANSFER_EVENT_NAME, eventId, CONT_TRANSFER_SPMN_EVENT_TABLE);
-	}
-
-	private Specimen getSpecimen(String formName, Long eventId, String eventTable) {
-		return getSpecimen(formName, eventId, eventTable, EVENT_ID_COL);
-	}
-
-	private Specimen getSpecimen(String formName, Long eventId, String eventTable, String eventIdColumn) {
-		String sql = String.format(GET_SPMN_ID_SQL, eventTable, eventIdColumn);
-		List<Object> rows = sessionFactory.getCurrentSession().createSQLQuery(sql)
-			.setParameter("eventId", eventId)
-			.setParameter("formName", formName)
-			.list();
-		if (rows == null || rows.isEmpty()) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.INV_EVT_ID, eventId);
-		}
-
-		Long spmnId = ((Number) rows.get(0)).longValue();
-		Specimen spmn = daoFactory.getSpecimenDao().getById(spmnId);
-		if (spmn == null) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_FOUND, spmnId);
-		}
-
-		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(spmn);
-		return spmn;
-	}
+//	private Specimen getSpecimen(String formName, Long eventId, String eventTable, String eventIdColumn) {
+//		String sql = String.format(GET_SPMN_ID_SQL, eventTable, eventIdColumn);
+//		List<Long> rows = sessionFactory.getCurrentSession().createNativeQuery(sql, Long.class)
+//			.setParameter("eventId", eventId)
+//			.setParameter("formName", formName)
+//			.list();
+//		if (rows == null || rows.isEmpty()) {
+//			throw OpenSpecimenException.userError(SpecimenErrorCode.INV_EVT_ID, eventId);
+//		}
+//
+//		Long spmnId = rows.get(0);
+//		Specimen spmn = daoFactory.getSpecimenDao().getById(spmnId);
+//		if (spmn == null) {
+//			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_FOUND, spmnId);
+//		}
+//
+//		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(spmn);
+//		return spmn;
+//	}
 
 	private Long getUserId(UserSummary inputUser) {
 		if (inputUser == null || StringUtils.isBlank(inputUser.getEmailAddress())) {
@@ -270,18 +268,18 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 		return user.getId();
 	}
 
-	private static final String GET_SPMN_ID_SQL =
-		"select " +
-		"  re.object_id " +
-		"from " +
-		"  %s evt " +
-		"  inner join catissue_form_record_entry re on re.record_id = evt.%s " +
-		"  inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id " +
-		"  inner join dyextn_containers f on f.identifier = fc.container_id " +
-		"where " +
-		"  f.name = :formName and " +
-		"  re.record_id = :eventId and " +
-		"  fc.entity_type = 'SpecimenEvent'";
+//	private static final String GET_SPMN_ID_SQL =
+//		"select " +
+//		"  re.object_id " +
+//		"from " +
+//		"  %s evt " +
+//		"  inner join catissue_form_record_entry re on re.record_id = evt.%s " +
+//		"  inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id " +
+//		"  inner join dyextn_containers f on f.identifier = fc.container_id " +
+//		"where " +
+//		"  f.name = :formName and " +
+//		"  re.record_id = :eventId and " +
+//		"  fc.entity_type = 'SpecimenEvent'";
 
 	private static final String GET_CONTAINER_TRANSFER_EVENT_ID_SQL =
 		"select" +
@@ -295,29 +293,27 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 
 	private static final String DISPOSAL_EVENT_TABLE = "catissue_disposal_event_param";
 
-	private static final String DISPOSAL_EVENT_NAME = "SpecimenDisposalEvent";
+//	private static final String DISPOSAL_EVENT_NAME = "SpecimenDisposalEvent";
 
 	private static final String RETURN_EVENT_TABLE = "os_order_items";
 
-	private static final String RETURN_EVENT_NAME = "SpecimenReturnEvent";
+//	private static final String RETURN_EVENT_NAME = "SpecimenReturnEvent";
 
 	private static final String RESERVED_EVENT_TABLE = "os_spmn_reserved_events";
 
-	private static final String RESERVED_EVENT_NAME = "SpecimenReservedEvent";
-
-	private static final String CANCEL_RESERVATION_EVENT_NAME = "SpecimenReservationCancelledEvent";
+//	private static final String RESERVED_EVENT_NAME = "SpecimenReservedEvent";
+//
+//	private static final String CANCEL_RESERVATION_EVENT_NAME = "SpecimenReservationCancelledEvent";
 
 	private static final String TRANSFER_EVENT_TABLE = "catissue_transfer_event_param";
 
-	private static final String TRANSFER_EVENT_NAME = "SpecimenTransferEvent";
+//	private static final String TRANSFER_EVENT_NAME = "SpecimenTransferEvent";
 
 	private static final String CONT_TRANSFER_EVENT_TABLE = "os_container_transfer_events";
 
-	private static final String CONT_TRANSFER_SPMN_EVENT_TABLE = "os_cont_transfer_evt_spmns";
-
-	private static final String CONT_TRANSFER_EVENT_NAME = "ContainerTransferEvent";
+//	private static final String CONT_TRANSFER_SPMN_EVENT_TABLE = "os_cont_transfer_evt_spmns";
+//
+//	private static final String CONT_TRANSFER_EVENT_NAME = "ContainerTransferEvent";
 
 	private static final String EVENT_ID_COL = "IDENTIFIER";
-
-	private static final String SPMN_ID_COL = "SPECIMEN_ID";
 }

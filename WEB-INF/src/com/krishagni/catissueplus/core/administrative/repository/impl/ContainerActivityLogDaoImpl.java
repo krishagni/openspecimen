@@ -8,15 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.ContainerActivityLog;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerActivityLogDao;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerActivityLogListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class ContainerActivityLogDaoImpl extends AbstractDao<ContainerActivityLog> implements ContainerActivityLogDao {
 	@Override
@@ -26,41 +23,38 @@ public class ContainerActivityLogDaoImpl extends AbstractDao<ContainerActivityLo
 
 	@Override
 	public List<ContainerActivityLog> getActivityLogs(ContainerActivityLogListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(ContainerActivityLog.class, "log")
-			.createAlias("log.container", "container")
-			.createAlias("log.task", "task")
-			.createAlias("log.performedBy", "performedBy")
-			.createAlias("log.activity", "activity", JoinType.LEFT_OUTER_JOIN)
-			.add(Restrictions.eq("log.activityStatus", "Active"))
-			.addOrder(Order.desc("log.id"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults());
+		Criteria<ContainerActivityLog> query = createCriteria(ContainerActivityLog.class, "log")
+			.join("log.container", "container")
+			.join("log.task", "task")
+			.join("log.performedBy", "performedBy")
+			.leftJoin("log.activity", "activity");
 
+		query.add(query.eq("log.activityStatus", "Active"));
 		if (crit.fromDate() != null) {
-			query.add(Restrictions.ge("log.activityDate", crit.fromDate()));
+			query.add(query.ge("log.activityDate", crit.fromDate()));
 		}
 
 		if (crit.toDate() != null) {
-			query.add(Restrictions.lt("log.activityDate", crit.toDate()));
+			query.add(query.lt("log.activityDate", crit.toDate()));
 		}
 
 		if (crit.performedBy() != null) {
-			query.add(Restrictions.eq("performedBy.id", crit.performedBy()));
+			query.add(query.eq("performedBy.id", crit.performedBy()));
 		}
 
 		if (crit.containerId() != null) {
-			query.add(Restrictions.eq("container.id", crit.containerId()));
+			query.add(query.eq("container.id", crit.containerId()));
 		}
 
 		if (crit.taskId() != null) {
-			query.add(Restrictions.eq("task.id", crit.taskId()));
+			query.add(query.eq("task.id", crit.taskId()));
 		}
 
 		if (crit.scheduledActivityId() != null) {
-			query.add(Restrictions.eq("activity.id", crit.scheduledActivityId()));
+			query.add(query.eq("activity.id", crit.scheduledActivityId()));
 		}
 
-		return query.list();
+		return query.orderBy(query.desc("log.id")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
@@ -69,7 +63,7 @@ public class ContainerActivityLogDaoImpl extends AbstractDao<ContainerActivityLo
 			return Collections.emptyMap();
 		}
 
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_LATEST_SCHED_ACTIVITY_DATE)
+		List<Object[]> rows = createNamedQuery(GET_LATEST_SCHED_ACTIVITY_DATE, Object[].class)
 			.setParameterList("activityIds", schedActivityIds)
 			.list();
 

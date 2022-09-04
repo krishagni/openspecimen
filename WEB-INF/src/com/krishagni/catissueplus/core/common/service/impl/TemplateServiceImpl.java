@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.common.service.impl;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
@@ -10,10 +11,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
 import org.springframework.context.MessageSource;
-import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import com.krishagni.catissueplus.core.common.barcodes.BarcodeGenerator;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -75,7 +76,11 @@ public class TemplateServiceImpl implements TemplateService {
 			props.put("Instant", Instant.class);
 			props.put("Calendar", Calendar.class);
 			props.put("barcodeGenerator", barcodeGenerator);
-			return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, templateName, props);
+
+			StringWriter result = new StringWriter();
+			VelocityContext context = new VelocityContext(props);
+			velocityEngine.mergeTemplate(templateName, "UTF-8", context, result);
+			return result.toString();
 		} catch (VelocityException ex) {
 			throw OpenSpecimenException.serverError(ex);
 		}
@@ -100,7 +105,9 @@ public class TemplateServiceImpl implements TemplateService {
 			props.put("dateFmt", dateFmt);
 			props.put("dateOnlyFmt", dateOnlyFmt);
 			props.put("barcodeGenerator", barcodeGenerator);
-			VelocityEngineUtils.mergeTemplate(velocityEngine, templateName, props, writer);
+
+			VelocityContext context = new VelocityContext(props);
+			velocityEngine.mergeTemplate(templateName, "UTF-8", context, writer);
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		}

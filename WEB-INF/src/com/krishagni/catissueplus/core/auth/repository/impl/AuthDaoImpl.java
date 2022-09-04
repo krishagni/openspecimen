@@ -2,13 +2,12 @@ package com.krishagni.catissueplus.core.auth.repository.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
 
 import com.krishagni.catissueplus.core.auth.domain.AuthCredential;
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
@@ -18,6 +17,8 @@ import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
 import com.krishagni.catissueplus.core.auth.repository.AuthDao;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Query;
 
 public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
@@ -26,86 +27,69 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 		return AuthDomain.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<AuthDomain> getAuthDomains(int maxResults) {
-		return sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_AUTH_DOMAINS)
-				.setMaxResults(maxResults)
-				.list();
+		return createNamedQuery(GET_AUTH_DOMAINS, AuthDomain.class)
+			.setMaxResults(maxResults)
+			.list();
 	}
-	
-	@SuppressWarnings(value = {"unchecked"})
+
 	@Override
 	public AuthDomain getAuthDomainByName(String domainName) {
-		List<AuthDomain> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_DOMAIN_BY_NAME)
-				.setString("domainName", domainName)
-				.list();
-		
+		List<AuthDomain> result = createNamedQuery(GET_DOMAIN_BY_NAME, AuthDomain.class)
+			.setParameter("domainName", domainName)
+			.list();
 		return result.isEmpty() ? null : result.get(0);
 	}
-	
-	@SuppressWarnings(value = {"unchecked"})
+
 	@Override
 	public AuthDomain getAuthDomainByType(String authType) {
-		List<AuthDomain> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_DOMAIN_BY_TYPE)
-				.setString("authType", authType)
-				.list();
-
+		List<AuthDomain> result = createNamedQuery(GET_DOMAIN_BY_TYPE, AuthDomain.class)
+			.setParameter("authType", authType)
+			.list();
 		return result.isEmpty() ? null : result.get(0);
 	}
 
-	@SuppressWarnings(value = {"unchecked"})
 	@Override
 	public Boolean isUniqueAuthDomainName(String domainName) {
-		List<AuthDomain> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_DOMAIN_BY_NAME)
-				.setString("domainName", domainName)
-				.list();
-		
+		List<AuthDomain> result = createNamedQuery(GET_DOMAIN_BY_NAME, AuthDomain.class)
+			.setParameter("domainName", domainName)
+			.list();
 		return result.isEmpty();
 	}
-	
-	@SuppressWarnings(value = {"unchecked"})
+
 	@Override
 	public AuthProvider getAuthProviderByType(String authType) {
-		List<AuthProvider> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_PROVIDER_BY_TYPE)
-				.setString("authType", authType)
-				.list();
-		
+		List<AuthProvider> result = createNamedQuery(GET_PROVIDER_BY_TYPE, AuthProvider.class)
+			.setParameter("authType", authType)
+			.list();
 		return result.isEmpty() ? null : result.get(0);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public AuthToken getAuthTokenByKey(String key) {
-		List<AuthToken> tokens = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_AUTH_TOKEN_BY_KEY)
-				.setString("token", key)
-				.list();
-
+		List<AuthToken> tokens = createNamedQuery(GET_AUTH_TOKEN_BY_KEY, AuthToken.class)
+			.setParameter("token", key)
+			.list();
 		return tokens.isEmpty() ? null : tokens.get(0);
 	}
 
 	@Override
 	public List<AuthToken> getAuthTokensByKey(List<String> keys) {
-		return getCurrentSession().createCriteria(AuthToken.class, "t")
-			.createAlias("t.loginAuditLog", "l")
-			.add(Restrictions.in("t.token", keys))
+		Criteria<AuthToken> query = createCriteria(AuthToken.class, "t");
+		return query.createAlias("t.loginAuditLog", "l")
+			.add(query.in("t.token", keys))
 			.list();
 	}
 
 	@Override
 	public void saveAuthToken(AuthToken token) {
-		sessionFactory.getCurrentSession().saveOrUpdate(token);
+		getCurrentSession().saveOrUpdate(token);
 	}
 	
 	@Override
 	public void deleteAuthToken(AuthToken token) {
-		sessionFactory.getCurrentSession().delete(token);
+		super.delete(token);
 	}
 
 	@Override
@@ -115,7 +99,7 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 			sql += " and token != :exceptToken";
 		}
 
-		Query query = getCurrentSession().createSQLQuery(sql);
+		Query<?> query = createNativeQuery(sql);
 		query.setParameter("userId", userId);
 		if (StringUtils.isNotBlank(except)) {
 			query.setParameter("exceptToken", except);
@@ -126,14 +110,14 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public int deleteAuthTokens(List<String> tokens) {
-		return getCurrentSession().getNamedQuery(DELETE_AUTH_TOKENS)
+		return createNamedQuery(DELETE_AUTH_TOKENS)
 			.setParameter("tokens", tokens)
 			.executeUpdate();
 	}
 
 	@Override
 	public List<Pair<String, Date>> getUserTokens(Long userId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_USER_TOKENS)
+		List<Object[]> rows = createNamedQuery(GET_USER_TOKENS, Object[].class)
 			.setParameter("userId", userId)
 			.list();
 
@@ -148,36 +132,34 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 			tokens.add(Pair.make(token, lastActiveTime));
 		}
 
-		return tokens.stream().sorted((t1, t2) -> t1.second().compareTo(t2.second())).collect(Collectors.toList());
+		return tokens.stream().sorted(Comparator.comparing(Pair::second)).collect(Collectors.toList());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<LoginAuditLog> getLoginAuditLogsByUser(Long userId, int maxResults) {
-		return sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_LOGIN_AUDIT_LOGS_BY_USER_ID)
-				.setLong("userId", userId)
-				.setMaxResults(maxResults)
-				.list();
+		return createNamedQuery(GET_LOGIN_AUDIT_LOGS_BY_USER_ID, LoginAuditLog.class)
+			.setParameter("userId", userId)
+			.setMaxResults(maxResults)
+			.list();
 	}
 	
 	@Override
 	public void deleteInactiveAuthTokens(Date latestAccessTime) {
-		getCurrentSession().getNamedQuery(DELETE_INACTIVE_AUTH_TOKENS)
+		createNamedQuery(DELETE_INACTIVE_AUTH_TOKENS)
 			.setParameter("latestCallTime", latestAccessTime)
 			.executeUpdate();
 	}
 	
 	@Override
 	public int deleteAuthTokensByUser(List<Long> userIds) {
-		return getCurrentSession().getNamedQuery(DELETE_AUTH_TOKENS_BY_USER_ID)
+		return createNamedQuery(DELETE_AUTH_TOKENS_BY_USER_ID)
 			.setParameterList("ids", userIds)
 			.executeUpdate();
 	}
 	
 	@Override
 	public void saveLoginAuditLog(LoginAuditLog log) {
-		sessionFactory.getCurrentSession().saveOrUpdate(log);
+		getCurrentSession().saveOrUpdate(log);
 	}
 
 	@Override
@@ -187,21 +169,21 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public AuthCredential getCredentials(String token) {
-		return (AuthCredential) getCurrentSession().getNamedQuery(GET_CREDENTIAL)
+		return createNamedQuery(GET_CREDENTIAL, AuthCredential.class)
 			.setParameter("token", token)
 			.uniqueResult();
 	}
 
 	@Override
 	public void deleteCredentials(String token) {
-		getCurrentSession().getNamedQuery(DELETE_CREDENTIAL)
+		createNamedQuery(DELETE_CREDENTIAL)
 			.setParameter("token", token)
 			.executeUpdate();
 	}
 
 	@Override
 	public void deleteDanglingCredentials() {
-		getCurrentSession().getNamedQuery(DELETE_DANGLING_CREDS).executeUpdate();
+		createNamedQuery(DELETE_DANGLING_CREDS).executeUpdate();
 	}
 
 	private static final String FQN = AuthDomain.class.getName();

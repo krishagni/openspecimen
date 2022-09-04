@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class  name="krishagni.catissueplus.beans.FormRecordEntryBean" table="CATISSUE_FORM_RECORD_ENTRY" lazy="true">
+  <class  name="krishagni.catissueplus.beans.FormRecordEntryBean" table="CATISSUE_FORM_RECORD_ENTRY" lazy="true"
+    entity-name="krishagni.catissueplus.beans.FormRecordEntryBean">
+
     <id name="identifier" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">CATISSUE_FORM_REC_ENTRY_SEQ</param>

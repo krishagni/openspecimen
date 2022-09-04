@@ -9,7 +9,7 @@ public interface Dao<T> {
 	
 	void saveOrUpdate(T t, boolean flush);
 	
-	void delete(T t);
+	<R> void delete(R t);
 	
 	T getById(Long id);
 	

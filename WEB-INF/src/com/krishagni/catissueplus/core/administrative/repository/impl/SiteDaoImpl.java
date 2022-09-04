@@ -9,16 +9,12 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.repository.SiteDao;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class SiteDaoImpl extends AbstractDao<Site> implements SiteDao {
@@ -29,59 +25,43 @@ public class SiteDaoImpl extends AbstractDao<Site> implements SiteDao {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Site> getSites(SiteListCriteria listCrit) {
-		Criteria query = getSitesListQuery(listCrit)
-				.addOrder(Order.asc("name"))
-				.setFirstResult(listCrit.startAt())
-				.setMaxResults(listCrit.maxResults());
-				
-		return query.list();
+		Criteria<Site> query = getSitesListQuery(listCrit);
+		return query.orderBy(query.asc("site.name")).list(listCrit.startAt(), listCrit.maxResults());
 	}
 
 	@Override
 	public Long getSitesCount(SiteListCriteria crit) {
-		Number count = (Number) getSitesListQuery(crit)
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		return getSitesListQuery(crit).getCount("site.id");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Site> getSitesByNames(Collection<String> siteNames) {
-		return sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_SITES_BY_NAMES)
-				.setParameterList("siteNames", siteNames)
-				.list();
+		return createNamedQuery(GET_SITES_BY_NAMES, Site.class)
+			.setParameterList("siteNames", siteNames)
+			.list();
 	}
 	
 	@Override
 	public Site getSiteByName(String siteName) {
 		List<Site> result = getSitesByNames(Collections.singletonList(siteName));
-		
 		return result.isEmpty() ? null : result.get(0);
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Site getSiteByCode(String siteCode) {
-		List<Site> result = getSessionFactory().getCurrentSession()
-				.getNamedQuery(GET_SITE_BY_CODE)
-				.setString("siteCode", siteCode)
-				.list();
-		
-		return result.isEmpty() ? null : result.get(0);
+		return createNamedQuery(GET_SITE_BY_CODE, Site.class)
+			.setParameter("siteCode", siteCode)
+			.uniqueResult();
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<Long, Integer> getCpCountBySite(Collection<Long> siteIds) {		
-		List<Object[]> rows = getSessionFactory().getCurrentSession().getNamedQuery(GET_CP_COUNT_BY_SITES)
+		List<Object[]> rows = createNamedQuery(GET_CP_COUNT_BY_SITES, Object[].class)
 			.setParameterList("siteIds", siteIds)
 			.list();
 		
-		Map<Long, Integer> countMap = new HashMap<Long, Integer>();
+		Map<Long, Integer> countMap = new HashMap<>();
 		for (Object[] row : rows) {
 			Long siteId = (Long)row[0];
 			Integer count = ((Long)row[1]).intValue();
@@ -98,42 +78,40 @@ public class SiteDaoImpl extends AbstractDao<Site> implements SiteDao {
 
 	@Override
 	public boolean isAffiliatedToUserInstitute(Long siteId, Long userId) {
-		Integer count = (Integer) getCurrentSession().getNamedQuery(IS_AFFILIATED_TO_USER_INST)
+		Integer count = createNamedQuery(IS_AFFILIATED_TO_USER_INST, Integer.class)
 			.setParameter("siteId", siteId)
 			.setParameter("userId", userId)
 			.uniqueResult();
 		return count != null && count > 0;
 	}
 
-	private Criteria getSitesListQuery(SiteListCriteria crit) {
-		Criteria query = sessionFactory.getCurrentSession()
-			.createCriteria(Site.class)
-			.createAlias("type", "type", JoinType.LEFT_OUTER_JOIN)
-			.add(Restrictions.eq("activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()));
-
+	private Criteria<Site> getSitesListQuery(SiteListCriteria crit) {
+		Criteria<Site> query = createCriteria(Site.class, "site")
+			.leftJoin("site.type", "type");
+		query.add(query.eq("site.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()));
 		return addSearchConditions(query, crit);
 	}
 
-	private Criteria addSearchConditions(Criteria query, SiteListCriteria listCrit) {
+	private Criteria<Site> addSearchConditions(Criteria<Site> query, SiteListCriteria listCrit) {
 		if (CollectionUtils.isNotEmpty(listCrit.ids())) {
-			query.add(Restrictions.in("id", listCrit.ids()));
+			query.add(query.in("site.id", listCrit.ids()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.query())) {
-			query.add(Restrictions.ilike("name", listCrit.query(), listCrit.matchMode()));
+			query.add(query.ilike("site.name", listCrit.query()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.institute())) {
-			query.createAlias("institute", "i")
-				.add(Restrictions.eq("i.name", listCrit.institute()));
+			query.join("site.institute", "i")
+				.add(query.eq("i.name", listCrit.institute()));
 		}
 
 		if (CollectionUtils.isNotEmpty(listCrit.includeTypes())) {
-			query.add(Restrictions.in("type.value", listCrit.includeTypes()));
+			query.add(query.in("type.value", listCrit.includeTypes()));
 		}
 
 		if (CollectionUtils.isNotEmpty(listCrit.excludeTypes())) {
-			query.add(Restrictions.not(Restrictions.in("type.value", listCrit.excludeTypes())));
+			query.add(query.notIn("type.value", listCrit.excludeTypes()));
 		}
 
 		return query;

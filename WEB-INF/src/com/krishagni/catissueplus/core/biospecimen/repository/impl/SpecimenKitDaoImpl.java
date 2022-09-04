@@ -8,16 +8,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenKit;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenKitSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class SpecimenKitDaoImpl extends AbstractDao<SpecimenKit> implements SpecimenKitDao {
 
@@ -26,23 +23,18 @@ public class SpecimenKitDaoImpl extends AbstractDao<SpecimenKit> implements Spec
 		return SpecimenKit.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<SpecimenKitSummary> getSpecimenKits(SpecimenKitListCriteria listCrit) {
-		Criteria query = getCurrentSession().createCriteria(SpecimenKit.class)
-			.setFirstResult(listCrit.startAt())
-			.setMaxResults(listCrit.maxResults())
-			.addOrder(Order.desc("id"));
-
+		Criteria<SpecimenKit> query = createCriteria(SpecimenKit.class, "k");
+		query.addOrder(query.desc("k.id"));
 		addCpRestriction(query, listCrit);
-
-		List<SpecimenKitSummary> kits =  getSpecimenKitSummary(query.list());
+		List<SpecimenKitSummary> kits =  getSpecimenKitSummary(query.list(listCrit.startAt(), listCrit.maxResults()));
 		if (kits.isEmpty() || !listCrit.includeStat()) {
 			return kits;
 		}
 
-		Map<Long, SpecimenKitSummary> kitsMap = kits.stream().collect(Collectors.toMap(kit -> kit.getId(), kit -> kit));
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_PARTICIPANT_N_SPECIMEN_CNT)
+		Map<Long, SpecimenKitSummary> kitsMap = kits.stream().collect(Collectors.toMap(SpecimenKitSummary::getId, kit -> kit));
+		List<Object[]> rows = createNamedQuery(GET_PARTICIPANT_N_SPECIMEN_CNT, Object[].class)
 			.setParameterList("kitIds", kitsMap.keySet())
 			.list();
 
@@ -56,16 +48,12 @@ public class SpecimenKitDaoImpl extends AbstractDao<SpecimenKit> implements Spec
 		return kits;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getCpIds(String key, Object value) {
-		List<Object[]> rows = getCurrentSession().createCriteria(SpecimenKit.class)
-			.createAlias("collectionProtocol", "cp")
-			.setProjection(
-				Projections.projectionList()
-					.add(Projections.property("cp.id"))
-					.add(Projections.property("id")))
-			.add(Restrictions.eq(key, value))
+		Criteria<Object[]> query = createCriteria(SpecimenKit.class, Object[].class, "k");
+		List<Object[]> rows = query.join("k.collectionProtocol", "cp")
+			.select("cp.id", "k.id")
+			.add(query.eq(key, value))
 			.list();
 
 		if (CollectionUtils.isEmpty(rows)) {
@@ -79,19 +67,18 @@ public class SpecimenKitDaoImpl extends AbstractDao<SpecimenKit> implements Spec
 		return result;
 	}
 
-	private void addCpRestriction(Criteria query, SpecimenKitListCriteria listCrit) {
+	private void addCpRestriction(Criteria<SpecimenKit> query, SpecimenKitListCriteria listCrit) {
 		if (listCrit.cpId() == null && StringUtils.isBlank(listCrit.cpShortTitle()) && StringUtils.isBlank(listCrit.cpTitle())) {
 			return;
 		}
 
-		query.createAlias("collectionProtocol", "cp");
-
+		query.join("k.collectionProtocol", "cp");
 		if (listCrit.cpId() != null) {
-			query.add(Restrictions.eq("cp.id", listCrit.cpId()));
+			query.add(query.eq("cp.id", listCrit.cpId()));
 		} else if (StringUtils.isNotBlank(listCrit.cpShortTitle())) {
-			query.add(Restrictions.eq("cp.shortTitle", listCrit.cpShortTitle()));
+			query.add(query.eq("cp.shortTitle", listCrit.cpShortTitle()));
 		} else if (StringUtils.isNotBlank(listCrit.cpTitle())) {
-			query.add(Restrictions.eq("cp.title", listCrit.cpTitle()));
+			query.add(query.eq("cp.title", listCrit.cpTitle()));
 		}
 	}
 

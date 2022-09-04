@@ -18,7 +18,6 @@ import org.hibernate.type.spi.TypeConfiguration;
 import org.hibernate.usertype.UserType;
 import org.springframework.beans.factory.InitializingBean;
 
-
 public class EnversEnumHandler implements InitializingBean {
 
 	SessionFactory sessionFactory;

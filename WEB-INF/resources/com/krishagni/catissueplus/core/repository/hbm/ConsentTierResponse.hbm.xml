@@ -4,7 +4,9 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse" table="CATISSUE_CONSENT_TIER_RESPONSE">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse" table="CATISSUE_CONSENT_TIER_RESPONSE"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.ConsentTierResponse">
+
     <id name="id" column="IDENTIFIER" type="long">
       <generator class="native">
         <param name="sequence">CATISSUE_CONSENT_TIER_RES_SEQ</param>

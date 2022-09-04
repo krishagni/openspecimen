@@ -10,19 +10,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolGroupDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpGroupListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtocolGroup> implements CollectionProtocolGroupDao  {
 
@@ -32,48 +27,42 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<CollectionProtocolGroup> getGroups(CpGroupListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(CollectionProtocolGroup.class, "group")
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.addOrder(Order.asc("group.name"));
-
+		Criteria<CollectionProtocolGroup> query = createCriteria(CollectionProtocolGroup.class, "group");
 		if (StringUtils.isNotBlank(crit.query())) {
-			query.add(Restrictions.ilike("group.name", crit.query(), MatchMode.ANYWHERE));
+			query.add(query.ilike("group.name", crit.query()));
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.siteCps()) || StringUtils.isNotBlank(crit.cpShortTitle())) {
-			DetachedCriteria allowedGroups = DetachedCriteria.forClass(CollectionProtocolGroup.class, "ag")
-				.setProjection(Projections.distinct(Projections.property("ag.id")))
-				.createAlias("ag.cps", "cp");
+			SubQuery<Long> allowedGroups = query.createSubQuery(CollectionProtocolGroup.class, "ag")
+				.join("ag.cps", "cp")
+				.distinct().select("ag.id");
 
 			if (CollectionUtils.isNotEmpty(crit.siteCps())) {
-				DetachedCriteria allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(crit.siteCps());
-				allowedGroups.add(Subqueries.propertyIn("cp.id", allowedCps));
+				SubQuery<Long> allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(allowedGroups, crit.siteCps());
+				allowedGroups.add(allowedGroups.in("cp.id", allowedCps));
 			}
 
 			if (StringUtils.isNotBlank(crit.cpShortTitle())) {
-				allowedGroups.add(Restrictions.eq("cp.shortTitle", crit.cpShortTitle()));
+				allowedGroups.add(allowedGroups.eq("cp.shortTitle", crit.cpShortTitle()));
 			}
 
-			query.add(Subqueries.propertyIn("group.id", allowedGroups));
+			query.add(query.in("group.id", allowedGroups));
 		}
 
-		return query.list();
+		return query.addOrder(query.asc("group.name")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public CollectionProtocolGroup getByName(String name) {
-		return (CollectionProtocolGroup) getCurrentSession().getNamedQuery(GET_BY_NAME)
+		return createNamedQuery(GET_BY_NAME, CollectionProtocolGroup.class)
 			.setParameter("name", name)
 			.uniqueResult();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<Long, Integer> getCpsCount(Collection<Long> groupIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_GROUP_CPS_COUNT)
+		List<Object[]> rows = createNamedQuery(GET_GROUP_CPS_COUNT, Object[].class)
 			.setParameterList("groupIds", groupIds)
 			.list();
 
@@ -86,24 +75,22 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<String> getCpsUsedInOtherGroups(CollectionProtocolGroup group) {
-		List<Long> cpIds = group.getCps().stream().map(CollectionProtocol::getId).collect(Collectors.toList());
-		Criteria query = getCurrentSession().createCriteria(CollectionProtocolGroup.class, "g")
-			.createAlias("g.cps", "cp")
-			.add(Restrictions.in("cp.id", cpIds))
-			.setProjection(Projections.property("cp.shortTitle"));
+		Criteria<String> query = createCriteria(CollectionProtocolGroup.class, String.class, "g")
+			.join("g.cps", "cp")
+			.select("cp.shortTitle");
+
 		if (group.getId() != null) {
-			query.add(Restrictions.ne("g.id", group.getId()));
+			query.add(query.ne("g.id", group.getId()));
 		}
 
-		return (List<String>) query.list();
+		List<Long> cpIds = group.getCps().stream().map(CollectionProtocol::getId).collect(Collectors.toList());
+		return query.add(query.in("cp.id", cpIds)).list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<Long, Set<Long>> getCpForms(List<Long> cpIds, String entityType) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CP_FORMS_BY_ENTITY)
+		List<Object[]> rows = createNamedQuery(GET_CP_FORMS_BY_ENTITY, Object[].class)
 			.setParameterList("cpIds", cpIds)
 			.setParameter("entityType", entityType)
 			.list();
@@ -123,7 +110,7 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 
 	@Override
 	public void deleteForms(Collection<Long> formIds) {
-		getCurrentSession().getNamedQuery(DELETE_GROUP_FORMS)
+		createNamedQuery(DELETE_GROUP_FORMS, Integer.class)
 			.setParameterList("formIds", formIds)
 			.executeUpdate();
 	}

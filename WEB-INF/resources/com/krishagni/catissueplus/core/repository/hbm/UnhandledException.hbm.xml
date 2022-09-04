@@ -4,7 +4,9 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.common.domain.UnhandledException" table="OS_UNHANDLED_EXCEPTIONS">
+  <class name="com.krishagni.catissueplus.core.common.domain.UnhandledException" table="OS_UNHANDLED_EXCEPTIONS"
+    entity-name="com.krishagni.catissueplus.core.common.domain.UnhandledException">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">OS_UNHANDLED_EXCEPTIONS_SEQ</param>

@@ -14,12 +14,12 @@ public class StorageContainerPositionDaoImpl extends AbstractDao<StorageContaine
 
 	@Override
 	public Long getSpecimenIdByPosition(Long containerId, String row, String column) {
-		List<Object> rows = getCurrentSession().getNamedQuery(GET_SPMN_ID_BY_POS)
+		List<Long> rows = createNamedQuery(GET_SPMN_ID_BY_POS, Long.class)
 			.setParameter("containerId", containerId)
 			.setParameter("rowLabel", row)
 			.setParameter("colLabel", column)
 			.list();
-		return rows != null && !rows.isEmpty() ? ((Number) rows.get(0)).longValue() : null;
+		return rows != null && !rows.isEmpty() ? rows.get(0) : null;
 	}
 
 	private static final String FQN = StorageContainerPosition.class.getName();

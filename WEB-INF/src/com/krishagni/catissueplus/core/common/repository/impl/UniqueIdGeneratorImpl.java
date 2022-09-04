@@ -2,31 +2,25 @@ package com.krishagni.catissueplus.core.common.repository.impl;
 
 import java.util.List;
 
-import org.hibernate.LockMode;
-
 import com.krishagni.catissueplus.core.common.domain.KeySequence;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.UniqueIdGenerator;
 
 public class UniqueIdGeneratorImpl extends AbstractDao<KeySequence> implements UniqueIdGenerator {
-
-	@SuppressWarnings("unchecked")
 	@Override
 	public Long getUniqueId(String type, String id) {
 		return getUniqueId(type, id, 0L);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Long getUniqueId(String type, String id, Long defStartSeq) {
-		List<KeySequence> seqs = getCurrentSession()
-				.getNamedQuery(GET_BY_TYPE_AND_TYPE_ID)
-				.setLockMode("ks", LockMode.PESSIMISTIC_WRITE)
-				.setString("type", type)
-				.setString("typeId", id)
-				.list();
+		List<KeySequence> seqs = createNamedQuery(GET_BY_TYPE_AND_TYPE_ID, KeySequence.class)
+			.acquirePessimisticWriteLock("ks")
+			.setParameter("type", type)
+			.setParameter("typeId", id)
+			.list();
 
-		KeySequence seq = null;
+		KeySequence seq;
 		if (seqs.isEmpty()) {
 			seq = new KeySequence();
 			seq.setType(type);
@@ -43,5 +37,5 @@ public class UniqueIdGeneratorImpl extends AbstractDao<KeySequence> implements U
 
 	private static final String FQN = KeySequence.class.getName();
 	
-	private String GET_BY_TYPE_AND_TYPE_ID = FQN + ".getByTypeAndTypeId";
+	private static final String GET_BY_TYPE_AND_TYPE_ID = FQN + ".getByTypeAndTypeId";
 }

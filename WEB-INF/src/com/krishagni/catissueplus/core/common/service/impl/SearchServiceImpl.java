@@ -28,7 +28,6 @@ import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.persister.entity.EntityPersister;
 import org.springframework.beans.factory.InitializingBean;
 
-
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.domain.SearchEntityKeyword;
@@ -244,6 +243,11 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 		public boolean requiresPostCommitHanding(EntityPersister persister) {
 			return false;
 		}
+
+		//		@Override
+//		public boolean requiresPostCommitHandling(EntityPersister persister) {
+//			return false;
+//		}
 	}
 
 	private class KeywordProcessor {

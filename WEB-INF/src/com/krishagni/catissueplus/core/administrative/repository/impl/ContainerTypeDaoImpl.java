@@ -8,17 +8,13 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.administrative.domain.ContainerType;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerTypeDao;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerTypeListCriteria;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class ContainerTypeDaoImpl extends AbstractDao<ContainerType> implements ContainerTypeDao {
 	
@@ -26,50 +22,39 @@ public class ContainerTypeDaoImpl extends AbstractDao<ContainerType> implements 
 	public Class<?> getType() {
 		return ContainerType.class;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public List<ContainerType> getTypes(ContainerTypeListCriteria crit) {
-		return getTypesListQuery(crit)
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.addOrder(Order.asc("name"))
-			.list();
+		Criteria<ContainerType> query = getTypesListQuery(crit);
+		return query.orderBy(query.asc("ct.name")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public Long getTypesCount(ContainerTypeListCriteria crit) {
-		Number count = (Number) getTypesListQuery(crit)
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		return getTypesListQuery(crit).getCount("ct.id");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<ContainerType> getByNames(Collection<String> names) {
-		return getCurrentSession().getNamedQuery(GET_BY_NAMES)
+		return createNamedQuery(GET_BY_NAMES, ContainerType.class)
 			.setParameterList("names", names)
 			.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public ContainerType getByName(String name) {
 		List<ContainerType> result = getByNames(Collections.singleton(name));
 		return result.isEmpty() ? null : result.get(0);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Long> getLeafTypeIds() {
-		return (List<Long>) getCurrentSession().getNamedQuery(GET_LEAF_IDS).list();
+		return createNamedQuery(GET_LEAF_IDS, Long.class).list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<DependentEntityDetail> getDependentEntities(Long typeId) {
-		List<Object[]> rows = (List<Object[]>) getCurrentSession().getNamedQuery(GET_DEPENDENTS)
+		List<Object[]> rows = createNamedQuery(GET_DEPENDENTS, Object[].class)
 			.setParameter("typeId", typeId)
 			.list();
 
@@ -84,31 +69,31 @@ public class ContainerTypeDaoImpl extends AbstractDao<ContainerType> implements 
 		return result;
 	}
 
-	private Criteria getTypesListQuery(ContainerTypeListCriteria crit) {
-		return addSearchConditions(getCurrentSession().createCriteria(ContainerType.class), crit);
+	private Criteria<ContainerType> getTypesListQuery(ContainerTypeListCriteria crit) {
+		return addSearchConditions(createCriteria(ContainerType.class, "ct"), crit);
 	}
 
-	private Criteria addSearchConditions(Criteria query, ContainerTypeListCriteria crit) {
-		addNameRestriction(query, crit.query(), crit.matchMode());
+	private Criteria<ContainerType> addSearchConditions(Criteria<ContainerType> query, ContainerTypeListCriteria crit) {
+		addNameRestriction(query, crit.query());
 		addCanHoldRestriction(query, crit.canHold());
 		return query;
 	}
 	
-	private void addNameRestriction(Criteria query, String name, MatchMode matchMode) {
+	private void addNameRestriction(Criteria<ContainerType> query, String name) {
 		if (StringUtils.isBlank(name)) {
 			return;
 		}
 		
-		query.add(Restrictions.ilike("name", name, matchMode));
+		query.add(query.ilike("ct.name", name));
 	}
 	
-	private void addCanHoldRestriction(Criteria query, List<String> canHold) {
+	private void addCanHoldRestriction(Criteria<ContainerType> query, List<String> canHold) {
 		if (CollectionUtils.isEmpty(canHold)) {
 			return;
 		}
 		
-		query.createAlias("canHold", "canHold")
-			.add(Restrictions.in("canHold.name", canHold));
+		query.createAlias("ct.canHold", "canHold")
+			.add(query.in("canHold.name", canHold));
 	}
 	
 	private static final String FQN = ContainerType.class.getName();

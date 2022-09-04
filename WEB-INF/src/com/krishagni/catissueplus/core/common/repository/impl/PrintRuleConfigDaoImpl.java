@@ -3,13 +3,10 @@ package com.krishagni.catissueplus.core.common.repository.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.common.domain.PrintRuleConfig;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigDao;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
 
@@ -19,55 +16,50 @@ public class PrintRuleConfigDaoImpl extends AbstractDao<PrintRuleConfig> impleme
 		return PrintRuleConfig.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<PrintRuleConfig> getPrintRules(PrintRuleConfigsListCriteria crit) {
-		return getPrintRulesConfigListQuery(crit)
-			.addOrder(Order.desc("pr.id"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.list();
+		Criteria<PrintRuleConfig> query = getPrintRulesConfigListQuery(crit);
+		return query.orderBy(query.desc("pr.id")).list(crit.startAt(), crit.maxResults());
 	}
 
-	private Criteria getPrintRulesConfigListQuery(PrintRuleConfigsListCriteria crit) {
-		Criteria criteria = getCurrentSession().createCriteria(PrintRuleConfig.class, "pr");
-		return addSearchConditions(criteria, crit);
+	private Criteria<PrintRuleConfig> getPrintRulesConfigListQuery(PrintRuleConfigsListCriteria crit) {
+		return addSearchConditions(createCriteria(PrintRuleConfig.class, "pr"), crit);
 	}
 
-	private Criteria addSearchConditions(Criteria query, PrintRuleConfigsListCriteria crit) {
+	private Criteria<PrintRuleConfig> addSearchConditions(Criteria<PrintRuleConfig> query, PrintRuleConfigsListCriteria crit) {
 		addObjectTypeRestriction(query, crit.objectType());
 		addUserNameRestriction(query, crit.userName());
 		addInstituteRestriction(query, crit.instituteName());
 		return query;
 	}
 
-	private void addObjectTypeRestriction(Criteria criteria, String objectType) {
+	private void addObjectTypeRestriction(Criteria<PrintRuleConfig> query, String objectType) {
 		if (StringUtils.isBlank(objectType)) {
 			return;
 		}
 
-		criteria.add(Restrictions.eq("pr.objectType", objectType));
+		query.add(query.eq("pr.objectType", objectType));
 	}
 
-	private void addUserNameRestriction(Criteria criteria, String name) {
+	private void addUserNameRestriction(Criteria<PrintRuleConfig> query, String name) {
 		if (StringUtils.isBlank(name)) {
 			return;
 		}
 
-		criteria.createAlias("pr.updatedBy", "u")
-			.add(Restrictions.disjunction()
-				.add(Restrictions.ilike("u.firstName", name, MatchMode.ANYWHERE))
-				.add(Restrictions.ilike("u.lastName",  name, MatchMode.ANYWHERE))
-				.add(Restrictions.ilike("u.loginName", name, MatchMode.ANYWHERE))
+		query.join("pr.updatedBy", "u")
+			.add(query.disjunction()
+				.add(query.ilike("u.firstName", name))
+				.add(query.ilike("u.lastName",  name))
+				.add(query.ilike("u.loginName", name))
 			);
 	}
 
-	private void addInstituteRestriction(Criteria criteria, String instituteName) {
+	private void addInstituteRestriction(Criteria<PrintRuleConfig> query, String instituteName) {
 		if (StringUtils.isBlank(instituteName)) {
 			return;
 		}
 
-		criteria.createAlias("pr.institute", "institute")
-			.add(Restrictions.eq("institute.name", instituteName));
+		query.join("pr.institute", "institute")
+			.add(query.eq("institute.name", instituteName));
 	}
 }

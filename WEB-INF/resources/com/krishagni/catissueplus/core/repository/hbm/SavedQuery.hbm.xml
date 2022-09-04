@@ -4,7 +4,9 @@
  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd"> 
 
 <hibernate-mapping>
-  <class name="com.krishagni.catissueplus.core.de.domain.SavedQuery" table="CATISSUE_SAVED_QUERIES">
+  <class name="com.krishagni.catissueplus.core.de.domain.SavedQuery" table="CATISSUE_SAVED_QUERIES"
+    entity-name="com.krishagni.catissueplus.core.de.domain.SavedQuery">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">CATISSUE_SAVED_QUERIES_SEQ</param>
@@ -15,7 +17,11 @@
 
     <property name="cpId" column="CP_ID"/>
 
+    <many-to-one name="cp" column="CP_ID" update="false" insert="false" not-found="ignore" />
+
     <property name="cpGroupId" column="CP_GROUP_ID"/>
+
+    <many-to-one name="cpGroup" column="CP_GROUP_ID" update="false" insert="false" not-found="ignore" />
 
     <many-to-one name="createdBy" column="CREATED_BY" cascade="none"/>
      

@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
-import org.hibernate.proxy.HibernateProxyHelper;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 
@@ -65,8 +64,7 @@ public class DpDistributionSite extends BaseEntity {
 			return true;
 		}
 		
-		if (obj == null	|| 
-			getClass() != HibernateProxyHelper.getClassWithoutInitializingProxy(obj)) {
+		if (obj == null	|| getClass() != getClassWithoutInitializingProxy(obj)) {
 			return false;
 		}
 		

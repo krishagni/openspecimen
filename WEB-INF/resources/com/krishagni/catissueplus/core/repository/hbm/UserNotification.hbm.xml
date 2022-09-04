@@ -4,7 +4,8 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.common.domain.UserNotification" table="OS_USER_NOTIFICATIONS">
+  <class name="com.krishagni.catissueplus.core.common.domain.UserNotification" table="OS_USER_NOTIFICATIONS"
+    entity-name="com.krishagni.catissueplus.core.common.domain.UserNotification">
 	
     <id name="id" column="IDENTIFIER">
       <generator class="native">

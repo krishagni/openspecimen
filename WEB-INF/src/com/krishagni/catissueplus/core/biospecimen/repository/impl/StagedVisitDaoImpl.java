@@ -17,22 +17,21 @@ public class StagedVisitDaoImpl extends AbstractDao<StagedVisit> implements Stag
 
 	@Override
 	public StagedVisit getByName(String name) {
-		return (StagedVisit) getCurrentSession().getNamedQuery(GET_BY_NAME)
+		return createNamedQuery(GET_BY_NAME, StagedVisit.class)
 			.setParameter("name", name.toLowerCase())
 			.uniqueResult();
 	}
 
 	@Override
 	public StagedVisit getBySprNo(String sprNo) {
-		return (StagedVisit) getCurrentSession().getNamedQuery(GET_BY_SPR_NO)
+		return createNamedQuery(GET_BY_SPR_NO, StagedVisit.class)
 			.setParameter("sprNo", sprNo.toLowerCase())
 			.uniqueResult();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<StagedVisit> getByEmpiOrMrn(String empiOrMrn) {
-		return getCurrentSession().getNamedQuery(GET_BY_EMPI_OR_MRN)
+		return createNamedQuery(GET_BY_EMPI_OR_MRN, StagedVisit.class)
 			.setParameter("empiOrMrn", empiOrMrn.toLowerCase())
 			.list();
 	}
@@ -45,7 +44,9 @@ public class StagedVisitDaoImpl extends AbstractDao<StagedVisit> implements Stag
 	}
 
 	private int deleteOldVisitRecords(String query, Date olderThanDt) {
-		return getCurrentSession().getNamedQuery(query).setTimestamp("olderThanDt", olderThanDt).executeUpdate();
+		return createNamedQuery(query, Integer.class)
+			.setParameter("olderThanDt", olderThanDt)
+			.executeUpdate();
 	}
 
 	private static final String FQN = StagedVisit.class.getName();

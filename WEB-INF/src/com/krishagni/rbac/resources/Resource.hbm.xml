@@ -4,7 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="com.krishagni.rbac.domain.Resource" table="RBAC_RESOURCES">
+  <class name="com.krishagni.rbac.domain.Resource" table="RBAC_RESOURCES"
+    entity-name="com.krishagni.rbac.domain.Resource">
 
     <id name="id" column="IDENTIFIER">
       <generator class="native">
@@ -17,9 +18,5 @@
     <query name="getResourceByName">
       from Resource r where r.name =:name
     </query>
-    
-    <query name="getAllResources">
-      from Resource
-    </query>
-  </class> 
+  </class>
 </hibernate-mapping>

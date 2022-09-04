@@ -10,21 +10,17 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Junction;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.events.Resource;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
+import com.krishagni.catissueplus.core.common.repository.Junction;
+import com.krishagni.catissueplus.core.common.repository.Restriction;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class BiospecimenDaoHelper {
 
@@ -37,49 +33,50 @@ public class BiospecimenDaoHelper {
 		return instance;
 	}
 
-	public void addSiteCpsCond(Criteria query, SpecimenListCriteria crit) {
+	public void addSiteCpsCond(AbstractCriteria<?, ?> query, SpecimenListCriteria crit) {
 		addSiteCpsCond(query, crit, true);
 	}
 
-	public void addSiteCpsCond(Criteria query, SpecimenListCriteria crit, boolean spmnList) {
-		addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), query.getAlias().equals("visit") ? "cpr" : "visit", spmnList);
+	public void addSiteCpsCond(AbstractCriteria<?, ?> query, SpecimenListCriteria crit, boolean spmnList) {
+		addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), spmnList);
 	}
 
-	public void addSiteCpsCond(Criteria query, Collection<SiteCpPair> siteCps, boolean useMrnSites, String startAlias) {
-		addSiteCpsCond(query, siteCps, useMrnSites, startAlias, true);
+	public void addSiteCpsCond(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps, boolean useMrnSites) {
+		addSiteCpsCond(query, siteCps, useMrnSites, true);
 	}
 
-	public void addSiteCpsCond(Criteria query, Collection<SiteCpPair> siteCps, boolean useMrnSites, String startAlias, boolean spmnList) {
+	public void addSiteCpsCond(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps, boolean useMrnSites, boolean spmnList) {
 		if (CollectionUtils.isEmpty(siteCps)) {
 			return;
 		}
 
-		switch (startAlias) {
-			case "visit":
-				query.createAlias("specimen.visit", "visit");
-
-			case "cpr":
-				query.createAlias("visit.registration", "cpr");
-
-			case "cp":
-				query.createAlias("cpr.collectionProtocol", "cp");
+		if (!query.hasJoin("visit")) {
+			query.join("specimen.visit", "visit");
 		}
 
-		query.createAlias("cp.sites", "cpSite")
-			.createAlias("cpSite.site", "site")
-			.createAlias("cpr.participant", "participant")
-			.createAlias("participant.pmis", "pmi", JoinType.LEFT_OUTER_JOIN)
-			.createAlias("pmi.site", "mrnSite", JoinType.LEFT_OUTER_JOIN);
+		if (!query.hasJoin("cpr")) {
+			query.join("visit.registration", "cpr");
+		}
 
-		Disjunction mainCond = Restrictions.disjunction();
+		if (!query.hasJoin("cp")) {
+			query.join("cpr.collectionProtocol", "cp");
+		}
+
+		query.join("cp.sites", "cpSite")
+			.join("cpSite.site", "site")
+			.join("cpr.participant", "participant")
+			.leftJoin("participant.pmis", "pmi")
+			.leftJoin("pmi.site", "mrnSite");
+
+		Disjunction mainCond = query.disjunction();
 		Map<String, Set<SiteCpPair>> siteCpsMap = SiteCpPair.segregateByResources(siteCps);
 		for (Map.Entry<String, Set<SiteCpPair>> siteCpEntry : siteCpsMap.entrySet()) {
-			Junction siteCpsCond = getSiteCpsCond(siteCpEntry.getValue(), useMrnSites);
+			Junction siteCpsCond = getSiteCpsCond(query, siteCpEntry.getValue(), useMrnSites);
 			if (spmnList && Resource.PRIMARY_SPECIMEN.getName().equals(siteCpEntry.getKey())) {
 				mainCond.add(
-					Restrictions.and(
-						Restrictions.eq("specimen.lineage", "New"),
-						siteCpsCond
+					query.and(
+						query.eq("specimen.lineage", "New"),
+						siteCpsCond.getRestriction()
 					)
 				);
 			} else {
@@ -139,56 +136,56 @@ public class BiospecimenDaoHelper {
 		return aql.toString();
 	}
 
-	public DetachedCriteria getCpIdsFilter(Collection<SiteCpPair> siteCps) {
-		DetachedCriteria filter = DetachedCriteria.forClass(CollectionProtocol.class, "cp")
-			.setProjection(Projections.distinct(Projections.property("cp.id")));
+	public SubQuery<Long> getCpIdsFilter(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps) {
+		SubQuery<Long> subQuery = query.createSubQuery(CollectionProtocol.class, "cp")
+			.distinct().select("cp.id");
 
 		boolean siteAdded = false, instAdded = false;
-		Disjunction orCond = Restrictions.disjunction();
+		Disjunction orCond = subQuery.disjunction();
 		for (SiteCpPair siteCp : siteCps) {
 			if (siteCp.getCpId() != null) {
-				orCond.add(Restrictions.eq("cp.id", siteCp.getCpId()));
+				orCond.add(subQuery.eq("cp.id", siteCp.getCpId()));
 			} else {
 				if (!siteAdded) {
-					filter.createAlias("cp.sites", "cpSite")
-						.createAlias("cpSite.site", "site");
+					subQuery.join("cp.sites", "cpSite")
+						.join("cpSite.site", "site");
 					siteAdded = true;
 				}
 
 				if (siteCp.getSiteId() != null) {
-					orCond.add(Restrictions.eq("site.id", siteCp.getSiteId()));
+					orCond.add(subQuery.eq("site.id", siteCp.getSiteId()));
 				} else {
 					if (!instAdded) {
-						filter.createAlias("site.institute", "institute");
+						subQuery.join("site.institute", "institute");
 						instAdded = true;
 					}
 
-					orCond.add(Restrictions.eq("institute.id", siteCp.getInstituteId()));
+					orCond.add(subQuery.eq("institute.id", siteCp.getInstituteId()));
 				}
 			}
 		}
 
-		return filter.add(orCond);
+		return subQuery.add(orCond);
 	}
 
-	private Junction getSiteCpsCond(Collection<SiteCpPair> siteCps, boolean useMrnSites) {
-		Disjunction cpSitesCond = Restrictions.disjunction();
+	private Junction getSiteCpsCond(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps, boolean useMrnSites) {
+		Disjunction cpSitesCond = query.disjunction();
 		for (SiteCpPair siteCp : siteCps) {
-			Junction siteCond = Restrictions.disjunction();
+			Junction siteCond = query.disjunction();
 			if (useMrnSites) {
 				//
 				// When MRNs exist, site ID should be one of the MRN site
 				//
-				Junction mrnSite = Restrictions.conjunction()
-					.add(Restrictions.isNotEmpty("participant.pmis"))
-					.add(getSiteIdRestriction("mrnSite.id", siteCp));
+				Junction mrnSite = query.conjunction()
+					.add(query.isNotEmpty("participant.pmis"))
+					.add(getSiteIdRestriction(query, "mrnSite.id", siteCp));
 
 				//
 				// When no MRNs exist, site ID should be one of CP site
 				//
-				Junction cpSite = Restrictions.conjunction()
-					.add(Restrictions.isEmpty("participant.pmis"))
-					.add(getSiteIdRestriction("site.id", siteCp));
+				Junction cpSite = query.conjunction()
+					.add(query.isEmpty("participant.pmis"))
+					.add(getSiteIdRestriction(query, "site.id", siteCp));
 
 				siteCond.add(mrnSite).add(cpSite);
 			} else {
@@ -196,13 +193,13 @@ public class BiospecimenDaoHelper {
 				// Site ID should be either MRN site or CP site
 				//
 				siteCond
-					.add(getSiteIdRestriction("mrnSite.id", siteCp))
-					.add(getSiteIdRestriction("site.id", siteCp));
+					.add(getSiteIdRestriction(query, "mrnSite.id", siteCp))
+					.add(getSiteIdRestriction(query, "site.id", siteCp));
 			}
 
-			Junction cond = Restrictions.conjunction().add(siteCond);
+			Junction cond = query.conjunction().add(siteCond);
 			if (siteCp.getCpId() != null) {
-				cond.add(Restrictions.eq("cp.id", siteCp.getCpId()));
+				cond.add(query.eq("cp.id", siteCp.getCpId()));
 			}
 
 			cpSitesCond.add(cond);
@@ -254,15 +251,16 @@ public class BiospecimenDaoHelper {
 		return "(" + StringUtils.join(cpSitesCond, " or ") + ")";
 	}
 
-	private Criterion getSiteIdRestriction(String property, SiteCpPair siteCp) {
+	private Restriction getSiteIdRestriction(AbstractCriteria<?, ?> query, String property, SiteCpPair siteCp) {
 		if (siteCp.getSiteId() != null) {
-			return Restrictions.eq(property, siteCp.getSiteId());
+			return query.eq(property, siteCp.getSiteId());
 		}
 
-		DetachedCriteria subQuery = DetachedCriteria.forClass(Site.class)
-			.add(Restrictions.eq("institute.id", siteCp.getInstituteId()))
-			.setProjection(Projections.property("id"));
-		return Subqueries.propertyIn(property, subQuery);
+		SubQuery<Long> subQuery = query.createSubQuery(Site.class, "site")
+			.join("site.institute", "institute");
+		subQuery.add(subQuery.eq("institute.id", siteCp.getInstituteId()))
+			.select("site.id");
+		return query.in(property, subQuery);
 	}
 
 	private String getAqlSiteIdRestriction(String property, SiteCpPair siteCp) {

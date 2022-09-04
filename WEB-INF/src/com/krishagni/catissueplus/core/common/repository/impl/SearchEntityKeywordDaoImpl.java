@@ -3,10 +3,9 @@ package com.krishagni.catissueplus.core.common.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.query.Query;
-
 import com.krishagni.catissueplus.core.common.domain.SearchEntityKeyword;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Query;
 import com.krishagni.catissueplus.core.common.repository.SearchEntityKeywordDao;
 
 public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword> implements SearchEntityKeywordDao {
@@ -17,9 +16,8 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<SearchEntityKeyword> getKeywords(String entity, Long entityId, String key) {
-		return (List<SearchEntityKeyword>) getCurrentSession().getNamedQuery(GET_KEYWORDS)
+		return createNamedQuery(GET_KEYWORDS, SearchEntityKeyword.class)
 			.setParameter("entity", entity)
 			.setParameter("entityId", entityId)
 			.setParameter("key", key)
@@ -27,16 +25,15 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<SearchEntityKeyword> getMatches(String entity, String searchTerm, int maxResults) {
-		String sql = getCurrentSession().getNamedQuery(GET_MATCHES).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(GET_MATCHES, SearchEntityKeyword.class).getQueryString();
 		if (entity != null) {
 			sql = String.format(sql, " r.short_name = :entity and ");
 		} else {
 			sql = String.format(sql, "");
 		}
 
-		Query query = getCurrentSession().createSQLQuery(sql);
+		Query<Object[]> query = createNativeQuery(sql, Object[].class);
 		if (entity != null) {
 			query.setParameter("entity", entity);
 		}
@@ -47,15 +44,15 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 
 		List<SearchEntityKeyword> result = new ArrayList<>();
 		for (Object[] row : rows) {
-			int idx = 0;
+			int idx = -1;
 
 			SearchEntityKeyword keyword = new SearchEntityKeyword();
-			keyword.setId(((Number) row[idx++]).longValue());
-			keyword.setEntity((String) row[idx++]);
-			keyword.setEntityId(((Number) row[idx++]).longValue());
-			keyword.setKey((String) row[idx++]);
-			keyword.setValue((String) row[idx++]);
-			keyword.setStatus(((Number) row[idx++]).intValue());
+			keyword.setId(((Number) row[++idx]).longValue());
+			keyword.setEntity((String) row[++idx]);
+			keyword.setEntityId(((Number) row[++idx]).longValue());
+			keyword.setKey((String) row[++idx]);
+			keyword.setValue((String) row[++idx]);
+			keyword.setStatus(((Number) row[++idx]).intValue());
 			result.add(keyword);
 		}
 
@@ -63,9 +60,8 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<String> getMatchingEntities(String entity, String searchTerm) {
-		String sql = getCurrentSession().getNamedQuery(GET_MATCHING_ENTITIES).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(GET_MATCHING_ENTITIES).getQueryString();
 		if (entity != null) {
 			sql = String.format(
 				sql,
@@ -76,12 +72,13 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 			sql = String.format(sql, "", "");
 		}
 
-		Query query = getCurrentSession().createSQLQuery(sql);
+		Query<String> query = createNativeQuery(sql, String.class)
+			.addStringScalar("entity");
 		if (entity != null) {
 			query.setParameter("entity", entity);
 		}
 
-		return (List<String>) query.setParameter("value", searchTerm + "%").list();
+		return query.setParameter("value", searchTerm + "%").list();
 	}
 
 	private static final String FQN = SearchEntityKeyword.class.getName();

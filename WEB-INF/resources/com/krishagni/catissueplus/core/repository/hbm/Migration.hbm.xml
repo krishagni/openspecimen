@@ -4,8 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.openspecimen.core.migration.domain.Migration"
-    table="OS_MIGRATIONS">
+  <class name="com.krishagni.openspecimen.core.migration.domain.Migration" table="OS_MIGRATIONS"
+    entity-name="com.krishagni.openspecimen.core.migration.domain.Migration">
 
     <id name="id" column="IDENTIFIER" type="long">
       <generator class="native">

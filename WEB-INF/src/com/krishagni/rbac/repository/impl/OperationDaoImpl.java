@@ -3,11 +3,9 @@ package com.krishagni.rbac.repository.impl;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.rbac.domain.Operation;
 import com.krishagni.rbac.repository.OperationDao;
 import com.krishagni.rbac.repository.OperationListCriteria;
@@ -17,35 +15,26 @@ public class OperationDaoImpl extends AbstractDao<Operation> implements Operatio
 	
 	private static final String GET_OPERATION_BY_NAME = FQN + ".getOperationByName";
 	
-	private static final String GET_ALL_OPERATIONS = FQN + ".getAllOperations";
-	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Operation getOperationByName(String opName) {
-		List<Operation> operations = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_OPERATION_BY_NAME)
-				.setString("name", opName)
-				.list();
+		List<Operation> operations = createNamedQuery(GET_OPERATION_BY_NAME, Operation.class)
+			.setParameter("name", opName)
+			.list();
 		return operations.isEmpty() ? null : operations.get(0);
 	}
 
 	@Override
 	public Operation getOperation(Long id) {
-		return (Operation)sessionFactory.getCurrentSession()
-				.get(Operation.class, id);
+		return getCurrentSession().get(Operation.class, id);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Operation> getOperations(OperationListCriteria listCriteria) {
-		Criteria query = sessionFactory.getCurrentSession().createCriteria(Operation.class)
-				.setFirstResult(listCriteria.startAt())
-				.setMaxResults(listCriteria.maxResults());
-		
+		Criteria<Operation> query = createCriteria(Operation.class, "op");
 		if (StringUtils.isNotBlank(listCriteria.query())) {
-			query.add(Restrictions.ilike("name", listCriteria.query(), MatchMode.ANYWHERE));
+			query.add(query.ilike("op.name", listCriteria.query()));
 		}
 		
-		return query.list();
+		return query.list(listCriteria.startAt(), listCriteria.maxResults());
 	}
 }

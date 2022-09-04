@@ -6,16 +6,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.StagedParticipant;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.StagedParticipantDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> implements StagedParticipantDao {
 
@@ -25,52 +23,48 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")	
 	public List<StagedParticipant> getByPmis(List<PmiDetail> pmis) {
 	    List<Long> participantIds = getMatchingParticipantIds(pmis);
 		if (participantIds == null || participantIds.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		return getCurrentSession().createCriteria(StagedParticipant.class, "sp")
-			.add(Restrictions.in("sp.id", participantIds))
-			.list();
+		Criteria<StagedParticipant> query = createCriteria(StagedParticipant.class, "sp");
+		return query.add(query.in("sp.id", participantIds)).list();
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public StagedParticipant getByEmpi(String empi) {
-		Criteria query = getCurrentSession().createCriteria(StagedParticipant.class, "sp");
+		Criteria<StagedParticipant> query = createCriteria(StagedParticipant.class, "sp");
 		if (isMySQL()) {
-			query.add(Restrictions.eq("sp.empi", empi));
+			query.add(query.eq("sp.empi", empi));
 		} else {
-			query.add(Restrictions.eq("sp.empi", empi).ignoreCase());
+			query.add(query.eq(query.lower("sp.empi"), empi.toLowerCase()));
 		}
 
-		return (StagedParticipant) query.uniqueResult();
+		return query.uniqueResult();
 	}
 
 	@Override
 	public StagedParticipant getByUid(String uid) {
-		Criteria query = getCurrentSession().createCriteria(StagedParticipant.class, "sp");
+		Criteria<StagedParticipant> query = createCriteria(StagedParticipant.class, "sp");
 		if (isMySQL()) {
-			query.add(Restrictions.eq("sp.uid", uid));
+			query.add(query.eq("sp.uid", uid));
 		} else {
-			query.add(Restrictions.eq("sp.uid", uid).ignoreCase());
+			query.add(query.eq(query.lower("sp.uid"), uid.toLowerCase()));
 		}
 
-		return (StagedParticipant) query.uniqueResult();
+		return query.uniqueResult();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<StagedParticipant> getByMrn(String mrn) {
-		Criteria query = getCurrentSession().createCriteria(StagedParticipant.class, "sp")
-			.createAlias("sp.pmiList", "pmi");
+		Criteria<StagedParticipant> query = createCriteria(StagedParticipant.class, "sp")
+			.join("sp.pmiList", "pmi");
 		if (isMySQL()) {
-			query.add(Restrictions.eq("pmi.medicalRecordNumber", mrn));
+			query.add(query.eq("pmi.medicalRecordNumber", mrn));
 		} else {
-			query.add(Restrictions.eq("pmi.medicalRecordNumber", mrn).ignoreCase());
+			query.add(query.eq(query.lower("pmi.medicalRecordNumber"), mrn.toLowerCase()));
 		}
 
 		return query.list();
@@ -85,6 +79,7 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 		return deleteOldParticipantRecs(DEL_OLD_PARTICIPANTS, olderThanDt);
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Long> getMatchingParticipantIds(List<PmiDetail> pmis) {
 		List<String> disjunctions = new ArrayList<>();
 		for (PmiDetail pmi : pmis) {
@@ -110,12 +105,15 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 		}
 
 		String sql = String.format(GET_MRN_MATCHING_PIDS, StringUtils.join(disjunctions, " or "));
-		List<Object> result = getCurrentSession().createSQLQuery(sql).list();
-		return result.stream().map(id -> ((Number) id).longValue()).collect(Collectors.toList());
+		return createNativeQuery(sql, Long.class)
+			.addLongScalar("participant_id")
+			.list();
 	}
 
 	private int deleteOldParticipantRecs(String query, Date olderThanDt) {
-		return getCurrentSession().getNamedQuery(query).setTimestamp("olderThanDt", olderThanDt).executeUpdate();
+		return createNamedQuery(query)
+			.setParameter("olderThanDt", olderThanDt)
+			.executeUpdate();
 	}
 
 	private static final String FQN = StagedParticipant.class.getName();

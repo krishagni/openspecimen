@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.ContainerTransferEvent" table="OS_CONTAINER_TRANSFER_EVENTS">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.ContainerTransferEvent" table="OS_CONTAINER_TRANSFER_EVENTS"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.ContainerTransferEvent">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">OS_CONT_TRANSFER_EVENT_SEQ</param>

@@ -21,11 +21,10 @@ public class QueryFolderDaoImpl extends AbstractDao<QueryFolder> implements Quer
 		return QueryFolder.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<QueryFolder> getUserFolders(Long userId) { 
-		return getCurrentSession().getNamedQuery(GET_QUERY_FOLDERS_BY_USER)
-			.setLong("userId", userId)
+		return createNamedQuery(GET_QUERY_FOLDERS_BY_USER, QueryFolder.class)
+			.setParameter("userId", userId)
 			.list();
 	}
 
@@ -36,12 +35,12 @@ public class QueryFolderDaoImpl extends AbstractDao<QueryFolder> implements Quer
 	
 	@Override
 	public void deleteFolder(QueryFolder folder) {
-		getCurrentSession().delete(folder);
+		super.delete(folder);
 	}
 
 	@Override
 	public boolean isFolderSharedWithUser(Long folderId, Long userId) {
-		Long sharedFolderId = (Long) getCurrentSession().getNamedQuery(SHARED_WITH_USER)
+		Long sharedFolderId = createNamedQuery(SHARED_WITH_USER, Long.class)
 			.setParameter("folderId", folderId)
 			.setParameter("userId", userId)
 			.setMaxResults(1)
@@ -49,11 +48,10 @@ public class QueryFolderDaoImpl extends AbstractDao<QueryFolder> implements Quer
 		return folderId.equals(sharedFolderId);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public QueryFolder getByName(String name) { 
-		List<QueryFolder> folders = getCurrentSession().getNamedQuery(GET_FOLDER_BY_NAME)
-			.setString("name", name)
+		List<QueryFolder> folders = createNamedQuery(GET_FOLDER_BY_NAME, QueryFolder.class)
+			.setParameter("name", name)
 			.list();
 		return folders.isEmpty() ? null : folders.iterator().next();
 	}

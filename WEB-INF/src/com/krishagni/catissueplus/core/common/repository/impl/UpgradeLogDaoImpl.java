@@ -9,22 +9,16 @@ import com.krishagni.catissueplus.core.common.repository.UpgradeLogDao;
 public class UpgradeLogDaoImpl extends AbstractDao<UpgradeLog> implements UpgradeLogDao {
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public UpgradeLog getLatestVersion() {
-		List<UpgradeLog> log = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_UPGRADE_LOGS)
+		List<UpgradeLog> log = createNamedQuery(GET_UPGRADE_LOGS, UpgradeLog.class)
 			.setMaxResults(1)
 			.list();
-		
 		return log.isEmpty() ? null : log.get(0);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<UpgradeLog> getUpgradeLogs() {
-		return sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_UPGRADE_LOGS)
-			.list();
+		return createNamedQuery(GET_UPGRADE_LOGS, UpgradeLog.class).list();
 	}
 	
 	private static final String FQN = UpgradeLog.class.getName();

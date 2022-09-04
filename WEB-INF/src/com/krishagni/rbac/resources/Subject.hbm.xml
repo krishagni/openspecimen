@@ -4,7 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="com.krishagni.rbac.domain.Subject" table="CATISSUE_USER">
+  <class name="com.krishagni.rbac.domain.Subject" table="CATISSUE_USER"
+    entity-name="com.krishagni.rbac.domain.Subject">
 
     <id name="id" column="IDENTIFIER">
       <generator class="native">

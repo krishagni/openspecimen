@@ -4,7 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
     
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.audit.domain.UserApiCallLog" table="OS_USER_API_CALLS_LOG">
+  <class name="com.krishagni.catissueplus.core.audit.domain.UserApiCallLog" table="OS_USER_API_CALLS_LOG"
+    entity-name="com.krishagni.catissueplus.core.audit.domain.UserApiCallLog">
 
     <id name="id" column="IDENTIFIER">
       <generator class="native">

@@ -1,15 +1,11 @@
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList.Op;
@@ -17,6 +13,7 @@ import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreListI
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> implements ContainerStoreListDao {
 
@@ -25,21 +22,18 @@ public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> i
 		return ContainerStoreList.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<ContainerStoreList> getStoreLists(ContainerStoreListCriteria crit) {
-		return getQuery(crit).addOrder(Order.asc("sl.id"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(CollectionUtils.isNotEmpty(crit.ids()) ? crit.ids().size() : crit.maxResults())
-			.list();
+		Criteria<ContainerStoreList> query = getQuery(crit);
+		return query.orderBy(query.asc("sl.id"))
+			.list(crit.startAt(), CollectionUtils.isNotEmpty(crit.ids()) ? crit.ids().size() : crit.maxResults());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<Op, Integer> getStoreListItemsCount(Date from, Date to) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_ITEMS_COUNT_BY_OP)
-			.setTimestamp("fromDate", from)
-			.setTimestamp("toDate", to)
+		List<Object[]> rows = createNamedQuery(GET_ITEMS_COUNT_BY_OP, Object[].class)
+			.setParameter("fromDate", from)
+			.setParameter("toDate", to)
 			.list();
 		return rows.stream().collect(Collectors.toMap(row -> (Op)row[0], row -> ((Long)row[1]).intValue()));
 	}
@@ -49,41 +43,40 @@ public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> i
 		getCurrentSession().saveOrUpdate(item);
 	}
 
-	private Criteria getQuery(ContainerStoreListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(ContainerStoreList.class, "sl");
-
+	private Criteria<ContainerStoreList> getQuery(ContainerStoreListCriteria crit) {
+		Criteria<ContainerStoreList> query = createCriteria(ContainerStoreList.class, "sl");
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
-			query.add(Restrictions.in("sl.id", crit.ids()));
+			query.add(query.in("sl.id", crit.ids()));
 		}
 
 		if (crit.fromDate() != null) {
-			query.add(Restrictions.ge("sl.executionTime", crit.fromDate()));
+			query.add(query.ge("sl.executionTime", crit.fromDate()));
 		}
 
 		if (crit.toDate() != null) {
-			query.add(Restrictions.le("sl.executionTime", crit.toDate()));
+			query.add(query.le("sl.executionTime", crit.toDate()));
 		}
 
 		if (crit.lastRetryTime() != null) {
 			query.add(
-				Restrictions.or(
-					Restrictions.isNull("sl.executionTime"),
-					Restrictions.le("sl.executionTime", crit.lastRetryTime())
+				query.or(
+					query.isNull("sl.executionTime"),
+					query.le("sl.executionTime", crit.lastRetryTime())
 				)
 			);
 		}
 
 		if (crit.maxRetries() != null) {
 			query.add(
-					Restrictions.or(
-							Restrictions.isNull("sl.noOfRetries"),
-							Restrictions.le("sl.noOfRetries", crit.maxRetries())
+					query.or(
+							query.isNull("sl.noOfRetries"),
+							query.le("sl.noOfRetries", crit.maxRetries())
 					)
 			);
 		}
 
 		if (crit.statuses() != null) {
-			query.add(Restrictions.in("sl.status", crit.statuses()));
+			query.add(query.in("sl.status", crit.statuses()));
 		}
 
 		return query;

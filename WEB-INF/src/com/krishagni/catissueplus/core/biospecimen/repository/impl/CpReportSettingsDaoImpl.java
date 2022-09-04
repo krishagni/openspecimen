@@ -16,21 +16,17 @@ public class CpReportSettingsDaoImpl extends AbstractDao<CpReportSettings> imple
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public CpReportSettings getByCp(Long cpId) {
-		List<CpReportSettings> settings = getCurrentSession()
-			.getNamedQuery(GET_BY_CP_ID)
-			.setLong("cpId", cpId)
+		List<CpReportSettings> settings = createNamedQuery(GET_BY_CP_ID, CpReportSettings.class)
+			.setParameter("cpId", cpId)
 			.list();
 		return CollectionUtils.isNotEmpty(settings) ? settings.iterator().next() : null;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public CpReportSettings getByCp(String cpShortTitle) {
-		List<CpReportSettings> settings = getCurrentSession()
-			.getNamedQuery(GET_BY_CP_SHORT_TITLE)
-			.setString("shortTitle", cpShortTitle)
+		List<CpReportSettings> settings = createNamedQuery(GET_BY_CP_SHORT_TITLE, CpReportSettings.class)
+			.setParameter("shortTitle", cpShortTitle)
 			.list();
 		return CollectionUtils.isNotEmpty(settings) ? settings.iterator().next() : null;
 	}

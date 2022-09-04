@@ -4,8 +4,9 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.User" table="CATISSUE_USER">
-	
+  <class name="com.krishagni.catissueplus.core.administrative.domain.User" table="CATISSUE_USER"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.User" >
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">CATISSUE_USER_SEQ</param>

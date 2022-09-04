@@ -8,14 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
@@ -24,6 +16,8 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements SpecimenListDao {
 
@@ -32,15 +26,12 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 		return SpecimenList.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<SpecimenListSummary> getSpecimenLists(SpecimenListsCriteria crit) {
-		List<SpecimenList> lists = getCurrentSession().createCriteria(SpecimenList.class, "l")
-			.add(Subqueries.propertyIn("l.id", getSpecimenListsQuery(crit)))
-			.addOrder(Order.desc("l.lastUpdatedOn"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.list();
+		Criteria<SpecimenList> query = createCriteria(SpecimenList.class, "l");
+		List<SpecimenList> lists = query.add(query.in("l.id", getSpecimenListsQuery(crit, query)))
+			.orderBy(query.desc("l.lastUpdatedOn"))
+			.list(crit.startAt(), crit.maxResults());
 
 		List<SpecimenListSummary> results = new ArrayList<>();
 		Map<Long, SpecimenListSummary> listMap = new HashMap<>();
@@ -56,7 +47,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 			return results;
 		}
 
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_LIST_SPECIMENS_COUNT)
+		List<Object[]> rows = createNamedQuery(GET_LIST_SPECIMENS_COUNT, Object[].class)
 			.setParameterList("listIds", listMap.keySet())
 			.list();
 
@@ -70,11 +61,8 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public Long getSpecimenListsCount(SpecimenListsCriteria crit) {
-		Number count = (Number) getCurrentSession().createCriteria(SpecimenList.class, "l")
-			.add(Subqueries.propertyIn("l.id", getSpecimenListsQuery(crit)))
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		Criteria<SpecimenList> query = createCriteria(SpecimenList.class, "l");
+		return query.add(query.in("l.id", getSpecimenListsQuery(crit, query))).getCount("l.id");
 	}
 
 	@Override
@@ -83,13 +71,10 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public SpecimenList getSpecimenListByName(String name) {
-		List<SpecimenList> result = getCurrentSession()
-				.getNamedQuery(GET_SPECIMEN_LIST_BY_NAME)
-				.setString("name", name)
-				.list();
-		
+		List<SpecimenList> result = createNamedQuery(GET_SPECIMEN_LIST_BY_NAME, SpecimenList.class)
+			.setParameter("name", name)
+			.list();
 		return result.isEmpty() ? null : result.get(0);
 	}
 
@@ -98,10 +83,9 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 		return getSpecimenListByName(SpecimenList.getDefaultListName(userId));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public int getListSpecimensCount(Long listId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_LIST_SPECIMENS_COUNT)
+		List<Object[]> rows = createNamedQuery(GET_LIST_SPECIMENS_COUNT, Object[].class)
 			.setParameterList("listIds", Collections.singletonList(listId))
 			.list();
 
@@ -114,7 +98,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public void deleteSpecimenList(SpecimenList list) {
-		getCurrentSession().delete(list);
+		super.delete(list);
 	}
 
 	@Override
@@ -124,7 +108,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 
 	public List<Long> getListsSharedWithUser(List<Long> listIds, Long userId) {
-		return getCurrentSession().getNamedQuery(SHARED_WITH_USER)
+		return createNamedQuery(SHARED_WITH_USER, Long.class)
 			.setParameterList("listIds", listIds)
 			.setParameter("userId", userId)
 			.list();
@@ -135,11 +119,11 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	//
 	@Override
 	public List<SpecimenListItem> getListItems(Long listId, List<Long> specimenIds) {
-		return getCurrentSession().createCriteria(SpecimenListItem.class, "li")
-			.createAlias("li.list", "list")
-			.createAlias("li.specimen", "specimen")
-			.add(Restrictions.eq("list.id", listId))
-			.add(Restrictions.in("specimen.id", specimenIds))
+		Criteria<SpecimenListItem> query = createCriteria(SpecimenListItem.class, "li");
+		return query.join("li.list", "list")
+			.join("li.specimen", "specimen")
+			.add(query.eq("list.id", listId))
+			.add(query.in("specimen.id", specimenIds))
 			.list();
 	}
 
@@ -160,21 +144,19 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	@Override
 	public int deleteListItems(Long listId, List<Long> specimenIds) {
 		List<SpecimenListItem> items = getListItems(listId, specimenIds);
-		items.forEach(item -> getCurrentSession().delete(item));
+		items.forEach(super::delete);
 		return items.size();
 	}
 
 	@Override
 	public int clearList(Long listId) {
-		Criteria query = getCurrentSession().createCriteria(SpecimenListItem.class, "li")
-			.createAlias("li.list", "list")
-			.addOrder(Order.asc("li.id"))
-			.setMaxResults(50);
+		Criteria<SpecimenListItem> query = createCriteria(SpecimenListItem.class, "li");
+		query.join("li.list", "list").orderBy(query.asc("li.id"));
 
 		int startAt = 0;
 		while (true) {
-			List<SpecimenListItem> items = query.setFirstResult(startAt).list();
-			items.forEach(item -> getCurrentSession().delete(item));
+			List<SpecimenListItem> items = query.list(startAt, 50);
+			items.forEach(super::delete);
 			if (items.size() < 50) {
 				break;
 			}
@@ -185,21 +167,21 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 		return startAt;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<Long> getSpecimenIdsInList(Long listId, List<Long> specimenIds) {
-		Criteria query = getCurrentSession().createCriteria(SpecimenList.class, "list")
-			.createAlias("list.specimens", "item")
-			.createAlias("item.specimen", "specimen")
-			.setProjection(Projections.property("specimen.id"))
-			.add(Restrictions.eq("list.id", listId));
+		Criteria<Long> query = createCriteria(SpecimenList.class, Long.class, "list");
+		query.join("list.specimens", "item")
+			.join("item.specimen", "specimen")
+			.add(query.eq("list.id", listId))
+			.select("specimen.id");
+
 		applyIdsFilter(query, "specimen.id", specimenIds);
 		return query.list();
 	}
 
 	@Override
 	public void addChildSpecimens(Long listId, boolean oracle) {
-		getCurrentSession().getNamedQuery(oracle ? ADD_CHILD_SPECIMENS_ORA : ADD_CHILD_SPECIMENS_MYSQL)
+		createNamedQuery(oracle ? ADD_CHILD_SPECIMENS_ORA : ADD_CHILD_SPECIMENS_MYSQL)
 			.setParameter("listId", listId)
 			.executeUpdate();
 	}
@@ -207,22 +189,16 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	@Override
 	@Deprecated
 	public Map<Long, List<Specimen>> getListCpSpecimens(Long listId) {
-		List<Object[]> rows = getCurrentSession()
-			.getNamedQuery(GET_LIST_CP_SPECIMENS)
-			.setLong("listId", listId)
+		List<Object[]> rows = createNamedQuery(GET_LIST_CP_SPECIMENS, Object[].class)
+			.setParameter("listId", listId)
 			.list();
 
-		Map<Long, List<Specimen>> cpSpecimens = new HashMap<Long, List<Specimen>>();
+		Map<Long, List<Specimen>> cpSpecimens = new HashMap<>();
 		for (Object[] row : rows) {
 			Long cpId = (Long)row[0];
 			Specimen specimen = (Specimen)row[1];
 
-			List<Specimen> specimens = cpSpecimens.get(cpId);
-			if (specimens == null) {
-				specimens = new ArrayList<>();
-				cpSpecimens.put(cpId, specimens);
-			}
-
+			List<Specimen> specimens = cpSpecimens.computeIfAbsent(cpId, k -> new ArrayList<>());
 			specimens.add(specimen);
 		}
 
@@ -232,73 +208,73 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	@Override
 	@Deprecated
 	public List<Long> getListSpecimensCpIds(Long listId) {
-		return getCurrentSession().getNamedQuery(GET_LIST_SPMNS_CP_IDS)
-			.setLong("listId", listId)
+		return createNamedQuery(GET_LIST_SPMNS_CP_IDS, Long.class)
+			.setParameter("listId", listId)
 			.list();
 	}
 
-	private DetachedCriteria getSpecimenListsQuery(SpecimenListsCriteria crit) {
-		DetachedCriteria query = DetachedCriteria.forClass(SpecimenList.class, "l")
-			.setProjection(Projections.distinct(Projections.property("l.id")))
-			.add(Restrictions.isNull("l.deletedOn"));
+	private SubQuery<Long> getSpecimenListsQuery(SpecimenListsCriteria crit, Criteria<?> mainQuery) {
+		SubQuery<Long> query = mainQuery.createSubQuery(SpecimenList.class, "l")
+			.distinct().select("l.id");
 
+		query.add(query.isNull("l.deletedOn"));
 		if (crit.userId() != null || StringUtils.isNotBlank(crit.query())) {
-			query.createAlias("l.owner", "owner");
+			query.join("l.owner", "owner");
 		}
 
 		if (crit.userId() != null) {
-			query.createAlias("l.sharedWith", "sharedUser", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("l.sharedWithGroups", "sharedGroup", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("sharedGroup.users", "sharedGroupUser", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("l.folders", "folder", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("folder.owner", "folderOwner", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("folder.userGroups", "folderUserGroup", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("folderUserGroup.users", "folderUser", JoinType.LEFT_OUTER_JOIN)
+			query.leftJoin("l.sharedWith", "sharedUser")
+				.leftJoin("l.sharedWithGroups", "sharedGroup")
+				.leftJoin("sharedGroup.users", "sharedGroupUser")
+				.leftJoin("l.folders", "folder")
+				.leftJoin("folder.owner", "folderOwner")
+				.leftJoin("folder.userGroups", "folderUserGroup")
+				.leftJoin("folderUserGroup.users", "folderUser")
 				.add(
-					Restrictions.disjunction(
-						Restrictions.eq("owner.id", crit.userId()),
-						Restrictions.eq("sharedUser.id", crit.userId()),
-						Restrictions.eq("sharedGroupUser.id", crit.userId()),
-						Restrictions.eq("folderOwner.id", crit.userId()),
-						Restrictions.eq("folderUser.id", crit.userId())
+					query.or(
+						query.eq("owner.id", crit.userId()),
+						query.eq("sharedUser.id", crit.userId()),
+						query.eq("sharedGroupUser.id", crit.userId()),
+						query.eq("folderOwner.id", crit.userId()),
+						query.eq("folderUser.id", crit.userId())
 					)
 				);
 		}
 
 		if (crit.folderId() != null) {
 			if (crit.userId() == null) {
-				query.createAlias("l.folders", "folder");
+				query.join("l.folders", "folder");
 			}
 
-			query.add(Restrictions.eq("folder.id", crit.folderId()));
+			query.add(query.eq("folder.id", crit.folderId()));
 		}
 
 		if (StringUtils.isNotBlank(crit.query())) {
 			if (isMySQL()) {
 				query.add(
-					Restrictions.disjunction(
-						Restrictions.like("l.name", crit.query(), MatchMode.ANYWHERE),
-						Restrictions.like("owner.firstName", crit.query(), MatchMode.ANYWHERE),
-						Restrictions.like("owner.lastName", crit.query(), MatchMode.ANYWHERE)
+					query.or(
+						query.like("l.name", crit.query()),
+						query.like("owner.firstName", crit.query()),
+						query.like("owner.lastName", crit.query())
 					)
 				);
 			} else {
 				query.add(
-					Restrictions.disjunction(
-						Restrictions.like("l.name", crit.query(), MatchMode.ANYWHERE).ignoreCase(),
-						Restrictions.like("owner.firstName", crit.query(), MatchMode.ANYWHERE).ignoreCase(),
-						Restrictions.like("owner.lastName", crit.query(), MatchMode.ANYWHERE).ignoreCase()
+					query.or(
+						query.ilike("l.name", crit.query()),
+						query.ilike("owner.firstName", crit.query()),
+						query.ilike("owner.lastName", crit.query())
 					)
 				);
 			}
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
-			query.add(Restrictions.in("l.id", crit.ids()));
+			query.add(query.in("l.id", crit.ids()));
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.notInIds())) {
-			query.add(Restrictions.not(Restrictions.in("l.id", crit.notInIds())));
+			query.add(query.notIn("l.id", crit.notInIds()));
 		}
 
 		return query;

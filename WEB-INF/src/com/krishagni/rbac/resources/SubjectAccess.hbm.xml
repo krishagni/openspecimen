@@ -4,7 +4,9 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="com.krishagni.rbac.domain.SubjectAccess" table="RBAC_SUBJECT_ACCESS_VIEW" mutable="false">
+  <class name="com.krishagni.rbac.domain.SubjectAccess" table="RBAC_SUBJECT_ACCESS_VIEW" mutable="false"
+    entity-name="com.krishagni.rbac.domain.SubjectAccess">
+
     <id name="id" column="IDENTIFIER" type="string"> </id>
 
     <many-to-one name="subject" column="SUBJECT_ID" insert="false" update="false"/>

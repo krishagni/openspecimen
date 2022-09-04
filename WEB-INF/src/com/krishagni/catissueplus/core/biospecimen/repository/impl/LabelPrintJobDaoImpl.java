@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
 import com.krishagni.catissueplus.core.biospecimen.repository.LabelPrintJobDao;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintFileItem;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.events.LabelPrintStat;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class LabelPrintJobDaoImpl extends AbstractDao<LabelPrintJob> implements LabelPrintJobDao {
 
@@ -26,7 +24,7 @@ public class LabelPrintJobDaoImpl extends AbstractDao<LabelPrintJob> implements 
 			throw new IllegalArgumentException("Not supported for type = " + type);
 		}
 
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPMN_PRINT_STATS)
+		List<Object[]> rows = createNamedQuery(GET_SPMN_PRINT_STATS, Object[].class)
 			.setParameter("startDate", start)
 			.setParameter("endDate", end)
 			.list();
@@ -54,25 +52,23 @@ public class LabelPrintJobDaoImpl extends AbstractDao<LabelPrintJob> implements 
 
 	@Override
 	public List<LabelPrintFileItem> getPrintFileItems(Long jobId, int startAt, int maxItems) {
-		return getCurrentSession().createCriteria(LabelPrintFileItem.class, "item")
-			.createAlias("item.job", "job")
-			.add(Restrictions.eq("job.id", jobId))
-			.addOrder(Order.asc("item.id"))
-			.setFirstResult(startAt)
-			.setMaxResults(maxItems)
-			.list();
+		Criteria<LabelPrintFileItem> query = createCriteria(LabelPrintFileItem.class, "item");
+		return query.join("item.job", "job")
+			.add(query.eq("job.id", jobId))
+			.orderBy(query.asc("item.id"))
+			.list(startAt, maxItems);
 	}
 
 	@Override
 	public void deletePrintFileItems(Long jobId) {
-		getCurrentSession().getNamedQuery(DEL_PRINT_FILE_ITEMS)
+		createNamedQuery(DEL_PRINT_FILE_ITEMS)
 			.setParameter("jobId", jobId)
 			.executeUpdate();
 	}
 
 	@Override
 	public void deletePrintFileItemsOlderThan(Date time) {
-		getCurrentSession().getNamedQuery(DEL_OLD_PRINT_FILE_ITEMS)
+		createNamedQuery(DEL_OLD_PRINT_FILE_ITEMS)
 			.setParameter("olderThan", time)
 			.executeUpdate();
 	}

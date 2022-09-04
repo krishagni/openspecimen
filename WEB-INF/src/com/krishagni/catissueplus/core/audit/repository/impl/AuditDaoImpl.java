@@ -10,24 +10,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Junction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.query.Query;
-import org.hibernate.sql.JoinType;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
-import org.hibernate.type.TimestampType;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
-
 
 import com.krishagni.catissueplus.core.audit.domain.DeleteLog;
 import com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord;
@@ -41,6 +28,9 @@ import com.krishagni.catissueplus.core.audit.repository.RevisionsListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Junction;
+import com.krishagni.catissueplus.core.common.repository.Query;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 import edu.common.dynamicextensions.ndao.DbSettingsFactory;
@@ -48,7 +38,6 @@ import edu.common.dynamicextensions.ndao.DbSettingsFactory;
 public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDao {
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AuditDetail getAuditDetail(String auditTable, Long objectId) {
 		RevisionDetail createRev = getRevisionInfo(getLatestRevisionInfo(auditTable, objectId, 0));
 		RevisionDetail updateRev = getRevisionInfo(getLatestRevisionInfo(auditTable, objectId, 1));
@@ -69,7 +58,6 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<RevisionDetail> getRevisions(String auditTable, Long objectId) {
 		String[] parts = auditTable.split(":");
 
@@ -79,17 +67,17 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			idColumn = parts[1];
 		}
 
-		List<Object[]> rows = getCurrentSession().createSQLQuery(String.format(GET_REV_INFO_SQL, auditTable, idColumn, ""))
-			.addScalar("rev", LongType.INSTANCE)
-			.addScalar("revTime", TimestampType.INSTANCE)
-			.addScalar("ipAddress", StringType.INSTANCE)
-			.addScalar("userId", LongType.INSTANCE)
-			.addScalar("firstName", StringType.INSTANCE)
-			.addScalar("lastName", StringType.INSTANCE)
-			.addScalar("emailAddr", StringType.INSTANCE)
-			.addScalar("loginName", StringType.INSTANCE)
-			.addScalar("instituteName", StringType.INSTANCE)
-			.addScalar("domainName", StringType.INSTANCE)
+		List<Object[]> rows = createNativeQuery(String.format(GET_REV_INFO_SQL, auditTable, idColumn, ""), Object[].class)
+			.addLongScalar("rev")
+			.addTimestampScalar("revTime")
+			.addStringScalar("ipAddress")
+			.addLongScalar("userId")
+			.addStringScalar("firstName")
+			.addStringScalar("lastName")
+			.addStringScalar("emailAddr")
+			.addStringScalar("loginName")
+			.addStringScalar("instituteName")
+			.addStringScalar("domainName")
 			.setParameter("objectId", objectId)
 			.list();
 
@@ -98,20 +86,17 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	@Override
 	public List<RevisionDetail> getRevisions(RevisionsListCriteria criteria) {
-		Criteria query = getCurrentSession().createCriteria(RevisionEntityRecord.class, "re")
-			.createAlias("re.revision", "r")
-			.createAlias("r.user", "u", JoinType.LEFT_OUTER_JOIN)
-			.createAlias("u.institute", "i", JoinType.LEFT_OUTER_JOIN)
-			.createAlias("u.authDomain", "d", JoinType.LEFT_OUTER_JOIN);
+		Criteria<Object[]> query = createCriteria(RevisionEntityRecord.class, Object[].class, "re");
+		query.join("re.revision", "r")
+			.leftJoin("r.user", "u")
+			.leftJoin("u.institute", "i")
+			.leftJoin("u.authDomain", "d");
 
 		buildRevisionsListQuery(query, criteria);
 		setRevisionsListFields(query);
 
-		query.addOrder(Order.desc("re.id"))
-			.setFirstResult(criteria.startAt())
-			.setMaxResults(criteria.maxResults());
-
-		List<RevisionDetail> revisions = getRevisions((List<Object[]>) query.list());
+		query.addOrder(query.desc("re.id"));
+		List<RevisionDetail> revisions = getRevisions(query.list(criteria.startAt(), criteria.maxResults()));
 		for (RevisionDetail revision : revisions) {
 			Map<String, List<RevisionEntityRecordDetail>> entitiesMap = new LinkedHashMap<>();
 			for (RevisionEntityRecordDetail entity : revision.getRecords()) {
@@ -194,13 +179,11 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Date getLatestApiCallTime(Long userId, String token) {
-		List<Date> result = getCurrentSession().getNamedQuery(GET_LATEST_API_CALL_TIME)
-			.setLong("userId", userId)
-			.setString("authToken", token)
+		List<Date> result = createNamedQuery(GET_LATEST_API_CALL_TIME, Date.class)
+			.setParameter("userId", userId)
+			.setParameter("authToken", token)
 			.list();
-
 		return result.isEmpty() ? null : result.get(0);
 	}
 
@@ -210,7 +193,6 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 
-	@SuppressWarnings("unchecked")
 	private Object[] getLatestRevisionInfo(String auditTable, Long objectId, int revType) {
 		String[] parts = auditTable.split(":");
 
@@ -221,17 +203,17 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		}
 
 		String sql = String.format(GET_REV_INFO_SQL, auditTable, idColumn, "and a.revtype = :revType");
-		List<Object[]> rows = getCurrentSession().createSQLQuery(sql)
-			.addScalar("rev", LongType.INSTANCE)
-			.addScalar("revTime", TimestampType.INSTANCE)
-			.addScalar("ipAddress", StringType.INSTANCE)
-			.addScalar("userId", LongType.INSTANCE)
-			.addScalar("firstName", StringType.INSTANCE)
-			.addScalar("lastName", StringType.INSTANCE)
-			.addScalar("emailAddr", StringType.INSTANCE)
-			.addScalar("loginName", StringType.INSTANCE)
-			.addScalar("instituteName", StringType.INSTANCE)
-			.addScalar("domainName", StringType.INSTANCE)
+		List<Object[]> rows = createNativeQuery(sql, Object[].class)
+			.addLongScalar("rev")
+			.addTimestampScalar("revTime")
+			.addStringScalar("ipAddress")
+			.addLongScalar("userId")
+			.addStringScalar("firstName")
+			.addStringScalar("lastName")
+			.addStringScalar("emailAddr")
+			.addStringScalar("loginName")
+			.addStringScalar("instituteName")
+			.addStringScalar("domainName")
 			.setParameter("objectId", objectId)
 			.setParameter("revType", revType)
 			.setMaxResults(1)
@@ -271,65 +253,46 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		return detail;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Integer getRevisionsCount(String auditTable, Long objectId) {
-		List<Integer> result = getCurrentSession().createSQLQuery(String.format(GET_REV_COUNT_SQL, auditTable))
-			.addScalar("revisions", IntegerType.INSTANCE)
+		List<Integer> result = createNativeQuery(String.format(GET_REV_COUNT_SQL, auditTable), Integer.class)
+			.addIntScalar("revisions")
 			.setParameter("objectId", objectId)
 			.list();
-
 		return CollectionUtils.isEmpty(result) ? null : result.iterator().next();
 	}
 
-	private Criteria buildRevisionsListQuery(Criteria query, RevisionsListCriteria criteria) {
+	private void buildRevisionsListQuery(Criteria<Object[]> query, RevisionsListCriteria criteria) {
 		if (criteria.startDate() != null) {
-			query.add(Restrictions.ge("r.revtstmp", criteria.startDate()));
+			query.add(query.ge("r.revtstmp", criteria.startDate()));
 		}
 
 		if (criteria.endDate() != null) {
-			query.add(Restrictions.le("r.revtstmp", criteria.endDate()));
+			query.add(query.le("r.revtstmp", criteria.endDate()));
 		}
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
-			query.add(Restrictions.in("u.id", criteria.userIds()));
+			query.add(query.in("u.id", criteria.userIds()));
 		}
 
 		if (criteria.lastId() != null) {
-			query.add(Restrictions.lt("re.id", criteria.lastId()));
+			query.add(query.lt("re.id", criteria.lastId()));
 		}
 
 		if (CollectionUtils.isNotEmpty(criteria.entities())) {
-			Junction orCond = Restrictions.disjunction();
+			Junction orCond = query.disjunction();
 			for (String entity : criteria.entities()) {
-				orCond.add(Restrictions.like("re.entityName", entity, MatchMode.END));
+				orCond.add(query.like("re.entityName", entity));
 			}
 
 			query.add(orCond);
 		}
-
-		return query;
 	}
 
-	private Criteria setRevisionsListFields(Criteria query) {
-		query.setProjection(
-			Projections.projectionList()
-				.add(Projections.property("r.id"))
-				.add(Projections.property("r.revtstmp"))
-				.add(Projections.property("r.ipAddress"))
-				.add(Projections.property("u.id"))
-				.add(Projections.property("u.firstName"))
-				.add(Projections.property("u.lastName"))
-				.add(Projections.property("u.emailAddress"))
-				.add(Projections.property("u.loginName"))
-				.add(Projections.property("i.name"))
-				.add(Projections.property("d.name"))
-				.add(Projections.property("re.id"))
-				.add(Projections.property("re.type"))
-				.add(Projections.property("re.entityName"))
-				.add(Projections.property("re.entityId"))
+	private void setRevisionsListFields(Criteria<Object[]> query) {
+		query.select("r.id", "r.revtstmp", "r.ipAddress",
+			"u.id", "u.firstName", "u.lastName", "u.emailAddress", "u.loginName",
+			"i.name", "d.name", "re.id", "re.type", "re.entityName", "re.entityId"
 		);
-
-		return query;
 	}
 
 	private List<RevisionDetail> getRevisions(List<Object[]> rows) {
@@ -351,24 +314,24 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		return revisions;
 	}
 
-	private Query buildFormDataRevisionsQuery(RevisionsListCriteria criteria) {
+	private Query<Object[]> buildFormDataRevisionsQuery(RevisionsListCriteria criteria) {
 		String sql = String.format(GET_FORM_DATA_AUD_EVENTS_SQL, buildBaseFormDataRevisionsQuery(criteria), buildQueryRestrictions(criteria));
-		Query query = getCurrentSession().createSQLQuery(sql)
-			.addScalar("identifier", LongType.INSTANCE)
-			.addScalar("event_timestamp", TimestampType.INSTANCE)
-			.addScalar("event_type", StringType.INSTANCE)
-			.addScalar("ip_address", StringType.INSTANCE)
-			.addScalar("object_id", LongType.INSTANCE)
-			.addScalar("record_id", LongType.INSTANCE)
-			.addScalar("entity_type", StringType.INSTANCE)
-			.addScalar("caption", StringType.INSTANCE)
-			.addScalar("user_id", LongType.INSTANCE)
-			.addScalar("first_name", StringType.INSTANCE)
-			.addScalar("last_name", StringType.INSTANCE)
-			.addScalar("email_address", StringType.INSTANCE)
-			.addScalar("login_name", StringType.INSTANCE)
-			.addScalar("name", StringType.INSTANCE)
-			.addScalar("domain_name", StringType.INSTANCE);
+		Query<Object[]> query = createNativeQuery(sql, Object[].class)
+			.addLongScalar("identifier")
+			.addTimestampScalar("event_timestamp")
+			.addStringScalar("event_type")
+			.addStringScalar("ip_address")
+			.addLongScalar("object_id")
+			.addLongScalar("record_id")
+			.addStringScalar("entity_type")
+			.addStringScalar("caption")
+			.addLongScalar("user_id")
+			.addStringScalar("first_name")
+			.addStringScalar("last_name")
+			.addStringScalar("email_address")
+			.addStringScalar("login_name")
+			.addStringScalar("name")
+			.addStringScalar("domain_name");
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
 			query.setParameterList("userIds", criteria.userIds());
@@ -393,7 +356,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		return query;
 	}
 
-	private Query buildFormRevisionsQuery(RevisionsListCriteria criteria) {
+	private Query<Object[]> buildFormRevisionsQuery(RevisionsListCriteria criteria) {
 		List<String> whereClauses = new ArrayList<>();
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
@@ -419,20 +382,20 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 		result += " order by r.rev desc ";
 		String sql = getLimitSql(result, criteria.startAt(), criteria.maxResults(), DbSettingsFactory.isOracle());
-		Query query = getCurrentSession().createSQLQuery(sql)
-			.addScalar("rev", LongType.INSTANCE)
-			.addScalar("rev_time", TimestampType.INSTANCE)
-			.addScalar("ip_address", StringType.INSTANCE)
-			.addScalar("rev_type", IntegerType.INSTANCE)
-			.addScalar("form_id", LongType.INSTANCE)
-			.addScalar("form_name", StringType.INSTANCE)
-			.addScalar("user_id", LongType.INSTANCE)
-			.addScalar("first_name", StringType.INSTANCE)
-			.addScalar("last_name", StringType.INSTANCE)
-			.addScalar("email_address", StringType.INSTANCE)
-			.addScalar("login_name", StringType.INSTANCE)
-			.addScalar("name", StringType.INSTANCE)
-			.addScalar("domain_name", StringType.INSTANCE);
+		Query<Object[]> query = createNativeQuery(sql, Object[].class)
+			.addLongScalar("rev")
+			.addTimestampScalar("rev_time")
+			.addStringScalar("ip_address")
+			.addIntScalar("rev_type")
+			.addLongScalar("form_id")
+			.addStringScalar("form_name")
+			.addLongScalar("user_id")
+			.addStringScalar("first_name")
+			.addStringScalar("last_name")
+			.addStringScalar("email_address")
+			.addStringScalar("login_name")
+			.addStringScalar("name")
+			.addStringScalar("domain_name");
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
 			query.setParameterList("userIds", criteria.userIds());

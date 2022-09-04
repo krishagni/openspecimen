@@ -4,7 +4,9 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.Participant" table="CATISSUE_PARTICIPANT" batch-size="100">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.Participant" table="CATISSUE_PARTICIPANT" batch-size="100"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.Participant">
+
     <id name="id" column="IDENTIFIER" type="long">
       <generator class="native">
         <param name="sequence">CATISSUE_PARTICIPANT_SEQ</param>

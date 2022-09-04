@@ -3,11 +3,9 @@ package com.krishagni.rbac.repository.impl;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.rbac.domain.Resource;
 import com.krishagni.rbac.repository.ResourceDao;
 import com.krishagni.rbac.repository.ResourceListCriteria;
@@ -16,36 +14,27 @@ public class ResourceDaoImpl extends AbstractDao<Resource> implements ResourceDa
 	private static final String FQN = Resource.class.getName();
 	
 	private static final String GET_RESOURCE_BY_NAME = FQN + ".getResourceByName";
-	
-	private static final String GET_ALL_RESOURCES = FQN + ".getAllResources";
-	
+
 	@Override
-	@SuppressWarnings("unchecked")
 	public Resource getResourceByName(String resourceName) {
-		List<Resource> resources = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_RESOURCE_BY_NAME)
-				.setString("name" , resourceName)
-				.list();
+		List<Resource> resources = createNamedQuery(GET_RESOURCE_BY_NAME, Resource.class)
+			.setParameter("name" , resourceName)
+			.list();
 		return resources.isEmpty() ? null : resources.get(0);
 	}
 
 	@Override
 	public Resource getResource(Long resourceId) {
-		return (Resource)sessionFactory.getCurrentSession()
-				.get(Resource.class, resourceId);
+		return getCurrentSession().get(Resource.class, resourceId);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Resource> getResources(ResourceListCriteria listCriteria) {
-		Criteria query = sessionFactory.getCurrentSession().createCriteria(Resource.class)
-				.setFirstResult(listCriteria.startAt())
-				.setMaxResults(listCriteria.maxResults());
-		
+		Criteria<Resource> query = createCriteria(Resource.class, "r");
 		if (StringUtils.isNotBlank(listCriteria.query())) {
-			query.add(Restrictions.ilike("name", listCriteria.query(), MatchMode.ANYWHERE));
+			query.add(query.ilike("r.name", listCriteria.query()));
 		}
 		
-		return query.list();
+		return query.list(listCriteria.startAt(), listCriteria.maxResults());
 	}
 }

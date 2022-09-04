@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.de.domain.Form" table="DYEXTN_CONTAINERS" batch-size="25">
+  <class name="com.krishagni.catissueplus.core.de.domain.Form" table="DYEXTN_CONTAINERS" batch-size="25"
+    entity-name="com.krishagni.catissueplus.core.de.domain.Form">
+
     <id name="id" column="IDENTIFIER"/>
 
     <property name="name" column="NAME"/>

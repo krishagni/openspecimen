@@ -20,7 +20,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.NotAudited;
-import org.hibernate.proxy.HibernateProxyHelper;
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.LazyInitializer;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
@@ -127,8 +128,7 @@ public class BaseEntity {
 			return true;
 		}
 
-		if (obj == null	|| 
-			getClass() != HibernateProxyHelper.getClassWithoutInitializingProxy(obj)) {
+		if (obj == null	|| getClass() != getClassWithoutInitializingProxy(obj)) {
 			return false;
 		}
 
@@ -183,8 +183,18 @@ public class BaseEntity {
 		return Collections.emptySet();
 	}
 
+	protected Class getClassWithoutInitializingProxy(Object obj) {
+		if (obj instanceof HibernateProxy) {
+			HibernateProxy proxy = (HibernateProxy) obj;
+			LazyInitializer li = proxy.getHibernateLazyInitializer();
+			return li.getPersistentClass();
+		} else {
+			return obj.getClass();
+		}
+	}
+
 	private Set<String> getProperties() {
-		Class<?> klass = HibernateProxyHelper.getClassWithoutInitializingProxy(this);
+		Class<?> klass = getClassWithoutInitializingProxy(this);
 		Set<String> properties = entityProperties.get(klass.getName());
 		if (properties != null) {
 			return properties;
@@ -337,7 +347,7 @@ public class BaseEntity {
 		}
 
 		try {
-			String className = HibernateProxyHelper.getClassWithoutInitializingProxy(value).getName();
+			String className = getClassWithoutInitializingProxy(value).getName();
 			if (!entityNameProperties.containsKey(className)) {
 				PropertyDescriptor[] descriptors = bean.getPropertyDescriptors();
 				entityNameProperties.put(className, Arrays.stream(descriptors).anyMatch(d -> d.getName().equals("name")));

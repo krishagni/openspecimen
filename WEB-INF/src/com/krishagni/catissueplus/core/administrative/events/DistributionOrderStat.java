@@ -9,11 +9,13 @@ public class DistributionOrderStat {
 	
 	private String name;
 	
-	private DistributionProtocolSummary distributionProtocol;
+	private Long dpId;
+
+	private String dpShortTitle;
 
 	private Date executionDate;
 
-	private Map<String, Object> groupByAttrVals = new HashMap<String, Object>();
+	private Map<String, Object> groupByAttrVals = new HashMap<>();
 	
 	private Long distributedSpecimenCount;
 	
@@ -33,12 +35,20 @@ public class DistributionOrderStat {
 		this.name = name;
 	}
 
-	public DistributionProtocolSummary getDistributionProtocol() {
-		return distributionProtocol;
+	public Long getDpId() {
+		return dpId;
 	}
 
-	public void setDistributionProtocol(DistributionProtocolSummary distributionProtocol) {
-		this.distributionProtocol = distributionProtocol;
+	public void setDpId(Long dpId) {
+		this.dpId = dpId;
+	}
+
+	public String getDpShortTitle() {
+		return dpShortTitle;
+	}
+
+	public void setDpShortTitle(String dpShortTitle) {
+		this.dpShortTitle = dpShortTitle;
 	}
 
 	public Date getExecutionDate() {

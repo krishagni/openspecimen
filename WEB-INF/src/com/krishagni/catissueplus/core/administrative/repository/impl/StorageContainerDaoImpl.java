@@ -10,23 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Junction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Property;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -43,7 +32,14 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Conjunction;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
+import com.krishagni.catissueplus.core.common.repository.Junction;
+import com.krishagni.catissueplus.core.common.repository.Query;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -56,47 +52,38 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	public Class<?> getType() {
 		return StorageContainer.class;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public List<StorageContainer> getStorageContainers(StorageContainerListCriteria listCrit) {
-		return new ListQueryBuilder(listCrit).query()
-				.setFirstResult(listCrit.startAt())
-				.setMaxResults(listCrit.maxResults())
-				.list();
+		Query<StorageContainer> query = new ListQueryBuilder(listCrit).query(StorageContainer.class);
+		return query.setFirstResult(listCrit.startAt())
+			.setMaxResults(listCrit.maxResults())
+			.list();
 	}
 	
 	@Override
 	public Long getStorageContainersCount(StorageContainerListCriteria listCrit) {
-		return ((Number) new ListQueryBuilder(listCrit, true).query().uniqueResult()).longValue();
+		return new ListQueryBuilder(listCrit, true).query(Long.class).uniqueResult();
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public StorageContainer getByName(String name) {
-		List<StorageContainer> result = sessionFactory.getCurrentSession()
-				.createCriteria(StorageContainer.class)
-				.add(Restrictions.eq("name", name).ignoreCase())
-				.add(Restrictions.eq("activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
-				.list();
-
-		return result.isEmpty() ? null : result.iterator().next();
+		Criteria<StorageContainer> query = createCriteria(StorageContainer.class, "s");
+		return query.add(query.eq("s.name", name))
+			.add(query.eq("s.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
+			.uniqueResult();
 	}
-	
-	@SuppressWarnings("unchecked")
-	public StorageContainer getByBarcode(String barcode) {		
-		List<StorageContainer> result = sessionFactory.getCurrentSession()
-				.createCriteria(StorageContainer.class)
-				.add(Restrictions.eq("barcode", barcode).ignoreCase())
-				.add(Restrictions.eq("activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
-				.list();
 
-		return result.isEmpty() ? null : result.iterator().next();		
+	public StorageContainer getByBarcode(String barcode) {
+		Criteria<StorageContainer> query = createCriteria(StorageContainer.class, "s");
+		return query.add(query.eq(query.lower("s.barcode"), barcode.toLowerCase()))
+			.add(query.eq("s.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
+			.uniqueResult();
 	}
 
 	@Override
 	public void delete(StorageContainerPosition position) {
-		sessionFactory.getCurrentSession().delete(position);		
+		super.delete(position);
 	}
 
 	@Override
@@ -104,73 +91,71 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return getObjectIds("containerId", key, value);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getNonCompliantContainers(ContainerRestrictionsCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(StorageContainer.class)
-			.createAlias("descendentContainers", "d")
-			.add(Restrictions.eq("id", crit.containerId()))
-			.setProjection(Projections.distinct(Projections.property("d.name")));
+		Criteria<String> query = createCriteria(StorageContainer.class, String.class, "s");
+		query.join("s.descendentContainers", "d")
+			.add(query.eq("s.id", crit.containerId()))
+			.distinct().select("d.name");
 
-		Disjunction restriction = Restrictions.disjunction();
+		Disjunction restriction = query.disjunction();
 		if (isNotEmpty(crit.specimenClasses())) {
-			query.createAlias("d.compAllowedSpecimenClasses", "spmnClass", JoinType.LEFT_OUTER_JOIN);
+			query.leftJoin("d.compAllowedSpecimenClasses", "spmnClass");
 			restriction.add(
-				Restrictions.conjunction()
-					.add(Restrictions.isNotNull("spmnClass.id"))
-					.add(Restrictions.not(Restrictions.in("spmnClass.id", getPvIds(crit.specimenClasses()))))
+				query.conjunction()
+					.add(query.isNotNull("spmnClass.id"))
+					.add(query.notIn("spmnClass.id", getPvIds(crit.specimenClasses())))
 			);
 		}
 
-		query.createAlias("d.compAllowedSpecimenTypes", "spmnType", JoinType.LEFT_OUTER_JOIN);
-		Junction notInTypes = Restrictions.conjunction();
+		query.leftJoin("d.compAllowedSpecimenTypes", "spmnType");
+		Junction notInTypes = query.conjunction();
 		if (isNotEmpty(crit.specimenTypes())) {
-			notInTypes.add(Restrictions.not(Restrictions.in("spmnType.id", getPvIds(crit.specimenTypes()))));
+			notInTypes.add(query.notIn("spmnType.id", getPvIds(crit.specimenTypes())));
 		}
 
 		if (isNotEmpty(crit.specimenClasses())) {
-			DetachedCriteria typesCrit = DetachedCriteria.forClass(PermissibleValue.class, "pv")
-				.createAlias("pv.parent", "ppv")
-				.add(Restrictions.eq("pv.attribute", "specimen_type"))
-				.add(Restrictions.in("ppv.id", getPvIds(crit.specimenClasses())))
-				.setProjection(Property.forName("pv.id"));
-			notInTypes.add(Subqueries.propertyNotIn("spmnType.id", typesCrit));
+			SubQuery<Long> typesQuery = query.createSubQuery(PermissibleValue.class, "pv");
+			typesQuery.join("pv.parent", "ppv")
+				.add(typesQuery.eq("pv.attribute", "specimen_type"))
+				.add(typesQuery.in("ppv.id", getPvIds(crit.specimenClasses())))
+				.select("pv.id");
+			notInTypes.add(query.notIn("spmnType.id", typesQuery));
 		}
 
 		restriction.add(
-			Restrictions.conjunction()
-				.add(Restrictions.isNotNull("spmnType.id"))
+			query.conjunction()
+				.add(query.isNotNull("spmnType.id"))
 				.add(notInTypes)
 		);
 
 		if (isNotEmpty(crit.collectionProtocols())) {
-			query.createAlias("d.compAllowedCps", "cp", JoinType.LEFT_OUTER_JOIN);
+			query.leftJoin("d.compAllowedCps", "cp");
 			restriction.add(
-				Restrictions.conjunction()
-					.add(Restrictions.isNotNull("cp.id"))
-					.add(Restrictions.not(Restrictions.in("cp.id", crit.collectionProtocolIds())))
+				query.conjunction()
+					.add(query.isNotNull("cp.id"))
+					.add(query.notIn("cp.id", crit.collectionProtocolIds()))
 			);
 		} else {
-			DetachedCriteria siteCrit = DetachedCriteria.forClass(CollectionProtocolSite.class)
-				.createAlias("collectionProtocol", "cp1")
-				.createAlias("site", "site1")
-				.add(Restrictions.eqProperty("cp1.id", "cp.id"))
-				.setProjection(Property.forName("site1.id"));
-
-			query.createAlias("d.compAllowedCps", "cp", JoinType.LEFT_OUTER_JOIN);
+			query.leftJoin("d.compAllowedCps", "cp");
+			SubQuery<Long> siteQuery = query.createSubQuery(CollectionProtocolSite.class, "cpSite");
+			siteQuery.join("cpSite.collectionProtocol", "cp1")
+				.join("cpSite.site", "site1")
+				.add(siteQuery.eq(siteQuery.getProperty("cp1.id"), query.getProperty("cp.id")))
+				.select("site1.id");
 			restriction.add(
-				Restrictions.conjunction()
-					.add(Restrictions.isNotNull("cp.id"))
-					.add(Subqueries.notIn(crit.siteId(), siteCrit))
+				query.conjunction()
+					.add(query.isNotNull("cp.id"))
+					.add(query.not(query.valueIn(crit.siteId(), siteQuery)))
 			);
 		}
 
 		if (isNotEmpty(crit.distributionProtocols())) {
-			query.createAlias("d.compAllowedDps", "dp", JoinType.LEFT_OUTER_JOIN);
+			query.leftJoin("d.compAllowedDps", "dp");
 			restriction.add(
-				Restrictions.conjunction()
-					.add(Restrictions.isNotNull("dp.id"))
-					.add(Restrictions.not(Restrictions.in("dp.id", crit.distributionProtocolIds())))
+				query.conjunction()
+					.add(query.isNotNull("dp.id"))
+					.add(query.notIn("dp.id", crit.distributionProtocolIds()))
 			);
 		}
 
@@ -178,81 +163,78 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return query.add(restriction).list();
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	@Override
 	public List<String> getNonCompliantSpecimens(ContainerRestrictionsCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(StorageContainer.class)
-			.createAlias("descendentContainers", "d")
-			.createAlias("d.occupiedPositions", "pos")
-			.createAlias("pos.occupyingSpecimen", "spmn")
-			.createAlias("spmn.visit", "visit")
-			.createAlias("visit.registration", "cpr")
-			.createAlias("cpr.collectionProtocol", "cp")
-			.add(Restrictions.eq("id", crit.containerId()))
-			.setProjection(Projections.distinct(Projections.property("spmn.label")));
+		Criteria<String> query = createCriteria(StorageContainer.class, String.class, "s");
+		query.join("s.descendentContainers", "d")
+			.join("d.occupiedPositions", "pos")
+			.join("pos.occupyingSpecimen", "spmn")
+			.join("spmn.visit", "visit")
+			.join("visit.registration", "cpr")
+			.join("cpr.collectionProtocol", "cp")
+			.add(query.eq("s.id", crit.containerId()))
+			.distinct().select("spmn.label");
 
-		Conjunction notInTypes = Restrictions.conjunction();
+		Conjunction notInTypes = query.conjunction();
 		if (isNotEmpty(crit.specimenClasses())) {
-			query.createAlias("spmn.specimenClass", "spmnClass");
-			notInTypes.add(Restrictions.not(Restrictions.in("spmnClass.id", getPvIds(crit.specimenClasses()))));
+			query.join("spmn.specimenClass", "spmnClass");
+			notInTypes.add(query.notIn("spmnClass.id", getPvIds(crit.specimenClasses())));
 		}
 
 		if (isNotEmpty(crit.specimenTypes())) {
-			query.createAlias("spmn.specimenType", "spmnType");
-			notInTypes.add(Restrictions.not(Restrictions.in("spmnType.id", getPvIds(crit.specimenTypes()))));
+			query.join("spmn.specimenType", "spmnType");
+			notInTypes.add(query.notIn("spmnType.id", getPvIds(crit.specimenTypes())));
 		}
 
-		Disjunction restriction = Restrictions.disjunction();
+		Disjunction restriction = query.disjunction();
 		if (isNotEmpty(crit.specimenClasses()) || isNotEmpty(crit.specimenTypes())) {
 			restriction.add(notInTypes);
 		}
 
 		if (isNotEmpty(crit.collectionProtocols())) {
-			restriction.add(Restrictions.not(Restrictions.in("cp.id", crit.collectionProtocolIds())));
+			restriction.add(query.notIn("cp.id", crit.collectionProtocolIds()));
 		} else {
-			DetachedCriteria siteCrit = DetachedCriteria.forClass(CollectionProtocolSite.class)
-				.createAlias("collectionProtocol", "cp1")
-				.createAlias("site", "site1")
-				.add(Restrictions.eqProperty("cp1.id", "cp.id"))
-				.setProjection(Property.forName("site1.id"));
+			SubQuery<Long> siteQuery = query.createSubQuery(CollectionProtocolSite.class, "cpSite");
+			siteQuery.join("cpSite.collectionProtocol", "cp1")
+				.join("cpSite.site", "site1")
+				.add(siteQuery.eq(siteQuery.getProperty("cp1.id"), query.getProperty("cp.id")))
+				.select("site1.id");
 
-			query.createAlias("site", "contSite");
-			restriction.add(Subqueries.propertyNotIn("contSite.id", siteCrit));
+			query.join("site", "contSite");
+			restriction.add(query.notIn("contSite.id", siteQuery));
 		}
 
 		return query.add(restriction).list();
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	@Override
 	public List<String> getNonCompliantDistributedSpecimens(ContainerRestrictionsCriteria crit) {
 		if (isEmpty(crit.distributionProtocols())) {
 			return Collections.emptyList();
 		}
 
-		return (List<String>) getCurrentSession().createCriteria(DistributionOrder.class, "order")
-			.createAlias("order.distributionProtocol", "dp")
-			.createAlias("order.orderItems", "orderItem")
-			.createAlias("orderItem.specimen", "spmn")
-			.createAlias("spmn.position", "pos")
-			.createAlias("pos.container", "container")
-			.createAlias("container.ancestorContainers", "ancestor")
-			.add(Restrictions.eq("ancestor.id", crit.containerId()))
-			.add(Restrictions.not(Restrictions.in("dp.id", crit.distributionProtocolIds())))
-			.setProjection(Projections.distinct(Projections.property("spmn.label")))
+		Criteria<String> query = createCriteria(DistributionOrder.class, String.class, "order");
+		return query.join("order.distributionProtocol", "dp")
+			.join("order.orderItems", "orderItem")
+			.join("orderItem.specimen", "spmn")
+			.join("spmn.position", "pos")
+			.join("pos.container", "container")
+			.join("container.ancestorContainers", "ancestor")
+			.add(query.eq("ancestor.id", crit.containerId()))
+			.add(query.notIn("dp.id", crit.distributionProtocolIds()))
+			.distinct().select("spmn.label")
 			.list();
 	}
 
 	@Override
 	public int getSpecimensCount(Long containerId) {
 		Map<Long, Integer> counts = getSpecimensCount(Collections.singletonList(containerId));
-		return counts.containsKey(containerId) ? counts.get(containerId) : 0;
+		return counts.getOrDefault(containerId, 0);
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	@Override
 	public Map<Long, Integer> getSpecimensCount(Collection<Long> containerIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPECIMENS_COUNT)
+		List<Object[]> rows = createNamedQuery(GET_SPECIMENS_COUNT, Object[].class)
 			.setParameterList("containerIds", containerIds)
 			.list();
 
@@ -261,59 +243,52 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 	@Override
 	public List<Specimen> getSpecimens(SpecimenListCriteria crit, boolean orderByLocation) {
-		Criteria query = getCurrentSession().createCriteria(Specimen.class, "specimen")
-			.createAlias("specimen.position", "pos")
-			.add(Subqueries.propertyIn("specimen.id", getContainerSpecimensListQuery(crit)))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults());
+		Criteria<Specimen> query = createCriteria(Specimen.class, "specimen");
+		query.join("specimen.position", "pos")
+			.add(query.in("specimen.id", getContainerSpecimensListQuery(crit, query)));
 
 		if (orderByLocation) {
-			query.createAlias("pos.container", "container")
-				.addOrder(Order.asc("container.name"))
-				.addOrder(Order.asc("pos.posTwoOrdinal"))
-				.addOrder(Order.asc("pos.posOneOrdinal"));
+			query.join("pos.container", "container")
+				.addOrder(query.asc("container.name"))
+				.addOrder(query.asc("pos.posTwoOrdinal"))
+				.addOrder(query.asc("pos.posOneOrdinal"));
 		} else {
-			query.addOrder(Order.asc("pos.id"));
+			query.addOrder(query.asc("pos.id"));
 		}
 
-		return query.list();
+		return query.list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public Long getSpecimensCount(SpecimenListCriteria crit) {
-		Number count = (Number) getContainerSpecimensListQuery(crit)
-			.setProjection(Projections.rowCount())
-			.getExecutableCriteria(getCurrentSession())
-			.uniqueResult();
-		return count.longValue();
+		Criteria<Long> query = createCriteria(Specimen.class, Long.class, "specimen");
+		return query.add(query.in("specimen.id", getContainerSpecimensListQuery(crit, query)))
+			.getCount("specimen.id");
 	}
 
 	@Override
-	@SuppressWarnings(value = "unchecked")
 	public Map<Long, Integer> getRootContainerSpecimensCount(Collection<Long> containerIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_ROOT_CONT_SPMNS_COUNT)
+		List<Object[]> rows = createNamedQuery(GET_ROOT_CONT_SPMNS_COUNT, Object[].class)
 			.setParameterList("containerIds", containerIds)
 			.list();
 		return rows.stream().collect(Collectors.toMap(row -> (Long)row[0], row -> (Integer)row[1]));
 	}
 
 	@Override
-	@SuppressWarnings(value = "unchecked")
 	public Map<String, Integer> getSpecimensCountByType(Long containerId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPMNS_CNT_BY_TYPE)
-			.setLong("containerId", containerId)
+		List<Object[]> rows = createNamedQuery(GET_SPMNS_CNT_BY_TYPE, Object[].class)
+			.setParameter("containerId", containerId)
 			.list();
 		return rows.stream().collect(Collectors.toMap(row -> (String)row[0], row -> (Integer)row[1]));
 	}
 
 	@Override
-	@SuppressWarnings(value = "unchecked")
 	public StorageContainerSummary getAncestorsHierarchy(Long containerId) {
 		Set<Long> ancestorIds = new HashSet<>();
 		Long rootId = null;
 
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_ANCESTORS)
-			.setLong("containerId", containerId)
+		List<Object[]> rows = createNamedQuery(GET_ANCESTORS, Object[].class)
+			.setParameter("containerId", containerId)
 			.list();
 		for (Object[] row : rows) {
 			ancestorIds.add((Long)row[0]);
@@ -322,8 +297,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			}
 		}
 
-		rows = getCurrentSession().getNamedQuery(GET_ROOT_AND_CHILD_CONTAINERS)
-			.setLong("rootId", rootId)
+		rows = createNamedQuery(GET_ROOT_AND_CHILD_CONTAINERS, Object[].class)
+			.setParameter("rootId", rootId)
 			.setParameterList("parentIds", ancestorIds)
 			.list();
 
@@ -338,10 +313,9 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	@Override
-	@SuppressWarnings(value = "unchecked")
 	public List<StorageContainerSummary> getChildContainers(StorageContainer container) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CHILD_CONTAINERS)
-			.setLong("parentId", container.getId())
+		List<Object[]> rows = createNamedQuery(GET_CHILD_CONTAINERS, Object[].class)
+			.setParameter("parentId", container.getId())
 			.list();
 
 		PositionAssigner assigner = container.getPositionAssigner();
@@ -362,38 +336,36 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	@Override
-	@SuppressWarnings(value = "unchecked")
 	public List<StorageContainer> getDescendantContainers(StorageContainerListCriteria crit) {
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(StorageContainer.class, "cont")
-			.setProjection(Projections.distinct(Projections.property("cont.id")));
-
-		Criteria innerQuery = detachedCriteria.getExecutableCriteria(getCurrentSession())
-			.createAlias("cont.ancestorContainers", "ancestors")
-			.add(Restrictions.eq("ancestors.id", crit.parentContainerId()));
+		Criteria<StorageContainer> outerQuery = createCriteria(StorageContainer.class, "cont");
+		SubQuery<Long> innerQuery = outerQuery.createSubQuery(StorageContainer.class, "cont")
+			.distinct().select("cont.id");
+		innerQuery.join("cont.ancestorContainers", "ancestors")
+			.add(innerQuery.eq("ancestors.id", crit.parentContainerId()));
 
 		if (crit.siteCps() != null && !crit.siteCps().isEmpty()) {
-			innerQuery.createAlias("cont.site", "site")
-				.createAlias("cont.allowedCps", "cp", JoinType.LEFT_OUTER_JOIN);
+			innerQuery.join("cont.site", "site")
+				.leftJoin("cont.allowedCps", "cp");
 
 			boolean instituteAdded = false;
-			Disjunction siteCpsCond = Restrictions.disjunction();
+			Disjunction siteCpsCond = innerQuery.disjunction();
 			for (SiteCpPair siteCp : crit.siteCps()) {
-				Junction siteCpCond = Restrictions.conjunction();
+				Junction siteCpCond = innerQuery.conjunction();
 				if (siteCp.getSiteId() != null) {
-					siteCpCond.add(Restrictions.eq("site.id", siteCp.getSiteId()));
+					siteCpCond.add(innerQuery.eq("site.id", siteCp.getSiteId()));
 				} else {
 					if (!instituteAdded) {
-						innerQuery.createAlias("site.institute", "institute");
+						innerQuery.join("site.institute", "institute");
 						instituteAdded = true;
 					}
 
-					siteCpCond.add(Restrictions.eq("institute.id", siteCp.getInstituteId()));
+					siteCpCond.add(innerQuery.eq("institute.id", siteCp.getInstituteId()));
 				}
 
 				if (siteCp.getCpId() != null) {
-					siteCpCond.add(Restrictions.or(
-						Restrictions.isNull("cp.id"),
-						Restrictions.eq("cp.id", siteCp.getCpId())
+					siteCpCond.add(innerQuery.or(
+						innerQuery.isNull("cp.id"),
+						innerQuery.eq("cp.id", siteCp.getCpId())
 					));
 				}
 
@@ -404,35 +376,32 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		}
 
 		if (StringUtils.isNotBlank(crit.query())) {
-			innerQuery.add(Restrictions.ilike("cont.name", crit.query(), crit.matchMode()));
+			innerQuery.add(innerQuery.ilike("cont.name", crit.query()));
 		}
 
-		return getCurrentSession().createCriteria(StorageContainer.class, "cont")
-			.add(Subqueries.propertyIn("cont.id", detachedCriteria))
-			.addOrder(Order.asc("cont.id"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.list();
+		return outerQuery.add(outerQuery.in("cont.id", innerQuery))
+			.addOrder(outerQuery.asc("cont.id"))
+			.list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public int deleteReservedPositions(List<String> reservationIds) {
-		return getCurrentSession().getNamedQuery(DEL_POS_BY_RSV_ID)
+		return createNamedQuery(DEL_POS_BY_RSV_ID)
 			.setParameterList("reservationIds", reservationIds)
 			.executeUpdate();
 	}
 
 	@Override
 	public int deleteReservedPositionsOlderThan(Date expireTime) {
-		return getCurrentSession().getNamedQuery(DEL_EXPIRED_RSV_POS)
-			.setTimestamp("expireTime", expireTime)
+		return createNamedQuery(DEL_EXPIRED_RSV_POS)
+			.setParameter("expireTime", expireTime)
 			.executeUpdate();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Long> getLeafContainerIds(Long containerId, int startAt, int maxContainers) {
-		return getCurrentSession().getNamedQuery(GET_LEAF_CONTAINERS)
+		return createNamedQuery(GET_LEAF_CONTAINERS, Long.class)
 			.setParameter("containerId", containerId)
 			.setFirstResult(startAt)
 			.setMaxResults(maxContainers)
@@ -447,50 +416,49 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		List<Long> containerIds, List<SiteCpPair> siteCps,
 		boolean useMrnSites, int firstN) {
 
-		DetachedCriteria validSpmnsQuery = DetachedCriteria.forClass(Specimen.class, "specimen")
-			.setProjection(Projections.distinct(Projections.property("specimen.id")));
+		Function<AbstractCriteria<?, ?>, SubQuery<Long>> validSpmnsQuery = (query) -> {
+			SubQuery<Long> subQuery = query.createSubQuery(Specimen.class, "specimen");
+			subQuery.join("specimen.position", "pos")
+				.join("pos.container", "container")
+				.join("container.ancestorContainers", "aContainer")
+				.add(subQuery.in("aContainer.id", containerIds))
+				.distinct().select("specimen.id");
+			BiospecimenDaoHelper.getInstance().addSiteCpsCond(subQuery, siteCps, useMrnSites);
+			return subQuery;
+		};
 
-		Criteria query = validSpmnsQuery.getExecutableCriteria(getCurrentSession())
-			.createAlias("specimen.position", "pos")
-			.createAlias("pos.container", "container")
-			.createAlias("container.ancestorContainers", "aContainer")
-			.add(Restrictions.in("aContainer.id", containerIds));
-
-		BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, siteCps, useMrnSites, "visit");
 		return getInvalidSpecimens(containerIds, validSpmnsQuery, firstN);
 	}
 
 	@Override
 	public Map<String, List<String>> getInvalidSpecimensForSite(List<Long> containerIds, Long siteId, int firstN) {
-		DetachedCriteria validSpmnsQuery = DetachedCriteria.forClass(Specimen.class, "specimen")
-			.setProjection(Projections.distinct(Projections.property("specimen.id")));
-		validSpmnsQuery.getExecutableCriteria(getCurrentSession())
-			.createAlias("specimen.position", "pos")
-			.createAlias("pos.container", "container")
-			.createAlias("container.ancestorContainers", "aContainer")
-			.createAlias("specimen.collectionProtocol", "cp")
-			.createAlias("cp.sites", "cpSite")
-			.createAlias("cpSite.site", "site")
-			.add(Restrictions.in("aContainer.id", containerIds))
-			.add(Restrictions.eq("site.id", siteId));
+		Function<AbstractCriteria<?, ?>, SubQuery<Long>> validSpmnsQuery = (query) -> {
+			SubQuery<Long> subQuery = query.createSubQuery(Specimen.class, "specimen");
+			subQuery.join("specimen.position", "pos")
+				.join("pos.container", "container")
+				.join("container.ancestorContainers", "aContainer")
+				.join("specimen.collectionProtocol", "cp")
+				.join("cp.sites", "cpSite")
+				.join("cpSite.site", "site")
+				.add(subQuery.in("aContainer.id", containerIds))
+				.add(subQuery.eq("site.id", siteId))
+				.distinct().select("specimen.id");
+			return subQuery;
+		};
 		return getInvalidSpecimens(containerIds, validSpmnsQuery, firstN);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<Long, List<Long>> getDescendantContainerIds(Collection<Long> containerIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_DESCENDANT_CONTAINER_IDS)
+		List<Object[]> rows = createNamedQuery(GET_DESCENDANT_CONTAINER_IDS, Object[].class)
 			.setParameterList("containerIds", containerIds)
 			.list();
 
 		Map<Long, List<Long>> result = new HashMap<>();
 		for (Object[] row : rows) {
 			Long ancestorId = (Long) row[0];
-			List<Long> descendantIds = result.get(ancestorId);
-			if (descendantIds == null) {
-				descendantIds = new ArrayList<>();
-				result.put(ancestorId, descendantIds);
-			}
+			List<Long> descendantIds = result.computeIfAbsent(ancestorId, k -> new ArrayList<>());
 			descendantIds.add((Long) row[1]);
 		}
 
@@ -498,16 +466,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<StorageContainer> getShippedContainers(Collection<Long> containerIds) {
-		return getCurrentSession().getNamedQuery(GET_SHIPPED_CONTAINERS)
+		return createNamedQuery(GET_SHIPPED_CONTAINERS, StorageContainer.class)
 			.setParameterList("containerIds", containerIds)
 			.list();
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<StorageContainerSummary> getUtilisations(Collection<Long> containerIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CONTAINER_UTILISATION)
+		List<Object[]> rows = createNamedQuery(GET_CONTAINER_UTILISATION, Object[].class)
 			.setParameterList("containerIds", containerIds)
 			.list();
 
@@ -526,29 +494,20 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		).collect(Collectors.toList());
 	}
 
-	@SuppressWarnings("unchecked")
-	private Map<String, List<String>> getInvalidSpecimens(List<Long> containerIds, DetachedCriteria validSpmnsQuery, int firstN) {
-		List<Object[]> rows = getCurrentSession().createCriteria(Specimen.class, "specimen")
-			.createAlias("specimen.position", "pos")
-			.createAlias("pos.container", "container")
-			.createAlias("container.ancestorContainers", "aContainer")
-			.setProjection(Projections.projectionList()
-				.add(Projections.property("specimen.label"))
-				.add(Projections.property("container.name")))
-			.add(Subqueries.propertyNotIn("specimen.id", validSpmnsQuery))
-			.add(Restrictions.in("aContainer.id", containerIds))
-			.addOrder(Order.asc("container.name"))
-			.setMaxResults(firstN > 0 ? firstN : 5)
-			.list();
+	private Map<String, List<String>> getInvalidSpecimens(List<Long> containerIds, Function<AbstractCriteria<?, ?>, SubQuery<Long>> validSpmnsQuery, int firstN) {
+		Criteria<Object[]> query = createCriteria(Specimen.class, Object[].class, "specimen");
+		List<Object[]> rows = query.join("specimen.position", "pos")
+			.join("pos.container", "container")
+			.join("container.ancestorContainers", "aContainer")
+			.select("specimen.label", "container.name")
+			.add(query.notIn("specimen.id", validSpmnsQuery.apply(query)))
+			.add(query.in("aContainer.id", containerIds))
+			.addOrder(query.asc("container.name"))
+			.list(0, firstN > 0 ? firstN : 5);
 
 		Map<String, List<String>> result = new HashMap<>();
 		for (Object[] row : rows) {
-			List<String> spmnLabels = result.get((String) row[1]);
-			if (spmnLabels == null) {
-				spmnLabels = new ArrayList<>();
-				result.put((String) row[1], spmnLabels);
-			}
-
+			List<String> spmnLabels = result.computeIfAbsent((String) row[1], k -> new ArrayList<>());
 			spmnLabels.add((String) row[0]);
 		}
 
@@ -628,7 +587,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			return container;
 		}
 
-		Collections.sort(container.getChildContainers(), this::comparePositions);
+		container.getChildContainers().sort(this::comparePositions);
 		container.getChildContainers().forEach(this::sortChildContainers);
 		return container;
 	}
@@ -637,59 +596,51 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return ObjectUtils.compare(s1.getStorageLocation().getPosition(), s2.getStorageLocation().getPosition());
 	}
 
-	private DetachedCriteria getContainerSpecimensListQuery(SpecimenListCriteria crit) {
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Specimen.class, "specimen")
-			.setProjection(Projections.distinct(Projections.property("specimen.id")));
-		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
-
-
-		query.createAlias("specimen.position", "pos")
-			.createAlias("pos.container", "container")
-			.createAlias("container.ancestorContainers", "anscestor")
-			.add(Restrictions.eq("anscestor.id", crit.ancestorContainerId()));
+	private SubQuery<Long> getContainerSpecimensListQuery(SpecimenListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
+		SubQuery<Long> query = mainQuery.createSubQuery(Specimen.class, "specimen");
+		query.distinct().select("specimen.id")
+			.join("specimen.position", "pos")
+			.join("pos.container", "container")
+			.join("container.ancestorContainers", "anscestor")
+			.add(query.eq("anscestor.id", crit.ancestorContainerId()));
 
 		if (crit.containerId() != null) {
-			query.add(Restrictions.eq("container.id", crit.containerId()));
+			query.add(query.eq("container.id", crit.containerId()));
 		} else if (StringUtils.isNotBlank(crit.container())) {
-			query.add(Restrictions.eq("container.name", crit.container()));
+			query.add(query.eq("container.name", crit.container()));
 		}
 
 		if (StringUtils.isNotBlank(crit.type())) {
-			query.createAlias("specimen.specimenType", "typePv")
-				.add(Restrictions.eq("typePv.value", crit.type()));
+			query.join("specimen.specimenType", "typePv")
+				.add(query.eq("typePv.value", crit.type()));
 		}
 
 		if (StringUtils.isNotBlank(crit.anatomicSite())) {
-			query.createAlias("specimen.tissueSite", "anatomicPv")
-				.add(Restrictions.eq("anatomicPv.value", crit.anatomicSite()));
+			query.join("specimen.tissueSite", "anatomicPv")
+				.add(query.eq("anatomicPv.value", crit.anatomicSite()));
 		}
 
-		String startAlias = "visit";
 		if (StringUtils.isNotBlank(crit.ppid()) || crit.cpId() != null || StringUtils.isNotBlank(crit.cpShortTitle())) {
-			query.createAlias("specimen.visit", "visit")
-				.createAlias("visit.registration", "cpr");
-
-			startAlias = "cp";
+			query.join("specimen.visit", "visit")
+				.join("visit.registration", "cpr");
 
 			if (StringUtils.isNotBlank(crit.ppid())) {
-				query.add(Restrictions.ilike("cpr.ppid", crit.ppid(), crit.matchMode()));
+				query.add(query.ilike("cpr.ppid", crit.ppid()));
 			}
 
 			if (crit.cpId() != null || StringUtils.isNotBlank(crit.cpShortTitle())) {
-				query.createAlias("cpr.collectionProtocol", "cp");
+				query.join("cpr.collectionProtocol", "cp");
 
 				if (crit.cpId() != null) {
-					query.add(Restrictions.eq("cp.id", crit.cpId()));
+					query.add(query.eq("cp.id", crit.cpId()));
 				} else {
-					query.add(Restrictions.eq("cp.shortTitle", crit.cpShortTitle()));
+					query.add(query.eq("cp.shortTitle", crit.cpShortTitle()));
 				}
-
-				startAlias = "cpSite";
 			}
 		}
 
-		BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), startAlias);
-		return detachedCriteria;
+		BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites());
+		return query;
 	}
 
 	private List<Long> getPvIds(Collection<PermissibleValue> pvs) {
@@ -705,17 +656,20 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		
 		private StringBuilder where = new StringBuilder();
 		
-		private Map<String, Object> params = new HashMap<String, Object>();
+		private final Map<String, Object> params = new HashMap<>();
+
+		private boolean countReq = false;
 		
 		public ListQueryBuilder(StorageContainerListCriteria crit) {
-			prepareQuery(crit, false);
+			prepareQuery(crit);
 		}
 		
 		public ListQueryBuilder(StorageContainerListCriteria crit, boolean countReq) {
-			prepareQuery(crit, countReq);
+			this.countReq = countReq;
+			prepareQuery(crit);
 		}
 
-		public Query query() {
+		public <T> Query<T> query(Class<T> returnType) {
 			addIdsRestriction();
 			addNotInIdsRestriction();
 			addNameRestriction();		
@@ -734,13 +688,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			// permissions check
 			addSiteCpRestriction();
 			
-			String hql = new StringBuilder(select)
-				.append(" ").append(from)
-				.append(" ").append(where)
-				.append(" order by c.id asc")
-				.toString();
-			
-			Query query = getCurrentSession().createQuery(hql);
+			String hql = select + " " + from + " " + where + " order by c.id asc";
+			Query<T> query = createQuery(hql, returnType);
 			for (Map.Entry<String, Object> param : params.entrySet()) {
 				if (param.getValue() instanceof Collection<?>) {
 					query.setParameterList(param.getKey(), (Collection<?>)param.getValue());
@@ -752,7 +701,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			return query;
 		}
 		
-		private void prepareQuery(StorageContainerListCriteria crit, boolean countReq) {
+		private void prepareQuery(StorageContainerListCriteria crit) {
 			this.crit = crit;
 
 			select = new StringBuilder(countReq ? "select count(distinct c.id)" : "select distinct c");

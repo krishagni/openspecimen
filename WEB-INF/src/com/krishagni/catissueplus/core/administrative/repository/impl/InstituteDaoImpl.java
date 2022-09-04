@@ -8,10 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.events.InstituteDetail;
@@ -19,6 +15,7 @@ import com.krishagni.catissueplus.core.administrative.repository.InstituteDao;
 import com.krishagni.catissueplus.core.administrative.repository.InstituteListCriteria;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class InstituteDaoImpl extends AbstractDao<Institute> implements InstituteDao {
 	
@@ -28,16 +25,10 @@ public class InstituteDaoImpl extends AbstractDao<Institute> implements Institut
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<InstituteDetail> getInstitutes(InstituteListCriteria listCrit) {
-		Criteria query = getInstituteListQuery(listCrit)
-			.addOrder(Order.asc("institute.name"))
-			.setFirstResult(listCrit.startAt())
-			.setMaxResults(listCrit.maxResults());
-		
-		addProjectionFields(query);
-		
-		List<Object[]> rows = query.list();
+		Criteria<Object[]> query = addProjectionFields(getInstituteListQuery(listCrit));
+
+		List<Object[]> rows = query.orderBy(query.asc("institute.name")).list();
 		List<InstituteDetail> institutes = new ArrayList<>();
 		Map<Long, InstituteDetail> instituteMap = new HashMap<>();
 		
@@ -62,16 +53,12 @@ public class InstituteDaoImpl extends AbstractDao<Institute> implements Institut
 
 	@Override
 	public Long getInstitutesCount(InstituteListCriteria listCrit) {
-		Number count = ((Number)getInstituteListQuery(listCrit)
-			.setProjection(Projections.rowCount())
-			.uniqueResult());
-		return count.longValue();
+		return getInstituteListQuery(listCrit).getCount("institute.id");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Institute> getInstituteByNames(List<String> names) {
-		return getCurrentSession().getNamedQuery(GET_INSTITUTES_BY_NAME)
+		return createNamedQuery(GET_INSTITUTES_BY_NAME, Institute.class)
 			.setParameterList("names", names)
 			.list();
 	}
@@ -84,7 +71,7 @@ public class InstituteDaoImpl extends AbstractDao<Institute> implements Institut
 
 	@Override
 	public List<DependentEntityDetail> getDependentEntities(Long instituteId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_DEPENDENT_ENTITIES)
+		List<Object[]> rows = createNamedQuery(GET_DEPENDENT_ENTITIES, Object[].class)
 			.setParameter("instituteId", instituteId)
 			.list();
 
@@ -99,39 +86,30 @@ public class InstituteDaoImpl extends AbstractDao<Institute> implements Institut
 		return dependents;
 	}
 	
-	private Criteria getInstituteListQuery(InstituteListCriteria crit) {
-		Criteria query = sessionFactory.getCurrentSession()
-			.createCriteria(Institute.class, "institute");
-
+	private Criteria<Object[]> getInstituteListQuery(InstituteListCriteria crit) {
+		Criteria<Object[]> query = createCriteria(Institute.class, Object[].class, "institute");
 		return addSearchConditions(query, crit);
 	}
 
-	private Criteria addSearchConditions(Criteria query, InstituteListCriteria listCrit) {
+	private Criteria<Object[]> addSearchConditions(Criteria<Object[]> query, InstituteListCriteria listCrit) {
 		if (StringUtils.isNotBlank(listCrit.query())) {
-			query.add(Restrictions.ilike("name", listCrit.query(), listCrit.matchMode()));
+			query.add(query.ilike("institute.name", listCrit.query()));
 		}
 
-		applyIdsFilter(query, "id", listCrit.ids());
+		applyIdsFilter(query, "institute.id", listCrit.ids());
 		return query;
 	}
 	
-	private void addProjectionFields(Criteria query) {
-		query.setProjection(Projections.distinct(
-			Projections.projectionList()
-				.add(Projections.property("institute.id"), "id")
-				.add(Projections.property("institute.name"), "name")
-				.add(Projections.property("institute.activityStatus"), "activityStatus")
-		));
+	private Criteria<Object[]> addProjectionFields(Criteria<Object[]> query) {
+		return query.distinct().select("institute.id", "institute.name", "institute.activityStatus");
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	private void addInstituteStats(Map<Long, InstituteDetail> institutesMap) {
 		if (institutesMap == null || institutesMap.isEmpty()) {
 			return;
 		}
 		
-		List<Object[]> stats = getSessionFactory().getCurrentSession()
-			.getNamedQuery(GET_INSTITUTE_STATS)
+		List<Object[]> stats = createNamedQuery(GET_INSTITUTE_STATS, Object[].class)
 			.setParameterList("instituteIds", institutesMap.keySet())
 			.list();
 		

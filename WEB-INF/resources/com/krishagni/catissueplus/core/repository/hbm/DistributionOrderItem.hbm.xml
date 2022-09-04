@@ -4,7 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem" table="OS_ORDER_ITEMS">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem" table="OS_ORDER_ITEMS"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem">
 	
     <id name="id" column="IDENTIFIER">
       <generator class="native">

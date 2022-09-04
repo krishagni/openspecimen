@@ -4,9 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class 
-    name="com.krishagni.rbac.domain.Permission" 
-    table="RBAC_PERMISSIONS">
+  <class name="com.krishagni.rbac.domain.Permission" table="RBAC_PERMISSIONS"
+    entity-name="com.krishagni.rbac.domain.Permission">
 
     <id name="id" column="IDENTIFIER">
       <generator class="native">
@@ -26,10 +25,6 @@
 			
     <query name="getPermissionByResourceAndOperation">
       from Permission p where p.resource.name = :resourceName and p.operation.name = :operationName  
-    </query>	
-    
-    <query name="getAllPermissions">
-      from Permission  
-    </query>	
-  </class> 
+    </query>
+  </class>
 </hibernate-mapping>

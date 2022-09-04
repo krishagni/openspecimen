@@ -3,16 +3,12 @@ package com.krishagni.catissueplus.core.administrative.repository.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.administrative.domain.ContainerTask;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerTaskDao;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerTaskListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class ContainerTaskDaoImpl extends AbstractDao<ContainerTask> implements ContainerTaskDao {
 
@@ -23,40 +19,38 @@ public class ContainerTaskDaoImpl extends AbstractDao<ContainerTask> implements 
 
 	@Override
 	public List<ContainerTask> getTasks(ContainerTaskListCriteria crit) {
-		return getTasksListQuery(crit)
-			.addOrder(Order.asc("task.name"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.list();
+		Criteria<ContainerTask> query = getTasksListQuery(crit);
+		return query.orderBy(query.asc("task.name")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public Integer getTasksCount(ContainerTaskListCriteria crit) {
-		return ((Number) getTasksListQuery(crit).setProjection(Projections.rowCount()).uniqueResult()).intValue();
+		Criteria<ContainerTask> query = getTasksListQuery(crit);
+		return query.getCount("task.id").intValue();
 	}
 
 	@Override
 	public ContainerTask getByName(String name) {
-		return (ContainerTask) getCurrentSession().getNamedQuery(GET_BY_NAME)
+		return createNamedQuery(GET_BY_NAME, ContainerTask.class)
 			.setParameter("name", name)
 			.uniqueResult();
 	}
 
-	private Criteria getTasksListQuery(ContainerTaskListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(ContainerTask.class, "task");
+	private Criteria<ContainerTask> getTasksListQuery(ContainerTaskListCriteria crit) {
+		Criteria<ContainerTask> query = createCriteria(ContainerTask.class, "task");
 
 		if (StringUtils.isNotBlank(crit.query())) {
-			query.add(Restrictions.ilike("task.name", crit.query(), MatchMode.ANYWHERE));
+			query.add(query.ilike("task.name", crit.query()));
 		}
 
 		if (StringUtils.isNotBlank(crit.activityStatus())) {
-			query.add(Restrictions.eq("task.activityStatus", crit.activityStatus()));
+			query.add(query.eq("task.activityStatus", crit.activityStatus()));
 		}
 
 		return query;
 	}
 
-	private static String FAQ = ContainerTask.class.getName();
+	private static final String FAQ = ContainerTask.class.getName();
 
-	private static String GET_BY_NAME = FAQ + ".getByName";
+	private static final String GET_BY_NAME = FAQ + ".getByName";
 }

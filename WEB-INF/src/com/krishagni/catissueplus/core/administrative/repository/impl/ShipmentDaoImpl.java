@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.administrative.repository.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,15 +11,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment.Status;
@@ -31,6 +23,10 @@ import com.krishagni.catissueplus.core.administrative.repository.ShipmentDao;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
+import com.krishagni.catissueplus.core.common.repository.Restriction;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
 
@@ -40,39 +36,26 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Shipment> getShipments(ShipmentListCriteria crit) {
-		return getShipmentsQuery(crit)
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.addOrder(Order.desc("shippedDate"))
-			.list();
+		Criteria<Shipment> query = getShipmentsQuery(crit);
+		return query.orderBy(query.desc("shipment.shippedDate")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public Long getShipmentsCount(ShipmentListCriteria crit) {
-		Number count = (Number) getShipmentsQuery(crit)
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		return getShipmentsQuery(crit).getCount("shipment.id");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Shipment getShipmentByName(String name) {
-		List<Shipment> result = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_SHIPMENT_BY_NAME)
-			.setString("name", name)
-			.list();
-		
-		return result.isEmpty() ? null : result.iterator().next();
+		return createNamedQuery(GET_SHIPMENT_BY_NAME, Shipment.class)
+			.setParameter("name", name)
+			.uniqueResult();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Specimen> getShippedSpecimensByIds(List<Long> specimenIds) {
-		return sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_SHIPPED_SPECIMENS_BY_IDS)
+		return createNamedQuery(GET_SHIPPED_SPECIMENS_BY_IDS, Specimen.class)
 			.setParameterList("ids", specimenIds)
 			.list();
 	}
@@ -83,69 +66,54 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<ShipmentContainer> getShipmentContainers(ShipmentItemsListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(ShipmentContainer.class, "sc")
-			.createAlias("sc.shipment", "s")
-			.add(Restrictions.eq("s.id", crit.shipmentId()))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults());
+		Criteria<ShipmentContainer> query = createCriteria(ShipmentContainer.class, "sc")
+			.join("sc.shipment", "s");
 
 		if (StringUtils.isNotBlank(crit.orderBy())) {
 			if ("name".equals(crit.orderBy())) {
-				query.createAlias("sc.container", "box")
-					.addOrder(crit.asc() ? Order.asc("box.name") : Order.desc("box.name"));
+				query.join("sc.container", "box")
+					.orderBy(crit.asc() ? query.asc("box.name") : query.desc("box.name"));
 			}
 		}
 
-		return query.addOrder(Order.asc("sc.id")).list();
+		return query.add(query.eq("s.id", crit.shipmentId()))
+			.addOrder(query.asc("sc.id"))
+			.list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<ShipmentSpecimen> getShipmentSpecimens(ShipmentItemsListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(ShipmentSpecimen.class, "ss")
-			.createAlias("ss.shipment", "s")
-			.createAlias("ss.specimen", "spmn")
-			.add(Restrictions.eq("s.id", crit.shipmentId()));
+		Criteria<ShipmentSpecimen> query = createCriteria(ShipmentSpecimen.class, "ss")
+			.join("ss.shipment", "s")
+			.join("ss.specimen", "spmn");
 
 		if (crit.containerId() != null) {
-			query.createAlias("spmn.position", "pos")
-				.createAlias("pos.container", "box")
-				.createAlias("box.ancestorContainers", "container")
-				.add(Restrictions.eq("container.id", crit.containerId()));
+			query.join("spmn.position", "pos")
+				.join("pos.container", "box")
+				.join("box.ancestorContainers", "container")
+				.add(query.eq("container.id", crit.containerId()));
 		}
 
 		List<Long> orderBySpmnIds = null;
 		if (StringUtils.isNotBlank(crit.orderBy())) {
 			switch (crit.orderBy()) {
-				case "label":
-					query.addOrder(crit.asc() ? Order.asc("spmn.label") : Order.desc("spmn.label"));
-					break;
-
-				case "ppid":
-					query.createAlias("spmn.visit", "visit")
-						.createAlias("visit.registration", "cpr")
-						.addOrder(crit.asc() ? Order.asc("cpr.ppid") : Order.desc("cpr.ppid"));
-					break;
-
-				case "cp":
-					query.createAlias("spmn.collectionProtocol", "cp")
-						.addOrder(crit.asc() ? Order.asc("cp.shortTitle") : Order.desc("cp.shortTitle"));
-					break;
-
-				case "location":
+				case "label" -> query.addOrder(crit.asc() ? query.asc("spmn.label") : query.desc("spmn.label"));
+				case "ppid" -> query.join("spmn.visit", "visit")
+					.join("visit.registration", "cpr")
+					.addOrder(crit.asc() ? query.asc("cpr.ppid") : query.desc("cpr.ppid"));
+				case "cp" -> query.join("spmn.collectionProtocol", "cp")
+					.addOrder(crit.asc() ? query.asc("cp.shortTitle") : query.desc("cp.shortTitle"));
+				case "location" -> {
 					if (crit.containerId() == null) {
-						query.createAlias("spmn.position", "pos", JoinType.LEFT_OUTER_JOIN)
-							.createAlias("pos.container", "box", JoinType.LEFT_OUTER_JOIN);
+						query.leftJoin("spmn.position", "pos")
+							.leftJoin("pos.container", "box");
 					}
-
-					query.addOrder(crit.asc() ? Order.asc("box.name") : Order.desc("box.name"))
-						.addOrder(crit.asc() ? Order.asc("pos.posTwoOrdinal") : Order.desc("pos.posOneOrdinal"))
-						.addOrder(crit.asc() ? Order.asc("pos.posOneOrdinal") : Order.desc("pos.posOneOrdinal"));
-					break;
-
-				case "externalId":
+					query.addOrder(crit.asc() ? query.asc("box.name") : query.desc("box.name"))
+						.addOrder(crit.asc() ? query.asc("pos.posTwoOrdinal") : query.desc("pos.posOneOrdinal"))
+						.addOrder(crit.asc() ? query.asc("pos.posOneOrdinal") : query.desc("pos.posOneOrdinal"));
+				}
+				case "externalId" -> {
 					orderBySpmnIds = getSpecimenIdsOrderedByExtId(
 						crit.shipmentId(),
 						crit.asc() ? "asc" : "desc",
@@ -154,29 +122,26 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 					if (orderBySpmnIds.isEmpty()) {
 						return Collections.emptyList();
 					}
-
 					applyIdsFilter(query, "spmn.id", orderBySpmnIds);
-					break;
+				}
 			}
 		}
 
 		if (orderBySpmnIds != null) {
 			List<ShipmentSpecimen> specimens = query.list();
 			List<Long> spmnIdsOrder = orderBySpmnIds;
-			specimens.sort((ss1, ss2) -> spmnIdsOrder.indexOf(ss1.getSpecimen().getId()) - spmnIdsOrder.indexOf(ss2.getSpecimen().getId()));
+			specimens.sort(Comparator.comparingInt(ss -> spmnIdsOrder.indexOf(ss.getSpecimen().getId())));
 			return specimens;
 		}
 
-		return query.addOrder(Order.asc("ss.id"))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.list();
+		return query.addOrder(query.asc("ss.id"))
+			.add(query.eq("s.id", crit.shipmentId()))
+			.list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<Long, Integer> getSpecimensCount(Collection<Long> shipmentIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPECIMENS_COUNT)
+		List<Object[]> rows = createNamedQuery(GET_SPECIMENS_COUNT, Object[].class)
 			.setParameterList("shipmentIds", shipmentIds)
 			.list();
 
@@ -184,9 +149,8 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<Long, Integer> getSpecimensCountByContainer(Long shipmentId, Collection<Long> containerIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPECIMENS_COUNT_BY_CONT)
+		List<Object[]> rows = createNamedQuery(GET_SPECIMENS_COUNT_BY_CONT, Object[].class)
 			.setParameter("shipmentId", shipmentId)
 			.setParameterList("containerIds", containerIds)
 			.list();
@@ -194,12 +158,12 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		return rows.stream().collect(Collectors.toMap(row -> (Long)row[0], row -> (Integer)row[1]));
 	}
 
-	private Criteria getShipmentsQuery(ShipmentListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(Shipment.class)
-			.createAlias("sendingSite", "sendSite")
-			.createAlias("receivingSite", "recvSite");
+	private Criteria<Shipment> getShipmentsQuery(ShipmentListCriteria crit) {
+		Criteria<Shipment> query = createCriteria(Shipment.class, "shipment")
+			.join("shipment.sendingSite", "sendSite")
+			.join("shipment.receivingSite", "recvSite");
 
-		applyIdsFilter(query, "id", crit.ids());
+		applyIdsFilter(query, "shipment.id", crit.ids());
 		addNameRestrictions(query, crit);
 		addSendSiteRestrictions(query, crit);
 		addRecvSiteRestrictions(query, crit);
@@ -208,45 +172,45 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		return query;
 	}
 
-	private void addNameRestrictions(Criteria query, ShipmentListCriteria crit) {
+	private void addNameRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {
 		if (StringUtils.isBlank(crit.name())) {
 			return;
 		}
 		
-		query.add(Restrictions.ilike("name", crit.name(), crit.matchMode()));
+		query.add(query.ilike("shipment.name", crit.name()));
 	}
 
-	private void addSendSiteRestrictions(Criteria query, ShipmentListCriteria crit) {
+	private void addSendSiteRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {
 		if (StringUtils.isBlank(crit.sendingSite())) {
 			return;
 		}
 
-		query.add(Restrictions.eq("sendSite.name", crit.sendingSite()));
+		query.add(query.eq("sendSite.name", crit.sendingSite()));
 	}
 
-	private void addRecvSiteRestrictions(Criteria query, ShipmentListCriteria crit) {
+	private void addRecvSiteRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {
 		if (StringUtils.isNotBlank(crit.recvInstitute())) {
-			query.createAlias("recvSite.institute", "institute")
-				.add(Restrictions.eq("institute.name", crit.recvInstitute()));
+			query.join("recvSite.institute", "institute")
+				.add(query.eq("institute.name", crit.recvInstitute()));
 		}
 
 		if (StringUtils.isNotBlank(crit.recvSite())) {
-			query.add(Restrictions.eq("recvSite.name", crit.recvSite()));
+			query.add(query.eq("recvSite.name", crit.recvSite()));
 		}
 	}
 
-	private void addStatusRestrictions(Criteria query, ShipmentListCriteria crit) {
+	private void addStatusRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {
 		if (crit.status() == null) {
 			return;
 		}
 
-		query.add(Restrictions.eq("status", crit.status()));
+		query.add(query.eq("shipment.status", crit.status()));
 	}
 
 	//
 	// Used to restrict access of shipments based on users' roles on various sites
 	//
-	private void addSiteRestrictions(Criteria query, ShipmentListCriteria crit) {
+	private void addSiteRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {
 		if (CollectionUtils.isEmpty(crit.sites())) {
 			return;
 		}
@@ -265,31 +229,32 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		// (recv site is one of accessible sites and shipment is not pending) or (send site is one of accessible sites)
 		//
 		query.add(
-			Restrictions.or(
-				Restrictions.and(
-					getSiteRestriction("recvSite.id", instituteIds, siteIds),
-					Restrictions.ne("status", Status.PENDING)
+			query.or(
+				query.and(
+					getSiteRestriction(query, "recvSite.id", instituteIds, siteIds),
+					query.ne("status", Status.PENDING)
 				), /* end of AND */
-				getSiteRestriction("sendSite.id", instituteIds, siteIds)
+				getSiteRestriction(query, "sendSite.id", instituteIds, siteIds)
 			) /* end of OR */
 		);
 	}
 
-	private Criterion getSiteRestriction(String sitePropName, Collection<Long> instituteIds, Collection<Long> siteIds) {
-		Disjunction result = Restrictions.disjunction();
+	private Restriction getSiteRestriction(Criteria<?> query, String sitePropName, Collection<Long> instituteIds, Collection<Long> siteIds) {
+		Disjunction result = query.disjunction();
 
 		if (!instituteIds.isEmpty()) {
-			DetachedCriteria instituteSites = DetachedCriteria.forClass(Site.class)
-				.add(Restrictions.in("institute.id", instituteIds))
-				.setProjection(Projections.property("id"));
-			result.add(Subqueries.propertyIn(sitePropName, instituteSites));
+			SubQuery<Long> instituteSites = query.createSubQuery(Site.class, "site")
+				.join("site.institute", "institute");
+			instituteSites.add(instituteSites.in("institute.id", instituteIds))
+				.select("site.id");
+			result.add(query.in(sitePropName, instituteSites));
 		}
 
 		if (!siteIds.isEmpty()) {
-			result.add(Restrictions.in(sitePropName, siteIds));
+			result.add(query.in(sitePropName, siteIds));
 		}
 
-		return result;
+		return result.getRestriction();
 	}
 
 	private List<Long> getSpecimenIdsOrderedByExtId(Long shipmentId, String sortOrder, int startAt, int maxResults) {
@@ -298,7 +263,7 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 			sortOrder, sortOrder, sortOrder, sortOrder
 		);
 
-		List<Object[]> specimenIds = getCurrentSession().createSQLQuery(sql)
+		List<Object[]> specimenIds = createNativeQuery(sql, Object[].class)
 			.setParameter("shipmentId", shipmentId)
 			.setFirstResult(startAt)
 			.setMaxResults(maxResults)

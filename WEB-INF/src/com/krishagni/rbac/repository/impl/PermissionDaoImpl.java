@@ -12,32 +12,23 @@ public class PermissionDaoImpl extends AbstractDao<Permission> implements Permis
 	
 	private static final String GET_PERM_BY_RESOURCE_OPERATION = FQN + ".getPermissionByResourceAndOperation";
 	
-	private static final String GET_ALL_PERMISSIONS = FQN + ".getAllPermissions";
-	
 	@Override
 	public Permission getPermission(Long permissionId) {
-		return (Permission)sessionFactory.getCurrentSession()
-				.get(Permission.class, permissionId);
+		return getCurrentSession().get(Permission.class, permissionId);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Permission getPermission(String resourceName, String operationName) {
-		List<Permission> perms = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_PERM_BY_RESOURCE_OPERATION)
-				.setString("resourceName", resourceName)
-				.setString("operationName", operationName)
-				.list();
-		
+		List<Permission> perms = createNamedQuery(GET_PERM_BY_RESOURCE_OPERATION, Permission.class)
+			.setParameter("resourceName", resourceName)
+			.setParameter("operationName", operationName)
+			.list();
 		return perms.isEmpty() ? null : perms.get(0);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<Permission> getPermissions(PermissionListCriteria listCriteria) {
-		return sessionFactory.getCurrentSession().createCriteria(Permission.class)
-				.setFirstResult(listCriteria.startAt())
-				.setMaxResults(listCriteria.maxResults())
-				.list();
+		return createCriteria(Permission.class, "p")
+			.list(listCriteria.startAt(), listCriteria.maxResults());
 	}
 }

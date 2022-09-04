@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -55,16 +56,10 @@ public class ImportQueries {
 	private static Long getUserId(String username) 
 	throws Exception {
 		JdbcDao jdbcDao = JdbcDaoFactory.getJdbcDao();
-		List<Object> params = new ArrayList<Object>();
+		List<Object> params = new ArrayList<>();
 		params.add(username);
 		
-		Long userId = jdbcDao.getResultSet(GET_USER_ID_SQL, params, new ResultExtractor<Long>() {
-			@Override
-			public Long extract(ResultSet rs) throws SQLException {
-				return rs.next() ? rs.getLong(1) : null;
-			}			
-		});
-		
+		Long userId = jdbcDao.getResultSet(GET_USER_ID_SQL, params, rs -> rs.next() ? rs.getLong(1) : null);
 		if (userId == null) {
 			logger.error("No active user with login name: " + username);
 			return null;
@@ -89,7 +84,7 @@ public class ImportQueries {
 
 
 		queriesPath = queriesPath.normalize();
-		for (String file : queriesPath.toFile().list()) {
+		for (String file : Objects.requireNonNull(queriesPath.toFile().list())) {
 			Path filepath = queriesPath.resolve(file).normalize();
 			if (!filepath.startsWith(queriesPath)) {
 				logger.error("Possible path traversal problem: " + file);
@@ -219,7 +214,7 @@ public class ImportQueries {
 	private static SavedQuery getSavedQuery(byte[] content)
 	throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.setVisibilityChecker(
+		mapper.setVisibility(
 			mapper.getSerializationConfig().getDefaultVisibilityChecker()
 				.withFieldVisibility(Visibility.ANY)
 				.withGetterVisibility(Visibility.NONE)

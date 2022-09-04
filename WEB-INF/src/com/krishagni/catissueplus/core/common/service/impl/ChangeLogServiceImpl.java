@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.common.service.impl;
 import java.util.Calendar;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.type.IntegerType;
+import org.hibernate.type.StandardBasicTypes;
 
 import com.krishagni.catissueplus.core.common.service.ChangeLogService;
 
@@ -17,23 +17,25 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 
 	@Override
 	public boolean doesChangeLogExists(String id, String author, String filename) {
-		Number count = (Number) sessionFactory.getCurrentSession().createSQLQuery(GET_CHANGE_LOG_COUNT_SQL)
-			.addScalar("cnt", IntegerType.INSTANCE)
+		Integer count = (Integer) sessionFactory.getCurrentSession().createNativeQuery(GET_CHANGE_LOG_COUNT_SQL)
+			.addScalar("cnt", StandardBasicTypes.INTEGER)
 			.setParameter("id", id)
 			.setParameter("author", author)
 			.setParameter("filename", filename)
 			.uniqueResult();
-		return count.intValue() > 0;
+		return count > 0;
 	}
 
 	@Override
 	public void insertChangeLog(String id, String author, String filename) {
-		Number number = (Number) sessionFactory.getCurrentSession().createSQLQuery(GET_LATEST_CHANGE_LOG_ORDER_SQL)
-			.addScalar("orderNo", IntegerType.INSTANCE)
+		Integer orderNo = (Integer) sessionFactory.getCurrentSession().createNativeQuery(GET_LATEST_CHANGE_LOG_ORDER_SQL)
+			.addScalar("orderNo", StandardBasicTypes.INTEGER)
 			.uniqueResult();
+		if (orderNo == null) {
+			orderNo = 0;
+		}
 
-		int orderNo = number != null ? number.intValue() : 0;
-		sessionFactory.getCurrentSession().createSQLQuery(INSERT_CHANGE_LOG)
+		sessionFactory.getCurrentSession().createNativeQuery(INSERT_CHANGE_LOG)
 			.setParameter("id", id)
 			.setParameter("author", author)
 			.setParameter("filename", filename)

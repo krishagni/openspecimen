@@ -5,16 +5,19 @@
   xmlns:aop="http://www.springframework.org/schema/aop"
   xmlns:security="http://www.springframework.org/schema/security"
   xmlns:task="http://www.springframework.org/schema/task"
+  xmlns:util="http://www.springframework.org/schema/util"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+    http://www.springframework.org/schema/beans/spring-beans.xsd
     http://www.springframework.org/schema/aop 
-    http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+    http://www.springframework.org/schema/aop/spring-aop.xsd
     http://www.springframework.org/schema/security 
-    http://www.springframework.org/schema/security/spring-security-4.2.xsd
+    http://www.springframework.org/schema/security/spring-security.xsd
     http://www.springframework.org/schema/task
-    http://www.springframework.org/schema/task/spring-task-4.3.xsd
+    http://www.springframework.org/schema/task/spring-task.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd
     http://www.springframework.org/schema/context 
-    http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+    http://www.springframework.org/schema/context/spring-context.xsd">
 
   <bean id="placeholderConfig" class="com.krishagni.catissueplus.core.init.AppPropertyPlaceholderConfigurer"/>
 
@@ -887,19 +890,19 @@
     </property>
   </bean>
 
-  <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
-    <property name="velocityProperties">
-      <value>
-        resource.loader=jar,class,file
-        jar.resource.loader.class=com.krishagni.catissueplus.core.common.JarDirectoryResourceLoader
-        jar.resource.loader.path=${plugin.dir}
-        class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
-        file.resource.loader.class=org.apache.velocity.runtime.resource.loader.FileResourceLoader
-        file.resource.loader.path=
-        input.encoding=utf-8
-        output.encoding=utf-8
-      </value>
-    </property>
+  <util:properties id="velocityProps">
+    <prop key="resource.loader">jar,class,file</prop>
+    <prop key="jar.resource.loader.class">com.krishagni.catissueplus.core.common.JarDirectoryResourceLoader</prop>
+    <prop key="jar.resource.loader.path">${plugin.dir}</prop>
+    <prop key="class.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
+    <prop key="file.resource.loader.class">org.apache.velocity.runtime.resource.loader.FileResourceLoader</prop>
+    <prop key="file.resource.loader.path"/>
+    <prop key="input.encoding">utf-8</prop>
+    <prop key="output.encoding">utf-8</prop>
+  </util:properties>
+
+  <bean id="velocityEngine" class="org.apache.velocity.app.VelocityEngine">
+    <constructor-arg ref="velocityProps" />
   </bean>
 
   <bean id="barcodeGenerator" class="com.krishagni.catissueplus.core.common.barcodes.BarcodeGeneratorImpl"/>

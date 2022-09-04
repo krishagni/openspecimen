@@ -4,7 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.auth.domain.AuthDomain" table="OS_AUTH_DOMAINS">
+  <class name="com.krishagni.catissueplus.core.auth.domain.AuthDomain" table="OS_AUTH_DOMAINS"
+    entity-name="com.krishagni.catissueplus.core.auth.domain.AuthDomain">
 	
     <id name="id" column="IDENTIFIER">
       <generator class="native">

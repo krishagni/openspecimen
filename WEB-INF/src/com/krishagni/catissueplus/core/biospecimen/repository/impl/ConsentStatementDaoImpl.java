@@ -4,16 +4,12 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentStatement;
 import com.krishagni.catissueplus.core.biospecimen.repository.ConsentStatementDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.ConsentStatementListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class ConsentStatementDaoImpl extends AbstractDao<ConsentStatement> implements ConsentStatementDao {
 	
@@ -23,71 +19,63 @@ public class ConsentStatementDaoImpl extends AbstractDao<ConsentStatement> imple
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<ConsentStatement> getStatements(ConsentStatementListCriteria listCrit) {
-		return getStatementListCriteria(listCrit)
-			.addOrder(Order.asc("code"))
-			.setFirstResult(listCrit.startAt())
-			.setMaxResults(listCrit.maxResults())
-			.list();
+		Criteria<ConsentStatement> query = getStatementListCriteria(listCrit);
+		return query.orderBy(query.asc("cs.code")).list(listCrit.startAt(), listCrit.maxResults());
 	}
 	
 	@Override
 	public Long getStatementsCount(ConsentStatementListCriteria listCrit) {
-		Number count = ((Number)getStatementListCriteria(listCrit)
-			.setProjection(Projections.rowCount())
-			.uniqueResult());
-		return count.longValue();
+		return getStatementListCriteria(listCrit).getCount("cs.id");
 	}
 	
 	@Override
 	public ConsentStatement getByCode(String code) {
-		return (ConsentStatement)getCurrentSession().getNamedQuery(GET_BY_CODE)
-			.setString("code", code)
+		return createNamedQuery(GET_BY_CODE, ConsentStatement.class)
+			.setParameter("code", code)
 			.uniqueResult();
 	}
 
 	@Override
 	public List<ConsentStatement> getByCodes(Collection<String> codes) {
-		return getCurrentSession().createCriteria(ConsentStatement.class, "cs")
-			.add(Restrictions.in("cs.code", codes))
-			.list();
+		Criteria<ConsentStatement> query = createCriteria(ConsentStatement.class, "cs");
+		return query.add(query.in("cs.code", codes)).list();
 	}
 
 	@Override
 	public ConsentStatement getByStatement(String statement) {
-		return (ConsentStatement)getCurrentSession().getNamedQuery(GET_BY_STATEMENT)
-			.setString("statement", statement)
+		return createNamedQuery(GET_BY_STATEMENT, ConsentStatement.class)
+			.setParameter("statement", statement)
 			.uniqueResult();
 	}
 
-	private Criteria getStatementListCriteria(ConsentStatementListCriteria listCrit) {
-		Criteria query = getCurrentSession().createCriteria(ConsentStatement.class);
-		String searchString = listCrit.query();
+	private Criteria<ConsentStatement> getStatementListCriteria(ConsentStatementListCriteria listCrit) {
+		Criteria<ConsentStatement> query = createCriteria(ConsentStatement.class, "cs");
 
+		String searchString = listCrit.query();
 		if (StringUtils.isBlank(searchString)) {
 			addCodeRestriction(query, listCrit.code());
 			addStatementRestriction(query, listCrit.statement());
 		} else {
 			query.add(
-				Restrictions.disjunction()
-					.add(Restrictions.ilike("code",      searchString, MatchMode.ANYWHERE))
-					.add(Restrictions.ilike("statement", searchString, MatchMode.ANYWHERE))
+				query.disjunction()
+					.add(query.ilike("cs.code",      searchString))
+					.add(query.ilike("cs.statement", searchString))
 			);
 		}
 
 		return query;
 	}
 
-	private void addCodeRestriction(Criteria query, String code) {
+	private void addCodeRestriction(Criteria<ConsentStatement> query, String code) {
 		if (StringUtils.isNotBlank(code)) {
-			query.add(Restrictions.ilike("code", code, MatchMode.ANYWHERE));
+			query.add(query.ilike("code", code));
 		}
 	}
 
-	private void addStatementRestriction(Criteria query, String statement) {
+	private void addStatementRestriction(Criteria<ConsentStatement> query, String statement) {
 		if (StringUtils.isNotBlank(statement)) {
-			query.add(Restrictions.ilike("statement", statement, MatchMode.ANYWHERE));
+			query.add(query.ilike("statement", statement));
 		}
 	}
 
@@ -96,5 +84,4 @@ public class ConsentStatementDaoImpl extends AbstractDao<ConsentStatement> imple
 	private static final String GET_BY_CODE = FQN + ".getByCode";
 
 	private static final String GET_BY_STATEMENT = FQN + ".getByStatement";
-
 }

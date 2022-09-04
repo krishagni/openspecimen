@@ -4,9 +4,8 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class
-    name="com.krishagni.catissueplus.core.common.domain.ConfigProperty"
-    table="OS_CFG_PROPS">
+  <class name="com.krishagni.catissueplus.core.common.domain.ConfigProperty" table="OS_CFG_PROPS"
+    entity-name="com.krishagni.catissueplus.core.common.domain.ConfigProperty">
 	
     <id name="id" column="IDENTIFIER">
       <generator class="native">

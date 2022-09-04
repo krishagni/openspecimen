@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.common.domain.SearchEntityKeyword" table="OS_SEARCH_ENTITY_KEYWORDS">
+  <class name="com.krishagni.catissueplus.core.common.domain.SearchEntityKeyword" table="OS_SEARCH_ENTITY_KEYWORDS"
+    entity-name="com.krishagni.catissueplus.core.common.domain.SearchEntityKeyword">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">OS_SEARCH_ENTITY_KEYWORDS_SEQ</param>

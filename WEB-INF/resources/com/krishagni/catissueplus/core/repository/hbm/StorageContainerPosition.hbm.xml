@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition" table="OS_CONTAINER_POSITIONS" batch-size="25">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition" table="OS_CONTAINER_POSITIONS" batch-size="25"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition">
+
     <id name="id" column="IDENTIFIER" type="long" unsaved-value="null">
       <generator class="native">
         <param name="sequence">OS_CONTAINER_POSITIONS_SEQ</param>

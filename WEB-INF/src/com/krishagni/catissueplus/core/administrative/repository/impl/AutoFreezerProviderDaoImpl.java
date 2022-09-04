@@ -8,15 +8,14 @@ import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 
 public class AutoFreezerProviderDaoImpl extends AbstractDao<AutoFreezerProvider> implements AutoFreezerProviderDao {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<AutoFreezerProvider> getAutomatedFreezers() {
-		return getCurrentSession().createCriteria(AutoFreezerProvider.class).list();
+		return createCriteria(AutoFreezerProvider.class, "f").list();
 	}
 
 	@Override
 	public AutoFreezerProvider getByName(String name) {
-		return (AutoFreezerProvider) getCurrentSession().getNamedQuery(GET_BY_NAME)
+		return createNamedQuery(GET_BY_NAME, AutoFreezerProvider.class)
 			.setParameter("name", name)
 			.uniqueResult();
 	}

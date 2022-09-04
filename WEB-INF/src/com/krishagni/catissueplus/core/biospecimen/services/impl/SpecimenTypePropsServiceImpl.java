@@ -7,9 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeProps;
@@ -18,6 +15,8 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.PvAttributes;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class SpecimenTypePropsServiceImpl implements SpecimenTypePropsService {
 	
@@ -28,16 +27,14 @@ public class SpecimenTypePropsServiceImpl implements SpecimenTypePropsService {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenTypeProps>> getProps() {
 		try {
-			List<PermissibleValue> specimenClasses = sessionFactory.getCurrentSession()
-				.createCriteria(PermissibleValue.class, "pv")
-				.createAlias("pv.parent", "ppv", JoinType.LEFT_OUTER_JOIN)
-				.add(Restrictions.eq("pv.attribute", PvAttributes.SPECIMEN_CLASS))
-				.add(Restrictions.isNull("ppv.id"))
-				.addOrder(Order.asc("pv.value"))
+			Criteria<PermissibleValue> query = Criteria.create(sessionFactory.getCurrentSession(), PermissibleValue.class, "pv");
+			List<PermissibleValue> specimenClasses = query.createAlias("pv.parent", "ppv", AbstractCriteria.JoinType.LEFT_JOIN)
+				.add(query.eq("pv.attribute", PvAttributes.SPECIMEN_CLASS))
+				.add(query.isNull("ppv.id"))
+				.addOrder(query.asc("pv.value"))
 				.list();
 
 			List<SpecimenTypeProps> props = new ArrayList<>();

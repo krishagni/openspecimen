@@ -19,9 +19,8 @@ public class RefreshSpecimenDetailsJob implements ScheduledTask {
 	public void doJob(ScheduledJobRun jobRun)
 	throws Exception {
 		sessionFactory.getCurrentSession()
-			.createSQLQuery("CALL refresh_specimen_stats()")
+			.createNativeQuery("CALL refresh_specimen_stats()")
 			.executeUpdate();
-		
 	}
 
 }

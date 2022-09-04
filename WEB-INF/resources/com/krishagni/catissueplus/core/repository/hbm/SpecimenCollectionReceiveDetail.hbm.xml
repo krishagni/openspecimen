@@ -5,7 +5,8 @@
 
 <hibernate-mapping auto-import="false">
   <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail"
-    table="OS_SPMN_COLL_RECV_DETAILS_VIEW" mutable="false" batch-size="100">
+    table="OS_SPMN_COLL_RECV_DETAILS_VIEW" mutable="false" batch-size="100"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail">
 
     <id name="id" column="SPECIMEN_ID" type="long">
       <generator class="foreign">

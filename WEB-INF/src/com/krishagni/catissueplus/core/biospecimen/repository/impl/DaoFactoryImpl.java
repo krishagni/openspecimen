@@ -372,7 +372,7 @@ public class DaoFactoryImpl implements DaoFactory {
 	@Override
 	public ConsentStatementDao getConsentStatementDao() {
 		ConsentStatementDaoImpl dao = new ConsentStatementDaoImpl();
-		setSessionFactory(dao);;
+		setSessionFactory(dao);
 		return dao;
 	}
 

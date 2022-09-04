@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent" table="OS_POOLED_SPECIMENS">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent" table="OS_POOLED_SPECIMENS"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">OS_POOLED_SPECIMENS_SEQ</param>

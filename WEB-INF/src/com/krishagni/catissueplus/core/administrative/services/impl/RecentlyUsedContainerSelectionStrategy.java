@@ -7,16 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.events.ContainerCriteria;
@@ -24,6 +18,9 @@ import com.krishagni.catissueplus.core.administrative.services.ContainerSelectio
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 
 @Configurable
@@ -68,12 +65,12 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 		//
 		// first lookup containers used for (cp, class, type) combination
 		//
-		List<StorageContainer> containers = getRecentlySelectedContainerQuery(crit)
-			.createAlias("spmn.specimenClass", "spmnClass")
-			.add(Restrictions.eq("spmnClass.value", crit.specimen().getSpecimenClass()))
+		Criteria<StorageContainer> query = getRecentlySelectedContainerQuery(crit);
+		List<StorageContainer> containers = query.createAlias("spmn.specimenClass", "spmnClass")
+			.add(query.eq("spmnClass.value", crit.specimen().getSpecimenClass()))
 			.createAlias("spmn.specimenType", "spmnType")
-			.add(Restrictions.eq("spmnType.value", crit.specimen().getType()))
-			.list();
+			.add(query.eq("spmnType.value", crit.specimen().getType()))
+			.list(0, 1);
 
 		if (CollectionUtils.isNotEmpty(containers)) {
 			return containers.iterator().next();
@@ -82,39 +79,38 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 		//
 		// when above fails, lookup containers used for cp alone
 		//
-		containers = getRecentlySelectedContainerQuery(crit).list();
+		containers = getRecentlySelectedContainerQuery(crit).list(0, 1);
 		return CollectionUtils.isNotEmpty(containers) ? containers.iterator().next() : null;
 	}
 
-	private Criteria getRecentlySelectedContainerQuery(ContainerCriteria criteria) {
+	private Criteria<StorageContainer> getRecentlySelectedContainerQuery(ContainerCriteria criteria) {
 		Session session = sessionFactory.getCurrentSession();
 		session.enableFilter("activeEntity");
-		Criteria query = session.createCriteria(StorageContainer.class, "cont")
+		Criteria<StorageContainer> query = Criteria.create(session, StorageContainer.class, "cont")
 			.createAlias("cont.occupiedPositions", "pos")
 			.createAlias("pos.occupyingSpecimen", "spmn")
 			.createAlias("spmn.visit", "visit")
 			.createAlias("visit.registration", "reg")
 			.createAlias("reg.collectionProtocol", "cp")
 			.createAlias("cont.site", "site")
-			.createAlias("cont.compAllowedCps", "allowedCp", JoinType.LEFT_OUTER_JOIN)
-			.add(Restrictions.eq("cp.id", criteria.specimen().getCpId()))
-			.add(getSiteCpRestriction(criteria.siteCps()))
-			.addOrder(Order.desc("pos.id"))
-			.setMaxResults(1);
+			.createAlias("cont.compAllowedCps", "allowedCp", AbstractCriteria.JoinType.LEFT_JOIN);
+		query.add(query.eq("cp.id", criteria.specimen().getCpId()))
+			.add(getSiteCpRestriction(query, criteria.siteCps()))
+			.addOrder(query.desc("pos.id"));
 
 		if (criteria.rule() != null) {
-			query.add(criteria.rule().getRestriction("cont", criteria.ruleParams()));
+			query.add(criteria.rule().getRestriction(query, "cont", criteria.ruleParams()));
 		}
 
 		return query;
 	}
 
-	private Disjunction getSiteCpRestriction(Set<SiteCpPair> siteCps) {
-		Disjunction disjunction = Restrictions.disjunction();
+	private Disjunction getSiteCpRestriction(Criteria<?> query, Set<SiteCpPair> siteCps) {
+		Disjunction disjunction = query.disjunction();
 		for (SiteCpPair siteCp : siteCps) {
-			disjunction.add(Restrictions.and(
-				Restrictions.eq("site.id", siteCp.getSiteId()),
-				Restrictions.or(Restrictions.isNull("allowedCp.id"), Restrictions.eq("allowedCp.id", siteCp.getCpId()))
+			disjunction.add(query.and(
+				query.eq("site.id", siteCp.getSiteId()),
+				query.or(query.isNull("allowedCp.id"), query.eq("allowedCp.id", siteCp.getCpId()))
 			));
 		}
 

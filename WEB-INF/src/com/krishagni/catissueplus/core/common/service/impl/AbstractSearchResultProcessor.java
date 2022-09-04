@@ -10,8 +10,7 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
+import org.hibernate.type.StandardBasicTypes;
 
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.events.SearchResult;
@@ -19,18 +18,19 @@ import com.krishagni.catissueplus.core.common.service.SearchResultProcessor;
 
 public abstract class AbstractSearchResultProcessor implements SearchResultProcessor {
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<SearchResult> search(String searchTerm, long lastId, int maxResults) {
 		String query = getQuery();
 		if (StringUtils.isBlank(query)) {
 			return Collections.emptyList();
 		}
 
-		List<Object[]> rows = getSessionFactory().getCurrentSession().createSQLQuery(query)
-			.addScalar("identifier", LongType.INSTANCE)
-			.addScalar("entity", StringType.INSTANCE)
-			.addScalar("entity_id", LongType.INSTANCE)
-			.addScalar("name", StringType.INSTANCE)
-			.addScalar("value", StringType.INSTANCE)
+		List<Object[]> rows = (List<Object[]>) getSessionFactory().getCurrentSession().createNativeQuery(query)
+			.addScalar("identifier", StandardBasicTypes.LONG)
+			.addScalar("entity", StandardBasicTypes.STRING)
+			.addScalar("entity_id", StandardBasicTypes.LONG)
+			.addScalar("name", StandardBasicTypes.STRING)
+			.addScalar("value", StandardBasicTypes.STRING)
 			.setParameter(1, searchTerm + "%")
 			.setParameter(2, lastId)
 			.setMaxResults(maxResults)
@@ -38,13 +38,13 @@ public abstract class AbstractSearchResultProcessor implements SearchResultProce
 
 		List<SearchResult> results = new ArrayList<>();
 		for (Object[] row : rows) {
-			int idx = 0;
+			int idx = -1;
 			SearchResult result = new SearchResult();
-			result.setId((Long) row[idx++]);
-			result.setEntity((String) row[idx++]);
-			result.setEntityId((Long) row[idx++]);
-			result.setKey((String) row[idx++]);
-			result.setValue((String) row[idx++]);
+			result.setId((Long) row[++idx]);
+			result.setEntity((String) row[++idx]);
+			result.setEntityId((Long) row[++idx]);
+			result.setKey((String) row[++idx]);
+			result.setValue((String) row[++idx]);
 			results.add(result);
 		}
 
@@ -52,16 +52,17 @@ public abstract class AbstractSearchResultProcessor implements SearchResultProce
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map<Long, Map<String, Object>> getEntityProps(Collection<Long> entityIds) {
 		String propsQuery = getEntityPropsQuery();
 		if (StringUtils.isBlank(propsQuery) || CollectionUtils.isEmpty(entityIds)) {
 			return Collections.emptyMap();
 		}
 
-		List<Object[]> rows = getSessionFactory().getCurrentSession().createSQLQuery(propsQuery)
-			.addScalar("entityId", LongType.INSTANCE)
-			.addScalar("name", StringType.INSTANCE)
-			.addScalar("value", StringType.INSTANCE)
+		List<Object[]> rows = (List<Object[]>) getSessionFactory().getCurrentSession().createNativeQuery(propsQuery)
+			.addScalar("entityId", StandardBasicTypes.LONG)
+			.addScalar("name", StandardBasicTypes.STRING)
+			.addScalar("value", StandardBasicTypes.STRING)
 			.setParameterList("entityIds", entityIds)
 			.list();
 

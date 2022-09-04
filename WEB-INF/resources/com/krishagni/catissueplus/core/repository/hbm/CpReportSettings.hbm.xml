@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings" table="OS_CP_REPORT_SETTINGS">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings" table="OS_CP_REPORT_SETTINGS"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">OS_CP_REPORT_SETTINGS_SEQ</param>

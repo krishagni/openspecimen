@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.UserUiState" table="OS_USER_UI_STATES">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.UserUiState" table="OS_USER_UI_STATES"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.UserUiState">
+
     <id name="userId" column="USER_ID"/>
 
     <property name="stateJson" column="STATE"/>

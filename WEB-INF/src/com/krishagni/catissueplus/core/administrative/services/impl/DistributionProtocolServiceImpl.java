@@ -371,7 +371,7 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 				DistributionOrderStat orderStat = orderStats.get(0);
 				csvWriter.writeNext(new String[] {
 					MessageUtil.getInstance().getMessage("dist_dp_title"),
-					orderStat.getDistributionProtocol().getTitle()
+					orderStat.getDpShortTitle()
 				});
 			}
 			
@@ -900,9 +900,9 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 	}
 	
 	private String [] getOrderStatsReportData(DistributionOrderStat stat, DistributionOrderStatListCriteria crit) {
-		List<String> data = new ArrayList<String>();
+		List<String> data = new ArrayList<>();
 		if (crit.dpId() == null) {
-			data.add(stat.getDistributionProtocol().getShortTitle());
+			data.add(stat.getDpShortTitle());
 		}
 		
 		data.add(stat.getName());

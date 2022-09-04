@@ -8,14 +8,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Criteria;
+import org.apache.commons.lang3.ClassUtils;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Junction;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.init.AppProperties;
 
@@ -39,28 +38,32 @@ public class AbstractDao<T> implements Dao<T> {
 	
 	@Override
 	public void saveOrUpdate(T obj, boolean flush) {
-		sessionFactory.getCurrentSession().saveOrUpdate(obj);
-		if (flush) {
-			flush();
-		}
-		
-		if (!(obj instanceof BaseEntity)) {
-			return;
-		}
-		
-		BaseEntity entity = (BaseEntity) obj;
-		if (CollectionUtils.isEmpty(entity.getOnSaveProcs())) {
-			return;
-		}
+		try {
+			sessionFactory.getCurrentSession().saveOrUpdate(obj);
+			if (flush) {
+				flush();
+			}
 
-		entity.getOnSaveProcs().forEach(Runnable::run);
+			if (!(obj instanceof BaseEntity)) {
+				return;
+			}
+
+			BaseEntity entity = (BaseEntity) obj;
+			if (CollectionUtils.isEmpty(entity.getOnSaveProcs())) {
+				return;
+			}
+
+			entity.getOnSaveProcs().forEach(Runnable::run);
+		} catch (HibernateException he) {
+			throw OpenSpecimenException.serverError(he);
+		}
 	}
 
 	@Override
-	public void delete(T obj) {
-		sessionFactory.getCurrentSession().delete(obj);
+	public <R> void delete(R obj) {
+		getCurrentSession().delete(obj);
 	}
-	
+
 	@Override
 	public T getById(Long id) {
 		return getById(id, null);
@@ -93,21 +96,16 @@ public class AbstractDao<T> implements Dao<T> {
 	public void flush() {
 		sessionFactory.getCurrentSession().flush();
 	}
-	
-	protected void applyIdsFilter(Criteria criteria, String attrName, List<Long> ids) {
+
+	protected void applyIdsFilter(AbstractCriteria<?, ?> criteria, String attrName, List<Long> ids) {
 		if (CollectionUtils.isEmpty(ids)) {
 			return;
 		}
-		
-		/*
-		 * All of this because oracle doesn't allow `in` parameter size to be more than 1000
-		 * so the parameter item list needs to be chunked out.
-		 */
-		Junction or = Restrictions.disjunction();
-		int numValues = ids.size();
-		for (int i = 0; i < numValues; i += 500) {
-			List<Long> params = ids.subList(i, Math.min(i + 500, numValues));
-			or.add(Restrictions.in(attrName, params));
+
+		Junction or = criteria.disjunction();
+		for (int i = 0; i < ids.size(); i += 500) {
+			List<Long> params = ids.subList(i, Math.min(i + 500, ids.size()));
+			or.add(criteria.in(attrName, params));
 		}
 
 		criteria.add(or);
@@ -121,11 +119,10 @@ public class AbstractDao<T> implements Dao<T> {
 	}
 
 	protected Map<String, Object> getObjectIds(String propName, String key, Object value) {
-		List<Long> rows = getCurrentSession().createCriteria(getType())
-			.setProjection(Projections.projectionList().add(Projections.property("id")))
-			.add(Restrictions.eq(key, value))
-			.list();
+		Criteria<Long> criteria = Criteria.create(getCurrentSession(), getType(),  Long.class, "t")
+			.select("t.id");
 
+		List<Long> rows = criteria.add(criteria.eq("t." + key, value)).list();
 		if (CollectionUtils.isEmpty(rows)) {
 			return Collections.emptyMap();
 		}
@@ -151,6 +148,46 @@ public class AbstractDao<T> implements Dao<T> {
 
 	protected boolean isMySQL() {
 		return getDbType().equals("mysql");
+	}
+
+	protected <R> Criteria<R> createCriteria(Class<R> fromClass, String alias) {
+		return createCriteria(fromClass, fromClass, alias);
+	}
+
+	protected <R> Criteria<R> createCriteria(Class<?> fromClass, Class<R> returnClass, String alias) {
+		return Criteria.create(getCurrentSession(), fromClass, returnClass, alias);
+	}
+
+	protected Query<?> createNamedQuery(String name) {
+		return Query.createNamedQuery(getCurrentSession(), name);
+	}
+
+	protected <R> Query<R> createNamedQuery(String name, Class<R> returnType) {
+		if (ClassUtils.isPrimitiveOrWrapper(returnType) || returnType.isArray() || returnType == String.class) {
+			return Query.createNamedQuery(getCurrentSession(), name);
+		}
+
+		return Query.createNamedQuery(getCurrentSession(), name, returnType);
+	}
+
+	public <R> Query<R> createQuery(String hql) {
+		return Query.createQuery(getCurrentSession(), hql);
+	}
+
+	public <R> Query<R> createQuery(String hql, Class<R> returnType) {
+		return Query.createQuery(getCurrentSession(), hql, returnType);
+	}
+
+	protected <R> Query<R> createNativeQuery(String sql) {
+		return Query.createNativeQuery(getCurrentSession(), sql);
+	}
+
+	protected <R> Query<R> createNativeQuery(String sql, Class<R> returnType) {
+		if (ClassUtils.isPrimitiveOrWrapper(returnType) || returnType.isArray() || returnType == String.class) {
+			return Query.createNativeQuery(getCurrentSession(), sql);
+		}
+
+		return Query.createNativeQuery(getCurrentSession(), sql, returnType);
 	}
 
 	private String getDbType() {

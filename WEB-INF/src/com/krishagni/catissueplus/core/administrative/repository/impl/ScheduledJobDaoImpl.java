@@ -9,14 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
-import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
@@ -24,38 +16,32 @@ import com.krishagni.catissueplus.core.administrative.events.JobRunsListCriteria
 import com.krishagni.catissueplus.core.administrative.events.ScheduledJobListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ScheduledJobDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class ScheduledJobDaoImpl extends AbstractDao<ScheduledJob> implements ScheduledJobDao {
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<ScheduledJob> getScheduledJobs(ScheduledJobListCriteria criteria) {
-		return getScheduledJobsListQuery(criteria)
-			.setFirstResult(criteria.startAt())
-			.setMaxResults(criteria.maxResults())
-			.addOrder(Order.desc("id"))
-			.list();
+		Criteria<ScheduledJob> query = getScheduledJobsListQuery(criteria);
+		return query.orderBy(query.desc("job.id")).list(criteria.startAt(), criteria.maxResults());
 	}
 
 	@Override
 	public Long getScheduledJobsCount(ScheduledJobListCriteria crit) {
-		Number count = (Number) getScheduledJobsListQuery(crit)
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		return getScheduledJobsListQuery(crit).getCount("job.id");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public ScheduledJob getJobByName(String name) {
-		return (ScheduledJob) getCurrentSession().getNamedQuery(GET_JOB_BY_NAME)
+		return createNamedQuery(GET_JOB_BY_NAME, ScheduledJob.class)
 			.setParameter("name", name)
 			.uniqueResult();
 	}
 
 	@Override
 	public String getRunByNodeForUpdate(Long jobId) {
-		Object[] row = (Object[]) getCurrentSession().getNamedQuery(GET_RUN_BY_NODE_FOR_UPDATE)
+		Object[] row = createNamedQuery(GET_RUN_BY_NODE_FOR_UPDATE, Object[].class)
 			.setParameter("jobId", jobId)
 			.uniqueResult();
 		return (String) row[2];
@@ -63,7 +49,7 @@ public class ScheduledJobDaoImpl extends AbstractDao<ScheduledJob> implements Sc
 
 	@Override
 	public int updateRunByNode(Long jobId, String node) {
-		return getCurrentSession().getNamedQuery(UPDATE_RUN_BY_NODE)
+		return createNamedQuery(UPDATE_RUN_BY_NODE)
 			.setParameter("jobId", jobId)
 			.setParameter("nodeName", node)
 			.executeUpdate();
@@ -75,35 +61,29 @@ public class ScheduledJobDaoImpl extends AbstractDao<ScheduledJob> implements Sc
 	}
 
 	@Override
-	public void saveOrUpdateJobRun(ScheduledJobRun job) {
-		getCurrentSession().saveOrUpdate(job);
+	public void saveOrUpdateJobRun(ScheduledJobRun jobRun) {
+		getCurrentSession().saveOrUpdate(jobRun);
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<ScheduledJobRun> getJobRuns(JobRunsListCriteria crit) {
-		return getCurrentSession().createCriteria(ScheduledJobRun.class, "run")
-			.add(Subqueries.propertyIn("run.id", getJobRunIdsQuery(crit)))
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.addOrder(Order.desc("run.id"))
-			.list();
+		Criteria<ScheduledJobRun> query = createCriteria(ScheduledJobRun.class, "run");
+		query.add(query.in("run.id", getJobRunIdsQuery(crit, query)));
+		return query.orderBy(query.desc("run.id")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<Long, Date> getJobsLastRunTime(Collection<Long> jobIds) {
 		return getJobsLastRunTime(jobIds, ALL_STATUSES);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<Long, Date> getJobsLastRunTime(Collection<Long> jobIds, List<String> statuses) {
 		if (jobIds == null || jobIds.isEmpty()) {
 			return Collections.emptyMap();
 		}
 
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_JOBS_LAST_RUNTIME)
+		List<Object[]> rows = createNamedQuery(GET_JOBS_LAST_RUNTIME, Object[].class)
 			.setParameterList("jobIds", jobIds)
 			.setParameterList("statuses", statuses)
 			.list();
@@ -111,83 +91,81 @@ public class ScheduledJobDaoImpl extends AbstractDao<ScheduledJob> implements Sc
 	}
 
 	@Override
-	public Class getType() {
+	public Class<ScheduledJob> getType() {
 		return ScheduledJob.class;
 	}
 
-	private Criteria getScheduledJobsListQuery(ScheduledJobListCriteria crit) {
-		return getCurrentSession().createCriteria(ScheduledJob.class, "job")
-			.add(Subqueries.propertyIn("job.id", getJobIdsQuery(crit)));
+	private Criteria<ScheduledJob> getScheduledJobsListQuery(ScheduledJobListCriteria crit) {
+		Criteria<ScheduledJob> query = createCriteria(ScheduledJob.class, "job");
+		return query.add(query.in("job.id", getJobIdsQuery(crit, query)));
 	}
 
-	private DetachedCriteria getJobIdsQuery(ScheduledJobListCriteria crit) {
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(ScheduledJob.class, "job")
-			.setProjection(Projections.distinct(Projections.property("job.id")));
-		Criteria subQuery = detachedCriteria.getExecutableCriteria(getCurrentSession());
+	private SubQuery<Long> getJobIdsQuery(ScheduledJobListCriteria crit, Criteria<ScheduledJob> query) {
+		SubQuery<Long> subQuery = query.createSubQuery(ScheduledJob.class, "job");
+		subQuery.distinct().select("job.id");
 
 		if (StringUtils.isNotBlank(crit.query())) {
-			subQuery.add(Restrictions.ilike("job.name", crit.query(), MatchMode.ANYWHERE));
+			subQuery.add(subQuery.ilike("job.name", crit.query()));
 		}
 
 		if (crit.type() != null) {
-			subQuery.add(Restrictions.eq("job.type", crit.type()));
+			subQuery.add(subQuery.eq("job.type", crit.type()));
 		}
 
 		if (crit.userId() != null) {
-			subQuery.createAlias("job.sharedWith", "su", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("job.createdBy", "createdBy")
+			subQuery.join("job.createdBy", "createdBy")
+				.leftJoin("job.sharedWith", "su")
 				.add(
-					Restrictions.or(
-						Restrictions.eq("createdBy.id", crit.userId()),
-						Restrictions.eq("su.id", crit.userId())
+					subQuery.or(
+						subQuery.eq("createdBy.id", crit.userId()),
+						subQuery.eq("su.id", crit.userId())
 					)
 				);
 		}
 
-		return detachedCriteria;
+		return subQuery;
 	}
 
-	private DetachedCriteria getJobRunIdsQuery(JobRunsListCriteria crit) {
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(ScheduledJobRun.class, "run")
-			.setProjection(Projections.distinct(Projections.property("run.id")));
-		Criteria subQuery = detachedCriteria.getExecutableCriteria(getCurrentSession());
+	private SubQuery<Long> getJobRunIdsQuery(JobRunsListCriteria crit, Criteria<ScheduledJobRun> query) {
+		SubQuery<Long> subQuery = query.createSubQuery(ScheduledJobRun.class, "run")
+			.distinct().select("run.id");
 
 		if (crit.jobId() != null) {
-			subQuery.createAlias("run.scheduledJob", "job")
-				.add(Restrictions.eq("job.id", crit.jobId()));
+			subQuery.join("run.scheduledJob", "job")
+				.add(subQuery.eq("job.id", crit.jobId()));
 		}
 
 		if (crit.fromDate() != null) {
-			subQuery.add(Restrictions.ge("run.startedAt", crit.fromDate()));
+			subQuery.add(subQuery.ge("run.startedAt", crit.fromDate()));
 		}
 
 		if (crit.toDate() != null) {
-			subQuery.add(Restrictions.le("run.finishedAt", crit.toDate()));
+			subQuery.add(subQuery.le("run.finishedAt", crit.toDate()));
 		}
 
 		if (crit.status() != null) {
-			subQuery.add(Restrictions.eq("run.status", crit.status()));
+			subQuery.add(subQuery.eq("run.status", crit.status()));
 		}
 
 		if (crit.userId() != null) {
-			subQuery.createAlias("run.runBy", "runBy")
-				.add(Restrictions.eq("runBy.id", crit.userId()));
+			subQuery.join("run.runBy", "runBy")
+				.add(subQuery.eq("runBy.id", crit.userId()));
 
 			if (crit.jobId() == null) {
-				subQuery.createAlias("run.scheduledJob", "job");
+				subQuery.join("run.scheduledJob", "job");
 			}
 
-			subQuery.createAlias("job.sharedWith", "su", JoinType.LEFT_OUTER_JOIN)
-				.createAlias("job.createdBy", "createdBy")
+			subQuery.join("job.createdBy", "createdBy")
+				.leftJoin("job.sharedWith", "su")
 				.add(
-					Restrictions.or(
-						Restrictions.eq("createdBy.id", crit.userId()),
-						Restrictions.eq("su.id", crit.userId())
+					subQuery.or(
+						subQuery.eq("createdBy.id", crit.userId()),
+						subQuery.eq("su.id", crit.userId())
 					)
 				);
 		}
 
-		return detachedCriteria;
+		return subQuery;
 	}
 
 

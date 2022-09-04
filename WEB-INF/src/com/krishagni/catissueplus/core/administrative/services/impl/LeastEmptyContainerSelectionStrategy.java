@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
-import org.hibernate.type.LongType;
+import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -88,12 +88,12 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		containersCache.get().put(container.getId(), container);
 		return container;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private List<Long> getLeastEmptyContainerIds(ContainerCriteria crit, Boolean aliquotsInSameContainer) {
 		sessionFactory.getCurrentSession().flush();
 
-		String sql = sessionFactory.getCurrentSession().getNamedQuery(GET_LEAST_EMPTY_CONTAINER_ID).getQueryString();
+		String sql = sessionFactory.getCurrentSession().createNamedQuery(GET_LEAST_EMPTY_CONTAINER_ID).getQueryString();
 		int orderByIdx = sql.indexOf("order by");
 		String beforeOrderBySql = sql.substring(0, orderByIdx);
 		String orderByLaterSql  = sql.substring(orderByIdx);
@@ -105,8 +105,8 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		}
 
 		sql += orderByLaterSql;
-		return sessionFactory.getCurrentSession().createSQLQuery(sql)
-			.addScalar("containerId", LongType.INSTANCE)
+		return (List<Long>) sessionFactory.getCurrentSession().createNativeQuery(sql)
+			.addScalar("containerId", StandardBasicTypes.LONG)
 			.setParameter("cpId", crit.specimen().getCpId())
 			.setParameter("specimenClass", crit.specimen().getSpecimenClass())
 			.setParameter("specimenType", crit.specimen().getType())
@@ -116,13 +116,11 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 	}
 
 	private String getCriteriaKey(ContainerCriteria crit) {
-		String key = new StringBuilder()
-			.append(crit.specimen().getCpId()).append(":")
-			.append(crit.specimen().getSpecimenClass()).append(":")
-			.append(crit.specimen().getType()).append(":")
-			.append(getAccessRestrictions(crit)).append(":")
-			.append(crit.rule() != null ? crit.rule().getSql("c", crit.ruleParams()) : "")
-			.toString();
+		String key = crit.specimen().getCpId() + ":" +
+			crit.specimen().getSpecimenClass() + ":" +
+			crit.specimen().getType() + ":" +
+			getAccessRestrictions(crit) + ":" +
+			(crit.rule() != null ? crit.rule().getSql("c", crit.ruleParams()) : "");
 		return Utility.getDigest(key);
 	}
 
@@ -130,12 +128,10 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		List<String> accessRestrictions = new ArrayList<>();
 
 		for (SiteCpPair siteCp : crit.siteCps()) {
-			accessRestrictions.add(new StringBuilder("(c.site_id = ")
-				.append(siteCp.getSiteId())
-				.append(" and ")
-				.append("(allowed_cps.cp_id is null or allowed_cps.cp_id = ").append(siteCp.getCpId()).append(")")
-				.append(")")
-				.toString()
+			accessRestrictions.add("(c.site_id = " + siteCp.getSiteId() +
+				" and " +
+				"(allowed_cps.cp_id is null or allowed_cps.cp_id = " + siteCp.getCpId() + ")" +
+				")"
 			);
 		}
 

@@ -3,14 +3,12 @@ package com.krishagni.catissueplus.core.administrative.repository.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledContainerActivity;
 import com.krishagni.catissueplus.core.administrative.repository.ScheduledContainerActivityDao;
 import com.krishagni.catissueplus.core.administrative.repository.ScheduledContainerActivityListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 
 public class ScheduledContainerActivityDaoImpl extends AbstractDao<ScheduledContainerActivity> implements ScheduledContainerActivityDao {
 	@Override
@@ -20,36 +18,33 @@ public class ScheduledContainerActivityDaoImpl extends AbstractDao<ScheduledCont
 
 	@Override
 	public List<ScheduledContainerActivity> getActivities(ScheduledContainerActivityListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(ScheduledContainerActivity.class, "activity")
-			.createAlias("activity.task", "task")
-			.createAlias("activity.container", "container")
-			.setFirstResult(crit.startAt())
-			.setMaxResults(crit.maxResults())
-			.addOrder(Order.asc("activity.id"));
+		Criteria<ScheduledContainerActivity> query = createCriteria(ScheduledContainerActivity.class, "activity")
+			.join("activity.task", "task")
+			.join("activity.container", "container");
 
 		if (crit.containerId() != null) {
-			query.add(Restrictions.eq("container.id", crit.containerId()));
+			query.add(query.eq("container.id", crit.containerId()));
 		}
 
 		if (crit.taskId() != null) {
-			query.add(Restrictions.eq("task.id", crit.taskId()));
+			query.add(query.eq("task.id", crit.taskId()));
 		} else if (StringUtils.isNotBlank(crit.taskName())) {
-			query.add(Restrictions.eq("task.name", crit.taskName()));
+			query.add(query.eq("task.name", crit.taskName()));
 		}
 
 		if (StringUtils.isNotBlank(crit.activityStatus())) {
-			query.add(Restrictions.eq("activity.activityStatus", crit.activityStatus()));
+			query.add(query.eq("activity.activityStatus", crit.activityStatus()));
 		}
 
-		return query.list();
+		return query.orderBy(query.asc("activity.id")).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
 	public ScheduledContainerActivity getActivity(Long containerId, String name) {
-		return (ScheduledContainerActivity) getCurrentSession().createCriteria(ScheduledContainerActivity.class, "activity")
-			.createAlias("activity.container", "container")
-			.add(Restrictions.eq("container.id", containerId))
-			.add(Restrictions.eq("activity.name", name))
+		Criteria<ScheduledContainerActivity> query = createCriteria(ScheduledContainerActivity.class, "activity")
+			.join("activity.container", "container");
+		return query.add(query.eq("container.id", containerId))
+			.add(query.eq("activity.name", name))
 			.uniqueResult();
 	}
 }

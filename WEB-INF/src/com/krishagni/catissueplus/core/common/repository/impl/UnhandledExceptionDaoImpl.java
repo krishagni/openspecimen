@@ -2,12 +2,9 @@ package com.krishagni.catissueplus.core.common.repository.impl;
 
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
 import com.krishagni.catissueplus.core.common.domain.UnhandledException;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.UnhandledExceptionDao;
 import com.krishagni.catissueplus.core.common.repository.UnhandledExceptionListCriteria;
 
@@ -19,46 +16,40 @@ public class UnhandledExceptionDaoImpl extends AbstractDao<UnhandledException> i
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<UnhandledException> getUnhandledExceptions(UnhandledExceptionListCriteria listCrit) {
-		return getUnhandledExceptionListQuery(listCrit)
-			.addOrder(Order.desc("e.timestamp"))
-			.setFirstResult(listCrit.startAt())
-			.setMaxResults(listCrit.maxResults())
-			.list();
+		Criteria<UnhandledException> query = getUnhandledExceptionListQuery(listCrit);
+		return query.orderBy(query.desc("e.timestamp"))
+			.list(listCrit.startAt(), listCrit.maxResults());
 	}
 	
-	private Criteria getUnhandledExceptionListQuery(UnhandledExceptionListCriteria listCrit) {
-		Criteria query = getCurrentSession().createCriteria(UnhandledException.class, "e");
-		return addSearchCondition(query, listCrit);
+	private Criteria<UnhandledException> getUnhandledExceptionListQuery(UnhandledExceptionListCriteria listCrit) {
+		return addSearchCondition(createCriteria(UnhandledException.class, "e"), listCrit);
 	}
 	
-	private Criteria addSearchCondition(Criteria query, UnhandledExceptionListCriteria listCrit) {
+	private Criteria<UnhandledException> addSearchCondition(Criteria<UnhandledException> query, UnhandledExceptionListCriteria listCrit) {
 		addInstituteRestriction(query, listCrit);
-		addDateRestriction(query, listCrit);
-		return query;
+		return addDateRestriction(query, listCrit);
 	}
 	
-	private Criteria addInstituteRestriction(Criteria query, UnhandledExceptionListCriteria listCrit) {
+	private Criteria<UnhandledException> addInstituteRestriction(Criteria<UnhandledException> query, UnhandledExceptionListCriteria listCrit) {
 		if (listCrit.instituteId() != null) {
-			query.createAlias("e.user", "user")
-				.createAlias("user.institute", "institute")
-				.add(Restrictions.eq("institute.id", listCrit.instituteId()));
+			query.join("e.user", "user")
+				.join("user.institute", "institute")
+				.add(query.eq("institute.id", listCrit.instituteId()));
 		}
 		
 		return query;
 	}
 	
-	private Criteria addDateRestriction(Criteria query, UnhandledExceptionListCriteria listCrit) {
+	private Criteria<UnhandledException> addDateRestriction(Criteria<UnhandledException> query, UnhandledExceptionListCriteria listCrit) {
 		if (listCrit.fromDate() != null) {
-			query.add(Restrictions.ge("e.timestamp", listCrit.fromDate()));
+			query.add(query.ge("e.timestamp", listCrit.fromDate()));
 		}
 		
 		if (listCrit.toDate() != null) {
-			query.add(Restrictions.le("e.timestamp", listCrit.toDate()));
+			query.add(query.le("e.timestamp", listCrit.toDate()));
 		}
 		
 		return query;
 	}
-
 }

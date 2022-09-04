@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.criterion.MatchMode;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -118,9 +117,9 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 		return self();
 	}
 
-	public MatchMode matchMode() {
-		return exactMatch() ? MatchMode.EXACT : MatchMode.ANYWHERE;
-	}
+//	public MatchMode matchMode() {
+//		return exactMatch() ? MatchMode.EXACT : MatchMode.ANYWHERE;
+//	}
 
 	@Override
 	@JsonProperty("includeStats")

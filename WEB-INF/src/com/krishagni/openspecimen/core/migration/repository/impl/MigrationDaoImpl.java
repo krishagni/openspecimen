@@ -14,16 +14,13 @@ public class MigrationDaoImpl extends AbstractDao<Migration> implements Migratio
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Migration getMigrationInfo(String name, String versionFrom,
 			String versionTo) {
-		List<Migration> result = sessionFactory.getCurrentSession()
-				.getNamedQuery(GET_MIGRATION_INFO)
-				.setString("name", name)
-				.setString("versionFrom", versionFrom)
-				.setString("versionTo", versionTo)
-				.list();
-		
+		List<Migration> result = getCurrentSession().createNamedQuery(GET_MIGRATION_INFO, Migration.class)
+			.setParameter("name", name)
+			.setParameter("versionFrom", versionFrom)
+			.setParameter("versionTo", versionTo)
+			.list();
 		return result.isEmpty() ? null : result.get(0);
 	}
 

@@ -4,7 +4,9 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.StorageContainerStats" table="OS_STORAGE_CONT_STATS_VIEW" mutable="false">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.StorageContainerStats" table="OS_STORAGE_CONT_STATS_VIEW" mutable="false"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.StorageContainerStats">
+
     <id name="id" column="CONTAINER_ID" type="long">
       <generator class="foreign">
         <param name="property">container</param>

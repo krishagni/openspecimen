@@ -4,7 +4,9 @@
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig" table="OS_CP_WORKFLOWS">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig" table="OS_CP_WORKFLOWS"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig">
+
     <id name="id" column="CP_ID">
       <generator class="foreign">
         <param name="property">cp</param>

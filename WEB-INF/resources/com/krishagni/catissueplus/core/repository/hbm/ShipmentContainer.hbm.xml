@@ -4,7 +4,9 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer" table="OS_SHIPMENT_CONTAINERS">
+  <class name="com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer" table="OS_SHIPMENT_CONTAINERS"
+    entity-name="com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer">
+
     <id name="id" column="IDENTIFIER">
       <generator class="native">
         <param name="sequence">OS_SHIPMENT_ITEMS_SEQ</param>

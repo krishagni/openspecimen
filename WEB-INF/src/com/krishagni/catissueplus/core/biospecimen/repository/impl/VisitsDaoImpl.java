@@ -6,21 +6,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Subqueries;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.VisitsDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.VisitsListCriteria;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	
@@ -29,72 +25,67 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 		return Visit.class;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void loadCreatedVisitStats(Map<Long, ? extends VisitSummary> visitsMap) {
 		if (visitsMap == null || visitsMap.isEmpty()) {
 			return;
 		}
 
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_VISIT_STATS)
+		List<Object[]> rows = createNamedQuery(GET_VISIT_STATS, Object[].class)
 			.setParameterList("visitIds", visitsMap.keySet())
 			.list();
 
 		for (Object[] row : rows) {
-			int idx = 0;
-			Long visitId = (Long) row[idx++];
+			int idx = -1;
+			Long visitId = (Long) row[++idx];
 			VisitSummary visit = visitsMap.get(visitId);
-			visit.setTotalPendingSpmns((Integer) row[idx++]);
-			visit.setPendingPrimarySpmns((Integer) row[idx++]);
-			visit.setPlannedPrimarySpmnsColl((Integer) row[idx++]);
-			visit.setUnplannedPrimarySpmnsColl((Integer) row[idx++]);
-			visit.setUncollectedPrimarySpmns((Integer) row[idx++]);
-			visit.setStoredSpecimens((Integer) row[idx++]);
-			visit.setNotStoredSpecimens((Integer) row[idx++]);
-			visit.setDistributedSpecimens((Integer) row[idx++]);
-			visit.setClosedSpecimens((Integer) row[idx++]);
+			visit.setTotalPendingSpmns((Integer) row[++idx]);
+			visit.setPendingPrimarySpmns((Integer) row[++idx]);
+			visit.setPlannedPrimarySpmnsColl((Integer) row[++idx]);
+			visit.setUnplannedPrimarySpmnsColl((Integer) row[++idx]);
+			visit.setUncollectedPrimarySpmns((Integer) row[++idx]);
+			visit.setStoredSpecimens((Integer) row[++idx]);
+			visit.setNotStoredSpecimens((Integer) row[++idx]);
+			visit.setDistributedSpecimens((Integer) row[++idx]);
+			visit.setClosedSpecimens((Integer) row[++idx]);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void loadAnticipatedVisitStats(Map<Long, ? extends VisitSummary> visitsMap) {
 		if (visitsMap == null || visitsMap.isEmpty()) {
 			return;
 		}
 
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_ANTICIPATED_VISIT_STATS)
+		List<Object[]> rows = createNamedQuery(GET_ANTICIPATED_VISIT_STATS, Object[].class)
 			.setParameterList("eventIds", visitsMap.keySet())
 			.list();
 
 		for (Object[] row : rows) {
-			int idx = 0;
-			Long eventId = (Long) row[idx++];
+			int idx = -1;
+			Long eventId = (Long) row[++idx];
 			VisitSummary visit = visitsMap.get(eventId);
-			visit.setTotalPendingSpmns((Integer) row[idx++]);
-			visit.setPendingPrimarySpmns((Integer) row[idx++]);
+			visit.setTotalPendingSpmns((Integer) row[++idx]);
+			visit.setPendingPrimarySpmns((Integer) row[++idx]);
 		}
 	}
 
 	@Override
 	public Long getVisitsCount(VisitsListCriteria crit) {
-		Number count = (Number) getVisitIdsListQuery(crit).getExecutableCriteria(getCurrentSession())
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		return count.longValue();
+		Criteria<Visit> query = createCriteria(Visit.class, "visit");
+		return query.add(query.in("visit.id", getVisitIdsListQuery(crit, query))).getCount("visit.id");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Visit> getVisitsList(VisitsListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(Visit.class, "visit")
-			.add(Subqueries.propertyIn("visit.id", getVisitIdsListQuery(crit)));
-
+		Criteria<Visit> query = createCriteria(Visit.class, "visit");
+		query.add(query.in("visit.id", getVisitIdsListQuery(crit, query)))
+			.orderBy(query.asc("visit.id"));
 		if (CollectionUtils.isEmpty(crit.names())) {
-			query.setFirstResult(crit.startAt()).setMaxResults(crit.maxResults());
+			return query.list(crit.startAt(), crit.maxResults());
 		}
 
-		return query.addOrder(Order.asc("id")).list();
+		return query.list();
 	}
 
 	@Override
@@ -104,51 +95,43 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Visit> getByName(Collection<String> names) {
-		return getCurrentSession().getNamedQuery(GET_VISIT_BY_NAME)
+		return createNamedQuery(GET_VISIT_BY_NAME, Visit.class)
 			.setParameterList("names", names)
 			.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Visit> getByIds(Collection<Long> ids) {
-		return getCurrentSession().getNamedQuery(GET_VISITS_BY_IDS)
+		return createNamedQuery(GET_VISITS_BY_IDS, Visit.class)
 			.setParameterList("ids", ids)
 			.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Visit> getBySpr(String sprNumber) {
-		return getCurrentSession().getNamedQuery(GET_VISIT_BY_SPR)
+		return createNamedQuery(GET_VISIT_BY_SPR, Visit.class)
 			.setParameter("sprNumber", sprNumber)
 			.list();
 	}
 
 	@Override
 	public List<Visit> getByEvent(Long cprId, String eventLabel) {
-		return getCurrentSession().createCriteria(Visit.class, "v")
-			.createAlias("v.cpEvent", "event")
-			.createAlias("v.registration", "reg")
-			.add(Restrictions.eq("reg.id", cprId))
-			.add(Restrictions.eq("event.eventLabel", eventLabel))
+		Criteria<Visit> query = createCriteria(Visit.class, "v");
+		return query.join("v.cpEvent", "event")
+			.join("v.registration", "reg")
+			.add(query.eq("reg.id", cprId))
+			.add(query.eq("event.eventLabel", eventLabel))
 			.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> getCprVisitIds(String key, Object value) {
-		List<Object[]> rows = getCurrentSession().createCriteria(Visit.class)
-			.createAlias("registration", "cpr")
-			.createAlias("cpr.collectionProtocol", "cp")
-			.setProjection(
-				Projections.projectionList()
-					.add(Projections.property("id"))
-					.add(Projections.property("cpr.id"))
-					.add(Projections.property("cp.id")))
-			.add(Restrictions.eq(key, value))
+		Criteria<Object[]> query = createCriteria(Visit.class, Object[].class, "visit");
+		List<Object[]> rows = query.join("visit.registration", "cpr")
+			.join("cpr.collectionProtocol", "cp")
+			.select("visit.id", "cpr.id", "cp.id")
+			.add(query.eq(key, value))
 			.list();
 
 		if (CollectionUtils.isEmpty(rows)) {
@@ -164,50 +147,40 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Visit getLatestVisit(Long cprId) {
-		List<Visit> visits = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_LATEST_VISIT_BY_CPR_ID)
-			.setLong("cprId", cprId)
+		List<Visit> visits = createNamedQuery(GET_LATEST_VISIT_BY_CPR_ID, Visit.class)
+			.setParameter("cprId", cprId)
 			.setMaxResults(1)
 			.list();
-
 		return visits.isEmpty() ? null :  visits.get(0);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Visit> getByEmpiOrMrn(Long cpId, String empiOrMrn) {
-		return getCurrentSession().getNamedQuery(GET_BY_EMPI_OR_MRN)
+		return createNamedQuery(GET_BY_EMPI_OR_MRN, Visit.class)
 			.setParameter("cpId", cpId)
 			.setParameter("empiOrMrn", empiOrMrn.toLowerCase())
 			.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Visit> getBySpr(Long cpId, String sprNumber) {
-		return getCurrentSession().getNamedQuery(GET_BY_CP_SPR)
+		return createNamedQuery(GET_BY_CP_SPR, Visit.class)
 			.setParameter("cpId", cpId)
 			.setParameter("sprNo", sprNumber.toLowerCase())
 			.list();
 	}
 
-	private DetachedCriteria getVisitIdsListQuery(VisitsListCriteria crit) {
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Visit.class, "visit")
-			.setProjection(Projections.distinct(Projections.property("visit.id")));
-		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
-
+	private SubQuery<Long> getVisitIdsListQuery(VisitsListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
+		SubQuery<Long> query = mainQuery.createSubQuery(Visit.class, "visit");
 		if (crit.lastId() != null && crit.lastId() >= 0L) {
-			query.add(Restrictions.gt("id", crit.lastId()));
+			query.add(query.gt("visit.id", crit.lastId()));
 		}
 
-		String startAlias = "cpr";
 		if (crit.cpId() != null) {
-			startAlias = "cpSite";
-			query.createAlias("visit.registration", "cpr")
-				.createAlias("cpr.collectionProtocol", "cp")
-				.add(Restrictions.eq("cp.id", crit.cpId()));
+			query.join("visit.registration", "cpr")
+				.join("cpr.collectionProtocol", "cp")
+				.add(query.eq("cp.id", crit.cpId()));
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
@@ -215,14 +188,14 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.names())) {
-			query.add(Restrictions.in("name", crit.names()));
+			query.add(query.in("visit.name", crit.names()));
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
-			BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), startAlias, false);
+			BiospecimenDaoHelper.getInstance().addSiteCpsCond(query, crit.siteCps(), crit.useMrnSites(), false);
 		}
 
-		return detachedCriteria;
+		return query;
 	}
 
 	private static final String FQN = Visit.class.getName();
