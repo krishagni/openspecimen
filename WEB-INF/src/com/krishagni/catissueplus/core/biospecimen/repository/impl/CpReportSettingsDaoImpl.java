@@ -2,7 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CpReportSettings;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpReportSettingsDao;

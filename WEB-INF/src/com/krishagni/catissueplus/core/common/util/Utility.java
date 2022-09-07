@@ -62,7 +62,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
@@ -568,12 +568,15 @@ public class Utility {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T collect(Collection<?> collection, String propertyName, boolean returnSet) {
-		Collection<?> result = CollectionUtils.collect(collection, new BeanToPropertyValueTransformer(propertyName));
-		if (returnSet) {
-			return (T) new HashSet(result);
-		}
-
-		return (T) result;
+		Stream<Object> output = nullSafeStream(collection)
+			.map(object -> {
+				try {
+					return PropertyUtils.getProperty(object, propertyName);
+				} catch (Exception e) {
+					throw OpenSpecimenException.serverError(e);
+				}
+			});
+		return returnSet ? (T) output.collect(Collectors.toSet()) : (T) output.collect(Collectors.toList());
 	}
 
 	public static <T> T collect(Collection<?> collection, String propertyName) {
