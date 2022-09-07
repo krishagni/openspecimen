@@ -155,13 +155,12 @@ public class PrintRuleConfig extends BaseEntity {
 
 	private ObjectMapper getWriteMapper() {
 		ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		mapper.setVisibilityChecker(
+		return mapper.setVisibility(
 			mapper.getSerializationConfig().getDefaultVisibilityChecker()
 				.withFieldVisibility(Visibility.ANY)
 				.withGetterVisibility(Visibility.NONE)
 				.withSetterVisibility(Visibility.NONE)
 				.withCreatorVisibility(Visibility.NONE));
-		return mapper;
 	}
 
 	private boolean isDisabled() {

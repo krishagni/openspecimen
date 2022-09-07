@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.ConsentStatement;
 import com.krishagni.catissueplus.core.biospecimen.repository.ConsentStatementDao;

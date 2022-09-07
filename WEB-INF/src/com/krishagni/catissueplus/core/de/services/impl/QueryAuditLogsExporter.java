@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -211,7 +211,7 @@ public class QueryAuditLogsExporter implements Runnable {
 	private void sendFailedEmailNotif(Exception e) {
 		Map<String, Object> props = new HashMap<>();
 		props.put("errorMsg", Utility.getErrorMessage(e));
-		props.put("errorStack", ExceptionUtils.getFullStackTrace(e));
+		props.put("errorStack", ExceptionUtils.getStackTrace(e));
 		sendNotif(AUDIT_LOG_EXPORT_FAILED, props);
 	}
 

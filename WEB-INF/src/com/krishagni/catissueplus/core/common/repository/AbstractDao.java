@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ClassUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -163,10 +162,6 @@ public class AbstractDao<T> implements Dao<T> {
 	}
 
 	protected <R> Query<R> createNamedQuery(String name, Class<R> returnType) {
-		if (ClassUtils.isPrimitiveOrWrapper(returnType) || returnType.isArray() || returnType == String.class) {
-			return Query.createNamedQuery(getCurrentSession(), name);
-		}
-
 		return Query.createNamedQuery(getCurrentSession(), name, returnType);
 	}
 
@@ -183,10 +178,6 @@ public class AbstractDao<T> implements Dao<T> {
 	}
 
 	protected <R> Query<R> createNativeQuery(String sql, Class<R> returnType) {
-		if (ClassUtils.isPrimitiveOrWrapper(returnType) || returnType.isArray() || returnType == String.class) {
-			return Query.createNativeQuery(getCurrentSession(), sql);
-		}
-
 		return Query.createNativeQuery(getCurrentSession(), sql, returnType);
 	}
 

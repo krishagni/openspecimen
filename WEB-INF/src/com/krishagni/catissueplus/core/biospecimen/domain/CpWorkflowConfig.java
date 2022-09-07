@@ -64,13 +64,12 @@ public class CpWorkflowConfig extends BaseEntity {
 	
 	private ObjectMapper getWriteMapper() {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.setVisibilityChecker(
+		return mapper.setVisibility(
 			mapper.getSerializationConfig().getDefaultVisibilityChecker()
 				.withFieldVisibility(Visibility.ANY)
 				.withGetterVisibility(Visibility.NONE)
 				.withSetterVisibility(Visibility.NONE)
 				.withCreatorVisibility(Visibility.NONE));
-		return mapper;		
 	}
 	
 	public static class Workflow {

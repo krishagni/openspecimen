@@ -2,7 +2,7 @@ package com.krishagni.catissueplus.core.common.util;
 
 import java.util.Calendar;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import com.fasterxml.jackson.core.JsonProcessingException;

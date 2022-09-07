@@ -5,13 +5,12 @@ import java.util.List;
 
 import javax.persistence.LockModeType;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
-
-import liquibase.pro.packaged.Q;
 
 public class Query<R> {
 	private org.hibernate.query.Query<R> query;
@@ -23,6 +22,10 @@ public class Query<R> {
 	}
 
 	public static <R> Query<R> createNamedQuery(Session session, String name, Class<R> returnType) {
+		if (ClassUtils.isPrimitiveOrWrapper(returnType) || returnType.isArray() || returnType == String.class) {
+			return createNamedQuery(session, name);
+		}
+
 		return new Query<>(session.createNamedQuery(name, returnType));
 	}
 
@@ -48,6 +51,10 @@ public class Query<R> {
 	}
 
 	public static <R> Query<R> createNativeQuery(Session session, String sql, Class<R> returnType) {
+		if (ClassUtils.isPrimitiveOrWrapper(returnType) || returnType.isArray() || returnType == String.class) {
+			return createNativeQuery(session, sql);
+		}
+
 		Query<R> query = new Query<>(session.createNativeQuery(sql, returnType));
 		query.nativeQuery = true;
 		return query;
@@ -81,6 +88,10 @@ public class Query<R> {
 
 	public Query<R> addBlobScalar(String columnAlias) {
 		return addScalar(columnAlias, StandardBasicTypes.BLOB);
+	}
+
+	public Query<R> addBigDecimalScalar(String columnAlias) {
+		return addScalar(columnAlias, StandardBasicTypes.BIG_DECIMAL);
 	}
 
 	public Query<R> acquirePessimisticWriteLock() {

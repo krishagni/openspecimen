@@ -109,7 +109,6 @@ public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 		}
 
 		return session.createQuery(cq).uniqueResult();
-//		return session.createQuery(cq).getSingleResultOrNull();
 	}
 
 	public Long getCount(String attribute) {

@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.common.service.impl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;

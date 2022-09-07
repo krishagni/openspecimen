@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -351,7 +350,7 @@ public class Specimen extends BaseExtensionEntity {
 
 			if (this.concentration == null || !this.concentration.equals(concentration)) {
 				for (Specimen child : getChildCollection()) {
-					if (ObjectUtils.equals(this.concentration, child.getConcentration()) && child.isAliquot()) {
+					if (Objects.equals(this.concentration, child.getConcentration()) && child.isAliquot()) {
 						child.setConcentration(concentration);
 					}
 				}

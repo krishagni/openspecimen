@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.init;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -16,7 +17,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.krishagni.catissueplus.core.common.PluginManager;
@@ -150,6 +151,9 @@ public class AppServletContextListener implements ServletContextListener {
 			Attributes attrs = jarFile.getManifest().getMainAttributes();
 			String pluginName = attrs.getValue("os-plugin-name");
 			if (StringUtils.isNotBlank(pluginName)) {
+//				Class<?> jarLoader = Class.forName("com.krishagni.openspecimen.JarLoader");
+//				Method addToClassPath = jarLoader.getDeclaredMethod("addToClassPath", JarFile.class);
+//				addToClassPath.invoke(null, jarFile);
 				ClassPathUtil.addFile(file);
 				PluginManager.getInstance().addPlugin(attrs);
 			}

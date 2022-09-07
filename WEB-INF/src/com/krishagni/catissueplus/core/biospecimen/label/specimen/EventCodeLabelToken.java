@@ -1,6 +1,6 @@
 package com.krishagni.catissueplus.core.biospecimen.label.specimen;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;

@@ -30,7 +30,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.springframework.context.ApplicationListener;
@@ -891,7 +891,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 				if (csvWriter != null) {
 					csvWriter.writeNext(errorLine);
-					csvWriter.writeNext(new String[] { ExceptionUtils.getFullStackTrace(t) });
+					csvWriter.writeNext(new String[] { ExceptionUtils.getStackTrace(t) });
 				}
 			} finally {
 				ImporterContextHolder.getInstance().clearContext();

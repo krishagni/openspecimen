@@ -53,7 +53,7 @@ public class ContainerSelectionStrategyFactoryImpl implements ContainerSelection
 				return null;
 			}
 
-			return klass.newInstance();
+			return klass.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			throw new RuntimeException("Error instantiating class", e);
 		}

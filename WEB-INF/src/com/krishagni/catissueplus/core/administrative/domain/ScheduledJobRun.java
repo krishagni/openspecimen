@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.administrative.domain;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 

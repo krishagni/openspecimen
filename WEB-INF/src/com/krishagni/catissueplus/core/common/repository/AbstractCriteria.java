@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.common.repository;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -200,6 +201,10 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return Restriction.of(builder.lessThan(getExpression(attribute), value));
 	}
 
+	public Restriction ltExpr(String attribute1, String attribute2) {
+		return Restriction.of(builder.lessThan(getExpression(attribute1), getExpression(attribute2)));
+	}
+
 	public <Y extends Comparable<? super Y>> Restriction le(String attribute, Y value) {
 		return Restriction.of(builder.lessThanOrEqualTo(getExpression(attribute), value));
 	}
@@ -263,6 +268,11 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return Property.of(builder.locate(builder.lower(getExpression(attribute)), value.toLowerCase()));
 	}
 
+	public Property function(String name, Class<?> returnType, Property... args) {
+		Expression<?>[] exprArgs = Arrays.stream(args).map(Property::getExpr).toArray(Expression<?>[]::new);
+		return Property.of(builder.function(name, returnType, exprArgs));
+	}
+
 	public Order asc(String attribute) {
 		return Order.of(builder.asc(getExpression(attribute)));
 	}
@@ -308,6 +318,11 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return self();
 	}
 
+	public T groupBy(Property prop) {
+		query.groupBy(Collections.singletonList(prop.getExpr()));
+		return self();
+	}
+
 	public T groupBy(List<Property> grouping) {
 		query.groupBy(grouping.stream().map(Property::getExpr).collect(Collectors.toList()));
 		return self();
@@ -319,6 +334,10 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 
 	public Property getProperty(String name) {
 		return Property.of(getExpression(name));
+	}
+
+	public Property literal(String literal) {
+		return Property.of(builder.literal(literal));
 	}
 
 	public <X> Expression<X> getExpression(String attribute) {

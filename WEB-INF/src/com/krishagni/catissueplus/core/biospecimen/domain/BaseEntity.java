@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -263,7 +264,7 @@ public class BaseEntity {
 		if (isSimpleType(obj)) {
 			result = obj.toString();
 		} else if (obj instanceof BigDecimal) {
-			result = ((BigDecimal) obj).setScale(6, BigDecimal.ROUND_HALF_UP).toString();
+			result = ((BigDecimal) obj).setScale(6, RoundingMode.HALF_UP).toString();
 		} else if (obj instanceof Number) {
 			result = obj.toString();
 		} else if (obj instanceof Iterable) {

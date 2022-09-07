@@ -4,7 +4,7 @@ import static com.krishagni.catissueplus.core.common.PvAttributes.CLINICAL_DIAG;
 import static com.krishagni.catissueplus.core.common.PvAttributes.CLINICAL_STATUS;
 import static com.krishagni.catissueplus.core.common.service.PvValidator.isValid;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;

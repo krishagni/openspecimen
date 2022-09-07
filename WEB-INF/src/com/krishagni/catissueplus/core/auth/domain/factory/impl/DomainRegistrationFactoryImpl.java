@@ -1,7 +1,7 @@
 
 package com.krishagni.catissueplus.core.auth.domain.factory.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;

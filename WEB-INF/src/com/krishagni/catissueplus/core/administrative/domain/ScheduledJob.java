@@ -468,7 +468,7 @@ public class ScheduledJob extends BaseEntity {
 		}
 		
 		try {
-			return (ScheduledTask)Class.forName(getTaskImplfqn()).newInstance();
+			return (ScheduledTask) Class.forName(getTaskImplfqn()).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			logger.error("Invalid scheduled job class: " + getTaskImplfqn(), e);
 			throw OpenSpecimenException.userError(ScheduledJobErrorCode.INVALID_TYPE);

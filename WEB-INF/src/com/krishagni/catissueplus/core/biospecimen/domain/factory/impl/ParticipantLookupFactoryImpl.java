@@ -1,6 +1,6 @@
 package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 

@@ -14,7 +14,7 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.Configuration;
 import org.opensaml.PaosBootstrap;
