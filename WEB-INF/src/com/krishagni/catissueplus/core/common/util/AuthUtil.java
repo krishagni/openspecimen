@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.common.util;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.TimeZone;
 
@@ -14,9 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -118,11 +117,11 @@ public class AuthUtil {
 			return null;
 		}
 
-		return new String(Base64.encode(token.getBytes()));
+		return new String(Base64.getEncoder().encode(token.getBytes()));
 	}
 	
 	public static String decodeToken(String token) {
-		return new String(Base64.decode(token.getBytes()));
+		return new String(Base64.getDecoder().decode(token.getBytes()));
 	}
 	
 	public static String getTokenFromCookie(HttpServletRequest httpReq) {

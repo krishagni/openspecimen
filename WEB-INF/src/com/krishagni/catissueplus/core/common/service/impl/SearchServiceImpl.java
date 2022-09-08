@@ -46,11 +46,11 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 
 	private DaoFactory daoFactory;
 
-	private Map<String, SearchEntityKeywordProvider> entityKeywordProviders = new HashMap<>();
+	private final Map<String, SearchEntityKeywordProvider> entityKeywordProviders = new HashMap<>();
 
-	private Map<String, SearchResultProcessor> resultProcessors = new HashMap<>();
+	private final Map<String, SearchResultProcessor> resultProcessors = new HashMap<>();
 
-	private Map<Transaction, KeywordProcessor> processors = new HashMap<>();
+	private final Map<Transaction, KeywordProcessor> processors = new HashMap<>();
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -243,11 +243,6 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 		public boolean requiresPostCommitHanding(EntityPersister persister) {
 			return false;
 		}
-
-		//		@Override
-//		public boolean requiresPostCommitHandling(EntityPersister persister) {
-//			return false;
-//		}
 	}
 
 	private class KeywordProcessor {

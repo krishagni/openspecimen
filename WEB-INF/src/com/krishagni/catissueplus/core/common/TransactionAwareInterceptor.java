@@ -8,19 +8,12 @@ import org.hibernate.Interceptor;
 import org.hibernate.Transaction;
 
 public class TransactionAwareInterceptor extends EmptyInterceptor implements Interceptor {
-	private ThreadLocal<Integer> activeTxns = new ThreadLocal<Integer>() {
-		@Override
-		protected Integer initialValue() {
-			return 0;
-		}
-	};
+	private final ThreadLocal<Integer> activeTxns = ThreadLocal.withInitial(() -> 0);
 
-	private Set<TransactionEventListener> listeners = new LinkedHashSet<>();
+	private final Set<TransactionEventListener> listeners = new LinkedHashSet<>();
 
 	public void addListener(TransactionEventListener listener) {
-		if (!listeners.contains(listener)) {
-			listeners.add(listener);
-		}
+		listeners.add(listener);
 	}
 
 	public void removeListener(TransactionEventListener listener) {
@@ -38,7 +31,7 @@ public class TransactionAwareInterceptor extends EmptyInterceptor implements Int
 		if (txns <= 1) {
 			TransactionalThreadLocals.getInstance().cleanup();
 			activeTxns.remove();
-			listeners.forEach(listener -> listener.onFinishTransaction());
+			listeners.forEach(TransactionEventListener::onFinishTransaction);
 		} else {
 			activeTxns.set(txns - 1);
 		}

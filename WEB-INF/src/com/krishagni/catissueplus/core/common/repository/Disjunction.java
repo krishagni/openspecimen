@@ -11,6 +11,11 @@ public class Disjunction extends Junction {
 
 	@Override
 	public Restriction getRestriction() {
+		// empty restrictions is always true
+		if (restrictions.isEmpty()) {
+			return Restriction.of(cb.isTrue(cb.literal(true)));
+		}
+
 		Predicate predicate = restrictions.stream()
 			.map(Restriction::getPredicate)
 			.reduce(cb.disjunction(), (result, p) -> cb.or(result, p));

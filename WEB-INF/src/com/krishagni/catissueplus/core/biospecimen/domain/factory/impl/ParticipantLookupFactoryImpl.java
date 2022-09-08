@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 
-
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantLookupFactory;
@@ -74,9 +73,7 @@ public class ParticipantLookupFactoryImpl implements ParticipantLookupFactory, I
 					className = lookupFlow.substring("class:".length()).trim();
 				}
 
-
-				Class<ParticipantLookupLogic> klass = (Class<ParticipantLookupLogic>) Class.forName(className);
-				result = BeanUtils.instantiate(klass);
+				result = (ParticipantLookupLogic) BeanUtils.instantiateClass(Class.forName(className));
 			}
 		} catch (Exception e) {
 			logger.info("Invalid participant lookup flow configuration setting: " + lookupFlow, e);

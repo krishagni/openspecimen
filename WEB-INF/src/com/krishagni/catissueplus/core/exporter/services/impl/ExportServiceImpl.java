@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.exporter.services.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -26,10 +28,8 @@ import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -371,7 +371,7 @@ public class ExportServiceImpl implements ExportService {
 				if (srcFile != null && srcFile.exists()) {
 					FileUtils.copyFile(srcFile, destFile);
 				} else {
-					FileUtils.write(destFile, "File does not exists");
+					FileUtils.write(destFile, "File does not exists", Charset.defaultCharset());
 				}
 			} catch (IOException ioe) {
 				throw new RuntimeException("Error writing to file", ioe);
@@ -554,7 +554,7 @@ public class ExportServiceImpl implements ExportService {
 					Map<String, String> fcv = (Map<String, String>)value;
 					result = fcv.get("filename");
 				} else {
-					result = ObjectUtils.toString(value);
+					result = Objects.toString(value, "");
 				}
 
 				return result;

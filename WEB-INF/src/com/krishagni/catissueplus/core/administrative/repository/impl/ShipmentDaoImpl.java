@@ -28,7 +28,8 @@ import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.repository.Restriction;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
-public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
+public class
+ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
 
 	@Override
 	public Class<Shipment> getType() {

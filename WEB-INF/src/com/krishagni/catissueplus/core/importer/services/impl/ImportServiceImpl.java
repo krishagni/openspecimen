@@ -30,8 +30,8 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.Hibernate;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -39,7 +39,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -772,7 +772,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 	private void setJobRunBy(ImportJob job, String node) {
 		TransactionSynchronizationManager.registerSynchronization(
-			new TransactionSynchronizationAdapter() {
+			new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
 					job.setRunByNode(node);
@@ -782,7 +782,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	}
 
 	private boolean acquireRunLock() {
-		return newTxTmpl.execute(
+		return Boolean.TRUE.equals(newTxTmpl.execute(
 			status -> {
 				String thisNode = AppProperties.getInstance().getNodeName();
 				String activeNode = importJobDao.getActiveImportRunnerNode();
@@ -794,11 +794,11 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 					return thisNode.equals(activeNode);
 				}
 			}
-		);
+		));
 	}
 
 	private boolean releaseRunLock() {
-		return newTxTmpl.execute(
+		return Boolean.TRUE.equals(newTxTmpl.execute(
 			status -> {
 				String thisNode = AppProperties.getInstance().getNodeName();
 				String activeNode = importJobDao.getActiveImportRunnerNode();
@@ -808,7 +808,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 				return importJobDao.setActiveImportRunnerNode("none");
 			}
-		);
+		));
 	}
 
 	private Date getTimestamp(File file) {

@@ -9,9 +9,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -121,7 +121,7 @@ public class CpReportGenerator {
 		if (StringUtils.isBlank(type) || type.equalsIgnoreCase("AQL")) {
 			source = new CpAqlDataSource();
 		} else {
-			source = (CollectionProtocolService.DataSource) Class.forName(type).newInstance();
+			source = (CollectionProtocolService.DataSource) BeanUtils.instantiateClass(Class.forName(type));
 		}
 
 		return source.getMetric(cp, metricCfg);
@@ -139,7 +139,7 @@ public class CpReportGenerator {
 			if (type.equals("AQL")) {
 				dataFile = new CpAqlDataSource().getDataFile(cp, cpSettings.getDataCfg());
 			} else {
-				DataSource ds = (DataSource) Class.forName(type).newInstance();
+				DataSource ds = (DataSource) BeanUtils.instantiateClass(Class.forName(type));
 				dataFile = ds.getDataFile(cp, cpSettings.getDataCfg());
 			}
 		} else {

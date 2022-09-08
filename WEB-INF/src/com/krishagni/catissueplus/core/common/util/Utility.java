@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -474,7 +476,7 @@ public class Utility {
 		String fileText = null;
 		try {
 			if (StringUtils.isBlank(contentType) || !contentType.equals("application/pdf")) {
-				fileText = IOUtils.toString(in);
+				fileText = IOUtils.toString(in, Charset.defaultCharset());
 			} else {
 				fileText = PdfUtil.getInstance().getText(in);
 			}
@@ -1248,7 +1250,7 @@ public class Utility {
 			Process process = Runtime.getRuntime().exec("id -u");
 			process.waitFor();
 			in = process.getInputStream();
-			String userId = IOUtils.toString(in);
+			String userId = IOUtils.toString(in, Charset.defaultCharset());
 			return userId != null && userId.trim().equals("0");
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
@@ -1316,7 +1318,7 @@ public class Utility {
 					fin = new FileInputStream(file);
 				}
 
-				List<String> secretSpecs = IOUtils.readLines(fin);
+				List<String> secretSpecs = IOUtils.readLines(fin, Charset.defaultCharset());
 				secretKey = new SecretKeySpec(secretSpecs.get(0).getBytes(), secretSpecs.get(1));
 				algorithm = secretSpecs.get(1);
 			} catch (Exception e) {
@@ -1390,7 +1392,7 @@ public class Utility {
 	}
 
 	private static String divide(BigDecimal dividend, long divisor, String unit) {
-		return String.valueOf(dividend.divide(BigDecimal.valueOf(divisor), 2, BigDecimal.ROUND_HALF_UP)) + unit;
+		return dividend.divide(BigDecimal.valueOf(divisor), 2, RoundingMode.HALF_UP) + unit;
 	}
 
 	private static final String GET_DATA_DIR =

@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workflow;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
@@ -90,7 +92,11 @@ public class WorkflowUtil {
 			InputStream in = null;
 			try {
 				in = getClass().getResourceAsStream(DEF_SYS_WORKFLOWS);
-				String workflowJson = IOUtils.toString(in);
+				if (in == null) {
+					throw new RuntimeException("Default system workflow missing from the package");
+				}
+
+				String workflowJson = IOUtils.toString(in, Charset.defaultCharset());
 				defSysWorkflows = new CpWorkflowConfig();
 				defSysWorkflows.setWorkflowsJson(workflowJson);
 			} catch (Exception e) {

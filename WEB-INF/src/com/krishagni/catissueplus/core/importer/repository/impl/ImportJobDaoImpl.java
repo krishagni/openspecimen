@@ -60,14 +60,14 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 			query.join("job.params", "params");
 
 			Disjunction orCond = query.disjunction();
-			query.add(orCond);
-
 			for (Map.Entry<String, String> kv : crit.params().entrySet()) {
 				orCond.add(query.and(
 					query.eq("params.indices", kv.getKey()),
 					query.eq("params.elements", kv.getValue())
 				));
 			}
+
+			query.add(orCond);
 		}
 
 		int startAt = crit.startAt() <= 0 ? 0 : crit.startAt();

@@ -15,6 +15,10 @@ import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 public class JsonDateDeserializer extends UntypedObjectDeserializer {
 	private static final LogUtil logger = LogUtil.getLogger(JsonDateDeserializer.class);
 
+	public JsonDateDeserializer() {
+		super(null, null);
+	}
+
 	@Override
 	public Object deserialize(JsonParser p, DeserializationContext ctxt)
 	throws IOException {

@@ -865,9 +865,7 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 					className = lookupFlow.substring("class:".length()).trim();
 				}
 
-
-				Class<VisitsLookup> klass = (Class<VisitsLookup>) Class.forName(className);
-				result = BeanUtils.instantiate(klass);
+				result = (VisitsLookup) BeanUtils.instantiateClass(Class.forName(className));
 			}
 		} catch (Exception e) {
 			logger.error("Invalid visits lookup flow configuration setting: " + lookupFlow, e);

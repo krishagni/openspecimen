@@ -14,6 +14,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -362,6 +363,17 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 
 			if (from == null) {
 				throw new CriteriaException("Unknown attribute: " + attribute);
+			}
+
+			if (from instanceof MapJoin<?,?,?>) {
+				MapJoin<?, ?, ?> mapJoin = (MapJoin<?, ?, ?>) from;
+				if (parts[1].equals("indices")) {
+					return (Expression<X>) mapJoin.key();
+				} else if (parts[1].equals("elements")) {
+					return (Expression<X>) mapJoin.value();
+				}
+
+				// eventually will result in an error
 			}
 
 			return from.get(parts[1]);

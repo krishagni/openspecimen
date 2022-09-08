@@ -76,8 +76,8 @@ public class DomainRegistrationFactoryImpl implements DomainRegistrationFactory 
 
 	private boolean isValidImplClass(String implClass) {
 		try {
-			Class authImplClass = Class.forName(implClass);
-			return authImplClass.newInstance() != null;
+			Class.forName(implClass).getDeclaredConstructor().newInstance();
+			return true;
 		} catch (Exception e) {
 			return false;
 		}

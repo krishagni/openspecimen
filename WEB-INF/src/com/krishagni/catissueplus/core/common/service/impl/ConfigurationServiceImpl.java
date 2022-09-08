@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.event.ContextRefreshedEvent;
-
 
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -315,7 +315,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		try {
 			fileDetail = getFileDetail(module, name, defValue);
 			if (fileDetail != null && fileDetail.getFileIn() != null) {
-				return IOUtils.toString(fileDetail.getFileIn());
+				return IOUtils.toString(fileDetail.getFileIn(), Charset.defaultCharset());
 			}
 
 			return StringUtils.EMPTY;

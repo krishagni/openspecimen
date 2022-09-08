@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.init;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -172,7 +173,7 @@ public class MigrateSurgicalPathologyReports implements InitializingBean {
 							OutputStream outputStream = null;
 							try {
 								File sprFile = getSprFile(detail.getVisitId());
-								FileUtils.writeStringToFile(sprFile, detail.getReportContent());
+								FileUtils.writeStringToFile(sprFile, detail.getReportContent(), Charset.defaultCharset());
 								
 								String sprName = detail.getVisitName() + ".txt"; 
 								boolean sprLocked = SPR_LOCKED.equals(detail.getActivityStatus());
@@ -273,19 +274,18 @@ public class MigrateSurgicalPathologyReports implements InitializingBean {
 
 	private List<SprDetail> getSprDetailsFromTable(final String getSprDetailsSql, final int maxResult) {
 		return jdbcTemplate.query(
-				getSprDetailsSql,
-				new Object[] {maxResult},
-				new RowMapper<SprDetail>() {
-					public SprDetail mapRow(ResultSet rs, int rowNum) throws SQLException {
-						SprDetail sprDetail = new SprDetail();
-						sprDetail.setVisitId(rs.getLong("visitId"));
-						sprDetail.setVisitName(rs.getString("visitName"));
-						sprDetail.setActivityStatus(rs.getString("activityStatus"));
-						sprDetail.setReportContent(rs.getString("reportContent"));
-						sprDetail.setReportId(rs.getLong("reportId"));
-						return sprDetail;
-					}
-			 });					
+			getSprDetailsSql,
+			(rs, rowNum) -> {
+				SprDetail sprDetail = new SprDetail();
+				sprDetail.setVisitId(rs.getLong("visitId"));
+				sprDetail.setVisitName(rs.getString("visitName"));
+				sprDetail.setActivityStatus(rs.getString("activityStatus"));
+				sprDetail.setReportContent(rs.getString("reportContent"));
+				sprDetail.setReportId(rs.getLong("reportId"));
+				return sprDetail;
+			},
+			maxResult
+		);
 	}
 	
 	private File getSprFile(Long visitId) {

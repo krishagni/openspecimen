@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,6 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.InitializingBean;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -79,9 +79,9 @@ public class LabelPrintFileSpooler implements InitializingBean {
     private void generateLabelFiles(List<LabelPrintFileItem> fileItems)
     throws Exception {
         for (LabelPrintFileItem fileItem : fileItems) {
-            List<Map<String, String>> labels = new ObjectMapper().readValue(fileItem.getContent(), new TypeReference<List<Map<String, String>>>() {});
+            List<Map<String, String>> labels = new ObjectMapper().readValue(fileItem.getContent(), new TypeReference<>() {});
             for (Map<String, String> label : labels) {
-                FileUtils.write(new File(label.get("file")), label.get("content"));
+                FileUtils.write(new File(label.get("file")), label.get("content"), Charset.defaultCharset());
             }
         }
     }
