@@ -74,7 +74,7 @@ dependencies {
   implementation   "org.aspectj:aspectjrt:1.9.7"
   aspects   "org.springframework:spring-aspects:5.3.22"
 
-  implementation fileTree(dir: 'lib', include: ['os-dynamic-forms-trunk.jar', 'not-yet-commons-ssl-0.3.17.jar', 'os-tinymce.jar'])
+  implementation fileTree(dir: 'lib', include: ['os-dynamic-forms-trunk.jar', 'os-tinymce.jar'])
   
   // implementation group: 'javax', name: 'javaee-api', version: '8.0'
   implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
@@ -179,6 +179,7 @@ dependencies {
 
   //SAML dependencies lib
   implementation group: 'org.springframework.security.extensions', name: 'spring-security-saml2-core', version:'1.0.10.RELEASE'
+  implementation group: 'com.narupley', name: 'not-going-to-be-commons-ssl', version: '0.3.20'
   implementation group: 'org.opensaml', name: 'opensaml', version: '2.6.4'
   implementation group: 'org.opensaml', name: 'openws', version: '1.5.4'
   implementation group: 'org.opensaml', name: 'xmltooling', version: '1.4.4'
