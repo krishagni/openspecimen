@@ -247,10 +247,10 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public int getAllVisitsCount(Long cpeId) {
-		Integer count = createNamedQuery(GET_ALL_VISITS_COUNT_BY_CPE, Integer.class)
+		Long count = createNamedQuery(GET_ALL_VISITS_COUNT_BY_CPE, Long.class)
 			.setParameter("cpeId", cpeId)
 			.uniqueResult();
-		return count != null ? count : 0;
+		return count != null ? count.intValue() : 0;
 	}
 
 	@Override
@@ -300,9 +300,10 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	
 	@Override
 	public int getConsentRespsCount(Long consentId) {
-		return createNamedQuery(GET_CONSENT_RESP_COUNT, Integer.class)
+		Long count = createNamedQuery(GET_CONSENT_RESP_COUNT, Long.class)
 			.setParameter("consentId", consentId)
 			.uniqueResult();
+		return count != null ? count.intValue() : 0;
 	}
 
 	@Override

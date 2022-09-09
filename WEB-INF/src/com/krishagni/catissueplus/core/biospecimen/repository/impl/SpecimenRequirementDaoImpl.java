@@ -18,16 +18,17 @@ public class SpecimenRequirementDaoImpl extends AbstractDao<SpecimenRequirement>
 	
 	@Override
 	public int getSpecimensCount(Long srId) {
-		return createNamedQuery(GET_SPECIMENS_COUNT, Integer.class)
+		Long count = createNamedQuery(GET_SPECIMENS_COUNT, Long.class)
 			.setParameter("srId", srId)
 			.uniqueResult();
+		return count != null ? count.intValue() : 0;
 	}
 	@Override
 	public int getAllSpecimensCount(Long srId) {
-		Integer count = createNamedQuery(GET_ALL_SPECIMENS_COUNT, Integer.class)
+		Long count = createNamedQuery(GET_ALL_SPECIMENS_COUNT, Long.class)
 			.setParameter("srId", srId)
 			.uniqueResult();
-		return count != null ? count : 0;
+		return count != null ? count.intValue() : 0;
 	}
 	
 	@Override
