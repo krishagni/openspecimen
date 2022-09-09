@@ -3,12 +3,12 @@ package com.krishagni.catissueplus.core.administrative.events;
 import java.util.Date;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
-@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReserveSpecimensDetail {
 	private Long dpId;
 

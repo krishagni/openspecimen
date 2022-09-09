@@ -6,16 +6,15 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workflow;
-import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigChangeListener;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Configurable
 public class WorkflowUtil {
@@ -59,7 +58,7 @@ public class WorkflowUtil {
 	public <T> T getSysWorkflow(String name, Class<T> klass) {
 		Workflow workflow = getSysWorkflow(name);
 		if (workflow != null) {
-			return new ObjectMapper().convertValue(workflow.getData(), klass);
+			return Utility.mapToObject(workflow.getData(), klass);
 		}
 
 		return null;

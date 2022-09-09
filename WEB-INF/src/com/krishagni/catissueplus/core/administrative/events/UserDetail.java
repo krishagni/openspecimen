@@ -6,15 +6,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @ListenAttributeChanges
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDetail extends AttributeModifiedSupport {
 	private static final String ARCHIVED = "Archived";
 

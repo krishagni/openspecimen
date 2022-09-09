@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 

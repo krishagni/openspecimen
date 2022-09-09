@@ -4,8 +4,7 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import java.util.Date;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
@@ -13,8 +12,8 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 
-@JsonSerialize(include=Inclusion.NON_NULL)
 @ListenAttributeChanges
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CollectionProtocolRegistrationDetail extends AttributeModifiedSupport {
 	private Long id;
 	

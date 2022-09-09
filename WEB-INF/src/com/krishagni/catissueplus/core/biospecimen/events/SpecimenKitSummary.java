@@ -2,12 +2,12 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.util.Date;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenKit;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
-@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SpecimenKitSummary {
 
 	private Long id;
