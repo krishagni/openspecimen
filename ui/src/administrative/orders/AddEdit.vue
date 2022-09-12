@@ -547,7 +547,12 @@ export default {
     },
 
     cancel: function() {
-      routerSvc.back();
+      const order = this.dataCtx.order || {};
+      if (order.id) {
+        routerSvc.goto('OrdersListItemDetail.Overview', {orderId: order.id}, {});
+      } else {
+        routerSvc.goto('OrdersList', {orderId: -1}, {});
+      }
     }
   }
 }
