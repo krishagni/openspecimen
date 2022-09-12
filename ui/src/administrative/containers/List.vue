@@ -17,30 +17,34 @@
 
     <os-page-body>
       <os-page-toolbar>
-        <template #default v-if="ctx.selectedContainers && ctx.selectedContainers.length > 0">
-          <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainers"
-            v-show-if-allowed="containerResources.deleteOpts" />
+        <template #default>
+          <span>
+            <span v-if="ctx.selectedContainers && ctx.selectedContainers.length > 0">
+              <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainers"
+                v-show-if-allowed="containerResources.deleteOpts" />
 
-          <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
-            v-show-if-allowed="containerResources.importOpts" />
-        </template>
+              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
+                v-show-if-allowed="containerResources.importOpts" />
+            </span>
 
-        <template #default v-else>
-          <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createContainer"
-            v-show-if-allowed="containerResources.createOpts" />
+            <span v-else>
+              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createContainer"
+                v-show-if-allowed="containerResources.createOpts" />
 
-          <os-button left-icon="cubes" :label="$t('containers.types')" @click="viewContainerTypes" />
+              <os-button left-icon="cubes" :label="$t('containers.types')" @click="viewContainerTypes" />
 
-          <os-button left-icon="tasks" :label="$t('containers.tasks')" @click="viewContainerTasks" />
+              <os-button left-icon="tasks" :label="$t('containers.tasks')" @click="viewContainerTasks" />
 
-          <os-menu :label="$t('common.buttons.import')" :options="importOpts"
-            v-show-if-allowed="containerResources.importOpts" />
+              <os-menu :label="$t('common.buttons.import')" :options="importOpts"
+                v-show-if-allowed="containerResources.importOpts" />
 
-          <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
-            v-show-if-allowed="containerResources.importOpts" />
+              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
+                v-show-if-allowed="containerResources.importOpts" />
 
-          <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-            url="https://help.openspecimen.org/containers" new-tab="true" />
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
+                url="https://help.openspecimen.org/containers" new-tab="true" />
+            </span>
+          </span>
         </template>
 
         <template #right>

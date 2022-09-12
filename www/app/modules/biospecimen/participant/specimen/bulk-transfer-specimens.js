@@ -21,7 +21,7 @@ angular.module('os.biospecimen.specimen')
 
     $scope.copyFirstLocationToAll = function() {
       var location = $scope.specimens[0].storageLocation;
-      location = !location ? {} : {name: location.name, mode: location.mode};
+      location = !location ? {} : {name: location.name, displayTitle: location.displayTitle, mode: location.mode};
       for (var i = 1; i < $scope.specimens.length; i++) {
         $scope.specimens[i].storageLocation = angular.extend({}, location);
       }

@@ -54,77 +54,78 @@ app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
 app.directive('os-badge', BadgeDirective);
 
-function registerHomePageCards(osSvc) {
+function registerHomePageCards(osSvc, i18n) {
+  const t = i18n.global.t;
   osSvc.homePageSvc.registerCards([
     {
       showIf: {resource: 'CollectionProtocol', operations: ['Read']},
       href: '#/cps',
       icon: 'fa fa-calendar',
-      title: 'Collection Protocols',
-      description: 'Create, update SOP of visits and specimens'
+      title: t('common.home.cps'),
+      description: t('common.home.cps_desc')
     },
 
     {
       showIf: 'admin',
       href: '#/institutes',
       icon: 'fa fa-institution',
-      title: 'Institutes',
-      description: 'Update information about institutions'
+      title: t('common.home.institutes'),
+      description: t('common.home.institutes_desc')
     },
 
     {
       showIf: {resource: 'User', operations: ['Create', 'Update']},
       href: '#/users',
       icon: 'fa fa-user',
-      title: 'Users',
-      description: 'Add, rename and manage users'
+      title: t('common.home.users'),
+      description: t('common.home.users_desc')
     },
 
     {
       showIf: {resource: 'User', operations: ['Create', 'Update']},
       href: '#/roles',
       icon: 'fa fa-lock',
-      title: 'Roles',
-      description: 'Create, update user access controls'
+      title: t('common.home.roles'),
+      description: t('common.home.roles_desc')
     },
 
     {
       showIf: 'institute-admin',
       href: '#/sites',
       icon: 'fa fa-hospital-o',
-      title: 'Sites',
-      description: 'Add and update sites'
+      title: t('common.home.sites'),
+      description: t('common.home.sites_desc')
     },
 
     {
       showIf: {resource: 'StorageContainer', operations: ['Read']},
       href: '#/containers',
       icon: 'fa fa-dropbox',
-      title: 'Containers',
-      description: 'Manage containers and their restrictions'
+      title: t('common.home.containers'),
+      description: t('common.home.containers_desc')
     },
 
     {
       showIf: {resource: 'Query', operations: ['Read']},
       href: '#/queries/list',
       icon: 'fa fa-dashboard',
-      title: 'Queries',
-      description: 'Create, share, and schedule queries'
+      title: t('common.home.queries'),
+      description: t('common.home.queries_desc')
     },
 
     {
       showIf: {resources: ['Specimen', 'PrimarySpecimen'], operations: ['Read']},
       href: '#/specimen-lists',
       icon: 'fa fa-shopping-cart',
-      title: 'Carts',
-      description: 'Create, share, and manage specimen carts'
+      title: t('common.home.carts'),
+      description: t('common.home.carts_desc')
     },
 
     {
       href: '#/forms',
       icon: 'fa fa-copy',
-      title: 'Forms',
-      description: 'Create and manage custom forms',
+      title: t('common.home.forms'),
+      description: t('common.home.forms_desc'),
       showIf: () => ui.currentUser.admin || ui.currentUser.instituteAdmin || ui.currentUser.manageForms
     },
 
@@ -132,40 +133,40 @@ function registerHomePageCards(osSvc) {
       showIf: {resource: 'DistributionProtocol', operations: ['Read']},
       href: '#/dps',
       icon: 'fa fa-truck',
-      title: 'Distribution Protocols',
-      description: 'Create, update procedures for distributing specimens'
+      title: t('common.home.dps'),
+      description: t('common.home.dps_desc')
     },
 
     {
       showIf: {resource: 'Order', operations: ['Read']},
       href: '#/orders',
       icon: 'fa fa-share',
-      title: 'Orders',
-      description: 'Create, execute request orders for distributing specimens'
+      title: t('common.home.orders'),
+      description: t('common.home.orders_desc')
     },
 
     {
       showIf: {resource: 'ShippingAndTracking', operations: ['Read']},
       href: '#/shipments',
       icon: 'fa fa-paper-plane-o',
-      title: 'Shipments',
-      description: 'Create, ship, track, and receive specimen shipments'
+      title: t('common.home.shipments'),
+      description: t('common.home.shipments_desc')
     },
 
     {
       showIf: {resource: 'ScheduledJob', operations: ['Read']},
       href: '#/jobs',
       icon: 'fa fa-gears',
-      title: 'Jobs',
-      description: 'Create, schedule, execute jobs'
+      title: t('common.home.jobs'),
+      description: t('common.home.jobs_desc')
     },
 
     {
       showIf: 'institute-admin',
       href: '#/consent-statements',
       icon: 'fa fa-file-text-o',
-      title: 'Consents',
-      description: 'Manage coded consent statements'
+      title: t('common.home.consents'),
+      description: t('common.home.consents_desc')
     },
 
     {
@@ -174,8 +175,8 @@ function registerHomePageCards(osSvc) {
         return setting[0].value;
       },
       icon: 'fa fa-graduation-cap',
-      title: 'Training',
-      description: 'User manual and training videos portal',
+      title: t('common.home.training'),
+      description: t('common.home.training_desc'),
       newTab: true
     },
 
@@ -183,8 +184,8 @@ function registerHomePageCards(osSvc) {
       showIf: 'admin',
       href: '#/settings/settings-list',
       icon: 'fa fa-wrench',
-      title: 'Settings',
-      description: 'Manage application configuration settings'
+      title: t('common.home.settings'),
+      description: t('common.home.settings_desc'),
     }
   ]);
 }
@@ -257,7 +258,7 @@ Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, sp
 
     let osSvc = window.osSvc = app.config.globalProperties.$osSvc;
     ui.currentUser = currUser;
-    registerHomePageCards(osSvc);
+    registerHomePageCards(osSvc, i18n);
 
     app.provide('ui', ui);
     app.provide('osSvc', osSvc);

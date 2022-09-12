@@ -753,18 +753,23 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		} else {
 			AccessCtrlMgr.getInstance().ensureUpdateUserRights(existingUser);
 			if (!AuthUtil.isAdmin() && AuthUtil.getCurrentUser().equals(existingUser)) {
-				//
-				// User is not an admin and trying update his/her profile.
-				//
-				UserDetail newDetail = UserDetail.from(existingUser);
-				List<String> allowedAttrs = Arrays.asList("phoneNumber", "timeZone", "dnd", "defaultPrinter", "downloadLabelsPrintFile", "address");
-				for (String attr : allowedAttrs) {
-					if (input.isAttrModified(attr)) {
-						Utility.setProperty(newDetail, attr, Utility.getProperty(input, attr));
-					}
-				}
+				try {
+					AccessCtrlMgr.getInstance().ensureUpdateUserRights(existingUser, false);
+				} catch (OpenSpecimenException ose) {
+					//
+					// User does not have update rights. Perhaps updating his/her own profile.
+					//
+					UserDetail newDetail = UserDetail.from(existingUser);
 
-				input = newDetail;
+					List<String> allowedAttrs = Arrays.asList("phoneNumber", "timeZone", "dnd", "defaultPrinter", "downloadLabelsPrintFile", "address");
+					for (String attr : allowedAttrs) {
+						if (input.isAttrModified(attr)) {
+							Utility.setProperty(newDetail, attr, Utility.getProperty(input, attr));
+						}
+					}
+
+					input = newDetail;
+				}
 			}
 		}
 

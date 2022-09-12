@@ -25,28 +25,33 @@
 
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
-            <template #default v-if="ctx.selectedTypes && ctx.selectedTypes.length > 0">
-              <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="confirmDelete"
-                v-show-if-allowed="'institute-admin'" />
+            <template #default>
+              <span>
+                <span v-if="ctx.selectedTypes && ctx.selectedTypes.length > 0">
+                  <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="confirmDelete"
+                    v-show-if-allowed="'institute-admin'" />
 
-              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportTypes"
-                v-show-if-allowed="typeResources.importOpts" />
-            </template>
+                  <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportTypes"
+                    v-show-if-allowed="typeResources.importOpts" />
+                </span>
 
-            <template #default v-else>
-              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createType"
-                v-show-if-allowed="'institute-admin'" />
+                <span v-else>
+                  <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createType"
+                    v-show-if-allowed="'institute-admin'" />
 
-              <os-button left-icon="box-open" :label="$t('container_types.view_containers')" @click="viewContainers" />
+                  <os-button left-icon="box-open" :label="$t('container_types.view_containers')"
+                    @click="viewContainers" />
 
-              <os-menu :label="$t('common.buttons.import')" :options="importOpts"
-                v-show-if-allowed="'institute-admin'" />
+                  <os-menu :label="$t('common.buttons.import')" :options="importOpts"
+                    v-show-if-allowed="'institute-admin'" />
 
-              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportTypes"
-                v-show-if-allowed="typeResources.importOpts" />
+                  <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportTypes"
+                    v-show-if-allowed="typeResources.importOpts" />
 
-              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="https://openspecimen.atlassian.net/wiki/x/ioDIBg" new-tab="true" />
+                  <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
+                    url="https://openspecimen.atlassian.net/wiki/x/ioDIBg" new-tab="true" />
+                </span>
+              </span>
             </template>
 
             <template #right>

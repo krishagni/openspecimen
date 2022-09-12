@@ -15,7 +15,8 @@ export default {
           "messageCode": "sites.institute_required"
         }
       },
-      "showWhen": "currentUser.admin == true"
+      "showWhen": "currentUser.admin == true",
+      "showInOverviewWhen": true
     },
 
     {
