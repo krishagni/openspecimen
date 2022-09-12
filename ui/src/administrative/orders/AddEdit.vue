@@ -37,7 +37,7 @@
             </os-form>
           </os-step>
 
-          <os-step title="Specimens" :validate="validateSpecimenDetails" v-if="dataCtx.order.status == 'PENDING'">
+          <os-step :title="'Specimens' + ((dataCtx.orderItems.length > 0 || ctx.itemsCount > 0) ? ' (' + (dataCtx.orderItems.length || ctx.itemsCount) + ')' : '')" :validate="validateSpecimenDetails" v-if="dataCtx.order.status == 'PENDING'">
             <span v-if="ctx.maxSpmnsLimitExceeded">
               <os-message type="warn">
                 <span>
@@ -324,10 +324,12 @@ export default {
                 specimenIds.push(item.specimen.id);
               });
 
-              const specimens = await this.$osSvc.specimenSvc.getByIds(specimenIds, true);
-              specimens.forEach(specimen => {
-                itemsMap[specimen.id].specimen = formUtil.createCustomFieldsMap(specimen, true);
-              });
+              if (specimenIds.length > 0) {
+                const specimens = await this.$osSvc.specimenSvc.getByIds(specimenIds, true);
+                specimens.forEach(specimen => {
+                  itemsMap[specimen.id].specimen = formUtil.createCustomFieldsMap(specimen, true);
+                });
+              }
             }
           }
 
@@ -545,7 +547,12 @@ export default {
     },
 
     cancel: function() {
-      routerSvc.back();
+      const order = this.dataCtx.order || {};
+      if (order.id) {
+        routerSvc.goto('OrdersListItemDetail.Overview', {orderId: order.id}, {});
+      } else {
+        routerSvc.goto('OrdersList', {orderId: -1}, {});
+      }
     }
   }
 }

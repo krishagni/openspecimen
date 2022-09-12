@@ -23,7 +23,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -255,6 +254,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			if (isSignupReq) {
 				ensureSignupAllowed();
 				detail.setActivityStatus(Status.ACTIVITY_STATUS_PENDING.getStatus());
+			} else if (!AuthUtil.isAdmin()) {
+				if (StringUtils.isBlank(detail.getType()) || !detail.getType().equals(User.Type.CONTACT.name())) {
+					detail.setInstituteName(AuthUtil.getCurrentUserInstitute().getName());
+				}
 			}
 			
 			User user = userFactory.createUser(detail);
@@ -753,6 +756,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		} else {
 			AccessCtrlMgr.getInstance().ensureUpdateUserRights(existingUser);
 			if (!AuthUtil.isAdmin() && AuthUtil.getCurrentUser().equals(existingUser)) {
+				if (StringUtils.isNotBlank(input.getInstituteName()) && !input.getInstituteName().equals(existingUser.getInstitute().getName())) {
+					throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+				}
+
 				try {
 					AccessCtrlMgr.getInstance().ensureUpdateUserRights(existingUser, false);
 				} catch (OpenSpecimenException ose) {

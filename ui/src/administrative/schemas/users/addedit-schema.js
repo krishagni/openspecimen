@@ -26,7 +26,7 @@ export default {
        },
 
        {
-         "fields": [ { "name": "user.instituteName" } ]
+         "fields": [ { "name": "user.instituteName", "showWhen": "currentUser.admin || user.type == 'CONTACT'" } ]
        },
 
        {
