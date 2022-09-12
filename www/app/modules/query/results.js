@@ -352,6 +352,7 @@ angular.module('os.query.results', ['os.query.models'])
               return {value: value, selected: false}
             }
           );
+          facet.dbRows = result[0].dbRows;
           facet.searchValues = !!searchTerm;
 
           var selectedValues = facet.selectedValues;
