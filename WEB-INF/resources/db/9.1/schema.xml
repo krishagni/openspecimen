@@ -156,4 +156,10 @@
       <column name="IP_ADDRESS" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add a standalone index on specimen barcode">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="CAT_SPECIMEN_BARCODE_IDX" >
+      <column name="BARCODE" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
