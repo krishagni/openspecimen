@@ -372,8 +372,8 @@ angular.module('os.biospecimen.specimen')
           var idx = $scope.ctx.aliquots.indexOf(aliquot);
           for (var i = idx + 1; i < idx + aliquot.$$count; ++i) {
             $scope.ctx.aliquots[i].storageLocation = {
-              name: aliquot.storageLocation.name,
-              mode: aliquot.storageLocation.mode
+              name: aliquot.storageLocation && aliquot.storageLocation.name,
+              mode: aliquot.storageLocation && aliquot.storageLocation.mode
             };
           }
         }
@@ -577,7 +577,7 @@ angular.module('os.biospecimen.specimen')
     }
 
     $scope.applyFirstLocationToAll = function() {
-      var loc = undefined;
+      var loc = {};
       if ($scope.ctx.aliquots.length > 0 && !!$scope.ctx.aliquots[0].storageLocation) {
         loc = $scope.ctx.aliquots[0].storageLocation;
       }
@@ -585,7 +585,7 @@ angular.module('os.biospecimen.specimen')
       angular.forEach($scope.ctx.aliquots,
         function(aliquot, idx) {
           if (idx != 0) {
-            aliquot.storageLocation = {name: loc.name, mode: loc.mode};
+            aliquot.storageLocation = {name: loc.name, mode: loc.mode, displayTitle: loc.displayTitle};
           }
         }
       );
