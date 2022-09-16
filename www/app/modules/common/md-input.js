@@ -119,7 +119,7 @@ angular.module('openspecimen')
           var valLabel = angular.element('<span class="os-value"/>')
             .attr("ng-if", "!(" + tAttrs.editWhen + ")")
             .attr("title", "{{" + tAttrs.ngModel + "}}")
-            .append("{{" + tAttrs.ngModel + "}}");
+            .append("{{" + (tAttrs.displayProp ? tAttrs.ngModel + "['" + tAttrs.displayProp + "']" : tAttrs.ngModel) + "}}");
 
           div = angular.element('<div class="os-md-input"></div>')
             .append(inputDiv)

@@ -266,7 +266,7 @@
           <tr class="row" ng-repeat="aliquot in ctx.aliquots" ng-form="aform" ng-if="aliquot.$$showInTable">
             <td class="col">
               <div style="display: flex;">
-                <a ui-sref="specimen({specimenId: aliquot.parent.id})">
+                <a ui-sref="specimen({specimenId: aliquot.parentId})">
                   <span>{{aliquot.parentLabel}}</span>
                   <span ng-if="!aliquot.$$specimenCentricCp">({{aliquot.ppid}})</span>
                 </a>

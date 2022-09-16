@@ -305,7 +305,7 @@ angular.module('os.biospecimen.specimen')
     }
 
     $scope.applyFirstLocationToAll = function() {
-      var loc = undefined;
+      var loc = {};
       if (ctx.derivatives.length > 0 && !!ctx.derivatives[0].storageLocation) {
         loc = ctx.derivatives[0].storageLocation;
       }
@@ -313,7 +313,7 @@ angular.module('os.biospecimen.specimen')
       angular.forEach(ctx.derivatives,
         function(derivative, idx) {
           if (idx != 0) {
-            derivative.storageLocation = {name: loc.name, mode: loc.mode};
+            derivative.storageLocation = {name: loc.name, mode: loc.mode, displayTitle: loc.displayTitle};
           }
         }
       );
