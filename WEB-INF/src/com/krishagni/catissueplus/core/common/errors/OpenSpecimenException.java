@@ -131,6 +131,10 @@ public class OpenSpecimenException extends RuntimeException {
 		this.exceptionId = exceptionId;
 	}
 
+	public static OpenSpecimenException unauthorized() {
+		return new OpenSpecimenException(ErrorType.UNAUTHORIZED);
+	}
+
 	public static OpenSpecimenException userError(ErrorCode error, Object ... params) {		
 		return new OpenSpecimenException(ErrorType.USER_ERROR, error, params);
 	}

@@ -8,5 +8,7 @@ public enum ErrorType {
 	
 	USER_ERROR,
 	
-	UNKNOWN_ERROR
+	UNKNOWN_ERROR,
+
+	UNAUTHORIZED
 }
