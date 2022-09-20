@@ -18,22 +18,58 @@
       </accordion-heading>
       <div class="values os-scrollbar" ng-if="facet.isOpen">
         <div class="facet-range clearfix" ng-if="facet.isRange">
-          <div class="col-xs-5 os-no-left-padding" ng-switch on="facet.dataType">
-            <div class="os-md-input" ng-switch-when="DATE">
-              <input type="text" ng-model="facet.min" placeholder="{{'queries.range_min' | translate}}"
-                os-query-date-picker="{{global.queryDateFmt}}">
+          <div ng-if="facet.relOp == 'any' || facet.relOp == 'between' || facet.relOp == 'exists'">
+            <div class="col-xs-5 os-no-left-padding" ng-switch on="facet.dataType">
+              <div class="os-md-input" ng-switch-when="DATE">
+                <input type="text" ng-model="facet.min" placeholder="{{'queries.range_min' | translate}}"
+                  os-query-date-picker="{{global.queryDateFmt}}">
+              </div>
+              <div class="os-md-input" ng-switch-default>
+                <input type="text" ng-model="facet.min" placeholder="{{'queries.range_min' | translate}}">
+              </div>
             </div>
-            <div class="os-md-input" ng-switch-default>
-              <input type="text" ng-model="facet.min" placeholder="{{'queries.range_min' | translate}}">
+            <div class="col-xs-5 os-no-left-padding" ng-switch on="facet.dataType">
+              <div class="os-md-input" ng-switch-when="DATE">
+                <input type="text" ng-model="facet.max" placeholder="{{'queries.range_max' | translate}}"
+                  os-query-date-picker="{{global.queryDateFmt}}">
+              </div>
+              <div class="os-md-input" ng-switch-default>
+                <input type="text" ng-model="facet.max" placeholder="{{'queries.range_max' | translate}}">
+              </div>
             </div>
           </div>
-          <div class="col-xs-5 os-no-left-padding" ng-switch on="facet.dataType">
-            <div class="os-md-input" ng-switch-when="DATE">
-              <input type="text" ng-model="facet.max" placeholder="{{'queries.range_max' | translate}}"
-                os-query-date-picker="{{global.queryDateFmt}}">
+          <div ng-if="facet.relOp == 'lt' || facet.relOp == 'le'">
+            <div class="col-xs-10 os-no-left-padding" ng-switch on="facet.dataType">
+              <div class="os-md-input" ng-switch-when="DATE">
+                <input type="text" ng-model="facet.max" placeholder="{{'queries.range_max' | translate}}"
+                  os-query-date-picker="{{global.queryDateFmt}}">
+              </div>
+              <div class="os-md-input" ng-switch-default>
+                <input type="text" ng-model="facet.max" placeholder="{{'queries.range_max' | translate}}">
+              </div>
             </div>
-            <div class="os-md-input" ng-switch-default>
-              <input type="text" ng-model="facet.max" placeholder="{{'queries.range_max' | translate}}">
+          </div>
+          <div ng-if="facet.relOp == 'gt' || facet.relOp == 'ge'">
+            <div class="col-xs-10 os-no-left-padding" ng-switch on="facet.dataType">
+              <div class="os-md-input" ng-switch-when="DATE">
+                <input type="text" ng-model="facet.min" placeholder="{{'queries.range_min' | translate}}"
+                  os-query-date-picker="{{global.queryDateFmt}}">
+              </div>
+              <div class="os-md-input" ng-switch-default>
+                <input type="text" ng-model="facet.min" placeholder="{{'queries.range_min' | translate}}">
+              </div>
+            </div>
+          </div>
+          <div ng-if="facet.relOp == 'eq'">
+            <div class="col-xs-10 os-no-left-padding" ng-switch on="facet.dataType">
+              <div class="os-md-input" ng-switch-when="DATE">
+                <input type="text" ng-model="facet.min" placeholder="{{'queries.range_eq' | translate}}"
+                  os-query-date-picker="{{global.queryDateFmt}}" ng-change="facet.max = facet.min">
+              </div>
+              <div class="os-md-input" ng-switch-default>
+                <input type="text" ng-model="facet.min" placeholder="{{'queries.range_eq' | translate}}"
+                  ng-change="facet.max = facet.min">
+              </div>
             </div>
           </div>
           <div class="col-xs-2 os-no-left-padding">
@@ -72,7 +108,7 @@
               <span>{{value.value}}</span>
             </div>
             <div class="text" ng-if="facet.dataType != 'STRING'">
-              <span>{{value.value | osFacetRange}}</span>
+              <span>{{value.value | osFacetRange: facet}}</span>
             </div>
           </li>
         </ul>

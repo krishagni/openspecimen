@@ -1,17 +1,18 @@
 
 angular.module('os.query.results', ['os.query.models'])
   .filter('osFacetRange', function() {
-    return function(input) {
-      var in0 = angular.isDefined(input[0]);
-      var in1 = angular.isDefined(input[1]);
+    return function(input, facet) {
+      var in0 = input[0] != undefined && input[0] != null && input[0] != '';
+      var in1 = input[1] != undefined && input[1] != null && input[1] != '';
+
       if (in0 && in1) {
-        return input[0] + " - " + input[1];
+        return facet.relOp == 'eq' ? '= ' + input[0] : input[0] + " - " + input[1];
       } else if (in0) {
-        return '>= ' + input[0];
+        return (facet.relOp == 'gt' ? '> ' : '>= ') + input[0];
       } else if (in1) {
-        return '<= ' + input[1];
+        return (facet.relOp == 'lt' ? '< ' : '<= ') + input[1];
       } else {
-        return 'Err';
+        return facet.relOp == 'between' ? 'Any' : 'Err';
       }
     }
   })
@@ -34,7 +35,7 @@ angular.module('os.query.results', ['os.query.models'])
 
     var STR_FACETED_OPS = ['eq', 'qin', 'exists', 'any'];
 
-    var RANGE_FACETED_OPS = ['le', 'ge', 'eq', 'between', 'exists', 'any'];
+    var RANGE_FACETED_OPS = ['lt', 'le', 'gt', 'ge', 'eq', 'between', 'exists', 'any'];
 
     var currResults = {};
 
@@ -240,11 +241,13 @@ angular.module('os.query.results', ['os.query.models'])
           if (!!filter.expr) {
             var tObj = filter.tObj = QueryUtil.getTemporalExprObj(filter.expr);
             filter.op = QueryUtil.getOpBySymbol(tObj.op);
-            if (tObj.op == 'between') {
-              var rhs = tObj.rhs.trim();
-              filter.value = JSON.parse('[' + rhs.substring(1, rhs.length - 1) + ']');
-            } else {
-              filter.value = tObj.rhs;
+            var rhs = tObj.rhs && tObj.rhs.trim();
+            if (rhs) {
+              if (tObj.op == 'between') {
+                filter.value = JSON.parse('[' + rhs.substring(1, rhs.length - 1) + ']');
+              } else {
+                filter.value = tObj.rhs;
+              }
             }
 
             type = 'INTEGER';
@@ -289,11 +292,15 @@ angular.module('os.query.results', ['os.query.models'])
 
       if (isRangeType) {
         var value = undefined;
-        switch (filter.op.name) {
-          case 'eq': value = [filter.value, filter.value]; break;
-          case 'le': value = [undefined, filter.value]; break;
-          case 'ge': value = [filter.value, undefined]; break;
-          case 'between': value = filter.value; break;
+        if (filter.value) {
+          switch (filter.op.name) {
+            case 'eq': value = [filter.value, filter.value]; break;
+            case 'lt': value = [undefined, filter.value]; break;
+            case 'le': value = [undefined, filter.value]; break;
+            case 'gt': value = [filter.value, undefined]; break;
+            case 'ge': value = [filter.value, undefined]; break;
+            case 'between': value = filter.value; break;
+          }
         }
 
         if (value) {
@@ -316,6 +323,7 @@ angular.module('os.query.results', ['os.query.models'])
         caption: !!filter.expr || !!filter.desc ? filter.desc : filter.field.caption,
         dataType: type,
         isRange: isRangeType,
+        relOp: isRangeType && filter.op && filter.op.name,
         expr: !!filter.expr ? filter.expr : (filter.form.name + "." + filter.field.name),
         type: type,
         values: values,
@@ -769,13 +777,13 @@ angular.module('os.query.results', ['os.query.models'])
             filter.op = QueryUtil.getOp('between');
           } else if (validMin && !validMax) {
             filter.value = minMax[0];
-            filter.op = QueryUtil.getOp('ge');
+            filter.op = QueryUtil.getOp(facet.relOp == 'gt' ? 'gt' : 'ge');
           } else if (!validMin && validMax) {
             filter.value = minMax[1];
-            filter.op = QueryUtil.getOp('le');
+            filter.op = QueryUtil.getOp(facet.relOp == 'lt' ? 'lt' : 'le');
           } else {
             filter.value = undefined;
-            filter.op = QueryUtil.getOp('any');
+            filter.op = QueryUtil.getOp(facet.relOp || 'any');
           }
 
           if (!filter.tObj) {
