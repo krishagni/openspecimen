@@ -574,9 +574,9 @@ public class AqlBuilder {
 			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid temporal expression: " + temporalExpr);
 		}
 
-		String rhs = temporalExpr.substring(0, matcher.start());
+		String lhs = temporalExpr.substring(0, matcher.start());
 		String op  = temporalExpr.substring(matcher.start(), matcher.end());
-		String lhs = temporalExpr.substring(matcher.end());
+		String rhs = temporalExpr.substring(matcher.end());
 		return Triple.of(lhs.trim(), op.trim(), rhs.trim());
 	}
 	
