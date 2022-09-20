@@ -4,6 +4,10 @@ angular.module('os.query.addeditfilter', ['os.query.models'])
       QueryUtil.onOpSelect($scope.queryLocal.currFilter);
     };
 
+    function isUndef(value) {
+      return value == undefined || value == null || (typeof value == 'string' && value.trim() == '');
+    }
+
     $scope.disableAddEditFilterBtn = function() {
       var filter = $scope.queryLocal.currFilter;
       if (!!filter.expr && !!filter.desc) {
@@ -21,17 +25,22 @@ angular.module('os.query.addeditfilter', ['os.query.models'])
         } else if (filter.value) {
           if (op == 'between') {
             if (filter.value instanceof Array && filter.value.length == 2 &&
-                 (filter.value[0] != undefined && filter.value[0] != null && filter.value[0] != '') &&
-                 (filter.value[1] != undefined && filter.value[1] != null && filter.value[1] != '')) {
+                !isUndef(filter.value[0]) && !isUndef(filter.value[1])) {
               return false;
             } else {
-              return true;
+              if (!filter.parameterized) {
+                return true;
+              } else {
+                return !(filter.value instanceof Array && filter.value.length == 2 &&
+                  isUndef(filter.value[0]) && isUndef(filter.value[1]));
+              }
             }
           }
 
           return false;
         } else {
-          return true;
+          var type = filter.field.type;
+          return !filter.parameterized || (type != 'DATE' && type != 'INTEGER' && type != 'FLOAT');
         }
       } else {
         return true;

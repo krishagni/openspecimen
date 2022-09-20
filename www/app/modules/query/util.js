@@ -198,8 +198,35 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
       return "\"" + escapeQuotes(value) + "\"";
     }
 
+    function isUndef(value) {
+      if (value == null || value == undefined || (typeof value == 'string' && value.trim() == '')) {
+        return true;
+      }
+
+      if (value instanceof Array) {
+        return value.every(function(val) { return val == null || val == undefined || val.trim() == ''; });
+      }
+
+      return false;
+    }
+
     function getFilterExpr(filter) {
       if (filter.expr) {
+        var tObj = getTemporalExprObj(filter.expr);
+        if (isUndef(tObj.lhs) || isUndef(tObj.op)) {
+          alert('Invalid temporal expression: ' + filter.expr);
+          return '1 = 0';
+        }
+
+        if (isUndef(tObj.rhs)) {
+          if (!filter.parameterized) {
+            alert('Invalid temporal expression: ' + filter.expr);
+            return '1 = 0';
+          } else {
+            return tObj.lhs + " any ";
+          }
+        }
+
         return filter.expr;
       }
 
@@ -207,9 +234,13 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
         return '';
       }
           
+      var type = filter.field.type;
       var expr = filter.form.name + "." + filter.field.name + " ";
-      expr += filter.op.symbol + " ";
+      if (isUndef(filter.value) && (type == 'DATE' || type == 'INTEGER' || type == 'FLOAT')) {
+        return expr + "any";
+      }
 
+      expr += filter.op.symbol + " ";
       if (filter.op.name == 'exists' || filter.op.name == 'not_exists' || filter.op.name == 'any') {
         return expr;
       }

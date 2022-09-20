@@ -8,13 +8,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.de.domain.Filter.Op;
@@ -34,8 +37,12 @@ import edu.common.dynamicextensions.query.QuerySpace;
 @Configurable
 public class AqlBuilder {
 
+	private static final Pattern TEMPORAL_EXPR = Pattern.compile("[<=>!]|\\sany\\s*$|\\sexists\\s*$|\\snot exists\\s*$|\\sbetween\\s");
+
 	@Autowired
 	private DaoFactory daoFactory;
+
+
 	
 	private AqlBuilder() {
 		
@@ -257,6 +264,11 @@ public class AqlBuilder {
 	
 	private String buildFilterExpr(Context ctx, Filter filter) {
 		if (filter.getExpr() != null) {
+			Triple<String, String, String> tObj = getTemporalObj(filter.getExpr());
+			if (StringUtils.isBlank(tObj.getRight()) && filter.isParameterized()) {
+				return tObj.getLeft() + " any ";
+			}
+
 			return filter.getExpr();
 		}
 		
@@ -266,12 +278,20 @@ public class AqlBuilder {
 			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid field: " + field);
 		}
 				
-		StringBuilder filterExpr = new StringBuilder();
-		filterExpr.append(field).append(" ").append(filter.getOp().symbol()).append(" ");
+		StringBuilder filterExpr = new StringBuilder(field).append(" ");
 		if (filter.getOp().isUnary()) {
-			return filterExpr.toString();
+			return filterExpr.append(filter.getOp().symbol()).append(" ").toString();
 		}
 
+		if (filter.getValues() == null || Stream.of(filter.getValues()).allMatch(e -> StringUtils.isBlank(e))) {
+			if (filter.isParameterized()) {
+				return filterExpr.append(" any ").toString();
+			}
+
+			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid filter: " + filter.getId());
+		}
+
+		filterExpr.append(filter.getOp().symbol()).append(" ");
 		if (filter.getSubQueryId() != null) {
 			SavedQuery query = filter.getSubQuery();
 			if (query == null) {
@@ -546,6 +566,18 @@ public class AqlBuilder {
 	private String getLhs(String temporalExpr) {
 		String[] parts = temporalExpr.split("[<=>!]|\\sany\\s*$|\\sexists\\s*$|\\snot exists\\s*$|\\sbetween\\s");
 		return parts[0];
+	}
+
+	private Triple getTemporalObj(String temporalExpr) {
+		Matcher matcher = TEMPORAL_EXPR.matcher(temporalExpr);
+		if (!matcher.find()) {
+			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid temporal expression: " + temporalExpr);
+		}
+
+		String rhs = temporalExpr.substring(0, matcher.start());
+		String op  = temporalExpr.substring(matcher.start(), matcher.end());
+		String lhs = temporalExpr.substring(matcher.end());
+		return Triple.of(lhs.trim(), op.trim(), rhs.trim());
 	}
 	
 	private class Context {

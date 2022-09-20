@@ -18,6 +18,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 import edu.common.dynamicextensions.query.QuerySpace;
 
@@ -324,7 +325,7 @@ public class SavedQuery extends BaseEntity {
 	public void setQueryDefJson(String queryDefJson, boolean includeTitle) {
 		SavedQuery query = null;
 		try {
-			query = getReadMapper().readValue(queryDefJson, SavedQuery.class);
+			query = Utility.jsonToObject(queryDefJson, SavedQuery.class);
 		} catch (Exception e) {
 			throw new RuntimeException("Error marshalling JSON to saved query: " + e.getMessage(), e);
 		}
@@ -429,11 +430,7 @@ public class SavedQuery extends BaseEntity {
 			"id", "title", "cpId", "cpGroupId", "queryDefJson", "deletedOn", "subQueries", "dependentQueries"
 		}).collect(Collectors.toSet());
 	}
-		
-	private ObjectMapper getReadMapper() {
-		return new ObjectMapper();
-	}
-	
+
 	private ObjectMapper getWriteMapper() {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.setVisibility(
