@@ -102,6 +102,9 @@ public class RestErrorController extends ResponseEntityExceptionHandler {
 				
 			case UNKNOWN_ERROR:
 				return HttpStatus.INTERNAL_SERVER_ERROR;
+
+			case UNAUTHORIZED:
+				return HttpStatus.UNAUTHORIZED;
 				
 			case NONE:
 				return HttpStatus.OK;
