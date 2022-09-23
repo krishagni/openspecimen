@@ -228,7 +228,7 @@
         <td class="col"
           ng-show="uiOpts.treeColumns.collector && showCollector"
           ng-style="{width: uiOpts.treeColumns.collector.width + '%'}">
-          <os-users os-md-input ng-model="specimen.collectionEvent.user"
+          <os-users class="os-md-input" ng-model="specimen.collectionEvent.user"
             ng-if="specimen.lineage == 'New' && (!specimen.existingStatus || specimen.existingStatus == 'Pending')"
             required>
           </os-users>
