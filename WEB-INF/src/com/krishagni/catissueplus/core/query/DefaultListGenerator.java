@@ -176,8 +176,7 @@ public class DefaultListGenerator implements ListGenerator {
 			return StringUtils.EMPTY;
 		}
 
-		Map<String, Column> filtersMap = Utility.nullSafeStream(cfg.getFilters())
-			.collect(Collectors.toMap(Column::getExpr, column -> column));
+		Map<String, Column> filtersMap = Utility.toLinkedMap(cfg.getFilters(), Column::getExpr, column -> column);
 
 		List<String> invalidFilters = new ArrayList<>();
 		Map<String, Container> formsCache = new HashMap<>();

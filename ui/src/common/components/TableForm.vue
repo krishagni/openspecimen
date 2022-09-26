@@ -44,10 +44,10 @@
             <div :style="field.uiStyle">
               <component :is="field.component" v-bind="field" :md-type="true"
                 v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
-                :tab-order="tabDirection == 'column' ? (itemIdx + numRows * fieldIdx) : (itemIdx * numCols + fieldIdx)"
+                :tab-order="'' + (tabDirection == 'column' ? (itemIdx + numRows * fieldIdx) : (itemIdx * numCols + fieldIdx))"
                 :form="{...ctx.items[itemIdx], ...data, _formCache}"
                 :context="{...ctx.items[itemIdx], ...data, _formCache}"
-                @update:model-value="handleInput(itemIdx, field, itemModel)">
+                @update:model-value="handleInput(itemIdx, field, itemModel, fieldIdx)">
               </component>
               <div v-if="v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
                 v$.itemModels[itemIdx][field.name].$error">
@@ -236,16 +236,19 @@ export default {
   },
 
   methods: {
-    handleInput: function(itemIdx, field, itemModel) {
-      exprUtil.setValue(this.ctx.items[itemIdx], field.name, itemModel[field.name]);
-      this.$emit('input', {field: field, value: itemModel[field.name], item: this.ctx.items[itemIdx], itemIdx: itemIdx})
+    handleInput: function(itemIdx, field, itemModel, fieldIdx) {
+      const item  = this.ctx.items[itemIdx];
+      const value = itemModel[field.name];
+
+      exprUtil.setValue(item, field.name, value);
+      this.$emit('input', {field, value, item, itemIdx, fieldIdx})
 
       if (this.v$.itemModels[itemIdx][field.name]) {
         this.v$.itemModels[itemIdx][field.name].$touch();
       }
 
       if (field.type == 'booleanCheckbox' && field.enableCopyFirstToAll) {
-        if (itemModel[field.name] == true) {
+        if (value == true) {
           this.ctx.selects[field.name] = this.itemModels.every(item => item[field.name] == true);
         } else {
           this.ctx.selects[field.name] = false;

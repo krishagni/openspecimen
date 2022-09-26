@@ -27,6 +27,7 @@ class FieldFactory {
     site: 'os-site-dropdown',
     span: 'os-span',
     'specimen-measure': 'os-specimen-measure',
+    'specimen-type': 'os-specimen-type',
     storageContainer: 'os-containers-dropdown',
     subform: 'os-subform',
     'storage-position': 'os-storage-position',
@@ -35,7 +36,11 @@ class FieldFactory {
   };
 
   getComponent(fieldType) {
-    return this.fieldTypes[fieldType] || 'Unknown Component';
+    return this.fieldTypes[fieldType] || 'os-unknown';
+  }
+
+  registerComponent(fieldType, componentName) {
+    this.fieldTypes[fieldType] = componentName;
   }
 
   getValidationRules(fields) {
