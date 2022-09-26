@@ -130,7 +130,7 @@ export default {
         );
         selected = (selected && [selected]) || [];
       } else if (typeof ls.loadFn == 'function') {
-        selected = await ls.loadFn({...searchOpts, context: this.context});
+        selected = await ls.loadFn({...searchOpts, context: this.context, _selected: this.modelValue});
       } else if (typeof ls.apiUrl == 'string') {
         Object.assign(searchOpts, this.queryParams(ls));
         selected = this.getFromBackend(searchOpts);
