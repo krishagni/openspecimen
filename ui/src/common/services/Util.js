@@ -81,6 +81,29 @@ class Util {
     );
   }
 
+  queryParams(form, ls) {
+    const params = {};
+
+    if (!ls.queryParams) {
+      return params;
+    }
+
+    if (ls.queryParams.static) {
+      Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.queryParams.static[name]);
+    }
+
+    if (ls.queryParams.dynamic) {
+      Object.keys(ls.queryParams.dynamic).forEach(
+        (name) => {
+          const expr = ls.queryParams.dynamic[name];
+          params[name] = exprUtil.eval(form, expr);
+        }
+      );
+    }
+
+    return params;
+  }
+
   uriEncode(params) {
     if (!params || Object.keys(params).length <= 0) {
       return undefined;
@@ -181,9 +204,12 @@ class Util {
     this.spmnTypeProps = resp.reduce(
       (acc, type) => {
         if (type.parentValue) {
-          acc[type.parentValue + ':' + type.value] = type.props;
+          let props = acc[type.parentValue + ':' + type.value] = type.props || {};
+          props.specimenClass = type.parentValue;
+          props.type = type.value;
         } else {
-          acc[type.value + ':*'] = type.props;
+          let props = acc[type.value + ':*'] = type.props;
+          props.specimenClass = type.value;
         }
 
         return acc;
@@ -191,6 +217,13 @@ class Util {
     );
 
     return this.spmnTypeProps;
+  }
+
+  getSpecimenTypes() {
+    const props = this.spmnTypeProps || {};
+    return Object.values(props)
+      .filter(prop => !!prop.type)
+      .map(prop => ({specimenClass: prop.specimenClass, type: prop.type}));
   }
 
   getSpecimenMeasureUnit({specimenClass, type, specimenType}, measure) {
@@ -355,6 +388,14 @@ class Util {
     }
 
     return result;
+  }
+
+  promise(result) {
+    if (typeof result == 'function') {
+      return new Promise((resolve) => resolve(result()));
+    }
+
+    return new Promise((resolve) => resolve(result));
   }
 
   _getEscapeMap(str) {
