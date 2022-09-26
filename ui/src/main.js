@@ -35,11 +35,12 @@ import routerSvc from '@/common/services/Router.js';
 
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
-import CommonComponents from '@/common/components';
-import CommonServices   from '@/common/services';
-import CommonFilters    from '@/common/filters';
-import AdminServices    from '@/administrative/services';
-import BioSpmnServices  from '@/biospecimen/services';
+import CommonComponents  from '@/common/components';
+import CommonServices    from '@/common/services';
+import CommonFilters     from '@/common/filters';
+import AdminServices     from '@/administrative/services';
+import BioSpmnComponents from '@/biospecimen/components';
+import BioSpmnServices   from '@/biospecimen/services';
 
 window['Vue'] = Vue;
 const app = createApp(Root)
@@ -48,6 +49,7 @@ const app = createApp(Root)
   .use(CommonServices)
   .use(CommonFilters)
   .use(AdminServices)
+  .use(BioSpmnComponents)
   .use(BioSpmnServices);
 
 app.directive('show-if-allowed', showIfAllowed);
