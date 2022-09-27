@@ -84,11 +84,11 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     };
 
     function loadDocuments() {
-      if (!$injector.has('ecDocument') || !!cpr.id || cp.visitLevelConsents) {
+      if (!$injector.has('ecCpDocument') || !!cpr.id || cp.visitLevelConsents) {
         return;
       }
 
-      return $injector.get('ecDocument').getCount({cpId: cp.id}).then(
+      return $injector.get('ecCpDocument').getCount(cp.id, {includeOnlyActive: true}).then(
         function(resp) {
           $scope.partCtx.documentsCount = resp.count;
         }
