@@ -19,7 +19,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -215,7 +214,8 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 			cancel(job);
 		}
 
-		if (!job.isActiveJob()) {
+		if (!job.isActiveJob(true)) {
+			logger.info("The job " + job.getName() + " cannot be scheduled.");
 			return;
 		}
 
