@@ -209,7 +209,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
       var attrsToDelete = [
         'hasChildren', 'parent', 'children', 'depth',
         'hasOnlyPendingChildren', 'isOpened', 'selected',
-        'aliquotGrp', 'grpLeader', 'pLabel', 'pBarcode',
+        'aliquotGrp', 'grpLeader', 'pLabel', 'pBarcode', 'pInitialQty',
         'isVirtual', 'existingStatus', 'showInTree',
         'expanded', 'aliquotLabels', 'aliquotBarcodes', 'removed'
       ];
@@ -438,8 +438,9 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
                 specimen.selected = true;
               }
 
-              specimen.pLabel = !!specimen.label;
-              specimen.pBarcode = !!specimen.barcode;
+              specimen.pLabel      = specimen.label;
+              specimen.pBarcode    = specimen.barcode;
+              specimen.pInitialQty = specimen.initialQty;
               return specimen;
             }
           );
@@ -1211,6 +1212,11 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
   
           return false;
         }
+
+        function isDirty(oldValue, newValue) {
+          // either of old value or new value is specified and their current values differ.
+          return (!!oldValue || !!newValue) && oldValue != newValue;
+        }
   
         function getSpecimensToSave(cp, uiSpecimens, visited) {
           var result = [];
@@ -1218,10 +1224,17 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             function(uiSpecimen) {
               if (visited.indexOf(uiSpecimen) >= 0 || // already visited
                   !uiSpecimen.selected || // not selected
-                  (uiSpecimen.existingStatus == 'Collected' && 
-                  !uiSpecimen.closeAfterChildrenCreation) ||
-                  ((!uiSpecimen.existingStatus || uiSpecimen.existingStatus == 'Pending') &&
-                   (!uiSpecimen.status || uiSpecimen.status == 'Pending'))) {
+                  (uiSpecimen.existingStatus == 'Collected' && !uiSpecimen.closeAfterChildrenCreation) ||
+                  (
+                    (!uiSpecimen.existingStatus || uiSpecimen.existingStatus == 'Pending') &&
+                    (!uiSpecimen.status || uiSpecimen.status == 'Pending') &&
+                    (
+                      !isDirty(uiSpecimen.pLabel, uiSpecimen.label) &&
+                      !isDirty(uiSpecimen.pBarcode, uiSpecimen.barcode) &&
+                      !isDirty(uiSpecimen.pInitialQty, uiSpecimen.initialQty)
+                    )
+                  )
+              ) {
                 // collected and not close after children creation
                 return;
               }
