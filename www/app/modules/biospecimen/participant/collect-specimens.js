@@ -1218,6 +1218,11 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           return (!!oldValue || !!newValue) && oldValue != newValue;
         }
   
+        function isDirty(oldValue, newValue) {
+          // either of old value or new value is specified and their current values differ.
+          return (!!oldValue || !!newValue) && oldValue != newValue;
+        }
+
         function getSpecimensToSave(cp, uiSpecimens, visited) {
           var result = [];
           angular.forEach(uiSpecimens, 
