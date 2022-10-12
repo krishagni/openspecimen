@@ -13,7 +13,6 @@ import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.ScheduledJobErrorCode;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
-import com.krishagni.catissueplus.core.administrative.services.impl.ExternalScheduledTask;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -319,27 +318,27 @@ public class ScheduledJob extends BaseEntity {
 	}
 	
 	public boolean isActiveJob() {
+		return isActiveJob(false);
+	}
+
+	public boolean isActiveJob(boolean printReason) {
 		if (!Status.ACTIVITY_STATUS_ACTIVE.getStatus().equals(activityStatus)) {
+			if (printReason) {
+				logger.info("Scheduled job " + getName() + " is not active. Activity Status = " + activityStatus);
+			}
+
 			return false;
 		}
 
 		if (getType() == Type.QUERY && (getSavedQuery() == null || getSavedQuery().getDeletedOn() != null)) {
+			if (printReason) {
+				String title = (getSavedQuery() != null ? getSavedQuery().getTitle() : "Unknown");
+				logger.info("Scheduled query " + title + " is deleted.");
+			}
+
 			return false;
 		}
 
-		if (isOnDemand()) {
-			return true;
-		}
-		
-		Date current = new Date();
-		if (current.before(startDate)) {
-			return false;
-		}
-		
-		if (endDate != null && current.after(endDate)) {
-			return false;
-		}
-		
 		return true;
 	}
 
