@@ -63,7 +63,7 @@
     "angular-ui-select": "~0.12.0",
     "angular-translate": "~2.18.4",
     "tinymce": "5.4.1",
-    "jquery": "3.6.0"
+    "jquery": "3.6.1"
   },
   "appPath": "app"
 }
