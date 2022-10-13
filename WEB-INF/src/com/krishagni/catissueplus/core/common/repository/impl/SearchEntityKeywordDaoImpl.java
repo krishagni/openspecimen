@@ -26,7 +26,7 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 
 	@Override
 	public List<SearchEntityKeyword> getMatches(String entity, String searchTerm, int maxResults) {
-		String sql = getCurrentSession().createNamedQuery(GET_MATCHES, SearchEntityKeyword.class).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(GET_MATCHES).getQueryString();
 		if (entity != null) {
 			sql = String.format(sql, " r.short_name = :entity and ");
 		} else {
