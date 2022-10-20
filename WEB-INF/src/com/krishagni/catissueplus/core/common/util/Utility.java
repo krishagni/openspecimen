@@ -781,10 +781,25 @@ public class Utility {
 		}
 	}
 
-	public static String mapToJson(Map<String, Object> map) {
+	public static String mapToJson(Map<String, ?> map) {
+		return mapToJson(map, false);
+	}
+
+	public static String mapToJson(Map<String, ?> map, boolean ignoreNull) {
 		try {
 			if (map == null) {
 				map = Collections.emptyMap();
+			}
+
+			if (ignoreNull) {
+				Map<String, Object> newMap = new HashMap<>();
+				for (Map.Entry<String, ?> kv : map.entrySet()) {
+					if (kv.getValue() != null) {
+						newMap.put(kv.getKey(), kv.getValue());
+					}
+				}
+
+				map = newMap;
 			}
 
 			return om.get().writeValueAsString(map);

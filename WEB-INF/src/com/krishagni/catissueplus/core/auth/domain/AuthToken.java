@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.auth.domain;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 public class AuthToken {
 	private String token;
@@ -41,5 +42,9 @@ public class AuthToken {
 
 	public void setLoginAuditLog(LoginAuditLog loginAuditLog) {
 		this.loginAuditLog = loginAuditLog;
+	}
+
+	public String getEncodedToken() {
+		return AuthUtil.encodeToken(token);
 	}
 }

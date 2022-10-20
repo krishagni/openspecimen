@@ -86,18 +86,42 @@ public class AuthUtil {
 		return toTimeZone(timeZone);
 	}
 
+	public static boolean isImpersonated() {
+		UserAuthToken token = (UserAuthToken) SecurityContextHolder.getContext().getAuthentication();
+		if (token == null) {
+			return false;
+		}
+
+		return token.isImpersonated();
+	}
+
 	public static void setCurrentUser(User user) {
 		setCurrentUser(user, null, null);
 	}
 
+	public static void setCurrentUser(User user, String ipAddress) {
+		setCurrentUser(user, null, ipAddress, null, false);
+	}
+
 	public static void setCurrentUser(User user, String authToken, HttpServletRequest httpReq) {
+		setCurrentUser(user, authToken, httpReq, false);
+	}
+
+	public static void setCurrentUser(User user, String authToken, HttpServletRequest httpReq, boolean impersonated) {
+		setCurrentUser(user, authToken, null, httpReq, impersonated);
+	}
+
+	public static void setCurrentUser(User user, String authToken, String ipAddress, HttpServletRequest httpReq, boolean impersonated) {
 		UserAuthToken token = new UserAuthToken(user, authToken, user.getAuthorities());
 		if (httpReq != null) {
 			token.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpReq));
 			token.setTimeZone(httpReq.getHeader("X-OS-CLIENT-TZ"));
 			token.setIpAddress(Utility.getRemoteAddress(httpReq));
+		} else if (ipAddress != null) {
+			token.setIpAddress(ipAddress);
 		}
 
+		token.setImpersonated(impersonated);
 		SecurityContextHolder.getContext().setAuthentication(token);
 	}
 
@@ -249,6 +273,8 @@ public class AuthUtil {
 
 		private String ipAddress;
 
+		private boolean impersonated;
+
 		public UserAuthToken(Object principal, Object credentials) {
 			super(principal, credentials);
 		}
@@ -271,6 +297,14 @@ public class AuthUtil {
 
 		public void setIpAddress(String ipAddress) {
 			this.ipAddress = ipAddress;
+		}
+
+		public void setImpersonated(boolean impersonated) {
+			this.impersonated = impersonated;
+		}
+
+		public boolean isImpersonated() {
+			return impersonated;
 		}
 	}
 }

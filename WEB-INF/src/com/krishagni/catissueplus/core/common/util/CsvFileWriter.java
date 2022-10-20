@@ -73,8 +73,12 @@ public class CsvFileWriter implements CsvWriter {
 	}
 	
 	@Override
-	public void flush() throws IOException {
-		csvWriter.flush();
+	public void flush() {
+		try {
+			csvWriter.flush();
+		} catch (IOException e) {
+			throw new CsvException("Error writing to the CSV file", e);
+		}
 	}
 	
 	@Override

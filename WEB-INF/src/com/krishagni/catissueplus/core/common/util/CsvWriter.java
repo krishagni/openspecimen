@@ -9,5 +9,5 @@ public interface CsvWriter extends Closeable {
 	
 	public void writeNext(String[] nextLine);
 	
-	public void flush() throws IOException;
+	public void flush();
 }

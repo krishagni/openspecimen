@@ -162,4 +162,25 @@
       <column name="BARCODE" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track impersonated user logins">
+    <addColumn tableName="OS_LOGIN_AUDIT_LOGS">
+      <column name="IMPERSONATED_BY" type="${int.type}">
+        <constraints foreignKeyName="FK_LOGIN_AUDIT_IMP_BY"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Track IP address of the user who initiated the export">
+    <addColumn tableName="OS_EXPORT_JOBS">
+      <column name="IP_ADDRESS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Track IP address of the user who initiated the import">
+    <addColumn tableName="OS_BULK_IMPORT_JOBS">
+      <column name="IP_ADDRESS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

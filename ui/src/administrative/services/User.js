@@ -60,7 +60,7 @@ class User {
   }
 
   async impersonate(user) {
-    return http.post('sessions/impersonate', {userId: user.id});
+    return http.post('sessions/impersonate', {loginName: user.loginName, domainName: user.domainName});
   }
 
   async unpersonate() {
