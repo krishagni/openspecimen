@@ -220,6 +220,7 @@ public class CollectionProtocolsController {
 
 		HttpServletResponse httpResp)
 	throws JsonProcessingException {
+		Date startTime = Calendar.getInstance().getTime();
 		CpQueryCriteria crit = new CpQueryCriteria();
 		crit.setId(cpId);
 		crit.setFullObject(true);
@@ -233,6 +234,7 @@ public class CollectionProtocolsController {
 			httpResp.setContentType("application/json");
 			httpResp.setHeader("Content-Disposition", "attachment;filename=CpDef_" + cpId + ".json");
 			IoUtil.copy(in, httpResp.getOutputStream());
+			exportSvc.saveJob("cpJson", startTime, Collections.singletonMap("cpId", cpId.toString()));
 		} catch (IOException e) {
 			throw new RuntimeException("Error sending file", e);
 		} finally {
@@ -245,10 +247,12 @@ public class CollectionProtocolsController {
 	@ResponseBody		
 	public CollectionProtocolDetail importCpDef(@PathVariable("file") MultipartFile file) 
 	throws IOException {
+		Date startTime = Calendar.getInstance().getTime();
 		CollectionProtocolDetail cp = new ObjectMapper().readValue(file.getBytes(), CollectionProtocolDetail.class);
 		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.importCollectionProtocol(new RequestEvent<>(cp));
 		resp.throwErrorIfUnsuccessful();
-		
+
+		importSvc.saveJob("cpJson", "CREATE", startTime, Collections.singletonMap("cpId", resp.getPayload().getId().toString()));
 		return resp.getPayload();
 	}
 	
