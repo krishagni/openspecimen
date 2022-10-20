@@ -198,7 +198,10 @@ public class CollectionProtocolGroupsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public void getWorkflowCfg(@PathVariable("id") Long groupId, HttpServletResponse httpResp) {
-		ResponseEvent<CpGroupWorkflowCfgDetail> resp = groupSvc.getWorkflows(RequestEvent.wrap(new EntityQueryCriteria(groupId)));
+		EntityQueryCriteria crit = new EntityQueryCriteria(groupId);
+		crit.setParams(Collections.singletonMap("export", true));
+
+		ResponseEvent<CpGroupWorkflowCfgDetail> resp = groupSvc.getWorkflows(RequestEvent.wrap(crit));
 		resp.throwErrorIfUnsuccessful();
 
 		InputStream in = null;
@@ -224,7 +227,7 @@ public class CollectionProtocolGroupsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public CpGroupWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long groupId, @RequestBody List<WorkflowDetail> workflows) {
-		return saveWorkflows(groupId, workflows);
+		return saveWorkflows(groupId, workflows, false);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/workflows-file")
@@ -240,7 +243,7 @@ public class CollectionProtocolGroupsController {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_REQUEST, e.getMessage());
 		}
 
-		return saveWorkflows(groupId, workflows);
+		return saveWorkflows(groupId, workflows, true);
 	}
 	private List<FormSummary> getForms(List<Long> formIds) {
 		return formIds.stream().map(
@@ -252,9 +255,10 @@ public class CollectionProtocolGroupsController {
 		).collect(Collectors.toList());
 	}
 
-	private CpGroupWorkflowCfgDetail saveWorkflows(Long groupId, List<WorkflowDetail> workflows) {
+	private CpGroupWorkflowCfgDetail saveWorkflows(Long groupId, List<WorkflowDetail> workflows, boolean importWfs) {
 		CpGroupWorkflowCfgDetail input = new CpGroupWorkflowCfgDetail();
 		input.setGroupId(groupId);
+		input.setImportWfs(importWfs);
 		for (WorkflowDetail workflow : workflows) {
 			input.getWorkflows().put(workflow.getName(), workflow);
 		}

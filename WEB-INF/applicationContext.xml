@@ -229,6 +229,8 @@
     <property name="formDao" ref="formDao"/>
     <property name="formSvc" ref="formSvc"/>
     <property name="cpSvc" ref="cpSvc"/>
+    <property name="exportSvc" ref="exportSvc" />
+    <property name="importSvc" ref="importObjectsSvc" />
   </bean>
 
   <bean id="participantLookupFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.ParticipantLookupFactoryImpl">
