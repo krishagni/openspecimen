@@ -183,7 +183,12 @@ public class ExportJob extends BaseEntity {
 			entityName = param("formName") + " (" + param("entityType") + ")";
 		} else {
 			Object[] params = { param("formName") };
-			entityName = MessageUtil.getInstance().getMessage("export_entities_" + getName(), params);
+
+			String key = "export_entities_" + getName();
+			entityName = MessageUtil.getInstance().getMessage(key, params);
+			if (entityName.equals(key)) {
+				entityName = getName();
+			}
 		}
 
 		return entityName;

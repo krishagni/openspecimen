@@ -256,7 +256,11 @@ public class ImportJob extends BaseEntity {
 			entityName = getParams().get("formName") + " (" + getParams().get("entityType") + ")";
 		} else {
 			String formName = getParams() != null ? getParams().get("formName") : null;
-			entityName = getMsg("bulk_import_entities_" + getName(), formName);
+			String key = "bulk_import_entities_" + getName();
+			entityName = getMsg(key, formName);
+			if (entityName.equals(key)) {
+				entityName = getName();
+			}
 		}
 
 		return entityName;

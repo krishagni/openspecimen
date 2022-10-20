@@ -1673,6 +1673,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	private ResponseEvent<ExportedFileDetail> exportReport(RequestEvent<ContainerQueryCriteria> req, ContainerReport report, Object... params) {
 		try {
+			Date startTime = Calendar.getInstance().getTime();
 			StorageContainer container = getContainer(req.getPayload());
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			User user = AuthUtil.getCurrentUser();
@@ -1684,6 +1685,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 						AuthUtil.setCurrentUser(user);
 						ExportedFileDetail file = report.generate(container, params);
 						fileId = file != null ? file.getName() : null;
+						exportSvc.saveJob(msg(report.getName()), startTime, Collections.singletonMap("containerId", container.getId().toString()));
 						return file;
 					} catch (Throwable e) {
 						t = e;
