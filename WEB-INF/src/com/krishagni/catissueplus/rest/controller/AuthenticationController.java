@@ -4,6 +4,7 @@ package com.krishagni.catissueplus.rest.controller;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,12 +21,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.auth.domain.AuthToken;
 import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+
 import ua_parser.Client;
 import ua_parser.Device;
 import ua_parser.OS;
@@ -107,16 +110,27 @@ public class AuthenticationController {
 	@RequestMapping(method=RequestMethod.POST, value="/impersonate")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, Object> impersonate(HttpServletRequest httpReq, HttpServletResponse httpResp, @RequestBody Map<String, Object> input) {
-		Map<String, Object> token = ResponseEvent.unwrap(userAuthService.impersonate(RequestEvent.wrap(input)));
-		AuthUtil.setImpersonateTokenCookie(httpReq, httpResp, (String) token.get("impersonateUserToken"));
-		return token;
+	public Map<String, Object> impersonate(HttpServletRequest httpReq, HttpServletResponse httpResp, @RequestBody LoginDetail input) {
+		input.setIpAddress(Utility.getRemoteAddress(httpReq));
+		input.setApiUrl(httpReq.getRequestURI());
+		input.setRequestMethod(RequestMethod.POST.name());
+
+		AuthToken token = ResponseEvent.unwrap(userAuthService.impersonate(RequestEvent.wrap(input)));
+		String encodedToken = token.getEncodedToken();
+		AuthUtil.setImpersonateTokenCookie(httpReq, httpResp, encodedToken);
+		return Collections.singletonMap("impersonateUserToken", encodedToken);
 	}
 
 	@RequestMapping(method=RequestMethod.DELETE, value="/impersonate")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, Object> impersonate(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		if (AuthUtil.isImpersonated()) {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			String token = (String) auth.getCredentials();
+			String status = ResponseEvent.unwrap(userAuthService.removeToken(RequestEvent.wrap(token)));
+		}
+
 		AuthUtil.setImpersonateTokenCookie(httpReq, httpResp, null);
 		return Collections.singletonMap("impersonateUserToken", null);
 	}

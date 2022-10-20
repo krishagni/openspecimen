@@ -86,11 +86,24 @@ public class AuthUtil {
 		return toTimeZone(timeZone);
 	}
 
+	public static boolean isImpersonated() {
+		UserAuthToken token = (UserAuthToken) SecurityContextHolder.getContext().getAuthentication();
+		if (token == null) {
+			return false;
+		}
+
+		return token.isImpersonated();
+	}
+
 	public static void setCurrentUser(User user) {
 		setCurrentUser(user, null, null);
 	}
 
 	public static void setCurrentUser(User user, String authToken, HttpServletRequest httpReq) {
+		setCurrentUser(user, authToken, httpReq, false);
+	}
+
+	public static void setCurrentUser(User user, String authToken, HttpServletRequest httpReq, boolean impersonated) {
 		UserAuthToken token = new UserAuthToken(user, authToken, user.getAuthorities());
 		if (httpReq != null) {
 			token.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpReq));
@@ -98,6 +111,7 @@ public class AuthUtil {
 			token.setIpAddress(Utility.getRemoteAddress(httpReq));
 		}
 
+		token.setImpersonated(impersonated);
 		SecurityContextHolder.getContext().setAuthentication(token);
 	}
 
@@ -249,6 +263,8 @@ public class AuthUtil {
 
 		private String ipAddress;
 
+		private boolean impersonated;
+
 		public UserAuthToken(Object principal, Object credentials) {
 			super(principal, credentials);
 		}
@@ -271,6 +287,14 @@ public class AuthUtil {
 
 		public void setIpAddress(String ipAddress) {
 			this.ipAddress = ipAddress;
+		}
+
+		public void setImpersonated(boolean impersonated) {
+			this.impersonated = impersonated;
+		}
+
+		public boolean isImpersonated() {
+			return impersonated;
 		}
 	}
 }

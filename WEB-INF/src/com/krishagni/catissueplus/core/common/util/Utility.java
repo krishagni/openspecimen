@@ -781,7 +781,7 @@ public class Utility {
 		}
 	}
 
-	public static String mapToJson(Map<String, Object> map) {
+	public static String mapToJson(Map<String, ?> map) {
 		try {
 			if (map == null) {
 				map = Collections.emptyMap();

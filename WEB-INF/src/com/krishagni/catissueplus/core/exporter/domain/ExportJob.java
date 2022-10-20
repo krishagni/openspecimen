@@ -34,6 +34,8 @@ public class ExportJob extends BaseEntity {
 
 	private Map<String, String> params = new HashMap<>();
 
+	private String ipAddress;
+
 	private transient ObjectSchema schema;
 
 	private transient List<Long> recordIds;
@@ -110,6 +112,14 @@ public class ExportJob extends BaseEntity {
 		}
 
 		return params.get(name);
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	public ObjectSchema getSchema() {

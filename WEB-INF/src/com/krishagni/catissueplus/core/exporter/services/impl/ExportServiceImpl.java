@@ -2,6 +2,8 @@ package com.krishagni.catissueplus.core.exporter.services.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -9,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -28,10 +31,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.audit.repository.RevisionsListCriteria;
+import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -46,11 +51,13 @@ import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.domain.ExportErrorCode;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.events.ExportDetail;
 import com.krishagni.catissueplus.core.exporter.events.ExportJobDetail;
 import com.krishagni.catissueplus.core.exporter.repository.ExportJobDao;
+import com.krishagni.catissueplus.core.exporter.repository.ExportJobsListCriteria;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.importer.domain.ObjectSchema;
 import com.krishagni.catissueplus.core.importer.services.ObjectSchemaFactory;
@@ -59,7 +66,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.nutility.IoUtil;
 
-public class ExportServiceImpl implements ExportService {
+public class ExportServiceImpl implements ExportService, InitializingBean {
 	private static final LogUtil logger = LogUtil.getLogger(ExportServiceImpl.class);
 
 	private Map<String, Supplier<Function<ExportJob, List<? extends Object>>>> genFactories = new HashMap<>();
@@ -69,6 +76,8 @@ public class ExportServiceImpl implements ExportService {
 	private ObjectSchemaFactory schemaFactory;
 
 	private ThreadPoolTaskExecutor taskExecutor;
+
+	private AuditService auditService;
 
 	private int ONLINE_EXPORT_TIMEOUT_SECS = 30;
 
@@ -82,6 +91,10 @@ public class ExportServiceImpl implements ExportService {
 
 	public void setExportJobDao(ExportJobDao exportJobDao) {
 		this.exportJobDao = exportJobDao;
+	}
+
+	public void setAuditService(AuditService auditService) {
+		this.auditService = auditService;
 	}
 
 	@Override
@@ -125,6 +138,11 @@ public class ExportServiceImpl implements ExportService {
 		genFactories.put(type, genFactory);
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		auditService.registerExporter(this::exportJobsReport);
+	}
+
 	private Pair<ExportJob, Future<Integer>> exportObjects(ExportDetail detail) {
 		ExportJob job = createJob(detail);
 		ExportTask task = new ExportTask(job);
@@ -166,6 +184,7 @@ public class ExportServiceImpl implements ExportService {
 		job.setRecordIds(detail.getRecordIds());
 		job.setDisableNotifs(detail.isDisableNotifs());
 		job.param("timeZone", tz != null ? tz.getID() : null);
+		job.setIpAddress(AuthUtil.getRemoteAddr());
 		exportJobDao.saveOrUpdate(job.markInProgress(), true);
 		return job;
 	}
@@ -178,6 +197,137 @@ public class ExportServiceImpl implements ExportService {
 
 		return result;
 	}
+
+	private File exportJobsReport(String baseDir, User exportedBy, Date exportedOn, List<User> users, RevisionsListCriteria crit) {
+		File auditDir = new File(ConfigUtil.getInstance().getDataDir(), "audit");
+		File result = new File(auditDir, baseDir);
+		if (!result.exists()) {
+			result.mkdirs();
+		}
+
+		String ts = new SimpleDateFormat("yyyyMMdd_HHmm").format(exportedOn);
+		File outputFile = new File(result, "os_export_jobs_" + ts + ".csv");
+		return exportJobsReport(exportedBy, exportedOn, users, crit, outputFile);
+	}
+
+	private File exportJobsReport(User exportedBy, Date exportedOn, List<User> users, RevisionsListCriteria crit, File outputFile) {
+		ExportJobsListCriteria jobsListCriteria = new ExportJobsListCriteria()
+			.fromDate(crit.startDate())
+			.toDate(crit.endDate())
+			.userIds(Utility.nullSafeStream(users).map(User::getId).collect(Collectors.toList()));
+
+		OutputStream fout = null;
+		CsvWriter csvWriter = null;
+
+		try {
+			fout      = Files.newOutputStream(outputFile.toPath());
+			csvWriter = CsvFileWriter.createCsvFileWriter(fout);
+
+			Map<String, String> headers = new LinkedHashMap<String, String>() {{
+				put(msg("common_server_url"), ConfigUtil.getInstance().getAppUrl());
+				put(msg("common_server_env"), ConfigUtil.getInstance().getDeployEnv());
+				put(msg("audit_rev_exported_by"), exportedBy.formattedName(true));
+				put(msg("audit_rev_exported_on"), Utility.getDateTimeString(exportedOn));
+
+				if (CollectionUtils.isNotEmpty(users)) {
+					String userNames = users.stream().map(u -> u.formattedName(true)).collect(Collectors.joining(", "));
+					put(msg("audit_rev_audited_users"), userNames);
+				}
+
+				if (jobsListCriteria.fromDate() != null) {
+					put(msg("audit_rev_start_date"), Utility.getDateTimeString(jobsListCriteria.fromDate()));
+				}
+
+				if (jobsListCriteria.toDate() != null) {
+					put(msg("audit_rev_end_date"),   Utility.getDateTimeString(jobsListCriteria.toDate()));
+				}
+
+				put("", "");
+			}};
+
+			Utility.writeKeyValuesToCsv(fout, headers);
+
+			jobsListCriteria.startAt(0).maxResults(100);
+			writeJobDetailToCsv(jobsListCriteria, csvWriter);
+
+			return outputFile;
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(csvWriter);
+			IOUtils.closeQuietly(fout);
+		}
+	}
+
+	private void writeJobDetailToCsv(ExportJobsListCriteria crit, CsvWriter csvWriter) {
+		csvWriter.writeNext(new String[1]);
+		csvWriter.writeNext(getAuditLogReportHeaders());
+
+		int count = 0;
+		boolean endOfRecords = false;
+		while (!endOfRecords) {
+			List<ExportJob> jobs = exportJobDao.getExportJobs(crit);
+			crit.startAt(crit.startAt() + jobs.size());
+			endOfRecords = jobs.size() < 100;
+
+			for (ExportJob job : jobs) {
+				csvWriter.writeNext(getAuditLogReportData(job));
+				++count;
+
+				if (count % 25 == 0) {
+					csvWriter.flush();
+				}
+			}
+		}
+
+		csvWriter.flush();
+	}
+
+	private String[] getAuditLogReportHeaders() {
+		return new String[] {
+			msg("audit_rev_id"),
+			msg("audit_rev_tstmp"),
+			msg("audit_rev_user"),
+			msg("audit_rev_user_email"),
+			msg("audit_rev_domain"),
+			msg("audit_rev_user_login"),
+			msg("audit_rev_institute"),
+			msg("audit_rev_ip_address"),
+			msg("export_job_exec_time"),
+			msg("export_job_records_count"),
+			msg("export_job_params")
+		};
+	}
+
+	private String[] getAuditLogReportData(ExportJob job) {
+		String timeToFinish = "N/A";
+		if (job.getEndTime() != null) {
+			timeToFinish = String.valueOf((job.getEndTime().getTime()  - job.getCreationTime().getTime()) / 1000);
+		}
+
+		User user = job.getCreatedBy();
+		Map<String, Object> params = new HashMap<>(job.getParams());
+		params.put("recordType", job.getName());
+		return new String[] {
+			job.getId().toString(),
+			Utility.getDateTimeString(job.getCreationTime()),
+			user.formattedName(),
+			user.getEmailAddress(),
+			user.getAuthDomain().getName(),
+			user.getLoginName(),
+			user.getInstitute() != null ? user.getInstitute().getName() : "",
+			job.getIpAddress() != null ? job.getIpAddress() : "",
+			timeToFinish,
+			job.getTotalRecords() != null ? job.getTotalRecords().toString() : "",
+			Utility.mapToJson(params)
+		};
+	}
+
+
+	private String msg(String key) {
+		return MessageUtil.getInstance().getMessage(key);
+	}
+
 
 	private class ExportTask implements Callable<Integer> {
 		private ExportJob job;

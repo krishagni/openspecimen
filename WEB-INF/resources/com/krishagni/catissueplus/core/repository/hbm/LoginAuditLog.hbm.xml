@@ -12,7 +12,9 @@
       </generator>
     </id>
     
-    <many-to-one name="user" column="USER_ID" not-null="true"/>	
+    <many-to-one name="user" column="USER_ID" not-null="true"/>
+
+    <many-to-one name="impersonatedBy" column="IMPERSONATED_BY" />
 
     <property name="ipAddress" column="IP_ADDRESS" not-null="true"/>
 

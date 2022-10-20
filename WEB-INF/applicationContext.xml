@@ -1395,6 +1395,7 @@
     </property>
     <property name="taskExecutor" ref="taskExecutor"/>
     <property name="schemaFactory" ref="objectSchemaFactory"/>
+    <property name="auditService" ref="auditService" />
   </bean>
   
   <bean id="supportService" class="com.krishagni.catissueplus.core.support.services.impl.SupportServiceImpl">

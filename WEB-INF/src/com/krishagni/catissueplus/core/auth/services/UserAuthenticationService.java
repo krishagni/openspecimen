@@ -23,5 +23,5 @@ public interface UserAuthenticationService {
 
 	User getUser(Long userId);
 
-	ResponseEvent<Map<String, Object>> impersonate(RequestEvent<Map<String, Object>> req);
+	ResponseEvent<AuthToken> impersonate(RequestEvent<LoginDetail> req);
 }
