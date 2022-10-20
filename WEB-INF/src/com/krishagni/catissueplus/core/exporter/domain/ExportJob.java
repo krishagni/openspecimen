@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.importer.domain.ObjectSchema;
 
 public class ExportJob extends BaseEntity {
@@ -173,5 +174,18 @@ public class ExportJob extends BaseEntity {
 
 		String userIdStr = user.getId().toString();
 		return Arrays.stream(users.split(",")).anyMatch(userId -> userId.trim().equals(userIdStr));
+	}
+
+	public String getEntityName() {
+		String entityName;
+
+		if (getName().equals("extensions")) {
+			entityName = param("formName") + " (" + param("entityType") + ")";
+		} else {
+			Object[] params = { param("formName") };
+			entityName = MessageUtil.getInstance().getMessage("export_entities_" + getName(), params);
+		}
+
+		return entityName;
 	}
 }

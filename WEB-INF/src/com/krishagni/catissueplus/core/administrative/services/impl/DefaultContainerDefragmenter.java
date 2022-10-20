@@ -1,7 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -372,11 +371,7 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 		}
 
 		if (movedSpmnsCnt % 50 == 0) {
-			try {
-				writer.flush();
-			} catch (IOException ioe) {
-				throw OpenSpecimenException.serverError(ioe);
-			}
+			writer.flush();
 		}
 	}
 

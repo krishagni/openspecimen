@@ -177,4 +177,10 @@
       <column name="IP_ADDRESS" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track IP address of the user who initiated the import">
+    <addColumn tableName="OS_BULK_IMPORT_JOBS">
+      <column name="IP_ADDRESS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

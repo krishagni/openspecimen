@@ -139,6 +139,21 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 	}
 
 	@Override
+	@PlusTransactional
+	public void saveJob(String entityName, Date startTime, Map<String, String> params) {
+		ExportJob job = new ExportJob();
+		job.setName(entityName);
+		job.setStatus(ExportJob.Status.COMPLETED);
+		job.setTotalRecords(1L);
+		job.setCreatedBy(AuthUtil.getCurrentUser());
+		job.setCreationTime(startTime);
+		job.setEndTime(Calendar.getInstance().getTime());
+		job.setParams(params);
+		job.setIpAddress(AuthUtil.getRemoteAddr());
+		exportJobDao.saveOrUpdate(job, true);
+	}
+
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		auditService.registerExporter(this::exportJobsReport);
 	}
@@ -293,21 +308,20 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 			msg("audit_rev_user_login"),
 			msg("audit_rev_institute"),
 			msg("audit_rev_ip_address"),
-			msg("export_job_exec_time"),
-			msg("export_job_records_count"),
-			msg("export_job_params")
+			msg("audit_rev_entity_name"),
+			msg("audit_rev_exec_time"),
+			msg("audit_rev_total_records"),
+			msg("audit_rev_other_params")
 		};
 	}
 
 	private String[] getAuditLogReportData(ExportJob job) {
-		String timeToFinish = "N/A";
+		String timeToFinish = "";
 		if (job.getEndTime() != null) {
 			timeToFinish = String.valueOf((job.getEndTime().getTime()  - job.getCreationTime().getTime()) / 1000);
 		}
 
 		User user = job.getCreatedBy();
-		Map<String, Object> params = new HashMap<>(job.getParams());
-		params.put("recordType", job.getName());
 		return new String[] {
 			job.getId().toString(),
 			Utility.getDateTimeString(job.getCreationTime()),
@@ -317,9 +331,10 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 			user.getLoginName(),
 			user.getInstitute() != null ? user.getInstitute().getName() : "",
 			job.getIpAddress() != null ? job.getIpAddress() : "",
+			job.getEntityName(),
 			timeToFinish,
 			job.getTotalRecords() != null ? job.getTotalRecords().toString() : "",
-			Utility.mapToJson(params)
+			Utility.mapToJson(job.getParams(), true)
 		};
 	}
 
@@ -835,38 +850,19 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 			return;
 		}
 
-		String entityName = getEntityName(job);
-
+		String entityName = job.getEntityName();
 		String [] subjParams = {job.getId().toString(), entityName};
 
 		Map<String, Object> props = new HashMap<>();
 		props.put("job", job);
 		props.put("entityName", entityName);
-		props.put("status", getMsg("export_statuses_" + job.getStatus().name().toLowerCase()));
+		props.put("status", msg("export_statuses_" + job.getStatus().name().toLowerCase()));
 		props.put("$subject", subjParams);
 		props.put("timeTaken", TimeUnit.MILLISECONDS.toMinutes(job.getEndTime().getTime() - job.getCreationTime().getTime()));
 
 		String[] rcpts = {job.getCreatedBy().getEmailAddress()};
 		EmailUtil.getInstance().sendEmail(JOB_STATUS_EMAIL_TMPL, rcpts, null, props);
 	}
-
-	private String getEntityName(ExportJob job) {
-		String entityName;
-
-		if (job.getName().equals(EXTENSIONS)) {
-			entityName = job.getParams().get("formName") + " (" + job.getParams().get("entityType") + ")";
-		} else {
-			entityName = getMsg("export_entities_" + job.getName(), job.param("formName"));
-		}
-
-		return entityName;
-	}
-
-
-	private String getMsg(String key, Object ... params) {
-		return MessageUtil.getInstance().getMessage(key, params);
-	}
-
 
 	private String getJobDir(ExportJob job) {
 		File dataDir = new File(ConfigUtil.getInstance().getDataDir());

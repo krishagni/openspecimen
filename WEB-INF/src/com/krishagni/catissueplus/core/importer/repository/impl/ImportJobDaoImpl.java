@@ -43,6 +43,8 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 		
 		Criteria query = getCurrentSession().createCriteria(ImportJob.class)
 			.createAlias("createdBy", "createdBy")
+			.createAlias("createdBy.authDomain", "authDomain")
+			.createAlias("createdBy.institute", "institute")
 			.setFetchMode("createdBy", FetchMode.JOIN)
 			.setFirstResult(startAt)
 			.setMaxResults(maxResults)
@@ -59,8 +61,10 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 		if (crit.instituteId() != null) {
 			query.createAlias("createdBy.institute", "institute")
 				.add(Restrictions.eq("institute.id", crit.instituteId()));
-		} else if (crit.userId() != null) {
-			query.add(Restrictions.eq("createdBy.id", crit.userId()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.userIds())) {
+			query.add(Restrictions.in("createdBy.id", crit.userIds()));
 		}
 		
 		if (CollectionUtils.isNotEmpty(crit.objectTypes())) {
@@ -80,7 +84,15 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 				));
 			}
 		}
-						
+
+		if (crit.fromDate() != null) {
+			query.add(Restrictions.ge("creationTime", crit.fromDate()));
+		}
+
+		if (crit.toDate() != null) {
+			query.add(Restrictions.le("creationTime", crit.toDate()));
+		}
+
 		return query.list();
 	}
 

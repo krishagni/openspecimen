@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.core.exporter.services;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -16,4 +18,6 @@ public interface ExportService {
 	ResponseEvent<String> getExportFile(RequestEvent<Long> req);
 
 	void registerObjectsGenerator(String type, Supplier<Function<ExportJob, List<? extends Object>>> genFactory);
+
+	void saveJob(String entityName, Date startTime, Map<String, String> params);
 }

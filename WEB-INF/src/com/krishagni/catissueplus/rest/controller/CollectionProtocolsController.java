@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -65,6 +66,8 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.FormSummary;
 import com.krishagni.catissueplus.core.de.services.FormService;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.catissueplus.core.importer.services.ImportService;
 import com.krishagni.catissueplus.core.query.Column;
 import com.krishagni.catissueplus.core.query.ListConfig;
 import com.krishagni.catissueplus.core.query.ListDetail;
@@ -87,6 +90,12 @@ public class CollectionProtocolsController {
 
 	@Autowired
 	private HttpServletRequest httpServletRequest;
+
+	@Autowired
+	private ImportService importSvc;
+
+	@Autowired
+	private ExportService exportSvc;
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -471,6 +480,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public void getWorkflowCfg(@PathVariable("id") Long cpId, HttpServletResponse httpResp) {
+		Date startTime = Calendar.getInstance().getTime();
 		ResponseEvent<CpWorkflowCfgDetail> resp = cpSvc.getWorkflows(new RequestEvent<>(cpId));
 		resp.throwErrorIfUnsuccessful();
 
@@ -486,6 +496,7 @@ public class CollectionProtocolsController {
 				.writeValueAsString(resp.getPayload().getWorkflows().values());
 			in = new ByteArrayInputStream(workflowsJson.getBytes());
 			Utility.sendToClient(httpResp, filename, "application/json", in);
+			exportSvc.saveJob("cpWf", startTime, Collections.singletonMap("cpId", cpId.toString()));
 		} catch (Exception e) {
 			throw OpenSpecimenException.userError(CommonErrorCode.FILE_SEND_ERROR, e.getMessage());
 		} finally {
@@ -506,6 +517,7 @@ public class CollectionProtocolsController {
 	public CpWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long cpId, @PathVariable("file") MultipartFile file) {
 		List<WorkflowDetail> workflows;
 
+		Date startTime = Calendar.getInstance().getTime();
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			workflows = mapper.readValue(file.getInputStream(), new TypeReference<List<WorkflowDetail>>() {});
@@ -513,7 +525,9 @@ public class CollectionProtocolsController {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_REQUEST, e.getMessage());
 		}
 
-		return saveWorkflows(cpId, workflows, false);
+		CpWorkflowCfgDetail result = saveWorkflows(cpId, workflows, false);
+		importSvc.saveJob("cpWf", "UPDATE", startTime, Collections.singletonMap("cpId", cpId.toString()));
+		return result;
 	}
 
 	@RequestMapping(method = RequestMethod.PATCH, value="/{id}/workflows")

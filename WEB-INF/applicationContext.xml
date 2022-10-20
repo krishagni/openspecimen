@@ -1383,6 +1383,7 @@
     <property name="importJobDao" ref="importJobDao"/>
     <property name="schemaFactory" ref="objectSchemaFactory"/>
     <property name="importerFactory" ref="objectImporterFactory"/>
+    <property name="auditService" ref="auditService" />
     <property name="transactionManager" ref="transactionManager"/>
   </bean>
 

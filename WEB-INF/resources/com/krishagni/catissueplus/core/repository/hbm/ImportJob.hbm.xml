@@ -52,6 +52,8 @@
 
     <property name="stopRunning" column="STOP_RUNNING"/>
 
+    <property name="ipAddress" column="IP_ADDRESS" />
+
     <map name="params" table="OS_BULK_IMPORT_JOB_PARAMS" lazy="false" batch-size="26">
       <key column="JOB_ID"/>
       <map-key column="PARAM" type="string"/>
