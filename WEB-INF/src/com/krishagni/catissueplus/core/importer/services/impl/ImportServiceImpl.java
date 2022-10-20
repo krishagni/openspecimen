@@ -439,6 +439,11 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 		job.setEndTime(Calendar.getInstance().getTime());
 		job.setAtomic(true);
 		job.setIpAddress(AuthUtil.getRemoteAddr());
+		job.param("noReport", Boolean.TRUE.toString());
+		if (params != null) {
+			job.getParams().putAll(params);
+		}
+
 		importJobDao.saveOrUpdate(job, true);
 		return job;
 	}

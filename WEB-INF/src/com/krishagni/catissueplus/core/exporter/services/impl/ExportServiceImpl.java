@@ -148,8 +148,12 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 		job.setCreatedBy(AuthUtil.getCurrentUser());
 		job.setCreationTime(startTime);
 		job.setEndTime(Calendar.getInstance().getTime());
-		job.setParams(params);
 		job.setIpAddress(AuthUtil.getRemoteAddr());
+		job.param("noReport", Boolean.TRUE.toString());
+		if (params != null) {
+			job.getParams().putAll(params);
+		}
+
 		exportJobDao.saveOrUpdate(job, true);
 	}
 

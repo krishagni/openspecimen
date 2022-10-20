@@ -261,4 +261,20 @@ public class ImportJob extends BaseEntity {
 
 		return entityName;
 	}
+
+	public void param(String name, String value) {
+		if (params == null) {
+			params = new HashMap<>();
+		}
+
+		params.putIfAbsent(name, value);
+	}
+
+	public String param(String name) {
+		if (params == null) {
+			return null;
+		}
+
+		return params.get(name);
+	}
 }
