@@ -1677,15 +1677,16 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			StorageContainer container = getContainer(req.getPayload());
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			User user = AuthUtil.getCurrentUser();
+			String ipAddress = AuthUtil.getRemoteAddr();
 			Future<ExportedFileDetail> result = taskExecutor.submit(
 				() -> {
 					Throwable t = null;
 					String fileId = null;
 					try {
-						AuthUtil.setCurrentUser(user);
+						AuthUtil.setCurrentUser(user, ipAddress);
 						ExportedFileDetail file = report.generate(container, params);
 						fileId = file != null ? file.getName() : null;
-						exportSvc.saveJob(msg(report.getName()), startTime, Collections.singletonMap("containerId", container.getId().toString()));
+						exportSvc.saveJob(report.getName(), startTime, Collections.singletonMap("containerId", container.getId().toString()));
 						return file;
 					} catch (Throwable e) {
 						t = e;

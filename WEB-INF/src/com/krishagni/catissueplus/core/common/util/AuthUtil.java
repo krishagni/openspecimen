@@ -99,16 +99,26 @@ public class AuthUtil {
 		setCurrentUser(user, null, null);
 	}
 
+	public static void setCurrentUser(User user, String ipAddress) {
+		setCurrentUser(user, null, ipAddress, null, false);
+	}
+
 	public static void setCurrentUser(User user, String authToken, HttpServletRequest httpReq) {
 		setCurrentUser(user, authToken, httpReq, false);
 	}
 
 	public static void setCurrentUser(User user, String authToken, HttpServletRequest httpReq, boolean impersonated) {
+		setCurrentUser(user, authToken, null, httpReq, impersonated);
+	}
+
+	public static void setCurrentUser(User user, String authToken, String ipAddress, HttpServletRequest httpReq, boolean impersonated) {
 		UserAuthToken token = new UserAuthToken(user, authToken, user.getAuthorities());
 		if (httpReq != null) {
 			token.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpReq));
 			token.setTimeZone(httpReq.getHeader("X-OS-CLIENT-TZ"));
 			token.setIpAddress(Utility.getRemoteAddress(httpReq));
+		} else if (ipAddress != null) {
+			token.setIpAddress(ipAddress);
 		}
 
 		token.setImpersonated(impersonated);
