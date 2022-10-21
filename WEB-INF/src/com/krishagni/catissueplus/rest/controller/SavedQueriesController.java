@@ -3,7 +3,9 @@ package com.krishagni.catissueplus.rest.controller;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,8 @@ import com.krishagni.catissueplus.core.de.events.QueryAuditLogSummary;
 import com.krishagni.catissueplus.core.de.events.SavedQueriesList;
 import com.krishagni.catissueplus.core.de.events.SavedQueryDetail;
 import com.krishagni.catissueplus.core.de.services.QueryService;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.catissueplus.core.importer.services.ImportService;
 
 import edu.common.dynamicextensions.nutility.IoUtil;
 
@@ -42,6 +46,12 @@ public class SavedQueriesController {
 
 	@Autowired
 	private QueryService querySvc;
+
+	@Autowired
+	private ImportService importSvc;
+
+	@Autowired
+	private ExportService exportSvc;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -106,6 +116,7 @@ public class SavedQueriesController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/definition-file")
 	@ResponseStatus(HttpStatus.OK)	
 	public void getQueryDefFile(@PathVariable("id") Long queryId, HttpServletResponse response) {
+		Date startTime = Calendar.getInstance().getTime();
 		String queryDef = response(querySvc.getQueryDef(request(queryId)));
 
 		response.setContentType("application/json");
@@ -115,6 +126,7 @@ public class SavedQueriesController {
 		try {
 			in = new ByteArrayInputStream(queryDef.getBytes());
 			IoUtil.copy(in, response.getOutputStream());
+			exportSvc.saveJob("saved_query", startTime, Collections.singletonMap("queryId", queryId.toString()));
 		} catch (IOException e) {
 			throw new RuntimeException("Error sending file", e);
 		} finally {
@@ -127,9 +139,12 @@ public class SavedQueriesController {
 	@ResponseBody		
 	public SavedQueryDetail importQuery(@PathVariable("file") MultipartFile file)
 	throws IOException {
+		Date startTime = Calendar.getInstance().getTime();
 		String json = new String(file.getBytes());
 		SavedQueryDetail detail = new Gson().fromJson(json, SavedQueryDetail.class);
-		return saveQuery(detail);
+		SavedQueryDetail result = saveQuery(detail);
+		importSvc.saveJob("saved_query", "CREATE", startTime, Collections.singletonMap("queryId", result.getId().toString()));
+		return result;
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)

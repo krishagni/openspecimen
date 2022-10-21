@@ -983,9 +983,10 @@ public class QueryServiceImpl implements QueryService {
 
 		logger.info("Initiating query audit logs export: " + crit);
 		User currentUser = AuthUtil.getCurrentUser();
+		String ipAddress = AuthUtil.getRemoteAddr();
 		List<User> revisionsByUsers = users;
 		File revisionsFile = null;
-		Future<File> result = exportThreadPool.submit(() -> exportAuditLogs(crit, currentUser, revisionsByUsers));
+		Future<File> result = exportThreadPool.submit(() -> exportAuditLogs(crit, currentUser, ipAddress, revisionsByUsers));
 		try {
 			logger.info("Waiting for the export query audit logs to finish ...");
 			revisionsFile = result.get(ONLINE_EXPORT_TIMEOUT_SECS, TimeUnit.SECONDS);
@@ -1712,8 +1713,9 @@ public class QueryServiceImpl implements QueryService {
 	}
 
 	@PlusTransactional
-	private File exportAuditLogs(QueryAuditLogsListCriteria crit, User exportedBy, List<User> runBy) {
+	private File exportAuditLogs(QueryAuditLogsListCriteria crit, User exportedBy, String ipAddress, List<User> runBy) {
 		QueryAuditLogsExporter exporter = new QueryAuditLogsExporter(crit, exportedBy, runBy);
+		exporter.setIpAddress(ipAddress);
 		exporter.run();
 		return exporter.getExportedFile();
 	}
