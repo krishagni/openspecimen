@@ -2,11 +2,16 @@ package com.krishagni.catissueplus.core.de.events;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class QueryAuditLogsListCriteria extends AbstractListCriteria<QueryAuditLogsListCriteria> {
 	private Date startDate;
@@ -83,4 +88,24 @@ public class QueryAuditLogsListCriteria extends AbstractListCriteria<QueryAuditL
 			.toString();
 	}
 
+	public Map<String, String> toStrMap() {
+		Map<String, String> result = new HashMap<>();
+		if (startDate != null) {
+			result.put("startDate", Utility.getDateTimeString(startDate));
+		}
+
+		if (endDate != null) {
+			result.put("endDate", Utility.getDateTimeString(endDate));
+		}
+
+		if (CollectionUtils.isNotEmpty(userIds)) {
+			result.put("userIds", userIds.stream().map(id -> id.toString()).collect(Collectors.joining(", ")));
+		}
+
+		if (instituteId != null) {
+			result.put("instituteId", instituteId.toString());
+		}
+
+		return result;
+	}
 }

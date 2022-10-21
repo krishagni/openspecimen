@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -23,6 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.LocaleUtils;
@@ -33,9 +36,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PluginManager;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -55,6 +58,8 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.catissueplus.core.importer.services.ImportService;
 
 public class ConfigurationServiceImpl implements ConfigurationService, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
 	private static final LogUtil logger = LogUtil.getLogger(ConfigurationServiceImpl.class);
@@ -68,7 +73,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 	private DaoFactory daoFactory;
 	
 	private MessageSource messageSource;
-	
+
 	private Properties appProps = new Properties();
 		
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -78,7 +83,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;
 	}
-	
+
 	public void setAppProps(Properties appProps) {
 		this.appProps = appProps;
 	}
@@ -197,12 +202,41 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 
 	@Override
 	public ResponseEvent<String> uploadSettingFile(RequestEvent<FileDetail> req) {
+		Date startTime = Calendar.getInstance().getTime();
 		OutputStream out = null;
 
 		try {
 			FileDetail detail = req.getPayload();
-			String filename = UUID.randomUUID() + "_" + detail.getFilename();
+			Map<String, Object> params = detail.getObjectProps();
+			String module = null, property = null;
+			if (params != null) {
+				module = (String) params.get("module");
+				property = (String) params.get("property");
+			}
 
+			if (StringUtils.isBlank(module)) {
+				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Module name is required");
+			}
+
+			if (StringUtils.isBlank(property)) {
+				return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Property name is required");
+			}
+
+			Map<String, ConfigSetting> settings = configSettings.get(module);
+			if (settings == null) {
+				return ResponseEvent.userError(ConfigErrorCode.SETTING_NOT_FOUND);
+			}
+
+			ConfigSetting setting = settings.get(property);
+			if (setting == null) {
+				return ResponseEvent.userError(ConfigErrorCode.SETTING_NOT_FOUND);
+			}
+
+			if (!setting.getProperty().isFile()) {
+				return ResponseEvent.userError(ConfigErrorCode.INVALID_SETTING_VALUE);
+			}
+
+			String filename = UUID.randomUUID() + "_" + detail.getFilename();
 			File settingsDir = getSettingFilesDir();
 			Path settingFile = settingsDir.toPath().resolve(filename);
 			if (!settingFile.normalize().startsWith(settingsDir.toPath())) {
@@ -211,6 +245,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 
 			out = new FileOutputStream(settingFile.toFile());
 			IOUtils.copy(detail.getFileIn(), out);
+
+			ImportService importSvc = OpenSpecimenAppCtxProvider.getBean("importObjectsSvc");
+			Map<String, String> impParams = new HashMap<>();
+			impParams.put("module", module);
+			impParams.put("property", property);
+			importSvc.saveJob("cfg_setting_file", "UPSERT", startTime, impParams);
 			return ResponseEvent.response(filename);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
@@ -379,6 +419,23 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 
 			throw ose;
 		}
+	}
+
+	@Override
+	public void downloadSettingFile(String moduleName, String propertyName, HttpServletResponse httpResp) {
+		Date startTime = Calendar.getInstance().getTime();
+		FileDetail detail = getFileDetail(moduleName, propertyName);
+		if (detail == null || detail.getFileIn() == null) {
+			return;
+		}
+
+		Utility.sendToClient(httpResp, detail.getFilename(), detail.getContentType(), detail.getFileIn());
+
+		ExportService exportSvc = OpenSpecimenAppCtxProvider.getBean("exportSvc");
+		Map<String, String> params = new HashMap<>();
+		params.put("module", moduleName);
+		params.put("property", propertyName);
+		exportSvc.saveJob("cfg_setting_file", startTime, params);
 	}
 
 	@Override

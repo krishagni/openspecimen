@@ -59,8 +59,8 @@ angular.module('os.administrative.models.setting', ['os.common.models'])
       );
     }
 
-    Setting.getFileUploadUrl = function() {
-      return Setting.url() + "files";
+    Setting.getFileUploadUrl = function(module, property) {
+      return Setting.url() + "files?module=" + module + "&property=" + property;
     }
 
     Setting.getPasswordSettings = function () {

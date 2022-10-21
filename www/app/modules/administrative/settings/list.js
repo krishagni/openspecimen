@@ -3,9 +3,11 @@ angular.module('os.administrative.setting.list', ['os.administrative.models'])
   .controller('SettingsListCtrl', function(
     $rootScope, $scope, $state, $stateParams, $sce, $filter, Setting, SettingUtil, Alerts) {
 
+    var fileCtx;
+
     function init() {
       $scope.isEdit = false;
-      $scope.fileCtx = {
+      fileCtx = $scope.fileCtx = {
         ctrl: {},
         uploadUrl: $sce.trustAsResourceUrl(Setting.getFileUploadUrl())
       };
@@ -49,6 +51,7 @@ angular.module('os.administrative.setting.list', ['os.administrative.models'])
       $scope.existingSetting = setting;
       $scope.setting = angular.copy(setting);
       $scope.setting.value = '';
+      fileCtx.uploadUrl = $sce.trustAsResourceUrl(Setting.getFileUploadUrl(setting.module, setting.name));
     }
     
     $scope.cancel = function() {

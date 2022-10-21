@@ -33,6 +33,7 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.QueryAuditLog;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
 @Configurable
 public class QueryAuditLogsExporter implements Runnable {
@@ -47,6 +48,8 @@ public class QueryAuditLogsExporter implements Runnable {
 
 	private User exportedBy;
 
+	private String ipAddress;
+
 	private List<User> runBy;
 
 	private File exportedFile;
@@ -54,16 +57,24 @@ public class QueryAuditLogsExporter implements Runnable {
 	@Autowired
 	private DaoFactory deDaoFactory;
 
+	@Autowired
+	private ExportService exportSvc;
+
 	public QueryAuditLogsExporter(QueryAuditLogsListCriteria crit, User exportedBy, List<User> runBy) {
 		this.crit = crit;
 		this.exportedBy = exportedBy;
 		this.runBy = runBy;
 	}
 
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
 	@Override
 	public void run() {
 		try {
-			AuthUtil.setCurrentUser(exportedBy);
+			Date startTime = Calendar.getInstance().getTime();
+			AuthUtil.setCurrentUser(exportedBy, ipAddress);
 
 			String baseDir = UUID.randomUUID().toString();
 			Date exportedOn = Calendar.getInstance().getTime();
@@ -80,6 +91,7 @@ public class QueryAuditLogsExporter implements Runnable {
 
 			logger.info("Sending query audit logs email to " + exportedBy.formattedName(true));
 			sendEmailNotif();
+			exportSvc.saveJob("query_audit_logs", startTime, crit.toStrMap());
 		} catch (Exception e) {
 			logger.error("Error generating the query audit logs report", e);
 			sendFailedEmailNotif(e);
