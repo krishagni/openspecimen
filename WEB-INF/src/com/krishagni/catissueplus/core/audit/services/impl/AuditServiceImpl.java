@@ -58,6 +58,7 @@ import com.krishagni.catissueplus.core.audit.services.AuditLogExporter;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -76,6 +77,7 @@ import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
 import com.krishagni.catissueplus.core.de.services.impl.QueryAuditLogsExporter;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class AuditServiceImpl implements AuditService, InitializingBean {
@@ -201,12 +203,13 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		criteria.startDate(startDate).endDate(endDate);
 
 		User currentUser     = AuthUtil.getCurrentUser();
+		String ipAddress     = AuthUtil.getRemoteAddr();
 		List<User> revisionsByUsers = users;
 
 		logger.info("Invoking task executor to initiate export of revisions: " + criteria);
 
 		File revisionsFile = null;
-		Future<File> result = taskExecutor.submit(() -> exportRevisions(criteria, currentUser, revisionsByUsers));
+		Future<File> result = taskExecutor.submit(() -> exportRevisions(criteria, currentUser, ipAddress, revisionsByUsers));
 		try {
 			logger.info("Waiting for the export revisions to finish ...");
 			revisionsFile = result.get(ONLINE_EXPORT_TIMEOUT_SECS, TimeUnit.SECONDS);
@@ -290,10 +293,11 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	}
 
 	@PlusTransactional
-	private File exportRevisions(RevisionsListCriteria criteria, User exportedBy, List<User> revisionsBy) {
+	private File exportRevisions(RevisionsListCriteria criteria, User exportedBy, String ipAddress, List<User> revisionsBy) {
 		try {
+			Date startTime = Calendar.getInstance().getTime();
 			List<File> inputFiles = new ArrayList<>();
-			AuthUtil.setCurrentUser(exportedBy);
+			AuthUtil.setCurrentUser(exportedBy, ipAddress);
 
 			String baseDir = UUID.randomUUID().toString();
 			Date exportedOn = Calendar.getInstance().getTime();
@@ -332,6 +336,9 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 			logger.info("Sending audit revisions email to " + exportedBy.formattedName() + " (" + exportedBy.getEmailAddress() + ")");
 			sendEmailNotif(criteria, exportedBy, revisionsBy, result);
+
+			ExportService exportSvc = OpenSpecimenAppCtxProvider.getBean("exportSvc");
+			exportSvc.saveJob("audit_report", startTime, criteria.toStrMap());
 			return result;
 		} finally {
 			AuthUtil.clearCurrentUser();

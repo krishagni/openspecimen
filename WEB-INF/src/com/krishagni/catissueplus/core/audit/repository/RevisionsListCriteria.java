@@ -2,10 +2,15 @@ package com.krishagni.catissueplus.core.audit.repository;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCriteria> {
 
@@ -92,5 +97,22 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 			.append("users = ").append(userIds()).append(", ")
 			.append("include modified props = ").append(includeModifiedProps())
 			.toString();
+	}
+
+	public Map<String, String> toStrMap() {
+		Map<String, String> result = new HashMap<>();
+		if (startDate != null) {
+			result.put("startDate", Utility.getDateTimeString(startDate));
+		}
+
+		if (endDate != null) {
+			result.put("endDate", Utility.getDateTimeString(endDate));
+		}
+
+		if (userIds != null && !userIds.isEmpty()) {
+			result.put("userIds", userIds.stream().map(id -> id.toString()).collect(Collectors.joining(", ")));
+		}
+
+		return result;
 	}
 }
