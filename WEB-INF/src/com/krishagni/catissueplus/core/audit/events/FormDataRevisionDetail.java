@@ -23,6 +23,8 @@ public class FormDataRevisionDetail {
 
 	private Long recordId;
 
+	private String data;
+
 	public Long getId() {
 		return id;
 	}
@@ -93,5 +95,13 @@ public class FormDataRevisionDetail {
 
 	public void setRecordId(Long recordId) {
 		this.recordId = recordId;
+	}
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
 	}
 }

@@ -585,7 +585,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
 					"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
 					"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_form_name",
-					"audit_rev_parent_entity_id", "audit_rev_entity_id"
+					"audit_rev_parent_entity_id", "audit_rev_entity_id", "audit_rev_change_log"
 				};
 				writeHeader(csvWriter, headerColumns);
 
@@ -663,9 +663,10 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			String formName = revision.getFormName();
 			String recordId = revision.getRecordId().toString();
 			String ipAddress = revision.getIpAddress();
+			String data = revision.getData();
 
 			if (entityType != null) {
-				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, entityType, formName, entityId, recordId});
+				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, entityType, formName, entityId, recordId, data});
 			} else {
 				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, formName, recordId});
 			}

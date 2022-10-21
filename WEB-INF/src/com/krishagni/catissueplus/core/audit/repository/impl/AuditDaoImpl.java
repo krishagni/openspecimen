@@ -28,7 +28,6 @@ import org.hibernate.type.TimestampType;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
-
 import com.krishagni.catissueplus.core.audit.domain.DeleteLog;
 import com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord;
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
@@ -141,6 +140,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			detail.setIpAddress((String) row[idx++]);
 			detail.setEntityId((Long) row[idx++]);
 			detail.setRecordId((Long) row[idx++]);
+			detail.setData((String) row[idx++]);
 			detail.setEntityType((String) row[idx++]);
 			detail.setFormName((String) row[idx++]);
 
@@ -360,6 +360,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("ip_address", StringType.INSTANCE)
 			.addScalar("object_id", LongType.INSTANCE)
 			.addScalar("record_id", LongType.INSTANCE)
+			.addScalar("form_data", StringType.INSTANCE)
 			.addScalar("entity_type", StringType.INSTANCE)
 			.addScalar("caption", StringType.INSTANCE)
 			.addScalar("user_id", LongType.INSTANCE)
@@ -606,14 +607,14 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	private static final String GET_FORM_DATA_AUD_EVENTS_BASE_SQL =
 		"select" +
-		"  e.identifier, e.event_timestamp, e.ip_address, e.user_id, e.event_type, e.record_id, e.form_id " +
+		"  e.identifier, e.event_timestamp, e.ip_address, e.user_id, e.event_type, e.record_id, e.form_id, e.form_data " +
 		"from " +
 		"  dyextn_audit_events e";
 
 	private static final String GET_FORM_DATA_AUD_EVENTS_SQL =
 		"select" +
 		"  t.identifier, t.event_timestamp, t.event_type, t.ip_address, fre.object_id, t.record_id, " +
-		"  fc.entity_type, f.caption, " +
+		"  t.form_data, fc.entity_type, f.caption, " +
 		"  t.user_id, u.first_name, u.last_name, u.email_address, u.login_name, i.name, d.domain_name " +
 		"from " +
 		"  (%s) t " +
