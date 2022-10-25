@@ -177,6 +177,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 			detail.setRecordId((Long) row[++idx]);
 			detail.setFormName((String) row[++idx]);
+			detail.setData((String) row[++idx]);
 
 			UserSummary user = new UserSummary();
 			user.setId((Long) row[++idx]);
@@ -427,6 +428,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addScalar("rev_type", IntegerType.INSTANCE)
 			.addScalar("form_id", LongType.INSTANCE)
 			.addScalar("form_name", StringType.INSTANCE)
+			.addScalar("change_log", StringType.INSTANCE)
 			.addScalar("user_id", LongType.INSTANCE)
 			.addScalar("first_name", StringType.INSTANCE)
 			.addScalar("last_name", StringType.INSTANCE)
@@ -630,7 +632,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	private static final String GET_FORM_REVISIONS_SQL =
 		"select" +
-		"  r.rev, r.rev_time, r.ip_address, r.rev_type, r.identifier as form_id, r.name as form_name, " +
+		"  r.rev, r.rev_time, r.ip_address, r.rev_type, r.identifier as form_id, r.name as form_name, r.modified_props as change_log, " +
 		"  r.rev_by as user_id, u.first_name, u.last_name, u.email_address, u.login_name, " +
 		"  i.name, d.domain_name " +
 		"from " +
