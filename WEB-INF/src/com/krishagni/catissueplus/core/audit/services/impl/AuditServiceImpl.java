@@ -323,6 +323,10 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			File queryRuns = exportQueryAudit(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
 			inputFiles.add(queryRuns);
 
+			logger.info("Export user API call logs...");
+			File apiLogs = exportApiCallsLog(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+			inputFiles.add(apiLogs);
+
 			for (AuditLogExporter exporter : exporters) {
 				inputFiles.add(exporter.export(baseDir, exportedBy, exportedOn, revisionsBy, criteria));
 			}
@@ -743,6 +747,77 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			.asc(false)
 			.userIds(Utility.nullSafeStream(revisionsBy).map(User::getId).collect(Collectors.toList()));
 		return new QueryAuditLogsExporter(crit, exportedBy, revisionsBy).exportAuditLogs(outputFile, exportedOn);
+	}
+
+	private File exportApiCallsLog(RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> callsBy, String baseDir) {
+		long startTime = System.currentTimeMillis();
+		CsvFileWriter csvWriter = null;
+
+		try {
+			File outputFile = getOutputFile(baseDir, "os_user_api_call_logs", exportedOn);
+			csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
+			writeExportHeader(csvWriter, criteria, exportedBy, exportedOn, callsBy);
+
+			String[] headerColumns = {
+				"audit_rev_id", "audit_call_start_time", "audit_call_end_time", "audit_rev_user", "audit_rev_user_email",
+				"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
+				"audit_call_method", "audit_call_url", "audit_call_resp_code"
+			};
+			csvWriter.writeNext(Stream.of(headerColumns).map(MessageUtil.getInstance()::getMessage).toArray(String[]::new));
+
+			long lastRevId = Long.MAX_VALUE, totalRecords = 0;
+			while (true) {
+				long t1 = System.currentTimeMillis();
+
+				List<UserApiCallLog> callLogs = daoFactory.getAuditDao().getApiCallLogs(criteria.lastId(lastRevId));
+				if (callLogs.isEmpty()) {
+					break;
+				}
+
+				for (UserApiCallLog callLog : callLogs) {
+					String user      = null;
+					String userEmail = null;
+					String userLogin = null;
+					String institute = null;
+					String domain    = null;
+					if (callLog.getUser() != null) {
+						user      = callLog.getUser().formattedName();
+						userEmail = callLog.getUser().getEmailAddress();
+						userLogin = callLog.getUser().getLoginName();
+						institute = callLog.getUser().getInstitute().getName();
+						domain    = callLog.getUser().getAuthDomain().getName();
+					}
+
+					String ipAddres = null;
+					if (callLog.getLoginAuditLog() != null) {
+						ipAddres = callLog.getLoginAuditLog().getIpAddress();
+					}
+
+					csvWriter.writeNext(new String[] {
+						callLog.getId().toString(),
+						Utility.getDateTimeString(callLog.getCallStartTime()),
+						Utility.getDateTimeString(callLog.getCallEndTime()),
+						user, userEmail, domain, userLogin, institute, ipAddres,
+						callLog.getMethod(), callLog.getUrl(), callLog.getResponseCode()
+					});
+
+					lastRevId = callLog.getId();
+					++totalRecords;
+					if (totalRecords % 25 == 0) {
+						csvWriter.flush();
+					}
+				}
+			}
+
+			csvWriter.flush();
+			return outputFile;
+		} catch (Exception e) {
+			logger.error("Error exporting user API call logs", e);
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(csvWriter);
+			logger.info("User API call logs export finished in " +  (System.currentTimeMillis() - startTime) + " ms");
+		}
 	}
 
 	private File getOutputFile(String dir, String filename, Date exportedOn) {
