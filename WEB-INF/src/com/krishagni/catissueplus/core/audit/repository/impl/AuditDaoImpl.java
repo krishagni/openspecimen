@@ -210,6 +210,33 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		getCurrentSession().saveOrUpdate(log);
 	}
 
+	@Override
+	public List<UserApiCallLog> getApiCallLogs(RevisionsListCriteria crit) {
+		Criteria query = getCurrentSession().createCriteria(UserApiCallLog.class, "log")
+			.createAlias("log.user", "user")
+			.createAlias("log.loginAuditLog", "al")
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults())
+			.addOrder(Order.desc("log.id"));
+
+		if (crit.lastId() != null) {
+			query.add(Restrictions.lt("log.id", crit.lastId()));
+		}
+
+		if (crit.startDate() != null) {
+			query.add(Restrictions.ge("log.callStartTime", crit.startDate()));
+		}
+
+		if (crit.endDate() != null) {
+			query.add(Restrictions.le("log.callStartTime", crit.endDate()));
+		}
+
+		if (crit.userIds() != null && !crit.userIds().isEmpty()) {
+			query.add(Restrictions.in("user.id", crit.userIds()));
+		}
+
+		return query.list();
+	}
 
 	@SuppressWarnings("unchecked")
 	private Object[] getLatestRevisionInfo(String auditTable, Long objectId, int revType) {
