@@ -24,6 +24,8 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 
 	private List<String> entities;
 
+	private List<String> reportTypes;
+
 	@Override
 	public RevisionsListCriteria self() {
 		return this;
@@ -90,6 +92,20 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 		return self();
 	}
 
+	public List<String> reportTypes() {
+		return reportTypes;
+	}
+
+	@JsonProperty("reportTypes")
+	public RevisionsListCriteria reportTypes(List<String> reportTypes) {
+		this.reportTypes = reportTypes;
+		return self();
+	}
+
+	public boolean includeReport(String type) {
+		return reportTypes != null && reportTypes.indexOf(type) >= 0;
+	}
+
 	public String toString() {
 		return new StringBuilder().append(super.toString()).append(", ")
 			.append("start date = ").append(startDate()).append(", ")
@@ -111,6 +127,10 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 
 		if (userIds != null && !userIds.isEmpty()) {
 			result.put("userIds", userIds.stream().map(id -> id.toString()).collect(Collectors.joining(", ")));
+		}
+
+		if (reportTypes != null && !reportTypes.isEmpty()) {
+			result.put("reportTypes", String.join(", ", reportTypes));
 		}
 
 		return result;

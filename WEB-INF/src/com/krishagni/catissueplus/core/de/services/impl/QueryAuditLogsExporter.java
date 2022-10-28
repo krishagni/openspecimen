@@ -201,7 +201,7 @@ public class QueryAuditLogsExporter implements Runnable {
 
 		String timeToFinish = "N/A";
 		if (log.getTimeToFinish() != null) {
-			timeToFinish = String.valueOf(log.getTimeToFinish() / 1000);
+			timeToFinish = log.getTimeToFinish().toString();
 		}
 
 		String recordsCount = log.getRecordCount() != null ? log.getRecordCount().toString() : "N/A";
