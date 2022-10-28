@@ -218,6 +218,10 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 	}
 
 	private File exportJobsReport(String baseDir, User exportedBy, Date exportedOn, List<User> users, RevisionsListCriteria crit) {
+		if (!crit.includeReport("query_exim")) {
+			return null;
+		}
+
 		File auditDir = new File(ConfigUtil.getInstance().getDataDir(), "audit");
 		File result = new File(auditDir, baseDir);
 		if (!result.exists()) {

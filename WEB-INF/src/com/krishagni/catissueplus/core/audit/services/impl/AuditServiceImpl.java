@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -200,6 +201,10 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			);
 		}
 
+		if (criteria.reportTypes() == null || criteria.reportTypes().isEmpty()) {
+			criteria.reportTypes(Collections.singletonList("data"));
+		}
+
 		criteria.startDate(startDate).endDate(endDate);
 
 		User currentUser     = AuthUtil.getCurrentUser();
@@ -302,33 +307,44 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			String baseDir = UUID.randomUUID().toString();
 			Date exportedOn = Calendar.getInstance().getTime();
 
-			logger.info("Exporting core objects' revisions... ");
-			File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
-			inputFiles.add(coreObjectsRevs);
+			if (criteria.includeReport("data")) {
+				logger.info("Exporting core objects' revisions... ");
+				File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
+				inputFiles.add(coreObjectsRevs);
 
-			FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
-			logger.info("Exporting form revisions... ");
-			File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
-			inputFiles.add(formsRevs);
+				FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
+				logger.info("Exporting form revisions... ");
+				File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
+				inputFiles.add(formsRevs);
 
-			logger.info("Exporting form data revisions... ");
-			File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
-			inputFiles.add(formsDataRevs);
+				logger.info("Exporting form data revisions... ");
+				File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
+				inputFiles.add(formsDataRevs);
+			}
 
-			logger.info("Export user password revisions... ");
-			File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
-			inputFiles.add(passwordRevs);
+			if (criteria.includeReport("auth")) {
+				logger.info("Export user password revisions... ");
+				File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+				inputFiles.add(passwordRevs);
+			}
 
-			logger.info("Export query run logs...");
-			File queryRuns = exportQueryAudit(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
-			inputFiles.add(queryRuns);
+			if (criteria.includeReport("query_exim")) {
+				logger.info("Export query run logs...");
+				File queryRuns = exportQueryAudit(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+				inputFiles.add(queryRuns);
+			}
 
-			logger.info("Export user API call logs...");
-			File apiLogs = exportApiCallsLog(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
-			inputFiles.add(apiLogs);
+			if (criteria.includeReport("api_calls")) {
+				logger.info("Export user API call logs...");
+				File apiLogs = exportApiCallsLog(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+				inputFiles.add(apiLogs);
+			}
 
 			for (AuditLogExporter exporter : exporters) {
-				inputFiles.add(exporter.export(baseDir, exportedBy, exportedOn, revisionsBy, criteria));
+				File reportFile = exporter.export(baseDir, exportedBy, exportedOn, revisionsBy, criteria);
+				if (reportFile != null) {
+					inputFiles.add(reportFile);
+				}
 			}
 
 			logger.info("Creating revisions ZIP file... ");
@@ -759,7 +775,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			writeExportHeader(csvWriter, criteria, exportedBy, exportedOn, callsBy);
 
 			String[] headerColumns = {
-				"audit_rev_id", "audit_call_start_time", "audit_call_end_time", "audit_rev_user", "audit_rev_user_email",
+				"audit_rev_id", "audit_start_time", "audit_end_time", "audit_rev_user", "audit_rev_user_email",
 				"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
 				"audit_call_method", "audit_call_url", "audit_call_resp_code"
 			};
@@ -844,6 +860,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		emailProps.put("users",     !userNames.isEmpty() ? userNames : null);
 		emailProps.put("fileId",    getFileId(revisionsFile));
 		emailProps.put("rcpt",      exportedBy.formattedName());
+		emailProps.put("reportTypes", criteria.reportTypes().stream().map(t -> MessageUtil.getInstance().getMessage("audit_report_type_" + t)).collect(Collectors.joining(", ")));
 
 		EmailUtil.getInstance().sendEmail(
 			REV_EMAIL_TMPL,
