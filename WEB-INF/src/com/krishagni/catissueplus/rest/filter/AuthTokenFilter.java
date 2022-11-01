@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -28,8 +29,8 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.GenericFilterBean;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
@@ -168,12 +169,16 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 			if (atResp.isSuccessful()) {
 				user = atResp.getPayload().getUser();
 				loginAuditLog = atResp.getPayload().getLoginAuditLog();
+			} else {
+				setUnauthorizedResp(req, resp, chain, true);
 			}
 		} else if (httpReq.getHeader(HttpHeaders.AUTHORIZATION) != null) {
 			AuthToken token = doBasicAuthentication(httpReq, httpResp);
 			if (token != null) {
 				user = token.getUser();
 				loginAuditLog = token.getLoginAuditLog();
+			} else {
+				setUnauthorizedResp(req, resp, chain, true);
 			}
 		}
 
