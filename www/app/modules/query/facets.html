@@ -1,7 +1,21 @@
 <div class="os-query-facets-panel">
-  <h4 translate="queries.filters"> Filters </h4>
+  <h4 class="title" ng-if="!resultsCtx.showFacetSearch">
+    <span translate="queries.filters"> Filters </span>
+    <button class="btn btn-xs btn-default" ng-click="showFacetSearch()" ng-if="resultsCtx.facets.length >= 10">
+      <span class="fa fa-search"></span>
+    </button>
+  </h4>
+
+  <div class="facet-search-input" ng-if="resultsCtx.showFacetSearch">
+    <input type="text" os-md-input ng-model="resultsCtx.facetSearchTerm"
+      placeholder="{{'queries.search_facet' | translate}}">
+    <button class="btn btn-xs btn-default" ng-click="hideFacetSearch()">
+      <span class="fa fa-times"></span>
+    </button>
+  </div>
+
   <accordion class="facets-list">
-    <accordion-group class="facet" ng-repeat="facet in resultsCtx.facets" is-open="facet.isOpen">
+    <accordion-group class="facet" ng-repeat="facet in filteredFacets = (resultsCtx.facets | filter: {caption: resultsCtx.facetSearchTerm})" is-open="facet.isOpen">
       <accordion-heading class="head">
         <a ng-click="toggleFacetValues(facet)">
           <span class="toggle" ng-switch on="facet.isOpen">
@@ -114,5 +128,11 @@
         </ul>
       </div>
     </accordion-group>
+
+    <div class="os-alert-container inline" ng-if="!filteredFacets.length">
+      <div class="alert alert-info">
+        <span translate="queries.no_matching_facet"></span>
+      </div>
+    </div>
   </accordion>
 </div>

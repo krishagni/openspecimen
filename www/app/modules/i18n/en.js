@@ -2084,6 +2084,8 @@
     "select_subquery": "Records of another query",
     "expr_and_filters": "Expression and Filters",
     "filters": "Filters",
+    "search_facet": "Search Filter",
+    "no_matching_facet": "No Matching Filter",
     "parameterized_marker": "P",
     "subquery_marker": "Q",
     "get_count": "Get Count",
