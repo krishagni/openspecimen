@@ -651,6 +651,16 @@ angular.module('os.query.results', ['os.query.models'])
       $state.go('query-addedit', {queryId: $scope.queryCtx.id});
     }
 
+    $scope.showFacetSearch = function() {
+      $scope.resultsCtx.showFacetSearch = true;
+    }
+
+    $scope.hideFacetSearch = function() {
+      $scope.resultsCtx.showFacetSearch = false;
+      $scope.resultsCtx.facetSearchTerm = undefined;
+    }
+
+
     $scope.defineView = function() {
       var prevCaseSensitive = $scope.queryCtx.caseSensitive;
       var mi = $modal.open({
@@ -798,6 +808,8 @@ angular.module('os.query.results', ['os.query.models'])
           } else if (angular.isDefined(filter.value)) {
             filter.expr += filter.value;
           }
+
+          facet.selectedValues = filter.value;
         } else {
           filter.op = QueryUtil.getOp('qin');
 

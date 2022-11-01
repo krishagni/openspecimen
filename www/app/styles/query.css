@@ -357,6 +357,17 @@
   text-decoration: none;
 }
 
+.os-query-facets-panel .facet-search-input {
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.os-query-facets-panel .facet-search-input button {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
 .os-query-facets-panel .facet .toggle {
   font-size: 16px;
   color: #707070;
