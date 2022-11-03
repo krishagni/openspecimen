@@ -1,7 +1,7 @@
 #if( $token )
   #set ($url = "$appUrl/#/reset-password?token=$token.token")
 #else
-  #set ($url = "$appUrl/#/")
+  #set ($url = "$appUrl/#/?directVisit=true")
 #end
 
 
@@ -14,7 +14,7 @@
             <tr>
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $user.firstName $user.lastName,
+                  Hello $user.formattedName(),
                   <br><br>
                   Congratulations! You are now a member of OpenSpecimen. Your registration details are as follows:
                   <br><br>
@@ -25,13 +25,16 @@
               <td>
                 <table>
                   <tr>
-                    <td>Last Name </td> <td> : $user.lastName</td>
-                  </tr>
-                  <tr>
                     <td>First Name </td><td> : $user.firstName </td>
                   </tr>
                   <tr>
+                    <td>Last Name </td> <td> : $user.lastName</td>
+                  </tr>
+                  <tr>
                     <td> Login Name  </td> <td>: $user.loginName </td>
+                  </tr>
+                  <tr>
+                    <td> Domain  </td> <td>: $user.authDomain.name </td>
                   </tr>
                   <tr>
                     <td>Email Address </td><td> : $user.emailAddress </td>
@@ -44,10 +47,10 @@
             </tr>
             <tr>
               <td>
-                <p style="margin: 10px 0 0 0;">You can now proceed to login to the application.
-                
-                 Password rules: at least one capital letter, one number, and eight characters. E.g. Login1@3.
-                
+                <p style="margin: 10px 0 0 0;">You can now proceed to sign-in to the application.
+                #if( $token && $passwordRules)
+                  $passwordRules
+                #end
                 </p>
               </td>
             </tr>

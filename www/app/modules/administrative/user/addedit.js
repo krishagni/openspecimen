@@ -44,6 +44,10 @@ angular.module('os.administrative.user.addedit', ['os.administrative.models'])
       $scope.domains = [];
       AuthDomain.getDomainNames().then(
         function(domains) {
+          if (!currentUser && !ui.os.appProps.localAccountSignups) {
+            domains = domains.filter(function(d) { return d != 'openspecimen'; });
+          }
+
           $scope.domains = domains;
           if (!$scope.user.id && $scope.domains.length == 1) {
             $scope.user.domainName = $scope.domains[0];
@@ -149,6 +153,7 @@ angular.module('os.administrative.user.addedit', ['os.administrative.models'])
         function(resp) {
           if (resp.status == 'ok') {
             $scope.signedUp = true;
+            $scope.approved = (resp.data.activityStatus == 'Active');
           }
         }
       )

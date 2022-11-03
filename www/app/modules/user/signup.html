@@ -16,14 +16,14 @@
         </div>
         <div class="form-group">
           <div class="col-xs-6">
-            <input type="text" name="lastName" ng-model="user.lastName" class="form-control"
-              placeholder="{{'user.last_name' | translate}}" ng-maxlength="255" required/>
-            <div os-field-error field="userForm.lastName"></div>
-          </div>
-          <div class="col-xs-6">
             <input type="text" name="firstName" ng-model="user.firstName" class="form-control"
               placeholder="{{'user.first_name' | translate}}" ng-maxlength="255" required/>
             <div os-field-error field="userForm.firstName"></div>
+          </div>
+          <div class="col-xs-6">
+            <input type="text" name="lastName" ng-model="user.lastName" class="form-control"
+              placeholder="{{'user.last_name' | translate}}" ng-maxlength="255" required/>
+            <div os-field-error field="userForm.lastName"></div>
           </div>
         </div>
 
@@ -55,20 +55,6 @@
         </div>
       
         <div class="form-group">
-          <div class="col-xs-6">
-            <os-institutes name="institute" ng-model="user.instituteName" on-select="onInstituteSelect(institute)"
-              placeholder="{{'user.institute' | translate}}" required>
-            </os-institutes>
-            <div os-field-error field="userForm.institute"></div>
-          </div>
-          <div class="col-xs-6">
-            <os-select ng-model="user.primarySite" list="sites" refresh="searchSites($select.search)"
-              name="primarySite" placeholder="{{'user.primary_site' | translate}}">
-            </os-select>
-          </div>
-        </div>
-
-        <div class="form-group">
           <div class="col-xs-12">
             <textarea rows="2" placeholder="{{'user.address' | translate}}" ng-model="user.address" class="form-control">
             </textarea>
@@ -87,9 +73,15 @@
 
 <div class="panel panel-default os-margin-10" ng-if="signedUp">
   <div class="panel-body">
-    <p>
+    <p ng-if="!approved">
       <strong translate="user.signed_up">
         Your membership request has been received. Please wait for an approval email from OpenSpecimen Administrator.
+        Thank you.
+      </strong>
+    </p>
+    <p ng-if="approved">
+      <strong translate="user.signup_approved">
+        Your signup request has been approved. Click on the "Sign-in" button sent to your email address to login.
         Thank you.
       </strong>
     </p>
