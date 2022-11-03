@@ -34,4 +34,44 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Auto approve user signup requests">
+    <sql>
+      call add_cfg_prop(
+        'administrative', 'auto_approve_signup',
+        'auto_approve_signup', 'auto_approve_signup_desc',
+        'BOOLEAN', 'false'
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Default role to assign to users on auto approval of their signup requests">
+    <sql>
+      call add_cfg_prop(
+        'administrative', 'def_role_on_signup',
+        'def_role_on_signup', 'def_role_on_signup_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Default institute to use for the newly signed up users">
+    <sql>
+      call add_cfg_prop(
+        'administrative', 'def_signup_institute',
+        'def_signup_institute', 'def_signup_institute_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Setting to permit local account signups">
+    <sql>
+      call add_cfg_prop(
+        'administrative', 'local_account_signups',
+        'local_account_signups', 'local_account_signups_desc',
+        'BOOLEAN', 'true'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

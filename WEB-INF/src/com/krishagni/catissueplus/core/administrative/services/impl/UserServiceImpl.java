@@ -109,6 +109,16 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 	private static final String DUMMY_EMAIL_ADDR = "localhost@localhost";
 
+	private static final String AUTO_APPROVE_SIGNUPS = "auto_approve_signup";
+
+	private static final String DEF_ROLE_ON_SIGNUP = "def_role_on_signup";
+
+	private static final String DEF_SIGNUP_INST = "def_signup_institute";
+
+	private static final String LOCAL_ACC_SIGNUPS = "local_account_signups";
+
+	private static final String PASSWD_RULES = "password_rule";
+
 	private static final Map<String, String> NOTIF_OPS = new HashMap<String, String>() {{
 		put("created",  "CREATE");
 		put("deleted",  "DELETE");
@@ -253,6 +263,8 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			UserDetail detail = req.getPayload();
 			if (isSignupReq) {
 				ensureSignupAllowed();
+				detail.setType(User.Type.NONE.name());
+				detail.setInstituteName(ConfigUtil.getInstance().getStrSetting(ADMIN_MOD, DEF_SIGNUP_INST, null));
 				detail.setActivityStatus(Status.ACTIVITY_STATUS_PENDING.getStatus());
 			} else if (!AuthUtil.isAdmin()) {
 				if (StringUtils.isBlank(detail.getType()) || !detail.getType().equals(User.Type.CONTACT.name())) {
@@ -264,10 +276,16 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			user.setForcePasswordReset(true);
 			resetAttrs(user);
 
-			if (!isSignupReq) {
+			if (isSignupReq) {
+				boolean allowLocalAccSignups = ConfigUtil.getInstance().getBoolSetting(ADMIN_MOD, LOCAL_ACC_SIGNUPS, true);
+				String userDomain = user.getAuthDomain().getName();
+				if (!allowLocalAccSignups && userDomain.equals(DEFAULT_AUTH_DOMAIN)) {
+					return ResponseEvent.userError(UserErrorCode.LOCAL_ACC_SIGNUP_NA);
+				}
+			} else {
 				AccessCtrlMgr.getInstance().ensureCreateUserRights(user);
 			}
-		
+
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			ensureUniqueLoginNameInDomain(user.getLoginName(), user.getAuthDomain().getName(), ose);
 			ensureUniqueEmailAddress(user.getEmailAddress(), ose);
@@ -281,8 +299,12 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			}
 
 			if (isSignupReq) {
-				sendUserSignupEmail(user);
-				notifyUserSignup(user);
+				if (ConfigUtil.getInstance().getBoolSetting(ADMIN_MOD, AUTO_APPROVE_SIGNUPS, false)) {
+					autoApprove(user);
+				} else {
+					sendUserSignupEmail(user);
+					notifyUserSignup(user);
+				}
 			} else {
 				if (!user.isContact()) {
 					sendUserCreatedEmail(user, generateForgotPwdToken(user));
@@ -914,7 +936,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		props.put("token", token);
 		props.put("ccAdmin", false);
 		props.put("ignoreDnd", true);
-
+		props.put("passwordRules", ConfigUtil.getInstance().getStrSetting(AUTH_MOD, PASSWD_RULES));
 		EmailUtil.getInstance().sendEmail(USER_CREATED_EMAIL_TMPL, new String[]{user.getEmailAddress()}, null, props);
 	}
 
@@ -1180,6 +1202,25 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		props.put("annDetail", detail);
 		props.put("ignoreDnd", true);
 		emailService.sendEmail(ANNOUNCEMENT_EMAIL_TMPL, adminEmailAddr, rcpts, null, props);
+	}
+
+
+	//
+	// To be invoked only from unauthenticated contexts
+	//
+	private void autoApprove(User user) {
+		try {
+			AuthUtil.setCurrentUser(daoFactory.getUserDao().getSystemUser());
+			user.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+			onAccountActivation(user, Status.ACTIVITY_STATUS_PENDING.getStatus());
+
+			String defRole = ConfigUtil.getInstance().getStrSetting(ADMIN_MOD, DEF_ROLE_ON_SIGNUP);
+			if (StringUtils.isNotBlank(defRole)) {
+				rbacSvc.addSubjectRole(null, null, user, new String[] { defRole }, getNotifReq(user, "CREATE", "ADD"));
+			}
+		} finally {
+			AuthUtil.clearCurrentUser();
+		}
 	}
 
 	private void onAccountActivation(User user, String prevStatus) {

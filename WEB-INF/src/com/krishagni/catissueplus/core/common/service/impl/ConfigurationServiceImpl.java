@@ -568,6 +568,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		props.put("searchDelay",             getIntSetting("common", "search_delay", 1000));
 		props.put("allowHtmlMarkup",         getBoolSetting("common", "de_form_html_markup", true));
 		props.put("auditEnabled",            appProps.getProperty("app.audit_enabled"));
+		props.put("localAccountSignups",     getBoolSetting("administrative", "local_account_signups", true));
 		return props;
 	}
 
