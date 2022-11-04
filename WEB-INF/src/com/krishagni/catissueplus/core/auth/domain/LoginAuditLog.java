@@ -11,6 +11,8 @@ public class LoginAuditLog {
 	private Long id;
 	
 	private User user;
+
+	private User impersonatedBy;
 	
 	private String ipAddress;
 	
@@ -36,6 +38,14 @@ public class LoginAuditLog {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public User getImpersonatedBy() {
+		return impersonatedBy;
+	}
+
+	public void setImpersonatedBy(User impersonatedBy) {
+		this.impersonatedBy = impersonatedBy;
 	}
 
 	public String getIpAddress() {

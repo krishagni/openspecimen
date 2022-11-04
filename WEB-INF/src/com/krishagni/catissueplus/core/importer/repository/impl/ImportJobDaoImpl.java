@@ -35,6 +35,8 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 	public List<ImportJob> getImportJobs(ListImportJobsCriteria crit) {
 		Criteria<ImportJob> query = createCriteria(ImportJob.class, "job");
 		query.join("job.createdBy", "createdBy")
+			.join("createdBy.authDomain", "authDomain")
+			.join("createdBy.institute", "institute")
 			.orderBy(query.desc("job.id"));
 
 		if (StringUtils.isNotBlank(crit.status())) {
@@ -46,10 +48,11 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 		}
 
 		if (crit.instituteId() != null) {
-			query.join("createdBy.institute", "institute")
-				.add(query.eq("institute.id", crit.instituteId()));
-		} else if (crit.userId() != null) {
-			query.add(query.eq("createdBy.id", crit.userId()));
+			query.add(query.eq("institute.id", crit.instituteId()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.userIds())) {
+			query.add(query.in("createdBy.id", crit.userIds()));
 		}
 		
 		if (CollectionUtils.isNotEmpty(crit.objectTypes())) {
@@ -68,6 +71,14 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 			}
 
 			query.add(orCond);
+		}
+
+		if (crit.fromDate() != null) {
+			query.add(query.ge("job.creationTime", crit.fromDate()));
+		}
+
+		if (crit.toDate() != null) {
+			query.add(query.le("job.creationTime", crit.toDate()));
 		}
 
 		int startAt = crit.startAt() <= 0 ? 0 : crit.startAt();

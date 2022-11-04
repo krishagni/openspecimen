@@ -59,6 +59,8 @@ public class ImportJob extends BaseEntity {
 
 	private String runByNode;
 
+	private String ipAddress;
+
 	private volatile Boolean stopRunning = Boolean.FALSE;
 	
 	private Map<String, String> params = new HashMap<>();
@@ -143,6 +145,10 @@ public class ImportJob extends BaseEntity {
 		this.failedRecords = failedRecords;
 	}
 
+	public Long getSuccessfulRecords() {
+		return totalRecords != null && failedRecords != null ? (totalRecords - failedRecords) : null;
+	}
+
 	public User getCreatedBy() {
 		return createdBy;
 	}
@@ -181,6 +187,14 @@ public class ImportJob extends BaseEntity {
 
 	public void setRunByNode(String runByNode) {
 		this.runByNode = runByNode;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	public Map<String, String> getParams() {
@@ -231,7 +245,40 @@ public class ImportJob extends BaseEntity {
 			.toString();
 	}
 
-	private String getMsg(String key) {
-		return MessageUtil.getInstance().getMessage(key);
+	private String getMsg(String key, Object... params) {
+		return MessageUtil.getInstance().getMessage(key, params);
+	}
+
+	public String getEntityName() {
+		String entityName;
+
+		if (getName().equals("extensions")) {
+			entityName = getParams().get("formName") + " (" + getParams().get("entityType") + ")";
+		} else {
+			String formName = getParams() != null ? getParams().get("formName") : null;
+			String key = "bulk_import_entities_" + getName();
+			entityName = getMsg(key, formName);
+			if (entityName.equals(key)) {
+				entityName = getName();
+			}
+		}
+
+		return entityName;
+	}
+
+	public void param(String name, String value) {
+		if (params == null) {
+			params = new HashMap<>();
+		}
+
+		params.putIfAbsent(name, value);
+	}
+
+	public String param(String name) {
+		if (params == null) {
+			return null;
+		}
+
+		return params.get(name);
 	}
 }

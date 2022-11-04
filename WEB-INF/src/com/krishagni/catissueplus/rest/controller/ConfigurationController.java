@@ -96,34 +96,41 @@ public class ConfigurationController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public void downloadSettingFile(
-			@RequestParam(value = "module", required = true)
-			String moduleName,
+		@RequestParam(value = "module")
+		String moduleName,
 
-			@RequestParam(value = "property", required = true)
-			String propertyName,
+		@RequestParam(value = "property")
+		String propertyName,
 
-			HttpServletResponse httpResp) throws IOException {
+		HttpServletResponse httpResp) throws IOException {
 
-		FileDetail detail = cfgSvc.getFileDetail(moduleName, propertyName);
-		if (detail == null || detail.getFileIn() == null) {
-			return;
-		}
-
-		Utility.sendToClient(httpResp, detail.getFilename(), detail.getContentType(), detail.getFileIn());
+		cfgSvc.downloadSettingFile(moduleName, propertyName, httpResp);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value="/files")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public String uploadSettingFile(@PathVariable("file") MultipartFile file)
+	public String uploadSettingFile(
+		@RequestParam(value = "module")
+		String module,
+
+		@RequestParam(value = "property")
+		String property,
+
+		@PathVariable("file") MultipartFile file)
 	throws IOException {
 		InputStream in = null;
 		try {
 			in = file.getInputStream();
 
+			Map<String, Object> props = new HashMap<>();
+			props.put("module", module);
+			props.put("property", property);
+
 			FileDetail detail = new FileDetail();
 			detail.setFilename(file.getOriginalFilename());
 			detail.setFileIn(in);
+			detail.setObjectProps(props);
 
 			ResponseEvent<String> resp = cfgSvc.uploadSettingFile(request(detail));
 			resp.throwErrorIfUnsuccessful();

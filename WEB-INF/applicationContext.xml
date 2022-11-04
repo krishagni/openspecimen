@@ -232,6 +232,8 @@
     <property name="formDao" ref="formDao"/>
     <property name="formSvc" ref="formSvc"/>
     <property name="cpSvc" ref="cpSvc"/>
+    <property name="exportSvc" ref="exportSvc" />
+    <property name="importSvc" ref="importObjectsSvc" />
   </bean>
 
   <bean id="participantLookupFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.ParticipantLookupFactoryImpl">
@@ -1386,6 +1388,7 @@
     <property name="importJobDao" ref="importJobDao"/>
     <property name="schemaFactory" ref="objectSchemaFactory"/>
     <property name="importerFactory" ref="objectImporterFactory"/>
+    <property name="auditService" ref="auditService" />
     <property name="transactionManager" ref="transactionManager"/>
   </bean>
 
@@ -1398,6 +1401,7 @@
     </property>
     <property name="taskExecutor" ref="taskExecutor"/>
     <property name="schemaFactory" ref="objectSchemaFactory"/>
+    <property name="auditService" ref="auditService" />
   </bean>
   
   <bean id="supportService" class="com.krishagni.catissueplus.core.support.services.impl.SupportServiceImpl">

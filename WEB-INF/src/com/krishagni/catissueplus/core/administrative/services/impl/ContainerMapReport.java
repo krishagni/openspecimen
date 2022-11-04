@@ -50,8 +50,8 @@ public class ContainerMapReport extends AbstractContainerReport implements Conta
 
 			writer.flush();
 			return new ExportedFileDetail(csvFilename, file);
-		} catch (IOException ioe) {
-			throw OpenSpecimenException.serverError(ioe);
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
 		} finally {
 			IOUtils.closeQuietly(writer);
 		}

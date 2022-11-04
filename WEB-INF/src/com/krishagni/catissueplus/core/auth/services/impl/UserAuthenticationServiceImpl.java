@@ -142,7 +142,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			Map<String, Object> authDetail = new HashMap<>();
 			authDetail.put("user", user);
 
-			AuthToken token = createToken(user, loginDetail);
+			AuthToken token = createToken(user, loginDetail, null);
 			if (token != null) {
 				authDetail.put("token", AuthUtil.encodeToken(token.getToken()));
 				authDetail.put("tokenObj", token);
@@ -151,7 +151,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			return ResponseEvent.response(authDetail);
 		} catch (OpenSpecimenException ose) {
 			if (user != null && user.isEnabled()) {
-				insertLoginAudit(user, loginDetail.getIpAddress(), false);
+				insertLoginAudit(user, loginDetail.getIpAddress(), null, false);
 				checkFailedLoginAttempt(user);
 				if (ose.containsError(AuthErrorCode.INVALID_CREDENTIALS)) {
 					notifyFailedLogin(loginDetail, user);
@@ -177,6 +177,14 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			User user = authToken.getUser();
 			if (!user.isAllowedAccessFrom(tokenDetail.getIpAddress())) {
 				throw OpenSpecimenException.userError(AuthErrorCode.NA_IP_ADDRESS, tokenDetail.getIpAddress());
+			}
+
+			LoginAuditLog loginAuditLog = authToken.getLoginAuditLog();
+			if (loginAuditLog.getImpersonatedBy() != null) {
+				long endTime = loginAuditLog.getLoginTime().getTime() + 60 * 60 * 1000;
+				if (endTime < Calendar.getInstance().getTimeInMillis()) {
+					throw OpenSpecimenException.userError(AuthErrorCode.IMP_TOKEN_EXP);
+				}
 			}
 
 			long timeSinceLastApiCall = auditService.getTimeSinceLastApiCall(user.getId(), token);
@@ -253,48 +261,29 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<Map<String, Object>> impersonate(RequestEvent<Map<String, Object>> req) {
+	public ResponseEvent<AuthToken> impersonate(RequestEvent<LoginDetail> req) {
 		try {
 			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
 
-			Map<String, Object> input = req.getPayload();
-			Number userId = (Number) input.get("userId");
-			String loginName = (String) input.get("username");
-
-			User user = null;
-			Object key = null;
-			if (userId != null) {
-				user = daoFactory.getUserDao().getById(userId.longValue());
-				key = userId;
-			} else if (StringUtils.isNotBlank(loginName)) {
-				String[] parts = loginName.split("/", 2);
-				String domain = User.DEFAULT_AUTH_DOMAIN;
-				if (parts.length == 1) {
-					user = daoFactory.getUserDao().getUser(parts[0], User.DEFAULT_AUTH_DOMAIN);
-				} else {
-					user = daoFactory.getUserDao().getUser(parts[1], parts[0]);
-				}
-
-				key = loginName;
+			LoginDetail input = req.getPayload();
+			String domain = input.getDomainName();
+			if (StringUtils.isBlank(domain)) {
+				domain = User.DEFAULT_AUTH_DOMAIN;
 			}
 
-			if (key == null) {
+			if (StringUtils.isBlank(input.getLoginName())) {
 				return ResponseEvent.userError(UserErrorCode.LOGIN_NAME_REQUIRED);
-			} else if (user == null) {
-				return ResponseEvent.userError(UserErrorCode.NOT_FOUND, key);
+			}
+
+			User user = daoFactory.getUserDao().getUser(input.getLoginName(), domain);
+			if (user == null) {
+				return ResponseEvent.userError(UserErrorCode.NOT_FOUND, domain + "/" + input.getLoginName());
 			}
 
 			Date startTime = Calendar.getInstance().getTime();
 			Date endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-			String result = Base64.getEncoder().encodeToString(
-				Utility.encrypt(
-					AuthUtil.getCurrentUser().getId() + "/" +
-					user.getId() + "/" +
-					endTime.getTime() + "/" +
-					AuthUtil.getRemoteAddr()
-				).getBytes()
-			);
 
+			AuthToken token = createToken(user, input, AuthUtil.getCurrentUser());
 			Map<String, Object> props = new HashMap<>();
 			props.put("$subject", new String[] { AuthUtil.getCurrentUser().formattedName() });
 			props.put("user", AuthUtil.getCurrentUser());
@@ -308,7 +297,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				null,
 				props
 			);
-			return ResponseEvent.response(Collections.singletonMap("impersonateUserToken", result));
+
+			return ResponseEvent.response(token);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -326,17 +316,17 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	}
 	
 	public String generateToken(User user, LoginDetail loginDetail) {
-		AuthToken token = createToken(user, loginDetail);
+		AuthToken token = createToken(user, loginDetail, null);
 		return token != null ? AuthUtil.encodeToken(token.getToken()) : null;
 	}
 
-	private AuthToken createToken(User user, LoginDetail loginDetail) {
+	private AuthToken createToken(User user, LoginDetail loginDetail, User impersonatedBy) {
 		int maxSessions = AuthConfig.getInstance().maxConcurrentLoginSessions();
 		if (maxSessions > 0) {
 			deleteOlderSessions(user, maxSessions);
 		}
 
-		LoginAuditLog loginAuditLog = insertLoginAudit(user, loginDetail.getIpAddress(), true);
+		LoginAuditLog loginAuditLog = insertLoginAudit(user, loginDetail.getIpAddress(), impersonatedBy, true);
 
 		AuthToken authToken = new AuthToken();
 		authToken.setIpAddress(loginDetail.getIpAddress());
@@ -402,9 +392,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		return deleted;
 	}
 
-	private LoginAuditLog insertLoginAudit(User user, String ipAddress, boolean loginSuccessful) {
+	private LoginAuditLog insertLoginAudit(User user, String ipAddress, User impersonatedBy, boolean loginSuccessful) {
 		LoginAuditLog loginAuditLog = new LoginAuditLog();
 		loginAuditLog.setUser(user);
+		loginAuditLog.setImpersonatedBy(impersonatedBy);
 		loginAuditLog.setIpAddress(ipAddress);
 		loginAuditLog.setLoginTime(Calendar.getInstance().getTime());
 		loginAuditLog.setLogoutTime(null);

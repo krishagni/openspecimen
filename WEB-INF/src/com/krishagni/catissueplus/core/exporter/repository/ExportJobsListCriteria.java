@@ -1,16 +1,14 @@
-package com.krishagni.catissueplus.core.importer.repository;
+package com.krishagni.catissueplus.core.exporter.repository;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
-public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsCriteria> {
-	
+public class ExportJobsListCriteria extends AbstractListCriteria<ExportJobsListCriteria> {
 	private List<Long> userIds;
-	
+
 	private Long instituteId;
 
 	private String status;
@@ -24,7 +22,7 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 	private Date toDate;
 
 	@Override
-	public ListImportJobsCriteria self() {
+	public ExportJobsListCriteria self() {
 		return this;
 	}
 
@@ -32,13 +30,8 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 		return userIds;
 	}
 
-	public ListImportJobsCriteria userIds(List<Long> userIds) {
+	public ExportJobsListCriteria userIds(List<Long> userIds) {
 		this.userIds = userIds;
-		return self();
-	}
-	
-	public ListImportJobsCriteria userId(Long userId) {
-		this.userIds = Collections.singletonList(userId);
 		return self();
 	}
 
@@ -46,7 +39,7 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 		return instituteId;
 	}
 
-	public ListImportJobsCriteria instituteId(Long instituteId) {
+	public ExportJobsListCriteria instituteId(Long instituteId) {
 		this.instituteId = instituteId;
 		return self();
 	}
@@ -55,7 +48,7 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 		return status;
 	}
 
-	public ListImportJobsCriteria status(String status) {
+	public ExportJobsListCriteria status(String status) {
 		this.status = status;
 		return self();
 	}
@@ -63,8 +56,8 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 	public List<String> objectTypes() {
 		return objectTypes;
 	}
-	
-	public ListImportJobsCriteria objectTypes(List<String> objectTypes) {
+
+	public ExportJobsListCriteria objectTypes(List<String> objectTypes) {
 		this.objectTypes = objectTypes;
 		return self();
 	}
@@ -73,7 +66,7 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 		return params;
 	}
 
-	public ListImportJobsCriteria params(Map<String, String> params) {
+	public ExportJobsListCriteria params(Map<String, String> params) {
 		this.params = params;
 		return self();
 	}
@@ -82,7 +75,7 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 		return fromDate;
 	}
 
-	public ListImportJobsCriteria fromDate(Date fromDate) {
+	public ExportJobsListCriteria fromDate(Date fromDate) {
 		this.fromDate = fromDate;
 		return self();
 	}
@@ -91,7 +84,7 @@ public class ListImportJobsCriteria extends AbstractListCriteria<ListImportJobsC
 		return toDate;
 	}
 
-	public ListImportJobsCriteria toDate(Date toDate) {
+	public ExportJobsListCriteria toDate(Date toDate) {
 		this.toDate = toDate;
 		return self();
 	}

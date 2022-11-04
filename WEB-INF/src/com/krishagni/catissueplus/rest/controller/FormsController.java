@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
-
 
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
 import com.krishagni.catissueplus.core.auth.domain.UserRequestData;
@@ -56,6 +57,8 @@ import com.krishagni.catissueplus.core.de.events.MoveFormRecordsOp;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp.RemoveType;
 import com.krishagni.catissueplus.core.de.services.FormService;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.catissueplus.core.importer.services.ImportService;
 
 import edu.common.dynamicextensions.domain.nui.Container;
 import edu.common.dynamicextensions.domain.nui.PermissibleValue;
@@ -74,6 +77,12 @@ public class FormsController {
 	
 	@Autowired
 	private FormService formSvc;
+
+	@Autowired
+	private ImportService importSvc;
+
+	@Autowired
+	private ExportService exportSvc;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -430,6 +439,7 @@ public class FormsController {
 	@ResponseBody
 	public FormSummary importForm(@PathVariable("file") MultipartFile file)
 	throws IOException {
+		Date startDate = Calendar.getInstance().getTime();
 		File tmpDir = new File(getTmpDirName());
 		try {
 			String contentType = file.getContentType();
@@ -444,7 +454,9 @@ public class FormsController {
 				Utility.downloadFile(file.getInputStream(), tmpDir.getAbsolutePath(), "forms.xml");
 			}
 
-			return ResponseEvent.unwrap(formSvc.importForm(RequestEvent.wrap(tmpDir.getAbsolutePath())));
+			FormSummary result = ResponseEvent.unwrap(formSvc.importForm(RequestEvent.wrap(tmpDir.getAbsolutePath())));
+			importSvc.saveJob("form", "UPSERT", startDate, Collections.singletonMap("formId", result.getFormId().toString()));
+			return result;
 		} finally {
 			try {
 				FileUtils.deleteDirectory(tmpDir);
@@ -458,9 +470,13 @@ public class FormsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public void exportFormZip(@PathVariable("id") Long containerId, HttpServletResponse httpResp) {
+		Date startDate = Calendar.getInstance().getTime();
 		ResponseEvent<Container> resp = formSvc.getFormDefinition(getRequest(containerId));
 		resp.throwErrorIfUnsuccessful();
-		exportFormZip(resp.getPayload(), httpResp);
+
+		Container form = resp.getPayload();
+		exportFormZip(form, httpResp);
+		exportSvc.saveJob("form", startDate, Collections.singletonMap("formId", form.getId().toString()));
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value="/{id}/permissible-values")

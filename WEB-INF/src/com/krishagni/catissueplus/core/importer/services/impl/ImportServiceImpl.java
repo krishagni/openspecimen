@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,13 +28,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.Hibernate;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -45,6 +50,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.events.MergedObject;
+import com.krishagni.catissueplus.core.audit.repository.RevisionsListCriteria;
+import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
@@ -88,7 +95,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.cachestore.LinkedEhCacheMap;
 
-public class ImportServiceImpl implements ImportService, ApplicationListener<ContextRefreshedEvent> {
+public class ImportServiceImpl implements ImportService, ApplicationListener<ContextRefreshedEvent>, InitializingBean {
 	private static final LogUtil logger = LogUtil.getLogger(ImportServiceImpl.class);
 
 	private static final int MAX_RECS_PER_TXN = 5000;
@@ -104,6 +111,8 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	private ObjectSchemaFactory schemaFactory;
 	
 	private ObjectImporterFactory importerFactory;
+
+	private AuditService auditService;
 	
 	private TransactionTemplate txTmpl;
 
@@ -127,6 +136,10 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 	public void setImporterFactory(ObjectImporterFactory importerFactory) {
 		this.importerFactory = importerFactory;
+	}
+
+	public void setAuditService(AuditService auditService) {
+		this.auditService = auditService;
 	}
 
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
@@ -412,6 +425,30 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	}
 
 	@Override
+	@PlusTransactional
+	public ImportJob saveJob(String entity, String op, Date startTime, Map<String, String> params) {
+		ImportJob job = new ImportJob();
+		job.setName(entity);
+		job.setType(Type.valueOf(op));
+		job.setCsvtype(ImportJob.CsvType.SINGLE_ROW_PER_OBJ);
+		job.setStatus(ImportJob.Status.COMPLETED);
+		job.setTotalRecords(1L);
+		job.setFailedRecords(0L);
+		job.setCreatedBy(AuthUtil.getCurrentUser());
+		job.setCreationTime(startTime);
+		job.setEndTime(Calendar.getInstance().getTime());
+		job.setAtomic(true);
+		job.setIpAddress(AuthUtil.getRemoteAddr());
+		job.param("noReport", Boolean.TRUE.toString());
+		if (params != null) {
+			job.getParams().putAll(params);
+		}
+
+		importJobDao.saveOrUpdate(job, true);
+		return job;
+	}
+
+	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		boolean startScheduler = (lastRefreshTime == 0L);
 		lastRefreshTime = System.currentTimeMillis();
@@ -435,6 +472,11 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 				}
 			}
 		});
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		auditService.registerExporter(this::exportJobsReport);
 	}
 
 	private boolean isZipFile(String zipFilename) {
@@ -569,6 +611,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 		job.setParams(detail.getObjectParams());
 		job.setFieldSeparator(detail.getFieldSeparator());
 		job.setRunByNode("none");
+		job.setIpAddress(AuthUtil.getRemoteAddr());
 
 		setImportType(detail, job, ose);
 		setCsvType(detail, job, ose);
@@ -833,6 +876,163 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 		return null;
 	}
+
+	//
+	// activity report
+	//
+	private File exportJobsReport(String baseDir, User exportedBy, Date exportedOn, List<User> users, RevisionsListCriteria crit) {
+		if (!crit.includeReport("query_exim")) {
+			return null;
+		}
+
+		File auditDir = new File(ConfigUtil.getInstance().getDataDir(), "audit");
+		File result = new File(auditDir, baseDir);
+		if (!result.exists()) {
+			result.mkdirs();
+		}
+
+		String ts = new SimpleDateFormat("yyyyMMdd_HHmm").format(exportedOn);
+		File outputFile = new File(result, "os_import_jobs_" + ts + ".csv");
+		return exportJobsReport(exportedBy, exportedOn, users, crit, outputFile);
+	}
+
+	private File exportJobsReport(User exportedBy, Date exportedOn, List<User> users, RevisionsListCriteria crit, File outputFile) {
+		ListImportJobsCriteria jobsListCriteria = new ListImportJobsCriteria()
+			.fromDate(crit.startDate())
+			.toDate(crit.endDate())
+			.userIds(Utility.nullSafeStream(users).map(User::getId).collect(Collectors.toList()));
+
+		OutputStream fout = null;
+		CsvWriter csvWriter = null;
+
+		try {
+			fout      = Files.newOutputStream(outputFile.toPath());
+			csvWriter = CsvFileWriter.createCsvFileWriter(fout);
+
+			Map<String, String> headers = new LinkedHashMap<String, String>() {{
+				put(msg("common_server_url"), ConfigUtil.getInstance().getAppUrl());
+				put(msg("common_server_env"), ConfigUtil.getInstance().getDeployEnv());
+				put(msg("audit_rev_exported_by"), exportedBy.formattedName(true));
+				put(msg("audit_rev_exported_on"), Utility.getDateTimeString(exportedOn));
+
+				if (CollectionUtils.isNotEmpty(users)) {
+					String userNames = users.stream().map(u -> u.formattedName(true)).collect(Collectors.joining(", "));
+					put(msg("audit_rev_audited_users"), userNames);
+				}
+
+				if (jobsListCriteria.fromDate() != null) {
+					put(msg("audit_rev_start_date"), Utility.getDateTimeString(jobsListCriteria.fromDate()));
+				}
+
+				if (jobsListCriteria.toDate() != null) {
+					put(msg("audit_rev_end_date"),   Utility.getDateTimeString(jobsListCriteria.toDate()));
+				}
+
+				put("", "");
+			}};
+
+			Utility.writeKeyValuesToCsv(fout, headers);
+
+			jobsListCriteria.startAt(0).maxResults(100);
+			writeJobDetailToCsv(jobsListCriteria, csvWriter);
+
+			return outputFile;
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(csvWriter);
+			IOUtils.closeQuietly(fout);
+		}
+	}
+
+	private void writeJobDetailToCsv(ListImportJobsCriteria crit, CsvWriter csvWriter) {
+		csvWriter.writeNext(new String[1]);
+		csvWriter.writeNext(getAuditLogReportHeaders());
+
+		int count = 0;
+		boolean endOfRecords = false;
+		while (!endOfRecords) {
+			List<ImportJob> jobs = importJobDao.getImportJobs(crit);
+			crit.startAt(crit.startAt() + jobs.size());
+			endOfRecords = jobs.size() < 100;
+
+			for (ImportJob job : jobs) {
+				csvWriter.writeNext(getAuditLogReportData(job));
+				++count;
+				if (count % 25 == 0) {
+					csvWriter.flush();
+				}
+			}
+		}
+
+		csvWriter.flush();
+	}
+
+	private String[] getAuditLogReportHeaders() {
+		return new String[] {
+			msg("audit_rev_id"),
+			msg("audit_rev_tstmp"),
+			msg("audit_rev_user"),
+			msg("audit_rev_user_email"),
+			msg("audit_rev_domain"),
+			msg("audit_rev_user_login"),
+			msg("audit_rev_institute"),
+			msg("audit_rev_ip_address"),
+			msg("audit_rev_entity_op"),
+			msg("audit_rev_entity_name"),
+			msg("audit_rev_exec_time"),
+			msg("audit_rev_total_records"),
+			msg("audit_rev_successful_records"),
+			msg("audit_rev_failed_records"),
+			msg("audit_rev_status"),
+			msg("audit_rev_other_params")
+		};
+	}
+
+	private String[] getAuditLogReportData(ImportJob job) {
+		String timeToFinish = "";
+		if (job.getEndTime() != null) {
+			timeToFinish = String.valueOf((job.getEndTime().getTime()  - job.getCreationTime().getTime()) / 1000);
+		}
+
+		String type = "audit_op_insert";
+		if (job.getType() == Type.UPDATE) {
+			type = "audit_op_update";
+		} else if (job.getType() == Type.UPSERT) {
+			type = "audit_op_upsert";
+		}
+
+		User user = job.getCreatedBy();
+		Map<String, Object> params = new HashMap<>(job.getParams());
+		params.put("atomic", job.getAtomic());
+		params.put("dateFormat", job.getDateFormat());
+		params.put("timeFormat", job.getTimeFormat());
+		params.put("timeZone", job.getTimeZone());
+		params.put("fieldSeparator", job.getFieldSeparator());
+		return new String[] {
+			job.getId().toString(),
+			Utility.getDateTimeString(job.getCreationTime()),
+			user.formattedName(),
+			user.getEmailAddress(),
+			user.getAuthDomain().getName(),
+			user.getLoginName(),
+			user.getInstitute() != null ? user.getInstitute().getName() : "",
+			job.getIpAddress() != null ? job.getIpAddress() : "",
+			msg(type),
+			job.getEntityName(),
+			timeToFinish,
+			job.getTotalRecords() != null ? job.getTotalRecords().toString() : "",
+			job.getSuccessfulRecords() != null ? job.getSuccessfulRecords().toString() : "",
+			job.getFailedRecords() != null ? job.getFailedRecords().toString() : "",
+			msg("bulk_import_statuses_" + job.getStatus()),
+			Utility.mapToJson(params, true)
+		};
+	}
+
+	private String msg(String key) {
+		return MessageUtil.getInstance().getMessage(key);
+	}
+
 
 	private class ImporterTask implements Runnable {
 		private ImportJob job;
@@ -1202,8 +1402,8 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 		private void sendJobStatusNotification() {
 			try {
-				String entityName = getEntityName();
-				String op = getMsg("bulk_import_ops_" + job.getType());
+				String entityName = job.getEntityName();
+				String op = msg("bulk_import_ops_" + job.getType());
 				String [] subjParams = new String[] {
 					job.getId().toString(),
 					op,
@@ -1214,7 +1414,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 				props.put("job", job);
 				props.put("entityName", entityName);
 				props.put("op", op);
-				props.put("status", getMsg("bulk_import_statuses_" + job.getStatus()));
+				props.put("status", msg("bulk_import_statuses_" + job.getStatus()));
 				props.put("atomic", atomic);
 				props.put("$subject", subjParams);
 				props.put("ccAdmin", isCopyNotifToAdminEnabled());
@@ -1226,29 +1426,12 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			}
 		}
 
-		private String getEntityName() {
-			String entityName;
-
-			if (job.getName().equals(EXTENSIONS)) {
-				entityName = job.getParams().get("formName") + " (" + job.getParams().get("entityType") + ")";
-			} else {
-				String formName = job.getParams() != null ? job.getParams().get("formName") : null;
-				entityName = getMsg("bulk_import_entities_" + job.getName(), formName);
-			}
-
-			return entityName;
-		}
-
 		private void clearSession() {
 			SessionUtil.getInstance().clearSession();
 		}
 
 		private boolean isCopyNotifToAdminEnabled() {
 			return ConfigUtil.getInstance().getBoolSetting("notifications", "cc_import_emails_to_admin", false);
-		}
-
-		private String getMsg(String key, Object ... params) {
-			return MessageUtil.getInstance().getMessage(key, params);
 		}
 
 		private static final String JOB_STATUS_EMAIL_TMPL = "import_job_status_notif";

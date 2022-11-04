@@ -7,35 +7,35 @@
             <tr>
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $user.firstName $user.lastName,
+                  Hello $user.formattedName(),
                   <br><br>
                   #if ($operation == "created")
-                    A new user $updatedUser.firstName $updatedUser.lastName has been created by $currentUser.firstName $currentUser.lastName.
+                    A new user $updatedUser.formattedName() has been created by $currentUser.formattedName().
                   #elseif ($operation == "approved")
-                    The user add request for $updatedUser.firstName $updatedUser.lastName has been approved by $currentUser.firstName $currentUser.lastName.
+                    The user add request for $updatedUser.formattedName() has been approved by $currentUser.formattedName().
                   #elseif ($operation == "rejected")
                     #if ($user.emailAddress == $updatedUser.emailAddress)
-                      Thanks for your interest in OpenSpecimen. Unfortunately, $currentUser.firstName $currentUser.lastName rejected your request.
+                      Thanks for your interest in OpenSpecimen. Unfortunately, $currentUser.formattedName() rejected your request.
                     #else
-                      The user $updatedUser.firstName $updatedUser.lastName sign-up request has been rejected by $currentUser.firstName $currentUser.lastName.
+                      The user $updatedUser.formattedName() sign-up request has been rejected by $currentUser.formattedName().
                     #end
                   #elseif ($operation == "deleted")
                     #if ($user.emailAddress == $updatedUser.emailAddress)
-                      Your account has been deleted by $currentUser.firstName $currentUser.lastName.
+                      Your account has been deleted by $currentUser.formattedName().
                     #else
-                      The user $updatedUser.firstName $updatedUser.lastName's account has been deleted by $currentUser.firstName $currentUser.lastName.
+                      The user $updatedUser.formattedName()'s account has been deleted by $currentUser.formattedName().
                     #end
                   #elseif ($operation == "unlocked")
                     #if ($user.emailAddress == $updatedUser.emailAddress)
-                      Your account has been unlocked by $currentUser.firstName $currentUser.lastName.
+                      Your account has been unlocked by $currentUser.formattedName().
                     #else
-                      The user $updatedUser.firstName $updatedUser.lastName's account has been unlocked by $currentUser.firstName $currentUser.lastName.
+                      The user $updatedUser.formattedName()'s account has been unlocked by $currentUser.formattedName().
                     #end
                   #elseif ($operation == "locked")
                     #if ($user.emailAddress == $updatedUser.emailAddress)
-                      Your account has been locked by $currentUser.firstName $currentUser.lastName.
+                      Your account has been locked by $currentUser.formattedName().
                     #else
-                      The user $updatedUser.firstName $updatedUser.lastName's account has been locked by $currentUser.firstName $currentUser.lastName.
+                      The user $updatedUser.formattedName()'s account has been locked by $currentUser.formattedName().
                     #end
                   #end
                 </p>
@@ -67,6 +67,6 @@
       <td>
         #parse( $footer )
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>

@@ -1,7 +1,9 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +51,8 @@ import com.krishagni.catissueplus.core.de.events.FormSummary;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
 import com.krishagni.catissueplus.core.de.repository.FormDao;
 import com.krishagni.catissueplus.core.de.services.FormService;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.catissueplus.core.importer.services.ImportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGroupService {
@@ -61,6 +65,10 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 	private FormService formSvc;
 
 	private CollectionProtocolService cpSvc;
+
+	private ExportService exportSvc;
+
+	private ImportService importSvc;
 
 	public void setGroupFactory(CollectionProtocolGroupFactory groupFactory) {
 		this.groupFactory = groupFactory;
@@ -80,6 +88,14 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 
 	public void setCpSvc(CollectionProtocolService cpSvc) {
 		this.cpSvc = cpSvc;
+	}
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
+	}
+
+	public void setImportSvc(ImportService importSvc) {
+		this.importSvc = importSvc;
 	}
 
 	@Override
@@ -288,9 +304,15 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 	@PlusTransactional
 	public ResponseEvent<CpGroupWorkflowCfgDetail> getWorkflows(RequestEvent<EntityQueryCriteria> req) {
 		try {
+			Date startTime = Calendar.getInstance().getTime();
 			EntityQueryCriteria crit = req.getPayload();
 			CollectionProtocolGroup group = getGroup(crit.getId(), crit.getName());
 			ensureReadAccess(group);
+
+			if (crit.paramBoolean("export")) {
+				exportSvc.saveJob("cpgWf", startTime, Collections.singletonMap("cpGroupId", group.getId().toString()));
+			}
+
 			return ResponseEvent.response(CpGroupWorkflowCfgDetail.from(group));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -303,6 +325,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 	@PlusTransactional
 	public ResponseEvent<CpGroupWorkflowCfgDetail> saveWorkflows(RequestEvent<CpGroupWorkflowCfgDetail> req) {
 		try {
+			Date startTime = Calendar.getInstance().getTime();
 			CpGroupWorkflowCfgDetail input = req.getPayload();
 			CollectionProtocolGroup group = getGroup(input.getGroupId(), input.getGroupName());
 			ensureUpdateAccess(group);
@@ -326,6 +349,10 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			}
 
 			daoFactory.getCpGroupDao().saveOrUpdate(group);
+			if (Boolean.TRUE.equals(input.getImportWfs())) {
+				importSvc.saveJob("cpgWf", "UPSERT", startTime, Collections.singletonMap("cpGroupId", group.getId().toString()));
+			}
+
 			return ResponseEvent.response(CpGroupWorkflowCfgDetail.from(group));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);

@@ -126,6 +126,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			detail.setIpAddress((String) row[idx++]);
 			detail.setEntityId((Long) row[idx++]);
 			detail.setRecordId((Long) row[idx++]);
+			detail.setData((String) row[idx++]);
 			detail.setEntityType((String) row[idx++]);
 			detail.setFormName((String) row[idx++]);
 
@@ -162,6 +163,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 			detail.setRecordId((Long) row[++idx]);
 			detail.setFormName((String) row[++idx]);
+			detail.setData((String) row[++idx]);
 
 			UserSummary user = new UserSummary();
 			user.setId((Long) row[++idx]);
@@ -192,6 +194,31 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		getCurrentSession().saveOrUpdate(log);
 	}
 
+	@Override
+	public List<UserApiCallLog> getApiCallLogs(RevisionsListCriteria crit) {
+		Criteria<UserApiCallLog> query = createCriteria(UserApiCallLog.class, "log");
+		query.join("log.user", "user")
+			.join("log.loginAuditLog", "al")
+			.addOrder(query.desc("log.id"));
+
+		if (crit.lastId() != null) {
+			query.add(query.lt("log.id", crit.lastId()));
+		}
+
+		if (crit.startDate() != null) {
+			query.add(query.ge("log.callStartTime", crit.startDate()));
+		}
+
+		if (crit.endDate() != null) {
+			query.add(query.le("log.callStartTime", crit.endDate()));
+		}
+
+		if (crit.userIds() != null && !crit.userIds().isEmpty()) {
+			query.add(query.in("user.id", crit.userIds()));
+		}
+
+		return query.list(crit.startAt(), crit.maxResults());
+	}
 
 	private Object[] getLatestRevisionInfo(String auditTable, Long objectId, int revType) {
 		String[] parts = auditTable.split(":");
@@ -323,6 +350,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addStringScalar("ip_address")
 			.addLongScalar("object_id")
 			.addLongScalar("record_id")
+			.addStringScalar("form_data")
 			.addStringScalar("entity_type")
 			.addStringScalar("caption")
 			.addLongScalar("user_id")
@@ -389,6 +417,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.addIntScalar("rev_type")
 			.addLongScalar("form_id")
 			.addStringScalar("form_name")
+			.addStringScalar("change_log")
 			.addLongScalar("user_id")
 			.addStringScalar("first_name")
 			.addStringScalar("last_name")
@@ -569,14 +598,14 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	private static final String GET_FORM_DATA_AUD_EVENTS_BASE_SQL =
 		"select" +
-		"  e.identifier, e.event_timestamp, e.ip_address, e.user_id, e.event_type, e.record_id, e.form_id " +
+		"  e.identifier, e.event_timestamp, e.ip_address, e.user_id, e.event_type, e.record_id, e.form_id, e.form_data " +
 		"from " +
 		"  dyextn_audit_events e";
 
 	private static final String GET_FORM_DATA_AUD_EVENTS_SQL =
 		"select" +
 		"  t.identifier, t.event_timestamp, t.event_type, t.ip_address, fre.object_id, t.record_id, " +
-		"  fc.entity_type, f.caption, " +
+		"  t.form_data, fc.entity_type, f.caption, " +
 		"  t.user_id, u.first_name, u.last_name, u.email_address, u.login_name, i.name, d.domain_name " +
 		"from " +
 		"  (%s) t " +
@@ -592,7 +621,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	private static final String GET_FORM_REVISIONS_SQL =
 		"select" +
-		"  r.rev, r.rev_time, r.ip_address, r.rev_type, r.identifier as form_id, r.name as form_name, " +
+		"  r.rev, r.rev_time, r.ip_address, r.rev_type, r.identifier as form_id, r.name as form_name, r.modified_props as change_log, " +
 		"  r.rev_by as user_id, u.first_name, u.last_name, u.email_address, u.login_name, " +
 		"  i.name, d.domain_name " +
 		"from " +

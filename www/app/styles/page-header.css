@@ -76,6 +76,7 @@
 }
 
 .os-page-header-actions button,
+.os-page-header-actions a.btn,
 .os-page-commands a.btn, 
 .os-page-commands button {
   border-radius: 3px;

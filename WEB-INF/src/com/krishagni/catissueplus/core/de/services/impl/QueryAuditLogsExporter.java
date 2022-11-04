@@ -33,6 +33,7 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.QueryAuditLog;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
 import com.krishagni.catissueplus.core.de.repository.DaoFactory;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
 @Configurable
 public class QueryAuditLogsExporter implements Runnable {
@@ -47,6 +48,8 @@ public class QueryAuditLogsExporter implements Runnable {
 
 	private User exportedBy;
 
+	private String ipAddress;
+
 	private List<User> runBy;
 
 	private File exportedFile;
@@ -54,16 +57,24 @@ public class QueryAuditLogsExporter implements Runnable {
 	@Autowired
 	private DaoFactory deDaoFactory;
 
+	@Autowired
+	private ExportService exportSvc;
+
 	public QueryAuditLogsExporter(QueryAuditLogsListCriteria crit, User exportedBy, List<User> runBy) {
 		this.crit = crit;
 		this.exportedBy = exportedBy;
 		this.runBy = runBy;
 	}
 
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
 	@Override
 	public void run() {
 		try {
-			AuthUtil.setCurrentUser(exportedBy);
+			Date startTime = Calendar.getInstance().getTime();
+			AuthUtil.setCurrentUser(exportedBy, ipAddress);
 
 			String baseDir = UUID.randomUUID().toString();
 			Date exportedOn = Calendar.getInstance().getTime();
@@ -80,6 +91,7 @@ public class QueryAuditLogsExporter implements Runnable {
 
 			logger.info("Sending query audit logs email to " + exportedBy.formattedName(true));
 			sendEmailNotif();
+			exportSvc.saveJob("query_audit_logs", startTime, crit.toStrMap());
 		} catch (Exception e) {
 			logger.error("Error generating the query audit logs report", e);
 			sendFailedEmailNotif(e);
@@ -139,7 +151,7 @@ public class QueryAuditLogsExporter implements Runnable {
 		writeHeader0(writer, exportedOn);
 
 		String[] keys = {
-			"audit_rev_id", "audit_rev_tstmp",
+			"audit_rev_id", "audit_start_time", "audit_end_time",
 			"audit_rev_user", "audit_rev_user_email", "audit_rev_domain", "audit_rev_user_login",
 			"audit_rev_institute", "audit_rev_ip_address", "audit_rev_entity_op",
 			"query_audit_logs_exec_time", "query_audit_logs_records_count",
@@ -173,7 +185,7 @@ public class QueryAuditLogsExporter implements Runnable {
 
 	private void writeRow(CsvWriter writer, QueryAuditLog log) {
 		String id        = log.getId().toString();
-		String dateTime  = Utility.getDateTimeString(log.getTimeOfExecution());
+		String startTime = Utility.getDateTimeString(log.getTimeOfExecution());
 		String user      = null;
 		String emailId   = null;
 		String domain    = null;
@@ -187,14 +199,19 @@ public class QueryAuditLogsExporter implements Runnable {
 			institute = log.getRunBy().getInstitute() != null ? log.getRunBy().getInstitute().getName() : null;
 		}
 
+		String endTime = "N/A";
 		String timeToFinish = "N/A";
 		if (log.getTimeToFinish() != null) {
-			timeToFinish = String.valueOf(log.getTimeToFinish() / 1000);
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(log.getTimeOfExecution().getTime());
+			cal.add(Calendar.MILLISECOND, log.getTimeToFinish().intValue());
+			endTime = Utility.getDateTimeString(cal.getTime());
+			timeToFinish = log.getTimeToFinish().toString();
 		}
 
 		String recordsCount = log.getRecordCount() != null ? log.getRecordCount().toString() : "N/A";
 		writer.writeNext(new String[] {
-			id, dateTime, user, emailId, domain, loginId, institute, log.getIpAddress(),
+			id, startTime, endTime, user, emailId, domain, loginId, institute, log.getIpAddress(),
 			log.getRunType(), timeToFinish, recordsCount,
 			log.getAql(), log.getSql()
 		});

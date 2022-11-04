@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -58,6 +59,7 @@ import com.krishagni.catissueplus.core.audit.services.AuditLogExporter;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -76,6 +78,7 @@ import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
 import com.krishagni.catissueplus.core.de.services.impl.QueryAuditLogsExporter;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class AuditServiceImpl implements AuditService, InitializingBean {
@@ -198,15 +201,20 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			);
 		}
 
+		if (criteria.reportTypes() == null || criteria.reportTypes().isEmpty()) {
+			criteria.reportTypes(Collections.singletonList("data"));
+		}
+
 		criteria.startDate(startDate).endDate(endDate);
 
 		User currentUser     = AuthUtil.getCurrentUser();
+		String ipAddress     = AuthUtil.getRemoteAddr();
 		List<User> revisionsByUsers = users;
 
 		logger.info("Invoking task executor to initiate export of revisions: " + criteria);
 
 		File revisionsFile = null;
-		Future<File> result = taskExecutor.submit(() -> exportRevisions(criteria, currentUser, revisionsByUsers));
+		Future<File> result = taskExecutor.submit(() -> exportRevisions(criteria, currentUser, ipAddress, revisionsByUsers));
 		try {
 			logger.info("Waiting for the export revisions to finish ...");
 			revisionsFile = result.get(ONLINE_EXPORT_TIMEOUT_SECS, TimeUnit.SECONDS);
@@ -290,37 +298,53 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	}
 
 	@PlusTransactional
-	private File exportRevisions(RevisionsListCriteria criteria, User exportedBy, List<User> revisionsBy) {
+	private File exportRevisions(RevisionsListCriteria criteria, User exportedBy, String ipAddress, List<User> revisionsBy) {
 		try {
+			Date startTime = Calendar.getInstance().getTime();
 			List<File> inputFiles = new ArrayList<>();
-			AuthUtil.setCurrentUser(exportedBy);
+			AuthUtil.setCurrentUser(exportedBy, ipAddress);
 
 			String baseDir = UUID.randomUUID().toString();
 			Date exportedOn = Calendar.getInstance().getTime();
 
-			logger.info("Exporting core objects' revisions... ");
-			File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
-			inputFiles.add(coreObjectsRevs);
+			if (criteria.includeReport("data")) {
+				logger.info("Exporting core objects' revisions... ");
+				File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
+				inputFiles.add(coreObjectsRevs);
 
-			FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
-			logger.info("Exporting form revisions... ");
-			File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
-			inputFiles.add(formsRevs);
+				FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
+				logger.info("Exporting form revisions... ");
+				File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
+				inputFiles.add(formsRevs);
 
-			logger.info("Exporting form data revisions... ");
-			File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
-			inputFiles.add(formsDataRevs);
+				logger.info("Exporting form data revisions... ");
+				File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
+				inputFiles.add(formsDataRevs);
+			}
 
-			logger.info("Export user password revisions... ");
-			File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
-			inputFiles.add(passwordRevs);
+			if (criteria.includeReport("auth")) {
+				logger.info("Export user password revisions... ");
+				File passwordRevs    = exportPasswordsData(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+				inputFiles.add(passwordRevs);
+			}
 
-			logger.info("Export query run logs...");
-			File queryRuns = exportQueryAudit(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
-			inputFiles.add(queryRuns);
+			if (criteria.includeReport("query_exim")) {
+				logger.info("Export query run logs...");
+				File queryRuns = exportQueryAudit(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+				inputFiles.add(queryRuns);
+			}
+
+			if (criteria.includeReport("api_calls")) {
+				logger.info("Export user API call logs...");
+				File apiLogs = exportApiCallsLog(criteria, exportedBy, exportedOn, revisionsBy, baseDir);
+				inputFiles.add(apiLogs);
+			}
 
 			for (AuditLogExporter exporter : exporters) {
-				inputFiles.add(exporter.export(baseDir, exportedBy, exportedOn, revisionsBy, criteria));
+				File reportFile = exporter.export(baseDir, exportedBy, exportedOn, revisionsBy, criteria);
+				if (reportFile != null) {
+					inputFiles.add(reportFile);
+				}
 			}
 
 			logger.info("Creating revisions ZIP file... ");
@@ -332,6 +356,9 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 			logger.info("Sending audit revisions email to " + exportedBy.formattedName() + " (" + exportedBy.getEmailAddress() + ")");
 			sendEmailNotif(criteria, exportedBy, revisionsBy, result);
+
+			ExportService exportSvc = OpenSpecimenAppCtxProvider.getBean("exportSvc");
+			exportSvc.saveJob("audit_report", startTime, criteria.toStrMap());
 			return result;
 		} finally {
 			AuthUtil.clearCurrentUser();
@@ -528,7 +555,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				String[] headerColumns = {
 					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
 					"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
-					"audit_rev_entity_op", "audit_rev_form_name", "audit_rev_entity_id"
+					"audit_rev_entity_op", "audit_rev_form_name", "audit_rev_entity_id", "audit_rev_change_log"
 				};
 				writeHeader(csvWriter, headerColumns);
 
@@ -578,7 +605,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 					"audit_rev_id", "audit_rev_tstmp", "audit_rev_user", "audit_rev_user_email",
 					"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
 					"audit_rev_entity_op", "audit_rev_entity_name", "audit_rev_form_name",
-					"audit_rev_parent_entity_id", "audit_rev_entity_id"
+					"audit_rev_parent_entity_id", "audit_rev_entity_id", "audit_rev_change_log"
 				};
 				writeHeader(csvWriter, headerColumns);
 
@@ -656,11 +683,12 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			String formName = revision.getFormName();
 			String recordId = revision.getRecordId().toString();
 			String ipAddress = revision.getIpAddress();
+			String data = revision.getData();
 
 			if (entityType != null) {
-				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, entityType, formName, entityId, recordId});
+				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, entityType, formName, entityId, recordId, data});
 			} else {
-				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, formName, recordId});
+				writer.writeNext(new String[] {revId, dateTime, user, userEmail, domain, userLogin, institute, ipAddress, opDisplay, formName, recordId, data});
 			}
 		}
 	}
@@ -737,6 +765,77 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		return new QueryAuditLogsExporter(crit, exportedBy, revisionsBy).exportAuditLogs(outputFile, exportedOn);
 	}
 
+	private File exportApiCallsLog(RevisionsListCriteria criteria, User exportedBy, Date exportedOn, List<User> callsBy, String baseDir) {
+		long startTime = System.currentTimeMillis();
+		CsvFileWriter csvWriter = null;
+
+		try {
+			File outputFile = getOutputFile(baseDir, "os_user_api_call_logs", exportedOn);
+			csvWriter = CsvFileWriter.createCsvFileWriter(outputFile);
+			writeExportHeader(csvWriter, criteria, exportedBy, exportedOn, callsBy);
+
+			String[] headerColumns = {
+				"audit_rev_id", "audit_start_time", "audit_end_time", "audit_rev_user", "audit_rev_user_email",
+				"audit_rev_domain", "audit_rev_user_login", "audit_rev_institute", "audit_rev_ip_address",
+				"audit_call_method", "audit_call_url", "audit_call_resp_code"
+			};
+			csvWriter.writeNext(Stream.of(headerColumns).map(MessageUtil.getInstance()::getMessage).toArray(String[]::new));
+
+			long lastRevId = Long.MAX_VALUE, totalRecords = 0;
+			while (true) {
+				long t1 = System.currentTimeMillis();
+
+				List<UserApiCallLog> callLogs = daoFactory.getAuditDao().getApiCallLogs(criteria.lastId(lastRevId));
+				if (callLogs.isEmpty()) {
+					break;
+				}
+
+				for (UserApiCallLog callLog : callLogs) {
+					String user      = null;
+					String userEmail = null;
+					String userLogin = null;
+					String institute = null;
+					String domain    = null;
+					if (callLog.getUser() != null) {
+						user      = callLog.getUser().formattedName();
+						userEmail = callLog.getUser().getEmailAddress();
+						userLogin = callLog.getUser().getLoginName();
+						institute = callLog.getUser().getInstitute().getName();
+						domain    = callLog.getUser().getAuthDomain().getName();
+					}
+
+					String ipAddres = null;
+					if (callLog.getLoginAuditLog() != null) {
+						ipAddres = callLog.getLoginAuditLog().getIpAddress();
+					}
+
+					csvWriter.writeNext(new String[] {
+						callLog.getId().toString(),
+						Utility.getDateTimeString(callLog.getCallStartTime()),
+						Utility.getDateTimeString(callLog.getCallEndTime()),
+						user, userEmail, domain, userLogin, institute, ipAddres,
+						callLog.getMethod(), callLog.getUrl(), callLog.getResponseCode()
+					});
+
+					lastRevId = callLog.getId();
+					++totalRecords;
+					if (totalRecords % 25 == 0) {
+						csvWriter.flush();
+					}
+				}
+			}
+
+			csvWriter.flush();
+			return outputFile;
+		} catch (Exception e) {
+			logger.error("Error exporting user API call logs", e);
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(csvWriter);
+			logger.info("User API call logs export finished in " +  (System.currentTimeMillis() - startTime) + " ms");
+		}
+	}
+
 	private File getOutputFile(String dir, String filename, Date exportedOn) {
 		return new File(getAuditDir(dir), filename + "_" + getTs(exportedOn) + ".csv");
 	}
@@ -761,6 +860,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		emailProps.put("users",     !userNames.isEmpty() ? userNames : null);
 		emailProps.put("fileId",    getFileId(revisionsFile));
 		emailProps.put("rcpt",      exportedBy.formattedName());
+		emailProps.put("reportTypes", criteria.reportTypes().stream().map(t -> MessageUtil.getInstance().getMessage("audit_report_type_" + t)).collect(Collectors.joining(", ")));
 
 		EmailUtil.getInstance().sendEmail(
 			REV_EMAIL_TMPL,

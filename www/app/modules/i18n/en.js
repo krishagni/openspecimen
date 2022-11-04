@@ -1497,6 +1497,7 @@
     "already_have_an_openspecimen_id": "Already have an OpenSpecimen ID?",
     "sign_in_here": "Sign In here",
     "signed_up": "Your membership request has been received. Please wait for an approval email from OpenSpecimen Administrator. Thank you.",
+    "signup_approved": "Your signup request has been approved. Click on the \"Sign-in\" button sent to your email address to login. Thank you.",
     "return_to_signin": "Return to Sign in",
 
     "tooltip": {
@@ -2084,6 +2085,8 @@
     "select_subquery": "Records of another query",
     "expr_and_filters": "Expression and Filters",
     "filters": "Filters",
+    "search_facet": "Search Filter",
+    "no_matching_facet": "No Matching Filter",
     "parameterized_marker": "P",
     "subquery_marker": "Q",
     "get_count": "Get Count",
@@ -3004,7 +3007,15 @@
         "allow_dist_label_printing_desc": "Allow printing of labels when specimens are distributed.",
 
         "order_attachment_type": "Order Attachment",
-        "order_attachment_type_desc": "Files to send in the order processed email notifications. Valid values are none, csv_report, manifest, or both."
+        "order_attachment_type_desc": "Files to send in the order processed email notifications. Valid values are none, csv_report, manifest, or both.",
+        "auto_approve_signup": "Auto Approve Users",
+        "auto_approve_signup_desc": "Enable automatic approval of new user signup requests.",
+        "def_role_on_signup": "Default Signup User Role",
+        "def_role_on_signup_desc": "Default role to assign users on auto approval of their signup requests.",
+        "def_signup_institute": "Default Signup Institute",
+        "def_signup_institute_desc": "Default institute to use for the newly signed up users.",
+        "local_account_signups": "Local Account Signups",
+        "local_account_signups_desc": "Enable signup requests for the 'openspecimen' domain."
       },
 
       "biospecimen": {

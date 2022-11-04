@@ -168,12 +168,16 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 			if (atResp.isSuccessful()) {
 				user = atResp.getPayload().getUser();
 				loginAuditLog = atResp.getPayload().getLoginAuditLog();
+			} else {
+				setUnauthorizedResp(req, resp, chain, true);
 			}
 		} else if (httpReq.getHeader(HttpHeaders.AUTHORIZATION) != null) {
 			AuthToken token = doBasicAuthentication(httpReq, httpResp);
 			if (token != null) {
 				user = token.getUser();
 				loginAuditLog = token.getLoginAuditLog();
+			} else {
+				setUnauthorizedResp(req, resp, chain, true);
 			}
 		}
 
@@ -212,12 +216,21 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 
 		User impersonatedUser = null;
 		if (user.isAdmin() && !user.isSysUser()) {
-			String impUserStr = AuthUtil.getImpersonateUser(httpReq);
-			if (StringUtils.isNotBlank(impUserStr)) {
+			String impUserToken = AuthUtil.getImpersonateUser(httpReq);
+			if (StringUtils.isNotBlank(impUserToken)) {
+				TokenDetail tokenDetail = new TokenDetail();
+				tokenDetail.setToken(impUserToken);
+				tokenDetail.setIpAddress(Utility.getRemoteAddress(httpReq));
+
 				try {
-					impersonatedUser = getUser(user, Utility.getRemoteAddress(httpReq), impUserStr);
+					ResponseEvent<AuthToken> atResp = authService.validateToken(new RequestEvent<>(tokenDetail));
+					atResp.throwErrorIfUnsuccessful();
+
+					authToken = impUserToken;
+					impersonatedUser = atResp.getPayload().getUser();
+					loginAuditLog = atResp.getPayload().getLoginAuditLog();
 				} catch (OpenSpecimenException ose) {
-					if (ose.containsError(AuthErrorCode.IMP_TOKEN_EXP) || ose.containsError(AuthErrorCode.IMP_TOKEN_INV)) {
+					if (ose.containsError(AuthErrorCode.IMP_TOKEN_EXP) || ose.containsError(AuthErrorCode.INVALID_TOKEN)) {
 						AuthUtil.clearTokenCookie(httpReq, httpResp);
 						httpResp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ose.getMessage());
 						teardownReqDataProviders(httpReq, httpResp);
@@ -227,18 +240,11 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 					throw ose;
 				}
 
-				if (impersonatedUser == null || !impersonatedUser.isActive()) {
-					String message = impersonatedUser == null ? " does not exist!" : " is not active!";
-					httpResp.sendError(HttpServletResponse.SC_BAD_REQUEST, "User " + impUserStr + message);
-					teardownReqDataProviders(httpReq, httpResp);
-					return;
-				}
-
 				impersonatedUser.setImpersonated(true);
 			}
 		}
 
-		AuthUtil.setCurrentUser(impersonatedUser != null ? impersonatedUser : user, authToken, httpReq);
+		AuthUtil.setCurrentUser(impersonatedUser != null ? impersonatedUser : user, authToken, httpReq, impersonatedUser != null);
 		Date callStartTime = Calendar.getInstance().getTime();
 		chain.doFilter(req, resp);
 		AuthUtil.clearCurrentUser();

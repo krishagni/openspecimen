@@ -3,14 +3,19 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CpGroupWorkflowCfgDetail {
 	private Long groupId;
 
 	private String groupName;
 
 	private Map<String, WorkflowDetail> workflows = new HashMap<>();
+
+	private Boolean importWfs;
 
 	public Long getGroupId() {
 		return groupId;
@@ -34,6 +39,14 @@ public class CpGroupWorkflowCfgDetail {
 
 	public void setWorkflows(Map<String, WorkflowDetail> workflows) {
 		this.workflows = workflows;
+	}
+
+	public Boolean getImportWfs() {
+		return importWfs;
+	}
+
+	public void setImportWfs(Boolean importWfs) {
+		this.importWfs = importWfs;
 	}
 
 	public static CpGroupWorkflowCfgDetail from(CollectionProtocolGroup group) {

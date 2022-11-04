@@ -30,6 +30,8 @@
 
     <property name="endTime" column="END_TIME"/>
 
+    <property name="ipAddress" column="IP_ADDRESS" />
+
     <map name="params" table="OS_EXPORT_JOB_PARAMS" lazy="false" batch-size="26">
       <key column="JOB_ID"/>
       <map-key column="PARAM" type="string"/>

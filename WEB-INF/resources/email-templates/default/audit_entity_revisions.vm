@@ -50,6 +50,10 @@
                       #end
                     </td>
                   </tr>
+                  <tr>
+                    <td> Report Types </td>
+                    <td> : $reportTypes </td>
+                  </tr>
                 </table>
               </td>
             </tr>

@@ -1,7 +1,10 @@
 package com.krishagni.catissueplus.rest.controller;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.events.JobExportDetail;
 import com.krishagni.catissueplus.core.administrative.events.JobRunsListCriteria;
@@ -30,6 +33,7 @@ import com.krishagni.catissueplus.core.administrative.services.ScheduledJobServi
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
 @Controller
 @RequestMapping("/scheduled-jobs")
@@ -40,6 +44,9 @@ public class ScheduledJobsController {
 	
 	@Autowired
 	private HttpServletRequest httpReq;
+
+	@Autowired
+	private ExportService exportSvc;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -162,10 +169,16 @@ public class ScheduledJobsController {
 		Long runId,
 			
 		HttpServletResponse httpResp) {
-		
+
+		Date startTime = Calendar.getInstance().getTime();
 		JobExportDetail detail = response(jobSvc.getJobResultFile(request(runId)));
 		File file = detail.getFile();
 		Utility.sendToClient(httpResp, file.getName(), file);
+
+		Map<String, String> params = new HashMap<>();
+		params.put("jobId", detail.getJobRun().getJobId().toString());
+		params.put("runId", detail.getJobRun().getId().toString());
+		exportSvc.saveJob("scheduled_job_report", startTime, params);
 	}
 
 	private <T> RequestEvent<T> request(T payload) {

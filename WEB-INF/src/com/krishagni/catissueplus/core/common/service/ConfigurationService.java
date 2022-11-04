@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.ConfigSettingDetail;
@@ -40,6 +42,8 @@ public interface ConfigurationService {
 	public String getFileContent(String module, String name, File... defValue);
 
 	public FileDetail getFileDetail(String module, String name, File... defValue);
+
+	void downloadSettingFile(String moduleName, String propertyName, HttpServletResponse httpResp);
 
 	public void reload();
 	
