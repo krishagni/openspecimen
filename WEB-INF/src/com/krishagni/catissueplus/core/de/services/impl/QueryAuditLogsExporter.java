@@ -151,7 +151,7 @@ public class QueryAuditLogsExporter implements Runnable {
 		writeHeader0(writer, exportedOn);
 
 		String[] keys = {
-			"audit_rev_id", "audit_rev_tstmp",
+			"audit_rev_id", "audit_start_time", "audit_end_time",
 			"audit_rev_user", "audit_rev_user_email", "audit_rev_domain", "audit_rev_user_login",
 			"audit_rev_institute", "audit_rev_ip_address", "audit_rev_entity_op",
 			"query_audit_logs_exec_time", "query_audit_logs_records_count",
@@ -185,7 +185,7 @@ public class QueryAuditLogsExporter implements Runnable {
 
 	private void writeRow(CsvWriter writer, QueryAuditLog log) {
 		String id        = log.getId().toString();
-		String dateTime  = Utility.getDateTimeString(log.getTimeOfExecution());
+		String startTime = Utility.getDateTimeString(log.getTimeOfExecution());
 		String user      = null;
 		String emailId   = null;
 		String domain    = null;
@@ -199,14 +199,19 @@ public class QueryAuditLogsExporter implements Runnable {
 			institute = log.getRunBy().getInstitute() != null ? log.getRunBy().getInstitute().getName() : null;
 		}
 
+		String endTime = "N/A";
 		String timeToFinish = "N/A";
 		if (log.getTimeToFinish() != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(log.getTimeOfExecution().getTime());
+			cal.add(Calendar.MILLISECOND, log.getTimeToFinish().intValue());
+			endTime = Utility.getDateTimeString(cal.getTime());
 			timeToFinish = log.getTimeToFinish().toString();
 		}
 
 		String recordsCount = log.getRecordCount() != null ? log.getRecordCount().toString() : "N/A";
 		writer.writeNext(new String[] {
-			id, dateTime, user, emailId, domain, loginId, institute, log.getIpAddress(),
+			id, startTime, endTime, user, emailId, domain, loginId, institute, log.getIpAddress(),
 			log.getRunType(), timeToFinish, recordsCount,
 			log.getAql(), log.getSql()
 		});
