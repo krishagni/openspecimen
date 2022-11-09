@@ -45,4 +45,9 @@ public class KeySequence {
 	public Long increment() {
 		return ++sequence;
 	}
+
+	public Long incrementBy(int delta) {
+		sequence += delta;
+		return sequence;
+	}
 }

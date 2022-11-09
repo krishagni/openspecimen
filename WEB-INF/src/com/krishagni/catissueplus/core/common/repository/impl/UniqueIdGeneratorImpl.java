@@ -10,21 +10,24 @@ import com.krishagni.catissueplus.core.common.repository.UniqueIdGenerator;
 
 public class UniqueIdGeneratorImpl extends AbstractDao<KeySequence> implements UniqueIdGenerator {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Long getUniqueId(String type, String id) {
 		return getUniqueId(type, id, 0L);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Long getUniqueId(String type, String id, Long defStartSeq) {
+		return getUniqueId(type, id, defStartSeq, 1);
+	}
+
+	@Override
+	public Long getUniqueId(String type, String id, Long defStartSeq, int incrementBy) {
 		List<KeySequence> seqs = getCurrentSession()
-				.getNamedQuery(GET_BY_TYPE_AND_TYPE_ID)
-				.setLockMode("ks", LockMode.PESSIMISTIC_WRITE)
-				.setString("type", type)
-				.setString("typeId", id)
-				.list();
+			.getNamedQuery(GET_BY_TYPE_AND_TYPE_ID)
+			.setLockMode("ks", LockMode.PESSIMISTIC_WRITE)
+			.setString("type", type)
+			.setString("typeId", id)
+			.list();
 
 		KeySequence seq = null;
 		if (seqs.isEmpty()) {
@@ -37,6 +40,7 @@ public class UniqueIdGeneratorImpl extends AbstractDao<KeySequence> implements U
 		}
 
 		Long uniqueId = seq.increment();
+		seq.incrementBy(incrementBy >= 1 ? incrementBy - 1 : 0);
 		getCurrentSession().saveOrUpdate(seq);
 		return uniqueId;
 	}
