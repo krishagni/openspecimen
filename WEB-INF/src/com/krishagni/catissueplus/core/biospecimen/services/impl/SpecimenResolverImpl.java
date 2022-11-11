@@ -91,6 +91,23 @@ public class SpecimenResolverImpl implements SpecimenResolver {
 	}
 
 	@Override
+	public Specimen getSpecimenByAddlLabel(String cpShortTitle, String label) {
+		Specimen specimen = null;
+
+		if (areLabelsUniquePerCp()) {
+			if (StringUtils.isBlank(cpShortTitle)) {
+				throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
+			}
+
+			specimen = daoFactory.getSpecimenDao().getByAdditionalLabelAndCp(cpShortTitle, label);
+		} else {
+			specimen = daoFactory.getSpecimenDao().getByAdditionalLabel(label);
+		}
+
+		return specimen;
+	}
+
+	@Override
 	public Specimen getSpecimenByBarcode(String cpShortTitle, String barcode) {
 		Specimen specimen = null;
 

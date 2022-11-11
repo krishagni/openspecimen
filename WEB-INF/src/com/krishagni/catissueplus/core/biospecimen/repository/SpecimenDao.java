@@ -24,6 +24,10 @@ public interface SpecimenDao extends Dao<Specimen> {
 
 	Specimen getByLabelAndCp(String cpShortTitle, String label);
 
+	Specimen getByAdditionalLabel(String label);
+
+	Specimen getByAdditionalLabelAndCp(String cpShortTitle, String label);
+
 	Specimen getByBarcode(String barcode);
 
 	Specimen getByBarcodeAndCp(String cpShortTitle, String barcode);

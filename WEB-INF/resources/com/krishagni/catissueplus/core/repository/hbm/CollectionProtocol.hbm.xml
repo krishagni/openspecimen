@@ -45,6 +45,8 @@
 
     <property name="aliquotLabelFormat" column="ALIQUOT_LABEL_FORMAT"/>
 
+    <property name="additionalLabelFormat" column="ADDL_LABEL_FORMAT" />
+
     <property name="specimenBarcodeFormat" column="SPECIMEN_BARCODE_FORMAT"/>
 
     <property name="ppidFormat" column="PPID_FORMAT"/>

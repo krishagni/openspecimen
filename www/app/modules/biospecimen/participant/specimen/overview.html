@@ -192,6 +192,11 @@
         </ng-switch>
       </li>
 
+      <li class="item" ng-show="!!specimen.additionalLabel">
+        <strong class="key key-sm" translate="specimens.additional_label">Additional Label</strong>
+        <span class="value value-md">{{specimen.additionalLabel}}</span>
+      </li>
+
       <li class="item" ng-if="barcodingEnabled">
         <strong class="key key-sm" translate="specimens.barcode">Barcode</strong>
         <span class="value value-md">{{specimen.barcode | osNoValue}}</span>

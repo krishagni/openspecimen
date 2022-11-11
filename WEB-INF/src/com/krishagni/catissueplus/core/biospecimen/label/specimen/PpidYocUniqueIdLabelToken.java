@@ -36,6 +36,6 @@ public class PpidYocUniqueIdLabelToken extends AbstractUniqueIdToken<Specimen> {
 		String ppid = specimen.getRegistration().getPpid();
 		int yoc = cal.get(Calendar.YEAR);
 		String key = ppid + "_" + yoc;
-		return daoFactory.getUniqueIdGenerator().getUniqueId(name, key);
+		return daoFactory.getUniqueIdGenerator().getUniqueId(getTypeKey(), key);
 	}
 }

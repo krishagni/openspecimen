@@ -658,6 +658,18 @@ angular.module('os.biospecimen.participant',
             return SettingUtil.getSetting('biospecimen', 'pending_spmns_disp_interval');
           },
 
+          additionalLabelAutoGen: function(cp, SettingUtil) {
+            if (!!cp.additionalLabelFmt) {
+              return true;
+            }
+
+            return SettingUtil.getSetting('biospecimen', 'specimen_addl_label_format').then(
+              function(setting) {
+                return !!setting.value;
+              }
+            );
+          },
+
           barcodingEnabled: function(cp, SettingUtil) {
             if (cp.barcodingEnabled) {
               return true;

@@ -112,6 +112,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	
 	private String aliquotLabelFormat;
 
+	private String additionalLabelFormat;
+
 	private String specimenBarcodeFormat;
 
 	private String ppidFormat;
@@ -326,6 +328,22 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	public void setAliquotLabelFormat(String aliquotLabelFormat) {
 		this.aliquotLabelFormat = aliquotLabelFormat;
+	}
+
+	public String getAdditionalLabelFormat() {
+		return additionalLabelFormat;
+	}
+
+	public String getAdditionalLabelFormatToUse() {
+		if (StringUtils.isNotBlank(getAdditionalLabelFormat())) {
+			return getAdditionalLabelFormat();
+		} else {
+			return ConfigUtil.getInstance().getStrSetting(ConfigParams.MODULE, ConfigParams.SPMN_ADDL_LABEL_FORMAT, null);
+		}
+	}
+
+	public void setAdditionalLabelFormat(String additionalLabelFormat) {
+		this.additionalLabelFormat = additionalLabelFormat;
 	}
 
 	public String getSpecimenBarcodeFormat() {
@@ -674,6 +692,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setSpecimenLabelFormat(cp.getSpecimenLabelFormat());
 		setDerivativeLabelFormat(cp.getDerivativeLabelFormat());
 		setAliquotLabelFormat(cp.getAliquotLabelFormat());
+		setAdditionalLabelFormat(cp.getAdditionalLabelFormat());
 		setSpecimenBarcodeFormat(cp.getSpecimenBarcodeFormat());
 		setManualSpecLabelEnabled(cp.isManualSpecLabelEnabled());
 		setBulkPartRegEnabled(cp.isBulkPartRegEnabled());
@@ -723,6 +742,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setSpecimenLabelFormat(getSpecimenLabelFormat());
 		cp.setAliquotLabelFormat(getAliquotLabelFormat());
 		cp.setDerivativeLabelFormat(getDerivativeLabelFormat());
+		cp.setAdditionalLabelFormat(getAdditionalLabelFormat());
 		cp.setSpecimenBarcodeFormat(getSpecimenBarcodeFormat());
 		cp.setManualSpecLabelEnabled(isManualSpecLabelEnabled());
 		cp.setBulkPartRegEnabled(isBulkPartRegEnabled());

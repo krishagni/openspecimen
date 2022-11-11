@@ -5,9 +5,27 @@ import org.apache.commons.lang3.StringUtils;
 public abstract class AbstractUniqueIdToken<T> extends AbstractLabelTmplToken {
 	protected String name;
 
+	protected String type;
+
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getTypeKey() {
+		if (StringUtils.isBlank(type)) {
+			return getName();
+		}
+
+		return getType() + "_" + getName();
 	}
 
 	@Override

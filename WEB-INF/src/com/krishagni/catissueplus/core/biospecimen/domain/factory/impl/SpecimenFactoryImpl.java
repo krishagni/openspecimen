@@ -149,6 +149,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		setParentSpecimen(detail, existing, parent, specimen, ose);
 
 		setLabel(detail, existing, specimen, ose);
+		setAdditionalLabel(detail, existing, specimen, ose);
 		setBarcode(detail, existing, specimen, ose);
 		setImageId(detail, existing, specimen, ose);
 		setActivityStatus(detail, existing, specimen, ose);
@@ -181,6 +182,22 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 
 		ose.checkAndThrow();
 		return specimen;
+	}
+
+	private void setAdditionalLabel(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(detail.getAdditionalLabel())) {
+			return;
+		}
+
+		specimen.setAdditionalLabel(detail.getAdditionalLabel());
+	}
+
+	private void setAdditionalLabel(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
+		if (existing == null || detail.isAttrModified("additionalLabel")) {
+			setAdditionalLabel(detail, specimen, ose);
+		} else {
+			specimen.setAdditionalLabel(existing.getAdditionalLabel());
+		}
 	}
 
 	private void setBarcode(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {

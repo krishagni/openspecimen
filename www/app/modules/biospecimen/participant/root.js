@@ -4,7 +4,7 @@ angular.module('os.biospecimen.participant.root', ['os.biospecimen.models'])
     $scope, $timeout, cpr, hasSde, hasDict, sysDict, cpDict,
     lookupFieldsCfg, headers, participantSpmnsViewState, aliquotQtyReq,
     pendingSpmnsDispInterval, barcodingEnabled, spmnBarcodesAutoGen,
-    ParticipantSpecimensViewState, AuthorizationService, Specimen) {
+    additionalLabelAutoGen, ParticipantSpecimensViewState, AuthorizationService, Specimen) {
 
     function init() {
       $scope.cpr = $scope.object = cpr;
@@ -21,6 +21,7 @@ angular.module('os.biospecimen.participant.root', ['os.biospecimen.models'])
       $scope.pendingSpmnsDispInterval = +pendingSpmnsDispInterval.value;
       $scope.barcodingEnabled = barcodingEnabled;
       $scope.spmnBarcodesAutoGen = spmnBarcodesAutoGen;
+      $scope.additionalLabelAutoGen = additionalLabelAutoGen;
       $scope.aliquotQtyReq = aliquotQtyReq;
 
       initAuthorizationOpts();

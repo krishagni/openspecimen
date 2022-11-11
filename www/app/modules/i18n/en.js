@@ -251,6 +251,7 @@
     "derivative_label_fmt": "Derivative Label Format",
     "aliquot_label_fmt": "Aliquot Label Format",
     "specimen_barcode_fmt": "Barcode Format",
+    "specimen_addl_label_fmt": "Additional Label Format",
     "close_parent_spmns": "Close Parent Specimens",
     "zero_out_qty": "Zero Out Specimen Quantity",
     "store_all_aliquots_in_same_container": "Store all Aliquots in same Container",
@@ -794,6 +795,7 @@
     "label": "Label",
     "new_label": "New Label",
     "barcode": "Barcode",
+    "additional_label": "Additional Label",
     "label_barcode": "Label / Barcode",
     "use_barcode": "Use Specimen Barcodes",
     "use_visit_names": "Use Visit Names",
@@ -3121,7 +3123,9 @@
         "pre_print_ship_recv_quality": "Shipment Received Quality",
         "pre_print_ship_recv_quality_desc": "Regular expression for acceptable shipment received qualities.",
         "max_spmns_update_limit": "Specimens Update UI Limit",
-        "max_spmns_update_limit_desc": "Maximum number of specimens that can be updated at a time using UI. The default value is 100."
+        "max_spmns_update_limit_desc": "Maximum number of specimens that can be updated at a time using UI. The default value is 100.",
+        "specimen_addl_label_format": "Specimen Additional Label Format",
+        "specimen_addl_label_format_desc": "System level format for auto generation of specimen additional labels."
       },
 
       "common": {

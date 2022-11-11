@@ -555,4 +555,18 @@
       <column name="defaultPrinter_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Additional specimen label format">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="ADDL_LABEL_FORMAT" type="${text.type}(255)" />
+      <column name="additionalLabelFormat_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Additional specimen label">
+    <addColumn tableName="CATISSUE_SPECIMEN_AUD">
+      <column name="ADDITIONAL_LABEL" type="${text.type}(255)" />
+      <column name="additionalLabel_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

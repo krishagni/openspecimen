@@ -183,4 +183,33 @@
       <column name="IP_ADDRESS" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Additional specimen label format">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="ADDL_LABEL_FORMAT" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen additional label">
+    <addColumn tableName="CATISSUE_SPECIMEN">
+      <column name="ADDITIONAL_LABEL" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique specimen additional label per collection protocol" dbms="mysql">
+    <addUniqueConstraint constraintName="UQ_SPMN_ADDL_LABEL"
+      tableName="CATISSUE_SPECIMEN" columnNames="COLLECTION_PROTOCOL_ID, ADDITIONAL_LABEL" />
+  </changeSet>
+
+  <changeSet author="vgaikwad" id="Unique specimen additional label per collection protocol" dbms="oracle">
+    <sql>
+      create unique index UQ_SPMN_ADDL_LABEL on catissue_specimen(
+        case when
+          collection_protocol_id is not null and additional_label is not null
+        then
+          collection_protocol_id || '-' || additional_label
+        end
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

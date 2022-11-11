@@ -19,6 +19,6 @@ public class CpPpidUniqueIdLabelToken extends AbstractUniqueIdToken<Specimen> {
 	public Number getUniqueId(Specimen specimen, String... args) {
 		String ppid = specimen.getVisit().getRegistration().getPpid();
 		String cpId = specimen.getCollectionProtocol().getId().toString();
-		return daoFactory.getUniqueIdGenerator().getUniqueId(name, cpId + "_" + ppid);
+		return daoFactory.getUniqueIdGenerator().getUniqueId(getTypeKey(), cpId + "_" + ppid);
 	}
 }

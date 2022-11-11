@@ -74,4 +74,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="System level additional label format">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'specimen_addl_label_format',
+        'specimen_addl_label_format', 'specimen_addl_label_format_desc',
+        'STRING', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
