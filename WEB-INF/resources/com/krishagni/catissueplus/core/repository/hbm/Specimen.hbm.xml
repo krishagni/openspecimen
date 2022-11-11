@@ -23,6 +23,8 @@
 
     <property name="label" column="LABEL" />
 
+    <property name="additionalLabel" column="ADDITIONAL_LABEL" />
+
     <property name="comment" column="COMMENTS" />
 
     <property name="activityStatus" column="ACTIVITY_STATUS" />
@@ -139,6 +141,27 @@
         s.label = :label and
         cp.shortTitle = :cpShortTitle
     </query>
+
+    <query name="getByAddlLabel">
+      select
+        s
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.Specimen s
+      where
+        s.additionalLabel = :label
+    </query>
+
+    <query name="getByAddlLabelAndCp">
+      select
+        s
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.Specimen s
+        join s.collectionProtocol cp
+      where
+        s.additionalLabel = :label and
+        cp.shortTitle = :cpShortTitle
+    </query>
+
 
     <query name="getByBarcode">
       from

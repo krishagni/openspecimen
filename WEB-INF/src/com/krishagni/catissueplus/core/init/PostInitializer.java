@@ -36,7 +36,7 @@ public class PostInitializer implements InitializingBean {
 		addKeywordProvider(new ParticipantSearchKeywordProvider());
 		addKeywordProvider(new MrnSearchKeywordProvider());
 		addKeywordProvider(Visit.class, Visit.getEntityName(), "name,surgicalPathologyNumber");
-		addKeywordProvider(Specimen.class, Specimen.getEntityName(), "label,barcode");
+		addKeywordProvider(Specimen.class, Specimen.getEntityName(), "label,additionalLabel,barcode");
 		addKeywordProvider(StorageContainer.class, StorageContainer.getEntityName(), "name,barcode,displayName");
 		addKeywordProvider(Site.class, Site.getEntityName(), "name,code");
 		addKeywordProvider(User.class, User.getEntityName(), "firstName,lastName,loginName,emailAddress");

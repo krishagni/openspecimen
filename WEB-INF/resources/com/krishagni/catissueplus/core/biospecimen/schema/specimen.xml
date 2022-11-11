@@ -31,7 +31,12 @@
     <field>
       <caption>#getMessage("specimen_label")</caption>
       <attribute>label</attribute>
-    </field>  
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_additional_label")</caption>
+      <attribute>additionalLabel</attribute>
+    </field>
 
     <field>
       <caption>#getMessage("specimen_barcode")</caption>

@@ -46,6 +46,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	private String aliquotLabelFmt;
 
+	private String additionalLabelFmt;
+
 	private String specimenBarcodeFmt;
 	
 	private String visitNameFmt;
@@ -219,6 +221,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	public void setAliquotLabelFmt(String aliquotLabelFmt) {
 		this.aliquotLabelFmt = aliquotLabelFmt;
+	}
+
+	public String getAdditionalLabelFmt() {
+		return additionalLabelFmt;
+	}
+
+	public void setAdditionalLabelFmt(String additionalLabelFmt) {
+		this.additionalLabelFmt = additionalLabelFmt;
 	}
 
 	public String getVisitNameFmt() {
@@ -442,6 +452,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setSpecimenLabelFmt(cp.getSpecimenLabelFormat());
 		result.setDerivativeLabelFmt(cp.getDerivativeLabelFormat());
 		result.setAliquotLabelFmt(cp.getAliquotLabelFormat());
+		result.setAdditionalLabelFmt(cp.getAdditionalLabelFormat());
 		result.setSpecimenBarcodeFmt(cp.getSpecimenBarcodeFormat());
 		result.setAliquotLabelFmtToUse(cp.getAliquotLabelFormatToUse());
 		result.setSpecimenBarcodeFmtToUse(cp.getSpecimenBarcodeFormatToUse());

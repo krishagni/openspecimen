@@ -51,7 +51,7 @@ public class SpecimenTypeAbbrUniqueIdLabelToken extends AbstractUniqueIdToken<Sp
 		arg = arg.trim();
 		switch (arg) {
 			case "registration":
-				keyType = "CPR_" + getName();
+				keyType = "CPR_" + getTypeKey();
 				if (useLabels) {
 					groupId = specimen.getCpId() + "_" + specimen.getRegistration().getPpid();
 				} else {
@@ -60,7 +60,7 @@ public class SpecimenTypeAbbrUniqueIdLabelToken extends AbstractUniqueIdToken<Sp
 				break;
 
 			case "parent_specimen":
-				keyType = "PARENT_SPMN_" + getName();
+				keyType = "PARENT_SPMN_" + getTypeKey();
 				if (specimen.getParentSpecimen() != null) {
 					if (useLabels) {
 						groupId = specimen.getCpId() + "_" + specimen.getParentSpecimen().getLabel();
@@ -73,7 +73,7 @@ public class SpecimenTypeAbbrUniqueIdLabelToken extends AbstractUniqueIdToken<Sp
 				break;
 
 			case "primary_specimen":
-				keyType = "PRIMARY_SPMN_" + getName();
+				keyType = "PRIMARY_SPMN_" + getTypeKey();
 				if (useLabels) {
 					groupId = specimen.getCpId() + "_" + specimen.getPrimarySpecimen().getLabel();
 				} else {
@@ -83,7 +83,7 @@ public class SpecimenTypeAbbrUniqueIdLabelToken extends AbstractUniqueIdToken<Sp
 
 			case "visit":
 			default:
-				keyType = "VISIT_" + getName();
+				keyType = "VISIT_" + getTypeKey();
 				if (useLabels) {
 					groupId = specimen.getCpId() + "_" + specimen.getVisit().getName();
 				} else {

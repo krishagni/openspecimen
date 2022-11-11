@@ -62,6 +62,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private Integer sortOrder;
 	
 	private String label;
+
+	private String additionalLabel;
 	
 	private String barcode;
 
@@ -249,6 +251,14 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	public String getAdditionalLabel() {
+		return additionalLabel;
+	}
+
+	public void setAdditionalLabel(String additionalLabel) {
+		this.additionalLabel = additionalLabel;
 	}
 
 	public String getBarcode() {
@@ -530,6 +540,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		}
 
 		result.setLabel(specimen.getLabel());
+		result.setAdditionalLabel(specimen.getAdditionalLabel());
 		result.setBarcode(specimen.getBarcode());
 		result.setType(PermissibleValue.getValue(specimen.getSpecimenType()));
 		result.setSpecimenClass(PermissibleValue.getValue(specimen.getSpecimenClass()));

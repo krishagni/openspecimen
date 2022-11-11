@@ -4,7 +4,7 @@ angular.module('os.biospecimen.specimen.addedit', [])
     $scope, $state, $parse, userRole, cp, cpr, visit, specimen, extensionCtxt,
     aliquotQtyReq, barcodingEnabled, spmnBarcodesAutoGen, hasDict, sysDict,
     cpDict, layout, onValueChangeCb, spmnReq, defSpmns, spmnCollFields,
-    createDerived, imagingEnabled, requirements,
+    createDerived, imagingEnabled, requirements, additionalLabelAutoGen,
     Alerts, CpConfigSvc, PluginReg, Util, ParticipantSpecimensViewState,
     Specimen, CollectSpecimensSvc) {
 
@@ -15,6 +15,7 @@ angular.module('os.biospecimen.specimen.addedit', [])
         cp: cp, cpr: cpr, visit: visit, spmnReq: spmnReq,
         extensionCtxt: extensionCtxt, hasDict: hasDict,
         sysDict: sysDict, cpDict: cpDict, userRole: userRole,
+        additionalLabelAutoGen: additionalLabelAutoGen,
         barcodingEnabled: barcodingEnabled, spmnBarcodesAutoGen: spmnBarcodesAutoGen,
         editMode: !!specimen.id, reqId: specimen.reqId, aliquotQtyReq: aliquotQtyReq,
         layout: layout, onValueChange: onValueChangeCb, mdInput: false,

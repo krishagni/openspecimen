@@ -110,6 +110,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	private LabelGenerator specimenBarcodeGenerator;
 
+	private LabelGenerator additionalLabelGenerator;
+
 	private ExportService exportSvc;
 
 	private AsyncTaskExecutor taskExecutor;
@@ -136,6 +138,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	public void setSpecimenBarcodeGenerator(LabelGenerator specimenBarcodeGenerator) {
 		this.specimenBarcodeGenerator = specimenBarcodeGenerator;
+	}
+
+	public void setAdditionalLabelGenerator(LabelGenerator additionalLabelGenerator) {
+		this.additionalLabelGenerator = additionalLabelGenerator;
 	}
 
 	public void setExportSvc(ExportService exportSvc) {
@@ -811,6 +817,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			if (StringUtils.isNotBlank(value) && !labelGenerator.isValidLabelTmpl(value)) {
 				throw OpenSpecimenException.userError(CpErrorCode.INVALID_ALIQUOT_LABEL_FMT, value);
 			}
+		} else if (StringUtils.equals(name, ConfigParams.SPMN_ADDL_LABEL_FORMAT)) {
+			if (StringUtils.isNotBlank(value) && !additionalLabelGenerator.isValidLabelTmpl(value)) {
+				throw OpenSpecimenException.userError(CpErrorCode.INVALID_ADDL_LABEL_FMT, value);
+			}
 		}
 	}
 
@@ -954,6 +964,24 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 	}
 
+	private void ensureUniqueAdditionalLabel(Specimen existing, Specimen specimen, OpenSpecimenException ose) {
+		if (StringUtils.isBlank(specimen.getAdditionalLabel())) {
+			return;
+		}
+
+		if (existing != null && specimen.getAdditionalLabel().equals(existing.getAdditionalLabel())) {
+			return;
+		}
+
+		if (getSpecimenByAddlLabel(specimen.getCpShortTitle(), specimen.getAdditionalLabel()) != null) {
+			if (areLabelsUniquePerCp()) {
+				ose.addError(SpecimenErrorCode.DUP_ADDL_LABEL_IN_CP, specimen.getAdditionalLabel(), specimen.getCpShortTitle());
+			} else {
+				ose.addError(SpecimenErrorCode.DUP_ADDL_LABEL, specimen.getAdditionalLabel());
+			}
+		}
+	}
+
 	private void ensureUniqueBarcode(Specimen existing, Specimen specimen, OpenSpecimenException ose) {
 		if (StringUtils.isBlank(specimen.getBarcode())) {
 			return;
@@ -1040,6 +1068,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			detail.setLabel(existing.getLabel());
 		}
 
+		if (StringUtils.isBlank(detail.getAdditionalLabel()) && StringUtils.isNotBlank(existing.getAdditionalLabel())) {
+			detail.setAdditionalLabel(existing.getAdditionalLabel());
+		}
+
 		if (StringUtils.isBlank(detail.getBarcode()) && StringUtils.isNotBlank(existing.getBarcode())) {
 			detail.setBarcode(existing.getBarcode());
 		}
@@ -1070,6 +1102,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		ensureValidAndUniqueLabel(existing, specimen, ose);
+		ensureUniqueAdditionalLabel(existing, specimen, ose);
 		ensureUniqueBarcode(existing, specimen, ose);
 		ensureContainerAccess(existing, specimen, ose);
 		ose.checkAndThrow();
@@ -1096,6 +1129,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.occupyPosition();
 		}
 
+		specimen.setAdditionalLabelIfEmpty();
 		specimen.setBarcodeIfEmpty();
 
 		if (detail != null) {
@@ -1238,6 +1272,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		return specimenResolver.getSpecimen(cpShortTitle, label);
 	}
 
+	private Specimen getSpecimenByAddlLabel(String cpShortTitle, String label) {
+		return specimenResolver.getSpecimenByAddlLabel(cpShortTitle, label);
+	}
+
 	private Specimen getSpecimenByBarcode(String cpShortTitle, String barcode) {
 		return specimenResolver.getSpecimenByBarcode(cpShortTitle, barcode);
 	}
@@ -1338,6 +1376,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		SpecimenInfo info = new SpecimenInfo();
 		info.setId(spmn.getId());
 		info.setLabel(spmn.getLabel());
+		info.setAdditionalLabel(spmn.getAdditionalLabel());
 		info.setBarcode(spmn.getBarcode());
 		info.setInitialQty(spmn.getInitialQuantity());
 		info.setAvailableQty(spmn.getAvailableQuantity());

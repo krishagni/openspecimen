@@ -124,6 +124,14 @@
       </div>
     </div>
 
+    <div class="form-group" ng-if="!additionalLabelAutoGen">
+      <label class="col-xs-3 control-label" translate="specimens.additional_label">Additional Label</label>
+      <div class="col-xs-6">
+        <input ng-model="derivative.additionalLabel" class="form-control"
+          type="text" placeholder="{{'specimens.additional_label' | translate}}">
+      </div>
+    </div>
+
     <div class="form-group" ng-if="barcodingEnabled && !spmnBarcodesAutoGen">
       <label class="col-xs-3 control-label" translate="specimens.barcode">Barcode</label>
       <div class="col-xs-6">

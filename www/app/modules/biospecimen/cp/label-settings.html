@@ -95,6 +95,11 @@
           </li>
 
           <li class="item">
+            <strong class="key key-sm" translate="cp.specimen_addl_label_fmt">Additional Label Format</strong>
+            <span class="value value-md">{{settingCtx.cp.additionalLabelFmt | osNoValue}}</span>
+          </li>
+
+          <li class="item">
             <strong class="key key-sm" translate="cp.label_format.barcoding">Specimen Barcoding</strong>
             <span class="value value-md">
               {{settingCtx.cp.barcodingEnabled | osBoolValue: 'common.enabled': 'common.disabled': 'common.not_specified'}}
@@ -311,6 +316,16 @@
             <input type="radio" name="bulkPartReg" ng-model="settingCtx.cp.bulkPartRegEnabled" ng-value="false">
             <span translate="common.disabled">Disabled</span>
           </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-xs-3">
+          <span translate="cp.specimen_addl_label_fmt">Additional Label Format</span>
+        </label>
+        <div class="col-xs-6">
+          <input name="addlLabelFmt" type="text" ng-model="settingCtx.cp.additionalLabelFmt"
+            class="form-control" placeholder="{{'cp.specimen_addl_label_fmt' | translate}}">
         </div>
       </div>
 

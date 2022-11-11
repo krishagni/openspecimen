@@ -25,7 +25,7 @@ public class VisitSpecPathStatusLabelToken extends AbstractUniqueIdToken<Specime
 		}
 
 		String key = visitId + "_" + specimen.getPathologicalStatus().getId().toString();
-		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(name, key);
+		Long uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(getTypeKey(), key);
 		return uniqueId == 1L && !eqArg("output_one", 1, args) ? -1 : uniqueId;
 	}
 }

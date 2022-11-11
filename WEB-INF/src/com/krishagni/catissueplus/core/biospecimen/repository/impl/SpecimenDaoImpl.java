@@ -80,8 +80,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	@SuppressWarnings("unchecked")
 	@Override
 	public Specimen getByLabel(String label) {
-		List<Specimen> specimens = sessionFactory.getCurrentSession()
-			.getNamedQuery(GET_BY_LABEL)
+		List<Specimen> specimens = getCurrentSession().getNamedQuery(GET_BY_LABEL)
 			.setString("label", label)
 			.list();
 		return specimens.isEmpty() ? null : specimens.iterator().next();
@@ -97,7 +96,25 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 		return specimens.isEmpty() ? null : specimens.iterator().next();
 	}
-	
+
+	@Override
+	public Specimen getByAdditionalLabel(String label) {
+		List<Specimen> specimens = getCurrentSession().getNamedQuery(GET_BY_ADDL_LABEL)
+			.setString("label", label)
+			.list();
+		return specimens.isEmpty() ? null : specimens.iterator().next();
+	}
+
+	@Override
+	public Specimen getByAdditionalLabelAndCp(String cpShortTitle, String label) {
+		List<Specimen> specimens = getCurrentSession().getNamedQuery(GET_BY_ADDL_LABEL_AND_CP)
+			.setString("label", label)
+			.setString("cpShortTitle", cpShortTitle)
+			.list();
+
+		return specimens.isEmpty() ? null : specimens.iterator().next();
+	}
+
 	@Override
 	public Specimen getSpecimenByVisitAndSr(Long visitId, Long srId) {
 		return getByVisitAndSrId(GET_BY_VISIT_AND_SR, visitId, srId);
@@ -732,6 +749,11 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String GET_BY_LABEL = FQN + ".getByLabel";
 
 	private static final String GET_BY_LABEL_AND_CP = FQN + ".getByLabelAndCp";
+
+	private static final String GET_BY_ADDL_LABEL = FQN + ".getByAddlLabel";
+
+	private static final String GET_BY_ADDL_LABEL_AND_CP = FQN + ".getByAddlLabelAndCp";
+
 
 	private static final String GET_BY_BARCODE = FQN + ".getByBarcode";
 

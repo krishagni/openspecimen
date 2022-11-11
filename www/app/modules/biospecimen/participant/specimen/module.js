@@ -688,6 +688,18 @@ angular.module('os.biospecimen.specimen',
             return hasSde && cpDict.length > 0;
           },
 
+          additionalLabelAutoGen: function(cp, SettingUtil) {
+            if (!!cp.additionalLabelFmt) {
+              return true;
+            }
+
+            return SettingUtil.getSetting('biospecimen', 'specimen_addl_label_format').then(
+              function(setting) {
+                return !!setting.value;
+              }
+            );
+          },
+
           barcodingEnabled: function(cp, SettingUtil) {
             if (cp.barcodingEnabled) {
               return true;
