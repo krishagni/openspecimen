@@ -13,8 +13,18 @@ public class PrimarySpecimenCounterLabelToken extends AbstractSpecimenLabelToken
 	@Autowired
 	private DaoFactory daoFactory;
 
+	private String type;
+
 	public PrimarySpecimenCounterLabelToken() {
 		this.name = "PRIMARY_SPEC_COUNTER";
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	@Override
@@ -82,12 +92,20 @@ public class PrimarySpecimenCounterLabelToken extends AbstractSpecimenLabelToken
 			pidStr = primarySpmn.getId().toString();
 		}
 
-		String uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(name, pidStr, Long.parseLong(counter)).toString();
+		String uniqueId = daoFactory.getUniqueIdGenerator().getUniqueId(getTypeKey(), pidStr, Long.parseLong(counter)).toString();
 		if (uniqueId.length() < counter.length()) {
 			uniqueId = StringUtils.leftPad(uniqueId, counter.length(), "0");
 		}
 
 		return primaryLabel.substring(0, matchIdx) + uniqueId;
+	}
+
+	private String getTypeKey() {
+		if (StringUtils.isBlank(type)) {
+			return name;
+		}
+
+		return type + "_" + name;
 	}
 
 	private final static Pattern LAST_DIGIT_PATTERN = Pattern.compile("([0-9]+)$");

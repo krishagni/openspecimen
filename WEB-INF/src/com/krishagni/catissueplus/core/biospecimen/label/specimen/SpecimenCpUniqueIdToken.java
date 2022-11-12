@@ -17,6 +17,6 @@ public class SpecimenCpUniqueIdToken extends AbstractUniqueIdToken<Specimen> {
 
 	@Override
 	public Number getUniqueId(Specimen specimen, String... args) {
-		return daoFactory.getUniqueIdGenerator().getUniqueId("SPEC_CP_UID", specimen.getCpId().toString());
+		return daoFactory.getUniqueIdGenerator().getUniqueId(getTypeKey(), specimen.getCpId().toString());
 	}
 }

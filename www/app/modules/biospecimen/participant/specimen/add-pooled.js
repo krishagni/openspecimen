@@ -2,7 +2,7 @@ angular.module('os.biospecimen.specimen')
   .controller('AddPooledSpecimenCtrl', function(
     $scope, $filter, $state, cp, cpr, visit, extensionCtxt,
     hasDict, cpDict, userRole, barcodingEnabled, spmnBarcodesAutoGen,
-    layout, onValueChangeCb, imagingEnabled, spmnCollFields, 
+    layout, onValueChangeCb, imagingEnabled, spmnCollFields, additionalLabelAutoGen,
     CollectionProtocolRegistration, Visit, Util, Specimen, PluginReg,
     CpConfigSvc, AuthorizationService, CollectSpecimensSvc, SpecimensHolder, Alerts) {
 
@@ -45,7 +45,7 @@ angular.module('os.biospecimen.specimen')
         layout: layout, onValueChange: onValueChangeCb, mdInput: false,
         hasInfo: PluginReg.getTmpls('specimen-addedit', 'info').length > 0,
         imagingEnabled: imagingEnabled, spmnCollFields: spmnCollFields,
-        storeSpmn: false,
+        storeSpmn: false, additionalLabelAutoGen: additionalLabelAutoGen,
         allSpmnUpdate: AuthorizationService.isAllowed({cp: cp.shortTitle, sites: sites, resource: 'Specimen', operations: ['Update']}),
 
         showSelectVisit: !cp.specimenCentric && (!visit || visit.id <= 0),

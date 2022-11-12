@@ -14,6 +14,11 @@ public class UniqueIdGeneratorImpl extends AbstractDao<KeySequence> implements U
 
 	@Override
 	public Long getUniqueId(String type, String id, Long defStartSeq) {
+		return getUniqueId(type, id, defStartSeq, 1);
+	}
+
+	@Override
+	public Long getUniqueId(String type, String id, Long defStartSeq, int incrementBy) {
 		List<KeySequence> seqs = createNamedQuery(GET_BY_TYPE_AND_TYPE_ID, KeySequence.class)
 			.acquirePessimisticWriteLock("ks")
 			.setParameter("type", type)
@@ -31,6 +36,7 @@ public class UniqueIdGeneratorImpl extends AbstractDao<KeySequence> implements U
 		}
 
 		Long uniqueId = seq.increment();
+		seq.incrementBy(incrementBy >= 1 ? incrementBy - 1 : 0);
 		getCurrentSession().saveOrUpdate(seq);
 		return uniqueId;
 	}

@@ -188,6 +188,7 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="ppidGenerator" ref="ppidGenerator"/>
     <property name="specimenLabelGenerator" ref="specimenLabelGenerator"/>
+    <property name="specimenAddlLabelGenerator" ref="specimenAddlLabelGenerator"/>
     <property name="specimenBarcodeGenerator" ref="specimenBarcodeGenerator"/>
     <property name="visitNameGenerator" ref="visitNameGenerator"/>
     <property name="cpCopier" ref="cpCopier"/>
@@ -377,6 +378,7 @@
     <property name="cfgSvc" ref="cfgSvc"/>
     <property name="labelGenerator" ref="specimenLabelGenerator"/>
     <property name="specimenBarcodeGenerator" ref="specimenBarcodeGenerator"/>
+    <property name="additionalLabelGenerator" ref="specimenAddlLabelGenerator"/>
     <property name="exportSvc" ref="exportSvc"/>
     <property name="taskExecutor" ref="taskExecutor"/>
   </bean>
@@ -420,6 +422,9 @@
         <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenTypeAbbrUniqueIdLabelToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.VisitSpecPathStatusLabelToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.TodaysDateLabelToken"/>
+        <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PvPropLabelToken">
+          <property name="daoFactory" ref="biospecimenDaoFactory"/>
+        </bean>
         <bean class="com.krishagni.catissueplus.core.common.EvalExprLabelToken">
           <property name="objectName" value="specimen"/>
         </bean>
@@ -430,6 +435,88 @@
 
   <bean id="specimenLabelGenerator" class="com.krishagni.catissueplus.core.common.service.impl.LabelGeneratorImpl">
     <property name="tokenRegistrar" ref="specimenTokenRegistrar"/>
+  </bean>
+
+  <bean id="specimenAddlLabelGenerator" class="com.krishagni.catissueplus.core.common.service.impl.LabelGeneratorImpl">
+    <property name="tokenRegistrar">
+      <bean class="com.krishagni.catissueplus.core.common.domain.DefaultLabelTmplTokenRegistrar">
+        <property name="tokens">
+          <list>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.CpCodeLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.BarcodeLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.EventDateLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.EventLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.EventCodeLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.ParentSpecimenLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.ParentSpecimenUniqueIdLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PpidLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PpidYocUniqueIdLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenUniqueIdLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenYocLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenYoc2LabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.VisitNameToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PpidSpecTypeLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.VisitSpecTypeLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenTypeLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenPathologyStatusToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SrCodeLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PpidUniqueIdLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.CpPpidUniqueIdLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenCpUniqueIdToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.ParentSpecimenCounterLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PrimarySpecimenCounterLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenCustomFieldLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.VisitUidLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.RegistrationGreekLetterSequence">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.VisitGreekLetterSequence">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.ParentSpecimenGreekLetterSequence">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PrimarySpecimenLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.SpecimenTypeAbbrUniqueIdLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.VisitSpecPathStatusLabelToken">
+              <property name="type" value="SPMN_ADDL_LABEL" />
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.TodaysDateLabelToken"/>
+            <bean class="com.krishagni.catissueplus.core.biospecimen.label.specimen.PvPropLabelToken">
+              <property name="daoFactory" ref="biospecimenDaoFactory"/>
+            </bean>
+            <bean class="com.krishagni.catissueplus.core.common.EvalExprLabelToken">
+              <property name="objectName" value="specimen"/>
+            </bean>
+            <ref bean="extnPvLabelToken"/>
+          </list>
+        </property>
+      </bean>
+    </property>
   </bean>
 
   <bean id="specimenBarcodeTokenRegistrar" class="com.krishagni.catissueplus.core.common.domain.DefaultLabelTmplTokenRegistrar">

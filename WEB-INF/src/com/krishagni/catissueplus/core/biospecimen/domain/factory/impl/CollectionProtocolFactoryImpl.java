@@ -47,6 +47,8 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 
 	private LabelGenerator specimenLabelGenerator;
 
+	private LabelGenerator specimenAddlLabelGenerator;
+
 	private LabelGenerator specimenBarcodeGenerator;
 	
 	private LabelGenerator visitNameGenerator;
@@ -65,6 +67,10 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 
 	public void setSpecimenLabelGenerator(LabelGenerator specimenLabelGenerator) {
 		this.specimenLabelGenerator = specimenLabelGenerator;
+	}
+
+	public void setSpecimenAddlLabelGenerator(LabelGenerator specimenAddlLabelGenerator) {
+		this.specimenAddlLabelGenerator = specimenAddlLabelGenerator;
 	}
 
 	public void setSpecimenBarcodeGenerator(LabelGenerator specimenBarcodeGenerator) {
@@ -329,6 +335,9 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		
 		labelFmt = ensureValidLabelFmt(input.getDerivativeLabelFmt(), CpErrorCode.INVALID_DERIVATIVE_LABEL_FMT, ose);
 		result.setDerivativeLabelFormat(labelFmt);
+
+		labelFmt = ensureValidLabelFmt(specimenAddlLabelGenerator, input.getAdditionalLabelFmt(), CpErrorCode.INVALID_ADDL_LABEL_FMT, ose);
+		result.setAdditionalLabelFormat(labelFmt);
 		
 		result.setManualSpecLabelEnabled(input.getManualSpecLabelEnabled());
 
@@ -344,10 +353,14 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 	}
 	
 	private String ensureValidLabelFmt(String labelFmt, ErrorCode error, OpenSpecimenException ose) {
-		if (StringUtils.isNotBlank(labelFmt) && !specimenLabelGenerator.isValidLabelTmpl(labelFmt)) {
+		return ensureValidLabelFmt(specimenLabelGenerator, labelFmt, error, ose);
+	}
+
+	private String ensureValidLabelFmt(LabelGenerator labelGenerator, String labelFmt, ErrorCode error, OpenSpecimenException ose) {
+		if (StringUtils.isNotBlank(labelFmt) && !labelGenerator.isValidLabelTmpl(labelFmt)) {
 			ose.addError(error, labelFmt);
 		}
-		
+
 		return labelFmt;
 	}
 

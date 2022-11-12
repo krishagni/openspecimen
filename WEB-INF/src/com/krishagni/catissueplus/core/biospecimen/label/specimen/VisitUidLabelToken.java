@@ -23,6 +23,6 @@ public class VisitUidLabelToken extends AbstractUniqueIdToken<Specimen> {
 			key = specimen.getVisit().getId().toString();
 		}
 
-		return daoFactory.getUniqueIdGenerator().getUniqueId(name, key);
+		return daoFactory.getUniqueIdGenerator().getUniqueId(getTypeKey(), key);
 	}
 }

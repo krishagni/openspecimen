@@ -28,6 +28,6 @@ public class ParentSpecimenUniqueIdLabelToken extends AbstractUniqueIdToken<Spec
 			pidStr = specimen.getParentSpecimen().getId().toString();
 		}
 
-		return daoFactory.getUniqueIdGenerator().getUniqueId(name, pidStr);
+		return daoFactory.getUniqueIdGenerator().getUniqueId(getTypeKey(), pidStr);
 	}
 }

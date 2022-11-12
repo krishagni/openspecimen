@@ -108,6 +108,8 @@ public class Specimen extends BaseExtensionEntity {
 
 	private String label;
 
+	private String additionalLabel;
+
 	private String activityStatus;
 
 	private String barcode;
@@ -186,6 +188,10 @@ public class Specimen extends BaseExtensionEntity {
 	@Autowired
 	@Qualifier("specimenLabelGenerator")
 	private LabelGenerator labelGenerator;
+
+	@Autowired
+	@Qualifier("specimenAddlLabelGenerator")
+	private LabelGenerator addlLabelGenerator;
 
 
 	@Autowired
@@ -367,6 +373,14 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	public String getAdditionalLabel() {
+		return additionalLabel;
+	}
+
+	public void setAdditionalLabel(String additionalLabel) {
+		this.additionalLabel = additionalLabel;
 	}
 
 	public String getActivityStatus() {
@@ -888,6 +902,7 @@ public class Specimen extends BaseExtensionEntity {
 		
 		virtualize(null, "Specimen deleted");
 		setLabel(Utility.getDisabledValue(getLabel(), 255));
+		setAdditionalLabel(Utility.getDisabledValue(getAdditionalLabel(), 255));
 		setBarcode(Utility.getDisabledValue(getBarcode(), 255));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 		updateAvailableStatus();
@@ -901,6 +916,7 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		setLabel(Utility.stripTs(getLabel()));
+		setAdditionalLabel(Utility.stripTs(getAdditionalLabel()));
 		setBarcode(Utility.stripTs(getBarcode()));
 		setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		updateAvailableStatus();
@@ -1152,6 +1168,7 @@ public class Specimen extends BaseExtensionEntity {
 		//	}
 		if (!isDeleted()) {
 			setLabel(specimen.getLabel());
+			setAdditionalLabel(specimen.getAdditionalLabel());
 			setBarcode(specimen.getBarcode());
 		}
 
@@ -1652,6 +1669,17 @@ public class Specimen extends BaseExtensionEntity {
 		}
 		
 		setLabel(label);
+	}
+
+	public void setAdditionalLabelIfEmpty() {
+		if (StringUtils.isNotBlank(additionalLabel) || isMissedOrNotCollected()) {
+			return;
+		}
+
+		String labelTmpl = getCollectionProtocol().getAdditionalLabelFormatToUse();
+		if (StringUtils.isNotBlank(labelTmpl)) {
+			setAdditionalLabel(addlLabelGenerator.generateLabel(labelTmpl, this));
+		}
 	}
 
 	public void setBarcodeIfEmpty() {

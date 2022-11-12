@@ -17,6 +17,6 @@ public class SpecimenUniqueIdLabelToken extends AbstractUniqueIdToken<Specimen> 
 
 	@Override
 	public Number getUniqueId(Specimen specimen, String... args) {
-		return daoFactory.getUniqueIdGenerator().getUniqueId("Specimen", getName());
+		return daoFactory.getUniqueIdGenerator().getUniqueId("Specimen", getTypeKey());
 	}
 }

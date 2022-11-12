@@ -80,7 +80,25 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			.list();
 		return specimens.isEmpty() ? null : specimens.iterator().next();
 	}
-	
+
+	@Override
+	public Specimen getByAdditionalLabel(String label) {
+		List<Specimen> specimens = createNamedQuery(GET_BY_ADDL_LABEL, Specimen.class)
+			.setParameter("label", label)
+			.list();
+		return specimens.isEmpty() ? null : specimens.iterator().next();
+	}
+
+	@Override
+	public Specimen getByAdditionalLabelAndCp(String cpShortTitle, String label) {
+		List<Specimen> specimens = createNamedQuery(GET_BY_ADDL_LABEL_AND_CP, Specimen.class)
+			.setParameter("label", label)
+			.setParameter("cpShortTitle", cpShortTitle)
+			.list();
+
+		return specimens.isEmpty() ? null : specimens.iterator().next();
+	}
+
 	@Override
 	public Specimen getSpecimenByVisitAndSr(Long visitId, Long srId) {
 		return getByVisitAndSrId(GET_BY_VISIT_AND_SR, visitId, srId);
@@ -672,6 +690,11 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String GET_BY_LABEL = FQN + ".getByLabel";
 
 	private static final String GET_BY_LABEL_AND_CP = FQN + ".getByLabelAndCp";
+
+	private static final String GET_BY_ADDL_LABEL = FQN + ".getByAddlLabel";
+
+	private static final String GET_BY_ADDL_LABEL_AND_CP = FQN + ".getByAddlLabelAndCp";
+
 
 	private static final String GET_BY_BARCODE = FQN + ".getByBarcode";
 
