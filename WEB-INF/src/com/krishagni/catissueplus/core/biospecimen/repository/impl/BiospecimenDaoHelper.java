@@ -50,15 +50,15 @@ public class BiospecimenDaoHelper {
 			return;
 		}
 
-		if (!query.hasJoin("visit")) {
-			query.join("specimen.visit", "visit");
-		}
+		if (!query.hasAlias("cp")) {
+			if (!query.hasAlias("cpr")) {
+				if (!query.hasAlias("visit")) {
+					query.join("specimen.visit", "visit");
+				}
 
-		if (!query.hasJoin("cpr")) {
-			query.join("visit.registration", "cpr");
-		}
+				query.join("visit.registration", "cpr");
+			}
 
-		if (!query.hasJoin("cp")) {
 			query.join("cpr.collectionProtocol", "cp");
 		}
 

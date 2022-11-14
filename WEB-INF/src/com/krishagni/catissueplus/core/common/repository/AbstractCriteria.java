@@ -44,6 +44,10 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 
 	public abstract T self();
 
+	public Class<?> fromClass() {
+		return fromClass;
+	}
+
 	public T join(String attribute, String alias) {
 		return createAlias(attribute, alias);
 	}
@@ -95,6 +99,10 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 
 	public boolean hasJoin(String alias) {
 		return joins.containsKey(alias);
+	}
+
+	public boolean hasAlias(String alias) {
+		return joins.containsKey(alias) || alias.equals(rootAlias);
 	}
 
 	public Expression<String> upper(String attribute) {
