@@ -14,7 +14,7 @@
   
   <changeSet author="nmarwaha" id="Pre condition to check the case sensitivity" dbms="mysql" runAlways="true">
     <preConditions onFail="HALT" onFailMessage="OpenSpecimen expects case insensitive flag to be set in MySQL. Set 'lower_case_table_names = 1' in my.cnf or my.ini and restart MySQL database server">
-      <sqlCheck expectedResult="2">
+      <sqlCheck expectedResult="1">
         select @@global.lower_case_table_names;
       </sqlCheck>
     </preConditions>
