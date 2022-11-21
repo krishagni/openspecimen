@@ -872,7 +872,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		ExecuteQueryEventOp op = new ExecuteQueryEventOp();
 		op.setDrivingForm("Participant");
 		op.setAql(query.getAql(restriction, "Specimen.specimenCarts.itemId asc"));
-		op.setWideRowMode(WideRowMode.OFF.name());
+		op.setWideRowMode(WideRowMode.DEEP.name());
 		op.setRunType("Export");
 		if (qdConsumer != null) {
 			return querySvc.exportQueryData(op, qdConsumer);
