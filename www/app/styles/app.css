@@ -116,37 +116,37 @@ pre {
   font-weight: bold;
 }
 
-.os-navbar > ul > li > a {
+.os-navbar ul.menu > li > a {
   text-decoration: none;
   padding: 15px 15px;
 }
 
-.os-navbar > ul > li > a.btn {
+.os-navbar ul.menu > li > a.btn {
   padding: 6px 12px;
 }
 
-.os-navbar-default > ul > li > a {
+.os-navbar-default ul.menu > li > a {
   color: #fff;
 }
 
-.os-navbar-default > ul > li > a > span.fa {
+.os-navbar-default ul.menu > li > a > span.fa {
   font-size: 20px;
 }
 
-.os-navbar-default > ul > li:hover {
+.os-navbar-default ul.menu > li:hover {
   background: #2d67a3;
 }
  
-.os-navbar > ul > li.form-input  {
+.os-navbar ul.menu > li.form-input  {
   padding: 4px 12px;
 }
 
-.os-navbar > ul > li.form-input > .btn {
+.os-navbar ul.menu > li.form-input > .btn {
   padding: 4px 8px!important;
   font-weight: bold;
 }
 
-.os-navbar > ul > li.form-input:hover  {
+.os-navbar ul.menu > li.form-input:hover  {
   background: inherit;
 }
 

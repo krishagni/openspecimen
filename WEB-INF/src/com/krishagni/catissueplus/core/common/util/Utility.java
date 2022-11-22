@@ -1040,6 +1040,7 @@ public class Utility {
 			TarArchiveOutputStream tarOut = new TarArchiveOutputStream(gzOut);
 		) {
 			tarOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
+			tarOut.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
 			Path sourceDirPath = sourceDir.toPath();
 			Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes fattrs) {

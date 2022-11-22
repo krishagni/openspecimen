@@ -418,10 +418,12 @@ public class UserFactoryImpl implements UserFactory {
 
 	private void setIpRange(UserDetail detail, User user, OpenSpecimenException ose) {
 		user.setIpRange(detail.getIpRange());
-
 		try {
 			if (StringUtils.isNotBlank(user.getIpRange()) && !user.getIpRange().equals("*")) {
-				new IpAddressMatcher(user.getIpRange());
+				String[] addresses = user.getIpRange().split(",");
+				for (String address : addresses) {
+					new IpAddressMatcher(address);
+				}
 			}
 		} catch (Exception e) {
 			ose.addError(UserErrorCode.INVALID_IP, user.getIpRange());
