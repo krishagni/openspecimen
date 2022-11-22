@@ -569,4 +569,8 @@
       <column name="additionalLabel_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Change width of API users' allowed IP range">
+    <modifyDataType tableName="CATISSUE_USER_AUD" columnName="IP_RANGE" newDataType="${text.type}(255)" />
+  </changeSet>
 </databaseChangeLog>

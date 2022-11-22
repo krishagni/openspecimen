@@ -578,7 +578,27 @@ public class User extends BaseEntity implements UserDetails {
 	}
 
 	public boolean isAllowedAccessFrom(String ipAddress) {
-		return !isApiUser() || getIpRange().equals("*") || new IpAddressMatcher(getIpRange()).matches(ipAddress);
+		if (!isApiUser()) {
+			return true;
+		}
+
+		if (getIpRange().equals("*")) {
+			return true;
+		}
+
+		String[] addresses = getIpRange().split(",");
+		for (String allowed : addresses) {
+			allowed = allowed.trim();
+			if (allowed.isEmpty()) {
+				continue;
+			}
+
+			if (new IpAddressMatcher(allowed).matches(ipAddress)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean isValidPasswordPattern(String password) {
