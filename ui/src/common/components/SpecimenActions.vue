@@ -314,7 +314,7 @@ export default {
     },
 
     getSites: function(cp, cpr) {
-      let sites = [];
+      let sites = null;
       if (cp) {
         sites = cp.cpSites.map(cpSite => cpSite.siteName);
         if (this.$ui.global.appProps.mrn_restriction_enabled && cpr) {
