@@ -45,7 +45,9 @@ class HttpClient {
   }
 
   async delete(url, data, params) {
-    return this.promise('delete', () => axios.delete(this.getUrl(url), this.config(params), data));
+    const config = this.config(params);
+    config.data = data;
+    return this.promise('delete', () => axios.delete(this.getUrl(url), config));
   }
 
   getUrl(url, {query = ''} = {}) {
