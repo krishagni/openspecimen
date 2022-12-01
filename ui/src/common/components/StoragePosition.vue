@@ -145,6 +145,12 @@ export default {
 
     getContainers: async function(opts) {
       let crit = {...this.containersListCrit, name: opts.name || opts.query, maxResults: 10};
+      if (opts._selected) {
+        crit.onlyFreeContainers = null;
+        crit.name = null;
+        crit.naam = opts._selected;
+      }
+
       if (this.entityType == 'specimen') {
         if (!crit.specimenType) {
           return [];

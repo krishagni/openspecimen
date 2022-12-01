@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -387,7 +388,52 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<StorageContainerDetail> patchStorageContainer(RequestEvent<StorageContainerDetail> req) {
 		return updateStorageContainer(req, true);
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<StorageContainerSummary>> patchStorageContainers(RequestEvent<List<StorageContainerDetail>> req) {
+		User user = AuthUtil.getCurrentUser();
+		String ipAddress = AuthUtil.getRemoteAddr();
+		Future<List<StorageContainerSummary>> promise = taskExecutor.submit(
+			new Callable<List<StorageContainerSummary>>() {
+				@Override
+				@PlusTransactional
+				public List<StorageContainerSummary> call() throws Exception {
+					AuthUtil.setCurrentUser(user, ipAddress);
+
+					int count = 0;
+					Throwable t = null;
+					try {
+						List<StorageContainerSummary> result = new ArrayList<>();
+						for (StorageContainerDetail input : req.getPayload()) {
+							result.add(StorageContainerSummary.from(updateStorageContainer0(input, true)));
+						}
+
+						count = result.size();
+						return result;
+					} catch (Throwable e) {
+						t = e;
+						throw e;
+					} finally {
+						sendBulkUpdateNotif("storage_containers_bulk_transferred", user, count, t);
+						AuthUtil.clearCurrentUser();
+					}
+				}
+			}
+		);
+
+		try {
+			List<StorageContainerSummary> result = promise.get(30 * 1000L, TimeUnit.MILLISECONDS);
+			return ResponseEvent.response(result);
+		} catch (TimeoutException te) {
+			return ResponseEvent.response(null);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Boolean> isAllowed(RequestEvent<TenantDetail> req) {
@@ -1245,30 +1291,34 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	private ResponseEvent<StorageContainerDetail> updateStorageContainer(RequestEvent<StorageContainerDetail> req, boolean partial) {
 		try {
-			StorageContainerDetail input = req.getPayload();			
-			StorageContainer existing = getContainer(input.getId(), input.getName());
-			AccessCtrlMgr.getInstance().ensureUpdateContainerRights(existing);			
-			
-			input.setId(existing.getId());
-			StorageContainer container;
-			if (partial) {
-				container = containerFactory.createStorageContainer(existing, input);
-			} else {
-				container = containerFactory.createStorageContainer(input); 
-			}
-			
-			ensureUniqueConstraints(existing, container);
-			existing.update(container);
-			daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
-			existing.updatePositionsIfChanged();
-			existing.validateRestrictions();
-			existing.addOrUpdateExtension();
-			return ResponseEvent.response(StorageContainerDetail.from(existing));			
+			StorageContainer result = updateStorageContainer0(req.getPayload(), partial);
+			return ResponseEvent.response(StorageContainerDetail.from(result));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
-		}		
+		}
+	}
+
+	private StorageContainer updateStorageContainer0(StorageContainerDetail input, boolean partial) {
+		StorageContainer existing = getContainer(input.getId(), input.getName());
+		AccessCtrlMgr.getInstance().ensureUpdateContainerRights(existing);
+
+		input.setId(existing.getId());
+		StorageContainer container;
+		if (partial) {
+			container = containerFactory.createStorageContainer(existing, input);
+		} else {
+			container = containerFactory.createStorageContainer(input);
+		}
+
+		ensureUniqueConstraints(existing, container);
+		existing.update(container);
+		daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
+		existing.updatePositionsIfChanged();
+		existing.validateRestrictions();
+		existing.addOrUpdateExtension();
+		return existing;
 	}
 	
 	private void ensureUniqueConstraints(StorageContainer existing, StorageContainer newContainer) {
@@ -1693,6 +1743,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 						throw e;
 					} finally {
 						sendReportEmail(report.getName(), user, container, fileId, t);
+						AuthUtil.clearCurrentUser();
 					}
 				}
 			);
@@ -2098,6 +2149,27 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		EmailUtil.getInstance().sendEmail(RPT_EMAIL_TMPL, new String[] { user.getEmailAddress() }, null, props);
 	}
 
+	private void sendBulkUpdateNotif(String action, User user, int count, Throwable exception) {
+		String error = null;
+		if (exception != null) {
+			Throwable rootCause = ExceptionUtils.getRootCause(exception);
+			if (rootCause == null) {
+				rootCause = exception;
+			}
+			error = ExceptionUtils.getStackTrace(rootCause);
+		}
+
+		action = MessageUtil.getInstance().getMessage(action);
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("$subject", new String[] { action });
+		props.put("action", action);
+		props.put("count", count);
+		props.put("error", error);
+		props.put("rcpt", user);
+		EmailUtil.getInstance().sendEmail(BULK_UPDATED_TMPL, new String[] { user.getEmailAddress() }, null, props);
+	}
+
 	private String msg(String code) {
 		return MessageUtil.getInstance().getMessage(code);
 	}
@@ -2107,4 +2179,6 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	private final static String AUTO_FREEZER_FAILED_OPS_RPT = "auto_freezer_failed_ops";
 
 	private final static String RPT_EMAIL_TMPL              = "container_report";
+
+	private final static String BULK_UPDATED_TMPL           = "containers_bulk_updated";
 }

@@ -807,6 +807,12 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 				where.append("c.name in (:names)");
 				params.put("names", crit.names());
 			}
+
+			if (CollectionUtils.isNotEmpty(crit.barcodes())) {
+				addAnd();
+				where.append("c.barcode in (:barcodes)");
+				params.put("barcodes", crit.barcodes());
+			}
 		}
 
 		private void addFreeContainersRestriction() {			

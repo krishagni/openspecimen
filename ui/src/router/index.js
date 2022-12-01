@@ -637,6 +637,11 @@ const routes = [
           };
         }
       },
+      {
+        path: 'container-transfer',
+        name: 'BulkContainerTransfer',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/BulkTransfer.vue')
+      },
 
       /**********************************
        **********************************

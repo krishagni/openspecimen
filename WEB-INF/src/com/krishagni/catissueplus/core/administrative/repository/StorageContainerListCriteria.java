@@ -18,6 +18,8 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 
 	private List<String> names;
 
+	private List<String> barcodes;
+
 	private boolean onlyFreeContainers;
 	
 	private Long parentContainerId;
@@ -59,6 +61,15 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 
 	public StorageContainerListCriteria names(List<String> names) {
 		this.names = names;
+		return self();
+	}
+
+	public List<String> barcodes() {
+		return barcodes;
+	}
+
+	public StorageContainerListCriteria barcodes(List<String> barcodes) {
+		this.barcodes = barcodes;
 		return self();
 	}
 

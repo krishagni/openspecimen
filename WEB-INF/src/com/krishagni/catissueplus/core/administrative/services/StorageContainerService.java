@@ -55,6 +55,8 @@ public interface StorageContainerService {
 	ResponseEvent<StorageContainerDetail> updateStorageContainer(RequestEvent<StorageContainerDetail> req);
 	
 	ResponseEvent<StorageContainerDetail> patchStorageContainer(RequestEvent<StorageContainerDetail> req);
+
+	ResponseEvent<List<StorageContainerSummary>> patchStorageContainers(RequestEvent<List<StorageContainerDetail>> req);
 	
 	ResponseEvent<Boolean> isAllowed(RequestEvent<TenantDetail> req);
 	

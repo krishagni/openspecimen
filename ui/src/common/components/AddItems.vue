@@ -30,6 +30,10 @@ export default {
         .filter(function(label) { return label.length != 0; });
     },
 
+    clearInput: function() {
+      this.input = '';
+    },
+
     addItems: function() {
       let itemLabelsMap = this.getLabels().reduce(
         (acc, itemLabel) => {

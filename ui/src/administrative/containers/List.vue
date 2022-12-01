@@ -41,6 +41,9 @@
               <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
                 v-show-if-allowed="containerResources.importOpts" />
 
+              <os-button left-icon="arrows-alt-h" :label="$t('containers.transfer')" @click="showTransferForm"
+                v-show-if-allowed="containerResources.updateOpts" />
+
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/containers" new-tab="true" />
             </span>
@@ -172,6 +175,10 @@ export default {
     exportContainers: function() {
       const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
       exportSvc.exportRecords({objectType: 'storageContainer', recordIds: containerIds});
+    },
+
+    showTransferForm: function() {
+      this.$goto('BulkContainerTransfer');
     },
 
     deleteContainers: async function() {

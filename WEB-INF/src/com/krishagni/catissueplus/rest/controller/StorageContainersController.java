@@ -74,6 +74,12 @@ public class StorageContainersController {
 	public List<StorageContainerSummary> getStorageContainers(
 		@RequestParam(value = "name", required = false)
 		String name,
+
+		@RequestParam(value = "naam", required = false)
+		List<String> names,
+
+		@RequestParam(value = "barcode", required = false)
+		List<String> barcodes,
 			
 		@RequestParam(value = "site", required = false)
 		String siteName,
@@ -131,6 +137,8 @@ public class StorageContainersController {
 		
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
 			.query(name)
+			.names(names)
+			.barcodes(barcodes)
 			.siteName(siteName)
 			.canHold(canHold)
 			.onlyFreeContainers(onlyFreeContainers)
@@ -162,7 +170,13 @@ public class StorageContainersController {
 	public Map<String, Long> getStorageContainersCount (
 		@RequestParam(value = "name", required = false)
 		String name,
-			
+
+		@RequestParam(value = "naam", required = false)
+		List<String> names,
+
+		@RequestParam(value = "barcode", required = false)
+		List<String> barcodes,
+
 		@RequestParam(value = "site", required = false)
 		String siteName,
 
@@ -207,6 +221,8 @@ public class StorageContainersController {
 		
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
 			.query(name)
+			.names(names)
+			.barcodes(barcodes)
 			.siteName(siteName)
 			.canHold(canHold)
 			.onlyFreeContainers(onlyFreeContainers)
@@ -332,6 +348,13 @@ public class StorageContainersController {
 		resp.throwErrorIfUnsuccessful();
 		
 		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value="/bulk-update")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<StorageContainerSummary> patchStorageContainers(@RequestBody List<StorageContainerDetail> input) {
+		return ResponseEvent.unwrap(storageContainerSvc.patchStorageContainers(RequestEvent.wrap(input)));
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value="{id}/occupied-positions")

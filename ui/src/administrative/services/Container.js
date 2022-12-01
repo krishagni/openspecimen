@@ -39,6 +39,10 @@ class Container {
     }
   }
 
+  async bulkUpdate(containers) {
+    return http.put('storage-containers/bulk-update', containers);
+  }
+
   async createContainers(containers) {
     return http.post('storage-containers/multiple', containers);
   }
