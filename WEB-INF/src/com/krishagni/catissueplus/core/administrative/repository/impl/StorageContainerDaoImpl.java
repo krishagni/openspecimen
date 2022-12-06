@@ -727,6 +727,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			addDpRestriction();
 			addStoreSpecimenRestriction();
 			addUsageModeRestriction();
+			addStatuses();
 			
 			addParentRestriction();
 			addCanHoldRestriction();
@@ -1017,8 +1018,34 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 			params.put("usedFor", crit.usageMode());
 		}
-	}
 
+		private void addStatuses() {
+			if (crit.statuses() == null || crit.statuses().isEmpty()) {
+				return;
+			}
+
+			String alias = crit.hierarchical() ? "dc" : "c";
+			List<String> disjunctions = new ArrayList<>();
+			for (StorageContainerListCriteria.Status status : crit.statuses()) {
+				switch (status) {
+					case AVAILABLE:
+						disjunctions.add("(" + alias + ".status is null and " + alias + ".activityStatus = 'Active')");
+						break;
+
+					case CHECKED_OUT:
+						disjunctions.add("(" + alias + ".status = 'CHECKED_OUT')");
+						break;
+
+					case ARCHIVED:
+						disjunctions.add("(" + alias + ".status = 'Closed')");
+						break;
+				}
+			}
+
+			addAnd();
+			where.append("(" + StringUtils.join(disjunctions, " or ") + ")");
+		}
+	}
 
 	private static final String FQN = StorageContainer.class.getName();
 

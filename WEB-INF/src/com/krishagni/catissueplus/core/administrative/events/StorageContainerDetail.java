@@ -57,6 +57,9 @@ public class StorageContainerDetail extends StorageContainerSummary {
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String transferComments;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private Boolean checkOut;
+
 	public Double getTemperature() {
 		return temperature;
 	}
@@ -199,6 +202,14 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	public void setTransferComments(String transferComments) {
 		this.transferComments = transferComments;
+	}
+
+	public Boolean getCheckOut() {
+		return checkOut;
+	}
+
+	public void setCheckOut(Boolean checkOut) {
+		this.checkOut = checkOut;
 	}
 
 	public static StorageContainerDetail from(StorageContainer container) {

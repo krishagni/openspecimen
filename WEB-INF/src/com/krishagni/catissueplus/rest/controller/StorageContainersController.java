@@ -125,6 +125,9 @@ public class StorageContainersController {
 
 		@RequestParam(value = "usageMode", required =  false, defaultValue = "")
 		String usageMode,
+
+		@RequestParam(value = "status", required = false, defaultValue = "AVAILABLE")
+		List<String> statuses,
 			
 		@RequestParam(value = "hierarchical", required = false, defaultValue = "false")
 		boolean hierarchical,
@@ -154,6 +157,7 @@ public class StorageContainersController {
 			.dpShortTitles(dpShortTitles)
 			.storeSpecimensEnabled(storeSpecimensEnabled)
 			.usageMode(usageMode)
+			.statuses(statuses)
 			.hierarchical(hierarchical)
 			.includeStat(includeStats)
 			.orderByStarred(orderByStarred);
@@ -216,6 +220,9 @@ public class StorageContainersController {
 		@RequestParam(value = "usageMode", required =  false, defaultValue = "")
 		String usageMode,
 
+		@RequestParam(value = "status", required = false, defaultValue = "AVAILABLE")
+		List<String> statuses,
+
 		@RequestParam(value = "hierarchical", required = false, defaultValue = "false")
 		boolean hierarchical) {
 		
@@ -236,6 +243,7 @@ public class StorageContainersController {
 			.dpShortTitles(dpShortTitles)
 			.storeSpecimensEnabled(storeSpecimensEnabled)
 			.usageMode(usageMode)
+			.statuses(statuses)
 			.hierarchical(hierarchical);
 
 		RequestEvent<StorageContainerListCriteria> req = new RequestEvent<>(crit);
@@ -356,7 +364,7 @@ public class StorageContainersController {
 	public List<StorageContainerSummary> patchStorageContainers(@RequestBody List<StorageContainerDetail> input) {
 		return ResponseEvent.unwrap(storageContainerSvc.patchStorageContainers(RequestEvent.wrap(input)));
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value="{id}/occupied-positions")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

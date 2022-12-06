@@ -8,6 +8,7 @@
       <span class="os-title">
         <h3>{{displayTitle}}</h3>
         <div class="accessories" v-if="ctx.container && ctx.container.id > 0">
+          <os-tag :value="status" :rounded="true" :type="tagType" v-show="status" />
           <os-copy-link size="small"
             :route="{name: 'ContainerDetail.Overview', params: {containerId: ctx.container.id}}" />
           <os-new-tab size="small"
@@ -124,6 +125,22 @@ export default {
       }
 
       return title;
+    },
+
+    status: function() {
+      if (this.ctx.container.status == 'CHECKED_OUT') {
+        return this.$t('containers.checked_out_status');
+      }
+
+      return null;
+    },
+
+    tagType: function() {
+      if (this.ctx.container.status == 'CHECKED_OUT') {
+        return 'danger';
+      }
+
+      return null;
     }
   },
 

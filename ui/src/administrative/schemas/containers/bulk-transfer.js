@@ -14,6 +14,9 @@ export default {
                 
         return container.name;
       },
+      "uiStyle": {
+        "min-width": "125px"
+      },
       "href": (rowObject) => ui.ngServer + '#/containers/' + rowObject.container.id + '/overview'
     },
     {
@@ -26,6 +29,9 @@ export default {
         }
 
         return '-'
+      },
+      "uiStyle": {
+        "min-width": "75px"
       }
     },
     {
@@ -42,7 +48,17 @@ export default {
         "selectProp": "name",
         "displayProp": "name"
       },
+      "uiStyle": {
+        "min-width": "200px"
+      },
+      "showWhen": "!checkout",
       "enableCopyFirstToAll": true
+    },
+    {
+      "name": "container.siteName",
+      "labelCode": "containers.site",
+      "type": "span",
+      "showWhen": "checkout"
     },
     {
       "name": "container.storageLocation",
@@ -59,6 +75,10 @@ export default {
           }
         }
       },
+      "uiStyle": {
+        "min-width": "300px"
+      },
+      "showWhen": "!checkout",
       "enableCopyFirstToAll": true
     },
     {
@@ -70,6 +90,40 @@ export default {
           "messageCode": "containers.transferred_by_required"
         }
       },
+      "uiStyle": {
+        "min-width": "200px"
+      },
+      "showWhen": "!checkin && !checkout",
+      "enableCopyFirstToAll": true
+    },
+    {
+      "name": "container.transferredBy",
+      "labelCode": "containers.checked_out_by",
+      "type": "user",
+      "validations": {
+        "required": {
+          "messageCode": "containers.checked_out_by_required"
+        }
+      },
+      "uiStyle": {
+        "min-width": "200px"
+      },
+      "showWhen": "checkout",
+      "enableCopyFirstToAll": true
+    },
+    {
+      "name": "container.transferredBy",
+      "labelCode": "containers.checked_in_by",
+      "type": "user",
+      "validations": {
+        "required": {
+          "messageCode": "containers.checked_in_by_required"
+        }
+      },
+      "uiStyle": {
+        "min-width": "200px"
+      },
+      "showWhen": "checkin",
       "enableCopyFirstToAll": true
     },
     {

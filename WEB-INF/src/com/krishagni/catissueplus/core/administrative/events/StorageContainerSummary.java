@@ -70,6 +70,10 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 
 	private Boolean starred;
 
+	private String status;
+
+	private StorageLocationSummary blockedLocation;
+
 	public Long getId() {
 		return id;
 	}
@@ -285,6 +289,22 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		this.starred = starred;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public StorageLocationSummary getBlockedLocation() {
+		return blockedLocation;
+	}
+
+	public void setBlockedLocation(StorageLocationSummary blockedLocation) {
+		this.blockedLocation = blockedLocation;
+	}
+
 	protected static void transform(StorageContainer container, StorageContainerSummary result) {
 		result.setId(container.getId());
 		result.setName(container.getName());
@@ -307,6 +327,8 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		result.setFreePositions(container.freePositionsCount());
 		result.setStoreSpecimensEnabled(container.isStoreSpecimenEnabled());
 		result.setAutomated(container.isAutomated());
+		result.setStatus(container.getStatus() != null ? container.getStatus().name() : null);
+		result.setBlockedLocation(StorageLocationSummary.from(container.getBlockedPosition()));
 
 		if (container.getAutoFreezerProvider() != null) {
 			result.setAutoFreezerProvider(container.getAutoFreezerProvider().getName());

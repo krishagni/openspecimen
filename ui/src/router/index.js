@@ -640,8 +640,28 @@ const routes = [
       {
         path: 'container-transfer',
         name: 'BulkContainerTransfer',
-        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/BulkTransfer.vue')
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/BulkTransfer.vue'),
+        props: () => {
+          return {checkout: false, checkin: false}
+        }
       },
+      {
+        path: 'container-checkout',
+        name: 'BulkContainerCheckout',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/BulkTransfer.vue'),
+        props: () => {
+          return {checkout: true, checkin: false}
+        }
+      },
+      {
+        path: 'container-checkin',
+        name: 'BulkContainerCheckin',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/BulkTransfer.vue'),
+        props: () => {
+          return {checkout: false, checkin: true}
+        }
+      },
+
 
       /**********************************
        **********************************

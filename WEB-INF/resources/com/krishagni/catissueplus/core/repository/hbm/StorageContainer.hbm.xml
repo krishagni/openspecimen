@@ -75,6 +75,13 @@
 
     <property name="capacity" column="CAPACITY"/>
 
+    <property name="status" column="STATUS">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">com.krishagni.catissueplus.core.administrative.domain.StorageContainer$Status</param>
+        <param name="type">12</param>
+      </type>
+    </property>
+
     <set name="childContainers" table="OS_STORAGE_CONTAINERS" inverse="true" cascade="all-delete-orphan">
       <key column="PARENT_CONTAINER_ID"/>
       <one-to-many  class="com.krishagni.catissueplus.core.administrative.domain.StorageContainer" />
@@ -141,6 +148,13 @@
       property-ref="occupyingContainer"
       cascade="save-update"
       fetch="join"/>
+
+    <one-to-one
+      name="blockedPosition"
+      class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
+      property-ref="blockedForContainer"
+      cascade="save-update"
+      fetch="join" />
 
     <set name="occupiedPositions" table="OS_CONTAINER_POSITIONS" cascade="all-delete-orphan" inverse="true">
       <key column="STORAGE_CONTAINER_ID" not-null="true"/>

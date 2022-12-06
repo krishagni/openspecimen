@@ -41,7 +41,7 @@
               <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
                 v-show-if-allowed="containerResources.importOpts" />
 
-              <os-button left-icon="arrows-alt-h" :label="$t('containers.transfer')" @click="showTransferForm"
+              <os-menu :label="$t('common.buttons.more')" :options="moreOpts"
                 v-show-if-allowed="containerResources.updateOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
@@ -117,6 +117,25 @@ export default {
           onSelect: () => routerSvc.ngGoto('containers-import-jobs')
         }
       ],
+
+      moreOpts: [
+        {
+          icon: 'arrows-alt-h',
+          caption: this.$t('containers.transfer'),
+          onSelect: () => routerSvc.goto('BulkContainerTransfer')
+        },
+        {
+          icon: 'sign-in-alt',
+          caption: this.$t('containers.check_in_button'),
+          onSelect: () => routerSvc.goto('BulkContainerCheckin')
+        },
+        {
+          icon: 'sign-out-alt',
+          caption: this.$t('containers.check_out_button'),
+          onSelect: () => routerSvc.goto('BulkContainerCheckout')
+        }
+      ],
+
 
       containerResources
     };

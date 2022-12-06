@@ -92,7 +92,11 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	USAGE_DIFFER,
 
-	NONE_PRINTED;
+	NONE_PRINTED,
+
+	CHECKED_OUT_ALREADY,
+
+	PARENT_CHECKOUT_NA;
 
 	@Override
 	public String code() {

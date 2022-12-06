@@ -6,7 +6,9 @@
       </template>
 
       <span>
-        <h3 v-t="'containers.transfer_containers'">Transfer Containers</h3>
+        <h3 v-t="'containers.checkout_containers'" v-if="checkout">Checkout Containers</h3>
+        <h3 v-t="'containers.checkin_containers'" v-else-if="checkin">Checkin Containers</h3>
+        <h3 v-t="'containers.transfer_containers'" v-else>Transfer Containers</h3>
       </span>
     </os-page-head>
 
@@ -43,7 +45,8 @@
           </div>
         </os-step>
 
-        <os-step :title="$t('containers.transfer')">
+        <os-step :title="checkin ? $t('containers.check_in_button') : checkout ?
+          $t('containers.check_out_button') : $t('containers.transfer')">
           <div>
             <os-table-form ref="transferForm" :schema="transferSchema"
               :data="txCtx" :items="txCtx.containers"
@@ -63,6 +66,22 @@
           </div>
         </os-step>
       </os-steps>
+
+      <os-confirm class="os-not-found-confirm" ref="notFoundConfirm">
+        <template #title>
+          <span v-t="'containers.add_containers.not_found'">Containers not found</span>
+        </template>
+
+        <template #message>
+          <div class="message">
+            <div v-t="'containers.add_containers.not_found_msg'">Following containers were not found: </div>
+
+            <div><i>{{ctx.notFound.join(', ')}}</i></div>
+
+            <div v-t="'containers.add_containers.proceed_q'">Do you want to proceed?</div>
+          </div>
+        </template>
+      </os-confirm>
     </os-page-body>
   </os-page>
 </template>
@@ -77,6 +96,8 @@ import routerSvc    from '@/common/services/Router.js';
 import util         from '@/common/services/Util.js';
 
 export default {
+  props: ['checkin', 'checkout'],
+
   data() {
     const bcrumb = [
       {url: routerSvc.getUrl('ContainersList', {}), label: 'Containers'}
@@ -88,7 +109,9 @@ export default {
 
         useBarcode: false,
 
-        containers: []
+        containers: [],
+
+        notFound: []
       },
 
       txCtx: {
@@ -108,14 +131,55 @@ export default {
       }
 
       const filterOpts = {};
+      if (this.checkin) {
+        filterOpts.status = ['CHECKED_OUT'];
+      }
+
       if (this.ctx.useBarcode) {
         filterOpts.barcode = itemLabels;
       } else {
         filterOpts.naam = itemLabels;
       }
 
+      this.ctx.notFound = [];
       containerSvc.getContainers(filterOpts).then(
-        (containers) => {
+        async (containers) => {
+          itemLabels = itemLabels.map(i => i.toLowerCase());
+
+          let idxFn, cmpFn;
+          if (this.ctx.useBarcode) {
+            idxFn = (c) => itemLabels.indexOf(c.barcode.toLowerCase());
+            cmpFn = (c, barcode) => barcode == c.barcode.toLowerCase();
+          } else {
+            idxFn = (c) => itemLabels.indexOf(c.name.toLowerCase());
+            cmpFn = (c, label) => label == c.name.toLowerCase();
+          }
+
+          containers.sort((c1, c2) => idxFn(c1) - idxFn(c2));
+
+          const notFound = [];
+          for (let label of itemLabels) {
+            let found = false;
+            for (let container of containers) {
+              if (cmpFn(container, label)) {
+                found = true;
+                break;
+              }
+            }
+
+            if (!found) {
+              notFound.push(label);
+            }
+          }
+
+          if (notFound.length > 0) {
+            this.ctx.notFound = notFound;
+            const resp = await this.$refs.notFoundConfirm.open();
+            if (resp != 'proceed') {
+              return;
+            }
+          }
+
           for (let container of containers) {
             if (containers.some(c => c.id == container)) {
               continue;
@@ -152,10 +216,12 @@ export default {
 
       const transferredBy = this.$ui.currentUser;
       const transferDate  = new Date().getTime();
+      this.txCtx.checkin  = this.checkin;
+      this.txCtx.checkout = this.checkout;
       this.txCtx.containers = this.ctx.containers.map(
         ({container}) => {
           const copy = container.trCtx = container.trCtx || util.clone(container);
-          copy.storageLocation = {};
+          copy.storageLocation = this.checkin ? container.blockedLocation : {};
           copy.transferredBy = transferredBy;
           copy.transferDate = transferDate;
           return {container: copy};
@@ -182,16 +248,27 @@ export default {
             storageLocation: container.storageLocation,
             transferredBy: container.transferredBy,
             transferDate: container.transferDate,
-            transferComments: container.transferComments
+            transferComments: container.transferComments,
+            checkOut: this.checkout
           }
         }
       );
       containerSvc.bulkUpdate(containers).then(
         (result) => {
+          let success = 'containers.transferred';
+          let pending = 'containers.transfer_pending';
+          if (this.checkin) {
+            success = 'containers.checked_in';
+            pending = 'containers.checkin_pending';
+          } else if (this.checkout) {
+            success = 'containers.checked_out';
+            pending = 'containers.checkout_pending';
+          }
+
           if (result) {
-            alertsSvc.success({code: 'containers.transferred', args: {count: result.length}});
+            alertsSvc.success({code: success, args: {count: result.length}});
           } else {
-            alertsSvc.info({code: 'containers.transfer_pending'});
+            alertsSvc.info({code: pending});
           }
 
           this.cancel();
@@ -205,3 +282,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-not-found-confirm .message > div {
+  padding: 0.5rem 0.25rem;
+}
+</style>

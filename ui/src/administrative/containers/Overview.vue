@@ -5,7 +5,15 @@
         v-show-if-allowed="containerResources.updateOpts" />
 
       <os-button left-icon="arrows-alt-h" :label="$t('containers.transfer')" @click="showTransferForm"
-        v-show-if-allowed="containerResources.updateOpts" />
+        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.status != 'CHECKED_OUT'" />
+
+      <os-button left-icon="sign-out-alt" :label="$t('containers.check_out_button')"
+        @click="showTransferForm('checkout')" v-show-if-allowed="containerResources.updateOpts"
+        v-if="ctx.container.status != 'CHECKED_OUT' && ctx.container.storageLocation &&
+          ctx.container.storageLocation.name" />
+
+      <os-button left-icon="sign-in-alt" :label="$t('containers.check_in_button')" @click="showTransferForm('checkin')"
+        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.status == 'CHECKED_OUT'" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainer"
         v-show-if-allowed="containerResources.deleteOpts" />
@@ -37,14 +45,22 @@
 
   <os-dialog ref="transferFormDialog">
     <template #header>
-      <span v-t="{path: 'containers.transfer_to', args: ctx.container}">Transfer {{ctx.container.name}} to ...</span>
+      <span v-t="{path: 'containers.check_out', args: ctx.container}" v-if="trCtx.checkout">
+        Checkout {{ctx.container.name}}
+      </span>
+      <span v-t="{path: 'containers.check_in', args: ctx.container}" v-else-if="trCtx.checkin">
+        Checkin {{ctx.container.name}}
+      </span>
+      <span v-t="{path: 'containers.transfer_to', args: ctx.container}" v-else>
+        Transfer {{ctx.container.name}} to ...
+      </span>
     </template>
     <template #content>
       <os-form ref="transferForm" :schema="ctx.transferFs.layout" :data="trCtx" @input="handleTransferInput($event)" />
     </template>
     <template #footer>
       <os-button text    :label="$t('common.buttons.cancel')" @click="closeTransferForm" />
-      <os-button primary :label="$t('containers.transfer')" @click="transfer" />
+      <os-button primary :label="$t(trCtx.checkout ? 'containers.check_out' : (trCtx.checkin ? 'containers.check_in' : 'containers.transfer'))" @click="transfer" />
     </template>
   </os-dialog>
 
@@ -208,14 +224,17 @@ export default {
       routerSvc.goto('ContainerAddEdit', {containerId: this.container.id});
     },
 
-    showTransferForm: function() {
+    showTransferForm: function(action) {
       const container = util.clone(this.container);
       container.transferredBy = this.$ui.currentUser;
       container.transferDate = new Date().getTime();
+      container.storageLocation = container.blockedLocation;
 
       const attrs = ['parent', 'childContainers', 'occupiedPositions', 'childContainersLoaded', 'hasChildren'];
       attrs.forEach(attr => delete container[attr]);
 
+      this.trCtx.checkout = action == 'checkout';
+      this.trCtx.checkin  = action == 'checkin';
       this.trCtx.container = container;
       this.$refs.transferFormDialog.open();
     },
@@ -251,6 +270,7 @@ export default {
         return;
       }
 
+      trCont.checkOut = this.trCtx.checkout;
       await containerSvc.saveOrUpdate(trCont);
       routerSvc.reload();
     },

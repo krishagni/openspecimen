@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Container status - checked out">
+    <addColumn tableName="OS_STORAGE_CONTAINERS">
+      <column name="STATUS" type="${text.type}(32)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Container blocked position">
+    <addColumn tableName="OS_CONTAINER_POSITIONS">
+      <column name="BLOCKED_FOR_CONTAINER_ID" type="${int.type}" />
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

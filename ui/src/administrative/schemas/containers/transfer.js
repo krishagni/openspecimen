@@ -21,7 +21,8 @@ export default {
               "required": {
                 "messageCode": "containers.site_required"
               }
-            }
+            },
+            "showWhen": "!checkout"
           }
         ]
       },
@@ -43,7 +44,7 @@ export default {
                 }
               }
             },
-            "showWhen": "!!container.siteName"
+            "showWhen": "!!container.siteName && !checkout"
           }
         ]
       },
@@ -58,7 +59,30 @@ export default {
               "required": {
                 "messageCode": "containers.transferred_by_required"
               }
-            }
+            },
+            "showWhen": "!checkout && !checkin"
+          },
+          {
+            "name": "container.transferredBy",
+            "labelCode": "containers.checked_in_by",
+            "type": "user",
+            "validations": {
+              "required": {
+                "messageCode": "containers.checked_in_by_required"
+              }
+            },
+            "showWhen": "checkin"
+          },
+          {
+            "name": "container.transferredBy",
+            "labelCode": "containers.checked_out_by",
+            "type": "user",
+            "validations": {
+              "required": {
+                "messageCode": "containers.checked_out_by_required"
+              }
+            },
+            "showWhen": "checkout"
           }
         ]
       },
