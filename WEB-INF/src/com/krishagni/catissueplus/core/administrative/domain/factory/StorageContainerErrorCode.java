@@ -96,7 +96,11 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	CHECKED_OUT_ALREADY,
 
-	PARENT_CHECKOUT_NA;
+	HAS_SPECIMENS,
+
+	PARENT_ARCHIVED,
+
+	ARCHIVED;
 
 	@Override
 	public String code() {

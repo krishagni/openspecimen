@@ -25,12 +25,12 @@
                 <os-icon name="eye" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.locations')">
+            <li v-os-tooltip.right="$t('containers.locations')" v-if="ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Locations')">
                 <os-icon name="map" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.specimens')">
+            <li v-os-tooltip.right="$t('containers.specimens')" v-if="ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
               </router-link>
@@ -41,7 +41,8 @@
               </router-link>
             </li>
             <li v-os-tooltip.right="$t('containers.maintenance')"
-              v-if="!ctx.container.storageLocation || !ctx.container.storageLocation.id">
+              v-if="!ctx.container.storageLocation || !ctx.container.storageLocation.id &&
+                    ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Maintenance')">
                 <os-icon name="calendar" />
               </router-link>
@@ -128,15 +129,19 @@ export default {
     },
 
     status: function() {
-      if (this.ctx.container.status == 'CHECKED_OUT') {
-        return this.$t('containers.checked_out_status');
+      const container = this.ctx.container;
+      if (container.activityStatus == 'Closed') {
+        return this.$t('containers.status.archived');
+      } else if (container.status == 'CHECKED_OUT') {
+        return this.$t('containers.status.checked_out');
       }
 
       return null;
     },
 
     tagType: function() {
-      if (this.ctx.container.status == 'CHECKED_OUT') {
+      const container = this.ctx.container;
+      if (container.activityStatus == 'Closed' || container.status == 'CHECKED_OUT') {
         return 'danger';
       }
 

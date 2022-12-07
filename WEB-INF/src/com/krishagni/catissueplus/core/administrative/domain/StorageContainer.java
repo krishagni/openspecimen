@@ -629,7 +629,15 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 
 	public boolean isActive() {
-		return com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_ACTIVE.getStatus().equals(getActivityStatus());
+		return com.krishagni.catissueplus.core.common.util.Status.isActiveStatus(getActivityStatus());
+	}
+
+	public boolean isArchived() {
+		return com.krishagni.catissueplus.core.common.util.Status.isClosedStatus(getActivityStatus());
+	}
+
+	public boolean isDeleted() {
+		return com.krishagni.catissueplus.core.common.util.Status.isDisabledStatus(getActivityStatus());
 	}
 
 	@Override
@@ -639,7 +647,7 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void update(StorageContainer other) {
 		updateActivityStatus(other);
-		if (!isActive()) {
+		if (isDeleted()) {
 			return;
 		}
 
@@ -784,6 +792,10 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 	
 	public void removePosition(StorageContainerPosition position) {
+		if (position == null) {
+			return;
+		}
+
 		if (isDimensionless()) {
 			getDaoFactory().getStorageContainerPositionDao().delete(position);
 		} else {
@@ -1078,6 +1090,19 @@ public class StorageContainer extends BaseExtensionEntity {
 		}
 
 		deleteWithoutCheck();
+	}
+
+	public void archive() {
+		if (isArchived() || isDeleted()) {
+			return;
+		}
+
+		int specimensCnt = getSpecimensCount();
+		if (specimensCnt > 0) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.HAS_SPECIMENS, getName());
+		}
+
+		archive0(true);
 	}
 	
 	public String getStringifiedAncestors() {
@@ -1387,6 +1412,28 @@ public class StorageContainer extends BaseExtensionEntity {
 		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 
+	private void archive0(boolean vacatePosition) {
+		getChildContainers().forEach(c -> c.archive0(false));
+		if (isSiteContainer()) {
+			getSite().setContainer(null);
+		}
+
+		if (vacatePosition && getParentContainer() != null) {
+			StorageContainer parent = getParentContainer();
+			updateContainerLocation(
+				getParentContainer().getSite(),
+				null,
+				null,
+				null,
+				null,
+				"ARCHIVED",
+				false);
+			setParentContainer(parent);
+		}
+
+		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_CLOSED.getStatus());
+	}
+
 	private int getSpecimensCount() {
 		return getDaoFactory().getStorageContainerDao().getSpecimensCount(getId());
 	}
@@ -1539,6 +1586,10 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 	
 	private void updateContainerLocation(StorageContainer other) {
+		if (!isActive()) {
+			return;
+		}
+
 		updateContainerLocation(
 			other.getSite(), other.getParentContainer(), other.getPosition(),
 			other.getTransferredBy(), other.getTransferDate(), other.getOpComments(),
@@ -1560,7 +1611,7 @@ public class StorageContainer extends BaseExtensionEntity {
 			!Objects.equals(parentContainer, otherParentContainer) ||
 			!StorageContainerPosition.areSame(position, otherPos)) {
 
-			transferEvent = new ContainerTransferEvent().fromLocation(site, parentContainer, position);
+			transferEvent = new ContainerTransferEvent().fromLocation(site, position != null ? position.getContainer() : null, position);
 			transferEvent.setContainer(this);
 			transferEvent.setUser(transferredBy != null ? transferredBy : AuthUtil.getCurrentUser());
 			transferEvent.setTime(transferDate != null ? transferDate : Calendar.getInstance().getTime());
@@ -1619,11 +1670,16 @@ public class StorageContainer extends BaseExtensionEntity {
 				setBlockedPosition(blockedPosition);
 				setStatus(Status.CHECKED_OUT);
 				transferEvent.setReason("CHECK-OUT: " + (transferReasons != null ? transferReasons : ""));
-			} else if (blockedPosition != null) {
+			} else if (getBlockedPosition() != null) {
+				String prefix = "";
+				if (!"ARCHIVED".equals(transferReasons)) {
+					prefix = "CHECK-IN: ";
+				}
+
 				getBlockedPosition().getContainer().removePosition(getBlockedPosition());
 				setBlockedPosition(null);
 				setStatus(null);
-				transferEvent.setReason("CHECK-IN: " + (transferReasons != null ? transferReasons : ""));
+				transferEvent.setReason(prefix + (transferReasons != null ? transferReasons : ""));
 			}
 
 			oldPosition = null;
@@ -1643,14 +1699,25 @@ public class StorageContainer extends BaseExtensionEntity {
 			return;
 		}
 
-		if (com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(other.getActivityStatus())) {
+		if (other.isDeleted()) {
 			delete(true);
-		} else {
+		} else if (other.isArchived()) {
+			archive();
+		} else if (isArchived() && other.isActive()) {
+			if (other.getParentContainer() != null && !other.getParentContainer().isActive()) {
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.PARENT_ARCHIVED, other.getParentContainer().getName());
+			}
+
 			List<StorageContainer> containers = new ArrayList<>();
 			containers.add(this);
 			while (!containers.isEmpty()) {
 				StorageContainer container = containers.remove(0);
-				container.setActivityStatus(other.getActivityStatus());
+				if (!container.isArchived()) {
+					// either active or deleted
+					continue;
+				}
+
+				container.setActivityStatus(other.getActivityStatus()); // active
 				containers.addAll(container.getChildContainers());
 			}
 		}

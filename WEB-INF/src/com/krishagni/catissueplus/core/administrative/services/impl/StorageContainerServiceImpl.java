@@ -309,6 +309,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<List<StorageContainerPositionDetail>> getOccupiedPositions(RequestEvent<Long> req) {
 		try {
 			StorageContainer container = getContainer(req.getPayload(), null);
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			return ResponseEvent.response(StorageContainerPositionDetail.from(container.getOccupiedPositions()));
 		} catch (OpenSpecimenException ose) {
@@ -322,6 +326,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenInfo>> getSpecimens(RequestEvent<SpecimenListCriteria> req) {
 		StorageContainer container = getContainer(req.getPayload().ancestorContainerId(), null);
+		if (container.isArchived()) {
+			return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+		}
+
 		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 		SpecimenListCriteria crit = addSiteCpRestrictions(req.getPayload(), container);
 
@@ -333,6 +341,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	public ResponseEvent<Long> getSpecimensCount(RequestEvent<SpecimenListCriteria> req) {
 		StorageContainer container = getContainer(req.getPayload().ancestorContainerId(), null);
+		if (container.isArchived()) {
+			return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+		}
+
 		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 		SpecimenListCriteria crit = addSiteCpRestrictions(req.getPayload(), container);
 
@@ -345,8 +357,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<QueryDataExportResult> getSpecimensReport(RequestEvent<ContainerQueryCriteria> req) {
 		ContainerQueryCriteria crit = req.getPayload();
 		StorageContainer container = getContainer(crit.getId(), crit.getName());
-		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+		if (container.isArchived()) {
+			return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+		}
 
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 		Integer queryId = ConfigUtil.getInstance().getIntSetting("common", "cont_spmns_report_query", -1);
 		if (queryId == -1) {
 			return ResponseEvent.userError(StorageContainerErrorCode.SPMNS_RPT_NOT_CONFIGURED);
@@ -441,6 +456,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			TenantDetail detail = req.getPayload();
 
 			StorageContainer container = getContainer(detail.getContainerId(), detail.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			
 			CollectionProtocol cp = new CollectionProtocol();
@@ -483,6 +502,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			PositionsDetail op = req.getPayload();
 			StorageContainer container = getContainer(op.getContainerId(), op.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			
 			List<StorageContainerPosition> positions = op.getPositions().stream()
 				.map(posDetail -> createPosition(container, posDetail, op.getVacateOccupant()))
@@ -547,6 +570,9 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 					replDetail.getSourceContainerName(),
 					null,
 					StorageContainerErrorCode.SRC_ID_OR_NAME_REQ);
+			if (srcContainer.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, srcContainer.getName());
+			}
 
 			List<StorageContainer> toPrint = new ArrayList<>();
 			for (DestinationDetail dest : replDetail.getDestinations()) {
@@ -577,6 +603,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			container.validateRestrictions();
 
 			StorageContainer parentContainer = container.getParentContainer();
+			if (parentContainer != null && parentContainer.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, parentContainer.getName());
+			}
+
 			if (parentContainer != null && !parentContainer.hasFreePositionsForReservation(input.getNumOfContainers())) {
 				return ResponseEvent.userError(StorageContainerErrorCode.NO_FREE_SPACE, parentContainer.getName());
 			}
@@ -634,6 +664,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				}
 
 				StorageContainer container = containerFactory.createStorageContainer(detail);
+				if (container.getParentContainer() != null && container.getParentContainer().isArchived()) {
+					return ResponseEvent.userError(StorageContainerErrorCode.PARENT_ARCHIVED, container.getParentContainer().getName());
+				}
+
 				AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
 				if (container.getType() != null) {
 					generateName(container);
@@ -709,6 +743,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			PositionsDetail opDetail = req.getPayload();
 			StorageContainer container = getContainer(opDetail.getContainerId(), opDetail.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateContainerRights(container);
 			if (container.isDimensionless()) {
 				return ResponseEvent.userError(StorageContainerErrorCode.DL_POS_BLK_NP, container.getName());
@@ -740,6 +778,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			PositionsDetail opDetail = req.getPayload();
 			StorageContainer container = getContainer(opDetail.getContainerId(), opDetail.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateContainerRights(container);
 			if (container.isDimensionless()) {
 				return ResponseEvent.userError(StorageContainerErrorCode.DL_POS_BLK_NP, container.getName());
@@ -1073,8 +1115,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@Override
 	public StorageContainer createStorageContainer(StorageContainer base, StorageContainerDetail input) {
 		StorageContainer container = containerFactory.createStorageContainer(base, input);
-		AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
+		if (container.getParentContainer() != null && container.getParentContainer().isArchived()) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.PARENT_ARCHIVED, container.getParentContainer().getName());
+		}
 
+		AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
 		ensureUniqueConstraints(null, container);
 		container.validateRestrictions();
 

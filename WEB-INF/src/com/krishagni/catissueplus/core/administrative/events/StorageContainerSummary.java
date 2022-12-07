@@ -316,6 +316,9 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		
 		result.setSiteName(container.getSite().getName());
 		result.setStorageLocation(StorageLocationSummary.from(container.getPosition()));
+		if (result.getStorageLocation() == null && container.getParentContainer() != null) {
+			result.setStorageLocation(StorageLocationSummary.from(container.getParentContainer()));
+		}
 		
 		result.setNoOfColumns(container.getNoOfColumns());
 		result.setNoOfRows(container.getNoOfRows());

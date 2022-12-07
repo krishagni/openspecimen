@@ -262,9 +262,9 @@ export default {
               value = position.displayName + ' (' + position.name + ')';
             }
 
-            if (position.mode == 'TWO_D') {
+            if (position.mode == 'TWO_D' && position.positionY && position.positionX) {
               value += ' (' + position.positionY + ', ' + position.positionX + ')';
-            } else if (position.mode == 'LINEAR') {
+            } else if (position.mode == 'LINEAR' && position.position >= 0) {
               value += ' (' + position.position + ')';
             }
           }

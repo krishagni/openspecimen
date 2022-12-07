@@ -265,7 +265,7 @@
         p.pos_two_str as rowStr, p.pos_one_str as colStr
       from
         os_storage_containers s
-        inner join os_container_positions p on p.occupying_container_id = s.identifier
+        left join os_container_positions p on p.occupying_container_id = s.identifier
       where
         s.parent_container_id in (:parentIds) and s.activity_status != 'Disabled'
 
@@ -301,7 +301,7 @@
         p.pos_two_str as rowStr, p.pos_one_str as colStr
       from
         os_storage_containers s
-        inner join os_container_positions p on p.occupying_container_id = s.identifier
+        left join os_container_positions p on p.occupying_container_id = s.identifier
       where
         s.parent_container_id = :parentId and s.activity_status != 'Disabled'
     </sql-query>

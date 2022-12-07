@@ -2,25 +2,22 @@
   <os-page-toolbar>
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editContainer"
-        v-show-if-allowed="containerResources.updateOpts" />
-
-      <os-button left-icon="arrows-alt-h" :label="$t('containers.transfer')" @click="showTransferForm"
-        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.status != 'CHECKED_OUT'" />
-
-      <os-button left-icon="sign-out-alt" :label="$t('containers.check_out_button')"
-        @click="showTransferForm('checkout')" v-show-if-allowed="containerResources.updateOpts"
-        v-if="ctx.container.status != 'CHECKED_OUT' && ctx.container.storageLocation &&
-          ctx.container.storageLocation.name" />
-
-      <os-button left-icon="sign-in-alt" :label="$t('containers.check_in_button')" @click="showTransferForm('checkin')"
-        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.status == 'CHECKED_OUT'" />
+        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.activityStatus == 'Active'" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainer"
         v-show-if-allowed="containerResources.deleteOpts" />
 
-      <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" />
+      <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels"
+        v-if="ctx.container.activityStatus == 'Active'" />
 
-      <os-menu :label="$t('common.buttons.export')" :options="ctx.reportOpts" />
+      <os-menu :label="$t('common.buttons.more')" right-icon="caret-down" :options="ctx.moreOpts"
+        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.moreOpts.length > 0" />
+
+      <os-button left-icon="check" :label="$t('common.buttons.unarchive')" @click="showUnarchiveForm"
+        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.activityStatus == 'Closed'" />
+
+      <os-menu :label="$t('common.buttons.export')" :options="ctx.reportOpts"
+        v-if="ctx.container.activityStatus == 'Active'" />
     </template>
   </os-page-toolbar>
 
@@ -99,6 +96,28 @@
       <os-button primary :label="$t('containers.defragment')" @click="defragment" />
     </template>
   </os-dialog>
+
+  <os-confirm ref="archiveDialog">
+    <template #title>
+      <span v-t="{path: 'containers.archive', args: ctx.container}">Archive {ctx.container.name}}</span>
+    </template>
+    <template #message>
+      <span v-t="{path: 'containers.confirm_archive', args: ctx.container}">Container <b>{{ctx.container.name}}</b> and its descendants will be archived. Are you sure you want to proceed?</span>
+    </template>
+  </os-confirm>
+
+  <os-dialog ref="unarchiveDialog">
+    <template #header>
+      <span v-t="{path: 'containers.unarchive', args: ctx.container}">Unarchive {{ctx.container.name}}</span>
+    </template>
+    <template #content>
+      <os-form ref="transferForm" :schema="ctx.transferFs.layout" :data="trCtx" @input="handleTransferInput($event)" />
+    </template>
+    <template #footer>
+      <os-button text    :label="$t('common.buttons.cancel')" @click="closeUnarchiveDialog" />
+      <os-button primary :label="$t('common.buttons.unarchive')" @click="unarchive" />
+    </template>
+  </os-dialog>
 </template>
 
 <script>
@@ -138,7 +157,9 @@ export default {
 
       routeQuery: route.query,
 
-      reportOpts: []
+      reportOpts: [],
+
+      moreOpts: []
     });
 
     const trCtx = reactive({
@@ -191,6 +212,39 @@ export default {
           onSelect: () => this.exportUtilisation()
         }
       ];
+
+      ctx.moreOpts = [];
+      if (container.activityStatus == 'Active') {
+        if (container.status != 'CHECKED_OUT') {
+          ctx.moreOpts.push({
+            icon: 'arrows-alt-h',
+            caption: this.$t('containers.transfer'),
+            onSelect: () => this.showTransferForm()
+          });
+
+          if (container.storageLocation && container.storageLocation.name) {
+            ctx.moreOpts.push({
+              icon: 'sign-out-alt',
+              caption: this.$t('containers.check_out_button'),
+              onSelect: () => this.showTransferForm('checkout')
+            });
+          }
+        }
+
+        if (container.status == 'CHECKED_OUT') {
+          ctx.moreOpts.push({
+            icon: 'sign-in-alt',
+            caption: this.$t('containers.check_in_button'),
+            onSelect: () => this.showTransferForm('checkin')
+          });
+        }
+
+        ctx.moreOpts.push({
+          icon: 'archive',
+          caption: this.$t('common.buttons.archive'),
+          onSelect: () => this.archive()
+        })
+      }
 
       if (!container.storageLocation || !container.storageLocation.name) {
         let types = Object.keys(container.specimensByType)
@@ -273,6 +327,36 @@ export default {
       trCont.checkOut = this.trCtx.checkout;
       await containerSvc.saveOrUpdate(trCont);
       routerSvc.reload();
+    },
+
+    archive: function() {
+      this.$refs.archiveDialog.open().then(
+        (resp) => {
+          if (resp == 'proceed') {
+            const container = util.clone(this.ctx.container);
+            container.activityStatus = 'Closed';
+            container.transferComments = 'Archived';
+            containerSvc.saveOrUpdate(container).then(() => routerSvc.reload());
+          }
+        }
+      );
+    },
+
+    showUnarchiveForm: function() {
+      const container = util.clone(this.ctx.container);
+      container.activityStatus = 'Active';
+      container.transferredBy = this.$ui.currentUser;
+      container.transferDate = new Date().getTime();
+      this.trCtx.container = container;
+      this.$refs.unarchiveDialog.open();
+    },
+
+    unarchive: function() {
+      containerSvc.saveOrUpdate(this.trCtx.container).then(() => routerSvc.reload());
+    },
+
+    closeUnarchiveDialog: function() {
+      this.$refs.unarchiveDialog.close();
     },
 
     deleteContainer: async function() {

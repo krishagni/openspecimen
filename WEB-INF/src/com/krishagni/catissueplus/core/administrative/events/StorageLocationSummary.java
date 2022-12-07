@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
@@ -108,16 +109,21 @@ public class StorageLocationSummary implements Serializable {
 			return null;
 		}
 		
-		StorageLocationSummary storageLocation = new StorageLocationSummary();
-		storageLocation.setId(position.getContainer().getId());
-		storageLocation.setName(position.getContainer().getName());
-		storageLocation.setBarcode(position.getContainer().getBarcode());
-		storageLocation.setDisplayName(position.getContainer().getDisplayName());
-		storageLocation.setMode(position.getContainer().getPositionLabelingMode().name());
+		StorageLocationSummary storageLocation = from(position.getContainer());
 		storageLocation.setPositionX(position.getPosOne());
 		storageLocation.setPositionY(position.getPosTwo());
 		storageLocation.setPosition(position.getPosition());
 		storageLocation.setReservationId(position.getReservationId());
+		return storageLocation;
+	}
+
+	public static StorageLocationSummary from(StorageContainer container) {
+		StorageLocationSummary storageLocation = new StorageLocationSummary();
+		storageLocation.setId(container.getId());
+		storageLocation.setName(container.getName());
+		storageLocation.setBarcode(container.getBarcode());
+		storageLocation.setDisplayName(container.getDisplayName());
+		storageLocation.setMode(container.getPositionLabelingMode().name());
 		return storageLocation;
 	}
 

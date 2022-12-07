@@ -1192,6 +1192,9 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		if (container == null) {
 			ose.addError(StorageContainerErrorCode.NOT_FOUND, key, 1);
 			return null;
+		} else if (container.isArchived()) {
+			ose.addError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			return null;
 		}
 
 		if (!container.canContain(specimen)) {

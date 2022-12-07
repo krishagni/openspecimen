@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -634,7 +633,19 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	private int comparePositions(StorageContainerSummary s1, StorageContainerSummary s2) {
-		return ObjectUtils.compare(s1.getStorageLocation().getPosition(), s2.getStorageLocation().getPosition());
+		Integer p1 = s1.getStorageLocation().getPosition();
+		Integer p2 = s2.getStorageLocation().getPosition();
+		if (p1 != null && p2 != null) {
+			return p1.compareTo(p2);
+		} else if (p1 == null && p2 == null) {
+			return s1.getId().compareTo(s2.getId());
+		} else if (p1 == null) {
+			return 1;
+		} else if (p2 == null) {
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 
 	private DetachedCriteria getContainerSpecimensListQuery(SpecimenListCriteria crit) {
