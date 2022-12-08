@@ -204,7 +204,7 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
       }
 
       if (value instanceof Array) {
-        return value.every(function(val) { return val == null || val == undefined || val.trim() == ''; });
+        return value.every(function(val) { return val == null || val == undefined || val.toString().trim() == ''; });
       }
 
       return false;
@@ -213,6 +213,10 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
     function getFilterExpr(filter) {
       if (filter.expr) {
         var tObj = getTemporalExprObj(filter.expr);
+        if (isUndef(tObj.lhs) && isUndef(tObj.op)) {
+          return filter.expr;
+        }
+
         if (isUndef(tObj.lhs) || isUndef(tObj.op)) {
           alert('Invalid temporal expression: ' + filter.expr);
           return '1 = 0';
@@ -220,7 +224,7 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
 
         if (isUndef(tObj.rhs)) {
           if (!filter.parameterized) {
-            alert('Invalid temporal expression: ' + filter.expr);
+            alert('Invalid temporal expression: ' + filter.expr + '. No RHS and not parameterized.');
             return '1 = 0';
           } else {
             return tObj.lhs + " any ";
@@ -236,20 +240,23 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
           
       var type = filter.field.type;
       var expr = filter.form.name + "." + filter.field.name + " ";
+      if (filter.op.name == 'exists' || filter.op.name == 'not_exists' || filter.op.name == 'any') {
+        expr += filter.op.symbol + " ";
+        return expr;
+      }
+
+      if (filter.hasSq) {
+        expr += filter.op.symbol + " ";
+        var sqWhere = getWhereExpr(filter.subQuery.context.filtersMap, filter.subQuery.context.exprNodes);
+        expr += '(select ' + filter.form.name + '.' + filter.field.name + ' where ' + sqWhere + ')';
+        return expr;
+      }
+
       if (isUndef(filter.value) && (type == 'DATE' || type == 'INTEGER' || type == 'FLOAT')) {
         return expr + "any";
       }
 
       expr += filter.op.symbol + " ";
-      if (filter.op.name == 'exists' || filter.op.name == 'not_exists' || filter.op.name == 'any') {
-        return expr;
-      }
-
-      if (filter.hasSq) {
-        var sqWhere = getWhereExpr(filter.subQuery.context.filtersMap, filter.subQuery.context.exprNodes);
-        expr += '(select ' + filter.form.name + '.' + filter.field.name + ' where ' + sqWhere + ')';
-        return expr;
-      }
 
       var filterValue = filter.value;
       if (filter.field.type == "STRING" || filter.field.type == "DATE") {
