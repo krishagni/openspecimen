@@ -407,15 +407,24 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<StorageContainerSummary>> patchStorageContainers(RequestEvent<List<StorageContainerDetail>> req) {
-		User user = AuthUtil.getCurrentUser();
+		User user        = AuthUtil.getCurrentUser();
 		String ipAddress = AuthUtil.getRemoteAddr();
-		Future<List<StorageContainerSummary>> promise = taskExecutor.submit(
-			new Callable<List<StorageContainerSummary>>() {
+		Future<ResponseEvent<List<StorageContainerSummary>>> promise = taskExecutor.submit(
+			new Callable<ResponseEvent<List<StorageContainerSummary>>>() {
 				@Override
-				@PlusTransactional
-				public List<StorageContainerSummary> call() throws Exception {
+				public ResponseEvent<List<StorageContainerSummary>> call() throws Exception {
 					AuthUtil.setCurrentUser(user, ipAddress);
+					try {
+						return patch();
+					} finally {
+						// clear only after the txn is committed.
+						// other the revision will not have the user.
+						AuthUtil.clearCurrentUser();
+					}
+				}
 
+				@PlusTransactional
+				private ResponseEvent<List<StorageContainerSummary>> patch() {
 					int count = 0;
 					Throwable t = null;
 					try {
@@ -425,21 +434,26 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 						}
 
 						count = result.size();
-						return result;
+						return ResponseEvent.response(result);
 					} catch (Throwable e) {
 						t = e;
-						throw e;
+						if (e instanceof OpenSpecimenException) {
+							OpenSpecimenException ose = (OpenSpecimenException) e;
+							if (ose.getErrorType() == ErrorType.USER_ERROR) {
+								return ResponseEvent.error(ose);
+							}
+						}
+
+						return ResponseEvent.serverError(new Exception(t.getCause()));
 					} finally {
-						sendBulkUpdateNotif("storage_containers_bulk_transferred", user, count, t);
-						AuthUtil.clearCurrentUser();
+						sendBulkUpdateNotif(user, count, t);
 					}
 				}
 			}
 		);
 
 		try {
-			List<StorageContainerSummary> result = promise.get(30 * 1000L, TimeUnit.MILLISECONDS);
-			return ResponseEvent.response(result);
+			return promise.get(30 * 1000L, TimeUnit.MILLISECONDS);
 		} catch (TimeoutException te) {
 			return ResponseEvent.response(null);
 		} catch (OpenSpecimenException ose) {
@@ -2194,7 +2208,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		EmailUtil.getInstance().sendEmail(RPT_EMAIL_TMPL, new String[] { user.getEmailAddress() }, null, props);
 	}
 
-	private void sendBulkUpdateNotif(String action, User user, int count, Throwable exception) {
+	private void sendBulkUpdateNotif(User user, int count, Throwable exception) {
 		String error = null;
 		if (exception != null) {
 			Throwable rootCause = ExceptionUtils.getRootCause(exception);
@@ -2204,11 +2218,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			error = ExceptionUtils.getStackTrace(rootCause);
 		}
 
-		action = MessageUtil.getInstance().getMessage(action);
-
 		Map<String, Object> props = new HashMap<>();
-		props.put("$subject", new String[] { action });
-		props.put("action", action);
+		props.put("$subject", new String[0]);
 		props.put("count", count);
 		props.put("error", error);
 		props.put("rcpt", user);

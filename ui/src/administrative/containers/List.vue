@@ -120,9 +120,9 @@ export default {
 
       moreOpts: [
         {
-          icon: 'arrows-alt-h',
-          caption: this.$t('containers.transfer'),
-          onSelect: () => routerSvc.goto('BulkContainerTransfer')
+          icon: 'archive',
+          caption: this.$t('common.buttons.archive'),
+          onSelect: () => routerSvc.goto('BulkContainerArchive')
         },
         {
           icon: 'sign-in-alt',
@@ -133,6 +133,11 @@ export default {
           icon: 'sign-out-alt',
           caption: this.$t('containers.check_out_button'),
           onSelect: () => routerSvc.goto('BulkContainerCheckout')
+        },
+        {
+          icon: 'arrows-alt-h',
+          caption: this.$t('containers.transfer'),
+          onSelect: () => routerSvc.goto('BulkContainerTransfer')
         }
       ],
 

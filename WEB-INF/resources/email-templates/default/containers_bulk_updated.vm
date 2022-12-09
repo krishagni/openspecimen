@@ -10,13 +10,13 @@
                   Hello $rcpt.formattedName(),
                   <br><br>
                   #if (!$error)
-                    #if($count > 1)
-                      $count containers $action.
+                    #if ($count > 1)
+                      $count containers updated.
                     #else
-                      One container $action.
+                      One container updated.
                     #end
                   #else
-                    Following error was encountered when transferring the containers to new location:
+                    Following error was encountered when bulk updating the containers:
                   #end
                   <br>
                 </p>
