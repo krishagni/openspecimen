@@ -60,6 +60,7 @@ import com.krishagni.catissueplus.core.administrative.events.StorageLocationSumm
 import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerTransferListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerReport;
@@ -714,6 +715,55 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			StorageContainer container = getContainer(req.getPayload());
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			return ResponseEvent.response(ContainerTransferEventDetail.from(container.getTransferEvents()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ExportedFileDetail> exportTransferEvents(RequestEvent<ContainerTransferListCriteria> req) {
+		try {
+			Set<SiteCpPair> allowedSiteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
+			if (allowedSiteCps != null && allowedSiteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			ContainerTransferListCriteria crit = req.getPayload();
+			crit.siteCps(allowedSiteCps);
+
+			User user = AuthUtil.getCurrentUser();
+			String ipAddress = AuthUtil.getRemoteAddr();
+			Future<ResponseEvent<String>> result = taskExecutor.submit(new Callable<ResponseEvent<String>>() {
+				@Override
+				public ResponseEvent<String> call() throws Exception {
+					try {
+						AuthUtil.setCurrentUser(user, ipAddress);
+						return exportTransferEvents0(crit);
+					} catch (Exception e) {
+						return ResponseEvent.serverError(e);
+					} finally {
+						AuthUtil.clearCurrentUser();
+					}
+				}
+			});
+
+			try {
+				ResponseEvent<String> resp = result.get(30000, TimeUnit.MILLISECONDS);
+				resp.throwErrorIfUnsuccessful();
+
+				ExportedFileDetail file = new ExportedFileDetail(true);
+				file.setName(resp.getPayload());
+				return ResponseEvent.response(file);
+			} catch (TimeoutException te) {
+				return ResponseEvent.response(new ExportedFileDetail(false));
+			} catch (OpenSpecimenException ose) {
+				return ResponseEvent.error(ose);
+			} catch (Exception e) {
+				return ResponseEvent.serverError(e);
+			}
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -2146,6 +2196,101 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		return rows;
 	}
 
+	@PlusTransactional
+	private ResponseEvent<String> exportTransferEvents0(ContainerTransferListCriteria crit) {
+		Date startTime = Calendar.getInstance().getTime();
+		String fileId = "csv_" + UUID.randomUUID().toString() + "_" + AuthUtil.getCurrentUser().getId() + "_transfer_report";
+		File file     = new File(ConfigUtil.getInstance().getReportsDir(), fileId + ".csv");
+
+		Throwable t = null;
+		CsvWriter writer = null;
+		try {
+			writer = CsvFileWriter.createCsvFileWriter(file);
+			writer.writeNext(new String[] { msg("common_exported_by"), AuthUtil.getCurrentUser().formattedName()});
+			writer.writeNext(new String[] { msg("common_exported_on"), Utility.getDateTimeString(Calendar.getInstance().getTime())});
+
+			writer.writeNext(new String[0]);
+			writer.writeNext(new String[] {
+				msg("storage_container_name"), msg("storage_container_freezer"), msg("storage_container_protocols"),
+				msg("transfer_event_id"), msg("transfer_event_user"), msg("transfer_event_time"), msg("common_reason"),
+				msg("transfer_event_from_site"), msg("transfer_event_from_container"), msg("transfer_event_from_row"), msg("transfer_event_from_col"), msg("transfer_event_from_position"),
+				msg("transfer_event_to_site"), msg("transfer_event_to_container"), msg("transfer_event_to_row"), msg("transfer_event_to_col"), msg("transfer_event_to_position")
+			});
+
+
+			Long lastId = null;
+			int numRows = 0;
+			boolean endOfEvents = false;
+			while (!endOfEvents) {
+				crit.lastId(lastId).startAt(0).maxResults(1000);
+
+				List<ContainerTransferEventDetail> events = daoFactory.getStorageContainerDao().getTransferEvents(crit);
+				endOfEvents = events.size() < crit.maxResults();
+
+				for (ContainerTransferEventDetail event : events) {
+					String name = event.getContainerName();
+					if (StringUtils.isNotBlank(event.getContainerDisplayName())) {
+						name = event.getContainerDisplayName() + " (" + name + ")";
+					}
+
+					String freezer = event.getFreezerName();
+					if (StringUtils.isNotBlank(event.getFreezerDisplayName())) {
+						freezer = event.getFreezerDisplayName() + " (" + freezer + ")";
+					}
+
+					StorageLocationSummary fromLoc = event.getFromLocation();
+					String fromContainer = null, fromRow = null, fromCol = null, fromPos = null;
+					if (fromLoc != null) {
+						fromContainer = fromLoc.getName();
+						if (StringUtils.isNotBlank(fromLoc.getDisplayName())) {
+							fromContainer = fromLoc.getDisplayName() + " (" + fromContainer + ")";
+						}
+						fromRow = fromLoc.getPositionY();
+						fromCol = fromLoc.getPositionX();
+						fromPos = fromLoc.getPosition() != null ? fromLoc.getPosition().toString() : null;
+					}
+
+					StorageLocationSummary toLoc = event.getToLocation();
+					String toContainer = null, toRow = null, toCol = null, toPos = null;
+					if (toLoc != null) {
+						toContainer = toLoc.getName();
+						if (StringUtils.isNotBlank(toLoc.getDisplayName())) {
+							fromContainer = toLoc.getDisplayName() + " (" + toContainer + ")";
+						}
+						toRow = toLoc.getPositionY();
+						toCol = toLoc.getPositionX();
+						toPos = toLoc.getPosition() != null ? toLoc.getPosition().toString() : null;
+					}
+
+
+					++numRows;
+					writer.writeNext(new String[]{
+						name, freezer, Utility.join(event.getCps(), cp -> cp, ", "),
+						event.getId().toString(), event.getUser().formattedName(), Utility.getDateTimeString(event.getTime()), event.getReason(),
+						event.getFromSite(), fromContainer, fromRow, fromCol, fromPos,
+						event.getToSite(), toContainer, toRow, toCol, toPos
+					});
+
+					lastId = event.getId();
+
+					if (numRows % 25 == 0) {
+						writer.flush();
+					}
+				}
+			}
+
+			writer.flush();
+			exportSvc.saveJob("transfer_report", startTime, crit.toStrMap());
+			return ResponseEvent.response(fileId);
+		} catch (Throwable e) {
+			t = e;
+			return ResponseEvent.serverError(new Exception(t));
+		} finally {
+			IOUtils.closeQuietly(writer);
+			sendTransferReportEmail(fileId, t);
+		}
+	}
+
 	private void sendAutoFreezerReport(AutoFreezerReportDetail reportDetail) {
 		String date = Utility.getDateString(Calendar.getInstance().getTime());
 
@@ -2208,6 +2353,24 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		EmailUtil.getInstance().sendEmail(RPT_EMAIL_TMPL, new String[] { user.getEmailAddress() }, null, props);
 	}
 
+	private void sendTransferReportEmail(String fileId, Throwable t) {
+		String error = null;
+		if (t != null) {
+			Throwable rootCause = ExceptionUtils.getRootCause(t);
+			if (rootCause == null) {
+				rootCause = t;
+			}
+			error = ExceptionUtils.getStackTrace(rootCause);
+		}
+
+		User rcpt = AuthUtil.getCurrentUser();
+		Map<String, Object> props = new HashMap<>();
+		props.put("fileId", fileId);
+		props.put("error", error);
+		props.put("rcpt", rcpt);
+		EmailUtil.getInstance().sendEmail(TRANSFER_RPT_TMPL, new String[] { rcpt.getEmailAddress() }, null, props);
+	}
+
 	private void sendBulkUpdateNotif(User user, int count, Throwable exception) {
 		String error = null;
 		if (exception != null) {
@@ -2237,4 +2400,6 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	private final static String RPT_EMAIL_TMPL              = "container_report";
 
 	private final static String BULK_UPDATED_TMPL           = "containers_bulk_updated";
+
+	private final static String TRANSFER_RPT_TMPL           = "container_transfer_report";
 }

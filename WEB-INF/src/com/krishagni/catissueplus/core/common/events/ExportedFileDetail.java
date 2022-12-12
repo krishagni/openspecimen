@@ -16,7 +16,7 @@ public class ExportedFileDetail {
 	}
 
 	public ExportedFileDetail(boolean completed) {
-		this.completed = false;
+		this.completed = completed;
 	}
 
 	public String getName() {

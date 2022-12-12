@@ -15,6 +15,8 @@ public class ContainerTransferEventDetail {
 
 	private String containerName;
 
+	private String containerDisplayName;
+
 	private String fromSite;
 
 	private StorageLocationSummary fromLocation;
@@ -28,6 +30,12 @@ public class ContainerTransferEventDetail {
 	private Date time;
 
 	private String reason;
+
+	private String freezerName;
+
+	private String freezerDisplayName;
+
+	private List<String> cps;
 
 	public Long getId() {
 		return id;
@@ -51,6 +59,14 @@ public class ContainerTransferEventDetail {
 
 	public void setContainerName(String containerName) {
 		this.containerName = containerName;
+	}
+
+	public String getContainerDisplayName() {
+		return containerDisplayName;
+	}
+
+	public void setContainerDisplayName(String containerDisplayName) {
+		this.containerDisplayName = containerDisplayName;
 	}
 
 	public String getFromSite() {
@@ -109,6 +125,30 @@ public class ContainerTransferEventDetail {
 		this.reason = reason;
 	}
 
+	public String getFreezerName() {
+		return freezerName;
+	}
+
+	public void setFreezerName(String freezerName) {
+		this.freezerName = freezerName;
+	}
+
+	public String getFreezerDisplayName() {
+		return freezerDisplayName;
+	}
+
+	public void setFreezerDisplayName(String freezerDisplayName) {
+		this.freezerDisplayName = freezerDisplayName;
+	}
+
+	public List<String> getCps() {
+		return cps;
+	}
+
+	public void setCps(List<String> cps) {
+		this.cps = cps;
+	}
+
 	public static List<ContainerTransferEventDetail> from(Collection<ContainerTransferEvent> events) {
 		return events.stream().map(ContainerTransferEventDetail::from).collect(Collectors.toList());
 	}
@@ -120,6 +160,7 @@ public class ContainerTransferEventDetail {
 		result.setToSite(event.getToSite().getName());
 		result.setContainerId(event.getContainer().getId());
 		result.setContainerName(event.getContainer().getName());
+		result.setContainerDisplayName(event.getContainer().getDisplayName());
 		result.setUser(UserSummary.from(event.getUser()));
 		result.setTime(event.getTime());
 		result.setReason(event.getReason());
@@ -128,6 +169,7 @@ public class ContainerTransferEventDetail {
 			StorageLocationSummary fromLocation = new StorageLocationSummary();
 			fromLocation.setId(event.getFromContainer().getId());
 			fromLocation.setName(event.getFromContainer().getName());
+			fromLocation.setDisplayName(event.getFromContainer().getDisplayName());
 			fromLocation.setPositionY(event.getFromRow());
 			fromLocation.setPositionX(event.getFromColumn());
 			fromLocation.setPosition(event.getFromPosition());
@@ -139,6 +181,7 @@ public class ContainerTransferEventDetail {
 			StorageLocationSummary toLocation = new StorageLocationSummary();
 			toLocation.setId(event.getToContainer().getId());
 			toLocation.setName(event.getToContainer().getName());
+			toLocation.setDisplayName(event.getToContainer().getDisplayName());
 			toLocation.setPositionY(event.getToRow());
 			toLocation.setPositionX(event.getToColumn());
 			toLocation.setPosition(event.getToPosition());

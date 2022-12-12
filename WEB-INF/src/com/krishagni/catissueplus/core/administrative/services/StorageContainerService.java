@@ -22,6 +22,7 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerSum
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerTransferListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
@@ -79,6 +80,8 @@ public interface StorageContainerService {
 	ResponseEvent<List<StorageContainerSummary>> createMultipleContainers(RequestEvent<List<StorageContainerDetail>> req);
 
 	ResponseEvent<List<ContainerTransferEventDetail>> getTransferEvents(RequestEvent<ContainerQueryCriteria> req);
+
+	ResponseEvent<ExportedFileDetail> exportTransferEvents(RequestEvent<ContainerTransferListCriteria> req);
 
 	//
 	// printing

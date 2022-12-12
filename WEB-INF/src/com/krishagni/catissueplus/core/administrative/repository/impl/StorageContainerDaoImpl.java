@@ -27,14 +27,17 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 
+import com.krishagni.catissueplus.core.administrative.domain.ContainerTransferEvent;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.PositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
+import com.krishagni.catissueplus.core.administrative.events.ContainerTransferEventDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerRestrictionsCriteria;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerTransferListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
@@ -523,6 +526,117 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 				return summary;
 			}
 		).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ContainerTransferEventDetail> getTransferEvents(ContainerTransferListCriteria crit) {
+		String selectClause = "select r, c, tr";
+		String fromClause = "from " +
+			StorageContainer.class.getName() + " r " +
+			"join r.descendentContainers c " +
+			"join c.transferEvents tr " +
+			"left join r.parentContainer rp ";
+		String whereClause = "where rp.id is null and c.activityStatus != 'Disabled'";
+		String orderBy = "order by tr.time desc";
+		Map<String, Object> params = new HashMap<>();
+
+		if (CollectionUtils.isNotEmpty(crit.freezerNames())) {
+			whereClause += " and r.name in (:freezerNames)";
+			params.put("freezerNames", crit.freezerNames());
+		}
+
+		if (crit.lastId() != null) {
+			whereClause += " and tr.id < :lastId";
+			params.put("lastId", crit.lastId());
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.cps())) {
+			whereClause += " and c.id in ( " +
+				"select " +
+				"  ccp.id " +
+				"from " +
+				   StorageContainer.class.getName() + " ccp " +
+				"  left join ccp.compAllowedCps cp " +
+				"where " +
+				"  cp.id is null or cp.shortTitle in (:cps)" +
+			")";
+			params.put("cps", crit.cps());
+		}
+
+		if (crit.fromDate() != null) {
+			whereClause += " and tr.time >= :fromDate";
+			params.put("fromDate", crit.fromDate());
+		}
+
+		if (crit.toDate() != null) {
+			whereClause += " and tr.time <= :toDate";
+			params.put("toDate", crit.toDate());
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
+			String sq =
+				"select " +
+				"  c.id " +
+				"from " +
+				   StorageContainer.class.getName() + " c " +
+				   "join c.site site " +
+				   "join site.institute institute " +
+				   "left join c.compAllowedCps cp " +
+				"where ";
+
+			List<String> disjunctions = new ArrayList<>();
+			for (SiteCpPair siteCp : crit.siteCps()) {
+				StringBuilder restriction = new StringBuilder();
+				if (siteCp.getSiteId() != null) {
+					restriction.append("(site.id = ").append(siteCp.getSiteId());
+				} else {
+					restriction.append("(institute.id = ").append(siteCp.getInstituteId());
+				}
+
+				if (siteCp.getCpId() != null) {
+					restriction.append(" and (")
+						.append("cp.id is null or ")
+						.append("cp.id = ").append(siteCp.getCpId())
+						.append(")");
+				}
+
+				restriction.append(")");
+				disjunctions.add(restriction.toString());
+			}
+
+			sq += String.join(" or ", disjunctions);
+			whereClause += " and c.id in (" + sq + ")";
+		}
+
+		Query query = getCurrentSession()
+			.createQuery(selectClause + " " + fromClause + " " + whereClause + " " + orderBy)
+			.setFirstResult(crit.startAt())
+			.setMaxResults(crit.maxResults());
+
+		for (Map.Entry<String, Object> param : params.entrySet()) {
+			if (param.getValue() instanceof Collection) {
+				query.setParameterList(param.getKey(), (Collection) param.getValue());
+			} else {
+				query.setParameter(param.getKey(), param.getValue());
+			}
+		}
+
+		List<ContainerTransferEventDetail> result = new ArrayList<>();
+		List<Object[]> rows = query.list();
+		for (Object[] row : rows) {
+			int idx = -1;
+			StorageContainer root = (StorageContainer) row[++idx];
+			StorageContainer container = (StorageContainer) row[++idx];
+			ContainerTransferEvent tr = (ContainerTransferEvent) row[++idx];
+
+			ContainerTransferEventDetail event = ContainerTransferEventDetail.from(tr);
+			event.setFreezerName(root.getName());
+			event.setFreezerDisplayName(root.getDisplayName());
+			event.setCps(Utility.nullSafeStream(container.getCompAllowedCps()).map(cp -> cp.getShortTitle()).collect(Collectors.toList()));
+			result.add(event);
+		}
+
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -6,10 +6,11 @@ import formSvc  from '@/forms/services/Form.js';
 
 import addEditLayout      from '@/administrative/schemas/containers/addedit.js';
 import containerSchema    from '@/administrative/schemas/containers/container.js';
-import specimenSchema     from '@/administrative/schemas/containers/specimen.js';
-import transferFormSchema from '@/administrative/schemas/containers/transfer.js';
 import defragFormSchema   from '@/administrative/schemas/containers/defragment.js';
+import specimenSchema     from '@/administrative/schemas/containers/specimen.js';
 import locationsSchema    from '@/administrative/schemas/containers/locations.js';
+import transferFormSchema from '@/administrative/schemas/containers/transfer.js';
+import transferReportFormSchema from '@/administrative/schemas/containers/transfer-report.js';
 
 import taskAddEditLayout  from '@/administrative/schemas/container-tasks/addedit.js';
 import taskSchema         from '@/administrative/schemas/container-tasks/task.js';
@@ -147,6 +148,10 @@ class Container {
     return http.get('storage-containers/' + container.id + '/transfer-events');
   }
 
+  generateTransferReport(criteria) {
+    return http.get('storage-containers/transfer-events', criteria);
+  }
+
   getScheduledActivities(container) {
     return http.get('scheduled-container-activities', {containerId: container.id});
   }
@@ -241,6 +246,10 @@ class Container {
 
   getTransferFormSchema() {
     return transferFormSchema;
+  }
+
+  getTransferReportFormSchema() {
+    return transferReportFormSchema;
   }
 
   getDefragFormSchema() {

@@ -41,6 +41,8 @@
               <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
                 v-show-if-allowed="containerResources.importOpts" />
 
+              <os-button left-icon="file" :label="$t('containers.transfer_report')" @click="showTransferReportDialog" />
+
               <os-menu :label="$t('common.buttons.more')" :options="moreOpts"
                 v-show-if-allowed="containerResources.updateOpts" />
 
@@ -75,6 +77,19 @@
           </span>
         </template>
       </os-confirm-delete>
+
+      <os-dialog ref="trRptDialog">
+        <template #header>
+          <span v-t="'containers.transfer_report'"> Transfer Report </span>
+        </template>
+        <template #content>
+          <os-form ref="transferRpt" :schema="ctx.trRptFs.layout" :data="trRptCtx" />
+        </template>
+        <template #footer>
+          <os-button text    :label="$t('common.buttons.cancel')"   @click="closeTransferReportDialog" />
+          <os-button primary :label="$t('common.buttons.generate')" @click="generateTransferReport" />
+        </template>
+      </os-dialog>
     </os-page-body>
   </os-page>
 </template>
@@ -87,6 +102,7 @@ import containerSvc from '@/administrative/services/Container.js';
 import alertsSvc    from '@/common/services/Alerts.js';
 import exportSvc    from '@/common/services/ExportService.js';
 import routerSvc    from '@/common/services/Router.js';
+import util         from '@/common/services/Util.js';
 
 import containerResources from './Resources.js';
 
@@ -100,7 +116,8 @@ export default {
         containersCount: -1,
         loading: true,
         query: this.filters,
-        selectedContainers: []
+        selectedContainers: [],
+        trRptFs: containerSvc.getTransferReportFormSchema(),
       },
 
       listSchema,
@@ -141,6 +158,7 @@ export default {
         }
       ],
 
+      trRptCtx: {criteria: {}},
 
       containerResources
     };
@@ -223,6 +241,42 @@ export default {
 
     viewContainerTasks: function() {
       routerSvc.goto('ContainerTasksList');
+    },
+
+    showTransferReportDialog: function() {
+      this.trRptCtx = {criteria: {}};
+      this.$refs.trRptDialog.open()
+    },
+
+    closeTransferReportDialog: function() {
+      this.$refs.trRptDialog.close();
+    },
+
+    generateTransferReport: function() {
+      const criteria = util.clone(this.trRptCtx.criteria);
+      if (criteria.fromDate) {
+        const dt = new Date(criteria.fromDate);
+        criteria.fromDate = dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate();
+      }
+
+      if (criteria.toDate) {
+        const dt = new Date(criteria.toDate);
+        criteria.toDate = dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate();
+      }
+
+      alertsSvc.info({code: 'containers.generating_transfer_report'});
+      containerSvc.generateTransferReport(criteria).then(
+        (report) => {
+          if (report.completed) {
+            alertsSvc.info({code: 'containers.downloading_transfer_report'});
+            containerSvc.downloadReport(report.name);
+          } else {
+            alertsSvc.info({code: 'containers.transfer_report_by_email'});
+          }
+
+          this.closeTransferReportDialog();
+        }
+      );
     }
   }
 }
