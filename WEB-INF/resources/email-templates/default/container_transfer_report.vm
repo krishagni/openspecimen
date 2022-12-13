@@ -10,7 +10,7 @@
             <tr>
               <td style="border-collapse:collapse;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $rcpt.formattedName()
+                  Hello $rcpt.formattedName(),
                   <br><br>
                   #if (!$error)
                     The containers transfer report requested by you is ready. Click on the link given below to download the report.
