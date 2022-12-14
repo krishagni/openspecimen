@@ -34,10 +34,6 @@ public class StorageContainerDetail extends StorageContainerSummary {
 	
 	private Set<String> calcAllowedSpecimenTypes = new HashSet<>();
 
-	private Set<String> allowedCollectionProtocols = new HashSet<>();
-	
-	private Set<String> calcAllowedCollectionProtocols = new HashSet<>();
-
 	private Set<String> allowedDistributionProtocols = new HashSet<>();
 
 	private Set<String> calcAllowedDistributionProtocols = new HashSet<>();
@@ -122,22 +118,6 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	public void setCalcAllowedSpecimenTypes(Set<String> calcAllowedSpecimenTypes) {
 		this.calcAllowedSpecimenTypes = calcAllowedSpecimenTypes;
-	}
-
-	public Set<String> getAllowedCollectionProtocols() {
-		return allowedCollectionProtocols;
-	}
-
-	public void setAllowedCollectionProtocols(Set<String> allowedCollectionProtocols) {
-		this.allowedCollectionProtocols = allowedCollectionProtocols;
-	}
-
-	public Set<String> getCalcAllowedCollectionProtocols() {
-		return calcAllowedCollectionProtocols;
-	}
-
-	public void setCalcAllowedCollectionProtocols(Set<String> calcAllowedCollectionProtocols) {
-		this.calcAllowedCollectionProtocols = calcAllowedCollectionProtocols;
 	}
 
 	public Set<String> getAllowedDistributionProtocols() {

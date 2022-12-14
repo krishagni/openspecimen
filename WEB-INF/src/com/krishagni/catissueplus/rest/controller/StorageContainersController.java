@@ -2,7 +2,6 @@ package com.krishagni.catissueplus.rest.controller;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +36,7 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerSum
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
-import com.krishagni.catissueplus.core.administrative.repository.ContainerTransferListCriteria;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
@@ -495,7 +493,16 @@ public class StorageContainersController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, String> exportUtilisation(@PathVariable("id") Long id) {
-		ContainerQueryCriteria crit = new ContainerQueryCriteria(id);
+		ContainerReportCriteria crit = new ContainerReportCriteria().ids(Collections.singletonList(id));
+		ExportedFileDetail file = ResponseEvent.unwrap(storageContainerSvc.exportUtilisation(RequestEvent.wrap(crit)));
+		return Collections.singletonMap("fileId", file != null ? file.getName() : null);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/export-utilisation")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> exportUtilisation(@RequestBody ContainerReportCriteria crit) {
+		crit.topLevelContainers(true);
 		ExportedFileDetail file = ResponseEvent.unwrap(storageContainerSvc.exportUtilisation(RequestEvent.wrap(crit)));
 		return Collections.singletonMap("fileId", file != null ? file.getName() : null);
 	}
@@ -605,43 +612,10 @@ public class StorageContainersController {
 		return ResponseEvent.unwrap(storageContainerSvc.getTransferEvents(RequestEvent.wrap(new ContainerQueryCriteria(containerId))));
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value="/transfer-events")
+	@RequestMapping(method = RequestMethod.POST, value="/export-transfer-events")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public ExportedFileDetail getTransferEvents(
-		@RequestParam(value = "freezer", required = false)
-		List<String> freezers,
-
-		@RequestParam(value = "cp", required = false)
-		List<String> cps,
-
-
-		@RequestParam(value = "fromDate", required = false)
-		@DateTimeFormat(pattern="yyyy-MM-dd")
-		Date fromDate,
-
-		@RequestParam(value = "toDate", required = false)
-		@DateTimeFormat(pattern="yyyy-MM-dd")
-		Date toDate,
-
-		@RequestParam(value = "lastId", required = false)
-		Long lastId,
-
-		@RequestParam(value = "startAt", required = false, defaultValue = "0")
-		int startAt,
-
-		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
-		int maxResults
-	) {
-
-		ContainerTransferListCriteria crit = new ContainerTransferListCriteria()
-			.freezerNames(freezers)
-			.cps(cps)
-			.fromDate(Utility.chopTime(fromDate))
-			.toDate(Utility.getEndOfDay(toDate))
-			.lastId(lastId)
-			.startAt(startAt)
-			.maxResults(maxResults);
+	public ExportedFileDetail exportTransferEvents(@RequestBody ContainerReportCriteria crit) {
 		return ResponseEvent.unwrap(storageContainerSvc.exportTransferEvents(RequestEvent.wrap(crit)));
 	}
 

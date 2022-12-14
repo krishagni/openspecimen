@@ -59,8 +59,8 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerSum
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
-import com.krishagni.catissueplus.core.administrative.repository.ContainerTransferListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerReport;
@@ -507,8 +507,22 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	@Override
-	public ResponseEvent<ExportedFileDetail> exportUtilisation(RequestEvent<ContainerQueryCriteria> req) {
-		return exportReport(req, utilisationReport);
+	@PlusTransactional
+	public ResponseEvent<ExportedFileDetail> exportUtilisation(RequestEvent<ContainerReportCriteria> req) {
+		try {
+			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			ContainerReportCriteria rptCrit = req.getPayload().siteCps(siteCps);
+			List<StorageContainer> containers = daoFactory.getStorageContainerDao().getStorageContainers(rptCrit.toListCriteria());
+			return exportReport(utilisationReport, containers, rptCrit);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
 	}
 
 	@Override
@@ -724,14 +738,14 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<ExportedFileDetail> exportTransferEvents(RequestEvent<ContainerTransferListCriteria> req) {
+	public ResponseEvent<ExportedFileDetail> exportTransferEvents(RequestEvent<ContainerReportCriteria> req) {
 		try {
 			Set<SiteCpPair> allowedSiteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
 			if (allowedSiteCps != null && allowedSiteCps.isEmpty()) {
 				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
 			}
 
-			ContainerTransferListCriteria crit = req.getPayload();
+			ContainerReportCriteria crit = req.getPayload();
 			crit.siteCps(allowedSiteCps);
 
 			User user = AuthUtil.getCurrentUser();
@@ -1832,40 +1846,57 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	private ResponseEvent<ExportedFileDetail> exportReport(RequestEvent<ContainerQueryCriteria> req, ContainerReport report, Object... params) {
 		try {
-			Date startTime = Calendar.getInstance().getTime();
 			StorageContainer container = getContainer(req.getPayload());
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
-			User user = AuthUtil.getCurrentUser();
-			String ipAddress = AuthUtil.getRemoteAddr();
-			Future<ExportedFileDetail> result = taskExecutor.submit(
-				() -> {
-					Throwable t = null;
-					String fileId = null;
-					try {
-						AuthUtil.setCurrentUser(user, ipAddress);
-						ExportedFileDetail file = report.generate(container, params);
-						fileId = file != null ? file.getName() : null;
-						exportSvc.saveJob(report.getName(), startTime, Collections.singletonMap("containerId", container.getId().toString()));
-						return file;
-					} catch (Throwable e) {
-						t = e;
-						throw e;
-					} finally {
-						sendReportEmail(report.getName(), user, container, fileId, t);
-						AuthUtil.clearCurrentUser();
-					}
-				}
-			);
+			return exportReport(report, Collections.singletonList(container), params);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 
-			try {
-				return ResponseEvent.response(result.get(30, TimeUnit.SECONDS));
-			} catch (TimeoutException te) {
-				return ResponseEvent.response(null);
-			} catch (OpenSpecimenException ose) {
-				return ResponseEvent.error(ose);
-			} catch (Exception e) {
-				return ResponseEvent.serverError(e);
+	private ResponseEvent<ExportedFileDetail> exportReport(ContainerReport report, List<StorageContainer> containers, Object... params) {
+		User user = AuthUtil.getCurrentUser();
+		String ipAddress = AuthUtil.getRemoteAddr();
+		Future<ExportedFileDetail> result = taskExecutor.submit(
+			() -> {
+				Date startTime = Calendar.getInstance().getTime();
+				Throwable t = null;
+				String fileId = null;
+				try {
+					AuthUtil.setCurrentUser(user, ipAddress);
+					ExportedFileDetail file = report.generate(containers, params);
+					fileId = file != null ? file.getName() : null;
+
+					Map<String, String> jobParams = null;
+					if (params != null && params.length > 0 && params[0] instanceof ContainerReportCriteria) {
+						jobParams = ((ContainerReportCriteria) params[0]).toStrMap();
+					} else {
+						jobParams = Collections.singletonMap("containerIds", containers.stream().map(c -> c.getId().toString()).collect(Collectors.joining(", ")));
+					}
+
+					exportSvc.saveJob(report.getName(), startTime, jobParams);
+					return file;
+				} catch (Throwable e) {
+					t = e;
+					throw e;
+				} finally {
+					StorageContainer container = null;
+					if (containers.size() == 1) {
+						container = containers.get(0);
+					}
+
+					sendReportEmail(report.getName(), user, container, fileId, t);
+					AuthUtil.clearCurrentUser();
+				}
 			}
+		);
+
+		try {
+			return ResponseEvent.response(result.get(30, TimeUnit.SECONDS));
+		} catch (TimeoutException te) {
+			return ResponseEvent.response(null);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -2197,7 +2228,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	@PlusTransactional
-	private ResponseEvent<String> exportTransferEvents0(ContainerTransferListCriteria crit) {
+	private ResponseEvent<String> exportTransferEvents0(ContainerReportCriteria crit) {
 		Date startTime = Calendar.getInstance().getTime();
 		String fileId = "csv_" + UUID.randomUUID().toString() + "_" + AuthUtil.getCurrentUser().getId() + "_transfer_report";
 		File file     = new File(ConfigUtil.getInstance().getReportsDir(), fileId + ".csv");
@@ -2337,13 +2368,16 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 		report = MessageUtil.getInstance().getMessage(report);
 
-		String displayTitle = container.getName();
-		if (StringUtils.isNotBlank(container.getDisplayName())) {
-			displayTitle = container.getDisplayName() + " (" + container.getName() + ")";
+		String displayTitle = null;
+		if (container != null) {
+			displayTitle = container.getName();
+			if (StringUtils.isNotBlank(container.getDisplayName())) {
+				displayTitle = container.getDisplayName() + " (" + displayTitle + ")";
+			}
 		}
 
 		Map<String, Object> props = new HashMap<>();
-		props.put("$subject", new String[] { report.toLowerCase(), displayTitle });
+		props.put("$subject", new String[] { report.toLowerCase(), displayTitle != null ? ": " + displayTitle : "" });
 		props.put("report", report.toLowerCase());
 		props.put("fileId", fileId);
 		props.put("error", error);

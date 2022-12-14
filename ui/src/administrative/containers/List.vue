@@ -41,10 +41,7 @@
               <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
                 v-show-if-allowed="containerResources.importOpts" />
 
-              <os-button left-icon="file" :label="$t('containers.transfer_report')" @click="showTransferReportDialog" />
-
-              <os-menu :label="$t('common.buttons.more')" :options="moreOpts"
-                v-show-if-allowed="containerResources.updateOpts" />
+              <os-menu :label="$t('common.buttons.more')" :options="moreOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/containers" new-tab="true" />
@@ -90,6 +87,19 @@
           <os-button primary :label="$t('common.buttons.generate')" @click="generateTransferReport" />
         </template>
       </os-dialog>
+
+      <os-dialog ref="utRptDialog">
+        <template #header>
+          <span v-t="'containers.utilisation_report'"> Utilisation Report </span>
+        </template>
+        <template #content>
+          <os-form ref="utilisationRpt" :schema="ctx.trRptFs.layout" :data="trRptCtx" />
+        </template>
+        <template #footer>
+          <os-button text    :label="$t('common.buttons.cancel')"   @click="closeUtilisationReportDialog" />
+          <os-button primary :label="$t('common.buttons.generate')" @click="generateUtilisationReport" />
+        </template>
+      </os-dialog>
     </os-page-body>
   </os-page>
 </template>
@@ -100,9 +110,9 @@ import listSchema   from '@/administrative/schemas/containers/list.js';
 
 import containerSvc from '@/administrative/services/Container.js';
 import alertsSvc    from '@/common/services/Alerts.js';
+import authSvc      from '@/common/services/Authorization.js';
 import exportSvc    from '@/common/services/ExportService.js';
 import routerSvc    from '@/common/services/Router.js';
-import util         from '@/common/services/Util.js';
 
 import containerResources from './Resources.js';
 
@@ -110,6 +120,46 @@ export default {
   props: ['filters'],
 
   data() {
+    const moreOpts = [];
+    if (authSvc.isAllowed({resource: 'StorageContainer', operations: ['Update']})) {
+      moreOpts.push({
+        icon: 'archive',
+        caption: this.$t('common.buttons.archive'),
+        onSelect: () => routerSvc.goto('BulkContainerArchive')
+      });
+      moreOpts.push({
+        icon: 'sign-in-alt',
+        caption: this.$t('containers.check_in_button'),
+        onSelect: () => routerSvc.goto('BulkContainerCheckin')
+      });
+      moreOpts.push({
+        icon: 'sign-out-alt',
+        caption: this.$t('containers.check_out_button'),
+        onSelect: () => routerSvc.goto('BulkContainerCheckout')
+      });
+      moreOpts.push({
+        icon: 'arrows-alt-h',
+        caption: this.$t('containers.transfer'),
+        onSelect: () => routerSvc.goto('BulkContainerTransfer')
+      });
+    }
+
+    if (moreOpts.length > 0) {
+      moreOpts.push({divider: true});
+    }
+
+    moreOpts.push({
+      icon: 'arrows-alt-h',
+      caption: this.$t('containers.transfer_report'),
+      onSelect: () => this.showTransferReportDialog()
+    });
+
+    moreOpts.push({
+      icon: 'file',
+      caption: this.$t('containers.utilisation_report'),
+      onSelect: () => this.showUtilisationReportDialog()
+    });
+
     return {
       ctx: {
         containers: [],
@@ -135,30 +185,9 @@ export default {
         }
       ],
 
-      moreOpts: [
-        {
-          icon: 'archive',
-          caption: this.$t('common.buttons.archive'),
-          onSelect: () => routerSvc.goto('BulkContainerArchive')
-        },
-        {
-          icon: 'sign-in-alt',
-          caption: this.$t('containers.check_in_button'),
-          onSelect: () => routerSvc.goto('BulkContainerCheckin')
-        },
-        {
-          icon: 'sign-out-alt',
-          caption: this.$t('containers.check_out_button'),
-          onSelect: () => routerSvc.goto('BulkContainerCheckout')
-        },
-        {
-          icon: 'arrows-alt-h',
-          caption: this.$t('containers.transfer'),
-          onSelect: () => routerSvc.goto('BulkContainerTransfer')
-        }
-      ],
+      moreOpts: moreOpts,
 
-      trRptCtx: {criteria: {}},
+      trRptCtx: {showDateRange: false, criteria: {}},
 
       containerResources
     };
@@ -244,7 +273,7 @@ export default {
     },
 
     showTransferReportDialog: function() {
-      this.trRptCtx = {criteria: {}};
+      this.trRptCtx = {showDateRange: true, criteria: {}};
       this.$refs.trRptDialog.open()
     },
 
@@ -253,19 +282,8 @@ export default {
     },
 
     generateTransferReport: function() {
-      const criteria = util.clone(this.trRptCtx.criteria);
-      if (criteria.fromDate) {
-        const dt = new Date(criteria.fromDate);
-        criteria.fromDate = dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate();
-      }
-
-      if (criteria.toDate) {
-        const dt = new Date(criteria.toDate);
-        criteria.toDate = dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate();
-      }
-
       alertsSvc.info({code: 'containers.generating_transfer_report'});
-      containerSvc.generateTransferReport(criteria).then(
+      containerSvc.exportTransferEvents(this.trRptCtx.criteria).then(
         (report) => {
           if (report.completed) {
             alertsSvc.info({code: 'containers.downloading_transfer_report'});
@@ -275,6 +293,31 @@ export default {
           }
 
           this.closeTransferReportDialog();
+        }
+      );
+    },
+
+    showUtilisationReportDialog: function() {
+      this.trRptCtx = {showDateRange: false, criteria: {}};
+      this.$refs.utRptDialog.open()
+    },
+
+    closeUtilisationReportDialog: function() {
+      this.$refs.utRptDialog.close();
+    },
+
+    generateUtilisationReport: function() {
+      alertsSvc.info({code: 'containers.generating_utilisation_report'});
+      containerSvc.exportUtilisation(null, this.trRptCtx.criteria).then(
+        (report) => {
+          if (report.fileId) {
+            alertsSvc.info({code: 'containers.downloading_utilisation_report'});
+            containerSvc.downloadReport(report.fileId);
+          } else {
+            alertsSvc.info({code: 'containers.utilisation_report_by_email'});
+          }
+
+          this.closeUtilisationReportDialog();
         }
       );
     }

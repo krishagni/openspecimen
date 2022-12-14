@@ -68,6 +68,8 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 
 	List<StorageContainerSummary> getUtilisations(Collection<Long> containerIds);
 
-	List<ContainerTransferEventDetail> getTransferEvents(ContainerTransferListCriteria crit);
+	List<ContainerTransferEventDetail> getTransferEvents(ContainerReportCriteria crit);
+
+	List<StorageContainerSummary> fetchReportDetails(List<Long> containerIds);
 }
 	

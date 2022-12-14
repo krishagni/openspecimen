@@ -2,7 +2,9 @@ package com.krishagni.catissueplus.core.administrative.events;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -65,7 +67,11 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 	private Boolean automated;
 
 	private String autoFreezerProvider;
-	
+
+	private Set<String> allowedCollectionProtocols = new HashSet<>();
+
+	private Set<String> calcAllowedCollectionProtocols = new HashSet<>();
+
 	private List<StorageContainerSummary> childContainers;
 
 	private Boolean starred;
@@ -73,6 +79,14 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 	private String status;
 
 	private StorageLocationSummary blockedLocation;
+
+	private Long freezerId;
+
+	private String freezerName;
+
+	private String freezerBarcode;
+
+	private String freezerDisplayName;
 
 	public Long getId() {
 		return id;
@@ -273,6 +287,22 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		this.autoFreezerProvider = autoFreezerProvider;
 	}
 
+	public Set<String> getAllowedCollectionProtocols() {
+		return allowedCollectionProtocols;
+	}
+
+	public void setAllowedCollectionProtocols(Set<String> allowedCollectionProtocols) {
+		this.allowedCollectionProtocols = allowedCollectionProtocols;
+	}
+
+	public Set<String> getCalcAllowedCollectionProtocols() {
+		return calcAllowedCollectionProtocols;
+	}
+
+	public void setCalcAllowedCollectionProtocols(Set<String> calcAllowedCollectionProtocols) {
+		this.calcAllowedCollectionProtocols = calcAllowedCollectionProtocols;
+	}
+
 	public List<StorageContainerSummary> getChildContainers() {
 		return childContainers;
 	}
@@ -303,6 +333,38 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 
 	public void setBlockedLocation(StorageLocationSummary blockedLocation) {
 		this.blockedLocation = blockedLocation;
+	}
+
+	public Long getFreezerId() {
+		return freezerId;
+	}
+
+	public void setFreezerId(Long freezerId) {
+		this.freezerId = freezerId;
+	}
+
+	public String getFreezerName() {
+		return freezerName;
+	}
+
+	public void setFreezerName(String freezerName) {
+		this.freezerName = freezerName;
+	}
+
+	public String getFreezerBarcode() {
+		return freezerBarcode;
+	}
+
+	public void setFreezerBarcode(String freezerBarcode) {
+		this.freezerBarcode = freezerBarcode;
+	}
+
+	public String getFreezerDisplayName() {
+		return freezerDisplayName;
+	}
+
+	public void setFreezerDisplayName(String freezerDisplayName) {
+		this.freezerDisplayName = freezerDisplayName;
 	}
 
 	protected static void transform(StorageContainer container, StorageContainerSummary result) {

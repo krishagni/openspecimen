@@ -429,5 +429,40 @@
       group by
         b.identifier, b.name, b.no_of_rows, b.no_of_cols
     </sql-query>
+
+    <sql-query name="getContainerReportDetails">
+      <return-scalar column="boxId" type="long" />
+      <return-scalar column="boxName" type="string" />
+      <return-scalar column="boxBarcode" type="string" />
+      <return-scalar column="boxDisplayName" type="string" />
+      <return-scalar column="boxStatus" type="string" />
+      <return-scalar column="boxActivityStatus" type="string" />
+      <return-scalar column="freezerId" type="long" />
+      <return-scalar column="freezerName" type="string" />
+      <return-scalar column="freezerBarcode" type="string" />
+      <return-scalar column="freezerDisplayName" type="string" />
+      <return-scalar column="typeName" type="string" />
+      <return-scalar column="cpShortTitle" type="string" />
+
+      select
+        b.identifier as boxId, b.name as boxName, b.barcode as boxBarcode, b.display_name as boxDisplayName,
+        b.status as boxStatus, b.activity_status as boxActivityStatus,
+        f.identifier as freezerId, f.name as freezerName, f.barcode as freezerBarcode,
+        f.display_name as freezerDisplayName, t.name as typeName, cp.short_title as cpShortTitle
+      from
+        os_storage_containers b
+        inner join os_containers_hierarchy h on h.descendent_id = b.identifier
+        inner join os_storage_containers f on f.identifier = h.ancestor_id
+        left join os_container_types t on t.identifier = b.type_id
+        left join os_stor_container_comp_cps scp on scp.storage_container_id = b.identifier
+        left join catissue_collection_protocol cp on cp.identifier = scp.cp_id
+      where
+        b.activity_status != 'Disabled' and
+        (cp.identifier is null or cp.activity_status != 'Disabled') and
+        f.parent_container_id is null and
+        b.identifier in (:boxIds)
+      order by
+        b.name
+    </sql-query>
   </class>
 </hibernate-mapping>

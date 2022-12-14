@@ -9,6 +9,7 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.services.ContainerReport;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
@@ -22,40 +23,47 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 		this.daoFactory = daoFactory;
 	}
 
+	@Override
+	public ExportedFileDetail generate(List<StorageContainer> containers, Object... params) {
+		throw new UnsupportedOperationException("Bulk report generation for " + getName() + " is not supported!");
+	}
+
 	protected void exportContainerSummary(StorageContainer container, CsvWriter writer) {
-		writer.writeNext(new String[] { message(CONTAINER_DETAILS) });
-		writer.writeNext(new String[] { message(CONTAINER_NAME), container.getName() });
-		writer.writeNext(new String[] { message(CONTAINER_DISPLAY_NAME), container.getDisplayName() });
-		writer.writeNext(new String[] { message(CONTAINER_HIERARCHY), container.getStringifiedAncestors() });
+		if (container != null) {
+			writer.writeNext(new String[] { message(CONTAINER_DETAILS) });
+			writer.writeNext(new String[] { message(CONTAINER_NAME), container.getName() });
+			writer.writeNext(new String[] { message(CONTAINER_DISPLAY_NAME), container.getDisplayName() });
+			writer.writeNext(new String[] { message(CONTAINER_HIERARCHY), container.getStringifiedAncestors() });
 
-		writer.writeNext(new String[] { message(CONTAINER_RESTRICTIONS) });
+			writer.writeNext(new String[] { message(CONTAINER_RESTRICTIONS) });
 
-		List<String> cps = new ArrayList<>();
-		cps.add(message(CONTAINER_PROTOCOL));
-		if (container.getCompAllowedCps().isEmpty()) {
-			cps.add(message(ALL));
-		} else {
-			for (CollectionProtocol cp : container.getCompAllowedCps()) {
-				cps.add(cp.getTitle());
+			List<String> cps = new ArrayList<>();
+			cps.add(message(CONTAINER_PROTOCOL));
+			if (container.getCompAllowedCps().isEmpty()) {
+				cps.add(message(ALL));
+			} else {
+				for (CollectionProtocol cp : container.getCompAllowedCps()) {
+					cps.add(cp.getTitle());
+				}
 			}
+			writer.writeNext(cps.toArray(new String[0]));
+
+			List<String> types = new ArrayList<>();
+			types.add(message(CONTAINER_SPECIMEN_TYPES));
+			if (container.getCompAllowedSpecimenClasses().isEmpty() &&
+				container.getCompAllowedSpecimenTypes().isEmpty()) {
+				types.add(message(ALL));
+			} else {
+				for (PermissibleValue specimenClass : container.getCompAllowedSpecimenClasses()) {
+					types.add(specimenClass.getValue());
+				}
+
+				for (PermissibleValue type : container.getCompAllowedSpecimenTypes()) {
+					types.add(type.getValue());
+				}
+			}
+			writer.writeNext(types.toArray(new String[0]));
 		}
-		writer.writeNext(cps.toArray(new String[0]));
-
-		List<String> types = new ArrayList<>();
-		types.add(message(CONTAINER_SPECIMEN_TYPES));
-		if (container.getCompAllowedSpecimenClasses().isEmpty() &&
-			container.getCompAllowedSpecimenTypes().isEmpty()) {
-			types.add(message(ALL));
-		} else {
-			for (PermissibleValue specimenClass : container.getCompAllowedSpecimenClasses()) {
-				types.add(specimenClass.getValue());
-			}
-
-			for (PermissibleValue type : container.getCompAllowedSpecimenTypes()) {
-				types.add(type.getValue());
-			}
-		}
-		writer.writeNext(types.toArray(new String[0]));
 
 		writer.writeNext(new String[] { message(EXPORTED_BY), AuthUtil.getCurrentUser().formattedName() });
 		writer.writeNext(new String[] { message(EXPORTED_ON), Utility.getDateTimeString(Calendar.getInstance().getTime()) });
@@ -68,28 +76,42 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 
 	// <zip>_<uuid>_<userId>_<name>
 	protected String getZipFileId(StorageContainer container, String uuid) {
-		return getFileId(container, "zip", uuid);
+		return getFileId(container.getName(), "zip", uuid);
+	}
+
+	protected String getZipFileId(String name, String uuid) {
+		return getFileId(name, "zip", uuid);
 	}
 
 	// <csv>_<uuid>_<userId>_<name>
 	protected String getCsvFileId(StorageContainer container, String uuid) {
-		return getFileId(container, "csv", uuid);
+		return getFileId(container.getName(), "csv", uuid);
 	}
 
-	private String getFileId(StorageContainer container, String type, String uuid) {
+	private String getFileId(String name, String type, String uuid) {
 		return String.join(
 			"_",
 			type,
 			uuid,
 			AuthUtil.getCurrentUser().getId().toString(),
-			Utility.sanitizeFilename(container.getName()));
+			Utility.sanitizeFilename(name));
 	}
 
 	protected static final String CONTAINER_DETAILS        = "storage_container_details";
 
-	protected static final String CONTAINER_NAME           = "storage_container_name";
+	protected static final String CONTAINER_NAME           = "container_name";
 
-	protected static final String CONTAINER_DISPLAY_NAME   = "storage_container_display_name";
+	protected static final String CONTAINER_BARCODE        = "container_barcode";
+
+	protected static final String CONTAINER_DISPLAY_NAME   = "container_display_name";
+
+	protected static final String FREEZER_NAME             = "freezer_name";
+
+	protected static final String FREEZER_BARCODE          = "freezer_barcode";
+
+	protected static final String FREEZER_DISPLAY_NAME     = "freezer_display_name";
+
+	protected static final String CONTAINER_STATUS         = "container_status";
 
 	protected static final String CONTAINER_HIERARCHY      = "storage_container_hierarchy";
 

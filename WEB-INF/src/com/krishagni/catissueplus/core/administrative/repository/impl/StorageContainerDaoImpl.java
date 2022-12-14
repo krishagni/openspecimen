@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,8 +37,8 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPos
 import com.krishagni.catissueplus.core.administrative.events.ContainerTransferEventDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerRestrictionsCriteria;
-import com.krishagni.catissueplus.core.administrative.repository.ContainerTransferListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
@@ -529,7 +530,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	@Override
-	public List<ContainerTransferEventDetail> getTransferEvents(ContainerTransferListCriteria crit) {
+	public List<ContainerTransferEventDetail> getTransferEvents(ContainerReportCriteria crit) {
 		String selectClause = "select r, c, tr";
 		String fromClause = "from " +
 			StorageContainer.class.getName() + " r " +
@@ -540,9 +541,9 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		String orderBy = "order by tr.time desc";
 		Map<String, Object> params = new HashMap<>();
 
-		if (CollectionUtils.isNotEmpty(crit.freezerNames())) {
+		if (CollectionUtils.isNotEmpty(crit.names())) {
 			whereClause += " and r.name in (:freezerNames)";
-			params.put("freezerNames", crit.freezerNames());
+			params.put("freezerNames", crit.names());
 		}
 
 		if (crit.lastId() != null) {
@@ -639,6 +640,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return result;
 	}
 
+
 	@SuppressWarnings("unchecked")
 	private Map<String, List<String>> getInvalidSpecimens(List<Long> containerIds, DetachedCriteria validSpmnsQuery, int firstN) {
 		List<Object[]> rows = getCurrentSession().createCriteria(Specimen.class, "specimen")
@@ -698,6 +700,44 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		}
 
 		return container;
+	}
+
+	@Override
+	public List<StorageContainerSummary> fetchReportDetails(List<Long> containerIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CONTAINER_DETAILS)
+			.setParameterList("boxIds", containerIds)
+			.list();
+
+		Map<Long, StorageContainerSummary> containersMap = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			int idx = -1;
+			Long boxId = (Long) row[++idx];
+			StorageContainerSummary box = containersMap.get(boxId);
+			if (box == null) {
+				box = new StorageContainerSummary();
+				box.setId((Long) boxId);
+				box.setName((String) row[++idx]);
+				box.setBarcode((String) row[++idx]);
+				box.setDisplayName((String) row[++idx]);
+				box.setStatus((String) row[++idx]);
+				box.setActivityStatus((String) row[++idx]);
+				box.setFreezerId((Long) row[++idx]);
+				box.setFreezerName((String) row[++idx]);
+				box.setFreezerBarcode((String) row[++idx]);
+				box.setFreezerDisplayName((String) row[++idx]);
+				box.setTypeName((String) row[++idx]);
+				containersMap.put(boxId, box);
+			} else {
+				idx += 10;
+			}
+
+			String cp = (String) row[++idx];
+			if (cp != null && !cp.trim().isEmpty()) {
+				box.getCalcAllowedCollectionProtocols().add(cp);
+			}
+		}
+
+		return new ArrayList<>(containersMap.values());
 	}
 
 	private void linkParentChildContainers(Map<Long, StorageContainerSummary> containersMap) {
@@ -1197,4 +1237,6 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	private static final String GET_SHIPPED_CONTAINERS = FQN + ".getShippedContainers";
 
 	private static final String GET_CONTAINER_UTILISATION = FQN + ".getContainersUtilisation";
+
+	private static final String GET_CONTAINER_DETAILS = FQN + ".getContainerReportDetails";
 }

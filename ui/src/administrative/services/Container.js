@@ -105,8 +105,14 @@ class Container {
     return http.post('storage-containers/' + container.id + '/export-empty-positions', {});
   }
 
-  async exportUtilisation(container) {
-    return http.post('storage-containers/' + container.id + '/export-utilisation', {});
+  async exportUtilisation(container, criteria) {
+    if (container) {
+      return http.post('storage-containers/' + container.id + '/export-utilisation', {});
+    } else if (criteria) {
+      return http.post('storage-containers/export-utilisation', criteria);
+    } else {
+      alert('No criteria and container for export utilisation');
+    }
   }
 
   async exportDefragReport(container, defragDetail) {
@@ -148,8 +154,8 @@ class Container {
     return http.get('storage-containers/' + container.id + '/transfer-events');
   }
 
-  generateTransferReport(criteria) {
-    return http.get('storage-containers/transfer-events', criteria);
+  exportTransferEvents(criteria) {
+    return http.post('storage-containers/export-transfer-events', criteria);
   }
 
   getScheduledActivities(container) {

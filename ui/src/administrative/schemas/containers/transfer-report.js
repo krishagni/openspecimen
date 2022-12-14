@@ -4,7 +4,7 @@ export default {
       {
         fields: [
           {
-            name: "criteria.freezer",
+            name: "criteria.name",
             labelCode: "containers.freezer",
             type: "multiselect",
             listSource: {
@@ -42,7 +42,8 @@ export default {
           {
             name: "criteria.fromDate",
             labelCode: "containers.from_date",
-            type: "datePicker"
+            type: "datePicker",
+            showWhen: "showDateRange"
           }
         ]
       },
@@ -51,7 +52,8 @@ export default {
           {
             name: "criteria.toDate",
             labelCode: "containers.to_date",
-            type: "datePicker"
+            type: "datePicker",
+            showWhen: "showDateRange"
           }
         ]
       }
