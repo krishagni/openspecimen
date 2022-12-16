@@ -413,7 +413,12 @@ export default {
       this.$refs.validationsDialog.validate(this.dataCtx.orderItems, labels, prop);
     },
 
-    handleOrderItemInput: function({item, itemIdx}) {
+    handleOrderItemInput: function({field, item, itemIdx}) {
+      if (field.name == 'quantity' || field.name == 'holdingLocation') {
+        item.dispose = (!!item.holdingLocation && !!item.holdingLocation.name) ||
+          (!item.specimen.availableQty || item.quantity >= item.specimen.availableQty);
+      }
+
       Object.assign(this.dataCtx.orderItems[itemIdx], item);
     },
 
