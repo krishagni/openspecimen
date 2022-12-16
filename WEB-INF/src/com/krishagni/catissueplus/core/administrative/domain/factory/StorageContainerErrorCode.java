@@ -96,7 +96,7 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	CHECKED_OUT_ALREADY,
 
-	HAS_SPECIMENS,
+	CANNOT_ARCHIVE,
 
 	PARENT_ARCHIVED,
 

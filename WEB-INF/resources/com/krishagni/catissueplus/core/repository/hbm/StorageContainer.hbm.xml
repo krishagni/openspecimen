@@ -252,6 +252,8 @@
       <return-scalar column="noOfRows"      type="int"/>
       <return-scalar column="noOfColumns"   type="int"/>
       <return-scalar column="posAssignment" type="string"/>
+      <return-scalar column="status"        type="string"/>
+      <return-scalar column="activityStatus" type="string"/>
       <return-scalar column="parentId"      type="long"/>
       <return-scalar column="rowNo"         type="int"/>
       <return-scalar column="colNo"         type="int"/>
@@ -261,8 +263,8 @@
       select
         s.identifier as containerId, s.name as containerName, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, s.pos_assignment as posAssignment,
-        s.parent_container_id as parentId, p.pos_two as rowNo, p.pos_one as colNo,
-        p.pos_two_str as rowStr, p.pos_one_str as colStr
+        s.status, s.activity_status as activityStatus, s.parent_container_id as parentId,
+        p.pos_two as rowNo, p.pos_one as colNo, p.pos_two_str as rowStr, p.pos_one_str as colStr
       from
         os_storage_containers s
         left join os_container_positions p on p.occupying_container_id = s.identifier
@@ -274,7 +276,8 @@
       select
         s.identifier as containerId, s.name as containerName, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, s.pos_assignment as posAssignment,
-        null as parentId, null as rowNo, null as colNo, null as rowStr, null as colStr
+        s.status, s.activity_status as activityStatus, null as parentId, null as rowNo, null as colNo,
+        null as rowStr, null as colStr
       from
         os_storage_containers s
       where
@@ -288,6 +291,8 @@
       <return-scalar column="noOfRows"      type="int"/>
       <return-scalar column="noOfColumns"   type="int"/>
       <return-scalar column="posAssignment" type="string"/>
+      <return-scalar column="status"        type="string"/>
+      <return-scalar column="activityStatus" type="string"/>
       <return-scalar column="parentId"      type="long"/>
       <return-scalar column="rowNo"         type="int"/>
       <return-scalar column="colNo"         type="int"/>
@@ -297,8 +302,8 @@
       select
         s.identifier as containerId, s.name as containerName, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, null as posAssignment,
-        s.parent_container_id as parentId, p.pos_two as rowNo, p.pos_one as colNo,
-        p.pos_two_str as rowStr, p.pos_one_str as colStr
+        s.status, s.activity_status as activityStatus, s.parent_container_id as parentId,
+        p.pos_two as rowNo, p.pos_one as colNo, p.pos_two_str as rowStr, p.pos_one_str as colStr
       from
         os_storage_containers s
         left join os_container_positions p on p.occupying_container_id = s.identifier

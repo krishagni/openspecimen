@@ -1092,19 +1092,6 @@ public class StorageContainer extends BaseExtensionEntity {
 		deleteWithoutCheck();
 	}
 
-	public void archive() {
-		if (isArchived() || isDeleted()) {
-			return;
-		}
-
-		int specimensCnt = getSpecimensCount();
-		if (specimensCnt > 0) {
-			throw OpenSpecimenException.userError(StorageContainerErrorCode.HAS_SPECIMENS, getName());
-		}
-
-		archive0(true);
-	}
-	
 	public String getStringifiedAncestors() {
 		StringBuilder names = new StringBuilder();
 		getStringifiedAncestors(names);
@@ -1412,8 +1399,21 @@ public class StorageContainer extends BaseExtensionEntity {
 		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 
-	private void archive0(boolean vacatePosition) {
-		getChildContainers().forEach(c -> c.archive0(false));
+	private void archive(String reason) {
+		if (isArchived() || isDeleted()) {
+			return;
+		}
+
+		int specimensCnt = getSpecimensCount();
+		if (specimensCnt > 0) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.CANNOT_ARCHIVE, getName(), specimensCnt);
+		}
+
+		archive0(true, reason);
+	}
+
+	private void archive0(boolean vacatePosition, String reason) {
+		getChildContainers().forEach(c -> c.archive0(false, null));
 		if (isSiteContainer()) {
 			getSite().setContainer(null);
 		}
@@ -1426,7 +1426,7 @@ public class StorageContainer extends BaseExtensionEntity {
 				null,
 				null,
 				null,
-				"ARCHIVED",
+				"ARCHIVED: " + (reason != null ? reason : ""),
 				false);
 			setParentContainer(parent);
 		}
@@ -1627,7 +1627,10 @@ public class StorageContainer extends BaseExtensionEntity {
 				throw OpenSpecimenException.userError(StorageContainerErrorCode.CHECKED_OUT_ALREADY, getName());
 			}
 
-			setParentContainer(null);
+			if (!checkOut) {
+				setParentContainer(null);
+			}
+
 			setPosition(null);
 			setSite(otherSite);
 		} else {
@@ -1702,7 +1705,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		if (other.isDeleted()) {
 			delete(true);
 		} else if (other.isArchived()) {
-			archive();
+			archive(other.getOpComments());
 		} else if (isArchived() && other.isActive()) {
 			if (other.getParentContainer() != null && !other.getParentContainer().isActive()) {
 				throw OpenSpecimenException.userError(StorageContainerErrorCode.PARENT_ARCHIVED, other.getParentContainer().getName());
@@ -1720,6 +1723,8 @@ public class StorageContainer extends BaseExtensionEntity {
 				container.setActivityStatus(other.getActivityStatus()); // active
 				containers.addAll(container.getChildContainers());
 			}
+
+			other.setOpComments("UNARCHIVED: " + (other.getOpComments() != null ? other.getOpComments() : ""));
 		}
 	}
 

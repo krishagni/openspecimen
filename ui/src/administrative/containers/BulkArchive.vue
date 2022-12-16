@@ -11,36 +11,56 @@
     </os-page-head>
 
     <os-page-body>
-      <div>
-        <div>
-          <os-add-items ref="addItems" :placeholder="$t('containers.scan_names_or_barcodes')"
-            @on-add="addContainers($event)" style="margin-bottom: 10px;" />
+      <os-steps ref="archiveWizard">
+        <os-step :title="$t('containers.list')">
+          <div>
+            <os-add-items ref="addItems" :placeholder="$t('containers.scan_names_or_barcodes')"
+              @on-add="addContainers($event)" style="margin-bottom: 10px;" />
 
-          <os-boolean-checkbox name="useBarcode" v-model="ctx.useBarcode">
-            <label v-t="'containers.use_barcode'">Use Barcode</label>
-          </os-boolean-checkbox>
+            <os-boolean-checkbox name="useBarcode" v-model="ctx.useBarcode">
+              <label v-t="'containers.use_barcode'">Use Barcode</label>
+            </os-boolean-checkbox>
 
-          <os-list-view
-            :data="ctx.containers"
-            :schema="listSchema"
-            :allowSelection="false"
-            :loading="false"
-            :showRowActions="true"
-            ref="listView">
-            <template #rowActions="slotProps">
-              <os-button left-icon="times" @click="removeContainer(slotProps.rowObject)" />
-            </template>
-          </os-list-view>
+            <os-list-view
+              :data="ctx.containers"
+              :schema="listSchema"
+              :allowSelection="false"
+              :loading="false"
+              :showRowActions="true"
+              ref="listView">
+              <template #rowActions="slotProps">
+                <os-button left-icon="times" @click="removeContainer(slotProps.rowObject)" />
+              </template>
+            </os-list-view>
 
-          <os-divider />
+            <os-divider />
 
-          <div class="os-form-footer">
-            <os-button primary :label="$t('common.buttons.archive')" @click="archive" />
+            <div class="os-form-footer">
+              <os-button primary :label="$t('common.buttons.next')" @click="next" />
 
-            <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
+              <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
+            </div>
           </div>
-        </div>
-      </div>
+        </os-step>
+        <os-step :title="$t('containers.archive')">
+          <div>
+            <os-table-form ref="archiveForm" :schema="archiveSchema"
+              :data="txCtx" :items="txCtx.containers"
+              :remove-items="true" @remove-item="removeContainer($event.item)">
+            </os-table-form>
+
+            <os-divider />
+
+            <div class="os-form-footer">
+              <os-button secondary :label="$t('common.buttons.previous')" @click="previous" />
+
+              <os-button primary :label="$t('common.buttons.submit')" @click="archive" />
+
+              <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
+            </div>
+          </div>
+        </os-step>
+      </os-steps>
 
       <os-confirm class="os-not-found-confirm" ref="notFoundConfirm">
         <template #title>
@@ -63,10 +83,12 @@
 
 <script>
 import listSchema     from '@/administrative/schemas/containers/boxes-list.js';
+import archiveSchema  from '@/administrative/schemas/containers/bulk-archive.js';
 
 import alertsSvc    from '@/common/services/Alerts.js';
 import containerSvc from '@/administrative/services/Container.js';
 import routerSvc    from '@/common/services/Router.js';
+import util         from '@/common/services/Util.js';
 
 export default {
   data() {
@@ -85,7 +107,13 @@ export default {
         notFound: []
       },
 
-      listSchema
+      txCtx: {
+        containers: []
+      },
+
+      listSchema,
+
+      archiveSchema
     };
   },
 
@@ -161,20 +189,57 @@ export default {
       }
 
       this.ctx.containers.splice(idx, 1);
+      if (this.$refs.archiveWizard.isLastStep()) {
+        this.txCtx.containers.splice(idx, 1);
+        if (this.txCtx.containers.length == 0) {
+          this.previous();
+        }
+      }
     },
 
-    archive: function() {
+    next: function() {
       if (this.ctx.containers.length == 0) {
         alertsSvc.error({code: 'containers.add_atleast_one'});
         return;
       }
 
-      const containers = this.ctx.containers.map(
-        ({container}) => ({id: container.id, activityStatus: 'Closed', transferComments: 'Archived'})
+      const transferredBy = this.$ui.currentUser;
+      const transferDate  = new Date().getTime();
+      this.txCtx.containers = this.ctx.containers.map(
+        ({container}) => {
+          const copy = container.trCtx = container.trCtx || util.clone(container);
+          copy.transferredBy = copy.transferredBy || transferredBy;
+          copy.transferDate = copy.transferDate || transferDate;
+          return {container: copy};
+        }
+      );
+
+      this.$refs.archiveWizard.next();
+    },
+
+    previous: function() {
+      this.$refs.archiveWizard.previous();
+    },
+
+    archive: function() {
+      if (!this.$refs.archiveForm.validate()) {
+        return;
+      }
+
+      const containers = this.txCtx.containers.map(
+        ({container}) => {
+          return {
+            id: container.id,
+            transferredBy: container.transferredBy,
+            transferDate: container.transferDate,
+            transferComments: container.transferComments,
+            activityStatus: 'Closed'
+          }
+        }
       );
 
       containerSvc.bulkUpdate(containers).then(
-        (result) => {
+        (result) => { 
           if (result) {
             alertsSvc.success({code: 'containers.archived', args: {count: result.length}});
           } else {

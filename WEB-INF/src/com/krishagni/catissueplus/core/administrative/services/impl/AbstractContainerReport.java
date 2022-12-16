@@ -25,7 +25,11 @@ public abstract class AbstractContainerReport implements ContainerReport  {
 
 	@Override
 	public ExportedFileDetail generate(List<StorageContainer> containers, Object... params) {
-		throw new UnsupportedOperationException("Bulk report generation for " + getName() + " is not supported!");
+		if (containers == null || containers.isEmpty()) {
+			return null;
+		}
+
+		return generate(containers.iterator().next(), params);
 	}
 
 	protected void exportContainerSummary(StorageContainer container, CsvWriter writer) {

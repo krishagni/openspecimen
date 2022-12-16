@@ -97,21 +97,29 @@
     </template>
   </os-dialog>
 
-  <os-confirm ref="archiveDialog">
-    <template #title>
-      <span v-t="{path: 'containers.archive', args: ctx.container}">Archive {ctx.container.name}}</span>
+  <os-dialog ref="archiveDialog">
+    <template #header>
+      <span v-t="{path: 'containers.archive_container', args: ctx.container}">Archive {ctx.container.name}}</span>
     </template>
-    <template #message>
-      <span v-t="{path: 'containers.confirm_archive', args: ctx.container}">Container <b>{{ctx.container.name}}</b> and its descendants will be archived. Are you sure you want to proceed?</span>
+    <template #content>
+      <os-form ref="archiveForm" :schema="ctx.archiveFs" :data="trCtx" @input="handleTransferInput($event)">
+        <template #message>
+          <span v-t="{path: 'containers.confirm_archive', args: ctx.container}">Container <b>{{ctx.container.name}}</b> and its descendants will be archived. Are you sure you want to proceed?</span>
+        </template>
+      </os-form>
     </template>
-  </os-confirm>
+    <template #footer>
+      <os-button text    :label="$t('common.buttons.cancel')" @click="closeArchiveDialog" />
+      <os-button primary :label="$t('common.buttons.archive')" @click="archive" />
+    </template>
+  </os-dialog>
 
   <os-dialog ref="unarchiveDialog">
     <template #header>
       <span v-t="{path: 'containers.unarchive', args: ctx.container}">Unarchive {{ctx.container.name}}</span>
     </template>
     <template #content>
-      <os-form ref="transferForm" :schema="ctx.transferFs.layout" :data="trCtx" @input="handleTransferInput($event)" />
+      <os-form ref="unarchiveForm" :schema="ctx.transferFs.layout" :data="trCtx" @input="handleTransferInput($event)" />
     </template>
     <template #footer>
       <os-button text    :label="$t('common.buttons.cancel')" @click="closeUnarchiveDialog" />
@@ -152,6 +160,25 @@ export default {
       transferFs: containerSvc.getTransferFormSchema(),
 
       defragFs: containerSvc.getDefragFormSchema(),
+
+      archiveFs: {
+        rows: [{
+          fields: [
+            {
+              "name": "container.transferComments",
+              "labelCode": "containers.transfer_reasons",
+              "type": "textarea",
+              "rows": "5",
+              "validations": {
+                "required": {
+                  "messageCode": "containers.transfer_reasons_required"
+                }
+              },
+              "showWhen": "showReason"
+            }
+          ]
+        }]
+      },
 
       dependents: [],
 
@@ -242,7 +269,7 @@ export default {
         ctx.moreOpts.push({
           icon: 'archive',
           caption: this.$t('common.buttons.archive'),
-          onSelect: () => this.archive()
+          onSelect: () => this.showArchiveForm()
         })
       }
 
@@ -329,17 +356,25 @@ export default {
       routerSvc.reload();
     },
 
+    showArchiveForm: function() {
+      const container = util.clone(this.ctx.container);
+      container.activityStatus = 'Closed';
+      container.transferredBy = this.$ui.currentUser;
+      container.transferDate = new Date().getTime();
+      this.trCtx = {container: container, showReason: container.storageLocation && container.storageLocation.name};
+      this.$refs.archiveDialog.open();
+    },
+
     archive: function() {
-      this.$refs.archiveDialog.open().then(
-        (resp) => {
-          if (resp == 'proceed') {
-            const container = util.clone(this.ctx.container);
-            container.activityStatus = 'Closed';
-            container.transferComments = 'Archived';
-            containerSvc.saveOrUpdate(container).then(() => routerSvc.reload());
-          }
-        }
-      );
+      if (!this.$refs.archiveForm.validate()) {
+        return;
+      }
+
+      containerSvc.saveOrUpdate(this.trCtx.container).then(() => routerSvc.reload());
+    },
+
+    closeArchiveDialog: function() {
+      this.$refs.archiveDialog.close();
     },
 
     showUnarchiveForm: function() {
@@ -347,7 +382,7 @@ export default {
       container.activityStatus = 'Active';
       container.transferredBy = this.$ui.currentUser;
       container.transferDate = new Date().getTime();
-      this.trCtx.container = container;
+      this.trCtx = {container: container};
       this.$refs.unarchiveDialog.open();
     },
 

@@ -680,6 +680,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		container.setNoOfRows((Integer)row[idx++]);
 		container.setNoOfColumns((Integer)row[idx++]);
 		container.setPositionAssignment((String)row[idx++]);
+		container.setStatus((String)row[idx++]);
+		container.setActivityStatus((String)row[idx++]);
 
 		if (row[idx] != null) {
 			StorageLocationSummary location = new StorageLocationSummary();
