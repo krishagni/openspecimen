@@ -24,13 +24,19 @@ public class ContainerDefragReport extends AbstractContainerReport implements Co
 		String uuid = UUID.randomUUID().toString();
 		File file = generateReport(container, (ContainerDefragDetail) params[0], uuid);
 
-		String zipFilename = getZipFileId(container, uuid);
-		String entryName = Utility.sanitizeFilename(container.getName()) + ".csv";
+		String filename = getFilename(container);
+		String zipFilename = getZipFileId(filename, uuid);
+		String entryName = filename + ".csv";
 		Pair<String, String> zipEntry = Pair.make(file.getAbsolutePath(), entryName);
 		File zipFile = new File(ConfigUtil.getInstance().getReportsDir(), zipFilename + ".zip");
 		Utility.zipFilesWithNames(Collections.singletonList(zipEntry), zipFile.getAbsolutePath());
 		file.delete();
 		return new ExportedFileDetail(zipFilename, zipFile);
+	}
+
+	@Override
+	public String getFilenamePrefix() {
+		return "defrag_report";
 	}
 
 	private File generateReport(StorageContainer container, ContainerDefragDetail input, String fileId) {

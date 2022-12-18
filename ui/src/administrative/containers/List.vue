@@ -38,9 +38,6 @@
               <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                 v-show-if-allowed="containerResources.importOpts" />
 
-              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
-                v-show-if-allowed="containerResources.importOpts" />
-
               <os-menu :label="$t('common.buttons.more')" :options="moreOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
@@ -121,7 +118,7 @@ export default {
 
   data() {
     const moreOpts = [];
-    if (authSvc.isAllowed({resource: 'StorageContainer', operations: ['Update']})) {
+    if (authSvc.isAllowed(containerResources.updateOpts)) {
       moreOpts.push({
         icon: 'archive',
         caption: this.$t('common.buttons.archive'),
@@ -159,6 +156,16 @@ export default {
       caption: this.$t('containers.utilisation_report'),
       onSelect: () => this.showUtilisationReportDialog()
     });
+
+    if (authSvc.isAllowed(containerResources.importOpts)) {
+      moreOpts.push({divider: true});
+
+      moreOpts.push({
+        icon: 'download',
+        caption: this.$t('common.buttons.export'),
+        onSelect: () => this.exportContainers()
+      });
+    }
 
     return {
       ctx: {

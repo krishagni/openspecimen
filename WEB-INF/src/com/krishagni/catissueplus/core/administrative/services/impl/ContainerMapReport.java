@@ -1,7 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,8 @@ public class ContainerMapReport extends AbstractContainerReport implements Conta
 			}
 
 			String uuid = UUID.randomUUID().toString();
-			String csvFilename = getCsvFileId(container, uuid);
+			String filename = getFilename(container);
+			String csvFilename = getCsvFileId(filename, uuid);
 			file = new File(ConfigUtil.getInstance().getReportsDir(), csvFilename + ".csv");
 			writer = CsvFileWriter.createCsvFileWriter(file);
 
@@ -56,7 +56,12 @@ public class ContainerMapReport extends AbstractContainerReport implements Conta
 			IOUtils.closeQuietly(writer);
 		}
 	}
-		
+
+	@Override
+	public String getFilenamePrefix() {
+		return "map_report";
+	}
+
 	private void exportOccupiedPositions(StorageContainer container, CsvWriter writer) {
 		PositionAssigner pa = container.getPositionAssigner();
 		boolean rowMajor = pa instanceof RowMajorPositionAssigner;

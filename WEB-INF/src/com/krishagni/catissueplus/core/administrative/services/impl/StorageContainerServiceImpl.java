@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -127,6 +128,8 @@ import edu.common.dynamicextensions.query.WideRowMode;
 
 public class StorageContainerServiceImpl implements StorageContainerService, ObjectAccessor, InitializingBean {
 	private static final LogUtil logger = LogUtil.getLogger(StorageContainerServiceImpl.class);
+
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
 	private DaoFactory daoFactory;
 
@@ -2230,7 +2233,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	private ResponseEvent<String> exportTransferEvents0(ContainerReportCriteria crit) {
 		Date startTime = Calendar.getInstance().getTime();
-		String fileId = "csv_" + UUID.randomUUID().toString() + "_" + AuthUtil.getCurrentUser().getId() + "_transfer_report";
+		String dateTime = sdf.format(startTime);
+		String fileId = "csv_" + UUID.randomUUID().toString() + "_" + AuthUtil.getCurrentUser().getId() + "_transfer_report_" + dateTime;
 		File file     = new File(ConfigUtil.getInstance().getReportsDir(), fileId + ".csv");
 
 		Throwable t = null;
@@ -2242,7 +2246,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			writer.writeNext(new String[0]);
 			writer.writeNext(new String[] {
-				msg("storage_container_name"), msg("storage_container_freezer"), msg("storage_container_protocols"),
+				msg("container_name"), msg("container_barcode"), msg("container_display_name"),
+				msg("freezer_name"), msg("freezer_barcode"), msg("freezer_display_name"), msg("storage_container_protocols"),
 				msg("transfer_event_id"), msg("transfer_event_user"), msg("transfer_event_time"), msg("common_reason"),
 				msg("transfer_event_from_site"), msg("transfer_event_from_container"), msg("transfer_event_from_row"), msg("transfer_event_from_col"), msg("transfer_event_from_position"),
 				msg("transfer_event_to_site"), msg("transfer_event_to_container"), msg("transfer_event_to_row"), msg("transfer_event_to_col"), msg("transfer_event_to_position")
@@ -2260,14 +2265,12 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 				for (ContainerTransferEventDetail event : events) {
 					String name = event.getContainerName();
-					if (StringUtils.isNotBlank(event.getContainerDisplayName())) {
-						name = event.getContainerDisplayName() + " (" + name + ")";
-					}
+					String barcode = event.getContainerBarcode();
+					String displayName = event.getContainerDisplayName();
 
 					String freezer = event.getFreezerName();
-					if (StringUtils.isNotBlank(event.getFreezerDisplayName())) {
-						freezer = event.getFreezerDisplayName() + " (" + freezer + ")";
-					}
+					String freezerBarcode = event.getFreezerBarcode();
+					String freezerDisplayName = event.getFreezerDisplayName();
 
 					StorageLocationSummary fromLoc = event.getFromLocation();
 					String fromContainer = null, fromRow = null, fromCol = null, fromPos = null;
@@ -2296,7 +2299,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 					++numRows;
 					writer.writeNext(new String[]{
-						name, freezer, Utility.join(event.getCps(), cp -> cp, ", "),
+						name, barcode, displayName, freezer, freezerBarcode, freezerDisplayName,
+						Utility.join(event.getCps(), cp -> cp, ", "),
 						event.getId().toString(), event.getUser().formattedName(), Utility.getDateTimeString(event.getTime()), event.getReason(),
 						event.getFromSite(), fromContainer, fromRow, fromCol, fromPos,
 						event.getToSite(), toContainer, toRow, toCol, toPos

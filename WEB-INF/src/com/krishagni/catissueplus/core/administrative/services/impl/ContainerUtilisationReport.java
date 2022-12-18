@@ -50,14 +50,19 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 		File file = generateReport(containers, rptCrit);
 
 		// <zip>_<uuid>_<userId>_<name>
-		String name = containers.size() == 1 ? containers.get(0).getName() : "utilisation_report";
+		String name = getFilename(containers.size() == 1 ? containers.get(0) : null);
 		String zipFilename = getZipFileId(name, file.getName());
-		String entryName = Utility.sanitizeFilename(name) + ".csv";
+		String entryName = name + ".csv";
 		Pair<String, String> zipEntry = Pair.make(file.getAbsolutePath(), entryName);
 		File zipFile = new File(ConfigUtil.getInstance().getReportsDir(), zipFilename + ".zip");
 		Utility.zipFilesWithNames(Collections.singletonList(zipEntry), zipFile.getAbsolutePath());
 		file.delete();
 		return new ExportedFileDetail(zipFilename, zipFile);
+	}
+
+	@Override
+	public String getFilenamePrefix() {
+		return "utilisation_report";
 	}
 
 	private File generateReport(List<StorageContainer> input, ContainerReportCriteria rptCrit) {

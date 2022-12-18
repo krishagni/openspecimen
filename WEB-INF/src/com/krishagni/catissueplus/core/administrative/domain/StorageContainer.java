@@ -1365,8 +1365,15 @@ public class StorageContainer extends BaseExtensionEntity {
 			.sorted((c1, c2) -> {
 				if (parent.isDimensionless()) {
 					return c1.getId().compareTo(c2.getId());
-				} else {
+				} else if (c1.getPosition() != null && c2.getPosition() != null) {
 					return c1.getPosition().getPosition().compareTo(c2.getPosition().getPosition());
+				} else if (c1.getPosition() != null) {
+					return -1;
+				} else if (c2.getPosition() != null) {
+					return 1;
+				} else {
+					// archived or checked out boxes
+					return c1.getId().compareTo(c2.getId());
 				}
 			})
 			.collect(Collectors.toList());

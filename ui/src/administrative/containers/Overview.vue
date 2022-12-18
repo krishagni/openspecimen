@@ -387,6 +387,10 @@ export default {
     },
 
     unarchive: function() {
+      if (!this.$refs.unarchiveForm.validate()) {
+        return;
+      }
+
       containerSvc.saveOrUpdate(this.trCtx.container).then(() => routerSvc.reload());
     },
 

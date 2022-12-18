@@ -5,15 +5,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import com.krishagni.catissueplus.core.administrative.domain.ContainerTransferEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class ContainerTransferEventDetail {
 	private Long id;
 
 	private Long containerId;
 
 	private String containerName;
+
+	private String containerBarcode;
 
 	private String containerDisplayName;
 
@@ -32,6 +37,8 @@ public class ContainerTransferEventDetail {
 	private String reason;
 
 	private String freezerName;
+
+	private String freezerBarcode;
 
 	private String freezerDisplayName;
 
@@ -59,6 +66,14 @@ public class ContainerTransferEventDetail {
 
 	public void setContainerName(String containerName) {
 		this.containerName = containerName;
+	}
+
+	public String getContainerBarcode() {
+		return containerBarcode;
+	}
+
+	public void setContainerBarcode(String containerBarcode) {
+		this.containerBarcode = containerBarcode;
 	}
 
 	public String getContainerDisplayName() {
@@ -133,6 +148,14 @@ public class ContainerTransferEventDetail {
 		this.freezerName = freezerName;
 	}
 
+	public String getFreezerBarcode() {
+		return freezerBarcode;
+	}
+
+	public void setFreezerBarcode(String freezerBarcode) {
+		this.freezerBarcode = freezerBarcode;
+	}
+
 	public String getFreezerDisplayName() {
 		return freezerDisplayName;
 	}
@@ -160,6 +183,7 @@ public class ContainerTransferEventDetail {
 		result.setToSite(event.getToSite().getName());
 		result.setContainerId(event.getContainer().getId());
 		result.setContainerName(event.getContainer().getName());
+		result.setContainerBarcode(event.getContainer().getBarcode());
 		result.setContainerDisplayName(event.getContainer().getDisplayName());
 		result.setUser(UserSummary.from(event.getUser()));
 		result.setTime(event.getTime());

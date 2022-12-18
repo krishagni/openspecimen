@@ -632,6 +632,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 			ContainerTransferEventDetail event = ContainerTransferEventDetail.from(tr);
 			event.setFreezerName(root.getName());
+			event.setFreezerBarcode(root.getBarcode());
 			event.setFreezerDisplayName(root.getDisplayName());
 			event.setCps(Utility.nullSafeStream(container.getCompAllowedCps()).map(cp -> cp.getShortTitle()).collect(Collectors.toList()));
 			result.add(event);
