@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -78,7 +80,7 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 			List<Long> containerIds = input.stream().map(StorageContainer::getId).collect(Collectors.toList());
 			Map<Long, StorageContainerSummary> containersMap  = getContainerDetails(containerIds).stream()
 				.collect(Collectors.toMap(StorageContainerSummary::getId, c -> c));
-			List<StorageContainerSummary> utilisations = getUtilisations(containersMap.keySet());
+			List<StorageContainerSummary> utilisations = getUtilisations(containersMap.values(), rptCrit.types());
 			for (StorageContainerSummary utilisation : utilisations) {
 				StorageContainerSummary container = containersMap.get(utilisation.getId());
 				container.setNoOfRows(utilisation.getNoOfRows());
@@ -92,15 +94,18 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 			List<Long> containersList = new ArrayList<>(containersMap.keySet());
 			while (!containersList.isEmpty()) {
 				Long parentId = containersList.remove(0);
-				writeToCsv(containersMap.remove(parentId), writer);
-				++count;
-				if (count % 25 == 0) {
-					writer.flush();
+				StorageContainerSummary parent = containersMap.remove(parentId);
+				if (CollectionUtils.isEmpty(rptCrit.types()) || (parent.getTypeName() != null && rptCrit.types().contains(parent.getTypeName()))) {
+					writeToCsv(parent, writer);
+					++count;
+					if (count % 25 == 0) {
+						writer.flush();
+					}
 				}
 
 				Map<Long, StorageContainerSummary> childrenMap = getChildContainers(parentId, cps, rptCrit.siteCps());
 				if (!childrenMap.isEmpty()) {
-					utilisations = getUtilisations(childrenMap.keySet());
+					utilisations = getUtilisations(childrenMap.values(), rptCrit.types());
 					for (StorageContainerSummary s : utilisations) {
 						StorageContainerSummary child = childrenMap.get(s.getId());
 						child.setNoOfRows(s.getNoOfRows());
@@ -173,8 +178,16 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 	}
 
 	@PlusTransactional
-	private List<StorageContainerSummary> getUtilisations(Collection<Long> containerIds) {
-		return daoFactory.getStorageContainerDao().getUtilisations(containerIds);
+	private List<StorageContainerSummary> getUtilisations(Collection<StorageContainerSummary> containers, Collection<String> types) {
+		if (CollectionUtils.isNotEmpty(types)) {
+			containers = containers.stream().filter(c -> c.getTypeName() != null && types.contains(c.getTypeName())).collect(Collectors.toList());
+		}
+
+		if (containers.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		return daoFactory.getStorageContainerDao().getUtilisations(containers.stream().map(StorageContainerSummary::getId).collect(Collectors.toList()));
 	}
 
 	private void writeToCsv(StorageContainerSummary container, CsvWriter writer) {
@@ -225,7 +238,7 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 
 		return sortedContainerIds.stream()
 			.map(containerId -> containers.get(containerId))
-			.collect(Collectors.toMap(c -> c.getId(), c -> c));
+			.collect(Collectors.toMap(c -> c.getId(), c -> c, (k1, k2) -> k1, LinkedHashMap::new));
 	}
 
 	private static final String CONTAINER_ROWS = "container_no_of_rows";

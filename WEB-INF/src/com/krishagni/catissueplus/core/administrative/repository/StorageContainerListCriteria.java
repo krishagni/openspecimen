@@ -60,6 +60,10 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 
 	private List<Status> statuses;
 
+	private Set<String> types;
+
+	private String orderBy;
+
 
 	@Override
 	public StorageContainerListCriteria self() {
@@ -295,5 +299,23 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 		} catch (Exception e) {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());
 		}
+	}
+
+	public Set<String> types() {
+		return types;
+	}
+
+	public StorageContainerListCriteria types(Set<String> types) {
+		this.types = types;
+		return self();
+	}
+
+	public String orderBy() {
+		return orderBy;
+	}
+
+	public StorageContainerListCriteria orderBy(String orderBy) {
+		this.orderBy = orderBy;
+		return self();
 	}
 }

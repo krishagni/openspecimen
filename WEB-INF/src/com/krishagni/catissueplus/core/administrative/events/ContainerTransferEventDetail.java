@@ -22,6 +22,8 @@ public class ContainerTransferEventDetail {
 
 	private String containerDisplayName;
 
+	private String typeName;
+
 	private String fromSite;
 
 	private StorageLocationSummary fromLocation;
@@ -82,6 +84,14 @@ public class ContainerTransferEventDetail {
 
 	public void setContainerDisplayName(String containerDisplayName) {
 		this.containerDisplayName = containerDisplayName;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
 	}
 
 	public String getFromSite() {

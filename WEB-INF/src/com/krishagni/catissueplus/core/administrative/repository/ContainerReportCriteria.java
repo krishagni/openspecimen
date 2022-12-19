@@ -20,6 +20,8 @@ public class ContainerReportCriteria extends AbstractListCriteria<ContainerRepor
 
 	private List<String> cps;
 
+	private List<String> types;
+
 	private Date fromDate;
 
 	private Date toDate;
@@ -57,6 +59,16 @@ public class ContainerReportCriteria extends AbstractListCriteria<ContainerRepor
 	@JsonProperty("cp")
 	public ContainerReportCriteria cps(List<String> cps) {
 		this.cps = cps;
+		return self();
+	}
+
+	public List<String> types() {
+		return types;
+	}
+
+	@JsonProperty("type")
+	public ContainerReportCriteria types(List<String> types) {
+		this.types = types;
 		return self();
 	}
 

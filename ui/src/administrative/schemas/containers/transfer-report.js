@@ -40,6 +40,21 @@ export default {
       {
         fields: [
           {
+            name: "criteria.type",
+            labelCode: "containers.types",
+            type: "multiselect",
+            listSource: {
+              apiUrl: "container-types",
+              displayProp: "name",
+              selectProp: "name",
+              searchProp: "name"
+            }
+          }
+        ]
+      },
+      {
+        fields: [
+          {
             name: "criteria.fromDate",
             labelCode: "containers.from_date",
             type: "datePicker",

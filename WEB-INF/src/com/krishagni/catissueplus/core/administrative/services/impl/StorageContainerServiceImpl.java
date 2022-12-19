@@ -2247,7 +2247,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			writer.writeNext(new String[0]);
 			writer.writeNext(new String[] {
 				msg("container_name"), msg("container_barcode"), msg("container_display_name"),
-				msg("freezer_name"), msg("freezer_barcode"), msg("freezer_display_name"), msg("storage_container_protocols"),
+				msg("freezer_name"), msg("freezer_barcode"), msg("freezer_display_name"),
+				msg("container_type"), msg("storage_container_protocols"),
 				msg("transfer_event_id"), msg("transfer_event_user"), msg("transfer_event_time"), msg("common_reason"),
 				msg("transfer_event_from_site"), msg("transfer_event_from_container"), msg("transfer_event_from_row"), msg("transfer_event_from_col"), msg("transfer_event_from_position"),
 				msg("transfer_event_to_site"), msg("transfer_event_to_container"), msg("transfer_event_to_row"), msg("transfer_event_to_col"), msg("transfer_event_to_position")
@@ -2299,7 +2300,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 					++numRows;
 					writer.writeNext(new String[]{
-						name, barcode, displayName, freezer, freezerBarcode, freezerDisplayName,
+						name, barcode, displayName, freezer, freezerBarcode, freezerDisplayName, event.getTypeName(),
 						Utility.join(event.getCps(), cp -> cp, ", "),
 						event.getId().toString(), event.getUser().formattedName(), Utility.getDateTimeString(event.getTime()), event.getReason(),
 						event.getFromSite(), fromContainer, fromRow, fromCol, fromPos,

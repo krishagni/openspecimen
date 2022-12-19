@@ -536,7 +536,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			StorageContainer.class.getName() + " r " +
 			"join r.descendentContainers c " +
 			"join c.transferEvents tr " +
-			"left join r.parentContainer rp ";
+			"left join r.parentContainer rp " +
+			"left join c.type t ";
 		String whereClause = "where rp.id is null and c.activityStatus != 'Disabled'";
 		String orderBy = "order by tr.time desc";
 		Map<String, Object> params = new HashMap<>();
@@ -562,6 +563,11 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 				"  cp.id is null or cp.shortTitle in (:cps)" +
 			")";
 			params.put("cps", crit.cps());
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.types())) {
+			whereClause += " and t.name in (:types)";
+			params.put("types", crit.types());
 		}
 
 		if (crit.fromDate() != null) {
@@ -631,6 +637,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			ContainerTransferEvent tr = (ContainerTransferEvent) row[++idx];
 
 			ContainerTransferEventDetail event = ContainerTransferEventDetail.from(tr);
+			event.setTypeName(container.getType() != null ? container.getType().getName() : null);
 			event.setFreezerName(root.getName());
 			event.setFreezerBarcode(root.getBarcode());
 			event.setFreezerDisplayName(root.getDisplayName());
@@ -896,17 +903,23 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			addStoreSpecimenRestriction();
 			addUsageModeRestriction();
 			addStatuses();
+			addTypes();
 			
 			addParentRestriction();
 			addCanHoldRestriction();
 
 			// permissions check
 			addSiteCpRestriction();
+
+			String orderBy = "c.id asc";
+			if (StringUtils.equals(orderBy, "parent")) {
+				orderBy += "pc.id asc, c.id asc";
+			}
 			
 			String hql = new StringBuilder(select)
 				.append(" ").append(from)
 				.append(" ").append(where)
-				.append(" order by c.id asc")
+				.append(" order by " + orderBy)
 				.toString();
 			
 			Query query = getCurrentSession().createQuery(hql);
@@ -1019,6 +1032,10 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 		private void addParentRestriction() {
 			if (!crit.topLevelContainers() && crit.parentContainerId() == null) {
+				if (StringUtils.equals("orderBy", "parent")) {
+					from.append("left join c.parentContainer pc");
+				}
+
 				return;
 			}
 			
@@ -1212,6 +1229,18 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 			addAnd();
 			where.append("(" + StringUtils.join(disjunctions, " or ") + ")");
+		}
+
+		private void addTypes() {
+			if (CollectionUtils.isEmpty(crit.types())) {
+				return;
+			}
+
+			addAnd();
+			String alias = crit.hierarchical() ? "dc" : "c";
+			from.append(" left join " + alias + ".type type");
+			where.append("type.name in (:types)");
+			params.put("types", crit.types());
 		}
 	}
 
