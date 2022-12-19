@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,12 +91,20 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 			throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, containerId, 1);
 		}
 
+		if (container.isArchived()) {
+			return Collections.emptyList();
+		}
+
 		List<Long> result = new ArrayList<>();
 		getLeafContainers(container, result);
 		return result;
 	}
 
 	private void getLeafContainers(StorageContainer container, List<Long> result) {
+		if (container.isArchived()) {
+			return;
+		}
+
 		if (!container.isDimensionless() && container.isStoreSpecimenEnabled() && container.getChildContainers().isEmpty()) {
 			result.add(container.getId());
 			return;
