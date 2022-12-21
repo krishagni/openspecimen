@@ -223,10 +223,17 @@ public class ContainerUtilisationReport extends AbstractContainerReport implemen
 		List<Long> sortedContainerIds = childContainers.stream()
 			.sorted(
 				(c1, c2) -> {
-					if (c1.getPosition().getPosition() != null && c2.getPosition().getPosition() != null) {
+					boolean c1HasPos = c1.getPosition() != null && c1.getPosition().getPosition() != null;
+					boolean c2HasPos = c2.getPosition() != null && c2.getPosition().getPosition() != null;
+					if (c1HasPos && c2HasPos) {
 						return c1.getPosition().getPosition().compareTo(c2.getPosition().getPosition());
+					} else if (c1HasPos) {
+						return -1;
+					} else if (c2HasPos) {
+						return 1;
+					} else {
+						return c1.getId().compareTo(c2.getId());
 					}
-					return c1.getId().compareTo(c2.getId());
 				}
 			)
 			.map(StorageContainer::getId)
