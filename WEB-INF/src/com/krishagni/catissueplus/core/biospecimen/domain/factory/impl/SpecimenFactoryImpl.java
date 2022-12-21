@@ -165,13 +165,6 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		setFreezeThawCycles(detail, existing, specimen, ose);
 		setExternalIds(detail, existing, specimen, ose);
 		setComments(detail, existing, specimen, ose);
-
-		if (sr != null && 
-				(!sr.getSpecimenClass().equals(specimen.getSpecimenClass()) ||
-					!sr.getSpecimenType().equals(specimen.getSpecimenType()))) {
-			specimen.setSpecimenRequirement(null);
-		}
-		
 		setSpecimenPosition(detail, existing, specimen, ose);
 		setHoldingLocation(detail, existing, specimen, ose);
 		setCollectionDetail(detail, existing, specimen, ose);
@@ -179,6 +172,13 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		setCreatedOn(detail, existing, specimen, ose);
 		setCreatedBy(detail, existing, specimen, ose);
 		setExtension(detail, existing, specimen, ose);
+		if (sr != null) {
+			if (!specimen.getLineage().equals(sr.getLineage())) {
+				ose.addError(SpecimenErrorCode.REQ_LINEAGE_MISMATCH, specimen.getLineage(), sr.getLineage());
+			} else if (!specimen.getSpecimenType().equals(sr.getSpecimenType())) {
+				ose.addError(SpecimenErrorCode.REQ_TYPE_MISMATCH, specimen.getSpecimenType().getValue(), sr.getSpecimenType().getValue());
+			}
+		}
 
 		ose.checkAndThrow();
 		return specimen;
@@ -464,7 +464,8 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			}
 		}
 
-		if (reqId == null && !isReqCodeSpecified(detail, visit)) {
+		if (reqId == null && !detail.isAttrModified("reqId") &&
+			!isReqCodeSpecified(detail, visit) && !detail.isAttrModified("reqCode")) {
 			return existingReq;
 		}
 
@@ -477,23 +478,27 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		if (reqCode != null && reqCode.equals(existingReqCode)) {
 			return existingReq;
 		}
-		
+
+		Object key = null;
 		SpecimenRequirement sr = null;
 		if (reqId != null) {
+			key = reqId;
 			sr = daoFactory.getSpecimenRequirementDao().getById(reqId);
-		} else if (detail.getCpId() != null) {
+		} else if (detail.getCpId() != null && StringUtils.isNotBlank(reqCode)) {
+			key = detail.getCpId() + ":" + reqCode;
 			sr = daoFactory.getSpecimenRequirementDao().getByCpEventLabelAndSrCode(
 				detail.getCpId(), visit.getCpEvent().getEventLabel(), reqCode);
-		} else {
+		} else if (StringUtils.isNotBlank(detail.getCpShortTitle()) && StringUtils.isNotBlank(reqCode)) {
+			key = detail.getCpShortTitle() + ":" + reqCode;
 			sr = daoFactory.getSpecimenRequirementDao().getByCpEventLabelAndSrCode(
 				detail.getCpShortTitle(), visit.getCpEvent().getEventLabel(), reqCode);
 		}
 		
-		if (sr == null) {
+		if (key != null && sr == null) {
 			ose.addError(SrErrorCode.NOT_FOUND);
 			return null;
 		}
-		
+
 		return sr;
 	}
 

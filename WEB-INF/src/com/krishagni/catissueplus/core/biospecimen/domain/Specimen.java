@@ -1184,6 +1184,8 @@ public class Specimen extends BaseExtensionEntity {
 			} else {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.VISIT_CHG_NOT_ALLOWED, getLabel());
 			}
+		} else {
+			updateRequirement(specimen.getSpecimenRequirement());
 		}
 
 		updateExternalIds(specimen.getExternalIds());
@@ -2151,6 +2153,24 @@ public class Specimen extends BaseExtensionEntity {
 		setCollectionProtocol(visit.getCollectionProtocol());
 		setSpecimenRequirement(sr);
 		getChildCollection().forEach(child -> child.updateVisit(visit, null));
+	}
+
+	private void updateRequirement(SpecimenRequirement sr) {
+		if (Objects.equals(getSpecimenRequirement(), sr)) {
+			return;
+		}
+
+		boolean hasPrevReq = getSpecimenRequirement() != null;
+		setSpecimenRequirement(sr);
+		if (hasPrevReq) {
+			getChildCollection().forEach(child -> child.updateRequirement(null));
+		}
+
+		if (sr != null && !isPrimary()) {
+			if (!Objects.equals(getParentSpecimen().getSpecimenRequirement(), sr.getParentSpecimenRequirement())) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.REQ_PARENT_MISMATCH);
+			}
+		}
 	}
 
 	private void updateExternalIds(Collection<SpecimenExternalIdentifier> otherExternalIds) {
