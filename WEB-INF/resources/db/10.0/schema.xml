@@ -16,4 +16,39 @@
       <column name="BLOCKED_FOR_CONTAINER_ID" type="${int.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Delete duplicate form record entries">
+    <sql>
+      delete from
+        catissue_form_record_entry
+      where
+        identifier in (
+          select
+            *
+          from (
+            select
+              ge.identifier
+            from
+              catissue_form_record_entry ge
+              left join catissue_form_record_entry le
+                on le.form_ctxt_id = ge.form_ctxt_id and
+                   le.object_id = ge.object_id and
+                   le.record_id = ge.record_id and
+                   le.activity_status = ge.activity_status and
+                   ge.identifier > le.identifier
+            where
+              le.identifier is not null
+          ) t
+        );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add an unique index on the form context, record and object tuple">
+    <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_OBJECT_RECORD_IDX" unique="true">
+      <column name="FORM_CTXT_ID" />
+      <column name="OBJECT_ID" />
+      <column name="RECORD_ID" />
+      <column name="ACTIVITY_STATUS" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
