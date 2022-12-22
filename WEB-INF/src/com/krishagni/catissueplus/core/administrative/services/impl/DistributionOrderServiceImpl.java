@@ -34,6 +34,7 @@ import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder.Status;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
+import com.krishagni.catissueplus.core.administrative.domain.OrderSavedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.SpecimenRequest;
 import com.krishagni.catissueplus.core.administrative.domain.SpecimenReservedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
@@ -85,6 +86,7 @@ import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.ManifestGenerator;
 import com.krishagni.catissueplus.core.common.service.ManifestGeneratorFactory;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
+import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
@@ -663,9 +665,10 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 
 			DistributionOrder savedOrder = daoFactory.getDistributionOrderDao().getById(order.getId());
 			savedOrder.addOrUpdateExtension();
+
+			EventPublisher.getInstance().publish(new OrderSavedEvent(savedOrder));
 			DistributionOrderDetail output = DistributionOrderDetail.from(savedOrder);
 			listeners.forEach(listener -> listener.onSave(input, output, savedOrder));
-
 			notifySaveOrUpdateOrder(savedOrder, null, t1);
 			return ResponseEvent.response(output);
 		} catch (OpenSpecimenException ose) {
@@ -725,6 +728,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 				existingOrder = daoFactory.getDistributionOrderDao().getById(existingOrder.getId());
 			}
 
+			EventPublisher.getInstance().publish(new OrderSavedEvent(existingOrder));
 			DistributionOrderDetail output = DistributionOrderDetail.from(existingOrder);
 			notifyOrderListeners(input, output, existingOrder);
 			notifySaveOrUpdateOrder(existingOrder, oldStatus, t1);

@@ -111,15 +111,22 @@ public class DistributionOrderItemDetail implements Serializable {
 	}
 
 	public static DistributionOrderItemDetail from(DistributionOrderItem orderItem) {
+		return from(orderItem, true);
+	}
+
+	public static DistributionOrderItemDetail from(DistributionOrderItem orderItem, boolean incSpmn) {
 		DistributionOrderItemDetail detail = new DistributionOrderItemDetail();
 		detail.setId(orderItem.getId());
 		detail.setOrderId(orderItem.getOrder().getId());
 		detail.setOrderName(orderItem.getOrder().getName());
 		detail.setQuantity(orderItem.getQuantity());
-		detail.setSpecimen(SpecimenInfo.from(orderItem.getSpecimen()));
 		detail.setCost(orderItem.getCost());
 		detail.setLabel(orderItem.getLabel());
 		detail.setStatus(orderItem.getStatus().name());
+		if (incSpmn) {
+			detail.setSpecimen(SpecimenInfo.from(orderItem.getSpecimen()));
+		}
+
 		return detail;
 	}
 	

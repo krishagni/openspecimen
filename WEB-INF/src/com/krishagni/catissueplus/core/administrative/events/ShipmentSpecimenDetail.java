@@ -51,10 +51,16 @@ public class ShipmentSpecimenDetail implements Comparable<ShipmentSpecimenDetail
 	}
 
 	public static ShipmentSpecimenDetail from(ShipmentSpecimen shipmentSpecimen) {
+		return from(shipmentSpecimen, true);
+	}
+
+	public static ShipmentSpecimenDetail from(ShipmentSpecimen shipmentSpecimen, boolean incSpmn) {
 		ShipmentSpecimenDetail itemDetail = new ShipmentSpecimenDetail();
 		itemDetail.setId(shipmentSpecimen.getId());
-		itemDetail.setSpecimen(SpecimenInfo.from(shipmentSpecimen.getSpecimen()));
 		itemDetail.setReceivedQuality(PermissibleValue.getValue(shipmentSpecimen.getReceivedQuality()));
+		if (incSpmn) {
+			itemDetail.setSpecimen(SpecimenInfo.from(shipmentSpecimen.getSpecimen()));
+		}
 		return itemDetail;
 	}
 	

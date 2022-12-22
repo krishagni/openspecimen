@@ -22,7 +22,7 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 
 	private String type;
 	
-	private String  courierName;
+	private String courierName;
 	
 	private String trackingNumber;
 	

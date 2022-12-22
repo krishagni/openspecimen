@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -56,6 +57,7 @@ public class ExpressionUtil {
 			methods.put("daysBetween", Utility.class.getDeclaredMethod("daysBetween", Date.class, Date.class));
 			methods.put("cmp", Utility.class.getDeclaredMethod("cmp", Date.class, Date.class));
 			methods.put("formatDate", Utility.class.getDeclaredMethod("format", Date.class, String.class));
+			methods.put("currentTime", Utility.class.getDeclaredMethod("currentTime"));
 			return methods;
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
@@ -85,23 +87,37 @@ public class ExpressionUtil {
 			return match(coll, elementName, expression, false);
 		}
 
-		private boolean match(Collection<?> coll, String elementName, String expression, boolean allMatch) {
+		public boolean forEvery(Iterable<?> coll, String elementName, String expression) {
+			return match(coll, elementName, expression, true);
+		}
+
+		public boolean forSome(Iterable<?> coll, String elementName, String expression) {
+			return match(coll, elementName, expression, false);
+		}
+
+		private boolean match(Iterable<?> coll, String elementName, String expression, boolean allMatch) {
 			Map<String, Object> localCtxt = new HashMap<>();
 			if (ctxt != null) {
 				localCtxt.putAll(ctxt);
 			}
 
-			if (coll == null || coll.isEmpty()) {
+			if (coll == null) {
 				return false;
 			}
 
+			boolean emptyCollection = true;
 			boolean truth = allMatch;
 			for (Object element : coll) {
+				emptyCollection = false;
 				localCtxt.put(elementName, element);
 				truth = ExpressionUtil.getInstance().evaluate(expression, localCtxt);
 				if ((allMatch && !truth) || (!allMatch && truth)) {
 					break;
 				}
+			}
+
+			if (emptyCollection) {
+				return false;
 			}
 
 			return truth;

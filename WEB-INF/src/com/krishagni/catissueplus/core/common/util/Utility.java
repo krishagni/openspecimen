@@ -641,6 +641,10 @@ public class Utility {
 		return getPeriodBetween(ChronoUnit.DAYS, start, end);
 	}
 
+	public static Date currentTime() {
+		return Calendar.getInstance().getTime();
+	}
+
 	public static int cmp(Date d1, Date d2) {
 		return cmp(d1, d2, false);
 	}
