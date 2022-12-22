@@ -43,6 +43,10 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Drop the non-unique index on the form context, record and object tuple">
+    <dropIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_REC_ENTRY_IDX" />
+  </changeSet>
+
   <changeSet author="vpawar" id="Add an unique index on the form context, record and object tuple">
     <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_OBJECT_RECORD_IDX" unique="true">
       <column name="FORM_CTXT_ID" />
