@@ -247,8 +247,13 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 				return ResponseEvent.userError(ShipmentErrorCode.CANNOT_CHG_TYPE);
 			}
 
+			if (newShipment.isDeleted()) {
+				AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(existing);
+				existing.delete();
+				return ResponseEvent.response(ShipmentDetail.from(existing));
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(newShipment);
-			
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			ensureUniqueConstraint(existing, newShipment, ose);
 			ensureValidItems(existing, newShipment, ose);
@@ -271,7 +276,22 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ShipmentDetail> deleteShipment(RequestEvent<Long> req) {
+		try {
+			Shipment shipment = getShipment(req.getPayload(), null);
+			AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(shipment);
+			shipment.delete();
+			return ResponseEvent.response(ShipmentDetail.from(shipment));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req) {

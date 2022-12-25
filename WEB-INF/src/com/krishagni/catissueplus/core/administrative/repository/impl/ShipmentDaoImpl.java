@@ -194,6 +194,13 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		return rows.stream().collect(Collectors.toMap(row -> (Long)row[0], row -> (Integer)row[1]));
 	}
 
+	@Override
+	public Integer deleteSpecimenShipmentEvents(Long shipmentId) {
+		return getCurrentSession().getNamedQuery(DELETE_SPECIMEN_SHIPMENT_EVENTS)
+			.setParameter("shipmentId", shipmentId)
+			.executeUpdate();
+	}
+
 	private Criteria getShipmentsQuery(ShipmentListCriteria crit) {
 		Criteria query = getCurrentSession().createCriteria(Shipment.class)
 			.createAlias("sendingSite", "sendSite")
@@ -315,6 +322,8 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	private static final String GET_SPECIMENS_COUNT = FQN + ".getSpecimensCount";
 
 	private static final String GET_SPECIMENS_COUNT_BY_CONT = FQN + ".getSpecimensCountByContainer";
+
+	private static final String DELETE_SPECIMEN_SHIPMENT_EVENTS = FQN + ".deleteSpecimenShipmentEvents";
 
 	private static final String GET_SPMN_IDS_ORD_BY_EXT_ID_MYSQL =
 		"select " +

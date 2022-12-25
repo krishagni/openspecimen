@@ -749,6 +749,7 @@
   },
 
   "shipments": {
+    "confirm_delete_msg": "Shipment '{name}' and any dependent data will be deleted. Are you sure you want to proceed?",
     "container_name": "Name",
     "container_dimension": "Dimension",
     "container_parent": "Parent Container",
@@ -756,6 +757,7 @@
     "containers": "Containers",
     "courier_name": "Courier Name",
     "create": "Create Shipment",
+    "deleted": "Shipment '{name}' deleted.",
     "details": "Shipment Details",
     "download_report": "Download Report",
     "draft_saved": "Draft shipment '{name}' saved.",

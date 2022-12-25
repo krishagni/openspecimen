@@ -139,7 +139,7 @@ export default {
 
         this.showDetails(selectedRow);
       } else {
-        this.showTable();
+        this.showTable(newValue == -2);
       }
     }
   },
@@ -194,10 +194,13 @@ export default {
       }
     },
 
-    showTable: function() {
+    showTable: function(reload) {
       this.ctx.detailView = false;
       this.$refs.listView.switchToTableView();
       routerSvc.goto('ShipmentsList', {shipmentId: -1}, {filters: this.filters});
+      if (reload) {
+        this.$refs.listView.reload();
+      }
     }
   }
 }

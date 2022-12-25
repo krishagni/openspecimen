@@ -1600,18 +1600,26 @@ public class AccessCtrlMgr {
 	}
 
 	public void ensureUpdateShipmentRights(Shipment shipment) {
+		ensureShipmentRights(shipment, Operation.UPDATE);
+	}
+
+	public void ensureDeleteShipmentRights(Shipment shipment) {
+		ensureShipmentRights(shipment, Operation.DELETE);
+	}
+
+	private void ensureShipmentRights(Shipment shipment, Operation op) {
 		if (AuthUtil.isAdmin()) {
 			return;
 		}
 
 		boolean allowed = false;
-		Set<SiteCpPair> allowedSites = getSiteCps(Resource.SHIPPING_N_TRACKING, Operation.UPDATE);
+		Set<SiteCpPair> allowedSites = getSiteCps(Resource.SHIPPING_N_TRACKING, op);
 		if (!shipment.isReceived() && isAccessAllowedOnSite(allowedSites, shipment.getSendingSite())) {
-			allowed = true; // send can update
+			allowed = true; // sender can update/delete
 		}
 
 		if (shipment.isReceived() && isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
-			allowed = true; // receiver can update
+			allowed = true; // receiver can update/delete
 		}
 
 		if (!allowed) {

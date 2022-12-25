@@ -136,5 +136,28 @@
       group by
         sc.container_id
     </sql-query>
+
+    <sql-query name="deleteSpecimenShipmentEvents">
+      delete from
+        catissue_form_record_entry
+      where
+        identifier in (
+          select
+            t.identifier
+          from (
+            select
+              re.identifier as identifier
+            from
+              catissue_form_record_entry re
+              inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+              inner join dyextn_containers f on f.identifier = fc.container_id
+              inner join os_shipment_specimens ss on ss.identifier = re.record_id and ss.specimen_id = re.object_id
+              inner join os_shipments s on s.identifier = ss.shipment_id
+            where
+              s.identifier = :shipmentId and
+              f.name in ('SpecimenShipmentShippedEvent', 'SpecimenShipmentReceivedEvent')
+          ) t
+        )
+    </sql-query>
   </class>
 </hibernate-mapping>

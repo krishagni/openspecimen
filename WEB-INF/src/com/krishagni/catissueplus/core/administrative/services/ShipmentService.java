@@ -26,6 +26,8 @@ public interface ShipmentService {
 	ResponseEvent<ShipmentDetail> createShipment(RequestEvent<ShipmentDetail> req);
 	
 	ResponseEvent<ShipmentDetail> updateShipment(RequestEvent<ShipmentDetail> req);
+
+	ResponseEvent<ShipmentDetail> deleteShipment(RequestEvent<Long> req);
 	
 	ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req);
 
