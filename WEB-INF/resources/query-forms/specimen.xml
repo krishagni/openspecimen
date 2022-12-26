@@ -487,6 +487,31 @@
 
     <row>
       <subForm>
+        <name>ancestorReqs</name>
+        <udn>ancestorReqs</udn>
+        <caption>#getMessage("specimen_ancestor_requirements")</caption>
+        <table>OS_ANCESTOR_SPMN_REQS_VIEW</table>
+        <foreignKey>SPECIMEN_ID</foreignKey>
+        <parentKey>IDENTIFIER</parentKey>
+        <row>
+          <textField>
+            <name>name</name>
+            <udn>name</udn>
+            <caption>#getMessage("specimen_ancestor_req_name")</caption>
+            <column>REQ_LABEL</column>
+          </textField>
+          <textField>
+            <name>code</name>
+            <udn>code</udn>
+            <caption>#getMessage("specimen_ancestor_req_code")</caption>
+            <column>REQ_CODE</column>
+          </textField>
+        </row>
+      </subForm>
+    </row>
+
+    <row>
+      <subForm>
         <name>spmnCollRecvDetails</name>
         <udn>spmnCollRecvDetails</udn>
         <caption>#getMessage("specimen_coll_recv_details")</caption>

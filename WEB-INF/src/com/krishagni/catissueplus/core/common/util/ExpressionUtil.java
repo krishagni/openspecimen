@@ -4,10 +4,11 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -93,6 +94,10 @@ public class ExpressionUtil {
 
 		public boolean forSome(Iterable<?> coll, String elementName, String expression) {
 			return match(coll, elementName, expression, false);
+		}
+
+		public String join(Collection<String> coll) {
+			return Utility.nullSafeStream(coll).filter(StringUtils::isNotBlank).collect(Collectors.joining());
 		}
 
 		private boolean match(Iterable<?> coll, String elementName, String expression, boolean allMatch) {

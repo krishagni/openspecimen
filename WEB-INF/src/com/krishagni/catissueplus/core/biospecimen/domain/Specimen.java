@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -177,7 +178,7 @@ public class Specimen extends BaseExtensionEntity {
 	// Available for all specimens in hierarchy based on values set for primary specimens
 	//
 	private Set<SpecimenCollectionReceiveDetail> collRecvDetailsList;
-	
+
 	private List<SpecimenTransferEvent> transferEvents;
 	
 	private Set<SpecimenListItem> specimenListItems =  new HashSet<>();
@@ -652,6 +653,16 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void setCollRecvDetailsList(Set<SpecimenCollectionReceiveDetail> collRecvDetailsList) {
 		this.collRecvDetailsList = collRecvDetailsList;
+	}
+
+	@NotAudited
+	public List<String> getReqNames() {
+		return getReqAttrs(SpecimenRequirement::getName);
+	}
+
+	@NotAudited
+	public List<String> getReqCodes() {
+		return getReqAttrs(SpecimenRequirement::getCode);
 	}
 
 	@NotAudited
@@ -2211,6 +2222,23 @@ public class Specimen extends BaseExtensionEntity {
 
 			result.add(specimen);
 			result.addAll(createPendingSpecimens(childSr, specimen));
+		}
+
+		return result;
+	}
+
+	private List<String> getReqAttrs(Function<SpecimenRequirement, String> mapper) {
+		List<String> result = new ArrayList<>();
+		Specimen specimen = this;
+		while (specimen != null) {
+			if (specimen.getSpecimenRequirement() != null) {
+				String attr = mapper.apply(specimen.getSpecimenRequirement());
+				if (StringUtils.isNotBlank(attr)) {
+					result.add(0, attr);
+				}
+			}
+
+			specimen = specimen.getParentSpecimen();
 		}
 
 		return result;
