@@ -318,7 +318,7 @@
     </createView>
   </changeSet>
 
-  <changeSet author="vpawar" id="Ancestor specimen requirement names / codes view">
+  <changeSet author="vpawar" id="Ancestor specimen requirement names / codes view" runOnChange="true">
     <createView viewName="OS_ANCESTOR_SPMN_REQS_VIEW" replaceIfExists="true">
       select
         ar.identifier, d.identifier as specimen_id, ar.spec_req_label as req_label, ar.code as req_code
@@ -328,7 +328,7 @@
         inner join catissue_specimen a on a.identifier = h.ancestor_id
         inner join catissue_cp_req_specimen ar on ar.identifier = a.req_specimen_id
       where
-        ar.spec_req_label is not null or ar.code is not null;
+        ar.spec_req_label is not null or ar.code is not null
     </createView>
   </changeSet>
 </databaseChangeLog>
