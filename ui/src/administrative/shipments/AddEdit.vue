@@ -275,7 +275,12 @@ export default {
             dataCtx.shipment.receivedDate = new Date();
 
             if (dataCtx.shipment.type == 'SPECIMEN') {
-              dataCtx.specimenItems.forEach(item => item.specimen.storageLocation = null);
+              dataCtx.specimenItems.forEach(
+                item => {
+                  item.specimen.storageLocation = null;
+                  item.specimen.printLabel = (item.specimen.labelAutoPrintMode == 'ON_RECEIVE');
+                }
+              );
             } else {
               dataCtx.containerItems.forEach(item => item.container.storageLocation = null);
             }

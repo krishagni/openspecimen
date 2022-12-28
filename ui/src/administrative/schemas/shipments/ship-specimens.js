@@ -143,6 +143,17 @@ export default {
         "min-width": "175px"
       },
       "enableCopyFirstToAll": true
+    },
+    {
+      "name": "specimen.printLabel",
+      "icon": "print",
+      "type": "booleanCheckbox",
+      "tooltip": "Print Labels",
+      "enableCopyFirstToAll": true,
+      "showWhen": "receive",
+      "uiStyle": {
+        "min-width": "30px"
+      }
     }
   ]
 }

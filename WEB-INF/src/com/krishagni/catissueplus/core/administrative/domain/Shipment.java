@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
+import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -392,9 +394,17 @@ public class Shipment extends BaseEntity {
 		}
 
 		Map<Specimen, ShipmentSpecimen> existingItems = getShipmentSpecimensMap();
+		List<PrintItem<Specimen>> printItems = new ArrayList<>();
 		for (ShipmentSpecimen newItem : other.getShipmentSpecimens()) {
 			ShipmentSpecimen oldItem = existingItems.remove(newItem.getSpecimen());
 			oldItem.receive(newItem);
+			if (oldItem.getSpecimen().isPrintLabel()) {
+				printItems.add(PrintItem.make(oldItem.getSpecimen(), oldItem.getSpecimen().getCopiesToPrint()));
+			}
+		}
+
+		if (!printItems.isEmpty()) {
+			Specimen.getLabelPrinter().print(printItems);
 		}
 	}
 

@@ -435,6 +435,7 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		detail.setId(info.getId());
 		detail.setStorageLocation(info.getStorageLocation());
 		detail.setTransferTime(shipment.getReceivedDate());
+		detail.setPrintLabel(info.isPrintLabel());
 
 		if (info.getLabel() != null && isSpmnRelabelingAllowed()) {
 			detail.setLabel(info.getLabel()); // relabeling at time of receiving shipment

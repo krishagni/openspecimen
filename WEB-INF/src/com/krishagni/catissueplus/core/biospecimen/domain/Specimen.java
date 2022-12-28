@@ -990,7 +990,6 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void prePrintChildrenLabels(String prevStatus, String prevRecv, LabelPrinter<Specimen> printer) {
-		List<PrintItem<Specimen>> printItems = new ArrayList<>();
 		if (getSpecimenRequirement() == null) {
 			//
 			// We pre-print child specimen labels of only planned specimens
@@ -1047,10 +1046,6 @@ public class Specimen extends BaseExtensionEntity {
 				if (StringUtils.isNotBlank(recvQuality) && !Pattern.matches(recvQuality, getShipmentReceiveQuality())) {
 					return;
 				}
-
-				if (getSpecimenRequirement() != null && getSpecimenRequirement().getLabelAutoPrintModeToUse() == CollectionProtocol.SpecimenLabelAutoPrintMode.ON_RECEIVE) {
-					printItems.add(PrintItem.make(this, getSpecimenRequirement().getLabelPrintCopiesToUse()));
-				}
 				break;
 
 			default:
@@ -1080,11 +1075,12 @@ public class Specimen extends BaseExtensionEntity {
 
 		List<Specimen> pendingSpecimens = createPendingSpecimens(getSpecimenRequirement(), this);
 		preCreatedSpmnsMap = pendingSpecimens.stream().collect(Collectors.toMap(Specimen::getReqId, s -> s));
-		for (Specimen pending : pendingSpecimens) {
-			if (pending.getParentSpecimen().equals(this)) {
-				printItems.addAll(pending.getPrePrintItems());
-			}
-		}
+
+		List<PrintItem<Specimen>> printItems = pendingSpecimens.stream()
+			.filter(spmn -> spmn.getParentSpecimen().equals(this))
+			.map(Specimen::getPrePrintItems)
+			.flatMap(List::stream)
+			.collect(Collectors.toList());
 		if (!printItems.isEmpty()) {
 			printer.print(printItems);
 		}
