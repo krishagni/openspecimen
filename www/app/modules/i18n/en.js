@@ -3017,7 +3017,11 @@
         "def_signup_institute": "Default Signup Institute",
         "def_signup_institute_desc": "Default institute to use for the newly signed up users.",
         "local_account_signups": "Local Account Signups",
-        "local_account_signups_desc": "Enable signup requests for the 'openspecimen' domain."
+        "local_account_signups_desc": "Enable signup requests for the 'openspecimen' domain.",
+        "add_spmn_ext_ids": "Add External IDs",
+        "add_spmn_ext_ids_desc": "Enable to add external IDs when receiving the shipment specimens.",
+        "def_ext_id_name": "External ID Name",
+        "def_ext_id_name_desc": "Default name for external IDs that are added when receiving the shipment specimens."
       },
 
       "biospecimen": {

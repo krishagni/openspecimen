@@ -167,16 +167,29 @@ export default {
 
       receivingInstitute: undefined,
 
-      allowSpecimenRelabeling: false
+      allowSpecimenRelabeling: false,
+
+      allowExtIdName: false,
+
+      allowExtIdValue: false,
+
+      defaultExtIdName: undefined
     });
 
     return { ctx, dataCtx };
   },
 
   created: async function() {
-    const setting = await settingsSvc.getSetting('administrative', 'allow_spmn_relabeling');
-    this.dataCtx.allowSpecimenRelabeling = util.isTrue(setting[0].value);
     this.loadShipment();
+
+    const allowRelabeling = await settingsSvc.getSetting('administrative', 'allow_spmn_relabeling');
+    this.dataCtx.allowSpecimenRelabeling = util.isTrue(allowRelabeling[0].value);
+
+    const addExtIds    = await settingsSvc.getSetting('administrative', 'add_spmn_ext_ids');
+    const defExtIdName = await settingsSvc.getSetting('administrative', 'def_ext_id_name');
+    this.dataCtx.allowExtIdName  = util.isTrue(addExtIds[0].value) && !defExtIdName[0].value;
+    this.dataCtx.allowExtIdValue = util.isTrue(addExtIds[0].value);
+    this.dataCtx.defaultExtIdName = defExtIdName[0].value;
   },
 
   computed: {
@@ -394,7 +407,22 @@ export default {
 
       const toSave = JSON.parse(JSON.stringify(this.dataCtx.shipment));
       if (toSave.type == 'SPECIMEN') {
-        toSave.shipmentSpmns = JSON.parse(JSON.stringify(this.dataCtx.specimenItems));
+        const items = toSave.shipmentSpmns = JSON.parse(JSON.stringify(this.dataCtx.specimenItems));
+        if (status == 'Received') {
+          for (let item of items) {
+            const specimen = item.specimen;
+            if (specimen.externalIdName || specimen.externalIdValue) {
+              const externalIds = specimen.externalIds = specimen.externalIds || [];
+              const name = specimen.externalIdName || this.dataCtx.defaultExtIdName;
+              const externalId = externalIds.find(eid => eid.name == name);
+              if (externalId) {
+                externalId.value = specimen.externalIdValue;
+              } else {
+                externalIds.push({name, value: specimen.externalIdValue});
+              }
+            }
+          }
+        }
       } else {
         toSave.shipmentContainers = JSON.parse(JSON.stringify(this.dataCtx.containerItems));
       }

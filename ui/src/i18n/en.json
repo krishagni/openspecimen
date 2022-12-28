@@ -761,6 +761,8 @@
     "details": "Shipment Details",
     "download_report": "Download Report",
     "draft_saved": "Draft shipment '{name}' saved.",
+    "external_id_name_req": "External ID: Name is mandatory",
+    "external_id_value_req": "External ID: Value is mandatory",
     "extra_specimens": "Failed: Additional specimens present in the shipment",
     "list": "Shipments",
     "name": "Name",
@@ -795,6 +797,8 @@
     "specimen": {
       "cp": "Collection Protocol",
       "external_id": "External ID",
+      "external_id_name": "External ID: Name",
+      "external_id_value": "External ID: Value",
       "label": "Label",
       "label_required": "Label is mandatory",
       "location": "Location",

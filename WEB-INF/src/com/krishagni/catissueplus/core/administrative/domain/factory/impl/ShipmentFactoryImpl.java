@@ -448,6 +448,10 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 			}
 		}
 
+		if (info.getExternalIds() != null) {
+			detail.setExternalIds(info.getExternalIds());
+		}
+
 		return specimenFactory.createSpecimen(existing, detail, null);
 	}
 

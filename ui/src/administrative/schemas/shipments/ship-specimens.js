@@ -68,6 +68,30 @@ export default {
       "sortable": true
     },
     {
+      "name": "specimen.externalIdName",
+      "labelCode": "shipments.specimen.external_id_name",
+      "type": "text",
+      "showWhen": "receive && allowExtIdName",
+      "validations": {
+        "requiredIf": {
+          "expr": "!!specimen.externalIdValue",
+          "messageCode": "shipments.external_id_name_req"
+        }
+      }
+    },
+    {
+      "name": "specimen.externalIdValue",
+      "labelCode": "shipments.specimen.external_id_value",
+      "type": "text",
+      "showWhen": "receive && allowExtIdValue",
+      "validations": {
+        "requiredIf": {
+          "expr": "!!specimen.externalIdName",
+          "messageCode": "shipments.external_id_value_req"
+        }
+      }
+    },
+    {
       "name": "specimen.availableQty",
       "labelCode": "shipments.specimen.quantity",
       "type": "specimen-measure",
