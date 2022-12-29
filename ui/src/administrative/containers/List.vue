@@ -23,8 +23,7 @@
               <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainers"
                 v-show-if-allowed="containerResources.deleteOpts" />
 
-              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
-                v-show-if-allowed="containerResources.importOpts" />
+              <os-menu :label="$t('common.buttons.export')" :options="exportOpts" />
             </span>
 
             <span v-else>
@@ -38,7 +37,10 @@
               <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                 v-show-if-allowed="containerResources.importOpts" />
 
-              <os-menu :label="$t('common.buttons.more')" :options="moreOpts" />
+              <os-menu :label="$t('common.buttons.actions')" :options="actionOpts"
+                v-show-if-allowed="containerResources.updateOpts" />
+
+              <os-menu :label="$t('common.buttons.export')" :options="exportOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/containers" new-tab="true" />
@@ -97,6 +99,19 @@
           <os-button primary :label="$t('common.buttons.generate')" @click="generateUtilisationReport" />
         </template>
       </os-dialog>
+
+      <os-dialog ref="exportContainersDialog">
+        <template #header>
+          <span v-t="'containers.export_containers'"> Export Containers </span>
+        </template>
+        <template #content>
+          <os-form ref="exportCritForm" :schema="ctx.trRptFs.layout" :data="trRptCtx" />
+        </template>
+        <template #footer>
+          <os-button text    :label="$t('common.buttons.cancel')"   @click="closeExportContainersDialog" />
+          <os-button primary :label="$t('common.buttons.export')" @click="exportContainers" />
+        </template>
+      </os-dialog>
     </os-page-body>
   </os-page>
 </template>
@@ -117,53 +132,50 @@ export default {
   props: ['filters'],
 
   data() {
-    const moreOpts = [];
+    const actionOpts = [];
     if (authSvc.isAllowed(containerResources.updateOpts)) {
-      moreOpts.push({
+      actionOpts.push({
         icon: 'archive',
         caption: this.$t('common.buttons.archive'),
         onSelect: () => routerSvc.goto('BulkContainerArchive')
       });
-      moreOpts.push({
+      actionOpts.push({
         icon: 'sign-in-alt',
         caption: this.$t('containers.check_in_button'),
         onSelect: () => routerSvc.goto('BulkContainerCheckin')
       });
-      moreOpts.push({
+      actionOpts.push({
         icon: 'sign-out-alt',
         caption: this.$t('containers.check_out_button'),
         onSelect: () => routerSvc.goto('BulkContainerCheckout')
       });
-      moreOpts.push({
+      actionOpts.push({
         icon: 'arrows-alt-h',
         caption: this.$t('containers.transfer'),
         onSelect: () => routerSvc.goto('BulkContainerTransfer')
       });
     }
 
-    if (moreOpts.length > 0) {
-      moreOpts.push({divider: true});
-    }
-
-    moreOpts.push({
+    const exportOpts = [];
+    exportOpts.push({
       icon: 'arrows-alt-h',
       caption: this.$t('containers.transfer_report'),
       onSelect: () => this.showTransferReportDialog()
     });
 
-    moreOpts.push({
+    exportOpts.push({
       icon: 'file',
       caption: this.$t('containers.utilisation_report'),
       onSelect: () => this.showUtilisationReportDialog()
     });
 
     if (authSvc.isAllowed(containerResources.importOpts)) {
-      moreOpts.push({divider: true});
+      exportOpts.push({divider: true});
 
-      moreOpts.push({
+      exportOpts.push({
         icon: 'download',
-        caption: this.$t('common.buttons.export'),
-        onSelect: () => this.exportContainers()
+        caption: this.$t('containers.list'),
+        onSelect: () => this.showExportContainersDialog()
       });
     }
 
@@ -192,7 +204,9 @@ export default {
         }
       ],
 
-      moreOpts: moreOpts,
+      actionOpts,
+
+      exportOpts,
 
       trRptCtx: {showDateRange: false, criteria: {}},
 
@@ -250,11 +264,6 @@ export default {
       }
     },
 
-    exportContainers: function() {
-      const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
-      exportSvc.exportRecords({objectType: 'storageContainer', recordIds: containerIds});
-    },
-
     showTransferForm: function() {
       this.$goto('BulkContainerTransfer');
     },
@@ -281,6 +290,12 @@ export default {
 
     showTransferReportDialog: function() {
       this.trRptCtx = {showDateRange: true, criteria: {}};
+      if (this.ctx.selectedContainers.length > 0) {
+        this.trRptCtx.criteria.name = this.ctx.selectedContainers.map(item => item.rowObject.container.name);
+        this.generateTransferReport();
+        return;
+      }
+
       this.$refs.trRptDialog.open()
     },
 
@@ -306,7 +321,13 @@ export default {
 
     showUtilisationReportDialog: function() {
       this.trRptCtx = {showDateRange: false, criteria: {}};
-      this.$refs.utRptDialog.open()
+      if (this.ctx.selectedContainers.length > 0) {
+        this.trRptCtx.criteria.name = this.ctx.selectedContainers.map(item => item.rowObject.container.name);
+        this.generateUtilisationReport();
+        return;
+      }
+
+      this.$refs.utRptDialog.open();
     },
 
     closeUtilisationReportDialog: function() {
@@ -327,6 +348,42 @@ export default {
           this.closeUtilisationReportDialog();
         }
       );
+    },
+
+    showExportContainersDialog: function() {
+      if (this.ctx.selectedContainers.length > 0) {
+        this.exportContainers();
+        return;
+      }
+
+      this.trRptCtx = {showDateRange: false, criteria: {}};
+      this.$refs.exportContainersDialog.open();
+    },
+
+    closeExportContainersDialog: function() {
+      this.$refs.exportContainersDialog.close();
+    },
+
+    exportContainers: function() {
+      const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
+      const params = {};
+      if (containerIds.length == 0) {
+        const crit = this.trRptCtx.criteria;
+        if (crit.name && crit.name.length > 0) {
+          params.names = crit.name.join('^');
+        }
+
+        if (crit.cp && crit.cp.length > 0) {
+          params.cps = crit.cp.join('^');
+        }
+
+        if (crit.type && crit.type.length > 0) {
+          params.types = crit.type.join('^');
+        }
+      }
+
+      exportSvc.exportRecords({objectType: 'storageContainer', recordIds: containerIds, params});
+      this.closeExportContainersDialog();
     }
   }
 }

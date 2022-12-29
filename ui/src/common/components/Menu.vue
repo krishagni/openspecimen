@@ -1,7 +1,7 @@
 
 <template>
   <span style="display: inline-block;">
-    <Button :label="label" right-icon="caret-down" @click="toggle" />
+    <Button :left-icon="icon" :label="label" right-icon="caret-down" @click="toggle" />
     <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
       <template #item="{item}">
         <os-divider v-if="item.divider" />
@@ -20,7 +20,7 @@ import Button from '@/common/components/Button.vue';
 import Icon from '@/common/components/Icon.vue';
 
 export default {
-  props: ['label', 'options'],
+  props: ['icon', 'label', 'options'],
 
   components: {
     Button,

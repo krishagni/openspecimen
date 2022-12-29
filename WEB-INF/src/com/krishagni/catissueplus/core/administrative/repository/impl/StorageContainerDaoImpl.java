@@ -374,9 +374,24 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			.createAlias("cont.ancestorContainers", "ancestors")
 			.add(Restrictions.eq("ancestors.id", crit.parentContainerId()));
 
+
+		boolean cpAliasAdded = false;
+		if (CollectionUtils.isNotEmpty(crit.cpShortTitles())) {
+			innerQuery.createAlias("cont.compAllowedCps", "cp", JoinType.LEFT_OUTER_JOIN)
+				.add(
+					Restrictions.or(
+						Restrictions.isNull("cp.id"),
+						Restrictions.in("cp.shortTitle", crit.cpShortTitles())
+					)
+				);
+			cpAliasAdded = true;
+		}
+
 		if (crit.siteCps() != null && !crit.siteCps().isEmpty()) {
-			innerQuery.createAlias("cont.site", "site")
-				.createAlias("cont.allowedCps", "cp", JoinType.LEFT_OUTER_JOIN);
+			innerQuery.createAlias("cont.site", "site");
+			if (!cpAliasAdded) {
+				innerQuery.createAlias("cont.compAllowedCps", "cp", JoinType.LEFT_OUTER_JOIN);
+			}
 
 			boolean instituteAdded = false;
 			Disjunction siteCpsCond = Restrictions.disjunction();
