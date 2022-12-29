@@ -426,6 +426,11 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
               $scope.cpr.participant, extensionCtxt, $scope.disableFieldOpts.customFields);
           }
 
+          var birthDate = $scope.cpr.participant.birthDate;
+          if (!!birthDate && typeof birthDate == 'string') {
+            $scope.cpr.participant.birthDateStr = birthDate;
+            setBirthDate($scope.cpr);
+          }
           $scope.partCtx.step = 'registerParticipant';
         }
       );
