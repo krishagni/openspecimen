@@ -366,6 +366,7 @@ angular.module('os.biospecimen.specimen.addedit', [])
           inputSpmn.anatomicSite = inputSpmn.laterality = undefined;
         }
 
+        var oldStatus = inputSpmn.status || 'Pending';
         var defValues = opts.defValues = opts.defValues || getDefValues(opts) || {};
         if (inputSpmn.status != 'Collected') {
           if (!inputSpmn.id) {
@@ -387,7 +388,7 @@ angular.module('os.biospecimen.specimen.addedit', [])
 
         var exObjs = ['specimen.lineage', 'specimen.parentLabel', 'specimen.events'];
 
-        if (!inputSpmn.id && !inputSpmn.reqId) {
+        if (!inputSpmn.id || oldStatus == 'Pending') {
           var ce = inputSpmn.collectionEvent = inputSpmn.collectionEvent || {};
           ce.user = (!ce.user || !ce.user.id) ? $rootScope.currentUser : ce.user;
 
@@ -396,10 +397,9 @@ angular.module('os.biospecimen.specimen.addedit', [])
 
           var re = inputSpmn.receivedEvent = inputSpmn.receivedEvent || {};
           re.user = (!re.user || !re.user.id) ? $rootScope.currentUser : re.user;
-          re.receivedQuality = re.receivedQuality ||
-            (opts.spmnCollFields && opts.spmnCollFields.defReceiveQuality) ||
+          re.receivedQuality = (opts.spmnCollFields && opts.spmnCollFields.defReceiveQuality) ||
             defValues['specimen.receivedEvent.receivedQuality'] ||
-            'Acceptable';
+            re.receivedQuality || 'Acceptable';
         }
 
         if (inputSpmn.lineage != 'New') {
