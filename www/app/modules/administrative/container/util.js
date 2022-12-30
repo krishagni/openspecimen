@@ -138,12 +138,12 @@ angular.module('os.administrative.container.util', ['os.common.box'])
 
     function getSpecimens(labels, filterOpts) {
       return SpecimenUtil.getSpecimens(labels, filterOpts).then(
-        function(specimens) {
-          if (!specimens) {
-            return specimens;
+        function(result) {
+          if (!result || !result.specimens || result.specimens.length == 0) {
+            return null;
           }
 
-          return confirmTransferAction(!labels, specimens);
+          return confirmTransferAction(!labels, result.specimens);
         }
       );
     }

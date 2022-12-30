@@ -40,12 +40,12 @@ angular.module('os.biospecimen.specimenlist.addedit', ['os.biospecimen.models'])
       }
 
       return SpecimenUtil.getSpecimens(labels, filterOpts).then(
-        function(specimens) {
-          if (!specimens) {
+        function(result) {
+          if (!result || !result.specimens) {
             return undefined;
           }
 
-          specimenList.specimenIds = specimens.map(function(spmn) { return spmn.id; });
+          specimenList.specimenIds = result.specimens.map(function(spmn) { return spmn.id; });
           return specimenList.$saveOrUpdate();
         }
       );
