@@ -159,30 +159,17 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public int deleteListItems(Long listId, List<Long> specimenIds) {
-		List<SpecimenListItem> items = getListItems(listId, specimenIds);
-		items.forEach(item -> getCurrentSession().delete(item));
-		return items.size();
+		return getCurrentSession().getNamedQuery(CLEAR_LIST_ITEMS)
+			.setParameter("listId", listId)
+			.setParameterList("specimenIds", specimenIds)
+			.executeUpdate();
 	}
 
 	@Override
 	public int clearList(Long listId) {
-		Criteria query = getCurrentSession().createCriteria(SpecimenListItem.class, "li")
-			.createAlias("li.list", "list")
-			.addOrder(Order.asc("li.id"))
-			.setMaxResults(50);
-
-		int startAt = 0;
-		while (true) {
-			List<SpecimenListItem> items = query.setFirstResult(startAt).list();
-			items.forEach(item -> getCurrentSession().delete(item));
-			if (items.size() < 50) {
-				break;
-			}
-
-			startAt += items.size();
-		}
-
-		return startAt;
+		return getCurrentSession().getNamedQuery(CLEAR_LIST)
+			.setParameter("listId", listId)
+			.executeUpdate();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -319,4 +306,8 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	private static final String ADD_CHILD_SPECIMENS_MYSQL = FQN + ".addChildSpecimensMySQL";
 
 	private static final String ADD_CHILD_SPECIMENS_ORA = FQN + ".addChildSpecimensOracle";
+
+	private static final String CLEAR_LIST = FQN + ".clearList";
+
+	private static final String CLEAR_LIST_ITEMS = FQN + ".clearListItems";
 }

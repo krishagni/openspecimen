@@ -177,5 +177,13 @@
           ne.obj_id is null
       ) t
     </sql-query>
+
+    <sql-query name="clearList">
+      delete from catissue_spec_tag_items where tag_id = :listId
+    </sql-query>
+
+    <sql-query name="clearListItems">
+      delete from catissue_spec_tag_items where tag_id = :listId and obj_id in (:specimenIds)
+    </sql-query>
   </class>
 </hibernate-mapping>

@@ -232,7 +232,7 @@ export default {
 
       const promises = [ orderSvc.getAddEditFormSchema(order.distributionProtocol) ];
       if (input) {
-        if (input.specimenIds) {
+        if (input.specimenIds && input.specimenIds.length > 0) {
           //
           // specific specimens selected from any list view
           //
@@ -245,7 +245,7 @@ export default {
             order.request = {id: input.requestId, catalogId: input.catalogId};
             order.requester = input.requestor;
           }
-        } else if (input.specimenListId) {
+        } else if (+input.specimenListId > 0) {
           //
           // distribute entire cart
           //
@@ -256,7 +256,7 @@ export default {
             promises.push(new Promise((resolve) => resolve([])));
           } else {
             order.specimenList = null;
-            promises.push(orderSvc.createOrderItemsFromCart(input.specimenListId, input.printLabel));
+            promises.push(orderSvc.createOrderItemsFromCart(input.specimenListId, input.printLabel, size));
           }
         } else if (input.allReserved && input.dp) {
           //

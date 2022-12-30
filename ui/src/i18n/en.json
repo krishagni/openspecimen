@@ -284,6 +284,7 @@
       "delete_selected": "Are you sure you want to delete the selected specimens and all its children?",
       "deleted": "Selected specimens and their children successfully deleted.",
       "distribute": "Distribute",
+      "distribute_all": "Distribute All",
       "distribute_now": "Distribute Now",
       "distribution_details": "Distribution Details",
       "edit_max_limit": "{count} specimens selected. Only {limit} specimens can be edited at a time.",
