@@ -297,6 +297,7 @@
         c.identifier as container_identifier, c.name as container_name,
         c.display_name as container_display_name, c.barcode as container_barcode,
         p.identifier as position_identifier, p.pos_one_str, p.pos_two_str,
+        p.pos_one, p.pos_two,
         case when c.pos_labeling_mode = 'LINEAR'
         then
           case when c.pos_assignment like 'HZ_%'

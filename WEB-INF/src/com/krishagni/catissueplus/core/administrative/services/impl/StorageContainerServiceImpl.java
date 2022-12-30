@@ -1989,11 +1989,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			name.setDirection("asc");
 
 			Column row = new Column();
-			row.setExpr("Specimen.specimenPosition.positionDimensionTwoString");
+			row.setExpr("Specimen.specimenPosition.rowOrdinal");
 			row.setDirection("asc");
 
 			Column col = new Column();
-			col.setExpr("Specimen.specimenPosition.positionDimensionOneString");
+			col.setExpr("Specimen.specimenPosition.columnOrdinal");
 			col.setDirection("asc");
 
 			orderBy = Arrays.asList(name, row, col);

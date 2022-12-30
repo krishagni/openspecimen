@@ -325,6 +325,20 @@
             <column>POS_ONE_STR</column>
           </textField>
 
+          <numberField>
+            <name>rowOrdinal</name>
+            <udn>rowOrdinal</udn>
+            <caption>#getMessage("specimen_spec_position_row_ordinal")</caption>
+            <column>POS_TWO</column>
+          </numberField>
+
+          <numberField>
+            <name>columnOrdinal</name>
+            <udn>columnOrdinal</udn>
+            <caption>#getMessage("specimen_spec_position_col_ordinal")</caption>
+            <column>POS_ONE</column>
+          </numberField>
+
           <textField>
             <name>formattedPos</name>
             <udn>formattedPos</udn>
