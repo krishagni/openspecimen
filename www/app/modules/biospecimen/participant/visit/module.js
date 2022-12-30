@@ -84,6 +84,21 @@ angular.module('os.biospecimen.visit', [
             // required for lastest visit CD
             //
             return visit.id ? null : cpr.getLatestVisit();
+          },
+          spmnCollWfData: function(cp, CpConfigSvc) {
+            return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
+              function(wfData) {
+                if (wfData && !angular.equals(wfData, {})) {
+                  return wfData;
+                }
+
+                return CpConfigSvc.getWorkflowData(-1, 'specimenCollection').then(
+                  function(data) {
+                    return data || {};
+                  }
+                );
+              }
+            );
           }
         },
         controller: 'AddEditVisitCtrl',

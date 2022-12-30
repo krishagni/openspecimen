@@ -164,6 +164,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
       }
 
       data.opts.showVisitDetails    = wfData.showVisitDetails != 'false' && wfData.showVisitDetails != false;
+      data.opts.defVisitDate        = wfData.defVisitDate;
       data.opts.showCollectionEvent = wfData.showCollectionEvent != 'false' && wfData.showCollectionEvent != false;
       data.opts.showReceivedEvent   = wfData.showReceivedEvent != 'false' && wfData.showReceivedEvent != false;
       data.opts.defReceiveQuality   = wfData.defReceiveQuality;
@@ -455,9 +456,9 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           }
 
           if (visit.status != 'Complete') {
-            visit.visitDate = new Date();
+            visit.visitDate = uiOpts.defVisitDate == 'none' ? null : new Date();
           } else {
-            visit.visitDate = visit.visitDate || new Date();
+            visit.visitDate = visit.visitDate || (uiOpts.defVisitDate == 'none' ? null : new Date());
           }
 
           visit.cprId = cpr.id;
