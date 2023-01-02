@@ -467,6 +467,7 @@
     "defrag_report_by_email": "Defragmentation report generation is taking more time than anticipated. Link to download the report will be sent to you by email.",
     "deleted": "Container '{name}' deleted.",
     "dimension": "Dimension",
+    "disable_reminders_q": "Disable Reminders?",
     "display_in_map": "Display in Map",
     "display_name": "Display Name",
     "distribution_protocols": "Distribution Protocols",

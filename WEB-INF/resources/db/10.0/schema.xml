@@ -55,4 +55,27 @@
       <column name="ACTIVITY_STATUS" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Mark the vital status PV for Dead">
+    <sql>
+      insert into
+        os_pv_props
+      select
+        pv.identifier as pv_id, 'dead', 'true'
+      from
+        catissue_permissible_value pv
+      where
+        pv.public_id = 'vital_status' and
+        pv.value = 'Dead' and
+        pv.activity_status != 'Disabled'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Setting to disable notifications for the scheduled container tasks">
+    <addColumn tableName="OS_SCHED_CONT_ACTIVITIES">
+      <column name="DISABLE_REMINDERS" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

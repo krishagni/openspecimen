@@ -24,4 +24,11 @@
       <column name="blockedPosition_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Setting to disable notifications for the scheduled container tasks">
+    <addColumn tableName="OS_SCHED_CONT_ACTIVITIES_AUD">
+      <column name="DISABLE_REMINDERS" type="${boolean.type}" />
+      <column name="disableReminders_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

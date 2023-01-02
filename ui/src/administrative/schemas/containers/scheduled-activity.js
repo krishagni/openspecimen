@@ -86,6 +86,20 @@ export default {
       {
         "fields": [
           {
+            "name": "activity.disableReminders",
+            "labelCode": "containers.disable_reminders_q",
+            "type": "radio",
+            "options": [
+              { "captionCode": "common.yes", "value": true },
+              { "captionCode": "common.no",  "value": false }
+            ],
+            "optionsPerRow": 2
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
             "name": "activity.reminderInterval",
             "labelCode": "containers.remind_before",
             "type": "number",
@@ -93,7 +107,8 @@ export default {
               "required": {
                 "messageCode": "containers.remind_before_required"
               }
-            }
+            },
+            "showWhen": "!activity.disableReminders"
           },
           {
             "name": "activity.reminderIntervalUnit",
@@ -113,7 +128,8 @@ export default {
               "required": {
                 "messageCode": "containers.remind_before_interval_unit_required"
               }
-            }
+            },
+            "showWhen": "!activity.disableReminders"
           }
         ]
       },

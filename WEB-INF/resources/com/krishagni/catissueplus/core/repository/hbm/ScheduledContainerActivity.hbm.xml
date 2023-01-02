@@ -28,6 +28,8 @@
 
     <many-to-one name="task" column="TASK_ID"/>
 
+    <property name="disableReminders" column="DISABLE_REMINDERS" />
+
     <property name="reminderInterval" column="REM_INTERVAL"/>
 
     <property name="reminderIntervalUnit" column="REM_INTERVAL_UNIT">

@@ -43,6 +43,10 @@ public class ContainerMaintenanceReminderTask implements ScheduledTask {
 		List<ScheduledContainerActivity> schedActivities = getScheduledActivities(startAt);
 		Map<Long, Date> latestActivityDates = getLatestActivityDates(schedActivities);
 		for (ScheduledContainerActivity activity : schedActivities) {
+			if (activity.isDisableReminders()) {
+				continue;
+			}
+
 			sendReminder(activity, latestActivityDates.get(activity.getId()));
 		}
 
