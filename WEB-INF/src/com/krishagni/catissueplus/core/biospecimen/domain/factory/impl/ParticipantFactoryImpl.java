@@ -23,7 +23,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
@@ -416,11 +415,12 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 			participant.setBirthDate(birthDate);
 		}
 
-		if (participant.getVitalStatus() == null || !DEAD_STATUS.equals(participant.getVitalStatus().getValue())) {
+		PermissibleValue vitalStatus = participant.getVitalStatus();
+		Map<String, String> pvProps = vitalStatus != null ? vitalStatus.getProps() : Collections.emptyMap();
+		if (vitalStatus == null || !"true".equals(pvProps.get("dead"))) {
 			participant.setDeathDate(null);
 		} else if (!partial || detail.isAttrModified("deathDate")) {
 			Date deathDate = detail.getDeathDate();
-
 			if (deathDate != null && deathDate.after(Calendar.getInstance().getTime())) {
 				oce.addError(ParticipantErrorCode.INVALID_DEATH_DATE);
 			}
