@@ -460,9 +460,9 @@
 
     "dp": {
       "title": "Distribution",
-      "add_dp": "Add Distribution Protocol",
-      "dup_dp": "Distribution protocol already added to the collection protocol.",
-      "no_dp": "No distribution protocols can be assigned to collection protocol."
+      "dps": "Distribution Protocols",
+      "no_dp": "No distribution protocols can be linked to the collection protocol.",
+      "no_dps": "No distribution protocol is linked to the collection protocol."
     },
 
     "reporting": {
