@@ -97,7 +97,7 @@ public class ExpressionUtil {
 		}
 
 		public String join(Collection<String> coll) {
-			return Utility.nullSafeStream(coll).filter(StringUtils::isNotBlank).collect(Collectors.joining());
+			return Utility.nullSafeStream(coll).filter(StringUtils::isNotBlank).collect(Collectors.joining(", "));
 		}
 
 		private boolean match(Iterable<?> coll, String elementName, String expression, boolean allMatch) {
