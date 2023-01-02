@@ -1475,7 +1475,7 @@ edu.common.de.SelectField = function(id, field, args) {
   };
 
   this.postRender = function() {
-    this.control = new Select2Search(this.inputEl, {multiple: this.isMultiSelect});
+    var control = this.control = new Select2Search(this.inputEl, {multiple: this.isMultiSelect});
     this.control.onQuery(qFunc).onChange(onChange);
     this.control.onInitSelection(initSelection).render();
 
@@ -1484,6 +1484,12 @@ edu.common.de.SelectField = function(id, field, args) {
       if (select2Container) {
         select2Container.prop({title: field.toolTip});
       }
+    }
+
+    if (!this.isMultiSelect && (field.mandatory != true && field.mandatory != 'true')) {
+      var clear = $('<a class="clear-option glyphicon glyphicon-remove"></a>');
+      clear.insertAfter(this.inputEl);
+      clear.click(function() { control.setValue(null); });
     }
 
     var hasValue = false;
@@ -2424,7 +2430,7 @@ edu.common.de.LookupField = function(params, callback) {
   };
 
   this.postRender = function() {
-    this.control = new Select2Search(this.inputEl);
+    var control = this.control = new Select2Search(this.inputEl);
     this.control.onQuery(qFunc).onChange(onChange);
     this.control.onInitSelection(initSelection).render();
 
@@ -2433,6 +2439,12 @@ edu.common.de.LookupField = function(params, callback) {
       if (select2Container) {
         select2Container.prop({title: field.toolTip});
       }
+    }
+
+    if (!this.isMultiSelect && (field.mandatory != true && field.mandatory != 'true')) {
+      var clear = $('<a class="clear-option glyphicon glyphicon-remove"></a>');
+      clear.insertAfter(this.inputEl);
+      clear.click(function() { control.setValue(null); });
     }
 
     if (this.value) {
