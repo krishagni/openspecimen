@@ -119,6 +119,22 @@
         </os-steps>
       </div>
     </os-page-body>
+
+    <os-confirm class="os-not-found-confirm" ref="notFoundConfirm">
+      <template #title>
+        <span v-t="'containers.add_containers.not_found'">Containers not found</span>
+      </template>
+
+      <template #message>
+        <div class="message">
+          <div v-t="'containers.add_containers.not_found_msg'">Following containers were not found: </div>
+
+          <div><i>{{ctx.notFound.join(', ')}}</i></div>
+
+          <div v-t="'containers.add_containers.proceed_q'">Do you want to proceed?</div>
+        </div>
+      </template>
+    </os-confirm>
   </os-page>
 </template>
 
@@ -155,7 +171,9 @@ export default {
 
       containersSchema: {columns: []},
 
-      loading: false
+      loading: false,
+
+      notFound: []
     });
 
     const dataCtx = reactive({
@@ -357,8 +375,33 @@ export default {
     getAndAddContainers: async function({itemLabels}) {
       const shipment   = this.dataCtx.shipment;
       const containers = await shipmentSvc.searchContainers(shipment.sendingSite, shipment.receivingSite, itemLabels);
+
+      const notFound = [];
+      for (let name of itemLabels) {
+        let found = false;
+        for (let container of containers) {
+          if (container.name.toLowerCase() == name.toLowerCase()) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          notFound.push(name);
+        }
+      }
+
+      if (notFound.length > 0) {
+        this.ctx.notFound = notFound;
+        const resp = await this.$refs.notFoundConfirm.open();
+        if (resp != 'proceed') {
+          return;
+        }
+      }
+
       const toAdd      = containers.map(container => ({container: container}));
       util.addIfAbsent(this.dataCtx.containerItems, toAdd, 'container.id');
+      this.$refs.addContainers.clearInput();
     },
 
     removeContainer: function({idx}) {
@@ -452,3 +495,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-not-found-confirm .message > div {
+  padding: 0.5rem 0.25rem;
+}
+</style>
