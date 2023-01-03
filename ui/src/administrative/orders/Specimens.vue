@@ -2,10 +2,9 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="print" label="Print" @click="printLabels" />
+      <os-button left-icon="print" label="Print" @click="printLabels" v-if="printDistLabels" />
 
-      <os-button left-icon="trash" label="Delete" @click="deleteItems"
-        v-show-if-allowed="orderResources.updateOpts" />
+      <os-button left-icon="trash" label="Delete" @click="deleteItems" v-if="updateAllowed" />
 
       <os-button left-icon="reply" label="Retrieve" @click="retrieveSpecimens"
         v-if="showRetrieveSpmns && selectedSpecimens.length == 0" />
@@ -26,7 +25,7 @@
   <os-query-list-view
     name="order-specimens-list-view"
     :object-id="order.id"
-    :allow-selection="printDistLabels"
+    :allow-selection="allowSelection"
     :include-count="includeCount"
     url="'#/specimens/' + hidden.specimenId"
     @selectedRows="onSpecimenSelection"
@@ -58,6 +57,7 @@
 
 import orderSvc   from '@/administrative/services/Order.js';
 import alertSvc   from '@/common/services/Alerts.js';
+import authSvc    from '@/common/services/Authorization.js';
 import routerSvc  from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
 
@@ -68,7 +68,11 @@ export default {
 
   data() {
     return {
+      updateAllowed: false,
+
       printDistLabels: false,
+
+      allowSelection: false,
 
       showRetrieveSpmns: false,
 
@@ -85,6 +89,9 @@ export default {
   async created() {
     const setting = await settingSvc.getSetting('administrative', 'allow_dist_label_printing');
     this.printDistLabels = setting[0].value == 'true' || setting[0].value == true;
+
+    this.updateAllowed = authSvc.isAllowed(orderResources.updateOpts);
+    this.allowSelection = this.printDistLabels || this.updateAllowed;
 
     if (this.order.status == 'EXECUTED') {
       const items = await orderSvc.getOrderItems(this.order.id, {maxResults: 1, storedInDistributionContainer: true});
