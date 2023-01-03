@@ -509,7 +509,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
 
     $scope.vitalStatusChanged = function() {
       var p = $scope.cpr.participant;
-      if ($scope.deadStatuses.indexOf(p.vitalStatus) && !!p.deathDate) {
+      if ($scope.deadStatuses.indexOf(p.vitalStatus) == -1 && !!p.deathDate) {
         p.deathDate = null;
       }
     }
