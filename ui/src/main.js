@@ -224,15 +224,16 @@ if (params.get('token')) {
   http.headers['X-OS-API-TOKEN'] = localStorage.osAuthToken;
 }
 
-let settingsQ  = settingSvc.getAppProps();
+let appPropsQ  = settingSvc.getAppProps();
 let localeQ    = settingSvc.getLocale();
 let messagesQ  = settingSvc.getI18nMessages();
 let currUserQ  = userSvc.getCurrentUser();
 let usrStateQ  = userSvc.getUiState();
 let usrRightsQ = authSvc.loadUserRights();
 let spmnPropsQ = util.loadSpecimenTypeProps();
+let siteAssetsQ = settingSvc.getSiteAssets();
 
-Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ]).then(
+Promise.all([appPropsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ, siteAssetsQ]).then(
   (resp) => {
     let appProps = resp[0];
     let locale   = resp[1];
@@ -255,7 +256,8 @@ Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, sp
         locale: locale.locale,
         utcOffset: locale.utcOffset
       },
-      state: resp[5]
+      state: resp[5],
+      siteAssets: resp[7]
     };
 
     let osSvc = window.osSvc = app.config.globalProperties.$osSvc;

@@ -20,6 +20,10 @@ class Setting {
     return http.get('config-settings/password');
   }
 
+  async getSiteAssets() {
+    return http.get('config-settings/deployment-site-assets');
+  }
+
   getKey(module, property) {
     return module + ':' + property;
   }
