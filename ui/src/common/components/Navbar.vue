@@ -130,12 +130,7 @@ export default {
     },
 
     deploySiteLogo: function() {
-      let logoUrl = this.siteAssets.siteLogo || '';
-      if (logoUrl && logoUrl.length > 9) {
-        logoUrl = http.getUrl(logoUrl.substring(9));
-      }
-
-      return logoUrl;
+      return this.siteAssets.siteLogo || '';
     },
 
     username: function() {
