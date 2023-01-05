@@ -1,6 +1,9 @@
 
 angular.module('openspecimen')
-  .factory('AuthService', function($http, $rootScope, $window, $q, ApiUtil, ApiUrls, SettingUtil, User) {
+  .factory('AuthService', function(
+    $http, $rootScope, $window, $q, $sce, $timeout,
+    ApiUtil, ApiUrls, SettingUtil, User) {
+
     var url = function() {
       return ApiUrls.getUrl('sessions');
     };
@@ -37,6 +40,12 @@ angular.module('openspecimen')
       },
 
       logout: function() {
+        if (!$http.defaults.headers.common['X-OS-API-TOKEN']) {
+          var qp = $q.defer();
+          qp.resolve({});
+          return qp.promise;
+        }
+
         var samlEnabled = SettingUtil.getSetting('auth', 'saml_enable');
         var sloEnabled  = SettingUtil.getSetting('auth', 'single_logout');
         var that = this;
@@ -45,24 +54,36 @@ angular.module('openspecimen')
           function(resp) {
             var q;
             if (resp[0].value == 'true' && resp[1].value == 'true') {
-              $rootScope.logoutUrl = ApiUrls.getServerUrl() + 'saml/logout?_nonce=' + Date.now();
+              $rootScope.logoutUrl = $sce.trustAsResourceUrl(ApiUrls.getServerUrl() + 'saml/logout?_nonce='+Date.now());
               $rootScope.logout = true;
               q = $q.defer();
-              q.resolve({data: {}});
+              q.resolve({});
               q = q.promise;
             } else {
               q = $http.delete(url());
             }
 
-            that.removeToken();
-            $rootScope.loggedIn = false;
-            delete $rootScope.reqState;
-            delete $rootScope.currentUser;
-            if ($window.localStorage['osReqState']) {
-              delete $window.localStorage['osReqState'];
-            }
 
-            return q.then(ApiUtil.processResp);
+            var r = $q.defer();
+            $timeout(
+              function() {
+                q.then(
+                  function() {
+                    that.removeToken();
+                    $rootScope.loggedIn = false;
+                    delete $rootScope.reqState;
+                    delete $rootScope.currentUser;
+                    if ($window.localStorage['osReqState']) {
+                      delete $window.localStorage['osReqState'];
+                    }
+
+                    r.resolve({});
+                  }
+                );
+              }
+            );
+
+            return r.promise;
           }
         );
       },
@@ -100,27 +121,35 @@ angular.module('openspecimen')
       var logoutQ;
       if ($location.search().logout) {
         logoutQ = $scope.logout();
+      } else {
+        logoutQ = $q.defer();
+        logoutQ.resolve({});
+        logoutQ = logoutQ.promise;
       }
- 
-      if ($http.defaults.headers.common['X-OS-API-TOKEN']) {
-        if ($rootScope.reqState) {
-          $state.go($rootScope.reqState.name, $rootScope.reqState.params);
-        } else {
-          $state.go('home');
+
+      logoutQ.then(
+        function() {
+          if ($http.defaults.headers.common['X-OS-API-TOKEN']) {
+            if ($rootScope.reqState) {
+              $state.go($rootScope.reqState.name, $rootScope.reqState.params);
+            } else {
+              $state.go('home');
+            }
+            //return;
+          } else if (!$stateParams.directVisit && $injector.has('scCatalog')) {
+            //
+            // User not logged in
+            //
+            $q.when(logoutQ, gotoCatalog, gotoCatalog);
+          }
+
+          if ($stateParams.directVisit == 'true') {
+            $rootScope.reqState = undefined;
+          }
+
+          loadDomains();
         }
-        //return;
-      } else if (!$stateParams.directVisit && $injector.has('scCatalog')) {
-        //
-        // User not logged in
-        //
-        $q.when(logoutQ, gotoCatalog, gotoCatalog);
-      }
-
-      if ($stateParams.directVisit == 'true') {
-        $rootScope.reqState = undefined;
-      }
-
-      loadDomains();
+      );
     }
 
     function gotoCatalog() {
