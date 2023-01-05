@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,11 @@ import org.hibernate.sql.JoinType;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDigestItem;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
+import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 
 public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements SpecimenListDao {
@@ -224,6 +227,37 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 			.list();
 	}
 
+	@Override
+	public List<Long> getDigestEnabledLists() {
+		return getCurrentSession().getNamedQuery(GET_DIGEST_ENABLED_LIST_IDS).list();
+	}
+
+	@Override
+	public List<SpecimenListDigestItem> getListDigest(Long listId, Date startTime, Date endTime) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_LIST_DIGEST)
+			.setParameter("listId", listId)
+			.setParameter("startTime", startTime)
+			.setParameter("endTime", endTime)
+			.list();
+
+		List<SpecimenListDigestItem> result = new ArrayList<>();
+		for (Object[] row : rows) {
+			int idx = -1;
+			UserSummary user = new UserSummary();
+			user.setFirstName((String) row[++idx]);
+			user.setLastName((String) row[++idx]);
+			user.setEmailAddress((String) row[++idx]);
+
+			SpecimenListDigestItem item = new SpecimenListDigestItem();
+			item.setUser(user);
+			item.setCpShortTitle((String) row[++idx]);
+			item.setAddedSpecimens((Long) row[++idx]);
+			result.add(item);
+		}
+
+		return result;
+	}
+
 	private DetachedCriteria getSpecimenListsQuery(SpecimenListsCriteria crit) {
 		DetachedCriteria query = DetachedCriteria.forClass(SpecimenList.class, "l")
 			.setProjection(Projections.distinct(Projections.property("l.id")))
@@ -310,4 +344,8 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	private static final String CLEAR_LIST = FQN + ".clearList";
 
 	private static final String CLEAR_LIST_ITEMS = FQN + ".clearListItems";
+
+	private static final String GET_DIGEST_ENABLED_LIST_IDS = FQN + ".getDigestEnabledListIds";
+
+	private static final String GET_LIST_DIGEST = FQN + ".getListDigest";
 }

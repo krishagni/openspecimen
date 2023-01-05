@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -22,7 +23,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
@@ -622,6 +622,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			}
 		}
 
+		Date currentTime = Calendar.getInstance().getTime();
 		List<SpecimenListItem> items = specimenIds.stream()
 			.map(specimenId -> {
 				Specimen spmn = new Specimen();
@@ -630,6 +631,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 				SpecimenListItem item = new SpecimenListItem();
 				item.setList(list);
 				item.setSpecimen(spmn);
+				item.setAddedBy(AuthUtil.getCurrentUser());
+				item.setAddedOn(currentTime);
 				return item;
 			}).collect(Collectors.toList());
 
@@ -750,10 +753,6 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		if (details.isAttrModified("sharedWith")){
 			ensureValidUsers(specimenList);
 		}
-
-		if (details.isAttrModified("sharedWithGroups")) {
-			ensureValidGroups(specimenList);
-		}
 	}
 	
 	private void ensureValidSpecimens(SpecimenListDetail details, List<SiteCpPair> siteCpPairs) {
@@ -783,26 +782,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		ensureValidUsers(sharedUsers);
 	}
 
-	private void ensureValidGroups(SpecimenList specimenList) {
-		if (CollectionUtils.isEmpty(specimenList.getSharedWithGroups()) || AuthUtil.isAdmin()) {
-			return;
-		}
-
-		for (UserGroup group : specimenList.getSharedWithGroups()) {
-			if (!group.getInstitute().equals(AuthUtil.getCurrentUserInstitute())) {
-				throw OpenSpecimenException.userError(SpecimenListErrorCode.INVALID_GROUPS_LIST);
-			}
-		}
-	}
-	
 	private void ensureValidUsers(List<Long> userIds) {
-		Long instituteId = null;
-		if (!AuthUtil.isAdmin()) {
-			User user = daoFactory.getUserDao().getById(AuthUtil.getCurrentUser().getId());
-			instituteId = user.getInstitute().getId();
-		}
-		
-		List<User> users = daoFactory.getUserDao().getUsersByIdsAndInstitute(userIds, instituteId);
+		List<User> users = daoFactory.getUserDao().getUsersByIds(userIds);
 		if (userIds.size() != users.size()) {
 			throw OpenSpecimenException.userError(SpecimenListErrorCode.INVALID_USERS_LIST);
 		}

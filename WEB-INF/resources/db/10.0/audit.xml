@@ -31,4 +31,20 @@
       <column name="disableReminders_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Enable or disable specimen carts digest notifications">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS_AUD">
+      <column name="SEND_DIGEST_NOTIFS" type="${boolean.type}" />
+      <column name="sendDigestNotifs_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Keep track who added specimens to the cart and when">
+    <addColumn tableName="CATISSUE_SPEC_TAG_ITEMS_AUD">
+      <column name="ADDED_BY" type="${int.type}" />
+      <column name="addedBy_MOD" type="${boolean.type}" />
+      <column name="ADDED_ON" type="${nullable.ts.type}" />
+      <column name="addedOn_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -50,6 +50,7 @@
     "remove_from_folder": "Remove from folder",
     "remove_specimens_q": "Remove specimens from the cart?",
     "search_folder": "Search Folder",
+    "send_digest_notifications": "Send digest of specimens added to the cart.",
     "select_one_spmn_to_rm": "Select at least one specimen to remove from the cart.",
     "share_with_users": "Share with users",
     "share_with_user_groups": "Share with user groups",

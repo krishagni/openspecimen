@@ -14,5 +14,9 @@
     <many-to-one name="specimen" column="OBJ_ID"/>
 
     <many-to-one name="list" column="TAG_ID"/>
+
+    <many-to-one name="addedBy" column="ADDED_BY" />
+
+    <property name="addedOn" column="ADDED_ON" />
   </class>
 </hibernate-mapping>

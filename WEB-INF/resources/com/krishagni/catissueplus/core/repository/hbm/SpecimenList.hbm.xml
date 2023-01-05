@@ -21,6 +21,8 @@
     <property name="lastUpdatedOn" column="LAST_UPDATED_ON"/>
 
     <many-to-one name="owner" column="USER_ID"/>
+
+    <property name="sendDigestNotifs" column="SEND_DIGEST_NOTIFS" />
      
     <set name="sharedWith" table="SHARED_SPECIMENLIST_TAGS">
       <key column="TAG_ID"/>
@@ -184,6 +186,44 @@
 
     <sql-query name="clearListItems">
       delete from catissue_spec_tag_items where tag_id = :listId and obj_id in (:specimenIds)
+    </sql-query>
+
+    <sql-query name="getDigestEnabledListIds">
+      <return-scalar column="listId" type="long" />
+
+      select
+        list.identifier as listId
+      from
+        catissue_specimenlist_tags list
+      where
+        list.send_digest_notifs = 1 and
+        list.deleted_on is null
+      order by
+        list.identifier asc
+    </sql-query>
+
+    <sql-query name="getListDigest">
+      <return-scalar column="first_name" type="string" />
+      <return-scalar column="last_name" type="string" />
+      <return-scalar column="email_address" type="string" />
+      <return-scalar column="short_title" type="string" />
+      <return-scalar column="specimens" type="long" />
+
+      <![CDATA[
+      select
+        usr.first_name, usr.last_name, usr.email_address,
+        cp.short_title, count(item.identifier) as specimens
+      from
+        catissue_spec_tag_items item
+        inner join catissue_user usr on usr.identifier = item.added_by
+        inner join catissue_specimen spmn on spmn.identifier = item.obj_id
+        inner join catissue_collection_protocol cp on cp.identifier = spmn.collection_protocol_id
+      where
+        item.tag_id = :listId and
+        item.added_on >= :startTime and item.added_on < :endTime
+      group by
+        usr.first_name, usr.last_name, usr.email_address, cp.short_title
+      ]]>
     </sql-query>
   </class>
 </hibernate-mapping>

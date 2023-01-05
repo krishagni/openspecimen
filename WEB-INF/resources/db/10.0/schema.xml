@@ -78,4 +78,20 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Enable or disable specimen carts digest notifications">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS">
+      <column name="SEND_DIGEST_NOTIFS" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Keep track who added specimens to the cart and when">
+    <addColumn tableName="CATISSUE_SPEC_TAG_ITEMS">
+      <column name="ADDED_BY" type="${int.type}">
+        <constraints foreignKeyName="FK_CART_ITEMS_ADDED_BY" referencedTableName="CATISSUE_USER"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="ADDED_ON" type="${nullable.ts.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

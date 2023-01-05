@@ -33,6 +33,11 @@ export default {
         "apiUrl": "user-groups",
         "displayProp": "name",
         "searchProp": "query",
+        "queryParams": {
+          "static": {
+            "listAll": true
+          }
+        }
       }
     },
     {
@@ -48,6 +53,11 @@ export default {
       "placeholder": "Add specimens to the cart by scanning labels or barcodes separated by comma, tab, or newline",
       "showWhen": "noInputSpecimens",
       "dataEntry": true
+    },
+    {
+      "type": "booleanCheckbox",
+      "inlineLabelCode": "carts.send_digest_notifications",
+      "name": "cart.sendDigestNotifs"
     }
   ]
 }

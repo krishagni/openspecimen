@@ -77,6 +77,7 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		setOwner(details, specimenList, partial , ose);
 		setName(details, specimenList, partial , ose);
 		setDescription(details, specimenList, partial, ose);
+		setDigestNotifsEnabled(details, specimenList, partial, ose);
 		setSharedUsers(details, specimenList, partial, ose);
 		setSharedGroups(details, specimenList, partial, ose);
 
@@ -122,6 +123,14 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		}
 
 		specimenList.setDescription(details.getDescription());
+	}
+
+	private void setDigestNotifsEnabled(SpecimenListDetail input, SpecimenList list, boolean partial, OpenSpecimenException ose) {
+		if (partial && !input.isAttrModified("sendDigestNotifs")) {
+			return;
+		}
+
+		list.setSendDigestNotifs(input.getSendDigestNotifs());
 	}
 
 	private void setSharedUsers(SpecimenListDetail details, SpecimenList specimenList, boolean partial, OpenSpecimenException ose) {

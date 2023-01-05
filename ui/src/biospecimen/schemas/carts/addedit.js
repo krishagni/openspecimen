@@ -19,6 +19,10 @@ export default {
 
       {
         "fields": [ { "name": "cart.specimenLabels" } ]
+      },
+
+      {
+        "fields": [ { "name": "cart.sendDigestNotifs" } ]
       }
     ]
   }

@@ -1,11 +1,13 @@
 package com.krishagni.catissueplus.core.biospecimen.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDigestItem;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
@@ -50,4 +52,8 @@ public interface SpecimenListDao extends Dao<SpecimenList> {
 	Map<Long, List<Specimen>> getListCpSpecimens(Long listId);
 
 	List<Long> getListSpecimensCpIds(Long listId);
+
+	List<Long> getDigestEnabledLists();
+
+	List<SpecimenListDigestItem> getListDigest(Long listId, Date startTime, Date endTime);
 }

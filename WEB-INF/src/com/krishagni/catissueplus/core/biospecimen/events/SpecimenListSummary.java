@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
@@ -29,6 +29,8 @@ public class SpecimenListSummary extends AttributeModifiedSupport {
 	private int specimenCount;
 
 	private Boolean starred;
+
+	private Boolean sendDigestNotifs;
 
 	public Long getId() {
 		return id;
@@ -102,6 +104,14 @@ public class SpecimenListSummary extends AttributeModifiedSupport {
 		this.starred = starred;
 	}
 
+	public Boolean getSendDigestNotifs() {
+		return sendDigestNotifs;
+	}
+
+	public void setSendDigestNotifs(Boolean sendDigestNotifs) {
+		this.sendDigestNotifs = sendDigestNotifs;
+	}
+
 	public static SpecimenListSummary fromSpecimenList(SpecimenList list){
 		SpecimenListSummary listSummary = new SpecimenListSummary();
 		listSummary.setId(list.getId());
@@ -111,6 +121,7 @@ public class SpecimenListSummary extends AttributeModifiedSupport {
 		listSummary.setLastUpdatedOn(list.getLastUpdatedOn());
 		listSummary.setOwner(UserSummary.from(list.getOwner()));
 		listSummary.setDefaultList(list.isDefaultList());
+		listSummary.setSendDigestNotifs(list.getSendDigestNotifs());
 		return listSummary;
 	}
 }
