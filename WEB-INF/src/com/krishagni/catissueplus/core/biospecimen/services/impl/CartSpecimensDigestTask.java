@@ -123,7 +123,7 @@ public class CartSpecimensDigestTask implements ScheduledTask {
 			.toArray(String[]::new);
 
 		Map<String, Object> props = new HashMap<>();
-		props.put("$subject", new String[] {cart.getName(), startTimeStr, endTimeStr});
+		props.put("$subject", new String[] {cart.getDisplayName(), startTimeStr, endTimeStr});
 		props.put("cart", cart);
 		props.put("startTime", startTimeStr);
 		props.put("endTime", endTimeStr);
