@@ -52,7 +52,7 @@
            scheduled_day_of_month, activity_status, repeat_schedule, type, command,
            task_impl_fqn, rt_args_provided, rt_args_help_text)
         values
-          (OS_SCHEDULED_JOBS_SEQ.nextVal, 'Consent responses digest', userId, SYSDATE, null, 45, 23, null,
+          (OS_SCHEDULED_JOBS_SEQ.nextVal, 'Specimen carts digest', userId, SYSDATE, null, 45, 23, null,
            null, 'Active', 'DAILY', 'INTERNAL', null,
            'com.krishagni.catissueplus.core.biospecimen.services.impl.CartSpecimensDigestTask', 0, null);
       end;
