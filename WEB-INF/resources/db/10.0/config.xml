@@ -54,7 +54,7 @@
         values
           (OS_SCHEDULED_JOBS_SEQ.nextVal, 'Consent responses digest', userId, SYSDATE, null, 45, 23, null,
            null, 'Active', 'DAILY', 'INTERNAL', null,
-           'com.krishagni.catissueplus.core.biospecimen.services.impl.CartSpecimensDigestTask, 0, null);
+           'com.krishagni.catissueplus.core.biospecimen.services.impl.CartSpecimensDigestTask', 0, null);
       end;
       //
     </sql>
