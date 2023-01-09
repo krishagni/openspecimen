@@ -3277,7 +3277,7 @@
         "default_result_view": "Default Result View Fields",
         "default_result_view_desc": "List of field values to be displayed in default query result view.",
         "floating_point_precision": "Real Numbers Precision",
-        "floating_point_precision_desc": "Number of digits to display after the decimal point. When 0 or no value is specified, values stored in the database are displayed as is."
+        "floating_point_precision_desc": "Number of digits to display after the decimal point. When 0 or no value is specified, values stored in the database are displayed as is. <br> <br> The setting is <ol> <li> Applicable only for the query results or query API driven list views </li> <li> Not applicable to the data entry or overview pages </li> <li> Not applicable to real number custom fields </li> </ol>"
       },
 
       "training": {
