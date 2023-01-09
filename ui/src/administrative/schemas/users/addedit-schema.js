@@ -10,7 +10,12 @@ export default {
        },
 
        {
-         "fields": [ { "name": "user.emailAddress" } ]
+         "fields": [
+           {
+             "name": "user.emailAddress",
+             "showWhen": "currentUser.id != user.id && (currentUser.admin || currentUser.instituteAdmin)"
+           }
+         ]
        },
 
        {
