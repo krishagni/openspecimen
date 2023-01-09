@@ -38,9 +38,9 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.domain.Email;
 import com.krishagni.catissueplus.core.common.domain.factory.EmailErrorCode;
@@ -54,6 +54,7 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
@@ -437,21 +438,26 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 			return validEmailIds;
 		}
 
-		String[] filteredEmailIds = ignoreDnd ? validEmailIds : filterEmailIds(validEmailIds);
+		String[] filteredEmailIds = filterEmailIds(validEmailIds, ignoreDnd);
 		if (logger.isDebugEnabled()) {
 			String ignoredEmailIds = Stream.of(validEmailIds)
 				.filter(emailId -> Stream.of(filteredEmailIds).noneMatch(emailId::equals))
 				.collect(Collectors.joining(", "));
-			logger.debug("Not sending email to contacts and users having DND enabled: " + ignoredEmailIds);
+			logger.debug("Not sending email to users who are either archived or have enabled DND: " + ignoredEmailIds);
 		}
 
 		return filteredEmailIds;
 	}
 
-	private String[] filterEmailIds(String[] emailIds) {
-		Map<String, Boolean> settings = getEmailIdDnds(emailIds);
+	private String[] filterEmailIds(String[] emailIds, boolean ignoreDnd) {
+		Map<String, Pair<Boolean, String>> settings = getEmailIdDnds(emailIds);
 		return Arrays.stream(emailIds)
-			.filter(emailId -> !settings.getOrDefault(emailId, false))
+			.filter(
+				emailId -> {
+					Pair<Boolean, String> status = settings.getOrDefault(emailId, Pair.make(false, "Disabled"));
+					return (ignoreDnd || !Boolean.TRUE.equals(status.first())) && !Status.isClosedOrDisabledStatus(status.second());
+				}
+			)
 			.toArray(String[]::new);
 	}
 
@@ -464,8 +470,8 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 	}
 
 	@PlusTransactional
-	private Map<String, Boolean> getEmailIdDnds(String[] validEmailIds) {
-		return daoFactory.getUserDao().getEmailIdDnds(Arrays.asList(validEmailIds));
+	private Map<String, Pair<Boolean, String>> getEmailIdDnds(String[] validEmailIds) {
+		return daoFactory.getUserDao().getEmailIdStatuses(Arrays.asList(validEmailIds));
 	}
 
 	private String toString(String[] arr) {
