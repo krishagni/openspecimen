@@ -505,7 +505,6 @@ edu.common.de.Form = function(args) {
     for (var i = 0; i < this.fieldObjs.length; ++i) {
       var field = this.fieldObjs[i];
       var value = field.getValue();
-
       if (!value) { // note doesn't have value;
         continue;
       }
@@ -1489,7 +1488,11 @@ edu.common.de.SelectField = function(id, field, args) {
     if (!this.isMultiSelect && (field.mandatory != true && field.mandatory != 'true')) {
       var clear = $('<a class="clear-option glyphicon glyphicon-remove"></a>');
       clear.insertAfter(this.inputEl);
-      clear.click(function() { control.setValue(null); });
+      var that = this;
+      clear.click(function() {
+        that.setValue(that.recId, null);
+        control.setValue(null);
+      });
     }
 
     var hasValue = false;
@@ -2444,7 +2447,11 @@ edu.common.de.LookupField = function(params, callback) {
     if (!this.isMultiSelect && (field.mandatory != true && field.mandatory != 'true')) {
       var clear = $('<a class="clear-option glyphicon glyphicon-remove"></a>');
       clear.insertAfter(this.inputEl);
-      clear.click(function() { control.setValue(null); });
+      var that = this;
+      clear.click(function() {
+        that.setValue(that.recId, null);
+        control.setValue(null);
+      });
     }
 
     if (this.value) {
