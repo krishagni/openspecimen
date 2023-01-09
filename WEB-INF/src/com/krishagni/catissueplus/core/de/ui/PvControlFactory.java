@@ -25,6 +25,7 @@ public class PvControlFactory extends AbstractLookupControlFactory {
 		ctrl.setAttribute(ParserUtil.getTextValue(ele, "attribute"));
 		ctrl.setLeafNode(ParserUtil.getBooleanValue(ele, "leafValue"));
 		ctrl.setRootNode(ParserUtil.getBooleanValue(ele, "rootValue"));
+		ctrl.setHasNumericValues(ParserUtil.getBooleanValue(ele, "numericValues"));
 		ctrl.setDefaultValue(ParserUtil.getTextValue(ele, "defaultValue"));
 		return ctrl;
 	}
@@ -36,6 +37,7 @@ public class PvControlFactory extends AbstractLookupControlFactory {
 		ctrl.setAttribute((String) props.get("attribute"));
 		ctrl.setLeafNode(getBool(props, "leafValue"));
 		ctrl.setRootNode(getBool(props, "rootValue"));
+		ctrl.setHasNumericValues(getBool(props, "numericValues"));
 		ctrl.setDefaultValue((String) props.get("defaultValue"));
 		return ctrl;
 	}
