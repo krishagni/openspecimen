@@ -1,6 +1,6 @@
 
 angular.module('os.biospecimen.specimenlist')
-  .controller('HomeSpecimenListCtrl', function($scope, SpecimenList) {
+  .controller('HomeSpecimenListCtrl', function($scope, SpecimenList, VueApp) {
     var ctx;
 
     function init(opts) {
@@ -21,6 +21,12 @@ angular.module('os.biospecimen.specimenlist')
       SpecimenList.query({includeStats: false, name: searchTerm, orderByStarred: true, maxResults: 25}).then(
         function(lists) {
           ctx.lists = lists;
+          angular.forEach(lists,
+            function(list) {
+              list.$$overviewUrl = VueApp.getVueViewUrl('carts/' + list.id + '/specimens');
+            }
+          );
+
           if (!searchTerm) {
             ctx.defList = lists;
           }

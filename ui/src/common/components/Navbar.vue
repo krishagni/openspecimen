@@ -85,9 +85,9 @@ export default {
 
   async created() {
     http.addListener({
-      callStarted:   () => this.$refs.loadingBar.increment(),
-      callFailed:    () => this.$refs.loadingBar.decrement(),
-      callCompleted: () => this.$refs.loadingBar.decrement(),
+      callStarted:   () => this.incrCallCount(),
+      callFailed:    () => this.decrCallCount(),
+      callCompleted: () => this.decrCallCount(),
     });
   },
 
@@ -119,6 +119,18 @@ export default {
   methods: {
     toggleProfileMenu: function(event) {
       this.$refs.userProfileMenu.toggle(event);
+    },
+
+    incrCallCount: function() {
+      if (this.$refs && this.$refs.loadingBar) {
+        this.$refs.loadingBar.increment();
+      }
+    },
+
+    decrCallCount: function() {
+      if (this.$refs && this.$refs.loadingBar) {
+        this.$refs.loadingBar.decrement();
+      }
     }
   }
 }
