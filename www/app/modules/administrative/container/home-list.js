@@ -1,5 +1,5 @@
 angular.module('os.administrative.container')
-  .controller('HomeContainersListCtrl', function($scope, Container, VueApp) {
+  .controller('HomeContainersListCtrl', function($scope, Container) {
     var ctx;
 
     function init(opts) {
@@ -19,12 +19,6 @@ angular.module('os.administrative.container')
 
       Container.query({topLevelContainers: true, name: searchTerm, orderByStarred: true, maxResults: 25}).then(
         function(containers) {
-          angular.forEach(containers,
-            function(container) {
-              container.$$overviewUrl = VueApp.getVueViewUrl('containers/' + container.id + '/detail/locations');
-            }
-          );
-
           ctx.containers = containers;
           if (!searchTerm) {
             ctx.defList = containers;
