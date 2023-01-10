@@ -55,11 +55,21 @@ export default {
       },
 
       {
-        "fields": [ { "name": "dp.distributingSites" } ]
+        "fields": [
+          {
+            "name": "dp.distributingSites",
+            "showWhen": "currentUser.admin"
+          }
+        ]
       },
 
       {
-        "fields": [ { "name": "dp.distributingSites.0.sites" } ]
+        "fields": [
+          {
+            "name": "dp.distributingSites.0.sites",
+            "showWhen": "!currentUser.admin"
+          }
+        ]
       }
     ]
   }

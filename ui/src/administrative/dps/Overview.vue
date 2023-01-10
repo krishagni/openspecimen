@@ -69,7 +69,9 @@ export default {
 
         dpObjs: [],
 
-        dict: []
+        dict: [],
+
+        currentUser: this.$ui.currentUser
       },
 
       dpResources
