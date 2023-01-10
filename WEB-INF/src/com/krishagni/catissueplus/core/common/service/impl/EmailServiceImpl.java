@@ -456,7 +456,7 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		return Arrays.stream(emailIds)
 			.filter(
 				emailId -> {
-					Pair<Boolean, String> status = settings.getOrDefault(emailId, Pair.make(false, "Disabled"));
+					Pair<Boolean, String> status = settings.getOrDefault(emailId, Pair.make(false, "Active"));
 					return (ignoreDnd || !Boolean.TRUE.equals(status.first())) && !Status.isClosedOrDisabledStatus(status.second());
 				}
 			)
