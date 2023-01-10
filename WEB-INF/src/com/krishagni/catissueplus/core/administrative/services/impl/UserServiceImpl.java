@@ -951,6 +951,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	} 
 	
 	private void sendUserCreatedEmail(User user, ForgotPasswordToken token) {
+		logger.info("Sending user created email.");
 		Map<String, Object> props = new HashMap<>();
 		props.put("user", user);
 		props.put("token", token);
@@ -958,6 +959,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		props.put("ignoreDnd", true);
 		props.put("passwordRules", ConfigUtil.getInstance().getStrSetting(AUTH_MOD, PASSWD_RULES));
 		EmailUtil.getInstance().sendEmail(USER_CREATED_EMAIL_TMPL, new String[]{user.getEmailAddress()}, null, props);
+		logger.info("Sent user created email.");
 	}
 
 	private void sendUserSignupEmail(User user) {

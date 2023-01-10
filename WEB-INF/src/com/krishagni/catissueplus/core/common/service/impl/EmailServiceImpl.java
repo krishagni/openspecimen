@@ -189,8 +189,8 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 
 			boolean ignoreDnd = (Boolean) props.getOrDefault("ignoreDnd", false);
 			String[] toRcpts = filterEmailIds("To", mail.getToAddress(), ignoreDnd);
-
 			if (toRcpts.length == 0) {
+				logger.info("Not sending email, as there are no recipients in the To field");
 				return false;
 			}
 
@@ -259,11 +259,13 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 
 	private boolean sendEmail(String tmplKey, String tmplSubj, String tmplContent, String[] to, String[] bcc, File[] attachments, Map<String, Object> props) {
 		if (!isEmailNotifEnabled()) {
+			logger.info("Notifications disabled at the system level");
 			return false;
 		}
 
 		boolean emailEnabled = cfgSvc.getBoolSetting("notifications", "email_" + tmplKey, true);
 		if (!emailEnabled) {
+			logger.info("Notifications disabled for: " + tmplKey);
 			return false;
 		}
 
@@ -439,11 +441,11 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		}
 
 		String[] filteredEmailIds = filterEmailIds(validEmailIds, ignoreDnd);
-		if (logger.isDebugEnabled()) {
-			String ignoredEmailIds = Stream.of(validEmailIds)
-				.filter(emailId -> Stream.of(filteredEmailIds).noneMatch(emailId::equals))
-				.collect(Collectors.joining(", "));
-			logger.debug("Not sending email to users who are either archived or have enabled DND: " + ignoredEmailIds);
+		String ignoredEmailIds = Stream.of(validEmailIds)
+			.filter(emailId -> Stream.of(filteredEmailIds).noneMatch(emailId::equals))
+			.collect(Collectors.joining(", "));
+		if (!ignoredEmailIds.isEmpty()) {
+			logger.info("Not sending email to users who are either archived or have enabled DND: " + ignoredEmailIds);
 		}
 
 		return filteredEmailIds;
