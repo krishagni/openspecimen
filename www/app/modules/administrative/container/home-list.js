@@ -19,13 +19,13 @@ angular.module('os.administrative.container')
 
       Container.query({topLevelContainers: true, name: searchTerm, orderByStarred: true, maxResults: 25}).then(
         function(containers) {
-          ctx.containers = containers;
           angular.forEach(containers,
-            function(c) {
-              c.$$overviewUrl = VueApp.getVueViewUrl('containers/' + c.id + '/detail/locations');
+            function(container) {
+              container.$$overviewUrl = VueApp.getVueViewUrl('containers/' + container.id + '/detail/locations');
             }
           );
 
+          ctx.containers = containers;
           if (!searchTerm) {
             ctx.defList = containers;
           }
