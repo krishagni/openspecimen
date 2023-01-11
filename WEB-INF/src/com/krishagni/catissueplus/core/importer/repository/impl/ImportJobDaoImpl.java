@@ -59,8 +59,7 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 		}
 
 		if (crit.instituteId() != null) {
-			query.createAlias("createdBy.institute", "institute")
-				.add(Restrictions.eq("institute.id", crit.instituteId()));
+			query.add(Restrictions.eq("institute.id", crit.instituteId()));
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.userIds())) {
