@@ -765,6 +765,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return new ArrayList<>(containersMap.values());
 	}
 
+	@Override
+	public List<StorageContainer> getAutomatedFreezers() {
+		return getCurrentSession().createCriteria(StorageContainer.class, "s")
+			.createAlias("s.parentContainer", "pc", JoinType.LEFT_OUTER_JOIN)
+			.createAlias("s.site", "site")
+			.add(Restrictions.eq("s.automated", true))
+			.add(Restrictions.isNull("pc.id"))
+			.list();
+	}
+
 	private void linkParentChildContainers(Map<Long, StorageContainerSummary> containersMap) {
 		Map<Long, StorageContainer> objMap = new HashMap<>();
 

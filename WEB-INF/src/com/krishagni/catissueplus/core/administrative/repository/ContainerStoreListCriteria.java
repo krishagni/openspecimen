@@ -8,6 +8,8 @@ import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class ContainerStoreListCriteria extends AbstractListCriteria<ContainerStoreListCriteria> {
 
+	private Long containerId;
+
 	private Integer maxRetries;
 
 	private Date lastRetryTime;
@@ -21,6 +23,15 @@ public class ContainerStoreListCriteria extends AbstractListCriteria<ContainerSt
 	@Override
 	public ContainerStoreListCriteria self() {
 		return this;
+	}
+
+	public Long containerId() {
+		return containerId;
+	}
+
+	public ContainerStoreListCriteria containerId(Long containerId) {
+		this.containerId = containerId;
+		return self();
 	}
 
 	public Integer maxRetries() {

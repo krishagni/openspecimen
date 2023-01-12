@@ -71,5 +71,7 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 	List<ContainerTransferEventDetail> getTransferEvents(ContainerReportCriteria crit);
 
 	List<StorageContainerSummary> fetchReportDetails(List<Long> containerIds);
+
+	List<StorageContainer> getAutomatedFreezers();
 }
 	

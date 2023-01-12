@@ -1,19 +1,22 @@
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList.Op;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreListItem;
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
@@ -49,8 +52,26 @@ public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> i
 		getCurrentSession().saveOrUpdate(item);
 	}
 
+	@Override
+	public List<StorageContainer> getAutomatedFreezers(List<Long> storeListIds) {
+		DetachedCriteria subQuery = DetachedCriteria.forClass(ContainerStoreList.class, "sl")
+			.createAlias("sl.container", "c")
+			.add(Restrictions.in("sl.id", storeListIds))
+			.setProjection(Projections.property("c.id"));
+
+		return getCurrentSession().createCriteria(StorageContainer.class, "c")
+			.createAlias("c.site", "site")
+			.add(Subqueries.propertyIn("c.id", subQuery))
+			.list();
+	}
+
 	private Criteria getQuery(ContainerStoreListCriteria crit) {
-		Criteria query = getCurrentSession().createCriteria(ContainerStoreList.class, "sl");
+		Criteria query = getCurrentSession().createCriteria(ContainerStoreList.class, "sl")
+			.createAlias("sl.container", "c");
+
+		if (crit.containerId() != null) {
+			query.add(Restrictions.eq("c.id", crit.containerId()));
+		}
 
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
 			query.add(Restrictions.in("sl.id", crit.ids()));

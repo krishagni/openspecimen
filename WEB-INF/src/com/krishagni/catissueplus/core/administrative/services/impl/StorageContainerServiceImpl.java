@@ -63,7 +63,6 @@ import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
-import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerReport;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionRule;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
@@ -1172,21 +1171,37 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@Override
 	@PlusTransactional
 	public File generateAutoFreezerReport(AutoFreezerReportDetail input) {
-		if (!AuthUtil.isAdmin()) {
-			throw OpenSpecimenException.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
-		}
-
 		try {
-			AutoFreezerReportDetail detail = generateStoreListsFailureReport(input);
-			if (!detail.reportForFailedOps()) {
-				Map<ContainerStoreList.Op, Integer> itemsCnt = daoFactory.getContainerStoreListDao()
-					.getStoreListItemsCount(detail.getFromDate(), detail.getToDate());
-				detail.setStored(itemsCnt.get(Op.PUT) == null ? 0 : itemsCnt.get(Op.PUT));
-				detail.setRetrieved(itemsCnt.get(Op.PICK) == null ? 0 : itemsCnt.get(Op.PICK));
+			List<StorageContainer> freezers = null;
+			if (input.reportForFailedOps()) {
+				freezers = daoFactory.getContainerStoreListDao().getAutomatedFreezers(input.getFailedStoreListIds());
+			} else {
+				freezers = daoFactory.getStorageContainerDao().getAutomatedFreezers();
 			}
 
-			sendAutoFreezerReport(detail);
-			return detail.getReport();
+			File lastReport = null;
+			for (StorageContainer freezer : freezers) {
+				if (CollectionUtils.isEmpty(freezer.getSite().getCoordinators())) {
+					logger.info("Not generating store list report for the freezer, as it has no site coordinators. Freezer: " + freezer.getName());
+					continue;
+				}
+
+				AutoFreezerReportDetail detail = generateStoreListsFailureReport(freezer, input);
+				if (!detail.reportForFailedOps()) {
+					Map<ContainerStoreList.Op, Integer> itemsCnt = daoFactory.getContainerStoreListDao()
+						.getStoreListItemsCount(detail.getFromDate(), detail.getToDate());
+					detail.setStored(itemsCnt.get(Op.PUT) == null ? 0 : itemsCnt.get(Op.PUT));
+					detail.setRetrieved(itemsCnt.get(Op.PICK) == null ? 0 : itemsCnt.get(Op.PICK));
+				}
+
+				sendAutoFreezerReport(freezer, detail);
+				if (detail.getReport() != null) {
+					lastReport = detail.getReport();
+				}
+			}
+
+
+			return lastReport;
 		} catch (Exception e) {
 			logger.error("Error generating automated freezer report", e);
 			throw OpenSpecimenException.serverError(e);
@@ -2144,7 +2159,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		};
 	}
 
-	private AutoFreezerReportDetail generateStoreListsFailureReport(AutoFreezerReportDetail reportDetail) {
+	private AutoFreezerReportDetail generateStoreListsFailureReport(StorageContainer freezer, AutoFreezerReportDetail reportDetail) {
 		CsvWriter csvWriter = null;
 		int failedLists = 0, maxLists = 100;
 		int failedToStore = 0, failedToRetrieve = 0;
@@ -2157,6 +2172,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			List<Long> storeListIds = reportDetail.getFailedStoreListIds();
 			boolean retrieveByIds = reportDetail.reportForFailedOps();
 			ContainerStoreListCriteria crit = new ContainerStoreListCriteria()
+				.containerId(freezer.getId())
 				.statuses(Collections.singletonList(ContainerStoreList.Status.FAILED))
 				.fromDate(!retrieveByIds ? reportDetail.getFromDate() : null)
 				.toDate(!retrieveByIds   ? reportDetail.getToDate() : null)
@@ -2210,6 +2226,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		return new String[] {
 			msg("auto_freezer_store_list_id"),
 			msg("auto_freezer_name"),
+			msg("auto_freezer_cp"),
 			msg("auto_freezer_specimen_label"),
 			msg("auto_freezer_specimen_barcode"),
 			msg("auto_freezer_operation"),
@@ -2232,8 +2249,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		String storeListError = StringUtils.isBlank(storeList.getError()) ? "" : storeList.getError();
 
 		for (ContainerStoreListItem item : storeList.getItems()) {
-			String label = item.getSpecimen().getLabel();
-			String barcode = item.getSpecimen().getBarcode();
+			Specimen spmn = item.getSpecimen();
 			StringBuilder error = new StringBuilder(storeListError);
 
 			if (StringUtils.isNotBlank(item.getError())) {
@@ -2244,8 +2260,18 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				error.append(item.getError());
 			}
 
-			rows.add(new String[] {storeListId, container, label, barcode, operation,
-					executionTime, lastRetriedTime, noOfRetries, error.toString()});
+			rows.add(new String[] {
+				storeListId,
+				container,
+				spmn.getCpShortTitle(),
+				spmn.getLabel(),
+				spmn.getBarcode(),
+				operation,
+				executionTime,
+				lastRetriedTime,
+				noOfRetries,
+				error.toString()
+			});
 		}
 
 		return rows;
@@ -2348,7 +2374,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		}
 	}
 
-	private void sendAutoFreezerReport(AutoFreezerReportDetail reportDetail) {
+	private void sendAutoFreezerReport(StorageContainer freezer, AutoFreezerReportDetail reportDetail) {
 		String date = Utility.getDateString(Calendar.getInstance().getTime());
 
 		Map<String, Object> emailProps = new HashMap<>();
@@ -2362,9 +2388,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			return;
 		}
 
-		UserListCriteria rcptsCrit = new UserListCriteria().activityStatus("Active").type("SUPER");
-		List<User> rcpts = daoFactory.getUserDao().getUsers(rcptsCrit);
-
+		List<User> rcpts = new ArrayList<>(freezer.getSite().getCoordinators());
 		String itAdminEmailId = ConfigUtil.getInstance().getItAdminEmailId();
 		if (StringUtils.isNotBlank(itAdminEmailId)) {
 			User itAdmin = new User();
