@@ -43,6 +43,12 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Create index on form context as it is required to enforce FK constraint" dbms="mysql">
+    <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_RECORD_CTXT_IDX">
+      <column name="FORM_CTXT_ID" />
+    </createIndex>
+  </changeSet>
+
   <changeSet author="vpawar" id="Drop the non-unique index on the form context, record and object tuple">
     <dropIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_REC_ENTRY_IDX" />
   </changeSet>
