@@ -417,7 +417,9 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
         function(lockedFields) {
           clearFields($scope, lockedFields);
           angular.extend($scope.cpr.participant, matchedParticipant);
-          $scope.cpr.participant.addPmi($scope.cpr.participant.newPmi());
+          if (lockedFields.indexOf('cpr.participant.pmis') == -1) {
+            $scope.cpr.participant.addPmi($scope.cpr.participant.newPmi());
+          }
 
           if (matchedCpr) {
             delete matchedCpr.participant;
