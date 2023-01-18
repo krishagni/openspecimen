@@ -237,6 +237,7 @@
         "derivative_label_fmt": "Format secundaire etiketten",
         "aliquot_label_fmt": "Format van verdeelbuisetiket",
         "specimen_barcode_fmt": "Format barcode",
+        "specimen_addl_label_fmt": "Extra etiket format",
         "close_parent_spmns": "Moedermaterialen sluiten",
         "zero_out_qty": "Hoeveelheid materiaal terugzetten naar nul",
         "store_all_aliquots_in_same_container": "Bewaar alle verdeelbuizen in dezelfde opslagcontainer",
@@ -421,9 +422,9 @@
         },
         "dp": {
             "title": "Distributie",
-            "add_dp": "Voeg distributieprotocol toe",
-            "dup_dp": "Distributieprotocol is al toegevoegd aan het afnameprotocol.",
-            "no_dp": "Distributieprotocol kan niet worden toegewezen aan afnameprotocol."
+            "dps": "Distribution Protocols",
+            "no_dp": "No distribution protocols can be linked to the collection protocol.",
+            "no_dps": "No distribution protocol is linked to the collection protocol."
         },
         "reporting": {
             "title": "Maandelijks rapport",
@@ -529,11 +530,11 @@
         "confirm_merging": "Samenvoegen deelnemer",
         "confirm_no_name_merge": "Deelnemer (<a href=\"{{url}}\" target=\"_blank\"> niet gespecificeerd</a> ) wordt verwijderd na samenvoeging. Wilt u doorgaan?",
         "confirm_merge": "Deelnemer (<a href=\"{{url}}\" target=\"_blank\">{{cpr.participant.firstName}} {{cpr.participant.lastName}}</a>) zal worden verwijderd na samenvoeging. Wilt u doorgaan?",
-        "search_results": "Zoekresultaat van deelnemer voor {{sleutel}}",
+        "search_results": "Zoekresultaat van deelnemer voor {{key}}",
         "visits_count": "Visits",
         "specimens_count": "Materialen",
         "generate_report": "CP rapport genereren",
-        "report_gen_initiated": "Rapport voor \"{{kortetitel}}\" wordt voorbereid en zal binnenkort per e-mail aan de beoogde ontvangers worden toegezonden",
+        "report_gen_initiated": "Rapport voor \"{{shortTitle}}\" wordt voorbereid en zal binnenkort per e-mail aan de beoogde ontvangers worden toegezonden",
         "anonymize": "Wis PHI gegevens van deelnemer",
         "confirm_anonymize": "Weet u zeker dat u alle PHI data wilt wissen van de deelnemer?",
         "anonymized_successfully": "PHI gegevens van deelnemer succesvol gewist",
@@ -723,6 +724,7 @@
         "label": "Etiket",
         "new_label": "Nieuw etiket",
         "barcode": "Barcode",
+        "additional_label": "Extra etiket",
         "label_barcode": "Etiket / Barcode",
         "use_barcode": "Gebruik barcodes van materiaal",
         "use_visit_names": "Gebruik visitnamen",
@@ -822,7 +824,7 @@
         "warn_large_no_derivatives": "De UI is niet gemaakt voor het aanmaken van zulke grote hoeveelheden afgeleide materialen. Mogelijk merkt u enige vertraging bij het weergeven van pagina's. In een dergelijk scenario raden wij u aan de optie bulk import te gebruiken.",
         "no_read_access": "U heeft geen rechten om de materialen te bekijken van AP: {{cp.shortTitle}}",
         "aliquots_count_req_auto_alloc": "Verdeelbuis telling is vereist voor auto-toewijzing!",
-        "edit_limit_maxed": "{{count}} materialen geselecteerd. Er kunnen slechts 100 materialen bewerkt worden in bulk!",
+        "edit_limit_maxed": "{{count}} materialen geselecteerd. Er kunnen maar {{limit}} materialen tegelijk worden bewerkt!",
         "non_primary_receive_na": "Eén of meerdere materialen zijn geen primaire materialen. Niet primaire materialen: {{specimens}}",
         "closed_edit_na": "Gesloten materiaal kan niet bewerkt worden. Gesloten materialen: {{specimens}}",
         "not_collected": "Eén of meerdere materialen zijn niet afgenomen. Niet afgenomen materialen: {{specimens}}",
@@ -893,6 +895,8 @@
         "specimen_not_found_cp": "Materiaal {{label}} bestaat niet in het afnameprotocol {{cpShortTitle}}.",
         "specimen_m_not_found_cp": "Materialen {{label}} bestaan niet in het afnameprotocol {{cpShortTitle}}.",
         "too_many_specimens": "Er zijn te veel materiaaletiketten/barcodes verstrekt. Probeer enkele etiketten/barcodes te verwijderen.",
+        "not_found": "Materialen niet gevonden",
+        "proceed_with_not_found": "De volgende materialen zijn niet gevonden: <br><br><i>{{notFoundLabels}}</i><br><br> Wilt u doorgaan?",
         "hide_pending": "Verberg verwachte materialen",
         "show_pending": "Laat verwachte materialen zien",
         "received_or_not_found": "Materiaal {{label}} is ontvangen of bestaat niet.",
@@ -960,6 +964,7 @@
             "select_same_visit_spmns": "Selecteer alstublieft materiaal van dezelfde visit"
         },
         "bulk_update": "Bewerk materialen in bulk",
+        "bulk_edit_pending": "Uw aanvraag om materialen in bulk bij te werken neemt meer tijd in beslag dan verwacht. U wordt per e-mail op de hoogte gebracht wanneer het verzoek is voltooid.",
         "bulk_events": {
             "add_edit": "Bulk Events",
             "receive": "Ontvangen materialen",
@@ -1279,7 +1284,7 @@
         "request_pending": "Opmerking: {{firstName}}  {{lastName}} wil toegang tot OpenSpecimen. Goedkeuren of afwijzen?",
         "user_request_approved": "Verzoek voor gebruik goedgekeurd",
         "activity_status": "Activiteitsstatus",
-        "confirm_reject": "Afwijzen van gebruiker {{onderdeelnaam}} zal de gebruiker uit de database verwijderen. Weet u zeker dat u door wilt gaan?",
+        "confirm_reject": "Afwijzen van gebruiker {{entityName}} zal de gebruiker uit de database verwijderen. Weet u zeker dat u door wilt gaan?",
         "locked": "Gebruikersaccount is vergrendeld.",
         "unlock_user": "Gebruiker ontgrendelen",
         "unlock_users": "Ontgrendelen",
@@ -1366,6 +1371,7 @@
         "already_have_an_openspecimen_id": "Heeft u al een OpenSpecimen ID?",
         "sign_in_here": "Hier aanmelden",
         "signed_up": "Uw verzoek voor lidmaatschap is ontvangen. Wacht alstublieft op een goedkeurings e-mail van de OpenSpecimen beheerder. Dank u.",
+        "signup_approved": "Uw aanmeldverzoek is goedgekeurd. Klik op de 'Sign-in' knop die naar uw e-mailadres is gestuurd. Dankuwel.",
         "return_to_signin": "Ga terug naar aanmelden",
         "tooltip": {
             "view_details": "Klik om gegevens gebruiker te bekijken",
@@ -1484,7 +1490,7 @@
         "confirm_delete": "{{entityType}} {{entityName}} en hun werkcontainers worden permanent verwijderd. Weet u zeker dat u door wilt gaan?",
         "assign_positions": "Posities toewijzen",
         "vacate_positions": "Bestaande materialen ontruimen",
-        "no_dimless_map": "De kaartweergave is niet beschikbaar voor dimensieloze container",
+        "no_dimless_map": "De overzichtsweergave is niet beschikbaar voor dimensieloze container",
         "view_specimens": "Bekijk materialen",
         "paste_specimen_labels": "Plakken of invoeren van materiaaletiketten of barcodes, gescheiden door komma, tab of enter",
         "no_free_locs": "Opslagcontainer bevat niet genoeg vrije locaties om de etiketten van de ingevoerde materialen te kunnen plaatsen",
@@ -1763,9 +1769,9 @@
         "record_count": "Aantal records",
         "record_stats": "De volgende tabel toont {{caption}} aantal dossiers.",
         "deleting_form": "Verwijder {{caption}} bevestiging voor formulier ",
-        "confirm_delete": "{{onderschrift}} formulier wordt definitief verwijderd. Weet u zeker dat u door wilt gaan?",
+        "confirm_delete": "{{caption}} formulier wordt definitief verwijderd. Weet u zeker dat u door wilt gaan?",
         "confirm_delete_with_data": "U verliest data wanneer u {{caption}} verwijderd. Wilt u doorgaan?",
-        "form_deleted": "{{onderschrift}} formulier succesvol verwijderd",
+        "form_deleted": "{{caption}} formulier succesvol verwijderd",
         "confirm_delete_association": "Weet u zeker dat u deze koppeling ( <b> {{level.caption}} {{!collectionProtocol.id ? '' : '/' + collectionProtocol.shortTitle}}) </b> wilt verwijderen? Let op! U heeft dan geen toegang meer tot deze gegevens met deze koppeling.",
         "association_deleted": "De koppeling succesvol verwijderd op <b>{{level.caption}}{{!collectionProtocol.id ? '' : '/' + collectionProtocol.shortTitle}}</b>",
         "delete_forms": "De gegevens gaan verloren als u de geselecteerde formulieren verwijderd. Wilt u verder gaan?",
@@ -1887,8 +1893,9 @@
         "select_cond_value": "Selecteer conditiewaarde",
         "select_cond_values": "Selecteer conditiewaarden",
         "specify_multiple_cond": "Specificeer meerdere conditiewaarden gescheiden door komma, tab of nieuwe regel",
-        "range_min": "Minimale bereik",
-        "range_max": "Maximale bereik",
+        "range_min": "Min. waarde",
+        "range_max": "Max. waarde",
+        "range_eq": "Is gelijk aan",
         "select_date": "Selecteer datum",
         "specify_cond": "Specificeer conditiewaarde",
         "parameterized_filter": "Filter met parameter",
@@ -1896,6 +1903,8 @@
         "select_subquery": "Gegevens van een andere query",
         "expr_and_filters": "Weergave en filters",
         "filters": "Filters",
+        "search_facet": "Zoek filter",
+        "no_matching_facet": "Geen overeenkomende filter",
         "parameterized_marker": "P",
         "subquery_marker": "Q",
         "get_count": "Aantal verkrijgen",
@@ -2089,7 +2098,7 @@
         "txn_size_exceeded": "Alleen {{maxTxnSize}} dossiers kunnen vooraf gevalideerd worden voor het importeren in de database. Echter, het invoerbestand bevat {{inputRecsCount}} dossiers. Wilt u doorgaan met de optie om alleen geldige dossiers in de database te importeren; terwijl ongeldige dossiers worden geweigerd?",
         "job_submitted": "Importeeropdracht voor bulkdata {{id}} ingediend",
         "job_stopped": "Importeerdopdracht bulkdata #{{jobId}} succesvol gestopt",
-        "job_completed": "Importeeropdracht bulkdata #{{opdrachtId}} is voltooid.",
+        "job_completed": "Importeeropdracht bulkdata #{{jobId}} is voltooid.",
         "job_stop_in_progress": "Het stoppen van bulk import opdracht #{{jobId}} duurt langer dan verwacht. Kom alstublieft later terug op deze pagina om de laatste status te bekijken.",
         "confirm_job_stop_title": "Bevestig het stoppen van opdracht #{{jobId}}",
         "confirm_job_stop": "Weet u zeker dat u de opdracht #{{jobId}} wilt stoppen?",
@@ -2178,7 +2187,7 @@
         "failed": "Exporteer opdracht {{id}} is mislukt met fouten. Neem alstublieft contact op met de systeembeheerder voor hulp!",
         "select_record_type": "Dossier type",
         "confirm_export_all_title": "Alle dossiers exporteren?",
-        "confirm_export_all_msg": "Weet u zeker dat u alle geselecteerde dossiers met type<b>{{titel}}</b> wilt exporteren?"
+        "confirm_export_all_msg": "Weet u zeker dat u alle geselecteerde dossiers met type<b>{{title}}</b> wilt exporteren?"
     },
     "specimen_kit": {
         "title": "Materiaal Kit",
@@ -2518,7 +2527,7 @@
         "loading_list": "Opdrachten aan het laden, een moment geduld alstublieft...",
         "empty_list": "Geen opdrachten om weer te geven!",
         "confirm_delete_title": "Bevestig verwijderen",
-        "confirm_delete": "Weet u zeker dat u de opdracht '{{naam}}' wilt verwijderen?",
+        "confirm_delete": "Weet u zeker dat u de opdracht '{{name}}' wilt verwijderen?",
         "create_job": "Opdracht aanmaken",
         "type": "Type",
         "internal": "Intern",
@@ -2592,7 +2601,7 @@
         "edit_job": "Bewerken",
         "delete_job": "Verwijderen",
         "view_job_runs": "Bekijk de runs",
-        "queued_for_exec": "Opdracht {{naam}} in de wachtrij voor uitvoering",
+        "queued_for_exec": "Opdracht {{name}} in de wachtrij voor uitvoering",
         "run_logs": "Run logs",
         "seconds": "seconden",
         "empty_runs_list": "Geen run log opdrachten om te laten zien!",
@@ -2690,7 +2699,9 @@
             "enable_device_verification": "Verificatie apparaat",
             "enable_device_verification_desc": "Schakel verificatie van apparaat met behulp van OTP in.",
             "notify_failed_logins": "Mislukte aanmeldingen melden",
-            "notify_failed_logins_desc": "Inschakelen om gebruikers en beheerders te waarschuwen wanneer een mislukte inlogpoging wordt gedaan."
+            "notify_failed_logins_desc": "Inschakelen om gebruikers en beheerders te waarschuwen wanneer een mislukte inlogpoging wordt gedaan.",
+            "max_login_sessions": "Limiet voor gelijktijdige aanmeldingen",
+            "max_login_sessions_desc": "Maximum aantal gelijktijdige aanmeldsessies toegestaan per gebruiker. Indien niet opgegeven of nul, zijn onbeperkte gelijktijdige aanmeldsessies toegestaan."
         },
         "administrative": {
             "title": "Administratief",
@@ -2719,7 +2730,19 @@
             "allow_dist_label_printing": "Print distributie-etiketten",
             "allow_dist_label_printing_desc": "Sta printen van etiketten toe wanneer materialen worden gedistribueerd.",
             "order_attachment_type": "Bijlage van bestelling",
-            "order_attachment_type_desc": "In het e-mailbericht over de verwerking van de bestelling de volgende bestanden meesturen: geen, csv_report, manifest of beide."
+            "order_attachment_type_desc": "In het e-mailbericht over de verwerking van de bestelling de volgende bestanden meesturen: geen, csv_report, manifest of beide.",
+            "auto_approve_signup": "Gebruikers automatisch goedkeuren",
+            "auto_approve_signup_desc": "Maakt automatische goedkeuring van aanmeldverzoeken van nieuwe gebruikers mogelijk.",
+            "def_role_on_signup": "Standaard rol bij aanmelding",
+            "def_role_on_signup_desc": "Standaard rol om gebruikers toe te wijzen bij automatische goedkeuring van hun aanmeldverzoeken.",
+            "def_signup_institute": "Standaard Instituut bij aanmelding",
+            "def_signup_institute_desc": "Standaard Instituut voor gebruik voor net aangemelde gebruikers",
+            "local_account_signups": "Lokale account aanmeldingen",
+            "local_account_signups_desc": "Aanmeldverzoeken voor het 'openspecimen' domein aanzetten.",
+            "add_spmn_ext_ids": "Add External IDs",
+            "add_spmn_ext_ids_desc": "Enable to add external IDs when receiving the shipment specimens.",
+            "def_ext_id_name": "External ID Name",
+            "def_ext_id_name_desc": "Default name for external IDs that are added when receiving the shipment specimens."
         },
         "biospecimen": {
             "title": "Biomateriaal",
@@ -2822,7 +2845,11 @@
             "cp_versioning_enabled": "Beoordelingen AP",
             "cp_versioning_enabled_desc": "Alle wijzigingen in het afnameprotocol moeten worden beoordeeld en gepubliceerd.",
             "pre_print_ship_recv_quality": "Kwaliteit ontvangen zending",
-            "pre_print_ship_recv_quality_desc": "Regular expression voor aanvaardbare kwaliteit van zending."
+            "pre_print_ship_recv_quality_desc": "Regular expression voor aanvaardbare kwaliteit van zending.",
+            "max_spmns_update_limit": "Materialen bijwerken UI limiet",
+            "max_spmns_update_limit_desc": "Maximum aantal materialen dat tegelijk kan worden bijgewerkt met UI. De standaardwaarde is 100.",
+            "specimen_addl_label_format": "Materiaal format extra etiket ",
+            "specimen_addl_label_format_desc": "Het format op systeem niveau voor het automatisch genereren van extra etiketten voor materialen."
         },
         "common": {
             "title": "Algemeen",
@@ -2885,7 +2912,9 @@
             "de_date_format": "Korte datum format",
             "de_date_format_desc": "Datumformat voor het ontleden van datum veldwaarden in de gegevensinvoer formulieren.",
             "time_format": "Tijd format",
-            "time_format_desc": "Tijd formaat voor de weergave en ontleden van de tijdcomponent van de datum-tijdvelden."
+            "time_format_desc": "Tijd formaat voor de weergave en ontleden van de tijdcomponent van de datum-tijdvelden.",
+            "max_audit_report_period": "Audit rapport periode",
+            "max_audit_report_period_desc": "Maximale periode, in aantal dagen, waarvoor de audit rapporten kunnen worden gegenereerd. Indien niet gespecificeerd, wordt de periode van 90 dagen gebruikt."
         },
         "email": {
             "title": "E-mail",
@@ -2962,7 +2991,7 @@
             "default_result_view": "Standaardvelden voor resultaatweergave",
             "default_result_view_desc": "Lijst van waarden die moeten worden weergegeven in de standaardweergave van de zoekresultaten.",
             "floating_point_precision": "Precisie in gehele getallen",
-            "floating_point_precision_desc": "Aantal cijfers dat moet worden weergegeven na de decimale komma. Wanneer er 0 of geen waarde wordt opgegeven, worden de in de database opgeslagen waarden weergegeven zoals ze zijn."
+            "floating_point_precision_desc": "Number of digits to display after the decimal point. When 0 or no value is specified, values stored in the database are displayed as is. <br> <br> The setting is <ol> <li> Applicable only for the query results or query API driven list views </li> <li> Not applicable to the data entry or overview pages </li> <li> Not applicable to real number custom fields </li> </ol>"
         },
         "training": {
             "title": "Training",
