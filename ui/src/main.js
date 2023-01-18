@@ -240,7 +240,17 @@ Promise.all([appPropsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, sp
     let messages = resp[2];
     let currUser = resp[3];
 
-    const i18n = window.osI18n = createI18n({locale: locale, messages: messages});
+    let fallback = locale.locale;
+    let parts = (fallback || '').split('_');
+    if (parts.length != 0) {
+      fallback = parts[0] || 'en';
+    }
+
+    const i18n = window.osI18n = createI18n({
+      locale: locale.locale,
+      fallbackLocale: [fallback, 'en'],
+      messages: messages
+    });
     app.use(i18n);
 
     ui.global = {
