@@ -12,6 +12,7 @@ import org.hibernate.LockMode;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -44,7 +45,7 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 		Criteria query = getCurrentSession().createCriteria(ImportJob.class)
 			.createAlias("createdBy", "createdBy")
 			.createAlias("createdBy.authDomain", "authDomain")
-			.createAlias("createdBy.institute", "institute")
+			.createAlias("createdBy.institute", "institute", JoinType.LEFT_OUTER_JOIN)
 			.setFetchMode("createdBy", FetchMode.JOIN)
 			.setFirstResult(startAt)
 			.setMaxResults(maxResults)
