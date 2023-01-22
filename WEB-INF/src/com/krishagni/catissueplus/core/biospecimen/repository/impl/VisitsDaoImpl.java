@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
@@ -187,10 +186,17 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Visit> getBySpr(Long cpId, String sprNumber) {
-		return getCurrentSession().getNamedQuery(GET_BY_CP_SPR)
-			.setParameter("cpId", cpId)
-			.setParameter("sprNo", sprNumber.toLowerCase())
-			.list();
+		Criteria query = getCurrentSession().createCriteria(Visit.class, "visit")
+			.createAlias("visit.registration", "cpr")
+			.createAlias("cpr.collectionProtocol", "cp")
+			.add(Restrictions.eq("cp.id", cpId));
+		if (isMySQL()) {
+			query.add(Restrictions.eq("visit.surgicalPathologyNumber", sprNumber));
+		} else {
+			query.add(Restrictions.eq("visit.surgicalPathologyNumber", sprNumber).ignoreCase());
+		}
+
+		return query.list();
 	}
 
 	private DetachedCriteria getVisitIdsListQuery(VisitsListCriteria crit) {
@@ -240,7 +246,5 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	private static final String GET_LATEST_VISIT_BY_CPR_ID = FQN + ".getLatestVisitByCprId";
 
 	private static final String GET_BY_EMPI_OR_MRN = FQN + ".getVisitsByEmpiOrMrn";
-
-	private static final String GET_BY_CP_SPR = FQN + ".getVisitByCpAndSprNo";
 }
 

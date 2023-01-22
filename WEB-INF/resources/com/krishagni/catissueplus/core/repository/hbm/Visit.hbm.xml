@@ -112,18 +112,6 @@
         cp.id = :cpId
     </query>
 
-    <query name="getVisitByCpAndSprNo">
-      select
-        v
-      from
-        com.krishagni.catissueplus.core.biospecimen.domain.Visit v
-        join v.registration reg
-        join reg.collectionProtocol cp
-      where
-        lower(v.surgicalPathologyNumber) = :sprNo and
-        cp.id = :cpId
-    </query>
-
     <sql-query name="getVisitStats">
       <return-scalar column="visitId" type="long"/>
       <return-scalar column="totalPendingSpmns" type="int"/>
