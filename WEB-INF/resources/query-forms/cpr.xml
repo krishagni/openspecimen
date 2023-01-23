@@ -485,7 +485,7 @@
         <name>specimenCount</name>
         <udn>specimenCount</udn>
         <caption>#getMessage("cpr_specimen_count")</caption>
-        <table>OS_CPR_SPMN_STATS_VIEW</table>
+        <table>OS_CPR_SPMN_STATS</table>
         <foreignKey>IDENTIFIER</foreignKey>
         <parentKey>CPR_ID</parentKey>
         <row>

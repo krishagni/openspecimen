@@ -100,4 +100,169 @@
       <column name="ADDED_ON" type="${nullable.ts.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Procedure to initialise participant specimen stats" runOnChange="true" dbms="mysql">
+    <sql>
+      drop procedure if exists create_cpr_spmn_stats;
+    </sql>
+
+    <sql endDelimiter="//">
+      create procedure create_cpr_spmn_stats()
+      begin
+        drop table if exists tmp_os_cpr_spmn_stats;
+
+        create table
+          tmp_os_cpr_spmn_stats
+        as
+          select
+            cpr.identifier as identifier,
+            count(distinct
+              case when spmn.collection_status = 'Collected' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_collected,
+            count(distinct
+              case when spmn.collection_status = 'Missed Collection' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_missed,
+            count(distinct
+              case when spmn.collection_status = 'Not Collected' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_not_collected,
+            count(distinct
+              case when ((sr.identifier is not null and spmn.identifier is null) or spmn.collection_status = 'Pending') then
+                case when (spmn.identifier is not null and spmn.req_specimen_id is null) then
+                  concat('s', spmn.identifier)
+                else
+                  concat('sr', sr.identifier)
+                end
+              else
+                null
+              end
+            ) as specimens_pending
+          from
+            catissue_coll_prot_reg cpr
+            left join catissue_coll_prot_event cpe
+              on cpe.collection_protocol_id = cpr.collection_protocol_id and cpe.activity_status != 'Disabled'
+            left join catissue_cp_req_specimen sr
+              on sr.collection_protocol_event_id = cpe.identifier and sr.activity_status != 'Disabled'
+            left join catissue_specimen_coll_group visit
+              on (visit.collection_protocol_event_id = cpe.identifier or visit.collection_protocol_event_id is null)
+                and visit.collection_protocol_reg_id = cpr.identifier and visit.activity_status != 'Disabled'
+            left join catissue_specimen spmn
+              on (spmn.req_specimen_id is null or spmn.req_specimen_id = sr.identifier)
+                and spmn.specimen_collection_group_id = visit.identifier and spmn.activity_status != 'Disabled'
+          group by
+            cpr.identifier;
+      end;
+      //
+    </sql>
+
+    <sql>
+      drop procedure if exists refresh_cpr_spmn_stats;
+    </sql>
+
+    <sql endDelimiter="//">
+      create procedure refresh_cpr_spmn_stats()
+      begin
+        call create_cpr_spmn_stats();
+
+        drop table if exists os_cpr_spmn_stats;
+
+        alter table tmp_os_cpr_spmn_stats rename os_cpr_spmn_stats;
+
+        create index os_cpr_spmn_stats_idx on os_cpr_spmn_stats (identifier);
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Procedure to initialise participant specimen stats" runOnChange="true" dbms="oracle">
+    <sql endDelimiter="//">
+      create or replace procedure create_cpr_spmn_stats() AUTHID CURRENT_USER is
+      begin
+        drop_table_if_exists('tmp_os_cpr_spmn_stats');
+
+        create table
+          tmp_os_cpr_spmn_stats
+        as
+          select
+            cpr.identifier as identifier,
+            count(distinct
+              case when spmn.collection_status = 'Collected' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_collected,
+            count(distinct
+              case when spmn.collection_status = 'Missed Collection' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_missed,
+            count(distinct
+              case when spmn.collection_status = 'Not Collected' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_not_collected,
+            count(distinct
+              case when ((sr.identifier is not null and spmn.identifier is null) or spmn.collection_status = 'Pending') then
+                case when (spmn.identifier is not null and spmn.req_specimen_id is null) then
+                  concat('s', spmn.identifier)
+                else
+                  concat('sr', sr.identifier)
+                end
+              else
+                null
+              end
+            ) as specimens_pending
+          from
+            catissue_coll_prot_reg cpr
+            left join catissue_coll_prot_event cpe
+              on cpe.collection_protocol_id = cpr.collection_protocol_id and cpe.activity_status != 'Disabled'
+            left join catissue_cp_req_specimen sr
+              on sr.collection_protocol_event_id = cpe.identifier and sr.activity_status != 'Disabled'
+            left join catissue_specimen_coll_group visit
+              on (visit.collection_protocol_event_id = cpe.identifier or visit.collection_protocol_event_id is null)
+                and visit.collection_protocol_reg_id = cpr.identifier and visit.activity_status != 'Disabled'
+            left join catissue_specimen spmn
+              on (spmn.req_specimen_id is null or spmn.req_specimen_id = sr.identifier)
+                and spmn.specimen_collection_group_id = visit.identifier and spmn.activity_status != 'Disabled'
+          group by
+            cpr.identifier;
+      end;
+      //
+    </sql>
+
+    <sql endDelimiter="//">
+      create or replace procedure refresh_cpr_spmn_stats() AUTHID CURRENT_USER is
+      begin
+        declare
+          table_does_not_exist exception;
+          pragma exception_init(table_does_not_exist, -942); -- ORA-00942
+        begin
+          drop table os_cpr_spmn_stats;
+        exception
+          when table_does_not_exist then null;
+        end;
+
+        alter table tmp_os_cpr_spmn_stats rename to os_cpr_spmn_stats;
+
+        create index os_cpr_spmn_stats_idx on os_cpr_spmn_stats (identifier);
+      end;
+      //
+    </sql>
+  </changeSet>
 </databaseChangeLog>

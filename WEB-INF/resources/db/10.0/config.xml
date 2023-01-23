@@ -59,4 +59,39 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Scheduled job to refresh CPR specimen stats" dbms="mysql">
+    <sql>
+      select identifier into @userId from catissue_user where login_name = '$system';
+
+      insert into os_scheduled_jobs
+        (identifier, name, created_by, start_date, end_date, scheduled_minute, scheduled_hour, scheduled_day_of_week,
+        scheduled_day_of_month, activity_status, repeat_schedule, type, command,
+        task_impl_fqn, rt_args_provided, rt_args_help_text)
+      values
+        (default, 'Refresh participant specimen stats', @userId, now(), null, 55, 23, null,
+        null, 'Active', 'DAILY', 'INTERNAL', null,
+        'com.krishagni.catissueplus.core.biospecimen.services.impl.RefreshCprSpecimenStats', 0, null);
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Scheduled job to refresh CPR specimen stats" dbms="oracle">
+    <sql endDelimiter="//">
+      declare
+        userId number;
+      begin
+        select identifier into userId from catissue_user where login_name like '$system';
+
+        insert into os_scheduled_jobs
+          (identifier, name, created_by, start_date, end_date, scheduled_minute, scheduled_hour, scheduled_day_of_week,
+          scheduled_day_of_month, activity_status, repeat_schedule, type, command,
+          task_impl_fqn, rt_args_provided, rt_args_help_text)
+        values
+          (OS_SCHEDULED_JOBS_SEQ.nextVal, 'Refresh participant specimen stats', userId, SYSDATE, null, 55, 23, null,
+          null, 'Active', 'DAILY', 'INTERNAL', null,
+          'com.krishagni.catissueplus.core.biospecimen.services.impl.RefreshCprSpecimenStats', 0, null);
+      end;
+      //
+    </sql>
+  </changeSet>
 </databaseChangeLog>
