@@ -77,11 +77,17 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		return getSpecimenIdsQuery(crit).getExecutableCriteria(getCurrentSession()).list();
 	}
 
+	@Override
+	public Long getMaxSpecimenId(SpecimenListCriteria crit) {
+		List<Long> result = getMaxSpecimenIdQuery(crit).getExecutableCriteria(getCurrentSession()).list();
+		return result != null && !result.isEmpty() ? result.get(0) : null;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Specimen getByLabel(String label) {
 		List<Specimen> specimens = getCurrentSession().getNamedQuery(GET_BY_LABEL)
-			.setString("label", label)
+			.setParameter("label", label)
 			.list();
 		return specimens.isEmpty() ? null : specimens.iterator().next();
 	}
@@ -469,6 +475,16 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private DetachedCriteria getSpecimenIdsQuery(SpecimenListCriteria crit) {
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Specimen.class, "specimen")
 			.setProjection(Projections.distinct(Projections.property("specimen.id")));
+		return getSpecimensQuery(crit, detachedCriteria);
+	}
+
+	private DetachedCriteria getMaxSpecimenIdQuery(SpecimenListCriteria crit) {
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Specimen.class, "specimen")
+			.setProjection(Projections.max("specimen.id"));
+		return getSpecimensQuery(crit, detachedCriteria);
+	}
+
+	private DetachedCriteria getSpecimensQuery(SpecimenListCriteria crit, DetachedCriteria detachedCriteria) {
 		Criteria query = detachedCriteria.getExecutableCriteria(getCurrentSession());
 
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
@@ -520,6 +536,9 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		}
 
 		query.add(Restrictions.gt("id", crit.lastId()));
+		if (crit.enableIdRange()) {
+			query.add(Restrictions.le("id", crit.lastId() + crit.rangeFactor() * crit.maxResults()));
+		}
 	}
 
 	private void addLineageCond(Criteria query, SpecimenListCriteria crit) {

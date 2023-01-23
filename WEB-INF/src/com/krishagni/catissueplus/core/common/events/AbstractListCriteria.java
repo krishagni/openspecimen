@@ -37,6 +37,8 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 
 	private boolean orderByStarred;
 
+	private boolean enableIdRange;
+
 	@Override
 	public Long lastId() {
 		return lastId;
@@ -70,6 +72,10 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 	public T maxResults(int maxResults) {
 		this.maxResults = maxResults;
 		return self();
+	}
+
+	public int rangeFactor() {
+		return 100;
 	}
 
 	@Override
@@ -193,6 +199,15 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 
 	public T orderByStarred(boolean orderByStarred) {
 		this.orderByStarred = orderByStarred;
+		return self();
+	}
+
+	public boolean enableIdRange() {
+		return enableIdRange;
+	}
+
+	public T enableIdRange(boolean enableIdRange) {
+		this.enableIdRange = enableIdRange;
 		return self();
 	}
 	
