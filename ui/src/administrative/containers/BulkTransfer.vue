@@ -50,7 +50,7 @@
           <div>
             <os-table-form ref="transferForm" :schema="transferSchema"
               :data="txCtx" :items="txCtx.containers"
-              :remove-items="true" @remove-item="removeContainer($event)"
+              :remove-items="true" @remove-item="removeContainer($event.item)"
               @input="handleContainerInput($event)">
             </os-table-form>
 
@@ -194,12 +194,21 @@ export default {
     },
 
     removeContainer: function({container}) {
-      const idx = this.ctx.containers.findIndex(ro => ro.container.id == container.id);
+      let idx = this.ctx.containers.findIndex(ro => ro.container.id == container.id);
       if (idx == -1) {
         return;
       }
 
       this.ctx.containers.splice(idx, 1);
+      if (this.txCtx.containers && this.txCtx.containers.length > 0) {
+        let idx = this.txCtx.containers.findIndex(ro => ro.container.id == container.id);
+        if (idx >= 0) {
+          this.txCtx.containers.splice(idx, 1);
+          if (this.txCtx.containers.length == 0) {
+            this.previous();
+          }
+        }
+      }
     },
 
     handleContainerInput: function({field, item}) {
