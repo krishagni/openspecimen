@@ -972,6 +972,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			}
 
 			from.append(countReq ? " left join c.position pos " : " left join fetch c.position pos ");
+			from.append(countReq ? " left join c.blockedPosition bp " : " left join fetch c.blockedPosition bp ");
 			params.put("activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		}
 		

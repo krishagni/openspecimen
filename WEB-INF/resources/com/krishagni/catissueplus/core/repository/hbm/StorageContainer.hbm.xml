@@ -154,9 +154,9 @@
       class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
       property-ref="blockedForContainer"
       cascade="save-update"
-      fetch="select" />
+      fetch="join" />
 
-    <set name="occupiedPositions" table="OS_CONTAINER_POSITIONS" cascade="all-delete-orphan" inverse="true">
+    <set name="occupiedPositions" table="OS_CONTAINER_POSITIONS" cascade="all-delete-orphan" inverse="true" batch-size="25">
       <key column="STORAGE_CONTAINER_ID" not-null="true"/>
       <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"/>
     </set>
