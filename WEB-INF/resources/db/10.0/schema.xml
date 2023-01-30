@@ -278,4 +278,10 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add unique constraint on the position blocked for the checked-out container" dbms="mysql">
+    <createIndex indexName="OS_POS_BLOCKED_CONTAINER_UQ" tableName="OS_CONTAINER_POSITIONS" unique="true">
+      <column name="BLOCKED_FOR_CONTAINER_ID" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
