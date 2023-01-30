@@ -368,6 +368,10 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 	}
 
 	protected static void transform(StorageContainer container, StorageContainerSummary result) {
+		transform(container, result, true);
+	}
+
+	protected static void transform(StorageContainer container, StorageContainerSummary result, boolean hydrated) {
 		result.setId(container.getId());
 		result.setName(container.getName());
 		result.setBarcode(container.getBarcode());
@@ -389,11 +393,13 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		result.setPositionAssignment(container.getPositionAssignment().name());
 		result.setColumnLabelingScheme(container.getColumnLabelingScheme());
 		result.setRowLabelingScheme(container.getRowLabelingScheme());
-		result.setFreePositions(container.freePositionsCount());
 		result.setStoreSpecimensEnabled(container.isStoreSpecimenEnabled());
 		result.setAutomated(container.isAutomated());
 		result.setStatus(container.getStatus() != null ? container.getStatus().name() : null);
-		result.setBlockedLocation(StorageLocationSummary.from(container.getBlockedPosition()));
+		if (hydrated) {
+			result.setFreePositions(container.freePositionsCount());
+			result.setBlockedLocation(StorageLocationSummary.from(container.getBlockedPosition()));
+		}
 
 		if (container.getAutoFreezerProvider() != null) {
 			result.setAutoFreezerProvider(container.getAutoFreezerProvider().getName());

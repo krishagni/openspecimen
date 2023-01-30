@@ -65,7 +65,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	public List<StorageContainer> getStorageContainers(StorageContainerListCriteria listCrit) {
 		return new ListQueryBuilder(listCrit).query()
 				.setFirstResult(listCrit.startAt())
-				.setMaxResults(listCrit.maxResults())
+				.setMaxResults(CollectionUtils.isEmpty(listCrit.ids()) ? listCrit.maxResults() : listCrit.ids().size())
 				.list();
 	}
 	

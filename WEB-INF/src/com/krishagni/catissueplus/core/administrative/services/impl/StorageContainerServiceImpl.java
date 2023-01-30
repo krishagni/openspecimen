@@ -2071,7 +2071,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 						}
 
 						if (loadTopLevelContainers) {
-							topLevelContainers = getContainers(topLevelCrit.startAt(startAt));
+							topLevelContainers = getContainers(topLevelCrit.startAt(startAt).maxResults(1));
 							startAt += topLevelContainers.size();
 							loadTopLevelContainers = CollectionUtils.isEmpty(job.getRecordIds());
 						}
@@ -2150,7 +2150,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 							return c1.getId().compareTo(c2.getId());
 						}
 					})
-					.map(StorageContainerDetail::from).collect(Collectors.toList());
+					.map(c -> StorageContainerDetail.from(c, false)).collect(Collectors.toList());
 			}
 
 			private boolean hasPosition(StorageContainer c) {
