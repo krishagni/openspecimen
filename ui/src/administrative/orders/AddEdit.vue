@@ -6,41 +6,42 @@
       </template>
 
       <span>
-        <h3 v-if="!dataCtx.order.id">Create Order</h3>
-        <h3 v-else>Update {{dataCtx.order.name}}</h3>
+        <h3 v-if="!dataCtx.order.id" v-t="'orders.create_order'">Create Order</h3>
+        <h3 v-else v-t="{path: 'orders.update_order', args: dataCtx.order}">Update {{dataCtx.order.name}}</h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <div v-if="ctx.loading">
         <os-message type="info">
-          <span>Loading the form. Please wait for a moment...</span>
+          <span v-t="'common.loading_form'">Loading the form. Please wait for a moment...</span>
         </os-message>
       </div>
       <div v-else>
         <os-steps ref="orderWizard">
-          <os-step title="Order Details" :validate="validateDetails">
+          <os-step :title="$t('orders.details')" :validate="validateDetails">
             <os-form ref="orderDetails" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
               <div>
-                <os-button class="next" primary label="Next" @click="next" />
+                <os-button class="next" primary :label="$t('common.buttons.next')" @click="next" />
 
-                <os-button v-if="dataCtx.order.status == 'EXECUTED'" primary label="Update" @click="updateOrder" />
+                <os-button v-if="dataCtx.order.status == 'EXECUTED'" primary :label="$t('common.buttons.update')"
+                  @click="updateOrder" />
 
                 <span v-if="dataCtx.order.status != 'EXECUTED' && dataCtx.orderItems.length > 0">
-                  <os-button primary label="Save Draft" @click="saveDraft" />
+                  <os-button primary :label="$t('orders.save_draft')" @click="saveDraft" />
 
-                  <os-button primary label="Distribute" @click="distribute" />
+                  <os-button primary :label="$t('orders.distribute')" @click="distribute" />
                 </span>
 
-                <os-button text label="Cancel"  @click="cancel" />
+                <os-button text :label="$t('common.buttons.cancel')"  @click="cancel" />
               </div>
             </os-form>
           </os-step>
 
-          <os-step :title="'Specimens' + ((dataCtx.orderItems.length > 0 || ctx.itemsCount > 0) ? ' (' + (dataCtx.orderItems.length || ctx.itemsCount) + ')' : '')" :validate="validateSpecimenDetails" v-if="dataCtx.order.status == 'PENDING'">
+          <os-step :title="$t('orders.specimens') + ((dataCtx.orderItems.length > 0 || ctx.itemsCount > 0) ? ' (' + (dataCtx.orderItems.length || ctx.itemsCount) + ')' : '')" :validate="validateSpecimenDetails" v-if="dataCtx.order.status == 'PENDING'">
             <span v-if="ctx.maxSpmnsLimitExceeded">
               <os-message type="warn">
-                <span>
+                <span v-t="{path: 'orders.max_spmns_limit_exceeded', args: ctx}">
                   The order has more specimens {{ctx.itemsCount && '(' + ctx.itemsCount + ')'}} than the 
                   allowed limit ({{ctx.maxSpmnsLimit}}) for displaying on UI. Please use CSV import if you 
                   like to specify additional details (quantity, cost etc). 
@@ -51,13 +52,13 @@
 
             <span v-else>
               <os-add-specimens ref="addSpmns" :criteria="ctx.specimensCriteria"
-                label="Add specimens by scanning labels or barcodes separated by a comma, tab, or newline"
+                :label="$t('orders.scan_specimen_labels')"
                 @on-add="addSpecimens">
-                <os-button label="Validate" @click="validateSpecimenLabels" />
+                <os-button :label="$t('orders.validate')" @click="validateSpecimenLabels" />
               </os-add-specimens>
 
               <os-message type="error" v-if="!dataCtx.orderItems || dataCtx.orderItems.length == 0">
-                <span>No specimens in the order. Add at least one specimen.</span>
+                <span v-t="'orders.no_spmns_in_order'">No specimens in the order. Add at least one specimen.</span>
               </os-message>
 
               <os-table-form v-else ref="specimenDetails" :schema="ctx.specimensSchema"
@@ -70,26 +71,29 @@
             <os-divider />
 
             <div class="os-form-footer">
-              <os-button class="previous" secondary label="Previous" @click="previous" />
-              <os-button class="next" primary label="Next" @click="next" />
-              <os-button primary label="Save Draft" @click="saveDraft"   v-if="dataCtx.order.status == 'PENDING'" />
-              <os-button primary label="Distribute" @click="distribute"  v-if="dataCtx.order.status == 'PENDING'" />
-              <os-button primary label="Update"     @click="updateOrder" v-if="dataCtx.order.status == 'EXECUTED'" />
-              <os-button text    label="Cancel"     @click="cancel" />
+              <os-button class="previous" secondary :label="$t('common.buttons.previous')" @click="previous" />
+              <os-button class="next" primary :label="$t('common.buttons.next')" @click="next" />
+              <os-button primary :label="$t('orders.save_draft')" @click="saveDraft"
+                v-if="dataCtx.order.status == 'PENDING'" />
+              <os-button primary :label="$t('orders.distribute')" @click="distribute"
+                v-if="dataCtx.order.status == 'PENDING'" />
+              <os-button primary :label="$t('common.buttons.update')" @click="updateOrder"
+                v-if="dataCtx.order.status == 'EXECUTED'" />
+              <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
             </div>
 
             <os-items-validation ref="validationsDialog" :report-messages="validationReportMsgs">
               <template #title>
-                <span>Specimens Validation Report</span>
+                <span v-t="'orders.specimens_validation_report'">Specimens Validation Report</span>
               </template>
               <template #found>
-                <span>Passed</span>
+                <span v-t="'orders.passed'">Passed</span>
               </template>
               <template #notFound>
-                <span>Failed: Specimens not present in the order</span>
+                <span v-t="'orders.specimens_not_present'">Failed: Specimens not present in the order</span>
               </template>
               <template #extras>
-                <span>Failed: Additional specimens present in the order</span>
+                <span v-t="'orders.extra_specimens'">Failed: Additional specimens present in the order</span>
               </template>
             </os-items-validation>
           </os-step>
@@ -105,6 +109,7 @@
 import { reactive, inject } from 'vue';
 
 import alertSvc    from '@/common/services/Alerts.js';
+import i18n        from '@/common/services/I18n.js';
 import formUtil    from '@/common/services/FormUtil.js';
 import routerSvc   from '@/common/services/Router.js';
 import settingsSvc from '@/common/services/Setting.js';
@@ -123,7 +128,7 @@ export default {
 
     let ctx = reactive({
       bcrumb: [
-        {url: routerSvc.getUrl('OrdersList', {orderId: -1}), label: 'Orders'}
+        {url: routerSvc.getUrl('OrdersList', {orderId: -1}), label: i18n.msg('orders.list')}
       ],
 
       addEditFs: {rows: []},
@@ -182,10 +187,10 @@ export default {
   computed: {
     validationReportMsgs: function() {
       return {
-        label: this.$refs.addSpmns && this.$refs.addSpmns.useBarcode ? 'Barcode' : 'Label',
-        error: 'Error',
-        notFound: 'Not present in the order',
-        extra: 'Additional specimen present in the order'
+        label: i18n.msg(this.$refs.addSpmns && this.$refs.addSpmns.useBarcode ? 'specimens.barcode' : 'specimens.label'),
+        error: i18n.msg('common.error'),
+        notFound: i18n.msg('orders.specimens_not_present'),
+        extra: i18n.msg('orders.extra_specimens')
       }
     }
   },
@@ -397,7 +402,7 @@ export default {
       } else if (!this.$refs.specimenDetails) {
         // max. limit is not breached. specimen table is not displayed.
         if (forward) {
-          alertSvc.error('No specimens in the order. Add at least one specimen.');
+          alertSvc.error({code: 'orders.no_spmns_in_order'});
           return false;
         } else {
           return true;
@@ -430,7 +435,7 @@ export default {
           dispose: true
         }));
       if (specimens.length != orderItems.length) {
-        alertSvc.error('One or more specimens not added to the order, as they are already distributed or disposed.');
+        alertSvc.error({code: 'orders.spmn_add_failed'});
       }
 
       const limit    = this.ctx.maxSpmnsLimit;
@@ -497,17 +502,29 @@ export default {
 
     saveDraft: async function() {
       const saved = await this.saveOrUpdate('PENDING');
-      alertSvc.success('Draft order "' + saved.name + '" saved!');
+      if (!saved) {
+        return;
+      }
+
+      alertSvc.success({code: 'orders.draft_saved', args: saved});
     },
 
     distribute: async function() {
       const saved = await this.saveOrUpdate('EXECUTED');
-      alertSvc.success('Order "' + saved.name + '" distributed!');
+      if (!saved) {
+        return;
+      }
+
+      alertSvc.success({code: 'orders.spmns_distributed', args: saved});
     },
 
     updateOrder: async function() {
       const saved = await this.saveOrUpdate(null);
-      alertSvc.success('Order "' + saved.name + '" updated!');
+      if (!saved) {
+        return;
+      }
+
+      alertSvc.success({code: 'orders.saved', args: saved});
     },
 
     saveOrUpdate: async function(status) {
@@ -516,12 +533,12 @@ export default {
 
       const fromList = order.specimenList || order.allReservedSpmns || order.copyItemsFromExistingOrder;
       if (order.status != 'EXECUTED' && !fromList && (!orderItems || orderItems.length == 0)) {
-        alertSvc.error('No specimens in the order. Add at least one specimen.');
+        alertSvc.error({code: 'orders.no_spmns_in_order'});
         return;
       }
 
       if (this.$refs.specimenDetails && !this.$refs.specimenDetails.validate()) {
-        alertSvc.error('There are validation errors in the specimens step. Please correct them.');
+        alertSvc.error({code: 'orders.validation_errors_spmn_step'});
         return;
       }
 

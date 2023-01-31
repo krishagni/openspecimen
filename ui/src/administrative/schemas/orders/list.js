@@ -26,31 +26,31 @@ export default {
   columns: [
     {
       name: "order.name",
-      caption: "Name",
+      captionCode: "orders.name",
       href: (row, query) => routerSvc.getUrl('OrdersListItemDetail.Overview', {orderId: row.rowObject.order.id}, query),
       value: (rowObject) => '#' + rowObject.order.id + ' ' + rowObject.order.name
     },
     {
       name: "order.requester",
-      caption: "Requestor",
+      captionCode: "orders.requester",
       type: "user"
     },
     {
       name: "order.siteName",
-      caption: "Site",
+      captionCode: "orders.site",
     },
     {
       name: "order.distributionProtocol.shortTitle",
-      caption: "Distribution Protocol",
+      captionCode: "orders.dp",
     },
     {
       name: "order.executionDate",
-      caption: "Date",
+      captionCode: "orders.date",
       type: "date",
     },
     {
       name: "order.status",
-      caption: "Status",
+      captionCode: "orders.status",
       value: (rowObject) => {
         if (rowObject.order.status == 'PENDING') {
           return 'Pending';
@@ -63,7 +63,7 @@ export default {
     },
     {
       name: "order.specimenCnt",
-      caption: "Specimens"
+      captionCode: "orders.specimens"
     }
   ],
 
@@ -71,24 +71,24 @@ export default {
     {
       name: "query",
       type: "text",
-      caption: "Name"
+      captionCode: "orders.name"
     },
     {
       name: "requestorId",
       type: "user",
-      caption: "Requestor",
+      captionCode: "orders.requester",
       selectProp: "id"
     },
     {
       name: "requestId",
       type: "number",
-      caption: "Request",
+      captionCode: "orders.request",
       maxFractionDigits: 0
     },
     {
       name: "receivingInstitute",
       type: "dropdown",
-      caption: "Receiving Institute",
+      captionCode: "orders.receiving_institute",
       listSource: {
         apiUrl: "institutes",
         displayProp: "name",
@@ -99,7 +99,7 @@ export default {
     {
       name: "dpShortTitle",
       type: "dropdown",
-      caption: "Distribution Protocol",
+      captionCode: "orders.dp",
       listSource: {
         apiUrl: "distribution-protocols",
         displayProp: "shortTitle",
@@ -110,13 +110,13 @@ export default {
     {
       name: "executionDate",
       type: "date",
-      caption: "Execution Date",
+      captionCode: "orders.execution_date",
       format: "yyyy-MM-dd"
     },
     {
       name: "status",
       type: "dropdown",
-      caption: "Status",
+      captionCode: "orders.status",
       listSource: {
         options: [
           { name: "Pending", value: "PENDING" },

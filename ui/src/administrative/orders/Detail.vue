@@ -20,13 +20,13 @@
           <ul>
             <li>
               <router-link :to="getRoute('Overview')">
-                <span>Overview</span>
+                <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
 
             <li>
               <router-link :to="getRoute('Specimens')">
-                <span>Specimens</span>
+                <span v-t="'orders.specimens'">Specimens</span>
               </router-link>
             </li>
 
@@ -36,13 +36,13 @@
 
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="'Overview'">
+            <li v-os-tooltip.right="$t('common.overview')">
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="'Specimens'">
+            <li v-os-tooltip.right="$t('orders.specimens')">
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
               </router-link>
@@ -61,6 +61,7 @@
 <script>
 import { reactive } from 'vue';
 
+import i18n        from '@/common/services/I18n.js';
 import routerSvc   from '@/common/services/Router.js';
 import formUtil    from '@/common/services/FormUtil.js';
 import orderSvc    from '@/administrative/services/Order.js';
@@ -73,7 +74,7 @@ export default {
       order: {},
 
       bcrumb: [
-        {url: routerSvc.getUrl('OrdersList', {orderId: -1}), label: 'Orders'}
+        {url: routerSvc.getUrl('OrdersList', {orderId: -1}), label: i18n.msg('orders.list')}
       ]
     });
 
