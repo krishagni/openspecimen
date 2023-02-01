@@ -33,6 +33,8 @@ public class ScheduledContainerActivityDetail {
 
 	private IntervalUnit reminderIntervalUnit;
 
+	private boolean disableReminders;
+
 	private boolean repeatCycle;
 
 	private List<UserSummary> assignedUsers;
@@ -127,6 +129,14 @@ public class ScheduledContainerActivityDetail {
 		this.reminderIntervalUnit = reminderIntervalUnit;
 	}
 
+	public boolean isDisableReminders() {
+		return disableReminders;
+	}
+
+	public void setDisableReminders(boolean disableReminders) {
+		this.disableReminders = disableReminders;
+	}
+
 	public boolean isRepeatCycle() {
 		return repeatCycle;
 	}
@@ -164,6 +174,7 @@ public class ScheduledContainerActivityDetail {
 		result.setTaskName(activity.getTask().getName());
 		result.setReminderInterval(activity.getReminderInterval());
 		result.setReminderIntervalUnit(activity.getReminderIntervalUnit());
+		result.setDisableReminders(activity.isDisableReminders());
 		result.setRepeatCycle(activity.isRepeatCycle());
 		result.setAssignedUsers(UserSummary.from(activity.getAssignedUsers()));
 		result.setActivityStatus(activity.getActivityStatus());

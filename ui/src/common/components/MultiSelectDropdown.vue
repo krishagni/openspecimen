@@ -90,22 +90,7 @@ export default {
 
         let params = {maxResults: 100};
         params[ls.searchProp || 'query'] = query;
-        if (ls.queryParams) {
-          if (ls.queryParams.static) {
-            Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.static[name]);
-          }
-
-          if (ls.queryParams.dynamic) {
-            let form = this.form;
-            Object.keys(ls.queryParams.dynamic).forEach(
-              function(name) {
-                let expr = ls.queryParams.dynamic[name];
-                params[name] = new Function('return ' + expr).call(form);
-              }
-            );
-          }
-        }
-
+        Object.assign(params, this.queryParams(ls));
         const options = await this.getFromBackend(params);
         this.ctx.options = this.dedup(selectedVals.concat(options));
       }
@@ -139,7 +124,7 @@ export default {
 
       let ls = this.listSource;
       let searchOpts = {};
-      searchOpts[ls.searchProp || 'value'] = toGet;
+      searchOpts[ls.valueProp || ls.searchProp || 'value'] = toGet;
 
       let selected = undefined;
       if (ls.options) {
@@ -164,6 +149,7 @@ export default {
         // requires support for multi valued query
         // get /records?value=v1&value=v2...
         //
+        Object.assign(searchOpts, this.queryParams(ls));
         selected = await http.get(ls.apiUrl, searchOpts);
       }
 
@@ -179,6 +165,28 @@ export default {
       let result = cached.concat(selected);
       result.sort((e1, e2) => indices[e1[ls.selectProp || 'id']] - indices[e2[ls.selectProp || 'id']]);
       return result;
+    },
+
+    queryParams(ls) {
+      const params = {};
+
+      if (ls.queryParams) {
+        if (ls.queryParams.static) {
+          Object.keys(ls.queryParams.static).forEach(name => params[name] = ls.queryParams.static[name]);
+        }
+
+        if (ls.queryParams.dynamic) {
+          let form = this.form;
+          Object.keys(ls.queryParams.dynamic).forEach(
+            function(name) {
+              let expr = ls.queryParams.dynamic[name];
+              params[name] = new Function('return ' + expr).call(form);
+            }
+          );
+        }
+      }
+
+      return params;
     },
 
     async getFromBackend(params) {

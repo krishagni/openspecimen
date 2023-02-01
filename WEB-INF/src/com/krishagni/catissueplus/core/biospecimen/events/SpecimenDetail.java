@@ -72,8 +72,6 @@ public class SpecimenDetail extends SpecimenInfo {
 	//
 	private boolean forceDelete;
 
-	private boolean printLabel;
-
 	private Integer incrParentFreezeThaw;
 
 	private Date transferTime;
@@ -248,20 +246,6 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	public void setForceDelete(boolean forceDelete) {
 		this.forceDelete = forceDelete;
-	}
-	
-	//
-	// Do not serialise printLabel from interaction object to response JSON. Therefore @JsonIgnore
-	// However, deserialise, if present, from input request JSON to interaction object. Hence @JsonProperty
-	//
-	@JsonIgnore
-	public boolean isPrintLabel() {
-		return printLabel;
-	}
-
-	@JsonProperty
-	public void setPrintLabel(boolean printLabel) {
-		this.printLabel = printLabel;
 	}
 
 	@JsonIgnore

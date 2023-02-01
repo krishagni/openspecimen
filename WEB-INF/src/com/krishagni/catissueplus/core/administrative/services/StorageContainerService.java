@@ -22,6 +22,7 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerSum
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
@@ -55,6 +56,8 @@ public interface StorageContainerService {
 	ResponseEvent<StorageContainerDetail> updateStorageContainer(RequestEvent<StorageContainerDetail> req);
 	
 	ResponseEvent<StorageContainerDetail> patchStorageContainer(RequestEvent<StorageContainerDetail> req);
+
+	ResponseEvent<List<StorageContainerSummary>> patchStorageContainers(RequestEvent<List<StorageContainerDetail>> req);
 	
 	ResponseEvent<Boolean> isAllowed(RequestEvent<TenantDetail> req);
 	
@@ -62,7 +65,7 @@ public interface StorageContainerService {
 
 	ResponseEvent<ExportedFileDetail> exportEmptyPositions(RequestEvent<ContainerQueryCriteria> req);
 
-	ResponseEvent<ExportedFileDetail> exportUtilisation(RequestEvent<ContainerQueryCriteria> req);
+	ResponseEvent<ExportedFileDetail> exportUtilisation(RequestEvent<ContainerReportCriteria> req);
 	
 	ResponseEvent<List<StorageContainerPositionDetail>> assignPositions(RequestEvent<PositionsDetail> req);
 		
@@ -77,6 +80,8 @@ public interface StorageContainerService {
 	ResponseEvent<List<StorageContainerSummary>> createMultipleContainers(RequestEvent<List<StorageContainerDetail>> req);
 
 	ResponseEvent<List<ContainerTransferEventDetail>> getTransferEvents(RequestEvent<ContainerQueryCriteria> req);
+
+	ResponseEvent<ExportedFileDetail> exportTransferEvents(RequestEvent<ContainerReportCriteria> req);
 
 	//
 	// printing

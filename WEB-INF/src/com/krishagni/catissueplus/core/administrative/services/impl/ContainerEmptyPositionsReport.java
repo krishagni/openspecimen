@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.PositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.RowMajorPositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
@@ -43,13 +42,19 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 		File file = exportEmptySlotsReport(container);
 
 		// <zip>_<uuid>_<userId>_<name>
-		String zipFilename = getZipFileId(container, file.getName());
-		String entryName = Utility.sanitizeFilename(container.getName()) + ".csv";
+		String filename = getFilename(container);
+		String zipFilename = getZipFileId(filename, file.getName());
+		String entryName = filename + ".csv";
 		Pair<String, String> zipEntry = Pair.make(file.getAbsolutePath(), entryName);
 		File zipFile = new File(ConfigUtil.getInstance().getReportsDir(), zipFilename + ".zip");
 		Utility.zipFilesWithNames(Collections.singletonList(zipEntry), zipFile.getAbsolutePath());
 		file.delete();
 		return new ExportedFileDetail(zipFilename, zipFile);
+	}
+
+	@Override
+	public String getFilenamePrefix() {
+		return "empty_positions_report";
 	}
 
 	private File exportEmptySlotsReport(StorageContainer container) {
@@ -109,6 +114,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 			exportContainerSummary(container, writer);
 			writer.writeNext(new String[] {
 				message(CONTAINER_NAME),
+				message(CONTAINER_BARCODE),
 				message(CONTAINER_DISPLAY_NAME),
 				message(CONTAINER_HIERARCHY),
 				message(CONTAINER_TYPE),
@@ -135,6 +141,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 			);
 
 		String name = container.getName();
+		String barcode = container.getBarcode();
 		String displayName = container.getDisplayName();
 		String hierarchy = container.getStringifiedAncestors();
 		String type = container.getType() != null ? container.getType().getName() : null;
@@ -150,7 +157,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 
 				String row    = container.toRowLabelingScheme(rowMajor ? cood.first() : cood.second());
 				String column = container.toColumnLabelingScheme(rowMajor ? cood.second() : cood.first());
-				writer.writeNext(new String[] { name, displayName, hierarchy, type, storesSpmn, row, column, pos.toString()});
+				writer.writeNext(new String[] { name, barcode, displayName, hierarchy, type, storesSpmn, row, column, pos.toString()});
 			}
 		}
 	}

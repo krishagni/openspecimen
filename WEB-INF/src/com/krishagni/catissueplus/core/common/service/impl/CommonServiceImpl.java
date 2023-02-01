@@ -10,7 +10,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskManager;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -139,7 +138,13 @@ public class CommonServiceImpl implements CommonService, InitializingBean {
 			}
 
 			File file = files.stream()
-				.sorted((f1, f2) -> -1 * f1.getName().compareTo(f2.getName()))
+				.sorted(
+					(f1, f2) -> {
+						String file1 = f1.getName().substring(1).split(".html")[0];
+						String file2 = f2.getName().substring(1).split(".html")[0];
+						return -1 * Double.valueOf(file1).compareTo(Double.valueOf(file2));
+					}
+				)
 				.findFirst().orElse(null);
 			return file != null ? Utility.getFileText(file) : "No release notes!";
 		} catch (Exception e) {

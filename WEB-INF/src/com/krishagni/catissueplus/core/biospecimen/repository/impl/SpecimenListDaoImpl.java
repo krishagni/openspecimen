@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDigestItem;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
+import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
@@ -143,28 +146,17 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public int deleteListItems(Long listId, List<Long> specimenIds) {
-		List<SpecimenListItem> items = getListItems(listId, specimenIds);
-		items.forEach(super::delete);
-		return items.size();
+		return createNamedQuery(CLEAR_LIST_ITEMS)
+			.setParameter("listId", listId)
+			.setParameterList("specimenIds", specimenIds)
+			.executeUpdate();
 	}
 
 	@Override
 	public int clearList(Long listId) {
-		Criteria<SpecimenListItem> query = createCriteria(SpecimenListItem.class, "li");
-		query.join("li.list", "list").orderBy(query.asc("li.id"));
-
-		int startAt = 0;
-		while (true) {
-			List<SpecimenListItem> items = query.list(startAt, 50);
-			items.forEach(super::delete);
-			if (items.size() < 50) {
-				break;
-			}
-
-			startAt += items.size();
-		}
-
-		return startAt;
+		return createNamedQuery(CLEAR_LIST)
+			.setParameter("listId", listId)
+			.executeUpdate();
 	}
 
 	@Override
@@ -211,6 +203,37 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 		return createNamedQuery(GET_LIST_SPMNS_CP_IDS, Long.class)
 			.setParameter("listId", listId)
 			.list();
+	}
+
+	@Override
+	public List<Long> getDigestEnabledLists() {
+		return createNamedQuery(GET_DIGEST_ENABLED_LIST_IDS, Long.class).list();
+	}
+
+	@Override
+	public List<SpecimenListDigestItem> getListDigest(Long listId, Date startTime, Date endTime) {
+		List<Object[]> rows = createNamedQuery(GET_LIST_DIGEST, Object[].class)
+			.setParameter("listId", listId)
+			.setParameter("startTime", startTime)
+			.setParameter("endTime", endTime)
+			.list();
+
+		List<SpecimenListDigestItem> result = new ArrayList<>();
+		for (Object[] row : rows) {
+			int idx = -1;
+			UserSummary user = new UserSummary();
+			user.setFirstName((String) row[++idx]);
+			user.setLastName((String) row[++idx]);
+			user.setEmailAddress((String) row[++idx]);
+
+			SpecimenListDigestItem item = new SpecimenListDigestItem();
+			item.setUser(user);
+			item.setCpShortTitle((String) row[++idx]);
+			item.setAddedSpecimens((Long) row[++idx]);
+			result.add(item);
+		}
+
+		return result;
 	}
 
 	private SubQuery<Long> getSpecimenListsQuery(SpecimenListsCriteria crit, Criteria<?> mainQuery) {
@@ -295,4 +318,12 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	private static final String ADD_CHILD_SPECIMENS_MYSQL = FQN + ".addChildSpecimensMySQL";
 
 	private static final String ADD_CHILD_SPECIMENS_ORA = FQN + ".addChildSpecimensOracle";
+
+	private static final String CLEAR_LIST = FQN + ".clearList";
+
+	private static final String CLEAR_LIST_ITEMS = FQN + ".clearListItems";
+
+	private static final String GET_DIGEST_ENABLED_LIST_IDS = FQN + ".getDigestEnabledListIds";
+
+	private static final String GET_LIST_DIGEST = FQN + ".getListDigest";
 }

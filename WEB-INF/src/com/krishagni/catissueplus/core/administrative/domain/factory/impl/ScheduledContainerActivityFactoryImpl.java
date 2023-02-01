@@ -18,6 +18,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.StorageCont
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.ScheduledContainerActivityDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.domain.IntervalUnit;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -127,6 +128,13 @@ public class ScheduledContainerActivityFactoryImpl implements ScheduledContainer
 	}
 
 	private void setReminderInterval(ScheduledContainerActivityDetail input, ScheduledContainerActivity activity, OpenSpecimenException ose) {
+		activity.setDisableReminders(input.isDisableReminders());
+		if (input.isDisableReminders()) {
+			activity.setReminderInterval(-1);
+			activity.setReminderIntervalUnit(IntervalUnit.DAYS);
+			return;
+		}
+
 		if (input.getReminderInterval() == null) {
 			ose.addError(ContainerActivityErrorCode.REM_INT_REQ);
 		} else if (input.getReminderInterval() <= 0) {

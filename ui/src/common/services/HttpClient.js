@@ -32,8 +32,8 @@ class HttpClient {
     }
   }
 
-  get(url, params) {
-    return this.promise('get', () => axios.get(this.getUrl(url), this.config(params)));
+  get(url, params, options) {
+    return this.promise('get', () => axios.get(this.getUrl(url), this.config(params, options)));
   }
 
   async post(url, data, params) {
@@ -45,11 +45,16 @@ class HttpClient {
   }
 
   async delete(url, data, params) {
-    return this.promise('delete', () => axios.delete(this.getUrl(url), this.config(params), data));
+    const config = this.config(params);
+    config.data = data;
+    return this.promise('delete', () => axios.delete(this.getUrl(url), config));
   }
 
   getUrl(url, {query = ''} = {}) {
-    url = this.getServerAppUrl() + 'rest/ng/' + url;
+    if (url.indexOf('http://') != 0 && url.indexOf('https://') != 0) {
+      url = this.getServerAppUrl() + 'rest/ng/' + url;
+    }
+
     if (query && typeof query == 'object') {
       let qp = '';
       Object.keys(query).forEach(
@@ -111,7 +116,7 @@ class HttpClient {
     link.dispatchEvent(clickEvent);
   }
 
-  config(params) {
+  config(params, options = {}) {
     if (params) {
       params = Object.keys(params).reduce(
         (urlSearchParams, name) => {
@@ -132,7 +137,7 @@ class HttpClient {
       );
     }
 
-    return {headers: this.headers, params: params};
+    return {headers: this.headers, params: params, ...options};
   }
 
   notifyStart(method) {
@@ -164,6 +169,7 @@ class HttpClient {
           }
 
           if (e.response.status == 401) {
+            localStorage.removeItem('osAuthToken');
             routerSvc.ngGoto('', {logout: true});
             return;
           }

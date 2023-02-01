@@ -36,6 +36,7 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerSum
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
@@ -74,6 +75,12 @@ public class StorageContainersController {
 	public List<StorageContainerSummary> getStorageContainers(
 		@RequestParam(value = "name", required = false)
 		String name,
+
+		@RequestParam(value = "naam", required = false)
+		List<String> names,
+
+		@RequestParam(value = "barcode", required = false)
+		List<String> barcodes,
 			
 		@RequestParam(value = "site", required = false)
 		String siteName,
@@ -119,6 +126,9 @@ public class StorageContainersController {
 
 		@RequestParam(value = "usageMode", required =  false, defaultValue = "")
 		String usageMode,
+
+		@RequestParam(value = "status", required = false, defaultValue = "AVAILABLE")
+		List<String> statuses,
 			
 		@RequestParam(value = "hierarchical", required = false, defaultValue = "false")
 		boolean hierarchical,
@@ -131,6 +141,8 @@ public class StorageContainersController {
 		
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
 			.query(name)
+			.names(names)
+			.barcodes(barcodes)
 			.siteName(siteName)
 			.canHold(canHold)
 			.onlyFreeContainers(onlyFreeContainers)
@@ -146,6 +158,7 @@ public class StorageContainersController {
 			.dpShortTitles(dpShortTitles)
 			.storeSpecimensEnabled(storeSpecimensEnabled)
 			.usageMode(usageMode)
+			.statuses(statuses)
 			.hierarchical(hierarchical)
 			.includeStat(includeStats)
 			.orderByStarred(orderByStarred);
@@ -162,7 +175,13 @@ public class StorageContainersController {
 	public Map<String, Long> getStorageContainersCount (
 		@RequestParam(value = "name", required = false)
 		String name,
-			
+
+		@RequestParam(value = "naam", required = false)
+		List<String> names,
+
+		@RequestParam(value = "barcode", required = false)
+		List<String> barcodes,
+
 		@RequestParam(value = "site", required = false)
 		String siteName,
 
@@ -202,11 +221,16 @@ public class StorageContainersController {
 		@RequestParam(value = "usageMode", required =  false, defaultValue = "")
 		String usageMode,
 
+		@RequestParam(value = "status", required = false, defaultValue = "AVAILABLE")
+		List<String> statuses,
+
 		@RequestParam(value = "hierarchical", required = false, defaultValue = "false")
 		boolean hierarchical) {
 		
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
 			.query(name)
+			.names(names)
+			.barcodes(barcodes)
 			.siteName(siteName)
 			.canHold(canHold)
 			.onlyFreeContainers(onlyFreeContainers)
@@ -220,6 +244,7 @@ public class StorageContainersController {
 			.dpShortTitles(dpShortTitles)
 			.storeSpecimensEnabled(storeSpecimensEnabled)
 			.usageMode(usageMode)
+			.statuses(statuses)
 			.hierarchical(hierarchical);
 
 		RequestEvent<StorageContainerListCriteria> req = new RequestEvent<>(crit);
@@ -333,7 +358,14 @@ public class StorageContainersController {
 		
 		return resp.getPayload();
 	}
-	
+
+	@RequestMapping(method = RequestMethod.PUT, value="/bulk-update")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<StorageContainerSummary> patchStorageContainers(@RequestBody List<StorageContainerDetail> input) {
+		return ResponseEvent.unwrap(storageContainerSvc.patchStorageContainers(RequestEvent.wrap(input)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value="{id}/occupied-positions")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
@@ -461,7 +493,16 @@ public class StorageContainersController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, String> exportUtilisation(@PathVariable("id") Long id) {
-		ContainerQueryCriteria crit = new ContainerQueryCriteria(id);
+		ContainerReportCriteria crit = new ContainerReportCriteria().ids(Collections.singletonList(id));
+		ExportedFileDetail file = ResponseEvent.unwrap(storageContainerSvc.exportUtilisation(RequestEvent.wrap(crit)));
+		return Collections.singletonMap("fileId", file != null ? file.getName() : null);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/export-utilisation")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> exportUtilisation(@RequestBody ContainerReportCriteria crit) {
+		crit.topLevelContainers(true);
 		ExportedFileDetail file = ResponseEvent.unwrap(storageContainerSvc.exportUtilisation(RequestEvent.wrap(crit)));
 		return Collections.singletonMap("fileId", file != null ? file.getName() : null);
 	}
@@ -569,6 +610,13 @@ public class StorageContainersController {
 	@ResponseBody
 	public List<ContainerTransferEventDetail> getTransferEvents(@PathVariable("id") Long containerId) {
 		return ResponseEvent.unwrap(storageContainerSvc.getTransferEvents(RequestEvent.wrap(new ContainerQueryCriteria(containerId))));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/export-transfer-events")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ExportedFileDetail exportTransferEvents(@RequestBody ContainerReportCriteria crit) {
+		return ResponseEvent.unwrap(storageContainerSvc.exportTransferEvents(RequestEvent.wrap(crit)));
 	}
 
 	//

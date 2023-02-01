@@ -164,7 +164,6 @@ export default {
       "type": "subform",
       "labelCode": "dps.distributing_sites",
       "name": "dp.distributingSites",
-      "showWhen": "currentUser.admin",
       "fields": [
         {
           "type": "dropdown",
@@ -199,7 +198,7 @@ export default {
       "labelCode": "dps.distributing_sites",
       "name": "dp.distributingSites.0.sites",
       "multiple": true,
-      "showWhen": "!currentUser.admin",
+      "showWhen": "!true",
       "listSource": {
         "apiUrl": "sites",
         "idProp": "name",

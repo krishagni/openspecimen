@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -176,7 +177,7 @@ public class Specimen extends BaseExtensionEntity {
 	// Available for all specimens in hierarchy based on values set for primary specimens
 	//
 	private Set<SpecimenCollectionReceiveDetail> collRecvDetailsList;
-	
+
 	private List<SpecimenTransferEvent> transferEvents;
 	
 	private Set<SpecimenListItem> specimenListItems =  new HashSet<>();
@@ -651,6 +652,16 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void setCollRecvDetailsList(Set<SpecimenCollectionReceiveDetail> collRecvDetailsList) {
 		this.collRecvDetailsList = collRecvDetailsList;
+	}
+
+	@NotAudited
+	public List<String> getReqNames() {
+		return getReqAttrs(SpecimenRequirement::getName);
+	}
+
+	@NotAudited
+	public List<String> getReqCodes() {
+		return getReqAttrs(SpecimenRequirement::getCode);
 	}
 
 	@NotAudited
@@ -1183,6 +1194,8 @@ public class Specimen extends BaseExtensionEntity {
 			} else {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.VISIT_CHG_NOT_ALLOWED, getLabel());
 			}
+		} else {
+			updateRequirement(specimen.getSpecimenRequirement());
 		}
 
 		updateExternalIds(specimen.getExternalIds());
@@ -2152,6 +2165,24 @@ public class Specimen extends BaseExtensionEntity {
 		getChildCollection().forEach(child -> child.updateVisit(visit, null));
 	}
 
+	private void updateRequirement(SpecimenRequirement sr) {
+		if (Objects.equals(getSpecimenRequirement(), sr)) {
+			return;
+		}
+
+		boolean hasPrevReq = getSpecimenRequirement() != null;
+		setSpecimenRequirement(sr);
+		if (hasPrevReq) {
+			getChildCollection().forEach(child -> child.updateRequirement(null));
+		}
+
+		if (sr != null && !isPrimary()) {
+			if (!Objects.equals(getParentSpecimen().getSpecimenRequirement(), sr.getParentSpecimenRequirement())) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.REQ_PARENT_MISMATCH);
+			}
+		}
+	}
+
 	private void updateExternalIds(Collection<SpecimenExternalIdentifier> otherExternalIds) {
 		for (SpecimenExternalIdentifier externalId : otherExternalIds) {
 			SpecimenExternalIdentifier existing = getExternalIdByName(getExternalIds(), externalId.getName());
@@ -2190,6 +2221,23 @@ public class Specimen extends BaseExtensionEntity {
 
 			result.add(specimen);
 			result.addAll(createPendingSpecimens(childSr, specimen));
+		}
+
+		return result;
+	}
+
+	private List<String> getReqAttrs(Function<SpecimenRequirement, String> mapper) {
+		List<String> result = new ArrayList<>();
+		Specimen specimen = this;
+		while (specimen != null) {
+			if (specimen.getSpecimenRequirement() != null) {
+				String attr = mapper.apply(specimen.getSpecimenRequirement());
+				if (StringUtils.isNotBlank(attr)) {
+					result.add(0, attr);
+				}
+			}
+
+			specimen = specimen.getParentSpecimen();
 		}
 
 		return result;

@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,9 +60,9 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerSum
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.events.TenantDetail;
 import com.krishagni.catissueplus.core.administrative.events.VacantPositionsOp;
+import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
-import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerReport;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionRule;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
@@ -125,6 +127,8 @@ import edu.common.dynamicextensions.query.WideRowMode;
 
 public class StorageContainerServiceImpl implements StorageContainerService, ObjectAccessor, InitializingBean {
 	private static final LogUtil logger = LogUtil.getLogger(StorageContainerServiceImpl.class);
+
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
 	private DaoFactory daoFactory;
 
@@ -308,6 +312,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<List<StorageContainerPositionDetail>> getOccupiedPositions(RequestEvent<Long> req) {
 		try {
 			StorageContainer container = getContainer(req.getPayload(), null);
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			return ResponseEvent.response(StorageContainerPositionDetail.from(container.getOccupiedPositions()));
 		} catch (OpenSpecimenException ose) {
@@ -321,6 +329,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenInfo>> getSpecimens(RequestEvent<SpecimenListCriteria> req) {
 		StorageContainer container = getContainer(req.getPayload().ancestorContainerId(), null);
+		if (container.isArchived()) {
+			return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+		}
+
 		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 		SpecimenListCriteria crit = addSiteCpRestrictions(req.getPayload(), container);
 
@@ -332,6 +344,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	public ResponseEvent<Long> getSpecimensCount(RequestEvent<SpecimenListCriteria> req) {
 		StorageContainer container = getContainer(req.getPayload().ancestorContainerId(), null);
+		if (container.isArchived()) {
+			return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+		}
+
 		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 		SpecimenListCriteria crit = addSiteCpRestrictions(req.getPayload(), container);
 
@@ -344,8 +360,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<QueryDataExportResult> getSpecimensReport(RequestEvent<ContainerQueryCriteria> req) {
 		ContainerQueryCriteria crit = req.getPayload();
 		StorageContainer container = getContainer(crit.getId(), crit.getName());
-		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+		if (container.isArchived()) {
+			return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+		}
 
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 		Integer queryId = ConfigUtil.getInstance().getIntSetting("common", "cont_spmns_report_query", -1);
 		if (queryId == -1) {
 			return ResponseEvent.userError(StorageContainerErrorCode.SPMNS_RPT_NOT_CONFIGURED);
@@ -387,7 +406,66 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<StorageContainerDetail> patchStorageContainer(RequestEvent<StorageContainerDetail> req) {
 		return updateStorageContainer(req, true);
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<StorageContainerSummary>> patchStorageContainers(RequestEvent<List<StorageContainerDetail>> req) {
+		User user        = AuthUtil.getCurrentUser();
+		String ipAddress = AuthUtil.getRemoteAddr();
+		Future<ResponseEvent<List<StorageContainerSummary>>> promise = taskExecutor.submit(
+			new Callable<ResponseEvent<List<StorageContainerSummary>>>() {
+				@Override
+				public ResponseEvent<List<StorageContainerSummary>> call() throws Exception {
+					AuthUtil.setCurrentUser(user, ipAddress);
+					try {
+						return patch();
+					} finally {
+						// clear only after the txn is committed.
+						// other the revision will not have the user.
+						AuthUtil.clearCurrentUser();
+					}
+				}
+
+				@PlusTransactional
+				private ResponseEvent<List<StorageContainerSummary>> patch() {
+					int count = 0;
+					Throwable t = null;
+					try {
+						List<StorageContainerSummary> result = new ArrayList<>();
+						for (StorageContainerDetail input : req.getPayload()) {
+							result.add(StorageContainerSummary.from(updateStorageContainer0(input, true)));
+						}
+
+						count = result.size();
+						return ResponseEvent.response(result);
+					} catch (Throwable e) {
+						t = e;
+						if (e instanceof OpenSpecimenException) {
+							OpenSpecimenException ose = (OpenSpecimenException) e;
+							if (ose.getErrorType() == ErrorType.USER_ERROR) {
+								return ResponseEvent.error(ose);
+							}
+						}
+
+						return ResponseEvent.serverError(new Exception(t.getCause()));
+					} finally {
+						sendBulkUpdateNotif(user, count, t);
+					}
+				}
+			}
+		);
+
+		try {
+			return promise.get(30 * 1000L, TimeUnit.MILLISECONDS);
+		} catch (TimeoutException te) {
+			return ResponseEvent.response(null);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Boolean> isAllowed(RequestEvent<TenantDetail> req) {
@@ -395,6 +473,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			TenantDetail detail = req.getPayload();
 
 			StorageContainer container = getContainer(detail.getContainerId(), detail.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			
 			CollectionProtocol cp = new CollectionProtocol();
@@ -427,8 +509,22 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	@Override
-	public ResponseEvent<ExportedFileDetail> exportUtilisation(RequestEvent<ContainerQueryCriteria> req) {
-		return exportReport(req, utilisationReport);
+	@PlusTransactional
+	public ResponseEvent<ExportedFileDetail> exportUtilisation(RequestEvent<ContainerReportCriteria> req) {
+		try {
+			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			ContainerReportCriteria rptCrit = req.getPayload().siteCps(siteCps);
+			List<StorageContainer> containers = daoFactory.getStorageContainerDao().getStorageContainers(rptCrit.toListCriteria());
+			return exportReport(utilisationReport, containers, rptCrit);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
 	}
 
 	@Override
@@ -437,6 +533,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			PositionsDetail op = req.getPayload();
 			StorageContainer container = getContainer(op.getContainerId(), op.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			
 			List<StorageContainerPosition> positions = op.getPositions().stream()
 				.map(posDetail -> createPosition(container, posDetail, op.getVacateOccupant()))
@@ -501,6 +601,9 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 					replDetail.getSourceContainerName(),
 					null,
 					StorageContainerErrorCode.SRC_ID_OR_NAME_REQ);
+			if (srcContainer.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, srcContainer.getName());
+			}
 
 			List<StorageContainer> toPrint = new ArrayList<>();
 			for (DestinationDetail dest : replDetail.getDestinations()) {
@@ -531,6 +634,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			container.validateRestrictions();
 
 			StorageContainer parentContainer = container.getParentContainer();
+			if (parentContainer != null && parentContainer.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, parentContainer.getName());
+			}
+
 			if (parentContainer != null && !parentContainer.hasFreePositionsForReservation(input.getNumOfContainers())) {
 				return ResponseEvent.userError(StorageContainerErrorCode.NO_FREE_SPACE, parentContainer.getName());
 			}
@@ -588,6 +695,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				}
 
 				StorageContainer container = containerFactory.createStorageContainer(detail);
+				if (container.getParentContainer() != null && container.getParentContainer().isArchived()) {
+					return ResponseEvent.userError(StorageContainerErrorCode.PARENT_ARCHIVED, container.getParentContainer().getName());
+				}
+
 				AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
 				if (container.getType() != null) {
 					generateName(container);
@@ -620,6 +731,55 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			StorageContainer container = getContainer(req.getPayload());
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			return ResponseEvent.response(ContainerTransferEventDetail.from(container.getTransferEvents()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ExportedFileDetail> exportTransferEvents(RequestEvent<ContainerReportCriteria> req) {
+		try {
+			Set<SiteCpPair> allowedSiteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps();
+			if (allowedSiteCps != null && allowedSiteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			ContainerReportCriteria crit = req.getPayload();
+			crit.siteCps(allowedSiteCps);
+
+			User user = AuthUtil.getCurrentUser();
+			String ipAddress = AuthUtil.getRemoteAddr();
+			Future<ResponseEvent<String>> result = taskExecutor.submit(new Callable<ResponseEvent<String>>() {
+				@Override
+				public ResponseEvent<String> call() throws Exception {
+					try {
+						AuthUtil.setCurrentUser(user, ipAddress);
+						return exportTransferEvents0(crit);
+					} catch (Exception e) {
+						return ResponseEvent.serverError(e);
+					} finally {
+						AuthUtil.clearCurrentUser();
+					}
+				}
+			});
+
+			try {
+				ResponseEvent<String> resp = result.get(30000, TimeUnit.MILLISECONDS);
+				resp.throwErrorIfUnsuccessful();
+
+				ExportedFileDetail file = new ExportedFileDetail(true);
+				file.setName(resp.getPayload());
+				return ResponseEvent.response(file);
+			} catch (TimeoutException te) {
+				return ResponseEvent.response(new ExportedFileDetail(false));
+			} catch (OpenSpecimenException ose) {
+				return ResponseEvent.error(ose);
+			} catch (Exception e) {
+				return ResponseEvent.serverError(e);
+			}
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -663,6 +823,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			PositionsDetail opDetail = req.getPayload();
 			StorageContainer container = getContainer(opDetail.getContainerId(), opDetail.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateContainerRights(container);
 			if (container.isDimensionless()) {
 				return ResponseEvent.userError(StorageContainerErrorCode.DL_POS_BLK_NP, container.getName());
@@ -694,6 +858,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		try {
 			PositionsDetail opDetail = req.getPayload();
 			StorageContainer container = getContainer(opDetail.getContainerId(), opDetail.getContainerName());
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateContainerRights(container);
 			if (container.isDimensionless()) {
 				return ResponseEvent.userError(StorageContainerErrorCode.DL_POS_BLK_NP, container.getName());
@@ -1003,21 +1171,37 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@Override
 	@PlusTransactional
 	public File generateAutoFreezerReport(AutoFreezerReportDetail input) {
-		if (!AuthUtil.isAdmin()) {
-			throw OpenSpecimenException.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
-		}
-
 		try {
-			AutoFreezerReportDetail detail = generateStoreListsFailureReport(input);
-			if (!detail.reportForFailedOps()) {
-				Map<ContainerStoreList.Op, Integer> itemsCnt = daoFactory.getContainerStoreListDao()
-					.getStoreListItemsCount(detail.getFromDate(), detail.getToDate());
-				detail.setStored(itemsCnt.get(Op.PUT) == null ? 0 : itemsCnt.get(Op.PUT));
-				detail.setRetrieved(itemsCnt.get(Op.PICK) == null ? 0 : itemsCnt.get(Op.PICK));
+			List<StorageContainer> freezers = null;
+			if (input.reportForFailedOps()) {
+				freezers = daoFactory.getContainerStoreListDao().getAutomatedFreezers(input.getFailedStoreListIds());
+			} else {
+				freezers = daoFactory.getStorageContainerDao().getAutomatedFreezers();
 			}
 
-			sendAutoFreezerReport(detail);
-			return detail.getReport();
+			File lastReport = null;
+			for (StorageContainer freezer : freezers) {
+				if (CollectionUtils.isEmpty(freezer.getSite().getCoordinators())) {
+					logger.info("Not generating store list report for the freezer, as it has no site coordinators. Freezer: " + freezer.getName());
+					continue;
+				}
+
+				AutoFreezerReportDetail detail = generateStoreListsFailureReport(freezer, input);
+				if (!detail.reportForFailedOps()) {
+					Map<ContainerStoreList.Op, Integer> itemsCnt = daoFactory.getContainerStoreListDao()
+						.getStoreListItemsCount(detail.getFromDate(), detail.getToDate());
+					detail.setStored(itemsCnt.get(Op.PUT) == null ? 0 : itemsCnt.get(Op.PUT));
+					detail.setRetrieved(itemsCnt.get(Op.PICK) == null ? 0 : itemsCnt.get(Op.PICK));
+				}
+
+				sendAutoFreezerReport(freezer, detail);
+				if (detail.getReport() != null) {
+					lastReport = detail.getReport();
+				}
+			}
+
+
+			return lastReport;
 		} catch (Exception e) {
 			logger.error("Error generating automated freezer report", e);
 			throw OpenSpecimenException.serverError(e);
@@ -1027,8 +1211,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@Override
 	public StorageContainer createStorageContainer(StorageContainer base, StorageContainerDetail input) {
 		StorageContainer container = containerFactory.createStorageContainer(base, input);
-		AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
+		if (container.getParentContainer() != null && container.getParentContainer().isArchived()) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.PARENT_ARCHIVED, container.getParentContainer().getName());
+		}
 
+		AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
 		ensureUniqueConstraints(null, container);
 		container.validateRestrictions();
 
@@ -1245,30 +1432,34 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	private ResponseEvent<StorageContainerDetail> updateStorageContainer(RequestEvent<StorageContainerDetail> req, boolean partial) {
 		try {
-			StorageContainerDetail input = req.getPayload();			
-			StorageContainer existing = getContainer(input.getId(), input.getName());
-			AccessCtrlMgr.getInstance().ensureUpdateContainerRights(existing);			
-			
-			input.setId(existing.getId());
-			StorageContainer container;
-			if (partial) {
-				container = containerFactory.createStorageContainer(existing, input);
-			} else {
-				container = containerFactory.createStorageContainer(input); 
-			}
-			
-			ensureUniqueConstraints(existing, container);
-			existing.update(container);
-			daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
-			existing.updatePositionsIfChanged();
-			existing.validateRestrictions();
-			existing.addOrUpdateExtension();
-			return ResponseEvent.response(StorageContainerDetail.from(existing));			
+			StorageContainer result = updateStorageContainer0(req.getPayload(), partial);
+			return ResponseEvent.response(StorageContainerDetail.from(result));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
-		}		
+		}
+	}
+
+	private StorageContainer updateStorageContainer0(StorageContainerDetail input, boolean partial) {
+		StorageContainer existing = getContainer(input.getId(), input.getName());
+		AccessCtrlMgr.getInstance().ensureUpdateContainerRights(existing);
+
+		input.setId(existing.getId());
+		StorageContainer container;
+		if (partial) {
+			container = containerFactory.createStorageContainer(existing, input);
+		} else {
+			container = containerFactory.createStorageContainer(input);
+		}
+
+		ensureUniqueConstraints(existing, container);
+		existing.update(container);
+		daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
+		existing.updatePositionsIfChanged();
+		existing.validateRestrictions();
+		existing.addOrUpdateExtension();
+		return existing;
 	}
 	
 	private void ensureUniqueConstraints(StorageContainer existing, StorageContainer newContainer) {
@@ -1673,39 +1864,57 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	private ResponseEvent<ExportedFileDetail> exportReport(RequestEvent<ContainerQueryCriteria> req, ContainerReport report, Object... params) {
 		try {
-			Date startTime = Calendar.getInstance().getTime();
 			StorageContainer container = getContainer(req.getPayload());
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
-			User user = AuthUtil.getCurrentUser();
-			String ipAddress = AuthUtil.getRemoteAddr();
-			Future<ExportedFileDetail> result = taskExecutor.submit(
-				() -> {
-					Throwable t = null;
-					String fileId = null;
-					try {
-						AuthUtil.setCurrentUser(user, ipAddress);
-						ExportedFileDetail file = report.generate(container, params);
-						fileId = file != null ? file.getName() : null;
-						exportSvc.saveJob(report.getName(), startTime, Collections.singletonMap("containerId", container.getId().toString()));
-						return file;
-					} catch (Throwable e) {
-						t = e;
-						throw e;
-					} finally {
-						sendReportEmail(report.getName(), user, container, fileId, t);
-					}
-				}
-			);
+			return exportReport(report, Collections.singletonList(container), params);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 
-			try {
-				return ResponseEvent.response(result.get(30, TimeUnit.SECONDS));
-			} catch (TimeoutException te) {
-				return ResponseEvent.response(null);
-			} catch (OpenSpecimenException ose) {
-				return ResponseEvent.error(ose);
-			} catch (Exception e) {
-				return ResponseEvent.serverError(e);
+	private ResponseEvent<ExportedFileDetail> exportReport(ContainerReport report, List<StorageContainer> containers, Object... params) {
+		User user = AuthUtil.getCurrentUser();
+		String ipAddress = AuthUtil.getRemoteAddr();
+		Future<ExportedFileDetail> result = taskExecutor.submit(
+			() -> {
+				Date startTime = Calendar.getInstance().getTime();
+				Throwable t = null;
+				String fileId = null;
+				try {
+					AuthUtil.setCurrentUser(user, ipAddress);
+					ExportedFileDetail file = report.generate(containers, params);
+					fileId = file != null ? file.getName() : null;
+
+					Map<String, String> jobParams = null;
+					if (params != null && params.length > 0 && params[0] instanceof ContainerReportCriteria) {
+						jobParams = ((ContainerReportCriteria) params[0]).toStrMap();
+					} else {
+						jobParams = Collections.singletonMap("containerIds", containers.stream().map(c -> c.getId().toString()).collect(Collectors.joining(", ")));
+					}
+
+					exportSvc.saveJob(report.getName(), startTime, jobParams);
+					return file;
+				} catch (Throwable e) {
+					t = e;
+					throw e;
+				} finally {
+					StorageContainer container = null;
+					if (containers.size() == 1) {
+						container = containers.get(0);
+					}
+
+					sendReportEmail(report.getName(), user, container, fileId, t);
+					AuthUtil.clearCurrentUser();
+				}
 			}
+		);
+
+		try {
+			return ResponseEvent.response(result.get(30, TimeUnit.SECONDS));
+		} catch (TimeoutException te) {
+			return ResponseEvent.response(null);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1795,11 +2004,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			name.setDirection("asc");
 
 			Column row = new Column();
-			row.setExpr("Specimen.specimenPosition.positionDimensionTwoString");
+			row.setExpr("Specimen.specimenPosition.rowOrdinal");
 			row.setDirection("asc");
 
 			Column col = new Column();
-			col.setExpr("Specimen.specimenPosition.positionDimensionOneString");
+			col.setExpr("Specimen.specimenPosition.columnOrdinal");
 			col.setDirection("asc");
 
 			orderBy = Arrays.asList(name, row, col);
@@ -1829,68 +2038,89 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			private List<StorageContainerDetail> topLevelContainers = new ArrayList<>();
 
+			private Set<String> types = null;
+
 			@Override
 			public List<StorageContainerDetail> apply(ExportJob job) {
-				initParams();
+				while (true) {
+					initParams();
 
-				if (endOfContainers) {
-					return Collections.emptyList();
-				}
-
-				if (topLevelContainers.isEmpty()) {
-					if (topLevelCrit == null) {
-						topLevelCrit = new StorageContainerListCriteria().topLevelContainers(true).ids(job.getRecordIds());
-						addContainerListCriteria(topLevelCrit);
+					if (endOfContainers) {
+						return Collections.emptyList();
 					}
 
-					if (loadTopLevelContainers) {
-						topLevelContainers = getContainers(topLevelCrit.startAt(startAt));
-						startAt += topLevelContainers.size();
-						loadTopLevelContainers = CollectionUtils.isEmpty(job.getRecordIds());
-					}
-				}
+					if (topLevelContainers.isEmpty()) {
+						if (topLevelCrit == null) {
+							topLevelCrit = new StorageContainerListCriteria().topLevelContainers(true).ids(job.getRecordIds());
+							Map<String, String> params = job.getParams();
+							if (params != null && !params.isEmpty()) {
+								if (StringUtils.isNotBlank(params.get("names"))) {
+									topLevelCrit.names(Arrays.asList(params.get("names").split("\\^")));
+								}
 
-				if (topLevelContainers.isEmpty()) {
-					endOfContainers = true;
-					return Collections.emptyList();
-				}
+								if (StringUtils.isNotBlank(params.get("cps"))) {
+									topLevelCrit.cpShortTitles(params.get("cps").split("\\^"));
+								}
 
-				if (descendantsCrit == null) {
-					descendantsCrit = new StorageContainerListCriteria()
-						.siteCps(topLevelCrit.siteCps()).maxResults(100000);
-				}
+								if (StringUtils.isNotBlank(params.get("types"))) {
+									types = Arrays.stream(params.get("types").split("\\^")).collect(Collectors.toSet());
+								}
+							}
 
-				StorageContainerDetail topLevelContainer = topLevelContainers.remove(0);
-				descendantsCrit.parentContainerId(topLevelContainer.getId());
-				List<StorageContainer> descendants = daoFactory.getStorageContainerDao().getDescendantContainers(descendantsCrit);
+							addContainerListCriteria(topLevelCrit);
+						}
 
-				Map<Long, List<StorageContainer>> childContainersMap = new HashMap<>();
-				for (StorageContainer container : descendants) {
-					Long parentId = container.getParentContainer() == null ? null : container.getParentContainer().getId();
-					List<StorageContainer> childContainers = childContainersMap.get(parentId);
-					if (childContainers == null) {
-						childContainers = new ArrayList<>();
-						childContainersMap.put(parentId, childContainers);
+						if (loadTopLevelContainers) {
+							topLevelContainers = getContainers(topLevelCrit.startAt(startAt).maxResults(1));
+							startAt += topLevelContainers.size();
+							loadTopLevelContainers = CollectionUtils.isEmpty(job.getRecordIds());
+						}
 					}
 
-					childContainers.add(container);
-				}
-
-				List<StorageContainerDetail> workList = new ArrayList<>();
-				workList.addAll(toDetailList(childContainersMap.get(null)));
-
-				List<StorageContainerDetail> result = new ArrayList<>();
-				while (!workList.isEmpty()) {
-					StorageContainerDetail containerDetail = workList.remove(0);
-					result.add(containerDetail);
-
-					List<StorageContainer> childContainers = childContainersMap.get(containerDetail.getId());
-					if (childContainers != null) {
-						workList.addAll(0, toDetailList(childContainers));
+					if (topLevelContainers.isEmpty()) {
+						endOfContainers = true;
+						return Collections.emptyList();
 					}
-				}
 
-				return result;
+					if (descendantsCrit == null) {
+						descendantsCrit = new StorageContainerListCriteria()
+							.cpShortTitles(topLevelCrit.cpShortTitles())
+							.siteCps(topLevelCrit.siteCps()).maxResults(100000);
+					}
+
+					StorageContainerDetail topLevelContainer = topLevelContainers.remove(0);
+					descendantsCrit.parentContainerId(topLevelContainer.getId());
+					List<StorageContainer> descendants = daoFactory.getStorageContainerDao().getDescendantContainers(descendantsCrit);
+
+					Map<Long, List<StorageContainer>> childContainersMap = new HashMap<>();
+					for (StorageContainer container : descendants) {
+						Long parentId = container.getParentContainer() == null ? null : container.getParentContainer().getId();
+						List<StorageContainer> childContainers = childContainersMap.computeIfAbsent(parentId, (k) -> new ArrayList<>());
+						childContainers.add(container);
+					}
+
+					List<StorageContainerDetail> workList = new ArrayList<>();
+					workList.addAll(toDetailList(childContainersMap.get(null)));
+
+					List<StorageContainerDetail> result = new ArrayList<>();
+					while (!workList.isEmpty()) {
+						StorageContainerDetail containerDetail = workList.remove(0);
+						if (types == null || types.isEmpty() || types.contains(containerDetail.getTypeName())) {
+							result.add(containerDetail);
+						}
+
+						List<StorageContainer> childContainers = childContainersMap.get(containerDetail.getId());
+						if (childContainers != null) {
+							workList.addAll(0, toDetailList(childContainers));
+						}
+					}
+
+					if (!result.isEmpty()) {
+						return result;
+					}
+
+					// continue until all the containers are exhausted
+				}
 			}
 
 			private void initParams() {
@@ -1910,17 +2140,17 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				DeObject.createExtensions(true, StorageContainer.EXTN, -1L, containers);
 				return containers.stream()
 					.sorted((c1, c2) -> {
-						if (!hasPosition(c1) && !hasPosition(c2)) {
-							return c1.getId().intValue() - c2.getId().intValue();
-						} else if (!hasPosition(c1)) {
+						if (hasPosition(c1) && hasPosition(c2)) {
+							return c1.getPosition().getPosition().compareTo(c2.getPosition().getPosition());
+						} else if (hasPosition(c1)) {
 							return -1;
-						} else if (!hasPosition(c2)) {
+						} else if (hasPosition(c2)) {
 							return 1;
 						} else {
-							return c1.getPosition().getPosition() - c2.getPosition().getPosition();
+							return c1.getId().compareTo(c2.getId());
 						}
 					})
-					.map(StorageContainerDetail::from).collect(Collectors.toList());
+					.map(c -> StorageContainerDetail.from(c, false)).collect(Collectors.toList());
 			}
 
 			private boolean hasPosition(StorageContainer c) {
@@ -1929,7 +2159,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		};
 	}
 
-	private AutoFreezerReportDetail generateStoreListsFailureReport(AutoFreezerReportDetail reportDetail) {
+	private AutoFreezerReportDetail generateStoreListsFailureReport(StorageContainer freezer, AutoFreezerReportDetail reportDetail) {
 		CsvWriter csvWriter = null;
 		int failedLists = 0, maxLists = 100;
 		int failedToStore = 0, failedToRetrieve = 0;
@@ -1942,6 +2172,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			List<Long> storeListIds = reportDetail.getFailedStoreListIds();
 			boolean retrieveByIds = reportDetail.reportForFailedOps();
 			ContainerStoreListCriteria crit = new ContainerStoreListCriteria()
+				.containerId(freezer.getId())
 				.statuses(Collections.singletonList(ContainerStoreList.Status.FAILED))
 				.fromDate(!retrieveByIds ? reportDetail.getFromDate() : null)
 				.toDate(!retrieveByIds   ? reportDetail.getToDate() : null)
@@ -1995,6 +2226,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		return new String[] {
 			msg("auto_freezer_store_list_id"),
 			msg("auto_freezer_name"),
+			msg("auto_freezer_cp"),
 			msg("auto_freezer_specimen_label"),
 			msg("auto_freezer_specimen_barcode"),
 			msg("auto_freezer_operation"),
@@ -2017,8 +2249,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		String storeListError = StringUtils.isBlank(storeList.getError()) ? "" : storeList.getError();
 
 		for (ContainerStoreListItem item : storeList.getItems()) {
-			String label = item.getSpecimen().getLabel();
-			String barcode = item.getSpecimen().getBarcode();
+			Specimen spmn = item.getSpecimen();
 			StringBuilder error = new StringBuilder(storeListError);
 
 			if (StringUtils.isNotBlank(item.getError())) {
@@ -2029,14 +2260,121 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				error.append(item.getError());
 			}
 
-			rows.add(new String[] {storeListId, container, label, barcode, operation,
-					executionTime, lastRetriedTime, noOfRetries, error.toString()});
+			rows.add(new String[] {
+				storeListId,
+				container,
+				spmn.getCpShortTitle(),
+				spmn.getLabel(),
+				spmn.getBarcode(),
+				operation,
+				executionTime,
+				lastRetriedTime,
+				noOfRetries,
+				error.toString()
+			});
 		}
 
 		return rows;
 	}
 
-	private void sendAutoFreezerReport(AutoFreezerReportDetail reportDetail) {
+	@PlusTransactional
+	private ResponseEvent<String> exportTransferEvents0(ContainerReportCriteria crit) {
+		Date startTime = Calendar.getInstance().getTime();
+		String dateTime = sdf.format(startTime);
+		String fileId = "csv_" + UUID.randomUUID().toString() + "_" + AuthUtil.getCurrentUser().getId() + "_transfer_report_" + dateTime;
+		File file     = new File(ConfigUtil.getInstance().getReportsDir(), fileId + ".csv");
+
+		Throwable t = null;
+		CsvWriter writer = null;
+		try {
+			writer = CsvFileWriter.createCsvFileWriter(file);
+			writer.writeNext(new String[] { msg("common_exported_by"), AuthUtil.getCurrentUser().formattedName()});
+			writer.writeNext(new String[] { msg("common_exported_on"), Utility.getDateTimeString(Calendar.getInstance().getTime())});
+
+			writer.writeNext(new String[0]);
+			writer.writeNext(new String[] {
+				msg("container_name"), msg("container_barcode"), msg("container_display_name"),
+				msg("freezer_name"), msg("freezer_barcode"), msg("freezer_display_name"),
+				msg("container_type"), msg("storage_container_protocols"),
+				msg("transfer_event_id"), msg("transfer_event_user"), msg("transfer_event_time"), msg("common_reason"),
+				msg("transfer_event_from_site"), msg("transfer_event_from_container"), msg("transfer_event_from_row"), msg("transfer_event_from_col"), msg("transfer_event_from_position"),
+				msg("transfer_event_to_site"), msg("transfer_event_to_container"), msg("transfer_event_to_row"), msg("transfer_event_to_col"), msg("transfer_event_to_position")
+			});
+
+
+			Long lastId = null;
+			int numRows = 0;
+			boolean endOfEvents = false;
+			while (!endOfEvents) {
+				crit.lastId(lastId).startAt(0).maxResults(1000);
+
+				List<ContainerTransferEventDetail> events = daoFactory.getStorageContainerDao().getTransferEvents(crit);
+				endOfEvents = events.size() < crit.maxResults();
+
+				for (ContainerTransferEventDetail event : events) {
+					String name = event.getContainerName();
+					String barcode = event.getContainerBarcode();
+					String displayName = event.getContainerDisplayName();
+
+					String freezer = event.getFreezerName();
+					String freezerBarcode = event.getFreezerBarcode();
+					String freezerDisplayName = event.getFreezerDisplayName();
+
+					StorageLocationSummary fromLoc = event.getFromLocation();
+					String fromContainer = null, fromRow = null, fromCol = null, fromPos = null;
+					if (fromLoc != null) {
+						fromContainer = fromLoc.getName();
+						if (StringUtils.isNotBlank(fromLoc.getDisplayName())) {
+							fromContainer = fromLoc.getDisplayName() + " (" + fromContainer + ")";
+						}
+						fromRow = fromLoc.getPositionY();
+						fromCol = fromLoc.getPositionX();
+						fromPos = fromLoc.getPosition() != null ? fromLoc.getPosition().toString() : null;
+					}
+
+					StorageLocationSummary toLoc = event.getToLocation();
+					String toContainer = null, toRow = null, toCol = null, toPos = null;
+					if (toLoc != null) {
+						toContainer = toLoc.getName();
+						if (StringUtils.isNotBlank(toLoc.getDisplayName())) {
+							fromContainer = toLoc.getDisplayName() + " (" + toContainer + ")";
+						}
+						toRow = toLoc.getPositionY();
+						toCol = toLoc.getPositionX();
+						toPos = toLoc.getPosition() != null ? toLoc.getPosition().toString() : null;
+					}
+
+
+					++numRows;
+					writer.writeNext(new String[]{
+						name, barcode, displayName, freezer, freezerBarcode, freezerDisplayName, event.getTypeName(),
+						Utility.join(event.getCps(), cp -> cp, ", "),
+						event.getId().toString(), event.getUser().formattedName(), Utility.getDateTimeString(event.getTime()), event.getReason(),
+						event.getFromSite(), fromContainer, fromRow, fromCol, fromPos,
+						event.getToSite(), toContainer, toRow, toCol, toPos
+					});
+
+					lastId = event.getId();
+
+					if (numRows % 25 == 0) {
+						writer.flush();
+					}
+				}
+			}
+
+			writer.flush();
+			exportSvc.saveJob("transfer_report", startTime, crit.toStrMap());
+			return ResponseEvent.response(fileId);
+		} catch (Throwable e) {
+			t = e;
+			return ResponseEvent.serverError(new Exception(t));
+		} finally {
+			IOUtils.closeQuietly(writer);
+			sendTransferReportEmail(fileId, t);
+		}
+	}
+
+	private void sendAutoFreezerReport(StorageContainer freezer, AutoFreezerReportDetail reportDetail) {
 		String date = Utility.getDateString(Calendar.getInstance().getTime());
 
 		Map<String, Object> emailProps = new HashMap<>();
@@ -2050,9 +2388,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			return;
 		}
 
-		UserListCriteria rcptsCrit = new UserListCriteria().activityStatus("Active").type("SUPER");
-		List<User> rcpts = daoFactory.getUserDao().getUsers(rcptsCrit);
-
+		List<User> rcpts = new ArrayList<>(freezer.getSite().getCoordinators());
 		String itAdminEmailId = ConfigUtil.getInstance().getItAdminEmailId();
 		if (StringUtils.isNotBlank(itAdminEmailId)) {
 			User itAdmin = new User();
@@ -2082,13 +2418,16 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 		report = MessageUtil.getInstance().getMessage(report);
 
-		String displayTitle = container.getName();
-		if (StringUtils.isNotBlank(container.getDisplayName())) {
-			displayTitle = container.getDisplayName() + " (" + container.getName() + ")";
+		String displayTitle = null;
+		if (container != null) {
+			displayTitle = container.getName();
+			if (StringUtils.isNotBlank(container.getDisplayName())) {
+				displayTitle = container.getDisplayName() + " (" + displayTitle + ")";
+			}
 		}
 
 		Map<String, Object> props = new HashMap<>();
-		props.put("$subject", new String[] { report.toLowerCase(), displayTitle });
+		props.put("$subject", new String[] { report.toLowerCase(), displayTitle != null ? ": " + displayTitle : "" });
 		props.put("report", report.toLowerCase());
 		props.put("fileId", fileId);
 		props.put("error", error);
@@ -2096,6 +2435,42 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		props.put("container", container);
 		props.put("displayTitle", displayTitle);
 		EmailUtil.getInstance().sendEmail(RPT_EMAIL_TMPL, new String[] { user.getEmailAddress() }, null, props);
+	}
+
+	private void sendTransferReportEmail(String fileId, Throwable t) {
+		String error = null;
+		if (t != null) {
+			Throwable rootCause = ExceptionUtils.getRootCause(t);
+			if (rootCause == null) {
+				rootCause = t;
+			}
+			error = ExceptionUtils.getStackTrace(rootCause);
+		}
+
+		User rcpt = AuthUtil.getCurrentUser();
+		Map<String, Object> props = new HashMap<>();
+		props.put("fileId", fileId);
+		props.put("error", error);
+		props.put("rcpt", rcpt);
+		EmailUtil.getInstance().sendEmail(TRANSFER_RPT_TMPL, new String[] { rcpt.getEmailAddress() }, null, props);
+	}
+
+	private void sendBulkUpdateNotif(User user, int count, Throwable exception) {
+		String error = null;
+		if (exception != null) {
+			Throwable rootCause = ExceptionUtils.getRootCause(exception);
+			if (rootCause == null) {
+				rootCause = exception;
+			}
+			error = ExceptionUtils.getStackTrace(rootCause);
+		}
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("$subject", new String[0]);
+		props.put("count", count);
+		props.put("error", error);
+		props.put("rcpt", user);
+		EmailUtil.getInstance().sendEmail(BULK_UPDATED_TMPL, new String[] { user.getEmailAddress() }, null, props);
 	}
 
 	private String msg(String code) {
@@ -2107,4 +2482,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	private final static String AUTO_FREEZER_FAILED_OPS_RPT = "auto_freezer_failed_ops";
 
 	private final static String RPT_EMAIL_TMPL              = "container_report";
+
+	private final static String BULK_UPDATED_TMPL           = "containers_bulk_updated";
+
+	private final static String TRANSFER_RPT_TMPL           = "container_transfer_report";
 }

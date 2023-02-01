@@ -43,6 +43,10 @@ public class StorageContainerPositionDetail implements Comparable<StorageContain
 	private String cpShortTitle;
 
 	private Boolean blocked;
+
+	private Long blockedEntityId;
+
+	private String blockedEntityName;
 	
 	public Long getId() {
 		return id;
@@ -164,6 +168,22 @@ public class StorageContainerPositionDetail implements Comparable<StorageContain
 		this.blocked = blocked;
 	}
 
+	public Long getBlockedEntityId() {
+		return blockedEntityId;
+	}
+
+	public void setBlockedEntityId(Long blockedEntityId) {
+		this.blockedEntityId = blockedEntityId;
+	}
+
+	public String getBlockedEntityName() {
+		return blockedEntityName;
+	}
+
+	public void setBlockedEntityName(String blockedEntityName) {
+		this.blockedEntityName = blockedEntityName;
+	}
+
 	@Override
 	public int compareTo(StorageContainerPositionDetail other) {
 		int cmp;
@@ -230,6 +250,13 @@ public class StorageContainerPositionDetail implements Comparable<StorageContain
 			result.setOccupyingEntityName(container.getName());
 			if (StringUtils.isNotBlank(container.getDisplayName())) {
 				result.setOccupantProps(Collections.singletonMap("displayName", container.getDisplayName()));
+			}
+		} else if (position.getBlockedForContainer() != null) {
+			result.setOccuypingEntity("container");
+			result.setBlockedEntityId(position.getBlockedForContainer().getId());
+			result.setBlockedEntityName(position.getBlockedForContainer().getName());
+			if (StringUtils.isNotBlank(position.getBlockedForContainer().getDisplayName())) {
+				result.setOccupantProps(Collections.singletonMap("displayName", position.getBlockedForContainer().getDisplayName()));
 			}
 		}
 		

@@ -1394,36 +1394,43 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 			private SpecimenListCriteria crit;
 
+			private Long maxId;
+
 			@Override
 			public List<? extends Object> apply(ExportJob job) {
 				initParams(job);
 
-				if (endOfSpecimens) {
-					return Collections.emptyList();
-				}
-
-				List<Specimen> specimens = daoFactory.getSpecimenDao().getSpecimens(crit.lastId(lastId));
-				if (CollectionUtils.isNotEmpty(crit.labels()) || specimens.size() < 100) {
-					endOfSpecimens = true;
-				}
-
 				List<SpecimenDetail> records = new ArrayList<>();
-				for (Specimen specimen : specimens) {
-					lastId = specimen.getId();
+				while (!endOfSpecimens && records.isEmpty()) {
+					List<Specimen> specimens = daoFactory.getSpecimenDao().getSpecimens(crit.lastId(lastId));
+					Long prevLastId = lastId;
+					for (Specimen specimen : specimens) {
+						lastId = specimen.getId();
+						try {
+							AccessCtrlMgr.SpecimenAccessRights rights = AccessCtrlMgr.getInstance().ensureReadSpecimenRights(specimen, true);
+							SpecimenDetail detail = SpecimenDetail.from(specimen, false, !rights.phiAccess, true);
+							if (specimen.isPrimary()) {
+								detail.setCollectionEvent(CollectionEventDetail.from(specimen.getCollectionEvent()));
+								detail.setReceivedEvent(ReceivedEventDetail.from(specimen.getReceivedEvent()));
+							}
 
-					try {
-						AccessCtrlMgr.SpecimenAccessRights rights = AccessCtrlMgr.getInstance().ensureReadSpecimenRights(specimen, true);
+							records.add(detail);
+						} catch (OpenSpecimenException ose) {
+							if (!ose.containsError(RbacErrorCode.ACCESS_DENIED)) {
+								logger.error("Encountered error exporting specimen record", ose);
+							}
+						}
+					}
 
-						SpecimenDetail detail = SpecimenDetail.from(specimen, false, !rights.phiAccess, true);
-						if (specimen.isPrimary()) {
-							detail.setCollectionEvent(CollectionEventDetail.from(specimen.getCollectionEvent()));
-							detail.setReceivedEvent(ReceivedEventDetail.from(specimen.getReceivedEvent()));
+					if (CollectionUtils.isNotEmpty(crit.labels())) {
+						endOfSpecimens = true;
+					} else {
+						if (prevLastId != null && (prevLastId.equals(lastId) || records.size() < crit.maxResults())) {
+							lastId = prevLastId + crit.rangeFactor() * crit.maxResults();
 						}
 
-						records.add(detail);
-					} catch (OpenSpecimenException ose) {
-						if (!ose.containsError(RbacErrorCode.ACCESS_DENIED)) {
-							logger.error("Encountered error exporting specimen record", ose);
+						if (maxId == null || (lastId != null && lastId >= maxId)) {
+							endOfSpecimens = true;
 						}
 					}
 				}
@@ -1469,7 +1476,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					if (CollectionUtils.isNotEmpty(crit.labels())) {
 						crit.limitItems(false);
 					} else {
-						crit.limitItems(true).maxResults(100);
+						maxId = daoFactory.getSpecimenDao().getMaxSpecimenId(crit);
+						crit.limitItems(true).maxResults(100).enableIdRange(true);
 					}
 				}
 

@@ -150,7 +150,13 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	POOL_SAME_CP_REQ,
 
-	UPDATE_LIMIT_MAXED;
+	UPDATE_LIMIT_MAXED,
+
+	REQ_LINEAGE_MISMATCH,
+
+	REQ_TYPE_MISMATCH,
+
+	REQ_PARENT_MISMATCH;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

@@ -4,13 +4,14 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-
 
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
+import com.krishagni.catissueplus.core.common.domain.ExtAppMessage;
 import com.krishagni.catissueplus.core.common.domain.MessageLog;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -88,6 +89,27 @@ public class MessageLogServiceImpl implements MessageLogService {
 		} finally {
 			finished();
 		}
+	}
+
+	@Override
+	public String processMessages(String extAppName, List<ExtAppMessage> messages) {
+		MessageHandler handler = handlers.get(extAppName);
+		if (handler == null) {
+			logger.error("No handler registered to process messages of external app: " + extAppName);
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Unrecognised external app: " + extAppName);
+		}
+
+		for (ExtAppMessage message : messages) {
+			if (StringUtils.isBlank(message.getMessage())) {
+				continue;
+			}
+
+			MessageLog messageLog = message.toMessageLog();
+			messageLog.setExternalApp(extAppName);
+			handler.process(messageLog);
+		}
+
+		return UUID.randomUUID().toString();
 	}
 
 	private int getMaxRetries() {

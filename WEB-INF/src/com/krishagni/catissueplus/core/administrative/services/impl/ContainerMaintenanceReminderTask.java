@@ -43,6 +43,10 @@ public class ContainerMaintenanceReminderTask implements ScheduledTask {
 		List<ScheduledContainerActivity> schedActivities = getScheduledActivities(startAt);
 		Map<Long, Date> latestActivityDates = getLatestActivityDates(schedActivities);
 		for (ScheduledContainerActivity activity : schedActivities) {
+			if (activity.isDisableReminders()) {
+				continue;
+			}
+
 			sendReminder(activity, latestActivityDates.get(activity.getId()));
 		}
 
@@ -65,11 +69,16 @@ public class ContainerMaintenanceReminderTask implements ScheduledTask {
 			cycleStartDate = lastActivityDate;
 		}
 
-		Date nextCycleDate = addInterval(cycleStartDate, activity.getCycleInterval(), activity.getCycleIntervalUnit());
-		nextCycleDate = Utility.chopTime(nextCycleDate);
+		Date currentTime = Calendar.getInstance().getTime();
+		Date nextCycleDate = null;
+		while (nextCycleDate == null || nextCycleDate.before(currentTime)) {
+			nextCycleDate = addInterval(cycleStartDate, activity.getCycleInterval(), activity.getCycleIntervalUnit());
+			cycleStartDate = nextCycleDate;
+		}
 
+		nextCycleDate = Utility.chopTime(nextCycleDate);
 		Date remStartDate = addInterval(nextCycleDate, -1 * activity.getReminderInterval(), activity.getReminderIntervalUnit());
-		if (Utility.chopTime(remStartDate).before(Calendar.getInstance().getTime())) {
+		if (Utility.chopTime(remStartDate).before(currentTime)) {
 			sendReminder(activity, lastActivityDate, nextCycleDate);
 		}
 	}

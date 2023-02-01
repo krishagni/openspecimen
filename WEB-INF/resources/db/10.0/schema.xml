@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Container status - checked out">
+    <addColumn tableName="OS_STORAGE_CONTAINERS">
+      <column name="STATUS" type="${text.type}(32)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Container blocked position">
+    <addColumn tableName="OS_CONTAINER_POSITIONS">
+      <column name="BLOCKED_FOR_CONTAINER_ID" type="${int.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Foreign key on checked-out container for which the position is blocked/reserved">
+    <addForeignKeyConstraint constraintName="FK_POS_BLOCK_FOR_CONT_ID"
+      baseTableName="OS_CONTAINER_POSITIONS" baseColumnNames="BLOCKED_FOR_CONTAINER_ID"
+      referencedTableName="OS_STORAGE_CONTAINERS" referencedColumnNames="IDENTIFIER" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on checked-out container for which the position is blocked/reserved" dbms="oracle">
+    <createIndex tableName="OS_CONTAINER_POSITIONS" indexName="OS_POS_BLOCKED_FOR_CONT_IDX">
+      <column name="BLOCKED_FOR_CONTAINER_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Delete duplicate form record entries">
+    <sql>
+      delete from
+        catissue_form_record_entry
+      where
+        identifier in (
+          select
+            *
+          from (
+            select
+              ge.identifier
+            from
+              catissue_form_record_entry ge
+              left join catissue_form_record_entry le
+                on le.form_ctxt_id = ge.form_ctxt_id and
+                   le.object_id = ge.object_id and
+                   le.record_id = ge.record_id and
+                   le.activity_status = ge.activity_status and
+                   ge.identifier > le.identifier
+            where
+              le.identifier is not null
+          ) t
+        );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Create index on form context as it is required to enforce FK constraint" dbms="mysql">
+    <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_RECORD_CTXT_IDX">
+      <column name="FORM_CTXT_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop the non-unique index on the form context, record and object tuple">
+    <dropIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_REC_ENTRY_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add an unique index on the form context, record and object tuple">
+    <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_OBJECT_RECORD_IDX" unique="true">
+      <column name="FORM_CTXT_ID" />
+      <column name="OBJECT_ID" />
+      <column name="RECORD_ID" />
+      <column name="ACTIVITY_STATUS" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Mark the vital status PV for Dead">
+    <sql>
+      insert into
+        os_pv_props
+      select
+        pv.identifier as pv_id, 'dead', 'true'
+      from
+        catissue_permissible_value pv
+      where
+        pv.public_id = 'vital_status' and
+        pv.value = 'Dead' and
+        pv.activity_status != 'Disabled'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Setting to disable notifications for the scheduled container tasks">
+    <addColumn tableName="OS_SCHED_CONT_ACTIVITIES">
+      <column name="DISABLE_REMINDERS" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Enable or disable specimen carts digest notifications">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS">
+      <column name="SEND_DIGEST_NOTIFS" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Keep track who added specimens to the cart and when">
+    <addColumn tableName="CATISSUE_SPEC_TAG_ITEMS">
+      <column name="ADDED_BY" type="${int.type}">
+        <constraints foreignKeyName="FK_CART_ITEMS_ADDED_BY" referencedTableName="CATISSUE_USER"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="ADDED_ON" type="${nullable.ts.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Procedure to initialise participant specimen stats" runOnChange="true" dbms="mysql">
+    <sql>
+      drop procedure if exists create_cpr_spmn_stats;
+    </sql>
+
+    <sql endDelimiter="//">
+      create procedure create_cpr_spmn_stats()
+      begin
+        drop table if exists tmp_os_cpr_spmn_stats;
+
+        create table
+          tmp_os_cpr_spmn_stats
+        as
+          select
+            cpr.identifier as identifier,
+            count(distinct
+              case when spmn.collection_status = 'Collected' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_collected,
+            count(distinct
+              case when spmn.collection_status = 'Missed Collection' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_missed,
+            count(distinct
+              case when spmn.collection_status = 'Not Collected' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_not_collected,
+            count(distinct
+              case when ((sr.identifier is not null and spmn.identifier is null) or spmn.collection_status = 'Pending') then
+                case when (spmn.identifier is not null and spmn.req_specimen_id is null) then
+                  concat('s', spmn.identifier)
+                else
+                  concat('sr', sr.identifier)
+                end
+              else
+                null
+              end
+            ) as specimens_pending
+          from
+            catissue_coll_prot_reg cpr
+            left join catissue_coll_prot_event cpe
+              on cpe.collection_protocol_id = cpr.collection_protocol_id and cpe.activity_status != 'Disabled'
+            left join catissue_cp_req_specimen sr
+              on sr.collection_protocol_event_id = cpe.identifier and sr.activity_status != 'Disabled'
+            left join catissue_specimen_coll_group visit
+              on (visit.collection_protocol_event_id = cpe.identifier or visit.collection_protocol_event_id is null)
+                and visit.collection_protocol_reg_id = cpr.identifier and visit.activity_status != 'Disabled'
+            left join catissue_specimen spmn
+              on (spmn.req_specimen_id is null or spmn.req_specimen_id = sr.identifier)
+                and spmn.specimen_collection_group_id = visit.identifier and spmn.activity_status != 'Disabled'
+          group by
+            cpr.identifier;
+      end;
+      //
+    </sql>
+
+    <sql>
+      drop procedure if exists refresh_cpr_spmn_stats;
+    </sql>
+
+    <sql endDelimiter="//">
+      create procedure refresh_cpr_spmn_stats()
+      begin
+        call create_cpr_spmn_stats();
+
+        drop table if exists os_cpr_spmn_stats;
+
+        alter table tmp_os_cpr_spmn_stats rename os_cpr_spmn_stats;
+
+        create index os_cpr_spmn_stats_idx on os_cpr_spmn_stats (identifier);
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Procedure to initialise participant specimen stats" runOnChange="true" dbms="oracle">
+    <sql endDelimiter="//">
+      create or replace procedure create_cpr_spmn_stats AUTHID CURRENT_USER is
+      begin
+        drop_table_if_exists('tmp_os_cpr_spmn_stats');
+
+        execute immediate 'create table
+          tmp_os_cpr_spmn_stats
+        as
+          select
+            cpr.identifier as identifier,
+            count(distinct
+              case when spmn.collection_status = ''Collected'' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_collected,
+            count(distinct
+              case when spmn.collection_status = ''Missed Collection'' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_missed,
+            count(distinct
+              case when spmn.collection_status = ''Not Collected'' then
+                spmn.identifier
+              else
+                null
+              end
+            ) as specimens_not_collected,
+            count(distinct
+              case when ((sr.identifier is not null and spmn.identifier is null) or spmn.collection_status = ''Pending'') then
+                case when (spmn.identifier is not null and spmn.req_specimen_id is null) then
+                  concat(''s'', spmn.identifier)
+                else
+                  concat(''sr'', sr.identifier)
+                end
+              else
+                null
+              end
+            ) as specimens_pending
+          from
+            catissue_coll_prot_reg cpr
+            left join catissue_coll_prot_event cpe
+              on cpe.collection_protocol_id = cpr.collection_protocol_id and cpe.activity_status != ''Disabled''
+            left join catissue_cp_req_specimen sr
+              on sr.collection_protocol_event_id = cpe.identifier and sr.activity_status != ''Disabled''
+            left join catissue_specimen_coll_group visit
+              on (visit.collection_protocol_event_id = cpe.identifier or visit.collection_protocol_event_id is null)
+                and visit.collection_protocol_reg_id = cpr.identifier and visit.activity_status != ''Disabled''
+            left join catissue_specimen spmn
+              on (spmn.req_specimen_id is null or spmn.req_specimen_id = sr.identifier)
+                and spmn.specimen_collection_group_id = visit.identifier and spmn.activity_status != ''Disabled''
+          group by
+            cpr.identifier';
+      end;
+      //
+    </sql>
+
+    <sql endDelimiter="//">
+      create or replace procedure refresh_cpr_spmn_stats AUTHID CURRENT_USER is
+      begin
+        create_cpr_spmn_stats();
+        declare
+          table_does_not_exist exception;
+          pragma exception_init(table_does_not_exist, -942); -- ORA-00942
+        begin
+          execute immediate 'drop table os_cpr_spmn_stats';
+        exception
+          when table_does_not_exist then null;
+        end;
+
+        execute immediate 'alter table tmp_os_cpr_spmn_stats rename to os_cpr_spmn_stats';
+
+        execute immediate 'create index os_cpr_spmn_stats_idx on os_cpr_spmn_stats (identifier)';
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add unique constraint on the position blocked for the checked-out container" dbms="mysql">
+    <createIndex indexName="OS_POS_BLOCKED_CONTAINER_UQ" tableName="OS_CONTAINER_POSITIONS" unique="true">
+      <column name="BLOCKED_FOR_CONTAINER_ID" />
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

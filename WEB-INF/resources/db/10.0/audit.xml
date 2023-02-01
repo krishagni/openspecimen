@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Container status - checked out">
+    <addColumn tableName="OS_STORAGE_CONTAINERS_AUD">
+      <column name="STATUS" type="${text.type}(32)" />
+      <column name="status_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Container blocked position">
+    <addColumn tableName="OS_CONTAINER_POSITIONS_AUD">
+      <column name="BLOCKED_FOR_CONTAINER_ID" type="${int.type}" />
+      <column name="blockedForContainer_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Blocked any positions for container">
+    <addColumn tableName="OS_STORAGE_CONTAINERS_AUD">
+      <column name="blockedPosition_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Setting to disable notifications for the scheduled container tasks">
+    <addColumn tableName="OS_SCHED_CONT_ACTIVITIES_AUD">
+      <column name="DISABLE_REMINDERS" type="${boolean.type}" />
+      <column name="disableReminders_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Enable or disable specimen carts digest notifications">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS_AUD">
+      <column name="SEND_DIGEST_NOTIFS" type="${boolean.type}" />
+      <column name="sendDigestNotifs_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Keep track who added specimens to the cart and when">
+    <addColumn tableName="CATISSUE_SPEC_TAG_ITEMS_AUD">
+      <column name="ADDED_BY" type="${int.type}" />
+      <column name="addedBy_MOD" type="${boolean.type}" />
+      <column name="ADDED_ON" type="${nullable.ts.type}" />
+      <column name="addedOn_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

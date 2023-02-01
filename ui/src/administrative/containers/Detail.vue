@@ -8,6 +8,7 @@
       <span class="os-title">
         <h3>{{displayTitle}}</h3>
         <div class="accessories" v-if="ctx.container && ctx.container.id > 0">
+          <os-tag :value="status" :rounded="true" :type="tagType" v-show="status" />
           <os-copy-link size="small"
             :route="{name: 'ContainerDetail.Overview', params: {containerId: ctx.container.id}}" />
           <os-new-tab size="small"
@@ -24,12 +25,12 @@
                 <os-icon name="eye" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.locations')">
+            <li v-os-tooltip.right="$t('containers.locations')" v-if="ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Locations')">
                 <os-icon name="map" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.specimens')">
+            <li v-os-tooltip.right="$t('containers.specimens')" v-if="ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
               </router-link>
@@ -40,7 +41,8 @@
               </router-link>
             </li>
             <li v-os-tooltip.right="$t('containers.maintenance')"
-              v-if="!ctx.container.storageLocation || !ctx.container.storageLocation.id">
+              v-if="!ctx.container.storageLocation || !ctx.container.storageLocation.id &&
+                    ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Maintenance')">
                 <os-icon name="calendar" />
               </router-link>
@@ -124,6 +126,26 @@ export default {
       }
 
       return title;
+    },
+
+    status: function() {
+      const container = this.ctx.container;
+      if (container.activityStatus == 'Closed') {
+        return this.$t('containers.status.archived');
+      } else if (container.status == 'CHECKED_OUT') {
+        return this.$t('containers.status.checked_out');
+      }
+
+      return null;
+    },
+
+    tagType: function() {
+      const container = this.ctx.container;
+      if (container.activityStatus == 'Closed' || container.status == 'CHECKED_OUT') {
+        return 'danger';
+      }
+
+      return null;
     }
   },
 

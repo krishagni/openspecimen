@@ -19,6 +19,8 @@ public interface SpecimenDao extends Dao<Specimen> {
 	Integer getSpecimensCount(SpecimenListCriteria crit);
 
 	List<Long> getSpecimenIds(SpecimenListCriteria crit);
+
+	Long getMaxSpecimenId(SpecimenListCriteria crit);
 	
 	Specimen getByLabel(String label);
 

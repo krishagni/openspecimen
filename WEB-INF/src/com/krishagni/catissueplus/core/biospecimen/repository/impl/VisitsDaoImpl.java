@@ -165,10 +165,18 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 
 	@Override
 	public List<Visit> getBySpr(Long cpId, String sprNumber) {
-		return createNamedQuery(GET_BY_CP_SPR, Visit.class)
-			.setParameter("cpId", cpId)
-			.setParameter("sprNo", sprNumber.toLowerCase())
-			.list();
+		Criteria<Visit> query = createCriteria(Visit.class, "visit")
+			.join("visit.registration", "cpr")
+			.join("cpr.collectionProtocol", "cp");
+		query.add(query.eq("cp.id", cpId));
+
+		if (isMySQL()) {
+			query.add(query.eq("visit.surgicalPathologyNumber", sprNumber));
+		} else {
+			query.add(query.eq("lower(visit.surgicalPathologyNumber)", sprNumber.toLowerCase()));
+		}
+
+		return query.list();
 	}
 
 	private SubQuery<Long> getVisitIdsListQuery(VisitsListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
@@ -213,7 +221,5 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	private static final String GET_LATEST_VISIT_BY_CPR_ID = FQN + ".getLatestVisitByCprId";
 
 	private static final String GET_BY_EMPI_OR_MRN = FQN + ".getVisitsByEmpiOrMrn";
-
-	private static final String GET_BY_CP_SPR = FQN + ".getVisitByCpAndSprNo";
 }
 

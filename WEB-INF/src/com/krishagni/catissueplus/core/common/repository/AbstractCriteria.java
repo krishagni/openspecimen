@@ -282,6 +282,10 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return Property.of(builder.function(name, returnType, exprArgs));
 	}
 
+	public Property max(String attribute) {
+		return Property.of(builder.max(getExpression(attribute)));
+	}
+
 	public Order asc(String attribute) {
 		return Order.of(builder.asc(getExpression(attribute)));
 	}

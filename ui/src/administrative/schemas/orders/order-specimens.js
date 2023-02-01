@@ -5,7 +5,7 @@ export default {
   columns: [
     {
       "name": "specimen.label",
-      "label": "Label",
+      "labelCode": "orders.specimen.label",
       "type": "span",
       "href": (rowObject) => ui.ngServer + '#/specimens/' + rowObject.specimen.id,
       "uiStyle": {
@@ -14,7 +14,7 @@ export default {
     },
     {
       "name": "specimen.type",
-      "label": "Type",
+      "labelCode": "orders.specimen.type",
       "type": "span",
       "uiStyle": {
         "min-width": "140px"
@@ -22,7 +22,7 @@ export default {
     },
     {
       "name": "specimen.cpShortTitle",
-      "label": "Collection Protocol",
+      "labelCode": "orders.specimen.cp",
       "type": "span",
       "uiStyle": {
         "min-width": "140px"
@@ -30,7 +30,7 @@ export default {
     },
     {
       "name": "specimen.storageLocation",
-      "label": "Location",
+      "labelCode": "orders.specimen.location",
       "type": "span",
       "displayType": "storage-position",
       "uiStyle": {
@@ -39,7 +39,7 @@ export default {
     },
     {
       "name": "specimen.availableQty",
-      "label": "Available",
+      "labelCode": "orders.specimen.available_qty",
       "type": "specimen-measure",
       "entity": "specimen",
       "measure": "quantity",
@@ -50,7 +50,7 @@ export default {
     },
     {
       "name": "quantity",
-      "label": "Quantity",
+      "labelCode": "orders.distributed_qty",
       "type": "specimen-measure",
       "entity": "specimen",
       "measure": "quantity",
@@ -60,18 +60,18 @@ export default {
       },
       "validations": {
         "le": {
-          "message": "Distributed quantity cannot be greater than the available quantity",
+          "messageCode": "orders.distributed_qty_gt_available_qty",
           "expr": "specimen.availableQty",
         },
         "requiredIf": {
-          "message": "Distributed quantity is mandatory",
+          "messageCode": "orders.distributed_qty_req",
           "expr": "!!specimen.availableQty",
         }
       },
     },
     {
       "name": "holdingLocation",
-      "label": "Holding Location",
+      "labelCode": "orders.holding_location",
       "type": "storage-position",
       "showWhen": "allowHoldingLocations",
       "listSource": {
@@ -91,7 +91,7 @@ export default {
     },
     {
       "name": "cost",
-      "label": "Cost",
+      "labelCode": "orders.cost",
       "type": "number",
       "maxFractionDigits": 2,
       "showWhen": "invoicingEnabled",

@@ -123,6 +123,8 @@ angular.module('os.administrative.form.formctxts', ['os.administrative.models'])
               entityIds.push(formCtxt.institutes[i].id);
             }
           }
+        } else if (formCtxt.selectedEntity.entityId == -1) {
+          entityIds = [-1];
         } else {
           cpIds = [-1];
         }

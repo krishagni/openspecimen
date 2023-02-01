@@ -4,13 +4,13 @@
       <os-page>
         <os-page-head>
           <span>
-            <h3>Orders</h3>
+            <h3 v-t="'orders.list'">Orders</h3>
           </span>
 
           <template #right>
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="'Switch to table view'"
+              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
               @click="showTable"
             />
 
@@ -26,23 +26,24 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <os-button left-icon="plus" label="Create"
+              <os-button left-icon="plus" :label="$t('common.buttons.create')"
                 @click="createOrder" v-show-if-allowed="orderResources.createOpts" />
 
-              <os-menu label="Import" :options="importOpts" v-show-if-allowed="orderResources.importOpts" />
+              <os-menu :label="$t('common.buttons.import')" :options="importOpts"
+                v-show-if-allowed="orderResources.importOpts" />
 
-              <os-button left-icon="undo" label="Return Specimens"
+              <os-button left-icon="undo" :label="$t('orders.return_specimens')"
                 @click="returnSpecimens" v-show-if-allowed="orderResources.updateOpts" />
 
-              <os-button left-icon="truck" label="View Distribution Protocols"
+              <os-button left-icon="truck" :label="$t('orders.view_dps')"
                 @click="viewDps" v-show-if-allowed="orderResources.dpOpts" />
 
-              <os-button-link left-icon="question-circle" label="Help"
+              <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/orders" new-tab="true" />
             </template>
 
             <template #right>
-              <os-button left-icon="search" label="Search" @click="openSearch" />
+              <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
           </os-page-toolbar>
 
@@ -97,17 +98,17 @@ export default {
       importOpts: [
         {
           icon: 'share',
-          caption: 'Orders',
+          caption: this.$t('orders.list'),
           onSelect: () => routerSvc.ngGoto('orders-import')
         },
         {
           icon: 'undo',
-          caption: 'Return Specimens',
+          caption: this.$t('orders.return_specimens'),
           onSelect: () => routerSvc.ngGoto('return-specimens-import')
         },
         {
           icon: 'table',
-          caption: 'View Past Imports',
+          caption: this.$t('bulk_imports.view_jobs'),
           onSelect: () => routerSvc.ngGoto('orders-import-jobs')
         }
       ],

@@ -3,34 +3,34 @@ export default {
   columns: [
     {
       "name": "item.specimenLabel",
-      "label": "Specimen",
+      "labelCode": "orders.specimen_title",
       "type": "span",
     },
     {
       "name": "item.orderName",
-      "label": "Distribution Order",
+      "labelCode": "orders.dist_order",
       "type": "span"
     },
     {
       "name": "item.quantity",
-      "label": "Return Quantity",
+      "labelCode": "orders.return_qty",
       "type": "specimen-measure",
       "measure": "quantity",
       "entity": "item.specimen",
       "validations": {
         "le": {
-          "message": "Return quantity cannot be greater than the distributed quantity",
+          "messageCode": "orders.ret_qty_gt_dist_qty",
           "expr": "item.distributedQty",
         },
         "requiredIf": {
-          "message": "Return quantity is mandatory",
+          "messageCode": "orders.ret_qty_req",
           "expr": "!!item.distributedQty"
         }
       },  
     },
     {
       "name": "item.location",
-      "label": "Location",
+      "labelCode": "orders.location",
       "type": "storage-position",
       "listSource": {
         "queryParams": {
@@ -48,24 +48,24 @@ export default {
     },
     {
       "name": "item.user",
-      "label": "User",
+      "labelCode": "orders.user",
       "type": "user"
     },
     {
       "name": "item.time",
-      "label": "Date and Time",
+      "labelCode": "orders.date_time",
       "type": "datePicker",
       "showTime": true
     },
     {
       "name": "item.incrFreezeThaw",
-      "label": "Freeze/Thaw",
+      "labelCode": "orders.freeze_thaw",
       "type": "number",
       "maxFractionDigits": 0
     },
     {
       "name": "item.comments",
-      "label": "Comments",
+      "labelCode": "orders.comments",
       "type": "textarea"
     }
   ]

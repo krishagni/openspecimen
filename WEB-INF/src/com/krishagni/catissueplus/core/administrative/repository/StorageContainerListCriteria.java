@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,8 +16,17 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class StorageContainerListCriteria extends AbstractListCriteria<StorageContainerListCriteria> {
+	public enum Status {
+		AVAILABLE,
+
+		CHECKED_OUT,
+
+		ARCHIVED
+	}
 
 	private List<String> names;
+
+	private List<String> barcodes;
 
 	private boolean onlyFreeContainers;
 	
@@ -47,7 +57,14 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 	private Set<SiteCpPair> siteCps;
 
 	private StorageContainer.UsageMode usageMode;
-	
+
+	private List<Status> statuses;
+
+	private Set<String> types;
+
+	private String orderBy;
+
+
 	@Override
 	public StorageContainerListCriteria self() {
 		return this;
@@ -59,6 +76,15 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 
 	public StorageContainerListCriteria names(List<String> names) {
 		this.names = names;
+		return self();
+	}
+
+	public List<String> barcodes() {
+		return barcodes;
+	}
+
+	public StorageContainerListCriteria barcodes(List<String> barcodes) {
+		this.barcodes = barcodes;
 		return self();
 	}
 
@@ -256,5 +282,40 @@ public class StorageContainerListCriteria extends AbstractListCriteria<StorageCo
 		} catch (Exception e) {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());
 		}
+	}
+
+	public List<Status> statuses() {
+		return statuses;
+	}
+
+	public StorageContainerListCriteria statuses(List<String> input) {
+		try {
+			if (CollectionUtils.isEmpty(input)) {
+				return self();
+			}
+
+			this.statuses = input.stream().map(Status::valueOf).distinct().collect(Collectors.toList());
+			return self();
+		} catch (Exception e) {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());
+		}
+	}
+
+	public Set<String> types() {
+		return types;
+	}
+
+	public StorageContainerListCriteria types(Set<String> types) {
+		this.types = types;
+		return self();
+	}
+
+	public String orderBy() {
+		return orderBy;
+	}
+
+	public StorageContainerListCriteria orderBy(String orderBy) {
+		this.orderBy = orderBy;
+		return self();
 	}
 }

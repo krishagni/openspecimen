@@ -43,10 +43,7 @@
                 <os-divider />
               </li>
               <li>
-                <a v-if="ssoLogout" :href="ssoLogoutUrl">
-                  <span v-t="'common.logout'">Log Out</span>
-                </a>
-                <a v-else :href="$ui.ngServer + '#/?logout=true'">
+                <a :href="$ui.ngServer + '#/?logout=true'">
                   <span v-t="'common.logout'">Log Out</span>
                 </a>
               </li>
@@ -64,8 +61,6 @@
 
 import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
-import settingsSvc from '@/common/services/Setting.js';
-import util from '@/common/services/Util.js';
 
 import Search        from '@/common/components/Search';
 import NewStuff      from '@/common/components/NewStuff';
@@ -84,32 +79,15 @@ export default {
 
   data() {
     return {
-      osLogo: osLogo,
-
-      ssoLogout: false,
-
-      ssoLogoutUrl: ''
+      osLogo: osLogo
     }
   },
 
   async created() {
-    const samlEnabled = await settingsSvc.getSetting('auth', 'saml_enable');
-    const sloEnabled  = await settingsSvc.getSetting('auth', 'single_logout');
-    this.ssoLogout = util.isTrue(samlEnabled[0].value) && util.isTrue(sloEnabled[0].value);
-    if (this.ssoLogout) {
-      const appUrl = await settingsSvc.getSetting('common', 'app_url');
-      this.ssoLogoutUrl = appUrl[0].value;
-      if (!this.ssoLogoutUrl.endsWith("/")) {
-        this.ssoLogoutUrl += '/';
-      }
-
-      this.ssoLogoutUrl += 'saml/logout';
-    }
-
     http.addListener({
-      callStarted:   () => this.$refs.loadingBar.increment(),
-      callFailed:    () => this.$refs.loadingBar.decrement(),
-      callCompleted: () => this.$refs.loadingBar.decrement(),
+      callStarted:   () => this.incrCallCount(),
+      callFailed:    () => this.decrCallCount(),
+      callCompleted: () => this.decrCallCount(),
     });
   },
 
@@ -130,12 +108,7 @@ export default {
     },
 
     deploySiteLogo: function() {
-      let logoUrl = this.siteAssets.siteLogo || '';
-      if (logoUrl && logoUrl.length > 9) {
-        logoUrl = http.getUrl(logoUrl.substring(9));
-      }
-
-      return logoUrl;
+      return this.siteAssets.siteLogo || '';
     },
 
     username: function() {
@@ -146,6 +119,18 @@ export default {
   methods: {
     toggleProfileMenu: function(event) {
       this.$refs.userProfileMenu.toggle(event);
+    },
+
+    incrCallCount: function() {
+      if (this.$refs && this.$refs.loadingBar) {
+        this.$refs.loadingBar.increment();
+      }
+    },
+
+    decrCallCount: function() {
+      if (this.$refs && this.$refs.loadingBar) {
+        this.$refs.loadingBar.decrement();
+      }
     }
   }
 }

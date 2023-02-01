@@ -59,7 +59,7 @@
                     <span>{{setting.$$osPropName}}</span>
                   </div>
                   <div class="col os-col-45">
-                    <span>{{setting.$$osPropDesc}}</span>
+                    <span ng-bind-html="setting.$$osPropDesc"></span>
                   </div>
                   <div class="col forced-wrap os-col-30" ng-switch on="setting.type">
                     <span ng-switch-when="BOOLEAN">

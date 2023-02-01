@@ -69,7 +69,9 @@ public enum UserErrorCode implements ErrorCode {
 
 	INVALID_PRINTER_NAME,
 
-	LOCAL_ACC_SIGNUP_NA;
+	LOCAL_ACC_SIGNUP_NA,
+
+	EMAIL_SELF_UPDATE_NA;
 	
 	public String code() {
 		return "USER_" + this.name();

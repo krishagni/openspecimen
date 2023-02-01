@@ -202,7 +202,7 @@ osApp.config(function(
     }
   })
   .factory('httpRespInterceptor', function(
-    $rootScope, $q, $injector, $window, $templateCache,
+    $rootScope, $q, $injector, $location, $window, $templateCache, $timeout,
     Alerts, LocationChangeListener) {
 
     var qp = '?_buildVersion=' + ui.os.appProps.build_version + '&_buildDate=' + ui.os.appProps.build_date;
@@ -223,6 +223,8 @@ osApp.config(function(
     var listeners = [];
 
     var timerId = undefined;
+
+    var fourNotOneTimer = undefined;
 
     function notifyListeners() {
       if (timerId) {
@@ -308,7 +310,20 @@ osApp.config(function(
 
           delete $window.localStorage['osAuthToken'];
           delete $injector.get("$http").defaults.headers.common['X-OS-API-TOKEN'];
-          $injector.get('$state').go('login'); // using injector to get rid of circular dependencies
+
+          if (fourNotOneTimer) {
+            clearTimeout(fourNotOneTimer);
+          }
+
+          fourNotOneTimer = setTimeout(
+            function() {
+              $injector.get('$state').go('login'); // using injector to get rid of circular dependencies
+            }, 1000);
+
+          // $timeout(function() { $window.location.reload(); }, 1000);
+
+          // $location.path('/');
+          // $timeout(function() { $window.location.reload(); }, 1000);
         } else if (rejection.status / 100 == 5) {
           if (rejection.data instanceof Array) {
             displayErrMsgs(rejection.data);
@@ -517,9 +532,9 @@ osApp.config(function(
       
     $rootScope.$on('$stateChangeError',
       function(event, toState, toParams, fromState, fromParams) {
-        if (fromState.name == "") {
+        if ($rootScope.currentUser && !fromState.name) {
           $state.go('home');
-        } else {
+        } else if (fromState.name) {
           $state.go(fromState.name);
         }
       });

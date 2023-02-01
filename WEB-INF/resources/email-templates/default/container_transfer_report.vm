@@ -1,0 +1,57 @@
+#set ( $apiUrl = "$appUrl/rest/ng/storage-containers/report?fileId=$fileId" )
+#set ( $downloadUrl = "$appUrl/#/file-download?downloadUrl=$urlEncoder.encode($apiUrl)" )
+
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
+  <tbody>
+    <tr>
+      <td style="border-collapse:collapse;">
+        <table cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;line-height:20px">
+          <tbody>
+            <tr>
+              <td style="border-collapse:collapse;padding-bottom:10px">
+                <p style="margin:10px 0 0 0">
+                  Hello $rcpt.formattedName(),
+                  <br><br>
+                  #if (!$error)
+                    The containers transfer report requested by you is ready. Click on the link given below to download the report.
+                  #else
+                    The following error was encountered when generating the containers transfer report:
+                  #end
+                  <br>
+                </p>
+              </td>
+            </tr>
+            #if (!$error)
+            <tr>
+              <td>
+                <a style="display: inline-block; text-decoration: none; padding: 10px; border: 1px solid #357ebd; border-radius: 5px; background-color: #428bca; color: #fff; margin: 10px auto;" href="$downloadUrl">
+                  Download
+                </a>
+              </td>
+            </tr>
+            #else
+            <tr>
+              <td>
+                <table border="1" style="border-collapse: collapse" cellpadding="10">
+                  <tr>
+                    <td> <b> Exception </b> </td>
+                  </tr>
+                  <tr>
+                    <td> <pre> $error </pre> </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            #end
+          </tbody>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        #parse( $footer )
+      </td>
+    </tr>
+  </tbody>
+</table>

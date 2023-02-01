@@ -224,22 +224,33 @@ if (params.get('token')) {
   http.headers['X-OS-API-TOKEN'] = localStorage.osAuthToken;
 }
 
-let settingsQ  = settingSvc.getAppProps();
+let appPropsQ  = settingSvc.getAppProps();
 let localeQ    = settingSvc.getLocale();
 let messagesQ  = settingSvc.getI18nMessages();
 let currUserQ  = userSvc.getCurrentUser();
 let usrStateQ  = userSvc.getUiState();
 let usrRightsQ = authSvc.loadUserRights();
 let spmnPropsQ = util.loadSpecimenTypeProps();
+let siteAssetsQ = settingSvc.getSiteAssets();
 
-Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ]).then(
+Promise.all([appPropsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, spmnPropsQ, siteAssetsQ]).then(
   (resp) => {
     let appProps = resp[0];
     let locale   = resp[1];
     let messages = resp[2];
     let currUser = resp[3];
 
-    const i18n = window.osI18n = createI18n({locale: locale, messages: messages});
+    let fallback = locale.locale;
+    let parts = (fallback || '').split('_');
+    if (parts.length != 0) {
+      fallback = parts[0] || 'en';
+    }
+
+    const i18n = window.osI18n = createI18n({
+      locale: locale.locale,
+      fallbackLocale: [fallback, 'en'],
+      messages: messages
+    });
     app.use(i18n);
 
     ui.global = {
@@ -255,7 +266,8 @@ Promise.all([settingsQ, localeQ, messagesQ, currUserQ, usrRightsQ, usrStateQ, sp
         locale: locale.locale,
         utcOffset: locale.utcOffset
       },
-      state: resp[5]
+      state: resp[5],
+      siteAssets: resp[7]
     };
 
     let osSvc = window.osSvc = app.config.globalProperties.$osSvc;

@@ -453,7 +453,8 @@
     <div class="form-group">
       <label class="col-xs-3 control-label" translate="participant.death_date">Death Date</label>
       <div class="col-xs-6">
-        <os-date-picker date="cpr.participant.deathDate" ng-disabled="cpr.participant.vitalStatus != 'Dead'"
+        <os-date-picker date="cpr.participant.deathDate"
+          ng-disabled="deadStatuses.indexOf(cpr.participant.vitalStatus) == -1"
           date-only = "true" placeholder="{{'participant.death_date' | translate}}">
         </os-date-picker>
       </div>

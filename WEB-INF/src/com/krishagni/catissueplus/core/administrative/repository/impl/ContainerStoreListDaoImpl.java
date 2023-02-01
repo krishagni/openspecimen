@@ -10,10 +10,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList.Op;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreListItem;
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> implements ContainerStoreListDao {
 
@@ -43,8 +45,27 @@ public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> i
 		getCurrentSession().saveOrUpdate(item);
 	}
 
+	@Override
+	public List<StorageContainer> getAutomatedFreezers(List<Long> storeListIds) {
+		Criteria<StorageContainer> query = createCriteria(StorageContainer.class, "c");
+
+		SubQuery<Long> subQuery = query.createSubQuery(ContainerStoreList.class, "sl")
+			.join("sl.container", "c");
+		subQuery.add(subQuery.in("sl.id", storeListIds)).select("c.id");
+
+		return query.join("c.site", "site")
+			.add(query.in("c.id", subQuery))
+			.list();
+	}
+
 	private Criteria<ContainerStoreList> getQuery(ContainerStoreListCriteria crit) {
-		Criteria<ContainerStoreList> query = createCriteria(ContainerStoreList.class, "sl");
+		Criteria<ContainerStoreList> query = createCriteria(ContainerStoreList.class, "sl")
+			.join("sl.container", "c");
+
+		if (crit.containerId() != null) {
+			query.add(query.eq("c.id", crit.containerId()));
+		}
+
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
 			query.add(query.in("sl.id", crit.ids()));
 		}

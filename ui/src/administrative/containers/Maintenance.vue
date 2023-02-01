@@ -194,7 +194,7 @@ export default {
       if (activity.id) {
         this.activity = util.clone(activity);
       } else {
-        this.activity = {containerId: this.container.id};
+        this.activity = {containerId: this.container.id, disableReminders: false};
       }
 
       this.$refs.addEditScheduledActivityDialog.open();

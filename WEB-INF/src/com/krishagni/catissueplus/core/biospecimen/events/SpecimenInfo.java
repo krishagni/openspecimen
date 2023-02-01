@@ -125,6 +125,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 
 	private Boolean closeAfterPooledCreation;
 
+	private boolean printLabel;
+
 	public Long getId() {
 		return id;
 	}
@@ -512,6 +514,20 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	@JsonIgnore
 	public String getConcentrationUnit() {
 		return PvUtil.getInstance().getSpecimenUnit("concentration", getSpecimenClass(), getType());
+	}
+
+	//
+	// Do not serialise printLabel from interaction object to response JSON. Therefore @JsonIgnore
+	// However, deserialise, if present, from input request JSON to interaction object. Hence @JsonProperty
+	//
+	@JsonIgnore
+	public boolean isPrintLabel() {
+		return printLabel;
+	}
+
+	@JsonProperty
+	public void setPrintLabel(boolean printLabel) {
+		this.printLabel = printLabel;
 	}
 
 	public static SpecimenInfo from(Specimen specimen) {

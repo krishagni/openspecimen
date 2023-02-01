@@ -2,7 +2,6 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -10,10 +9,12 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.StagedParticipant;
+import com.krishagni.catissueplus.core.biospecimen.domain.StagedParticipantMedicalIdentifier;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.StagedParticipantDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Disjunction;
 
 public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> implements StagedParticipantDao {
 
@@ -79,35 +80,43 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 		return deleteOldParticipantRecs(DEL_OLD_PARTICIPANTS, olderThanDt);
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<Long> getMatchingParticipantIds(List<PmiDetail> pmis) {
-		List<String> disjunctions = new ArrayList<>();
+		Criteria<Long> query = createCriteria(StagedParticipantMedicalIdentifier.class, Long.class, "pmi")
+			.join("pmi.participant", "participant")
+			.select("participant.id");
+
+		boolean added = false;
+		Disjunction disjunctions = query.disjunction();
 		for (PmiDetail pmi : pmis) {
 			if (StringUtils.isBlank(pmi.getSiteName()) || StringUtils.isBlank(pmi.getMrn())) {
 				continue;
 			}
 
+			added = true;
 			if (isMySQL()) {
-				disjunctions.add(String.format(
-					"pmi.medical_record_number = '%s' and pmi.site_name = '%s'",
-					pmi.getMrn(), pmi.getSiteName()
-				));
+				disjunctions.add(
+					query.and(
+						query.eq("pmi.medicalRecordNumber", pmi.getMrn()),
+						query.eq("pmi.site", pmi.getSiteName())
+					)
+				);
 			} else {
-				disjunctions.add(String.format(
-					"lower(pmi.medical_record_number) = '%s' and lower(pmi.site_name) = '%s'",
-					pmi.getMrn().toLowerCase(), pmi.getSiteName().toLowerCase()
-				));
+				disjunctions.add(
+					query.and(
+						query.eq("lower(pmi.medicalRecordNumber)", pmi.getMrn().toLowerCase()),
+						query.eq("lower(pmi.site)", pmi.getSiteName().toLowerCase())
+					)
+				);
 			}
 		}
 
-		if (disjunctions.isEmpty()) {
+		if (!added) {
 			return Collections.emptyList();
 		}
 
-		String sql = String.format(GET_MRN_MATCHING_PIDS, StringUtils.join(disjunctions, " or "));
-		return createNativeQuery(sql, Long.class)
-			.addLongScalar("participant_id")
-			.list();
+		query.add(disjunctions);
+
+		return query.list();
 	}
 
 	private int deleteOldParticipantRecs(String query, Date olderThanDt) {
@@ -125,6 +134,4 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 	private static final String DEL_OLD_PARTICIPANT_RACES = FQN + ".deleteOldParticipantRaces";
 
 	private static final String DEL_OLD_PARTICIPANT_ETHNICITIES = FQN + ".deleteOldParticipantEthnicities";
-
-	private static final String GET_MRN_MATCHING_PIDS = "select distinct participant_id from os_staged_part_medical_ids pmi where %s";
 }

@@ -18,6 +18,7 @@ import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment.Status;
 import com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer;
+import com.krishagni.catissueplus.core.administrative.domain.ShipmentSavedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
@@ -46,6 +47,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
+import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -224,6 +226,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 
 			getShipmentDao().saveOrUpdate(shipment, true);
 			sendEmailNotifications(shipment, null, detail.isSendMail());
+			EventPublisher.getInstance().publish(new ShipmentSavedEvent(shipment));
 			return ResponseEvent.response(ShipmentDetail.from(shipment));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -244,8 +247,13 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 				return ResponseEvent.userError(ShipmentErrorCode.CANNOT_CHG_TYPE);
 			}
 
+			if (newShipment.isDeleted()) {
+				AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(existing);
+				existing.delete();
+				return ResponseEvent.response(ShipmentDetail.from(existing));
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(newShipment);
-			
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			ensureUniqueConstraint(existing, newShipment, ose);
 			ensureValidItems(existing, newShipment, ose);
@@ -260,6 +268,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			existing.update(newShipment);
 			getShipmentDao().saveOrUpdate(existing, true);
 			sendEmailNotifications(newShipment, oldStatus, detail.isSendMail());
+			EventPublisher.getInstance().publish(new ShipmentSavedEvent(existing));
 			return ResponseEvent.response(ShipmentDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -267,7 +276,22 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ShipmentDetail> deleteShipment(RequestEvent<Long> req) {
+		try {
+			Shipment shipment = getShipment(req.getPayload(), null);
+			AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(shipment);
+			shipment.delete();
+			return ResponseEvent.response(ShipmentDetail.from(shipment));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req) {

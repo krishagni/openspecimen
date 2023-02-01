@@ -6,10 +6,11 @@ import formSvc  from '@/forms/services/Form.js';
 
 import addEditLayout      from '@/administrative/schemas/containers/addedit.js';
 import containerSchema    from '@/administrative/schemas/containers/container.js';
-import specimenSchema     from '@/administrative/schemas/containers/specimen.js';
-import transferFormSchema from '@/administrative/schemas/containers/transfer.js';
 import defragFormSchema   from '@/administrative/schemas/containers/defragment.js';
+import specimenSchema     from '@/administrative/schemas/containers/specimen.js';
 import locationsSchema    from '@/administrative/schemas/containers/locations.js';
+import transferFormSchema from '@/administrative/schemas/containers/transfer.js';
+import transferReportFormSchema from '@/administrative/schemas/containers/transfer-report.js';
 
 import taskAddEditLayout  from '@/administrative/schemas/container-tasks/addedit.js';
 import taskSchema         from '@/administrative/schemas/container-tasks/task.js';
@@ -37,6 +38,10 @@ class Container {
     } else {
       return http.put('storage-containers/' + container.id, container);
     }
+  }
+
+  async bulkUpdate(containers) {
+    return http.put('storage-containers/bulk-update', containers);
   }
 
   async createContainers(containers) {
@@ -100,8 +105,14 @@ class Container {
     return http.post('storage-containers/' + container.id + '/export-empty-positions', {});
   }
 
-  async exportUtilisation(container) {
-    return http.post('storage-containers/' + container.id + '/export-utilisation', {});
+  async exportUtilisation(container, criteria) {
+    if (container) {
+      return http.post('storage-containers/' + container.id + '/export-utilisation', {});
+    } else if (criteria) {
+      return http.post('storage-containers/export-utilisation', criteria);
+    } else {
+      alert('No criteria and container for export utilisation');
+    }
   }
 
   async exportDefragReport(container, defragDetail) {
@@ -141,6 +152,10 @@ class Container {
 
   getTransferEvents(container) {
     return http.get('storage-containers/' + container.id + '/transfer-events');
+  }
+
+  exportTransferEvents(criteria) {
+    return http.post('storage-containers/export-transfer-events', criteria);
   }
 
   getScheduledActivities(container) {
@@ -237,6 +252,10 @@ class Container {
 
   getTransferFormSchema() {
     return transferFormSchema;
+  }
+
+  getTransferReportFormSchema() {
+    return transferReportFormSchema;
   }
 
   getDefragFormSchema() {

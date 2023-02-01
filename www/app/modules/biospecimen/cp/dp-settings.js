@@ -1,24 +1,18 @@
 
 angular.module('os.biospecimen.cp.dp', [])
-  .controller('CpDpSettingsCtrl', function($scope, cp, DistributionProtocol, Alerts, AuthorizationService) {
+  .controller('CpDpSettingsCtrl', function($scope, cp, DistributionProtocol, Alerts) {
     var defDps = undefined;
     function init() {
       $scope.dpCtx = {
         cp: angular.copy(cp),
-        savedDps: [],
-        editAllowed: AuthorizationService.isAllowed($scope.cpResource.updateOpts)
+        savedDps: []
       };
 
       initCpDps();
-      if ($scope.dpCtx.editAllowed) {
-        loadDps();
-      }
     }
 
     function initCpDps() {
-      var savedDps = angular.copy(cp.distributionProtocols);
-      angular.forEach(savedDps, addDisplayValue);
-      $scope.dpCtx.savedDps = savedDps;
+      var savedDps = $scope.dpCtx.savedDps = angular.copy(cp.distributionProtocols);
       return savedDps;
     }
 
@@ -31,9 +25,7 @@ angular.module('os.biospecimen.cp.dp', [])
       var filterOpts = {activityStatus: 'Active', query: searchString, excludeExpiredDps: true, cp: cp.shortTitle};
       DistributionProtocol.query(filterOpts).then(
         function(dps) {
-          angular.forEach(dps, addDisplayValue);
           $scope.dpCtx.dps = dps;
-
           if (!searchString) {
             defDps = dps;
 
@@ -45,66 +37,23 @@ angular.module('os.biospecimen.cp.dp', [])
       );
     }
 
-    function addDisplayValue(obj) {
-      return angular.extend(obj, {itemKey: obj.shortTitle, displayValue: obj.shortTitle});
-    }
-
-    function addDp(dp) {
-      var dupDp = $scope.dpCtx.cp.distributionProtocols.some(
-        function(savedDp) {
-          return savedDp.shortTitle == dp.itemKey;
-        }
-      );
-
-      if (dupDp) {
-        Alerts.error('cp.dp.dup_dp');
-        return false;
-      }
-
-      $scope.dpCtx.cp.distributionProtocols.push({shortTitle: dp.itemKey});
-      return true;
-    }
-
-    function removeDp(dp) {
-      var retainedDps = $scope.dpCtx.cp.distributionProtocols.filter(
-        function(savedDp) {
-          return savedDp.shortTitle != dp.itemKey;
-        }
-      );
-
-      $scope.dpCtx.cp.distributionProtocols = retainedDps;
-    }
-
-
     $scope.loadDps = loadDps;
 
-    $scope.listChanged = function(action, dp) {
-      switch(action) {
-        case 'add':
-          if (!addDp(dp)) {
-            return;
-          }
+    $scope.showEditForm = function() {
+      $scope.dpCtx.view = 'edit';
+    }
 
-          break;
+    $scope.revertEdit = function() {
+      $scope.dpCtx.cp.distributionProtocols = $scope.dpCtx.savedDps;
+      $scope.dpCtx.view = 'view';
+    }
 
-        case 'remove':
-          removeDp(dp);
-          break;
-
-        case 'update':
-          removeDp({itemKey: dp.shortTitle});
-          if (!addDp({itemKey: dp.displayValue})) {
-            return;
-          }
-      }
-
-      delete $scope.dpCtx.cp.repositoryNames;
-      delete $scope.dpCtx.cp.extensionDetail;
-      delete $scope.dpCtx.cp.catalogSetting;
+    $scope.save = function() {
       return $scope.dpCtx.cp.$saveOrUpdate().then(
         function(savedCp) {
           angular.extend(cp, savedCp);
-          return initCpDps();
+          initCpDps();
+          $scope.dpCtx.view = 'view';
         }
       );
     }

@@ -4,7 +4,7 @@ export default {
   fields:  [
     {
       "type": "span",
-      "label": "Request",
+      "labelCode": "orders.request",
       "name": "order.request.id",
       "showWhen": "!!order.request.id",
       "href": (data) => {
@@ -18,7 +18,7 @@ export default {
     },
     {
       "type": "dropdown",
-      "label": "Distribution Protocol",
+      "labelCode": "orders.dp",
       "name": "order.distributionProtocol",
       "listSource": {
         "apiUrl": "distribution-protocols",
@@ -28,24 +28,24 @@ export default {
       "disableWhen": "order.status != 'PENDING'",
       "validations": {
         "required": {
-          "message": "Distribution protocol is mandatory"
+          "messageCode": "orders.dp_req"
         }
       },
       "href": (data) => routerSvc.getUrl('DpDetail.Overview', {dpId: data.order.distributionProtocol.id})
     },
     {
       "type": "text",
-      "label": "Name",
+      "labelCode": "orders.name",
       "name": "order.name",
       "validations": {
         "required": {
-          "message": "Order name is mandatory"
+          "messageCode": "orders.name_req"
         }
       }
     },
     {
       "type": "dropdown",
-      "label": "Receiving Institute",
+      "labelCode": "orders.receiving_institute",
       "name": "order.instituteName",
       "listSource": {
         "apiUrl": "institutes",
@@ -55,13 +55,13 @@ export default {
       },
       "validations": {
         "required": {
-          "message": "Receiving institute is mandatory"
+          "messageCode": "orders.receiving_institute_req"
         }
       }
     },
     {
       "type": "site",
-      "label": "Receiving Site",
+      "labelCode": "orders.receiving_site",
       "name": "order.siteName",
       "selectProp": "name",
       "listSource": {
@@ -78,38 +78,38 @@ export default {
     },
     {
       "type": "user",
-      "label": "Requestor",
+      "labelCode": "orders.requester",
       "name": "order.requester",
       "validations": {
         "required": {
-          "message": "Requestor is mandatory"
+          "messageCode": "orders.requester_req"
         }
       }
     },
     {
       "type": "datePicker",
-      "label": "Distribution Date",
+      "labelCode": "orders.distribution_date",
       "name": "order.executionDate",
       "showTime": true,
       "validations": {
         "required": {
-          "message": "Distribution Date is mandatory"
+          "messageCode": "orders.distribution_date_req"
         }
       }
     },
     {
       "type": "text",
-      "label": "Tracking URL",
+      "labelCode": "orders.tracking_url",
       "name": "order.trackingUrl"
     },
     {
       "type": "textarea",
-      "label": "Sender Comments",
+      "labelCode": "orders.sender_comments",
       "name": "order.comments"
     },
     {
       "type": "user",
-      "label": "Distributor",
+      "labelCode": "orders.distributor",
       "name": "order.distributor"
     }
   ]

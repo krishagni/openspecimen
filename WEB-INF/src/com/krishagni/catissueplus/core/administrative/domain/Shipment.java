@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -15,8 +16,12 @@ import org.hibernate.envers.Audited;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
+import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
 public class Shipment extends BaseEntity {
@@ -275,6 +280,13 @@ public class Shipment extends BaseEntity {
 		updateStatus(other);
 	}
 
+	public void delete() {
+		DaoFactory daoFactory = OpenSpecimenAppCtxProvider.getBean("biospecimenDaoFactory");
+		setName(Utility.getDisabledValue(getName(), 255));
+		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		daoFactory.getShipmentDao().deleteSpecimenShipmentEvents(getId());
+	}
+
 	public void ship() {
 		if (isShipped()) {
 			//
@@ -341,6 +353,14 @@ public class Shipment extends BaseEntity {
 		return Status.RECEIVED == getStatus();
 	}
 
+	public boolean isActive() {
+		return com.krishagni.catissueplus.core.common.util.Status.isActiveStatus(getActivityStatus());
+	}
+
+	public boolean isDeleted() {
+		return com.krishagni.catissueplus.core.common.util.Status.isDisabledStatus(getActivityStatus());
+	}
+
 	private Map<Specimen, ShipmentSpecimen> getShipmentSpecimensMap() {
 		return getShipmentSpecimens().stream()
 			.collect(Collectors.toMap(ShipmentSpecimen::getSpecimen, item -> item));
@@ -374,9 +394,17 @@ public class Shipment extends BaseEntity {
 		}
 
 		Map<Specimen, ShipmentSpecimen> existingItems = getShipmentSpecimensMap();
+		List<PrintItem<Specimen>> printItems = new ArrayList<>();
 		for (ShipmentSpecimen newItem : other.getShipmentSpecimens()) {
 			ShipmentSpecimen oldItem = existingItems.remove(newItem.getSpecimen());
 			oldItem.receive(newItem);
+			if (oldItem.getSpecimen().isPrintLabel()) {
+				printItems.add(PrintItem.make(oldItem.getSpecimen(), oldItem.getSpecimen().getCopiesToPrint()));
+			}
+		}
+
+		if (!printItems.isEmpty()) {
+			Specimen.getLabelPrinter().print(printItems);
 		}
 	}
 

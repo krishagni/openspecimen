@@ -460,9 +460,9 @@
 
     "dp": {
       "title": "Distribution",
-      "add_dp": "Add Distribution Protocol",
-      "dup_dp": "Distribution protocol already added to the collection protocol.",
-      "no_dp": "No distribution protocols can be assigned to collection protocol."
+      "dps": "Distribution Protocols",
+      "no_dp": "No distribution protocols can be linked to the collection protocol.",
+      "no_dps": "No distribution protocol is linked to the collection protocol."
     },
 
     "reporting": {
@@ -3017,7 +3017,11 @@
         "def_signup_institute": "Default Signup Institute",
         "def_signup_institute_desc": "Default institute to use for the newly signed up users.",
         "local_account_signups": "Local Account Signups",
-        "local_account_signups_desc": "Enable signup requests for the 'openspecimen' domain."
+        "local_account_signups_desc": "Enable signup requests for the 'openspecimen' domain.",
+        "add_spmn_ext_ids": "Add External IDs",
+        "add_spmn_ext_ids_desc": "Enable to add external IDs when receiving the shipment specimens.",
+        "def_ext_id_name": "External ID Name",
+        "def_ext_id_name_desc": "Default name for external IDs that are added when receiving the shipment specimens."
       },
 
       "biospecimen": {
@@ -3273,7 +3277,7 @@
         "default_result_view": "Default Result View Fields",
         "default_result_view_desc": "List of field values to be displayed in default query result view.",
         "floating_point_precision": "Real Numbers Precision",
-        "floating_point_precision_desc": "Number of digits to display after the decimal point. When 0 or no value is specified, values stored in the database are displayed as is."
+        "floating_point_precision_desc": "Number of digits to display after the decimal point. When 0 or no value is specified, values stored in the database are displayed as is. <br> <br> The setting is <ol> <li> Applicable only for the query results or query API driven list views </li> <li> Not applicable to the data entry or overview pages </li> <li> Not applicable to real number custom fields </li> </ol>"
       },
 
       "training": {

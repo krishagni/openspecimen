@@ -68,12 +68,22 @@ export default {
       if (!container.storageLocation || !container.storageLocation.id || container.storageLocation.id <= 0) {
         // freezer
         children = await containerSvc.getChildContainers(container);
-        root = {key: container.id, label: container.displayName || container.name, data: {parent: null, container}};
+        root = {
+          key: container.id,
+          icon: 'pi pi-circle-fill ' + this.getStatusBallColor(container),
+          label: container.displayName || container.name,
+          data: {parent: null, container}
+        };
       } else {
         // intermediate container
         const hierarchy = await containerSvc.getAncestorsHierarchy(container);
         children = hierarchy.childContainers;
-        root = {key: hierarchy.id, label: hierarchy.displayName || hierarchy.name, data: {parent: null, container: hierarchy}};
+        root = {
+          key: hierarchy.id,
+          icon: 'pi pi-circle-fill ' + this.getStatusBallColor(hierarchy),
+          label: hierarchy.displayName || hierarchy.name,
+          data: {parent: null, container: hierarchy}
+        };
       }
 
       this.addTreeNodes(root, children);
@@ -137,7 +147,14 @@ export default {
     addTreeNodes(parent, children) {
       parent.children = [];
       for (let child of children) {
-        const node = {key: child.id, label: child.displayName || child.name, data: {parent: parent, container: child}, leaf: false};
+        const node = {
+          key: child.id,
+          icon: 'pi pi-circle-fill ' + this.getStatusBallColor(child),
+          label: child.displayName || child.name,
+          data: {parent: parent, container: child},
+          leaf: false
+        };
+
         parent.children.push(node);
         if (child.childContainers instanceof Array) {
           this.addTreeNodes(node, child.childContainers);
@@ -152,6 +169,16 @@ export default {
 
       this.selectedNodes = {}
       this.selectedNodes[node.key] = true;
+    },
+
+    getStatusBallColor: function(container) {
+      if (container.status == 'CHECKED_OUT') {
+        return 'os-checked-out-ball';
+      } else if (container.activityStatus == 'Closed') {
+        return 'os-archived-ball';
+      } else {
+        return 'os-active-ball';
+      }
     }
   }
 }
@@ -174,5 +201,56 @@ export default {
 
 .os-container-tree :deep(.p-tree-container .p-treenode .p-treenode-content:focus) {
   box-shadow: none;
+}
+
+.os-container-tree :deep(.p-treenode-icon.os-active-ball) {
+  color: #5CB85C!important;
+}
+
+.os-container-tree :deep(.p-treenode-icon.os-archived-ball) {
+  color: #DC3545!important;
+}
+
+.os-container-tree :deep(.p-treenode-icon.os-checked-out-ball) {
+  color: #FEAE65!important;
+}
+
+.os-container-tree :deep(.p-treenode-icon) {
+  position: relative;
+}
+
+.os-container-tree :deep(.p-treenode-icon::after) {
+  background-color: #000000;
+  border-radius: 3px;
+  color: #ffffff;
+  display: none;
+  padding: .25em .5rem;
+  max-width: 12.5rem;
+  position: absolute;
+  text-align: center;
+  z-index: 999;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, calc(100% + 10px));
+}
+
+.os-container-tree :deep(.p-treenode-icon.os-active-ball::after) {
+  content: 'Active';
+}
+
+.os-container-tree :deep(.p-treenode-icon.os-archived-ball::after) {
+  content: 'Archived';
+}
+
+.os-container-tree :deep(.p-treenode-icon.os-checked-out-ball::after) {
+  content: 'Checked Out';
+}
+
+
+.os-container-tree :deep(.p-treenode-icon:hover::after) {
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 0.9rem;
+  font-weight: normal;
 }
 </style>

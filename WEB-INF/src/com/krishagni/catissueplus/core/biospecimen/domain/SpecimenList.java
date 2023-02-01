@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -47,6 +46,8 @@ public class SpecimenList extends BaseEntity {
 	private Set<SpecimenListsFolder> folders = new HashSet<>();
 	
 	private Date deletedOn;
+
+	private Boolean sendDigestNotifs;
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -142,6 +143,14 @@ public class SpecimenList extends BaseEntity {
 		this.deletedOn = deletedOn;
 	}
 
+	public Boolean getSendDigestNotifs() {
+		return sendDigestNotifs;
+	}
+
+	public void setSendDigestNotifs(Boolean sendDigestNotifs) {
+		this.sendDigestNotifs = sendDigestNotifs;
+	}
+
 	public void addSharedUsers(List<User> users) {
 		sharedWith.addAll(users);
 		setLastUpdatedOn(Calendar.getInstance().getTime());
@@ -178,6 +187,7 @@ public class SpecimenList extends BaseEntity {
 		updateSharedUsers(specimenList.getSharedWith());
 		updateSharedGroups(specimenList.getSharedWithGroups());
 		setLastUpdatedOn(Calendar.getInstance().getTime());
+		setSendDigestNotifs(specimenList.getSendDigestNotifs());
 	}
 
 	public void delete() {
@@ -196,6 +206,14 @@ public class SpecimenList extends BaseEntity {
 
 	public boolean isDefaultList() {
 		return isDefaultList(getOwner());
+	}
+
+	public String getDisplayName() {
+		if (isDefaultList()) {
+			return getOwner().formattedName() + " Default Cart";
+		}
+
+		return getName();
 	}
 
 	public static String getDefaultListName(User user) {

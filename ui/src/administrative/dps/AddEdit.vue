@@ -115,6 +115,10 @@ export default {
       const toSave = util.clone(this.dataCtx.dp);
       toSave.distributingSites = toSave.distributingSites.reduce(
         (acc, el) => {
+          if (!el.institute || !el.sites || el.sites.length == 0) {
+            return acc;
+          }
+
           acc[el.institute] = el.sites.map(site => site.name);
           return acc
         },

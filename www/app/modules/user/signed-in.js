@@ -107,5 +107,9 @@ angular.module('openspecimen')
        );
      }
 
-     init();
+     $scope.signOut = function() {
+       $state.go('login', {logout: true});
+     }
+
+    init();
   });

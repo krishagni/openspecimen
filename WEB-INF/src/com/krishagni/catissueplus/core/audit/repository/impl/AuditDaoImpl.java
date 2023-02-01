@@ -580,8 +580,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		"  os_revisions r " +
 		"  inner join %s a on a.rev = r.rev " +
 		"  inner join catissue_user u on u.identifier = r.user_id " +
-		"  inner join catissue_institution i on i.identifier = u.institute_id " +
-		"  inner join os_auth_domains d on d.identifier = u.domain_id " +
+		"  left join catissue_institution i on i.identifier = u.institute_id " +
+		"  left join os_auth_domains d on d.identifier = u.domain_id " +
 		"where " +
 		"  a.%s = :objectId " +
 		"  %s " +	// for additional constraints if any

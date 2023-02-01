@@ -32,6 +32,8 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 
 	private Boolean blocked;
 
+	private StorageContainer blockedForContainer;
+
 	private transient boolean supressAccessChecks;
 
 	public Integer getPosOneOrdinal() {
@@ -124,6 +126,14 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 
 	public Boolean isBlocked() {
 		return blocked != null && blocked;
+	}
+
+	public StorageContainer getBlockedForContainer() {
+		return blockedForContainer;
+	}
+
+	public void setBlockedForContainer(StorageContainer blockedForContainer) {
+		this.blockedForContainer = blockedForContainer;
 	}
 
 	public boolean isHoldingLocation() {

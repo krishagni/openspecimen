@@ -23,6 +23,7 @@ import com.krishagni.catissueplus.core.administrative.domain.UserUiState;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
@@ -240,12 +241,17 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	@Override
-	public Map<String, Boolean> getEmailIdDnds(Collection<String> emailIds) {
-		List<Object[]> rows = createNamedQuery(GET_EMAIL_ID_DNDS, Object[].class)
+	public Map<String, Pair<Boolean, String>> getEmailIdStatuses(Collection<String> emailIds) {
+		List<Object[]> rows = createNamedQuery(GET_EMAIL_ID_STATUSES, Object[].class)
 			.setParameterList("emailIds", emailIds)
 			.list();
 
-		return rows.stream().collect(Collectors.toMap(row -> (String) row[0], row -> (Boolean) row[1]));
+		return rows.stream().collect(
+			Collectors.toMap(
+				row -> (String) row[0], // email ID
+				row -> Pair.make((Boolean) row[1], (String) row[2]) // dnd, activityStatus
+			)
+		);
 	}
 
 	@Override
@@ -637,7 +643,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
 	private static final String UPDATE_STATUS = FQN + ".updateStatus";
 
-	private static final String GET_EMAIL_ID_DNDS = FQN + ".getEmailIdDnds";
+	private static final String GET_EMAIL_ID_STATUSES = FQN + ".getEmailIdStatuses";
 
 	private static final String GET_FORMS = FQN + ".getForms";
 

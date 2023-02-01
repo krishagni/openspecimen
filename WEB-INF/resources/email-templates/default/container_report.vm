@@ -13,10 +13,18 @@
                 <p style="margin:10px 0 0 0">
                   Hello $rcpt.firstName $rcpt.lastName,
                   <br><br>
-                  #if (!$error)
-                  The container <a href="$containerUrl">$displayTitle</a> $report is ready to download. Click on the link given below to download the report.
+                  #if ($container)
+                    #if (!$error)
+                    The container <a href="$containerUrl">$displayTitle</a> $report is ready to download. Click on the link given below to download the report.
+                    #else
+                    The following error was encountered when generating the $report for the container <a href="$containerUrl">$container.name</a>.
+                    #end
                   #else
-                  The following error was encountered when generating the $report for the container <a href="$containerUrl">$container.name</a>.
+                    #if (!$error)
+                    The containers' utilisation report requested by you is ready. Click on the link given below to download the report.
+                    #else
+                    The following error was encountered when generating the containers' utilisation report:
+                    #end
                   #end
                   <br>
                 </p>
@@ -53,6 +61,6 @@
       <td>
         #parse( $footer )
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>

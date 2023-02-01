@@ -2,7 +2,7 @@
 angular.module('os.biospecimen.visit.addedit', [])
   .controller('AddEditVisitCtrl', function(
     $scope, $state, $stateParams, $injector, userRole, cp, cpr, visit, latestVisit,
-    extensionCtxt, hasDict, layout, onValueChangeCb, mrnAccessRestriction,
+    extensionCtxt, hasDict, layout, onValueChangeCb, mrnAccessRestriction, spmnCollWfData,
     ParticipantSpecimensViewState, PvManager, ExtensionsUtil, CollectSpecimensSvc, Alerts) {
 
     function loadPvs() {
@@ -22,9 +22,10 @@ angular.module('os.biospecimen.visit.addedit', [])
         documentsCount: 0
       }
 
+      var defVisitDate = spmnCollWfData.defVisitDate == 'none' ? null : new Date();
       if (!currVisit.id) {
         angular.extend(currVisit, {
-          visitDate: new Date(),
+          visitDate: defVisitDate,
           status: 'Complete',
           clinicalDiagnoses: latestVisit ? latestVisit.clinicalDiagnoses : currVisit.clinicalDiagnoses,
           site: getVisitSite(cpr, latestVisit, currVisit)
@@ -32,7 +33,7 @@ angular.module('os.biospecimen.visit.addedit', [])
         ctx.pendingToStart = true;
         delete currVisit.anticipatedVisitDate;
       } else if (currVisit.status == 'Pending') {
-        currVisit.visitDate = new Date();
+        currVisit.visitDate = defVisitDate;
         ctx.pendingToStart = true;
       }
 
@@ -41,7 +42,7 @@ angular.module('os.biospecimen.visit.addedit', [])
       } else if ($stateParams.newVisit == 'true') {
         var presetValues = {
           id: undefined, name: undefined,
-          status: 'Complete', visitDate: new Date(),
+          status: 'Complete', visitDate: defVisitDate,
           surgicalPathologyNumber: null, sprName: null, sprLocked: false
         };
 

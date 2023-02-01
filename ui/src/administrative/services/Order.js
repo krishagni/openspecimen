@@ -51,8 +51,8 @@ class Order {
     return resp.count;
   }
 
-  async createOrderItemsFromCart(cartId, printLabel) {
-    const specimens = await http.get('specimen-lists/' + cartId + '/specimens', {available: true});
+  async createOrderItemsFromCart(cartId, printLabel, maxResults) {
+    const specimens = await http.get('specimen-lists/' + cartId + '/specimens', {available: true, maxResults});
     return this.createOrderItems(specimens, printLabel);
   }
 

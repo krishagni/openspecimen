@@ -2,7 +2,9 @@ package com.krishagni.catissueplus.core.administrative.events;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -65,10 +67,26 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 	private Boolean automated;
 
 	private String autoFreezerProvider;
-	
+
+	private Set<String> allowedCollectionProtocols = new HashSet<>();
+
+	private Set<String> calcAllowedCollectionProtocols = new HashSet<>();
+
 	private List<StorageContainerSummary> childContainers;
 
 	private Boolean starred;
+
+	private String status;
+
+	private StorageLocationSummary blockedLocation;
+
+	private Long freezerId;
+
+	private String freezerName;
+
+	private String freezerBarcode;
+
+	private String freezerDisplayName;
 
 	public Long getId() {
 		return id;
@@ -269,6 +287,22 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		this.autoFreezerProvider = autoFreezerProvider;
 	}
 
+	public Set<String> getAllowedCollectionProtocols() {
+		return allowedCollectionProtocols;
+	}
+
+	public void setAllowedCollectionProtocols(Set<String> allowedCollectionProtocols) {
+		this.allowedCollectionProtocols = allowedCollectionProtocols;
+	}
+
+	public Set<String> getCalcAllowedCollectionProtocols() {
+		return calcAllowedCollectionProtocols;
+	}
+
+	public void setCalcAllowedCollectionProtocols(Set<String> calcAllowedCollectionProtocols) {
+		this.calcAllowedCollectionProtocols = calcAllowedCollectionProtocols;
+	}
+
 	public List<StorageContainerSummary> getChildContainers() {
 		return childContainers;
 	}
@@ -285,7 +319,59 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		this.starred = starred;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public StorageLocationSummary getBlockedLocation() {
+		return blockedLocation;
+	}
+
+	public void setBlockedLocation(StorageLocationSummary blockedLocation) {
+		this.blockedLocation = blockedLocation;
+	}
+
+	public Long getFreezerId() {
+		return freezerId;
+	}
+
+	public void setFreezerId(Long freezerId) {
+		this.freezerId = freezerId;
+	}
+
+	public String getFreezerName() {
+		return freezerName;
+	}
+
+	public void setFreezerName(String freezerName) {
+		this.freezerName = freezerName;
+	}
+
+	public String getFreezerBarcode() {
+		return freezerBarcode;
+	}
+
+	public void setFreezerBarcode(String freezerBarcode) {
+		this.freezerBarcode = freezerBarcode;
+	}
+
+	public String getFreezerDisplayName() {
+		return freezerDisplayName;
+	}
+
+	public void setFreezerDisplayName(String freezerDisplayName) {
+		this.freezerDisplayName = freezerDisplayName;
+	}
+
 	protected static void transform(StorageContainer container, StorageContainerSummary result) {
+		transform(container, result, true);
+	}
+
+	protected static void transform(StorageContainer container, StorageContainerSummary result, boolean hydrated) {
 		result.setId(container.getId());
 		result.setName(container.getName());
 		result.setBarcode(container.getBarcode());
@@ -296,6 +382,9 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		
 		result.setSiteName(container.getSite().getName());
 		result.setStorageLocation(StorageLocationSummary.from(container.getPosition()));
+		if (result.getStorageLocation() == null && container.getParentContainer() != null) {
+			result.setStorageLocation(StorageLocationSummary.from(container.getParentContainer()));
+		}
 		
 		result.setNoOfColumns(container.getNoOfColumns());
 		result.setNoOfRows(container.getNoOfRows());
@@ -304,9 +393,13 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		result.setPositionAssignment(container.getPositionAssignment().name());
 		result.setColumnLabelingScheme(container.getColumnLabelingScheme());
 		result.setRowLabelingScheme(container.getRowLabelingScheme());
-		result.setFreePositions(container.freePositionsCount());
 		result.setStoreSpecimensEnabled(container.isStoreSpecimenEnabled());
 		result.setAutomated(container.isAutomated());
+		result.setStatus(container.getStatus() != null ? container.getStatus().name() : null);
+		if (hydrated) {
+			result.setFreePositions(container.freePositionsCount());
+			result.setBlockedLocation(StorageLocationSummary.from(container.getBlockedPosition()));
+		}
 
 		if (container.getAutoFreezerProvider() != null) {
 			result.setAutoFreezerProvider(container.getAutoFreezerProvider().getName());

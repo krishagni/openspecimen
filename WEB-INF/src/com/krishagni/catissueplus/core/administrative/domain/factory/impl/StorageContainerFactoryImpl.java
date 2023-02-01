@@ -593,6 +593,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	private void setTransferDetails(StorageContainerDetail detail, StorageContainer existing, StorageContainer container, OpenSpecimenException ose) {
 		container.setTransferDate(detail.getTransferDate());
 		container.setOpComments(detail.getTransferComments());
+		container.setCheckOut(detail.getCheckOut());
 
 		UserSummary transferredBy = detail.getTransferredBy();
 		if (transferredBy == null) {

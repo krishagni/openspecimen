@@ -164,7 +164,23 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
 
     function loadPvs() {
       $scope.genders       = PvManager.getPvs('gender');
-      $scope.vitalStatuses = PvManager.getPvs('vital-status');
+      PvManager.loadPvs('vital-status', null, function(pv) { return pv; }, true, false, {includeProps: true}).then(
+        function(pvs) {
+          var vitalStatuses = [];
+          var deadStatuses = [];
+          angular.forEach(pvs,
+            function(pv) {
+              vitalStatuses.push(pv.value);
+              if (pv.props && (pv.props.dead == 'true' || pv.props.dead == true)) {
+                deadStatuses.push(pv.value);
+              }
+            }
+          );
+
+          $scope.vitalStatuses = vitalStatuses;
+          $scope.deadStatuses = deadStatuses;
+        }
+      );
     };
 
     function registerParticipant(event, gotoConsents) {
@@ -417,7 +433,9 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
         function(lockedFields) {
           clearFields($scope, lockedFields);
           angular.extend($scope.cpr.participant, matchedParticipant);
-          $scope.cpr.participant.addPmi($scope.cpr.participant.newPmi());
+          if (lockedFields.indexOf('cpr.participant.pmis') == -1) {
+            $scope.cpr.participant.addPmi($scope.cpr.participant.newPmi());
+          }
 
           if (matchedCpr) {
             delete matchedCpr.participant;
@@ -426,6 +444,11 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
               $scope.cpr.participant, extensionCtxt, $scope.disableFieldOpts.customFields);
           }
 
+          var birthDate = $scope.cpr.participant.birthDate;
+          if (!!birthDate && typeof birthDate == 'string') {
+            $scope.cpr.participant.birthDateStr = birthDate;
+            setBirthDate($scope.cpr);
+          }
           $scope.partCtx.step = 'registerParticipant';
         }
       );
@@ -488,7 +511,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
 
     $scope.vitalStatusChanged = function() {
       var p = $scope.cpr.participant;
-      if (p.vitalStatus != 'Dead' && !!p.deathDate) {
+      if ($scope.deadStatuses.indexOf(p.vitalStatus) == -1 && !!p.deathDate) {
         p.deathDate = null;
       }
     }

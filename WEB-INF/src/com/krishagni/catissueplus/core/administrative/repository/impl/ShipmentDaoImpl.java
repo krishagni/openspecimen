@@ -28,8 +28,7 @@ import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.repository.Restriction;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
-public class
-ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
+public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
 
 	@Override
 	public Class<Shipment> getType() {
@@ -159,6 +158,13 @@ ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
 		return rows.stream().collect(Collectors.toMap(row -> (Long)row[0], row -> (Integer)row[1]));
 	}
 
+	@Override
+	public Integer deleteSpecimenShipmentEvents(Long shipmentId) {
+		return createNamedQuery(DELETE_SPECIMEN_SHIPMENT_EVENTS)
+			.setParameter("shipmentId", shipmentId)
+			.executeUpdate();
+	}
+
 	private Criteria<Shipment> getShipmentsQuery(ShipmentListCriteria crit) {
 		Criteria<Shipment> query = createCriteria(Shipment.class, "shipment")
 			.join("shipment.sendingSite", "sendSite")
@@ -281,6 +287,8 @@ ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
 	private static final String GET_SPECIMENS_COUNT = FQN + ".getSpecimensCount";
 
 	private static final String GET_SPECIMENS_COUNT_BY_CONT = FQN + ".getSpecimensCountByContainer";
+
+	private static final String DELETE_SPECIMEN_SHIPMENT_EVENTS = FQN + ".deleteSpecimenShipmentEvents";
 
 	private static final String GET_SPMN_IDS_ORD_BY_EXT_ID_MYSQL =
 		"select " +

@@ -36,7 +36,7 @@ public class ImportJobDaoImpl extends AbstractDao<ImportJob> implements ImportJo
 		Criteria<ImportJob> query = createCriteria(ImportJob.class, "job");
 		query.join("job.createdBy", "createdBy")
 			.join("createdBy.authDomain", "authDomain")
-			.join("createdBy.institute", "institute")
+			.leftJoin("createdBy.institute", "institute")
 			.orderBy(query.desc("job.id"));
 
 		if (StringUtils.isNotBlank(crit.status())) {

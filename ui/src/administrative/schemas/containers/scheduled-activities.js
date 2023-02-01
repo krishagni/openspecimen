@@ -20,6 +20,10 @@ export default {
       name: "activity.reminderInterval",
       captionCode: "containers.remind_before",
       value: ({activity}) => {
+        if (activity.disableReminders) {
+          return 'N/A';
+        }
+
         return activity.reminderInterval + ' ' + activity.reminderIntervalUnit.charAt(0).toLowerCase();
       }
     },

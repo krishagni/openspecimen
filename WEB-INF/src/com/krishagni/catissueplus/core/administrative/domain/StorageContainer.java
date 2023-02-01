@@ -40,7 +40,6 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.SchemeOrdinalConverterUtil;
-import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 
@@ -72,6 +71,10 @@ public class StorageContainer extends BaseExtensionEntity {
 	public enum UsageMode {
 		STORAGE,
 		DISTRIBUTION
+	}
+
+	public enum Status {
+		CHECKED_OUT
 	}
 
 	private static final String ENTITY_NAME = "storage_container";
@@ -146,7 +149,7 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	private User createdBy;
 
-	private String activityStatus = Status.ACTIVITY_STATUS_ACTIVE.getStatus();
+	private String activityStatus = com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_ACTIVE.getStatus();
 	
 	private String comments;
 
@@ -176,10 +179,14 @@ public class StorageContainer extends BaseExtensionEntity {
 	private boolean storeSpecimenEnabled = false;
 			
 	private StorageContainerPosition position;
+
+	private StorageContainerPosition blockedPosition;
 	
 	private Set<StorageContainerPosition> occupiedPositions = new HashSet<>();
 
 	private Set<ContainerTransferEvent> transferEvents = new LinkedHashSet<>();
+
+	private Status status;
 
 	//
 	// query capabilities
@@ -200,6 +207,8 @@ public class StorageContainer extends BaseExtensionEntity {
 	private transient User transferredBy;
 
 	private transient Date transferDate;
+
+	private transient Boolean checkOut;
 
 	//
 	// position assignment changes
@@ -450,6 +459,14 @@ public class StorageContainer extends BaseExtensionEntity {
 		this.transferDate = transferDate;
 	}
 
+	public Boolean getCheckOut() {
+		return checkOut;
+	}
+
+	public void setCheckOut(Boolean checkOut) {
+		this.checkOut = checkOut;
+	}
+
 	@NotAudited
 	public Set<StorageContainer> getChildContainers() {
 		return childContainers;
@@ -532,6 +549,14 @@ public class StorageContainer extends BaseExtensionEntity {
 		this.position = position;
 	}
 
+	public StorageContainerPosition getBlockedPosition() {
+		return blockedPosition;
+	}
+
+	public void setBlockedPosition(StorageContainerPosition blockedPosition) {
+		this.blockedPosition = blockedPosition;
+	}
+
 	@NotAudited
 	public Set<StorageContainerPosition> getOccupiedPositions() {
 		return occupiedPositions;
@@ -548,6 +573,14 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void setTransferEvents(Set<ContainerTransferEvent> transferEvents) {
 		this.transferEvents = transferEvents;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	@NotAudited
@@ -596,7 +629,15 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 
 	public boolean isActive() {
-		return Status.ACTIVITY_STATUS_ACTIVE.getStatus().equals(getActivityStatus());
+		return com.krishagni.catissueplus.core.common.util.Status.isActiveStatus(getActivityStatus());
+	}
+
+	public boolean isArchived() {
+		return com.krishagni.catissueplus.core.common.util.Status.isClosedStatus(getActivityStatus());
+	}
+
+	public boolean isDeleted() {
+		return com.krishagni.catissueplus.core.common.util.Status.isDisabledStatus(getActivityStatus());
 	}
 
 	@Override
@@ -606,7 +647,7 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void update(StorageContainer other) {
 		updateActivityStatus(other);
-		if (!isActive()) {
+		if (isDeleted()) {
 			return;
 		}
 
@@ -751,6 +792,10 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 	
 	public void removePosition(StorageContainerPosition position) {
+		if (position == null) {
+			return;
+		}
+
 		if (isDimensionless()) {
 			getDaoFactory().getStorageContainerPositionDao().delete(position);
 		} else {
@@ -1046,7 +1091,7 @@ public class StorageContainer extends BaseExtensionEntity {
 
 		deleteWithoutCheck();
 	}
-	
+
 	public String getStringifiedAncestors() {
 		StringBuilder names = new StringBuilder();
 		getStringifiedAncestors(names);
@@ -1320,8 +1365,15 @@ public class StorageContainer extends BaseExtensionEntity {
 			.sorted((c1, c2) -> {
 				if (parent.isDimensionless()) {
 					return c1.getId().compareTo(c2.getId());
-				} else {
+				} else if (c1.getPosition() != null && c2.getPosition() != null) {
 					return c1.getPosition().getPosition().compareTo(c2.getPosition().getPosition());
+				} else if (c1.getPosition() != null) {
+					return -1;
+				} else if (c2.getPosition() != null) {
+					return 1;
+				} else {
+					// archived or checked out boxes
+					return c1.getId().compareTo(c2.getId());
 				}
 			})
 			.collect(Collectors.toList());
@@ -1339,6 +1391,11 @@ public class StorageContainer extends BaseExtensionEntity {
 			setPosition(null);
 		}
 
+		if (getBlockedPosition() != null) {
+			getBlockedPosition().getContainer().removePosition(getBlockedPosition());
+			setBlockedPosition(null);
+		}
+
 		DeObject extension = getExtension();
 		if (extension != null) {
 			extension.delete();
@@ -1346,7 +1403,42 @@ public class StorageContainer extends BaseExtensionEntity {
 
 		setName(Utility.getDisabledValue(getName(), 64));
 		setBarcode(Utility.getDisabledValue(getBarcode(), 64));
-		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
+	}
+
+	private void archive(String reason) {
+		if (isArchived() || isDeleted()) {
+			return;
+		}
+
+		int specimensCnt = getSpecimensCount();
+		if (specimensCnt > 0) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.CANNOT_ARCHIVE, getName(), specimensCnt);
+		}
+
+		archive0(true, reason);
+	}
+
+	private void archive0(boolean vacatePosition, String reason) {
+		getChildContainers().forEach(c -> c.archive0(false, null));
+		if (isSiteContainer()) {
+			getSite().setContainer(null);
+		}
+
+		if (vacatePosition && getParentContainer() != null) {
+			StorageContainer parent = getParentContainer();
+			updateContainerLocation(
+				getParentContainer().getSite(),
+				null,
+				null,
+				null,
+				null,
+				"ARCHIVED: " + (reason != null ? reason : ""),
+				false);
+			setParentContainer(parent);
+		}
+
+		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_CLOSED.getStatus());
 	}
 
 	private int getSpecimensCount() {
@@ -1425,7 +1517,8 @@ public class StorageContainer extends BaseExtensionEntity {
 			return (vacateOccupant && pos.getOccupyingContainer() == null) ||
 					pos.getOccupyingSpecimen() != null && pos.getOccupyingSpecimen().getId().equals(entityId);
 		} else {
-			return pos.getOccupyingContainer() != null && pos.getOccupyingContainer().getId().equals(entityId);
+			return (pos.getOccupyingContainer() != null && pos.getOccupyingContainer().getId().equals(entityId)) ||
+				(pos.getBlockedForContainer() != null && pos.getBlockedForContainer().getId().equals(entityId));
 		}
 	}
 	
@@ -1500,19 +1593,24 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 	
 	private void updateContainerLocation(StorageContainer other) {
+		if (!isActive()) {
+			return;
+		}
+
 		updateContainerLocation(
 			other.getSite(), other.getParentContainer(), other.getPosition(),
-			other.getTransferredBy(), other.getTransferDate(), other.getOpComments()
+			other.getTransferredBy(), other.getTransferDate(), other.getOpComments(),
+			Boolean.TRUE.equals(other.getCheckOut())
 		);
 	}
 
 	private void updateContainerLocation(Site otherSite, StorageContainer otherParentContainer, StorageContainerPosition otherPos) {
-		updateContainerLocation(otherSite, otherParentContainer, otherPos, null, null, null);
+		updateContainerLocation(otherSite, otherParentContainer, otherPos, null, null, null, false);
 	}
 
 	private void updateContainerLocation(
 		Site otherSite, StorageContainer otherParentContainer, StorageContainerPosition otherPos,
-		User transferredBy, Date transferDate, String transferReasons) {
+		User transferredBy, Date transferDate, String transferReasons, boolean checkOut) {
 		Site existing = site;
 
 		ContainerTransferEvent transferEvent = null;
@@ -1520,19 +1618,26 @@ public class StorageContainer extends BaseExtensionEntity {
 			!Objects.equals(parentContainer, otherParentContainer) ||
 			!StorageContainerPosition.areSame(position, otherPos)) {
 
-			transferEvent = new ContainerTransferEvent().fromLocation(site, parentContainer, position);
+			transferEvent = new ContainerTransferEvent().fromLocation(site, position != null ? position.getContainer() : null, position);
 			transferEvent.setContainer(this);
 			transferEvent.setUser(transferredBy != null ? transferredBy : AuthUtil.getCurrentUser());
 			transferEvent.setTime(transferDate != null ? transferDate : Calendar.getInstance().getTime());
 			transferEvent.setReason(transferReasons);
 		}
 
+		StorageContainerPosition oldPosition = null;
 		if (otherParentContainer == null) {
 			if (getParentContainer() != null) {
+				oldPosition = position;
 				getParentContainer().removePosition(position);
+			} else if (checkOut) {
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.CHECKED_OUT_ALREADY, getName());
 			}
-			
-			setParentContainer(null);
+
+			if (!checkOut) {
+				setParentContainer(null);
+			}
+
 			setPosition(null);
 			setSite(otherSite);
 		} else {
@@ -1544,9 +1649,11 @@ public class StorageContainer extends BaseExtensionEntity {
 
 			if (position != null) {
 				position.update(otherPos);
+				position.setBlockedForContainer(null);
+				position.setBlocked(false);
 			} else {
 				setPosition(otherPos);
-			}			
+			}
 		}
 
 		//
@@ -1562,6 +1669,30 @@ public class StorageContainer extends BaseExtensionEntity {
 		if (transferEvent != null) {
 			transferEvent.toLocation(site, parentContainer, position);
 			getTransferEvents().add(transferEvent);
+
+			if (checkOut && oldPosition != null) {
+				StorageContainerPosition blockedPosition = oldPosition.getContainer().createPosition(
+					oldPosition.getPosOneOrdinal(), oldPosition.getPosOne(),
+					oldPosition.getPosTwoOrdinal(), oldPosition.getPosTwo()
+				);
+				blockedPosition.setBlocked(true);
+				blockedPosition.setBlockedForContainer(this);
+				setBlockedPosition(blockedPosition);
+				setStatus(Status.CHECKED_OUT);
+				transferEvent.setReason("CHECK-OUT: " + (transferReasons != null ? transferReasons : ""));
+			} else if (getBlockedPosition() != null) {
+				String prefix = "";
+				if (!"ARCHIVED".equals(transferReasons)) {
+					prefix = "CHECK-IN: ";
+				}
+
+				getBlockedPosition().getContainer().removePosition(getBlockedPosition());
+				setBlockedPosition(null);
+				setStatus(null);
+				transferEvent.setReason(prefix + (transferReasons != null ? transferReasons : ""));
+			}
+
+			oldPosition = null;
 		}
 	}
 	
@@ -1578,16 +1709,29 @@ public class StorageContainer extends BaseExtensionEntity {
 			return;
 		}
 
-		if (Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(other.getActivityStatus())) {
+		if (other.isDeleted()) {
 			delete(true);
-		} else {
+		} else if (other.isArchived()) {
+			archive(other.getOpComments());
+		} else if (isArchived() && other.isActive()) {
+			if (other.getParentContainer() != null && !other.getParentContainer().isActive()) {
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.PARENT_ARCHIVED, other.getParentContainer().getName());
+			}
+
 			List<StorageContainer> containers = new ArrayList<>();
 			containers.add(this);
 			while (!containers.isEmpty()) {
 				StorageContainer container = containers.remove(0);
-				container.setActivityStatus(other.getActivityStatus());
+				if (!container.isArchived()) {
+					// either active or deleted
+					continue;
+				}
+
+				container.setActivityStatus(other.getActivityStatus()); // active
 				containers.addAll(container.getChildContainers());
 			}
+
+			other.setOpComments("UNARCHIVED: " + (other.getOpComments() != null ? other.getOpComments() : ""));
 		}
 	}
 

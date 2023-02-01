@@ -28,6 +28,8 @@ public class ScheduledContainerActivity extends BaseEntity {
 
 	private IntervalUnit reminderIntervalUnit;
 
+	private boolean disableReminders;
+
 	private boolean repeatCycle;
 
 	private Set<User> assignedUsers;
@@ -96,6 +98,14 @@ public class ScheduledContainerActivity extends BaseEntity {
 
 	public void setReminderIntervalUnit(IntervalUnit reminderIntervalUnit) {
 		this.reminderIntervalUnit = reminderIntervalUnit;
+	}
+
+	public boolean isDisableReminders() {
+		return disableReminders;
+	}
+
+	public void setDisableReminders(boolean disableReminders) {
+		this.disableReminders = disableReminders;
 	}
 
 	public boolean isRepeatCycle() {

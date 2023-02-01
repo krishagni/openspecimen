@@ -50,6 +50,7 @@ public class SpecimenListDetail extends SpecimenListSummary {
 		details.setSharedWith(UserSummary.from(list.getSharedWith()));
 		details.setSharedWithGroups(UserGroupSummary.from(list.getSharedWithGroups()));
 		details.setDefaultList(list.isDefaultList());
+		details.setSendDigestNotifs(list.getSendDigestNotifs());
 		return details;
 	}
 }

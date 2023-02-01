@@ -33,6 +33,8 @@
 
     <many-to-one name="occupyingContainer" column="OCCUPYING_CONTAINER_ID" unique="true"/>
 
+    <many-to-one name="blockedForContainer" column="BLOCKED_FOR_CONTAINER_ID" unique="true" />
+
     <sql-query name="getSpecimenIdByPosition">
       select
         occupying_specimen_id

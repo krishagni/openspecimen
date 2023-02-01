@@ -11,7 +11,7 @@
     <div class="form-group">
       <label class="col-xs-2 control-label" translate="settings.description">Description</label>
       <div class="form-value col-xs-10">
-        <span>{{'settings.' + setting.module + '.' + setting.name + '_desc' | translate}}</span>
+        <span ng-bind-html="setting.$$osPropDesc"></span>
       </div>
     </div>
     

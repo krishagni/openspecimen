@@ -209,9 +209,9 @@
         user.id in (:userIds)
     </query>
 
-    <query name="getEmailIdDnds">
+    <query name="getEmailIdStatuses">
       select
-        u.emailAddress, u.dnd
+        u.emailAddress, u.dnd, u.activityStatus
       from
         com.krishagni.catissueplus.core.administrative.domain.User u
       where

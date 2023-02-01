@@ -1,9 +1,63 @@
 <div class="clearfix">
   <div class="col-xs-8">
-    <os-editable-item-list
-      items="dpCtx.savedDps" item-pvs="dpCtx.dps" text-attr="displayValue"
-      list-changed="listChanged" allow-edit="dpCtx.editAllowed" refresh="loadDps"
-      add-caption="{{'cp.dp.add_dp' | translate}}" list-title="{{'cp.dp.title' | translate}}">
-    </os-editable-item-list>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <span translate="cp.dp.title">Distribution Protocols</span>
+        <span class="os-btns" show-if-allowed="cpResource.updateOpts" ng-if="dpCtx.view != 'edit'">
+          <button class="default" ng-click="showEditForm()" ng-show="!dpCtx.savedDps || dpCtx.savedDps.length == 0">
+            <span class="fa fa-plus"></span>
+            <span translate="common.buttons.add">Add</span>
+          </button>
+          <button class="default" ng-click="showEditForm()" ng-show="dpCtx.savedDps.length > 0">
+            <span class="fa fa-pencil"></span>
+            <span translate="common.buttons.edit">Edit</span>
+          </button>
+        </span>
+      </div>
+      <div class="panel-body">
+        <div ng-if="dpCtx.view != 'edit'">
+          <div class="os-alert-container inline show" ng-if="!dpCtx.savedDps || dpCtx.savedDps.length == 0">
+            <div class="alert alert-info">
+              <span translate="cp.dp.no_dps"></span>
+            </div>
+          </div>
+          <ul class="os-key-values os-one-col" ng-if="dpCtx.savedDps.length > 0">
+            <li class="item">
+              <strong class="key key-sm" translate="cp.dp.dps">Distribution Protocols</strong>
+              <span class="value value-md">
+                <span>{{dpCtx.cp.distributionProtocols | osArrayJoin: 'shortTitle'}}</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div ng-if="dpCtx.view == 'edit'">
+          <form name="dpSettingsForm" os-form-validator="dpSettingsForm" class="form-horizontal" novalidate>
+            <div class="form-group">
+              <label class="control-label col-xs-3">
+                <span translate="cp.dp.dps">Distribution Protocols</span>
+              </label>
+              <div class="col-xs-6">
+                <os-select multiple class="form-control" ng-model="dpCtx.cp.distributionProtocols"
+                  list="dpCtx.dps" display-prop="shortTitle" refresh="loadDps">
+                </os-select>
+              </div>
+            </div>
+
+            <div class="os-divider"></div>
+
+            <div class="form-group">
+              <div class="col-xs-offset-3 col-xs-6">
+                <button class="btn btn-primary" os-form-submit="save()">
+                  <span translate="common.buttons.save">Save</span>
+                </button>
+                <button class="btn os-btn-text" ng-click="revertEdit()">
+                  <span translate="common.buttons.cancel">Cancel</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

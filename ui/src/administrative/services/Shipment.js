@@ -27,6 +27,10 @@ class Shipment {
     }
   }
 
+  async delete(shipment) {
+    return http.delete('shipments/' + shipment.id);
+  }
+
   async getSpecimens(shipmentId, params = {startAt: 0, maxResults: 25}) {
     return http.get('shipments/' + shipmentId + '/specimens', params || {startAt: 0, maxResults: 25});
   }

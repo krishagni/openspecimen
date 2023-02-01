@@ -23,8 +23,7 @@
               <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainers"
                 v-show-if-allowed="containerResources.deleteOpts" />
 
-              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
-                v-show-if-allowed="containerResources.importOpts" />
+              <os-menu :label="$t('common.buttons.export')" :options="exportOpts" />
             </span>
 
             <span v-else>
@@ -38,8 +37,10 @@
               <os-menu :label="$t('common.buttons.import')" :options="importOpts"
                 v-show-if-allowed="containerResources.importOpts" />
 
-              <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportContainers"
-                v-show-if-allowed="containerResources.importOpts" />
+              <os-menu :label="$t('common.buttons.actions')" :options="actionOpts"
+                v-show-if-allowed="containerResources.updateOpts" />
+
+              <os-menu :label="$t('common.buttons.export')" :options="exportOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
                 url="https://help.openspecimen.org/containers" new-tab="true" />
@@ -72,6 +73,45 @@
           </span>
         </template>
       </os-confirm-delete>
+
+      <os-dialog ref="trRptDialog">
+        <template #header>
+          <span v-t="'containers.transfer_report'"> Transfer Report </span>
+        </template>
+        <template #content>
+          <os-form ref="transferRpt" :schema="ctx.trRptFs.layout" :data="trRptCtx" />
+        </template>
+        <template #footer>
+          <os-button text    :label="$t('common.buttons.cancel')"   @click="closeTransferReportDialog" />
+          <os-button primary :label="$t('common.buttons.generate')" @click="generateTransferReport" />
+        </template>
+      </os-dialog>
+
+      <os-dialog ref="utRptDialog">
+        <template #header>
+          <span v-t="'containers.utilisation_report'"> Utilisation Report </span>
+        </template>
+        <template #content>
+          <os-form ref="utilisationRpt" :schema="ctx.trRptFs.layout" :data="trRptCtx" />
+        </template>
+        <template #footer>
+          <os-button text    :label="$t('common.buttons.cancel')"   @click="closeUtilisationReportDialog" />
+          <os-button primary :label="$t('common.buttons.generate')" @click="generateUtilisationReport" />
+        </template>
+      </os-dialog>
+
+      <os-dialog ref="exportContainersDialog">
+        <template #header>
+          <span v-t="'containers.export_containers'"> Export Containers </span>
+        </template>
+        <template #content>
+          <os-form ref="exportCritForm" :schema="ctx.trRptFs.layout" :data="trRptCtx" />
+        </template>
+        <template #footer>
+          <os-button text    :label="$t('common.buttons.cancel')"   @click="closeExportContainersDialog" />
+          <os-button primary :label="$t('common.buttons.export')" @click="exportContainers" />
+        </template>
+      </os-dialog>
     </os-page-body>
   </os-page>
 </template>
@@ -82,6 +122,7 @@ import listSchema   from '@/administrative/schemas/containers/list.js';
 
 import containerSvc from '@/administrative/services/Container.js';
 import alertsSvc    from '@/common/services/Alerts.js';
+import authSvc      from '@/common/services/Authorization.js';
 import exportSvc    from '@/common/services/ExportService.js';
 import routerSvc    from '@/common/services/Router.js';
 
@@ -91,13 +132,61 @@ export default {
   props: ['filters'],
 
   data() {
+    const actionOpts = [];
+    if (authSvc.isAllowed(containerResources.updateOpts)) {
+      actionOpts.push({
+        icon: 'archive',
+        caption: this.$t('common.buttons.archive'),
+        onSelect: () => routerSvc.goto('BulkContainerArchive')
+      });
+      actionOpts.push({
+        icon: 'sign-in-alt',
+        caption: this.$t('containers.check_in_button'),
+        onSelect: () => routerSvc.goto('BulkContainerCheckin')
+      });
+      actionOpts.push({
+        icon: 'sign-out-alt',
+        caption: this.$t('containers.check_out_button'),
+        onSelect: () => routerSvc.goto('BulkContainerCheckout')
+      });
+      actionOpts.push({
+        icon: 'arrows-alt-h',
+        caption: this.$t('containers.transfer'),
+        onSelect: () => routerSvc.goto('BulkContainerTransfer')
+      });
+    }
+
+    const exportOpts = [];
+    exportOpts.push({
+      icon: 'arrows-alt-h',
+      caption: this.$t('containers.transfer_report'),
+      onSelect: () => this.showTransferReportDialog()
+    });
+
+    exportOpts.push({
+      icon: 'file',
+      caption: this.$t('containers.utilisation_report'),
+      onSelect: () => this.showUtilisationReportDialog()
+    });
+
+    if (authSvc.isAllowed(containerResources.importOpts)) {
+      exportOpts.push({divider: true});
+
+      exportOpts.push({
+        icon: 'download',
+        caption: this.$t('containers.list'),
+        onSelect: () => this.showExportContainersDialog()
+      });
+    }
+
     return {
       ctx: {
         containers: [],
         containersCount: -1,
         loading: true,
         query: this.filters,
-        selectedContainers: []
+        selectedContainers: [],
+        trRptFs: containerSvc.getTransferReportFormSchema(),
       },
 
       listSchema,
@@ -114,6 +203,12 @@ export default {
           onSelect: () => routerSvc.ngGoto('containers-import-jobs')
         }
       ],
+
+      actionOpts,
+
+      exportOpts,
+
+      trRptCtx: {showDateRange: false, criteria: {}},
 
       containerResources
     };
@@ -169,9 +264,8 @@ export default {
       }
     },
 
-    exportContainers: function() {
-      const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
-      exportSvc.exportRecords({objectType: 'storageContainer', recordIds: containerIds});
+    showTransferForm: function() {
+      this.$goto('BulkContainerTransfer');
     },
 
     deleteContainers: async function() {
@@ -192,6 +286,104 @@ export default {
 
     viewContainerTasks: function() {
       routerSvc.goto('ContainerTasksList');
+    },
+
+    showTransferReportDialog: function() {
+      this.trRptCtx = {showDateRange: true, criteria: {}};
+      if (this.ctx.selectedContainers.length > 0) {
+        this.trRptCtx.criteria.name = this.ctx.selectedContainers.map(item => item.rowObject.container.name);
+        this.generateTransferReport();
+        return;
+      }
+
+      this.$refs.trRptDialog.open()
+    },
+
+    closeTransferReportDialog: function() {
+      this.$refs.trRptDialog.close();
+    },
+
+    generateTransferReport: function() {
+      alertsSvc.info({code: 'containers.generating_transfer_report'});
+      containerSvc.exportTransferEvents(this.trRptCtx.criteria).then(
+        (report) => {
+          if (report.completed) {
+            alertsSvc.info({code: 'containers.downloading_transfer_report'});
+            containerSvc.downloadReport(report.name);
+          } else {
+            alertsSvc.info({code: 'containers.transfer_report_by_email'});
+          }
+
+          this.closeTransferReportDialog();
+        }
+      );
+    },
+
+    showUtilisationReportDialog: function() {
+      this.trRptCtx = {showDateRange: false, criteria: {}};
+      if (this.ctx.selectedContainers.length > 0) {
+        this.trRptCtx.criteria.name = this.ctx.selectedContainers.map(item => item.rowObject.container.name);
+        this.generateUtilisationReport();
+        return;
+      }
+
+      this.$refs.utRptDialog.open();
+    },
+
+    closeUtilisationReportDialog: function() {
+      this.$refs.utRptDialog.close();
+    },
+
+    generateUtilisationReport: function() {
+      alertsSvc.info({code: 'containers.generating_utilisation_report'});
+      containerSvc.exportUtilisation(null, this.trRptCtx.criteria).then(
+        (report) => {
+          if (report.fileId) {
+            alertsSvc.info({code: 'containers.downloading_utilisation_report'});
+            containerSvc.downloadReport(report.fileId);
+          } else {
+            alertsSvc.info({code: 'containers.utilisation_report_by_email'});
+          }
+
+          this.closeUtilisationReportDialog();
+        }
+      );
+    },
+
+    showExportContainersDialog: function() {
+      if (this.ctx.selectedContainers.length > 0) {
+        this.exportContainers();
+        return;
+      }
+
+      this.trRptCtx = {showDateRange: false, criteria: {}};
+      this.$refs.exportContainersDialog.open();
+    },
+
+    closeExportContainersDialog: function() {
+      this.$refs.exportContainersDialog.close();
+    },
+
+    exportContainers: function() {
+      const containerIds = this.ctx.selectedContainers.map(item => item.rowObject.container.id);
+      const params = {};
+      if (containerIds.length == 0) {
+        const crit = this.trRptCtx.criteria;
+        if (crit.name && crit.name.length > 0) {
+          params.names = crit.name.join('^');
+        }
+
+        if (crit.cp && crit.cp.length > 0) {
+          params.cps = crit.cp.join('^');
+        }
+
+        if (crit.type && crit.type.length > 0) {
+          params.types = crit.type.join('^');
+        }
+      }
+
+      exportSvc.exportRecords({objectType: 'storageContainer', recordIds: containerIds, params});
+      this.closeExportContainersDialog();
     }
   }
 }

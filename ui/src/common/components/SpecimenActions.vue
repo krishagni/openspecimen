@@ -258,6 +258,9 @@ export default {
 
       if (this.ctx.isDistAllowed) {
         options.push({ icon: 'share', caption: i18n('common.specimen_actions.distribute'), onSelect: () => this.showDistributionDialog() });
+        if (+this.cartId > 0) {
+          options.push({ icon: 'share', caption: i18n('common.specimen_actions.distribute_all'), onSelect: () => this.showDistributionDialog(true) });
+        }
       }
 
       if (authSvc.isAllowed({resource: 'ShippingAndTracking', operations: ['Create']})) {
@@ -314,7 +317,7 @@ export default {
     },
 
     getSites: function(cp, cpr) {
-      let sites = [];
+      let sites = null;
       if (cp) {
         sites = cp.cpSites.map(cpSite => cpSite.siteName);
         if (this.$ui.global.appProps.mrn_restriction_enabled && cpr) {
@@ -485,13 +488,17 @@ export default {
       routerSvc.ngGoto('cp-view/' + cpId + '/add-pooled-specimen', {cprId: cprId, visitId: visitId});
     },
 
-    showDistributionDialog: function() {
-      if (!this.specimens || this.specimens.length == 0) {
+    showDistributionDialog: function(distAll) {
+      if (!distAll && (!this.specimens || this.specimens.length == 0)) {
         alertsSvc.error({code: 'common.specimen_actions.select_for_distribution'});
         return;
       }
 
-      this.ctx.distDetails = { clearListId: this.cartId, clearListMode: 'NONE' };
+      this.ctx.distDetails = {
+        specimenListId: (distAll && this.cartId) || undefined,
+        clearListId: this.cartId,
+        clearListMode: 'NONE'
+      };
       this.$refs.distributeDialog.open();
     },
 
@@ -547,6 +554,7 @@ export default {
         distributeAvailableQty: true,
         orderItems: this.getOrderItems(this.specimens, userInput.printLabel),
         comments: userInput.comments,
+        specimenList: userInput.specimenListId && {id: userInput.specimenListId},
         clearListId: userInput.clearListId,
         clearListMode: userInput.clearListMode,
         status: 'EXECUTED'
@@ -578,6 +586,7 @@ export default {
         dp: userInput.dp,
         specimenIds: this.specimens && this.specimens.map(spmn => spmn.id),
         printLabel: userInput.printLabel,
+        specimenListId: userInput.specimenListId,
         clearListId: userInput.clearListId,
         clearListMode: userInput.clearListMode,
         comments: userInput.comments

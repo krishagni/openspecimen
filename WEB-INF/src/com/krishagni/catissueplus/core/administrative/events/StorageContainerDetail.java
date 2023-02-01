@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
@@ -34,10 +35,6 @@ public class StorageContainerDetail extends StorageContainerSummary {
 	
 	private Set<String> calcAllowedSpecimenTypes = new HashSet<>();
 
-	private Set<String> allowedCollectionProtocols = new HashSet<>();
-	
-	private Set<String> calcAllowedCollectionProtocols = new HashSet<>();
-
 	private Set<String> allowedDistributionProtocols = new HashSet<>();
 
 	private Set<String> calcAllowedDistributionProtocols = new HashSet<>();
@@ -56,6 +53,9 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String transferComments;
+
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private Boolean checkOut;
 
 	public Double getTemperature() {
 		return temperature;
@@ -119,22 +119,6 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	public void setCalcAllowedSpecimenTypes(Set<String> calcAllowedSpecimenTypes) {
 		this.calcAllowedSpecimenTypes = calcAllowedSpecimenTypes;
-	}
-
-	public Set<String> getAllowedCollectionProtocols() {
-		return allowedCollectionProtocols;
-	}
-
-	public void setAllowedCollectionProtocols(Set<String> allowedCollectionProtocols) {
-		this.allowedCollectionProtocols = allowedCollectionProtocols;
-	}
-
-	public Set<String> getCalcAllowedCollectionProtocols() {
-		return calcAllowedCollectionProtocols;
-	}
-
-	public void setCalcAllowedCollectionProtocols(Set<String> calcAllowedCollectionProtocols) {
-		this.calcAllowedCollectionProtocols = calcAllowedCollectionProtocols;
 	}
 
 	public Set<String> getAllowedDistributionProtocols() {
@@ -201,9 +185,21 @@ public class StorageContainerDetail extends StorageContainerSummary {
 		this.transferComments = transferComments;
 	}
 
+	public Boolean getCheckOut() {
+		return checkOut;
+	}
+
+	public void setCheckOut(Boolean checkOut) {
+		this.checkOut = checkOut;
+	}
+
 	public static StorageContainerDetail from(StorageContainer container) {
+		return from(container, true);
+	}
+
+	public static StorageContainerDetail from(StorageContainer container, boolean hydrated) {
 		StorageContainerDetail result = new StorageContainerDetail();
-		StorageContainerDetail.transform(container, result);
+		StorageContainerDetail.transform(container, result, hydrated);
 
 		result.setTemperature(container.getTemperature());
 		result.setComments(container.getComments());
@@ -215,18 +211,17 @@ public class StorageContainerDetail extends StorageContainerSummary {
 		}
 
 		result.setAllowedSpecimenClasses(PermissibleValue.toValueSet(container.getAllowedSpecimenClasses()));
-		result.setCalcAllowedSpecimenClasses(PermissibleValue.toValueSet(container.getCompAllowedSpecimenClasses()));
-
 		result.setAllowedSpecimenTypes(PermissibleValue.toValueSet(container.getAllowedSpecimenTypes()));
-		result.setCalcAllowedSpecimenTypes(PermissibleValue.toValueSet(container.getCompAllowedSpecimenTypes()));
-		
-		result.setAllowedCollectionProtocols(getCpNames(container.getAllowedCps()));		
-		result.setCalcAllowedCollectionProtocols(getCpNames(container.getCompAllowedCps()));
-
+		result.setAllowedCollectionProtocols(getCpNames(container.getAllowedCps()));
 		result.setAllowedDistributionProtocols(getDpNames(container.getAllowedDps()));
-		result.setCalcAllowedDistributionProtocols(getDpNames(container.getCompAllowedDps()));
-		
-		result.setOccupiedPositions(container.occupiedPositionsOrdinals());
+
+		if (hydrated) {
+			result.setCalcAllowedSpecimenClasses(PermissibleValue.toValueSet(container.getCompAllowedSpecimenClasses()));
+			result.setCalcAllowedSpecimenTypes(PermissibleValue.toValueSet(container.getCompAllowedSpecimenTypes()));
+			result.setCalcAllowedCollectionProtocols(getCpNames(container.getCompAllowedCps()));
+			result.setCalcAllowedDistributionProtocols(getDpNames(container.getCompAllowedDps()));
+			result.setOccupiedPositions(container.occupiedPositionsOrdinals());
+		}
 		return result;
 	}
 	

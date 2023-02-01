@@ -297,6 +297,7 @@
         c.identifier as container_identifier, c.name as container_name,
         c.display_name as container_display_name, c.barcode as container_barcode,
         p.identifier as position_identifier, p.pos_one_str, p.pos_two_str,
+        p.pos_one, p.pos_two,
         case when c.pos_labeling_mode = 'LINEAR'
         then
           case when c.pos_assignment like 'HZ_%'
@@ -315,6 +316,20 @@
       where
         c.activity_status != 'Disabled' and
         p.occupying_specimen_id is not null
+    </createView>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Ancestor specimen requirement names / codes view" runOnChange="true">
+    <createView viewName="OS_ANCESTOR_SPMN_REQS_VIEW" replaceIfExists="true">
+      select
+        ar.identifier, d.identifier as specimen_id, ar.spec_req_label as req_label, ar.code as req_code
+      from
+        catissue_specimen d
+        inner join catissue_specimen_hierarchy h on h.descendent_id = d.identifier
+        inner join catissue_specimen a on a.identifier = h.ancestor_id
+        inner join catissue_cp_req_specimen ar on ar.identifier = a.req_specimen_id
+      where
+        ar.spec_req_label is not null or ar.code is not null
     </createView>
   </changeSet>
 </databaseChangeLog>

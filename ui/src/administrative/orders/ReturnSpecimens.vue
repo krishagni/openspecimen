@@ -6,19 +6,19 @@
       </template>
 
       <span class="os-title">
-        <h3>Return Specimens</h3>
+        <h3 v-t="'orders.return_specimens'">Return Specimens</h3>
       </span>
     </os-page-head>
 
     <os-page-body>
       <div>
         <os-add-specimens ref="addSpmns"
-          label="Add specimens by scanning labels or barcodes separated by a comma, tab, or newline"
+          :label="$t('orders.scan_specimen_labels')"
           @on-add="addSpecimens"
         />
 
         <os-message type="error" v-if="ctx.returnItems.length == 0">
-          <span>No specimens to return. Add at least one specimen to return.</span>
+          <span v-t="'orders.no_spmns_to_return'">No specimens to return. Add at least one specimen to return.</span>
         </os-message>
 
         <div v-else>
@@ -30,9 +30,9 @@
           <os-divider />
 
           <div class="os-footer">
-            <os-button primary label="Submit" @click="returnSpecimens" />
+            <os-button primary :label="$t('common.buttons.submit')" @click="returnSpecimens" />
 
-            <os-button text label="Cancel" @click="cancel" />
+            <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default {
 
   created() {
     this.ctx.bcrumb = [
-      {url: routerSvc.getUrl('OrdersList', {orderId: -1}), label: 'Orders'}
+      {url: routerSvc.getUrl('OrdersList', {orderId: -1}), label: this.$t('orders.list')}
     ],
 
     this.returnDate = new Date();
@@ -116,7 +116,7 @@ export default {
           ''
         );
 
-        alertSvc.error('Following specimens are either not distributed or already returned: ' + labels);
+        alertSvc.error({code: 'orders.returned_or_not_distributed', args: {labels: labels}});
       } 
     },
 
@@ -145,7 +145,7 @@ export default {
       );
 
       const resp = await orderSvc.returnSpecimens(payload);
-      alertSvc.success(resp.length + (resp.length == 1 ? ' specimen' : ' specimens') + ' returned!');
+      alertSvc.success({code: 'orders.returned', args: {count: resp.length}});
       routerSvc.goto('OrdersList', {orderId: -1});
     },
 

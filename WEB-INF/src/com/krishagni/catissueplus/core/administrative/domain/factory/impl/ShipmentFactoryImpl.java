@@ -40,7 +40,6 @@ import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
-import com.krishagni.catissueplus.core.common.service.PvValidator;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
@@ -270,7 +269,10 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		}
 
 		if (CollectionUtils.isEmpty(detail.getShipmentSpmns())) {
-			ose.addError(ShipmentErrorCode.NO_SPECIMENS_TO_SHIP);
+			if (shipment.isActive()) {
+				ose.addError(ShipmentErrorCode.NO_SPECIMENS_TO_SHIP);
+			}
+
 			return;
 		}
 
@@ -297,7 +299,10 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		}
 
 		if (CollectionUtils.isEmpty(detail.getShipmentContainers())) {
-			ose.addError(ShipmentErrorCode.NO_CONTAINERS_TO_SHIP);
+			if (shipment.isActive()) {
+				ose.addError(ShipmentErrorCode.NO_CONTAINERS_TO_SHIP);
+			}
+
 			return;
 		}
 
@@ -430,6 +435,7 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		detail.setId(info.getId());
 		detail.setStorageLocation(info.getStorageLocation());
 		detail.setTransferTime(shipment.getReceivedDate());
+		detail.setPrintLabel(info.isPrintLabel());
 
 		if (info.getLabel() != null && isSpmnRelabelingAllowed()) {
 			detail.setLabel(info.getLabel()); // relabeling at time of receiving shipment
@@ -441,6 +447,10 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 			if (NumUtil.greaterThan(info.getAvailableQty(), existing.getInitialQuantity())) {
 				detail.setInitialQty(info.getAvailableQty());
 			}
+		}
+
+		if (info.getExternalIds() != null) {
+			detail.setExternalIds(info.getExternalIds());
 		}
 
 		return specimenFactory.createSpecimen(existing, detail, null);

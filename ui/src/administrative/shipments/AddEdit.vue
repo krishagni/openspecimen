@@ -119,6 +119,22 @@
         </os-steps>
       </div>
     </os-page-body>
+
+    <os-confirm class="os-not-found-confirm" ref="notFoundConfirm">
+      <template #title>
+        <span v-t="'containers.add_containers.not_found'">Containers not found</span>
+      </template>
+
+      <template #message>
+        <div class="message">
+          <div v-t="'containers.add_containers.not_found_msg'">Following containers were not found: </div>
+
+          <div><i>{{ctx.notFound.join(', ')}}</i></div>
+
+          <div v-t="'containers.add_containers.proceed_q'">Do you want to proceed?</div>
+        </div>
+      </template>
+    </os-confirm>
   </os-page>
 </template>
 
@@ -155,7 +171,9 @@ export default {
 
       containersSchema: {columns: []},
 
-      loading: false
+      loading: false,
+
+      notFound: []
     });
 
     const dataCtx = reactive({
@@ -167,16 +185,29 @@ export default {
 
       receivingInstitute: undefined,
 
-      allowSpecimenRelabeling: false
+      allowSpecimenRelabeling: false,
+
+      allowExtIdName: false,
+
+      allowExtIdValue: false,
+
+      defaultExtIdName: undefined
     });
 
     return { ctx, dataCtx };
   },
 
   created: async function() {
-    const setting = await settingsSvc.getSetting('administrative', 'allow_spmn_relabeling');
-    this.dataCtx.allowSpecimenRelabeling = util.isTrue(setting[0].value);
     this.loadShipment();
+
+    const allowRelabeling = await settingsSvc.getSetting('administrative', 'allow_spmn_relabeling');
+    this.dataCtx.allowSpecimenRelabeling = util.isTrue(allowRelabeling[0].value);
+
+    const addExtIds    = await settingsSvc.getSetting('administrative', 'add_spmn_ext_ids');
+    const defExtIdName = await settingsSvc.getSetting('administrative', 'def_ext_id_name');
+    this.dataCtx.allowExtIdName  = util.isTrue(addExtIds[0].value) && !defExtIdName[0].value;
+    this.dataCtx.allowExtIdValue = util.isTrue(addExtIds[0].value);
+    this.dataCtx.defaultExtIdName = defExtIdName[0].value;
   },
 
   computed: {
@@ -262,7 +293,12 @@ export default {
             dataCtx.shipment.receivedDate = new Date();
 
             if (dataCtx.shipment.type == 'SPECIMEN') {
-              dataCtx.specimenItems.forEach(item => item.specimen.storageLocation = null);
+              dataCtx.specimenItems.forEach(
+                item => {
+                  item.specimen.storageLocation = null;
+                  item.specimen.printLabel = (item.specimen.labelAutoPrintMode == 'ON_RECEIVE');
+                }
+              );
             } else {
               dataCtx.containerItems.forEach(item => item.container.storageLocation = null);
             }
@@ -339,8 +375,33 @@ export default {
     getAndAddContainers: async function({itemLabels}) {
       const shipment   = this.dataCtx.shipment;
       const containers = await shipmentSvc.searchContainers(shipment.sendingSite, shipment.receivingSite, itemLabels);
+
+      const notFound = [];
+      for (let name of itemLabels) {
+        let found = false;
+        for (let container of containers) {
+          if (container.name.toLowerCase() == name.toLowerCase()) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          notFound.push(name);
+        }
+      }
+
+      if (notFound.length > 0) {
+        this.ctx.notFound = notFound;
+        const resp = await this.$refs.notFoundConfirm.open();
+        if (resp != 'proceed') {
+          return;
+        }
+      }
+
       const toAdd      = containers.map(container => ({container: container}));
       util.addIfAbsent(this.dataCtx.containerItems, toAdd, 'container.id');
+      this.$refs.addContainers.clearInput();
     },
 
     removeContainer: function({idx}) {
@@ -394,7 +455,22 @@ export default {
 
       const toSave = JSON.parse(JSON.stringify(this.dataCtx.shipment));
       if (toSave.type == 'SPECIMEN') {
-        toSave.shipmentSpmns = JSON.parse(JSON.stringify(this.dataCtx.specimenItems));
+        const items = toSave.shipmentSpmns = JSON.parse(JSON.stringify(this.dataCtx.specimenItems));
+        if (status == 'Received') {
+          for (let item of items) {
+            const specimen = item.specimen;
+            if (specimen.externalIdName || specimen.externalIdValue) {
+              const externalIds = specimen.externalIds = specimen.externalIds || [];
+              const name = specimen.externalIdName || this.dataCtx.defaultExtIdName;
+              const externalId = externalIds.find(eid => eid.name == name);
+              if (externalId) {
+                externalId.value = specimen.externalIdValue;
+              } else {
+                externalIds.push({name, value: specimen.externalIdValue});
+              }
+            }
+          }
+        }
       } else {
         toSave.shipmentContainers = JSON.parse(JSON.stringify(this.dataCtx.containerItems));
       }
@@ -419,3 +495,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-not-found-confirm .message > div {
+  padding: 0.5rem 0.25rem;
+}
+</style>

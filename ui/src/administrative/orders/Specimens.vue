@@ -2,12 +2,11 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="print" label="Print" @click="printLabels" />
+      <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" v-if="printDistLabels" />
 
-      <os-button left-icon="trash" label="Delete" @click="deleteItems"
-        v-show-if-allowed="orderResources.updateOpts" />
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteItems" v-if="updateAllowed" />
 
-      <os-button left-icon="reply" label="Retrieve" @click="retrieveSpecimens"
+      <os-button left-icon="reply" :label="$t('orders.retrieve')" @click="retrieveSpecimens"
         v-if="showRetrieveSpmns && selectedSpecimens.length == 0" />
     </template>
 
@@ -19,14 +18,14 @@
         @updateListSize="getSpecimensCount"
       />
 
-      <os-button left-icon="search" label="Search" @click="toggleSearch" />
+      <os-button left-icon="search" :label="$t('common.buttons.search')" @click="toggleSearch" />
     </template>
   </os-page-toolbar>
 
   <os-query-list-view
     name="order-specimens-list-view"
     :object-id="order.id"
-    :allow-selection="printDistLabels"
+    :allow-selection="allowSelection"
     :include-count="includeCount"
     url="'#/specimens/' + hidden.specimenId"
     @selectedRows="onSpecimenSelection"
@@ -36,20 +35,20 @@
 
   <os-dialog ref="retrieveSpmnComments">
     <template #header>
-      <span> Retrieve Specimens </span>
+      <span v-t="'orders.retrieve_specimens'"> Retrieve Specimens </span>
     </template>
     <template #content>
-      <os-textarea placeholder="Reason for retrieving specimens" rows="5" v-model="retrieveSpmnsReason" />
+      <os-textarea :placeholder="$t('orders.retrieve_reason')" rows="5" v-model="retrieveSpmnsReason" />
     </template>
     <template #footer>
-      <os-button text    label="Cancel" @click="cancelRetrieveSpecimens" />
-      <os-button primary label="Retrieve" @click="submitRetrieveSpecimens" />
+      <os-button text    :label="$t('common.buttons.cancel')" @click="cancelRetrieveSpecimens" />
+      <os-button primary :label="$t('orders.retrieve')" @click="submitRetrieveSpecimens" />
     </template>
   </os-dialog>
 
   <os-confirm-delete ref="deleteDialog" :captcha="false">
     <template #message>
-      <span>Are you sure you want to remove the selected specimens from the order?</span>
+      <span v-t="'orders.confirm_rm_specimens'">Are you sure you want to remove the selected specimens from the order?</span>
     </template>
   </os-confirm-delete>
 </template>
@@ -58,6 +57,7 @@
 
 import orderSvc   from '@/administrative/services/Order.js';
 import alertSvc   from '@/common/services/Alerts.js';
+import authSvc    from '@/common/services/Authorization.js';
 import routerSvc  from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
 
@@ -68,7 +68,11 @@ export default {
 
   data() {
     return {
+      updateAllowed: false,
+
       printDistLabels: false,
+
+      allowSelection: false,
 
       showRetrieveSpmns: false,
 
@@ -85,6 +89,9 @@ export default {
   async created() {
     const setting = await settingSvc.getSetting('administrative', 'allow_dist_label_printing');
     this.printDistLabels = setting[0].value == 'true' || setting[0].value == true;
+
+    this.updateAllowed = authSvc.isAllowed(orderResources.updateOpts);
+    this.allowSelection = this.printDistLabels || this.updateAllowed;
 
     if (this.order.status == 'EXECUTED') {
       const items = await orderSvc.getOrderItems(this.order.id, {maxResults: 1, storedInDistributionContainer: true});
@@ -112,7 +119,7 @@ export default {
 
     printLabels: async function() {
       if (this.selectedSpecimens.length == 0) {
-        alertSvc.error('No specimens selected.');
+        alertSvc.error({code: 'orders.no_specimen_selected'});
         return;
       }
 
@@ -126,13 +133,13 @@ export default {
       if (downloadEnabled) {
         orderSvc.downloadLabelsFile(printJob.id, this.order.name + '.csv');
       } else {
-        alertSvc.success('Distribution labels print job ' + printJob.id + ' created.');
+        alertSvc.success({code: 'orders.print_job_created', args: printJob});
       }
     },
 
     deleteItems: async function() {
       if (this.selectedSpecimens.length == 0) {
-        alertSvc.error('No specimens selected.');
+        alertSvc.error({code: 'orders.no_specimen_selected'});
         return;
       }
 
@@ -142,8 +149,7 @@ export default {
       }
 
       const result = await orderSvc.deleteOrderItems(this.order.id, this.selectedSpecimens);
-      const subject = result.deleted == 1 ? ' specimen ' : ' specimens ';
-      alertSvc.success(result.deleted + subject + ' deleted from the order!');
+      alertSvc.success({code: 'orders.spmns_removed', args: {count: result.deleted}});
       if (result.deleted > 0) {
         this.$refs.specimensList.reload();
       }

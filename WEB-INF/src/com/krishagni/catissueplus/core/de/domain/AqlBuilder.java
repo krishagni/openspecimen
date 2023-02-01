@@ -265,7 +265,7 @@ public class AqlBuilder {
 	private String buildFilterExpr(Context ctx, Filter filter) {
 		if (filter.getExpr() != null) {
 			Triple<String, String, String> tObj = getTemporalObj(filter.getExpr());
-			if (StringUtils.isBlank(tObj.getRight()) && filter.isParameterized()) {
+			if (tObj != null && StringUtils.isBlank(tObj.getRight()) && filter.isParameterized()) {
 				return tObj.getLeft() + " any ";
 			}
 
@@ -283,15 +283,6 @@ public class AqlBuilder {
 			return filterExpr.append(filter.getOp().symbol()).append(" ").toString();
 		}
 
-		if (filter.getValues() == null || Stream.of(filter.getValues()).allMatch(e -> StringUtils.isBlank(e))) {
-			if (filter.isParameterized()) {
-				return filterExpr.append(" any ").toString();
-			}
-
-			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid filter: " + filter.getId());
-		}
-
-		filterExpr.append(filter.getOp().symbol()).append(" ");
 		if (filter.getSubQueryId() != null) {
 			SavedQuery query = filter.getSubQuery();
 			if (query == null) {
@@ -302,8 +293,20 @@ public class AqlBuilder {
 			ctx.addActiveQuery(filter.getSubQueryId());
 			String subAql = getQuery(ctx, new Object[] { field }, query.getFilters(), null, query.getQueryExpression(), query.getHavingClause(), null, null);
 			ctx.removeActiveQuery(filter.getSubQueryId());
-			return filterExpr.append("(").append(subAql).append(")").toString();
+			return filterExpr.append(filter.getOp().symbol())
+				.append(" (").append(subAql).append(")")
+				.toString();
 		}
+
+		if (filter.getValues() == null || Stream.of(filter.getValues()).allMatch(e -> StringUtils.isBlank(e))) {
+			if (filter.isParameterized()) {
+				return filterExpr.append(" any ").toString();
+			}
+
+			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid filter: " + filter.getId());
+		}
+
+		filterExpr.append(filter.getOp().symbol()).append(" ");
 
 		Container form = null;
 		String ctrlName = null;
@@ -571,7 +574,7 @@ public class AqlBuilder {
 	private Triple getTemporalObj(String temporalExpr) {
 		Matcher matcher = TEMPORAL_EXPR.matcher(temporalExpr);
 		if (!matcher.find()) {
-			throw OpenSpecimenException.userError(SavedQueryErrorCode.MALFORMED, "Invalid temporal expression: " + temporalExpr);
+			return null;
 		}
 
 		String lhs = temporalExpr.substring(0, matcher.start());

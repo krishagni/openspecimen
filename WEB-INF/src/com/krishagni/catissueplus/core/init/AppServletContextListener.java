@@ -1,7 +1,7 @@
 package com.krishagni.catissueplus.core.init;
 
 import java.io.File;
-import java.lang.reflect.Method;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -17,8 +17,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.common.PluginManager;
 import com.krishagni.catissueplus.core.common.util.ClassPathUtil;
@@ -41,13 +41,14 @@ public class AppServletContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
 			if (Utility.isRootUser()) {
-				System.err.println("****************************************");
-				System.err.println("*        ERROR! ERROR!! ERROR!!!       *");
-				System.err.println("****************************************");
-				System.err.println("OpenSpecimen is started using root user.");
-				System.err.println("Avoid using root user to run OpenSpecimen.");
-				System.err.println("Instead consider using a regular user account.");
-				System.err.println("Exiting");
+				System.err.println(" ***************************************************");
+				System.err.println(" *        ERROR! ERROR!! ERROR!!!                  *");
+				System.err.println(" ***************************************************");
+				System.err.println(" OpenSpecimen is started using root user.");
+				System.err.println(" Avoid using root user to run OpenSpecimen.");
+				System.err.println(" Instead consider using a regular user account.");
+				System.err.println(" Exiting");
+				System.err.println(" ***************************************************");
 				System.exit(1);
 			}
 
@@ -56,8 +57,20 @@ public class AppServletContextListener implements ServletContextListener {
 
 			Properties props = AppProperties.getInstance(tomcatDir, getContextName(sce)).getProperties();
 
-			String msg = getWelcomeMessage();
+			double maxSizeGb = getMaxSizeInGb();
+			String msg = getWelcomeMessage(maxSizeGb);
 			writeToConsole(msg);
+			if (maxSizeGb < 2.0) {
+				System.err.println(" ***************************************************");
+				System.err.println(" *        ERROR! ERROR!! ERROR!!!                  *");
+				System.err.println(" ***************************************************");
+				System.err.println(" OpenSpecimen is started using < 2GB heap size.");
+				System.err.println(" Minimum 2GB heap required.");
+				System.err.println(" Consider using -Xmx2048m option when starting Tomcat");
+				System.err.println(" Exiting");
+				System.err.println(" ***************************************************");
+				System.exit(1);
+			}
 
 			initLogging(props);
 			writeToLogFile(msg);
@@ -172,7 +185,7 @@ public class AppServletContextListener implements ServletContextListener {
 		logger.info(msg);
 	}
 
-	private String getWelcomeMessage() {
+	private String getWelcomeMessage(double maxSizeInGb) {
 		AppProperties appProps = AppProperties.getInstance();
 
 		return
@@ -182,6 +195,56 @@ public class AppServletContextListener implements ServletContextListener {
 			"\n Build Date    : " + new Date(Long.parseLong(appProps.getBuildDate())) +
 			"\n Commit        : " + appProps.getBuildRevision() +
 			"\n Present Time  : " + Calendar.getInstance().getTime() +
+			"\n Max. Heap Size: " + String.format("%.2f GB", maxSizeInGb) +
 			"\n ***************************************************";
+	}
+
+	private double getMaxSizeInGb() {
+		double maxMemory = Runtime.getRuntime().maxMemory();
+		for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+			arg = arg.trim().toLowerCase();
+			if (arg.startsWith("-xmx")) {
+				arg = arg.substring(4).toLowerCase().trim();
+
+				int unitIdx = -1;
+				for (char ch : arg.toCharArray()) {
+					++unitIdx;
+					if (!Character.isDigit(ch)) {
+						break;
+					}
+				}
+
+				String sizeStr = arg.substring(0, unitIdx).trim();
+				String unit = arg.substring(unitIdx).trim();
+
+				double factor = 1;
+				switch (unit) {
+					case "k":
+					case "kb":
+						factor = 1024.0;
+						break;
+
+					case "m":
+					case "mb":
+						factor = 1024.0 * 1024.0;
+						break;
+
+					case "g":
+					case "gb":
+						factor = 1024.0 * 1024.0 * 1024.0;
+						break;
+
+					case "t":
+					case "tb":
+						factor = 1024.0 * 1024.0 * 1024.0;
+						break;
+				}
+
+				maxMemory = Double.parseDouble(sizeStr) * factor;
+				break;
+			}
+		}
+
+		return (maxMemory / (1024.0 * 1024.0 * 1024.0));
 	}
 }

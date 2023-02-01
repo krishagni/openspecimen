@@ -819,6 +819,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		boolean wasInstituteAdmin = existingUser.isInstituteAdmin();
 		String prevStatus = existingUser.getActivityStatus();
 		Institute prevInstitute = existingUser.getInstitute();
+		String prevEmailId = existingUser.getEmailAddress();
 		existingUser.update(user);
 		ensureApiUserUpdateByAdmin(existingUser, null);
 
@@ -826,6 +827,25 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			AccessCtrlMgr.getInstance().ensureDeleteUserRights(existingUser);
 		} else {
 			AccessCtrlMgr.getInstance().ensureUpdateUserRights(existingUser);
+			if (!StringUtils.equals(prevEmailId, existingUser.getEmailAddress())) {
+				//
+				// Email ID has changed
+				//
+				if (!AuthUtil.isAdmin() && !AuthUtil.isInstituteAdmin()) {
+					//
+					// Updater requires to be either super admin or institute admin
+					//
+					throw OpenSpecimenException.userError(RbacErrorCode.INST_ADMIN_RIGHTS_REQ, existingUser.getInstitute().getName());
+				}
+
+				if (existingUser.equals(AuthUtil.getCurrentUser())) {
+					//
+					// Updater cannot update his or her own email ID
+					// Email ID has to be updated by other super admins or institute admins
+					//
+					throw OpenSpecimenException.userError(UserErrorCode.EMAIL_SELF_UPDATE_NA);
+				}
+			}
 		}
 
 		if (isActivated(prevStatus, user.getActivityStatus())) {
@@ -931,6 +951,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	} 
 	
 	private void sendUserCreatedEmail(User user, ForgotPasswordToken token) {
+		logger.info("Sending user created email.");
 		Map<String, Object> props = new HashMap<>();
 		props.put("user", user);
 		props.put("token", token);
@@ -938,6 +959,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		props.put("ignoreDnd", true);
 		props.put("passwordRules", ConfigUtil.getInstance().getStrSetting(AUTH_MOD, PASSWD_RULES));
 		EmailUtil.getInstance().sendEmail(USER_CREATED_EMAIL_TMPL, new String[]{user.getEmailAddress()}, null, props);
+		logger.info("Sent user created email.");
 	}
 
 	private void sendUserSignupEmail(User user) {

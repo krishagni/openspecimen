@@ -51,7 +51,7 @@
   <template v-for="(field, idx) of fields.subform" :key="idx">
     <Section>
       <template #title>
-        <span>{{label(field)}}></span>
+        <span>{{label(field)}}</span>
       </template>
       <template #content>
         <div class="os-sf-table">
@@ -59,7 +59,7 @@
             <thead>
               <tr>
                 <th v-for="sfField in field.fields" :key="sfField.name">
-                  <span>{{sfField.label}}</span>
+                  <span>{{label(sfField)}}</span>
                 </th>
               </tr>
             </thead>
@@ -262,9 +262,9 @@ export default {
               value = position.displayName + ' (' + position.name + ')';
             }
 
-            if (position.mode == 'TWO_D') {
+            if (position.mode == 'TWO_D' && position.positionY && position.positionX) {
               value += ' (' + position.positionY + ', ' + position.positionX + ')';
-            } else if (position.mode == 'LINEAR') {
+            } else if (position.mode == 'LINEAR' && position.position >= 0) {
               value += ' (' + position.position + ')';
             }
           }

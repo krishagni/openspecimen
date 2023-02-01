@@ -289,6 +289,19 @@ select.form-control.de-input-error + .chosen-container-multi .chosen-choices {
   padding-bottom: 6px;
 }
 
+.select2-container ~ .clear-option {
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  right: 24px;
+  top: calc(50% - 2px);
+  font-size: 8px;
+  text-decoration: none;
+  color: #333;
+  opacity: 0.6;
+  border: 0;
+}
+
 .de-addon {
   position:relative;
 }
@@ -431,3 +444,4 @@ select.form-control.de-input-error + .chosen-container-multi .chosen-choices {
 .de-form .panel-title .pb {
   float: right;
 }
+

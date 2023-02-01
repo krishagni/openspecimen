@@ -30,4 +30,6 @@ public interface ShipmentDao extends Dao<Shipment> {
 	Map<Long, Integer> getSpecimensCount(Collection<Long> shipmentIds);
 
 	Map<Long, Integer> getSpecimensCountByContainer(Long shipmentId, Collection<Long> containerIds);
+
+	Integer deleteSpecimenShipmentEvents(Long shipmentId);
 }

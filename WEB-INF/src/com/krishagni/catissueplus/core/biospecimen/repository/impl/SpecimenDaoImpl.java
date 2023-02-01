@@ -65,6 +65,14 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@Override
+	public Long getMaxSpecimenId(SpecimenListCriteria crit) {
+		Criteria<Long> query = createCriteria(Specimen.class, Long.class, "specimen");
+		query.select(query.max("specimen.id"))
+			.in("specimen.id", getSpecimenIdsQuery(crit, query));
+		return query.uniqueResult();
+	}
+
+	@Override
 	public Specimen getByLabel(String label) {
 		List<Specimen> specimens = createNamedQuery(GET_BY_LABEL, Specimen.class)
 			.setParameter("label", label)
@@ -461,6 +469,9 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		}
 
 		query.add(query.gt("specimen.id", crit.lastId()));
+		if (crit.enableIdRange()) {
+			query.add(query.le("specimen.id", crit.lastId() + crit.rangeFactor() * crit.maxResults()));
+		}
 	}
 
 	private void addLineageCond(AbstractCriteria<?, ?> query, SpecimenListCriteria crit) {

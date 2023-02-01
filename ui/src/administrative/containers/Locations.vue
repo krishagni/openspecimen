@@ -50,9 +50,11 @@
         v-if="!isDimensionless">
         <template #occupant_container="slotProps">
           <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
-            <os-icon class="container-icon" name="box-open" />
+            <os-icon class="blocked" name="ban" v-os-tooltip="$t('containers.blocked')"
+              v-if="slotProps.occupant.blocked" />
+            <os-icon class="container-icon" name="box-open" v-else />
             <span class="name" v-os-tooltip="slotProps.occupant.tooltip">
-              <span>{{slotProps.occupant.displayName}}</span>
+              <span>{{slotProps.occupant.displayName || slotProps.occupant.blockedEntityName}}</span>
             </span>
           </a>
         </template>
@@ -320,7 +322,11 @@ export default {
       const currentTarget = event.currentTarget;
       this.ctx.occupant = {};
 
-      const entityId = occupant.occupyingEntityId;
+      const entityId = occupant.occupyingEntityId || occupant.blockedEntityId;
+      if (!entityId) {
+        return;
+      }
+
       if (occupant.occuypingEntity == 'container') {
         if (!this.ctx.containerDict) {
           this.ctx.containerDict = containerSvc.getSummaryDict();

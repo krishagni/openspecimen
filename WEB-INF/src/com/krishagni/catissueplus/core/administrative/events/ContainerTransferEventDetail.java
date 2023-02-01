@@ -5,15 +5,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import com.krishagni.catissueplus.core.administrative.domain.ContainerTransferEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ContainerTransferEventDetail {
 	private Long id;
 
 	private Long containerId;
 
 	private String containerName;
+
+	private String containerBarcode;
+
+	private String containerDisplayName;
+
+	private String typeName;
 
 	private String fromSite;
 
@@ -28,6 +37,14 @@ public class ContainerTransferEventDetail {
 	private Date time;
 
 	private String reason;
+
+	private String freezerName;
+
+	private String freezerBarcode;
+
+	private String freezerDisplayName;
+
+	private List<String> cps;
 
 	public Long getId() {
 		return id;
@@ -51,6 +68,30 @@ public class ContainerTransferEventDetail {
 
 	public void setContainerName(String containerName) {
 		this.containerName = containerName;
+	}
+
+	public String getContainerBarcode() {
+		return containerBarcode;
+	}
+
+	public void setContainerBarcode(String containerBarcode) {
+		this.containerBarcode = containerBarcode;
+	}
+
+	public String getContainerDisplayName() {
+		return containerDisplayName;
+	}
+
+	public void setContainerDisplayName(String containerDisplayName) {
+		this.containerDisplayName = containerDisplayName;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
 	}
 
 	public String getFromSite() {
@@ -109,6 +150,38 @@ public class ContainerTransferEventDetail {
 		this.reason = reason;
 	}
 
+	public String getFreezerName() {
+		return freezerName;
+	}
+
+	public void setFreezerName(String freezerName) {
+		this.freezerName = freezerName;
+	}
+
+	public String getFreezerBarcode() {
+		return freezerBarcode;
+	}
+
+	public void setFreezerBarcode(String freezerBarcode) {
+		this.freezerBarcode = freezerBarcode;
+	}
+
+	public String getFreezerDisplayName() {
+		return freezerDisplayName;
+	}
+
+	public void setFreezerDisplayName(String freezerDisplayName) {
+		this.freezerDisplayName = freezerDisplayName;
+	}
+
+	public List<String> getCps() {
+		return cps;
+	}
+
+	public void setCps(List<String> cps) {
+		this.cps = cps;
+	}
+
 	public static List<ContainerTransferEventDetail> from(Collection<ContainerTransferEvent> events) {
 		return events.stream().map(ContainerTransferEventDetail::from).collect(Collectors.toList());
 	}
@@ -120,6 +193,8 @@ public class ContainerTransferEventDetail {
 		result.setToSite(event.getToSite().getName());
 		result.setContainerId(event.getContainer().getId());
 		result.setContainerName(event.getContainer().getName());
+		result.setContainerBarcode(event.getContainer().getBarcode());
+		result.setContainerDisplayName(event.getContainer().getDisplayName());
 		result.setUser(UserSummary.from(event.getUser()));
 		result.setTime(event.getTime());
 		result.setReason(event.getReason());
@@ -128,6 +203,7 @@ public class ContainerTransferEventDetail {
 			StorageLocationSummary fromLocation = new StorageLocationSummary();
 			fromLocation.setId(event.getFromContainer().getId());
 			fromLocation.setName(event.getFromContainer().getName());
+			fromLocation.setDisplayName(event.getFromContainer().getDisplayName());
 			fromLocation.setPositionY(event.getFromRow());
 			fromLocation.setPositionX(event.getFromColumn());
 			fromLocation.setPosition(event.getFromPosition());
@@ -139,6 +215,7 @@ public class ContainerTransferEventDetail {
 			StorageLocationSummary toLocation = new StorageLocationSummary();
 			toLocation.setId(event.getToContainer().getId());
 			toLocation.setName(event.getToContainer().getName());
+			toLocation.setDisplayName(event.getToContainer().getDisplayName());
 			toLocation.setPositionY(event.getToRow());
 			toLocation.setPositionX(event.getToColumn());
 			toLocation.setPosition(event.getToPosition());

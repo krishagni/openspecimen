@@ -2,12 +2,12 @@
   <os-page-toolbar>
     <template #default>
       <os-button v-show-if-allowed="orderResources.updateOpts"
-        left-icon="edit" label="Edit" @click="editOrder" />
+        left-icon="edit" :label="$t('common.buttons.edit')" @click="editOrder" />
 
-      <os-button left-icon="download" label="Download Report" @click="downloadReport" />
+      <os-button left-icon="download" :label="$t('orders.download_report')" @click="downloadReport" />
 
       <os-button v-show-if-allowed="orderResources.deleteOpts"
-        left-icon="trash" label="Delete" @click="deleteOrder" />
+        left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteOrder" />
 
       <os-plugin-views page="order-detail" view="more-menu" :view-props="{order: ctx.order}" />
     </template>
@@ -25,7 +25,7 @@
 
   <os-confirm-delete ref="deleteDialog" :captcha="false">
     <template #message>
-      <span>Order '{{order.name}}' and any dependent data will be deleted. Are you sure you want to proceed?</span>
+      <span v-t="{path: 'orders.confirm_delete_msg', args: ctx.order}">Order '{{order.name}}' and any dependent data will be deleted. Are you sure you want to proceed?</span>
     </template>
   </os-confirm-delete>
 </template>
@@ -111,9 +111,9 @@ export default {
 
           const result = await orderSvc.delete(this.order);
           if (!result.completed) {
-            alertsSvc.info('Deletion of order is taking more time than anticipated. An email notification will be sent to you on deletion.');
+            alertsSvc.info({code: 'orders.delete_more_time'});
           } else {
-            alertsSvc.success('Order #' + this.order.id + ': ' + this.order.name + ' deleted!');
+            alertsSvc.success({code: 'orders.deleted', args: this.order});
           }
 
           routerSvc.goto('OrdersList', {orderId: -2}, this.ctx.routeQuery);

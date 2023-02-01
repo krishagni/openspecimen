@@ -24,6 +24,8 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 
 	private String defaultValue;
 
+	private boolean hasNumericValues;
+
 	public String getAttribute() {
 		return attribute;
 	}
@@ -56,6 +58,14 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		this.defaultValue = defaultValue;
 	}
 
+	public boolean getHasNumericValues() {
+		return hasNumericValues;
+	}
+
+	public void setHasNumericValues(boolean hasNumericValues) {
+		this.hasNumericValues = hasNumericValues;
+	}
+
 	@Override
 	public Long fromString(String s) {
 		if (StringUtils.isBlank(s)) {
@@ -63,7 +73,13 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		}
 
 		try {
-			return Long.parseLong(s);
+			Long pvId = Long.parseLong(s);
+			Long idByValue = null;
+			if (hasNumericValues) {
+				idByValue = getIdByValue(s);
+			}
+
+			return idByValue != null ? idByValue : pvId;
 		} catch (NumberFormatException nfe) {
 			return getIdByValue(s);
 		}
@@ -81,6 +97,7 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		props.put("attribute", attribute);
 		props.put("leafValue", leafNode);
 		props.put("rootValue", rootNode);
+		props.put("numericValues", hasNumericValues);
 		props.put("defaultValue", defaultValue);
 	}
 
@@ -91,6 +108,7 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		XmlUtil.writeElement(writer, "attribute", attribute);
 		XmlUtil.writeElement(writer, "leafValue", leafNode);
 		XmlUtil.writeElement(writer, "rootValue", rootNode);
+		XmlUtil.writeElement(writer, "numericValues", hasNumericValues);
 		XmlUtil.writeCDataElement(writer, "defaultValue", defaultValue);
 		XmlUtil.writeElementEnd(writer, "pvField");
 	}
