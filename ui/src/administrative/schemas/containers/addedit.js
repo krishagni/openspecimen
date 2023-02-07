@@ -81,6 +81,44 @@ export default {
       {
         "fields": [
           {
+            "type": "textarea",
+            "name": "displayNames",
+            "labelCode": "containers.display_names",
+            "placeholderCode": "containers.scan_display_names",
+            "showWhen": "createType == 'multiple'"
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
+            "type": "textarea",
+            "name": "uniqueNames",
+            "labelCode": "containers.names",
+            "placeholderCode": "containers.scan_unique_names",
+            "showWhen": "createType == 'multiple' && !container.typeName",
+            "validations": {
+              "required": {
+                "messageCode": "containers.unique_names_required"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
+            "type": "textarea",
+            "name": "barcodes",
+            "labelCode": "containers.barcodes",
+            "placeholderCode": "containers.scan_barcodes",
+            "showWhen": "createType == 'multiple'"
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
             "name": "container.siteName",
             "showWhen": "!container.id && !parentContainer"
           }
