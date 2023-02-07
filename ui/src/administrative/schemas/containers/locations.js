@@ -19,6 +19,18 @@ export default {
       }
     },
     {
+      "name": "container.barcode",
+      "labelCode": "containers.barcode",
+      "type": "text",
+      "showWhen": "showBarcodes"
+    },
+    {
+      "name": "container.displayName",
+      "labelCode": "containers.display_name",
+      "type": "text",
+      "showWhen": "showDisplayNames"
+    },
+    {
       "name": "container.siteName",
       "labelCode": "containers.site",
       "type": "site",

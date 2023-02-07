@@ -263,6 +263,10 @@ export default {
              }
            }
 
+           if (field.placeholderCode) {
+             field.placeholder = this.$t(field.placeholderCode);
+           }
+
            formRow.push(field);
          }
 

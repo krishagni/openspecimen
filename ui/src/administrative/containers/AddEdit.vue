@@ -94,6 +94,12 @@ export default {
       containers: [],
 
       parentContainer: null,
+
+      displayNames: '',
+
+      uniqueNames: '',
+
+      barcodes: ''
     });
 
     return { ctx, dataCtx };
@@ -264,17 +270,50 @@ export default {
           positions = await containerSvc.getVacantPositions(position, dataCtx.numOfContainers);
         }
 
-        this.createMultipleContainers(dataCtx.numOfContainers, container, positions);
+        this.createMultipleContainers(dataCtx, container, positions);
       } else if (dataCtx.createType == 'hierarchy') {
         this.createHierarchy(container);
       }
     },
 
-    createMultipleContainers: function(numContainers, container, positions) {
+    createMultipleContainers: function(ctx, container, positions) {
       const containers = [];
-      for (var i = 0; i < numContainers; ++i) {
+
+      let names = [];
+      if (!container.typeName) {
+        names = util.splitStr(ctx.uniqueNames || '', /,|\t|\n/, true);
+        if (names.length < ctx.numOfContainers || names.length > ctx.numOfContainers) {
+          const msgCode = names.length < ctx.numOfContainers ? 'less_names_than_count' : 'more_names_than_count';
+          alertsSvc.error({
+            code: 'containers.' + msgCode,
+            args: {names: names.length, count: ctx.numOfContainers}
+          });
+
+          return;
+        }
+      }
+
+      const displayNames   = util.splitStr(ctx.displayNames || '', /,|\t|\n/, true);
+      ctx.showDisplayNames = displayNames.length > 0
+
+      const barcodes   = util.splitStr(ctx.barcodes || '', /,|\t|\n/, true);
+      ctx.showBarcodes = barcodes.length > 0
+
+      for (var i = 0; i < ctx.numOfContainers; ++i) {
         const copy = util.clone(container);
         delete copy.numOfContainers;
+        if (i < names.length) {
+          copy.name = names[i];
+        }
+
+        if (i < barcodes.length) {
+          copy.barcode = barcodes[i];
+        }
+
+        if (i < displayNames.length) {
+          copy.displayName = displayNames[i];
+        }
+
         if (positions.length > 0) {
           copy.storageLocation = positions[i];
         }
