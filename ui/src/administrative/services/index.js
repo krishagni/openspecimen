@@ -1,4 +1,5 @@
 
+import boxScanner       from './BoxScanner.js';
 import containerSvc     from './Container.js';
 import containerTypeSvc from './ContainerType.js';
 import instituteSvc     from './Institute.js';
@@ -11,6 +12,7 @@ export default {
   install(app) {
     let osSvc = app.config.globalProperties.$osSvc = app.config.globalProperties.$osSvc || {};
     Object.assign(osSvc, {
+      boxScanner:       boxScanner,
       containerSvc:     containerSvc,
       containerTypeSvc: containerTypeSvc,
       instituteSvc:     instituteSvc,
