@@ -32,6 +32,11 @@ class CpWorkflow {
     return workflow && workflow.data;
   }
 
+  async getSysWorkflow(wfName) {
+    let workflow = await this._loadWorkflows(-1, wfName);
+    return workflow && workflow.data;
+  }
+
   overrideFields(baseFields, fields) {
     const baseFieldsMap       = this._objLookupMap(baseFields);
     const overriddenFieldsMap = this._objLookupMap(fields, 'baseField');

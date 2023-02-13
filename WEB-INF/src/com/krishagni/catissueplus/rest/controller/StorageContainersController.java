@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
+import com.krishagni.catissueplus.core.administrative.events.BoxDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerDefragDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerHierarchyDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerQueryCriteria;
@@ -834,6 +835,20 @@ public class StorageContainersController {
 		ResponseEvent<List<StorageLocationSummary>> resp = storageContainerSvc.getVacantPositions(req);
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/box-specimens")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> addBoxSpecimens(@RequestBody BoxDetail input) {
+		return ResponseEvent.unwrap(storageContainerSvc.addBoxSpecimens(RequestEvent.wrap(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/box-specimens")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> updateBoxSpecimens(@RequestBody BoxDetail input) {
+		return ResponseEvent.unwrap(storageContainerSvc.updateBoxSpecimens(RequestEvent.wrap(input)));
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/{id}/labels")

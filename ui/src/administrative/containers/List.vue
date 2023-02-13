@@ -125,6 +125,7 @@ import alertsSvc    from '@/common/services/Alerts.js';
 import authSvc      from '@/common/services/Authorization.js';
 import exportSvc    from '@/common/services/ExportService.js';
 import routerSvc    from '@/common/services/Router.js';
+import wfSvc        from '@/common/services/Workflow.js';
 
 import containerResources from './Resources.js';
 
@@ -212,6 +213,26 @@ export default {
 
       containerResources
     };
+  },
+
+  created() {
+    if (this.actionOpts.length == 0) {
+      return;
+    }
+
+    wfSvc.getSysWorkflow('box-scanners').then(
+      ({scanners}) => {
+        if (!scanners || scanners.length == 0) {
+          return;
+        }
+
+        this.actionOpts.push({
+          icon: 'qrcode',
+          caption: this.$t('containers.scan_boxes'),
+          onSelect: () => routerSvc.goto('ScanBoxes')
+        });
+      }
+    );
   },
 
   methods: {

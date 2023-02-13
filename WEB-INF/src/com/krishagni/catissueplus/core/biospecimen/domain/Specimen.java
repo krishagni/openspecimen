@@ -1425,6 +1425,10 @@ public class Specimen extends BaseExtensionEntity {
 		}
 	}
 
+	public void virtualise(String comments) {
+		virtualize(Calendar.getInstance().getTime(), comments);
+	}
+
 	private void updateCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
 		if (getParentEvent() != null && createdOn != null && !createdOn.equals(getParentEvent().getTime())) {

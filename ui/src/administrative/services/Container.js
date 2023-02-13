@@ -220,8 +220,20 @@ class Container {
     return http.put('container-tasks/' + payload.id, payload);
   }
 
+  async addBoxSpecimens(boxSpecimens) {
+    return http.post('storage-containers/box-specimens', boxSpecimens);
+  }
+
+  async updateBoxSpecimens(boxSpecimens) {
+    return http.put('storage-containers/box-specimens', boxSpecimens);
+  }
+
   async getSpecimen(specimenId) {
     return http.get('specimens/' + specimenId);
+  }
+
+  async searchSpecimens(criteria) {
+    return http.post('specimens/search', criteria);
   }
 
   async getDict() {

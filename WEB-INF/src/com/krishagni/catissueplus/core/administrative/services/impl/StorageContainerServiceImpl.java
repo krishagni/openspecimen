@@ -44,6 +44,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCo
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerFactory;
 import com.krishagni.catissueplus.core.administrative.events.AutoFreezerReportDetail;
+import com.krishagni.catissueplus.core.administrative.events.BoxDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ContainerDefragDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerHierarchyDetail;
@@ -1138,6 +1139,91 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			return ResponseEvent.response(
 				vacantPositions.stream().map(StorageLocationSummary::from).collect(Collectors.toList()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	//
+	// Box scanning APIs
+	//
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Object>> addBoxSpecimens(RequestEvent<BoxDetail> req) {
+		try {
+			BoxDetail input = req.getPayload();
+			if (StringUtils.isBlank(input.getType())) {
+				return ResponseEvent.userError(StorageContainerErrorCode.TYPE_REQUIRED);
+			}
+
+			StorageContainerDetail boxDetail = new StorageContainerDetail();
+			boxDetail.setName("dummy_" + Calendar.getInstance().getTime().getTime());
+			boxDetail.setBarcode(input.getBarcode());
+			boxDetail.setTypeName(input.getType());
+			boxDetail.setStorageLocation(input.getStorageLocation());
+			StorageContainer box = createStorageContainer(null, boxDetail);
+			box.setName(nameGenerator.generateLabel(box.getType().getNameFormat(), box));
+
+			List<StorageContainerPosition> positions = Utility.nullSafeStream(input.getPositions())
+				.map(posDetail -> createPosition(box, posDetail, false))
+				.collect(Collectors.toList());
+
+			box.assignPositions(positions, false);
+			daoFactory.getStorageContainerDao().saveOrUpdate(box, true);
+
+			Map<String, Object> result = new HashMap<>();
+			result.put("id", box.getId());
+			result.put("name", box.getName());
+			result.put("barcode", box.getBarcode());
+			result.put("specimens", positions.size());
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Object>> updateBoxSpecimens(RequestEvent<BoxDetail> req) {
+		try {
+			BoxDetail input = req.getPayload();
+			StorageContainer box = getContainer(input.getId(), null, input.getBarcode());
+
+			StorageContainerDetail boxDetail = new StorageContainerDetail();
+			boxDetail.setId(box.getId());
+			boxDetail.setStorageLocation(input.getStorageLocation());
+			updateStorageContainer0(boxDetail, true);
+
+			Map<Long, Specimen> existing = new HashMap<>();
+			for (StorageContainerPosition existingPos : box.getOccupiedPositions()) {
+				if (existingPos.getOccupyingSpecimen() != null) {
+					existing.put(existingPos.getOccupyingSpecimen().getId(), existingPos.getOccupyingSpecimen());
+				}
+			}
+
+			List<StorageContainerPosition> positions = new ArrayList<>();
+			for (StorageContainerPositionDetail pos : input.getPositions()) {
+				existing.remove(pos.getOccupyingEntityId());
+				positions.add(createPosition(box, pos, true));
+			}
+
+			box.assignPositions(positions, true);
+			for (Specimen specimen : existing.values()) {
+				specimen.virtualise("Scanned box");
+			}
+
+			daoFactory.getStorageContainerDao().saveOrUpdate(box, true);
+
+			Map<String, Object> result = new HashMap<>();
+			result.put("id", box.getId());
+			result.put("name", box.getName());
+			result.put("barcode", box.getBarcode());
+			result.put("specimens", positions.size());
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
