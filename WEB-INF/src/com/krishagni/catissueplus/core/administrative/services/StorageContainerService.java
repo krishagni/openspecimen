@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerStoreList;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.events.AutoFreezerReportDetail;
+import com.krishagni.catissueplus.core.administrative.events.BoxDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerDefragDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerHierarchyDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerQueryCriteria;
@@ -127,6 +128,13 @@ public interface StorageContainerService {
 	ResponseEvent<List<StorageContainerSummary>> getDescendantContainers(RequestEvent<StorageContainerListCriteria> req);
 
 	ResponseEvent<List<StorageLocationSummary>> getVacantPositions(RequestEvent<VacantPositionsOp> req);
+
+	//
+	// Box APIs
+	//
+	ResponseEvent<Map<String, Object>> addBoxSpecimens(RequestEvent<BoxDetail> req);
+
+	ResponseEvent<Map<String, Object>> updateBoxSpecimens(RequestEvent<BoxDetail> req);
 
 	//
 	// Auto freezer APIs

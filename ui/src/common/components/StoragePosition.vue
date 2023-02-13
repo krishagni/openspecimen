@@ -156,9 +156,9 @@ export default {
           return [];
         }
       } else if (this.entityType == 'storage_container') {
-        if (!crit.site) {
-          return [];
-        }
+        // if (!crit.site) {
+        //  return [];
+        // }
       } else if (this.entityType == 'order_item') {
         if (!crit.dpShortTitle) {
           return [];

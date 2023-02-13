@@ -667,6 +667,11 @@ const routes = [
           return {checkout: false, checkin: true}
         }
       },
+      {
+        path: 'scan-boxes',
+        name: 'ScanBoxes',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/ScanBoxes.vue')
+      },
 
 
       /**********************************
