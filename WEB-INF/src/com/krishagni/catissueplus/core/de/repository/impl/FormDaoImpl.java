@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -444,17 +445,21 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	@Override
 	public Pair<String, Long> getFormNameContext(Long cpId, String entityType, Long entityId) {
 		List<Object[]> rows = createNamedQuery(GET_FORM_NAME_CTXT_ID, Object[].class)
-			.setParameter("cpId", cpId)
 			.setParameter("entityType", entityType)
-			.setParameter("entityId", entityId)
 			.list();
 
-		if (CollectionUtils.isEmpty(rows)) {
-			return null;
+		for (Object[] row : rows) {
+			int idx = -1;
+			String name     = (String) row[++idx];
+			Long fcId       = (Long) row[++idx];
+			Long fcEntityId = (Long) row[++idx];
+			Long fcCpId     = (Long) row[++idx];
+			if ((entityId == null && Objects.equals(cpId, fcCpId)) || (Objects.equals(entityId, fcEntityId))) {
+				return Pair.make(name, fcId);
+			}
 		}
 
-		Object[] row = rows.iterator().next();
-		return Pair.make((String)row[0], (Long)row[1]);
+		return null;
 	}
 	
 	@Override

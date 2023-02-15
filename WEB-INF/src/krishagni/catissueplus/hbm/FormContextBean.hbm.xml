@@ -506,17 +506,18 @@
     <sql-query name="getFormNameContextId">
       <return-scalar column="formName" type="string"/>
       <return-scalar column="ctxtId" type="long"/>
+      <return-scalar column="entityId" type="long" />
+      <return-scalar column="cpId" type="long" />
 
       select
-        c.name as formName, fc.identifier as ctxtId
+        c.name as formName, fc.identifier as ctxtId, fc.entity_id as entityId, fc.cp_id as cpId
       from
         dyextn_containers c
         inner join catissue_form_context fc on fc.container_id = c.identifier
       where
         c.deleted_on is null and
         fc.deleted_on is null and
-        fc.entity_type = :entityType and
-        ((:entityId is null and fc.cp_id = :cpId) or fc.entity_id = :entityId)
+        fc.entity_type = :entityType
     </sql-query>
                          
     <sql-query name="getFormIds">
