@@ -318,7 +318,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					props.put("specimensCount", req.getPayload().getIds().size());
 
 					try {
-						List<SpecimenInfo> updateSpecimens = bulkUpdateSpecimens(req.getPayload(), currentUser);
+						AuthUtil.setCurrentUser(currentUser);
+						List<SpecimenInfo> updateSpecimens = bulkUpdateSpecimens(req.getPayload());
 						EmailUtil.getInstance().sendEmail(
 							SPMNS_UPDATED_TMPL,
 							new String[] { currentUser.getEmailAddress() },
@@ -340,6 +341,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 						} else {
 							throw OpenSpecimenException.serverError(e);
 						}
+					} finally {
+						AuthUtil.clearCurrentUser();
 					}
 				}
 			);
@@ -775,6 +778,26 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	}
 
 	@Override
+	@PlusTransactional
+	public List<SpecimenInfo> bulkUpdateSpecimens(BulkEntityDetail<SpecimenDetail> buDetail) {
+		SpecimenDetail spmn = buDetail.getDetail();
+		int limit = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.MAX_SPMNS_UPDATE_LIMIT, 100);
+		if (buDetail.getIds().size() > limit) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.UPDATE_LIMIT_MAXED, buDetail.getIds().size(), limit);
+		}
+
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		List<Specimen> savedSpmns = new ArrayList<>();
+		for (Long id : buDetail.getIds()) {
+			spmn.setId(id);
+			savedSpmns.add(updateSpecimen(spmn, ose));
+		}
+
+		ose.checkAndThrow();
+		return SpecimenDetail.from(savedSpmns);
+	}
+
+	@Override
 	public String getObjectName() {
 		return Specimen.getEntityName();
 	}
@@ -839,31 +862,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		crit.siteCps(siteCps);
 		crit.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
 		return daoFactory.getSpecimenDao().getSpecimens(crit);
-	}
-
-	@PlusTransactional
-	private List<SpecimenInfo> bulkUpdateSpecimens(BulkEntityDetail<SpecimenDetail> buDetail, User currentUser)
-	throws Exception {
-		try {
-			AuthUtil.setCurrentUser(currentUser);
-			SpecimenDetail spmn = buDetail.getDetail();
-			int limit = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.MAX_SPMNS_UPDATE_LIMIT, 100);
-			if (buDetail.getIds().size() > limit) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.UPDATE_LIMIT_MAXED, buDetail.getIds().size(), limit);
-			}
-
-			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-			List<Specimen> savedSpmns = new ArrayList<>();
-			for (Long id : buDetail.getIds()) {
-				spmn.setId(id);
-				savedSpmns.add(updateSpecimen(spmn, ose));
-			}
-
-			ose.checkAndThrow();
-			return SpecimenDetail.from(savedSpmns);
-		} finally {
-			AuthUtil.clearCurrentUser();
-		}
 	}
 
 	private Specimen updateSpecimen(SpecimenDetail detail, OpenSpecimenException ose) {
