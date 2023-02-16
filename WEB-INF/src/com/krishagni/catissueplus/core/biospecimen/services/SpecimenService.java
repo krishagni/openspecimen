@@ -81,4 +81,6 @@ public interface SpecimenService {
 	public List<Specimen> getSpecimensById(List<Long> ids);
 
 	Specimen updateSpecimen(Specimen existing, Specimen newSpmn);
+
+	List<SpecimenInfo> bulkUpdateSpecimens(BulkEntityDetail<SpecimenDetail> req);
 }
