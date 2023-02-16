@@ -454,7 +454,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			Long fcId       = (Long) row[++idx];
 			Long fcEntityId = (Long) row[++idx];
 			Long fcCpId     = (Long) row[++idx];
-			if ((entityId == null && Objects.equals(cpId, fcCpId)) || (Objects.equals(entityId, fcEntityId))) {
+			if ((entityId == null && Objects.equals(cpId, fcCpId)) || (entityId != null && entityId.equals(fcEntityId))) {
 				return Pair.make(name, fcId);
 			}
 		}
