@@ -70,6 +70,17 @@ export default {
 
       this.inputValue = oldVal;
     }
+  },
+
+  methods: {
+    getDisplayValue: function() {
+      let result = this.inputValue;
+      if (!result || !this.unit) {
+        return result;
+      }
+
+      return result + ' ' + this.unit;
+    }
   }
 }
 </script>

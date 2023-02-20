@@ -51,6 +51,25 @@ export default {
 
       return result;
     }
+  },
+
+  methods: {
+    getDisplayValue: function() {
+      if (!this.modelValue || !(this.modelValue instanceof Array)) {
+        return null;
+      }
+
+      let selectedValues = [];
+      for (let optionRow of this.optionRows) {
+        for (let option of optionRow) {
+          if (this.modelValue.indexOf(option.value) >= 0) {
+            selectedValues.push(option.caption);
+          }
+        }
+      }
+
+      return selectedValues.join(', ');
+    }
   }
 }
 

@@ -94,6 +94,15 @@ export default {
   },
 
   methods: {
+    getDisplayValue: function() {
+      if (!this.selected) {
+        return null;
+      }
+
+      const option = this._getSelectedOption(this.selected);
+      return option.type + ' (' + option.specimenClass + ')';
+    },
+
     _updateValue(value) {
       if (this.entity) {
         const option            = this.selectedOption = this._getSelectedOption(value);

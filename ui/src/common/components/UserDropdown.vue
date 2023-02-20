@@ -1,11 +1,11 @@
 
 <template>
   <span v-if="multiple">
-    <MultiSelectDropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
+    <MultiSelectDropdown ref="msDd" v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
       :tabOrder="tabOrder" :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
   </span>
   <span v-else>
-    <Dropdown v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
+    <Dropdown ref="ssDd" v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
       :tabOrder="tabOrder" :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
   </span>
 </template>
@@ -97,6 +97,12 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
       }
+    }
+  },
+
+  methods: {
+    getDisplayValue() {
+      return this.multiple ? this.$refs.msDd.getDisplayValue() : this.$refs.ssDd.getDisplayValue();
     }
   }
 }

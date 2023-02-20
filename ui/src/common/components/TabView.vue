@@ -47,7 +47,7 @@ export default {
   methods: {
     tabChanged: function({index}) {
       const tab = this.tabs[index];
-      this.$emit('tab-changed', { activeTab: index, previousTab: this.previousTab, tab });
+      this.$emit('tab-changed', { tabPanel: this, activeTab: index, previousTab: this.previousTab, tab });
       this.previousTab = index;
     },
 

@@ -1,7 +1,9 @@
 
 <template>
-  <MultiSelectDropdown v-model="inputValue" :list-source="listSource" :tab-order="tabOrder" v-if="multiple" />
-  <Dropdown v-model="inputValue" :list-source="listSource" :tab-order="tabOrder" v-else />
+  <MultiSelectDropdown ref="msDd" v-model="inputValue" :list-source="listSource"
+    :tab-order="tabOrder" v-if="multiple" />
+  <Dropdown ref="ssDd" v-model="inputValue" :list-source="listSource"
+    :tab-order="tabOrder" v-else />
 </template>
 
 <script>
@@ -72,6 +74,12 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
       }
+    }
+  },
+
+  methods: {
+    getDisplayValue() {
+      return this.multiple ? this.$refs.msDd.getDisplayValue() : this.$refs.ssDd.getDisplayValue();
     }
   }
 }

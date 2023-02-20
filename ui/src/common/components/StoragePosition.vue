@@ -182,6 +182,21 @@ export default {
 
     positionSelected: function({position}) {
       this.position = position;
+    },
+
+    getDisplayValue: function() {
+      const position = this.position;
+      if (!position || !position.name) {
+        return null;
+      }
+
+      if ((!position.mode || position.mode == 'TWO_D') && position.positionY && position.positionX) {
+        return position.name + ' (' + position.positionY + ', ' + position.positionX + ')';
+      } else if (position.position) {
+        return position.name + ' (' + position.position + ')';
+      } else {
+        return position.name;
+      }
     }
   }
 }

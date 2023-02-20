@@ -200,14 +200,39 @@ export default {
         return this.modelValue;
       }
 
-      const fieldRef = this.$refs.selectWidget;
-      let selectedOption = (fieldRef.options || []).find(option => option[this.selectProp] == this.modelValue);
+      let options = this.$refs.selectWidget.options || [];
+      let selectedOption = null;
+      if (this.selectProp) {
+        selectedOption = options.find(option => option[this.selectProp] == this.modelValue);
+      } else {
+        selectedOption = options.find(option => option == this.modelValue);
+      }
+
       if (!selectedOption) {
-        selectedOption = {};
-        selectedOption[this.selectProp] = this.modelValue;
+        if (this.selectProp) {
+          selectedOption = {};
+          selectedOption[this.selectProp] = this.modelValue;
+        } else {
+          selectedOption = this.modelValue;
+        }
       }
 
       return selectedOption;
+    },
+
+    getDisplayValue() {
+      const option = this.getSelectedOption();
+      if (!option) {
+        return null;
+      }
+
+      if (typeof this.displayProp == 'function') {
+        return this.displayProp(option);
+      } else if (this.displayProp) {
+        return option[this.displayProp];
+      }
+
+      return option;
     }
   },
 
@@ -236,9 +261,6 @@ export default {
   },
 
   watch: {
-    selected: function() {
-    },
-
     modelValue: async function() {
       let selectedVal = await this.selectedValue();
       if (this.ctx.options) {

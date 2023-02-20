@@ -18,6 +18,8 @@
 <script>
 import Calendar from 'primevue/calendar';
 
+import utilSvc from '@/common/services/Util.js';
+
 export default {
   props: ['modelValue', 'showTime', 'tabOrder'],
 
@@ -75,6 +77,21 @@ export default {
       }
 
       return fmt;
+    }
+  },
+
+  methods: {
+    getDisplayValue: function() {
+      if (!this.inputValue) {
+        return null;
+      }
+
+      let format = this.ui.global.locale.shortDateFmt || 'dd-MM-yyyy';
+      if (this.showTime) {
+        format += ' HH:mm';
+      }
+
+      return utilSvc.formatDate(this.inputValue, format);
     }
   }
 }

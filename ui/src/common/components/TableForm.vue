@@ -42,8 +42,8 @@
         <tr v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
           <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
             <div :style="field.uiStyle">
-              <component :is="field.component" v-bind="field" :md-type="true"
-                v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
+              <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
+                :md-type="true" v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
                 :tab-order="'' + (tabDirection == 'column' ? (itemIdx + numRows * fieldIdx) : (itemIdx * numCols + fieldIdx))"
                 :form="{...ctx.items[itemIdx], ...data, _formCache}"
                 :context="{...ctx.items[itemIdx], ...data, _formCache}"
@@ -379,6 +379,23 @@ export default {
 
         this.ctx.selects[field.name] = this.itemModels.every(item => item[field.name] == true);
       }
+    },
+
+    getViewState() {
+      let result = [];
+      for (let field of this.fields) {
+        const uiFields = this.$refs['osField-' + field.name];
+        if (uiFields) {
+          let label = field.displayLabel;
+          if (!label && field.icon && field.tooltip) {
+            label = field.tooltip;
+          }
+
+          result.push({label: label, values: uiFields.map(uiField => uiField.getDisplayValue())});
+        }
+      }
+
+      return result;
     }
   }
 }

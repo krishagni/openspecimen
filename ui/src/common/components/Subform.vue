@@ -16,7 +16,7 @@
         <tbody>
           <tr v-for="(sfRowData, sfRdIdx) of inputValue" :key="sfRdIdx">
             <td v-for="(field, cidx) of sfFields" :key="cidx">
-              <component :is="field.component" v-bind="field" v-model="sfRowData[field.name]"
+              <component :ref="'osField-' + cidx" :is="field.component" v-bind="field" v-model="sfRowData[field.name]"
                 :context="{...sfRowData}" @update:model-value="handleInput(sfRowData, sfRdIdx, field)">
               </component>
               <div v-if="v$.inputValue[sfRdIdx][field.name] && v$.inputValue[sfRdIdx][field.name].$error">
@@ -176,6 +176,21 @@ export default {
 
     removeSfRow: function(idx) {
       this.inputValue.splice(idx, 1);
+    },
+
+    getDisplayValue: function() {
+      let result = [];
+      for (let idx = 0; idx < this.sfFields.length; ++idx) {
+        const refs = this.$refs['osField-' + idx];
+        if (!refs) {
+          break;
+        }
+
+        const values = refs.map(ref => ref.getDisplayValue());
+        result.push({label: this.label(this.sfFields[idx]), values: values});
+      }
+
+      return result;
     }
   }
 }

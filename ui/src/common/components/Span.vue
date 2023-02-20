@@ -82,6 +82,10 @@ export default {
   },
 
   methods: {
+    getDisplayValue: function() {
+      return this.displayText;
+    },
+
     _getStorageLocation: function(value) {
       let result = value;
 

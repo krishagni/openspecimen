@@ -211,6 +211,29 @@ export default {
        }
 
        return fieldRef;
+     },
+
+     getViewState() {
+       let state = [];
+       for (let formRow of this.formRows) {
+         const row = [];
+         for (let field of formRow.fields) {
+           let label = '';
+           if (field.label || field.labelCode) {
+             label = this.label(field);
+           } else if (field.icon && field.tooltip) {
+             label = field.tooltip;
+           }
+
+           row.push({
+             label: label,
+             value: this.$refs['osField-' + field.name][0].getDisplayValue()
+           });
+         }
+         state.push(row);
+       }
+
+       return state;
      }
    },
 
@@ -285,7 +308,11 @@ export default {
        let model = {};
        for (let row of this.schema.rows) {
          for (let field of row.fields) {
-           model[field.name] = exprUtil.getValue(this.ctx.formData, field.name);
+           if (typeof field.value == 'function') {
+             model[field.name] = field.value(this.ctx.formData);
+           } else {
+             model[field.name] = exprUtil.getValue(this.ctx.formData, field.name);
+           }
          }
        }
 

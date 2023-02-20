@@ -39,6 +39,9 @@ export default {
   },
 
   methods: {
+    getDisplayValue: function() {
+      return this.modelValue;
+    }
   }
 }
 </script>

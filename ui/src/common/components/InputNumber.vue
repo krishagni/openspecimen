@@ -43,6 +43,10 @@ export default {
   methods: {
     handleInput: function(event) {
       this.inputValue = event.value;
+    },
+
+    getDisplayValue: function() {
+      return this.modelValue;
     }
   }
 }

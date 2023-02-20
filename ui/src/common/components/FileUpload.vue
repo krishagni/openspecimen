@@ -98,6 +98,14 @@ export default {
 
     removeFile: function() {
       this.$emit('update:modelValue', null);
+    },
+
+    getDisplayValue: function() {
+      if (this.inputValue) {
+        return this.inputValue.filename;
+      }
+
+      return null;
     }
   }
 }

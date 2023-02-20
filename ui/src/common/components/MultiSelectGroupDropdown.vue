@@ -109,6 +109,29 @@ export default {
       } else if (typeof this.listSource.loadFn == 'function') {
         this.listSource.loadFn({context: this.context}).then(options => this.allOptions = this.options = options);
       }
+    },
+
+    getSelectedOptions: function() {
+      if (!this.modelValue) {
+        return [];
+      }
+
+      if (!(this.modelValue instanceof Array)) {
+        return [];
+      }
+
+
+      let options = this.$refs.selectWidget.options || [];
+      if (this.selectProp) {
+        return options.filter(option => this.modelValue.indexOf(option[this.selectProp || 'id']) >= 0);
+      } else {
+        return options.filter(option => this.modelValue.indexOf(option) >= 0);
+      }
+    },
+
+    getDisplayValue() {
+      const options = this.getSelectedOptions();
+      return options.map(option => this.displayProp ? option[this.displayProp] : option).join(', ');
     }
   },
 

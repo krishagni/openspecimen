@@ -70,6 +70,24 @@ export default {
 
       return result;
     }
+  },
+
+  methods: {
+    getDisplayValue: function() {
+      if (!this.modelValue) {
+        return null;
+      }
+
+      for (let optionRow of this.optionRows) {
+        for (let option of optionRow) {
+          if (option.value == this.modelValue) {
+            return option.displayLabel;
+          }
+        }
+      }
+
+      return null;
+    }
   }
 }
 

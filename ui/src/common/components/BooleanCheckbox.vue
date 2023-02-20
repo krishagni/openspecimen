@@ -39,6 +39,14 @@ export default {
         return this.inlineLabel;
       }
     }
+  },
+
+  methods: {
+    getDisplayValue: function() {
+      return this.$t(
+        (this.modelValue == true || this.modelValue == 1 || this.modelValue == 'true') ? 'common.yes' : 'common.no'
+      );
+    }
   }
 }
 </script>

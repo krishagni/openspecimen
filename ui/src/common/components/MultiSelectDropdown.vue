@@ -3,6 +3,7 @@
   <div class="os-dropdown">
     <div class="p-float-label" v-if="$attrs['md-type']">
       <MultiSelect
+        ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
         :option-label="displayProp"
@@ -19,6 +20,7 @@
     </div>
     <div v-else>
       <MultiSelect
+        ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
         :option-label="displayProp"
@@ -219,6 +221,29 @@ export default {
     },
 
     onChange: function() {
+    },
+
+    getSelectedOptions: function() {
+      if (!this.modelValue) {
+        return [];
+      }
+
+      if (!(this.modelValue instanceof Array)) {
+        return [];
+      }
+
+
+      let options = this.$refs.selectWidget.options || [];
+      if (this.selectProp) {
+        return options.filter(option => this.modelValue.indexOf(option[this.selectProp || 'id']) >= 0);
+      } else {
+        return options.filter(option => this.modelValue.indexOf(option) >= 0);
+      }
+    },
+
+    getDisplayValue() {
+      const options = this.getSelectedOptions();
+      return options.map(option => this.displayProp ? option[this.displayProp] : option).join(', ');
     }
   },
 

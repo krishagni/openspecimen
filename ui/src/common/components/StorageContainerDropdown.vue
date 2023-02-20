@@ -1,6 +1,6 @@
 
 <template>
-  <Dropdown v-model="inputValue" :list-source="listSource" :tab-order="tabOrder" />
+  <Dropdown ref="ssDd" v-model="inputValue" :list-source="listSource" :tab-order="tabOrder" />
 </template>
 
 <script>
@@ -67,6 +67,12 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
       }
+    }
+  },
+
+  methods: {
+    getDisplayValue() {
+      return this.$refs.ssDd.getDisplayValue();
     }
   }
 }

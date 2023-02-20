@@ -106,6 +106,10 @@ export default {
 
     cancel: function() {
       this.editMode = false;
+    },
+
+    getDisplayValue: function() {
+      return this.inputValue;
     }
   }
 }
