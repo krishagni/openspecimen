@@ -27,7 +27,7 @@
     </field>
 
     <field>
-      <type>date</type>
+      <type>datetime</type>
       <caption>#getMessage("specimen_disposal_date")</caption>
       <attribute>date</attribute>
     </field>
