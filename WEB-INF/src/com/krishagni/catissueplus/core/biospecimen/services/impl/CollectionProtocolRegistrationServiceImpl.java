@@ -1238,9 +1238,16 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			visitDetail.setCprId(cpr.getId());
 			visitDetail.setEventId(cpe.getId());
 			visitDetail.setSite(collectionSite);
-			visitDetail.setClinicalDiagnoses(Collections.singleton(cpe.getClinicalDiagnosis().getValue()));
-			visitDetail.setClinicalStatus(PermissibleValue.getValue(cpe.getClinicalStatus()));
 			visitDetail.setStatus(Visit.VISIT_STATUS_PENDING);
+			if (cpe.getClinicalDiagnosis() != null) {
+				visitDetail.setClinicalDiagnoses(Collections.singleton(cpe.getClinicalDiagnosis().getValue()));
+			}
+
+			if (cpe.getClinicalStatus() != null) {
+				visitDetail.setClinicalStatus(PermissibleValue.getValue(cpe.getClinicalStatus()));
+			}
+
+
 
 			int interval = 0;
 			if (minOffset != null) {
