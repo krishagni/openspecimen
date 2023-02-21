@@ -208,7 +208,12 @@ export default {
         "fields": [ { "name": "container.storeSpecimensEnabled" } ]
       },
       {
-        "fields": [ { "name": "container.cellDisplayProp" } ]
+        "fields": [
+          {
+            "name": "container.cellDisplayProp",
+            "showWhen": "!container.storageLocation || !container.storageLocation.name"
+          }
+        ]
       },
       {
         "fields": [

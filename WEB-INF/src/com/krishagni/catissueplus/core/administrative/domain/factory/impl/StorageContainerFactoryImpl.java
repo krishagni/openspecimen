@@ -1,15 +1,13 @@
 package com.krishagni.catissueplus.core.administrative.domain.factory.impl;
 
-import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_CLASS;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.AutoFreezerProvider;
 import com.krishagni.catissueplus.core.administrative.domain.ContainerType;
@@ -39,6 +37,8 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
+
+import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_CLASS;
 
 public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	private DaoFactory daoFactory;
@@ -150,16 +150,17 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	}
 	
 	@Override
-	public StorageContainer createStorageContainer(String name, ContainerType type, StorageContainer parentContainer) {
+	public StorageContainer createStorageContainer(String name, ContainerType type, StorageContainer parent) {
 		StorageContainerDetail detail = getStorageContainerDetail(type);
 		detail.setName(name);
-		detail.setUsedFor(parentContainer.getUsedFor().name());
-		detail.setSiteName(parentContainer.getSite().getName());
+		detail.setUsedFor(parent.getUsedFor().name());
+		detail.setSiteName(parent.getSite().getName());
+		detail.setCellDisplayProp(parent.getCellDisplayProp() != null ? parent.getCellDisplayProp().name() : null);
 
 		StorageContainer container = createStorageContainer(detail);
-		container.setParentContainer(parentContainer);
+		container.setParentContainer(parent);
 
-		StorageContainerPosition position = parentContainer.nextAvailablePosition();
+		StorageContainerPosition position = parent.nextAvailablePosition();
 		position.setOccupyingContainer(container);
 		container.setPosition(position);
 		setComputedRestrictions(container);
