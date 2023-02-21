@@ -941,6 +941,7 @@
     "cp": "Collection Protocol",
     "extracted_from": "from {anatomicSite}",
     "label": "Label",
+    "label_or_barcode": "Label (Barcode)",
     "location": "Location",
     "not_stored": "Not Stored",
     "ppid": "PPID",
