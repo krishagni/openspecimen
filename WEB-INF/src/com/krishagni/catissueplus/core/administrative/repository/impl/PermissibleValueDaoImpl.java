@@ -49,14 +49,14 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 		Criteria<PermissibleValue> query = createCriteria(PermissibleValue.class, "pv");
 
 		SubQuery<Long> subQuery = query.createSubQuery(PermissibleValue.class, "pv");
-		subQuery.join("pv.props", "props")
+		subQuery.joinMap("pv.props", "props")
 			.add(subQuery.eq("pv.attribute", attribute))
-			.add(subQuery.eq("props.key", propName))
+			.add(subQuery.eq(subQuery.key("props"), propName))
 			.add(subQuery.or(
-				subQuery.eq("props.value", propValue),
-				subQuery.ilike("props.value", propValue + "^%"),
-				subQuery.ilike("props.value", "%^" + propValue + "^%"),
-				subQuery.ilike("props.value", "%^" + propValue)
+				subQuery.eq(subQuery.value("props"), propValue),
+				subQuery.ilike(subQuery.value("props"), propValue + "^%"),
+				subQuery.ilike(subQuery.value("props"), "%^" + propValue + "^%"),
+				subQuery.ilike(subQuery.value("props"), "%^" + propValue)
 			))
 			.select("pv.id");
 

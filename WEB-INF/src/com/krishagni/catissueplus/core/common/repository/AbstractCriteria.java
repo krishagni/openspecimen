@@ -25,7 +25,11 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 	public enum JoinType {
 		RIGHT_JOIN,
 		LEFT_JOIN,
-		INNER_JOIN
+		INNER_JOIN,
+
+		LEFT_JOIN_MAP,
+
+		INNER_JOIN_MAP
 	}
 
 	protected Session session;
@@ -52,12 +56,24 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return createAlias(attribute, alias);
 	}
 
+	public T joinMap(String attribute, String alias) {
+		return createAlias(attribute, alias, JoinType.INNER_JOIN_MAP);
+	}
+
 	public T leftJoin(String attribute, String alias) {
 		return createAlias(attribute, alias, JoinType.LEFT_JOIN);
 	}
 
 	public T leftJoin(String attribute, String alias, Supplier<Restriction> restriction) {
 		return createAlias(attribute, alias, JoinType.LEFT_JOIN, restriction);
+	}
+
+	public T leftJoinMap(String attribute, String alias) {
+		return createAlias(attribute, alias, JoinType.LEFT_JOIN_MAP);
+	}
+
+	public T leftJoinMap(String attribute, String alias, Supplier<Restriction> restriction) {
+		return createAlias(attribute, alias, JoinType.LEFT_JOIN_MAP, restriction);
 	}
 
 	public T createAlias(String attribute, String alias) {
@@ -87,6 +103,8 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		switch (joinType) {
 			case LEFT_JOIN -> joins.put(alias, joinFrom.join(joinWith, javax.persistence.criteria.JoinType.LEFT));
 			case RIGHT_JOIN -> joins.put(alias, joinFrom.join(joinWith, javax.persistence.criteria.JoinType.RIGHT));
+			case INNER_JOIN_MAP -> joins.put(alias, joinFrom.joinMap(joinWith));
+			case LEFT_JOIN_MAP -> joins.put(alias, joinFrom.joinMap(joinWith, javax.persistence.criteria.JoinType.LEFT));
 			default -> joins.put(alias, joinFrom.join(joinWith));
 		}
 
@@ -111,6 +129,14 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 
 	public Expression<String> lower(String attribute) {
 		return builder.lower(getExpression(attribute));
+	}
+
+	public <T> Expression<T> key(String alias) {
+		return (Expression<T>) getMapJoin(alias).key();
+	}
+
+	public <T> Expression<T> value(String alias) {
+		return (Expression<T>) getMapJoin(alias).value();
 	}
 
 	public T add(Restriction restriction) {
@@ -254,7 +280,11 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return Restriction.of(builder.like(getExpression(attribute), "%" + pattern + "%"));
 	}
 	public Restriction ilike(String attribute, String pattern) {
-		return Restriction.of(builder.like(builder.lower(getExpression(attribute)), "%" + pattern.toLowerCase() + "%"));
+		return ilike(getExpression(attribute), pattern);
+	}
+
+	public Restriction ilike(Expression<String> expression, String pattern) {
+		return Restriction.of(builder.like(builder.lower(expression), "%" + pattern.toLowerCase() + "%"));
 	}
 
 	public Disjunction disjunction() {
@@ -394,5 +424,18 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 
 			return from.get(parts[1]);
 		}
+	}
+
+	private MapJoin<?, ?, ?> getMapJoin(String alias) {
+		Join<?, ?> join = joins.get(alias);
+		if (join == null) {
+			throw new CriteriaException("Unknown alias: " + alias);
+		}
+
+		if (!(join instanceof MapJoin<?,?,?>)) {
+			throw new CriteriaException("Alias " + alias + " is not of map join type.");
+		}
+
+		return (MapJoin<?,?,?>) join;
 	}
 }
