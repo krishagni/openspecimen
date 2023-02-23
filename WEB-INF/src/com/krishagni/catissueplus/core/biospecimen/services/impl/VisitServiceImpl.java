@@ -601,6 +601,10 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 			
 			existing = visit;
 		} else {
+			if (visit.isDeleted()) {
+				AccessCtrlMgr.getInstance().ensureDeleteVisitRights(existing);
+			}
+
 			existing.update(visit);
 		}
 		

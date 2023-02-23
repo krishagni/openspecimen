@@ -33,7 +33,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
@@ -752,6 +751,10 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		}
 
 		if (existing != null) {
+			if (cpr.isDeleted()) {
+				AccessCtrlMgr.getInstance().ensureDeleteCprRights(existing);
+			}
+
 			existing.update(cpr);
 			cpr = existing;
 		}
