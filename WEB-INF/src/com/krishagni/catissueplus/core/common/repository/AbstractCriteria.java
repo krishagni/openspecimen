@@ -178,6 +178,10 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return Restriction.of(getExpression(attribute).in(subQuery.getQuery()));
 	}
 
+	public Restriction in(Expression<?> expr, Collection<?> values) {
+		return Restriction.of(expr.in(values));
+	}
+
 	public Restriction notIn(String attribute, Collection<?> values) {
 		return not(in(attribute, values));
 	}
