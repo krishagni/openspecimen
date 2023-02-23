@@ -677,6 +677,7 @@
     "cost": "Cost",
     "create": "Create Distribution Protocol",
     "deleted": "Distribution protocol deleted. | {count} distribution protocols deleted.",
+    "dist_site_req": "Distributing site is mandatory",
     "distribute": "Distribute",
     "distribute_all": "Distribute All",
     "distributed_qty": "Distributed Quantity",

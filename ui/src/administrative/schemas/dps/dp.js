@@ -189,6 +189,11 @@ export default {
                 "institute": "institute"
               }
             }
+          },
+          "validations": {
+            "required": {
+              "messageCode": "dps.dist_site_req"
+            }
           }
         }
       ]

@@ -72,6 +72,7 @@ export default {
 
         if (result.length > 1) {
           const dp = dataCtx.dp = result[1];
+          dp.disableEmailNotifs = dp.disableEmailNotifs == true;
           formUtil.createCustomFieldsMap(dp);
 
           const sites = dp.distributingSites || {};
@@ -93,6 +94,20 @@ export default {
     );
 
     return { ctx, dataCtx };
+  },
+
+  computed: {
+    noOfSites: function() {
+      return (this.dataCtx.dp.distributingSites || []).length;
+    }
+  },
+
+  watch: {
+    noOfSites: function(newVal) {
+      if (newVal == 0) {
+        this.dataCtx.dp.distributingSites = [{institute: this.$ui.currentUser.instituteName, sites: []}];
+      }
+    }
   },
 
   methods: {

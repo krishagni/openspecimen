@@ -42,6 +42,7 @@
 
 import useVuelidate from '@vuelidate/core'
 import fieldFactory from '@/common/services/FieldFactory.js';
+import i18n         from '@/common/services/I18n.js';
 
 export default {
   props: ['modelValue', 'fields'],
@@ -111,7 +112,8 @@ export default {
       }
 
       for (let rowIdx = 0; rowIdx < this.inputValue.length; ++rowIdx) {
-        result.push({});
+        const error = {};
+        result.push(error);
 
         for (let field of this.fields) {
           let validators = this.v$.inputValue &&
@@ -124,7 +126,13 @@ export default {
 
           for (let rule in field.validations) {
             if (validators[rule] && validators[rule].$invalid) {
-              result[rowIdx][field.name] = field.validations[rule].message;
+              if (field.validations[rule].messageCode) {
+                error[field.name] = i18n.msg(field.validations[rule].messageCode);
+              } else if (typeof field.validations[rule].message == 'function') {
+                error[field.name] = field.validations[rule].message();
+              } else {
+                error[field.name] = field.validations[rule].message;
+              }
               break;
             }
           }
