@@ -81,6 +81,10 @@ export default {
   },
 
   methods: {
+    getDisplayValue: function() {
+      return this.$refs.dd.getDisplayValue();
+    },
+
     _displayLabel({cpr}) {
       let label = cpr.ppid;
       if (cpr.participant.firstName || cpr.participant.lastName) {

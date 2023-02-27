@@ -1,6 +1,7 @@
 
 <template>
   <os-dropdown
+    ref="dd"
     v-model="inputValue"
     :list-source="ddLs"
     :form="form"
@@ -87,6 +88,10 @@ export default {
   },
 
   methods: {
+    getDisplayValue: function() {
+      return this.$refs.dd.getDisplayValue();
+    },
+
     _getCache() {
       let cache = (this.form || this.context || {})._formCache || {};
       cache = cache['reqsList'] = cache['reqsList'] || {};
