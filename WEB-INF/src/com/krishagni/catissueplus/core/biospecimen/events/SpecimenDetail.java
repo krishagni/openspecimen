@@ -345,12 +345,23 @@ public class SpecimenDetail extends SpecimenInfo {
 		SpecimenInfo.fromTo(specimen, result);
 
 		if (specimen.getPooledEvent() != null) {
-			result.setSpecimensPool(SpecimenInfo.from(new ArrayList<>(specimen.getPooledEvent().getPoolItems())));
-			Collections.sort(result.getSpecimensPool());
+			result.setSpecimensPool(
+				specimen.getPooledEvent().getPoolItems().stream()
+					.filter(s -> !s.isDeleted())
+					.map(SpecimenInfo::from)
+					.sorted()
+					.collect(Collectors.toList())
+			);
 		}
 
 		if (specimen.isPoolItem() && CollectionUtils.isNotEmpty(specimen.getPoolItemEvents())) {
-			result.setPooledSpecimens(specimen.getPoolItemEvents().stream().map(e -> SpecimenInfo.from(e.getPooledSpecimen())).sorted().collect(Collectors.toList()));
+			result.setPooledSpecimens(
+				specimen.getPoolItemEvents().stream()
+					.filter(e -> !e.getPooledSpecimen().isDeleted())
+					.map(e -> SpecimenInfo.from(e.getPooledSpecimen()))
+					.sorted()
+					.collect(Collectors.toList())
+			);
 		}
 		
 		SpecimenRequirement sr = specimen.getSpecimenRequirement();
