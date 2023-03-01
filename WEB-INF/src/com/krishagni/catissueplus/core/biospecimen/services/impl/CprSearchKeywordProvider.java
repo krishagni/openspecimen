@@ -90,6 +90,16 @@ public class CprSearchKeywordProvider extends AbstractSearchEntityKeywordProvide
 		}
 
 		Participant participant = cpr.getParticipant();
+		if (participant == null) {
+			String[] propertyNames = event.getPersister().getPropertyNames();
+			for (int i = 0; i < propertyNames.length; ++i) {
+				if (propertyNames[i].equals("participant")) {
+					participant = (Participant) event.getOldState()[i];
+					break;
+				}
+			}
+		}
+
 		if (participant == null || participant.isDeleted()) {
 			return keywords;
 		}
