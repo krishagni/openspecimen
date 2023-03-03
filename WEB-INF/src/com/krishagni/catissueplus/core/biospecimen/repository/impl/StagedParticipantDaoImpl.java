@@ -103,8 +103,8 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 			} else {
 				disjunctions.add(
 					query.and(
-						query.eq("lower(pmi.medicalRecordNumber)", pmi.getMrn().toLowerCase()),
-						query.eq("lower(pmi.site)", pmi.getSiteName().toLowerCase())
+						query.eq(query.lower("pmi.medicalRecordNumber"), pmi.getMrn().toLowerCase()),
+						query.eq(query.lower("pmi.site"), pmi.getSiteName().toLowerCase())
 					)
 				);
 			}
