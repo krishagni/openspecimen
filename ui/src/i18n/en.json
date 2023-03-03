@@ -1064,5 +1064,9 @@
     "user_roles": "User Roles",
     "time_zone": "Time Zone",
     "type": "Type"
+  },
+
+  "visits": {
+    "visit": "Visit"
   }
 }
