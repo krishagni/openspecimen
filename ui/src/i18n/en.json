@@ -83,7 +83,8 @@
       "proceed_q": "Do you want to proceed?",
       "select_specimen_cp": "Following specimens are present in multiple collection protocols. Select the right collection protocol before proceeding.",
       "unresolved_specimens": "One or more specimens not resolved: {labels}.",
-      "use_barcode": "Use Barcode"
+      "use_barcode": "Use Barcode",
+      "use_visit_names": "Use Visit Names"
     },
 
     "add_to_cart": {

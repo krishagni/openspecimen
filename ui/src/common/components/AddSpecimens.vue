@@ -2,10 +2,12 @@
 <template>
   <div class="os-add-specimens" :class="{'bottom-options': optionsAtBottom == true}">
     <div class="options">
-      <os-boolean-checkbox name="useBarcode" v-model="useBarcode" v-if="barcodingEnabled">
+      <os-boolean-checkbox name="useBarcode" v-model="useBarcode" v-if="barcodingEnabled && !useVisitNames">
         <label v-t="'common.add_specimens.use_barcode'">Use Specimen Barcode</label>
       </os-boolean-checkbox>
-
+      <os-boolean-checkbox name="useVisitNames" v-model="useVisitNames" v-if="allowVisitNames && !useBarcode">
+        <label v-t="'common.add_specimens.use_visit_names'">Use Visit Names</label>
+      </os-boolean-checkbox>
       <slot name="options"></slot>
     </div>
 
@@ -89,13 +91,24 @@ import util   from '@/common/services/Util.js';
 
 export default {
 
-  props: ['criteria', 'errorOpts', 'placeholder', 'label', 'optionsAtBottom', 'hideButtons', 'modelValue'],
+  props: [
+    'criteria',
+    'errorOpts',
+    'placeholder',
+    'label',
+    'optionsAtBottom',
+    'hideButtons',
+    'modelValue',
+    'allowVisitNames'
+  ],
 
   emits: ['on-add', 'labels-scanned'],
 
   data() {
     return {
       useBarcode: false,
+
+      useVisitNames: false,
 
       dupLabels: [],
 
@@ -141,7 +154,7 @@ export default {
     getSpecimens: async function() {
       const labels = util.splitStr(this.inputValue, /,|\t|\n/, false);
       if (labels.length == 0) {
-        return {specimens: [], useBarcode: this.useBarcode};
+        return {specimens: [], useBarcode: this.useBarcode, useVisitNames: this.useVisitNames};
       }
 
       return this.getSpecimensByLabel(labels);
@@ -150,24 +163,26 @@ export default {
     getSpecimensByLabel: async function(labels) {
       labels = labels || [];
       if (labels.length == 0) {
-        return {specimens: [], useBarcode: this.useBarcode};
+        return {specimens: [], useBarcode: this.useBarcode, useVisitNames: this.useVisitNames};
       }
 
       const dupLabels = util.getDupItems(labels);
       if (dupLabels.length > 0) {
         alerts.error({code: 'common.add_specimens.dup_labels', args: {labels: dupLabels.join(', ')}});
-        return {specimens: [], useBarcode: this.useBarcode, error: true};
+        return {specimens: [], useBarcode: this.useBarcode, useVisitNames: this.useVisitNames, error: true};
       }
 
       let searchReq = Object.assign({exactMatch: true}, this.criteria || {});
-      if (this.useBarcode) {
+      if (this.useVisitNames) {
+        searchReq.visitNames = labels;
+      } else if (this.useBarcode) {
         searchReq.barcodes = labels;
       } else {
         searchReq.labels = labels;
       }
 
       searchReq.maxResults = 1000;
-      return http.post('specimens/search', searchReq).then(
+      return http.post(searchReq.url || 'specimens/search', searchReq).then(
         specimens => this.resolveSpecimens(searchReq.labels, searchReq.barcodes, specimens).then(
           resolvedSpmns => ({...resolvedSpmns, useBarcode: this.useBarcode})
         )
@@ -179,9 +194,11 @@ export default {
       if (!!labels && labels.length > 0) {
         inputs = labels;
         attr = 'label';
-      } else {
+      } else if (!!barcodes && barcodes.length > 0) {
         inputs = barcodes;
         attr = 'barcode';
+      } else {
+        return { specimens };
       }
 
       return this.resolveSpecimens1(inputs, attr, specimens);

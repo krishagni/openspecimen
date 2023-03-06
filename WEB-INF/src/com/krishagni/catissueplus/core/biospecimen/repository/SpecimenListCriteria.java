@@ -1,9 +1,12 @@
 package com.krishagni.catissueplus.core.biospecimen.repository;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
@@ -57,6 +60,8 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 	private boolean minimalInfo;
 
 	private boolean includeOnlyTbr;
+
+	private Predicate<Specimen> filterFn;
 
 	@Override
 	public SpecimenListCriteria self() {		
@@ -314,6 +319,15 @@ public class SpecimenListCriteria extends AbstractListCriteria<SpecimenListCrite
 	@JsonProperty("includeOnlyTbr")
 	public SpecimenListCriteria includeOnlyTbr(boolean includeOnlyTbr) {
 		this.includeOnlyTbr = includeOnlyTbr;
+		return self();
+	}
+
+	public Predicate<Specimen> filterFn() {
+		return filterFn;
+	}
+
+	public SpecimenListCriteria filterFn(Predicate<Specimen> filterFn) {
+		this.filterFn = filterFn;
 		return self();
 	}
 }

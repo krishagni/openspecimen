@@ -188,12 +188,19 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				specimens = Specimen.sortByIds(specimens, crit.ids());
 			}
 
-			List<? extends SpecimenInfo> result = null;
 			if (crit.includeExtensions()) {
 				createExtensions(crit.cpId(), specimens);
+			}
+
+			if (crit.filterFn() != null) {
+				specimens = specimens.stream().filter(crit.filterFn()).collect(Collectors.toList());
+			}
+
+			List<? extends SpecimenInfo> result = null;
+			if (crit.includeExtensions()) {
 				result = specimens.stream().map(s -> SpecimenDetail.from(s, false, true, true)).collect(Collectors.toList());
 			} else if (crit.minimalInfo()) {
-				result = specimens.stream().map(s -> toMinimalInfo(s)).collect(Collectors.toList());
+				result = specimens.stream().map(this::toMinimalInfo).collect(Collectors.toList());
 			} else {
 				result = SpecimenInfo.from(specimens);
 			}
