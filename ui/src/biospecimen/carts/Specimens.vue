@@ -18,6 +18,9 @@
         <template #default>
           <os-specimen-actions :cart-id="ctx.cart.id" :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
 
+          <os-plugin-views page="cart-specimens" view="page-header"
+            :view-props="{cart: ctx.cart, selectedSpecimens}" />
+
           <os-menu :label="$t('common.buttons.more')" :options="moreOpts" />
         </template>
 

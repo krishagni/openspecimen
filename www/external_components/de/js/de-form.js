@@ -421,6 +421,7 @@ edu.common.de.Form = function(args) {
       this.formDiv.append(panel);
       this.updatePb();
     }
+
     this.setValue(this.formData);
 
     if (this.$hasSkipLogic) {
@@ -1804,6 +1805,7 @@ edu.common.de.SubFormField = function(id, sfField, args) {
     this.recId = recId;
     this.sfFieldsEl.children().remove();
     this.fieldObjsRows = [];
+    this.rowIdx = 0;
 
     for (var i = 0; i < value.length; ++i) {
       var sfInst = value[i];

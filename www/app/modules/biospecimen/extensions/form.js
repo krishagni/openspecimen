@@ -3,7 +3,7 @@
 * Css changes are in extension.css file.
 */
 angular.module('os.biospecimen.extensions', ['os.biospecimen.models'])
-  .directive('osDeForm', function($http, $rootScope, Form, ApiUrls, ExtensionsUtil, LocationChangeListener, SettingUtil) {
+  .directive('osDeForm', function($http, $rootScope, $parse, Form, ApiUrls, ExtensionsUtil, LocationChangeListener, SettingUtil) {
     return {
       restrict: 'A',
       controller: function() {
@@ -98,6 +98,7 @@ angular.module('os.biospecimen.extensions', ['os.biospecimen.models'])
         }, true);
 
         if (attrs.extendedObj) {
+          ctrl.extendedObj = $parse(attrs.extendedObj)(scope);
           scope.$watch(attrs.extendedObj,
             function(extendedObj) {
               ctrl.extendedObj = extendedObj;

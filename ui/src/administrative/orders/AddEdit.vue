@@ -356,7 +356,7 @@ export default {
       );
     },
 
-    handleInput: async function({field, value, data}) {
+    handleInput: async function({field, value, oldValue, data}) {
       if (field.name == 'order.distributionProtocol') {
         const dp    = value;
         const order = this.dataCtx.order;
@@ -374,6 +374,9 @@ export default {
         this.dataCtx.order.extensionDetail = { attrsMap: defaultValues || {} };
 
         await this.addItemCosts(this.dataCtx.orderItems);
+      } else if (field.name == 'order.instituteName' && value != oldValue) {
+        const order = this.dataCtx.order;
+        order.siteName = order.requester = null;
       }
 
       Object.assign(this.dataCtx, data);
