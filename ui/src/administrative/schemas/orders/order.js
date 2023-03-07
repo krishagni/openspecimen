@@ -80,6 +80,13 @@ export default {
       "type": "user",
       "labelCode": "orders.requester",
       "name": "order.requester",
+      "listSource": {
+        "queryParams": {
+          "dynamic": {
+            "institute": "order.instituteName"
+          }
+        }
+      },
       "validations": {
         "required": {
           "messageCode": "orders.requester_req"
