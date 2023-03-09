@@ -883,49 +883,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		return existing;
 	}
 
-	private void ensureEditAllowed(SpecimenDetail detail, Specimen existing) {
-		if (existing == null || existing.isEditAllowed()) {
-			return;
+	private void ensureEditAllowed(Specimen existing) {
+		if (existing != null && existing.isReserved()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, existing.getLabel());
 		}
-
-		if (!existing.isReserved()) {
-			//
-			// check whether the new status is active
-			//
-			String status = detail.getActivityStatus();
-			if (StringUtils.isNotBlank(status) && !Status.isValidActivityStatus(status))  {
-				throw OpenSpecimenException.userError(ActivityStatusErrorCode.INVALID);
-			}
-
-			if (StringUtils.isNotBlank(status) && Status.ACTIVITY_STATUS_ACTIVE.getStatus().equals(status)) {
-				return;
-			}
-
-			if (existing.isStoredInDistributionContainer() &&
-				detail.areTheOnlyModifiedAttrs("id", "cpShortTitle", "label", "barcode", "storageLocation", "transferComments")) {
-				return;
-			}
-		}
-
-		throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, existing.getLabel());
-	}
-
-	private void ensureEditAllowed(Specimen newSpmn, Specimen existing) {
-		if (existing == null || existing.isEditAllowed()) {
-			return;
-		}
-
-		if (!existing.isReserved()) {
-			if (newSpmn.isActive()) {
-				return;
-			}
-
-			if (existing.isStoredInDistributionContainer()) {
-				return;
-			}
-		}
-
-		throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, existing.getLabel());
 	}
 
 	private void ensureValidAndUniqueLabel(Specimen existing, Specimen specimen, OpenSpecimenException ose) {
@@ -1086,11 +1047,11 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	private Specimen saveOrUpdate(SpecimenDetail detail, Specimen specimen, Specimen existing, Specimen parent) {
 		if (specimen == null) {
-			ensureEditAllowed(detail, existing);
+			ensureEditAllowed(existing);
 
 			specimen = specimenFactory.createSpecimen(existing, detail, parent);
 		} else {
-			ensureEditAllowed(specimen, existing);
+			ensureEditAllowed(existing);
 		}
 
 		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen);
@@ -1124,7 +1085,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.setLabelIfEmpty();
 		} else if (specimen.getParentSpecimen() != null) {
 			if (!specimen.getParentSpecimen().isEditAllowed()) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, specimen.getParentSpecimen().getLabel());
+				throw OpenSpecimenException.userError(SpecimenErrorCode.PROC_NOT_ALLOWED, specimen.getParentSpecimen().getLabel());
 			}
 
 			specimen.setLabelIfEmpty();
@@ -1183,7 +1144,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	private List<Specimen> getSpecimensToPrint(PrintSpecimenLabelDetail detail) {
 		List<Specimen> specimens = null;
 		if (CollectionUtils.isNotEmpty(detail.getSpecimenIds())) {
-			specimens = daoFactory.getSpecimenDao().getSpecimensByIds(detail.getSpecimenIds());
+			specimens = daoFactory.getSpecimenDao().getByIds(detail.getSpecimenIds());
 			specimens = Specimen.sortByIds(specimens, detail.getSpecimenIds());
 		} else if (CollectionUtils.isNotEmpty(detail.getSpecimenLabels())) {
 			specimens = daoFactory.getSpecimenDao().getSpecimens(new SpecimenListCriteria().labels(detail.getSpecimenLabels()));

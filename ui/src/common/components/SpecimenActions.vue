@@ -429,12 +429,6 @@ export default {
         return;
       }
 
-      const closedSpmns = dbSpmns.filter(spmn => spmn.activityStatus != 'Active');
-      if (closedSpmns.length > 0) {
-        this.showError('common.specimen_actions.cannot_edit_closed', closedSpmns);
-        return;
-      }
-
       const ncSpmns = dbSpmns.filter(spmn => spmn.status != 'Collected');
       if (ncSpmns.length > 0) {
         this.showError('common.specimen_actions.not_collected', ncSpmns);
@@ -472,7 +466,7 @@ export default {
 
       const closedSpmns = dbSpmns.filter(spmn => spmn.activityStatus != 'Active');
       if (closedSpmns.length > 0) {
-        this.showError('common.specimen_actions.cannot_edit_closed', closedSpmns);
+        this.showError('common.specimen_actions.cannot_op_closed', closedSpmns);
         return;
       }
 
@@ -644,19 +638,19 @@ export default {
     },
 
     createAliquots: function() {
-      this.gotoNgView('bulk-create-aliquots', {}, 'common.specimen_actions.select_for_aliquots');
+      this.gotoNgView('bulk-create-aliquots', {}, 'common.specimen_actions.select_for_aliquots', false, false, true);
     },
 
     createDerivatives: function() {
-      this.gotoNgView('bulk-create-derivatives', {}, 'common.specimen_actions.select_for_derived');
+      this.gotoNgView('bulk-create-derivatives', {}, 'common.specimen_actions.select_for_derived', false, false, true);
     },
 
     addEditEvent: function() {
-      this.gotoNgView('bulk-add-event', {}, 'common.specimen_actions.select_for_add_edit_event');
+      this.gotoNgView('bulk-add-event', {}, 'common.specimen_actions.select_for_add_edit_event', false, false, false);
     },
 
     transferSpecimens: function() {
-      this.gotoNgView('bulk-transfer-specimens', {}, 'common.specimen_actions.select_for_transfer');
+      this.gotoNgView('bulk-transfer-specimens', {}, 'common.specimen_actions.select_for_transfer', false, false, true);
     },
 
     showRetrieveSpecimensDialog: function() {
@@ -698,7 +692,7 @@ export default {
       alertsSvc.error({code: error, args: {labels: spmns.map(s => !s.label ? s.id : s.label).join(', ')}});
     },
 
-    gotoNgView: async function(url, params, msg, anyStatus, excludeExtensions) {
+    gotoNgView: async function(url, params, msg, anyStatus, excludeExtensions, forbidClosedSpmns) {
       if (!this.specimens || this.specimens.length == 0) {
         alertsSvc.error({code: msg});
         return;
@@ -714,10 +708,12 @@ export default {
           return;
         }
 
-        const closedSpmns = dbSpmns.filter(spmn => spmn.activityStatus != 'Active');
-        if (closedSpmns.length > 0) {
-          this.showError('common.specimen_actions.cannot_edit_closed', closedSpmns);
-          return;
+        if (forbidClosedSpmns) {
+          const closedSpmns = dbSpmns.filter(spmn => spmn.activityStatus != 'Active');
+          if (closedSpmns.length > 0) {
+            this.showError('common.specimen_actions.cannot_op_closed', closedSpmns);
+            return;
+          }
         }
       }
 

@@ -9,8 +9,7 @@
           <span translate="specimens.sys_event">System Event</span>
         </span>
         <span class="os-btns">
-          <span ng-show="specimen.activityStatus != 'Closed' && event.isEditable"
-            show-if-allowed="specimenResource.updateOpts">
+          <span ng-show="event.isEditable" show-if-allowed="specimenResource.updateOpts">
             <button class="btn btn-primary" ui-sref="specimen-detail.extensions.addedit({spe: true,
               formId: event.containerId, formCtxId: event.appData.formCtxtId, recordId: event.id})">
               <span class="fa fa-pencil"></span>

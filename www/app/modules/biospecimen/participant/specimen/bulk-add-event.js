@@ -227,12 +227,6 @@ angular.module('os.biospecimen.specimen.bulkaddevent', ['os.biospecimen.models']
     }
 
     function filterSpecimens(spmns) {
-      var closedSpmns = spmns.filter(function(spmn) { return spmn.activityStatus != 'Active'; });
-      if (closedSpmns.length > 0) {
-        showError('specimens.closed_edit_na', closedSpmns);
-        return false;
-      }
-
       var ncSpmns = spmns.filter(function(spmn) { return spmn.status != 'Collected'; });
       if (ncSpmns.length > 0) {
         showError('specimens.not_collected', ncSpmns);

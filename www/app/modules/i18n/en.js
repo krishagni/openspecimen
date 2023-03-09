@@ -901,6 +901,7 @@
     "closed_edit_na": "Closed specimens cannot be edited. Closed specimens: {{specimens}}",
     "not_collected": "One or more specimens are not collected. Not collected specimens: {{specimens}}",
     "already_received": "One or more specimens have been already received. Received specimens: {{specimens}}",
+    "cannot_op_closed": "Cannot perform the requested action on closed specimens. Closed specimens: {{specimens}}",
 
     "loading_list": "Loading specimens, please wait for a moment...",
     "empty_list": "No specimens to show!",

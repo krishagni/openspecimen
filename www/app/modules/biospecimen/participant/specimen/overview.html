@@ -2,8 +2,7 @@
   <div class="os-page-commands">
     <div class="left" os-imaging>
       <button show-if-allowed="specimenResource.updateOpts" class="default" ui-sref="specimen-addedit"
-        ng-if="!!visit.id && !specimen.reserved && (!specimen.activityStatus || specimen.activityStatus == 'Active')"
-        ng-switch on="!!specimen.id">
+        ng-if="!!visit.id && !specimen.reserved" ng-switch on="!!specimen.id">
         <span ng-switch-when="true">
           <span class="fa fa-pencil"></span>
           <span translate="common.buttons.edit">Edit</span>

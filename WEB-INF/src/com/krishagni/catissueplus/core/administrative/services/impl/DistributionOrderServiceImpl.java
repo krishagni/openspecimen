@@ -903,9 +903,9 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		List<String> closedSpmns = inputSpmns.stream()
 			.filter(spmn -> !spmn.isActive()).map(Specimen::getLabel)
 			.limit(10)
-			.collect(Collectors.toList());
+			.toList();
 		if (!closedSpmns.isEmpty()) {
-			ose.addError(DistributionOrderErrorCode.CLOSED_SPECIMENS, closedSpmns);
+			ose.addError(DistributionOrderErrorCode.CLOSED_SPECIMENS, closedSpmns.size(), StringUtils.join(closedSpmns, ", "));
 			return;
 		}
 

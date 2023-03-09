@@ -1619,7 +1619,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 		Specimen specimen = getSpecimen(pos);
 		if (!specimen.isActive() || specimen.isReserved()) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, specimen.getLabel());
+			throw OpenSpecimenException.userError(SpecimenErrorCode.STORE_NOT_ALLOWED, specimen.getLabel());
 		}
 
 		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen, false);

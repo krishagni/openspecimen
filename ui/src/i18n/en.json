@@ -280,6 +280,7 @@
       "already_received": "One or more specimens have been already received. Received specimens: {labels}",
       "already_reserved_for_dp": "Specimens are already reserved for distribution to the selected DP.",
       "cannot_edit_closed": "Closed specimens cannot be edited. Closed specimens: {labels}",
+      "cannot_op_closed": "Cannot perform the requested action on the closed specimens. Closed specimens: {labels}",
       "closed": "Selected specimens successfully closed.",
       "create_aliquots": "Create Aliquots",
       "create_derivatives": "Create Derivatives",

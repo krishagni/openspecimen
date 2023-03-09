@@ -1267,7 +1267,7 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void updateStatus(String activityStatus, User user, Date date, String reason, boolean isForceDelete) {
 		if (isReserved()) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, getLabel());
+			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, getLabel());
 		}
 
 		if (this.activityStatus != null && this.activityStatus.equals(activityStatus)) {
@@ -1502,6 +1502,10 @@ public class Specimen extends BaseExtensionEntity {
 			return;
 		}
 
+		if (isClosed() && (newPosition != null && !newPosition.getContainer().isDistributionContainer())) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.STORE_NOT_ALLOWED, getLabel());
+		}
+
 		if (oldPosition != null && !oldPosition.isSupressAccessChecks()) {
 			AccessCtrlMgr.getInstance().ensureSpecimenStoreRights(oldPosition.getContainer());
 		}
@@ -1578,7 +1582,7 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		if (!spmn.isEditAllowed()) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, spmn.getLabel());
+			throw OpenSpecimenException.userError(SpecimenErrorCode.PROC_NOT_ALLOWED, spmn.getLabel());
 		}
 
 		if (pooledEvent == null) {
@@ -1986,7 +1990,7 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		if (!isEditAllowed()) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.EDIT_NOT_ALLOWED, getLabel());
+			throw OpenSpecimenException.userError(SpecimenErrorCode.PROC_NOT_ALLOWED, getLabel());
 		}
 
 		SpecimenChildrenEvent currentEvent = null;

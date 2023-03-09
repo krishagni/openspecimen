@@ -211,7 +211,8 @@
       </div>
     </div>
 
-    <div class="form-group" ng-if="opts.storeSpmn && inputSpmn.status == 'Collected'">
+    <div class="form-group" ng-if="opts.storeSpmn && inputSpmn.status == 'Collected'
+      && inputSpmn.activityStatus == 'Active'">
       <label class="col-xs-3 control-label" translate="specimens.location">Location</label>
       <div class="col-xs-6">
         <os-storage-position entity="inputSpmn" cp-id="opts.cpr.cpId" virtual="spmnCtx.isVirtual"></os-storage-position>

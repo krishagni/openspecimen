@@ -326,7 +326,7 @@ angular.module('os.biospecimen.specimen')
 
         initOpts(scope, element, attrs);
 
-        function gotoView(state, params, msgCode, anyStatus, excludeExtensions, vueView) {
+        function gotoView(state, params, msgCode, anyStatus, excludeExtensions, vueView, forbidClosedSpmns) {
           var selectedSpmns = scope.specimens({anyStatus: anyStatus});
           if (!selectedSpmns || selectedSpmns.length == 0) {
             Alerts.error('specimen_list.' + msgCode);
@@ -342,6 +342,22 @@ angular.module('os.biospecimen.specimen')
 
           Specimen.getByIds(specimenIds, excludeExtensions != true).then(
             function(spmns) {
+              if (!anyStatus) {
+                var ncSpmns = spmns.filter(spmn => spmn.status != 'Collected');
+                if (ncSpmns.length > 0) {
+                  Alerts.error('specimens.not_collected', {specimens: ncSpmns.map(function(s) { return s.label; }).join(', ')});
+                  return;
+                }
+
+                if (forbidClosedSpmns) {
+                  var closedSpmns = spmns.filter(spmn => spmn.activityStatus != 'Active');
+                  if (closedSpmns.length > 0) {
+                    Alerts.error('specimens.cannot_op_closed', {specimens: closedSpmns.map(function(s) { return s.label; }).join(', ')});
+                    return;
+                  }
+                }
+              }
+
               angular.forEach(spmns, function(spmn) { ExtensionsUtil.createExtensionFieldMap(spmn, true); });
               SpecimensHolder.setSpecimens(spmns);
               navTo(scope, state, params);
@@ -480,11 +496,6 @@ angular.module('os.biospecimen.specimen')
                 return showError('specimens.non_primary_receive_na', nonPrimarySpmns);
               }
 
-              var closedSpmns = spmns.filter(function(spmn) { return spmn.activityStatus != 'Active'; });
-              if (closedSpmns.length > 0) {
-                return showError('specimens.closed_edit_na', closedSpmns);
-              }
-
               var ncSpmns = spmns.filter(function(spmn) { return spmn.status != 'Collected'; });
               if (ncSpmns.length > 0) {
                 return showError('specimens.not_collected', ncSpmns);
@@ -503,11 +514,11 @@ angular.module('os.biospecimen.specimen')
         }
 
         scope.createAliquots = function() {
-          gotoView('specimen-bulk-create-aliquots', {}, 'no_specimens_to_create_aliquots');
+          gotoView('specimen-bulk-create-aliquots', {}, 'no_specimens_to_create_aliquots', false, false, false, true);
         }
 
         scope.createDerivatives = function() {
-          gotoView('specimen-bulk-create-derivatives', {}, 'no_specimens_to_create_derivatives');
+          gotoView('specimen-bulk-create-derivatives', {}, 'no_specimens_to_create_derivatives', false, false, false, true);
         }
 
         scope.poolSpecimens = function() {
@@ -555,7 +566,7 @@ angular.module('os.biospecimen.specimen')
         }
 
         scope.transferSpecimens = function() {
-          gotoView('bulk-transfer-specimens', {}, 'no_specimens_to_transfer');
+          gotoView('bulk-transfer-specimens', {}, 'no_specimens_to_transfer', false, false, false, true);
         }
 
         scope.retrieveSpecimens = function() {

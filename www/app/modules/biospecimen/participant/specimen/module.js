@@ -211,7 +211,7 @@ angular.module('os.biospecimen.specimen',
           $scope.extnOpts = {
             update: $scope.specimenResource.updateOpts,
             entity: specimen,
-            isEntityActive: (specimen.activityStatus == 'Active')
+            isEntityActive: (specimen.activityStatus != 'Disabled')
           };
 
           ExtensionsUtil.linkFormRecords(forms, records);
