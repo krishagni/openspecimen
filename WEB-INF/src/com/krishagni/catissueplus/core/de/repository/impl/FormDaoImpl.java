@@ -116,14 +116,53 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		query.leftJoin("form.associations", "fc", () -> query.isNull("fc.deletedOn"))
 			.add(query.isNull("form.deletedOn"));
 
+		if (CollectionUtils.isNotEmpty(crit.cpIds())) {
+			query.add(
+				query.or(
+					query.eq("fc.cpId", -1L),
+					query.in("fc.cpId", crit.cpIds())
+				)
+			);
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.entityTypes())) {
+			query.add(query.in("fc.entityType", crit.entityTypes()));
+		}
+
 		List<Object[]> rows = query.add(query.in("form.id", getListFormIdsQuery(crit, query)))
 			.select(
 				"form.id", "form.name", "form.caption",
 				"fc.entityType", "fc.sysForm", "fc.multiRecord", "fc.identifier", "fc.cpId"
 			).list();
 
+		Map<String, List<Object[]>> forms = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			Long formId = (Long) row[0];
+			String entityType = (String) row[3];
+			String key = entityType + ":" + formId;
+			List<Object[]> associations = forms.computeIfAbsent(key, (k) -> new ArrayList<>());
+			associations.add(row);
+		}
+
 		List<FormSummary> result = new ArrayList<>();
 		for (Object[] row : rows) {
+			Long formId = (Long) row[0];
+			String entityType = (String) row[3];
+			String key = entityType + ":" + formId;
+			if (forms.get(key).size() > 1) {
+				//
+				// multiple associations for this form - one with CP, another for all current and future
+				//
+				Long cpId = (Long) row[7];
+				if (cpId == null || cpId == -1L) {
+					//
+					// skip this association
+					// we would like to add the CP specific association to the final result list
+					//
+					continue;
+				}
+			}
+
 			int idx = -1;
 			FormSummary form = new FormSummary();
 			form.setFormId((Long) row[++idx]);
