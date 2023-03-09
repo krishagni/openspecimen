@@ -65,8 +65,7 @@
             </li>
 
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="!cpViewCtx.isCoordinator && !specimen.reserved && specimen.activityStatus == 'Active'
-                && specimen.status == 'Collected'">
+              ng-if="!cpViewCtx.isCoordinator && !specimen.reserved && specimen.status == 'Collected'">
               <a ui-sref="specimen-detail.events(
                 {eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})">
                 <span class="fa fa-calendar-o"></span>
