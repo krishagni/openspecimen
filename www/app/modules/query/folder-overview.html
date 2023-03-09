@@ -11,7 +11,16 @@
       </li>
       <li class="item">
         <strong class="key key-sm" translate="queries.shared_with">Shared With</strong>
-        <span class="value value-md">{{folder.sharedWith | osUserDisplayName | osNoValue}}</span>
+        <span class="value value-md" ng-show="!folder.sharedWithAll">
+          {{folder.sharedWith | osUserDisplayName | osNoValue}}
+        </span>
+        <span class="value value-md" ng-show="folder.sharedWithAll">
+          <span translate="queries.all_current_n_future_users">All current and future users</span>
+        </span>
+      </li>
+      <li class="item" ng-show="!folder.sharedWithAll">
+        <strong class="key key-sm" translate="queries.shared_with_groups">Shared With Groups</strong>
+        <span class="value value-md">{{folder.sharedWithGroups | osArrayJoin: 'name' | osNoValue}}</span>
       </li>
     </ul>
   </div>

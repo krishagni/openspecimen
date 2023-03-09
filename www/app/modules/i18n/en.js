@@ -2033,6 +2033,7 @@
     "delete": "Delete",
 
     "all": "All",
+    "all_current_n_future_users": "All Current and Future Users",
     "folders": "Folders",
     "my_folders": "My Folders",
     "shared_folders": "Shared Folders",
@@ -2055,6 +2056,7 @@
     "share_folder_with_users": "Share with users",
     "share_folder_with_user_groups": "Share with user groups",
     "shared_with": "Shared with",
+    "shared_with_groups": "Shared with Groups",
     "users": "Users",
     "delete_query": "Delete Query",
     "confirm_delete_query": "Are you sure you want to delete query '{{title}}'?",
