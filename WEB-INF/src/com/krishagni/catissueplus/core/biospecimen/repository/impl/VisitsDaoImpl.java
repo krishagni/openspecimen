@@ -180,7 +180,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	}
 
 	private SubQuery<Long> getVisitIdsListQuery(VisitsListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
-		SubQuery<Long> query = mainQuery.createSubQuery(Visit.class, "visit");
+		SubQuery<Long> query = mainQuery.createSubQuery(Visit.class, "visit").select("visit.id");
 		if (crit.lastId() != null && crit.lastId() >= 0L) {
 			query.add(query.gt("visit.id", crit.lastId()));
 		}
