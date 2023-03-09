@@ -13,6 +13,10 @@ angular.module('openspecimen')
         user = new User({id: -1});
       }
 
+      if (user.id == -1 && !$http.defaults.headers.common['X-OS-IMPERSONATE-USER']) {
+        return;
+      }
+
       return user.impersonate().then(
         function(token) {
           if (token) {
