@@ -343,14 +343,14 @@ angular.module('os.biospecimen.specimen')
           Specimen.getByIds(specimenIds, excludeExtensions != true).then(
             function(spmns) {
               if (!anyStatus) {
-                var ncSpmns = spmns.filter(spmn => spmn.status != 'Collected');
+                var ncSpmns = spmns.filter(function(spmn) { return spmn.status != 'Collected' });
                 if (ncSpmns.length > 0) {
                   Alerts.error('specimens.not_collected', {specimens: ncSpmns.map(function(s) { return s.label; }).join(', ')});
                   return;
                 }
 
                 if (forbidClosedSpmns) {
-                  var closedSpmns = spmns.filter(spmn => spmn.activityStatus != 'Active');
+                  var closedSpmns = spmns.filter(function(spmn) { return spmn.activityStatus != 'Active' });
                   if (closedSpmns.length > 0) {
                     Alerts.error('specimens.cannot_op_closed', {specimens: closedSpmns.map(function(s) { return s.label; }).join(', ')});
                     return;
