@@ -56,9 +56,10 @@ export default {
   padding-right: 15px;
 }
 
-.os-menu .p-menuitem-link {
+.os-menu :deep(.p-menuitem > .p-menuitem-content .p-menuitem-link) {
   min-width: 12rem;
   padding: 0.5rem 1rem;
+  color: inherit;
 }
 </style>
 
