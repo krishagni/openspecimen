@@ -51,14 +51,13 @@ export default {
 </script>
 
 <style scoped>
-
 .os-menu-item-icon {
   padding-right: 15px;
 }
 
 .os-menu .os-menu-item {
   min-width: 12rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem!important;
   color: inherit;
 }
 </style>
