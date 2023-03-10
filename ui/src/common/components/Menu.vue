@@ -5,7 +5,7 @@
     <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
       <template #item="{item}">
         <os-divider v-if="item.divider" />
-        <a class="p-menuitem-link" @click="item.command" v-else>
+        <a class="os-menu-item p-menuitem-link" @click="item.command" v-else>
           <Icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon"></Icon>
           <span>{{item.label}}</span>
         </a>
@@ -56,7 +56,7 @@ export default {
   padding-right: 15px;
 }
 
-.os-menu :deep(.p-menuitem > .p-menuitem-content .p-menuitem-link) {
+.os-menu .os-menu-item {
   min-width: 12rem;
   padding: 0.5rem 1rem;
   color: inherit;
