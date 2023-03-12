@@ -162,6 +162,9 @@
   <include file="db/10.0/config.xml"/>
   <include file="db/10.0/audit.xml" />
 
+  <include file="db/10.1/schema.xml"/>
+  <include file="db/10.1/audit.xml" />
+
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
 </databaseChangeLog>

@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.SpecimenReservedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
@@ -520,6 +521,11 @@ public class Specimen extends BaseExtensionEntity {
 		this.position = position;
 	}
 
+	@NotAudited
+	public Site getStorageSite() {
+		return position != null && position.getContainer() != null ? position.getContainer().getSite() : null;
+	}
+
 	public Specimen getParentSpecimen() {
 		return parentSpecimen;
 	}
@@ -891,6 +897,10 @@ public class Specimen extends BaseExtensionEntity {
 
 	public boolean isReceived() {
 		return isPrimary() && isCollected() && getReceivedEvent() != null && getReceivedEvent().isReceived();
+	}
+
+	public boolean isStorageSiteBasedAccessRightsEnabled() {
+		return getCollectionProtocol().storageSiteBasedAccessRightsEnabled();
 	}
 
 	public void disable() {
@@ -1585,6 +1595,10 @@ public class Specimen extends BaseExtensionEntity {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.PROC_NOT_ALLOWED, spmn.getLabel());
 		}
 
+		if (spmn.isStorageSiteBasedAccessRightsEnabled() && spmn.isStored()) {
+			AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(spmn);
+		}
+
 		if (pooledEvent == null) {
 			pooledEvent = new SpecimenPooledEvent();
 			pooledEvent.setPooledSpecimen(this);
@@ -1806,6 +1820,10 @@ public class Specimen extends BaseExtensionEntity {
 
 	public boolean isStoredInDistributionContainer() {
 		return getPosition() != null && getPosition().getContainer().isDistributionContainer();
+	}
+
+	public boolean isStored() {
+		return getPosition() != null && getPosition().getContainer() != null;
 	}
 
 	public void updateHierarchyStatus() {

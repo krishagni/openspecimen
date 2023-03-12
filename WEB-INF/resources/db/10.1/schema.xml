@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Storage site based access restriction">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="STORE_SITE_ACCESS_RIGHTS" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

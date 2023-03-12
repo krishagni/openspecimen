@@ -1078,7 +1078,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		// before the specimen is associated to session to ensure specimen is not flushed
 		// to database
 		//
-
 		if (existing != null) {
 			existing.update(specimen);
 			specimen = existing;
@@ -1086,6 +1085,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		} else if (specimen.getParentSpecimen() != null) {
 			if (!specimen.getParentSpecimen().isEditAllowed()) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.PROC_NOT_ALLOWED, specimen.getParentSpecimen().getLabel());
+			}
+
+			if (specimen.isStorageSiteBasedAccessRightsEnabled() && specimen.getParentSpecimen().isStored()) {
+				AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen.getParentSpecimen());
 			}
 
 			specimen.setLabelIfEmpty();

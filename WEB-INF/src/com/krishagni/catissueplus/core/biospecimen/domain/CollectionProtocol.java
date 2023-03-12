@@ -142,6 +142,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private Boolean aliquotsInSameContainer;
 
+	private Boolean storageSiteBasedAccess;
+
 	private LabelSequenceKey labelSequenceKey = LabelSequenceKey.ID;
 
 	private VisitCollectionMode visitCollectionMode = VisitCollectionMode.ALL_SPMNS;
@@ -487,6 +489,19 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.aliquotsInSameContainer = aliquotsInSameContainer;
 	}
 
+	public Boolean getStorageSiteBasedAccess() {
+		return storageSiteBasedAccess;
+	}
+
+	public void setStorageSiteBasedAccess(Boolean storageSiteBasedAccess) {
+		this.storageSiteBasedAccess = storageSiteBasedAccess;
+	}
+
+	@NotAudited
+	public boolean storageSiteBasedAccessRightsEnabled() {
+		return Boolean.TRUE.equals(getStorageSiteBasedAccess());
+	}
+
 	public LabelSequenceKey getLabelSequenceKey() {
 		return labelSequenceKey;
 	}
@@ -701,6 +716,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setSetQtyToZero(cp.getSetQtyToZero());
 		setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
+		setStorageSiteBasedAccess(cp.getStorageSiteBasedAccess());
 		setLabelSequenceKey(cp.getLabelSequenceKey());
 		setVisitCollectionMode(cp.getVisitCollectionMode());
 		setVisitNamePrintMode(cp.getVisitNamePrintMode());
@@ -749,6 +765,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setBarcodingEnabled(isBarcodingEnabled());
 		cp.setCloseParentSpecimens(isCloseParentSpecimens());
 		cp.setSetQtyToZero(getSetQtyToZero());
+		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
 		cp.setLabelSequenceKey(getLabelSequenceKey());
 		cp.setVisitCollectionMode(getVisitCollectionMode());
 		cp.setVisitNamePrintMode(getVisitNamePrintMode());
@@ -768,6 +785,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 		cp.setContainerSelectionStrategy(getContainerSelectionStrategy());
 		cp.setAliquotsInSameContainer(getAliquotsInSameContainer());
+		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
 		cp.setActivityStatus(getActivityStatus());
 	}
 	

@@ -382,12 +382,11 @@ public class Visit extends BaseExtensionEntity {
 		for (Specimen specimen : getSpecimens()) {
 			if (specimen.isActiveOrClosed() && specimen.isCollected()) {
 				if (hasDeleteSpmnRights == null) {
-					hasDeleteSpmnRights = AccessCtrlMgr.getInstance().hasDeleteSpecimenRights(getRegistration());
-					getRegistration().setHasDeleteSpecimenRights(hasDeleteSpmnRights);
-				}
-
-				if (!hasDeleteSpmnRights) {
-					throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+					AccessCtrlMgr.getInstance().ensureDeleteSpecimenRights(specimen);
+					if (!getCollectionProtocol().storageSiteBasedAccessRightsEnabled()) {
+						hasDeleteSpmnRights = true;
+						getRegistration().setHasDeleteSpecimenRights(true);
+					}
 				}
 			}
 

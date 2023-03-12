@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
@@ -841,9 +840,9 @@ public class AccessCtrlMgr {
 
 	private boolean ensureVisitObjectRights(CollectionProtocolRegistration cpr, Operation op, boolean checkPhiAccess) {
 		Resource[] resources = {Resource.VISIT};
-		boolean phiAccess = ensureVisitAndSpecimenObjectRights(cpr, resources, op, checkPhiAccess);
+		boolean phiAccess = ensureVisitAndSpecimenObjectRights(cpr, null, resources, op, checkPhiAccess);
 		if (isImportOp() || isExportOp()) {
-			ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.EXIM, false);
+			ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.EXIM, false);
 		}
 
 		return phiAccess;
@@ -882,10 +881,10 @@ public class AccessCtrlMgr {
 			resources = new Resource[] { Resource.SPECIMEN};
 		}
 
-
-		ensureVisitAndSpecimenObjectRights(specimen.getRegistration(), resources, Operation.UPDATE, checkPhiAccess);
+		Site storageSite = specimen.isStorageSiteBasedAccessRightsEnabled() ? specimen.getStorageSite() : null;
+		ensureVisitAndSpecimenObjectRights(specimen.getRegistration(), storageSite, resources, Operation.UPDATE, checkPhiAccess);
 		if (isImportOp() || isExportOp()) {
-			ensureVisitAndSpecimenObjectRights(specimen.getRegistration(), resources, Operation.EXIM, false);
+			ensureVisitAndSpecimenObjectRights(specimen.getRegistration(), isImportOp() ? storageSite : null, resources, Operation.EXIM, false);
 		}
 	}
 
@@ -914,9 +913,9 @@ public class AccessCtrlMgr {
 		Resource[] resources;
 		try {
 			resources = new Resource[] { Resource.SPECIMEN};
-			boolean phiRights = ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.READ, checkPhiAccess);
+			boolean phiRights = ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.READ, checkPhiAccess);
 			if (isImportOp() || isExportOp()) {
-				ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.EXIM, false);
+				ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.EXIM, false);
 			}
 
 			rights.allSpmns = true;
@@ -927,9 +926,9 @@ public class AccessCtrlMgr {
 			}
 
 			resources = new Resource[] { Resource.PRIMARY_SPECIMEN};
-			boolean phiRights = ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.READ, checkPhiAccess);
+			boolean phiRights = ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.READ, checkPhiAccess);
 			if (isImportOp() || isExportOp()) {
-				ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.EXIM, false);
+				ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.EXIM, false);
 			}
 
 			rights.onlyPrimarySpmns = true;
@@ -941,9 +940,9 @@ public class AccessCtrlMgr {
 
 	public boolean ensureReadSpecimenRights(CollectionProtocolRegistration cpr, boolean checkPhiAccess) {
 		Resource[] resources = { Resource.SPECIMEN };
-		boolean phiAccess = ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.READ, checkPhiAccess);
+		boolean phiAccess = ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.READ, checkPhiAccess);
 		if (isImportOp() || isExportOp()) {
-			ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.EXIM, false);
+			ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.EXIM, false);
 		}
 
 		return phiAccess;
@@ -951,34 +950,17 @@ public class AccessCtrlMgr {
 
 	public boolean ensureReadPrimarySpecimenRights(CollectionProtocolRegistration cpr, boolean checkPhiAccess) {
 		Resource[] resources = { Resource.PRIMARY_SPECIMEN};
-		boolean phiAccess = ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.READ, checkPhiAccess);
+		boolean phiAccess = ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.READ, checkPhiAccess);
 		if (isImportOp() || isExportOp()) {
-			ensureVisitAndSpecimenObjectRights(cpr, resources, Operation.EXIM, false);
+			ensureVisitAndSpecimenObjectRights(cpr, null, resources, Operation.EXIM, false);
 		}
 
 		return phiAccess;
 	}
 
 	public void ensureDeleteSpecimenRights(Specimen specimen) {
-		ensureSpecimenObjectRights(specimen, Operation.DELETE, false);
-	}
-
-	public boolean hasDeleteSpecimenRights(CollectionProtocolRegistration reg) {
-		try {
-			Resource[] resources = {Resource.SPECIMEN, Resource.PRIMARY_SPECIMEN};
-			ensureVisitAndSpecimenObjectRights(reg, resources, Operation.DELETE, false);
-			if (isImportOp() || isExportOp()) {
-				ensureVisitAndSpecimenObjectRights(reg, resources, Operation.EXIM, false);
-			}
-
-			return true;
-		} catch (OpenSpecimenException ose) {
-			if (!ose.containsError(RbacErrorCode.ACCESS_DENIED)) {
-				throw ose;
-			}
-
-			return false;
-		}
+		Site storageSite = specimen.isStorageSiteBasedAccessRightsEnabled() ? specimen.getStorageSite() : null;
+		ensureSpecimenObjectRights(specimen, storageSite, Operation.DELETE, false);
 	}
 
 	public List<SiteCpPair> getReadAccessSpecimenSiteCps() {
@@ -1020,10 +1002,15 @@ public class AccessCtrlMgr {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_FOUND, specimenId);
 		}
 
-		return ensureSpecimenObjectRights(specimen, op, checkPhiAccess);
+		Site storageSite = null;
+		if (op == Operation.CREATE || op == Operation.UPDATE || op == Operation.DELETE) {
+			storageSite = specimen.isStorageSiteBasedAccessRightsEnabled() ? specimen.getStorageSite() : null;
+		}
+
+		return ensureSpecimenObjectRights(specimen, storageSite, op, checkPhiAccess);
 	}
 
-	private boolean ensureSpecimenObjectRights(Specimen spmn, Operation op, boolean checkPhiAccess) {
+	private boolean ensureSpecimenObjectRights(Specimen spmn, Site storageSite, Operation op, boolean checkPhiAccess) {
 		Resource[] resources = null;
 		if (spmn.isPrimary()) {
 			resources = new Resource[]{Resource.SPECIMEN, Resource.PRIMARY_SPECIMEN};
@@ -1031,15 +1018,15 @@ public class AccessCtrlMgr {
 			resources = new Resource[]{Resource.SPECIMEN};
 		}
 
-		boolean phiAccess =  ensureVisitAndSpecimenObjectRights(spmn.getRegistration(), resources, op, checkPhiAccess);
+		boolean phiAccess =  ensureVisitAndSpecimenObjectRights(spmn.getRegistration(), storageSite, resources, op, checkPhiAccess);
 		if (isImportOp() || isExportOp()) {
-			ensureVisitAndSpecimenObjectRights(spmn.getRegistration(), resources, Operation.EXIM, false);
+			ensureVisitAndSpecimenObjectRights(spmn.getRegistration(), isImportOp() ? storageSite : null, resources, Operation.EXIM, false);
 		}
 
 		return phiAccess;
 	}
 
-	private boolean ensureVisitAndSpecimenObjectRights(CollectionProtocolRegistration cpr, Resource[] resources, Operation op, boolean checkPhiAccess) {
+	private boolean ensureVisitAndSpecimenObjectRights(CollectionProtocolRegistration cpr, Site storageSite, Resource[] resources, Operation op, boolean checkPhiAccess) {
 		if (AuthUtil.isAdmin()) {
 			return true;
 		}
@@ -1051,7 +1038,7 @@ public class AccessCtrlMgr {
 			ops = new String[] {op.getName()};
 		}
 
-		ensureVisitAndSpecimenObjectRights(cpr, resources, ops);
+		ensureVisitAndSpecimenObjectRights(cpr, storageSite, resources, ops);
 		return checkPhiAccess && ensurePhiRights(cpr, op);
 	}
 
@@ -1452,15 +1439,22 @@ public class AccessCtrlMgr {
 
 		CollectionProtocolRegistration cpr = visit.getRegistration();
 		String[] ops = {op.getName()};
-		ensureVisitAndSpecimenObjectRights(cpr, new Resource[] { Resource.SURGICAL_PATHOLOGY_REPORT }, ops);
+		ensureVisitAndSpecimenObjectRights(cpr, null, new Resource[] { Resource.SURGICAL_PATHOLOGY_REPORT }, ops);
 		ensureSprEximRights(visit);
 	}
 
-	private void ensureVisitAndSpecimenObjectRights(CollectionProtocolRegistration cpr, Resource[] resources, String[] ops) {
+	private void ensureVisitAndSpecimenObjectRights(CollectionProtocolRegistration cpr, Site storageSite, Resource[] resources, String[] ops) {
+		if (AuthUtil.getCurrentUser() == null) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		Long userId = AuthUtil.getCurrentUser().getId();
 		Long cpId = cpr.getCollectionProtocol().getId();
 		String[] resourceNames = Stream.of(resources).map(Resource::getName).toArray(String[]::new);
 		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(userId, cpId, resourceNames, ops);
+		if (storageSite != null && !isAccessAllowedOnAnySite(accessList, Collections.singleton(storageSite))) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
 
 		Set<Site> cpSites = cpr.getCollectionProtocol().getRepositories();
 		if (!isAccessAllowedOnAnySite(accessList, cpSites)) {
@@ -1484,7 +1478,7 @@ public class AccessCtrlMgr {
 	private void ensureSprEximRights(Visit visit) {
 		if (isImportOp() || isExportOp()) {
 			String[] ops = {Operation.EXIM.getName()};
-			ensureVisitAndSpecimenObjectRights(visit.getRegistration(), new Resource[] { Resource.SURGICAL_PATHOLOGY_REPORT }, ops);
+			ensureVisitAndSpecimenObjectRights(visit.getRegistration(), null, new Resource[] { Resource.SURGICAL_PATHOLOGY_REPORT }, ops);
 		}
 	}
 

@@ -106,6 +106,8 @@
         <param name="type">12</param>
       </type>
     </property>
+
+    <property name="storageSiteBasedAccess" column="STORE_SITE_ACCESS_RIGHTS" />
     
     <set name="spmnLabelPrintSettings" inverse="true" cascade="all-delete-orphan">
       <key column="CP_ID"/>

@@ -128,6 +128,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setCloseParentSpecimens(input, cp, ose);
 		setSetQtyToZero(input, cp, ose);
 		setContainerSelectionStrategy(input, cp, ose);
+		cp.setStorageSiteBasedAccess(input.getStorageSiteBasedAccess());
 		setVisitCollectionMode(input, cp, ose);
 		setVisitNamePrintMode(input, cp, ose);
 		cp.setVisitNamePrintCopies(input.getVisitNamePrintCopies());

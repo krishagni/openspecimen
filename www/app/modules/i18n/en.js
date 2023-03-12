@@ -491,7 +491,8 @@
     "import_workflows": "Import Workflows",
     "export_workflows": "Export Workflows",
     "workflows_file": "Workflows JSON File",
-    "workflows_imported": "Workflows Imported."
+    "workflows_imported": "Workflows Imported.",
+    "storage_site_update_rights": "Storage Site based Update Checks"
   },
 
   "cp_groups": {
