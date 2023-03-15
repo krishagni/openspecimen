@@ -61,7 +61,6 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
-import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -83,7 +82,6 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
-import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
@@ -547,6 +545,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				aliquot.setPrintLabel(spec.printLabel());
 				aliquot.setComments(spec.getComments());
 				aliquot.setExtensionDetail(spec.getExtensionDetail());
+				aliquot.setReqId(spec.getReqId());
 
 				if (i < reqIds.size()) {
 					aliquot.setReqId(reqIds.get(i));

@@ -226,8 +226,10 @@ class Util {
       .map(prop => ({specimenClass: prop.specimenClass, type: prop.type}));
   }
 
-  getSpecimenMeasureUnit({specimenClass, type, specimenType}, measure) {
-    type = type || specimenType;
+  getSpecimenMeasureUnit(specimen, measure) {
+    const specimenClass = (specimen && specimen.specimenClass);
+    const specimenType  = (specimen && specimen.specimenType);
+    const type          = (specimen && specimen.type) || specimenType;
     if (!specimenClass || !type) {
       return '-';
     }

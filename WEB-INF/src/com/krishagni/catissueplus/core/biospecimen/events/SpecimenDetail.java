@@ -514,6 +514,7 @@ public class SpecimenDetail extends SpecimenInfo {
 			return;
 		}
 
+		specimen.setCprId(visit.getRegistration().getId());
 		specimen.setVisitId(visit.getId());
 		specimen.setVisitName(visit.getName());
 		specimen.setVisitStatus(visit.getStatus());

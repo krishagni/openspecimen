@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.PermissibleValueDetails;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
@@ -233,19 +233,23 @@ public class VisitDetail extends VisitSummary {
 	}
 
 	public String getDescription() {
-		if (StringUtils.isBlank(getEventLabel())) {
-			return "Unplanned Visit / " + getName();
-		}
-
 		String result = "";
-		if (getEventPoint() != null) {
-			result += (getEventPoint() < 0 ? "-" : "") + "T" + Math.abs(getEventPoint());
-			result += getEventPointUnit().name().charAt(0);
+		if (StringUtils.isBlank(getEventLabel())) {
+			result = "Unplanned Visit";
+		} else {
+			if (getEventPoint() != null) {
+				result += (getEventPoint() < 0 ? "-" : "") + "T" + Math.abs(getEventPoint());
+				result += getEventPointUnit().name().charAt(0) + ": ";
+			}
+
+			result += getEventLabel();
+			if (StringUtils.isNotBlank(getEventCode())) {
+				result += " (" + getEventCode() + ")";
+			}
 		}
 
-		result += getEventLabel();
-		if (StringUtils.isNotBlank(getEventCode())) {
-			result += " (" + getEventCode() + ")";
+		if (getVisitDate() != null) {
+			result += " / " + Utility.getDateString(getVisitDate());
 		}
 
 		return result;

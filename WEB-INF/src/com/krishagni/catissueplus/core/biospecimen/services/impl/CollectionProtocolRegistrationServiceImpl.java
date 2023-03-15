@@ -1094,7 +1094,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 
 	private List<SpecimenDetail> getSpecimensByVisit(Visit visit, boolean excludePhi, boolean excludeChildren) {
-		Set<SpecimenRequirement> anticipatedSpecimens = visit.isUnplanned() ? Collections.EMPTY_SET : visit.getCpEvent().getTopLevelAnticipatedSpecimens();
+		Set<SpecimenRequirement> anticipatedSpecimens = visit.isUnplanned() ? Collections.emptySet() : visit.getCpEvent().getTopLevelAnticipatedSpecimens();
 		Set<Specimen> specimens = visit.getTopLevelSpecimens();
 
 		if (!specimens.isEmpty()) {

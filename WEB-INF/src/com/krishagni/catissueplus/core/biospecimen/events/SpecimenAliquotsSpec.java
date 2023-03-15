@@ -69,6 +69,8 @@ public class SpecimenAliquotsSpec {
 
 	private boolean linkToReqs;
 
+	private Long reqId;
+
 	public Long getParentId() {
 		return parentId;
 	}
@@ -323,5 +325,13 @@ public class SpecimenAliquotsSpec {
 
 	public void setLinkToReqs(boolean linkToReqs) {
 		this.linkToReqs = linkToReqs;
+	}
+
+	public Long getReqId() {
+		return reqId;
+	}
+
+	public void setReqId(Long reqId) {
+		this.reqId = reqId;
 	}
 }
