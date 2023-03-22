@@ -18,8 +18,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
@@ -792,7 +792,7 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 	
 	public void removePosition(StorageContainerPosition position) {
-		if (position == null) {
+		if (position == null || position.getId() == null) {
 			return;
 		}
 
@@ -801,7 +801,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		} else {
 			Iterator<StorageContainerPosition> iter = getOccupiedPositions().iterator();
 			while (iter.hasNext()) {
-				if (iter.next().getId().equals(position.getId())) {
+				if (position.getId().equals(iter.next().getId())) {
 					iter.remove();
 					break;
 				}
@@ -1515,7 +1515,8 @@ public class StorageContainer extends BaseExtensionEntity {
 			return false; // position is not vacant and entity is new
 		} else if (isSpecimenEntity) {
 			return (vacateOccupant && pos.getOccupyingContainer() == null) ||
-					pos.getOccupyingSpecimen() != null && pos.getOccupyingSpecimen().getId().equals(entityId);
+				(pos.getOccupyingSpecimen() != null && pos.getOccupyingSpecimen().getId().equals(entityId)) ||
+				(pos.getCheckoutSpecimen() != null && pos.getCheckoutSpecimen().getId().equals(entityId));
 		} else {
 			return (pos.getOccupyingContainer() != null && pos.getOccupyingContainer().getId().equals(entityId)) ||
 				(pos.getBlockedForContainer() != null && pos.getBlockedForContainer().getId().equals(entityId));
@@ -1613,17 +1614,17 @@ public class StorageContainer extends BaseExtensionEntity {
 		User transferredBy, Date transferDate, String transferReasons, boolean checkOut) {
 		Site existing = site;
 
-		ContainerTransferEvent transferEvent = null;
-		if (!Objects.equals(site, otherSite) ||
-			!Objects.equals(parentContainer, otherParentContainer) ||
-			!StorageContainerPosition.areSame(position, otherPos)) {
-
-			transferEvent = new ContainerTransferEvent().fromLocation(site, position != null ? position.getContainer() : null, position);
-			transferEvent.setContainer(this);
-			transferEvent.setUser(transferredBy != null ? transferredBy : AuthUtil.getCurrentUser());
-			transferEvent.setTime(transferDate != null ? transferDate : Calendar.getInstance().getTime());
-			transferEvent.setReason(transferReasons);
+		if (Objects.equals(site, otherSite) &&
+			Objects.equals(parentContainer, otherParentContainer) &&
+			StorageContainerPosition.areSame(position, otherPos)) {
+			return;
 		}
+
+		ContainerTransferEvent transferEvent = new ContainerTransferEvent().fromLocation(site, position != null ? position.getContainer() : null, position);
+		transferEvent.setContainer(this);
+		transferEvent.setUser(transferredBy != null ? transferredBy : AuthUtil.getCurrentUser());
+		transferEvent.setTime(transferDate != null ? transferDate : Calendar.getInstance().getTime());
+		transferEvent.setReason(transferReasons);
 
 		StorageContainerPosition oldPosition = null;
 		if (otherParentContainer == null) {
@@ -1666,34 +1667,32 @@ public class StorageContainer extends BaseExtensionEntity {
 			updateSite(site);
 		}
 
-		if (transferEvent != null) {
-			transferEvent.toLocation(site, parentContainer, position);
-			getTransferEvents().add(transferEvent);
+		transferEvent.toLocation(site, parentContainer, position);
+		getTransferEvents().add(transferEvent);
 
-			if (checkOut && oldPosition != null) {
-				StorageContainerPosition blockedPosition = oldPosition.getContainer().createPosition(
-					oldPosition.getPosOneOrdinal(), oldPosition.getPosOne(),
-					oldPosition.getPosTwoOrdinal(), oldPosition.getPosTwo()
-				);
-				blockedPosition.setBlocked(true);
-				blockedPosition.setBlockedForContainer(this);
-				setBlockedPosition(blockedPosition);
-				setStatus(Status.CHECKED_OUT);
-				transferEvent.setReason("CHECK-OUT: " + (transferReasons != null ? transferReasons : ""));
-			} else if (getBlockedPosition() != null) {
-				String prefix = "";
-				if (!"ARCHIVED".equals(transferReasons)) {
-					prefix = "CHECK-IN: ";
-				}
-
-				getBlockedPosition().getContainer().removePosition(getBlockedPosition());
-				setBlockedPosition(null);
-				setStatus(null);
-				transferEvent.setReason(prefix + (transferReasons != null ? transferReasons : ""));
+		if (checkOut && oldPosition != null) {
+			StorageContainerPosition blockedPosition = oldPosition.getContainer().createPosition(
+				oldPosition.getPosOneOrdinal(), oldPosition.getPosOne(),
+				oldPosition.getPosTwoOrdinal(), oldPosition.getPosTwo()
+			);
+			blockedPosition.setBlocked(true);
+			blockedPosition.setBlockedForContainer(this);
+			setBlockedPosition(blockedPosition);
+			setStatus(Status.CHECKED_OUT);
+			transferEvent.setReason("CHECK-OUT: " + (transferReasons != null ? transferReasons : ""));
+		} else if (getBlockedPosition() != null) {
+			String prefix = "";
+			if (!"ARCHIVED".equals(transferReasons)) {
+				prefix = "CHECK-IN: ";
 			}
 
-			oldPosition = null;
+			getBlockedPosition().getContainer().removePosition(getBlockedPosition());
+			setBlockedPosition(null);
+			setStatus(null);
+			transferEvent.setReason(prefix + (transferReasons != null ? transferReasons : ""));
 		}
+
+		oldPosition = null;
 	}
 	
 	private void updateSite(Site site) {

@@ -83,6 +83,8 @@ angular.module('os.biospecimen.specimen')
             evtCtx.time = +field.value;
           } else if (field.name == 'comments' || field.name == 'reason') {
             evtCtx.comments = field.value;
+          } else if (field.name == 'status') {
+            evtCtx.status = field.value;
           }
         }
       );

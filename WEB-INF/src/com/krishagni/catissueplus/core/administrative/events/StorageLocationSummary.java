@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.events;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
+import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StorageLocationSummary implements Serializable {
@@ -31,6 +33,12 @@ public class StorageLocationSummary implements Serializable {
 	private Integer position;
 
 	private String reservationId;
+
+	private UserSummary checkoutBy;
+
+	private Date checkoutTime;
+
+	private String checkoutComments;
 
 	public Long getId() {
 		return id;
@@ -104,6 +112,30 @@ public class StorageLocationSummary implements Serializable {
 		this.reservationId = reservationId;
 	}
 
+	public UserSummary getCheckoutBy() {
+		return checkoutBy;
+	}
+
+	public void setCheckoutBy(UserSummary checkoutBy) {
+		this.checkoutBy = checkoutBy;
+	}
+
+	public Date getCheckoutTime() {
+		return checkoutTime;
+	}
+
+	public void setCheckoutTime(Date checkoutTime) {
+		this.checkoutTime = checkoutTime;
+	}
+
+	public String getCheckoutComments() {
+		return checkoutComments;
+	}
+
+	public void setCheckoutComments(String checkoutComments) {
+		this.checkoutComments = checkoutComments;
+	}
+
 	public static StorageLocationSummary from(StorageContainerPosition position) {
 		if (position == null) {
 			return null;
@@ -114,6 +146,9 @@ public class StorageLocationSummary implements Serializable {
 		storageLocation.setPositionY(position.getPosTwo());
 		storageLocation.setPosition(position.getPosition());
 		storageLocation.setReservationId(position.getReservationId());
+		storageLocation.setCheckoutBy(UserSummary.from(position.getCheckoutBy()));
+		storageLocation.setCheckoutComments(position.getCheckoutComments());
+		storageLocation.setCheckoutTime(position.getCheckoutTime());
 		return storageLocation;
 	}
 

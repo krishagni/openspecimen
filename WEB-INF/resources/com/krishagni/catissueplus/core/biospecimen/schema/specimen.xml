@@ -183,6 +183,28 @@
       <attribute>activityStatus</attribute>
     </field>
 
+    <record>
+      <caption>#getMessage("specimen_transfer_user")</caption>
+      <attribute>transferUser</attribute>
+
+      <field>
+        <caption>#getMessage("specimen_event_user_email")</caption>
+        <attribute>emailAddress</attribute>
+      </field>
+    </record>
+
+    <field>
+      <type>datetime</type>
+      <caption>#getMessage("specimen_transfer_time")</caption>
+      <attribute>transferTime</attribute>
+    </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("specimen_checkout")</caption>
+      <attribute>checkout</attribute>
+    </field>
+
     <field>
       <caption>#getMessage("common_reason")</caption>
       <attribute>opComments</attribute>

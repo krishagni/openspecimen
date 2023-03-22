@@ -837,6 +837,13 @@ public class StorageContainersController {
 		return resp.getPayload();
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/unblock-checkout-positions")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> unblockCheckoutPositions(@RequestBody List<SpecimenInfo> specimens) {
+		return ResponseEvent.unwrap(storageContainerSvc.unblockCheckoutPositions(RequestEvent.wrap(specimens)));
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value = "/box-specimens")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

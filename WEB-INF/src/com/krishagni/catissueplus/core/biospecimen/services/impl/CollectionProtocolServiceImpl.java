@@ -1605,7 +1605,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		List<Long> siteIds = sites.stream().map(Site::getId).collect(Collectors.toList());
 		Map<String, Integer> counts = daoFactory.getCprDao().getParticipantsBySite(cp.getId(), siteIds);
 		if (!counts.isEmpty()) {
-			String siteLabels = counts.keySet().stream().collect(Collectors.joining(", "));
+			String siteLabels = String.join(", ", counts.keySet());
 			throw OpenSpecimenException.userError(CpErrorCode.USED_SITES, siteLabels, counts.size());
 		}
 

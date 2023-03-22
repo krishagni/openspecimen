@@ -1284,6 +1284,164 @@
 
     <row>
       <subForm>
+        <name>checkoutPosition</name>
+        <udn>checkoutPosition</udn>
+        <caption>#getMessage("specimen_checkout_details")</caption>
+        <table>OS_CHECKED_OUT_SPECIMENS_VIEW</table>
+        <foreignKey>SPECIMEN_ID</foreignKey>
+        <parentKey>IDENTIFIER</parentKey>
+        <primaryKey>SPECIMEN_ID</primaryKey>
+        <row>
+          <numberField>
+            <name>positionId</name>
+            <udn>positionId</udn>
+            <caption>#getMessage("specimen_spec_position_id")</caption>
+            <column>POSITION_IDENTIFIER</column>
+            <hidden>true</hidden>
+          </numberField>
+
+          <textField>
+            <name>containerName</name>
+            <udn>containerName</udn>
+            <caption>#getMessage("specimen_spec_position_container_name")</caption>
+            <column>CONTAINER_NAME</column>
+            <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+          </textField>
+
+          <textField>
+            <name>containerDisplayName</name>
+            <udn>containerDisplayName</udn>
+            <caption>#getMessage("specimen_spec_position_container_display_name")</caption>
+            <column>CONTAINER_DISPLAY_NAME</column>
+          </textField>
+
+          <textField>
+            <name>containerBarcode</name>
+            <udn>containerBarcode</udn>
+            <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
+            <column>CONTAINER_BARCODE</column>
+            <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
+          </textField>
+
+          <textField>
+            <name>rowY</name>
+            <udn>rowY</udn>
+            <caption>#getMessage("specimen_spec_position_container_row")</caption>
+            <column>POS_TWO_STR</column>
+          </textField>
+
+          <textField>
+            <name>colX</name>
+            <udn>colX</udn>
+            <caption>#getMessage("specimen_spec_position_container_column")</caption>
+            <column>POS_ONE_STR</column>
+          </textField>
+
+          <numberField>
+            <name>rowOrdinal</name>
+            <udn>rowOrdinal</udn>
+            <caption>#getMessage("specimen_spec_position_row_ordinal")</caption>
+            <column>POS_TWO</column>
+          </numberField>
+
+          <numberField>
+            <name>columnOrdinal</name>
+            <udn>columnOrdinal</udn>
+            <caption>#getMessage("specimen_spec_position_col_ordinal")</caption>
+            <column>POS_ONE</column>
+          </numberField>
+
+          <textField>
+            <name>formattedPos</name>
+            <udn>formattedPos</udn>
+            <caption>#getMessage("specimen_spec_position_formatted_pos")</caption>
+            <column>FORMATTED_POSITION</column>
+          </textField>
+        </row>
+        <row>
+          <subForm>
+            <name>containerHierarchy</name>
+            <udn>containerHierarchy</udn>
+            <caption>#getMessage("specimen_spec_position_container_hierarchy")</caption>
+            <table>OS_CONTAINER_HIERARCHY_VIEW</table>
+            <foreignKey>CONTAINER_ID</foreignKey>
+            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <primaryKey>CONTAINER_ID</primaryKey>
+            <row>
+              <textField>
+                <name>hierarchy</name>
+                <udn>hierarchy</udn>
+                <caption>#getMessage("specimen_spec_position_container_hierarchy")</caption>
+                <column>HIERARCHY</column>
+              </textField>
+            </row>
+          </subForm>
+        </row>
+        <row>
+          <subForm>
+            <name>ancestors</name>
+            <udn>ancestors</udn>
+            <caption>#getMessage("specimen_spec_position_container_ancestors")</caption>
+            <table>OS_CONTAINER_ANCESTORS_VIEW</table>
+            <foreignKey>CONTAINER_ID</foreignKey>
+            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <primaryKey>CONTAINER_ID</primaryKey>
+            <row>
+              <textField>
+                <name>root_container_name</name>
+                <udn>root_container_name</udn>
+                <caption>#getMessage("specimen_spec_position_container_root_name")</caption>
+                <column>FREEZER</column>
+                <recordUrl>#/object-state-params-resolver?stateName=container-detail.overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+              </textField>
+            </row>
+          </subForm>
+        </row>
+        <row>
+          <subForm>
+            <name>allAncestors</name>
+            <udn>allAncestors</udn>
+            <caption>#getMessage("specimen_spec_position_container_all_ancestors")</caption>
+            <table>OS_CONTAINERS_HIERARCHY</table>
+            <foreignKey>DESCENDENT_ID</foreignKey>
+            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <pathLink>true</pathLink>
+            <row>
+              <numberField>
+                <name>ancestorId</name>
+                <udn>ancestorId</udn>
+                <caption>#getMessage("specimen_spec_position_container_ancestor_id")</caption>
+                <column>ANCESTOR_ID</column>
+              </numberField>
+            </row>
+          </subForm>
+        </row>
+        <row>
+          <userField>
+            <name>checkoutBy</name>
+            <udn>checkoutBy</udn>
+            <caption>#getMessage("specimen_checkout_by")</caption>
+            <column>CHECKOUT_BY</column>
+          </userField>
+          <datePicker>
+            <name>checkoutTime</name>
+            <udn>checkoutTime</udn>
+            <caption>#getMessage("specimen_checkout_time")</caption>
+            <column>CHECKOUT_TIME</column>
+            <format>MM-dd-yyyy HH:mm</format>
+          </datePicker>
+          <textField>
+            <name>checkoutComments</name>
+            <udn>checkoutComments</udn>
+            <caption>#getMessage("specimen_checkout_comments")</caption>
+            <column>CHECKOUT_COMMENTS</column>
+          </textField>
+        </row>
+      </subForm>
+    </row>
+
+    <row>
+      <subForm>
         <name>extensions</name>
         <udn>extensions</udn>
         <caption>#getMessage("specimen_extensions")</caption>

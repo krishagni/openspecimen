@@ -934,21 +934,31 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 	}
 
 	private void setSpecimenPosition(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
+		if (Boolean.TRUE.equals(detail.getCheckout())) {
+			detail.setStorageLocation(null);
+		}
+
 		StorageContainerPosition position = getPosition(
 			specimen, detail.getStorageLocation(),
 			detail.getContainerLocation(), detail.getContainerTypeId(), detail.getContainerTypeName(),
 			ose);
 
+		specimen.setTransferUser(getUser(detail.getTransferUser(), ose));;
 		specimen.setTransferTime(detail.getTransferTime());
 		specimen.setTransferComments(detail.getTransferComments());
+		if (StringUtils.isBlank(specimen.getTransferComments())) {
+			specimen.setTransferComments(detail.getOpComments());
+		}
+
 		specimen.setPosition(position);
 		if (position != null) {
 			position.setOccupyingSpecimen(specimen);
 		}
+		specimen.setCheckout(detail.getCheckout());
 	}
 
 	private void setSpecimenPosition(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
-		if (existing == null || detail.isAttrModified("storageLocation")) {
+		if (existing == null || detail.isAttrModified("storageLocation") || Boolean.TRUE.equals(detail.getCheckout())) {
 			setSpecimenPosition(detail, specimen, ose);
 		} else if (existing.getPosition() != null) {
 			//

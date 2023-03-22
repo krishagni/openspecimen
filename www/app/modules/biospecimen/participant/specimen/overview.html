@@ -72,6 +72,23 @@
                 <span translate="specimens.ctx_menu.add_event">Add Event</span>
               </a>
             </li>
+
+            <li show-if-allowed="specimenResource.updateOpts"
+              ng-if="!cpViewCtx.isCoordinator && specimen.storageLocation.id > 0">
+              <a ng-click="checkout(specimen)">
+                <span class="fa fa-sign-out"></span>
+                <span translate="specimens.buttons.checkout">Checkout</span>
+              </a>
+            </li>
+
+            <li show-if-allowed="specimenResource.updateOpts"
+              ng-if="!cpViewCtx.isCoordinator && specimen.checkoutPosition.id > 0">
+              <a ng-click="checkin(specimen)">
+                <span class="fa fa-sign-in"></span>
+                <span translate="specimens.buttons.checkin">Checkin</span>
+              </a>
+            </li>
+
             <li show-if-allowed="specimenResource.updateOpts"
               ng-if="!cpViewCtx.isCoordinator && !specimen.reserved && specimen.activityStatus == 'Active'
                 && specimen.status == 'Collected'">
@@ -397,4 +414,3 @@
     </div>
   </div>
 </script>
-

@@ -162,6 +162,20 @@ export default {
             {
               fields: [
                 {
+                  type: 'user',
+                  labelCode: 'common.specimen_actions.transfer_user',
+                  name: 'transferUser',
+                  validations: {
+                    required: {
+                      messageCode: 'common.specimen_actions.transfer_user_req'
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              fields: [
+                {
                   type: 'datePicker',
                   labelCode: 'common.specimen_actions.transfer_time',
                   showTime: true,
@@ -180,6 +194,15 @@ export default {
                   type: 'textarea',
                   labelCode: 'common.comments',
                   name: 'comments'
+                }
+              ]
+            },
+            {
+              fields: [
+                {
+                  type: 'booleanCheckbox',
+                  inlineLabelCode: 'common.specimen_actions.checkout',
+                  name: 'checkout'
                 }
               ]
             }
@@ -659,7 +682,7 @@ export default {
         return;
       }
 
-      this.ctx.retrieveDetails = { transferTime: Date.now() };
+      this.ctx.retrieveDetails = { transferUser: this.$ui.currentUser, transferTime: Date.now() };
       this.$refs.retrieveSpmnsDialog.open();
     },
 
@@ -674,8 +697,10 @@ export default {
           return {
             id: spmn.id,
             storageLocation: {},
+            transferUser: input.transferUser,
             transferTime: input.transferTime,
-            transferComments: input.comments
+            transferComments: input.comments,
+            checkout: input.checkout
           }
         }
       );

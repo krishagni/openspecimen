@@ -6,6 +6,17 @@
     <div class="os-modal-body">
       <div class="form-group">
         <label class="col-xs-3 control-label">
+          <span translate="specimens.event_user">User</span>
+        </label>
+        <div class="col-xs-9">
+          <os-users ng-model="input.transferUser" default-current-user
+            placeholder="{{'specimens.event_user' | translate}}">
+          </os-users>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-xs-3 control-label">
           <span translate="specimens.bulk_transfer.time">Date</span>
         </label>
         <div class="col-xs-9">
@@ -30,6 +41,17 @@
           <textarea class="form-control" rows="2" ng-model="input.transferComments"
             placeholder="{{'specimens.bulk_transfer.comments' | translate}}">
           </textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-xs-offset-3 col-xs-6 os-text-checkbox">
+          <div class="checkbox">
+            <os-checkbox ng-model="input.checkout"></os-checkbox>
+          </div>
+          <div class="message os-ctrl-padding-top">
+            <span translate="specimens.buttons.checkout">Checkout</span>
+          </div>
         </div>
       </div>
 

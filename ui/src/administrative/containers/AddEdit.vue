@@ -139,6 +139,9 @@ export default {
       if (this.containerId && +this.containerId > 0) {
         const container = dataCtx.container = await containerSvc.getContainer(this.containerId);
         formUtil.createCustomFieldsMap(container);
+        if (container.blockedLocation) {
+          delete container.storageLocation;
+        }
 
         const allowedTypes = container.allowedTypes = [];
         for (let specimenClass of (container.allowedSpecimenClasses || [])) {

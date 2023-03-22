@@ -21,6 +21,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
+import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
@@ -74,9 +75,13 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	private Integer incrParentFreezeThaw;
 
+	private UserSummary transferUser;
+
 	private Date transferTime;
 
 	private String transferComments;
+
+	private Boolean checkout;
 
 	private boolean autoCollectParents;
 
@@ -87,6 +92,11 @@ public class SpecimenDetail extends SpecimenInfo {
 	private Long dpId;
 
 	private StorageLocationSummary holdingLocation;
+
+	private boolean checkedOut;
+
+	private StorageLocationSummary checkoutPosition;
+
 
 	public CollectionEventDetail getCollectionEvent() {
 		return collectionEvent;
@@ -259,6 +269,16 @@ public class SpecimenDetail extends SpecimenInfo {
 	}
 
 	@JsonIgnore
+	public UserSummary getTransferUser() {
+		return transferUser;
+	}
+
+	@JsonProperty
+	public void setTransferUser(UserSummary transferUser) {
+		this.transferUser = transferUser;
+	}
+
+	@JsonIgnore
 	public Date getTransferTime() {
 		return transferTime;
 	}
@@ -276,6 +296,16 @@ public class SpecimenDetail extends SpecimenInfo {
 	@JsonProperty
 	public void setTransferComments(String transferComments) {
 		this.transferComments = transferComments;
+	}
+
+	@JsonIgnore
+	public Boolean getCheckout() {
+		return checkout;
+	}
+
+	@JsonProperty
+	public void setCheckout(Boolean checkout) {
+		this.checkout = checkout;
 	}
 
 	@JsonIgnore
@@ -320,6 +350,22 @@ public class SpecimenDetail extends SpecimenInfo {
 	@JsonProperty
 	public void setHoldingLocation(StorageLocationSummary holdingLocation) {
 		this.holdingLocation = holdingLocation;
+	}
+
+	public boolean isCheckedOut() {
+		return checkedOut;
+	}
+
+	public void setCheckedOut(boolean checkedOut) {
+		this.checkedOut = checkedOut;
+	}
+
+	public StorageLocationSummary getCheckoutPosition() {
+		return checkoutPosition;
+	}
+
+	public void setCheckoutPosition(StorageLocationSummary checkoutPosition) {
+		this.checkoutPosition = checkoutPosition;
 	}
 
 	@JsonIgnore
@@ -408,6 +454,8 @@ public class SpecimenDetail extends SpecimenInfo {
 
 		result.setUid(specimen.getUid());
 		result.setParentUid(specimen.getParentUid());
+		result.setCheckedOut(specimen.getCheckoutPosition() != null);
+		result.setCheckoutPosition(StorageLocationSummary.from(specimen.getCheckoutPosition()));
 		return result;
 	}
 	

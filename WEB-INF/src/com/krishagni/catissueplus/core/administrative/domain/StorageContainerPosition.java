@@ -32,7 +32,15 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 
 	private Boolean blocked;
 
+	private Specimen checkoutSpecimen;
+
 	private StorageContainer blockedForContainer;
+
+	private User checkoutBy;
+
+	private Date checkoutTime;
+
+	private String checkoutComments;
 
 	private transient boolean supressAccessChecks;
 
@@ -128,12 +136,44 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 		return blocked != null && blocked;
 	}
 
+	public Specimen getCheckoutSpecimen() {
+		return checkoutSpecimen;
+	}
+
+	public void setCheckoutSpecimen(Specimen checkoutSpecimen) {
+		this.checkoutSpecimen = checkoutSpecimen;
+	}
+
 	public StorageContainer getBlockedForContainer() {
 		return blockedForContainer;
 	}
 
 	public void setBlockedForContainer(StorageContainer blockedForContainer) {
 		this.blockedForContainer = blockedForContainer;
+	}
+
+	public User getCheckoutBy() {
+		return checkoutBy;
+	}
+
+	public void setCheckoutBy(User checkoutBy) {
+		this.checkoutBy = checkoutBy;
+	}
+
+	public Date getCheckoutTime() {
+		return checkoutTime;
+	}
+
+	public void setCheckoutTime(Date checkoutTime) {
+		this.checkoutTime = checkoutTime;
+	}
+
+	public String getCheckoutComments() {
+		return checkoutComments;
+	}
+
+	public void setCheckoutComments(String checkoutComments) {
+		this.checkoutComments = checkoutComments;
 	}
 
 	public boolean isHoldingLocation() {
@@ -244,11 +284,12 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 				Objects.equals(p1.getPosTwoOrdinal(), p2.getPosTwoOrdinal());
 		}
 	}
-
+	
 	private static final String[] POS_UPDATE_IGN_PROPS = new String[] {
-			"id",
-			"occupyingSpecimen",
-			"occupyingContainer"
+		"id",
+		"occupyingSpecimen",
+		"occupyingContainer",
+		"checkoutSpecimen"
 	};
 
 	private static final String NOT_STORED = "storage_container_not_stored";

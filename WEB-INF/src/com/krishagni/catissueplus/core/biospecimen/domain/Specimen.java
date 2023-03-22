@@ -140,6 +140,8 @@ public class Specimen extends BaseExtensionEntity {
 
 	private StorageContainerPosition position;
 
+	private StorageContainerPosition checkoutPosition;
+
 	private Specimen parentSpecimen;
 
 	private Set<Specimen> childCollection = new HashSet<>();
@@ -209,9 +211,13 @@ public class Specimen extends BaseExtensionEntity {
 
 	private transient boolean freezeThawIncremented;
 
+	private transient User transferUser;
+
 	private transient Date transferTime;
 
 	private transient String transferComments;
+
+	private transient Boolean checkout;
 
 	private transient boolean autoCollectParents;
 
@@ -521,6 +527,14 @@ public class Specimen extends BaseExtensionEntity {
 		this.position = position;
 	}
 
+	public StorageContainerPosition getCheckoutPosition() {
+		return checkoutPosition;
+	}
+
+	public void setCheckoutPosition(StorageContainerPosition checkoutPosition) {
+		this.checkoutPosition = checkoutPosition;
+	}
+
 	@NotAudited
 	public Site getStorageSite() {
 		return position != null && position.getContainer() != null ? position.getContainer().getSite() : null;
@@ -735,6 +749,14 @@ public class Specimen extends BaseExtensionEntity {
 		this.forceDelete = forceDelete;
 	}
 
+	public User getTransferUser() {
+		return transferUser;
+	}
+
+	public void setTransferUser(User transferUser) {
+		this.transferUser = transferUser;
+	}
+
 	public Date getTransferTime() {
 		return transferTime;
 	}
@@ -749,6 +771,14 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void setTransferComments(String transferComments) {
 		this.transferComments = transferComments;
+	}
+
+	public Boolean getCheckout() {
+		return checkout;
+	}
+
+	public void setCheckout(Boolean checkout) {
+		this.checkout = checkout;
 	}
 
 	public boolean isAutoCollectParents() {
@@ -920,12 +950,12 @@ public class Specimen extends BaseExtensionEntity {
 			child.setOpComments(getOpComments());
 			child.disable(checkChildSpecimens);
 		}
-		
-		virtualize(null, "Specimen deleted");
+
 		setLabel(Utility.getDisabledValue(getLabel(), 255));
 		setAdditionalLabel(Utility.getDisabledValue(getAdditionalLabel(), 255));
 		setBarcode(Utility.getDisabledValue(getBarcode(), 255));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		virtualize(null, "Specimen deleted");
 		updateAvailableStatus();
 		FormUtil.getInstance().deleteRecords(getCpId(), Arrays.asList("Specimen", "SpecimenEvent", "SpecimenExtension"), getId());
 		getDeleteEvents().add(SpecimenDeleteEvent.deleteEvent(this, getOpComments()));
@@ -1128,9 +1158,9 @@ public class Specimen extends BaseExtensionEntity {
 			return;
 		}
 
-		transferTo(holdingLocation, user, time, reason);
-		addDisposalEvent(user, time, reason, comments);
 		setActivityStatus(Status.ACTIVITY_STATUS_CLOSED.getStatus());
+		transferTo(holdingLocation, user, time, reason, false);
+		addDisposalEvent(user, time, reason, comments);
 		updateAvailableStatus();
 	}
 	
@@ -1214,7 +1244,9 @@ public class Specimen extends BaseExtensionEntity {
 
 		setCreatedOn(specimen.getCreatedOn()); // required for auto-collection of parent specimens
 		updateCollectionStatus(specimen.getCollectionStatus());
-		updatePosition(specimen.getPosition(), null, specimen.getTransferTime(), specimen.getTransferComments());
+
+		setCheckout(specimen.getCheckout());
+		updatePosition(specimen.getPosition(), specimen.getTransferUser(), specimen.getTransferTime(), specimen.getTransferComments());
 		updateCreatedBy(specimen.getCreatedBy());
 
 		if (isCollected()) {
@@ -1503,12 +1535,18 @@ public class Specimen extends BaseExtensionEntity {
 	}
 	
 	private void transferTo(StorageContainerPosition newPosition, Date time, String comments) {
-		transferTo(newPosition, null, time, comments);
+		transferTo(newPosition, null, time, comments, Boolean.TRUE.equals(checkout));
 	}
 
-	private void transferTo(StorageContainerPosition newPosition, User user, Date time, String comments) {
+	private void transferTo(StorageContainerPosition newPosition, User user, Date time, String comments, boolean checkout) {
 		StorageContainerPosition oldPosition = getPosition();
 		if (StorageContainerPosition.areSame(oldPosition, newPosition)) {
+			// for closed and checked out specimens, both old and new position will be the same
+			if ((isDeleted() || isClosed()) && getCheckoutPosition() != null) {
+				getCheckoutPosition().vacate();
+				setCheckoutPosition(null);
+			}
+
 			return;
 		}
 
@@ -1541,6 +1579,23 @@ public class Specimen extends BaseExtensionEntity {
 			oldPosition.getContainer().retrieveSpecimen(this);
 			transferEvent.setFromLocation(oldPosition);
 
+			if (checkout) {
+				StorageContainerPosition checkoutPos = new StorageContainerPosition();
+				checkoutPos.setPosOneOrdinal(oldPosition.getPosOneOrdinal());
+				checkoutPos.setPosOne(oldPosition.getPosOne());
+				checkoutPos.setPosTwoOrdinal(oldPosition.getPosTwoOrdinal());
+				checkoutPos.setPosTwo(oldPosition.getPosTwo());
+				checkoutPos.setContainer(oldPosition.getContainer());
+				checkoutPos.setBlocked(true);
+				checkoutPos.setCheckoutSpecimen(this);
+				checkoutPos.setCheckoutBy(transferEvent.getUser());
+				checkoutPos.setCheckoutTime(transferEvent.getTime());
+				checkoutPos.setCheckoutComments(transferEvent.getComments());
+				setCheckoutPosition(checkoutPos);
+
+				transferEvent.setStatus("CHECK-OUT");
+			}
+
 			oldPosition.vacate();
 			setPosition(null);
 		} else if (newPosition != null) {
@@ -1550,6 +1605,13 @@ public class Specimen extends BaseExtensionEntity {
 			newPosition.setOccupyingSpecimen(this);
 			newPosition.occupy();
 			setPosition(newPosition);
+		}
+
+		if (!checkout && getCheckoutPosition() != null) {
+			getCheckoutPosition().vacate();
+			setCheckoutPosition(null);
+			transferEvent.setStatus("CHECK-IN");
+			transferEvent.setComments(comments);
 		}
 		
 		transferEvent.saveOrUpdate();		
@@ -1789,7 +1851,7 @@ public class Specimen extends BaseExtensionEntity {
 			}
 		}
 
-		transferTo(newPosition, user, time, comments);
+		transferTo(newPosition, user, time, comments, Boolean.TRUE.equals(checkout));
 	}
 
 	public String getLabelOrDesc() {

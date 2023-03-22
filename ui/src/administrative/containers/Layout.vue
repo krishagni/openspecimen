@@ -86,7 +86,7 @@ export default {
         rowProp:              'posTwoOrdinal',
         colProp:              'posOneOrdinal',
         isVacatable:          (occupant) => occupant.occuypingEntity == 'specimen',
-        occupantName:         (occupant) => occupant.occupyingEntityName,
+        occupantName:         (occupant) => occupant.occupyingEntityName || occupant.blockedEntityName,
         createCell:           (label, row, column, oldOccupant) => (
                                 {
                                   occuypingEntity: 'specimen',

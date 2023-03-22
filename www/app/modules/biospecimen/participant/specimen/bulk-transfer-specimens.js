@@ -7,7 +7,7 @@ angular.module('os.biospecimen.specimen')
       var transferTime = new Date().getTime();
       angular.forEach(specimens, function(spmn) {
         spmn.oldLocation = spmn.storageLocation;
-        spmn.storageLocation = {};
+        spmn.storageLocation = spmn.checkoutPosition || {};
         spmn.transferTime = transferTime;
       });
 

@@ -220,21 +220,7 @@ public class StorageContainerPositionDetail implements Comparable<StorageContain
 		if (position.getOccupyingSpecimen() != null) {
 			Specimen specimen = position.getOccupyingSpecimen();
 
-			Map<String, Object> props = new HashMap<>();
-			props.put("specimenClass", specimen.getSpecimenClass().getValue());
-			props.put("type",          specimen.getSpecimenType().getValue());
-
-			if (specimen.getBarcode() != null) {
-				props.put("barcode", specimen.getBarcode());
-			}
-
-			if (position.getContainer().getCellDisplayProp() == StorageContainer.CellDisplayProp.SPECIMEN_PPID) {
-				//
-				// PPID is populated on demand because of its potential performance impact
-				//
-				props.put("ppid", specimen.getVisit().getRegistration().getPpid());
-			}
-
+			Map<String, Object> props = props(position.getContainer(), specimen);
 			if (specimen.getReservedEvent() != null) {
 				props.put("reserved", true);
 			}
@@ -258,6 +244,11 @@ public class StorageContainerPositionDetail implements Comparable<StorageContain
 			if (StringUtils.isNotBlank(position.getBlockedForContainer().getDisplayName())) {
 				result.setOccupantProps(Collections.singletonMap("displayName", position.getBlockedForContainer().getDisplayName()));
 			}
+		} else if (position.getCheckoutSpecimen() != null) {
+			result.setOccuypingEntity("specimen");
+			result.setBlockedEntityId(position.getCheckoutSpecimen().getId());
+			result.setBlockedEntityName(position.getCheckoutSpecimen().getLabel());
+			result.setOccupantProps(props(position.getContainer(), position.getCheckoutSpecimen()));
 		}
 		
 		return result;
@@ -265,5 +256,24 @@ public class StorageContainerPositionDetail implements Comparable<StorageContain
 	
 	public static List<StorageContainerPositionDetail> from(Collection<StorageContainerPosition> positions) {
 		return positions.stream().map(StorageContainerPositionDetail::from).sorted().collect(Collectors.toList());
+	}
+
+	private static Map<String, Object> props(StorageContainer container, Specimen specimen) {
+		Map<String, Object> props = new HashMap<>();
+		props.put("specimenClass", specimen.getSpecimenClass().getValue());
+		props.put("type",          specimen.getSpecimenType().getValue());
+
+		if (specimen.getBarcode() != null) {
+			props.put("barcode", specimen.getBarcode());
+		}
+
+		if (container.getCellDisplayProp() == StorageContainer.CellDisplayProp.SPECIMEN_PPID) {
+			//
+			// PPID is populated on demand because of its potential performance impact
+			//
+			props.put("ppid", specimen.getRegistration().getPpid());
+		}
+
+		return props;
 	}
 }

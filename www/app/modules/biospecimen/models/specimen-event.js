@@ -22,7 +22,8 @@ angular.module('os.biospecimen.models.specimenevent', ['os.common.models'])
     var disabledFields = {
       'SpecimenTransferEvent': [
         'fromContainer', 'fromRow', 'fromCol', 'fromDimensionTwo', 'fromDimensionOne', 'fromPosition',
-        'toContainer', 'toRow', 'toCol', 'toDimensionTwo', 'toDimensionOne', 'toPosition'
+        'toContainer', 'toRow', 'toCol', 'toDimensionTwo', 'toDimensionOne', 'toPosition',
+        'status'
       ]
     }
     

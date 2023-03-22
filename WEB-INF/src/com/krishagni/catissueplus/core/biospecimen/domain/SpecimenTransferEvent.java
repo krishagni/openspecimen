@@ -40,6 +40,8 @@ public class SpecimenTransferEvent extends SpecimenEvent {
 
 	private String toCol;
 
+	private String status;
+
 	@Autowired
 	private DaoFactory daoFactory;
 
@@ -165,6 +167,14 @@ public class SpecimenTransferEvent extends SpecimenEvent {
 		setToCol(to.getPosOne());
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	@Override
 	public Map<String, Object> getEventAttrs() {
 		Map<String, Object> eventAttrs = new HashMap<>();
@@ -186,6 +196,7 @@ public class SpecimenTransferEvent extends SpecimenEvent {
 			eventAttrs.put("toPosition", getPosition(toContainer, toDimensionOne, toDimensionTwo));
 		}
 
+		eventAttrs.put("status", status);
 		return eventAttrs;
 	}
 
@@ -210,6 +221,8 @@ public class SpecimenTransferEvent extends SpecimenEvent {
 			setToRow(getStr(attrValues.get("toRow")));
 			setToCol(getStr(attrValues.get("toCol")));
 		}
+
+		setStatus(getStr(attrValues.get("status")));
 	}
 
 	@Override
@@ -223,7 +236,7 @@ public class SpecimenTransferEvent extends SpecimenEvent {
 			return Collections.emptyList();
 		}
 		
-		List<SpecimenTransferEvent> events = new ArrayList<SpecimenTransferEvent>();
+		List<SpecimenTransferEvent> events = new ArrayList<>();
 		for (Long recId : recIds) {
 			SpecimenTransferEvent event = new SpecimenTransferEvent(specimen);
 			event.setId(recId);

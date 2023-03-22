@@ -30,6 +30,9 @@
             <span class="btn os-status-pooled" ng-if="specimen.specimensPool.length > 0">
               <span translate="specimens.pooled">Pooled</span>
             </span>
+            <span class="btn os-status-closed" ng-if="specimen.checkoutPosition">
+              <span translate="specimens.checked_out">Checked Out</span>
+            </span>
           </div>
           <div ng-switch-when="false" ng-switch on="!!specimen.label">
             <span ng-switch-when="true">{{specimen.label}}</span>
@@ -37,6 +40,9 @@
             <span class="btn" ng-class="statusCss.css">{{specimen.availabilityStatus || 'Pending'}}</span>
             <span class="btn os-status-pooled" ng-if="specimen.specimensPool.length > 0">
               <span translate="specimens.pooled">Pooled</span>
+            </span>
+            <span class="btn os-status-closed" ng-if="specimen.checkoutPosition">
+              <span translate="specimens.checked_out">Checked Out</span>
             </span>
           </div>
         </div>

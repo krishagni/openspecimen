@@ -72,6 +72,13 @@
       property-ref="occupyingSpecimen"
       cascade="save-update"/>
 
+    <one-to-one
+      name="checkoutPosition"
+      class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
+      property-ref="checkoutSpecimen"
+      cascade="save-update"
+      fetch="join" />
+
     <many-to-one name="parentSpecimen" column="PARENT_SPECIMEN_ID"/>
 
     <set name="childCollection" table="CATISSUE_SPECIMEN" inverse="true" cascade="all" batch-size="25">

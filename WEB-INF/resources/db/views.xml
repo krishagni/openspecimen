@@ -332,4 +332,35 @@
         ar.spec_req_label is not null or ar.code is not null
     </createView>
   </changeSet>
+
+  <changeSet author="vpawar" id="Checked out specimens view" runOnChange="true">
+    <createView viewName="OS_CHECKED_OUT_SPECIMENS_VIEW" replaceIfExists="true">
+      select
+        c.identifier as container_identifier, c.name as container_name,
+        c.display_name as container_display_name, c.barcode as container_barcode,
+        p.identifier as position_identifier, p.pos_one_str, p.pos_two_str,
+        p.pos_one, p.pos_two,
+        case when c.pos_labeling_mode = 'LINEAR'
+        then
+          case when c.pos_assignment like 'HZ_%'
+          then
+            concat('', ((p.pos_two - 1) * c.no_of_cols) + p.pos_one)
+          else
+            concat('', ((p.pos_two - 1) * c.no_of_rows) + p.pos_one)
+          end
+        else
+          concat(p.pos_two_str, concat(', ', p.pos_one_str))
+        end as formatted_position,
+        p.checkout_specimen_id as specimen_id,
+        p.checkout_by as checkout_by,
+        p.checkout_time as checkout_time,
+        p.checkout_comments as checkout_comments
+      from
+        os_storage_containers c
+        inner join os_container_positions p on p.storage_container_id = c.identifier
+      where
+        c.activity_status != 'Disabled' and
+        p.checkout_specimen_id is not null
+    </createView>
+  </changeSet>
 </databaseChangeLog>

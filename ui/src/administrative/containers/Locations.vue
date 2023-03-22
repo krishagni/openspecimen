@@ -63,8 +63,11 @@
             :class="{'new-occupant': !slotProps.occupant.id, 'displaced-occupant': !!slotProps.occupant.oldOccupant}"
             @click="showOccupantDetails($event, slotProps.occupant)">
 
+            <os-icon class="blocked" name="ban" v-os-tooltip="$t('containers.blocked')"
+              v-if="slotProps.occupant.blocked" />
+
             <os-icon class="specimen-icon" name="vial" :style="slotProps.occupant.colorCode" 
-              v-show="slotProps.occupant.displayName" v-os-tooltip="slotProps.occupant.tooltip" />
+              v-else-if="slotProps.occupant.displayName" v-os-tooltip="slotProps.occupant.tooltip" />
 
             <os-icon class="specimen-reserved" name="ban" v-os-tooltip="$t('containers.reserved_specimen')"
               v-if="slotProps.occupant.occupantProps && slotProps.occupant.occupantProps.reserved" />
@@ -293,7 +296,7 @@ export default {
                 break;
             }
 
-            occupant.displayName = occupant.displayName || occupant.occupyingEntityName;
+            occupant.displayName = occupant.displayName || occupant.occupyingEntityName || occupant.blockedEntityName;
             if (!colorCoding[specimenClass + ':' + type]) {
               colorCoding[specimenClass + ':' + type] = util.getContainerColorCode(occupant.occupantProps) || {};
             }

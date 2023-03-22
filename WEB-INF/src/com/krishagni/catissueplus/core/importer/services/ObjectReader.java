@@ -356,37 +356,32 @@ public class ObjectReader implements Closeable {
 	}
 		
 	private static List<String> getSchemaFields(Record record, String prefix) {
-		List<String> columnNames = new ArrayList<String>();
-		
-		for (Field field : record.getFields()) {
-			String columnName = prefix + field.getCaption();
-			if (field.isMultiple()) {
-				columnNames.add(columnName + "#1");
-				columnNames.add(columnName + "#2");
-			} else {
-				columnNames.add(columnName);
+		List<String> columnNames = new ArrayList<>();
+		for (Object field : record.getOrderedFields()) {
+			if (field instanceof Field simpleField) {
+				String columnName = prefix + simpleField.getCaption();
+				if (simpleField.isMultiple()) {
+					columnNames.add(columnName + "#1");
+					columnNames.add(columnName + "#2");
+				} else {
+					columnNames.add(columnName);
+				}
+			} else if (field instanceof Record subRecord) {
+				String newPrefix = prefix;
+				if (StringUtils.isNotBlank(subRecord.getCaption())) {
+					newPrefix += subRecord.getCaption() + "#";
+				}
+
+				if (subRecord.isMultiple()) {
+					columnNames.addAll(getSchemaFields(subRecord, newPrefix + "1#"));
+					columnNames.addAll(getSchemaFields(subRecord, newPrefix + "2#"));
+				} else {
+					columnNames.addAll(getSchemaFields(subRecord, newPrefix));
+				}
 			}
 		}
-		
-		if (record.getSubRecords() == null) {
-			return columnNames;
-		}
-		
-		for (Record subRecord : record.getSubRecords()) {
-			String newPrefix = prefix;
-			if (StringUtils.isNotBlank(subRecord.getCaption())) {
-				newPrefix += subRecord.getCaption() + "#";
-			}
-			
-			if (subRecord.isMultiple()) {
-				columnNames.addAll(getSchemaFields(subRecord, newPrefix + "1#"));
-				columnNames.addAll(getSchemaFields(subRecord, newPrefix + "2#"));
-			} else {
-				columnNames.addAll(getSchemaFields(subRecord, newPrefix));
-			}			
-		}
-		
-		return columnNames;				
+
+		return columnNames;
 	}
 	
 	private boolean isSetToBlankField(Object value) {

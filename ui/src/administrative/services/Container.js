@@ -220,6 +220,10 @@ class Container {
     return http.put('container-tasks/' + payload.id, payload);
   }
 
+  async unblockCheckoutLocations(specimens) {
+    return http.post('storage-containers/unblock-checkout-positions', specimens);
+  }
+
   async addBoxSpecimens(boxSpecimens) {
     return http.post('storage-containers/box-specimens', boxSpecimens);
   }

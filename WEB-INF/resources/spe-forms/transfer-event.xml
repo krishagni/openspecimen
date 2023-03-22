@@ -119,6 +119,19 @@
     </row>
 
     <row>
+      <dropDown>
+        <name>status</name>
+        <udn>status</udn>
+        <caption>#getMessage("transfer_event_storage_status")</caption>
+        <column>STORAGE_STATUS</column>
+        <options>
+          <option><value>CHECK-IN</value></option>
+          <option><value>CHECK-OUT</value></option>
+        </options>
+      </dropDown>
+    </row>
+
+    <row>
       <textArea>
         <name>comments</name>
         <udn>comments</udn>

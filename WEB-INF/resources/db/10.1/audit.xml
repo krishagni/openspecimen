@@ -11,4 +11,23 @@
       <column name="storageSiteBasedAccess_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Checked out specimen position">
+    <addColumn tableName="OS_CONTAINER_POSITIONS_AUD">
+      <column name="CHECKOUT_SPECIMEN_ID" type="${int.type}" />
+      <column name="checkoutSpecimen_MOD" type="${boolean.type}" />
+      <column name="CHECKOUT_BY" type="${int.type}" />
+      <column name="checkoutBy_MOD" type="${boolean.type}" />
+      <column name="CHECKOUT_TIME" type="${nullable.ts.type}" />
+      <column name="checkoutTime_MOD" type="${boolean.type}" />
+      <column name="CHECKOUT_COMMENTS" type="${text.type}(255)" />
+      <column name="checkoutComments_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen checked out position">
+    <addColumn tableName="CATISSUE_SPECIMEN_AUD">
+      <column name="checkoutPosition_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

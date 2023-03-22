@@ -155,6 +155,11 @@ export default {
         caption: this.$t('containers.transfer'),
         onSelect: () => routerSvc.goto('BulkContainerTransfer')
       });
+      actionOpts.push({
+        icon: 'check',
+        caption: this.$t('containers.unblock'),
+        onSelect: () => routerSvc.goto('UnblockLocations')
+      });
     }
 
     const exportOpts = [];

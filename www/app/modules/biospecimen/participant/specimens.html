@@ -92,7 +92,11 @@
               <span>{{specimen.label | osNoValue}}</span>
             </td>
             <td class="col col-xs-3 os-word-break">
-              <os-disp-storage-position position="specimen.storageLocation"></os-disp-storage-position>
+              <os-disp-storage-position position="specimen.storageLocation" ng-show="!specimen.checkoutPosition">
+              </os-disp-storage-position>
+              <span class="os-specimen-checked-out" ng-show="specimen.checkoutPosition">
+                <span translate="specimens.checked_out">Checked Out</span>
+              </span>
             </td>
           </tr>
         </tbody>

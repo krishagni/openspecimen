@@ -592,8 +592,10 @@ angular.module('os.biospecimen.specimen')
                     return {
                       id: spmn.id,
                       storageLocation: {},
+                      transferUser: input.transferUser,
                       transferTime: input.transferTime,
-                      transferComments: input.transferComments
+                      transferComments: input.transferComments,
+                      checkout: input.checkout
                     };
                   }
                 );

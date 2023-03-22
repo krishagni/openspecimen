@@ -10,4 +10,37 @@
       <column name="STORE_SITE_ACCESS_RIGHTS" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Position blocked for checked-out specimen">
+    <addColumn tableName="OS_CONTAINER_POSITIONS">
+      <column name="CHECKOUT_SPECIMEN_ID" type="${int.type}" />
+      <column name="CHECKOUT_BY" type="${int.type}" />
+      <column name="CHECKOUT_TIME" type="${nullable.ts.type}" />
+      <column name="CHECKOUT_COMMENTS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Foreign key on checked-out specimen for which the position is blocked">
+    <addForeignKeyConstraint constraintName="FK_POS_CHECKED_OUT_SPMN_ID"
+      baseTableName="OS_CONTAINER_POSITIONS" baseColumnNames="CHECKOUT_SPECIMEN_ID"
+      referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on checked-out specimen" dbms="mysql">
+    <createIndex indexName="OS_POS_CHECKED_OUT_SPMN_UQ" tableName="OS_CONTAINER_POSITIONS" unique="true">
+      <column name="CHECKOUT_SPECIMEN_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on checked-out specimen" dbms="oracle">
+    <createIndex tableName="OS_CONTAINER_POSITIONS" indexName="OS_POS_CHECKED_OUT_SPMN_IDX">
+      <column name="CHECKOUT_SPECIMEN_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Transfer event storage status - checked-in or checked-out">
+    <addColumn tableName="CATISSUE_TRANSFER_EVENT_PARAM">
+      <column name="STORAGE_STATUS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

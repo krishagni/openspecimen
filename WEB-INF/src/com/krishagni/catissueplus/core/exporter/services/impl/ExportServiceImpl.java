@@ -587,8 +587,7 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 
 		private List<String> getHeaderNames(String namePrefix, String captionPrefix, Object recField) {
 			List<String> names = new ArrayList<>();
-			if (recField instanceof ObjectSchema.Field) {
-				ObjectSchema.Field field = (ObjectSchema.Field) recField;
+			if (recField instanceof ObjectSchema.Field field) {
 				String caption = captionPrefix + field.getCaption();
 				if (field.isMultiple()) {
 					int count = getFieldCount(namePrefix + field.getAttribute());
@@ -598,8 +597,7 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 				} else {
 					names.add(caption);
 				}
-			} else if (recField instanceof ObjectSchema.Record) {
-				ObjectSchema.Record subRecord = (ObjectSchema.Record) recField;
+			} else if (recField instanceof ObjectSchema.Record subRecord) {
 				String srName = namePrefix + subRecord.getAttribute();
 				String srCaption = captionPrefix;
 				if (StringUtils.isNotBlank(subRecord.getCaption())) {

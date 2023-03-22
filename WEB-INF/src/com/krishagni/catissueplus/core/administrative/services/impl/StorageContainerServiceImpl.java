@@ -1146,6 +1146,42 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		}
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Object>> unblockCheckoutPositions(RequestEvent<List<SpecimenInfo>> req) {
+		try {
+			int count = 0;
+			Set<StorageContainer> allowedContainers = new HashSet<>();
+			Set<Specimen> seenSpecimens = new HashSet<>();
+			for (SpecimenInfo inputSpmn : req.getPayload()) {
+				Specimen spmn = specimenResolver.getSpecimen(inputSpmn.getId(), inputSpmn.getCpShortTitle(), inputSpmn.getLabel(), inputSpmn.getBarcode());
+				if (!seenSpecimens.add(spmn)) {
+					continue;
+				}
+
+				if (spmn.getCheckoutPosition() == null) {
+					continue;
+				}
+
+				AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(spmn);
+				if (!allowedContainers.contains(spmn.getCheckoutPosition().getContainer())) {
+					AccessCtrlMgr.getInstance().ensureUpdateContainerRights(spmn.getCheckoutPosition().getContainer());
+					allowedContainers.add(spmn.getCheckoutPosition().getContainer());
+				}
+
+				daoFactory.getStorageContainerPositionDao().delete(spmn.getCheckoutPosition());
+				spmn.setCheckoutPosition(null);
+				++count;
+			}
+
+			return ResponseEvent.response(Collections.singletonMap("count", count));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	//
 	// Box scanning APIs
 	//

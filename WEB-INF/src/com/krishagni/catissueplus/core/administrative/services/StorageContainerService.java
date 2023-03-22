@@ -129,6 +129,8 @@ public interface StorageContainerService {
 
 	ResponseEvent<List<StorageLocationSummary>> getVacantPositions(RequestEvent<VacantPositionsOp> req);
 
+	ResponseEvent<Map<String, Object>> unblockCheckoutPositions(RequestEvent<List<SpecimenInfo>> req);
+
 	//
 	// Box APIs
 	//

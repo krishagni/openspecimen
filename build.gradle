@@ -70,8 +70,8 @@ configurations.all {
 }
 
 dependencies {
-  ajc       "org.aspectj:aspectjtools:1.9.7"
-  implementation   "org.aspectj:aspectjrt:1.9.7"
+  ajc       "org.aspectj:aspectjtools:1.9.19"
+  implementation   "org.aspectj:aspectjrt:1.9.19"
   aspects   "org.springframework:spring-aspects:5.3.22"
 
   implementation fileTree(dir: 'lib', include: ['os-dynamic-forms-trunk.jar', 'os-tinymce.jar'])
@@ -81,7 +81,7 @@ dependencies {
   implementation group: 'org.antlr', name: 'antlr4', version:'4.5.1'
   implementation group: 'aopalliance', name: 'aopalliance', version:'1.0'
   implementation group: 'asm', name: 'asm', version:'3.3.1'
-  implementation group: 'org.aspectj', name: 'aspectjweaver', version:'1.9.7'
+  implementation group: 'org.aspectj', name: 'aspectjweaver', version:'1.9.19'
   implementation group: 'cglib', name: 'cglib', version:'3.1'
   implementation group: 'commons-beanutils', name: 'commons-beanutils', version:'1.9.4'
   implementation group: 'commons-codec', name: 'commons-codec', version:'1.15'
@@ -199,6 +199,8 @@ dependencies {
 }
 
 compileJava {
+  options.release = 16
+
   afterEvaluate {
     tasks.withType(JavaCompile) {
       options.compilerArgs += ['-Xlint:deprecation', '-Xmaxwarns', '10000', '-Xmaxerrs',  '2000']
@@ -209,8 +211,8 @@ compileJava {
     ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", 
                 classpath: configurations.ajc.asPath)
     ant.iajc(
-      source: 14,
-      target: 14,
+      source: 16,
+      target: 16,
       destDir: sourceSets.main.output.classesDirs.asPath,
       maxmem: "512m", 
       fork: "true",

@@ -1,0 +1,56 @@
+<form name="closeForm" os-form-validator="closeForm" novalidate>
+  <div class="os-modal">
+    <div class="os-modal-header">
+      <span translate="specimens.checkout">Checkout Specimen</span>
+    </div>
+    <div class="os-modal-body">
+      <div class="form-horizontal">
+        <div class="form-group">
+          <label class="col-xs-3 control-label">
+            <span translate="specimens.event_user">User</span>
+          </label>
+          <div class="col-xs-9">
+            <os-users ng-model="specimen.transferUser" default-current-user
+              placeholder="{{'specimens.event_user' | translate}}">
+            </os-users>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-xs-3 control-label">
+            <span translate="specimens.event_time">Date and Time</span>
+          </label>
+          <div class="col-xs-9">
+            <div class="os-date-time clearfix">
+              <div class="os-col-70 input os-no-padding">
+                <os-date-picker date="specimen.transferTime" placeholder="{{'specimens.event_time' | translate}}">
+                </os-date-picker>
+              </div>
+              <div class="os-col-30">
+                <timepicker ng-model="specimen.transferTime" class="os-time-no-wheels" show-meridian="false">
+                </timepicker>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-xs-3 control-label">
+            <span translate="specimens.event_reason">Comments</span>
+          </label>
+          <div class="col-xs-9">
+            <textarea class="form-control" ng-model="specimen.transferComments" rows="2"
+              placeholder="{{'specimens.event_reason' | translate}}">
+            </textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="os-modal-footer">
+      <button class="btn os-btn-text" ng-click="cancel()">
+        <span translate="common.buttons.cancel">Cancel</span>
+      </button>
+      <button class="btn btn-primary" ng-click="checkout()">
+        <span translate="specimens.buttons.checkout">Checkout</span>
+      </button>
+    </div>
+  </div>
+</form>

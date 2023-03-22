@@ -86,6 +86,7 @@ angular.module('os.biospecimen.specimen.detail', [])
       }).result.then(
         function(result) {
           specimen.storageLocation = undefined;
+          specimen.checkoutPosition = undefined;
           specimen.activityStatus = result[0].activityStatus;
           specimen.availabilityStatus = result[0].availabilityStatus;
           $scope.statusCss = SpecimenUtil.getStatusCss(specimen);

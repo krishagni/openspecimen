@@ -35,6 +35,14 @@
 
     <many-to-one name="blockedForContainer" column="BLOCKED_FOR_CONTAINER_ID" unique="true" />
 
+    <many-to-one name="checkoutSpecimen" column="CHECKOUT_SPECIMEN_ID" unique="true" />
+
+    <many-to-one name="checkoutBy" column="CHECKOUT_BY" />
+
+    <property name="checkoutTime" column="CHECKOUT_TIME" />
+
+    <property name="checkoutComments" column="CHECKOUT_COMMENTS" />
+
     <sql-query name="getSpecimenIdByPosition">
       select
         occupying_specimen_id

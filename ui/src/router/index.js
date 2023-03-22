@@ -672,6 +672,11 @@ const routes = [
         name: 'ScanBoxes',
         component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/ScanBoxes.vue')
       },
+      {
+        path: 'unblock-locations',
+        name: 'UnblockLocations',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/UnblockLocations.vue')
+      },
 
 
       /**********************************
