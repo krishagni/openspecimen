@@ -63,6 +63,12 @@
     </field>
 
     <field>
+      <type>boolean</type>
+      <caption>#getMessage("order_checkout_specimens")</caption>
+      <attribute>checkout</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("order_comments")</caption>
       <attribute>comments</attribute>
     </field>

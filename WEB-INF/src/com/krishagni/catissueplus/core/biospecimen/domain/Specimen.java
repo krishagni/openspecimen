@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -1407,9 +1408,14 @@ public class Specimen extends BaseExtensionEntity {
 		//
 		// close specimen if explicitly closed or no quantity available
 		//
-		if (item.isDistributedAndClosed()) {
-			String dpShortTitle = item.getOrder().getDistributionProtocol().getShortTitle();
-			close(item.getOrder().getDistributor(), item.getOrder().getExecutionDate(), "Distributed to " + dpShortTitle);
+		DistributionOrder order = item.getOrder();
+		String dpShortTitle = order.getDistributionProtocol().getShortTitle();
+		if (Boolean.TRUE.equals(order.getCheckoutSpecimens())) {
+			transferTo(null, order.getDistributor(), order.getExecutionDate(), "Distributed to " + dpShortTitle, true);
+			item.setStatus(DistributionOrderItem.Status.DISTRIBUTED);
+			setAvailabilityStatus(DISTRIBUTED);
+		} else if (item.isDistributedAndClosed()) {
+			close(order.getDistributor(), order.getExecutionDate(), "Distributed to " + dpShortTitle);
 			setAvailabilityStatus(DISTRIBUTED);
 		}
 	}
@@ -1429,7 +1435,7 @@ public class Specimen extends BaseExtensionEntity {
 		StorageContainer container = item.getReturningContainer();
 		if (container != null) {
 			StorageContainerPosition position = container.createPosition(item.getReturningColumn(), item.getReturningRow());
-			transferTo(position, item.getReturnDate(), "Specimen returned");
+			transferTo(position, item.getReturnedBy(), item.getReturnDate(), "Specimen returned", false);
 		}
 
 		SpecimenReturnEvent.createForDistributionOrderItem(item).saveRecordEntry();

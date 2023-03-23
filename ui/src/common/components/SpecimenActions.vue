@@ -142,6 +142,20 @@ export default {
               fields: [
                 {
                   type: 'radio',
+                  labelCode: 'dps.checkout_specimens',
+                  name: 'checkout',
+                  options: [
+                    {caption: this.$t('common.yes'), value: true},
+                    {caption: this.$t('common.no'), value: false}
+                  ],
+                  optionsPerRow: 3
+                }
+              ]
+            },
+            {
+              fields: [
+                {
+                  type: 'radio',
                   labelCode: 'dps.print_labels',
                   name: 'printLabel',
                   options: [
@@ -574,6 +588,7 @@ export default {
         specimenList: userInput.specimenListId && {id: userInput.specimenListId},
         clearListId: userInput.clearListId,
         clearListMode: userInput.clearListMode,
+        checkout: userInput.checkout,
         status: 'EXECUTED'
       };
 
@@ -606,6 +621,7 @@ export default {
         specimenListId: userInput.specimenListId,
         clearListId: userInput.clearListId,
         clearListMode: userInput.clearListMode,
+        checkout: userInput.checkout,
         comments: userInput.comments
       });
 

@@ -69,6 +69,7 @@ public class DistributionOrderFactoryImpl implements DistributionOrderFactory {
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		
 		order.setId(detail.getId());
+		order.setCheckoutSpecimens(detail.isCheckout());
 		setName(detail, order, ose);
 		setRequest(detail, order, ose);
 		setSpecimenList(detail, order, ose);

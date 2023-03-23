@@ -53,6 +53,16 @@
           </div>
         </div>
       </div>
+      <div class="form-group" ng-hide="ctx.hideDistributeBtn || ctx.distList">
+        <div class="col-xs-offset-3 col-xs-6 os-text-checkbox">
+          <div class="checkbox">
+            <os-checkbox ng-model="ctx.checkoutSpecimens"></os-checkbox>
+          </div>
+          <div class="message os-ctrl-padding-top">
+            <span translate="orders.checkout_specimens">Checkout Specimens</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="os-modal-footer">
       <button class="btn os-btn-text" ng-click="cancel()">

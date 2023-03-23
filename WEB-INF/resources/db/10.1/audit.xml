@@ -30,4 +30,11 @@
       <column name="checkoutPosition_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Order setting to indicate whether the specimens are checked out or not">
+    <addColumn tableName="OS_ORDERS_AUD">
+      <column name="CHECKOUT_SPECIMENS" type="${boolean.type}" />
+      <column name="checkoutSpecimens_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

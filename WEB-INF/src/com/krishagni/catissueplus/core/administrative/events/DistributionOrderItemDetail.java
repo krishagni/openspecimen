@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 
 public class DistributionOrderItemDetail implements Serializable {
@@ -124,7 +125,7 @@ public class DistributionOrderItemDetail implements Serializable {
 		detail.setLabel(orderItem.getLabel());
 		detail.setStatus(orderItem.getStatus().name());
 		if (incSpmn) {
-			detail.setSpecimen(SpecimenInfo.from(orderItem.getSpecimen()));
+			detail.setSpecimen(SpecimenDetail.from(orderItem.getSpecimen(), true, true, true));
 		}
 
 		return detail;

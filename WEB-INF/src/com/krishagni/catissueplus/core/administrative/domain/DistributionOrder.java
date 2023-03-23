@@ -74,6 +74,8 @@ public class DistributionOrder extends BaseExtensionEntity {
 
 	private ClearListMode clearListMode;
 
+	private Boolean checkoutSpecimens;
+
 	public static String getEntityName() {
 		return ENTITY_NAME;
 	}
@@ -235,6 +237,14 @@ public class DistributionOrder extends BaseExtensionEntity {
 		this.clearListMode = clearListMode;
 	}
 
+	public Boolean getCheckoutSpecimens() {
+		return checkoutSpecimens;
+	}
+
+	public void setCheckoutSpecimens(Boolean checkoutSpecimens) {
+		this.checkoutSpecimens = checkoutSpecimens;
+	}
+
 	public Institute getInstitute() {
 		return requester.getInstitute();
 	}
@@ -254,6 +264,9 @@ public class DistributionOrder extends BaseExtensionEntity {
 		setClearListId(newOrder.getClearListId());
 		setClearListMode(newOrder.getClearListMode());
 		setAllReservedSpecimens(newOrder.getAllReservedSpecimens());
+		if (!isOrderExecuted()) {
+			setCheckoutSpecimens(newOrder.getCheckoutSpecimens());
+		}
 
 		updateRequest(newOrder);
 		updateOrderItems(newOrder);

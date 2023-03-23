@@ -59,6 +59,8 @@
     </property>
 
     <property name="allReservedSpecimens" column="SPMNS_RESERVED_FOR_DP"/>
+
+    <property name="checkoutSpecimens" column="CHECKOUT_SPECIMENS" />
       
     <filter name="activeEntity"/>
         

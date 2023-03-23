@@ -231,7 +231,8 @@ export default {
           specimenListId: order.specimenList && order.specimenList.id,
           clearListId: order.clearListId,
           clearListMode: order.clearListMode,
-          allReserved: !!order.allReservedSpmns
+          allReserved: !!order.allReservedSpmns,
+          checkout: order.checkout
         };
       }
 
@@ -292,6 +293,7 @@ export default {
         order.clearListId   = input.clearFromCart || input.clearListId;
         order.clearListMode = input.clearCart || input.clearListMode;
         order.distributionProtocol = input.dp;
+        order.checkout      = input.checkout;
         order.comments      = input.comments;
       } else {
         dataCtx.orderItems = [];

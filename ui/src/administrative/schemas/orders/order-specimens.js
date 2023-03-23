@@ -105,6 +105,7 @@ export default {
       "type": "booleanCheckbox",
       "tooltip": "Dispose",
       "enableCopyFirstToAll": true,
+      "showWhen": "!order.checkout",
       "uiStyle": {
         "min-width": "30px"
       }

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -1359,9 +1360,10 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 					put(msg("dist_requested_date"), Utility.getDateTimeString(order.getExecutionDate()));
 					put(msg("dist_receiving_site"), order.getSite() == null ? notSpecified : order.getSite().getName());
 					put(msg("dist_tracking_url"),   StringUtils.isBlank(order.getTrackingUrl()) ? notSpecified : order.getTrackingUrl());
+					put(msg("dist_checkout_specimens"), Boolean.TRUE.equals(order.getCheckoutSpecimens()) ? msg("common_yes") : msg("common_no"));
 					put(msg("dist_comments"),       StringUtils.isBlank(order.getComments()) ? notSpecified : order.getComments());
 					put(msg("dp_irb_id"),           StringUtils.isBlank(dp.getIrbId()) ? notSpecified : dp.getIrbId());
-					put(msg("dist_exported_by"),    AuthUtil.getCurrentUser().formattedName());
+					put(msg("dist_exported_by"),    Objects.requireNonNull(AuthUtil.getCurrentUser()).formattedName());
 					put(msg("dist_exported_on"),    Utility.getDateTimeString(Calendar.getInstance().getTime()));
 
 					User pi = dp.getPrincipalInvestigator();
@@ -1467,54 +1469,50 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 
 		String filename = Utility.sanitizeFilename(order.getName());
 		switch (attachType) {
-			case CSV_REPORT:
+			case CSV_REPORT -> {
 				File dataFile = getCsvReport(order);
 				if (dataFile == null) {
 					return null;
 				}
-
 				if (isFileLargerThan1MB(dataFile)) {
 					String name = MimeUtility.encodeText(filename + ".csv");
 					return Pair.make("zip", zipFile(name, dataFile));
 				} else {
 					return Pair.make("csv", dataFile);
 				}
-
-			case MANIFEST:
+			}
+			case MANIFEST -> {
 				File manifest = getManifest(order);
 				if (manifest == null) {
 					return null;
 				}
-
 				if (isFileLargerThan1MB(manifest)) {
 					String name = MimeUtility.encodeText(filename + ".pdf");
 					return Pair.make("zip", zipFile(name, manifest));
 				} else {
 					return Pair.make("pdf", manifest);
 				}
-
-			case BOTH:
+			}
+			case BOTH -> {
 				List<Pair<String, String>> inputFiles = new ArrayList<>();
 				String zipPath = null;
-
 				File csvFile = getCsvReport(order);
 				if (csvFile != null) {
 					String name = MimeUtility.encodeText(filename + ".csv");
 					inputFiles.add(Pair.make(csvFile.getAbsolutePath(), name));
 					zipPath = csvFile.getParent();
 				}
-
 				File pdfFile = getManifest(order);
 				if (pdfFile != null) {
 					String name = MimeUtility.encodeText(filename + ".pdf");
 					inputFiles.add(Pair.make(pdfFile.getAbsolutePath(), name));
 					zipPath = pdfFile.getParent();
 				}
-
 				if (!inputFiles.isEmpty()) {
 					zipPath = new File(zipPath, filename + ".zip").getAbsolutePath();
 					return Pair.make("zip", Utility.zipFilesWithNames(inputFiles, zipPath));
 				}
+			}
 		}
 
 		return null;

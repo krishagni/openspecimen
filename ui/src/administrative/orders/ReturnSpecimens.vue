@@ -96,7 +96,7 @@ export default {
             itemId: orderItem.id,
             quantity: orderItem.quantity,
             distributedQty: orderItem.quantity,
-            location: {},
+            location: orderItem.specimen.checkoutPosition || orderItem.specimen.storageLocation || {},
             user: ui.currentUser,
             time: this.returnDate,
             incrFreezeThaw: 1,

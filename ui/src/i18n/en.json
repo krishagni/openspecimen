@@ -777,6 +777,7 @@
   },
 
   "orders": {
+    "checkout_specimens": "Checkout Specimens",
     "confirm_delete_msg": "Order '{name}' and any dependent data will be deleted. Are you sure you want to proceed?",
     "confirm_rm_specimens": "Are you sure you want to remove the selected specimens from the order?",
     "comments": "Comments",

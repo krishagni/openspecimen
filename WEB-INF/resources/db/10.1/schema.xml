@@ -43,4 +43,10 @@
       <column name="STORAGE_STATUS" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Order setting to indicate whether to checkout the specimens or not">
+    <addColumn tableName="OS_ORDERS">
+      <column name="CHECKOUT_SPECIMENS" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -118,6 +118,15 @@ export default {
       "type": "user",
       "labelCode": "orders.distributor",
       "name": "order.distributor"
+    },
+    {
+      "type": "booleanCheckbox",
+      "labelCode": "orders.checkout_specimens",
+      "name": "order.checkout",
+      "options": [
+        { "value": true, "captionCode": "common.yes" },
+        { "value": false, "captionCode": "common.no" }
+      ]
     }
   ]
 }

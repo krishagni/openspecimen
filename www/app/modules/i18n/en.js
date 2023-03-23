@@ -2563,6 +2563,7 @@
     "loading_items": "Loading order items. Please wait for a moment...",
     "more_time": "Saving distribution order is taking more time than anticipated. An email notification will be sent to you on successful distribution of specimens",
     "holding_loc_draft_not_allowed": "Cannot save draft, as one or more specimens are assigned holding locations.",
+    "checkout_specimens": "Checkout Specimens",
 
     "loading_list": "Loading orders, please wait for a moment...",
     "empty_list": "No orders to show!",

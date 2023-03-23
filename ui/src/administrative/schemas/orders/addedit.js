@@ -27,6 +27,9 @@ export default {
         "fields": [ { "name": "order.trackingUrl" } ]
       },
       {
+        "fields": [ { "name": "order.checkout", "showWhen": "order.status == 'PENDING'" } ]
+      },
+      {
         "fields": [ { "name": "order.comments" } ]
       }
     ]

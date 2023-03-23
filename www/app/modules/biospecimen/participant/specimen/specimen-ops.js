@@ -95,7 +95,8 @@ angular.module('os.biospecimen.specimen')
               defDps: undefined,
               dps: [],
               dp: undefined,
-              hideDistributeBtn: hideDistributeBtn
+              hideDistributeBtn: hideDistributeBtn,
+              checkoutSpecimens: false
             };
           }
 
@@ -215,7 +216,8 @@ angular.module('os.biospecimen.specimen')
           specimenListId: specimenListId,
           specimenIds: details.specimenIds,
           printLabel: details.printLabels,
-          comments: details.comments
+          comments: details.comments,
+          checkout: details.checkoutSpecimens
         });
 
         navTo(
@@ -247,6 +249,7 @@ angular.module('os.biospecimen.specimen')
         distributeAvailableQty: true,
         orderItems: getOrderItems(specimens, details.printLabels),
         comments: details.comments,
+        checkout: details.checkoutSpecimens,
         status: 'EXECUTED'
       }).$saveOrUpdate().then(
         function(createdOrder) {

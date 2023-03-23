@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
@@ -53,6 +54,8 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 	private boolean copyItemsFromExistingOrder;
 
 	private boolean distributeAvailableQty;
+
+	private boolean checkout;
 
 	public UserSummary getDistributor() {
 		return distributor;
@@ -192,6 +195,14 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 		this.distributeAvailableQty = distributeAvailableQty;
 	}
 
+	public boolean isCheckout() {
+		return checkout;
+	}
+
+	public void setCheckout(boolean checkout) {
+		this.checkout = checkout;
+	}
+
 	public static DistributionOrderDetail from(DistributionOrder order) {
 		return from(order, false);
 	}
@@ -223,6 +234,7 @@ public class DistributionOrderDetail extends DistributionOrderSummary implements
 			detail.setOrderItems(DistributionOrderItemDetail.from(order.getOrderItems()));
 		}
 
+		detail.setCheckout(Boolean.TRUE.equals(order.getCheckoutSpecimens()));
 		detail.setActivityStatus(order.getActivityStatus());
 		return detail;
 	}
