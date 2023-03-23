@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Limit on maximum number of child specimens per parent">
+    <sql>
+      call add_cfg_prop(
+        'biospecimen', 'max_child_specimens_limit',
+        'max_child_specimens_limit', 'max_child_specimens_limit_desc',
+        'INT', '100'
+      );
+    </sql>
+  </changeSet>
+</databaseChangeLog>

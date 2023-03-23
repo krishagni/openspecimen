@@ -3139,7 +3139,9 @@
         "max_spmns_update_limit": "Specimens Update UI Limit",
         "max_spmns_update_limit_desc": "Maximum number of specimens that can be updated at a time using UI. The default value is 100.",
         "specimen_addl_label_format": "Specimen Additional Label Format",
-        "specimen_addl_label_format_desc": "System level format for auto generation of specimen additional labels."
+        "specimen_addl_label_format_desc": "System level format for auto generation of specimen additional labels.",
+        "max_child_specimens_limit": "Max. Child Specimens",
+        "max_child_specimens_limit_desc": "Maximum number of child specimens that can be created from a parent specimen."
       },
 
       "common": {

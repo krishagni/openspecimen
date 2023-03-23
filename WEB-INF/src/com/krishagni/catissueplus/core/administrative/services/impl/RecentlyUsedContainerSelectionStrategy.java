@@ -22,6 +22,7 @@ import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 @Configurable
 public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectionStrategy {
@@ -96,6 +97,8 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 			.createAlias("cont.compAllowedCps", "allowedCp", AbstractCriteria.JoinType.LEFT_JOIN);
 		query.add(query.eq("cp.id", criteria.specimen().getCpId()))
 			.add(getSiteCpRestriction(query, criteria.siteCps()))
+			.add(query.ne("cont.status", StorageContainer.Status.CHECKED_OUT))
+			.add(query.eq("cont.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
 			.addOrder(query.desc("pos.id"));
 
 		if (criteria.rule() != null) {
@@ -136,6 +139,10 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 		List<StorageContainer> children = parent.getChildContainersSortedByPosition();
 		if (last != null) {
 			for (StorageContainer container : children) {
+				if (container.isArchived() || container.getStatus() == StorageContainer.Status.CHECKED_OUT) {
+					continue;
+				}
+
 				childIdx++;
 				if ((parent.isDimensionless() && container.getId().equals(last.getId())) ||
 					(!parent.isDimensionless() && container.getPosition().getPosition().equals(last.getPosition().getPosition()))) {

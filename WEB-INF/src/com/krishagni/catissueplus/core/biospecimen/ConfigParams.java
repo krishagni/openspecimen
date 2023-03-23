@@ -91,6 +91,8 @@ public class ConfigParams {
 
 	public static final String MAX_SPMNS_UPDATE_LIMIT    = "max_spmns_update_limit";
 
+	public static final String MAX_CHILDREN_LIMIT        = "max_child_specimens_limit";
+
 	public static String getConsentsDirPath() {
 		String path = ConfigUtil.getInstance().getStrSetting(MODULE, CONSENTS_DIR, null);
 		if (StringUtils.isBlank(path)) {

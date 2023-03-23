@@ -229,7 +229,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				createExtensions(null, specimens);
 				result = specimens.stream().map(s -> SpecimenDetail.from(s, false, true, true)).collect(Collectors.toList());
 			} else if (minimalInfo) {
-				result = specimens.stream().map(s -> toMinimalInfo(s)).collect(Collectors.toList());
+				result = specimens.stream().map(this::toMinimalInfo).collect(Collectors.toList());
 			} else {
 				result = SpecimenInfo.from(specimens);
 			}
@@ -525,6 +525,11 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					.map(c -> c.getSpecimenRequirement().getId())
 					.collect(Collectors.toSet());
 				reqIds.removeAll(collectedReqs);
+			}
+
+			int childrenLimit = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.MAX_CHILDREN_LIMIT, 100);
+			if (count > childrenLimit) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.CHILDREN_LIMIT_MAXED, parentSpmn.getLabel(), childrenLimit);
 			}
 
 			List<StorageLocationSummary> locations = spec.getLocations();
@@ -1006,6 +1011,11 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 
 		if (CollectionUtils.isNotEmpty(detail.getChildren())) {
+			int childrenLimit = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.MAX_CHILDREN_LIMIT, 100);
+			if (detail.getChildren().size() > childrenLimit) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.CHILDREN_LIMIT_MAXED, specimen.getLabel(), childrenLimit);
+			}
+
 			for (SpecimenDetail childDetail : detail.getChildren()) {
 				if (childDetail.getCreatedOn() == null) {
 					childDetail.setCreatedOn(specimen.getCreatedOn());

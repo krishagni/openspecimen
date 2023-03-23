@@ -162,7 +162,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	REQ_TYPE_MISMATCH,
 
-	REQ_PARENT_MISMATCH;
+	REQ_PARENT_MISMATCH,
+
+	CHILDREN_LIMIT_MAXED;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

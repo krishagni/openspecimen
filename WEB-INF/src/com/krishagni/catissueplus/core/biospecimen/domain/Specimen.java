@@ -1624,8 +1624,12 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void addChildSpecimen(Specimen specimen) {
-		specimen.setParentSpecimen(this);
+		int childrenLimit = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.MAX_CHILDREN_LIMIT, 100);
+		if (getChildCollection().size() >= childrenLimit) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.CHILDREN_LIMIT_MAXED, getLabel(), childrenLimit);
+		}
 
+		specimen.setParentSpecimen(this);
 		if (!isCollected() && specimen.isCollected()) {
 			if (!specimen.autoCollectParents) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_PARENT_REQ);
