@@ -947,14 +947,13 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	@Override
 	public Container getFormAtRevision(Long formId, Long revId) {
 		try {
-			Blob xmlBlob = createNativeQuery(
+			Blob xmlBlob = (Blob) createNativeQuery(
 				"select " +
 					"xml " +
 				"from " +
 					"dyextn_containers_aud " +
 				"where " +
-					"identifier = :formId and rev = :rev",
-				Blob.class
+					"identifier = :formId and rev = :rev"
 			)
 				.setParameter("formId", formId)
 				.setParameter("rev", revId)
@@ -965,7 +964,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 				return null;
 			}
 
-			return Container.fromXml(new String(xmlBlob.getBytes(1, (int) xmlBlob.length())));
+			return Container.fromXml(new String(xmlBlob.getBytes(1, Long.valueOf(xmlBlob.length()).intValue())));
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(CommonErrorCode.SQL_EXCEPTION, e.getMessage());
 		}
