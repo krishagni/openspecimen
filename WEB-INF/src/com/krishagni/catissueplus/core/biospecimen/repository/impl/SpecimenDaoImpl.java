@@ -633,7 +633,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	private Specimen getByVisitAndSrId(String hql, Long visitId, Long srId) {
-		List<Specimen> specimens = createQuery(hql, Specimen.class)
+		List<Specimen> specimens = getCurrentSession().getNamedQuery(hql)
 			.setParameter("visitId", visitId)
 			.setParameter("srId", srId)
 			.list();
