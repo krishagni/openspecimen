@@ -2,8 +2,13 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
+
+import org.apache.commons.io.FileUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
@@ -24,11 +29,13 @@ public class FilesBacklogCleaner implements ScheduledTask {
 	@Override
 	public void doJob(ScheduledJobRun jobRun) 
 	throws Exception {
-		cleanupOlderFiles(getQueryExportDataDir(), period, null);
-		cleanupOlderFiles(getLogFilesDir(), getLogFilesRetainPeriod(), null);
-		cleanupOlderFiles(getAuditFilesDir(), period, null);
-		cleanupOlderFiles(getLoginActivityReportsDir(), period, null);
-		cleanupOlderFiles(getDataDir(), period, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"));
+		cleanupOlderFiles(getQueryExportDataDir(), period, null, true);
+		cleanupOlderFiles(getLogFilesDir(), getLogFilesRetainPeriod(), null, true);
+		cleanupOlderFiles(getAuditFilesDir(), period, null, true);
+		cleanupOlderFiles(getLoginActivityReportsDir(), period, null, true);
+		cleanupOlderFiles(getImportJobsDir(), period, null, true);
+		cleanupOlderFiles(getExportJobsDir(), period, null, true);
+		cleanupOlderFiles(getDataDir(), period, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"), false);
 	}
 
 	private String getDataDir() {
@@ -51,11 +58,19 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		return new File(getDataDir(), "login-activity-reports").getAbsolutePath();
 	}
 
+	private String getImportJobsDir() {
+		return new File(getDataDir(), "bulk-import" + File.separator + "jobs").getAbsolutePath();
+	}
+
+	private String getExportJobsDir() {
+		return new File(getDataDir(), "export-jobs").getAbsolutePath();
+	}
+
 	private int getLogFilesRetainPeriod() {
 		return ConfigUtil.getInstance().getIntSetting("common", "log_files_retain_period", period);
 	}
 
-	private static void cleanupOlderFiles(String dataDir, int period, FilenameFilter filter) {
+	private static void cleanupOlderFiles(String dataDir, int period, FilenameFilter filter, boolean rmDirs) {
 		if (period <= 0) {
 			return;
 		}
@@ -65,23 +80,34 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		timeBefore.add(Calendar.DATE, -period);
 		Long timeInMilliseconds = timeBefore.getTimeInMillis();
 
-		cleanupDir(dataDir, timeInMilliseconds, filter);
+		cleanupDir(dataDir, timeInMilliseconds, filter, rmDirs);
 	}
 
-	private static void cleanupDir(String directory, Long timeBefore, FilenameFilter filter) {
+	private static void cleanupDir(String directory, Long timeBefore, FilenameFilter filter, boolean rmDirs) {
 		try {
 			File dir = new File(directory);
 			if (!dir.exists() || !dir.isDirectory()) {
 				return;
 			}
 
-			for (File file : dir.listFiles(filter)) {
-				if (!file.isDirectory() && (file.lastModified() < timeBefore)) {
-					file.delete();
+			for (File file : Objects.requireNonNull(dir.listFiles(filter))) {
+				BasicFileAttributes fileAttrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+				if (fileAttrs.lastModifiedTime().toMillis() >= timeBefore) {
+					continue;
+				}
+
+				if (fileAttrs.isDirectory() && rmDirs) {
+					FileUtils.deleteDirectory(file);
+				} else if (!file.isDirectory()) {
+					FileUtils.delete(file);
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Error deleting files from directory: " + directory, e);
+			if (rmDirs) {
+				logger.error("Error deleting the directory: " + directory, e);
+			} else {
+				logger.error("Error deleting files from directory: " + directory, e);
+			}
 		}
 	}
 }
