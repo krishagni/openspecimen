@@ -3,12 +3,14 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
@@ -29,13 +31,26 @@ public class FilesBacklogCleaner implements ScheduledTask {
 	@Override
 	public void doJob(ScheduledJobRun jobRun) 
 	throws Exception {
-		cleanupOlderFiles(getQueryExportDataDir(), period, null, true);
+		Integer inputPeriod = null;
+		if (StringUtils.isNotBlank(jobRun.getScheduledJob().getFixedArgs())) {
+			try {
+				String[] args = jobRun.getScheduledJob().getFixedArgs().split(",");
+				inputPeriod = Integer.parseInt(args[0].trim());
+			} catch (Exception e) {
+				logger.error("Error parsing the retention period from the job configuration. Defaulting to 30 days", e);
+			}
+		}
+
+		int effectivePeriod = inputPeriod != null ? inputPeriod : period;
+		cleanupOlderFiles(getQueryExportDataDir(), effectivePeriod, null, true);
 		cleanupOlderFiles(getLogFilesDir(), getLogFilesRetainPeriod(), null, true);
-		cleanupOlderFiles(getAuditFilesDir(), period, null, true);
-		cleanupOlderFiles(getLoginActivityReportsDir(), period, null, true);
-		cleanupOlderFiles(getImportJobsDir(), period, null, true);
-		cleanupOlderFiles(getExportJobsDir(), period, null, true);
-		cleanupOlderFiles(getDataDir(), period, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"), false);
+		cleanupOlderFiles(getAuditFilesDir(), effectivePeriod, null, true);
+		cleanupOlderFiles(getLoginActivityReportsDir(), effectivePeriod, null, true);
+		cleanupOlderFiles(getImportJobsDir(), effectivePeriod, null, true);
+		cleanupOlderFiles(getExportJobsDir(), effectivePeriod, null, true);
+		cleanupOlderFiles(getDirPath("oc", "import-logs"), effectivePeriod, null, true);
+		cleanupOlderFiles(getDirPath("oc", "auto-importer"), effectivePeriod, null, true);
+		cleanupOlderFiles(getDataDir(), effectivePeriod, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"), false);
 	}
 
 	private String getDataDir() {
@@ -43,27 +58,31 @@ public class FilesBacklogCleaner implements ScheduledTask {
 	}
 
 	private String getQueryExportDataDir() {
-		return new File(getDataDir(), QUERY_EXPORT_DIR).getAbsolutePath();
+		return getDirPath(QUERY_EXPORT_DIR);
 	}
 
 	private String getLogFilesDir() {
-		return new File(getDataDir(), LOG_FILES_DIR).getAbsolutePath();
+		return getDirPath(LOG_FILES_DIR);
 	}
 
 	private String getAuditFilesDir() {
-		return new File(getDataDir(), AUDIT_FILES_DIR).getAbsolutePath();
+		return getDirPath(AUDIT_FILES_DIR);
 	}
 
 	private String getLoginActivityReportsDir() {
-		return new File(getDataDir(), "login-activity-reports").getAbsolutePath();
+		return getDirPath("login-activity-reports");
 	}
 
 	private String getImportJobsDir() {
-		return new File(getDataDir(), "bulk-import" + File.separator + "jobs").getAbsolutePath();
+		return getDirPath("bulk-import", "jobs");
 	}
 
 	private String getExportJobsDir() {
-		return new File(getDataDir(), "export-jobs").getAbsolutePath();
+		return getDirPath("export-jobs");
+	}
+
+	private String getDirPath(String... more) {
+		return Path.of(getDataDir(), more).toFile().getAbsolutePath();
 	}
 
 	private int getLogFilesRetainPeriod() {
