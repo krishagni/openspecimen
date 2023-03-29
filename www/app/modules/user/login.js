@@ -13,7 +13,7 @@ angular.module('openspecimen')
         user = new User({id: -1});
       }
 
-      if (user.id == -1 && !$http.defaults.headers.common['X-OS-IMPERSONATE-USER']) {
+      if (user.id == -1 && !$http.defaults.headers.common['X-OS-API-TOKEN']) {
         return;
       }
 
@@ -35,7 +35,16 @@ angular.module('openspecimen')
         return $http.post(url(), loginData).then(ApiUtil.processResp).then(
           function(resp) {
             if (resp.data && !resp.data.resetPasswordToken) {
-              impersonate(null);
+              $http.defaults.headers.common['X-OS-API-TOKEN'] = resp.data.token;
+              return impersonate(null).then(
+                function() {
+                  return resp;
+                },
+
+                function() {
+                  return resp;
+                }
+              );
             }
 
             return resp;
