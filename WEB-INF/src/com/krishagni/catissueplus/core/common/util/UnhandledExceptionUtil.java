@@ -5,12 +5,10 @@ import java.util.Calendar;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-
 
 import com.krishagni.catissueplus.core.common.domain.UnhandledException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -49,20 +47,19 @@ public class UnhandledExceptionUtil {
 		exception.setStackTrace(ExceptionUtils.getStackTrace(t));
 
 		if (inputArgs.length != 0) {
-			try {
-				Object args = inputArgs;
-				if (inputArgs[0] instanceof RequestEvent) {
-					args = ((RequestEvent)inputArgs[0]).getPayload();
-				}
+			Object args = inputArgs;
+			if (inputArgs[0] instanceof RequestEvent) {
+				args = ((RequestEvent)inputArgs[0]).getPayload();
+			}
 
-				ObjectMapper mapper = new ObjectMapper();
-				FilterProvider filters = new SimpleFilterProvider()
-					.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "statementId"));
+			ObjectMapper mapper = new ObjectMapper();
+			FilterProvider filters = new SimpleFilterProvider()
+				.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "statementId"));
+			try {
 				exception.setInputArgs(mapper.writer(filters).writeValueAsString(args));
-			} catch (JsonProcessingException e) {
-				String errorMsg = "Error marshalling input arguments";
-				exception.setInputArgs(errorMsg);
-				logger.error(errorMsg, e);
+			} catch (Throwable jsonError) {
+				// Best efforts to serialize the input arguments
+				exception.setInputArgs(jsonError.getMessage());
 			}
 		}
 

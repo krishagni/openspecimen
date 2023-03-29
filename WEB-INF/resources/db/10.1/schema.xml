@@ -49,4 +49,8 @@
       <column name="CHECKOUT_SPECIMENS" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Not all exceptions are generated in an authenticated context">
+    <dropNotNullConstraint tableName="OS_UNHANDLED_EXCEPTIONS" columnName="USER_ID" columnDataType="${int.type}" />
+  </changeSet>
 </databaseChangeLog>
