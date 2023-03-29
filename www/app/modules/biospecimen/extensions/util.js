@@ -285,9 +285,13 @@ angular.module('os.biospecimen.extensions.util', [])
         };
       } else if (deField.type == 'datePicker') {
         sdeField.type = deField.format && deField.format.indexOf('HH:mm') != -1 ? 'datetime' : 'date';
+        if (deField.defaultType == 'CURRENT_DATE') {
+          sdeField.defaultValue = 'current_date';
+        }
       } else if (deField.type == 'userField') {
         sdeField.type = 'user';
         sdeField.selectProp = 'id';
+        sdeField.defaultValue = 'current_user';
       } else if (deField.type == 'siteField') {
         sdeField.type = 'dropdown';
         sdeField.listSource = {
