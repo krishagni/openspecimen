@@ -13,7 +13,7 @@ export default {
          "fields": [
            {
              "name": "user.emailAddress",
-             "showWhen": "currentUser.id != user.id && (currentUser.admin || currentUser.instituteAdmin)"
+             "showWhen": "!user.id || (currentUser.id != user.id && (currentUser.admin || currentUser.instituteAdmin))"
            }
          ]
        },
