@@ -362,7 +362,9 @@
         os_storage_containers c
         inner join os_stor_container_cps ccps on ccps.storage_container_id = c.identifier
       where
-        c.site_id in (:siteIds) and ccps.cp_id = :cpId
+        c.site_id in (:siteIds) and
+        ccps.cp_id = :cpId and
+        c.activity_status != 'Disabled'
     </sql-query>
   </class>
 </hibernate-mapping>
