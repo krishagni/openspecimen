@@ -403,6 +403,10 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			whereClauses.add("r.rev < :lastId");
 		}
 
+		if (CollectionUtils.isNotEmpty(criteria.entities())) {
+			whereClauses.add("r.identifier in (" + GET_ENTITY_FORMS_SQL + ")");
+		}
+
 		String result = GET_FORM_REVISIONS_SQL;
 		if (!whereClauses.isEmpty()) {
 			result += " where " + StringUtils.join(whereClauses, " and ");
@@ -629,6 +633,15 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		"  inner join catissue_user u on u.identifier = r.rev_by " +
 		"  inner join catissue_institution i on i.identifier = u.institute_id " +
 		"  inner join os_auth_domains d on d.identifier = u.domain_id";
+
+	private static final String GET_ENTITY_FORMS_SQL =
+		"select" +
+		"  fc.container_id " +
+		"from " +
+		"  catissue_form_context fc " +
+		"where " +
+		"  fc.entity_type in :entities and " +
+		"  fc.deleted_on is null";
 
 	private static final String GET_LATEST_API_CALL_TIME = FQN + ".getLatestApiCallTime";
 }
