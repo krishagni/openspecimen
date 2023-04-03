@@ -322,6 +322,7 @@
       where
         c.store_specimens = 1 and
         c.activity_status = 'Active' and
+        (c.status is null or c.status != 'CHECKED_OUT') and
         (
           allowed_cps.cp_id = :cpId or
           (allowed_cps.cp_id is null and

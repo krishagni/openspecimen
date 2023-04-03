@@ -97,7 +97,7 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 			.createAlias("cont.compAllowedCps", "allowedCp", AbstractCriteria.JoinType.LEFT_JOIN);
 		query.add(query.eq("cp.id", criteria.specimen().getCpId()))
 			.add(getSiteCpRestriction(query, criteria.siteCps()))
-			.add(query.ne("cont.status", StorageContainer.Status.CHECKED_OUT))
+			.add(query.or(query.isNull("cont.status"), query.ne("cont.status", StorageContainer.Status.CHECKED_OUT)))
 			.add(query.eq("cont.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
 			.addOrder(query.desc("pos.id"));
 
