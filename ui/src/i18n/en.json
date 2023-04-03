@@ -246,7 +246,9 @@
 
     "new_stuff": {
       "announcements": "Announcements",
-      "read_more": "Read More...",
+      "click_here": "Click here",
+      "congrats": "Congrats! You are upgraded to {build_version}.",
+      "read_more": "to read more about the new features and enhancements in this release.",
       "whats_new_q": "What's New?"
     },
 

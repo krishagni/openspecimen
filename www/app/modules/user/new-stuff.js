@@ -11,17 +11,6 @@ angular.module('openspecimen')
           ctx.notesLink = notesLink.value;
         }
       );
-
-      loadReleaseNotes();
-    }
-
-    function loadReleaseNotes() {
-      $http.get(ApiUrls.getBaseUrl() + '/release-notes/latest-summary').then(
-        function(resp) {
-          ctx.notes = $sce.trustAsHtml(resp.data.notes);
-          ctx.loading = false;
-        }
-      );
     }
 
     function hidePopover() {

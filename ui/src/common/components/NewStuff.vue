@@ -10,12 +10,10 @@
           <span v-t="'common.new_stuff.announcements'">Announcements</span>
         </div>
         <div class="content">
-          <span v-html="releaseNotes"></span>
-        </div>
-        <div class="footer">
-          <a :href="releaseNotesLink" target="_blank" rel="noopener">
-            <span v-t="'common.new_stuff.read_more'">Read more...</span>
-          </a>
+          <span v-t="{path: 'common.new_stuff.congrats', args: $ui.global.appProps}"></span>
+          <p>
+            <a :href="releaseNotesLink" target="_blank" rel="noopener"><span v-t="'common.new_stuff.click_here'">Click here</span></a> <span v-t="'common.new_stuff.read_more'">to read more about the new features and enhancements in this release.</span>
+          </p>
         </div>
       </div>
     </os-overlay>
@@ -25,15 +23,12 @@
 <script>
 
 import commonSvc   from '@/common/services/Common.js';
-import http        from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';
 
 export default {
   data() {
     return {
       uiState: this.$ui.global.state,
-
-      releaseNotes: undefined,
 
       releaseNotesLink: undefined
     }
@@ -43,11 +38,8 @@ export default {
     toggleOverlay: async function(event) {
       let tgt = event.currentTarget;
 
-      if (this.releaseNotes == undefined) {
-        const summary = await http.get('release-notes/latest-summary');
+      if (this.releaseNotesLink == undefined) {
         const link    = await settingsSvc.getSetting('training', 'release_notes');
-
-        this.releaseNotes = summary.notes;
         this.releaseNotesLink = link[0].value;
       }
 
@@ -76,15 +68,18 @@ export default {
   cursor: pointer;
 }
 
+.os-new-stuff-overlay {
+  max-width: 25rem;
+  margin-bottom: -1.25rem;
+}
+
 .os-new-stuff-overlay .header {
   border-bottom: 1px solid #ddd;
   padding-bottom: 0.5rem;
   font-weight: bold;
 }
 
-.os-new-stuff-overlay .footer {
-  border-top: 1px solid #ddd;
-  padding-top: 0.5rem;
+.os-new-stuff-overlay .content {
+  padding: 0.5rem 0rem;
 }
-
 </style>

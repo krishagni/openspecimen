@@ -11,15 +11,10 @@
   </div>
 
   <div class="content">
-    <span ng-show="ctx.loading" translate="new_stuff.loading_notes">Loading release notes... </span>
-    <span ng-show="!ctx.loading">
-      <div ng-bind-html="ctx.notes"></div>
-    </span>
-  </div>
-
-  <div class="footer">
-    <a href="{{ctx.notesLink}}" target="_blank" rel="noopener">
-      <span translate="new_stuff.read_more">Read more...</span>
-    </a>
+    <span>{{'new_stuff.congrats' | translate: global.appProps}}</span>
+    <br><br>
+    <p>
+      <a href="{{ctx.notesLink}}" target="_blank" rel="noopener"><span translate="new_stuff.click_here">Click here</span></a> <span translate="new_stuff.read_more">to read more about the new features and enhancements in this release.</span>
+    </p>
   </div>
 </div>

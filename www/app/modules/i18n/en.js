@@ -3361,7 +3361,8 @@
     "new_stuff": {
       "title": "What's new?",
       "announcements": "Announcements",
-      "read_more": "Read more...",
-      "loading_notes": "Loading... Please wait for a moment."
+      "congrats": "Congrats! You are upgraded to {{build_version}}.",
+      "click_here": "Click here",
+      "read_more": "to read more about the new features and enhancements in this release."
     }
 }
