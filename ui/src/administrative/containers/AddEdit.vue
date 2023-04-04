@@ -205,8 +205,12 @@ export default {
         }
 
         fieldRef.reloadOptions();
-      } else if (!container.id && field.name == 'container.typeName') {
-        setTimeout(() => this.setTypeProps(fieldRef.getSelectedOption()), 100);
+      } else if (field.name == 'container.typeName') {
+        if (!container.id) {
+          setTimeout(() => this.setTypeProps(fieldRef.getSelectedOption()), 100);
+        } else {
+          container.typeId = null;
+        }
       } else if (field.name == 'createType') {
         if (value != 'single') {
           container.name = container.barcode = container.displayName = null;
