@@ -2,15 +2,17 @@ package com.krishagni.catissueplus.core.de.events;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.DeObject.Attr;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
@@ -92,6 +94,41 @@ public class ExtensionDetail implements Serializable {
 		}
 
 		return attrsMap;
+	}
+
+	@JsonIgnore
+	public AttrDetail getAttr(String name) {
+		return Utility.nullSafeStream(attrs).filter(a -> a.getName().equals(name))
+			.findFirst().orElse(null);
+	}
+
+	@JsonIgnore
+	public Object getAttrValue(String name) {
+		AttrDetail attr = getAttr(name);
+		if (attr == null || attr.getValue() == null) {
+			return null;
+		}
+
+		if ("datePicker".equals(attr.getType())) {
+			if (attr.getValue() instanceof String) {
+				try {
+					long time = Long.parseLong((String) attr.getValue());
+					return new Date(time);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else if (attr.getValue() instanceof Number) {
+				return new Date(((Number) attr.getValue()).longValue());
+			}
+		}
+
+		return attr.getValue();
+	}
+
+	@JsonIgnore
+	public Object getAttrDisplayValue(String name) {
+		AttrDetail attr = getAttr(name);
+		return attr != null ? attr.getDisplayValue() : null;
 	}
 
 	public boolean isUseUdn() {
