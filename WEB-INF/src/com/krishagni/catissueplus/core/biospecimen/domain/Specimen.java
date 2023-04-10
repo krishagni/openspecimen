@@ -1930,10 +1930,10 @@ public class Specimen extends BaseExtensionEntity {
 			} else {
 				setAvailabilityStatus(getCollectionStatus());
 			}
-		} else if (isClosed()) {
-			setAvailabilityStatus(Specimen.DISPOSED);
 		} else if (isDeleted()) {
 			setAvailabilityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+		} else if (!DISTRIBUTED.equals(getAvailabilityStatus()) && isClosed()) {
+			setAvailabilityStatus(Specimen.DISPOSED);
 		}
 	}
 
