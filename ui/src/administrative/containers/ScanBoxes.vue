@@ -27,7 +27,7 @@
             <ul class="os-key-values">
               <li class="item">
                 <strong class="key key-sm">
-                  <span v-t="'containers.barcode'">Barcode</span>
+                  <span v-t="{path: 'containers.' + ctx.scannedField}">Barcode</span>
                 </strong>
                 <span class="value value-md">{{ctx.box.barcode}}</span>
               </li>
@@ -127,6 +127,8 @@ export default {
       ctx: {
         bcrumb,
 
+        scannedField: 'barcode',
+
         scannerOpts: {options: [], displayProp: 'name'}
       }
     };
@@ -134,11 +136,13 @@ export default {
 
   created() {
     wfSvc.getSysWorkflow('box-scanners').then(
-      ({scanners}) => {
+      ({scannedBoxField, scanners}) => {
         const options = this.ctx.scannerOpts.options = scanners.map((s, idx) => ({id: idx, ...s}));
         if (options.length == 1) {
           this.ctx.scanner = options[0];
         }
+
+        this.ctx.scannedField = scannedBoxField || 'barcode';
       }
     );
   },
@@ -164,7 +168,9 @@ export default {
         return;
       }
 
-      containerSvc.getContainers({barcode: box.barcode}).then(
+      const filterOpts = {};
+      filterOpts[this.ctx.scannedField] = box.barcode;
+      containerSvc.getContainers(filterOpts).then(
         (containers) => {
           ctx.box = box;
           if (containers.length > 0) {
@@ -217,7 +223,6 @@ export default {
 
       const payload = {
         id: box.id,
-        barcode: box.barcode,
         type: box.type,
         storageLocation: ctx.parentContainer,
         positions: ctx.specimens.map(
@@ -230,6 +235,7 @@ export default {
           })
         )
       };
+      payload[this.ctx.scannedField] = box.barcode;
 
       let result = null;
       if (!box.id) {
@@ -238,7 +244,7 @@ export default {
         result = await containerSvc.updateBoxSpecimens(payload);
       }
 
-      alertsSvc.success({code: 'containers.specimens_added', args: {...result, count: result.specimens}});
+      alertsSvc.success({code: 'containers.specimens_added', args: {box: result[ctx.scannedField], count: result.specimens}});
       if (scanAnother) {
         this.clear();
       } else {

@@ -1195,12 +1195,19 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			}
 
 			StorageContainerDetail boxDetail = new StorageContainerDetail();
-			boxDetail.setName("dummy_" + Calendar.getInstance().getTime().getTime());
+			if (StringUtils.isNotBlank(input.getName())) {
+				boxDetail.setName(input.getName());
+			} else {
+				boxDetail.setName("dummy_" + Calendar.getInstance().getTime().getTime());
+			}
+
 			boxDetail.setBarcode(input.getBarcode());
 			boxDetail.setTypeName(input.getType());
 			boxDetail.setStorageLocation(input.getStorageLocation());
 			StorageContainer box = createStorageContainer(null, boxDetail);
-			box.setName(nameGenerator.generateLabel(box.getType().getNameFormat(), box));
+			if (StringUtils.isBlank(input.getName())) {
+				box.setName(nameGenerator.generateLabel(box.getType().getNameFormat(), box));
+			}
 
 			List<StorageContainerPosition> positions = Utility.nullSafeStream(input.getPositions())
 				.map(posDetail -> createPosition(box, posDetail, false))

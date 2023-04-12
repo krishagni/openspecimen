@@ -19,8 +19,12 @@ export default {
 </script>
 
 <style scoped>
-  .os-message :deep(.p-message-text) {
-    font-weight: normal;
-    font-size: 14px;
-  }
+.os-message :deep(.p-message-wrapper) {
+  white-space: normal;
+}
+
+.os-message :deep(.p-message-text) {
+  font-weight: normal;
+  font-size: 14px;
+}
 </style>

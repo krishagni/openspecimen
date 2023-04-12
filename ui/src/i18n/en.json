@@ -595,7 +595,7 @@
     "specimen_position_selector": "Specimen Position Selector",
     "specimen_types": "Specimen Types",
     "specimens": "Specimens",
-    "specimens_added": "One specimen added to the box {barcode}.|{count} specimens added to the box {barcode}.",
+    "specimens_added": "One specimen added to the box {box}.|{count} specimens added to the box {box}.",
     "specimens_not_found": "One or more specimens not found.",
     "specimens_not_found_ids": "Following specimens were not found: {ids}.",
     "specimens_stored": "One specimen stored in the container. | {count} specimens stored in the container.",
