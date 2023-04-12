@@ -1200,7 +1200,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		int startAt, int maxResults,
 		Function<Object[], Map<String, Object>> rowMapper) {
 
-		String sql = getCurrentSession().createNamedQuery(queryName, Object[].class).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(queryName).getQueryString();
 		if (CollectionUtils.isNotEmpty(names)) {
 			int orderByIdx = sql.lastIndexOf("order by");
 			sql = sql.substring(0, orderByIdx) + " and " + namesCond + " " + sql.substring(orderByIdx);
