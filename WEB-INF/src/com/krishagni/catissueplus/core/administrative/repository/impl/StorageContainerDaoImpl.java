@@ -146,11 +146,12 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			siteQuery.join("cpSite.collectionProtocol", "cp1")
 				.join("cpSite.site", "site1")
 				.add(siteQuery.eq(siteQuery.getProperty("cp1.id"), query.getProperty("cp.id")))
+				.add(siteQuery.eq("site1.id", crit.siteId()))
 				.select("site1.id");
 			restriction.add(
 				query.conjunction()
 					.add(query.isNotNull("cp.id"))
-					.add(query.not(query.valueIn(crit.siteId(), siteQuery)))
+					.add(query.not(query.exists(siteQuery)))
 			);
 		}
 
