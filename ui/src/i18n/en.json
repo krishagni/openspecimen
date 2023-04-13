@@ -661,6 +661,8 @@
     "admin_rights_req_to_edit": "Super admin rights required to edit the distribution protocol.",
     "all_specimens": "All Specimens",
 
+    "cancel_reservation": "Cancel Reservation",
+    "checkout_specimens": "Checkout Specimens",
     "closed": "Distribution protocol '{shortTitle}' closed.",
     "confirm_delete_selected": "Are you sure you want to delete the selected distribution protocols?",
 
@@ -682,7 +684,6 @@
       "select_to_add": "Select the consent to add"
     },
 
-    "cancel_reservation": "Cancel Reservation",
     "comments": "Comments",
     "coordinators": "Coordinators",
     "cost": "Cost",
