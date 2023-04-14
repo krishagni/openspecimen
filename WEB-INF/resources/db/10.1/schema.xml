@@ -64,7 +64,7 @@
           referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER" />
       </column>
       <column name="PARTICIPANT_ID" type="${int.type}">
-        <constraints nullable="false" foreignKeyName="FK_QUERY_CPR_RECS_PART_ID"
+        <constraints foreignKeyName="FK_QUERY_CPR_RECS_PART_ID"
           referencedTableName="CATISSUE_PARTICIPANT" referencedColumnNames="IDENTIFIER" />
       </column>
       <column name="FIRST_NAME" type="${text.type}(255)" />
@@ -212,38 +212,37 @@
             site_id, creation_time, creator, update_time, updater
           )
         select
-          cpr.identifier as cpr_id,
-          cpr.collection_protocol_id as cp_id,
-          cpr.participant_id,
+          :new.identifier as cpr_id,
+          :new.collection_protocol_id as cp_id,
+          :new.participant_id,
           p.first_name,
           p.middle_name,
           p.last_name,
           p.email_address,
           p.birth_date as dob,
           p.social_security_number as ssn,
-          cpr.activity_status,
+          :new.activity_status,
           p.gender_id,
-          cpr.registration_date,
-          cpr.protocol_participant_id as ppid,
+          :new.registration_date,
+          :new.protocol_participant_id as ppid,
           p.vital_status_id,
           p.death_date,
           p.empi_id,
-          cpr.barcode,
-          cpr.consent_sign_date,
-          cpr.consent_witness,
-          cpr.consent_comments,
-          cpr.consent_document_name,
-          cpr.external_subject_id,
-          cpr.site_id,
-          cpr.creation_time,
-          cpr.creator,
-          cpr.update_time,
-          cpr.updater
+          :new.barcode,
+          :new.consent_sign_date,
+          :new.consent_witness,
+          :new.consent_comments,
+          :new.consent_document_name,
+          :new.external_subject_id,
+          :new.site_id,
+          :new.creation_time,
+          :new.creator,
+          :new.update_time,
+          :new.updater
         from
-          catissue_coll_prot_reg cpr
-          inner join catissue_participant p on p.identifier = cpr.participant_id
+          catissue_participant p
         where
-          cpr.identifier = :new.identifier;
+          p.identifier = :new.participant_id;
       end;
       //
     </sql>
