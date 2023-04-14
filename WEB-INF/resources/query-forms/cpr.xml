@@ -5,7 +5,7 @@
   <view>
     <name>Participant</name>
     <caption>#getMessage("participant")</caption>
-    <table>CPR_VIEW</table>
+    <table>OS_CPR_RECS</table>
     <primaryKey>CPR_ID</primaryKey>
     <activeCondition>ACTIVITY_STATUS != 'Disabled'</activeCondition>  
     <row>
