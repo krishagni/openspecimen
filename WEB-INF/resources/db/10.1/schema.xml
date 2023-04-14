@@ -137,6 +137,12 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Enable faster lookups on PPID">
+    <createIndex tableName="OS_CPR_RECS" indexName="OS_CPR_RECS_PPID_IDX">
+      <column name="PPID" type="${text.type}(255)" />
+    </createIndex>
+  </changeSet>
+
   <changeSet author="vpawar" id="Part 1: Trigger to keep the queries registration table updated: New Registration" dbms="mysql" runOnChange="true">
     <sql>
       drop trigger if exists os_cpr_recs_ins;
