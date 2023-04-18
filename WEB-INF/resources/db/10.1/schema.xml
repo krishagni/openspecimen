@@ -143,6 +143,42 @@
     </createIndex>
   </changeSet>
 
+  <changeSet author="vpawar" id="Enable faster lookups on eMPI">
+    <createIndex tableName="OS_CPR_RECS" indexName="OS_CPR_RECS_EMPI_IDX">
+      <column name="EMPI_ID" type="${text.type}(64)" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query table: Index on registration CP" dbms="oracle">
+    <createIndex tableName="OS_CPR_RECS" indexName="OS_CPR_RECS_CP_IDX">
+      <column name="CP_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query table: Index on registration participant ID" dbms="oracle">
+    <createIndex tableName="OS_CPR_RECS" indexName="OS_CPR_RECS_PART_IDX">
+      <column name="PARTICIPANT_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query table: Index on registration gender" dbms="oracle">
+    <createIndex tableName="OS_CPR_RECS" indexName="OS_CPR_RECS_GENDER_IDX">
+      <column name="GENDER_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query table: Index on registration vital status" dbms="oracle">
+    <createIndex tableName="OS_CPR_RECS" indexName="OS_CPR_RECS_VSTATUS_IDX">
+      <column name="VITAL_STATUS_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query table: Index on registration site" dbms="oracle">
+    <createIndex tableName="OS_CPR_RECS" indexName="OS_CPR_RECS_SITE_IDX">
+      <column name="SITE_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
   <changeSet author="vpawar" id="Part 1: Trigger to keep the queries registration table updated: New Registration" dbms="mysql" runOnChange="true">
     <sql>
       drop trigger if exists os_cpr_recs_ins;
