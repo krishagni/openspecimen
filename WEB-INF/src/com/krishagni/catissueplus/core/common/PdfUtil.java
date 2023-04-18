@@ -4,17 +4,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfTextExtractor;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.TemplateService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
 @Configurable
 public class PdfUtil {
@@ -58,11 +60,19 @@ public class PdfUtil {
 		tmplSvc.render(template, model, html);
 
 		try (FileOutputStream out = new FileOutputStream(outputPdf)) {
-			new PdfRendererBuilder()
+			PdfRendererBuilder builder = new PdfRendererBuilder()
 				.useFastMode()
 				.withFile(html)
-				.toStream(out)
-				.run();
+				.toStream(out);
+
+			File fontsDir = new File(ConfigUtil.getInstance().getDataDir(), "fonts");
+			if (fontsDir.exists()) {
+				for (File fontsFile : Objects.requireNonNull(fontsDir.listFiles())) {
+					builder.useFont(fontsFile, FilenameUtils.getBaseName(fontsFile.getName()));
+				}
+			}
+
+			builder.run();
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		} finally {
