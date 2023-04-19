@@ -1430,6 +1430,8 @@ public class Specimen extends BaseExtensionEntity {
 			} else if (item.getReturnedQuantity() != null) {
 				setAvailableQuantity(getAvailableQuantity().add(item.getReturnedQuantity()));
 			}
+
+			updateAvailableStatus();
 		}
 
 		StorageContainer container = item.getReturningContainer();
