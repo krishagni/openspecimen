@@ -89,7 +89,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		String orderBy = StringUtils.isNotBlank(crit.orderBy()) ? crit.orderBy() : "cpr.id";
 		query.addOrder(crit.asc() ? query.asc(orderBy) : query.desc(orderBy));
 
-		if (CollectionUtils.isEmpty(crit.ppids())) {
+		if (CollectionUtils.isEmpty(crit.ppids()) && CollectionUtils.isEmpty(crit.externalSubjectIds())) {
 			return query.list(crit.startAt(), crit.maxResults());
 		}
 
@@ -260,6 +260,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		addSpecimenCondition(query, cprCrit);
 		addSiteCpsCond(query, cprCrit);
 		addPpidsCond(query, cprCrit);
+		addExternalSubjectIdsCond(query, cprCrit);
 		addIdsCond(query, cprCrit);
 		return query;		
 	}
@@ -358,6 +359,12 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 	private void addPpidsCond(Criteria<Object[]> query, CprListCriteria crit) {
 		if (CollectionUtils.isNotEmpty(crit.ppids())) {
 			query.add(query.in("cpr.ppid", crit.ppids()));
+		}
+	}
+
+	private void addExternalSubjectIdsCond(Criteria<Object[]> query, CprListCriteria crit) {
+		if (CollectionUtils.isNotEmpty(crit.externalSubjectIds())) {
+			query.add(query.in("cpr.externalSubjectId", crit.externalSubjectIds()));
 		}
 	}
 
@@ -543,6 +550,10 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 		if (CollectionUtils.isNotEmpty(crit.ppids())) {
 			subQuery.add(subQuery.in("cpr.ppid", crit.ppids()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.externalSubjectIds())) {
+			subQuery.add(subQuery.in("cpr.externalSubjectId", crit.externalSubjectIds()));
 		}
 
 		BiospecimenDaoHelper.getInstance().addSiteCpsCond(subQuery, crit.siteCps(), crit.useMrnSites(), false);

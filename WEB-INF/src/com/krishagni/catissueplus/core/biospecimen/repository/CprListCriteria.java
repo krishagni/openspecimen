@@ -39,6 +39,8 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 
 	private List<String> ppids;
 
+	private List<String> externalSubjectIds;
+
 	@Override
 	public CprListCriteria self() {
 		return this;
@@ -173,6 +175,16 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 	@JsonProperty("ppids")
 	public CprListCriteria ppids(List<String> ppids) {
 		this.ppids = ppids;
+		return self();
+	}
+
+	public List<String> externalSubjectIds() {
+		return externalSubjectIds;
+	}
+
+	@JsonProperty("externalSubjectIds")
+	public CprListCriteria externalSubjectIds(List<String> externalSubjectIds) {
+		this.externalSubjectIds = externalSubjectIds;
 		return self();
 	}
 }

@@ -657,6 +657,13 @@
     "view_specimens": "View Specimens"
   },
 
+  "cprs": {
+    "cp": "Collection Protocol",
+    "participant_name": "Name",
+    "ppid": "PPID",
+    "registration_date": "Registration Date"
+  },
+
   "dps": {
     "admin_rights_req_to_edit": "Super admin rights required to edit the distribution protocol.",
     "all_specimens": "All Specimens",

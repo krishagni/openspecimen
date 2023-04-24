@@ -788,6 +788,25 @@ angular.module('os.biospecimen.participant',
               }
             );
           },
+          tmWorkflowId: function($injector, cp, cpr, hasConsentRules, CpConfigSvc) {
+            if (!!cpr.id || !$injector.has('Workflow') || hasConsentRules) {
+              return false;
+            }
+
+            return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
+              function(data) {
+                if (data && data.workflowId > 0) {
+                  return data.workflowId;
+                }
+
+                return CpConfigSvc.getWorkflowData(-1, 'specimenCollection').then(
+                  function(data) {
+                    return data && data.workflowId;
+                  }
+                );
+              }
+            );
+          },
           cpEvents: function(cp, cpr, hasConsentRules, CollectionProtocolEvent) {
             if (!!cpr.id || hasConsentRules) {
               return null;

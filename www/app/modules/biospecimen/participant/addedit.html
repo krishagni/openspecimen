@@ -77,24 +77,31 @@
           </button>
         </span>
         <span show-if-allowed="specimenUpdateOpts">
-          <button class="btn btn-primary" os-form-submit="lookup(partCtx.cpEvents[0])"
-            ng-if="!partCtx.twoStep && partCtx.cpEvents.length == 1">
-            <span translate="participant.buttons.register_n_collect">Register & Collect</span>
-          </button>
-          <span dropdown ng-if="!partCtx.twoStep && partCtx.cpEvents.length > 1" on-toggle="toggleEventsMenu(open)">
-            <button class="btn btn-primary dropdown-toggle">
+          <span ng-if="partCtx.tmWorkflowId > 0">
+            <button class="btn btn-primary" os-form-submit="lookup(partCtx.wfEvent)">
               <span translate="participant.buttons.register_n_collect">Register & Collect</span>
-              <span class="fa fa-caret-down"></span>
             </button>
-            <ul class="dropdown-menu os-dropdown" os-ui-element="partCtx.eventsDd">
-              <li ng-repeat="event in partCtx.cpEvents">
-                <a os-form-submit="lookup(event)">
-                  <os-event-desc event-point="event.eventPoint" event-point-unit="event.eventPointUnit"
-                    event-label="event.eventLabel">
-                  </os-event-desc>
-                </a>
-              </li>
-            </ul>
+          </span>
+          <span ng-if="!partCtx.tmWorkflowId || partCtx.tmWorkflowId < 0">
+            <button class="btn btn-primary" os-form-submit="lookup(partCtx.cpEvents[0])"
+              ng-if="!partCtx.twoStep && partCtx.cpEvents.length == 1">
+              <span translate="participant.buttons.register_n_collect">Register & Collect</span>
+            </button>
+            <span dropdown ng-if="!partCtx.twoStep && partCtx.cpEvents.length > 1" on-toggle="toggleEventsMenu(open)">
+              <button class="btn btn-primary dropdown-toggle">
+                <span translate="participant.buttons.register_n_collect">Register & Collect</span>
+                <span class="fa fa-caret-down"></span>
+              </button>
+              <ul class="dropdown-menu os-dropdown" os-ui-element="partCtx.eventsDd">
+                <li ng-repeat="event in partCtx.cpEvents">
+                  <a os-form-submit="lookup(event)">
+                    <os-event-desc event-point="event.eventPoint" event-point-unit="event.eventPointUnit"
+                      event-label="event.eventLabel">
+                    </os-event-desc>
+                  </a>
+                </li>
+              </ul>
+            </span>
           </span>
         </span>
         <button class="btn os-btn-text" ng-click="back()">

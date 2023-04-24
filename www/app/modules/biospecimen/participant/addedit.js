@@ -4,9 +4,9 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     $scope, $state, $stateParams, $translate, $modal, $q, $timeout, $injector,
     userRole, cp, cpr, extensionCtxt, hasDict, cpDict, twoStepReg, layout,
     onValueChangeCb, mrnAccessRestriction, addPatientOnLookupFail,
-    lookupFieldsCfg, lockedFields, cpEvents, visitsTab,
+    lookupFieldsCfg, lockedFields, tmWorkflowId, cpEvents, visitsTab,
     CpConfigSvc, CollectionProtocolRegistration, Participant,
-    Visit, CollectSpecimensSvc, Site, PvManager, ExtensionsUtil, Alerts) {
+    Visit, CollectSpecimensSvc, Site, PvManager, ExtensionsUtil, Alerts, VueApp) {
 
     var availableSites = [];
     var inputParticipant = null;
@@ -21,6 +21,8 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       $scope.partCtx = {
         cpSites: cp.cpSites.map(function(cpSite) { return cpSite.siteName; }),
         cpEvents: cpEvents,
+        tmWorkflowId: tmWorkflowId,
+        wfEvent: {id: -1},
         documentsCount: 0,
         fieldOpts: {
           viewCtx: $scope,
@@ -207,7 +209,7 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
             cpr.participant.registeredCps = registeredCps;
 
             if (event) {
-              if (cp.spmnLabelPrePrintMode == 'ON_REGISTRATION') {
+              if (cp.spmnLabelPrePrintMode == 'ON_REGISTRATION' && event.id > 0) {
                 Visit.listFor(savedCpr.id, false).then(
                   function(visits) {
                     var pendingVisit = visits.find(function(v) { return v.status == 'Pending' && v.eventId == event.id });
@@ -242,6 +244,18 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     };
 
     function gotoSpmnCollection(cpr, event, pendingVisit) {
+      if ($scope.partCtx.tmWorkflowId > 0) {
+        var tmWfInstance = $injector.get('WorkflowInstance');
+        var model = new tmWfInstance({workflow: {id: $scope.partCtx.tmWorkflowId}, inputItems: [{cpr: {id: cpr.id}}]});
+        model.$saveOrUpdate().then(
+          function(instance) {
+            VueApp.setVueView('task-manager/instances/' + instance.id, {});
+          }
+        );
+
+        return;
+      }
+
       var state = $state.get('participant-detail.overview');
       var visit = pendingVisit;
       if (!visit) {
