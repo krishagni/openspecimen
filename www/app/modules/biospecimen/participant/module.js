@@ -790,7 +790,7 @@ angular.module('os.biospecimen.participant',
           },
           tmWorkflowId: function($injector, cp, cpr, hasConsentRules, CpConfigSvc) {
             if (!!cpr.id || !$injector.has('Workflow') || hasConsentRules) {
-              return false;
+              return -1;
             }
 
             return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
@@ -893,6 +893,25 @@ angular.module('os.biospecimen.participant',
           },
           consents: function(hasDict, hasFieldsFn, cpr, cpViewCtx) {
             return (hasDict && hasFieldsFn(['consents']) && cpViewCtx.consentsReadAllowed) ? cpr.getConsents() : null;
+          },
+          tmWorkflowId: function($injector, cp, cpr, CpConfigSvc) {
+            if (!$injector.has('Workflow')) {
+              return -1;
+            }
+
+            return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
+              function(data) {
+                if (data && data.workflowId > 0) {
+                  return data.workflowId;
+                }
+
+                return CpConfigSvc.getWorkflowData(-1, 'specimenCollection').then(
+                  function(data) {
+                    return data && data.workflowId;
+                  }
+                );
+              }
+            );
           }
         },
         controller: 'ParticipantOverviewCtrl',

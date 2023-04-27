@@ -2,8 +2,8 @@
 angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
   .controller('ParticipantOverviewCtrl', function(
     $scope, $state, $stateParams, $injector, userRole, hasSde, hasDict, hasFieldsFn,
-    storePhi, cpDict, visitsTab, cp, cpr, consents, visits,
-    Visit, CollectSpecimensSvc, SpecimenLabelPrinter, ExtensionsUtil, Util, Alerts) {
+    storePhi, cpDict, visitsTab, cp, cpr, consents, visits, tmWorkflowId,
+    Visit, CollectSpecimensSvc, SpecimenLabelPrinter, ExtensionsUtil, Util, Alerts, VueApp) {
 
     function init() {
       $scope.occurredVisits    = Visit.completedVisits(visits);
@@ -20,7 +20,8 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
           {objectId: cpr.participant.id, objectName: 'participant'}
         ],
         showAnonymize: storePhi,
-        watchOn: ['cpr.participant']
+        watchOn: ['cpr.participant'],
+        workflowId: tmWorkflowId
       }
 
       $scope.occurredVisitsCols = initVisitTab(visitsTab.occurred, $scope.occurredVisits);
@@ -96,6 +97,22 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
     }
 
     $scope.collect = function(visit) {
+      if ($scope.partCtx.workflowId > 0) {
+        var tmWfInstance = $injector.get('WorkflowInstance');
+        var model = new tmWfInstance({
+          workflow: {id: $scope.partCtx.workflowId},
+          inputItems: [{cpr: {id: cpr.id}, cpe: {id: visit.eventId}, visit: visit.id && {id: visit.id}}]
+        });
+
+        model.$saveOrUpdate().then(
+          function(instance) {
+            VueApp.setVueView('task-manager/instances/' + instance.id, {});
+          }
+        );
+
+        return;
+      }
+
       var retSt = {state: $state.current, params: $stateParams};
       CollectSpecimensSvc.collectVisit(retSt, cp, cpr.id, visit);
     }

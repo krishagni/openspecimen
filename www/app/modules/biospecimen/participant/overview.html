@@ -171,7 +171,7 @@
                 </td>
                 <td class="col">
                   <div class="os-more-option-btns" ng-show="cpr.hasConsented">
-                    <span dropdown>
+                    <span dropdown ng-if="!partCtx.workflowId || partCtx.workflowId <= 0">
                       <button class="btn btn-xs btn-default dropdown-toggle">
                         <span translate="specimens.buttons.collect">Collect</span>
                         <span class="fa fa-caret-down"></span>
@@ -190,6 +190,11 @@
                           </a>
                         </li>
                       </ul>
+                    </span>
+                    <span ng-if="partCtx.workflowId > 0">
+                      <button class="btn btn-xs btn-default" ng-click="collect(visit)">
+                        <span translate="specimens.buttons.collect">Collect</span>
+                      </button>
                     </span>
                   </div>
                 </td>
