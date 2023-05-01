@@ -166,6 +166,8 @@
   <include file="db/10.1/config.xml"/>
   <include file="db/10.1/audit.xml" />
 
+  <include file="db/10.2/schema.xml" />
+
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
 </databaseChangeLog>

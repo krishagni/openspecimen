@@ -1163,6 +1163,20 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			extensionField.setType("SUBFORM");
 			extensionField.setSubFields(getFormFields(form));
 			extensionField.getSubFields().add(0, getRecordIdField(form));
+
+			Control recStatusCtrl = form.getRecordStatusControl();
+			FormFieldSummary recDetails = new FormFieldSummary();
+			recDetails.setName(recStatusCtrl.getName());
+			recDetails.setCaption(recStatusCtrl.getCaption());
+			recDetails.setType("SUBFORM");
+			extensionField.getSubFields().add(recDetails);
+
+			FormFieldSummary status = new FormFieldSummary();
+			status.setName("status");
+			status.setType("STRING");
+			status.setCaption(form.getCaption() + " Status");
+			status.setPvs(Arrays.asList("COMPLETE", "DRAFT"));
+			recDetails.setSubFields(new ArrayList<>(List.of(status)));
 			extensionFields.add(extensionField);
 		}
 
@@ -1337,8 +1351,19 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			FormData existing = formDataMgr.getFormData(formData.getContainer(), formData.getRecordId());
 			formData = updateFormData(existing, formData);
 		}
-		
-		formData.validate();
+
+		String formStatus = (String) appData.get("formStatus");
+		if (StringUtils.isBlank(formStatus)) {
+			formStatus = "COMPLETE";
+		}
+
+		if (!formStatus.equals("COMPLETE") && !formStatus.equals("DRAFT")) {
+			throw OpenSpecimenException.userError(FormErrorCode.INV_DATA_STATUS, formStatus);
+		}
+
+		if (formStatus.equals("COMPLETE")) {
+			formData.validate();
+		}
 
 		String prevStatus = null;
 		String prevRecv = null;
@@ -1433,6 +1458,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		recordEntry.setRecordId(recordId);
 		recordEntry.setUpdatedBy(userCtxt.getUserId());
 		recordEntry.setUpdatedTime(Calendar.getInstance().getTime());
+		recordEntry.setFormStatus(FormRecordEntryBean.FormStatus.valueOf(formStatus));
 		formDao.saveOrUpdateRecordEntry(recordEntry);
 		formData.setRecordId(recordId);
 
@@ -1859,6 +1885,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		if (record != null) {
 			appData.put("sysForm",     record.isSysRecord());
 			appData.put("multiRecord", record.isMultiRecord());
+			appData.put("formStatus",  record.getFormStatus());
 		}
 
 		return formData;
@@ -2236,11 +2263,14 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					(cprFormValueMap) -> {
 						CollectionProtocolRegistration cpr = (CollectionProtocolRegistration) cprFormValueMap.first();
 						Map<String, Object> valueMap = cprFormValueMap.second();
+						Map<String, Object> appData = (Map<String, Object>) valueMap.get("appData");
 
 						Map<String, Object> formData = new HashMap<>();
 						formData.put("recordId", valueMap.get("id"));
 						formData.put("cpShortTitle", cpr.getCollectionProtocol().getShortTitle());
 						formData.put("ppid", cpr.getPpid());
+						formData.put("fdeStatus", appData != null ? appData.get("formStatus") : "N/A");
+						formData.put("activityStatus", "ACTIVE");
 						formData.put("formValueMap", valueMap);
 						return formData;
 					}
@@ -2373,20 +2403,28 @@ public class FormServiceImpl implements FormService, InitializingBean {
 						}
 					}
 
-					Long recordId = (Long)record.get("recordId");
-					result.add(toFormRec.apply(Pair.make(lastObj, getFormData(recordId, !lastObjPhiAllowed))));
+					Long recordId = (Long) record.get("recordId");
+					String status = (String) record.get("formStatus");
+					result.add(toFormRec.apply(Pair.make(lastObj, getFormData(recordId, status, !lastObjPhiAllowed))));
 				}
 
 				return result;
 			}
 
-			private Map<String, Object> getFormData(Long recordId, boolean maskPhi) {
+			private Map<String, Object> getFormData(Long recordId, String formStatus, boolean maskPhi) {
 				FormData formData = formDataMgr.getFormData(form, recordId);
 
 				if (formHasPhi && maskPhi) {
 					formData.maskPhiFieldValues();
 				}
 
+				Map<String, Object> appData = formData.getAppData();
+				if (appData == null) {
+					appData = new HashMap<>();
+					formData.setAppData(appData);
+				}
+
+				appData.put("formStatus", formStatus);
 				return formData.getFieldNameValueMap(true);
 			}
 

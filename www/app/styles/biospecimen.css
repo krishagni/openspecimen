@@ -123,6 +123,11 @@
   background: #46b8da!important;
 }
 
+.panel .panel-heading .os-status-pending,
+.os-page-header .os-stauts-pending {
+  background: #f0ad4e!important;
+}
+
 .panel .panel-heading .os-status-reserved,
 .os-page-header .os-status-reserved {
   background: rgba(128, 0, 128, 0.7)!important;
@@ -150,6 +155,8 @@
 
 .panel .panel-heading .os-status-info,
 .os-page-header .os-status-info,
+.panel .panel-heading .os-status-pending,
+.os-page-header .os-status-pending,
 .panel .panel-heading .os-status-closed,
 .os-page-header .os-status-closed,
 .panel .panel-heading .os-status-reserved,
@@ -170,6 +177,7 @@
 }
 
 .panel .panel-heading .os-status-info,
+.panel .panel-heading .os-status-pending,
 .panel .panel-heading .os-status-closed,
 .panel .panel-heading .os-status-reserved {
   margin-bottom: 5px;

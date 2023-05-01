@@ -8,6 +8,10 @@
           ng-show="event.appData.sysForm == 'true' || event.appData.sysForm == true">
           <span translate="specimens.sys_event">System Event</span>
         </span>
+        <span class="btn os-status-pending" style="margin-bottom: 0px;"
+          ng-show="event.appData.formStatus == 'DRAFT'">
+          <span translate="extensions.draft">Draft</span>
+        </span>
         <span class="os-btns">
           <span ng-show="event.isEditable" show-if-allowed="specimenResource.updateOpts">
             <button class="btn btn-primary" ui-sref="specimen-detail.extensions.addedit({spe: true,

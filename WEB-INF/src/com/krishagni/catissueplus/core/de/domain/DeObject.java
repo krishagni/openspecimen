@@ -582,6 +582,7 @@ public abstract class DeObject {
 		re.setUpdatedBy(userCtx.getUserId());
 		re.setUpdatedTime(Calendar.getInstance().getTime());
 		re.setActivityStatus(Status.ACTIVE);
+		re.setFormStatus(FormRecordEntryBean.FormStatus.COMPLETE);
 		return re;
 	}	
 		

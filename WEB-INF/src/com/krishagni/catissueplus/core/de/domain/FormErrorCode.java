@@ -51,7 +51,9 @@ public enum FormErrorCode implements ErrorCode {
 
 	OBJ_ID_REQ,
 
-	INVALID_TOKEN;
+	INVALID_TOKEN,
+
+	INV_DATA_STATUS;
 
 	@Override
 	public String code() {

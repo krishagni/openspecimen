@@ -638,6 +638,12 @@ edu.common.de.Form = function(args) {
       btns.append(saveNext);
     }
 
+    if (args.showSaveDraft == true || args.showSaveDraft == 'true') {
+      var saveDraft = $("<button/>").addClass("btn btn-primary save-draft").append("Save as Draft");
+      saveDraft.on("click", function() { that.save(false, true); });
+      btns.append(saveDraft);
+    }
+
     var save = $("<button/>").addClass("btn btn-primary save").append("Save");
     save.on("click", function() { that.save(); });
     btns.append(save);
@@ -715,15 +721,17 @@ edu.common.de.Form = function(args) {
     this.updatePb();
   }
 
-  this.save = function(next) {
-    if (!this.validate()) {
+  this.save = function(next, draftMode) {
+    if (!draftMode && !this.validate()) {
       if (args.onValidationError) {
         args.onValidationError();
       }
       return;
     }
 
-    var formData = {appData: this.appData};
+    var appData = this.appData || {};
+    appData.formStatus = (draftMode && 'DRAFT' || 'COMPLETE');
+    var formData = {appData: appData};
     var url = this.formSaveUrl.replace(":formId", this.formId);
     var method;
     if (this.recordId) {

@@ -1987,6 +1987,7 @@
     "list": "Forms",
     "sys_form": "System Form",
     "sys_form_help": "System form records cannot be added or edited or deleted!",
+    "draft": "Draft",
 
     "name": "Name",
     "updated_by": "Updated By",

@@ -812,6 +812,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 				regRecord.put("cprId", ((Number) row[2]).longValue());
 				regRecord.put("ppid", row[3]);
 				regRecord.put("recordId", ((Number) row[4]).longValue());
+				regRecord.put("formStatus", row[5]);
 				return regRecord;
 			});
 	}
@@ -830,6 +831,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 				partRecord.put("participantId", ((Number) row[3]).longValue());
 				partRecord.put("ppid", row[4]);
 				partRecord.put("recordId", ((Number) row[5]).longValue());
+				partRecord.put("formStatus", row[6]);
 				return partRecord;
 			});
 	}
@@ -847,6 +849,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 				visitRecord.put("visitId", ((Number) row[2]).longValue());
 				visitRecord.put("visitName", row[3]);
 				visitRecord.put("recordId", ((Number) row[4]).longValue());
+				visitRecord.put("formStatus", row[5]);
 				return visitRecord;
 			});
 	}
@@ -866,6 +869,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 				spmnRecord.put("spmnLabel", row[3]);
 				spmnRecord.put("spmnBarcode", row[4]);
 				spmnRecord.put("recordId", ((Number) row[5]).longValue());
+				spmnRecord.put("formStatus", row[6]);
 				return spmnRecord;
 			});
 	}

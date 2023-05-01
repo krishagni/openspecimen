@@ -31,10 +31,16 @@ public class FormRecordEntryBean {
 	
 	private String entityType;
 
+	private FormStatus formStatus;
+
 	private FormContextBean formCtxt;
 
 	public enum Status {
 		ACTIVE, CLOSED
+	}
+
+	public enum FormStatus {
+		DRAFT, COMPLETE;
 	}
 	
 	public Long getIdentifier() {
@@ -99,6 +105,14 @@ public class FormRecordEntryBean {
 
 	public void setActivityStatusStr(String status) {
 	  this.status = status != null ? Status.valueOf(status) : Status.ACTIVE;
+	}
+
+	public FormStatus getFormStatus() {
+		return formStatus;
+	}
+
+	public void setFormStatus(FormStatus formStatus) {
+		this.formStatus = formStatus;
 	}
 
 	public String getEntityType() {

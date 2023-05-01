@@ -25,6 +25,13 @@
 
     <property name="activityStatusStr" column="ACTIVITY_STATUS"/>
 
+    <property name="formStatus" column="FORM_STATUS">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">krishagni.catissueplus.beans.FormRecordEntryBean$FormStatus</param>
+        <param name="type">12</param>
+      </type>
+    </property>
+
     <many-to-one name="formCtxt" column="FORM_CTXT_ID" not-found="ignore" update="false" insert="false"/>
 
     <query name="getRecordEntryById">
@@ -78,7 +85,8 @@
     <sql-query name="getRegistrationRecords">
       select
         cp.identifier as cpId, cp.short_title as cpShortTitle,
-        cpr.identifier as cprId, cpr.protocol_participant_id as ppid, re.record_id as recordId
+        cpr.identifier as cprId, cpr.protocol_participant_id as ppid,
+        re.record_id as recordId, re.form_status as formStatus
       from
         catissue_coll_prot_reg cpr
         inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
@@ -96,7 +104,8 @@
     <sql-query name="getParticipantRecords">
       select
         cp.identifier as cpId, cp.short_title as cpShortTitle,
-        cpr.identifier as cprId, cpr.participant_id as participantId, cpr.protocol_participant_id as ppid, re.record_id as recordId
+        cpr.identifier as cprId, cpr.participant_id as participantId, cpr.protocol_participant_id as ppid,
+        re.record_id as recordId, re.form_status as formStatus
       from
         catissue_coll_prot_reg cpr
         inner join catissue_collection_protocol cp on cp.identifier = cpr.collection_protocol_id
@@ -114,7 +123,8 @@
     <sql-query name="getVisitRecords">
       select
         cp.identifier as cpId, cp.short_title as cpShortTitle,
-        v.identifier as visitId, v.name as visitName, re.record_id as recordId
+        v.identifier as visitId, v.name as visitName,
+        re.record_id as recordId, re.form_status as formStatus
       from
         catissue_specimen_coll_group v
         inner join catissue_coll_prot_reg cpr on cpr.identifier = v.collection_protocol_reg_id
@@ -134,7 +144,7 @@
       select
         cp.identifier as cpId, cp.short_title as cpShortTitle,
         s.identifier as spmnId, s.label as spmnLabel, s.barcode as spmnBarcode,
-        re.record_id as recordId
+        re.record_id as recordId, re.form_status as formStatus
       from
         catissue_specimen s
         inner join catissue_collection_protocol cp on cp.identifier = s.collection_protocol_id
@@ -246,7 +256,8 @@
         re.object_id = :objectId and
         f.deleted_on is null and
         fc.deleted_on is null and
-        re.activity_status = 'ACTIVE'
+        re.activity_status = 'ACTIVE' and
+        (re.form_status is null or re.form_status = 'COMPLETE')
     </sql-query>
 
     <sql-query name="moveRegistrationRecords">

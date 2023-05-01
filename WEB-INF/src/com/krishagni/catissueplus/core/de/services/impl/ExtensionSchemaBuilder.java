@@ -114,7 +114,8 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 		} else if (entityType.equals("User")) {
 			fields.add(getField("emailAddress", "Email Address"));
 		}
-		
+
+		fields.add(getField("fdeStatus", "Status"));
 		fields.add(getField("activityStatus", "Activity Status"));
 		record.setFields(fields);
 		

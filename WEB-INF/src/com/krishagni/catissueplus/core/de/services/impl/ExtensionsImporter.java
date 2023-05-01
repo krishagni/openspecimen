@@ -127,6 +127,7 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 		Map<String, Object> appData = new HashMap<>();
 		appData.put("formCtxtId", formCtxId);
 		appData.put("objectId", objectId);
+		appData.put("formStatus", extnObj.get("fdeStatus"));
 		formValueMap.put("appData", appData);
 		if (recordId != null) {
 			formValueMap.put("id", recordId);
