@@ -170,7 +170,15 @@ angular.module('os.common.form', [])
         );
       } else {
         ctrl.formSubmitted(true);
-        if (ctrl.isValidForm()) {
+
+        var draftMode = attrs.draftMode;
+        if (draftMode == 'true') {
+          draftMode = true;
+        } else if (draftMode) {
+          draftMode = scope.$eval(draftMode);
+        }
+
+        if (draftMode || ctrl.isValidForm()) {
           if (attrs.localForm) {
             LocationChangeListener.allowChange();
           }

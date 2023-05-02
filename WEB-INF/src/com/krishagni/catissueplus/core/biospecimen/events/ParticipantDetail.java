@@ -75,6 +75,8 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 	// Used for CP based custom fields
 	private Long cpId = -1L;
 
+	private String dataEntryStatus;
+
 	//
 	// Used in matching API to decide whether to populate registration
 	// info or not
@@ -301,6 +303,14 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 
 	public void setCpId(Long cpId) {
 		this.cpId = cpId;
+	}
+
+	public String getDataEntryStatus() {
+		return dataEntryStatus;
+	}
+
+	public void setDataEntryStatus(String dataEntryStatus) {
+		this.dataEntryStatus = dataEntryStatus;
 	}
 
 	public boolean isForceDelete() {

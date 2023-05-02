@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.DeObject.Attr;
@@ -25,6 +26,8 @@ public class ExtensionDetail implements Serializable {
 	private Long formId;
 
 	private String formCaption;
+
+	private String dataEntryStatus;
 	
 	private List<AttrDetail> attrs = new ArrayList<>();
 
@@ -62,6 +65,14 @@ public class ExtensionDetail implements Serializable {
 
 	public void setFormCaption(String formCaption) {
 		this.formCaption = formCaption;
+	}
+
+	public String getDataEntryStatus() {
+		return dataEntryStatus;
+	}
+
+	public void setDataEntryStatus(String dataEntryStatus) {
+		this.dataEntryStatus = dataEntryStatus;
 	}
 
 	public List<AttrDetail> getAttrs() {
@@ -157,6 +168,7 @@ public class ExtensionDetail implements Serializable {
 		detail.setObjectId(extension.getObjectId());
 		detail.setFormId(extension.getFormId());
 		detail.setFormCaption(extension.getFormCaption());
+		detail.setDataEntryStatus(extension.getDataEntryStatus() != null ? extension.getDataEntryStatus().name() : BaseEntity.DataEntryStatus.COMPLETE.name());
 		detail.setAttrs(AttrDetail.from(extension.getAttrs(), excludePhi));	
 		return detail;
 	}

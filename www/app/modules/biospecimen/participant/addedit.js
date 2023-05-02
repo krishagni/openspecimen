@@ -186,8 +186,9 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     };
 
     function registerParticipant(event, gotoConsents) {
+      var draftMode = $scope.cpr.dataEntryStatus == 'DRAFT';
       var formCtrl = $scope.deFormCtrl.ctrl;
-      if (formCtrl && !formCtrl.validate()) {
+      if (formCtrl && !draftMode && !formCtrl.validate()) {
         return;
       }
 
@@ -495,8 +496,9 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
     }
 
     function cacheInputParticipant() {
+      var draftMode = $scope.cpr.dataEntryStatus == 'DRAFT';
       var formCtrl = $scope.deFormCtrl.ctrl;
-      if (formCtrl && !formCtrl.validate()) {
+      if (formCtrl && !draftMode && !formCtrl.validate()) {
         return;
       }
 
@@ -554,7 +556,8 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       }
     };
 
-    $scope.register = function(event, gotoConsents) {
+    $scope.register = function(event, gotoConsents, draftMode) {
+      $scope.cpr.dataEntryStatus = draftMode ? 'DRAFT' : 'COMPLETE';
       if ($scope.partCtx.edit) {
         cacheInputParticipant();
         $scope.cpr.participant.getMatchingParticipants().then(
@@ -567,7 +570,13 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
       }
     };
 
-    $scope.lookup = function(event, gotoConsents) {
+    $scope.lookup = function(event, gotoConsents, draftMode) {
+      var formCtrl = $scope.deFormCtrl.ctrl;
+      if (formCtrl && !draftMode && !formCtrl.validate()) {
+        return;
+      }
+
+      $scope.cpr.dataEntryStatus = draftMode ? 'DRAFT' : 'COMPLETE';
       cacheInputParticipant();
       $scope.partCtx.skipped = false;
       $scope.cpr.participant.getMatchingParticipants().then(

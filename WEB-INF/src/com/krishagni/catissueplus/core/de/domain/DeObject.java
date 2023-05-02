@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.dao.DataAccessException;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
@@ -134,8 +135,15 @@ public abstract class DeObject {
 			int revision = formData.getRevision();
 			boolean isInsert = (this.id == null);
 			this.id = formDataMgr.saveOrUpdateFormData(userCtx, formData);
+
+			Long fcId = getFormContext();
+			FormRecordEntryBean re = null;
 			if (isInsert && this.id != null) {
-				saveRecordEntry();			
+				re = prepareRecordEntry(getUserCtx(), fcId, getId());
+				daoFactory.getFormDao().saveOrUpdateRecordEntry(re);
+			} else if (this.id != null) {
+				re = daoFactory.getFormDao().getRecordEntry(fcId, getObjectId(), getId());
+				re.setFormStatus(getDataEntryStatus());
 			}
 
 			attrs.clear();
@@ -268,6 +276,10 @@ public abstract class DeObject {
 	public abstract Long getEntityId();
 
 	public abstract void setAttrValues(Map<String, Object> attrValues);
+
+	public BaseEntity.DataEntryStatus getDataEntryStatus() {
+		return BaseEntity.DataEntryStatus.COMPLETE;
+	}
 
 	public Map<String, Object> getAttrValues() {
 		loadRecordIfNotLoaded();
@@ -569,11 +581,24 @@ public abstract class DeObject {
 		FormData formData = FormData.getFormData(container, getAttrValues(), useUdn, null);
 		formData.setRecordId(this.id);
 
-		formData.validate();
-		return formData;		
+		Map<String, Object> appData = formData.getAppData();
+		if (appData == null) {
+			appData = new HashMap<>();
+		}
+
+		BaseEntity.DataEntryStatus formStatus = getDataEntryStatus();
+		if (formStatus == null) {
+			formStatus = BaseEntity.DataEntryStatus.COMPLETE;
+		}
+
+		appData.put("formStatus", formStatus.name());
+		if (formStatus == BaseEntity.DataEntryStatus.COMPLETE) {
+			formData.validate();
+		}
+
+		return formData;
 	}
-	
-	
+
 	private FormRecordEntryBean prepareRecordEntry(UserContext userCtx, Long formCtxId, Long recordId) {
 		FormRecordEntryBean re = new FormRecordEntryBean();
 		re.setFormCtxtId(formCtxId);
@@ -582,7 +607,7 @@ public abstract class DeObject {
 		re.setUpdatedBy(userCtx.getUserId());
 		re.setUpdatedTime(Calendar.getInstance().getTime());
 		re.setActivityStatus(Status.ACTIVE);
-		re.setFormStatus(FormRecordEntryBean.FormStatus.COMPLETE);
+		re.setFormStatus(getDataEntryStatus());
 		return re;
 	}	
 		

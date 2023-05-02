@@ -147,10 +147,13 @@
         </thead>
         <tbody class="os-table-body">
           <tr class="row" ng-repeat="record in selectedForm.records" os-row-click="showRecord(record)">
-            <td class="col">
+            <td class="col os-key-values">
               <a ui-sref="{{extnState}}list({formId: record.formId, recordId: record.recordId, formCtxtId: record.fcId})">
                 <span>#{{record.recordId}}</span>
               </a>
+              <span class="value os-status-pending" style="padding: 4px;" ng-if="record.formStatus == 'DRAFT'">
+                <span translate="common.draft">Draft</span>
+              </span>
             </td>
             <td class="col">
               <span>{{record.user | osUserDisplayName}}</span>

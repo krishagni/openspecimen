@@ -110,6 +110,18 @@
       </dropDown>
     </row>
     <row>
+      <dropDown>
+        <name>dataEntryStatus</name>
+        <udn>dataEntryStatus</udn>
+        <caption>#getMessage("common_data_entry_status")</caption>
+        <column>DATA_ENTRY_STATUS</column>
+        <options>
+          <option><value>COMPLETE</value></option>
+          <option><value>DRAFT</value></option>
+        </options>
+      </dropDown>
+    </row>
+    <row>
       <pvField>
         <name>gender</name>
         <udn>gender</udn>

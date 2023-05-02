@@ -658,7 +658,8 @@
       "anonymize": "Anonymize",
       "prepare_kit": "Prepare Specimen Kit",
       "reg_participants": "Register Participants",
-      "skip": "Skip"
+      "skip": "Skip",
+      "save_as_draft": "Save as Draft"
     },
 
     "menu": {

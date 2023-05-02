@@ -12,4 +12,235 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Registration data entry status - draft or complete">
+    <addColumn tableName="CATISSUE_COLL_PROT_REG">
+      <column name="DATA_ENTRY_STATUS" type="${text.type}(32)" defaultValue="COMPLETE">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query: Registration table with data entry status">
+    <addColumn tableName="OS_CPR_RECS">
+      <column name="DATA_ENTRY_STATUS" type="${text.type}(32)" defaultValue="COMPLETE">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to keep the queries registration table updated: New Registration" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_cpr_recs_ins;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_cpr_recs_ins after insert on catissue_coll_prot_reg
+      for each row
+      begin
+        insert into
+          os_cpr_recs(
+            cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
+            email_address, dob, ssn, activity_status, gender_id, registration_date,
+            ppid, vital_status_id, death_date, empi_id, barcode, consent_sign_date,
+            consent_witness, consent_comments, consent_document_name, external_subject_id,
+            site_id, creation_time, creator, update_time, updater, data_entry_status
+          )
+        select
+          cpr.identifier as cpr_id,
+          cpr.collection_protocol_id as cp_id,
+          cpr.participant_id,
+          p.first_name,
+          p.middle_name,
+          p.last_name,
+          p.email_address,
+          p.birth_date as dob,
+          p.social_security_number as ssn,
+          cpr.activity_status,
+          p.gender_id,
+          cpr.registration_date,
+          cpr.protocol_participant_id as ppid,
+          p.vital_status_id,
+          p.death_date,
+          p.empi_id,
+          cpr.barcode,
+          cpr.consent_sign_date,
+          cpr.consent_witness,
+          cpr.consent_comments,
+          cpr.consent_document_name,
+          cpr.external_subject_id,
+          cpr.site_id,
+          cpr.creation_time,
+          cpr.creator,
+          cpr.update_time,
+          cpr.updater,
+          cpr.data_entry_status
+        from
+          catissue_coll_prot_reg cpr
+          inner join catissue_participant p on p.identifier = cpr.participant_id
+        where
+          cpr.identifier = new.identifier;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Part 1: Trigger to keep the queries registration table updated: New Registration" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//" splitStatements="false">
+      create or replace trigger os_cpr_recs_ins after insert on catissue_coll_prot_reg
+      for each row
+      begin
+        insert into
+          os_cpr_recs(
+            cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
+            email_address, dob, ssn, activity_status, gender_id, registration_date,
+            ppid, vital_status_id, death_date, empi_id, barcode, consent_sign_date,
+            consent_witness, consent_comments, consent_document_name, external_subject_id,
+            site_id, creation_time, creator, update_time, updater, data_entry_status
+          )
+        select
+          :new.identifier as cpr_id,
+          :new.collection_protocol_id as cp_id,
+          :new.participant_id,
+          p.first_name,
+          p.middle_name,
+          p.last_name,
+          p.email_address,
+          p.birth_date as dob,
+          p.social_security_number as ssn,
+          :new.activity_status,
+          p.gender_id,
+          :new.registration_date,
+          :new.protocol_participant_id as ppid,
+          p.vital_status_id,
+          p.death_date,
+          p.empi_id,
+          :new.barcode,
+          :new.consent_sign_date,
+          :new.consent_witness,
+          :new.consent_comments,
+          :new.consent_document_name,
+          :new.external_subject_id,
+          :new.site_id,
+          :new.creation_time,
+          :new.creator,
+          :new.update_time,
+          :new.updater,
+          :new.data_entry_status
+        from
+          catissue_participant p
+        where
+          p.identifier = :new.participant_id;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Part 2: Trigger to keep the queries registration table updated: Update Registration" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_cpr_recs_cpr_update;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_cpr_recs_cpr_update after update on catissue_coll_prot_reg
+      for each row
+      begin
+        update
+          os_cpr_recs
+        set
+          cp_id = new.collection_protocol_id,
+          participant_id = new.participant_id,
+          activity_status = new.activity_status,
+          registration_date = new.registration_date,
+          ppid = new.protocol_participant_id,
+          barcode = new.barcode,
+          consent_sign_date = new.consent_sign_date,
+          consent_witness = new.consent_witness,
+          consent_comments = new.consent_comments,
+          consent_document_name = new.consent_document_name,
+          external_subject_id = new.external_subject_id,
+          site_id = new.site_id,
+          creation_time = new.creation_time,
+          creator = new.creator,
+          update_time = new.update_time,
+          updater = new.updater,
+          data_entry_status = new.data_entry_status
+        where
+          cpr_id = new.identifier;
+
+        if (new.participant_id != old.participant_id) then
+          update
+            os_cpr_recs cpr
+            inner join catissue_participant p on p.identifier = cpr.participant_id
+          set
+            cpr.first_name = p.first_name,
+            cpr.middle_name = p.middle_name,
+            cpr.last_name = p.last_name,
+            cpr.email_address = p.email_address,
+            cpr.dob = p.birth_date,
+            cpr.ssn = p.social_security_number,
+            cpr.gender_id = p.gender_id,
+            cpr.vital_status_id = p.vital_status_id,
+            cpr.death_date = p.death_date,
+            cpr.empi_id = p.empi_id
+          where
+            cpr.cpr_id = new.identifier;
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Part 2: Trigger to keep the queries registration table updated: Update Registration" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//" splitStatements="false">
+      create or replace trigger os_cpr_recs_cpr_update after update on catissue_coll_prot_reg
+      for each row
+      begin
+        update
+          os_cpr_recs
+        set
+          cp_id = :new.collection_protocol_id,
+          participant_id = :new.participant_id,
+          activity_status = :new.activity_status,
+          registration_date = :new.registration_date,
+          ppid = :new.protocol_participant_id,
+          barcode = :new.barcode,
+          consent_sign_date = :new.consent_sign_date,
+          consent_witness = :new.consent_witness,
+          consent_comments = :new.consent_comments,
+          consent_document_name = :new.consent_document_name,
+          external_subject_id = :new.external_subject_id,
+          site_id = :new.site_id,
+          creation_time = :new.creation_time,
+          creator = :new.creator,
+          update_time = :new.update_time,
+          updater = :new.updater,
+          data_entry_status = :new.data_entry_status
+        where
+          cpr_id = :new.identifier;
+
+        if (:new.participant_id != :old.participant_id) then
+          merge into
+            os_cpr_recs cpr
+          using
+            catissue_participant p on (p.identifier = cpr.participant_id)
+          when matched then
+            update set
+              cpr.first_name = p.first_name,
+              cpr.middle_name = p.middle_name,
+              cpr.last_name = p.last_name,
+              cpr.email_address = p.email_address,
+              cpr.dob = p.birth_date,
+              cpr.ssn = p.social_security_number,
+              cpr.gender_id = p.gender_id,
+              cpr.vital_status_id = p.vital_status_id,
+              cpr.death_date = p.death_date,
+              cpr.empi_id = p.empi_id
+            where
+              cpr.cpr_id = :new.identifier;
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
 </databaseChangeLog>

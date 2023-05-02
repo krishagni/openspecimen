@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Registration data entry status - draft or complete">
+    <addColumn tableName="CATISSUE_COLL_PROT_REG_AUD">
+      <column name="DATA_ENTRY_STATUS" type="${text.type}(32)" defaultValue="COMPLETE" />
+      <column name="dataEntryStatus_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

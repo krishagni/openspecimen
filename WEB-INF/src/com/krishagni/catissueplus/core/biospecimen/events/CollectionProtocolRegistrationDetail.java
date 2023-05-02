@@ -31,6 +31,8 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 
 	private String activityStatus;
 
+	private String dataEntryStatus;
+
 	private Date registrationDate;
 
 	private String externalSubjectId;
@@ -115,6 +117,14 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 		this.activityStatus = activityStatus;
 	}
 
+	public String getDataEntryStatus() {
+		return dataEntryStatus;
+	}
+
+	public void setDataEntryStatus(String dataEntryStatus) {
+		this.dataEntryStatus = dataEntryStatus;
+	}
+
 	public Date getRegistrationDate() {
 		return registrationDate;
 	}
@@ -193,6 +203,7 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 		detail.setParticipant(ParticipantDetail.from(participant, excludePhi, otherCprs));
 		detail.setId(cpr.getId());		
 		detail.setActivityStatus(cpr.getActivityStatus());
+		detail.setDataEntryStatus(cpr.getDataEntryStatus().name());
 		detail.setBarcode(cpr.getBarcode());
 		detail.setPpid(cpr.getPpid());
 		detail.setRegistrationDate(cpr.getRegistrationDate());

@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 import edu.common.dynamicextensions.domain.nui.Container;
@@ -31,7 +32,7 @@ public class FormRecordEntryBean {
 	
 	private String entityType;
 
-	private FormStatus formStatus;
+	private BaseEntity.DataEntryStatus formStatus;
 
 	private FormContextBean formCtxt;
 
@@ -39,10 +40,6 @@ public class FormRecordEntryBean {
 		ACTIVE, CLOSED
 	}
 
-	public enum FormStatus {
-		DRAFT, COMPLETE;
-	}
-	
 	public Long getIdentifier() {
 		return identifier;
 	}
@@ -107,11 +104,11 @@ public class FormRecordEntryBean {
 	  this.status = status != null ? Status.valueOf(status) : Status.ACTIVE;
 	}
 
-	public FormStatus getFormStatus() {
+	public BaseEntity.DataEntryStatus getFormStatus() {
 		return formStatus;
 	}
 
-	public void setFormStatus(FormStatus formStatus) {
+	public void setFormStatus(BaseEntity.DataEntryStatus formStatus) {
 		this.formStatus = formStatus;
 	}
 

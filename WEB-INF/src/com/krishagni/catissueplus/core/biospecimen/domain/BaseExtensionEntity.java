@@ -97,6 +97,12 @@ public abstract class BaseExtensionEntity extends BaseEntity {
 			public Long getEntityId() {
 				return BaseExtensionEntity.this.getEntityId();
 			}
+
+			@Override
+			public DataEntryStatus getDataEntryStatus() {
+				DataEntryStatus status = BaseExtensionEntity.this.getDataEntryStatus();
+				return status != null ? status : DataEntryStatus.COMPLETE;
+			}
 		};
 		
 		if (StringUtils.isBlank(extnObj.getFormName())) {

@@ -30,6 +30,8 @@ public class FormRecordSummary {
 
 	private String formCaption;
 
+	private String formStatus;
+
 	public Long getId() {
 		return id;
 	}
@@ -108,6 +110,14 @@ public class FormRecordSummary {
 
 	public void setFormCaption(String formCaption) {
 		this.formCaption = formCaption;
+	}
+
+	public String getFormStatus() {
+		return formStatus;
+	}
+
+	public void setFormStatus(String formStatus) {
+		this.formStatus = formStatus;
 	}
 
 	public void addFieldValue(ControlValue cv) {

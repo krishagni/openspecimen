@@ -35,6 +35,10 @@ public class BaseEntity {
 
 	private static final Map<String, Boolean> entityNameProperties = new ConcurrentHashMap<>();
 
+	public enum DataEntryStatus {
+		DRAFT, COMPLETE;
+	}
+
 	protected Long id;
 
 	protected User creator;
@@ -44,6 +48,8 @@ public class BaseEntity {
 	protected User updater;
 
 	protected Date updateTime;
+
+	protected DataEntryStatus dataEntryStatus;
 	
 	protected transient List<Runnable> onSaveProcs;
 
@@ -87,6 +93,14 @@ public class BaseEntity {
 
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public DataEntryStatus getDataEntryStatus() {
+		return dataEntryStatus;
+	}
+
+	public void setDataEntryStatus(DataEntryStatus dataEntryStatus) {
+		this.dataEntryStatus = dataEntryStatus;
 	}
 
 	public BaseEntity getRoot() {

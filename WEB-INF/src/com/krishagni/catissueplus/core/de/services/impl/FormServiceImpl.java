@@ -33,6 +33,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCo
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
@@ -1458,7 +1459,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		recordEntry.setRecordId(recordId);
 		recordEntry.setUpdatedBy(userCtxt.getUserId());
 		recordEntry.setUpdatedTime(Calendar.getInstance().getTime());
-		recordEntry.setFormStatus(FormRecordEntryBean.FormStatus.valueOf(formStatus));
+		recordEntry.setFormStatus(BaseEntity.DataEntryStatus.valueOf(formStatus));
 		formDao.saveOrUpdateRecordEntry(recordEntry);
 		formData.setRecordId(recordId);
 

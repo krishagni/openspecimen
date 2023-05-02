@@ -43,6 +43,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("common_data_entry_status")</caption>
+      <attribute>dataEntryStatus</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("common_reason")</caption>
       <attribute>opComments</attribute>
     </field>

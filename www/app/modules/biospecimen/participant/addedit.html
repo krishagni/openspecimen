@@ -63,6 +63,9 @@
 
     <div class="form-group">
       <div class="col-xs-6" ng-class="{'col-xs-offset-3': !partCtx.fieldOpts.verticalLayout}">
+        <button class="btn btn-primary" os-form-submit="lookup(null, null, true)" draft-mode="true">
+          <span translate="participant.buttons.save_as_draft">Save as Draft</span>
+        </button>
         <button class="btn btn-primary" os-form-submit="lookup()" ng-switch on="partCtx.twoStep">
           <span ng-switch-when="true" translate="participant.buttons.lookup">Lookup</span>
           <span ng-switch-default translate="participant.buttons.register">Register</span>
@@ -297,6 +300,10 @@
 
         <div class="form-group">
           <div class="col-xs-6" ng-class="{'col-xs-offset-3': !partCtx.fieldOpts.verticalLayout}">
+            <button class="btn btn-primary" os-form-submit="register(null, null, true)" draft-mode="true">
+              <span translate="participant.buttons.save_as_draft"> Save as Draft </span>
+            </button>
+
             <button class="btn btn-primary" os-form-submit="register()" ng-switch on="!!cpr.id">
               <span ng-switch-when="true" translate="participant.buttons.update_registration"> Update </span>
               <span ng-switch-default translate="participant.buttons.register"> Register </span>
@@ -308,24 +315,31 @@
               </button>
             </span>
             <span show-if-allowed="specimenUpdateOpts">
-              <button class="btn btn-primary" os-form-submit="register(partCtx.cpEvents[0])"
-                ng-if="!cpr.id && partCtx.cpEvents.length == 1">
-                <span translate="participant.buttons.register_n_collect">Register & Collect</span>
-              </button>
-              <span dropdown ng-if="!cpr.id && partCtx.cpEvents.length > 1" on-toggle="toggleEventsMenu(open)">
-                <button class="btn btn-primary dropdown-toggle">
+              <span ng-if="partCtx.tmWorkflowId > 0">
+                <button class="btn btn-primary" os-form-submit="register(partCtx.wfEvent)">
                   <span translate="participant.buttons.register_n_collect">Register & Collect</span>
-                  <span class="fa fa-caret-down"></span>
                 </button>
-                <ul class="dropdown-menu os-dropdown" os-ui-element="partCtx.eventsDd">
-                  <li ng-repeat="event in partCtx.cpEvents">
-                    <a os-form-submit="register(event)">
-                      <os-event-desc event-point="event.eventPoint" event-point-unit="event.eventPointUnit"
-                        event-label="event.eventLabel">
-                      </os-event-desc>
-                    </a>
-                  </li>
-                </ul>
+              </span>
+              <span ng-if="!partCtx.tmWorkflowId || partCtx.tmWorkflowId < 0">
+                <button class="btn btn-primary" os-form-submit="register(partCtx.cpEvents[0])"
+                  ng-if="!cpr.id && partCtx.cpEvents.length == 1">
+                  <span translate="participant.buttons.register_n_collect">Register & Collect</span>
+                </button>
+                <span dropdown ng-if="!cpr.id && partCtx.cpEvents.length > 1" on-toggle="toggleEventsMenu(open)">
+                  <button class="btn btn-primary dropdown-toggle">
+                    <span translate="participant.buttons.register_n_collect">Register & Collect</span>
+                    <span class="fa fa-caret-down"></span>
+                  </button>
+                  <ul class="dropdown-menu os-dropdown" os-ui-element="partCtx.eventsDd">
+                    <li ng-repeat="event in partCtx.cpEvents">
+                      <a os-form-submit="register(event)">
+                        <os-event-desc event-point="event.eventPoint" event-point-unit="event.eventPointUnit"
+                          event-label="event.eventLabel">
+                        </os-event-desc>
+                      </a>
+                    </li>
+                  </ul>
+                </span>
               </span>
             </span>
             <button class="btn os-btn-text" ng-click="previous()">

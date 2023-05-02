@@ -442,10 +442,12 @@
       <return-scalar column="userId" type="long"/>
       <return-scalar column="userFirstName" type="string"/>
       <return-scalar column="userLastName" type="string"/>
+      <return-scalar column="data_entry_status" type="string" />
 
       select
         r.identifier as id, r.record_id as recordId, r.update_time as updateTime, f.is_sys_form as sysForm,
-        u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName
+        u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
+        r.form_status as data_entry_status
       from
         catissue_form_record_entry r
         inner join catissue_form_context f on r.form_ctxt_id = f.identifier
@@ -579,11 +581,13 @@
       <return-scalar column="userId" type="long"/>
       <return-scalar column="userFirstName" type="string"/>
       <return-scalar column="userLastName" type="string"/>
+      <return-scalar column="dataEntryStatus" type="string" />
 
       select
         fc.container_id as formId, fc.identifier as formCtxId, fc.is_sys_form as sysForm,
         re.record_id as recordId, re.update_time as updateTime,
-        u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName
+        u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
+        re.form_status as dataEntryStatus
       from
         catissue_form_context fc
         inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier
@@ -604,11 +608,13 @@
       <return-scalar column="userId" type="long"/>
       <return-scalar column="userFirstName" type="string"/>
       <return-scalar column="userLastName" type="string"/>
+      <return-scalar column="dataEntryStatus" type="string" />
 
       select
         fc.container_id as formId, fc.identifier as formCtxId, fc.is_sys_form as sysForm,
         re.record_id as recordId, re.update_time as updateTime,
-        u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName
+        u.identifier as userId, u.first_name as userFirstName, u.last_name as userLastName,
+        re.form_status as dataEntryStatus
       from
         catissue_form_context fc
         inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier

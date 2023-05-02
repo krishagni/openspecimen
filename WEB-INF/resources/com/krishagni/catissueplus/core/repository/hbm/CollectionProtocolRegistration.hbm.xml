@@ -41,6 +41,13 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
+    <property name="dataEntryStatus" column="DATA_ENTRY_STATUS">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity$DataEntryStatus</param>
+        <param name="type">12</param>
+      </type>
+    </property>
+
     <many-to-one name="consentWitness" column="CONSENT_WITNESS" />
 
     <many-to-one name="participant" column="PARTICIPANT_ID" fetch="join"/>

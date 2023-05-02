@@ -367,7 +367,8 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			user.setFirstName((String)row[++idx]);
 			user.setLastName((String)row[++idx]);
 			record.setUser(user);
-			
+
+			record.setFormStatus((String) row[++idx]);
 			formRecords.add(record);
 		}
 		
@@ -673,9 +674,10 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			UserSummary user = new UserSummary();
 			user.setId((Long)row[idx++]);
 			user.setFirstName((String)row[idx++]);
-			user.setLastName((String)row[idx]);
+			user.setLastName((String)row[idx++]);
 			record.setUser(user);
 
+			record.setFormStatus((String) row[idx]);
 			List<FormRecordSummary> recs = result.computeIfAbsent(form, (k) -> new ArrayList<>());
 			recs.add(record);
 		}

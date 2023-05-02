@@ -352,6 +352,7 @@ public class CollectionProtocolRegistration extends BaseEntity {
 	public void update(CollectionProtocolRegistration cpr) {
 		setForceDelete(cpr.isForceDelete());
 		setOpComments(cpr.getOpComments());
+		setDataEntryStatus(cpr.getDataEntryStatus());
 
 		updateActivityStatus(cpr.getActivityStatus());
 		if (!isActive()) {

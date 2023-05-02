@@ -20,6 +20,10 @@
         <div ng-switch on="!!fieldsCtx.headers.participant.leftTitle">
           <div ng-switch-when="true">
             <os-html-template template="fieldsCtx.headers.participant.leftTitle"></os-html-template>
+
+            <span class="btn os-status-pending" ng-if="cpr.dataEntryStatus == 'DRAFT'">
+              <span translate="common.draft">DRAFT</span>
+            </span>
           </div>
           <div ng-switch-default>
             <span translate="{{cpr.ppid}}"></span>
@@ -27,7 +31,11 @@
               (cpr.participant.firstName || cpr.participant.middleName || cpr.participant.lastName)">
               ( {{cpr.participant.firstName}} {{cpr.participant.middleName}} {{cpr.participant.lastName}} )
             </span>
+            <span class="btn os-status-pending" ng-if="cpr.dataEntryStatus == 'DRAFT'">
+              <span translate="common.draft">DRAFT</span>
+            </span>
           </div>
+
         </div>
       </h3>
     </div>

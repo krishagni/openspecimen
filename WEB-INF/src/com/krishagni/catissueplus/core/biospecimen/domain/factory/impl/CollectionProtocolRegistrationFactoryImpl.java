@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
@@ -17,6 +18,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolRegi
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -55,6 +57,7 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		setExternalSubjectId(detail, existing, cpr, ose);
 		setSite(detail, existing, cpr, ose);
 		setActivityStatus(detail, existing, cpr, ose);
+		setDataEntryStatus(detail, existing, cpr, ose);
 		setParticipant(detail, existing, cpr, ose);
 
 		ose.checkAndThrow();
@@ -168,6 +171,32 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		}
 	}
 
+	private void setDataEntryStatus(CollectionProtocolRegistrationDetail detail, CollectionProtocolRegistration cpr, OpenSpecimenException ose) {
+		String deStatus = detail.getDataEntryStatus();
+		if (StringUtils.isBlank(deStatus)) {
+			cpr.setDataEntryStatus(BaseEntity.DataEntryStatus.COMPLETE);
+		} else {
+			try {
+				cpr.setDataEntryStatus(BaseEntity.DataEntryStatus.valueOf(deStatus));
+			} catch (Exception e) {
+				ose.addError(CommonErrorCode.INVALID_INPUT, "Invalid data entry status: " + deStatus);
+			}
+		}
+	}
+
+	private void setDataEntryStatus(
+		CollectionProtocolRegistrationDetail detail,
+		CollectionProtocolRegistration existing,
+		CollectionProtocolRegistration cpr,
+		OpenSpecimenException ose) {
+
+		if (existing == null || detail.isAttrModified("dataEntryStatus")) {
+			setDataEntryStatus(detail, cpr, ose);
+		} else {
+			cpr.setDataEntryStatus(existing.getDataEntryStatus());
+		}
+	}
+
 	private void setCollectionProtocol(
 			CollectionProtocolRegistrationDetail detail,
 			CollectionProtocolRegistration cpr,
@@ -243,6 +272,10 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 
 		if (cpr.getCollectionProtocol() != null) {
 			participantDetail.setCpId(cpr.getCollectionProtocol().getId());
+		}
+
+		if (cpr.getDataEntryStatus() != null) {
+			participantDetail.setDataEntryStatus(cpr.getDataEntryStatus().name());
 		}
 
 		Participant participant;

@@ -27,6 +27,7 @@ import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.ParticipantMedicalIdentifier;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
@@ -544,6 +545,15 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 	
 	private void setExtension(ParticipantDetail detail, Participant participant, boolean partial, OpenSpecimenException ose) {
 		participant.setCpId(detail.getCpId());
+		if (StringUtils.isBlank(detail.getDataEntryStatus())) {
+			participant.setDataEntryStatus(BaseEntity.DataEntryStatus.COMPLETE);
+		} else {
+			try {
+				participant.setDataEntryStatus(BaseEntity.DataEntryStatus.valueOf(detail.getDataEntryStatus()));
+			} catch (Exception e) {
+				ose.addError(CommonErrorCode.INVALID_INPUT, "Invalid data entry status: " + detail.getDataEntryStatus());
+			}
+		}
 
 		DeObject extension = DeObject.createExtension(detail.getExtensionDetail(), participant);
 		participant.setExtension(extension);
