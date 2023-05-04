@@ -63,7 +63,8 @@
 
     <div class="form-group">
       <div class="col-xs-6" ng-class="{'col-xs-offset-3': !partCtx.fieldOpts.verticalLayout}">
-        <button class="btn btn-primary" os-form-submit="lookup(null, null, true)" draft-mode="true">
+        <button class="btn btn-primary" os-form-submit="lookup(null, null, true)" draft-mode="true"
+          ng-show="cp.draftDataEntry">
           <span translate="participant.buttons.save_as_draft">Save as Draft</span>
         </button>
         <button class="btn btn-primary" os-form-submit="lookup()" ng-switch on="partCtx.twoStep">
@@ -300,7 +301,8 @@
 
         <div class="form-group">
           <div class="col-xs-6" ng-class="{'col-xs-offset-3': !partCtx.fieldOpts.verticalLayout}">
-            <button class="btn btn-primary" os-form-submit="register(null, null, true)" draft-mode="true">
+            <button class="btn btn-primary" os-form-submit="register(null, null, true)" draft-mode="true"
+              ng-show="cp.draftDataEntry">
               <span translate="participant.buttons.save_as_draft"> Save as Draft </span>
             </button>
 

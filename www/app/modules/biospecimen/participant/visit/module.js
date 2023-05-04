@@ -235,10 +235,11 @@ angular.module('os.biospecimen.visit', [
           surveys: function(cpViewCtx) {
             return cpViewCtx.getSurveys();
           },
-          viewOpts: function() {
+          viewOpts: function(cp) {
             return {
               goBackFn: null,
-              showSaveNext: true
+              showSaveNext: true,
+              showSaveDraft: cp.draftDataEntry
             };
           }
         },

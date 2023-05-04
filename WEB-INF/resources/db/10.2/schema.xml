@@ -243,4 +243,12 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP level setting to enable/disable draft data entry mode">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="DRAFT_DATA_ENTRY" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

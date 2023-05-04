@@ -195,6 +195,11 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		} else {
 			cpr.setDataEntryStatus(existing.getDataEntryStatus());
 		}
+
+		if (cpr.getDataEntryStatus() == BaseEntity.DataEntryStatus.DRAFT &&
+			cpr.getCollectionProtocol() != null && !cpr.getCollectionProtocol().draftDataEntryEnabled()) {
+			ose.addError(CprErrorCode.DRAFT_NOT_ALLOWED, cpr.getCollectionProtocol().getShortTitle());
+		}
 	}
 
 	private void setCollectionProtocol(

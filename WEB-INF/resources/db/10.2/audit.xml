@@ -11,4 +11,11 @@
       <column name="dataEntryStatus_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP level setting to enable/disable draft data entry mode">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="DRAFT_DATA_ENTRY" type="${boolean.type}" />
+      <column name="draftDataEntry_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

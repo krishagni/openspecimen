@@ -1371,61 +1371,75 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		OpenSpecimenEvent<?> collOrRecvEvent = null;
 		Object object = null;
 
+		CollectionProtocol cp = null;
 		String entityType = formContext.getEntityType();
-		if (entityType.equals("Participant")) {
-			CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
-			if (cpr == null) {
-				throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
-			}
-
-			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
-			object = cpr;
-		} else if (entityType.equals("CommonParticipant")) {
-			CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
-			if (cpr == null) {
-				throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
-			}
-
-			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
-			objectId = cpr.getParticipant().getId();
-			object = cpr;
-		} else if (entityType.equals("SpecimenCollectionGroup")) {
-			Visit visit = daoFactory.getVisitsDao().getById(objectId);
-			if (visit == null) {
-				throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, objectId);
-			}
-
-			AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(visit, form.hasPhiFields());
-			object = visit;
-		} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
-			Specimen specimen = ensureSpecimenUpdateRights(objectId, form.hasPhiFields());
-			object = specimen;
-			if (isCollectionOrReceivedEvent(form)) {
-				if (isReceivedEvent(form.getName())) {
-					String newLabel = (String) formData.getAppData().get("newSpecimenlabel");
-					if (StringUtils.isNotBlank(newLabel)) {
-						specimen.setLabel(newLabel.trim());
-					}
-
-					prevStatus = specimen.getCollectionStatus();
-					if (specimen.getReceivedEvent() != null && specimen.getReceivedEvent().getQuality() != null) {
-						prevRecv = specimen.getReceivedEvent().getQuality().getValue();
-					}
-
-					setReceivedEventUserTime(formData);
+		switch (entityType) {
+			case "Participant" -> {
+				CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
+				if (cpr == null) {
+					throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
 				}
 
-				specimen.setUpdated(true);
-				collOrRecvEvent = new SpecimenSavedEvent(specimen);
+				AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
+				object = cpr;
+				cp = cpr.getCollectionProtocol();
 			}
-		} else if (entityType.equals("User") || entityType.equals("UserProfile")) {
-			User user = daoFactory.getUserDao().getById(objectId);
-			if (user == null) {
-				throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, objectId);
-			}
+			case "CommonParticipant" -> {
+				CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
+				if (cpr == null) {
+					throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
+				}
 
-			AccessCtrlMgr.getInstance().ensureUpdateUserRights(user, entityType.equals("UserProfile"));
-			object = user;
+				AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
+				objectId = cpr.getParticipant().getId();
+				object = cpr;
+				cp = cpr.getCollectionProtocol();
+			}
+			case "SpecimenCollectionGroup" -> {
+				Visit visit = daoFactory.getVisitsDao().getById(objectId);
+				if (visit == null) {
+					throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, objectId);
+				}
+				AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(visit, form.hasPhiFields());
+				object = visit;
+				cp = visit.getCollectionProtocol();
+			}
+			case "Specimen", "SpecimenEvent" -> {
+				Specimen specimen = ensureSpecimenUpdateRights(objectId, form.hasPhiFields());
+				object = specimen;
+				cp = specimen.getCollectionProtocol();
+				if (isCollectionOrReceivedEvent(form)) {
+					if (isReceivedEvent(form.getName())) {
+						String newLabel = (String) formData.getAppData().get("newSpecimenlabel");
+						if (StringUtils.isNotBlank(newLabel)) {
+							specimen.setLabel(newLabel.trim());
+						}
+
+						prevStatus = specimen.getCollectionStatus();
+						if (specimen.getReceivedEvent() != null && specimen.getReceivedEvent().getQuality() != null) {
+							prevRecv = specimen.getReceivedEvent().getQuality().getValue();
+						}
+
+						setReceivedEventUserTime(formData);
+					}
+
+					specimen.setUpdated(true);
+					collOrRecvEvent = new SpecimenSavedEvent(specimen);
+				}
+			}
+			case "User", "UserProfile" -> {
+				User user = daoFactory.getUserDao().getById(objectId);
+				if (user == null) {
+					throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, objectId);
+				}
+				AccessCtrlMgr.getInstance().ensureUpdateUserRights(user, entityType.equals("UserProfile"));
+				object = user;
+			}
+		}
+
+		BaseEntity.DataEntryStatus dataEntryStatus = BaseEntity.DataEntryStatus.valueOf(formStatus);
+		if (dataEntryStatus == BaseEntity.DataEntryStatus.DRAFT && cp != null && !cp.draftDataEntryEnabled()) {
+			throw OpenSpecimenException.userError(CprErrorCode.DRAFT_NOT_ALLOWED, cp.getShortTitle());
 		}
 
 		formData.setRecordId(recordId);
@@ -1459,7 +1473,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		recordEntry.setRecordId(recordId);
 		recordEntry.setUpdatedBy(userCtxt.getUserId());
 		recordEntry.setUpdatedTime(Calendar.getInstance().getTime());
-		recordEntry.setFormStatus(BaseEntity.DataEntryStatus.valueOf(formStatus));
+		recordEntry.setFormStatus(dataEntryStatus);
 		formDao.saveOrUpdateRecordEntry(recordEntry);
 		formData.setRecordId(recordId);
 

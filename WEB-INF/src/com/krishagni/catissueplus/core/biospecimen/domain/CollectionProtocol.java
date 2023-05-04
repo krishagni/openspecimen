@@ -144,6 +144,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private Boolean storageSiteBasedAccess;
 
+	private Boolean draftDataEntry;
+
 	private LabelSequenceKey labelSequenceKey = LabelSequenceKey.ID;
 
 	private VisitCollectionMode visitCollectionMode = VisitCollectionMode.ALL_SPMNS;
@@ -502,6 +504,19 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		return Boolean.TRUE.equals(getStorageSiteBasedAccess());
 	}
 
+	public Boolean getDraftDataEntry() {
+		return draftDataEntry;
+	}
+
+	public void setDraftDataEntry(Boolean draftDataEntry) {
+		this.draftDataEntry = draftDataEntry;
+	}
+
+	@NotAudited
+	public boolean draftDataEntryEnabled() {
+		return Boolean.TRUE.equals(draftDataEntry);
+	}
+
 	public LabelSequenceKey getLabelSequenceKey() {
 		return labelSequenceKey;
 	}
@@ -717,6 +732,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
 		setStorageSiteBasedAccess(cp.getStorageSiteBasedAccess());
+		setDraftDataEntry(cp.getDraftDataEntry());
 		setLabelSequenceKey(cp.getLabelSequenceKey());
 		setVisitCollectionMode(cp.getVisitCollectionMode());
 		setVisitNamePrintMode(cp.getVisitNamePrintMode());
@@ -766,6 +782,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setCloseParentSpecimens(isCloseParentSpecimens());
 		cp.setSetQtyToZero(getSetQtyToZero());
 		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
+		cp.setDraftDataEntry(getDraftDataEntry());
 		cp.setLabelSequenceKey(getLabelSequenceKey());
 		cp.setVisitCollectionMode(getVisitCollectionMode());
 		cp.setVisitNamePrintMode(getVisitNamePrintMode());
@@ -786,6 +803,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setContainerSelectionStrategy(getContainerSelectionStrategy());
 		cp.setAliquotsInSameContainer(getAliquotsInSameContainer());
 		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
+		cp.setDraftDataEntry(getDraftDataEntry());
 		cp.setActivityStatus(getActivityStatus());
 	}
 	

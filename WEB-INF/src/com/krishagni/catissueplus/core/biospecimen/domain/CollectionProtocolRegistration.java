@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -353,6 +354,9 @@ public class CollectionProtocolRegistration extends BaseEntity {
 		setForceDelete(cpr.isForceDelete());
 		setOpComments(cpr.getOpComments());
 		setDataEntryStatus(cpr.getDataEntryStatus());
+		if (getDataEntryStatus() == DataEntryStatus.DRAFT && !getCollectionProtocol().draftDataEntryEnabled()) {
+			throw OpenSpecimenException.userError(CprErrorCode.DRAFT_NOT_ALLOWED, getCollectionProtocol().getShortTitle());
+		}
 
 		updateActivityStatus(cpr.getActivityStatus());
 		if (!isActive()) {

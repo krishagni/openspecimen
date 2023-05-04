@@ -1088,10 +1088,11 @@ angular.module('os.biospecimen.participant',
           records: function(cpr) {
             return cpr.getRecords();
           },
-          viewOpts: function() {
+          viewOpts: function(cp) {
             return {
               goBackFn: null,
-              showSaveNext: true
+              showSaveNext: true,
+              showSaveDraft: cp.draftDataEntry
             };
           }
         },

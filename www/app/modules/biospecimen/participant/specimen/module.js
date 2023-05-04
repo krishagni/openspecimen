@@ -279,7 +279,7 @@ angular.module('os.biospecimen.specimen',
               }
             ];
           },
-          viewOpts: function($state, $stateParams, formDef, SpecimenEvent, LocationChangeListener) {
+          viewOpts: function($state, $stateParams, formDef, cp, SpecimenEvent, LocationChangeListener) {
             var goBackFn = null;
             if ($stateParams.spe == 'true') {
               if ($stateParams.recordId) {
@@ -303,6 +303,7 @@ angular.module('os.biospecimen.specimen',
               goBackFn: goBackFn,
               showSaveNext: $stateParams.spe != 'true',
               showActionBtns: !SpecimenEvent.isSysEvent(formDef.name) || SpecimenEvent.isEditable(formDef.name),
+              showSaveDraft: cp.draftDataEntry,
               disabledFields: SpecimenEvent.getDisabledFields(formDef.name)
             };
           }

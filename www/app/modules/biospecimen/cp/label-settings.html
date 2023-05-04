@@ -137,6 +137,12 @@
               {{settingCtx.cp.storageSiteBasedAccess | osBoolValue: 'common.enabled' : 'common.disabled' : 'common.disabled'}}
             </span>
           </li>
+          <li class="item">
+            <strong class="key key-sm" translate="cp.draft_data_entry">Draft Data Entry</strong>
+            <span class="value value-md">
+              {{settingCtx.cp.draftDataEntry | osBoolValue: 'common.enabled' : 'common.disabled' : 'common.disabled'}}
+            </span>
+          </li>
         </ul>
       </div>
 
@@ -424,6 +430,22 @@
           <label class="radio-inline">
             <input type="radio" name="storageSiteUpdateChecks" ng-model="settingCtx.cp.storageSiteBasedAccess"
               ng-value="false">
+            <span translate="common.disabled">Disabled</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-xs-3">
+          <span translate="cp.draft_data_entry">Draft Data Entry</span>
+        </label>
+        <div class="col-xs-6">
+          <label class="radio-inline">
+            <input type="radio" name="draftDataEntry" ng-model="settingCtx.cp.draftDataEntry" ng-value="true">
+            <span translate="common.enabled">Enabled</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="draftDataEntry" ng-model="settingCtx.cp.draftDataEntry" ng-value="false">
             <span translate="common.disabled">Disabled</span>
           </label>
         </div>

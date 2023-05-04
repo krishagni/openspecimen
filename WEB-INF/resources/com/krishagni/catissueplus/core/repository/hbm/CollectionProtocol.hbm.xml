@@ -108,6 +108,8 @@
     </property>
 
     <property name="storageSiteBasedAccess" column="STORE_SITE_ACCESS_RIGHTS" />
+
+    <property name="draftDataEntry" column="DRAFT_DATA_ENTRY" />
     
     <set name="spmnLabelPrintSettings" inverse="true" cascade="all-delete-orphan">
       <key column="CP_ID"/>

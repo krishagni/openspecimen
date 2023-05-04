@@ -5,7 +5,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegi
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolRegistrationDetail;
 
 public interface CollectionProtocolRegistrationFactory {
-	public CollectionProtocolRegistration createCpr(CollectionProtocolRegistrationDetail details);
+	CollectionProtocolRegistration createCpr(CollectionProtocolRegistrationDetail details);
 
-	public CollectionProtocolRegistration createCpr(CollectionProtocolRegistration existing, CollectionProtocolRegistrationDetail details);
+	CollectionProtocolRegistration createCpr(CollectionProtocolRegistration existing, CollectionProtocolRegistrationDetail details);
 }

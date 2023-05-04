@@ -72,6 +72,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	private Boolean storageSiteBasedAccess;
 
+	private Boolean draftDataEntry;
+
 	private String labelSequenceKey;
 
 	private String visitCollectionMode;
@@ -321,6 +323,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		this.storageSiteBasedAccess = storageSiteBasedAccess;
 	}
 
+	public Boolean getDraftDataEntry() {
+		return draftDataEntry;
+	}
+
+	public void setDraftDataEntry(Boolean draftDataEntry) {
+		this.draftDataEntry = draftDataEntry;
+	}
+
 	public String getLabelSequenceKey() {
 		return labelSequenceKey;
 	}
@@ -478,6 +488,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		result.setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
 		result.setStorageSiteBasedAccess(cp.getStorageSiteBasedAccess());
+		result.setDraftDataEntry(cp.getDraftDataEntry());
 		result.setLabelSequenceKey(cp.getLabelSequenceKey().name());
 		result.setVisitCollectionMode(cp.getVisitCollectionMode().name());
 		result.setVisitNamePrintMode(cp.getVisitNamePrintMode().name());

@@ -492,7 +492,8 @@
     "export_workflows": "Export Workflows",
     "workflows_file": "Workflows JSON File",
     "workflows_imported": "Workflows Imported.",
-    "storage_site_update_rights": "Storage Site based Update Checks"
+    "storage_site_update_rights": "Storage Site based Update Checks",
+    "draft_data_entry": "Draft Data Entry"
   },
 
   "cp_groups": {

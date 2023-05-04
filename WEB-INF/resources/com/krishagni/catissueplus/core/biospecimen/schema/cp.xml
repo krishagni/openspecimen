@@ -175,8 +175,20 @@
       <attribute>activityStatus</attribute>
     </field>
 
-   <record type="customFields" entityType="CollectionProtocolExtension">
-     <attribute>extensionDetail</attribute>
-   </record>
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("cp_storage_site_based_access")</caption>
+      <attribute>storageSiteBasedAccess</attribute>
+    </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("cp_draft_data_entry")</caption>
+      <attribute>draftDataEntry</attribute>
+    </field>
+
+    <record type="customFields" entityType="CollectionProtocolExtension">
+      <attribute>extensionDetail</attribute>
+    </record>
   </record>
 </object-schema>
