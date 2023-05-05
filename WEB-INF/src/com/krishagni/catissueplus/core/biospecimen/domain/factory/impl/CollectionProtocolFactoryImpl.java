@@ -129,7 +129,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setSetQtyToZero(input, cp, ose);
 		setContainerSelectionStrategy(input, cp, ose);
 		cp.setStorageSiteBasedAccess(input.getStorageSiteBasedAccess());
-		cp.setDraftDataEntry(input.getDraftDataEntry());
+		cp.setDraftDataEntry(input.getDraftDataEntry() != null ? input.getDraftDataEntry() : false);
 		setVisitCollectionMode(input, cp, ose);
 		setVisitNamePrintMode(input, cp, ose);
 		cp.setVisitNamePrintCopies(input.getVisitNamePrintCopies());

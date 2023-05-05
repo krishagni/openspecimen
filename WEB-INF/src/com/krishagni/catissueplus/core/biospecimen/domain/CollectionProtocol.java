@@ -732,7 +732,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
 		setStorageSiteBasedAccess(cp.getStorageSiteBasedAccess());
-		setDraftDataEntry(cp.getDraftDataEntry());
+		setDraftDataEntry(cp.draftDataEntryEnabled());
 		setLabelSequenceKey(cp.getLabelSequenceKey());
 		setVisitCollectionMode(cp.getVisitCollectionMode());
 		setVisitNamePrintMode(cp.getVisitNamePrintMode());
@@ -782,7 +782,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setCloseParentSpecimens(isCloseParentSpecimens());
 		cp.setSetQtyToZero(getSetQtyToZero());
 		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
-		cp.setDraftDataEntry(getDraftDataEntry());
+		cp.setDraftDataEntry(draftDataEntryEnabled());
 		cp.setLabelSequenceKey(getLabelSequenceKey());
 		cp.setVisitCollectionMode(getVisitCollectionMode());
 		cp.setVisitNamePrintMode(getVisitNamePrintMode());
@@ -803,7 +803,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setContainerSelectionStrategy(getContainerSelectionStrategy());
 		cp.setAliquotsInSameContainer(getAliquotsInSameContainer());
 		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
-		cp.setDraftDataEntry(getDraftDataEntry());
+		cp.setDraftDataEntry(draftDataEntryEnabled());
 		cp.setActivityStatus(getActivityStatus());
 	}
 	

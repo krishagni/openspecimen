@@ -488,7 +488,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setContainerSelectionStrategy(cp.getContainerSelectionStrategy());
 		result.setAliquotsInSameContainer(cp.getAliquotsInSameContainer());
 		result.setStorageSiteBasedAccess(cp.getStorageSiteBasedAccess());
-		result.setDraftDataEntry(cp.getDraftDataEntry());
+		result.setDraftDataEntry(cp.draftDataEntryEnabled());
 		result.setLabelSequenceKey(cp.getLabelSequenceKey().name());
 		result.setVisitCollectionMode(cp.getVisitCollectionMode().name());
 		result.setVisitNamePrintMode(cp.getVisitNamePrintMode().name());
