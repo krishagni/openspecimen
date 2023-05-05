@@ -8,6 +8,8 @@ public class ContainerQueryCriteria {
 	private String barcode;
 
 	private boolean includeStats;
+
+	private boolean errorIfNotFound = true;
 	
 	public ContainerQueryCriteria(Long id) {
 		this.id = id;
@@ -40,6 +42,15 @@ public class ContainerQueryCriteria {
 
 	public ContainerQueryCriteria includeStats(boolean includeStats) {
 		this.includeStats = includeStats;
+		return this;
+	}
+
+	public boolean errorIfNotFound() {
+		return errorIfNotFound;
+	}
+
+	public ContainerQueryCriteria errorIfNotFound(boolean errorIfNotFound) {
+		this.errorIfNotFound = errorIfNotFound;
 		return this;
 	}
 }

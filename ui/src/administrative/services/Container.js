@@ -28,8 +28,12 @@ class Container {
     return http.get('storage-containers/' + containerId, {includeStats: includeStats});
   }
 
-  async getContainerByName(name) {
-    return http.get('storage-containers/byname', { name });
+  async getContainerByName(name, errorIfNotFound = true) {
+    return http.get('storage-containers/byname', { name, errorIfNotFound });
+  }
+
+  async getContainerByBarcode(barcode, errorIfNotFound = true) {
+    return http.get('storage-containers/byname', { barcode, errorIfNotFound });
   }
 
   async saveOrUpdate(container) {

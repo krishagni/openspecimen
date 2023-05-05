@@ -306,9 +306,12 @@ public class StorageContainersController {
 		String barcode,
 
 		@RequestParam(value = "includeStats", required = false, defaultValue = "false")
-		boolean includeStats) {
+		boolean includeStats,
 
-		return getContainer(new ContainerQueryCriteria(name, barcode).includeStats(includeStats));
+		@RequestParam(value = "errorIfNotFound", required = false, defaultValue = "true")
+		boolean errorIfNotFound) {
+
+		return getContainer(new ContainerQueryCriteria(name, barcode).includeStats(includeStats).errorIfNotFound(errorIfNotFound));
 	}
 
 	@RequestMapping(method = RequestMethod.POST)

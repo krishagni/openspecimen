@@ -292,9 +292,12 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	public ResponseEvent<StorageContainerDetail> getStorageContainer(RequestEvent<ContainerQueryCriteria> req) {
 		try {		
-			StorageContainer container = getContainer(req.getPayload());						
-			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+			StorageContainer container = getContainer(req.getPayload());
+			if (container == null) {
+				return ResponseEvent.response(null);
+			}
 
+			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			StorageContainerDetail detail = StorageContainerDetail.from(container);
 			if (req.getPayload().includeStats()) {
 				detail.setSpecimensByType(daoFactory.getStorageContainerDao().getSpecimensCountByType(detail.getId()));
@@ -601,7 +604,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 					replDetail.getSourceContainerId(), 
 					replDetail.getSourceContainerName(),
 					null,
-					StorageContainerErrorCode.SRC_ID_OR_NAME_REQ);
+					StorageContainerErrorCode.SRC_ID_OR_NAME_REQ,
+					true);
 			if (srcContainer.isArchived()) {
 				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, srcContainer.getName());
 			}
@@ -1204,6 +1208,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			boxDetail.setBarcode(input.getBarcode());
 			boxDetail.setTypeName(input.getType());
 			boxDetail.setStorageLocation(input.getStorageLocation());
+			boxDetail.setAllowedSpecimenClasses(input.getAllowedSpecimenClasses());
+			boxDetail.setAllowedSpecimenTypes(input.getAllowedSpecimenTypes());
+			boxDetail.setAllowedCollectionProtocols(input.getAllowedCollectionProtocols());
+
 			StorageContainer box = createStorageContainer(null, boxDetail);
 			if (StringUtils.isBlank(input.getName())) {
 				box.setName(nameGenerator.generateLabel(box.getType().getNameFormat(), box));
@@ -1239,6 +1247,18 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			StorageContainerDetail boxDetail = new StorageContainerDetail();
 			boxDetail.setId(box.getId());
 			boxDetail.setStorageLocation(input.getStorageLocation());
+			if (input.isAttrModified("allowedSpecimenClasses")) {
+				boxDetail.setAllowedSpecimenClasses(input.getAllowedSpecimenClasses());
+			}
+
+			if (input.isAttrModified("allowedSpecimenTypes")) {
+				boxDetail.setAllowedSpecimenTypes(input.getAllowedSpecimenTypes());
+			}
+
+			if (input.isAttrModified("allowedCollectionProtocols")) {
+				boxDetail.setAllowedCollectionProtocols(input.getAllowedCollectionProtocols());
+			}
+
 			updateStorageContainer0(boxDetail, true);
 
 			Map<Long, Specimen> existing = new HashMap<>();
@@ -1520,7 +1540,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	private StorageContainer getContainer(ContainerQueryCriteria crit) {
-		return getContainer(crit.getId(), crit.getName(), crit.getBarcode());
+		return getContainer(crit.getId(), crit.getName(), crit.getBarcode(), StorageContainerErrorCode.ID_NAME_OR_BARCODE_REQ, crit.errorIfNotFound());
 	}
 
 	private StorageContainer getContainer(Long id, String name) {
@@ -1528,10 +1548,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 	
 	private StorageContainer getContainer(Long id, String name, String barcode) {
-		return getContainer(id, name, barcode, StorageContainerErrorCode.ID_NAME_OR_BARCODE_REQ);
+		return getContainer(id, name, barcode, StorageContainerErrorCode.ID_NAME_OR_BARCODE_REQ, true);
 	}
 	
-	private StorageContainer getContainer(Long id, String name, String barcode, ErrorCode requiredErrCode) {
+	private StorageContainer getContainer(Long id, String name, String barcode, ErrorCode requiredErrCode, boolean errorIfNotFound) {
 		StorageContainer container = null;
 		Object key = null;
 
@@ -1552,7 +1572,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 		if (key == null) {
 			throw OpenSpecimenException.userError(requiredErrCode);
-		} else if (container == null) {
+		} else if (container == null && errorIfNotFound) {
 			throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, key, 1);
 		}
 

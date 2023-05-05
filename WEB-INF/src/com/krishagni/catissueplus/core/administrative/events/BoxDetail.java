@@ -2,8 +2,13 @@ package com.krishagni.catissueplus.core.administrative.events;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-public class BoxDetail {
+import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
+import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
+
+@ListenAttributeChanges
+public class BoxDetail extends AttributeModifiedSupport {
 	private Long id;
 
 	private String name;
@@ -13,6 +18,12 @@ public class BoxDetail {
 	private String type;
 
 	private StorageLocationSummary storageLocation;
+
+	private Set<String> allowedSpecimenClasses;
+
+	private Set<String> allowedSpecimenTypes;
+
+	private Set<String> allowedCollectionProtocols;
 
 	private List<StorageContainerPositionDetail> positions = new ArrayList<>();
 
@@ -62,5 +73,29 @@ public class BoxDetail {
 
 	public void setPositions(List<StorageContainerPositionDetail> positions) {
 		this.positions = positions;
+	}
+
+	public Set<String> getAllowedSpecimenClasses() {
+		return allowedSpecimenClasses;
+	}
+
+	public void setAllowedSpecimenClasses(Set<String> allowedSpecimenClasses) {
+		this.allowedSpecimenClasses = allowedSpecimenClasses;
+	}
+
+	public Set<String> getAllowedSpecimenTypes() {
+		return allowedSpecimenTypes;
+	}
+
+	public void setAllowedSpecimenTypes(Set<String> allowedSpecimenTypes) {
+		this.allowedSpecimenTypes = allowedSpecimenTypes;
+	}
+
+	public Set<String> getAllowedCollectionProtocols() {
+		return allowedCollectionProtocols;
+	}
+
+	public void setAllowedCollectionProtocols(Set<String> allowedCollectionProtocols) {
+		this.allowedCollectionProtocols = allowedCollectionProtocols;
 	}
 }

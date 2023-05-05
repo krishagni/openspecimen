@@ -42,8 +42,26 @@
                   <span v-t="'containers.parent_container'">Parent Container</span>
                 </strong>
                 <span style="display: inline-block; min-width: 350px;">
-                  <os-storage-position v-model="ctx.parentContainer"
+                  <os-storage-position v-model="ctx.box.storageLocation"
                     :list-source="{queryParams: {static: {entityType: 'storage_container'}}}" />
+                </span>
+              </li>
+              <li class="item">
+                <strong class="key key-sm">
+                  <span v-t="'containers.collection_protocols'">Collection Protocols</span>
+                </strong>
+                <span style="display: inline-block; min-width: 350px;">
+                  <os-multi-select-dropdown v-model="ctx.box.allowedCollectionProtocols"
+                    :list-source="ctx.allowedCpOpts" />
+                </span>
+              </li>
+              <li class="item">
+                <strong class="key key-sm">
+                  <span v-t="'containers.specimen_types'">Specimen Types</span>
+                </strong>
+                <span style="display: inline-block; min-width: 350px;">
+                  <os-multi-select-group-dropdown v-model="ctx.box.allowedTypes"
+                    :list-source="ctx.allowedTypeOpts" />
                 </span>
               </li>
             </ul>
@@ -113,7 +131,10 @@
 import containerSvc from '@/administrative/services/Container.js';
 import scanner      from '@/administrative/services/BoxScanner.js';
 
+import cpSvc        from '@/biospecimen/services/CollectionProtocol.js';
+
 import alertsSvc from '@/common/services/Alerts.js';
+import http      from '@/common/services/HttpClient.js';
 import routerSvc from '@/common/services/Router.js';
 import wfSvc     from '@/common/services/Workflow.js';
 
@@ -129,7 +150,20 @@ export default {
 
         scannedField: 'barcode',
 
-        scannerOpts: {options: [], displayProp: 'name'}
+        scannerOpts: {options: [], displayProp: 'name'},
+
+        allowedCpOpts: {
+          displayProp: 'shortTitle',
+          selectProp: 'shortTitle',
+          loadFn: this._getAllowedCps
+        },
+
+        allowedTypeOpts: {
+          displayProp: 'type',
+          groupNameProp: 'specimenClass',
+          groupItemsProp: 'types',
+          loadFn: this._getAllowedTypes
+        }
       }
     };
   },
@@ -168,15 +202,32 @@ export default {
         return;
       }
 
-      const filterOpts = {};
-      filterOpts[this.ctx.scannedField] = box.barcode;
-      containerSvc.getContainers(filterOpts).then(
-        (containers) => {
+      let promise = null;
+      if (this.ctx.scannedField == 'name') {
+        promise = containerSvc.getContainerByName(box.barcode, false);
+      } else if (this.ctx.scannedField == 'barcode') {
+        promise = containerSvc.getContainerByBarcode(box.barcode, false);
+      }
+
+      promise.then(
+        (container) => {
           ctx.box = box;
-          if (containers.length > 0) {
-            box.id = containers[0].id;
-            box.type = containers[0].typeName;
-            ctx.parentContainer = containers[0].storageLocation;
+          if (container) {
+            box.id = container.id;
+            box.type = container.typeName;
+            box.siteName = container.siteName;
+            box.allowedCollectionProtocols = container.allowedCollectionProtocols;
+            box.storageLocation = container.storageLocation;
+
+            const allowedTypes = box.allowedTypes = [];
+            for (let specimenClass of (container.allowedSpecimenClasses || [])) {
+              allowedTypes.push({specimenClass, type: 'All ' + specimenClass, all: true});
+            }
+
+            for (let type of (container.allowedSpecimenTypes || [])) {
+              allowedTypes.push({type});
+            }
+
           } else {
             box.type = ctx.scanner.containerType;
           }
@@ -216,15 +267,28 @@ export default {
     save: async function(scanAnother) {
       const ctx = this.ctx;
       const box = ctx.box;
-      if (!ctx.parentContainer || !ctx.parentContainer.name) {
+      if (!box.storageLocation || !box.storageLocation.name) {
         alertsSvc.error({code: 'containers.parent_container_not_selected'});
         return;
+      }
+
+      const spmnClasses = [];
+      const spmnTypes   = [];
+      for (let type of box.allowedTypes) {
+        if (type.all) {
+          spmnClasses.push(type.specimenClass);
+        } else {
+          spmnTypes.push(type.type);
+        }
       }
 
       const payload = {
         id: box.id,
         type: box.type,
-        storageLocation: ctx.parentContainer,
+        storageLocation: box.storageLocation,
+        allowedCollectionProtocols: box.allowedCollectionProtocols,
+        allowedSpecimenClasses: spmnClasses,
+        allowedSpecimenTypes: spmnTypes,
         positions: ctx.specimens.map(
           (spmn) => ({
             posOne: spmn.storageLocation.posOne,
@@ -255,15 +319,147 @@ export default {
     clear: function() {
       const ctx = this.ctx;
       ctx.box = ctx.specimens = ctx.error = ctx.errorArgs = null;
-
-      const location = ctx.parentContainer;
-      if (location) {
-        location.positionX = location.positionY = location.position = null;
-      }
     },
 
     cancel: function() {
       this.$goto('ContainersList');
+    },
+
+    _getAllowedCps: async function({query, maxResults}) {
+      const container = this.ctx.box;
+      const parentContainer = await this._getParentContainer(container);
+      const allowedCps      = (parentContainer && parentContainer.calcAllowedCollectionProtocols) || [];
+
+      if (allowedCps.length > 0) {
+        return this._filterProtocols(allowedCps, query);
+      } else if (parentContainer || container.siteName) {
+        const siteName = (parentContainer && parentContainer.siteName) || container.siteName;
+        let cacheKey = siteName.toLowerCase();
+        if (query) {
+          cacheKey += ':' + query.toLowerCase();
+        }
+
+        const cpsMap = this.cpsMap = this.cpsMap || {};
+        const cachedCps = cpsMap[cacheKey];
+        if (cachedCps) {
+          return cachedCps;
+        }
+
+        return cpSvc.getCps({repositoryName: siteName, query, maxResults}).then(
+          (cps) => {
+            cpsMap[cacheKey] = cps;
+            return cps;
+          }
+        );
+      } else {
+        return [];
+      }
+    },
+
+
+    _getParentContainer: async function(container) {
+      let parentContainer = null;
+      if (container.storageLocation && container.storageLocation.name) {
+        const containersMap = this.containersMap = this.containersMap || {};
+        parentContainer = containersMap[container.storageLocation.name];
+        if (!parentContainer) {
+          parentContainer = await containerSvc.getContainerByName(container.storageLocation.name);
+          containersMap[parentContainer.name] = parentContainer;
+        }
+      }
+
+      return parentContainer;
+    },
+
+    _filterProtocols: async function(protocols, query) {
+      let result = protocols;
+      if (query) {
+        result = result.filter(protocol => protocol.toLowerCase().indexOf(query.toLowerCase()) != -1);
+      }
+
+      return result.map(shortTitle => ({ shortTitle }));
+    },
+
+    _getAllowedTypes: async function() {
+      const container = this.ctx.box;
+      const parentTypes = await this._getParentTypes(container);
+      if (parentTypes.length > 0) {
+        return this._filterVisibleOptions(container, parentTypes);
+      }
+
+      const allTypes = await this._getAllSpecimenTypes();
+      const groups = {};
+      for (let type of allTypes) {
+        if (!type.parentValue) {
+          continue;
+        }
+
+        if (groups[type.parentValue]) {
+          groups[type.parentValue].types.push({type: type.value});
+        } else {
+          groups[type.parentValue] = {
+            specimenClass: type.parentValue,
+            types: [
+              {type: 'All ' + type.parentValue, all: true, specimenClass: type.parentValue},
+              {type: type.value}
+            ]
+          };
+        }
+      }
+
+      const result = Object.keys(groups).sort().map(group => groups[group]);
+      return this._filterVisibleOptions(container, result);
+    },
+
+    _getParentTypes: async function(container) {
+      const parentContainer = await this._getParentContainer(container);
+      const allowedClasses  = (parentContainer && parentContainer.calcAllowedSpecimenClasses) || [];
+      const allowedTypes    = (parentContainer && parentContainer.calcAllowedSpecimenTypes) || [];
+      if (allowedClasses.length == 0 && allowedTypes.length == 0) {
+        return [];
+      }
+
+      const groups   = {};
+      for (let specimenClass of allowedClasses) {
+        groups[specimenClass] = {specimenClass, types: [{type: 'All ' + specimenClass, all: true, specimenClass}]};
+      }
+
+      const allTypes = await this._getAllSpecimenTypes();
+      for (let type of allTypes) {
+        if (allowedClasses.indexOf(type.parentValue) != -1) {
+          groups[type.parentValue].types.push({type: type.value});
+        } else if (allowedTypes.indexOf(type.value) != -1) {
+          let specimenClass = type.parentValue;
+          let groupTypes = groups[specimenClass] = groups[specimenClass] || {specimenClass, types: []};
+          groupTypes.types.push({type: type.value});
+        }
+      }
+
+      return Object.keys(groups).sort().map(group => groups[group]);
+    },
+
+    _getAllSpecimenTypes: async function() {
+      if (!this.allSpecimenTypes) {
+        const pvOpts = {attribute: 'specimen_type', includeParentValue: true};
+        this.allSpecimenTypes = await http.get('permissible-values', pvOpts);
+      }
+
+      return this.allSpecimenTypes;
+    },
+
+    _filterVisibleOptions: function(container, types) {
+      const allowedClasses = container.allowedSpecimenClasses || [];
+      const allowedTypes   = container.allowedSpecimenTypes || [];
+
+      for (let type of types) {
+        if (allowedClasses.indexOf(type.specimenClass) != -1) {
+          type.types.splice(1, type.types.length - 1);
+        } else if (type.types[0].all && type.types.some(at => allowedTypes.indexOf(at.type) != -1)) {
+          type.types.splice(0, 1);
+        }
+      }
+
+      return types;
     }
   }
 }
@@ -296,6 +492,10 @@ export default {
 
 .form .os-buttons button {
   margin-right: 10px;
+  margin-bottom: 20px;
+}
+
+.os-key-values .item {
   margin-bottom: 20px;
 }
 </style>
