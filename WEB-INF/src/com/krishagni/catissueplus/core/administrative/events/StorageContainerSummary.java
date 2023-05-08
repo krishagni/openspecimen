@@ -72,6 +72,14 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 
 	private Set<String> calcAllowedCollectionProtocols = new HashSet<>();
 
+	private Set<String> allowedSpecimenClasses = new HashSet<>();
+
+	private Set<String> calcAllowedSpecimenClasses = new HashSet<>();
+
+	private Set<String> allowedSpecimenTypes = new HashSet<>();
+
+	private Set<String> calcAllowedSpecimenTypes = new HashSet<>();
+
 	private List<StorageContainerSummary> childContainers;
 
 	private Boolean starred;
@@ -301,6 +309,38 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 
 	public void setCalcAllowedCollectionProtocols(Set<String> calcAllowedCollectionProtocols) {
 		this.calcAllowedCollectionProtocols = calcAllowedCollectionProtocols;
+	}
+
+	public Set<String> getAllowedSpecimenClasses() {
+		return allowedSpecimenClasses;
+	}
+
+	public void setAllowedSpecimenClasses(Set<String> allowedSpecimenClasses) {
+		this.allowedSpecimenClasses = allowedSpecimenClasses;
+	}
+
+	public Set<String> getCalcAllowedSpecimenClasses() {
+		return calcAllowedSpecimenClasses;
+	}
+
+	public void setCalcAllowedSpecimenClasses(Set<String> calcAllowedSpecimenClasses) {
+		this.calcAllowedSpecimenClasses = calcAllowedSpecimenClasses;
+	}
+
+	public Set<String> getAllowedSpecimenTypes() {
+		return allowedSpecimenTypes;
+	}
+
+	public void setAllowedSpecimenTypes(Set<String> allowedSpecimenTypes) {
+		this.allowedSpecimenTypes = allowedSpecimenTypes;
+	}
+
+	public Set<String> getCalcAllowedSpecimenTypes() {
+		return calcAllowedSpecimenTypes;
+	}
+
+	public void setCalcAllowedSpecimenTypes(Set<String> calcAllowedSpecimenTypes) {
+		this.calcAllowedSpecimenTypes = calcAllowedSpecimenTypes;
 	}
 
 	public List<StorageContainerSummary> getChildContainers() {

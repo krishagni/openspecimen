@@ -882,6 +882,8 @@
     "confirm_delete_msg": "Shipment '{name}' and any dependent data will be deleted. Are you sure you want to proceed?",
     "container_name": "Name",
     "container_dimension": "Dimension",
+    "container_cps": "Collection Protocols",
+    "container_specimen_types": "Specimen Types",
     "container_parent": "Parent Container",
     "container_shipments": "Container Shipments",
     "containers": "Containers",

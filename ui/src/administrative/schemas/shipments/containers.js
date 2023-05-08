@@ -10,13 +10,32 @@ export default {
     {
       "name": "containerDimension",
       "captionCode": "shipments.container_dimension",
-      "value": (rowObject) => {
-        let container = rowObject.container;
+      "value": ({container}) => {
         if (container.positionLabelingMode != 'NONE') {
           return container.noOfRows + ' x ' + container.noOfColumns;
         }
 
         return '-';
+      }
+    },
+    {
+      "name": "allowedCps",
+      "captionCode": "shipments.container_cps",
+      "type": "span",
+      "value": ({container}) => {
+        let allowedCps = (container.allowedCollectionProtocols || []).join(', ');
+        return !allowedCps.trim() ? '-' : allowedCps;
+      }
+    },
+    {
+      "name": "allowedTypes",
+      "captionCode": "shipments.container_specimen_types",
+      "type": "span",
+      "value": ({container}) => {
+        let classTypes = [].concat(container.allowedSpecimenClasses || []);
+        classTypes.push.apply(classTypes, container.allowedSpecimenTypes || []);
+        let result = classTypes.join(', ');
+        return !result.trim() ? '-' : result;
       }
     },
     {

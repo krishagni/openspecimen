@@ -7,19 +7,38 @@ export default {
       "name": "container.name",
       "labelCode": "shipments.container_name",
       "type": "span",
-      "href": (rowObject) => ui.ngServer + '#/containers/' + rowObject.container.id + '/overview'
+      "href": ({container}) => ui.ngServer + '#/containers/' + container.id + '/overview'
     },
     {
       "name": "containerDimension",
       "labelCode": "shipments.container_dimension",
       "type": "span",
-      "value": (rowObject) => {
-        let container = rowObject.container;
+      "value": ({container}) => {
         if (container.positionLabelingMode != 'NONE') {
           return container.noOfRows + ' x ' + container.noOfColumns;
         }
 
         return '-'
+      }
+    },
+    {
+      "name": "allowedCps",
+      "labelCode": "shipments.container_cps",
+      "type": "span",
+      "value": ({container}) => {
+        let allowedCps = (container.allowedCollectionProtocols || []).join(', ');
+        return !allowedCps.trim() ?  '-' : allowedCps;
+      }
+    },
+    {
+      "name": "allowedTypes",
+      "labelCode": "shipments.container_specimen_types",
+      "type": "span",
+      "value": ({container}) => {
+        let classTypes = [].concat(container.allowedSpecimenClasses || []);
+        classTypes.push.apply(classTypes, container.allowedSpecimenTypes || []);
+        let result = classTypes.join(', ');
+        return !result.trim() ? '-' : result;
       }
     },
     {

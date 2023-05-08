@@ -27,14 +27,6 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	private ExtensionDetail extensionDetail;
 
-	private Set<String> allowedSpecimenClasses = new HashSet<>();
-	
-	private Set<String> calcAllowedSpecimenClasses = new HashSet<>();
-	
-	private Set<String> allowedSpecimenTypes = new HashSet<>();
-	
-	private Set<String> calcAllowedSpecimenTypes = new HashSet<>();
-
 	private Set<String> allowedDistributionProtocols = new HashSet<>();
 
 	private Set<String> calcAllowedDistributionProtocols = new HashSet<>();
@@ -87,38 +79,6 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	public void setExtensionDetail(ExtensionDetail extensionDetail) {
 		this.extensionDetail = extensionDetail;
-	}
-
-	public Set<String> getAllowedSpecimenClasses() {
-		return allowedSpecimenClasses;
-	}
-
-	public void setAllowedSpecimenClasses(Set<String> allowedSpecimenClasses) {
-		this.allowedSpecimenClasses = allowedSpecimenClasses;
-	}
-
-	public Set<String> getCalcAllowedSpecimenClasses() {
-		return calcAllowedSpecimenClasses;
-	}
-
-	public void setCalcAllowedSpecimenClasses(Set<String> calcAllowedSpecimenClasses) {
-		this.calcAllowedSpecimenClasses = calcAllowedSpecimenClasses;
-	}
-
-	public Set<String> getAllowedSpecimenTypes() {
-		return allowedSpecimenTypes;
-	}
-
-	public void setAllowedSpecimenTypes(Set<String> allowedSpecimenTypes) {
-		this.allowedSpecimenTypes = allowedSpecimenTypes;
-	}
-
-	public Set<String> getCalcAllowedSpecimenTypes() {
-		return calcAllowedSpecimenTypes;
-	}
-
-	public void setCalcAllowedSpecimenTypes(Set<String> calcAllowedSpecimenTypes) {
-		this.calcAllowedSpecimenTypes = calcAllowedSpecimenTypes;
 	}
 
 	public Set<String> getAllowedDistributionProtocols() {

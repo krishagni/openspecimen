@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 
 public class ShipmentContainerDetail implements Comparable<ShipmentContainerDetail>, Serializable {
 
@@ -60,7 +61,21 @@ public class ShipmentContainerDetail implements Comparable<ShipmentContainerDeta
 	public static ShipmentContainerDetail from(ShipmentContainer shipmentContainer) {
 		ShipmentContainerDetail detail = new ShipmentContainerDetail();
 		detail.setId(shipmentContainer.getId());
-		detail.setContainer(StorageContainerSummary.from(shipmentContainer.getContainer()));
+
+		StorageContainerSummary container = StorageContainerSummary.from(shipmentContainer.getContainer());
+		if (shipmentContainer.getContainer().getAllowedCps() != null) {
+			container.setAllowedCollectionProtocols(shipmentContainer.getContainer().getAllowedCps().stream().map(CollectionProtocol::getShortTitle).collect(Collectors.toSet()));
+		}
+
+		if (shipmentContainer.getContainer().getAllowedSpecimenClasses() != null) {
+			container.setAllowedSpecimenClasses(PermissibleValue.toValueSet(shipmentContainer.getContainer().getAllowedSpecimenClasses()));
+		}
+
+		if (shipmentContainer.getContainer().getAllowedSpecimenTypes() != null) {
+			container.setAllowedSpecimenTypes(PermissibleValue.toValueSet(shipmentContainer.getContainer().getAllowedSpecimenTypes()));
+		}
+
+		detail.setContainer(container);
 		detail.setReceivedQuality(PermissibleValue.getValue(shipmentContainer.getReceivedQuality()));
 		return detail;
 	}

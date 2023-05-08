@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment.Status;
 import com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer;
@@ -34,6 +35,7 @@ import com.krishagni.catissueplus.core.administrative.repository.ShipmentDao;
 import com.krishagni.catissueplus.core.administrative.repository.StorageContainerListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ShipmentService;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -346,9 +348,24 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 
 		List<Long> containerIds = containers.stream().map(StorageContainer::getId).collect(Collectors.toList());
 		Map<Long, Integer> spmnsCount = daoFactory.getStorageContainerDao().getSpecimensCount(containerIds);
-		return containers.stream().map(StorageContainerSummary::from)
-			.map(s -> { s.setStoredSpecimens(spmnsCount.get(s.getId())); return s; })
-			.collect(Collectors.toList());
+		return containers.stream().map(
+			s -> {
+				StorageContainerSummary result = StorageContainerSummary.from(s);
+				if (s.getAllowedCps() != null) {
+					result.setAllowedCollectionProtocols(s.getAllowedCps().stream().map(CollectionProtocol::getShortTitle).collect(Collectors.toSet()));
+				}
+
+				if (s.getAllowedSpecimenClasses() != null) {
+					result.setAllowedSpecimenClasses(PermissibleValue.toValueSet(s.getAllowedSpecimenClasses()));
+				}
+
+				if (s.getAllowedSpecimenTypes() != null) {
+					result.setAllowedSpecimenTypes(PermissibleValue.toValueSet(s.getAllowedSpecimenTypes()));
+				}
+
+				result.setStoredSpecimens(spmnsCount.get(s.getId()));
+				return result;
+			}).collect(Collectors.toList());
 	}
 
 	@Override
