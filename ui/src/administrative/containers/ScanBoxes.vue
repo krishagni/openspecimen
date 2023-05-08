@@ -91,7 +91,7 @@
               </thead>
               <tbody>
                 <tr v-for="spmn of ctx.specimens" :key="spmn.id">
-                  <td>{{spmn.barcode}}</td>
+                  <td>{{$filters.noValue(spmn.barcode)}}</td>
                   <td>{{spmn.label}}</td>
                   <td>{{spmn.cpShortTitle}}</td>
                   <td>{{spmn.type}} ({{spmn.specimenClass}})</td>
@@ -122,6 +122,81 @@
           </div>
         </div>
       </div>
+
+      <os-dialog ref="missingSpecimensDialog" :size="'md'" :closable="'false'">
+        <template #header>
+          <span v-t="'containers.missing_specimens'">Missing Specimens...</span>
+        </template>
+        <template #content>
+          <os-steps ref="missingSpecimensWizard">
+            <os-step :title="$t('containers.specimens')">
+              <template #default>
+                <div>
+                  <div>
+                    <p v-t="'containers.missing_specimens_list'">Following specimens are missing in the box: </p>
+                  </div>
+                  <div>
+                    <table class="os-table">
+                      <thead>
+                        <tr>
+                          <th v-t="'containers.specimen.barcode'">Barcode</th>
+                          <th v-t="'containers.specimen.label'">Label</th>
+                          <th v-t="'containers.specimen.cp'">Collection Protocol</th>
+                          <th v-t="'containers.specimen.type'">Type</th>
+                          <th v-t="'containers.specimen.available_qty'">Available Quantity</th>
+                          <th v-t="'containers.specimen.location'">Location</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="spmn of ctx.missingSpmns" :key="spmn.id">
+                          <td>
+                            <span>{{$filters.noValue(spmn.barcode)}}</span>
+                          </td>
+                          <td>
+                            <span>{{spmn.label}}</span>
+                          </td>
+                          <td>
+                            <span>{{spmn.cpShortTitle}}</span>
+                          </td>
+                          <td>
+                            <span>{{spmn.type}} ({{spmn.specimenClass}})</span>
+                          </td>
+                          <td>
+                            <os-specimen-measure v-model="spmn.availableQty" :read-only="true" entity="specimen"
+                              :context="{specimen: spmn}" />
+                          </td>
+                          <td>
+                            <span>{{spmn.storageLocation.positionY}}, {{spmn.storageLocation.positionX}}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </template>
+            </os-step>
+            <os-step :title="$t('common.reason')">
+              <template #default>
+                <div>
+                  <os-form ref="missingSpecimensForm"
+                    :schema="ctx.missingSpmnsReasonForm" :data="ctx.missingSpmnsReason" />
+                </div>
+              </template>
+            </os-step>
+          </os-steps>
+        </template>
+        <template #footer>
+          <div>
+            <os-button text :label="$t('common.buttons.cancel')" @click="abortSave" />
+            <os-button primary :label="$t('common.buttons.proceed')" @click="moveToMissingSpmnsReason"
+              v-if="ctx.reviewMissingSpmns" />
+            <span v-else>
+              <os-button secondary :label="$t('common.buttons.previous')" @click="backToReviewSpmns" />
+              <os-button primary :label="$t('common.buttons.save')" @click="continueWithSave" />
+            </span>
+          </div>
+        </template>
+      </os-dialog>
     </os-page-body>
   </os-page>
 </template>
@@ -163,7 +238,48 @@ export default {
           groupNameProp: 'specimenClass',
           groupItemsProp: 'types',
           loadFn: this._getAllowedTypes
-        }
+        },
+
+        missingSpmnsReasonForm: {
+          rows: [
+            {
+              fields: [
+                {
+                  type: 'radio',
+                  name: 'reason',
+                  labelCode: 'containers.action',
+                  options: [
+                    { captionCode: 'containers.dispose_specimens', value: 'DISPOSED' },
+                    { captionCode: 'containers.move_specimens_as_not_stored', value: 'NOT_STORED' }
+                  ],
+                  optionsPerRow: 2,
+                  validations: {
+                    required: {
+                      messageCode: "common.reason_required"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              fields: [
+                {
+                  type: 'textarea',
+                  name: 'comments',
+                  labelCode: 'common.comments',
+                  rows: 5,
+                  validations: {
+                    required: {
+                      messageCode: "common.comments_required"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+
+        missingSpmnsReason: { }
       }
     };
   },
@@ -209,6 +325,7 @@ export default {
         promise = containerSvc.getContainerByBarcode(box.barcode, false);
       }
 
+      ctx.error = null;
       promise.then(
         (container) => {
           ctx.box = box;
@@ -230,6 +347,8 @@ export default {
 
           } else {
             box.type = ctx.scanner.containerType;
+            box.allowedCollectionProtocols = [];
+            box.allowedTypes = [];
           }
         }
       );
@@ -305,7 +424,11 @@ export default {
       if (!box.id) {
         result = await containerSvc.addBoxSpecimens(payload);
       } else {
-        result = await containerSvc.updateBoxSpecimens(payload);
+        result = await this.updateBoxSpecimens(payload);
+      }
+
+      if (!result) {
+        return;
       }
 
       alertsSvc.success({code: 'containers.specimens_added', args: {box: result[ctx.scannedField], count: result.specimens}});
@@ -323,6 +446,53 @@ export default {
 
     cancel: function() {
       this.$goto('ContainersList');
+    },
+
+    updateBoxSpecimens: function(payload) {
+      return containerSvc.getMissingSpecimens(payload).then(
+        (missingSpmns) => {
+          if (missingSpmns.length == 0) {
+            return containerSvc.updateBoxSpecimens(payload);
+          }
+
+          this.ctx.missingSpmns = missingSpmns;
+          this.payload = payload;
+          return new Promise((resolver) => {
+            this.$refs.missingSpecimensDialog.open();
+            this.ctx.reviewMissingSpmns = true;
+            this.ctx.missingSpmnsReason = {};
+            this.missingSpmnsResolver = resolver;
+          });
+        }
+      );
+    },
+
+    abortSave: function() {
+      this.missingSpmnsResolver(null);
+      this.$refs.missingSpecimensDialog.close();
+    },
+
+    moveToMissingSpmnsReason: function() {
+      this.$refs.missingSpecimensWizard.next();
+      this.ctx.reviewMissingSpmns = false;
+    },
+
+    backToReviewSpmns: function() {
+      this.$refs.missingSpecimensWizard.previous();
+      this.ctx.reviewMissingSpmns = true;
+    },
+
+    continueWithSave: async function() {
+      if (!this.$refs.missingSpecimensForm.validate()) {
+        return;
+      }
+
+      const reason = this.ctx.missingSpmnsReason;
+      this.payload.removeSpecimensReason = reason.reason;
+      this.payload.removeSpecimensComments = reason.comments;
+      const result = await containerSvc.updateBoxSpecimens(this.payload);
+      this.missingSpmnsResolver(result);
+      this.$refs.missingSpecimensDialog.close();
     },
 
     _getAllowedCps: async function({query, maxResults}) {

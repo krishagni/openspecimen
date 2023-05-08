@@ -138,6 +138,8 @@ public interface StorageContainerService {
 
 	ResponseEvent<Map<String, Object>> updateBoxSpecimens(RequestEvent<BoxDetail> req);
 
+	ResponseEvent<List<SpecimenInfo>> getMissingSpecimens(RequestEvent<BoxDetail> req);
+
 	//
 	// Auto freezer APIs
 	//

@@ -2,6 +2,7 @@
 import arrayJoiner from './ArrayJoin.js';
 import boolValue from './BoolValue.js';
 import dateFmt from './DateFormatter.js';
+import noValue from './NoValue.js';
 import storagePosition from './StoragePosition.js';
 import specimenMeasure from './SpecimenMeasure.js';
 import user from './User.js';
@@ -14,6 +15,7 @@ export default {
       boolValue: boolValue.toString,
       date: dateFmt.date,
       dateTime: dateFmt.dateTime,
+      noValue: noValue.noValue,
       shortDateTime: dateFmt.shortDateTime,
       specimenMeasure: specimenMeasure.format,
       storagePosition: storagePosition.toString,

@@ -861,6 +861,13 @@ public class StorageContainersController {
 		return ResponseEvent.unwrap(storageContainerSvc.updateBoxSpecimens(RequestEvent.wrap(input)));
 	}
 
+	@RequestMapping(method = RequestMethod.PUT, value = "/box-missing-specimens")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<SpecimenInfo> getMissingSpecimens(@RequestBody BoxDetail input) {
+		return ResponseEvent.unwrap(storageContainerSvc.getMissingSpecimens(RequestEvent.wrap(input)));
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value = "/{id}/labels")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

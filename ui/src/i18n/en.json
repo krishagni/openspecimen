@@ -148,6 +148,7 @@
     },
 
     "comments": "Comments",
+    "comments_required": "Comments is mandatory",
     "confirm_delete": "{type} '{title}' and any dependent data will be deleted. Are you sure you want to proceed?",
     "copied_to_clipboard": "Copied to clipboard",
     "copy_first_to_all": "(Copy first to all)",
@@ -269,6 +270,8 @@
       "search": "Search..."
     },
 
+    "reason": "Reason",
+    "reason_required": "Reason is mandatory",
     "record_deleted": "{type} '{title}' deleted!",
 
     "signature": {
@@ -481,6 +484,7 @@
     "display_in_map": "Display in Map",
     "display_name": "Display Name",
     "display_names": "Display Names",
+    "disposed": "Disposed",
     "distribution_protocols": "Distribution Protocols",
     "download_report": "Download Report",
     "downloading_defrag_report": "Downloading the defragmentation report...",
@@ -529,8 +533,10 @@
     "no_free_positions": "Container does not have enough free positions to store input specimens.",
     "no_map_for_dimless": "The map view is not available for dimensionless container.",
     "not_checked_out": "No locations blocked by the specimens: {labels}.",
+    "not_stored": "Not Stored",
     "num_containers": "No. of Containers",
     "num_containers_required": "No. of Containers is mandatory",
+    "ok_remove": "Ok, remove",
     "only_blocked_can_freed": "Only blocked positions can be unblocked.",
     "only_free_can_blocked": "Only free positions can be blocked.",
     "parent_container": "Parent Container",
@@ -549,6 +555,7 @@
     "remind_before": "Remind Before",
     "remind_before_required": "Remind Before is mandatory",
     "remind_before_interval_unit_required": "Remind Before Interval Unit is mandatory",
+    "remove_specimens": "Remove Specimens...",
     "reserved_specimen": "Reserved Specimen",
     "row_labeling_scheme": "Rows",
     "row_labeling_scheme_required": "Row Labeling Scheme is mandatory",
@@ -599,6 +606,7 @@
     "specimens_not_found": "One or more specimens not found.",
     "specimens_not_found_ids": "Following specimens were not found: {ids}.",
     "specimens_stored": "One specimen stored in the container. | {count} specimens stored in the container.",
+    "specimens_will_be_removed": "Following specimens will be removed...",
     "start_date": "Start Date",
     "start_date_required": "Start Date is mandatory",
     "status": {

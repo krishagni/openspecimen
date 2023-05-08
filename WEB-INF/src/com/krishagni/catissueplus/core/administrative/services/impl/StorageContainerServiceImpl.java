@@ -1242,7 +1242,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<Map<String, Object>> updateBoxSpecimens(RequestEvent<BoxDetail> req) {
 		try {
 			BoxDetail input = req.getPayload();
-			StorageContainer box = getContainer(input.getId(), null, input.getBarcode());
+			StorageContainer box = getContainer(input.getId(), input.getName(), input.getBarcode());
 
 			StorageContainerDetail boxDetail = new StorageContainerDetail();
 			boxDetail.setId(box.getId());
@@ -1275,8 +1275,14 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			}
 
 			box.assignPositions(positions, true);
-			for (Specimen specimen : existing.values()) {
-				specimen.virtualise("Scanned box");
+			if (StringUtils.isBlank(input.getRemoveSpecimensReason())) {
+				input.setRemoveSpecimensReason("NOT_STORED");
+			}
+
+			if ("DISPOSED".equals(input.getRemoveSpecimensReason())) {
+				existing.values().forEach(spmn -> spmn.close(AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), input.getRemoveSpecimensComments()));
+			} else {
+				existing.values().forEach(spmn -> spmn.virtualise(input.getRemoveSpecimensComments()));
 			}
 
 			daoFactory.getStorageContainerDao().saveOrUpdate(box, true);
@@ -1287,6 +1293,36 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			result.put("barcode", box.getBarcode());
 			result.put("specimens", positions.size());
 			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<SpecimenInfo>> getMissingSpecimens(RequestEvent<BoxDetail> req) {
+		try {
+			BoxDetail input = req.getPayload();
+			StorageContainer box = getContainer(input.getId(), input.getName(), input.getBarcode());
+			AccessCtrlMgr.getInstance().ensureReadContainerRights(box);
+			if (box.isDimensionless()) {
+				return ResponseEvent.response(Collections.emptyList());
+			}
+
+			Map<Long, Specimen> existing = new LinkedHashMap<>();
+			for (StorageContainerPosition existingPos : box.getOccupiedPositions().stream().sorted().toList()) {
+				if (existingPos.getOccupyingSpecimen() != null) {
+					existing.put(existingPos.getOccupyingSpecimen().getId(), existingPos.getOccupyingSpecimen());
+				}
+			}
+
+			for (StorageContainerPositionDetail pos : input.getPositions()) {
+				existing.remove(pos.getOccupyingEntityId());
+			}
+
+			return ResponseEvent.response(existing.values().stream().map(SpecimenInfo::from).toList());
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

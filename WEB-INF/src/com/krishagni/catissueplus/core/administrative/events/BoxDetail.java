@@ -27,6 +27,12 @@ public class BoxDetail extends AttributeModifiedSupport {
 
 	private List<StorageContainerPositionDetail> positions = new ArrayList<>();
 
+	// DISPOSE, NOT_STORED, DISTRIBUTED
+	private String removeSpecimensReason;
+
+	// COMMENTs
+	private String removeSpecimensComments;
+
 	public Long getId() {
 		return id;
 	}
@@ -73,6 +79,22 @@ public class BoxDetail extends AttributeModifiedSupport {
 
 	public void setPositions(List<StorageContainerPositionDetail> positions) {
 		this.positions = positions;
+	}
+
+	public String getRemoveSpecimensReason() {
+		return removeSpecimensReason;
+	}
+
+	public void setRemoveSpecimensReason(String removeSpecimensReason) {
+		this.removeSpecimensReason = removeSpecimensReason;
+	}
+
+	public String getRemoveSpecimensComments() {
+		return removeSpecimensComments;
+	}
+
+	public void setRemoveSpecimensComments(String removeSpecimensComments) {
+		this.removeSpecimensComments = removeSpecimensComments;
 	}
 
 	public Set<String> getAllowedSpecimenClasses() {

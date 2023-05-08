@@ -236,6 +236,10 @@ class Container {
     return http.put('storage-containers/box-specimens', boxSpecimens);
   }
 
+  async getMissingSpecimens(boxSpecimens) {
+    return http.put('storage-containers/box-missing-specimens', boxSpecimens);
+  }
+
   async getSpecimen(specimenId) {
     return http.get('specimens/' + specimenId);
   }
