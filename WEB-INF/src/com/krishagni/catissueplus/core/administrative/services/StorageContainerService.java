@@ -140,6 +140,8 @@ public interface StorageContainerService {
 
 	ResponseEvent<List<SpecimenInfo>> getMissingSpecimens(RequestEvent<BoxDetail> req);
 
+	ResponseEvent<ExportedFileDetail> getMissingSpecimensReport(RequestEvent<BoxDetail> req);
+
 	//
 	// Auto freezer APIs
 	//

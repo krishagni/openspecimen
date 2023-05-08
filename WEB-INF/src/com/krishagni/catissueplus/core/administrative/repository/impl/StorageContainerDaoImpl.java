@@ -86,6 +86,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	@Override
+	public List<StorageContainerPosition> getMissingSpecimens(Long containerId, List<Long> specimenIds) {
+		Criteria<StorageContainerPosition> query = createCriteria(StorageContainerPosition.class, "pos")
+			.join("pos.container", "container")
+			.join("pos.occupyingSpecimen", "specimen");
+		return query.add(query.eq("container.id", containerId))
+			.add(query.notIn("specimen.id", specimenIds))
+			.list();
+	}
+
+	@Override
 	public void delete(StorageContainerPosition position) {
 		super.delete(position);
 	}

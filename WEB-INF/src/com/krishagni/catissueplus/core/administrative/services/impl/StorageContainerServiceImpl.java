@@ -2,10 +2,12 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -80,6 +82,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.RollbackTransaction;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
@@ -1304,31 +1307,79 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenInfo>> getMissingSpecimens(RequestEvent<BoxDetail> req) {
 		try {
-			BoxDetail input = req.getPayload();
-			StorageContainer box = getContainer(input.getId(), input.getName(), input.getBarcode());
-			AccessCtrlMgr.getInstance().ensureReadContainerRights(box);
-			if (box.isDimensionless()) {
-				return ResponseEvent.response(Collections.emptyList());
+			Pair<StorageContainer, Collection<Specimen>> result = getMissingSpecimens(req.getPayload());
+			if (result.second() == null) {
+				return ResponseEvent.response(null);
 			}
 
-			Map<Long, Specimen> existing = new LinkedHashMap<>();
-			for (StorageContainerPosition existingPos : box.getOccupiedPositions().stream().sorted().toList()) {
-				if (existingPos.getOccupyingSpecimen() != null) {
-					existing.put(existingPos.getOccupyingSpecimen().getId(), existingPos.getOccupyingSpecimen());
-				}
-			}
-
-			for (StorageContainerPositionDetail pos : input.getPositions()) {
-				existing.remove(pos.getOccupyingEntityId());
-			}
-
-			return ResponseEvent.response(existing.values().stream().map(SpecimenInfo::from).toList());
+			return ResponseEvent.response(result.second().stream().map(SpecimenInfo::from).toList());
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
 	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ExportedFileDetail> getMissingSpecimensReport(RequestEvent<BoxDetail> req) {
+		try {
+			Date startTime = Calendar.getInstance().getTime();
+			Pair<StorageContainer, Collection<Specimen>> result = getMissingSpecimens(req.getPayload());
+			if (result.second() == null) {
+				return ResponseEvent.response(null);
+			}
+
+			String fileId = String.join(
+				"_",
+				"csv",
+				UUID.randomUUID().toString(),
+				AuthUtil.getCurrentUser().getId().toString(),
+				result.first().getBarcode());
+
+
+			File output = new File(ConfigUtil.getInstance().getReportsDir(), fileId + ".csv");
+			output.deleteOnExit();
+
+			try (CsvWriter writer = CsvFileWriter.createCsvFileWriter(output)) {
+				StorageContainer box = result.first();
+				writer.writeNext(new String[] { msg("storage_container_name"), box.getName() });
+				writer.writeNext(new String[] { msg("storage_container_barcode"), box.getBarcode() });
+				writer.writeNext(new String[] { msg("storage_container_display_name"), box.getDisplayName() });
+				writer.writeNext(new String[] { msg("storage_container_hierarchy"), box.getStringifiedAncestors() });
+				writer.writeNext(new String[] { msg("common_exported_by"), Objects.requireNonNull(AuthUtil.getCurrentUser()).formattedName() });
+				writer.writeNext(new String[] { msg("common_exported_on"), Utility.getDateTimeString(Calendar.getInstance().getTime()) });
+				writer.writeNext(new String[] { } );
+
+				writer.writeNext(new String[] {
+					msg("specimen_barcode"), msg("specimen_label"), msg("cp"),
+					msg("specimen_class"), msg("specimen_type"), msg("specimen_available_quantity"),
+					msg("specimen_spec_position_container_row"), msg("specimen_spec_position_container_column")
+				});
+
+				DecimalFormat df = new DecimalFormat();
+				df.setMaximumFractionDigits(2);
+				for (Specimen spmn : result.second()) {
+					writer.writeNext(new String[] {
+						spmn.getBarcode(), spmn.getLabel(), spmn.getCpShortTitle(),
+						spmn.getSpecimenClass().getValue(), spmn.getSpecimenType().getValue(),
+						spmn.getAvailableQuantity() != null ? df.format(spmn.getAvailableQuantity()) : null,
+						spmn.getPosition().getPosTwo(), spmn.getPosition().getPosOne()
+					});
+				}
+			}
+
+			ExportedFileDetail fileDetail = new ExportedFileDetail(true);
+			fileDetail.setName(fileId);
+			exportSvc.saveJob("box_missing_specimens_report", startTime, Collections.singletonMap("containerId", result.first().getId().toString()));
+			return ResponseEvent.response(fileDetail);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 
 	//
 	// Automated freezer related APIs
@@ -2342,6 +2393,22 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				return c.getPosition() != null && c.getPosition().getPosition() != null;
 			}
 		};
+	}
+
+	private Pair<StorageContainer, Collection<Specimen>> getMissingSpecimens(BoxDetail input) {
+		StorageContainer box = getContainer(input.getId(), input.getName(), input.getBarcode());
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(box);
+		if (box.isDimensionless()) {
+			return Pair.make(box, null);
+		}
+
+		List<Long> specimenIds = input.getPositions().stream().map(StorageContainerPositionDetail::getOccupyingEntityId).toList();
+		List<Specimen> missingSpmns = daoFactory.getStorageContainerDao()
+			.getMissingSpecimens(box.getId(), specimenIds)
+			.stream().sorted()
+			.map(StorageContainerPosition::getOccupyingSpecimen)
+			.toList();
+		return Pair.make(box, missingSpmns);
 	}
 
 	private AutoFreezerReportDetail generateStoreListsFailureReport(StorageContainer freezer, AutoFreezerReportDetail reportDetail) {

@@ -861,6 +861,14 @@ public class StorageContainersController {
 		return ResponseEvent.unwrap(storageContainerSvc.updateBoxSpecimens(RequestEvent.wrap(input)));
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/box-missing-specimens-report")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> getMissingSpecimensReport(@RequestBody BoxDetail input) {
+		ExportedFileDetail file = ResponseEvent.unwrap(storageContainerSvc.getMissingSpecimensReport(RequestEvent.wrap(input)));
+		return Collections.singletonMap("fileId", file != null ? file.getName() : null);
+	}
+
 	@RequestMapping(method = RequestMethod.PUT, value = "/box-missing-specimens")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

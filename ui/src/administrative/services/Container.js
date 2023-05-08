@@ -240,6 +240,13 @@ class Container {
     return http.put('storage-containers/box-missing-specimens', boxSpecimens);
   }
 
+  async downloadMissingSpecimensReport(boxSpecimens) {
+    const resp = await http.post('storage-containers/box-missing-specimens-report', boxSpecimens);
+    if (resp.fileId) {
+      http.downloadFile(http.getUrl('storage-containers/report', {query: {fileId: resp.fileId}}));
+    }
+  }
+
   async getSpecimen(specimenId) {
     return http.get('specimens/' + specimenId);
   }

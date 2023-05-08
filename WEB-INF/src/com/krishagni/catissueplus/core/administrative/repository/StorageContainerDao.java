@@ -21,6 +21,8 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 	StorageContainer getByName(String name);
 	
 	StorageContainer getByBarcode(String barcode);
+
+	List<StorageContainerPosition> getMissingSpecimens(Long containerId, List<Long> specimenIds);
 	
 	void delete(StorageContainerPosition position);
 

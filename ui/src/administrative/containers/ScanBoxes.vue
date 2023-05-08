@@ -188,8 +188,10 @@
         <template #footer>
           <div>
             <os-button text :label="$t('common.buttons.cancel')" @click="abortSave" />
-            <os-button primary :label="$t('common.buttons.proceed')" @click="moveToMissingSpmnsReason"
-              v-if="ctx.reviewMissingSpmns" />
+            <span v-if="ctx.reviewMissingSpmns">
+              <os-button secondary :label="$t('containers.download_report')" @click="downloadMissingSpmnsRpt" />
+              <os-button primary :label="$t('common.buttons.proceed')" @click="moveToMissingSpmnsReason" />
+            </span>
             <span v-else>
               <os-button secondary :label="$t('common.buttons.previous')" @click="backToReviewSpmns" />
               <os-button primary :label="$t('common.buttons.save')" @click="continueWithSave" />
@@ -255,7 +257,7 @@ export default {
                   optionsPerRow: 2,
                   validations: {
                     required: {
-                      messageCode: "common.reason_required"
+                      messageCode: "containers.action_required"
                     }
                   }
                 }
@@ -470,6 +472,10 @@ export default {
     abortSave: function() {
       this.missingSpmnsResolver(null);
       this.$refs.missingSpecimensDialog.close();
+    },
+
+    downloadMissingSpmnsRpt: async function() {
+      containerSvc.downloadMissingSpecimensReport(this.payload);
     },
 
     moveToMissingSpmnsReason: function() {
