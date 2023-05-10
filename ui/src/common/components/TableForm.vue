@@ -33,7 +33,7 @@
               <os-menu :label="$t('common.buttons.more')" :options="field.options" />
             </span>
           </th>
-          <th v-if="removeItems == true">
+          <th v-if="removeItems == true || copyItems == true">
             <span>&nbsp;</span>
           </th>
         </tr>
@@ -55,8 +55,14 @@
               </div>
             </div>
           </td>
-          <td v-if="removeItems == true">
-            <os-button size="small" left-icon="times" @click="removeItem(itemIdx)" />
+          <td v-if="removeItems == true || copyItems == true">
+            <os-button-group style="min-width: 5rem;">
+              <os-button size="small" left-icon="copy" @click="copyItem(itemIdx)"
+                v-os-tooltip.bottom="$t('common.buttons.copy')" v-if="copyItems == true" />
+
+              <os-button size="small" left-icon="times" @click="removeItem(itemIdx)"
+                v-os-tooltip.bottom="$t('workflows.buttons.remove')" v-if="removeItems == true" />
+            </os-button-group>
           </td>
         </tr>
         <tr class="footer-row" v-if="$slots.footerRow">
@@ -83,9 +89,9 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 
 export default {
-  props: ['schema', 'data', 'items', 'tab-direction', 'removeItems'],
+  props: ['schema', 'data', 'items', 'tab-direction', 'removeItems', 'copyItems'],
 
-  emits: ['input', 'form-validity', 'remove-item'],
+  emits: ['input', 'form-validity', 'remove-item', 'copy-item'],
 
   setup(props) {
     const ctx = reactive({
@@ -289,6 +295,10 @@ export default {
 
     removeItem: function(idx) {
       this.$emit('remove-item', {item: this.ctx.items[idx], idx: idx});
+    },
+
+    copyItem: function(idx) {
+      this.$emit('copy-item', {item: this.ctx.items[idx], idx: idx});
     },
 
     sort: function(field) {
