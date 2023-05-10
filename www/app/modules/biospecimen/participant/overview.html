@@ -151,12 +151,20 @@
                 </td>
                 <td class="col col-xs-2">
                   <span>&nbsp;</span>
+                  <button class="btn btn-xs btn-primary" ng-show="cpr.hasConsented && avSelected"
+                    ng-click="collect(null)">
+                    <span translate="specimens.buttons.collect">Collect</span>
+                  </button>
                 </td>
               </tr>
             </thead>
             <tbody class="os-table-body">
               <tr class="row" ng-repeat="visit in anticipatedVisits">
                 <td class="col">
+                  <div style="padding: 0px 8px;" class="os-select-specimen-cb" ng-show="cpr.hasConsented && partCtx.workflowId > 0">
+                    <os-checkbox ng-change="toggleAvSelect(visit)" ng-model="visit.selected"></os-checkbox>
+                  </div>
+
                   <a ui-sref="visit-detail.overview({visitId: visit.id, eventId: visit.eventId})">
                     <os-event-desc event-point="visit.eventPoint" event-point-unit="visit.eventPointUnit"
                       event-label="visit.eventLabel"></os-event-desc>
@@ -170,7 +178,7 @@
                   <span>{{visit.pendingPrimarySpmns}}</span>
                 </td>
                 <td class="col">
-                  <div class="os-more-option-btns" ng-show="cpr.hasConsented">
+                  <div class="os-more-option-btns" ng-show="cpr.hasConsented && !avSelected">
                     <span dropdown ng-if="!partCtx.workflowId || partCtx.workflowId <= 0">
                       <button class="btn btn-xs btn-default dropdown-toggle">
                         <span translate="specimens.buttons.collect">Collect</span>

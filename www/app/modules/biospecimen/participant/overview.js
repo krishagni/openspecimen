@@ -99,9 +99,25 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
     $scope.collect = function(visit) {
       if ($scope.partCtx.workflowId > 0) {
         var tmWfInstance = $injector.get('WorkflowInstance');
+
+        var selected = [];
+        if (visit) {
+          selected = [visit];
+        } else {
+          selected = ($scope.anticipatedVisits || []).filter(function(v) { return v.selected; });
+        }
+
         var model = new tmWfInstance({
           workflow: {id: $scope.partCtx.workflowId},
-          inputItems: [{cpr: {id: cpr.id}, cpe: {id: visit.eventId}, visit: visit.id && {id: visit.id}}]
+          inputItems: selected.map(
+            function(visit) {
+              return {
+                cpr: {id: cpr.id},
+                cpe: visit.eventId && {id: visit.eventId},
+                visit: visit.id && {id: visit.id}
+              }
+            }
+          )
         });
 
         model.$saveOrUpdate().then(
@@ -129,6 +145,10 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
       var ts = Util.formatDate(Date.now(), 'yyyyMMdd_HHmmss');
       var outputFilename = [cpr.cpShortTitle, cpr.ppid, ts].join('_') + '.csv';
       SpecimenLabelPrinter.printLabels(args, outputFilename);
+    }
+
+    $scope.toggleAvSelect = function(visit) {
+      $scope.avSelected = ($scope.anticipatedVisits || []).some(function(v) { return !!v.selected; });
     }
 
     init();
