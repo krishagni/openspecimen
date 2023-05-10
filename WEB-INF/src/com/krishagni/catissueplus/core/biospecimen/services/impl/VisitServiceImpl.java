@@ -5,9 +5,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -146,9 +148,12 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 	@Override
 	public ResponseEvent<List<VisitDetail>> getVisits(RequestEvent<VisitsListCriteria> criteria) {
 		VisitsListCriteria crit = criteria.getPayload();
+		if (StringUtils.isBlank(crit.name()) && StringUtils.isBlank(crit.sprNumber())) {
+			return ResponseEvent.response(getVisits0(crit));
+		}
+
 		List<Visit> visits = new ArrayList<>();
 		boolean hasPhiFields = false;
-
 		if (StringUtils.isNotEmpty(crit.name())) {
 			visits.add(getVisit(null, crit.name()));
 		} else if (StringUtils.isNotEmpty(crit.sprNumber())) {
@@ -558,6 +563,41 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 	public void afterPropertiesSet() {
 		cfgSvc.registerChangeListener(ConfigParams.MODULE, (name, value) -> { visitsLookup = null; });
 		exportSvc.registerObjectsGenerator("visit", this::getVisitsGenerator);
+	}
+
+	private List<VisitDetail> getVisits0(VisitsListCriteria crit) {
+		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadVisitSiteCps(crit.cpId());
+		if (siteCps != null) {
+			if (siteCps.isEmpty()) {
+				return Collections.emptyList();
+			}
+
+			crit.siteCps(new ArrayList<>(siteCps));
+		}
+
+		List<Visit> visits = daoFactory.getVisitsDao().getVisitsList(crit);
+		Map<Long, Boolean> hasPhiAccess = new HashMap<>(); // {cprId -> phiAccess}
+		List<VisitDetail> result = new ArrayList<>();
+		for (Visit visit : visits) {
+			Long cprId = visit.getRegistration().getId();
+			if (!hasPhiAccess.containsKey(cprId)) {
+				try {
+					boolean phiAccess = AccessCtrlMgr.getInstance().ensureReadVisitRights(visit, true);
+					hasPhiAccess.put(cprId, phiAccess);
+				} catch (OpenSpecimenException e) {
+					if (e.containsError(RbacErrorCode.ACCESS_DENIED)) {
+						continue;
+					}
+
+					throw e;
+				}
+			}
+
+			boolean excludePhi = !hasPhiAccess.get(cprId);
+			result.add(VisitDetail.from(visit, crit.includeExtensions(), excludePhi));
+		}
+
+		return result;
 	}
 
 	private Visit saveOrUpdateVisit(VisitDetail input, boolean update, boolean partial) {

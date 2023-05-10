@@ -87,6 +87,28 @@ public class VisitsController {
 		return resp.getPayload();
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/list")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<VisitDetail> getVisits(
+		@RequestParam(value = "name", required = false)
+		List<String> names,
+
+		@RequestParam(value = "includeExtensions", required = false, defaultValue = "false")
+		boolean includeExtensions,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults
+	) {
+		VisitsListCriteria crit = new VisitsListCriteria()
+			.names(names).includeExtensions(includeExtensions)
+			.startAt(startAt).maxResults(maxResults);
+		return ResponseEvent.unwrap(visitService.getVisits(RequestEvent.wrap(crit)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value="/bynamespr")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

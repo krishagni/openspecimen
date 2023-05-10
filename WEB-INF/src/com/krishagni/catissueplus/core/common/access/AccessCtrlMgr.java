@@ -812,6 +812,15 @@ public class AccessCtrlMgr {
 		return hasVisitObjectRights(cpr, Operation.DELETE);
 	}
 
+	public Set<SiteCpPair> getReadVisitSiteCps(Long cpId) {
+		return getSiteCps(
+			new String[] { Resource.VISIT.getName() },
+			cpId,
+			new String[] { Operation.READ.getName() },
+			false
+		);
+	}
+
 	private boolean hasVisitObjectRights(CollectionProtocolRegistration cpr, Operation op) {
 		try {
 			ensureVisitObjectRights(cpr, op, false);

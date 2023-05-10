@@ -1100,6 +1100,10 @@
   },
 
   "visits": {
-    "visit": "Visit"
+    "event": "Event",
+    "visit": "Visit",
+    "visit_date": "Visit Date",
+    "visit_name": "Visit Name",
+    "visit_site": "Visit Site"
   }
 }
