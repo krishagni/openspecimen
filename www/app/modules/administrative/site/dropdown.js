@@ -96,7 +96,7 @@ angular.module('openspecimen')
 
           var ngDisabled = "";
           if (angular.isDefined(tAttrs.ngDisabled)) {
-            ngDisabled = "ng-disabled=\"" + tAttrs.ngDisabled.replace(/"/g, "'") + "\"";
+            ngDisabled = "ng-disabled=\"$parent.$parent." + tAttrs.ngDisabled.replace(/"/g, "'") + "\"";
           }
 
           var mdInput = tAttrs.mdType == 'true' ? 'os-md-input' : '';

@@ -42,12 +42,17 @@ angular.module('os.biospecimen.models.cpr',
     }
 
     CollectionProtocolRegistration.bulkRegistration = function(bulkRegDetail) {
+      var participant = bulkRegDetail.participant = bulkRegDetail.participant || {};
+      participant.source = 'OpenSpecimen';
+
       var url = CollectionProtocolRegistration.url() + '/bulk';
       return $http.post(url, bulkRegDetail).then(CollectionProtocolRegistration.modelRespTransform);
     }
 
     //Update registrations in bulk with same detail
     CollectionProtocolRegistration.bulkEdit = function(detail) {
+      var participant = detail.participant = detail.participant || {};
+      participant.source = 'OpenSpecimen';
       return $http.put(CollectionProtocolRegistration.url() + "bulk-update", detail)
         .then(CollectionProtocolRegistration.modelArrayRespTransform);
     }
@@ -101,7 +106,8 @@ angular.module('os.biospecimen.models.cpr',
     };
 
     CollectionProtocolRegistration.prototype.$saveProps = function() {
-      this.participant = this.participant.$saveProps();
+      this.participant = angular.copy(this.participant.$saveProps());
+      this.participant.source = 'OpenSpecimen';
       return this;
     };
 
