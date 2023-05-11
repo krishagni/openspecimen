@@ -116,7 +116,12 @@
     </createTable>
   </changeSet>
 
-  <changeSet author="vpawar" id="Populate the query registration records table with the existing registrations data">
+  <changeSet author="vpawar" id="Populate the query registration records table with the present registrations data">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        select count(*) from os_cpr_recs
+      </sqlCheck>
+    </preConditions>
     <sql>
       insert into
         os_cpr_recs (
@@ -127,13 +132,34 @@
           site_id, creation_time, creator, update_time, updater
         )
       select
-        cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
-        email_address, dob, ssn, activity_status, gender_id, registration_date,
-        ppid, vital_status_id, death_date, empi_id, barcode, consent_sign_date,
-        consent_witness, consent_comments, consent_document_name, external_subject_id,
-        site_id, creation_time, creator, update_time, updater
+        cpr.identifier as cpr_id, cpr.collection_protocol_id as cp_id,
+        cpr.participant_id as participant_id, p.first_name as first_name,
+        p.middle_name as middle_name, p.last_name as last_name,
+        p.email_address as email_address, p.birth_date as dob, p.social_security_number as ssn,
+        cpr.activity_status as activity_status, p.gender_id as gender_id,
+        cpr.registration_date as registration_date, cpr.protocol_participant_id as ppid,
+        p.vital_status_id as vital_status_id, p.death_date as death_date,
+        p.empi_id as empi_id, cpr.barcode as barcode,
+        cpr.consent_sign_date as consent_sign_date, cpr.consent_witness as consent_witness,
+        cpr.consent_comments as consent_comments,
+        substr(cpr.consent_document_name, instr(cpr.consent_document_name, '_') + 1) as consent_document_name,
+        cpr.external_subject_id as external_subject_id, cpr.site_id as site_id,
+        cpr.creation_time as creation_time, cpr.creator as creator,
+        case
+          when cpr.update_time is null then p.update_time
+          when p.update_time is null then cpr.update_time
+          when cpr.update_time &lt; p.update_time then p.update_time
+          else cpr.update_time
+        end as update_time,
+        case
+          when cpr.update_time is null then p.updater
+          when p.update_time is null then cpr.updater
+          when cpr.update_time &lt; p.update_time then p.updater
+          else cpr.updater
+        end as updater
       from
-        cpr_view
+        catissue_coll_prot_reg cpr
+        inner join catissue_participant p on cpr.participant_id = p.identifier
     </sql>
   </changeSet>
 
