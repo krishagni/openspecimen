@@ -39,6 +39,14 @@
         </tr>
       </thead>
       <tbody>
+        <tr v-if="!itemModels || itemModels.length == 0">
+          <td :colspan="fields.length">
+            <os-message type="info">
+              <span>No items to display</span>
+            </os-message>
+          </td>
+        </tr>
+
         <tr v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
           <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
             <div :style="field.uiStyle">
