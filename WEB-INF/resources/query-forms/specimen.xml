@@ -82,6 +82,16 @@
     </row>
 
     <row>
+      <textField>
+        <name>additionalLabel</name>
+        <udn>additionalLabel</udn>
+        <caption>#getMessage("specimen_additional_label")</caption>
+        <column>ADDITIONAL_LABEL</column>
+        <recordUrl>#/object-state-params-resolver?stateName=specimen-detail.overview&amp;objectName=specimen&amp;key=id&amp;value={{$specimenId}}</recordUrl>
+      </textField>
+    </row>
+
+    <row>
       <pvField>
         <name>class</name>
         <udn>class</udn>
