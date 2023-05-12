@@ -184,6 +184,7 @@
       from
         com.krishagni.catissueplus.core.administrative.domain.User iu
       where
+        iu.type != 'CONTACT' and
         iu.id in (
           select
             user.id
@@ -191,6 +192,7 @@
             com.krishagni.catissueplus.core.auth.domain.LoginAuditLog log
             right join log.user user
           where
+            user.type != 'CONTACT' and
             user.activityStatus = 'Active' and
             ((log.loginSuccessful is null and user.creationDate &lt;= :lastLoginTime) or log.loginSuccessful = 1)
           group by
