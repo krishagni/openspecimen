@@ -251,4 +251,8 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Increase the size of CP workflows JSON column" dbms="mysql">
+    <modifyDataType tableName="OS_CP_WORKFLOWS" columnName="WORKFLOWS" newDataType="${medium.clob.type}" />
+  </changeSet>
 </databaseChangeLog>
