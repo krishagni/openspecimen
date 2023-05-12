@@ -85,6 +85,16 @@ angular.module('openspecimen')
           scope.options.legend = {display: true, position: 'bottom'};
         }
 
+        var options = scope.options = scope.options || {};
+        if (options.type != 'doughnut' && options.type != 'pie') {
+          var scales = options.scales = options.scales || {};
+          scales.yAxes = [{
+            ticks: {
+              beginAtZero: true
+            }
+          }];
+        }
+
         scope.override = [];
         scope.$watch('data',
           function() {
