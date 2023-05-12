@@ -342,7 +342,7 @@ angular.module('os.query.results', ['os.query.models'])
 
       var q = undefined;
       if (!!searchTerm) {
-        q = QueryExecutor.getFacetValues($scope.queryCtx.selectedCp.id, [facet.expr], searchTerm, criteria);
+        q = QueryExecutor.getFacetValues($scope.queryCtx.selectedCp, [facet.expr], searchTerm, criteria);
       }
 
       if (!q) {
