@@ -1393,6 +1393,10 @@ form fieldset legend {
   padding-top: 5px;
 }
 
+[disabled] {
+  pointer-events: none;
+}
+
 form .form-group:empty {
   display: none!important;
 }
