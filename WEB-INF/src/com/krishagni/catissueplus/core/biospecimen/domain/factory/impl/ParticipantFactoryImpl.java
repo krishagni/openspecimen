@@ -555,7 +555,12 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 			}
 		}
 
-		DeObject extension = DeObject.createExtension(detail.getExtensionDetail(), participant);
+		ExtensionDetail input = detail.getExtensionDetail();
+		if (input == null) {
+			input = new ExtensionDetail();
+		}
+
+		DeObject extension = DeObject.createExtension(input, participant);
 		participant.setExtension(extension);
 	}
 
