@@ -381,14 +381,36 @@ angular.module('os.query.util', ['os.query.models', 'os.query.save'])
     };
 
     function getTemporalExprObj(temporalExpr) {
+      var qre = /"(.*?)"|'(.*?)'/;
+      var qmatches = undefined;
+      var placeholders = {};
+      var i = 0;
+      while ((qmatches = qre.exec(temporalExpr))) {
+        var match = qmatches[0];
+        placeholders['$RX' + i] = match;
+
+        temporalExpr = temporalExpr.substring(0, qmatches.index) + '$RX' + i + temporalExpr.substring(qmatches.index + match.length);
+        ++i;
+      }
+
       var re = /<=|>=|<|>|=|!=|\sbetween\s|\)any|\sany|\)exists|\sexists/g
       var matches = undefined;
       if ((matches = re.exec(temporalExpr))) {
-        return {
-          lhs: temporalExpr.substring(0, matches.index),
-          op : matches[0].trim(),
-          rhs: temporalExpr.substring(matches.index + matches[0].length)
+        var lhs = temporalExpr.substring(0, matches.index);
+        if (lhs) {
+          angular.forEach(Object.keys(placeholders), function(placeholder) {
+            lhs = lhs.replaceAll(placeholder, placeholders[placeholder]);
+          });
         }
+
+        var rhs = temporalExpr.substring(matches.index + matches[0].length);
+        if (rhs) {
+          angular.forEach(Object.keys(placeholders), function(placeholder) {
+            rhs = rhs.replaceAll(placeholder, placeholders[placeholder]);
+          });
+        }
+
+        return { lhs: lhs, op : matches[0].trim(), rhs: rhs }
       }
 
       return {};

@@ -712,14 +712,16 @@ angular.module('openspecimen')
       return $filter('date')(date, format);
     }
 
-    function linkify(text) {
+    function linkify(text, linkText) {
       if (!text || typeof text != 'string') {
         return text;
       }
 
-      return text.replace(httpsRe, '<a href="$1" target="_blank">$1</a>')
-        .replace(wwwRe, '$1<a href="http://$2" target="_blank">$2</a>')
-        .replace(mailRe, '<a href="mailto:$1">$1</a>');
+      var httpsText = linkText || '$1';
+      var wwwText = linkText || '$2';
+      return text.replace(httpsRe, '<a href="$1" target="_blank">' + httpsText + '</a>')
+        .replace(wwwRe, '$1<a href="http://$2" target="_blank">' + wwwText + '</a>')
+        .replace(mailRe, '<a href="mailto:$1">' + httpsText + '</a>');
     }
 
     return {

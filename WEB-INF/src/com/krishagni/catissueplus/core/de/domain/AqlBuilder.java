@@ -36,7 +36,6 @@ import edu.common.dynamicextensions.query.QuerySpace;
 
 @Configurable
 public class AqlBuilder {
-
 	private static final Pattern TEMPORAL_EXPR = Pattern.compile("[<=>!]|\\sany\\s*$|\\sexists\\s*$|\\snot exists\\s*$|\\sbetween\\s");
 
 	@Autowired
@@ -567,20 +566,63 @@ public class AqlBuilder {
 	}
 	
 	private String getLhs(String temporalExpr) {
-		String[] parts = temporalExpr.split("[<=>!]|\\sany\\s*$|\\sexists\\s*$|\\snot exists\\s*$|\\sbetween\\s");
-		return parts[0];
+		Triple<String, String, String> tObj = getTemporalObj(temporalExpr);
+		if (tObj == null) {
+			return temporalExpr;
+		}
+
+		return tObj.getLeft();
 	}
 
-	private Triple getTemporalObj(String temporalExpr) {
+	private Triple<String, String, String> getTemporalObj(String temporalExpr) {
+		Map<String, String> placeholders = new HashMap<>();
+		temporalExpr = insertPlaceholders(temporalExpr, '"', "DQ", placeholders);
+		temporalExpr = insertPlaceholders(temporalExpr, '\'', "SQ", placeholders);
+
 		Matcher matcher = TEMPORAL_EXPR.matcher(temporalExpr);
 		if (!matcher.find()) {
 			return null;
 		}
 
-		String lhs = temporalExpr.substring(0, matcher.start());
-		String op  = temporalExpr.substring(matcher.start(), matcher.end());
-		String rhs = temporalExpr.substring(matcher.end());
+		String lhs = replacePlaceholders(temporalExpr.substring(0, matcher.start()), placeholders);
+		String op  = replacePlaceholders(temporalExpr.substring(matcher.start(), matcher.end()), placeholders);
+		String rhs = replacePlaceholders(temporalExpr.substring(matcher.end()), placeholders);
 		return Triple.of(lhs.trim(), op.trim(), rhs.trim());
+	}
+
+	private String insertPlaceholders(String input, char ch, String varPrefix, Map<String, String> placeholders) {
+		int matches = 0;
+
+		int lastIdx = 0;
+		while (true) {
+			int startIdx = input.indexOf(ch, lastIdx);
+			if (startIdx == -1) {
+				break;
+			}
+
+			int endIdx = input.indexOf(ch, startIdx + 1);
+			if (endIdx == -1) {
+				break;
+			}
+
+			String expr = input.substring(startIdx, endIdx + 1);
+			String placeholder = varPrefix + matches;
+			placeholders.put(placeholder, expr);
+			input = input.substring(0, startIdx) + placeholder + input.substring(endIdx + 1);
+			++matches;
+		}
+
+		return input;
+	}
+
+	private String replacePlaceholders(String input, Map<String, String> placeholders) {
+		if (StringUtils.isNotBlank(input)) {
+			for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+				input = input.replaceAll(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return input;
 	}
 	
 	private class Context {

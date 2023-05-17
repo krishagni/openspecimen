@@ -446,12 +446,13 @@ public class QueryServiceImpl implements QueryService {
 			}
 
 			QueryExecResult formattedResult = new QueryExecResult()
+				.setRows(queryResult.getStringifiedRows())  // this is very important because the column urls are created
+															// only after examining all the stringified rows.
+				.setDbRowsCount(queryResult.getDbRowsCount())
 				.setColumnMetadata(queryResult.getColumnMetadata())
 				.setColumnLabels(queryResult.getColumnLabels())
 				.setColumnTypes(queryResult.getColumnTypes())
 				.setColumnUrls(queryResult.getColumnUrls())
-				.setRows(queryResult.getStringifiedRows())
-				.setDbRowsCount(queryResult.getDbRowsCount())
 				.setColumnIndices(indices);
 
 			return ResponseEvent.response(addRecordIdUrls(queryResult, formattedResult));

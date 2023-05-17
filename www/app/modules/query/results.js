@@ -438,7 +438,6 @@ angular.module('os.query.results', ['os.query.models'])
       for (var i = 0; i < numGrpCols; ++i) {
         result.columnLabels[i] = removeSeparator(result.columnLabels[i]);
       }
-
       var numValueCols = $scope.queryCtx.reporting.params.summaryFields.length;
       var numRollupCols = numValueCols;
       var rollupExclFields = $scope.queryCtx.reporting.params.rollupExclFields;
@@ -491,7 +490,7 @@ angular.module('os.query.results', ['os.query.models'])
           var cellTemplate = null;
           if (result.columnUrls[idx]) {
             var link, linkTxt;
-            if (result.columnUrls[idx] == 'true') {
+            if (result.columnUrls[idx] == 'true' || result.columnUrls[idx] == 'url_value') {
               link = '{{row.entity[col.field]}}';
               linkTxt = 'Click here';
             } else {
