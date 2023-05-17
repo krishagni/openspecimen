@@ -255,4 +255,230 @@
   <changeSet author="vpawar" id="Increase the size of CP workflows JSON column" dbms="mysql">
     <modifyDataType tableName="OS_CP_WORKFLOWS" columnName="WORKFLOWS" newDataType="${medium.clob.type}" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Stored procedures to populate specimen statistics" dbms="mysql">
+    <sql>
+      drop procedure if exists create_specimen_stats_table;
+    </sql>
+    <sql endDelimiter="//">
+      create procedure create_specimen_stats_table()
+      begin
+        drop table if exists tmp_specimen_stats;
+
+        create table tmp_specimen_stats (
+          specimen_id bigint not null,
+          collector_id bigint default null,
+          collection_procedure_id bigint default null,
+          collection_container_id bigint default null,
+          collection_time datetime null default null,
+          receiver_id bigint default null,
+          received_quality_id bigint default null,
+          received_time datetime null default null,
+          frozen_time datetime null default null,
+          processing_time bigint default null,
+          ischemia_time bigint default null,
+          specimen_seq mediumint default null
+        );
+      end;
+      //
+    </sql>
+    <sql>
+      drop procedure if exists populate_specimen_stats;
+    </sql>
+    <sql endDelimiter="//">
+      create procedure populate_specimen_stats()
+      begin
+        insert into tmp_specimen_stats (
+          specimen_id,
+          collection_time, collection_procedure_id,
+          collection_container_id, collector_id,
+          received_time,
+          received_quality_id, receiver_id,
+          frozen_time, processing_time, ischemia_time,
+          specimen_seq
+        )
+
+        select
+          c.identifier as specimen_id,
+          ce.event_timestamp as collection_time, ce.collection_procedure_id as collection_procedure_id,
+          ce.collection_container_id as collection_container_id, ce.user_id as collector_id,
+          re.event_timestamp as received_time,
+          re.received_quality_id as received_quality_id, re.user_id as receiver_id,
+          fe.event_timestamp as frozen_time,
+          timestampdiff(MINUTE, re.event_timestamp,fe.event_timestamp) as processing_time,
+          timestampdiff(MINUTE, ce.event_timestamp, fe.event_timestamp) as ischemia_time,
+          0
+        from
+          catissue_specimen s
+          inner join catissue_coll_event_param ce on ce.specimen_id = s.identifier
+          inner join catissue_received_event_param re on re.specimen_id = s.identifier
+          inner join catissue_specimen_hierarchy h on h.ancestor_id = s.identifier
+          inner join catissue_specimen c on c.identifier = h.descendent_id
+          left join (
+            select
+              fre.object_id as specimen_id, max(fep.event_timestamp) as event_timestamp
+            from
+              catissue_frozen_event_param fep
+              inner join catissue_form_record_entry fre on fre.record_id = fep.identifier
+              inner join catissue_form_context ffc on ffc.identifier = fre.form_ctxt_id
+              inner join dyextn_containers ff on ff.identifier = ffc.container_id and ff.name = 'SpecimenFrozenEvent'
+            group by
+              fre.object_id
+          ) fe on fe.specimen_id = s.identifier
+        where
+          s.parent_specimen_id is null and
+          s.collection_status != 'Pending' and
+          s.activity_status != 'Disabled' and c.activity_status != 'Disabled' and
+          c.collection_status = 'Collected';
+
+        update
+          tmp_specimen_stats stats
+          inner join (
+            select
+              identifier,
+              dense_rank() over (partition by specimen_collection_group_id, parent_specimen_id, specimen_type_id order by identifier) as specimen_seq
+            from
+              catissue_specimen
+            where
+              activity_status = 'Active' and
+              availability_status = 'Available'
+          ) t on t.identifier = stats.specimen_id
+        set
+          stats.specimen_seq = t.specimen_seq;
+      end;
+      //
+    </sql>
+    <sql>
+      drop procedure if exists refresh_specimen_stats;
+    </sql>
+    <sql endDelimiter="//">
+      create procedure refresh_specimen_stats()
+      begin
+        call create_specimen_stats_table();
+
+        call populate_specimen_stats();
+
+        drop table if exists os_specimen_stats;
+
+        alter table tmp_specimen_stats rename os_specimen_stats;
+
+        create index os_specimen_stats_idx on os_specimen_stats (specimen_id);
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Stored procedures to populate specimen statistics" runOnChange="true" dbms="oracle">
+    <sql endDelimiter="//">
+      create or replace procedure create_specimen_stats_table authid current_user is
+      begin
+        declare
+          table_does_not_exist exception;
+          pragma exception_init(table_does_not_exist, -942); -- ORA-00942
+        begin
+          execute immediate 'drop table tmp_specimen_stats';
+        exception
+          when table_does_not_exist then null;
+        end;
+
+        execute immediate 'create table tmp_specimen_stats (
+          specimen_id number(19) not null,
+          collector_id number(19) default null,
+          collection_procedure_id number(19) default null,
+          collection_container_id number(19) default null,
+          collection_time timestamp default null,
+          receiver_id number(19) default null,
+          received_quality_id number(19) default null,
+          received_time timestamp default null,
+          frozen_time timestamp default null,
+          processing_time number(19) default null,
+          ischemia_time number(19) default null,
+          specimen_seq number(7) default null
+        )';
+      end;
+      //
+    </sql>
+
+    <sql endDelimiter="//">
+      create or replace procedure populate_specimen_stats is
+      begin
+        execute immediate 'insert into tmp_specimen_stats (
+          specimen_id,
+          collection_time, collection_procedure_id,
+          collection_container_id, collector_id,
+          received_time,
+          received_quality_id, receiver_id,
+          frozen_time, processing_time, ischemia_time,
+          specimen_seq
+        )
+        select
+          c.identifier as specimen_id,
+          ce.event_timestamp as collection_time, ce.collection_procedure_id as collection_procedure_id,
+          ce.collection_container_id as collection_container_id, ce.user_id as collector_id,
+          re.event_timestamp as received_time, re.received_quality_id as received_quality_id,
+          re.user_id as receiver_id, fe.event_timestamp as frozen_time,
+          round((cast(fe.event_timestamp as date) - cast(re.event_timestamp as date))*24*60)  as processing_time,
+          round((cast(fe.event_timestamp as date) - cast(ce.event_timestamp as date))*24*60)  as ischemia_time,
+          0
+        from
+          catissue_specimen s
+          inner join catissue_coll_event_param ce on ce.specimen_id = s.identifier
+          inner join catissue_received_event_param re on re.specimen_id = s.identifier
+          inner join catissue_specimen_hierarchy h on h.ancestor_id = s.identifier
+          inner join catissue_specimen c on c.identifier = h.descendent_id
+          left join (
+            select
+              fre.object_id as specimen_id, max(fep.event_timestamp) as event_timestamp
+            from
+              catissue_frozen_event_param fep
+              inner join catissue_form_record_entry fre on fre.record_id = fep.identifier
+              inner join catissue_form_context ffc on ffc.identifier = fre.form_ctxt_id
+              inner join dyextn_containers ff on ff.identifier = ffc.container_id and ff.name = ''SpecimenFrozenEvent''
+            group by
+              fre.object_id
+          ) fe on fe.specimen_id = s.identifier
+        where
+          s.parent_specimen_id is null and s.collection_status = ''Collected'' and
+          s.activity_status != ''Disabled'' and c.activity_status != ''Disabled'' and
+          c.collection_status = ''Collected'' and cre.activity_status = ''ACTIVE'' and
+          rre.activity_status = ''ACTIVE''';
+
+        execute immediate 'merge into tmp_specimen_stats us using (
+          select
+            identifier,
+            dense_rank() over (partition by specimen_collection_group_id, parent_specimen_id, specimen_type_id order by identifier) as specimen_seq
+          from
+            catissue_specimen
+          where
+            activity_status = ''Active'' and
+            availability_status = ''Available''
+        ) t on (t.identifier = us.specimen_id)
+        when matched then
+          update set us.specimen_seq = t.specimen_seq';
+      end;
+      //
+    </sql>
+    <sql endDelimiter="//">
+      create or replace procedure refresh_specimen_stats authid current_user is
+      begin
+        create_specimen_stats_table();
+
+        populate_specimen_stats();
+
+        declare
+          table_does_not_exist exception;
+          pragma exception_init(table_does_not_exist, -942); -- ORA-00942
+        begin
+          execute immediate 'drop table os_specimen_stats';
+        exception
+          when table_does_not_exist then null;
+        end;
+
+        execute immediate 'alter table tmp_specimen_stats rename to os_specimen_stats';
+
+        execute immediate 'create index os_specimen_stats_idx on os_specimen_stats (specimen_id)';
+      end;
+      //
+    </sql>
+  </changeSet>
 </databaseChangeLog>

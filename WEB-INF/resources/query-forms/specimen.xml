@@ -676,8 +676,8 @@
           <numberField>
             <name>aliquotSequence</name>
             <udn>aliquotSequence</udn>
-            <caption>#getMessage("specimen_aliquot_sequence")</caption>
-            <column>ALIQUOT_SEQ</column>
+            <caption>#getMessage("specimen_sequence")</caption>
+            <column>SPECIMEN_SEQ</column>
           </numberField>
         </row>
       </subForm>
