@@ -327,7 +327,7 @@
           ) fe on fe.specimen_id = s.identifier
         where
           s.parent_specimen_id is null and
-          s.collection_status != 'Pending' and
+          s.collection_status = 'Collected' and
           s.activity_status != 'Disabled' and c.activity_status != 'Disabled' and
           c.collection_status = 'Collected';
 
@@ -440,8 +440,7 @@
         where
           s.parent_specimen_id is null and s.collection_status = ''Collected'' and
           s.activity_status != ''Disabled'' and c.activity_status != ''Disabled'' and
-          c.collection_status = ''Collected'' and cre.activity_status = ''ACTIVE'' and
-          rre.activity_status = ''ACTIVE''';
+          c.collection_status = ''Collected''';
 
         execute immediate 'merge into tmp_specimen_stats us using (
           select
