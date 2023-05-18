@@ -28,8 +28,10 @@ import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Conjunction;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Query;
+import com.krishagni.catissueplus.core.common.repository.Restriction;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -462,20 +464,29 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			return;
 		}
 
-		query.join("u.roles", "sr");
 
+		query.leftJoin("u.roles", "sr");
+
+		Conjunction and = query.conjunction();
 		if (CollectionUtils.isNotEmpty(listCrit.roleNames())) {
-			query.join("sr.role", "role")
-				.add(query.in("role.name", listCrit.roleNames()));
+			query.leftJoin("sr.role", "role");
+			and.add(query.in("role.name", listCrit.roleNames()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.siteName())) {
-			addSiteRestriction(query, "sr", listCrit.siteName());
+			and.add(addSiteRestriction(query, "sr", listCrit.siteName()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.cpShortTitle())) {
-			addCpRestriction(query, "sr", listCrit.cpShortTitle());
+			and.add(addCpRestriction(query, "sr", listCrit.cpShortTitle()));
 		}
+
+		query.add(
+			query.or(
+				query.eq("u.type", User.Type.SUPER),
+				query.and(query.isNotNull("sr.id"), and.getRestriction())
+			)
+		);
 	}
 
 	private void addResourceRestrictions(AbstractCriteria<?, ?> query, UserListCriteria listCrit) {
@@ -483,20 +494,29 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			return;
 		}
 
-		query.join("u.acl", "acl")
-			.add(query.eq("acl.resource", listCrit.resourceName()));
+		query.leftJoin("u.acl", "acl");
+
+		Conjunction and = query.conjunction();
+		and.add(query.eq("acl.resource", listCrit.resourceName()));
 
 		if (CollectionUtils.isNotEmpty(listCrit.opNames())) {
-			query.add(query.in("acl.operation", listCrit.opNames()));
+			and.add(query.in("acl.operation", listCrit.opNames()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.siteName())) {
-			addSiteRestriction(query, "acl", listCrit.siteName());
+			and.add(addSiteRestriction(query, "acl", listCrit.siteName()));
 		}
 
 		if (StringUtils.isNotBlank(listCrit.cpShortTitle())) {
-			addCpRestriction(query, "acl", listCrit.cpShortTitle());
+			and.add(addCpRestriction(query, "acl", listCrit.cpShortTitle()));
 		}
+
+		query.add(
+			query.or(
+				query.eq("u.type", User.Type.SUPER),
+				query.and(query.isNotNull("acl.id"), and.getRestriction())
+			)
+		);
 	}
 
 	private void addGroupRestrictions(AbstractCriteria<?, ?> query, UserListCriteria listCrit) {
@@ -508,7 +528,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.add(query.eq("group.name", listCrit.group()));
 	}
 
-	private void addSiteRestriction(AbstractCriteria<?, ?> query, String alias, String siteName) {
+	private Restriction addSiteRestriction(AbstractCriteria<?, ?> query, String alias, String siteName) {
 		query.leftJoin(alias + ".site", "rs");
 
 		SubQuery<Long> userInstituteSite = query.createSubQuery(Site.class, "uis")
@@ -518,16 +538,16 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.add(userInstituteSite.eq("uis.name", siteName))
 			.select("uis.id");
 
-		query.add(query.or(
+		return query.or(
 			query.and(
 				query.isNull("rs.id"),
 				query.exists(userInstituteSite)
 			),
 			query.eq("rs.name", siteName)
-		));
+		);
 	}
 
-	private void addCpRestriction(AbstractCriteria<?, ?> query, String alias, String cpShortTitle) {
+	private Restriction addCpRestriction(AbstractCriteria<?, ?> query, String alias, String cpShortTitle) {
 		query.leftJoin(alias + ".collectionProtocol", "rcp")
 			.leftJoin(alias + ".site", "rsite");
 
@@ -552,13 +572,13 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			.add(userInstituteCp.eq("uicp.shortTitle", cpShortTitle))
 			.select("uicp.id");
 
-		query.add(query.or(
+		return query.or(
 			query.and(
 				query.isNull("rcp.id"),
 				query.exists(userInstituteCp)
 			),
 			query.eq("rcp.shortTitle", cpShortTitle)
-		));
+		);
 	}
 
 	private boolean hasRoleRestrictions(UserListCriteria listCrit) {
