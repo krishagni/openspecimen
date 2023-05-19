@@ -147,8 +147,7 @@ public abstract class BaseExtensionEntity extends BaseEntity {
 			return null;
 		}
 
-		DeObject.Attr reqAttr = extn.getAttrs().stream().filter(attr -> attr.getUdn().equals(udn)).findFirst().orElse(null);
-		return reqAttr != null ? extn.getAttrValue(reqAttr) : null;
+		return extn.getAttrValue(udn);
 	}
 	
 	private Long getRecordId(DeObject extnObj) {
