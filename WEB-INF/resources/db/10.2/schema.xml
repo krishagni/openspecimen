@@ -480,4 +480,34 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Additional Label - Reorder the index columns - label first and then CP ID - Part 1">
+    <dropUniqueConstraint constraintName="UQ_SPMN_ADDL_LABEL"
+      tableName="CATISSUE_SPECIMEN" uniqueColumns="COLLECTION_PROTOCOL_ID, ADDITIONAL_LABEL"  />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Additional Label - Reorder the index columns - label first and then CP ID - Part 2">
+    <addUniqueConstraint constraintName="OS_SPMN_ADD_LABEL_UQ"
+      tableName="CATISSUE_SPECIMEN" columnNames="ADDITIONAL_LABEL, COLLECTION_PROTOCOL_ID"  />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen Label - Reorder the index columns - label first and then CP ID - Part 1">
+    <dropUniqueConstraint constraintName="CAT_SPEC_CP_ID_LABEL_UQ"
+      tableName="CATISSUE_SPECIMEN" uniqueColumns="COLLECTION_PROTOCOL_ID, LABEL"  />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen Label - Reorder the index columns - label first and then CP ID - Part 2">
+    <addUniqueConstraint constraintName="OS_SPMN_LABEL_UQ"
+      tableName="CATISSUE_SPECIMEN" columnNames="LABEL, COLLECTION_PROTOCOL_ID"  />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen Barcode - Reorder the index columns - barcode first and then CP ID - Part 1">
+    <dropUniqueConstraint constraintName="CAT_SPEC_CP_ID_BARCODE_UQ"
+      tableName="CATISSUE_SPECIMEN" uniqueColumns="COLLECTION_PROTOCOL_ID, BARCODE"  />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen Barcode - Reorder the index columns - barcode first and then CP ID - Part 2">
+    <addUniqueConstraint constraintName="OS_SPMN_BARCODE_UQ"
+      tableName="CATISSUE_SPECIMEN" columnNames="BARCODE, COLLECTION_PROTOCOL_ID"  />
+  </changeSet>
 </databaseChangeLog>
