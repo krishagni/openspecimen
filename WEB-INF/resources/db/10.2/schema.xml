@@ -481,6 +481,12 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Index on specimen collection protocol ID. Needed to enforce FK constraints">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_SPMN_CP_IDX">
+      <column name="COLLECTION_PROTOCOL_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
   <changeSet author="vpawar" id="Additional Label - Reorder the index columns - label first and then CP ID - Part 1">
     <dropUniqueConstraint constraintName="UQ_SPMN_ADDL_LABEL"
       tableName="CATISSUE_SPECIMEN" uniqueColumns="COLLECTION_PROTOCOL_ID, ADDITIONAL_LABEL"  />
