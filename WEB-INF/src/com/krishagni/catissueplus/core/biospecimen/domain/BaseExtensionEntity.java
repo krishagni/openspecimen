@@ -131,6 +131,25 @@ public abstract class BaseExtensionEntity extends BaseEntity {
 	public Long getEntityId() {
 		return null;
 	}
+
+	public String getCustomFieldDisplayValue(String udn) {
+		DeObject extn = getExtension();
+		if (extn == null) {
+			return null;
+		}
+
+		return extn.getAttrDisplayValue(udn);
+	}
+
+	public Object getCustomFieldValue(String udn) {
+		DeObject extn = getExtension();
+		if (extn == null) {
+			return null;
+		}
+
+		DeObject.Attr reqAttr = extn.getAttrs().stream().filter(attr -> attr.getUdn().equals(udn)).findFirst().orElse(null);
+		return reqAttr != null ? extn.getAttrValue(reqAttr) : null;
+	}
 	
 	private Long getRecordId(DeObject extnObj) {
 		List<Long> recIds = extnObj.getRecordIds();

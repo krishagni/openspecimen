@@ -283,7 +283,38 @@ public abstract class DeObject {
 
 	public Map<String, Object> getAttrValues() {
 		loadRecordIfNotLoaded();
-		return getAttrValues(attrs);
+		return getAttrValues(attrs, isUseUdn());
+	}
+
+	public Object getAttrValue(Attr attr, boolean useUdn) {
+		Object value = null;
+		if (attr.isSubForm()) {
+			if (attr.isOneToOne()) {
+				value = getAttrValues((List<Attr>)attr.getValue(), useUdn);
+			} else {
+				if (attr.getValue() == null) {
+					value = new ArrayList<>();
+				} else {
+					value = ((List<List<Attr>>)attr.getValue()).stream()
+						.map(sfAttrs -> getAttrValues(sfAttrs, useUdn))
+						.collect(Collectors.toList());
+				}
+			}
+		} else {
+			value = attr.getValue();
+		}
+
+		return value;
+	}
+
+	public Object getAttrValue(String udn) {
+		Attr reqAttr = getAttrs().stream().filter(attr -> attr.getUdn().equals(udn)).findFirst().orElse(null);
+		return reqAttr != null ? getAttrValue(reqAttr, true) : null;
+	}
+
+	public String getAttrDisplayValue(String udn) {
+		Attr reqAttr = getAttrs().stream().filter(attr -> attr.getUdn().equals(udn)).findFirst().orElse(null);
+		return reqAttr != null ? reqAttr.getDisplayValue() : null;
 	}
 
 	public Map<String, String> getLabelValueMap() {
@@ -292,7 +323,7 @@ public abstract class DeObject {
 			.filter(attr -> !attr.getType().equals("subForm"))
 			.collect(
 				Collectors.toMap(
-					attr -> attr.getCaption(),
+					Attr::getCaption,
 					attr -> attr.getDisplayValue(notSpecified),
 					(v1, v2) -> {throw new IllegalStateException("Duplicate key");},
 					LinkedHashMap::new)
@@ -664,28 +695,10 @@ public abstract class DeObject {
 		return attrs;
 	}
 
-	private Map<String, Object> getAttrValues(List<Attr> attrs) {
+	private Map<String, Object> getAttrValues(List<Attr> attrs, boolean useUdn) {
 		Map<String, Object> result = new LinkedHashMap<>();
-
-		Object value = null;
 		for (Attr attr : attrs) {
-			if (attr.isSubForm()) {
-				if (attr.isOneToOne()) {
-					value = getAttrValues((List<Attr>)attr.getValue());
-				} else {
-					if (attr.getValue() == null) {
-						value = new ArrayList<>();
-					} else {
-						value = ((List<List<Attr>>)attr.getValue()).stream()
-							.map(sfAttrs -> getAttrValues(sfAttrs))
-							.collect(Collectors.toList());
-					}
-				}
-			} else {
-				value = attr.getValue();
-			}
-
-			result.put(isUseUdn() ? attr.getUdn() : attr.getName(), value);
+			result.put(useUdn ? attr.getUdn() : attr.getName(), getAttrValue(attr, useUdn));
 		}
 
 		return result;
