@@ -572,4 +572,41 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Cleanup the unwanted / spurious index on the specimen table - 1" dbms="oracle">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="CATISSUE_SPECIMEN" indexName="CATISSUE_SPECIMEN_LABEL_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="CATISSUE_SPECIMEN" indexName="CATISSUE_SPECIMEN_LABEL_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Cleanup the unwanted / spurious index on the specimen table - 2" dbms="oracle">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="CATISSUE_SPECIMEN" indexName="CAT_SPECIMEN_BARCODE_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="CATISSUE_SPECIMEN" indexName="CAT_SPECIMEN_BARCODE_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen additional label for lookups" dbms="oracle">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_SPMN_ADDL_LABEL_CP_IDX">
+      <column name="ADDITIONAL_LABEL" />
+      <column name="COLLECTION_PROTOCOL_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen barcode for lookups" dbms="oracle">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_SPMN_BARCODE_CP_IDX">
+      <column name="BARCODE" />
+      <column name="COLLECTION_PROTOCOL_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen label for lookups" dbms="oracle">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_SPMN_LABEL_CP_IDX">
+      <column name="LABEL" />
+      <column name="COLLECTION_PROTOCOL_ID" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
