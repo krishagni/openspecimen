@@ -29,7 +29,12 @@
                 <strong class="key key-sm">
                   <span v-t="{path: 'containers.' + ctx.scannedField}">Barcode</span>
                 </strong>
-                <span class="value value-md">{{ctx.box.barcode}}</span>
+                <span class="value value-md">
+                  <span>{{ctx.box.barcode}}</span>
+                  <span v-if="ctx.noBoxBarcode" style="margin-left: 1rem;">
+                    <os-button-link style="color: inherit;" left-icon="edit" @click="editBoxBarcode" />
+                  </span>
+                </span>
               </li>
               <li class="item">
                 <strong class="key key-sm">
@@ -67,6 +72,32 @@
             </ul>
           </template>
         </os-section>
+
+        <os-section v-else-if="ctx.box && !ctx.box.barcode">
+          <template #title>
+            <span v-t="'containers.box_details'">Box Details</span>
+          </template>
+
+          <template #content>
+            <os-message type="error">
+              <span v-t="{path: 'containers.box_' + ctx.scannedField + '_not_detected'}">Box barcode not detected</span>
+            </os-message>
+
+            <ul class="os-key-values">
+              <li class="item">
+                <strong class="key key-sm">
+                  <span v-t="{path: 'containers.' + ctx.scannedField}">Barcode</span>
+                </strong>
+                <span style="display: flex; min-width: 350px;">
+                  <os-input-text style="flex: 1; margin-right: 1rem;" v-model="ctx.box.inputBarcode" />
+
+                  <os-button left-icon="search" @click="searchBox" />
+                </span>
+              </li>
+            </ul>
+          </template>
+        </os-section>
+
 
         <os-section v-if="ctx.specimens">
           <template #title>
@@ -112,9 +143,11 @@
           <os-divider />
 
           <div class="os-buttons">
-            <os-button primary :label="$t('common.buttons.save')" @click="save(false)" />
+            <os-button primary :label="$t('common.buttons.save')" @click="save(false)"
+              v-show="ctx.box && ctx.box.barcode" />
 
-            <os-button primary :label="$t('containers.save_n_scan_another')" @click="save(true)" />
+            <os-button primary :label="$t('containers.save_n_scan_another')" @click="save(true)"
+              v-show="ctx.box && ctx.box.barcode" />
 
             <os-button secondary :label="$t('common.buttons.clear')" @click="clear" />
 
@@ -308,22 +341,40 @@ export default {
   },
 
   methods: {
-    scan: async function() {
+    editBoxBarcode: function() {
       const ctx = this.ctx;
-      if (!ctx.scanner) {
+      ctx.box.inputBarcode = ctx.box.barcode;
+      ctx.box.barcode = null;
+    },
+
+    searchBox: function() {
+      if (!this.ctx.box.inputBarcode) {
+        alertsSvc.error({code: 'containers.box_' + this.ctx.scannedField + '_not_specified'});
         return;
       }
 
-      const {box, tubes} = await scanner.scan(ctx.scanner);
+      this.loadBoxDetails({barcode: this.ctx.box.inputBarcode}, true);
+    },
+
+    loadBoxDetails: async function(box, noBoxBarcode) {
+      const ctx = this.ctx;
       if (!box || !box.barcode) {
-        alertsSvc.error({code: 'containers.no_box_barcode'});
+        ctx.noBoxBarcode = true;
+        ctx.box = {
+          type: ctx.scanner.containerType,
+          allowedCollectionProtocols: [],
+          allowedTypes: []
+        };
+
+        alertsSvc.error({code: 'containers.box_' + this.ctx.scannedField + '_not_detected'});
         return;
       }
 
+      ctx.noBoxBarcode = noBoxBarcode || false;
       let promise = null;
-      if (this.ctx.scannedField == 'name') {
+      if (ctx.scannedField == 'name') {
         promise = containerSvc.getContainerByName(box.barcode, false);
-      } else if (this.ctx.scannedField == 'barcode') {
+      } else if (ctx.scannedField == 'barcode') {
         promise = containerSvc.getContainerByBarcode(box.barcode, false);
       }
 
@@ -354,7 +405,18 @@ export default {
           }
         }
       );
+    },
 
+    scan: async function() {
+      const ctx = this.ctx;
+      if (!ctx.scanner) {
+        return;
+      }
+
+      const {box, tubes} = await scanner.scan(ctx.scanner);
+      this.loadBoxDetails(box);
+
+      ctx.error = null;
       const spmnBarcodesMap = {};
       const spmnBarcodes = [];
       for (let tube of tubes) {
