@@ -6,7 +6,13 @@
 <script>
 
 export default {
-  props: ['note']
+  props: ['note'],
+
+  methods: {
+    getDisplayValue() {
+      return this.note;
+    }
+  }
 }
 
 </script>
