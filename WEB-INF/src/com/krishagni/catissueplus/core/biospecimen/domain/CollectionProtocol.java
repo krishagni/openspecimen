@@ -21,6 +21,7 @@ import com.krishagni.catissueplus.core.administrative.domain.DistributionProtoco
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
@@ -161,6 +162,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private Boolean consentsWaived;
 
 	private Boolean visitLevelConsents;
+
+	private UserGroup emailSenderGroup;
 
 	private Set<CpConsentTier> consentTier = new LinkedHashSet<>();
 	
@@ -598,6 +601,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.visitLevelConsents = visitLevelConsents;
 	}
 
+	public UserGroup getEmailSenderGroup() {
+		return emailSenderGroup;
+	}
+
+	public void setEmailSenderGroup(UserGroup emailSenderGroup) {
+		this.emailSenderGroup = emailSenderGroup;
+	}
+
 	public Set<CpConsentTier> getConsentTier() {
 		return consentTier;
 	}
@@ -739,6 +750,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setVisitNamePrintCopies(cp.getVisitNamePrintCopies());
 		setUnsignedConsentDocumentURL(cp.getUnsignedConsentDocumentURL());
 		setExtension(cp.getExtension());
+		setEmailSenderGroup(cp.getEmailSenderGroup());
 //		setCatalogId(cp.getCatalogId());
 		
 		updateSites(cp.getSites());
@@ -804,6 +816,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setAliquotsInSameContainer(getAliquotsInSameContainer());
 		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
 		cp.setDraftDataEntry(draftDataEntryEnabled());
+		cp.setEmailSenderGroup(getEmailSenderGroup());
 		cp.setActivityStatus(getActivityStatus());
 	}
 	

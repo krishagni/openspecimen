@@ -156,4 +156,12 @@ public class UserGroupController {
 
 		throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Invalid user group op: " + op);
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/member-of")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Boolean> isMemberOf(@RequestParam(value = "groupName") String groupName) {
+		Boolean status = ResponseEvent.unwrap(groupSvc.isMemberOf(RequestEvent.wrap(groupName)));
+		return Collections.singletonMap("status", status);
+	}
 }

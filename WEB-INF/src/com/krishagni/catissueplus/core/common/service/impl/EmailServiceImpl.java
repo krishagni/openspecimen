@@ -180,6 +180,7 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		return sendEmail(mail, null);
 	}
 
+	@Override
 	public boolean sendEmail(Email mail, Map<String, Object> props) {
 		try {
 			if (!isEmailNotifEnabled()) {
@@ -257,24 +258,13 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 		}
 	}
 
-	private boolean sendEmail(String tmplKey, String tmplSubj, String tmplContent, String[] to, String[] bcc, File[] attachments, Map<String, Object> props) {
-		if (!isEmailNotifEnabled()) {
-			logger.info("Notifications disabled at the system level");
-			return false;
-		}
-
-		boolean emailEnabled = cfgSvc.getBoolSetting("notifications", "email_" + tmplKey, true);
-		if (!emailEnabled) {
-			logger.info("Notifications disabled for: " + tmplKey);
-			return false;
-		}
-
+	@Override
+	public Email getEmail(String tmplKey, String tmplSubj, String tmplContent, String[] to, String[] bcc, File[] attachments, Map<String, Object> props) {
 		if (props == null) {
 			props = new HashMap<>();
 		}
 
 		String adminEmailId = getAdminEmailId();
-
 		if (StringUtils.isNotBlank(tmplContent)) {
 			props.put("templateContent", tmplContent);
 		} else {
@@ -301,6 +291,26 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 			email.setCcAddress(new String[] { adminEmailId });
 		}
 
+		return email;
+	}
+
+	private boolean sendEmail(String tmplKey, String tmplSubj, String tmplContent, String[] to, String[] bcc, File[] attachments, Map<String, Object> props) {
+		if (!isEmailNotifEnabled()) {
+			logger.info("Notifications disabled at the system level");
+			return false;
+		}
+
+		boolean emailEnabled = cfgSvc.getBoolSetting("notifications", "email_" + tmplKey, true);
+		if (!emailEnabled) {
+			logger.info("Notifications disabled for: " + tmplKey);
+			return false;
+		}
+
+		if (props == null) {
+			props = new HashMap<>();
+		}
+
+		Email email = getEmail(tmplKey, tmplSubj, tmplContent, to, bcc, attachments, props);
 		return sendEmail(email, props);
 	}
 

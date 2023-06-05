@@ -74,6 +74,10 @@ public class UserGroupSummary extends AttributeModifiedSupport {
 	}
 
 	public static UserGroupSummary from(UserGroup group) {
+		if (group == null) {
+			return null;
+		}
+
 		UserGroupSummary result = new UserGroupSummary();
 		result.setId(group.getId());
 		result.setName(group.getName());

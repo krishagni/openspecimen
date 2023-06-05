@@ -17,4 +17,6 @@ public interface UserGroupDao extends Dao<UserGroup> {
 	UserGroup getByName(String name);
 
 	List<UserGroup> getByNames(Collection<String> names);
+
+	boolean isMemberOf(String groupName, Long userId);
 }

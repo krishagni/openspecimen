@@ -124,6 +124,8 @@
 
     <property name="draftMode" column="DRAFT_MODE" />
 
+    <many-to-one name="emailSenderGroup" column="EMAIL_SENDER_GROUP" />
+
     <set name="consentTier" table="CATISSUE_CONSENT_TIER" inverse="true" cascade="all-delete-orphan" order-by="id">
       <key column="COLL_PROTOCOL_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier"/>

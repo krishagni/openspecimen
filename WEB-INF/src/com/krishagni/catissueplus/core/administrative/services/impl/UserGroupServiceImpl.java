@@ -188,6 +188,19 @@ public class UserGroupServiceImpl implements UserGroupService {
 		}
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Boolean> isMemberOf(RequestEvent<String> req) {
+		try {
+			String groupName = req.getPayload();
+			return ResponseEvent.response(daoFactory.getUserGroupDao().isMemberOf(groupName, AuthUtil.getCurrentUser().getId()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	private UserGroup getGroup(Long groupId, String groupName) {
 		UserGroup result = null;
 		Object key = null;

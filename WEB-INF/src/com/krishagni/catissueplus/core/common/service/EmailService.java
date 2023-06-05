@@ -19,7 +19,11 @@ public interface EmailService {
 	
 	boolean sendEmail(Email mail);
 
+	boolean sendEmail(Email mail, Map<String, Object> props);
+
 	void registerProcessor(EmailProcessor processor);
 
 	void sendTestEmail();
+
+	Email getEmail(String emailTmplKey, String tmplSubj, String tmplContent, String[] to, String[] bcc, File[] attachments, Map<String, Object> props);
 }

@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.administrative.repository.UserGroupDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserGroupListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGroupDao {
 
@@ -82,6 +83,19 @@ public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGrou
 		return createNamedQuery(GET_BY_NAMES, UserGroup.class)
 			.setParameterList("names", names)
 			.list();
+	}
+
+	@Override
+	public boolean isMemberOf(String groupName, Long userId) {
+		Criteria<Long> query = createCriteria(UserGroup.class, Long.class, "ug")
+			.join("ug.users", "user");
+
+		Long count = query.add(query.eq("ug.name", groupName))
+			.add(query.eq("user.id", userId))
+			.add(query.ne("user.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()))
+			.select(query.count("user.id"))
+			.uniqueResult();
+		return count != null && count > 0;
 	}
 
 	private static final String FQN = UserGroup.class.getName();

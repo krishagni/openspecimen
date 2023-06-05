@@ -26,5 +26,13 @@ angular.module('os.administrative.models.user')
       );
     }
 
+    UserGroup.isMemberOf = function(groupName) {
+      return $http.get(UserGroup.url() + 'member-of', {params: {groupName: groupName}}).then(
+        function(resp) {
+          return resp.status;
+        }
+      );
+    }
+
     return UserGroup;
   });

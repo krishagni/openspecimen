@@ -609,4 +609,13 @@
       <column name="COLLECTION_PROTOCOL_ID" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Collection protocol email sender group">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="EMAIL_SENDER_GROUP" type="${int.type}">
+        <constraints foreignKeyName="FK_CP_EMAIL_SENDER_GROUP"
+          referencedTableName="OS_USER_GROUPS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

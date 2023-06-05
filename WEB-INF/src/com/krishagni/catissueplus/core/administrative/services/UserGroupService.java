@@ -25,4 +25,6 @@ public interface UserGroupService {
 	ResponseEvent<UserGroupDetail> addUsers(RequestEvent<UserGroupDetail> req);
 
 	ResponseEvent<UserGroupDetail> removeUsers(RequestEvent<UserGroupDetail> req);
+
+	ResponseEvent<Boolean> isMemberOf(RequestEvent<String> req);
 }

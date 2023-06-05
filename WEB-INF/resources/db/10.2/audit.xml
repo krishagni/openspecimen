@@ -22,4 +22,11 @@
   <changeSet author="vpawar" id="Increase the size of CP workflows JSON column" dbms="mysql">
     <modifyDataType tableName="OS_CP_WORKFLOWS_AUD" columnName="WORKFLOWS" newDataType="${medium.clob.type}" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Collection protocol email sender group">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="EMAIL_SENDER_GROUP" type="${int.type}" />
+      <column name="emailSenderGroup_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>
