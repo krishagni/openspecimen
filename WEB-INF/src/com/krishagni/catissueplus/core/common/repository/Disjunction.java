@@ -16,9 +16,11 @@ public class Disjunction extends Junction {
 			return Restriction.of(cb.isTrue(cb.literal(true)));
 		}
 
-		Predicate predicate = restrictions.stream()
-			.map(Restriction::getPredicate)
-			.reduce(cb.disjunction(), (result, p) -> cb.or(result, p));
-		return Restriction.of(predicate);
+		return Restriction.of(cb.or(restrictions.stream().map(Restriction::getPredicate).toArray(Predicate[]::new)));
+
+//		Predicate predicate = restrictions.stream()
+//			.map(Restriction::getPredicate)
+//			.reduce(cb.disjunction(), (result, p) -> cb.or(result, p));
+//		return Restriction.of(predicate);
 	}
 }

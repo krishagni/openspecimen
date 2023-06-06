@@ -11,9 +11,10 @@ public class Conjunction extends Junction {
 
 	@Override
 	public Restriction getRestriction() {
-		Predicate predicate = restrictions.stream()
-			.map(Restriction::getPredicate)
-			.reduce(cb.conjunction(), (result, p) -> cb.and(result, p));
-		return Restriction.of(predicate);
+		return Restriction.of(cb.and(restrictions.stream().map(Restriction::getPredicate).toArray(Predicate[]::new)));
+//		Predicate predicate = restrictions.stream()
+//			.map(Restriction::getPredicate)
+//			.reduce(cb.conjunction(), (result, p) -> cb.and(result, p));
+//		return Restriction.of(predicate);
 	}
 }
