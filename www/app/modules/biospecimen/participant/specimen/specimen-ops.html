@@ -11,7 +11,7 @@
         <span translate="common.buttons.edit">Edit</span>
       </a>
     </li>
-    <li ng-if="!isCoordinator" show-if-allowed="resourceOpts.specimenUpdateOpts">
+    <li ng-if="notCoordinatOrStoreAllowed" show-if-allowed="resourceOpts.specimenUpdateOpts">
       <a ng-click="printSpecimenLabels()">
         <span class="fa fa-print"></span>
         <span translate="common.buttons.print">Print</span>
@@ -23,7 +23,7 @@
         <span translate="common.buttons.delete">Delete</span>
       </a>
     </li>
-    <li ng-if="!isCoordinator" show-if-allowed="resourceOpts.specimenUpdateOpts">
+    <li ng-if="notCoordinatOrStoreAllowed" show-if-allowed="resourceOpts.specimenUpdateOpts">
       <a ng-click="closeSpecimens()">
         <span class="fa fa-remove"></span>
         <span translate="common.buttons.close"> Close </span>
@@ -47,7 +47,7 @@
         <span translate="specimen_list.ship">Ship</span>
       </a>
     </li>
-    <li ng-if="!isCoordinator" show-if-allowed="resourceOpts.specimenUpdateOpts">
+    <li ng-if="notCoordinatOrStoreAllowed" show-if-allowed="resourceOpts.specimenUpdateOpts">
       <a ng-click="receiveSpecimens()">
         <span class="fa fa-check-square-o"></span>
         <span translate="specimen_list.receive">Receive</span>
@@ -71,7 +71,7 @@
         <span translate="specimen_list.create_derivatives">Create Derivatives</span>
       </a>
     </li>
-    <li ng-if="!isCoordinator" show-if-allowed="resourceOpts.specimenUpdateOpts">
+    <li ng-if="notCoordinatOrStoreAllowed" show-if-allowed="resourceOpts.specimenUpdateOpts">
       <a ng-click="addEvent()">
         <span class="fa fa-calendar-o"></span>
         <span translate="specimen_list.add_event">Add Event</span>

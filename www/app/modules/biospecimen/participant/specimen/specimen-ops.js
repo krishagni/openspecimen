@@ -8,10 +8,23 @@ angular.module('os.biospecimen.specimen')
 
     function initOpts(scope, element, attrs) {
       scope.title = attrs.title || 'specimens.ops';
+
+      scope.notCoordinatOrStoreAllowed = true;
       if (scope.cp) {
         SettingUtil.getSetting('biospecimen', 'coordinator_role_name').then(
           function(setting) {
             scope.isCoordinator = (setting.value == AuthorizationService.getRole(scope.cp));
+
+            if (!scope.isCoordinator) {
+              scope.notCoordinatOrStoreAllowed = true;
+            } else if (scope.cp.storageSiteBasedAccess) {
+              var cpSites = scope.cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
+              scope.notCoordinatOrStoreAllowed = AuthorizationService.isAllowed(
+                {sites: cpSites, resource: 'StorageContainer', operations: ['Read']}
+              );
+            } else {
+              scope.notCoordinatOrStoreAllowed = false;
+            }
           }
         );
       }

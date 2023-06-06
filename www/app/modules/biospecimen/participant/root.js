@@ -1,9 +1,9 @@
 
 angular.module('os.biospecimen.participant.root', ['os.biospecimen.models'])
   .controller('ParticipantRootCtrl', function(
-    $scope, $timeout, cpr, hasSde, hasDict, sysDict, cpDict,
+    $scope, $timeout, cp, cpr, hasSde, hasDict, sysDict, cpDict,
     lookupFieldsCfg, headers, participantSpmnsViewState, aliquotQtyReq,
-    pendingSpmnsDispInterval, barcodingEnabled, spmnBarcodesAutoGen,
+    pendingSpmnsDispInterval, barcodingEnabled, spmnBarcodesAutoGen, isCoordinator,
     additionalLabelAutoGen, ParticipantSpecimensViewState, AuthorizationService, Specimen) {
 
     function init() {
@@ -122,7 +122,13 @@ angular.module('os.biospecimen.participant.root', ['os.biospecimen.models'])
       var allUpdate = AuthorizationService.isAllowed($scope.specimenResource.allUpdateOpts);
       var del = AuthorizationService.isAllowed($scope.specimenResource.deleteOpts);
       var store = AuthorizationService.isAllowed({sites: sites, resource: 'StorageContainer', operations: ['Read']});
-      $scope.specimenAllowedOps = {allUpdate: allUpdate, update: update, delete: del, store: store};
+      $scope.specimenAllowedOps = {
+        allUpdate: allUpdate,
+        update: update,
+        delete: del,
+        store: store,
+        notCoordinatOrStoreAllowed: !isCoordinator || (cp.storageSiteBasedAccess && store)
+      };
 
       // Surgical Pathology Report Authorization Options
       $scope.sprResource = {

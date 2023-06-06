@@ -70,7 +70,7 @@
           <span class="os-title" translate="specimens.menu.extensions">Forms</span>
         </a>
       </li>
-      <li ui-sref-active="active" ng-if="!!specimen.id && !cpViewCtx.isCoordinator">
+      <li ui-sref-active="active" ng-if="!!specimen.id && specimenAllowedOps.notCoordinatOrStoreAllowed">
         <a ui-sref=".events">
           <i class="fa fa-calendar-o"></i>
           <span class="os-title">Events</span>
