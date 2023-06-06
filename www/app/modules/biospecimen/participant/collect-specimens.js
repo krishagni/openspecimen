@@ -1761,6 +1761,7 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           }
 
           if (specimens.length > 0) {
+            angular.forEach(specimens, function(specimen) { specimen.visit = undefined; });
             specimens[0].visit = visitToSave;
             sdeSampleSvc.updateSamples(specimens).then(
               function(savedSpecimens) {
