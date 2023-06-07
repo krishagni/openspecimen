@@ -167,6 +167,7 @@
   <include file="db/10.1/audit.xml" />
 
   <include file="db/10.2/schema.xml" />
+  <include file="db/10.2/seed-data.xml" />
   <include file="db/10.2/audit.xml" />
 
   <!-- Views are created always at the last -->

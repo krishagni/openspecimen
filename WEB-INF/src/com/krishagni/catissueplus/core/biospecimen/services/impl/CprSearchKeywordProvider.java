@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,9 @@ public class CprSearchKeywordProvider extends AbstractSearchEntityKeywordProvide
 
 		Set<Long> entityIds = getEntityIds(cpr);
 		List<SearchEntityKeyword> keywords = createKeywords(entityIds, "ppid", null, cpr.getPpid(), 0);
+		if (StringUtils.isNotBlank(cpr.getExternalSubjectId())) {
+			keywords.addAll(createKeywords(entityIds, "externalSubjectId", null, cpr.getExternalSubjectId(), 0));
+		}
 
 		if (StringUtils.isNotBlank(participant.getFirstName())) {
 			keywords.addAll(createKeywords(entityIds, "firstName", null, participant.getFirstName(), 0));
@@ -122,7 +126,7 @@ public class CprSearchKeywordProvider extends AbstractSearchEntityKeywordProvide
 
 	@Override
 	public List<String> getKeywordProps() {
-		return Collections.singletonList("ppid");
+		return Arrays.asList("ppid", "externalSubjectId");
 	}
 
 	@Override
