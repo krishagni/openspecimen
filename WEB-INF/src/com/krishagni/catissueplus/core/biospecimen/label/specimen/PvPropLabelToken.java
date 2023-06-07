@@ -52,8 +52,7 @@ public class PvPropLabelToken extends AbstractLabelTmplToken {
 			DeObject extn = (DeObject)objectWrapper.getPropertyValue("extension");
 			if (extn != null && extn.getAttrs() != null) {
 				for (DeObject.Attr attr : extn.getAttrs()) {
-					if (attr.getUdn().equals(fieldName) && attr.getCtrlValue().getControl() instanceof PvControl) {
-						PvControl pvCtrl = (PvControl) attr.getCtrlValue().getControl();
+					if (attr.getUdn().equals(fieldName) && attr.getCtrlValue().getControl() instanceof PvControl pvCtrl) {
 						if (attr.getValue() instanceof Number) {
 							pv = daoFactory.getPermissibleValueDao().getById(((Number) attr.getValue()).longValue());
 						} else if (attr.getValue() != null) {
@@ -75,6 +74,8 @@ public class PvPropLabelToken extends AbstractLabelTmplToken {
 		String result = StringUtils.EMPTY;
 		if ("concept_code".equals(propName)) {
 			result = pv.getConceptCode();
+		} else if ("value".equals(propName)) {
+			result = pv.getValue();
 		}
 
 		if (StringUtils.isBlank(result)) {

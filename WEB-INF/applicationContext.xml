@@ -695,7 +695,10 @@
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.EvalExprPrintToken">
           <property name="objectName" value="container"/>
         </bean>
-
+        <bean class="com.krishagni.catissueplus.core.biospecimen.print.PvPropPrintToken">
+          <property name="defaultLevel" value="container" />
+          <property name="daoFactory" ref="biospecimenDaoFactory" />
+        </bean>
       </list>
     </property>
   </bean>
@@ -824,7 +827,10 @@
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.EvalExprPrintToken">
           <property name="objectName" value="orderItem"/>
         </bean>
-
+        <bean class="com.krishagni.catissueplus.core.biospecimen.print.PvPropPrintToken">
+          <property name="defaultLevel" value="orderItem" />
+          <property name="daoFactory" ref="biospecimenDaoFactory" />
+        </bean>
       </list>
     </property>
   </bean>
@@ -1042,6 +1048,10 @@
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.EvalExprPrintToken">
           <property name="objectName" value="specimen"/>
         </bean>
+        <bean class="com.krishagni.catissueplus.core.biospecimen.print.PvPropPrintToken">
+          <property name="defaultLevel" value="specimen" />
+          <property name="daoFactory" ref="biospecimenDaoFactory" />
+        </bean>
       </list>
     </property>
   </bean>
@@ -1055,6 +1065,10 @@
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.CustomFieldPrintToken"/>
         <bean class="com.krishagni.catissueplus.core.biospecimen.print.EvalExprPrintToken">
           <property name="objectName" value="visit"/>
+        </bean>
+        <bean class="com.krishagni.catissueplus.core.biospecimen.print.PvPropPrintToken">
+          <property name="defaultLevel" value="visit" />
+          <property name="daoFactory" ref="biospecimenDaoFactory" />
         </bean>
       </list>
     </property>

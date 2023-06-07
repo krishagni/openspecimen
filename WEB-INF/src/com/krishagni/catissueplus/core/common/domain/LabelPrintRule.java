@@ -246,7 +246,7 @@ public abstract class LabelPrintRule {
 				List<String> args = tokenArgs.second();
 
 				String name = token.getName().toLowerCase();
-				if (args.size() > 1 && (name.equals("eval") || name.equals("custom_field"))) {
+				if (args.size() > 1 && (name.equals("eval") || name.equals("custom_field") || name.equals("pv_prop"))) {
 					name = args.get(0).replaceAll("^\"|\"$", "");
 					args = args.subList(1, args.size());
 				} else {
