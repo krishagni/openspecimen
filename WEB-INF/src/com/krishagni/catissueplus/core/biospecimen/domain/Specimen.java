@@ -1755,7 +1755,22 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		getCollectionEvent().saveOrUpdate();
-		getReceivedEvent().saveOrUpdate();
+
+		SpecimenReceivedEvent receivedEvent = getReceivedEvent();
+		if (receivedEvent.isReceived()) {
+			if (receivedEvent.getUser() == null) {
+				receivedEvent.setUser(AuthUtil.getCurrentUser());
+			}
+
+			if (receivedEvent.getTime() == null) {
+				receivedEvent.setTime(Calendar.getInstance().getTime());
+			}
+		} else {
+			receivedEvent.setUser(null);
+			receivedEvent.setTime(null);
+		}
+
+		receivedEvent.saveOrUpdate();
 	}
 	
 	public void setLabelIfEmpty() {
