@@ -53,10 +53,14 @@ public class PvPropLabelToken extends AbstractLabelTmplToken {
 			if (extn != null && extn.getAttrs() != null) {
 				for (DeObject.Attr attr : extn.getAttrs()) {
 					if (attr.getUdn().equals(fieldName) && attr.getCtrlValue().getControl() instanceof PvControl pvCtrl) {
-						if (attr.getValue() instanceof Number) {
-							pv = daoFactory.getPermissibleValueDao().getById(((Number) attr.getValue()).longValue());
-						} else if (attr.getValue() != null) {
-							pv = daoFactory.getPermissibleValueDao().getByValue(pvCtrl.getAttribute(), attr.getValue().toString());
+						if (attr.getValue() != null) {
+							String valueStr = attr.getValue().toString();
+							if (StringUtils.isNumeric(valueStr)) {
+								Long pvId = Long.parseLong(valueStr);
+								pv = daoFactory.getPermissibleValueDao().getById(pvId);
+							} else {
+								pv = daoFactory.getPermissibleValueDao().getByValue(pvCtrl.getAttribute(), valueStr);
+							}
 						}
 
 						break;
