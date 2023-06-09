@@ -618,4 +618,8 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Increase the width of external app message type column/field">
+    <modifyDataType tableName="OS_EXT_APP_MESSAGE_LOGS" columnName="TYPE" newDataType="${text.type}(32)" />
+  </changeSet>
 </databaseChangeLog>
