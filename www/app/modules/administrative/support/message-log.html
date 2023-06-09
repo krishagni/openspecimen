@@ -42,8 +42,8 @@
 
         <div class="os-section os-line-section">
           <strong class="key key-sm" translate="common.ext_messages.message">Message</strong>
-          <pre class="value value-md" ng-if="!messageLog.displayType">{{messageLog.message}}</pre>
-          <pre class="value value-md" ng-if="messageLog.displayType == 'json'">{{messageLog.message | json}}</pre>
+          <pre class="value value-md" style="font-family: monospace" ng-if="!messageLog.displayType">{{messageLog.message}}</pre>
+          <pre class="value value-md" style="font-family: monospace" ng-if="messageLog.displayType == 'json'">{{messageLog.message | json}}</pre>
         </div>
 
         <div class="os-section os-line-section">
