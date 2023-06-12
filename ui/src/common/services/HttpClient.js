@@ -36,16 +36,16 @@ class HttpClient {
     return this.promise('get', () => axios.get(this.getUrl(url), this.config(params, options)));
   }
 
-  async post(url, data, params) {
-    return this.promise('post', () => axios.post(this.getUrl(url), data, this.config(params)));
+  async post(url, data, params, options) {
+    return this.promise('post', () => axios.post(this.getUrl(url), data, this.config(params, options)));
   }
 
-  async put(url, data, params) {
-    return this.promise('put', () => axios.put(this.getUrl(url), data, this.config(params)));
+  async put(url, data, params, options) {
+    return this.promise('put', () => axios.put(this.getUrl(url), data, this.config(params, options)));
   }
 
-  async delete(url, data, params) {
-    const config = this.config(params);
+  async delete(url, data, params, options) {
+    const config = this.config(params, options);
     config.data = data;
     return this.promise('delete', () => axios.delete(this.getUrl(url), config));
   }
