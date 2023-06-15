@@ -9,11 +9,13 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.administrative.repository.UserGroupDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserGroupListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGroupDao {
@@ -33,6 +35,12 @@ public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGrou
 
 		if (StringUtils.isNotBlank(crit.institute())) {
 			query.add(query.eq("institute.name", crit.institute()));
+		} else if (StringUtils.isNotBlank(crit.site())) {
+			SubQuery<Long> instituteId = query.createSubQuery(Site.class, "site")
+				.join("site.institute", "institute")
+				.distinct().select("institute.id");
+			instituteId.add(instituteId.eq("site.name", crit.site()));
+			query.add(query.in("institute.id", instituteId));
 		}
 
 		return query.orderBy(query.asc("g.name")).list(crit.startAt(), crit.maxResults());
@@ -49,6 +57,12 @@ public class UserGroupDaoImpl extends AbstractDao<UserGroup> implements UserGrou
 
 		if (StringUtils.isNotBlank(crit.institute())) {
 			query.add(query.eq("institute.name", crit.institute()));
+		} else if (StringUtils.isNotBlank(crit.site())) {
+			SubQuery<Long> instituteId = query.createSubQuery(Site.class, "site")
+				.join("site.institute", "institute")
+				.distinct().select("institute.id");
+			instituteId.add(instituteId.eq("site.name", crit.site()));
+			query.add(query.in("institute.id", instituteId));
 		}
 
 		return query.getCount("g.id");

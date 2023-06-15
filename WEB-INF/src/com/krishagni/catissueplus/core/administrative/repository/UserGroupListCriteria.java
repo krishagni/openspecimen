@@ -8,6 +8,8 @@ public class UserGroupListCriteria extends AbstractListCriteria<UserGroupListCri
 
 	private String institute;
 
+	private String site;
+
 	@Override
 	public UserGroupListCriteria self() {
 		return this;
@@ -28,6 +30,15 @@ public class UserGroupListCriteria extends AbstractListCriteria<UserGroupListCri
 
 	public UserGroupListCriteria institute(String institute) {
 		this.institute = institute;
+		return self();
+	}
+
+	public String site() {
+		return site;
+	}
+
+	public UserGroupListCriteria site(String site) {
+		this.site = site;
 		return self();
 	}
 }

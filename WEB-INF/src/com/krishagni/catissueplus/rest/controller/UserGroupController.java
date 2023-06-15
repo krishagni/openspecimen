@@ -41,6 +41,9 @@ public class UserGroupController {
 		@RequestParam(value = "query", required = false, defaultValue = "")
 		String searchStr,
 
+		@RequestParam(value = "site", required = false, defaultValue = "")
+		String site,
+
 		@RequestParam(value = "institute", required = false, defaultValue = "")
 		String institute,
 
@@ -59,6 +62,7 @@ public class UserGroupController {
 		UserGroupListCriteria crit = new UserGroupListCriteria()
 			.query(searchStr)
 			.institute(institute)
+			.site(site)
 			.listAll(listAll)
 			.includeStat(includeStats)
 			.startAt(startAt)
@@ -76,12 +80,16 @@ public class UserGroupController {
 		@RequestParam(value = "institute", required = false, defaultValue = "")
 		String institute,
 
+		@RequestParam(value = "site", required = false, defaultValue = "")
+		String site,
+
 		@RequestParam(value = "listAll", required = false, defaultValue = "false")
 		boolean listAll) {
 
 		UserGroupListCriteria crit = new UserGroupListCriteria()
 			.query(searchStr)
 			.institute(institute)
+			.site(site)
 			.listAll(listAll);
 
 		Long count = ResponseEvent.unwrap(groupSvc.getGroupsCount(RequestEvent.wrap(crit)));
