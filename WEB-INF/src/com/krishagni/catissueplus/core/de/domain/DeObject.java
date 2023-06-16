@@ -542,6 +542,7 @@ public abstract class DeObject {
 		re.setUpdatedBy(AuthUtil.getCurrentUser().getId());
 		re.setUpdatedTime(Calendar.getInstance().getTime());
 		re.setActivityStatus(Status.ACTIVE);
+		re.setFormStatus(BaseEntity.DataEntryStatus.COMPLETE);
 		DeObject.fakeObject().daoFactory.getFormDao().saveOrUpdateRecordEntry(re);
 		return re.getIdentifier();
 	}
