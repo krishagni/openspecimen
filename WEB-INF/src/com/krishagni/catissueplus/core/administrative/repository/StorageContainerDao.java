@@ -75,5 +75,7 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 	List<StorageContainerSummary> fetchReportDetails(List<Long> containerIds);
 
 	List<StorageContainer> getAutomatedFreezers();
+
+	Long getRootContainerId(Long containerId);
 }
 	

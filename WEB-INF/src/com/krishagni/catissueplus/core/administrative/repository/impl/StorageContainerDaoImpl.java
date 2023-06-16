@@ -744,6 +744,13 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			.list();
 	}
 
+	@Override
+	public Long getRootContainerId(Long containerId) {
+		return createNamedQuery(GET_ROOT_CONTAINER_ID, Long.class)
+			.setParameter("containerId", containerId)
+			.uniqueResult();
+	}
+
 	private void linkParentChildContainers(Map<Long, StorageContainerSummary> containersMap) {
 		Map<Long, StorageContainer> objMap = new HashMap<>();
 
@@ -1256,4 +1263,6 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	private static final String GET_CONTAINER_UTILISATION = FQN + ".getContainersUtilisation";
 
 	private static final String GET_CONTAINER_DETAILS = FQN + ".getContainerReportDetails";
+
+	private static final String GET_ROOT_CONTAINER_ID = FQN + ".getRootContainerId";
 }

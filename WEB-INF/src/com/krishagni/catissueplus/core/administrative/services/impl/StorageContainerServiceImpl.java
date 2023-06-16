@@ -303,7 +303,13 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			StorageContainerDetail detail = StorageContainerDetail.from(container);
 			if (req.getPayload().includeStats()) {
+				Long rootId = container.getId();
+				if (container.getPosition() != null) {
+					rootId = daoFactory.getStorageContainerDao().getRootContainerId(container.getId());
+				}
+
 				detail.setSpecimensByType(daoFactory.getStorageContainerDao().getSpecimensCountByType(detail.getId()));
+				detail.setRootContainerId(rootId);
 			}
 
 			return ResponseEvent.response(detail);

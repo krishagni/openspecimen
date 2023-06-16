@@ -57,6 +57,11 @@ export default {
         this.selectedNodes = {};
         this.selectedNodes[newVal] = true;
       }
+
+      const rootNode = this.containerTree && this.containerTree.length > 0 && this.containerTree[0].data.container;
+      if (rootNode && rootNode.id != this.container.rootContainerId) {
+        this.setupTree();
+      }
     }
   },
 

@@ -35,6 +35,8 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	private Map<String, Integer> specimensByType;
 
+	private Long rootContainerId;
+
 	private boolean printLabels;
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -111,6 +113,14 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	public void setSpecimensByType(Map<String, Integer> specimensByType) {
 		this.specimensByType = specimensByType;
+	}
+
+	public Long getRootContainerId() {
+		return rootContainerId;
+	}
+
+	public void setRootContainerId(Long rootContainerId) {
+		this.rootContainerId = rootContainerId;
 	}
 
 	public boolean isPrintLabels() {

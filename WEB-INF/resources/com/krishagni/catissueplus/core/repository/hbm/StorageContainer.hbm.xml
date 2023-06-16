@@ -472,5 +472,18 @@
       order by
         b.name
     </sql-query>
+
+    <sql-query name="getRootContainerId">
+      <return-scalar column="rootId" type="long" />
+
+      select
+        d.ancestor_id as rootId
+      from
+        os_containers_hierarchy d
+        left join os_container_positions p on p.occupying_container_id = d.ancestor_id
+      where
+        d.descendent_id = :containerId and
+        p.identifier is null
+    </sql-query>
   </class>
 </hibernate-mapping>
