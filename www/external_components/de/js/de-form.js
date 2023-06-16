@@ -1879,14 +1879,18 @@ edu.common.de.SubFormField = function(id, sfField, args) {
     return $("<div/>").addClass("form-group clearfix").append(addBtn);
   };
 
-  this.getRemoveButton = function(rowDiv, rowIdx) {
+  this.getRemoveButton = function(rowDiv, fieldObjs) {
     var removeBtn = edu.common.de.Utility.iconButton({btnClass: 'btn btn-default', icon: 'trash'});
     var that = this;
     removeBtn.on("click", function() {
       rowDiv.remove();
-      that.fieldObjsRows.splice(rowIdx, 1);
-      that.recIds.splice(rowIdx, 1);
-      that.rowIdx--;
+
+      var idx = that.fieldObjsRows.indexOf(fieldObjs);
+      if (idx >= 0) {
+        that.fieldObjsRows.splice(idx, 1);
+        that.recIds.splice(idx, 1);
+        that.rowIdx--;
+      }
     });
 
     return removeBtn;
@@ -1910,7 +1914,7 @@ edu.common.de.SubFormField = function(id, sfField, args) {
       fieldObjs.push(fieldObj);
     }
 
-    var removeButton = this.getRemoveButton(rowDiv, this.rowIdx);
+    var removeButton = this.getRemoveButton(rowDiv, fieldObjs);
     rowDiv.append(this.cell(removeButton, "3%"));
 
     this.sfFieldsEl.append(rowDiv);
