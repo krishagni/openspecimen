@@ -43,6 +43,7 @@ import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
@@ -371,12 +372,18 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			}
 		}
 
-		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		if (!group.getCps().isEmpty() || !AuthUtil.isAdmin()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
 	}
 
 	private void ensureUpdateAccess(CollectionProtocolGroup group) {
 		for (CollectionProtocol cp : group.getCps()) {
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
+		}
+
+		if (group.getCps().isEmpty() && !AuthUtil.isAdmin()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 	}
 
