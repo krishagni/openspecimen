@@ -32,22 +32,22 @@ class HttpClient {
     }
   }
 
-  get(url, params, options) {
-    return this.promise('get', () => axios.get(this.getUrl(url), this.config(params, options)));
+  get(url, params, options, errorHandler) {
+    return this.promise('get', () => axios.get(this.getUrl(url), this.config(params, options)), errorHandler);
   }
 
-  async post(url, data, params, options) {
-    return this.promise('post', () => axios.post(this.getUrl(url), data, this.config(params, options)));
+  async post(url, data, params, options, errorHandler) {
+    return this.promise('post', () => axios.post(this.getUrl(url), data, this.config(params, options)), errorHandler);
   }
 
-  async put(url, data, params, options) {
-    return this.promise('put', () => axios.put(this.getUrl(url), data, this.config(params, options)));
+  async put(url, data, params, options, errorHandler) {
+    return this.promise('put', () => axios.put(this.getUrl(url), data, this.config(params, options)), errorHandler);
   }
 
-  async delete(url, data, params, options) {
+  async delete(url, data, params, options, errorHandler) {
     const config = this.config(params, options);
     config.data = data;
-    return this.promise('delete', () => axios.delete(this.getUrl(url), config));
+    return this.promise('delete', () => axios.delete(this.getUrl(url), config), errorHandler);
   }
 
   getUrl(url, {query = ''} = {}) {
@@ -144,24 +144,28 @@ class HttpClient {
     this.listeners.forEach(listener => listener.callStarted({method}));
   }
 
-  notifyComplete(method) {
-    this.listeners.forEach(listener => listener.callCompleted({method}));
+  notifyComplete(method, response) {
+    this.listeners.forEach(listener => listener.callCompleted({method, response}));
   }
 
-  notifyFail(method) {
-    this.listeners.forEach(listener => listener.callFailed({method}));
+  notifyFail(method, response) {
+    this.listeners.forEach(listener => listener.callFailed({method, response}));
   }
 
-  promise(method, apiCall) {
+  promise(method, apiCall, errorHandler) {
     this.notifyStart(method);
     return new Promise((resolve) => {
       apiCall()
         .then(resp => {
-          this.notifyComplete(method);
+          this.notifyComplete(method, resp);
           resolve(resp.data);
         })
         .catch(e => {
-          this.notifyFail(method);
+          this.notifyFail(method, e.response);
+          if (typeof errorHandler == 'function') {
+            errorHandler(resolve, e.response);
+            return;
+          }
 
           if (!e.response) {
             alertSvc.error(e.message);
