@@ -346,6 +346,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		result.setAdditionalLabelFormat(labelFmt);
 		
 		result.setManualSpecLabelEnabled(input.getManualSpecLabelEnabled());
+		result.setKitLabelsEnabled(input.getKitLabelsEnabled());
 
 		if (StringUtils.isBlank(input.getLabelSequenceKey())) {
 			result.setLabelSequenceKey(CollectionProtocol.LabelSequenceKey.ID);

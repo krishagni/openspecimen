@@ -392,7 +392,12 @@ angular.module('os.biospecimen.cp',
         url: '/label',
         templateUrl: 'modules/biospecimen/cp/label-settings.html',
         parent: 'cp-detail.settings',
-        controller: 'CpLabelSettingsCtrl'
+        controller: 'CpLabelSettingsCtrl',
+        resolve: {
+          hasSupplies: function($injector) {
+            return $injector.has('Supply');
+          }
+        }
       })
       .state('cp-detail.settings.forms', {
         url: '/forms',

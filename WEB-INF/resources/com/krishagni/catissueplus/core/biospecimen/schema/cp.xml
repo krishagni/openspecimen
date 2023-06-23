@@ -138,6 +138,12 @@
       <caption>#getMessage("cp_label_seq_key")</caption>
       <attribute>labelSequenceKey</attribute>
     </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("cp_kit_labels")</caption>
+      <attribute>kitLabelsEnabled</attribute>
+    </field>
     
     <field>
       <caption>#getMessage("cp_spmn_label_pre_print_mode")</caption>

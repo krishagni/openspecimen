@@ -20,7 +20,9 @@ import com.krishagni.catissueplus.core.administrative.events.StorageLocationSumm
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
@@ -96,6 +98,8 @@ public class SpecimenDetail extends SpecimenInfo {
 	private boolean checkedOut;
 
 	private StorageLocationSummary checkoutPosition;
+
+	private String kitLabel;
 
 
 	public CollectionEventDetail getCollectionEvent() {
@@ -368,6 +372,14 @@ public class SpecimenDetail extends SpecimenInfo {
 		this.checkoutPosition = checkoutPosition;
 	}
 
+	public String getKitLabel() {
+		return kitLabel;
+	}
+
+	public void setKitLabel(String kitLabel) {
+		this.kitLabel = kitLabel;
+	}
+
 	@JsonIgnore
 	public String getLogKey() {
 		String result = getId().toString();
@@ -499,12 +511,38 @@ public class SpecimenDetail extends SpecimenInfo {
 			boolean partial,
 			boolean excludePhi,
 			boolean excludeChildren) {
+
+		if (visit != null && visit.getCpEvent() != null && visit.getCollectionProtocol().isKitLabelsEnabled()) {
+			Map<Long, String> kitLabels = visit.getKitLabels();
+			if (kitLabels == null) {
+				DaoFactory daoFactory = OpenSpecimenAppCtxProvider.getBean("biospecimenDaoFactory");
+				visit.setKitLabels(daoFactory.getSpecimenDao().getKitLabels(visit));
+			}
+		}
+
+
 		List<SpecimenDetail> result = Utility.stream(specimens)
 			.map(s -> SpecimenDetail.from(s, partial, excludePhi, excludeChildren))
 			.collect(Collectors.toList());
 
 		merge(visit, anticipated, result, null, getReqSpecimenMap(result), excludeChildren);
 		SpecimenDetail.sort(result);
+
+		if (visit != null && visit.getKitLabels() != null) {
+			List<SpecimenDetail> workingList = new ArrayList<>(result);
+			while (!workingList.isEmpty()) {
+				SpecimenDetail spmn = workingList.remove(0);
+				if (StringUtils.isNotBlank(spmn.getKitLabel()) || spmn.getReqId() == null) {
+					continue;
+				}
+
+				spmn.setKitLabel(visit.getKitLabels().get(spmn.getReqId()));
+				if (spmn.getChildren() != null) {
+					workingList.addAll(0, spmn.getChildren());
+				}
+			}
+		}
+
 		return result;
 	}
 

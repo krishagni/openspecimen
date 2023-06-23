@@ -445,6 +445,8 @@
       "LABEL": "Record Names/Labels"
     },
 
+    "kit_labels": "Kit Labels",
+
     "cpe_point_units_abbr": {
       "DAYS": "D",
       "WEEKS": "W",

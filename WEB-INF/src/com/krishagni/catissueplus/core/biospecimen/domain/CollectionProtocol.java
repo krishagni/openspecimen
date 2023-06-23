@@ -129,6 +129,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	
 	private Boolean manualSpecLabelEnabled;
 
+	private Boolean kitLabelsEnabled;
+
 	private Boolean bulkPartRegEnabled;
 
 	private Boolean specimenCentric;
@@ -415,6 +417,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	
 	public boolean isManualSpecLabelEnabled() {
 		return manualSpecLabelEnabled != null ? manualSpecLabelEnabled : false;
+	}
+
+	public void setKitLabelsEnabled(Boolean kitLabelsEnabled) {
+		this.kitLabelsEnabled = kitLabelsEnabled;
+	}
+
+	public boolean isKitLabelsEnabled() {
+		return Boolean.TRUE.equals(kitLabelsEnabled);
 	}
 
 	public boolean isBulkPartRegEnabled() {
@@ -736,6 +746,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setAdditionalLabelFormat(cp.getAdditionalLabelFormat());
 		setSpecimenBarcodeFormat(cp.getSpecimenBarcodeFormat());
 		setManualSpecLabelEnabled(cp.isManualSpecLabelEnabled());
+		setKitLabelsEnabled(cp.isKitLabelsEnabled());
 		setBulkPartRegEnabled(cp.isBulkPartRegEnabled());
 		setBarcodingEnabled(cp.isBarcodingEnabled());
 		setCloseParentSpecimens(cp.isCloseParentSpecimens());
@@ -789,6 +800,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setAdditionalLabelFormat(getAdditionalLabelFormat());
 		cp.setSpecimenBarcodeFormat(getSpecimenBarcodeFormat());
 		cp.setManualSpecLabelEnabled(isManualSpecLabelEnabled());
+		cp.setKitLabelsEnabled(isKitLabelsEnabled());
 		cp.setBulkPartRegEnabled(isBulkPartRegEnabled());
 		cp.setBarcodingEnabled(isBarcodingEnabled());
 		cp.setCloseParentSpecimens(isCloseParentSpecimens());

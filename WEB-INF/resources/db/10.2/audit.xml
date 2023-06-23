@@ -29,4 +29,11 @@
       <column name="emailSenderGroup_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP level setting to enable/disable usage of kit labels">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="KIT_LABELS_ENABLED" type="${boolean.type}" />
+      <column name="kitLabelsEnabled_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

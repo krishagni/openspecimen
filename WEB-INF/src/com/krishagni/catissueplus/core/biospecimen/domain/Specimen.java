@@ -53,6 +53,7 @@ import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -61,6 +62,8 @@ import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 @Configurable
 @Audited
 public class Specimen extends BaseExtensionEntity {
+	private static final LogUtil logger = LogUtil.getLogger(Specimen.class);
+
 	public static final String NEW = "New";
 	
 	public static final String ALIQUOT = "Aliquot";
@@ -1777,8 +1780,13 @@ public class Specimen extends BaseExtensionEntity {
 		if (StringUtils.isNotBlank(label) || isMissedOrNotCollected()) {
 			return;
 		}
-		
-		String labelTmpl = getLabelTmpl();				
+
+		if (getCollectionProtocol().isKitLabelsEnabled() && getSpecimenRequirement() != null) {
+			setLabel(getKitLabel(getVisit(), getSpecimenRequirement()));
+			return;
+		}
+
+		String labelTmpl = getLabelTmpl();
 		String label = null;
 		if (StringUtils.isNotBlank(labelTmpl)) {
 			label = labelGenerator.generateLabel(labelTmpl, this);
@@ -2089,6 +2097,17 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		return lineage.equals(NEW) || lineage.equals(DERIVED) || lineage.equals(ALIQUOT);
+	}
+
+	private String getKitLabel(Visit visit, SpecimenRequirement sr) {
+		List<String> labels = daoFactory.getSpecimenDao().getKitLabels(visit, sr);
+		if (labels.isEmpty()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.NO_KIT_LABEL, visit.getDescription(), sr.getDescription());
+		} else if (labels.size() > 1) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.MULTI_KIT_LABELS, visit.getDescription(), sr.getDescription());
+		}
+
+		return labels.iterator().next();
 	}
 
 	private void addToChildrenEvent(Specimen childSpmn) {

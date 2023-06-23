@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -117,6 +118,8 @@ public class Visit extends BaseExtensionEntity {
 	private transient boolean updated;
 
 	private transient boolean statusChanged;
+
+	private transient Map<Long, String> kitLabels;
 	
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -321,6 +324,14 @@ public class Visit extends BaseExtensionEntity {
 
 	public void setStatusChanged(boolean statusChanged) {
 		this.statusChanged = statusChanged;
+	}
+
+	public Map<Long, String> getKitLabels() {
+		return kitLabels;
+	}
+
+	public void setKitLabels(Map<Long, String> kitLabels) {
+		this.kitLabels = kitLabels;
 	}
 
 	public boolean isCompleted() {
@@ -589,6 +600,28 @@ public class Visit extends BaseExtensionEntity {
 
 	public boolean hasCollectedSpecimens() {
 		return getSpecimens().stream().anyMatch(s -> s.isActiveOrClosed() && s.isCollected());
+	}
+
+	public String getDescription() {
+		String desc = "";
+		if (StringUtils.isNotBlank(getName())) {
+			desc = getName() + ", ";
+		}
+
+		if (getCpEvent() != null) {
+			desc += getCpEvent().getEventLabel();
+			if (StringUtils.isNotBlank(getCpEvent().getCode())) {
+				desc += ", " + getCpEvent().getCode();
+			}
+		} else {
+			desc += "Unplanned";
+		}
+
+		if (getId() != null) {
+			desc += ", " + getId();
+		}
+
+		return desc;
 	}
 
 	private void ensureNoActiveChildObjects() {

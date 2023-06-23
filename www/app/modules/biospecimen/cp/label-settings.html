@@ -116,6 +116,11 @@
             <span class="value value-md">{{'cp.label_seq_keys.' + settingCtx.cp.labelSequenceKey | translate}}</span>
           </li>
 
+          <li class="item" ng-show="settingCtx.hasSupplies">
+            <strong class="key key-sm" translate="cp.kit_labels">Kit Labels</strong>
+            <span class="value value-md">{{settingCtx.cp.kitLabelsEnabled | osBoolValue: 'common.enabled' : 'common.disabled' : 'common.not_specified'}}</span>
+          </li>
+
           <li class="item" ng-show="!cp.specimenCentric">
             <strong class="key key-sm" translate="cp.on_visit_completion">On Visit Completion</strong>
             <span class="value value-md" ng-switch on="settingCtx.cp.visitCollectionMode">
@@ -381,6 +386,22 @@
           <label class="radio-inline">
             <input type="radio" name="labelSeqKey" ng-model="settingCtx.cp.labelSequenceKey" ng-value="'LABEL'">
             <span translate="cp.label_seq_keys.LABEL">Record Label</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" ng-if="settingCtx.hasSupplies">
+        <label class="control-label col-xs-3">
+          <span translate="cp.kit_labels">Kit Labels</span>
+        </label>
+        <div class="col-xs-6">
+          <label class="radio-inline">
+            <input type="radio" name="kitLabels" ng-model="settingCtx.cp.kitLabelsEnabled" ng-value="true">
+            <span translate="common.enabled">Enabled</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="kitLabels" ng-model="settingCtx.cp.kitLabelsEnabled" ng-value="false">
+            <span translate="common.disabled">Disabled</span>
           </label>
         </div>
       </div>

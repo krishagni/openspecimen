@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -75,4 +76,8 @@ public interface SpecimenDao extends Dao<Specimen> {
 	int activateSpecimen(Long specimenId, boolean includeChildren);
 
 	void savedPooledEvent(SpecimenPooledEvent event);
+
+	List<String> getKitLabels(Visit visit, SpecimenRequirement sr);
+
+	Map<Long, String> getKitLabels(Visit visit);
 }

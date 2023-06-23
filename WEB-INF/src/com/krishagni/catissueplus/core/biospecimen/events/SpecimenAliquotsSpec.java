@@ -9,6 +9,8 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
 public class SpecimenAliquotsSpec {
+	private Long id; // workflow support
+
 	private Long parentId;
 	
 	private String parentLabel;
@@ -69,7 +71,15 @@ public class SpecimenAliquotsSpec {
 
 	private boolean linkToReqs;
 
-	private Long reqId;
+	private List<Long> reqIds;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public Long getParentId() {
 		return parentId;
@@ -327,11 +337,11 @@ public class SpecimenAliquotsSpec {
 		this.linkToReqs = linkToReqs;
 	}
 
-	public Long getReqId() {
-		return reqId;
+	public List<Long> getReqIds() {
+		return reqIds;
 	}
 
-	public void setReqId(Long reqId) {
-		this.reqId = reqId;
+	public void setReqIds(List<Long> reqIds) {
+		this.reqIds = reqIds;
 	}
 }

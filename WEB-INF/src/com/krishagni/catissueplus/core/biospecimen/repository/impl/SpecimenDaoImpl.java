@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
@@ -368,6 +369,31 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	public void savedPooledEvent(SpecimenPooledEvent event) {
 		getCurrentSession().saveOrUpdate(event);
 		getCurrentSession().flush();
+	}
+
+	@Override
+	public List<String> getKitLabels(Visit visit, SpecimenRequirement sr) {
+		return createQuery(GET_KIT_LABELS_HQL, String.class)
+			.setParameter("visitId", visit.getId())
+			.setParameter("cpeId", visit.getCpEvent().getId())
+			.setParameter("srId", sr.getId())
+			.list();
+	}
+
+	// sr_id => label
+	@Override
+	public Map<Long, String> getKitLabels(Visit visit) {
+		List<Object[]> rows = createQuery(GET_VISIT_KIT_LABELS_HQL, Object[].class)
+			.setParameter("visitId", visit.getId())
+			.setParameter("eventId", visit.getCpEvent().getId())
+			.list();
+
+		Map<Long, String> labels = new HashMap<>();
+		for (Object[] row : rows) {
+			labels.put((Long) row[0], (String) row[1]);
+		}
+
+		return labels;
 	}
 
 	private void addIdsCond(AbstractCriteria<?, ?> query, List<Long> ids) {
@@ -741,4 +767,34 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	private static final String GET_DESCENDENTS_SQL =
 		"select descendent_id from catissue_specimen_hierarchy where ancestor_id = %d and ancestor_id != descendent_id";
+
+	private static final String GET_KIT_LABELS_HQL =
+		"select " +
+		"  si.barcode " +
+		"from " +
+		"  com.krishagni.openspecimen.supplies.domain.SupplyItem si " +
+		"  join si.rootItem ri " +
+		"  join si.cpe cpe " +
+		"  join si.sr sr " +
+		"where " +
+		"  ri.entityType = 'visit' and " +
+		"  ri.entityId = :visitId and " +
+		"  si.entityType = 'specimen' and " +
+		"  si.entityId is null and " +
+		"  cpe.id = :cpeId and " +
+		"  sr.id = :srId";
+
+	private static final String GET_VISIT_KIT_LABELS_HQL =
+		"select " +
+		"  sr.id as srId, si.barcode as barcode " +
+		"from " +
+		"  com.krishagni.openspecimen.supplies.domain.SupplyItem si " +
+		"  join si.rootItem ri " +
+		"  join si.cpe cpe " +
+		"  join si.sr sr " +
+		"where " +
+		"  ri.entityType = 'visit' and " +
+		"  ri.entityId = :visitId and " +
+		"  si.entityType = 'specimen' and " +
+		"  cpe.id = :eventId";
 }

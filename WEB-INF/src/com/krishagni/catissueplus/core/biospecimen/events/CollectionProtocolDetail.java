@@ -59,6 +59,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 	
 	private Boolean manualSpecLabelEnabled;
 
+	private Boolean kitLabelsEnabled;
+
 	private Boolean bulkPartRegEnabled;
 
 	private Boolean barcodingEnabled;
@@ -268,6 +270,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	public void setManualSpecLabelEnabled(Boolean manualSpecLabelEnabled) {
 		this.manualSpecLabelEnabled = manualSpecLabelEnabled;
+	}
+
+	public Boolean getKitLabelsEnabled() {
+		return kitLabelsEnabled;
+	}
+
+	public void setKitLabelsEnabled(Boolean kitLabelsEnabled) {
+		this.kitLabelsEnabled = kitLabelsEnabled;
 	}
 
 	public Boolean getBulkPartRegEnabled() {
@@ -491,6 +501,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setManualPpidEnabled(cp.isManualPpidEnabled());
 		result.setManualVisitNameEnabled(cp.isManualVisitNameEnabled());
 		result.setManualSpecLabelEnabled(cp.isManualSpecLabelEnabled());
+		result.setKitLabelsEnabled(cp.isKitLabelsEnabled());
 		result.setBulkPartRegEnabled(cp.isBulkPartRegEnabled());
 		result.setSpecimenCentric(cp.isSpecimenCentric());
 		result.setBarcodingEnabled(cp.isBarcodingEnabled());

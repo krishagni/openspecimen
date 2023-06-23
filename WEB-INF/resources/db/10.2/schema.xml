@@ -622,4 +622,10 @@
   <changeSet author="vpawar" id="Increase the width of external app message type column/field">
     <modifyDataType tableName="OS_EXT_APP_MESSAGE_LOGS" columnName="TYPE" newDataType="${text.type}(32)" />
   </changeSet>
+
+  <changeSet author="vpawar" id="CP level setting to enable/disable usage of kit labels">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="KIT_LABELS_ENABLED" type="${boolean.type}" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

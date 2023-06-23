@@ -61,6 +61,8 @@
 
     <property name="manualSpecLabelEnabled" column="MANUAL_SPEC_LABEL_ALLOWED"/>
 
+    <property name="kitLabelsEnabled" column="KIT_LABELS_ENABLED" />
+
     <property name="bulkPartRegEnabled" column="BULK_PART_REG_ALLOWED"/>
 
     <property name="specimenCentric" column="SPECIMEN_CENTRIC"/>

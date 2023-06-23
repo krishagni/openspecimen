@@ -651,13 +651,18 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		existing.setNameIfEmpty();
 		daoFactory.getVisitsDao().saveOrUpdate(existing);
 		existing.addOrUpdateExtension();
-		existing.printLabels(prevVisitStatus);
-
 		if (existing.isDeleted()) {
 			DeleteLogUtil.getInstance().log(existing);
 		}
 
 		EventPublisher.getInstance().publish(new VisitSavedEvent(existing));
+
+		//
+		// this might result in creation of pending specimens
+		// and associated supplies consumption
+		// therefore has to be invoked after emitting the visit saved event
+		//
+		existing.printLabels(prevVisitStatus);
 		return existing;
 	}
 

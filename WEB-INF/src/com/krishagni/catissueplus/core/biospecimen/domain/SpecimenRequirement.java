@@ -462,6 +462,19 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		setCode(Utility.getDisabledValue(getCode(), 32));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
+
+	public String getDescription() {
+		String desc = getLineage() + ", " + getSpecimenType().getValue();
+		if (StringUtils.isNotBlank(getCode())) {
+			desc += ", " + getCode();
+		} else if (StringUtils.isNotBlank(getName())) {
+			desc += ", " + getName();
+		} else {
+			desc += ", " + getId();
+		}
+
+		return desc;
+	}
 		
 	@Override
 	public int compareTo(SpecimenRequirement other) {
