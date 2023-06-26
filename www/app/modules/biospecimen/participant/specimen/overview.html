@@ -43,7 +43,7 @@
         </os-assign-to-spmn-list>
 
         <button show-if-allowed="specimenResource.updateOpts" class="default"
-          ng-if="specimenAllowedOps.notCoordinatOrStoreAllowed && specimen.activityStatus == 'Active' && specimen.status == 'Collected'"
+          ng-if="notCoordinatOrStoreAllowed && specimen.activityStatus == 'Active' && specimen.status == 'Collected'"
           ng-click="printSpecimenLabels()">
           <span class="fa fa-print"></span>
           <span translate="specimens.buttons.print">Print</span>
@@ -65,7 +65,7 @@
             </li>
 
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimenAllowedOps.notCoordinatOrStoreAllowed && !specimen.reserved && specimen.status == 'Collected'">
+              ng-if="notCoordinatOrStoreAllowed && !specimen.reserved && specimen.status == 'Collected'">
               <a ui-sref="specimen-detail.events(
                 {eventId: visit.eventId, visitId: visit.id, specimenId: specimen.id, srId: specimen.reqId})">
                 <span class="fa fa-calendar-o"></span>
@@ -74,7 +74,7 @@
             </li>
 
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimenAllowedOps.notCoordinatOrStoreAllowed && specimen.storageLocation.id > 0">
+              ng-if="notCoordinatOrStoreAllowed && specimen.storageLocation.id > 0">
               <a ng-click="checkout(specimen)">
                 <span class="fa fa-sign-out"></span>
                 <span translate="specimens.buttons.checkout">Checkout</span>
@@ -82,7 +82,7 @@
             </li>
 
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimenAllowedOps.notCoordinatOrStoreAllowed && specimen.checkoutPosition.id > 0">
+              ng-if="notCoordinatOrStoreAllowed && specimen.checkoutPosition.id > 0">
               <a ng-click="checkin(specimen)">
                 <span class="fa fa-sign-in"></span>
                 <span translate="specimens.buttons.checkin">Checkin</span>
@@ -90,7 +90,7 @@
             </li>
 
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimenAllowedOps.notCoordinatOrStoreAllowed && !specimen.reserved && specimen.activityStatus == 'Active'
+              ng-if="notCoordinatOrStoreAllowed && !specimen.reserved && specimen.activityStatus == 'Active'
                 && specimen.status == 'Collected'">
               <a ng-click="closeSpecimen()">
                 <span class="fa fa-remove"></span>
@@ -98,7 +98,7 @@
               </a>
             </li>
             <li show-if-allowed="specimenResource.updateOpts"
-              ng-if="specimenAllowedOps.notCoordinatOrStoreAllowed && specimen.activityStatus == 'Closed'">
+              ng-if="notCoordinatOrStoreAllowed && specimen.activityStatus == 'Closed'">
               <a ng-click="reopen()">
                 <span class="fa fa-check"></span>
                 <span translate="specimens.buttons.reopen">Reopen</span>

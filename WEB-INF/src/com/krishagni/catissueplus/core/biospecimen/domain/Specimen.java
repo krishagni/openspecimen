@@ -215,6 +215,8 @@ public class Specimen extends BaseExtensionEntity {
 
 	private transient boolean freezeThawIncremented;
 
+	private transient StorageContainerPosition oldPosition;
+
 	private transient User transferUser;
 
 	private transient Date transferTime;
@@ -1551,6 +1553,7 @@ public class Specimen extends BaseExtensionEntity {
 
 	private void transferTo(StorageContainerPosition newPosition, User user, Date time, String comments, boolean checkout) {
 		StorageContainerPosition oldPosition = getPosition();
+		setOldPosition(oldPosition);
 		if (StorageContainerPosition.areSame(oldPosition, newPosition)) {
 			// for closed and checked out specimens, both old and new position will be the same
 			if ((isDeleted() || isClosed()) && getCheckoutPosition() != null) {
@@ -1913,6 +1916,14 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		freezeThawIncremented = true;
+	}
+
+	public StorageContainerPosition getOldPosition() {
+		return oldPosition;
+	}
+
+	public void setOldPosition(StorageContainerPosition oldPosition) {
+		this.oldPosition = oldPosition;
 	}
 
 	public boolean isStoredInDistributionContainer() {

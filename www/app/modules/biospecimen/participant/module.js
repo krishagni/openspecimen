@@ -254,6 +254,11 @@ angular.module('os.biospecimen.participant',
                 return cpViewCtx.isCoordinator;
               }
             );
+          },
+
+          storeAllowed: function(cp, authInit, AuthorizationService) {
+            var sites = cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
+            return AuthorizationService.isAllowed({sites: sites, resource: 'StorageContainer', operations: ['Read']});
           }
         },
         parent: 'signed-in',

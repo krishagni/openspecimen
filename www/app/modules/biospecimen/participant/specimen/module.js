@@ -74,13 +74,18 @@ angular.module('os.biospecimen.specimen',
                 return setting.value == 'true' || setting.value == true;
               }
             );
+          },
+
+          notCoordinatOrStoreAllowed: function(cp, specimen, isCoordinator, storeAllowed) {
+            return !isCoordinator || (cp.storageSiteBasedAccess && storeAllowed && specimen.storageLocation && specimen.storageLocation.id > 0);
           }
         },
-        controller: function($scope, participantSpmnsViewState, specimen, imagingEnabled) {
+        controller: function($scope, participantSpmnsViewState, specimen, imagingEnabled, notCoordinatOrStoreAllowed) {
           $scope.specimen = $scope.object = specimen;
           $scope.entityType = 'Specimen';
           $scope.extnState = 'specimen-detail.extensions.';
           $scope.imagingEnabled = imagingEnabled;
+          $scope.notCoordinatOrStoreAllowed = notCoordinatOrStoreAllowed;
 
           participantSpmnsViewState.selectSpecimen(specimen);
           $scope.$on('$destroy', function() { participantSpmnsViewState.unselectSpecimen(); });
