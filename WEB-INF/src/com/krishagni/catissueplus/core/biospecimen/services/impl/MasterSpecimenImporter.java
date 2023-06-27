@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -90,10 +91,6 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 
 		if (StringUtils.isBlank(detail.getCpShortTitle())) {
 			throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
-		}
-
-		if (detail.getCollectionDate() == null) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_DATE_REQUIRED);
 		}
 
 		CollectionProtocolRegistration cpr = null;
@@ -233,9 +230,6 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 	
 	private void upsertSpecimen(MasterSpecimenDetail detail) {
 		SpecimenDetail specimenDetail = new SpecimenDetail();
-		specimenDetail.setCpShortTitle(detail.getCpShortTitle());
-		specimenDetail.setVisitId(detail.getVisitId());
-
 		if (detail.isAttrModified("reqCode")) {
 			specimenDetail.setReqCode(detail.getReqCode());
 		}
@@ -320,6 +314,9 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		setLocation(detail, specimenDetail);
 		setCollectionDetail(detail, specimenDetail);
 		setReceiveDetail(detail, specimenDetail);
+		if (specimenDetail.modifiedAttrsCount() == 0) {
+			return;
+		}
 
 		Specimen spmn = null;
 		if (StringUtils.isNotBlank(specimenDetail.getLabel())) {
@@ -330,10 +327,26 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 			spmn = daoFactory.getSpecimenDao().getByBarcodeAndCp(specimenDetail.getCpShortTitle(), specimenDetail.getBarcode());
 		}
 
+		specimenDetail.setCpShortTitle(detail.getCpShortTitle());
+		specimenDetail.setVisitId(detail.getVisitId());
+
 		ResponseEvent<SpecimenDetail> resp;
 		if (spmn == null) {
 			if (StringUtils.isBlank(specimenDetail.getStatus())) {
 				specimenDetail.setStatus(Specimen.COLLECTED);
+			}
+
+			if (detail.getCollectionDate() == null) {
+				Date collectionDate = detail.getVisitDate();
+				if (collectionDate == null) {
+					throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_DATE_REQUIRED);
+				}
+
+				if (specimenDetail.getCollectionEvent() == null) {
+					specimenDetail.setCollectionEvent(new CollectionEventDetail());
+				}
+
+				specimenDetail.getCollectionEvent().setTime(collectionDate);
 			}
 
 			resp = specimenSvc.createSpecimen(RequestEvent.wrap(specimenDetail));

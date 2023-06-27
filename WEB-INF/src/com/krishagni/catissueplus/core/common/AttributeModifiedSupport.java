@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.common;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,10 @@ public class AttributeModifiedSupport implements Serializable {
 	
 	public boolean isAttrModified(String attr) {
 		return modifiedAttrs.contains(attr);
+	}
+
+	public Set<String> modifiedAttrs() {
+		return Collections.unmodifiableSet(modifiedAttrs);
 	}
 
 	public int modifiedAttrsCount() {
