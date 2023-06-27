@@ -142,7 +142,7 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 			if (StringUtils.isBlank(detail.getVisitName())) {
 				cpr.getVisits().stream()
 					.filter(visit -> isVisitOfSameEvent(visit, detail.getEventLabel()))
-					.filter(visit -> DateUtils.isSameDay(visit.getVisitDate(), detail.getVisitDate()))
+					.filter(visit -> detail.getVisitDate() != null && DateUtils.isSameDay(visit.getVisitDate(), detail.getVisitDate()))
 					.findAny().ifPresent(matchedVisit -> detail.setVisitId(matchedVisit.getId()));
 			} else {
 				cpr.getVisits().stream()
@@ -209,10 +209,6 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 
 		ResponseEvent<VisitDetail> resp;
 		if (visitDetail.getId() != null) {
-			if (detail.isAttrModified("visitDate")) {
-				visitDetail.setVisitDate(detail.getVisitDate());
-			}
-
 			if (detail.isAttrModified("status")) {
 				visitDetail.setStatus(detail.getStatus());
 			}
