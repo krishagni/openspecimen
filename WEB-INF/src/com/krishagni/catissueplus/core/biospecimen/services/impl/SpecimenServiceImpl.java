@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -315,39 +316,39 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<SpecimenInfo>> bulkUpdateSpecimens(RequestEvent<BulkEntityDetail<SpecimenDetail>> req) {
+		final AtomicBoolean timeout = new AtomicBoolean(false);
+
 		try {
 			User currentUser = AuthUtil.getCurrentUser();
 			Future<List<SpecimenInfo>> result = taskExecutor.submit(
 				() ->  {
+					String emailTmpl = SPMNS_UPDATED_TMPL;
 					Map<String, Object> props = new HashMap<>();
 					props.put("rcpt", currentUser);
 					props.put("specimensCount", req.getPayload().getIds().size());
 
 					try {
 						AuthUtil.setCurrentUser(currentUser);
-						List<SpecimenInfo> updateSpecimens = bulkUpdateSpecimens(req.getPayload());
-						EmailUtil.getInstance().sendEmail(
-							SPMNS_UPDATED_TMPL,
-							new String[] { currentUser.getEmailAddress() },
-							null,
-							props);
-						return updateSpecimens;
+						return bulkUpdateSpecimens(req.getPayload());
 					} catch (Exception e) {
+						emailTmpl = SPMNS_UPDATE_FAILED_TMPL;
+
 						String stackTrace = ExceptionUtils.getStackTrace(e);
 						props.put("error", stackTrace);
-						EmailUtil.getInstance().sendEmail(
-							SPMNS_UPDATE_FAILED_TMPL,
-							new String[] { currentUser.getEmailAddress() },
-							null,
-							props
-						);
-
 						if (e instanceof OpenSpecimenException) {
-							throw (OpenSpecimenException) e;
+							throw e;
 						} else {
 							throw OpenSpecimenException.serverError(e);
 						}
 					} finally {
+						if (timeout.get()) {
+							EmailUtil.getInstance().sendEmail(
+								emailTmpl,
+								new String[] { currentUser.getEmailAddress() },
+								null,
+								props);
+						}
+
 						AuthUtil.clearCurrentUser();
 					}
 				}
@@ -355,6 +356,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 			return ResponseEvent.response(result.get(30000, TimeUnit.MILLISECONDS));
 		} catch (TimeoutException te) {
+			timeout.set(true);
 			return ResponseEvent.response(null);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
