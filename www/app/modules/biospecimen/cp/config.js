@@ -312,9 +312,9 @@ angular.module('openspecimen')
 
         return getWorkflowData(cpId, 'dictionary').then(
           function(data) {
-            var fields = data.fields;
+            var fields = angular.copy(data.fields || []);
             if (cpId == -1 || !cpId) {
-              return fields || [];
+              return fields;
             }
 
             if (fields && fields.length > 0) {
@@ -323,7 +323,7 @@ angular.module('openspecimen')
          
             return getWorkflowData(-1, 'dictionary').then(
               function(sysDict) {
-                var fields = sysDict.fields || defValue || [];
+                var fields = angular.copy(sysDict.fields || defValue || []);
                 if (fields.length == 0 || cpId == -1 || !cpId) {
                   return fields;
                 }
