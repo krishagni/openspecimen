@@ -10,4 +10,6 @@ public interface SearchEntityKeywordDao extends Dao<SearchEntityKeyword> {
 	List<SearchEntityKeyword> getMatches(String entity, String searchTerm, int maxResults);
 
 	List<String> getMatchingEntities(String entity, String searchTerm);
+
+	boolean isValidEntityShortName(String shortName);
 }

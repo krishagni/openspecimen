@@ -80,5 +80,18 @@
       order by
         r.sort_order
     </sql-query>
+
+    <sql-query name="getEntityRankByShortName">
+      <return-scalar column="entity" type="string" />
+      <return-scalar column="sort_order" type="integer" />
+      <return-scalar column="short_name" type="string" />
+
+      select
+        r.entity, r.sort_order, r.short_name
+      from
+        os_search_entity_ranks r
+      where
+        r.short_name = :shortName
+    </sql-query>
   </class>
 </hibernate-mapping>

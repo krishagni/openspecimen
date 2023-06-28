@@ -75,6 +75,7 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 			return Collections.emptyList();
 		}
 
+		String userInput = searchTerm;
 		searchTerm = searchTerm.toLowerCase();
 		String[] pairs = searchTerm.split(":", 2);
 		searchTerm = pairs[pairs.length - 1].trim();
@@ -82,6 +83,10 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 		String entity = null;
 		if (pairs.length > 1) {
 			entity = pairs[0].trim();
+			if (!daoFactory.getSearchEntityKeywordDao().isValidEntityShortName(entity)) {
+				entity = null;
+				searchTerm = userInput;
+			}
 		}
 
 		if (AuthUtil.isAdmin()) {

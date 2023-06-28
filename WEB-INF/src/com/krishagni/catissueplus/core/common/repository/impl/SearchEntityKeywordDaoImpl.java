@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.common.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.krishagni.catissueplus.core.common.domain.SearchEntityKeyword;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Query;
@@ -81,6 +83,14 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 		return query.setParameter("value", searchTerm + "%").list();
 	}
 
+	@Override
+	public boolean isValidEntityShortName(String shortName) {
+		List<Object[]> rows = createNamedQuery(GET_ENTITY_RANK_BY_SHORT_NAME, Object[].class)
+			.setParameter("shortName", shortName)
+			.list();
+		return CollectionUtils.isNotEmpty(rows);
+	}
+
 	private static final String FQN = SearchEntityKeyword.class.getName();
 
 	private static final String GET_KEYWORDS = FQN + ".getKeywords";
@@ -88,4 +98,6 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 	private static final String GET_MATCHES = FQN + ".getMatches";
 
 	private static final String GET_MATCHING_ENTITIES = FQN + ".getMatchingEntities";
+
+	private static final String GET_ENTITY_RANK_BY_SHORT_NAME = FQN + ".getEntityRankByShortName";
 }
