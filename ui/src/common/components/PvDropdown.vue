@@ -36,7 +36,7 @@ export default {
 
           if (opts.value || opts.value == 0) {
             try {
-              let id = parseInt(opts.value);
+              let id = +opts.value;
               if (!isNaN(id)) {
                 return http.get('permissible-values/v/' + id).then(pv => [pv]);
               }
