@@ -720,6 +720,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 				ensureUniqueConstraints(null, container);
 				container.validateRestrictions();
+				if (container.getPosition() != null) {
+					container.getPosition().occupy();
+				}
+
 				daoFactory.getStorageContainerDao().saveOrUpdate(container);
 				container.addOrUpdateExtension();
 				result.add(StorageContainerSummary.from(container));
