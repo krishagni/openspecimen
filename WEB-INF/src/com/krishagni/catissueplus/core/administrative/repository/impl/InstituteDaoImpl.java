@@ -28,7 +28,8 @@ public class InstituteDaoImpl extends AbstractDao<Institute> implements Institut
 	public List<InstituteDetail> getInstitutes(InstituteListCriteria listCrit) {
 		Criteria<Object[]> query = addProjectionFields(getInstituteListQuery(listCrit));
 
-		List<Object[]> rows = query.orderBy(query.asc("institute.name")).list();
+		List<Object[]> rows = query.orderBy(query.asc("institute.name"))
+			.list(listCrit.startAt(), listCrit.maxResults());
 		List<InstituteDetail> institutes = new ArrayList<>();
 		Map<Long, InstituteDetail> instituteMap = new HashMap<>();
 		
