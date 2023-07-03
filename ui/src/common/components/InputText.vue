@@ -2,11 +2,12 @@
 <template>
   <div class="os-input-text">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
-      <p-input-text type="text" v-model="inputValue" :tabindex="tabOrder" />
+      <p-input-text type="text" v-model="inputValue" :tabindex="tabOrder"  :disabled="$attrs.disabled" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <p-input-text type="text" v-model="inputValue" :tabindex="tabOrder" :placeholder="$attrs.placeholder"/>
+      <p-input-text type="text" v-model="inputValue" :tabindex="tabOrder"
+        :placeholder="$attrs.placeholder" :disabled="$attrs.disabled" />
     </div>
   </div>
 </template>
