@@ -2517,6 +2517,10 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 						SpecimenRequirementDetail detail = SpecimenRequirementDetail.from(sr, false);
 						detail.setCpShortTitle(cp.getShortTitle());
 						detail.setEventLabel(cpe.getEventLabel());
+						if (sr.getParentSpecimenRequirement() != null) {
+							detail.setParentSrCode(sr.getParentSpecimenRequirement().getCode());
+						}
+
 						result.add(detail);
 					}
 				}
