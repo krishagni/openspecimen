@@ -1321,7 +1321,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	}
 
 	private Function<ExportJob, List<?>> getUsersGenerator(Function<List<User>, List<?>> transformer) {
-		return new Function<ExportJob, List<?>>() {
+		return new Function<>() {
 			private boolean endOfUsers;
 
 			private int startAt;
@@ -1337,6 +1337,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 				}
 
 				UserListCriteria listCrit = addUserListCriteria(new UserListCriteria().startAt(startAt).ids(job.getRecordIds()));
+				if (CollectionUtils.isNotEmpty(job.getRecordIds())) {
+					listCrit.maxResults(job.getRecordIds().size());
+				}
+
 				List<User> users = daoFactory.getUserDao().getUsers(listCrit);
 				startAt += users.size();
 				if (users.isEmpty() || CollectionUtils.isNotEmpty(job.getRecordIds())) {

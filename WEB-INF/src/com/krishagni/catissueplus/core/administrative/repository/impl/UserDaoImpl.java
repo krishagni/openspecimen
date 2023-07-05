@@ -46,6 +46,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 	public List<User> getUsers(UserListCriteria listCrit) {
 		Criteria<User> query = getUsersListQuery(listCrit);
+		listCrit.maxResults(CollectionUtils.isNotEmpty(listCrit.ids()) ? listCrit.ids().size() : listCrit.maxResults());
 		return query.orderBy(query.asc("u.firstName"), query.asc("u.lastName"))
 			.list(listCrit.startAt(), listCrit.maxResults());
 	}
