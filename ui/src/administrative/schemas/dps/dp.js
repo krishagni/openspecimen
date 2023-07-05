@@ -212,6 +212,11 @@ export default {
             "institute": "currentUser.instituteName"
           }
         }
+      },
+      "validations": {
+        "required": {
+          "messageCode": "dps.dist_site_req"
+        }
       }
     }
   ]
