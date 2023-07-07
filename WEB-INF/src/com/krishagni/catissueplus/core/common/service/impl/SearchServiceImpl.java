@@ -75,8 +75,7 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 			return Collections.emptyList();
 		}
 
-		String userInput = searchTerm;
-		searchTerm = searchTerm.toLowerCase();
+		String userInput = searchTerm = searchTerm.toLowerCase();
 		String[] pairs = searchTerm.split(":", 2);
 		searchTerm = pairs[pairs.length - 1].trim();
 
