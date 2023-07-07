@@ -258,6 +258,8 @@
         fc.deleted_on is null and
         re.activity_status = 'ACTIVE' and
         (re.form_status is null or re.form_status = 'COMPLETE')
+      order by
+        re.update_time desc
     </sql-query>
 
     <sql-query name="moveRegistrationRecords">
