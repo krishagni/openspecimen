@@ -158,7 +158,9 @@
       cascade="save-update"
       fetch="join" />
 
-    <set name="occupiedPositions" table="OS_CONTAINER_POSITIONS" cascade="all-delete-orphan" inverse="true" batch-size="25">
+    <!-- OPSMN-6269: do not use batch size on occupied positions as this can result in materialising of dimensionless
+         container positions as well. -->
+    <set name="occupiedPositions" table="OS_CONTAINER_POSITIONS" cascade="all-delete-orphan" inverse="true">
       <key column="STORAGE_CONTAINER_ID" not-null="true"/>
       <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"/>
     </set>
