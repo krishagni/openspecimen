@@ -60,6 +60,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.LabelPrintJobSummary;
+import com.krishagni.catissueplus.core.common.events.LabelTokenDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
@@ -484,15 +485,15 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		}
 	}
 
+	@Override
+	public List<LabelTokenDetail> getPrintLabelTokens() {
+		return LabelTokenDetail.from("print_", getLabelPrinter().getTokens());
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public LabelPrinter<Visit> getLabelPrinter() {
-		String beanName = cfgSvc.getStrSetting(
-				ConfigParams.MODULE, 
-				ConfigParams.VISIT_LABEL_PRINTER, 
-				"defaultVisitLabelPrinter");
-		
-		return (LabelPrinter<Visit>)OpenSpecimenAppCtxProvider.getAppCtx().getBean(beanName);
+		return Visit.getLabelPrinter();
 	}
 
 	@PlusTransactional

@@ -1,30 +1,45 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class VisitLabelPrintRule extends LabelPrintRule {
-	private String cpShortTitle;
+	private List<CollectionProtocol> cps = new ArrayList<>();
 	
-	private String visitSite;
+	private Site visitSite;
 
-	public String getCpShortTitle() {
-		return cpShortTitle;
-	}
-	
-	public void setCpShortTitle(String cpShortTitle) {
-		this.cpShortTitle = cpShortTitle;
+	public void setCp(CollectionProtocol cp) {
+		cps = new ArrayList<>();
+		cps.add(cp);
 	}
 
-	public String getVisitSite() {
+	public List<CollectionProtocol> getCps() {
+		return cps;
+	}
+
+	public void setCps(List<CollectionProtocol> cps) {
+		this.cps = cps;
+	}
+
+
+	public Site getVisitSite() {
 		return visitSite;
 	}
 
-	public void setVisitSite(String visitSite) {
+	public void setVisitSite(Site visitSite) {
 		this.visitSite = visitSite;
 	}
 
@@ -32,12 +47,12 @@ public class VisitLabelPrintRule extends LabelPrintRule {
 		if (!super.isApplicableFor(user, ipAddr)) {
 			return false;
 		}
-		
-		if (!isWildCard(cpShortTitle) && !visit.getCollectionProtocol().getShortTitle().equals(cpShortTitle)) {
+
+		if (CollectionUtils.isNotEmpty(cps) && cps.stream().noneMatch(cp -> cp.equals(visit.getCollectionProtocol()))) {
 			return false;
 		}
-		
-		if (!isWildCard(visitSite) && (visit.getSite() == null || !visit.getSite().getName().equals(visitSite))) {
+
+		if (visitSite != null && !visitSite.equals(visit.getSite())) {
 			return false;
 		}
 
@@ -47,15 +62,23 @@ public class VisitLabelPrintRule extends LabelPrintRule {
 	@Override
 	protected Map<String, Object> getDefMap(boolean ufn) {
 		Map<String, Object> ruleDef = new HashMap<>();
-		ruleDef.put("cpShortTitle", getCpShortTitle());
-		ruleDef.put("visitSite", getVisitSite());
+		ruleDef.put("cps", getCpList(ufn));
+		ruleDef.put("visitSite", getSite(ufn, getVisitSite()));
 		return ruleDef;
 	}
 
 	public String toString() {
-		return new StringBuilder(super.toString())
-			.append(", cp = ").append(getCpShortTitle())
-			.append(", visit site = ").append(getVisitSite())
-			.toString();
+		return super.toString() +
+			", cp = " + getCpList(true) +
+			", visit site = " + getSite(true, getVisitSite());
+	}
+
+	private List<String> getCpList(boolean ufn) {
+		Function<CollectionProtocol, String> cpMapper = ufn ? CollectionProtocol::getShortTitle : (cp) -> cp.getId().toString();
+		return Utility.nullSafeStream(getCps()).map(cpMapper).collect(Collectors.toList());
+	}
+
+	private String getSite(boolean ufn, Site site) {
+		return site != null ? (ufn ? site.getName() : site.getId().toString()) : null;
 	}
 }

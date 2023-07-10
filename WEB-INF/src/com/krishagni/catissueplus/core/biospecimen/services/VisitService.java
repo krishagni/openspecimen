@@ -17,6 +17,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.VisitsListCriteria
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.LabelPrintJobSummary;
+import com.krishagni.catissueplus.core.common.events.LabelTokenDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
@@ -61,6 +62,8 @@ public interface VisitService {
 	//
 	// Internal APIs
 	//
+	List<LabelTokenDetail> getPrintLabelTokens();
+
 	LabelPrinter<Visit> getLabelPrinter();
 
 	List<Visit> getVisitsByName(List<String> visitNames);

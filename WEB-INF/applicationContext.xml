@@ -1106,6 +1106,12 @@
   <bean id="labelPrintRuleFactoryRegistrar" class="com.krishagni.catissueplus.core.common.domain.LabelPrintRuleFactoryRegistrar" factory-method="getInstance">
     <property name="printRuleFactories">
       <map>
+        <entry key="VISIT">
+          <bean class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.VisitNamePrintRuleFactoryImpl">
+            <property name="daoFactory" ref="biospecimenDaoFactory" />
+            <property name="printLabelTokensRegistrar" ref="visitPrintLabelTokensRegistrar" />
+          </bean>
+        </entry>
         <entry key="SPECIMEN">
           <bean class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.SpecimenLabelPrintRuleFactoryImpl">
             <property name="daoFactory" ref="biospecimenDaoFactory"/>
