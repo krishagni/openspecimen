@@ -39,7 +39,13 @@ export default {
       },
 
       set(value) {
-        this.$emit('update:modelValue', +value);
+        if (value == '.') {
+          value = '0.';
+        } else {
+          value = +value;
+        }
+
+        this.$emit('update:modelValue', value);
       }
     },
 
