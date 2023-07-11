@@ -52,11 +52,7 @@ public class VisitLabelPrintRule extends LabelPrintRule {
 			return false;
 		}
 
-		if (visitSite != null && !visitSite.equals(visit.getSite())) {
-			return false;
-		}
-
-		return true;
+		return visitSite == null || visitSite.equals(visit.getSite());
 	}
 
 	@Override
