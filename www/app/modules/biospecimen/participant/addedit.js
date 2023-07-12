@@ -82,6 +82,14 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
         );
       }
 
+      $scope.$watch('cpr.participant.birthDate',
+        function(newVal, oldVal) {
+          if (!newVal) {
+            $scope.cpr.participant.birthDateStr = null;
+          }
+        }
+      );
+
       loadDocuments();
     };
 
@@ -192,7 +200,10 @@ angular.module('os.biospecimen.participant.addedit', ['os.biospecimen.models', '
         return;
       }
 
-      var cprToSave = angular.copy($scope.cpr);
+      $scope.cpr.participant.birthDateStr = null;
+      var cprToSave = new CollectionProtocolRegistration(
+        JSON.parse(JSON.stringify($scope.cpr, function(k, v) { return v === undefined ? null : v; }))
+      );
       cprToSave.cpId = $scope.cpId;
       cprToSave.site = cprToSave.site || '';
 
