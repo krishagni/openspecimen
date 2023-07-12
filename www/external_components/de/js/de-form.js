@@ -291,7 +291,7 @@ edu.common.de.SkipLogic = function(form, fieldObj, fieldAttrs) {
       fieldObj.postRender();
     } else {
       fieldObj.$el.hide();
-      fieldObj.setValue(fieldObj.recId, undefined); // clear field value
+      fieldObj.setValue(fieldObj.recId, null); // clear field value
     }
   }
 
@@ -1220,7 +1220,8 @@ edu.common.de.DatePicker = function(id, field, args) {
 
   this.setValue = function(recId, value) {
     this.recId = recId;
-    if (!value || (typeof value == 'string' && value.trim().length == 0)) {
+    if (value === null || value === undefined || (typeof value == 'string' && value.trim().length == 0)) {
+      this.dateEl.val(null);
       return;
     }
 
