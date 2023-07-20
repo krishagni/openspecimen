@@ -259,7 +259,7 @@ public class UserSummary implements Serializable {
 		result.setFirstName(user.getFirstName());
 		result.setLastName(user.getLastName());
 		result.setLoginName(user.getLoginName());
-		result.setDomain(user.getAuthDomain().getName());
+		result.setDomain(user.getAuthDomain() != null ? user.getAuthDomain().getName() : null);
 		result.setEmailAddress(user.getEmailAddress());
 		result.setAdmin(user.isAdmin());
 		result.setInstituteAdmin(user.isInstituteAdmin());
