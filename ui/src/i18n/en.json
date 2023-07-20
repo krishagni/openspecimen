@@ -1,5 +1,6 @@
 {
   "audit": {
+    "download_revision": "Download Revision",
     "entered_by": "Entered By",
     "entered_on": "Entered On",
     "no_of_revs": "Number of Revisions",

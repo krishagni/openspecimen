@@ -70,7 +70,7 @@ button:hover {
 }
 
 .btn.btn-xs {
-  padding: 1px 6px;
+  padding: 0px 6px;
 }
 
 .inline-button.btn {
