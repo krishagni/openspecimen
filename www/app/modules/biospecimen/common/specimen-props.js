@@ -224,7 +224,7 @@ angular.module('os.biospecimen.common.specimenprops', [])
         '</span>'
     }
   })
-  .filter("osSpecimenQuantity", function(SpecimenPropsSvc) {
+  .filter("osSpecimenQuantity", function(SpecimenPropsSvc, $filter) {
     var propsInited = false;
 
     return function(input, spmn, measure) {
@@ -236,6 +236,10 @@ angular.module('os.biospecimen.common.specimenprops', [])
         SpecimenPropsSvc.getProps(spmn.specimenClass, spmn.type);
         propsInited = true;
         return input; // will be called again
+      }
+
+      if (input === undefined || input === null) {
+        return $filter('osNoValue')(input);
       }
 
       var props = SpecimenPropsSvc.getPropsFromMap(spmn.specimenClass, spmn.type) || {};
