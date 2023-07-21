@@ -3,7 +3,7 @@
   <div class="os-navbar">
     <div class="items">
       <div class="logo">
-        <a href="http://www.openspecimen.org" target="_blank" relopener="noopener">
+        <a :href="homeUrl" relopener="noopener">
           <img :src="osLogo">
         </a>
         <a class="deploy-logo" :href="deploySiteUrl" v-if="deploySiteLogo" target="_blank" rel="noopener">
@@ -61,6 +61,7 @@
 
 import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
+import routerSvc from '@/common/services/Router.js';
 
 import Search        from '@/common/components/Search';
 import NewStuff      from '@/common/components/NewStuff';
@@ -113,6 +114,10 @@ export default {
 
     username: function() {
       return this.$filters.username(this.$ui.currentUser);
+    },
+
+    homeUrl: function() {
+      return routerSvc.ngUrl('home');
     }
   },
 
