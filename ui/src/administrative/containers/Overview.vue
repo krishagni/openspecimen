@@ -408,7 +408,8 @@ export default {
       alertsSvc.success({code: 'containers.deleted', args: container});
 
       if (container.storageLocation && container.storageLocation.id) {
-        routerSvc.goto('ContainerDetail.Overview', {containerId: container.storageLocation.id});
+        await routerSvc.goto('ContainerDetail.Overview', {containerId: container.storageLocation.id});
+        routerSvc.reload();
       } else {
         routerSvc.goto('ContainersList', {containerId: -1});
       }

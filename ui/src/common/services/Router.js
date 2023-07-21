@@ -42,7 +42,7 @@ class Router {
   }
 
   goto(name, params, query) {
-    router.push({name: name, params: params || {}, query: query || {}});
+    return router.push({name: name, params: params || {}, query: query || {}});
   }
 
   back() {
