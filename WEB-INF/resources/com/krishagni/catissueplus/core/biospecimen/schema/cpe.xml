@@ -52,16 +52,6 @@
     </field>
 
     <field>
-      <caption>#getMessage("cpe_when_to_print")</caption>
-      <attribute>visitNamePrintMode</attribute>
-    </field>
-
-    <field>
-      <caption>#getMessage("cpe_print_copies")</caption>
-      <attribute>visitNamePrintCopies</attribute>
-    </field>
-    
-    <field>
       <caption>#getMessage("cpe_activity_status")</caption>
       <attribute>activityStatus</attribute>
     </field>

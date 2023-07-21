@@ -93,15 +93,6 @@
       </type>
     </property>
 
-    <property name="visitNamePrintMode" column="VISIT_NAME_PRINT_MODE">
-      <type name="org.hibernate.type.EnumType">
-        <param name="enumClass">com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol$VisitNamePrintMode</param>
-        <param name="type">12</param>
-      </type>
-    </property>
-
-    <property name="visitNamePrintCopies" column="VISIT_NAME_PRINT_COPIES"/>
-
     <property name="spmnLabelPrePrintMode" column="SPMN_LABEL_PRE_PRINT_MODE">
       <type name="org.hibernate.type.EnumType">
         <param name="enumClass">com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol$SpecimenLabelPrePrintMode</param>

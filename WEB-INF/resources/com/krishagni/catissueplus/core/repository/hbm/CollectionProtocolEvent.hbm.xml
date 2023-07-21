@@ -44,15 +44,6 @@
 
     <many-to-one name="clinicalStatus" column="CLINICAL_STATUS_ID" fetch="join"/>
 
-    <property name="visitNamePrintMode" column="VISIT_NAME_PRINT_MODE">
-      <type name="org.hibernate.type.EnumType">
-        <param name="enumClass">com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol$VisitNamePrintMode</param>
-        <param name="type">12</param>
-      </type>
-    </property>
-
-    <property name="visitNamePrintCopies" column="VISIT_NAME_PRINT_COPIES"/>
-
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
     <set
