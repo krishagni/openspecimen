@@ -1054,7 +1054,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			CsvWriter csvWriter = null;
 
 			try {
-				AuthUtil.setCurrentUser(job.getCreatedBy());
+				AuthUtil.setCurrentUser(job.getCreatedBy(), job.getIpAddress());
 				ImporterContextHolder.getInstance().newContext();
 				saveJob(totalRecords, failedRecords, Status.IN_PROGRESS);
 				if (job.isStopped()) {

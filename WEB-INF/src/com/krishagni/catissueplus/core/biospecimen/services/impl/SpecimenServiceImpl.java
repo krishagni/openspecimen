@@ -320,6 +320,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 		try {
 			User currentUser = AuthUtil.getCurrentUser();
+			String ipAddress = AuthUtil.getRemoteAddr();
 			Future<List<SpecimenInfo>> result = taskExecutor.submit(
 				() ->  {
 					String emailTmpl = SPMNS_UPDATED_TMPL;
@@ -328,7 +329,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 					props.put("specimensCount", req.getPayload().getIds().size());
 
 					try {
-						AuthUtil.setCurrentUser(currentUser);
+						AuthUtil.setCurrentUser(currentUser, ipAddress);
 						return bulkUpdateSpecimens(req.getPayload());
 					} catch (Exception e) {
 						emailTmpl = SPMNS_UPDATE_FAILED_TMPL;
