@@ -48,6 +48,8 @@ public class Participant extends BaseExtensionEntity {
 
 	private String emailAddress;
 
+	private String phoneNumber;
+
 	private PermissibleValue gender;
 
 	private String sexGenotype;
@@ -132,6 +134,14 @@ public class Participant extends BaseExtensionEntity {
 		} else {
 			this.emailAddress = emailAddress;
 		}
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public PermissibleValue getGender() {
@@ -274,6 +284,7 @@ public class Participant extends BaseExtensionEntity {
 		setUid(participant.getUid());
 		setEmpi(participant.getEmpi());
 		setEmailAddress(participant.getEmailAddress());
+		setPhoneNumber(participant.getPhoneNumber());
 		setActivityStatus(participant.getActivityStatus());
 		setSexGenotype(participant.getSexGenotype());
 		setVitalStatus(participant.getVitalStatus());

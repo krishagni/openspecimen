@@ -19,6 +19,11 @@
 </field>
 
 <field>
+  <caption>#getMessage("participant_phone_number")</caption>
+  <attribute>phoneNumber</attribute>
+</field>
+
+<field>
   <type>dateOnly</type>
   <caption>#getMessage("participant_dob")</caption>
   <attribute>birthDate</attribute>

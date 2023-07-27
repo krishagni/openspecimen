@@ -306,6 +306,7 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 		setEmpi(detail, participant, partial, ose);
 		setName(detail, participant, partial, ose);
 		setEmailAddress(detail, participant, partial, ose);
+		setPhoneNumber(detail, participant, partial, ose);
 		setVitalStatus(detail, participant, partial, ose);
 		setBirthAndDeathDate(detail, participant, partial, ose);
 		setActivityStatus(detail, participant, partial, ose);
@@ -393,6 +394,12 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 			}
 
 			participant.setEmailAddress(detail.getEmailAddress());
+		}
+	}
+
+	private void setPhoneNumber(ParticipantDetail detail, Participant participant, boolean partial, OpenSpecimenException ose) {
+		if (!partial || detail.isAttrModified("phoneNumber")) {
+			participant.setPhoneNumber(detail.getPhoneNumber());
 		}
 	}
 

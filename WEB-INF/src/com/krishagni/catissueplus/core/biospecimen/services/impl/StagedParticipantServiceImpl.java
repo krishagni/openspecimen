@@ -212,6 +212,7 @@ public class StagedParticipantServiceImpl implements StagedParticipantService {
 		participant.setMiddleName(detail.getMiddleName());
 		participant.setLastName(detail.getLastName());
 		participant.setEmailAddress(detail.getEmailAddress());
+		participant.setPhoneNumber(detail.getPhoneNumber());
 		participant.setBirthDate(detail.getBirthDate());
 		participant.setDeathDate(detail.getDeathDate());
 		participant.setGender(getPv(PvAttributes.GENDER, detail.getGender(), ParticipantErrorCode.INVALID_GENDER));

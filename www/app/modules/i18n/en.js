@@ -556,6 +556,7 @@
     "last_name": "Last Name",
     "middle_name": "Middle Name",
     "email_address": "Email Address",
+    "phone_number": "Phone Number",
     "birth_date": "Birth Date",
     "uid": "National ID",
     "mpi": "Master Patient Index",

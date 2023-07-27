@@ -20,6 +20,8 @@ public class ParticipantSummary {
 
 	private String emailAddress;
 
+	private String phoneNumber;
+
 	private Date birthDate;
 
 	public Long getId() {
@@ -78,6 +80,14 @@ public class ParticipantSummary {
 		this.emailAddress = emailAddress;
 	}
 
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
 	public Date getBirthDate() {
 		return birthDate;
 	}
@@ -99,6 +109,7 @@ public class ParticipantSummary {
 		result.setEmpi(p.getEmpi());
 		result.setUid(p.getUid());
 		result.setEmailAddress(p.getEmailAddress());
+		result.setPhoneNumber(p.getPhoneNumber());
 		result.setBirthDate(p.getBirthDate());
 		return result;
 	}

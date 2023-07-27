@@ -34,6 +34,11 @@
     </li>
 
     <li class="item">
+      <strong class="key key-sm" translate="participant.phone_number">Phone Number</strong>
+      <span class="value value-md"> {{cpr.participant.phoneNumber | osNoValue}} </span>
+    </li>
+
+    <li class="item">
       <strong class="key key-sm" translate="participant.birth_date">Birth Date:</strong>
       <span class="value value-md"> {{cpr.participant.birthDate | date: global.dateFmt | osNoValue}} </span>
     </li>

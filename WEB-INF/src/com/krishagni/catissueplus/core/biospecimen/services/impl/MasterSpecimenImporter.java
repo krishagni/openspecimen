@@ -393,6 +393,10 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 			participantDetail.setEmailAddress(detail.getEmailAddress());
 		}
 
+		if (detail.isAttrModified("phoneNumber")) {
+			participantDetail.setPhoneNumber(detail.getPhoneNumber());
+		}
+
 		if (detail.isAttrModified("birthDate")) {
 			participantDetail.setBirthDate(detail.getBirthDate());
 		}

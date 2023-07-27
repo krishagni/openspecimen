@@ -51,6 +51,15 @@
       </textField>
     </row>
     <row>
+      <textField>
+        <name>phoneNumber</name>
+        <udn>phoneNumber</udn>
+        <caption>#getMessage("participant_phone_number")</caption>
+        <column>PHONE_NUMBER</column>
+        <phi>true</phi>
+      </textField>
+    </row>
+    <row>
       <datePicker>
         <name>dateOfBirth</name>
         <udn>dateOfBirth</udn>
