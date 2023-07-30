@@ -90,6 +90,7 @@
           </os-page-toolbar>
 
           <os-list-view
+            :context="ctx.ui"
             :data="ctx.users"
             :schema="ctx.listSchema"
             :query="ctx.query"
@@ -120,7 +121,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { inject, reactive } from 'vue';
 
 import userGrpSvc from '@/administrative/services/UserGroup.js';
 import userSvc from '@/administrative/services/User.js';
@@ -141,6 +142,8 @@ import Announcement from './Announcement.vue';
 export default {
   name: 'UsersList',
 
+  inject: ['ui'],
+
   props: ['filters', 'userId', 'groupId'],
 
   components: {
@@ -149,7 +152,10 @@ export default {
   },
 
   setup(props) {
+    const ui = inject('ui');
     let ctx = reactive({
+      ui: ui,
+
       inited: false,
 
       group: undefined,

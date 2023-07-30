@@ -352,6 +352,7 @@ export default {
       }
 
       trCont.checkOut = this.trCtx.checkout;
+      trCont.status = null;
       await containerSvc.saveOrUpdate(trCont);
       routerSvc.reload();
     },

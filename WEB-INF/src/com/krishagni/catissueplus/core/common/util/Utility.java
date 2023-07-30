@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +43,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,7 +61,6 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -1031,6 +1030,10 @@ public class Utility {
 	}
 
 	public static File tarGzip(File sourceDir, File destDir) {
+		return tarGzip(sourceDir, destDir, null);
+	}
+
+	public static File tarGzip(File sourceDir, File destDir, Predicate<File> filter) {
 		if (!sourceDir.isDirectory()) {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Source directory path is required");
 		}
@@ -1049,6 +1052,10 @@ public class Utility {
 			Files.walkFileTree(sourceDirPath, new SimpleFileVisitor<Path>() {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes fattrs) {
 					if (fattrs.isSymbolicLink()) {
+						return FileVisitResult.CONTINUE;
+					}
+
+					if (filter != null && !filter.test(file.toFile())) {
 						return FileVisitResult.CONTINUE;
 					}
 

@@ -31,6 +31,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorC
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
@@ -67,6 +68,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 			container.setId(detail.getId());
 		}
 
+		setStatus(detail, existing, container, ose);
 		setName(detail, existing, container, ose);
 		setBarcode(detail, existing, container, ose);
 		setDisplayName(detail, existing, container, ose);
@@ -166,6 +168,18 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		setComputedRestrictions(container);
 		container.setType(type);
 		return container;
+	}
+
+	private void setStatus(StorageContainerDetail detail, StorageContainer existing, StorageContainer container, OpenSpecimenException ose) {
+		if (detail.isAttrModified("status") || existing == null) {
+			try {
+				container.setStatus(detail.getStatus() == null ? null : StorageContainer.Status.valueOf(detail.getStatus()));
+			} catch (Exception e) {
+				ose.addError(CommonErrorCode.INVALID_INPUT, "Invalid status: " + detail.getStatus());
+			}
+		} else {
+			container.setStatus(existing.getStatus());
+		}
 	}
 	
 	private void setName(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
@@ -621,7 +635,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	private void setPosition(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
 		StorageContainer parentContainer = container.getParentContainer();
 		StorageLocationSummary location = detail.getStorageLocation();
-		if (parentContainer == null || location == null) { // top-level container; therefore no position
+		if (parentContainer == null || location == null || container.isCheckedOut()) { // top-level container or checked out; therefore no position
 			return;
 		}
 
@@ -644,7 +658,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 			position = parentContainer.nextAvailablePosition();
 			if (position == null) {
 				ose.addError(StorageContainerErrorCode.NO_FREE_SPACE, parentContainer.getName());
-			} 
+			}
 		} 
 		
 		if (position != null) {

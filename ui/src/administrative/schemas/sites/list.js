@@ -57,7 +57,8 @@ export default {
           opts.name = opts.query;
           return instituteSvc.getInstitutes(opts);
         }
-      }
+      },
+      showWhen: "currentUser.admin"
     }
   ]
 }

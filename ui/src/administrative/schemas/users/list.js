@@ -68,7 +68,8 @@ export default {
         displayProp: 'name',
         selectProp: 'name',
         searchProp: 'name'
-      }
+      },
+      showWhen: "currentUser.admin"
     },
     {
       name: 'group',
