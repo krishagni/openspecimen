@@ -52,6 +52,7 @@
           </os-page-toolbar>
 
           <os-list-view
+            :context="ctx.ui"
             :data="ctx.sites"
             :schema="listSchema"
             :query="ctx.query"
@@ -94,6 +95,7 @@ export default {
   data() {
     return {
       ctx: {
+        ui: this.$ui,
         sites: [],
         sitesCount: -1,
         loading: true,
