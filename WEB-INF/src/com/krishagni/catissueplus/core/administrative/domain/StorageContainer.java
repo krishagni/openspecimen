@@ -584,6 +584,11 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 
 	@NotAudited
+	public boolean isCheckedOut() {
+		return status == Status.CHECKED_OUT;
+	}
+
+	@NotAudited
 	public StorageContainerStats getStats() {
 		return stats;
 	}
