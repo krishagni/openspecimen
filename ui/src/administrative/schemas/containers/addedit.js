@@ -49,8 +49,7 @@ export default {
                 "expr": "createType == 'hierarchy'",
                 "message": "Container type is mandatory"
               }
-            },
-            "showWhen": "dimensionLess != true"
+            }
           }
         ]
       },

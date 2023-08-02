@@ -39,6 +39,7 @@ export default {
 
         return null;
       },
+      "showInOverviewWhen": "type.noOfRows > 0 && type.noOfColumns > 0",
     },
     {
       "type": "number",
@@ -76,6 +77,7 @@ export default {
           "messageCode": "container_types.position_labeling_required"
         }
       },
+      "showInOverviewWhen": "type.noOfRows > 0 && type.noOfColumns > 0",
       "summary": true
     },
     {
@@ -89,6 +91,7 @@ export default {
 
         return null;
       },
+      "showInOverviewWhen": "type.noOfRows > 0 && type.noOfColumns > 0",
       "summary": true
     },
     {
@@ -155,6 +158,7 @@ export default {
         "selectProp": "name",
         "displayProp": "value"
       },
+      "showInOverviewWhen": "type.noOfRows > 0 && type.noOfColumns > 0",
       "validations": {
         "required": {
           "messageCode": "container_types.position_assignment_required"

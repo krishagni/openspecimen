@@ -678,7 +678,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				cloned.addOrUpdateExtension();
 				containers.add(cloned);
 
-				List<StorageContainer> result = createContainerHierarchy(cloned.getType().getCanHold(), cloned);
+				List<StorageContainer> result = new ArrayList<>();
+				if (!cloned.getType().isDimensionless()) {
+					result = createContainerHierarchy(cloned.getType().getCanHold(), cloned);
+				}
+
 				result.add(0, cloned);
 				if (input.isPrintLabels()) {
 					printLabels(result);

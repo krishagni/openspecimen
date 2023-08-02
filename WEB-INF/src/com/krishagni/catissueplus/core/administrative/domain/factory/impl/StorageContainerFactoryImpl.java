@@ -321,13 +321,6 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		} else {
 			container.setCapacity(existing.getCapacity());
 		}
-
-		if (rowDimLess && colDimLess) {
-			//
-			// container type is not applicable for dimensionless containers
-			//
-			container.setType(null);
-		}
 	}
 	
 	private void setNoOfColumns(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {

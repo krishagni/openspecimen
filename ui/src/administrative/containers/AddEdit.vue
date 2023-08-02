@@ -250,6 +250,7 @@ export default {
       container.positionAssignment = type.positionAssignment;
       container.temperature = type.temperature;
       container.storeSpecimensEnabled = type.storeSpecimenEnabled;
+      this.dataCtx.dimensionLess  = !(type.noOfRows > 0 && type.noOfColumns > 0);
     },
 
     saveOrUpdate: async function() {

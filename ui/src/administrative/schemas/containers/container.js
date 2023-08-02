@@ -21,7 +21,6 @@ export default {
       "type": "dropdown",
       "labelCode": "containers.type",
       "name": "container.typeName",
-      "showInOverviewWhen": "container.noOfRows > 0 && container.noOfColumns > 0",
       "href": (data) => {
         const container = data.container;
         if (container.typeId > 0) {

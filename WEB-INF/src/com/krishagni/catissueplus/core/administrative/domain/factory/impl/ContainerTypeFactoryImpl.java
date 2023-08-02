@@ -112,11 +112,17 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 	private void setDimension(ContainerTypeDetail detail, ContainerType existing, ContainerType containerType, OpenSpecimenException ose) {
 		setNoOfColumns(detail, existing, containerType, ose);
 		setNoOfRows(detail, existing, containerType, ose);
+
+		boolean rowDimLess = (containerType.getNoOfRows() == null);
+		boolean colDimLess = (containerType.getNoOfColumns() == null);
+		if ((!rowDimLess || !colDimLess) && (rowDimLess || colDimLess)) {
+			ose.addError(ContainerTypeErrorCode.INVALID_CAPACITY);
+		}
 	}
 	
 	private void setNoOfColumns(ContainerTypeDetail detail, ContainerType containerType, OpenSpecimenException ose) {
-		int noOfCols = detail.getNoOfColumns();		
-		if (noOfCols <= 0) {
+		Integer noOfCols = detail.getNoOfColumns();
+		if (noOfCols != null && noOfCols <= 0) {
 			ose.addError(ContainerTypeErrorCode.INVALID_CAPACITY, noOfCols);
 		}
 		
@@ -132,8 +138,8 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 	}
 
 	private void setNoOfRows(ContainerTypeDetail detail, ContainerType containerType, OpenSpecimenException ose) {
-		int noOfRows = detail.getNoOfRows();
-		if (noOfRows <= 0) {
+		Integer noOfRows = detail.getNoOfRows();
+		if (noOfRows != null && noOfRows <= 0) {
 			ose.addError(ContainerTypeErrorCode.INVALID_CAPACITY, noOfRows);
 		}
 				
@@ -159,6 +165,11 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 	}
 
 	private void setPositionLabelingMode(ContainerTypeDetail detail, ContainerType existing, ContainerType containerType, OpenSpecimenException ose) {
+		if (containerType.isDimensionless()) {
+			containerType.setPositionLabelingMode(StorageContainer.PositionLabelingMode.NONE);
+			return;
+		}
+
 		if (detail.isAttrModified("positionLabelingMode") || existing == null) {
 			setPositionLabelingMode(detail, containerType, ose);
 		} else {
@@ -178,6 +189,11 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 	}
 
 	private void setPositionAssignment(ContainerTypeDetail detail, ContainerType existing, ContainerType containerType, OpenSpecimenException ose) {
+		if (containerType.isDimensionless()) {
+			containerType.setPositionAssignment(StorageContainer.PositionAssignment.HZ_TOP_DOWN_LEFT_RIGHT);
+			return;
+		}
+
 		if (detail.isAttrModified("positionAssignment") || existing == null) {
 			setPositionAssignment(detail, containerType, ose);
 		} else {
@@ -186,7 +202,7 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 	}
 
 	private void setLabelingSchemes(ContainerTypeDetail detail, ContainerType existing, ContainerType containerType, OpenSpecimenException ose) {
-		if (containerType.getPositionLabelingMode() == StorageContainer.PositionLabelingMode.LINEAR) {
+		if (containerType.getPositionLabelingMode() != StorageContainer.PositionLabelingMode.TWO_D) {
 			containerType.setColumnLabelingScheme(StorageContainer.NUMBER_LABELING_SCHEME);
 			containerType.setRowLabelingScheme(StorageContainer.NUMBER_LABELING_SCHEME);
 			return;

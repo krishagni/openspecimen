@@ -26,9 +26,9 @@ public class ContainerType extends BaseEntity {
 
 	private String nameFormat;
 
-	private int noOfColumns;
+	private Integer noOfColumns;
 	
-	private int noOfRows;
+	private Integer noOfRows;
 
 	private StorageContainer.PositionLabelingMode positionLabelingMode = StorageContainer.PositionLabelingMode.TWO_D;
 
@@ -73,20 +73,24 @@ public class ContainerType extends BaseEntity {
 		this.nameFormat = nameFormat;
 	}
 
-	public int getNoOfColumns() {
+	public Integer getNoOfColumns() {
 		return noOfColumns;
 	}
 
-	public void setNoOfColumns(int noOfColumns) {
+	public void setNoOfColumns(Integer noOfColumns) {
 		this.noOfColumns = noOfColumns;
 	}
 
-	public int getNoOfRows() {
+	public Integer getNoOfRows() {
 		return noOfRows;
 	}
 
-	public void setNoOfRows(int noOfRows) {
+	public void setNoOfRows(Integer noOfRows) {
 		this.noOfRows = noOfRows;
+	}
+
+	public boolean isDimensionless() {
+		return noOfRows == null && noOfColumns == null;
 	}
 
 	public StorageContainer.PositionLabelingMode getPositionLabelingMode() {
