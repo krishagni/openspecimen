@@ -26,7 +26,7 @@ export default {
       "labelCode": "containers.barcode",
       "type": "span",
       "href": ({container}) => {
-        return container.id && ((ui.ngServer + '#/containers/' + container.id + '/overview' || '');
+        return container.id && ((ui.ngServer + '#/containers/' + container.id + '/overview') || '');
       }
     },
     {
