@@ -29,6 +29,7 @@ import com.krishagni.catissueplus.core.administrative.events.ContainerHierarchyD
 import com.krishagni.catissueplus.core.administrative.events.ContainerQueryCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ContainerReplicationDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerTransferEventDetail;
+import com.krishagni.catissueplus.core.administrative.events.FindPlacesCriteria;
 import com.krishagni.catissueplus.core.administrative.events.PositionsDetail;
 import com.krishagni.catissueplus.core.administrative.events.ReservePositionsOp;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerDetail;
@@ -621,6 +622,13 @@ public class StorageContainersController {
 	@ResponseBody
 	public ExportedFileDetail exportTransferEvents(@RequestBody ContainerReportCriteria crit) {
 		return ResponseEvent.unwrap(storageContainerSvc.exportTransferEvents(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/empty-places")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<StorageContainerSummary> findEmptyPlaces(@RequestBody FindPlacesCriteria crit) {
+		return ResponseEvent.unwrap(storageContainerSvc.findEmptyPlaces(RequestEvent.wrap(crit)));
 	}
 
 	//

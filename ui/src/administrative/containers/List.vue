@@ -156,6 +156,11 @@ export default {
         onSelect: () => routerSvc.goto('BulkContainerTransfer')
       });
       actionOpts.push({
+        icon: 'box',
+        caption: this.$t('containers.find_places.title'),
+        onSelect: () => routerSvc.goto('ContainerFindPlaces')
+      });
+      actionOpts.push({
         icon: 'check',
         caption: this.$t('containers.unblock'),
         onSelect: () => routerSvc.goto('UnblockLocations')

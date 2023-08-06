@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.administrative.events.ContainerHierarchyD
 import com.krishagni.catissueplus.core.administrative.events.ContainerQueryCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ContainerReplicationDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerTransferEventDetail;
+import com.krishagni.catissueplus.core.administrative.events.FindPlacesCriteria;
 import com.krishagni.catissueplus.core.administrative.events.PositionsDetail;
 import com.krishagni.catissueplus.core.administrative.events.PrintContainerLabelDetail;
 import com.krishagni.catissueplus.core.administrative.events.ReservePositionsOp;
@@ -83,6 +84,8 @@ public interface StorageContainerService {
 	ResponseEvent<List<ContainerTransferEventDetail>> getTransferEvents(RequestEvent<ContainerQueryCriteria> req);
 
 	ResponseEvent<ExportedFileDetail> exportTransferEvents(RequestEvent<ContainerReportCriteria> req);
+
+	ResponseEvent<List<StorageContainerSummary>> findEmptyPlaces(RequestEvent<FindPlacesCriteria> req);
 
 	//
 	// printing

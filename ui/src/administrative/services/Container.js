@@ -247,6 +247,10 @@ class Container {
     }
   }
 
+  async findEmptyPlaces(crit) {
+    return http.post('storage-containers/empty-places', crit);
+  }
+
   async getSpecimen(specimenId) {
     return http.get('specimens/' + specimenId);
   }

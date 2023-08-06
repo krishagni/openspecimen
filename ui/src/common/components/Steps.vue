@@ -45,6 +45,21 @@ export default {
       return idx == this.steps.length - 1;
     },
 
+    navTo: function(stepIdx) {
+      let step = this.steps[this.currentStep];
+      if (typeof step.validate == 'function' && !step.validate(true)) {
+        return;
+      }
+
+      if (stepIdx >= 0 && stepIdx < this.steps.length) {
+        this.currentStep = stepIdx;
+      }
+    },
+
+    stepIndex: function() {
+      return this.currentStep;
+    },
+
     next: function() {
       let step = this.steps[this.currentStep];
       if (typeof step.validate == 'function' && !step.validate(true)) {

@@ -17,7 +17,17 @@ export default {
       "uiStyle": {
         "min-width": "125px"
       },
-      "href": (rowObject) => ui.ngServer + '#/containers/' + rowObject.container.id + '/overview'
+      "href": ({container}) => {
+        return container.id && ((ui.ngServer + '#/containers/' + container.id + '/overview') || '');
+      }
+    },
+    {
+      "name": "container.barcode",
+      "labelCode": "containers.barcode",
+      "type": "span",
+      "href": ({container}) => {
+        return container.id && ((ui.ngServer + '#/containers/' + container.id + '/overview' || '');
+      }
     },
     {
       "name": "container.dimension",
@@ -32,7 +42,17 @@ export default {
       },
       "uiStyle": {
         "min-width": "75px"
-      }
+      },
+      showWhen: "!findPlaces"
+    },
+    {
+      "name": "container.typeName",
+      "labelCode": "containers.type",
+      "type": "span",
+      "uiStyle": {
+        "min-width": "75px"
+      },
+      "showWhen": "findPlaces"
     },
     {
       "name": "container.siteName",
@@ -51,7 +71,7 @@ export default {
       "uiStyle": {
         "min-width": "200px"
       },
-      "showWhen": "!checkout",
+      "showWhen": "!checkout && !findPlaces",
       "enableCopyFirstToAll": true
     },
     {
@@ -78,8 +98,17 @@ export default {
       "uiStyle": {
         "min-width": "300px"
       },
-      "showWhen": "!checkout",
+      "showWhen": "!checkout && !findPlaces",
       "enableCopyFirstToAll": true
+    },
+    {
+      "name": "container.storageLocation.name",
+      "labelCode": "containers.transfer_to",
+      "type": "span",
+      "uiStyle": {
+        "min-width": "150px"
+      },
+      "showWhen": "findPlaces"
     },
     {
       "name": "container.transferredBy",

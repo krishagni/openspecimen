@@ -652,6 +652,12 @@ const routes = [
         }
       },
       {
+        path: 'container-find-places',
+        name: 'ContainerFindPlaces',
+        component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/FindPlaces.vue'),
+        props: () => { }
+      },
+      {
         path: 'container-checkout',
         name: 'BulkContainerCheckout',
         component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/BulkTransfer.vue'),

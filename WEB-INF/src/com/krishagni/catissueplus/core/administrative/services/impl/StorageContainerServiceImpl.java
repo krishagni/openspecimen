@@ -54,6 +54,7 @@ import com.krishagni.catissueplus.core.administrative.events.ContainerQueryCrite
 import com.krishagni.catissueplus.core.administrative.events.ContainerReplicationDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerReplicationDetail.DestinationDetail;
 import com.krishagni.catissueplus.core.administrative.events.ContainerTransferEventDetail;
+import com.krishagni.catissueplus.core.administrative.events.FindPlacesCriteria;
 import com.krishagni.catissueplus.core.administrative.events.PositionsDetail;
 import com.krishagni.catissueplus.core.administrative.events.PrintContainerLabelDetail;
 import com.krishagni.catissueplus.core.administrative.events.ReservePositionsOp;
@@ -802,6 +803,36 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			} catch (Exception e) {
 				return ResponseEvent.serverError(e);
 			}
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<StorageContainerSummary>> findEmptyPlaces(RequestEvent<FindPlacesCriteria> req) {
+		try {
+			FindPlacesCriteria criteria = req.getPayload();
+			Set<SiteCpPair> allowedSiteCps = AccessCtrlMgr.getInstance().getReadAccessContainerSiteCps(criteria.getCpId());
+			if (allowedSiteCps != null && allowedSiteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			if (criteria.getCpId() != null) {
+				allowedSiteCps = getRequiredSiteCps(allowedSiteCps, Collections.singleton(criteria.getCpId()));
+				if (allowedSiteCps.isEmpty()) {
+					return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+				}
+			}
+
+			criteria.setSiteCps(allowedSiteCps);
+			if (criteria.getRequiredPlaces() <= 0) {
+				criteria.setRequiredPlaces(1);
+			}
+
+			return ResponseEvent.response(daoFactory.getStorageContainerDao().findEmptyPlaces(criteria));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -1692,9 +1723,19 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	private StorageContainer updateStorageContainer0(StorageContainerDetail input, boolean partial) {
-		StorageContainer existing = getContainer(input.getId(), input.getName());
-		AccessCtrlMgr.getInstance().ensureUpdateContainerRights(existing);
+		StorageContainer existing = getContainer(
+			input.getId(),
+			input.getName(),
+			input.getBarcode(),
+			StorageContainerErrorCode.ID_NAME_OR_BARCODE_REQ,
+			!Boolean.TRUE.equals(input.getCreateIfAbsent())
+		);
 
+		if (existing == null) {
+			return createStorageContainer(null, input);
+		}
+
+		AccessCtrlMgr.getInstance().ensureUpdateContainerRights(existing);
 		input.setId(existing.getId());
 		StorageContainer container;
 		if (partial) {

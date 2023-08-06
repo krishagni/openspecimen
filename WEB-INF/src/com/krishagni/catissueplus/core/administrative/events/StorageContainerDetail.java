@@ -51,6 +51,9 @@ public class StorageContainerDetail extends StorageContainerSummary {
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Boolean checkOut;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private Boolean createIfAbsent;
+
 	public Double getTemperature() {
 		return temperature;
 	}
@@ -161,6 +164,14 @@ public class StorageContainerDetail extends StorageContainerSummary {
 
 	public void setCheckOut(Boolean checkOut) {
 		this.checkOut = checkOut;
+	}
+
+	public Boolean getCreateIfAbsent() {
+		return createIfAbsent;
+	}
+
+	public void setCreateIfAbsent(Boolean createIfAbsent) {
+		this.createIfAbsent = createIfAbsent;
 	}
 
 	public static StorageContainerDetail from(StorageContainer container) {

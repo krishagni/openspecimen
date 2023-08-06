@@ -9,6 +9,7 @@ import java.util.Map;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.events.ContainerTransferEventDetail;
+import com.krishagni.catissueplus.core.administrative.events.FindPlacesCriteria;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
@@ -77,5 +78,7 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 	List<StorageContainer> getAutomatedFreezers();
 
 	Long getRootContainerId(Long containerId);
+
+	List<StorageContainerSummary> findEmptyPlaces(FindPlacesCriteria crit);
 }
 	

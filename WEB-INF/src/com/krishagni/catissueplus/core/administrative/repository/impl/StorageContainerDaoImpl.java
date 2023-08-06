@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.domain.PositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.events.ContainerTransferEventDetail;
+import com.krishagni.catissueplus.core.administrative.events.FindPlacesCriteria;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.repository.ContainerReportCriteria;
@@ -749,6 +750,156 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return createNamedQuery(GET_ROOT_CONTAINER_ID, Long.class)
 			.setParameter("containerId", containerId)
 			.uniqueResult();
+	}
+
+	@Override
+	public List<StorageContainerSummary> findEmptyPlaces(FindPlacesCriteria crit) {
+		String selectList =
+			"select " +
+			"  pc.identifier as freezerId, c.identifier as containerId, c.no_of_rows as numRows, c.no_of_cols as numCols, " +
+			"  count(p.identifier) as occupiedPlaces, " +
+			"  ((c.no_of_rows * c.no_of_cols) - count(p.identifier)) as freePlaces ";
+
+		String fromClause =
+			"from " +
+			"  os_storage_containers pc " +
+			"  inner join os_containers_hierarchy h on h.ancestor_id = pc.identifier " +
+			"  inner join os_storage_containers c on c.identifier = h.descendent_id " +
+			"  left join os_container_positions p on p.storage_container_id = c.identifier ";
+
+		String whereClause =
+			"where " +
+			"  c.activity_status != 'Disabled' " +
+			"  and c.store_specimens = 0 " +
+			"  and pc.parent_container_id is null " +
+			"  and pc.activity_status != 'Disabled' ";
+
+		Map<String, Object> params = new HashMap<>();
+		if (crit.getFreezerId() != null && crit.getFreezerId() > 0) {
+			whereClause += " and pc.identifier = :freezerId ";
+			params.put("freezerId", crit.getFreezerId());
+		}
+
+		if (crit.getTypeId() != null && crit.getTypeId() > 0) {
+			fromClause  += " left join os_container_types t on t.identifier = c.type_id ";
+			whereClause += " and t.can_hold = :containerType ";
+			params.put("containerType", crit.getTypeId());
+		}
+
+		if (crit.getCpId() != null && crit.getCpId() > 0) {
+			fromClause += " left join os_stor_container_comp_cps ccp on ccp.storage_container_id = c.identifier";
+			whereClause +=
+				" and (" +
+				"  (" +
+				"    ccp.cp_id is null and " +
+				"    c.site_id in (select site_id from catissue_site_cp where collection_protocol_id = :cpId) " +
+				"  ) or " +
+				"  ccp.cp_id = :cpId " +
+				" ) ";
+			params.put("cpId", crit.getCpId());
+		}
+
+		if (crit.getSiteCps() != null && !crit.getSiteCps().isEmpty()) {
+			String innerQuery = "" +
+				"select" +
+				"  c.identifier " +
+				"from " +
+				"  os_storage_containers c " +
+				"  inner join catissue_site site on site.identifier = c.site_id " +
+				"  inner join catissue_institution i on i.identifier = site.institute_id " +
+				"  left join os_stor_container_comp_cps ccp on ccp.storage_container_id = c.identifier ";
+
+			List<String> restrictions = new ArrayList<>();
+			for (SiteCpPair siteCp : crit.getSiteCps()) {
+				String restriction = "";
+				if (siteCp.getSiteId() != null) {
+					restriction += "site.identifier = " + siteCp.getSiteId();
+				} else {
+					restriction += "institute.identifier = " + siteCp.getInstituteId();
+				}
+
+				if (siteCp.getCpId() != null) {
+					restriction += " and (ccp.cp_id is null or ccp.cp_id = " + siteCp.getCpId() + ")";
+				}
+
+				restrictions.add("(" + restriction + ")");
+			}
+
+			innerQuery += " where c.activity_status != 'Disabled' and (" + String.join(" or ", restrictions) + ")";
+			whereClause += " and c.identifier in (" + innerQuery + ") ";
+		}
+
+		String groupBy =
+			"group by" +
+			"  pc.identifier, c.identifier, c.no_of_rows, c.no_of_cols " +
+			"having " +
+			"  (c.no_of_rows * c.no_of_cols) - count(p.identifier) >= :freePlaces " +
+			"order by " +
+			"  ((c.no_of_rows * c.no_of_cols) - count(p.identifier)) desc";
+		if (Boolean.TRUE.equals(crit.getAllInOneContainer())) {
+			params.put("freePlaces", crit.getRequiredPlaces());
+		} else {
+			params.put("freePlaces", 1);
+		}
+
+		String sql = selectList + " " + fromClause + " " + whereClause + " " + groupBy;
+		Query<Object[]> query = createNativeQuery(sql, Object[].class)
+			.addLongScalar("freezerId")
+			.addLongScalar("containerId")
+			.addIntScalar("numRows")
+			.addIntScalar("numCols")
+			.addIntScalar("occupiedPlaces")
+			.addIntScalar("freePlaces")
+			.setFirstResult(crit.getStartAt())
+			.setMaxResults(crit.getMaxResults());
+		for (Map.Entry<String, Object> param : params.entrySet()) {
+			query.setParameter(param.getKey(), param.getValue());
+		}
+
+		List<Object[]> rows = query.list();
+		Map<Long, List<StorageContainerSummary>> freezerContainers = new HashMap<>();
+		Map<Long, StorageContainerSummary> containers = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			int idx = -1;
+			StorageContainerSummary container = new StorageContainerSummary();
+			container.setFreezerId((Long) row[++idx]);
+			container.setId((Long) row[++idx]);
+			container.setNoOfRows((Integer) row[++idx]);
+			container.setNoOfColumns((Integer) row[++idx]);
+			container.setUsedPositions((Integer) row[++idx]);
+			container.setFreePositions((Integer) row[++idx]);
+
+			containers.put(container.getId(), container);
+			freezerContainers.computeIfAbsent(container.getFreezerId(), (k) -> new ArrayList<>()).add(container);
+		}
+
+		Set<Long> containerIds = new HashSet<>(freezerContainers.keySet());
+		containerIds.addAll(containers.keySet());
+
+		List<StorageContainer> dbContainers = getByIds(containerIds);
+		for (StorageContainer c : dbContainers) {
+			List<StorageContainerSummary> fcs = freezerContainers.get(c.getId());
+			if (fcs != null) {
+				for (StorageContainerSummary fc : fcs) {
+					fc.setFreezerName(c.getName());
+					fc.setFreezerDisplayName(c.getDisplayName());
+					fc.setBarcode(c.getBarcode());
+				}
+			}
+
+			StorageContainerSummary item = containers.get(c.getId());
+			if (item != null) {
+				item.setName(c.getName());
+				item.setDisplayName(c.getDisplayName());
+				item.setBarcode(c.getBarcode());
+				if (c.getType() != null) {
+					item.setTypeId(c.getType().getId());
+					item.setTypeName(c.getType().getName());
+				}
+			}
+		}
+
+		return new ArrayList<>(containers.values());
 	}
 
 	private void linkParentChildContainers(Map<Long, StorageContainerSummary> containersMap) {
