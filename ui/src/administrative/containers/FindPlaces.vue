@@ -314,9 +314,11 @@ export default {
             }
           }
 
-
           for (let toAdd of containers) {
-            if (ctx.transferItems.some(({container}) => container.name == toAdd.name || container.barcode == toAdd.barcode)) {
+            if (ctx.transferItems.some(
+                 ({container}) =>
+                   (toAdd.name && container.name == toAdd.name) ||
+                   (toAdd.barcode && container.barcode == toAdd.barcode))) {
               continue;
             }
 
@@ -356,6 +358,11 @@ export default {
       
       this.ctx.addContainersResolve(this.ctx.newBox);
       this.$refs.addContainers.close();
+    },
+
+    removeContainer: function(item) {
+      const idx = this.ctx.transferItems.indexOf(item);
+      this.ctx.transferItems.splice(idx, 1);
     },
     
     submit: function() {
