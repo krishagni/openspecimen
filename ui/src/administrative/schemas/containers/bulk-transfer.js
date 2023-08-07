@@ -18,7 +18,7 @@ export default {
         "min-width": "125px"
       },
       "href": ({container}) => {
-        return container.id && ((ui.ngServer + '#/containers/' + container.id + '/overview') || '');
+        return (container.id && (ui.ngServer + '#/containers/' + container.id + '/overview')) || '';
       }
     },
     {
@@ -26,7 +26,7 @@ export default {
       "labelCode": "containers.barcode",
       "type": "span",
       "href": ({container}) => {
-        return container.id && ((ui.ngServer + '#/containers/' + container.id + '/overview') || '');
+        return (container.id && (ui.ngServer + '#/containers/' + container.id + '/overview')) || '';
       }
     },
     {
