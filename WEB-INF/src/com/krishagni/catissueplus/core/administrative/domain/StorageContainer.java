@@ -77,6 +77,8 @@ public class StorageContainer extends BaseExtensionEntity {
 		CHECKED_OUT
 	}
 
+	public static final String DUMMY_NAME = "dummy$os";
+
 	private static final String ENTITY_NAME = "storage_container";
 
 	private static final String DEF_SITE_CONT_NAME = "storage_container_site_cont_name";

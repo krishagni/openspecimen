@@ -69,11 +69,11 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		}
 
 		setStatus(detail, existing, container, ose);
+		setType(detail, existing, container, ose);
 		setName(detail, existing, container, ose);
 		setBarcode(detail, existing, container, ose);
 		setDisplayName(detail, existing, container, ose);
 		setUsageMode(detail, existing, container, ose);
-		setType(detail, existing, container, ose);
 		setTemperature(detail, existing, container, ose);
 		setCapacity(detail, existing, container, ose);
 		setPositionLabelingMode(detail, existing, container, ose);
@@ -185,7 +185,10 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	private void setName(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
 		String name = detail.getName();
 		if (StringUtils.isBlank(name)) {
-			ose.addError(StorageContainerErrorCode.NAME_REQUIRED);
+			if (container.getType() == null || StringUtils.isBlank(container.getType().getNameFormat())) {
+				ose.addError(StorageContainerErrorCode.NAME_REQUIRED);
+			}
+
 			return;
 		}
 		

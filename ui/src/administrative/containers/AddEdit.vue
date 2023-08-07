@@ -233,13 +233,16 @@ export default {
     },
 
     setTypeProps: function(type) {
-      const container = this.dataCtx.container;
+      const ctx = this.dataCtx;
+      const container = ctx.container;
       if (!type) {
         container.typeId = container.typeName = undefined;
+        ctx.typeNameFormat = undefined;
         return;
       }
 
-      this.dataCtx.dimensionLess = false;
+      ctx.dimensionLess = false;
+      ctx.typeNameFormat = type.nameFormat;
       container.typeId = type.id;
       container.typeName = type.name;
       container.noOfRows = type.noOfRows;
@@ -250,7 +253,12 @@ export default {
       container.positionAssignment = type.positionAssignment;
       container.temperature = type.temperature;
       container.storeSpecimensEnabled = type.storeSpecimenEnabled;
-      this.dataCtx.dimensionLess  = !(type.noOfRows > 0 && type.noOfColumns > 0);
+      ctx.dimensionLess  = !(type.noOfRows > 0 && type.noOfColumns > 0);
+      if (type.nameFormat && ctx.createType == 'single') {
+        container.name = undefined;
+      } else if (type.nameFormat && (ctx.createType == 'multiple' || ctx.createType == 'hierarchy')) {
+        ctx.uniqueNames = undefined;
+      }
     },
 
     saveOrUpdate: async function() {
@@ -271,36 +279,27 @@ export default {
           routerSvc.goto(view, {containerId: savedContainer.id});
         }
       } else if (dataCtx.createType == 'multiple') {
-        const position = container.storageLocation;
-
-        let positions = [];
-        if (position.name) {
-          positions = await containerSvc.getVacantPositions(position, dataCtx.numOfContainers);
-        }
-
-        this.createMultipleContainers(dataCtx, container, positions);
+        this.createMultipleContainers(dataCtx, container);
       } else if (dataCtx.createType == 'hierarchy') {
         this.createHierarchy(container);
       }
     },
 
-    createMultipleContainers: function(ctx, container, positions) {
-      const containers = [];
-
+    createMultipleContainers: async function(ctx, container) {
       let names = [];
-      if (!container.typeName) {
+      if (ctx.uniqueNames) {
         names = util.splitStr(ctx.uniqueNames || '', /,|\t|\n/, true);
-        if (names.length < ctx.numOfContainers || names.length > ctx.numOfContainers) {
-          const msgCode = names.length < ctx.numOfContainers ? 'less_names_than_count' : 'more_names_than_count';
-          alertsSvc.error({
-            code: 'containers.' + msgCode,
-            args: {names: names.length, count: ctx.numOfContainers}
-          });
-
-          return;
-        }
+        ctx.numOfContainers = names.length;
+        ctx.showNames = true;
       }
 
+      const position = container.storageLocation;
+      let positions = [];
+      if (position.name) {
+        positions = await containerSvc.getVacantPositions(position, ctx.numOfContainers);
+      }
+
+      const containers = [];
       const displayNames   = util.splitStr(ctx.displayNames || '', /,|\t|\n/, true);
       ctx.showDisplayNames = displayNames.length > 0
 
@@ -322,7 +321,7 @@ export default {
           copy.displayName = displayNames[i];
         }
 
-        if (positions.length > 0) {
+        if (i < positions.length && positions.length > 0) {
           copy.storageLocation = positions[i];
         }
 
@@ -362,7 +361,14 @@ export default {
     },
 
     createHierarchy: function(container) {
+      let names = [];
+      if (this.dataCtx.uniqueNames) {
+        names = util.splitStr(this.dataCtx.uniqueNames || '', /,|\t|\n/, true);
+        this.dataCtx.numOfContainers = names.length;
+      }
+
       container.numOfContainers = this.dataCtx.numOfContainers;
+      container.names = names;
       containerSvc.createHierarchy(container).then(
         (containers) => {
           if (containers.length == 1) {

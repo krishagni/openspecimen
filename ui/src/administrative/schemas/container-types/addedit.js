@@ -51,12 +51,12 @@ export default {
           {
             "labelCode": "container_types.rows",
             "name": "type.rowLabelingScheme",
-            "showWhen": "dimensionLess != true"
+            "showWhen": "dimensionLess != true && type.positionLabelingMode == 'TWO_D'"
           },
           {
             "labelCode": "container_types.columns",
             "name": "type.columnLabelingScheme",
-            "showWhen": "dimensionLess != true"
+            "showWhen": "dimensionLess != true && type.positionLabelingMode == 'TWO_D'"
           }
         ]
       },

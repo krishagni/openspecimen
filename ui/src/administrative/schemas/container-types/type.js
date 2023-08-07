@@ -16,12 +16,7 @@ export default {
     {
       "type": "text",
       "labelCode": "container_types.name_format",
-      "name": "type.nameFormat",
-      "validations": {
-        "required": {
-          "messageCode": "container_types.name_format_required"
-        }
-      }
+      "name": "type.nameFormat"
     },
     {
       "type": "number",

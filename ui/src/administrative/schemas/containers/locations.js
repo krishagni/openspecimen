@@ -5,13 +5,13 @@ export default {
       "labelCode": "containers.unique_name",
       "type": "span",
       "value": () => 'Auto',
-      "showWhen": "container.typeName"
+      "showWhen": "!showNames"
     },
     {
       "name": "container.name",
       "labelCode": "containers.unique_name",
       "type": "text",
-      "showWhen": "!container.typeName",
+      "showWhen": "showNames",
       "validations": {
         "required": {
           "messageCode": "containers.unique_name_required"

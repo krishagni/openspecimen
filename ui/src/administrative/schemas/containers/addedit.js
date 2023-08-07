@@ -20,10 +20,23 @@ export default {
       {
         "fields": [
           {
+            "name": "container.typeName",
+            "validations": {
+              "requiredIf": {
+                "expr": "createType == 'hierarchy'",
+                "message": "Container type is mandatory"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
             "type": "number",
             "name": "numOfContainers",
             "labelCode": "containers.num_containers",
-            "showWhen": "createType == 'multiple' || createType == 'hierarchy'",
+            "showWhen": "typeNameFormat && (createType == 'multiple' || createType == 'hierarchy')",
             "validations": {
               "required": {
                 "messageCode": "containers.num_containers_required"
@@ -43,19 +56,6 @@ export default {
       {
         "fields": [
           {
-            "name": "container.typeName",
-            "validations": {
-              "requiredIf": {
-                "expr": "createType == 'hierarchy'",
-                "message": "Container type is mandatory"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "fields": [
-          {
             "name": "container.displayName",
             "showWhen": "createType == 'single'"
           }
@@ -65,7 +65,7 @@ export default {
         "fields": [
           {
             "name": "container.name",
-            "showWhen": "createType == 'single'"
+            "showWhen": "!typeNameFormat && createType == 'single'"
           }
         ]
       },
@@ -95,7 +95,7 @@ export default {
             "name": "uniqueNames",
             "labelCode": "containers.names",
             "placeholderCode": "containers.scan_unique_names",
-            "showWhen": "createType == 'multiple' && !container.typeName",
+            "showWhen": "!typeNameFormat && (createType == 'multiple' || createType == 'hierarchy')",
             "validations": {
               "required": {
                 "messageCode": "containers.unique_names_required"

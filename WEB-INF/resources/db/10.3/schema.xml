@@ -189,4 +189,8 @@
   <changeSet author="vpawar" id="Dimensionless container types - no. of columns is optional">
     <dropNotNullConstraint tableName="OS_CONTAINER_TYPES" columnName="NO_OF_COLS" columnDataType="${int.type}" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Drop not null constraint on container type name">
+    <dropNotNullConstraint tableName="OS_CONTAINER_TYPES" columnName="NAME_FORMAT" columnDataType="${text.type}(255) "/>
+  </changeSet>
 </databaseChangeLog>

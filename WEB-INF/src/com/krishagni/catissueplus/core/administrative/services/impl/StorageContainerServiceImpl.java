@@ -644,7 +644,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		List<StorageContainer> containers = new ArrayList<>();
 
 		try {
-			StorageContainer container = containerFactory.createStorageContainer("dummyName", input);
+			StorageContainer container = containerFactory.createStorageContainer(StorageContainer.DUMMY_NAME, input);
 			AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
 			container.validateRestrictions();
 
@@ -657,6 +657,16 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				return ResponseEvent.userError(StorageContainerErrorCode.NO_FREE_SPACE, parentContainer.getName());
 			}
 
+			if (container.getType() == null || StringUtils.isBlank(container.getType().getNameFormat())) {
+				if (CollectionUtils.isEmpty(input.getNames())) {
+					return ResponseEvent.userError(StorageContainerErrorCode.NAME_REQUIRED);
+				}
+
+				input.setNumOfContainers(input.getNames().size());
+			} else {
+				input.setNames(null);
+			}
+
 			boolean setCapacity = true;
 			for (int i = 1; i <= input.getNumOfContainers(); i++) {
 				StorageContainer cloned;
@@ -667,7 +677,12 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 					setPosition(cloned);
 				}
 
-				generateName(cloned);
+				if (CollectionUtils.isEmpty(input.getNames())) {
+					generateName(cloned);
+				} else {
+					cloned.setName(input.getNames().get(i - 1));
+				}
+
 				ensureUniqueConstraints(null, cloned);
 
 				if (cloned.isStoreSpecimenEnabled() && setCapacity) {
@@ -680,7 +695,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				containers.add(cloned);
 
 				List<StorageContainer> result = new ArrayList<>();
-				if (!cloned.getType().isDimensionless()) {
+				if (!cloned.getType().isDimensionless() && StringUtils.isNotBlank(cloned.getType().getNameFormat())) {
 					result = createContainerHierarchy(cloned.getType().getCanHold(), cloned);
 				}
 
@@ -690,7 +705,6 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				}
 
 				result.clear();
-				result = null;
 			}
 			
 			return ResponseEvent.response(StorageContainerDetail.from(containers));
@@ -709,8 +723,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			List<StorageContainer> toPrint = new ArrayList<>();
 
 			for (StorageContainerDetail detail : req.getPayload()) {
-				if (StringUtils.isNotBlank(detail.getTypeName()) || detail.getTypeId() != null) {
-					detail.setName("dummy");
+				if (StringUtils.isBlank(detail.getName()) && (StringUtils.isNotBlank(detail.getTypeName()) || detail.getTypeId() != null)) {
+					detail.setName(StorageContainer.DUMMY_NAME);
 				}
 
 				StorageContainer container = containerFactory.createStorageContainer(detail);
@@ -719,8 +733,12 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				}
 
 				AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
-				if (container.getType() != null) {
+				if (container.getType() != null && StringUtils.isNotBlank(container.getType().getNameFormat())) {
 					generateName(container);
+				}
+
+				if (StringUtils.isBlank(container.getName()) || container.getName().equals(StorageContainer.DUMMY_NAME)) {
+					return ResponseEvent.userError(StorageContainerErrorCode.NAME_REQUIRED);
 				}
 
 				ensureUniqueConstraints(null, container);
@@ -1262,6 +1280,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			StorageContainer box = createStorageContainer(null, boxDetail);
 			if (StringUtils.isBlank(input.getName())) {
+				if (StringUtils.isBlank(box.getType().getNameFormat())) {
+					return ResponseEvent.userError(StorageContainerErrorCode.NAME_REQUIRED);
+				}
+
 				box.setName(nameGenerator.generateLabel(box.getType().getNameFormat(), box));
 			}
 
@@ -1494,6 +1516,14 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		StorageContainer container = containerFactory.createStorageContainer(base, input);
 		if (container.getParentContainer() != null && container.getParentContainer().isArchived()) {
 			throw OpenSpecimenException.userError(StorageContainerErrorCode.PARENT_ARCHIVED, container.getParentContainer().getName());
+		}
+
+		if (StringUtils.isBlank(container.getName())) {
+			if (container.getType() == null || StringUtils.isBlank(container.getType().getNameFormat())) {
+				throw OpenSpecimenException.userError(StorageContainerErrorCode.NAME_REQUIRED);
+			}
+
+			generateName(container);
 		}
 
 		AccessCtrlMgr.getInstance().ensureCreateContainerRights(container);
@@ -1746,6 +1776,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 		ensureUniqueConstraints(existing, container);
 		existing.update(container);
+		if (StringUtils.isBlank(existing.getName())) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.NAME_REQUIRED);
+		}
+
 		daoFactory.getStorageContainerDao().saveOrUpdate(existing, true);
 		existing.updatePositionsIfChanged();
 		existing.validateRestrictions();
@@ -1924,7 +1958,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	private List<StorageContainer> createContainerHierarchy(ContainerType containerType, StorageContainer parentContainer) {
 		List<StorageContainer> result = new ArrayList<>();
-		if (containerType == null) {
+		if (containerType == null || StringUtils.isBlank(containerType.getNameFormat())) {
 			return result;
 		}
 		

@@ -81,7 +81,6 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 	private void setNameFormat(ContainerTypeDetail detail, ContainerType containerType, OpenSpecimenException ose) {
 		String nameFormat = detail.getNameFormat();
 		if (StringUtils.isBlank(nameFormat)) {
-			ose.addError(ContainerTypeErrorCode.NAME_FORMAT_REQUIRED);
 			return;
 		}
 
