@@ -32,11 +32,11 @@ export default {
     },
     {
       name: "container.usedPositions",
-      captionCode: "containers.occupied_places"
+      captionCode: "containers.occupied_locations"
     },
     {
       name: "container.freePositions",
-      captionCode: "containers.free_places"
+      captionCode: "containers.free_locations"
     }
   ]
 }
