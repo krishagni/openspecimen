@@ -71,8 +71,16 @@ export default {
           {
             "type": "booleanCheckbox",
             "name": "criteria.allInOneContainer",
-            "inlineLabelCode": "containers.find_places.all_in_the_same_container",
-            "showWhen": "criteria.requiredPlaces > 1"
+            "inlineLabelCode": "containers.find_places.all_in_the_same_container"
+          }
+        ]
+      },
+      {
+        "fields": [
+          {
+            "type": "booleanCheckbox",
+            "name": "criteria.strictMatch",
+            "inlineLabelCode": "containers.find_places.strict_match"
           }
         ]
       }

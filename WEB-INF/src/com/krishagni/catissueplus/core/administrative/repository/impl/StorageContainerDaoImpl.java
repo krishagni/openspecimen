@@ -782,20 +782,26 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 		if (crit.getTypeId() != null && crit.getTypeId() > 0) {
 			fromClause  += " left join os_container_types t on t.identifier = c.type_id ";
-			whereClause += " and t.can_hold = :containerType ";
+			if (Boolean.TRUE.equals(crit.getStrictMatch())) {
+				whereClause += " and t.can_hold = :containerType ";
+			} else {
+				whereClause += " and (t.can_hold is null or t.can_hold = :containerType) ";
+			}
+
 			params.put("containerType", crit.getTypeId());
 		}
 
 		if (crit.getCpId() != null && crit.getCpId() > 0) {
 			fromClause += " left join os_stor_container_comp_cps ccp on ccp.storage_container_id = c.identifier";
-			whereClause +=
-				" and (" +
-				"  (" +
-				"    ccp.cp_id is null and " +
-				"    c.site_id in (select site_id from catissue_site_cp where collection_protocol_id = :cpId) " +
-				"  ) or " +
-				"  ccp.cp_id = :cpId " +
-				" ) ";
+			String cpCond = "ccp.cp_id = :cpId";
+			if (!Boolean.TRUE.equals(crit.getStrictMatch())) {
+				cpCond += " or (" +
+					"  ccp.cp_id is null and " +
+					"  c.site_id in (select site_id from catissue_site_cp where collection_protocol_id = :cpId) " +
+					")";
+			}
+
+			whereClause += " and (" + cpCond + ") ";
 			params.put("cpId", crit.getCpId());
 		}
 

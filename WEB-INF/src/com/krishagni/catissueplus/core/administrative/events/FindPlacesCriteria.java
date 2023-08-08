@@ -15,6 +15,8 @@ public class FindPlacesCriteria {
 
 	private Boolean allInOneContainer;
 
+	private Boolean strictMatch;
+
 	private Set<SiteCpPair> siteCps;
 
 	private int startAt;
@@ -59,6 +61,14 @@ public class FindPlacesCriteria {
 
 	public void setAllInOneContainer(Boolean allInOneContainer) {
 		this.allInOneContainer = allInOneContainer;
+	}
+
+	public Boolean getStrictMatch() {
+		return strictMatch;
+	}
+
+	public void setStrictMatch(Boolean strictMatch) {
+		this.strictMatch = strictMatch;
 	}
 
 	public Set<SiteCpPair> getSiteCps() {

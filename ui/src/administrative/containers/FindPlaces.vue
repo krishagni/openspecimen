@@ -188,7 +188,7 @@ export default {
       }
 
       const crit = this.ctx.criteria;
-      const payload = {};
+      const payload = {strictMatch: crit.strictMatch};
       if (crit.freezer) {
         payload.freezerId = crit.freezer.id;
       }
