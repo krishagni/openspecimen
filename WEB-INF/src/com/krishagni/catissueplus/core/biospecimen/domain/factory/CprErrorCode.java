@@ -49,7 +49,11 @@ public enum CprErrorCode implements ErrorCode {
 
 	CP_CLOSED,
 
-	NO_EMAIL_IDS,
+	NO_EMAIL_ID,
+
+	NO_PHONE,
+
+	NO_EMAIL_ID_OR_PHONE,
 
 	INVALID_FORM_TYPE,
 
