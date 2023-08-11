@@ -1,9 +1,10 @@
 angular.module('os.biospecimen.participant.bulkregistration', ['os.biospecimen.models'])
   .controller('BulkRegistrationCtrl', function(
-    $scope, $state, currentUser, events, cp, CollectionProtocolRegistration, Alerts) {
+    $scope, $state, currentUser, events, cp, mrnAccessRestriction, CollectionProtocolRegistration, Alerts) {
 
     function init() {
       $scope.ctx = {
+        mrnAccessRestriction: mrnAccessRestriction,
         cpEvents: events,
         cpSites: cp.cpSites.map(function(cs) { return cs.siteName; }),
         cpId: cp.id,

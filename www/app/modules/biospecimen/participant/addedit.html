@@ -379,9 +379,9 @@
     <div class="form-group">
       <label class="col-xs-3 control-label" translate="participant.reg_site">Registration Site</label>
       <div class="col-xs-6">
-        <os-select name="regSite" ng-model="cpr.site" list="partCtx.cpSites"
+        <os-sites name="regSite" ng-model="cpr.site" list-all="{{!partCtx.mrnAccessRestriction}}"
           placeholder="{{'participant.reg_site' | translate}}">
-        </os-select>
+        </os-sites>
         <div os-field-error field="pform.regSite"></div>
       </div>
     </div>

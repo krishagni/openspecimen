@@ -43,8 +43,6 @@ public enum CprErrorCode implements ErrorCode {
 
 	COLLECTION_SITE_REQUIRED,
 
-	NOT_CP_SITE,
-
 	MUL_REGS_FOR_PMIS,
 
 	CP_CLOSED,

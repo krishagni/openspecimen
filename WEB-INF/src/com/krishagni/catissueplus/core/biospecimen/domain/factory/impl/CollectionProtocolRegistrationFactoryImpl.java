@@ -126,11 +126,6 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 			return;
 		}
 
-		if (cpr.getCollectionProtocol() != null && !cpr.getCollectionProtocol().getRepositories().contains(site)) {
-			ose.addError(CprErrorCode.NOT_CP_SITE, site.getName(), cpr.getCollectionProtocol().getShortTitle());
-			return;
-		}
-
 		cpr.setSite(site);
 	}
 

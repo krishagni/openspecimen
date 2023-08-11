@@ -45,9 +45,9 @@
         <span translate="participant.collection_site">Collection Site</span>
       </label>
       <div class="col-xs-6">
-        <os-select name="collectionSite" ng-model="ctx.collectionSite" list="ctx.cpSites"
-          placeholder="{{'participant.collection_site' | translate}}" required>
-        </os-select>
+        <os-sites name="collectionSite" ng-model="ctx.collectionSite" list-all="{{!ctx.mrnAccessRestriction}}"
+          placeholder="{{'participant.collection_site' | translate}}">
+        </os-sites>
         <div os-field-error field="pform.collectionSite"></div>
       </div>
     </div>
