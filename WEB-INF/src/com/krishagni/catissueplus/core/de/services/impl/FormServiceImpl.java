@@ -2440,7 +2440,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				}
 
 				appData.put("formStatus", formStatus);
-				return formData.getFieldNameValueMap(true);
+				return formData.getFieldNameValueMap(true, true);
 			}
 
 			private boolean isAccessDeniedError(OpenSpecimenException ose) {
