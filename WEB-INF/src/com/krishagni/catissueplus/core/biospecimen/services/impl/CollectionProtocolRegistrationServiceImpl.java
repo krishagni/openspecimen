@@ -741,7 +741,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		ensureValidAndUniquePpid(existing, cpr, ose);
 		ensureUniqueBarcode(existing, cpr, ose);
 		if (existing == null) {
-			ensureUniqueParticipantReg(cpr, ose);
+			if (cpr.isDeleted()) {
+				ose.addError(CprErrorCode.CREATE_DISABLED_NA);
+			} else {
+				ensureUniqueParticipantReg(cpr, ose);
+			}
 		}
 		
 		ose.checkAndThrow();

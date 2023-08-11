@@ -630,6 +630,10 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		ose.checkAndThrow();
 
 		if (existing == null) {
+			if (visit.isDeleted()) {
+				throw OpenSpecimenException.userError(VisitErrorCode.CREATE_DISABLED_NA);
+			}
+
 			if (visit.isEventClosed()) {
 				throw OpenSpecimenException.userError(CpeErrorCode.CLOSED, visit.getCpEvent().getEventLabel());
 			}

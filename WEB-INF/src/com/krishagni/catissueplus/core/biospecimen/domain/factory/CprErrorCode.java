@@ -57,7 +57,9 @@ public enum CprErrorCode implements ErrorCode {
 
 	INVALID_FORM_TYPE,
 
-	DRAFT_NOT_ALLOWED;
+	DRAFT_NOT_ALLOWED,
+
+	CREATE_DISABLED_NA;
 
 	@Override
 	public String code() {

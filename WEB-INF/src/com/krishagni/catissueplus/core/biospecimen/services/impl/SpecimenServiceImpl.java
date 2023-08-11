@@ -1104,6 +1104,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen = existing;
 			specimen.setLabelIfEmpty();
 		} else if (specimen.getParentSpecimen() != null) {
+			if (specimen.isDeleted()) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.CREATE_DISABLED_NA);
+			}
+
 			if (!specimen.getParentSpecimen().isEditAllowed()) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.PROC_NOT_ALLOWED, specimen.getParentSpecimen().getLabel());
 			}
@@ -1115,6 +1119,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			specimen.setLabelIfEmpty();
 			specimen.getParentSpecimen().addChildSpecimen(specimen);
 		} else {
+			if (specimen.isDeleted()) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.CREATE_DISABLED_NA);
+			}
+
 			specimen.setLabelIfEmpty();
 			specimen.occupyPosition();
 		}

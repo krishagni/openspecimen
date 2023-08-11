@@ -172,7 +172,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	NOT_ACTIVE,
 
-	ALIQUOT_REQ;
+	ALIQUOT_REQ,
+
+	CREATE_DISABLED_NA;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();
