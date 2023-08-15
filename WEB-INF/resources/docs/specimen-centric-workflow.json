@@ -75,6 +75,9 @@
                  "value": "Missed Collection"
                },
                {
+                 "value": "Not Collected"
+               },
+               {
                  "value": "Pending"
                }
              ]
