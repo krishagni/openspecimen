@@ -428,6 +428,11 @@ export default {
         spmnBarcodes.push(tube.barcode);
       }
 
+      if (spmnBarcodes.length == 0) {
+        ctx.specimens = [];
+        return;
+      }
+
       containerSvc.searchSpecimens({barcode: spmnBarcodes}).then(
         (specimens) => {
           ctx.specimens = specimens;
