@@ -16,6 +16,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 @Configurable
 public class CpCoordinatorsReportTask implements ScheduledTask {
@@ -34,7 +35,13 @@ public class CpCoordinatorsReportTask implements ScheduledTask {
 	private void notifyPis(List<Long> cpIds) {
 		for (int i = 0; i < cpIds.size(); i += 25) {
 			List<CollectionProtocol> cps = getByIds(cpIds.subList(i, Math.min(i + 25, cpIds.size())));
-			cps.forEach(this::notifyPi);
+			for (CollectionProtocol cp : cps) {
+				if (Status.isClosedStatus(cp.getActivityStatus())) {
+					continue;
+				}
+
+				notifyPi(cp);
+			}
 		}
 	}
 
