@@ -6,6 +6,7 @@
         ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
+        :data-key="dataKey"
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
@@ -13,6 +14,8 @@
         :disabled="disabled"
         :tabindex="tabOrder"
         :reset-filter-on-hide="true"
+        :maxSelectedLabels="0"
+        :selectedItemsLabel="selectedItemsLabel"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -24,6 +27,7 @@
         ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
+        :data-key="dataKey"
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
@@ -31,6 +35,8 @@
         :disabled="disabled"
         :tabindex="tabOrder"
         :reset-filter-on-hide="true"
+        :maxSelectedLabels="0"
+        :selectedItemsLabel="selectedItemsLabel"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -40,14 +46,13 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
 import MultiSelect from 'primevue/multiselect';
 
 import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey'],
 
   emits: ['update:modelValue'],
 
@@ -55,13 +60,12 @@ export default {
     MultiSelect
   },
 
-  setup() {
-    let ctx = reactive({ options: [] });
-    return { ctx }
-  },
-
   data() {
-    return { };
+    return {
+      ctx: {
+        options: []
+      }
+    };
   },
 
   methods: {
@@ -83,12 +87,8 @@ export default {
       if (this.listSource.options) {
         this.ctx.options = this.dedup(selectedVals.concat(this.listSource.options));
       } else if (typeof this.listSource.loadFn == 'function') {
-        let self = this;
-        this.listSource.loadFn({context: this.context, query: query, maxResults: 100}).then(
-          function(options) {
-            self.ctx.options = self.dedup(selectedVals.concat(options));
-          }
-        );
+        const options = await this.listSource.loadFn({context: this.context, query: query, maxResults: 100});
+        this.ctx.options = this.dedup(selectedVals.concat(options));
       } else if (typeof this.listSource.apiUrl == 'string') {
         let ls = this.listSource;
 
@@ -266,6 +266,21 @@ export default {
 
     selectProp: function() {
       return this.listSource.selectProp;
+    },
+
+    selectedItemsLabel: function() {
+      const selected = this.selected || [];
+      if (selected.length == 0) {
+        return null;
+      }
+
+      if (typeof this.displayProp == 'function') {
+        return selected.map(s => this.displayProp(s)).join(', ');
+      } else if (this.displayProp) {
+        return selected.map(s => s[this.displayProp]).join(', ');
+      } else {
+        return selected.join(', ');
+      }
     },
 
     showClear: function() {

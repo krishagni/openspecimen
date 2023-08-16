@@ -6,6 +6,7 @@
         ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
+        :data-key="dataKey"
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
@@ -23,6 +24,7 @@
         ref="selectWidget"
         v-model="selected"
         :options="ctx.options"
+        :data-key="dataKey"
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
@@ -46,7 +48,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey'],
 
   emits: ['update:modelValue'],
 
