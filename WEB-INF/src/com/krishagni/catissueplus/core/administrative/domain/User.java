@@ -89,7 +89,7 @@ public class User extends BaseEntity implements UserDetails {
 
 	private Boolean dnd;
 
-	private boolean apiUser;
+	private Boolean apiUser;
 
 	private String ipRange;
 
@@ -291,7 +291,7 @@ public class User extends BaseEntity implements UserDetails {
 	}
 
 	public boolean isApiUser() {
-		return apiUser;
+		return apiUser != null && apiUser;
 	}
 
 	public void setApiUser(Boolean apiUser) {
