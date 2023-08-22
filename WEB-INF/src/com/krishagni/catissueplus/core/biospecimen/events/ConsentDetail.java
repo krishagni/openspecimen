@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -46,16 +45,12 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 	private String consentDocumentName;
 
 	//For BO
-	@JsonIgnore
 	private String statement;
 
-	@JsonIgnore
 	private String code;
-	
-	@JsonIgnore
+
 	private String response;
 
-	@JsonIgnore
 	private File documentFile;
 
 	public Long getCprId() {
@@ -129,7 +124,7 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 	public void setConsentDocumentName(String consentDocumentName) {
 		this.consentDocumentName = consentDocumentName;
 	}
-	
+
 	public String getStatement() {
 		return statement;
 	}

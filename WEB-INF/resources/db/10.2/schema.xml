@@ -632,4 +632,10 @@
       <column name="KIT_LABELS_ENABLED" type="${boolean.type}" defaultValueBoolean="false" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add index on the form record ID">
+    <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_RE_REC_IDX">
+      <column name="RECORD_ID" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
