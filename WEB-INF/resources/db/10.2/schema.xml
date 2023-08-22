@@ -633,7 +633,12 @@
     </addColumn>
   </changeSet>
 
-  <changeSet author="vpawar" id="Add index on the form record ID">
+  <changeSet author="vpawar" id="Add index on the form record ID if it does not exist">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="CATISSUE_FORM_RECORD_ENTRY" columnNames="RECORD_ID" />
+      </not>
+    </preConditions>
     <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FORM_RE_REC_IDX">
       <column name="RECORD_ID" />
     </createIndex>
