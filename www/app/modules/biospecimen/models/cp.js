@@ -118,6 +118,14 @@ angular.module('os.biospecimen.models.cp', ['os.common.models'])
       );
     }
 
+    CollectionProtocol.prototype.updateConsentsSource = function(sourceCp) {
+      return $http.put(CollectionProtocol.url() + this.$id() + "/consents-source", sourceCp).then(
+        function(resp) {
+          return new CollectionProtocol(resp.data);
+        }
+      );
+    }
+
     CollectionProtocol.prototype.getWorkflows = function() {
       return CollectionProtocol.getWorkflows(this.$id());
     }

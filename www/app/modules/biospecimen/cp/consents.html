@@ -4,7 +4,8 @@
       <div ng-switch="consentCtx.allowEdit">
         <div ng-switch-when="true">
           <ul class="os-key-values os-one-col">
-            <li class="item" ng-hide="(!!consentCtx.tiers && consentCtx.tiers.length > 0) || consentCtx.hasDocs">
+            <li class="item" ng-hide="(!!consentCtx.tiers && consentCtx.tiers.length > 0) ||
+                                       consentCtx.hasDocs || cp.consentsSource">
               <strong class="key key-sm" translate="cp.consents_waived">Consents Waived</strong>
               <div class="value value-md">
                 <div class="btn-group btn-group-xs">
@@ -19,6 +20,23 @@
                     <span translate="common.no">No</span>
                   </button>
                 </div>
+              </div>
+            </li>
+
+            <li class="item" ng-hide="cp.consentsWaived || (!cp.consentsSource && consentCtx.tiers.length > 0) ||
+                                       (!cp.consentsSource && consentCtx.hasDocs)">
+              <strong class="key key-sm" translate="cp.consents_cp">Consents CP</strong>
+              <div class="value value-md">
+                <span ng-if="cp.consentsSource.id > 0">
+                  <a ui-sref="cp-detail.consents({cpId: cp.consentsSource.id})">{{cp.consentsSource.shortTitle}}</a>
+                  <button class="btn btn-default btn-xs" ng-click="showSelectConsentsCp()">
+                    <span class="fa fa-pencil"></span>
+                  </button>
+                </span>
+                <button class="btn btn-default btn-xs" ng-if="!cp.consentsSource" ng-click="showSelectConsentsCp()">
+                  <span class="fa fa-gear"></span>
+                  <span translate="common.buttons.set">Set</span>
+                </button>
               </div>
             </li>
           </ul>
@@ -38,7 +56,7 @@
       <div ng-if="!consentCtx.hasEc">
         <os-editable-item-list
           items="consentCtx.tiers" item-pvs="consentCtx.stmts" text-attr="displayValue"
-          list-changed="listChanged" allow-edit="consentCtx.allowEdit" refresh="loadConsentStmts" 
+          list-changed="listChanged" allow-edit="consentCtx.allowEdit && !cp.consentsSource" refresh="loadConsentStmts"
           add-caption="{{'cp.add_consent_tier' | translate}}" list-title="{{'cp.consent_tiers' | translate}}"
           ng-if="!cp.consentsWaived && (consentCtx.allowEdit || consentCtx.tiers.length > 0)">
         </os-editable-item-list>

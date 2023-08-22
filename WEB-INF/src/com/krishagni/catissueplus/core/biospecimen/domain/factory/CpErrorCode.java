@@ -115,7 +115,13 @@ public enum CpErrorCode implements ErrorCode {
 
 	PUB_INVALID_REVIEWERS,
 
-	INVALID_PUB_ID;
+	INVALID_PUB_ID,
+
+	CONSENTS_SOURCE_NOT_FOUND,
+
+	CONSENTS_SOURCED,
+
+	VISIT_CONSENTS_ENABLED;
 	
 	@Override
 	public String code() {

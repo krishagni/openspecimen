@@ -39,7 +39,7 @@
         </fieldset>
       </div>
     </div>
-    <a class="list-group-item" ng-if="!addMode && allowEdit" ng-click="showAddItem()">
+    <a class="list-group-item" ng-if="!addMode" ng-click="showAddItem()" ng-disabled="!allowEdit">
       {{addCaption}}
     </a>
 

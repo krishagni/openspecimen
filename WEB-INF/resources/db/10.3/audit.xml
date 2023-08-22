@@ -12,4 +12,10 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="vpawar" id="CP consents source">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="CONSENTS_SOURCE_CP_ID" type="${int.type}" />
+      <column name="consentsSource_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

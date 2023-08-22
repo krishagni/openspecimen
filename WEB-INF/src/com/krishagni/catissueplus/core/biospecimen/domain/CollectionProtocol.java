@@ -165,6 +165,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private Boolean visitLevelConsents;
 
+	private CollectionProtocol consentsSource;
+
 	private UserGroup emailSenderGroup;
 
 	private Set<CpConsentTier> consentTier = new LinkedHashSet<>();
@@ -611,6 +613,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.visitLevelConsents = visitLevelConsents;
 	}
 
+	public CollectionProtocol getConsentsSource() {
+		return consentsSource;
+	}
+
+	public void setConsentsSource(CollectionProtocol consentsSource) {
+		this.consentsSource = consentsSource;
+	}
+
 	public UserGroup getEmailSenderGroup() {
 		return emailSenderGroup;
 	}
@@ -819,6 +829,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 		cp.setConsentsWaived(isConsentsWaived());
 		cp.setVisitLevelConsents(getVisitLevelConsents());
+		cp.setConsentsSource(getConsentsSource());
 		cp.setUnsignedConsentDocumentURL(getUnsignedConsentDocumentURL());
 		copyConsentTierTo(cp);
 
@@ -833,6 +844,10 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	}
 	
 	public void copyConsentTierTo(CollectionProtocol cp) {
+		if (cp.getConsentsSource() != null) {
+			return;
+		}
+
 		for (CpConsentTier consentTier : getConsentTier()) {
 			cp.addConsentTier(consentTier.copy());
 		}

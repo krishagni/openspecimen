@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
-  .controller('CpConsentsCtrl', function($scope, $state, $q, cp, hasEc, consentTiers, DeleteUtil, Alerts,
-    AuthorizationService, ConsentStatement) {
+  .controller('CpConsentsCtrl', function($scope, $state, $q, $modal, cp, hasEc, consentTiers, DeleteUtil, Alerts,
+    AuthorizationService, ConsentStatement, CollectionProtocol) {
 
     var defStmts;
 
@@ -95,6 +95,73 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
         function(result) {
           Alerts.success("cp.consents_waived_updated", {waived: result.consentsWaived});
           $scope.cp.draftMode = true;
+        }
+      );
+    }
+
+    $scope.showSelectConsentsCp = function() {
+      $modal.open({
+        templateUrl: 'modules/biospecimen/cp/set-consents-cp.html',
+        controller: function($scope, $modalInstance) {
+          var mctx = $scope.mctx = {
+            defCps: null,
+            cps: [],
+            selectedCp: angular.copy(cp.consentsSource || {}),
+            cp: cp
+          };
+
+          $scope.searchCps = function(query) {
+            if (mctx.defCps && (!query || mctx.defCps.length < 100)) {
+              mctx.cps = mctx.defCps;
+              return;
+            }
+
+            CollectionProtocol.query({query: query}).then(
+              function(cps) {
+                mctx.cps = cps;
+                if (!query) {
+                  mctx.defCps = cps;
+                }
+              }
+            );
+          }
+
+          $scope.submit = function() {
+            $scope.submitting = true;
+            cp.updateConsentsSource(mctx.selectedCp || {}).then(
+              function(savedCp) {
+                $modalInstance.close(savedCp);
+              },
+
+              function() {
+                $scope.submitting = false;
+              }
+            );
+          }
+
+          $scope.cancel = function() {
+            $modalInstance.dismiss('close');
+          }
+        },
+      }).result.then(
+        function(savedCp) {
+          var consentsSource = null;
+          if (!savedCp.consentsSource) {
+            cp.consentsSource = null;
+            consentsSource = cp;
+          } else {
+            consentsSource = cp.consentsSource = savedCp.consentsSource;
+          }
+
+          if (!hasEc) {
+            consentsSource.getConsentTiers().then(
+              function(tiers) {
+                $scope.consentCtx.tiers = initConsentTiers(tiers);
+              }
+            );
+          }
+
+          cp.draftMode = true;
         }
       );
     }

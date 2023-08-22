@@ -193,4 +193,13 @@
   <changeSet author="vpawar" id="Drop not null constraint on container type name">
     <dropNotNullConstraint tableName="OS_CONTAINER_TYPES" columnName="NAME_FORMAT" columnDataType="${text.type}(255) "/>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP consents source">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="CONSENTS_SOURCE_CP_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_CONSENTS_SOURCE_CP_ID"
+          referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

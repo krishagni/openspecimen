@@ -388,8 +388,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			ensureUniqueShortTitle(existingCp, cp, ose);
 			ensureUniqueCode(existingCp, cp, ose);
 			ensureUniqueCpSiteCode(cp, ose);
-			if (existingCp.isConsentsWaived() != cp.isConsentsWaived()) {
-			  ensureConsentTierIsEmpty(existingCp, ose);
+			if (existingCp.isConsentsWaived() != cp.isConsentsWaived() || cp.getConsentsSource() != null) {
+				ensureConsentTierIsEmpty(existingCp, ose);
 			}
 
 			ose.checkAndThrow();
@@ -478,6 +478,50 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			}
 
 			existingCp.setConsentsWaived(detail.getConsentsWaived());
+			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(existingCp));
+			return ResponseEvent.response(CollectionProtocolDetail.from(existingCp));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<CollectionProtocolDetail> updateConsentsSource(RequestEvent<CollectionProtocolDetail> req) {
+		try {
+			CollectionProtocolDetail detail = req.getPayload();
+			CollectionProtocol existingCp = getCollectionProtocol(detail.getId(), detail.getTitle(), detail.getShortTitle());
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(existingCp);
+			if (detail.getConsentsSource() != null && CollectionUtils.isNotEmpty(existingCp.getConsentTier())) {
+				return ResponseEvent.userError(CpErrorCode.CONSENT_TIER_FOUND, existingCp.getShortTitle());
+			}
+
+			CollectionProtocolSummary inputCs = detail.getConsentsSource();
+			if (inputCs == null || (inputCs.getId() == null && StringUtils.isBlank(inputCs.getShortTitle()))) {
+				existingCp.setConsentsSource(null);
+			} else {
+				if (Boolean.TRUE.equals(existingCp.getVisitLevelConsents())) {
+					return ResponseEvent.userError(CpErrorCode.VISIT_CONSENTS_ENABLED, existingCp.getShortTitle());
+				}
+
+				if (existingCp.isConsentsWaived()) {
+					return ResponseEvent.userError(CpErrorCode.CONSENTS_WAIVED, existingCp.getShortTitle());
+				}
+
+				CollectionProtocol consentsSource = getCollectionProtocol(inputCs.getId(), null, inputCs.getShortTitle());
+				if (Boolean.TRUE.equals(consentsSource.getVisitLevelConsents())) {
+					return ResponseEvent.userError(CpErrorCode.VISIT_CONSENTS_ENABLED, consentsSource.getShortTitle());
+				}
+
+				if (consentsSource.isConsentsWaived()) {
+					return ResponseEvent.userError(CpErrorCode.CONSENTS_WAIVED, existingCp.getShortTitle());
+				}
+
+				existingCp.setConsentsSource(consentsSource);
+			}
+
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(existingCp));
 			return ResponseEvent.response(CollectionProtocolDetail.from(existingCp));
 		} catch (OpenSpecimenException ose) {
@@ -637,7 +681,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			}
 			
 			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
-			return ResponseEvent.response(ConsentTierDetail.from(cp.getConsentTier()));
+			Set<CpConsentTier> consents = cp.getConsentsSource() != null ? cp.getConsentsSource().getConsentTier() : cp.getConsentTier();
+			return ResponseEvent.response(ConsentTierDetail.from(consents));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -659,26 +704,26 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			if (cp.isConsentsWaived()) {
 				return ResponseEvent.userError(CpErrorCode.CONSENTS_WAIVED, cp.getShortTitle());
 			}
+
+			if (cp.getConsentsSource() != null) {
+				return ResponseEvent.userError(CpErrorCode.CONSENTS_SOURCED, cp.getConsentsSource().getShortTitle());
+			}
 			
 			ConsentTierDetail input = opDetail.getConsentTier();
 			CpConsentTier resp = null;			
 			ConsentStatement stmt = null;
 			switch (opDetail.getOp()) {
-				case ADD:
+				case ADD -> {
 					ensureUniqueConsentStatement(input, cp);
 					stmt = getStatement(input.getStatementId(), input.getStatementCode(), input.getStatement());
 					resp = cp.addConsentTier(getConsentTierObj(input.getId(), stmt));
-					break;
-					
-				case UPDATE:
+				}
+				case UPDATE -> {
 					ensureUniqueConsentStatement(input, cp);
 					stmt = getStatement(input.getStatementId(), input.getStatementCode(), input.getStatement());
 					resp = cp.updateConsentTier(getConsentTierObj(input.getId(), stmt));
-					break;
-					
-				case REMOVE:
-					resp = cp.removeConsentTier(input.getId());
-					break;			    
+				}
+				case REMOVE -> resp = cp.removeConsentTier(input.getId());
 			}
 			
 			if (resp != null) {

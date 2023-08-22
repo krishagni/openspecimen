@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,8 +115,6 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		cp.setStoreSprEnabled(input.getStoreSprEnabled());
 		cp.setExtractSprText(input.getExtractSprText());
 		cp.setDescriptionURL(input.getDescriptionUrl());
-		cp.setConsentsWaived(input.getConsentsWaived());
-		cp.setVisitLevelConsents(input.getVisitLevelConsents());
 		cp.setBulkPartRegEnabled(input.getBulkPartRegEnabled());
 		cp.setSpecimenCentric(input.isSpecimenCentric());
 		if (!cp.isSpecimenCentric()) {
@@ -141,6 +140,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setActivityStatus(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
 		setEmailSenderGroup(input, cp, ose);
+		setConsentsSource(input, cp, ose);
 
 		ose.checkAndThrow();
 		return cp;
@@ -583,6 +583,55 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		}
 
 		result.setEmailSenderGroup(senderGroup);
+	}
+
+	private void setConsentsSource(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		if (result.isSpecimenCentric()) {
+			result.setConsentsWaived(true);
+			result.setVisitLevelConsents(false);
+			result.setConsentsSource(null);
+			result.setConsentTier(Collections.emptySet());
+			return;
+		}
+
+		result.setConsentsWaived(Boolean.TRUE.equals(input.getConsentsWaived()));
+		result.setVisitLevelConsents(Boolean.TRUE.equals(input.getVisitLevelConsents()));
+		if (Boolean.TRUE.equals(result.getVisitLevelConsents())) {
+			result.setConsentsSource(null);
+			ose.addError(CpErrorCode.VISIT_CONSENTS_ENABLED, result.getShortTitle());
+			return;
+		}
+
+		if (input.getConsentsSource() == null) {
+			return;
+		}
+
+		Object key = null;
+		CollectionProtocol consentsSource = null;
+		if (input.getConsentsSource().getId() != null) {
+			key = input.getConsentsSource().getId();
+			consentsSource = daoFactory.getCollectionProtocolDao().getById(input.getConsentsSource().getId());
+		} else if (StringUtils.isNotBlank(input.getConsentsSource().getShortTitle())) {
+			key = input.getConsentsSource().getShortTitle();
+			consentsSource = daoFactory.getCollectionProtocolDao().getCpByShortTitle(input.getConsentsSource().getShortTitle());
+		} else if (StringUtils.isNotBlank(input.getConsentsSource().getCode())) {
+			key = input.getConsentsSource().getCode();
+			consentsSource = daoFactory.getCollectionProtocolDao().getCpByCode(input.getConsentsSource().getCode());
+		}
+
+		if (key == null) {
+			return;
+		}
+
+		if (consentsSource == null) {
+			ose.addError(CpErrorCode.CONSENTS_SOURCE_NOT_FOUND, key);
+		} else if (Boolean.TRUE.equals(consentsSource.getVisitLevelConsents())) {
+			ose.addError(CpErrorCode.VISIT_CONSENTS_ENABLED, consentsSource.getShortTitle());
+		} else if (CollectionUtils.intersection(consentsSource.getRepositories(), result.getRepositories()).isEmpty()) {
+			// TODO: common site between CP and consents source is missing
+		}
+
+		result.setConsentsSource(consentsSource);
 	}
 	
 	private User getUser(UserSummary userDetail) {

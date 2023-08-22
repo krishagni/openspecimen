@@ -333,13 +333,21 @@ public class CollectionProtocolsController {
 	public CollectionProtocolDetail updateConsentsWaived(@PathVariable Long id, @RequestBody Map<String, String> props) {
 		CollectionProtocolDetail cp = new  CollectionProtocolDetail();
 		cp.setId(id);
-		cp.setConsentsWaived(Boolean.valueOf(props.get("consentsWaived")));
-		
-		ResponseEvent<CollectionProtocolDetail> resp = cpSvc.updateConsentsWaived(request(cp));
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		cp.setConsentsWaived(Boolean.parseBoolean(props.get("consentsWaived")));
+		return response(cpSvc.updateConsentsWaived(request(cp)));
 	}
-	
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/consents-source")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public CollectionProtocolDetail updateConsentsSource(@PathVariable Long id, @RequestBody CollectionProtocolSummary source) {
+		CollectionProtocolDetail cp = new  CollectionProtocolDetail();
+		cp.setId(id);
+		cp.setConsentsSource(source);
+		return response(cpSvc.updateConsentsSource(request(cp)));
+	}
+
+
 	@RequestMapping(method = RequestMethod.GET, value="/{id}/dependent-entities")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
@@ -400,9 +408,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<ConsentTierDetail> getConsentTiers(@PathVariable("id") Long cpId) {
-		ResponseEvent<List<ConsentTierDetail>> resp = cpSvc.getConsentTiers(request(cpId));
-		resp.throwErrorIfUnsuccessful();		
-		return resp.getPayload();
+		return response(cpSvc.getConsentTiers(request(cpId)));
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/consent-tiers")

@@ -189,7 +189,8 @@
       "patient_mode": "Patient Mode",
       "refresh": "Refresh",
       "dismiss": "Dismiss",
-      "widgets": "Widgets"
+      "widgets": "Widgets",
+      "set": "Set"
     }
   },
 
@@ -296,6 +297,9 @@
 
     "consents_waived": "Consent waived?",
     "consents_waived_updated": "Participant consent {{waived ? 'waived' : 'enabled'}} successfully.",
+    "consents_cp": "Consents CP",
+    "set_consents_cp": "Set Consents CP",
+    "select_consents_cp": "Select Consents CP",
     "unsigned_consent_url": "Unsigned Consent Form URL",
     "consent_tiers": "Consent Tiers", 
     "add_consent_tier": "Add Statement...",

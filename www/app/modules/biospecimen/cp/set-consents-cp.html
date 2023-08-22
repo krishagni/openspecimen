@@ -1,0 +1,31 @@
+<ng-form name="consentsCpForm" class="form-horizontal" os-form-validator="consentsCpForm"
+  ng-class="{'os-form-submitting': submitting}" novalidate>
+  <div class="os-modal">
+    <div class="os-modal-header">
+      <span translate="cp.set_consents_cp">Set Consents CP</span>
+    </div>
+    <div class="os-modal-body">
+      <div class="form-group">
+        <label class="control-label col-xs-4">
+          <span translate="cp.select_consents_cp">Select Consents CP</span>
+        </label>
+        <div class="col-xs-8">
+          <os-select name="cp" ng-model="mctx.selectedCp"
+            list="mctx.cps" display-prop="shortTitle"
+            placeholder="{{'econsents.select_consents_cp' | translate}}" refresh="searchCps">
+          </os-select>
+          <div os-field-error field="consentsCpForm.cp"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-modal-footer">
+      <button class="btn os-btn-text" ng-click="cancel()">
+        <span translate="common.buttons.cancel">Cancel</span>
+      </button>
+      <button class="btn btn-primary" ng-click="submit()">
+        <span translate="common.buttons.update">Update</span>
+      </button>
+    </div>
+  </div>
+</ng-form>

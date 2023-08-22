@@ -395,6 +395,16 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			
 			AccessCtrlMgr.getInstance().ensureReadConsentRights(existing);
 
+			CollectionProtocol consentsCp = existing.getCollectionProtocol().getConsentsSource();
+			if (consentsCp != null) {
+				CollectionProtocolRegistration consentsCpr = daoFactory.getCprDao().getCprByParticipantId(consentsCp.getId(), existing.getParticipant().getId());
+				if (consentsCpr == null) {
+					return ResponseEvent.userError(CprErrorCode.CONSENT_FORM_NOT_FOUND);
+				}
+
+				existing = consentsCpr;
+			}
+
 			String fileName = existing.getSignedConsentDocumentName();
 			if (StringUtils.isBlank(fileName)) {
 				return ResponseEvent.userError(CprErrorCode.CONSENT_FORM_NOT_FOUND);
@@ -428,6 +438,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			}
 
 			CollectionProtocolRegistration existing = getCpr(cprId, null, cpShortTitle, ppid);
+			CollectionProtocol consentsCp = existing.getCollectionProtocol().getConsentsSource();
+			if (consentsCp != null) {
+				return ResponseEvent.userError(CpErrorCode.CONSENTS_SOURCED, consentsCp.getShortTitle());
+			}
+
 			raiseErrorIfSpecimenCentric(existing);
 			AccessCtrlMgr.getInstance().ensureUpdateConsentRights(existing);
 			
@@ -469,6 +484,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 				return ResponseEvent.userError(CprErrorCode.M_NOT_FOUND, cprId, 1);
 			}
 
+			CollectionProtocol consentsCp = cpr.getCollectionProtocol().getConsentsSource();
+			if (consentsCp != null) {
+				return ResponseEvent.userError(CpErrorCode.CONSENTS_SOURCED, consentsCp.getShortTitle());
+			}
+
 			raiseErrorIfSpecimenCentric(cpr);
 			AccessCtrlMgr.getInstance().ensureUpdateConsentRights(cpr);
 
@@ -502,6 +522,21 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			RegistrationQueryCriteria crit = req.getPayload();
 			CollectionProtocolRegistration cpr = getCpr(crit.getCprId(), crit.getCpId(), crit.getPpid());
 			AccessCtrlMgr.getInstance().ensureReadConsentRights(cpr);
+
+			CollectionProtocol cp = cpr.getCollectionProtocol();
+			CollectionProtocol consentsCp = cp.getConsentsSource();
+			if (consentsCp != null) {
+				CollectionProtocolRegistration consentsCpr = daoFactory.getCprDao().getCprByParticipantId(consentsCp.getId(), cpr.getParticipant().getId());
+				ConsentDetail output = new ConsentDetail();
+				if (consentsCpr != null) {
+					output = ConsentDetail.fromCpr(consentsCpr);
+				}
+
+				output.setCpShortTitle(cpr.getCpShortTitle());
+				output.setPpid(cpr.getPpid());
+				return ResponseEvent.response(output);
+			}
+
 			return ResponseEvent.response(ConsentDetail.fromCpr(cpr));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -518,6 +553,11 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 
 			CollectionProtocolRegistration existing = getCpr(consentDetail.getCprId(),
 				consentDetail.getCpId(), consentDetail.getCpShortTitle(), consentDetail.getPpid());
+			CollectionProtocol consentsCp = existing.getCollectionProtocol().getConsentsSource();
+			if (consentsCp != null) {
+				return ResponseEvent.userError(CpErrorCode.CONSENTS_SOURCED, consentsCp.getShortTitle());
+			}
+
 			raiseErrorIfSpecimenCentric(existing);
 
 			AccessCtrlMgr.getInstance().ensureUpdateConsentRights(existing);

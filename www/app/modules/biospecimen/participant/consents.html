@@ -18,7 +18,8 @@
               </span>
               <span ng-switch-when="false" translate="common.not_specified">Not Specified</span>
             </div>
-            <div class="col-xs-2" ng-switch on="!!consent.consentDocumentName" show-if-allowed="consentUpdateOpts">
+            <div class="col-xs-2" ng-switch on="!!consent.consentDocumentName"
+              show-if-allowed="consentUpdateOpts" ng-show="!cp.consentsSource">
               <div class="btn btn-default btn-xs" ng-switch-when="false" ng-click="showUploadMode()">
                 <span class="fa fa-wrench"></span>
               </div>
@@ -56,7 +57,7 @@
         <div class="list-group">
           <div class="list-group-item clearfix os-section-hdr">
             <span translate="participant.consent.responses">Consent Responses</span>
-            <div show-if-allowed="consentUpdateOpts" class="btn-group os-btns right">
+            <div show-if-allowed="consentUpdateOpts" class="btn-group os-btns right"  ng-show="!cp.consentsSource">
               <button class="btn btn-primary" ng-if="!editMode" ng-click="showEditConsents()">
                 <span class="fa fa-pencil"></span>
                 <span translate="common.buttons.edit">Edit</span>
