@@ -28,10 +28,17 @@
               <strong class="key key-sm" translate="cp.consents_cp">Consents CP</strong>
               <div class="value value-md">
                 <span ng-if="cp.consentsSource.id > 0">
-                  <a ui-sref="cp-detail.consents({cpId: cp.consentsSource.id})">{{cp.consentsSource.shortTitle}}</a>
-                  <button class="btn btn-default btn-xs" ng-click="showSelectConsentsCp()">
-                    <span class="fa fa-pencil"></span>
-                  </button>
+                  <a style="margin-right: 5px;" ui-sref="cp-detail.consents({cpId: cp.consentsSource.id})">
+                    <span>{{cp.consentsSource.shortTitle}}</span>
+                  </a>
+                  <div class="btn-group btn-group-xs">
+                    <button class="btn btn-default btn-xs" ng-click="showSelectConsentsCp()">
+                      <span class="fa fa-pencil"></span>
+                    </button>
+                    <button class="btn btn-default btn-xs" ng-click="resetConsentsCp()">
+                      <span class="fa fa-times"></span>
+                    </button>
+                  </div>
                 </span>
                 <button class="btn btn-default btn-xs" ng-if="!cp.consentsSource" ng-click="showSelectConsentsCp()">
                   <span class="fa fa-gear"></span>

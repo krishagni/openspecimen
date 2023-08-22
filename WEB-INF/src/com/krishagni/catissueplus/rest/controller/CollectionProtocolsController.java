@@ -129,7 +129,10 @@ public class CollectionProtocolsController {
 			boolean detailedList,
 
 			@RequestParam(value = "orderByStarred", required = false, defaultValue = "false")
-			boolean orderByStarred) {
+			boolean orderByStarred,
+
+			@RequestParam(value = "onlyParticipantConsentCps", required = false, defaultValue = "false")
+			boolean onlyParticipantConsentCps) {
 		
 		CpListCriteria crit = new CpListCriteria()
 			.query(searchStr)
@@ -141,6 +144,7 @@ public class CollectionProtocolsController {
 			.includePi(detailedList)
 			.includeStat(detailedList)
 			.orderByStarred(orderByStarred)
+			.onlyParticipantConsentCps(onlyParticipantConsentCps)
 			.startAt(startAt)
 			.maxResults(maxResults);
 
@@ -169,7 +173,10 @@ public class CollectionProtocolsController {
 			String repositoryName,
 
 			@RequestParam(value = "instituteId", required = false)
-			Long instituteId) {
+			Long instituteId,
+
+			@RequestParam(value = "onlyParticipantConsentCps", required = false, defaultValue = "false")
+			boolean onlyParticipantConsentCps) {
 		
 		CpListCriteria crit = new CpListCriteria()
 			.query(searchStr)
@@ -177,7 +184,8 @@ public class CollectionProtocolsController {
 			.irbId(irbId)
 			.piId(piId)
 			.repositoryName(repositoryName)
-			.instituteId(instituteId);
+			.instituteId(instituteId)
+			.onlyParticipantConsentCps(onlyParticipantConsentCps);
 		
 		ResponseEvent<Long> resp = cpSvc.getProtocolsCount(request(crit));
 		resp.throwErrorIfUnsuccessful();

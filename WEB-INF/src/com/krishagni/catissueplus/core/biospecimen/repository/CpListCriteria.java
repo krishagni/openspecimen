@@ -20,6 +20,8 @@ public class CpListCriteria extends AbstractListCriteria<CpListCriteria> {
 	
 	private boolean includePi;
 
+	private boolean onlyParticipantConsentCps;
+
 	private Set<SiteCpPair> siteCps;
 	
 	@Override
@@ -78,6 +80,15 @@ public class CpListCriteria extends AbstractListCriteria<CpListCriteria> {
 	
 	public CpListCriteria includePi(boolean includePi) {
 		this.includePi = includePi;
+		return self();
+	}
+
+	public boolean onlyParticipantConsentCps() {
+		return onlyParticipantConsentCps;
+	}
+
+	public CpListCriteria onlyParticipantConsentCps(boolean onlyParticipantConsentCps) {
+		this.onlyParticipantConsentCps = onlyParticipantConsentCps;
 		return self();
 	}
 

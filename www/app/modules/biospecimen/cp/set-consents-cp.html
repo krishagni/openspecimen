@@ -10,7 +10,7 @@
           <span translate="cp.select_consents_cp">Select Consents CP</span>
         </label>
         <div class="col-xs-8">
-          <os-select name="cp" ng-model="mctx.selectedCp"
+          <os-select name="cp" ng-model="mctx.selectedCp" required
             list="mctx.cps" display-prop="shortTitle"
             placeholder="{{'econsents.select_consents_cp' | translate}}" refresh="searchCps">
           </os-select>

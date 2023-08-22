@@ -67,6 +67,26 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
       return initConsentTier(consentTier);
     }
 
+    function onAddRmConsentCp(savedCp) {
+      var consentsSource = null;
+      if (!savedCp.consentsSource) {
+        cp.consentsSource = null;
+        consentsSource = cp;
+      } else {
+        consentsSource = cp.consentsSource = savedCp.consentsSource;
+      }
+
+      if (!hasEc) {
+        consentsSource.getConsentTiers().then(
+          function(tiers) {
+            $scope.consentCtx.tiers = initConsentTiers(tiers);
+          }
+        );
+      }
+
+      cp.draftMode = true;
+    }
+
     $scope.loadConsentStmts = loadConsentStmts;
 
     $scope.listChanged = function(action, stmt) {
@@ -116,11 +136,11 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
               return;
             }
 
-            CollectionProtocol.query({query: query}).then(
+            CollectionProtocol.query({query: query, onlyParticipantConsentCps: true}).then(
               function(cps) {
-                mctx.cps = cps;
+                mctx.cps = cps.filter(function(icp) { return icp.id != cp.id; });
                 if (!query) {
-                  mctx.defCps = cps;
+                  mctx.defCps = mctx.cps;
                 }
               }
             );
@@ -145,23 +165,15 @@ angular.module('os.biospecimen.cp.consents', ['os.biospecimen.models'])
         },
       }).result.then(
         function(savedCp) {
-          var consentsSource = null;
-          if (!savedCp.consentsSource) {
-            cp.consentsSource = null;
-            consentsSource = cp;
-          } else {
-            consentsSource = cp.consentsSource = savedCp.consentsSource;
-          }
+          onAddRmConsentCp(savedCp);
+        }
+      );
+    }
 
-          if (!hasEc) {
-            consentsSource.getConsentTiers().then(
-              function(tiers) {
-                $scope.consentCtx.tiers = initConsentTiers(tiers);
-              }
-            );
-          }
-
-          cp.draftMode = true;
+    $scope.resetConsentsCp = function() {
+      cp.updateConsentsSource({}).then(
+        function(savedCp) {
+          onAddRmConsentCp(savedCp);
         }
       );
     }

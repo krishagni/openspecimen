@@ -386,6 +386,10 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 			}
 		}
 
+		if (crit.onlyParticipantConsentCps()) {
+			query.add(query.or(query.eq("cp.visitLevelConsents", false)));
+		}
+
 		applyIdsFilter(query, "cp.id", crit.ids());
 		addSiteCpsCond(query, crit.siteCps());
 		if (CollectionUtils.isNotEmpty(crit.notInIds())) {
