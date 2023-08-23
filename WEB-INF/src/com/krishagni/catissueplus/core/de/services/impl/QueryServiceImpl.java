@@ -3,7 +3,9 @@ package com.krishagni.catissueplus.core.de.services.impl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +51,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCo
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr.ParticipantReadAccess;
@@ -128,19 +132,19 @@ public class QueryServiceImpl implements QueryService {
 
 	private static final Pattern SELECT_PATTERN = Pattern.compile("^(select\\s+distinct|select)\\s+.*$");
 	
-	private static String QUERY_DATA_EXPORTED_EMAIL_TMPL = "query_export_data";
+	private static final String QUERY_DATA_EXPORTED_EMAIL_TMPL = "query_export_data";
 	
-	private static String SHARE_QUERY_FOLDER_EMAIL_TMPL = "query_share_query_folder";
+	private static final String SHARE_QUERY_FOLDER_EMAIL_TMPL = "query_share_query_folder";
 
-	private static String CFG_MOD = "query";
+	private static final String CFG_MOD = "query";
 
-	private static String MAX_CONCURRENT_QUERIES = "max_concurrent_queries";
+	private static final String MAX_CONCURRENT_QUERIES = "max_concurrent_queries";
 
-	private static int DEF_MAX_CONCURRENT_QUERIES = 10;
+	private static final int DEF_MAX_CONCURRENT_QUERIES = 10;
 
-	private static String MAX_RECS_IN_MEM = "max_recs_in_memory";
+	private static final String MAX_RECS_IN_MEM = "max_recs_in_memory";
 
-	private static int DEF_MAX_RECS_IN_MEM = 100;
+	private static final int DEF_MAX_RECS_IN_MEM = 100;
 
 	private static final int EXPORT_THREAD_POOL_SIZE = getThreadPoolSize();
 	
@@ -148,7 +152,7 @@ public class QueryServiceImpl implements QueryService {
 
 	private static final String FORM_RECORD_URL = "#/object-state-params-resolver?objectName=formRecord&key=recordId&value={{$value}}";
 
-	private static ExecutorService exportThreadPool = Executors.newFixedThreadPool(EXPORT_THREAD_POOL_SIZE);
+	private static final ExecutorService exportThreadPool = Executors.newFixedThreadPool(EXPORT_THREAD_POOL_SIZE);
 
 	private DaoFactory daoFactory;
 
@@ -564,12 +568,16 @@ public class QueryServiceImpl implements QueryService {
 		try {
 			ensureReadRights();
 
-			String path = getExportDataDir() + File.separator + fileId;
-			File f = new File(path);
-			if (f.exists()) {
-				return ResponseEvent.response(f);
+			File progressFile = new File(getExportDataDir(), fileId + ".in_progress");
+			if (progressFile.exists()) {
+				return ResponseEvent.userError(SavedQueryErrorCode.EXPORT_DATA_IN_PROGRESS);
+			}
+
+			File dataFile = new File(getExportDataDir(), fileId);
+			if (dataFile.exists()) {
+				return ResponseEvent.response(dataFile);
 			} else {
-				return ResponseEvent.userError(SavedQueryErrorCode.EXPORT_DATA_FILE_NOT_FOUND);
+				return ResponseEvent.userError(SavedQueryErrorCode.EXPORT_DATA_FILE_NOT_FOUND, fileId);
 			}
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1699,7 +1707,7 @@ public class QueryServiceImpl implements QueryService {
 				queryId = 0L; // to indicate unsaved query
 			}
 
-			filename = "query_" + queryId + "_" + UUID.randomUUID().toString();
+			filename = "query_" + queryId + "_" + UUID.randomUUID();
 		}
 
 		return filename;
@@ -1795,8 +1803,13 @@ public class QueryServiceImpl implements QueryService {
 		public Boolean call() {
 			SecurityContextHolder.getContext().setAuthentication(auth);
 
+			boolean error = false;
 			QueryResultData data = null;
+			File progressFile = new File(getExportDataDir(), filename + ".in_progress");
 			try {
+				FileUtils.writeStringToFile(progressFile, "In Progress", Charset.defaultCharset());
+				progressFile.deleteOnExit();
+
 				QueryResponse resp;
 				if (procFn == null) {
 					QueryResultExporter exporter = new QueryResultCsvExporter(Utility.getFieldSeparator());
@@ -1812,15 +1825,52 @@ public class QueryServiceImpl implements QueryService {
 				notifyExportCompleted();
 			} catch (Exception e) {
 				logger.error("Error exporting query data", e);
+				error = true;
 				throw OpenSpecimenException.serverError(e);
 			} finally {
 				IOUtils.closeQuietly(fout);
 				if (data != null) {
 					data.close();
 				}
+
+				File dataFile = new File(getExportDataDir(), filename);
+				if (!error) {
+					try {
+						zipExportedDataFile(dataFile);
+					} catch (Exception e) {
+						logger.error("Error compressing the query result to ZIP file. Deleting the file", e);
+						FileUtils.deleteQuietly(dataFile);
+					}
+				} else {
+					FileUtils.deleteQuietly(dataFile);
+				}
+
+				FileUtils.deleteQuietly(progressFile);
 			}
 
 			return true;
+		}
+
+		private void zipExportedDataFile(File dataFile) throws IOException {
+			String zipFilename = filename + ".zip";
+			String entryName = filename;
+
+			if (entryName.endsWith(".zip")) {
+				entryName = filename.substring(0, filename.lastIndexOf("."));
+				zipFilename = filename;
+			} else if (!entryName.endsWith(".csv") && !entryName.endsWith(".xlsx") && !entryName.endsWith(".xls")) {
+				int index = filename.lastIndexOf("_");
+				if (index == -1) {
+					index = filename.length();
+				}
+
+				entryName = filename.substring(0, index) + ".csv";
+			}
+
+			File zipFile = new File(getExportDataDir(), zipFilename);
+			Utility.zipFilesWithNames(Collections.singletonList(Pair.make(dataFile.getAbsolutePath(), entryName)), zipFile.getAbsolutePath());
+			FileUtils.deleteQuietly(dataFile);
+			FileUtils.moveFile(zipFile, dataFile);
 		}
 
 		private void notifyExportCompleted() {

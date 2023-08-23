@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -93,16 +93,19 @@ public class QueryController {
 	@RequestMapping(method = RequestMethod.GET, value="/export")
 	@ResponseStatus(HttpStatus.OK)
 	public void downloadExportDataFile(
-			@RequestParam(value = "fileId", required = true) 
-			String fileId,
+		@RequestParam(value = "fileId")
+		String fileId,
 			
-			@RequestParam(value = "filename", required = false, defaultValue = "QueryResults.csv")
-			String filename,
+		@RequestParam(value = "filename", required = false, defaultValue = "QueryResults.zip")
+		String filename,
 			
-			HttpServletResponse response) {
+		HttpServletResponse response) {
 
 		fileId = Utility.cleanPath(Utility.stripWs(fileId));
 		filename = Utility.cleanPath(Utility.stripWs(filename));
+		if (!filename.endsWith(".zip")) {
+			filename += ".zip";
+		}
 
 		File file = response(querySvc.getExportDataFile(request(fileId)));
 		Utility.sendToClient(response, filename, file);
