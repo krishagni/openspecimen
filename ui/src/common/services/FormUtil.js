@@ -79,6 +79,9 @@ class FormUtil {
         let rowSchema = {fields: []};
         row.forEach(
           (field) => {
+            field.formId = formDef.id;
+            field.fqn = (namePrefix || '') + field.name;
+
             let fieldSchema = {source: 'de', ...fieldFactory.getFieldSchema(field, namePrefix)};
             if (fieldSchema.type) {
               rowSchema.fields.push(fieldSchema);
