@@ -57,7 +57,7 @@ public class ScheduledQueryTask implements ScheduledTask {
 		QueryService.ExportProcessor processor = new DefaultQueryExportProcessor(query.getCpId(), query.getCpGroupId()) {
 			@Override
 			public String filename() {
-				return "scheduled_query_" + query.getId() + "_" + jobRun.getId() + ".csv";
+				return "scheduled_query_" + query.getId() + "_" + jobRun.getId() + ".csv.zip";
 			}
 		};
 

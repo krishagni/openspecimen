@@ -42,6 +42,7 @@ public class QueryDataExportResult {
 		this.completed = completed;
 	}
 
+	@JsonIgnore
 	public Future<Boolean> getPromise() {
 		return promise;
 	}
