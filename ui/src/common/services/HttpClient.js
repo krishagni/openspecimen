@@ -161,9 +161,9 @@ class HttpClient {
           resolve(resp.data);
         })
         .catch(e => {
-          this.notifyFail(method, e.response);
+          this.notifyFail(method, e.response || e.message);
           if (typeof errorHandler == 'function') {
-            errorHandler(resolve, e.response);
+            errorHandler(resolve, e.response || e.message);
             return;
           }
 
