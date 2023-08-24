@@ -128,6 +128,10 @@ a:focus, a:hover {
   margin: 0rem;
 }
 
+.os-app-toast .p-toast-message .p-toast-message-content {
+  word-break: break-word;
+}
+
 .os-hide {
   display: none!important;
 }
@@ -162,6 +166,12 @@ a:focus, a:hover {
 
 .os-table tbody td {
   border-top: 1px solid #ddd;
+}
+
+.os-table tbody tr.error td {
+  background: #f8d7da;
+  border-top: 1px solid #f5c6cb;
+  color: #721c24;
 }
 
 .os-table.os-table-borderless thead th,

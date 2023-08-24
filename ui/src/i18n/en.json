@@ -564,6 +564,7 @@
     "no_containers_match_criteria": "No containers match the criteria.",
     "no_free_positions": "Container does not have enough free positions to store input specimens.",
     "no_map_for_dimless": "The map view is not available for dimensionless container.",
+    "no_tube_barcodes_detected": "No specimen barcodes were detected.",
     "not_checked_out": "No locations blocked by the specimens: {labels}.",
     "not_stored": "Not Stored",
     "num_containers": "No. of Containers",
@@ -695,6 +696,7 @@
     "utilisation_report_by_email": "Utilisation report generation is taking more time than anticipated. Link to download the report will be sent to you by email.",
     "vacate_existing_specimens": "Vacate Existing Specimens",
     "view_color_coding": "View Color Coding",
+    "view_map": "View Map",
     "view_specimens": "View Specimens"
   },
 

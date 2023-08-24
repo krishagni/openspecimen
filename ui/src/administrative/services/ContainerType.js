@@ -19,6 +19,10 @@ class ContainerType {
     return http.get('container-types/' + typeId);
   }
 
+  async getTypeByName(typeName) {
+    return http.get('container-types/byname', {name: typeName});
+  }
+
   async saveOrUpdate(type) {
     if (type.id) {
       return http.put('container-types/' + type.id, type);

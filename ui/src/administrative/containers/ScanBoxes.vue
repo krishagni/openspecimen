@@ -109,6 +109,10 @@
               <span v-t="{path: ctx.error, args: ctx.errorArgs}"></span>
             </os-message>
 
+            <span v-if="ctx.specimens.length > 0">
+              <os-button left-icon="map" :label="$t('containers.view_map')" @click="showBoxMap" />
+            </span>
+
             <table class="os-table" v-if="ctx.specimens.length > 0">
               <thead>
                 <tr>
@@ -121,7 +125,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="spmn of ctx.specimens" :key="spmn.id">
+                <tr v-for="(spmn, index) of ctx.specimens" :key="index" :class="{'error': !spmn.id}">
                   <td>{{$filters.noValue(spmn.barcode)}}</td>
                   <td>{{spmn.label}}</td>
                   <td>{{spmn.cpShortTitle}}</td>
@@ -136,6 +140,10 @@
                 </tr>
               </tbody>
             </table>
+
+            <os-message type="info" v-else>
+              <span v-t="'containers.no_tube_barcodes_detected'">No specimen barcodes detected in the box</span>
+            </os-message>
           </template>
         </os-section>
 
@@ -155,6 +163,43 @@
           </div>
         </div>
       </div>
+
+      <os-dialog ref="boxMapView" :size="'lg'" :closable="true">
+        <template #header>
+          <span>{{ctx.box.barcode}}</span>
+        </template>
+        <template #content>
+          <Layout class="map" :container="ctx.boxMap.container" :occupants="ctx.boxMap.occupants">
+            <template #occupant_specimen="slotProps">
+              <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
+                <os-icon class="specimen-icon" :class="{'not-found': !slotProps.occupant.occupyingEntityId}"
+                  name="vial" :style="slotProps.occupant.colorCode"
+                  v-os-tooltip="slotProps.occupant.tooltip" />
+
+                <span class="name" v-os-tooltip="slotProps.occupant.displayName">
+                  <span>{{slotProps.occupant.displayName}}</span>
+                </span>
+              </a>
+            </template>
+          </Layout>
+        </template>
+        <template #footer>
+          <os-button primary :label="$t('common.buttons.done')" @click="closeBoxMap" />
+        </template>
+      </os-dialog>
+
+      <os-overlay ref="occupantDetails">
+        <div class="os-container-occupant">
+          <div>
+            <h4 class="title">
+              <span v-t="'containers.specimen.singular'">Specimen</span>
+            </h4>
+
+            <os-overview :schema="ctx.specimenDict" :object="ctx.occupant"
+              :columns="1" v-if="ctx.specimenDict.length > 0" />
+          </div>
+        </div>
+      </os-overlay>
 
       <os-dialog ref="missingSpecimensDialog" :size="'md'" :closable="'false'">
         <template #header>
@@ -238,17 +283,25 @@
 
 <script>
 
-import containerSvc from '@/administrative/services/Container.js';
-import scanner      from '@/administrative/services/BoxScanner.js';
+import containerSvc     from '@/administrative/services/Container.js';
+import containerTypeSvc from '@/administrative/services/ContainerType.js';
+import scanner          from '@/administrative/services/BoxScanner.js';
 
 import cpSvc        from '@/biospecimen/services/CollectionProtocol.js';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import http      from '@/common/services/HttpClient.js';
+import numUtil   from '@/common/services/NumberConverterUtil.js';
 import routerSvc from '@/common/services/Router.js';
+import util      from '@/common/services/Util.js';
 import wfSvc     from '@/common/services/Workflow.js';
 
+
+import Layout from './Layout.vue';
+
 export default {
+  components: { Layout },
+
   data() {
     const bcrumb = [
       {url: routerSvc.getUrl('ContainersList', {}), label: this.$t('containers.list')}
@@ -384,6 +437,7 @@ export default {
           ctx.box = box;
           if (container) {
             box.id = container.id;
+            box.container = container;
             box.type = container.typeName;
             box.siteName = container.siteName;
             box.allowedCollectionProtocols = container.allowedCollectionProtocols;
@@ -399,6 +453,7 @@ export default {
             }
 
           } else {
+            box.id = box.container = null;
             box.type = ctx.scanner.containerType;
             box.allowedCollectionProtocols = [];
             box.allowedTypes = [];
@@ -435,21 +490,114 @@ export default {
 
       containerSvc.searchSpecimens({barcode: spmnBarcodes}).then(
         (specimens) => {
-          ctx.specimens = specimens;
-          for (let spmn of specimens) {
-            const barcode = spmn.barcode.toLowerCase();
-            const tube = spmnBarcodesMap[barcode];
-            spmn.storageLocation = {posOne: tube.column, posTwo: tube.row};
+          ctx.specimens = [];
 
-            delete spmnBarcodesMap[barcode];
+          const specimensMap = specimens.reduce(
+            (map, spmn) => {
+              map[spmn.barcode.toLowerCase()] = spmn;
+              return map;
+            }, {});
+          const notFound = [];
+
+          for (let tube of tubes) {
+            if (!tube.barcode) {
+              continue;
+            }
+
+            const spmn = specimensMap[tube.barcode.toLowerCase()];
+            if (spmn) {
+              spmn.storageLocation = {posOne: tube.column, posTwo: tube.row};
+              ctx.specimens.push(spmn);
+            } else {
+              ctx.specimens.push({barcode: tube.barcode, storageLocation: {posOne: tube.column, posTwo: tube.row}});
+              notFound.push(tube);
+            }
           }
 
-          if (Object.keys(spmnBarcodesMap).length > 0) {
+          if (notFound.length > 0) {
             ctx.error = 'containers.specimens_not_found_ids';
-            ctx.errorArgs = {ids: Object.keys(spmnBarcodesMap).join(', ')}
+            ctx.errorArgs = {
+              ids: notFound.map(tube => tube.barcode + ' (' + tube.row + ', ' + tube.column + ')').join(', ')
+            }
           }
         }
       );
+    },
+
+    showBoxMap: async function() {
+      const ctx = this.ctx;
+
+      this.containerTypes = this.containerTypes || {};
+      let containerType = this.containerTypes[ctx.box.type];
+      if (!containerType) {
+        containerType = this.containerTypes[ctx.box.type] = await containerTypeSvc.getTypeByName(ctx.box.type);
+      }
+
+      const colorCoding = this.colorCoding = this.colorCoding || {};
+      const container = ctx.box.container || containerType
+      ctx.boxMap = {
+        container: container,
+        occupants: ctx.specimens.map(
+          (specimen) => {
+            const spmnClass = specimen.specimenClass, type = specimen.type;
+            const occupantProps = {
+              ppid: specimen.ppid, barcode: specimen.barcode,
+              specimenClass: spmnClass, type: type
+            }
+
+            let colorCode = colorCoding[spmnClass + ':' + type];
+            if (!colorCode) {
+              colorCode = colorCoding[spmnClass + ':' + type] = util.getContainerColorCode(occupantProps) || {};
+            }
+
+            return {
+              mode: container.positionLabelingMode,
+              posOne: specimen.storageLocation.posOne,
+              posTwo: specimen.storageLocation.posTwo,
+              posOneOrdinal: numUtil.toNumber(container.columnLabelingScheme, specimen.storageLocation.posOne),
+              posTwoOrdinal: numUtil.toNumber(container.rowLabelingScheme, specimen.storageLocation.posTwo),
+              occuypingEntity: 'specimen',
+              occupyingEntityId: specimen.id,
+              occupyingEntityName: specimen.label,
+              occupantProps: occupantProps,
+              cpShortTitle: specimen.cpShortTitle,
+              colorCode: colorCode,
+              tooltip: specimen.id ? (specimen.specimenClass + ', ' + specimen.type) : 'Not Found',
+              displayName: specimen.barcode
+            };
+          }
+        )
+      };
+
+      this.$refs.boxMapView.open();
+    },
+
+    closeBoxMap: function() {
+      this.ctx.boxMap = {};
+      this.$refs.boxMapView.close();
+    },
+
+    showOccupantDetails: async function(event, occupant) {
+      const currentTarget = event.currentTarget;
+      this.ctx.occupant = {};
+
+      const entityId = occupant.occupyingEntityId;
+      if (!entityId) {
+        return;
+      }
+
+      if (!this.ctx.specimenDict) {
+        this.ctx.specimenDict = containerSvc.getSpecimenDict();
+      }
+
+      this.specimens = this.specimens || {};
+      let specimen = this.specimens[entityId];
+      if (!specimen) {
+        specimen = this.specimens[entityId] = await containerSvc.getSpecimen(entityId);
+      }
+
+      this.ctx.occupant = {specimen: specimen};
+      setTimeout(() => this.$refs.occupantDetails.toggle({currentTarget}), 100);
     },
 
     save: async function(scanAnother) {
@@ -477,7 +625,9 @@ export default {
         allowedCollectionProtocols: box.allowedCollectionProtocols,
         allowedSpecimenClasses: spmnClasses,
         allowedSpecimenTypes: spmnTypes,
-        positions: ctx.specimens.map(
+        positions: ctx.specimens.filter(
+          (spmn) => spmn.id > 0
+        ).map(
           (spmn) => ({
             posOne: spmn.storageLocation.posOne,
             posTwo: spmn.storageLocation.posTwo,
@@ -740,5 +890,69 @@ export default {
 
 .os-key-values .item {
   margin-bottom: 20px;
+}
+
+/* Duplicate */
+.map {
+  flex: 1;
+}
+
+.map .occupant {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+
+.map .occupant .specimen-icon {
+  display: inline-block;
+  font-size: 175%;
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  background: #3a87ad;
+  color: #fff;
+  text-align: center;
+  z-index: 10;
+}
+
+.map .occupant:hover .icon {
+  color: #23527c;
+  color: #fff;
+}
+
+.map .occupant .specimen-icon.not-found:after {
+  content: '\2573';
+  display: block;
+  color: red;
+  font-size: 60px;
+  margin-top: -55px;
+  margin-left: -12px;
+}
+
+.map .occupant .name {
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  border: #3a87ad;
+  color: #666;
+  border-radius: 3px;
+  padding: 2px;
+  display: block;
+  text-align: center;
+  margin-top: 2px;
+  z-index: 10;
+}
+
+.map .occupant:hover .name {
+  color: #333;
+}
+
+.os-container-occupant h4.title {
+  margin-top: 0;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
 }
 </style>

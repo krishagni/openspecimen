@@ -178,7 +178,9 @@ class BoxUtil {
         let {row, column} = assigner.fromPos({pos: occupant, nr, nc});
         let ri = assigner.toMapRow({row, col: column, nr, nc});
         let ci = assigner.toMapCol({row, col: column, nr, nc});
-        matrix[ri][ci].occupied = true;
+        if (ri < matrix.length && ci < matrix[ri].length) {
+          matrix[ri][ci].occupied = true;
+        }
       }
     } else if (opts.occupants) {
       for (let occupant of opts.occupants) {
@@ -186,7 +188,9 @@ class BoxUtil {
         let col = occupant[opts.colProp];
         let ri  = assigner.toMapRow({row, col, nr, nc});
         let ci  = assigner.toMapCol({row, col, nr, nc});
-        matrix[ri][ci].occupied = occupant;
+        if (ri < matrix.length && ci < matrix[ri].length) {
+          matrix[ri][ci].occupied = occupant;
+        }
       }
     }
 
