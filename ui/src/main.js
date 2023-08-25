@@ -42,6 +42,8 @@ import AdminServices     from '@/administrative/services';
 import BioSpmnComponents from '@/biospecimen/components';
 import BioSpmnServices   from '@/biospecimen/services';
 
+import Layout from '@/administrative/containers/Layout.vue';
+
 window['Vue'] = Vue;
 const app = createApp(Root)
   .use(ToastService)
@@ -55,6 +57,8 @@ const app = createApp(Root)
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
 app.directive('os-badge', BadgeDirective);
+
+app.component('os-container-layout', Layout);
 
 function registerHomePageCards(osSvc, i18n) {
   const t = i18n.global.t;
