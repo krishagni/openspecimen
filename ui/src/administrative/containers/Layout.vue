@@ -148,4 +148,61 @@ export default {
   width: 100%;
   display: inline-block;
 }
+
+.os-container-layout {
+  flex: 1;
+}
+
+.os-container-layout :deep(.occupant) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+
+.os-container-layout :deep(.occupant .specimen-icon) {
+  display: inline-block;
+  font-size: 175%;
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  background: #3a87ad;
+  color: #fff;
+  text-align: center;
+  z-index: 10;
+}
+
+.os-container-layout :deep(.occupant:hover .icon) {
+  color: #23527c;
+  color: #fff;
+}
+
+.os-container-layout :deep(.occupant .specimen-icon.not-found:after) {
+  content: '\2573';
+  display: block;
+  color: red;
+  font-size: 60px;
+  margin-top: -55px;
+  margin-left: -12px;
+}
+
+.os-container-layout :deep(.occupant .name) {
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  border: #3a87ad;
+  color: #666;
+  border-radius: 3px;
+  padding: 2px;
+  display: block;
+  text-align: center;
+  margin-top: 2px;
+  z-index: 10;
+}
+
+.os-container-layout :deep(.occupant:hover .name) {
+  color: #333;
+}
 </style>

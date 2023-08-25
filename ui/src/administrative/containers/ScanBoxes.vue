@@ -535,6 +535,14 @@ export default {
 
       const colorCoding = this.colorCoding = this.colorCoding || {};
       const container = ctx.box.container || containerType
+      if (!container) {
+        alertsSvc.error({code: 'containers.no_layout_detail_to_render'});
+        return;
+      } else if (!container.noOfRows || !container.noOfColumns) {
+        alertsSvc.error({code: 'containers.no_map_for_dimless'});
+        return;
+      }
+
       ctx.boxMap = {
         container: container,
         occupants: ctx.specimens.map(
@@ -890,64 +898,6 @@ export default {
 
 .os-key-values .item {
   margin-bottom: 20px;
-}
-
-/* Duplicate */
-.map {
-  flex: 1;
-}
-
-.map .occupant {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-}
-
-.map .occupant .specimen-icon {
-  display: inline-block;
-  font-size: 175%;
-  height: 35px;
-  width: 35px;
-  border-radius: 50%;
-  background: #3a87ad;
-  color: #fff;
-  text-align: center;
-  z-index: 10;
-}
-
-.map .occupant:hover .icon {
-  color: #23527c;
-  color: #fff;
-}
-
-.map .occupant .specimen-icon.not-found:after {
-  content: '\2573';
-  display: block;
-  color: red;
-  font-size: 60px;
-  margin-top: -55px;
-  margin-left: -12px;
-}
-
-.map .occupant .name {
-  width: 100%;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  border: #3a87ad;
-  color: #666;
-  border-radius: 3px;
-  padding: 2px;
-  display: block;
-  text-align: center;
-  margin-top: 2px;
-  z-index: 10;
-}
-
-.map .occupant:hover .name {
-  color: #333;
 }
 
 .os-container-occupant h4.title {
