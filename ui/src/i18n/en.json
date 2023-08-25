@@ -563,6 +563,7 @@
     "no_change_not_transferred": "No change in location detected. Container not transferred!",
     "no_containers_match_criteria": "No containers match the criteria.",
     "no_free_positions": "Container does not have enough free positions to store input specimens.",
+    "no_layout_detail_to_render": "Container layout detail is not available to render the map view.",
     "no_map_for_dimless": "The map view is not available for dimensionless container.",
     "no_tube_barcodes_detected": "No specimen barcodes were detected.",
     "not_checked_out": "No locations blocked by the specimens: {labels}.",
