@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,11 @@ public class LabelPrintJobsController {
 		@RequestParam(value = "lastId", required = false, defaultValue = "0")
 		Long lastId,
 
+		@RequestParam(value = "from", required = false)
+		Date from,
+
 		@RequestParam(value = "printerName", required = false)
-		String printerName,
+		List<String> printerNames,
 
 		@RequestParam(value = "hasContent", required = false)
 		Boolean hasContent,
@@ -45,8 +49,9 @@ public class LabelPrintJobsController {
 
 		LabelPrintJobItemListCriteria crit = new LabelPrintJobItemListCriteria()
 			.lastId(lastId)
-			.printerName(printerName)
+			.printerNames(printerNames)
 			.hasContent(hasContent)
+			.fromDate(from)
 			.startAt(startAt)
 			.maxResults(maxResults);
 		return ResponseEvent.unwrap(printJobSvc.getPrintJobItems(RequestEvent.wrap(crit)));
