@@ -235,6 +235,19 @@ export default {
     },
 
     {
+      "type": "radio",
+      "labelCode": "users.manage_print_jobs",
+      "name": "user.managePrintJobs",
+      "optionsPerRow": 2,
+      "tooltip": "Invoke print APIs to download labels' data",
+      "options": [
+        { "caption": "Yes", "value": true },
+        { "caption": "No", "value": false }
+      ],
+      "showWhen": "!user.type || user.type == 'INSTITUTE' || user.type == 'NONE'",
+    },
+
+    {
       "type": "textarea",
       "labelCode": "users.address",
       "name": "user.address",

@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.krishagni.catissueplus.core.biospecimen.repository.LabelPrintJobDao;
-import com.krishagni.catissueplus.core.common.domain.LabelPrintFileItem;
+import com.krishagni.catissueplus.core.biospecimen.repository.LabelPrintJobItemListCriteria;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
+import com.krishagni.catissueplus.core.common.domain.LabelPrintJobItem;
 import com.krishagni.catissueplus.core.common.events.LabelPrintStat;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
@@ -46,13 +49,8 @@ public class LabelPrintJobDaoImpl extends AbstractDao<LabelPrintJob> implements 
 	}
 
 	@Override
-	public void savePrintFileItem(LabelPrintFileItem item) {
-		getCurrentSession().saveOrUpdate(item);
-	}
-
-	@Override
-	public List<LabelPrintFileItem> getPrintFileItems(Long jobId, int startAt, int maxItems) {
-		Criteria<LabelPrintFileItem> query = createCriteria(LabelPrintFileItem.class, "item");
+	public List<LabelPrintJobItem> getPrintJobItems(Long jobId, int startAt, int maxItems) {
+		Criteria<LabelPrintJobItem> query = createCriteria(LabelPrintJobItem.class, "item");
 		return query.join("item.job", "job")
 			.add(query.eq("job.id", jobId))
 			.orderBy(query.asc("item.id"))
@@ -60,26 +58,26 @@ public class LabelPrintJobDaoImpl extends AbstractDao<LabelPrintJob> implements 
 	}
 
 	@Override
-	public void deletePrintFileItems(Long jobId) {
-		createNamedQuery(DEL_PRINT_FILE_ITEMS)
-			.setParameter("jobId", jobId)
-			.executeUpdate();
-	}
+	public List<LabelPrintJobItem> getPrintJobItems(LabelPrintJobItemListCriteria criteria) {
+		Criteria<LabelPrintJobItem> query = createCriteria(LabelPrintJobItem.class, "item");
+		query.join("item.job", "job");
 
-	@Override
-	public void deletePrintFileItemsOlderThan(Date time) {
-		createNamedQuery(DEL_OLD_PRINT_FILE_ITEMS)
-			.setParameter("olderThan", time)
-			.executeUpdate();
+		if (criteria.lastId() != null) {
+			query.add(query.gt("item.id", criteria.lastId()));
+		}
+
+		if (StringUtils.isNotBlank(criteria.printerName())) {
+			query.add(query.eq("item.printerName", criteria.printerName()));
+		}
+
+		if (Boolean.TRUE.equals(criteria.hasContent())) {
+			query.add(query.isNotNull("item.content"));
+		}
+
+		return query.list(criteria.startAt(), criteria.maxResults());
 	}
 
 	private static final String FQN = LabelPrintJob.class.getName();
 
 	private static final String GET_SPMN_PRINT_STATS = FQN + ".getSpecimenPrintStats";
-
-	private static final String PRINT_FILE_ITEMS_FQN = LabelPrintFileItem.class.getName();
-
-	private static final String DEL_PRINT_FILE_ITEMS = PRINT_FILE_ITEMS_FQN + ".deleteItems";
-
-	private static final String DEL_OLD_PRINT_FILE_ITEMS = PRINT_FILE_ITEMS_FQN + ".deleteItemsOlderThan";
 }

@@ -85,6 +85,8 @@ public class User extends BaseEntity implements UserDetails {
 
 	private Boolean manageWfs;
 
+	private Boolean managePrintJobs;
+
 	private String timeZone;
 
 	private Boolean dnd;
@@ -270,6 +272,18 @@ public class User extends BaseEntity implements UserDetails {
 		this.manageWfs = manageWfs;
 	}
 
+	public boolean canManagePrintJobs() {
+		return isAdmin() || (!isContact() && Boolean.TRUE.equals(managePrintJobs));
+	}
+
+	public Boolean getManagePrintJobs() {
+		return managePrintJobs;
+	}
+
+	public void setManagePrintJobs(Boolean managePrintJobs) {
+		this.managePrintJobs = managePrintJobs;
+	}
+
 	public String getTimeZone() {
 		return timeZone;
 	}
@@ -439,6 +453,7 @@ public class User extends BaseEntity implements UserDetails {
 			setLoginName(user.getLoginName());
 			setManageForms(user.canManageForms());
 			setManageWfs(user.canManageWfs());
+			setManagePrintJobs(user.canManagePrintJobs());
 			setApiUser(user.isApiUser());
 			setIpRange(user.getIpRange());
 			setDefaultPrinter(user.getDefaultPrinter());

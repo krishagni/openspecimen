@@ -51,6 +51,8 @@ public class UserSummary implements Serializable {
 
 	private Boolean manageWfs;
 
+	private Boolean managePrintJobs;
+
 	private Boolean downloadLabelsPrintFile;
 
 	private int cpCount;
@@ -183,6 +185,14 @@ public class UserSummary implements Serializable {
 		this.manageWfs = manageWfs;
 	}
 
+	public Boolean getManagePrintJobs() {
+		return managePrintJobs;
+	}
+
+	public void setManagePrintJobs(Boolean managePrintJobs) {
+		this.managePrintJobs = managePrintJobs;
+	}
+
 	public Boolean getDownloadLabelsPrintFile() {
 		return downloadLabelsPrintFile;
 	}
@@ -267,6 +277,7 @@ public class UserSummary implements Serializable {
 		result.setPhoneNumber(user.getPhoneNumber());
 		result.setManageForms(user.getManageForms());
 		result.setManageWfs(user.canManageWfs());
+		result.setManagePrintJobs(user.canManagePrintJobs());
 		result.setActivityStatus(user.getActivityStatus());
 		result.setImpersonated(user.isImpersonated());
 		result.setDownloadLabelsPrintFile(user.isDownloadLabelsPrintFile());

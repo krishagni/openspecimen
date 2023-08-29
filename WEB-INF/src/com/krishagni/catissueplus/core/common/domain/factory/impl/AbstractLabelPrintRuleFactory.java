@@ -62,6 +62,7 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		setCmdFileFmt(ruleDef, failOnError, rule, ose);
 		setFileLineEnding(ruleDef, failOnError, rule, ose);
 		setFileExtn(ruleDef, failOnError, rule, ose);
+		setCreateFile(ruleDef, failOnError, rule, ose);
 		setPrinterName(ruleDef, failOnError, rule, ose);
 		setIpAddressMatcher(ruleDef, failOnError, rule, ose);
 		setUsers(ruleDef, failOnError, rule, ose);
@@ -172,7 +173,7 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 
 	private void setCmdFilesDir(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
 		if (isEmptyString(input.get("cmdFilesDir"))) {
-			ose.addError(PrintRuleConfigErrorCode.CMD_FILES_DIR_REQ);
+			input.put("cmdFilesDir", "*");
 			return;
 		}
 
@@ -196,7 +197,11 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 	}
 
 	private String getDefaultPrintLabelsDir() {
-		return ConfigUtil.getInstance().getDataDir() + File.separator + "print-labels";
+		try {
+			return new File(ConfigUtil.getInstance().getDataDir(), "print-labels").getCanonicalPath();
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		}
 	}
 
 	private void setCmdFileFmt(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
@@ -226,6 +231,11 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		}
 
 		rule.setFileExtn(input.get("fileExtn").toString());
+	}
+
+	private void setCreateFile(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
+		Boolean createFile = (Boolean) input.get("createFile");
+		rule.setCreateFile(createFile == null || Boolean.TRUE.equals(createFile));
 	}
 
 	private void setPrinterName(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {

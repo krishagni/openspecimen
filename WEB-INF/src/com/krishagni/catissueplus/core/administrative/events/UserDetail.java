@@ -48,6 +48,8 @@ public class UserDetail extends AttributeModifiedSupport {
 
 	private boolean manageWfs;
 
+	private boolean managePrintJobs;
+
 	private boolean dnd;
 
 	private boolean apiUser;
@@ -173,6 +175,14 @@ public class UserDetail extends AttributeModifiedSupport {
 		this.manageWfs = manageWfs;
 	}
 
+	public boolean isManagePrintJobs() {
+		return managePrintJobs;
+	}
+
+	public void setManagePrintJobs(boolean managePrintJobs) {
+		this.managePrintJobs = managePrintJobs;
+	}
+
 	public Boolean getDnd() {
 		return dnd;
 	}
@@ -264,6 +274,7 @@ public class UserDetail extends AttributeModifiedSupport {
 		detail.setPhoneNumber(user.getPhoneNumber());
 		detail.setManageForms(user.getManageForms());
 		detail.setManageWfs(user.canManageWfs());
+		detail.setManagePrintJobs(user.canManagePrintJobs());
 		detail.setDnd(user.getDnd());
 		detail.setApiUser(user.isApiUser());
 		detail.setIpRange(user.getIpRange());

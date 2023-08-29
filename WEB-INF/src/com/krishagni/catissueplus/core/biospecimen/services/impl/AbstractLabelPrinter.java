@@ -1,10 +1,9 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,7 +23,6 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.TransactionAwareInterceptor;
 import com.krishagni.catissueplus.core.common.TransactionEventListener;
-import com.krishagni.catissueplus.core.common.domain.LabelPrintFileItem;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJobItem;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJobSavedEvent;
@@ -124,7 +122,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 			job.setSubmittedBy(currentUser);
 			job.setItemType(getItemType());
 
-			List<Map<String, Object>> labelDataList = new ArrayList<>();
+			ObjectMapper mapper = new ObjectMapper();
 			for (PrintItem<T> printItem : printItems) {
 				boolean found = false;
 				T obj = printItem.getObject();
@@ -143,13 +141,14 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 					item.setCopies(printItem.getCopies());
 					item.setStatus(LabelPrintJobItem.Status.QUEUED);
 					item.setLabelType(rule.getLabelType());
-					item.setData(new ObjectMapper().writeValueAsString(labelDataItems));
+					item.setLabelDesign(rule.getLabelDesign());
+					item.setData(mapper.writeValueAsString(labelDataItems));
 					item.setObject(obj);
 					item.setDataItems(labelDataItems);
+					item.setContent(mapper.writeValueAsString(generateCmdFileContent(item, rule, labelDataItems)));
+					item.setCreateFile(rule.getCreateFile());
 
 					job.getItems().add(item);
-					labelDataList.add(makeLabelData(item, rule, labelDataItems));
-
 					found = true;
 					break;
 				}
@@ -165,8 +164,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 			daoFactory.getLabelPrintJobDao().saveOrUpdate(job, true);
 			EventPublisher.getInstance().publish(new LabelPrintJobSavedEvent(job));
-
-			generateCmdFiles(job, labelDataList);
+			jobIds.get().add(job.getId());
 			return job;
 		} catch (Exception e) {
 			logger.error("Error printing distribution labels", e);
@@ -239,73 +237,19 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 		}
 	}
 
-	protected Map<String, Object> makeLabelData(LabelPrintJobItem item, LabelPrintRule rule, Map<String, String> dataItems) {
-		Map<String, Object> labelData = new HashMap<>();
-		labelData.put("jobItem", item);
-		labelData.put("rule", rule);
-		labelData.put("dataItems", dataItems);
-		return labelData;
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void generateCmdFiles(LabelPrintJob job, List<Map<String, Object>> labelDataList) {
-		jobIds.get().add(job.getId());
-
-		List<Map<String, Object>> fileItems = new ArrayList<>();
-		for (Map<String, Object> labelData : labelDataList) {
-			generateCmdFileContent(
-				(LabelPrintJobItem) labelData.get("jobItem"),
-				(LabelPrintRule) labelData.get("rule"),
-				(Map<String, String>) labelData.get("dataItems"),
-				fileItems
-			);
-
-			if (fileItems.size() >= 25) {
-				writeToDb(job, fileItems);
-				fileItems.clear();
-			}
-		}
-
-		if (!fileItems.isEmpty()) {
-			writeToDb(job, fileItems);
-		}
-	}
-
-	private void writeToDb(LabelPrintJob job, List<Map<String, Object>> items) {
-		try {
-			LabelPrintFileItem fileItem = new LabelPrintFileItem();
-			fileItem.setJob(job);
-			fileItem.setContent(new ObjectMapper().writeValueAsString(items));
-			fileItem.setCreator(AuthUtil.getCurrentUser());
-			fileItem.setCreationTime(Calendar.getInstance().getTime());
-			daoFactory.getLabelPrintJobDao().savePrintFileItem(fileItem);
-		} catch (Exception e) {
-			throw new RuntimeException("Error spooling labels", e);
-		}
-	}
-
-	private void generateCmdFileContent(LabelPrintJobItem jobItem, LabelPrintRule rule, Map<String, String> dataItems, List<Map<String, Object>> out) {
+	private List<Map<String, Object>> generateCmdFileContent(LabelPrintJobItem jobItem, LabelPrintRule rule, Map<String, String> dataItems) {
 		if (StringUtils.isBlank(rule.getCmdFilesDir()) || rule.getCmdFilesDir().trim().equals("*")) {
-			return;
+			return Collections.emptyList();
 		}
 
 		try {
-			String content = null;
-			switch (rule.getCmdFileFmt()) {
-				case CSV:
-					content = getCommaSeparatedValueFields(dataItems, rule.getLineEnding());
-					break;
+			String content = switch (rule.getCmdFileFmt()) {
+				case CSV -> getCommaSeparatedValueFields(dataItems, rule.getLineEnding());
+				case KEY_VALUE -> getKeyValueFields(dataItems, false, rule.getLineEnding());
+				case KEY_Q_VALUE -> getKeyValueFields(dataItems, true, rule.getLineEnding());
+			};
 
-				case KEY_VALUE:
-					content = getKeyValueFields(dataItems, false, rule.getLineEnding());
-					break;
-
-				case KEY_Q_VALUE:
-					content = getKeyValueFields(dataItems, true, rule.getLineEnding());
-					break;
-			}
-
-			generateCmdFileContent(jobItem, rule, content, out);
+			return generateCmdFileContent(jobItem, rule, content);
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		}
@@ -332,18 +276,21 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 		return "CRLF".equals(lineEnding) ? "\r\n" : "\n";
 	}
 
-	private void generateCmdFileContent(LabelPrintJobItem item, LabelPrintRule rule, String content, List<Map<String, Object>> out)
-	throws IOException {
+	private List<Map<String, Object>> generateCmdFileContent(LabelPrintJobItem item, LabelPrintRule rule, String content) {
 		String tstamp = new SimpleDateFormat(TSTAMP_FMT).format(item.getJob().getSubmissionDate());
 		int labelCount = uniqueNum.incrementAndGet();
 
+		List<Map<String, Object>> result = new ArrayList<>();
 		for (int i = 0; i < item.getCopies(); ++i) {
 			String filename = String.format(LABEL_FILENAME_FMT, item.getJob().getItemType(), tstamp, labelCount, (i + 1), rule.getFileExtn());
 
 			Map<String, Object> label = new HashMap<>();
-			label.put("file", new File(rule.getCmdFilesDir(), filename).getAbsolutePath());
+			label.put("dir", rule.getCmdFilesDir());
+			label.put("file", filename);
 			label.put("content", content);
-			out.add(label);
+			result.add(label);
 		}
+
+		return result;
 	}
 }
