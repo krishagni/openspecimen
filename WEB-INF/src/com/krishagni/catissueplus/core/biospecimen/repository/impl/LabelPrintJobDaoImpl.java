@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.repository.LabelPrintJobDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabelPrintJobItemListCriteria;
@@ -66,8 +66,12 @@ public class LabelPrintJobDaoImpl extends AbstractDao<LabelPrintJob> implements 
 			query.add(query.gt("item.id", criteria.lastId()));
 		}
 
-		if (StringUtils.isNotBlank(criteria.printerName())) {
-			query.add(query.eq("item.printerName", criteria.printerName()));
+		if (criteria.fromDate() != null) {
+			query.add(query.gt("job.submissionDate", criteria.fromDate()));
+		}
+
+		if (CollectionUtils.isNotEmpty(criteria.printerNames())) {
+			query.add(query.in("item.printerName", criteria.printerNames()));
 		}
 
 		if (Boolean.TRUE.equals(criteria.hasContent())) {
