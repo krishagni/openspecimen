@@ -707,6 +707,10 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
+  <bean id="labelPrintJobsSvc" class="com.krishagni.catissueplus.core.common.service.impl.LabelPrintJobServiceImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+  </bean>
+
   <bean id="defaultContainerLabelPrinter" class="com.krishagni.catissueplus.core.administrative.services.impl.DefaultContainerLabelPrinter"
         depends-on="labelPrintRuleFactoryRegistrar">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>

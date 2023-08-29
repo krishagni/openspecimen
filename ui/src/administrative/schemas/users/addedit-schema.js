@@ -71,6 +71,10 @@ export default {
        },
 
        {
+         "fields": [ { "name": "user.managePrintJobs" } ]
+       },
+
+       {
          "fields": [ { "name": "user.address" } ]
        }
     ]

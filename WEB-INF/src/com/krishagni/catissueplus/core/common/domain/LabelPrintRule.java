@@ -70,6 +70,8 @@ public abstract class LabelPrintRule {
 
 	private String fileExtn;
 
+	private Boolean createFile;
+
 	private List<User> effectiveUsers;
 
 	public String getLabelType() {
@@ -175,6 +177,14 @@ public abstract class LabelPrintRule {
 		this.fileExtn = fileExtn;
 	}
 
+	public Boolean getCreateFile() {
+		return createFile;
+	}
+
+	public void setCreateFile(Boolean createFile) {
+		this.createFile = createFile;
+	}
+
 	public List<User> getEffectiveUsers() {
 		if (effectiveUsers != null) {
 			return effectiveUsers;
@@ -212,11 +222,7 @@ public abstract class LabelPrintRule {
 			return false;
 		}
 
-		if (ipAddressMatcher != null && !ipAddressMatcher.matches(ipAddr)) {
-			return false;
-		}
-		
-		return true;
+		return ipAddressMatcher == null || ipAddressMatcher.matches(ipAddr);
 	}
 	
 	public Map<String, String> getDataItems(PrintItem<?> printItem) {
@@ -270,7 +276,8 @@ public abstract class LabelPrintRule {
 			.append(", user groups = ").append(getUserGroupsList(true))
 			.append(", printer = ").append(getPrinterName())
 			.append(", line ending = ").append(getLineEnding())
-			.append(", file extension = ").append(getFileExtn());
+			.append(", file extension = ").append(getFileExtn())
+			.append(", create file = ").append(Boolean.TRUE.equals(getCreateFile()));
 
 		String tokens = getDataTokens().stream()
 			.map(Pair::first)
@@ -300,6 +307,7 @@ public abstract class LabelPrintRule {
 			rule.put("cmdFileFmt", getCmdFileFmt().fmt);
 			rule.put("lineEnding", getLineEnding());
 			rule.put("fileExtn", getFileExtn());
+			rule.put("createFile", getCreateFile());
 			rule.putAll(getDefMap(ufn));
 			return rule;
 		} catch (Exception e) {

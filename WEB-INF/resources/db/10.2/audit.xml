@@ -36,4 +36,11 @@
       <column name="kitLabelsEnabled_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="User ability to manage print jobs using APIs">
+    <addColumn tableName="CATISSUE_USER_AUD">
+      <column name="MANAGE_PRINT_JOBS" type="${boolean.type}" />
+      <column name="managePrintJobs_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -27,8 +27,14 @@ public class LabelPrintJobItem extends BaseEntity {
 	private Status status;
 	
 	private String labelType;
+
+	private String labelDesign;
 	
 	private String data;
+
+	private String content;
+
+	private Boolean createFile;
 
 	private transient Object object;
 
@@ -98,12 +104,36 @@ public class LabelPrintJobItem extends BaseEntity {
 		this.labelType = labelType;
 	}
 
+	public String getLabelDesign() {
+		return labelDesign;
+	}
+
+	public void setLabelDesign(String labelDesign) {
+		this.labelDesign = labelDesign;
+	}
+
 	public String getData() {
 		return data;
 	}
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public Boolean getCreateFile() {
+		return createFile;
+	}
+
+	public void setCreateFile(Boolean createFile) {
+		this.createFile = createFile;
 	}
 
 	public Object getObject() {

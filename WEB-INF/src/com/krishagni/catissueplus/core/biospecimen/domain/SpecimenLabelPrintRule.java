@@ -135,7 +135,7 @@ public class SpecimenLabelPrintRule extends LabelPrintRule {
 	}
 
 	private List<String> getCpList(boolean ufn) {
-		Function<CollectionProtocol, String> cpMapper = ufn ? (cp) -> cp.getShortTitle() : (cp) -> cp.getId().toString();
+		Function<CollectionProtocol, String> cpMapper = ufn ? CollectionProtocol::getShortTitle : (cp) -> cp.getId().toString();
 		return Utility.nullSafeStream(getCps()).map(cpMapper).collect(Collectors.toList());
 	}
 

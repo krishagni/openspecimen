@@ -34,6 +34,12 @@
 
     <property name="labelType" column="LABEL_TYPE" not-null="true"/>
 
+    <property name="labelDesign" column="LABEL_DESIGN" />
+
+    <property name="createFile" column="CREATE_FILE" />
+
     <property name="data" column="DATA" not-null="true"/>
+
+    <property name="content" column="CONTENT"  />
   </class>
 </hibernate-mapping>

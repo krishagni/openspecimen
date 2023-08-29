@@ -643,4 +643,18 @@
       <column name="RECORD_ID" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Print job items - label design, create file, and file content">
+    <addColumn tableName="OS_LABEL_PRINT_JOB_ITEMS">
+      <column name="LABEL_DESIGN" type="${text.type}(128)" />
+      <column name="CREATE_FILE" type="${boolean.type}" />
+      <column name="CONTENT" type="${clob.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="User ability to manage print jobs using APIs">
+    <addColumn tableName="CATISSUE_USER">
+      <column name="MANAGE_PRINT_JOBS" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>
