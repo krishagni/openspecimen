@@ -93,7 +93,10 @@ export default {
       ctx.loading = true;
       dataCtx.type = { };
       if (this.typeId && +this.typeId > 0) {
-        dataCtx.type = await typesSvc.getType(this.typeId);
+        const type = dataCtx.type = await typesSvc.getType(this.typeId);
+        if (type.noOfRows == null || type.noOfColumns == null) {
+          dataCtx.dimensionLess = true;
+        }
       }
 
       ctx.loading = false;
