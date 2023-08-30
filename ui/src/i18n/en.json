@@ -603,6 +603,7 @@
     "scan_names_or_barcodes": "Scan container name or barcode separated by comma, newline or tab...",
     "scan_specimens": "Scan specimen labels or barcodes separated by comma, newline or tab...",
     "scan_unique_names": "Scan container names separated by comma, newline or tab...",
+    "scanned_barcodes": "{count} barcodes scanned.",
     "schedule_an_activity": "Schedule an Activity",
     "scheduled_activities": "Scheduled Activities",
     "scheduled_activity_archived": "Scheduled activity '{name}' archived.",

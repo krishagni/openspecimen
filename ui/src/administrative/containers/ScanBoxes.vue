@@ -105,6 +105,10 @@
           </template>
 
           <template #content>
+            <os-message type="info">
+              <span v-t="{path: 'containers.scanned_barcodes', args: {count: ctx.scannedBarcodes.length}}"> </span>
+            </os-message>
+
             <os-message v-if="ctx.error" type="error">
               <span v-t="{path: ctx.error, args: ctx.errorArgs}"></span>
             </os-message>
@@ -169,6 +173,9 @@
           <span>{{ctx.box.barcode}}</span>
         </template>
         <template #content>
+          <os-message type="info" style="margin-top: 0">
+            <span v-t="{path: 'containers.scanned_barcodes', args: {count: ctx.scannedBarcodes.length}}"> </span>
+          </os-message>
           <Layout class="map" :container="ctx.boxMap.container" :occupants="ctx.boxMap.occupants">
             <template #occupant_specimen="slotProps">
               <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
@@ -483,6 +490,7 @@ export default {
         spmnBarcodes.push(tube.barcode);
       }
 
+      ctx.scannedBarcodes = spmnBarcodes;
       if (spmnBarcodes.length == 0) {
         ctx.specimens = [];
         return;
@@ -570,7 +578,7 @@ export default {
               occupantProps: occupantProps,
               cpShortTitle: specimen.cpShortTitle,
               colorCode: colorCode,
-              tooltip: specimen.id ? (specimen.specimenClass + ', ' + specimen.type) : 'Not Found',
+              tooltip: specimen.id ? (specimen.specimenClass + ', ' + specimen.type) : 'Specimen ' + specimen.barcode + ' not found',
               displayName: specimen.barcode
             };
           }
