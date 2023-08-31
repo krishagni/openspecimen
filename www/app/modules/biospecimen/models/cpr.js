@@ -149,14 +149,38 @@ angular.module('os.biospecimen.models.cpr',
       }
 
       ExtensionsUtil.createExtensionFieldMap(this.participant);
-      for (var i = 0; i < visitsTab.anticipatedEvents.length; ++i) {
-        var spec = visitsTab.anticipatedEvents[i];
-        if ($parse(spec.rule)({cpr: this})) {
-          return spec.events;
+
+      var anticipatedEvents = {rules: [], matchType: 'any'};
+      if (visitsTab.anticipatedEvents instanceof Array) {
+        anticipatedEvents.rules = visitsTab.anticipatedEvents;
+      } else if (typeof visitsTab.anticipatedEvents == 'object') {
+        anticipatedEvents = visitsTab.anticipatedEvents;
+      }
+
+
+      var result = null;
+      var input = {cpr: this};
+      var rules = anticipatedEvents.rules || [];
+      for (var i = 0; i < rules.length; ++i) {
+        var spec = rules[i];
+        if (!spec.rule || spec.rule == 'any' || spec.rule == '*' || $parse(spec.rule)(input)) {
+          if (anticipatedEvents.matchType == 'any') {
+            result = spec.events;
+            break;
+          } else if (anticipatedEvents.matchType == 'all') {
+            angular.forEach(spec.events,
+              function(event) {
+                result = result || [];
+                if (result.indexOf(event) == -1) {
+                  result.push(event);
+                }
+              }
+            );
+          }
         }
       }
 
-      return null;
+      return result;
     }
 
     return CollectionProtocolRegistration;
