@@ -66,17 +66,17 @@ public class AuthUtil {
 	}
 	
 	public static String getRemoteAddr() {
-		UserAuthToken token = (UserAuthToken) SecurityContextHolder.getContext().getAuthentication();
-		if (token == null) {
-			return null;
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth instanceof UserAuthToken token) {
+			return token.getIpAddress();
 		}
 
-		return token.getIpAddress();
+		return null;
 	}
 
 	public static TimeZone getUserTimeZone() {
-		UserAuthToken token = (UserAuthToken) SecurityContextHolder.getContext().getAuthentication();
-		if (token == null) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!(auth instanceof UserAuthToken token)) {
 			return null;
 		}
 
@@ -86,12 +86,12 @@ public class AuthUtil {
 	}
 
 	public static boolean isImpersonated() {
-		UserAuthToken token = (UserAuthToken) SecurityContextHolder.getContext().getAuthentication();
-		if (token == null) {
-			return false;
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth instanceof UserAuthToken token) {
+			return token.isImpersonated();
 		}
 
-		return token.isImpersonated();
+		return false;
 	}
 
 	public static void setCurrentUser(User user) {
