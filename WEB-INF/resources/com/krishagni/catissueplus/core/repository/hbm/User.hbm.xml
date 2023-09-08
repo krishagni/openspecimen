@@ -203,6 +203,18 @@
             max(log.loginTime) &lt;= :lastLoginTime or max(log.loginTime) is null
         )
     </query>
+
+    <query name="getLatestLoginTimes">
+      select
+        user.id as userId, max(log.loginTime) as loginTime
+      from
+        com.krishagni.catissueplus.core.auth.domain.LoginAuditLog log
+        join log.user user
+      where
+        user.id in (:userIds)
+      group by
+        user.id
+    </query>
     
     <query name="updateStatus">
       update

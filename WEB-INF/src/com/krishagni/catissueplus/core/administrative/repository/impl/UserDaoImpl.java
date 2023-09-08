@@ -221,6 +221,20 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	@Override
+	public Map<Long, Date> getLatestLoginTime(List<Long> userIds) {
+		List<Object[]> rows = createNamedQuery(GET_LATEST_LOGIN_TIMES, Object[].class)
+			.setParameterList("userIds", userIds)
+			.list();
+
+		Map<Long, Date> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (Date) row[1]);
+		}
+
+		return result;
+	}
+
+	@Override
 	public int updateStatus(List<User> users, String status) {
 		if (CollectionUtils.isEmpty(users)) {
 			return 0;
@@ -661,6 +675,8 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	private static final String GET_PASSWDS_UPDATED_BEFORE = FQN + ".getPasswordsUpdatedBeforeDate";
 	
 	private static final String GET_INACTIVE_USERS = FQN + ".getInactiveUsers";
+
+	private static final String GET_LATEST_LOGIN_TIMES = FQN + ".getLatestLoginTimes";
 	
 	private static final String UPDATE_STATUS = FQN + ".updateStatus";
 

@@ -57,6 +57,8 @@ public interface UserDao extends Dao<User> {
 	List<Password> getPasswords(Date fromDate, Date toDate, Long lastId, List<User> updatedBy);
 	
 	List<User> getInactiveUsers(Date lastLoginTime);
+
+	Map<Long, Date> getLatestLoginTime(List<Long> userIds);
 	
 	int updateStatus(List<User> users, String status);
 
