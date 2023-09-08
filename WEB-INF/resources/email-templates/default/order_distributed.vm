@@ -81,8 +81,16 @@
                 </table>
               </td>
             </tr>
+            #if ( $order.comments && $order.comments.trim().length() > 0 )
             <tr>
-              <br>
+              <td>
+                <div style="margin-top: 20px;"> <b> <u> Sender Comments </u> </b> </div>
+                <pre style="font-family: inherit; margin-top: 5px;">$order.comments.trim()</pre>
+              </td>
+            </tr>
+            #end
+            <tr>
+              <td> <br> </td>
             </tr>
             <tr>
               <td style="border-collapse:collapse;padding-bottom:10px">
