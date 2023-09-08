@@ -309,10 +309,13 @@
         else
           concat(p.pos_two_str, concat(', ', p.pos_one_str))
         end as formatted_position,
-        p.occupying_specimen_id as specimen_id
+        p.occupying_specimen_id as specimen_id,
+        s.identifier as site_id,
+        s.name as site_name
       from
         os_storage_containers c
         inner join os_container_positions p on p.storage_container_id = c.identifier
+        inner join catissue_site s on s.identifier = c.site_id
       where
         c.activity_status != 'Disabled' and
         p.occupying_specimen_id is not null
@@ -354,10 +357,13 @@
         p.checkout_specimen_id as specimen_id,
         p.checkout_by as checkout_by,
         p.checkout_time as checkout_time,
-        p.checkout_comments as checkout_comments
+        p.checkout_comments as checkout_comments,
+        s.identifier as site_id,
+        s.name as site_name
       from
         os_storage_containers c
         inner join os_container_positions p on p.storage_container_id = c.identifier
+        inner join catissue_site s on s.identifier = c.site_id
       where
         c.activity_status != 'Disabled' and
         p.checkout_specimen_id is not null

@@ -40,6 +40,10 @@ public class StorageLocationSummary implements Serializable {
 
 	private String checkoutComments;
 
+	private Long siteId;
+
+	private String siteName;
+
 	public Long getId() {
 		return id;
 	}
@@ -136,6 +140,22 @@ public class StorageLocationSummary implements Serializable {
 		this.checkoutComments = checkoutComments;
 	}
 
+	public Long getSiteId() {
+		return siteId;
+	}
+
+	public void setSiteId(Long siteId) {
+		this.siteId = siteId;
+	}
+
+	public String getSiteName() {
+		return siteName;
+	}
+
+	public void setSiteName(String siteName) {
+		this.siteName = siteName;
+	}
+
 	public static StorageLocationSummary from(StorageContainerPosition position) {
 		if (position == null) {
 			return null;
@@ -159,6 +179,8 @@ public class StorageLocationSummary implements Serializable {
 		storageLocation.setBarcode(container.getBarcode());
 		storageLocation.setDisplayName(container.getDisplayName());
 		storageLocation.setMode(container.getPositionLabelingMode().name());
+		storageLocation.setSiteId(container.getSite().getId());
+		storageLocation.setSiteName(container.getSite().getName());
 		return storageLocation;
 	}
 

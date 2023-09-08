@@ -321,6 +321,14 @@
             <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
           </textField>
 
+          <siteField>
+            <name>containerSite</name>
+            <udn>containerSite</udn>
+            <caption>#getMessage("specimen_spec_position_container_site")</caption>
+            <column>SITE_ID</column>
+            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+          </siteField>
+
           <textField>
             <name>positionDimensionTwoString</name>
             <udn>positionDimensionTwoString</udn>
@@ -1332,6 +1340,14 @@
             <column>CONTAINER_BARCODE</column>
             <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
           </textField>
+
+          <siteField>
+            <name>containerSite</name>
+            <udn>containerSite</udn>
+            <caption>#getMessage("specimen_spec_position_container_site")</caption>
+            <column>SITE_ID</column>
+            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+          </siteField>
 
           <textField>
             <name>rowY</name>

@@ -56,9 +56,9 @@
 
     <many-to-one name="autoFreezerProvider" column="AUTO_FREEZER_PROVIDER_ID"/>
 
-    <many-to-one name="type" column="TYPE_ID"/>
+    <many-to-one name="type" column="TYPE_ID" fetch="join" />
 
-    <many-to-one name="site" column="SITE_ID"/>
+    <many-to-one name="site" column="SITE_ID" fetch="join" />
 
     <many-to-one name="parentContainer" column="PARENT_CONTAINER_ID"/>
 
