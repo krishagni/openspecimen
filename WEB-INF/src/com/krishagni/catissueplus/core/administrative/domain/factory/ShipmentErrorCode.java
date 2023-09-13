@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.administrative.domain.factory;
 import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 
 public enum ShipmentErrorCode implements ErrorCode {
+	REQ_CHG_NA,
+
 	NOT_FOUND,
 	
 	NAME_REQUIRED,
@@ -32,8 +34,10 @@ public enum ShipmentErrorCode implements ErrorCode {
 	INVALID_STATUS,
 	
 	NOT_SHIPPED_TO_RECV,
-	
-	INVALID_RECEIVED_DATE,
+
+	SHIP_DT_BEFORE_REQ_DT,
+
+	RECV_DT_BEFORE_SHIP_DT,
 	
 	ALREADY_SHIPPED,
 	
@@ -50,6 +54,10 @@ public enum ShipmentErrorCode implements ErrorCode {
 	INVALID_SHIPPED_SPECIMENS,
 
 	INVALID_SHIPPED_CONTAINERS,
+
+	CANNOT_SHIP,
+
+	CANNOT_RECEIVE,
 	
 	STATUS_CHANGE_NOT_ALLOWED,
 
@@ -67,7 +75,9 @@ public enum ShipmentErrorCode implements ErrorCode {
 
 	CONTAINER_ALREADY_SHIPPED,
 
-	CONT_NAMES_REQ
+	CONT_NAMES_REQ,
+
+	REQ_INV_CREATE_STATUS
 	
 	;
 	

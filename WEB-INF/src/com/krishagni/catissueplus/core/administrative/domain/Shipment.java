@@ -30,6 +30,8 @@ public class Shipment extends BaseEntity {
 	public enum Status {
 		PENDING("Pending"),
 
+		REQUESTED("Requested"),
+
 		SHIPPED("Shipped"),
 
 		RECEIVED("Received");
@@ -64,6 +66,12 @@ public class Shipment extends BaseEntity {
 	public enum Type {
 		SPECIMEN, CONTAINER
 	}
+
+	private boolean request;
+
+	private User requester;
+
+	private Date requestDate;
 
 	private String name;
 
@@ -104,7 +112,31 @@ public class Shipment extends BaseEntity {
 	public static String getEntityName() {
 		return ENTITY_NAME;
 	}
-	
+
+	public boolean isRequest() {
+		return request;
+	}
+
+	public void setRequest(boolean request) {
+		this.request = request;
+	}
+
+	public User getRequester() {
+		return requester;
+	}
+
+	public void setRequester(User requester) {
+		this.requester = requester;
+	}
+
+	public Date getRequestDate() {
+		return requestDate;
+	}
+
+	public void setRequestDate(Date requestDate) {
+		this.requestDate = requestDate;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -258,6 +290,18 @@ public class Shipment extends BaseEntity {
 	}
 
 	public void update(Shipment other) {
+		if (isRequest() != other.isRequest()) {
+			throw OpenSpecimenException.userError(ShipmentErrorCode.REQ_CHG_NA);
+		}
+
+		if (isRequest()) {
+			setRequester(other.getRequester());
+			setRequestDate(other.getRequestDate());
+		} else {
+			setRequester(null);
+			setRequestDate(null);
+		}
+
 		setName(other.getName());
 		setCourierName(other.getCourierName());
 		setTrackingNumber(other.getTrackingNumber());
@@ -269,7 +313,7 @@ public class Shipment extends BaseEntity {
 		setReceiver(other.getReceiver());
 		setReceiverComments(other.getReceiverComments());
 		setActivityStatus(other.getActivityStatus());
-		if (isPending()) {
+		if (isPending() || isRequested()) {
 			setSendingSite(other.getSendingSite());
 			setReceivingSite(other.getReceivingSite());
 		}
@@ -296,8 +340,10 @@ public class Shipment extends BaseEntity {
 			return;
 		}
 
-		if (!isPending()) {
-			throw OpenSpecimenException.userError(ShipmentErrorCode.STATUS_CHANGE_NOT_ALLOWED);
+		if ((isRequest() && !isRequested()) || (!isRequest() && !isPending())) {
+			// A request has to be in requested state to be shipped.
+			// Others need to be in pending state to be shipped.
+			throw OpenSpecimenException.userError(ShipmentErrorCode.CANNOT_SHIP, getStatus().getName());
 		}
 
 		//
@@ -323,7 +369,7 @@ public class Shipment extends BaseEntity {
 	
 	public void receive(Shipment other) {
 		if (!isShipped() && !isReceived()) {
-			throw OpenSpecimenException.userError(ShipmentErrorCode.STATUS_CHANGE_NOT_ALLOWED);
+			throw OpenSpecimenException.userError(ShipmentErrorCode.CANNOT_RECEIVE, getStatus().getName());
 		}
 
 		if (isSpecimenShipment()) {
@@ -344,7 +390,11 @@ public class Shipment extends BaseEntity {
 	public boolean isPending() {
 		return Status.PENDING == getStatus();
 	}
-	
+
+	public boolean isRequested() {
+		return Status.REQUESTED == getStatus();
+	}
+
 	public boolean isShipped() {
 		return Status.SHIPPED == getStatus();
 	}
@@ -372,7 +422,7 @@ public class Shipment extends BaseEntity {
 	}
 
 	private void updateShipmentSpecimens(Shipment other) {
-		if (!isSpecimenShipment() || !isPending()) {
+		if (!isSpecimenShipment() || !(isPending() || isRequested())) {
 			return;
 		}
 
@@ -419,7 +469,7 @@ public class Shipment extends BaseEntity {
 	}
 
 	private void updateShipmentContainers(Shipment other) {
-		if (!isContainerShipment() || !isPending()) {
+		if (!isContainerShipment() || !(isPending() || isRequested())) {
 			return;
 		}
 
@@ -458,7 +508,7 @@ public class Shipment extends BaseEntity {
 	}
 
 	private void updateNotifyUsers(Shipment other) {
-		if (!isPending()) {
+		if (!(isPending() || isRequested())) {
 			return;
 		}
 
@@ -466,12 +516,22 @@ public class Shipment extends BaseEntity {
 	}
 
 	private void updateStatus(Shipment other) {
-		if ((isPending() || isShipped()) && other.isShipped()) {
+		if (isRequest() && (isPending() || isRequested()) && other.isRequested()) {
+			//
+			// to move to requested state, the shipment should be a request and
+			// should be either in pending or requested state
+			//
+			setStatus(Status.REQUESTED);
+		} else if (((!isRequest() && isPending()) || isRequested() || isShipped()) && other.isShipped()) {
+			//
+			// to move to shipped state, the shipment should be in either pending (for non-requests),
+			// requested or shipped state
+			//
 			ship();
 		} else if ((isShipped() || isReceived()) && other.isReceived()) {
 			receive(other);
 		} else if (getStatus() != other.getStatus()) {
-			throw OpenSpecimenException.userError(ShipmentErrorCode.STATUS_CHANGE_NOT_ALLOWED);
+			throw OpenSpecimenException.userError(ShipmentErrorCode.STATUS_CHANGE_NOT_ALLOWED, getStatus().getName(), other.getStatus().getName());
 		}
 	}
 }

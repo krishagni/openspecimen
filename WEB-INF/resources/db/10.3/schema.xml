@@ -202,4 +202,30 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request">
+    <addColumn tableName="OS_SHIPMENTS">
+      <column name="REQUEST" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="REQUESTER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SHIPMENT_REQUESTER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request: request date">
+    <addColumn tableName="OS_SHIPMENTS">
+      <column name="REQUEST_DATE" type="${nullable.ts.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request: Shipment sender is not mandatory.">
+    <dropNotNullConstraint tableName="OS_SHIPMENTS" columnName="SENDER_ID" columnDataType="${int.type}" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request: Shipment date is not mandatory">
+    <dropNotNullConstraint tableName="OS_SHIPMENTS" columnName="SHIPPED_DATE" columnDataType="${nullable.ts.type}" />
+  </changeSet>
 </databaseChangeLog>

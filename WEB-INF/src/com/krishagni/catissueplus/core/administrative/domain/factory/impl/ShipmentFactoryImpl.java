@@ -44,6 +44,7 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.importer.services.impl.ImporterContextHolder;
 
 public class ShipmentFactoryImpl implements ShipmentFactory {
@@ -78,6 +79,9 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		
 		shipment.setId(detail.getId());
+		shipment.setRequest(detail.isRequest());
+		setRequester(detail, shipment, ose);
+		setRequestDate(detail, shipment, ose);
 		setName(detail, shipment, ose);
 		setType(detail, shipment, ose);
 		setCourierName(detail, shipment, ose);
@@ -99,6 +103,25 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		
 		ose.checkAndThrow();
 		return shipment;
+	}
+
+	private void setRequester(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
+		if (!detail.isRequest()) {
+			shipment.setRequester(null);
+		} else {
+			shipment.setRequester(getUser(detail.getRequester(), AuthUtil.getCurrentUser(), ose));
+		}
+	}
+
+	private void setRequestDate(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
+		if (!detail.isRequest()) {
+			shipment.setRequestDate(null);
+		} else {
+			shipment.setRequestDate(detail.getRequestDate());
+			if (shipment.getRequestDate() == null) {
+				shipment.setRequestDate(Calendar.getInstance().getTime());
+			}
+		}
 	}
 	
 	private void setName(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
@@ -188,22 +211,30 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 	}
 	
 	private void setShippedDate(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
+		if (shipment.isRequest()) {
+			if (shipment.isPending() || shipment.isRequested()) {
+				return;
+			}
+		}
+
+		Date requestDate = shipment.getRequestDate();
 		Date shippedDate = detail.getShippedDate();
+		Date todayDate = Calendar.getInstance().getTime();
 		if (shippedDate == null) {
-			shippedDate = Calendar.getInstance().getTime();
+			shippedDate = requestDate == null || todayDate.after(requestDate) ? todayDate : requestDate;
+		} else if (requestDate != null && shippedDate.before(requestDate)) {
+			ose.addError(ShipmentErrorCode.SHIP_DT_BEFORE_REQ_DT, Utility.getDateTimeString(shippedDate), Utility.getDateTimeString(requestDate));
 		}
 
 		shipment.setShippedDate(shippedDate);
 	}
 	
 	private void setSender(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
-		User sender = getUser(detail.getSender(), AuthUtil.getCurrentUser());
-		if (sender == null) {
-			ose.addError(UserErrorCode.NOT_FOUND);
+		if (shipment.isRequested() || shipment.isPending()) {
 			return;
 		}
-		
-		shipment.setSender(sender);
+
+		shipment.setSender(getUser(detail.getSender(), AuthUtil.getCurrentUser(), ose));
 	}
 	
 	private void setSenderComments(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
@@ -220,7 +251,7 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		if (receivedDate == null) {
 			receivedDate = todayDate.after(shipment.getShippedDate()) ? todayDate : shipment.getShippedDate();
 		} else if (receivedDate.before(shipment.getShippedDate())) {
-			ose.addError(ShipmentErrorCode.INVALID_RECEIVED_DATE);
+			ose.addError(ShipmentErrorCode.RECV_DT_BEFORE_SHIP_DT, Utility.getDateTimeString(receivedDate), Utility.getDateTimeString(shipment.getShippedDate()));
 		}
 
 		shipment.setReceivedDate(receivedDate);
@@ -230,14 +261,8 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		if (!shipment.isReceived()) {
 			return;
 		}
-		
-		User receiver = getUser(detail.getReceiver(), AuthUtil.getCurrentUser());
-		if (receiver == null) {
-			ose.addError(UserErrorCode.NOT_FOUND);
-			return;
-		}
-		
-		shipment.setReceiver(receiver);
+
+		shipment.setReceiver(getUser(detail.getReceiver(), AuthUtil.getCurrentUser(), ose));
 	}
 	
 	private void setReceiverComments(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
@@ -341,30 +366,39 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		
 		Set<User> result = new HashSet<>();
 		for (UserSummary userSummary : detail.getNotifyUsers()) {
-			User user = getUser(userSummary, null);
-			if (user == null) {
-				ose.addError(UserErrorCode.NOT_FOUND);
-				return;
+			User user = getUser(userSummary, null, ose);
+			if (user != null) {
+				result.add(user);
 			}
-			
-			result.add(user);
 		}
 		
 		shipment.setNotifyUsers(result);
 	}
 	
-	private User getUser(UserSummary userSummary, User defaultUser) {
+	private User getUser(UserSummary userSummary, User defaultUser, OpenSpecimenException ose) {
 		if (userSummary == null) {
 			return defaultUser;
 		}
-		
+
+		Object key = null;
 		User user = defaultUser;
 		if (userSummary.getId() != null) {
+			key = userSummary.getId();
 			user = daoFactory.getUserDao().getById(userSummary.getId());
 		} else if (StringUtils.isNotBlank(userSummary.getEmailAddress())) {
+			key = userSummary.getEmailAddress();
 			user = daoFactory.getUserDao().getUserByEmailAddress(userSummary.getEmailAddress());
 		} else if (StringUtils.isNotBlank(userSummary.getLoginName()) && StringUtils.isNotBlank(userSummary.getDomain())) {
+			key = userSummary.getDomain() + ": " + userSummary.getLoginName();
 			user = daoFactory.getUserDao().getUser(userSummary.getLoginName(), userSummary.getDomain());
+		}
+
+		if (key == null) {
+			return defaultUser;
+		} else if (user == null) {
+			if (ose != null) {
+				ose.addError(UserErrorCode.NOT_FOUND, key);
+			}
 		}
 		
 		return user;

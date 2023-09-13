@@ -396,7 +396,8 @@ const routes = [
         props: (route) => (
           {
             shipmentId: route.params && route.params.shipmentId,
-            shipmentType: route.query && route.query.shipmentType
+            shipmentType: route.query && route.query.shipmentType,
+            action: route.query && route.query.action
           }
         )
       },

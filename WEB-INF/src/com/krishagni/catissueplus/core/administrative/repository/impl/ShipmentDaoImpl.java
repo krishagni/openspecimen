@@ -27,6 +27,7 @@ import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.repository.Restriction;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDao {
 
@@ -38,7 +39,13 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	@Override
 	public List<Shipment> getShipments(ShipmentListCriteria crit) {
 		Criteria<Shipment> query = getShipmentsQuery(crit);
-		return query.orderBy(query.desc("shipment.shippedDate")).list(crit.startAt(), crit.maxResults());
+		return query.orderBy(
+			query.desc(
+				query.isNotNull("shipment.shippedDate"),
+				"shipment.shippedDate",
+				"shipment.requestDate"
+			)
+		).list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
@@ -222,6 +229,18 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 			return;
 		}
 
+		//
+		// A pending request is accessible only to the super admins and the requester
+		//
+		query.leftJoin("shipment.requester", "requester")
+			.add(
+				query.or(
+					query.eq("shipment.request", false),
+					query.ne("shipment.status", Status.PENDING),
+					query.eq("requester.id", AuthUtil.getCurrentUser().getId())
+				)
+			);
+
 		Set<Long> instituteIds = new HashSet<>();
 		Set<Long> siteIds      = new HashSet<>();
 		for (SiteCpPair site : crit.sites()) {
@@ -233,13 +252,19 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		}
 
 		//
-		// (recv site is one of accessible sites and shipment is not pending) or (send site is one of accessible sites)
+		// (recv site is one of accessible sites and (shipment is not pending or it is a request)) or
+		// (send site is one of accessible sites)
+		// The shipment.request = true ensures the requesters can see/view the pending/draft shipments
+		// created by them
 		//
 		query.add(
 			query.or(
 				query.and(
 					getSiteRestriction(query, "recvSite.id", instituteIds, siteIds),
-					query.ne("status", Status.PENDING)
+					query.or(
+						query.eq("shipment.request", true),
+						query.ne("shipment.status", Status.PENDING)
+					)
 				), /* end of AND */
 				getSiteRestriction(query, "sendSite.id", instituteIds, siteIds)
 			) /* end of OR */

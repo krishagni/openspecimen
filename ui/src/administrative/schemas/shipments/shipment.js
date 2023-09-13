@@ -1,6 +1,17 @@
 export default {
   fields:  [
     {
+      "type": "user",
+      "labelCode": "shipments.requester",
+      "name": "shipment.requester",
+      "showWhen": "shipment.request",
+      "validations": {
+        "required": {
+          "messageCode": "shipments.requester_required"
+        }
+      }
+    },
+    {
       "type": "text",
       "labelCode": "shipments.name",
       "name": "shipment.name",
@@ -35,6 +46,14 @@ export default {
       "labelCode": "shipments.sending_site",
       "name": "shipment.sendingSite",
       "selectProp": "name",
+      "listSource": {
+        "selectProp": "name",
+        "queryParams": {
+          "dynamic": {
+            "listAll": "shipment.request"
+          },
+        }
+      },
       "validations": {
         "required": {
           "messageCode": "shipments.sending_site_required"
@@ -71,10 +90,8 @@ export default {
         "selectProp": "name",
         "queryParams": {
           "dynamic": {
-            "institute": "shipment.receivingInstitute"
-          },
-          "static": {
-            "listAll": true
+            "institute": "shipment.receivingInstitute",
+            "listAll": "!shipment.request || shipment.status != 'Pending'"
           }
         }
       },

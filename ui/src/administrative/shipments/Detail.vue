@@ -111,6 +111,7 @@ export default {
     tagType: function() {
       switch (this.ctx.shipment.status) {
         case 'Pending':
+        case 'Requested':
           return 'warning';
         case 'Shipped':
           return 'info';

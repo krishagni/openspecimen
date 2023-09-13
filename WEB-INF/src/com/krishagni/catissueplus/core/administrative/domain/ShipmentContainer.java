@@ -48,7 +48,7 @@ public class ShipmentContainer extends BaseEntity {
 	}
 
 	public void ship() {
-		if (!shipment.isPending()) {
+		if (!(shipment.isPending() || shipment.isRequested())) {
 			return;
 		}
 

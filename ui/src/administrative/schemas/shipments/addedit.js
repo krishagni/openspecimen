@@ -3,19 +3,45 @@ export default {
   layout: {
     "rows": [
       {
+        "fields": [
+          {
+            "name": "shipment.request",
+            "type": "booleanCheckbox",
+            "inlineLabelCode": "shipments.shipment_request",
+            "disableWhen": "shipment.id > 0"
+          }
+        ]
+      },
+
+      {
         "fields": [ { "name": "shipment.name" } ]
       },
 
       {
-        "fields": [ { "name": "shipment.courierName" } ]
+        "fields": [
+          {
+            "name": "shipment.courierName",
+            "showWhen": "!shipment.request || ship || receive || (shipment.status != 'Pending' && shipment.status != 'Requested')"
+          }
+        ]
       },
 
       {
-        "fields": [ { "name": "shipment.trackingNumber" } ]
+        "fields": [
+          {
+            "name": "shipment.trackingNumber",
+            "showWhen": "!shipment.request || ship || receive || (shipment.status != 'Pending' && shipment.status != 'Requested')"
+          }
+        ]
       },
 
       {
-        "fields": [ { "name": "shipment.trackingUrl" } ]
+        "fields": [
+          {
+            "name": "shipment.trackingUrl",
+            "showWhen": "!shipment.request || ship || receive || (shipment.status != 'Pending' && shipment.status != 'Requested')"
+          }
+        ]
       },
 
       {
@@ -31,7 +57,8 @@ export default {
         "fields": [
           {
             "name": "shipment.receivingInstitute",
-            "disableWhen": "shipment.status != 'Pending'"
+            "disableWhen": "shipment.status != 'Pending'",
+            "showWhen": "currentUser.admin || !shipment.request"
           }
         ]
       },
@@ -55,11 +82,21 @@ export default {
       },
 
       {
-        "fields": [ { "name": "shipment.shippedDate" } ]
+        "fields": [
+          {
+            "name": "shipment.shippedDate",
+            "showWhen": "!shipment.request || ship || receive || (shipment.status != 'Pending' && shipment.status != 'Requested')"
+          }
+        ]
       },
 
       {
-        "fields": [ { "name": "shipment.senderComments" } ]
+        "fields": [
+          {
+            "name": "shipment.senderComments",
+            "showWhen": "!shipment.request || ship || receive || (shipment.status != 'Pending' && shipment.status != 'Requested')"
+          }
+        ]
       },
 
       {

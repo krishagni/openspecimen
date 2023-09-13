@@ -18,4 +18,25 @@
       <column name="consentsSource_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Rename the unused audit column">
+    <renameColumn tableName="OS_SHIPMENTS_AUD" oldColumnName="request_MOD"
+      newColumnName="request_MOD_OLD" columnDataType="${boolean.type}" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request">
+    <addColumn tableName="OS_SHIPMENTS_AUD">
+      <column name="REQUEST" type="${boolean.type}" />
+      <column name="request_MOD" type="${boolean.type}" />
+      <column name="REQUESTER_ID" type="${int.type}" />
+      <column name="requester_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request: request date">
+    <addColumn tableName="OS_SHIPMENTS_AUD">
+      <column name="REQUEST_DATE" type="${nullable.ts.type}" />
+      <column name="requestDate_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

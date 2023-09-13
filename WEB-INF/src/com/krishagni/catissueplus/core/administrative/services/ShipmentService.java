@@ -31,5 +31,5 @@ public interface ShipmentService {
 	
 	ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req);
 
-	List<StorageContainerSummary> getContainers(List<String> names, String sendingSiteName, String receivingSiteName);
+	List<StorageContainerSummary> getContainers(List<String> names, boolean request, String sendingSiteName, String receivingSiteName);
 }

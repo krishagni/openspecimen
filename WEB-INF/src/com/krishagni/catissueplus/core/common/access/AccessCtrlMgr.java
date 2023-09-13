@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1579,6 +1580,17 @@ public class AccessCtrlMgr {
 			return;
 		}
 
+		if (shipment.isRequest() && shipment.isPending()) {
+			//
+			// A draft shipment request can be accessed only by its requester
+			//
+			if (Objects.equals(AuthUtil.getCurrentUser(), shipment.getRequester())) {
+				return;
+			}
+
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		Set<SiteCpPair> allowedSites = getReadAccessShipmentSites();
 		if (!isAccessAllowedOnSite(allowedSites, shipment.getSendingSite())) {
 			if (shipment.isPending() || !isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
@@ -1588,7 +1600,7 @@ public class AccessCtrlMgr {
 
 		ensureShipmentEximRights();
 	}
-	
+
 	public void ensureCreateShipmentRights() {
 		if (AuthUtil.isAdmin()) {
 			return;
@@ -1601,6 +1613,11 @@ public class AccessCtrlMgr {
 
 		ensureShipmentEximRights();
 	}
+
+	public void ensureCreateShipmentRights(Shipment shipment) {
+		ensureShipmentRights(shipment, Operation.CREATE);
+	}
+
 
 	public void ensureUpdateShipmentRights(Shipment shipment) {
 		ensureShipmentRights(shipment, Operation.UPDATE);
@@ -1615,14 +1632,29 @@ public class AccessCtrlMgr {
 			return;
 		}
 
+		if (shipment.isRequest() && shipment.isPending()) {
+			//
+			// A draft shipment request can be accessed only by its requester
+			//
+			if (Objects.equals(AuthUtil.getCurrentUser(), shipment.getRequester())) {
+				return;
+			}
+
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		boolean allowed = false;
 		Set<SiteCpPair> allowedSites = getSiteCps(Resource.SHIPPING_N_TRACKING, op);
 		if (!shipment.isReceived() && isAccessAllowedOnSite(allowedSites, shipment.getSendingSite())) {
 			allowed = true; // sender can update/delete
 		}
 
-		if (shipment.isReceived() && isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
-			allowed = true; // receiver can update/delete
+		if (!allowed && shipment.isReceived() && isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
+			allowed = true; // receiver can update / delete
+		}
+
+		if (!allowed && shipment.isRequest() && shipment.isRequested() && isAccessAllowedOnSite(allowedSites, shipment.getReceivingSite())) {
+			allowed = true; // requester/receiver can modify submitted requests
 		}
 
 		if (!allowed) {
@@ -1850,6 +1882,10 @@ public class AccessCtrlMgr {
 	}
 
 	private boolean isAccessAllowedOnSite(SiteCpPair allowedSite, Site site) {
+		if (site == null) {
+			return false;
+		}
+
 		return (allowedSite.getSiteId() != null && allowedSite.getSiteId().equals(site.getId())) ||
 			(allowedSite.getSiteId() == null && allowedSite.getInstituteId().equals(site.getInstitute().getId()));
 	}

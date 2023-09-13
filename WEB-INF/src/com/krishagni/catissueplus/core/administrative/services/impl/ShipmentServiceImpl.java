@@ -175,7 +175,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 				.collect(Collectors.toMap(sc -> sc.getContainer().getId(), sc -> sc));
 
 			Map<Long, Integer> spmnCounts;
-			if (shipment.isPending()) {
+			if (shipment.isPending() || shipment.isRequested()) {
 				spmnCounts = daoFactory.getStorageContainerDao().getSpecimensCount(containersMap.keySet());
 			} else {
 				spmnCounts = getShipmentDao().getSpecimensCountByContainer(shipment.getId(), containersMap.keySet());
@@ -209,10 +209,10 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	@PlusTransactional
 	public ResponseEvent<ShipmentDetail> createShipment(RequestEvent<ShipmentDetail> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureCreateShipmentRights();
 			ShipmentDetail detail = req.getPayload();
 			Shipment shipment = shipmentFactory.createShipment(detail, Status.PENDING);
-			
+			AccessCtrlMgr.getInstance().ensureCreateShipmentRights(shipment);
+
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			ensureValidShipmentStatus(shipment, detail.getStatus(), ose);
 			ensureUniqueConstraint(null, shipment, ose);
@@ -318,7 +318,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 
 	@Override
 	@PlusTransactional
-	public List<StorageContainerSummary> getContainers(List<String> names, String sendSiteName, String recvSiteName) {
+	public List<StorageContainerSummary> getContainers(List<String> names, boolean request, String sendSiteName, String recvSiteName) {
 		if (CollectionUtils.isEmpty(names)) {
 			throw OpenSpecimenException.userError(ShipmentErrorCode.CONT_NAMES_REQ);
 		}
@@ -328,7 +328,11 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			throw  OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 
-		StorageContainerListCriteria crit = new StorageContainerListCriteria().siteCps(siteCps).names(names);
+		//
+		// when creating requests, users do not have access to the container stored at the sending site
+		// therefore suppress the access checks
+		//
+		StorageContainerListCriteria crit = new StorageContainerListCriteria().siteCps(request ? null : siteCps).names(names);
 		List<StorageContainer> containers = daoFactory.getStorageContainerDao().getStorageContainers(crit);
 		if (containers.isEmpty()) {
 			return Collections.emptyList();
@@ -432,9 +436,9 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		Status status = Status.fromName(shipmentStatus);
 		if (status == null) {
 			ose.addError(ShipmentErrorCode.INVALID_STATUS);
-		}
-		
-		if (status == Status.RECEIVED) {
+		} else if (shipment.isRequest() && (status != Status.PENDING && status != Status.REQUESTED)) {
+			ose.addError(ShipmentErrorCode.REQ_INV_CREATE_STATUS, shipment.getName(), status.getName());
+		} else if (status == Status.RECEIVED) {
 			ose.addError(ShipmentErrorCode.NOT_SHIPPED_TO_RECV, shipment.getName());
 		}
 	}
@@ -459,7 +463,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	}
 	
 	private void ensureValidSpecimens(Shipment existing, Shipment shipment, OpenSpecimenException ose) {
-		if (existing != null && !existing.isPending()) {
+		if (existing != null && !(existing.isPending() || existing.isRequested())) {
 			return;
 		}
 
@@ -475,7 +479,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	}
 
 	private void ensureValidContainers(Shipment existing, Shipment shipment, OpenSpecimenException ose) {
-		if (existing != null && !existing.isPending()) {
+		if (existing != null && !(existing.isPending() || existing.isRequested())) {
 			return;
 		}
 
@@ -702,8 +706,10 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		if (!sendNotif) {
 			return;
 		}
-		
-		if ((oldStatus == null || oldStatus == Status.PENDING) && shipment.isShipped()) {
+
+		if ((oldStatus == null || oldStatus == Status.PENDING) && shipment.isRequested()) {
+			// sendShipmentRequestedEmail(shipment);
+		} else if ((oldStatus == null || oldStatus == Status.PENDING || oldStatus == Status.REQUESTED) && shipment.isShipped()) {
 			sendShipmentShippedEmail(shipment);
 		} else if (oldStatus == Status.SHIPPED && shipment.isReceived()) {
 			sendShipmentReceivedEmail(shipment);
@@ -762,8 +768,14 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 					put(getMessage("shipment_tracking_number"), shipment.getTrackingNumber());
 					put(getMessage("shipment_tracking_url"),    shipment.getTrackingUrl());
 					put(getMessage("shipment_sending_site"),    shipment.getSendingSite().getName());
-					put(getMessage("shipment_sender"),          shipment.getSender().formattedName());
-					put(getMessage("shipment_shipped_date"),    Utility.getDateTimeString(shipment.getShippedDate()));
+					if (shipment.getSender() != null) {
+						put(getMessage("shipment_sender"),          shipment.getSender().formattedName());
+					}
+
+					if (shipment.getShippedDate() != null) {
+						put(getMessage("shipment_shipped_date"),    Utility.getDateTimeString(shipment.getShippedDate()));
+					}
+
 					put(getMessage("shipment_sender_comments"), shipment.getSenderComments());
 					put(getMessage("shipment_recv_site"),       shipment.getReceivingSite().getName());
 					

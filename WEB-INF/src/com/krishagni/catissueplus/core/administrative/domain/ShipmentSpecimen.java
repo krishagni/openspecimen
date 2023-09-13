@@ -60,7 +60,7 @@ public class ShipmentSpecimen extends BaseEntity {
 	}
 
 	public void ship() {
-		if (!shipment.isPending()) {
+		if (!(shipment.isPending() || shipment.isRequested())) {
 			return;
 		}
 

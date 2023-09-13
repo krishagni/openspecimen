@@ -4,6 +4,12 @@
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" v-show-if-allowed="shipmentResources.updateOpts"
         @click="$goto('ShipmentAddEdit', {shipmentId: ctx.shipment.id}, {shipmentType: ctx.shipment.type})" />
 
+      <os-button left-icon="paper-plane" :label="$t('shipments.ship')"
+        v-if="(!ctx.shipment.request && ctx.shipment.status == 'Pending') || ctx.shipment.status == 'Requested'"
+        v-show-if-allowed="shipmentResources.updateOpts"
+        @click="$goto('ShipmentAddEdit', {shipmentId: ctx.shipment.id},
+          {shipmentType: ctx.shipment.type, action: 'ship'})" />
+
       <os-button left-icon="inbox" :label="$t('shipments.receive')" v-if="ctx.shipment.status == 'Shipped'"
         v-show-if-allowed="shipmentResources.updateOpts"
         @click="$goto('ShipmentReceive', {shipmentId: ctx.shipment.id}, {shipmentType: ctx.shipment.type})" />

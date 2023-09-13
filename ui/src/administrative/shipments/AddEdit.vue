@@ -57,10 +57,16 @@
 
               <div class="os-form-footer">
                 <os-button secondary :label="$t('common.buttons.previous')" @click="previous" />
-                <os-button primary :label="$t('shipments.save_draft')" @click="saveDraft" v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button primary :label="$t('shipments.ship')" @click="ship" v-if="dataCtx.shipment.status == 'Pending'" />
-                <os-button primary :label="$t('shipments.receive')" @click="receiveShipment" v-if="dataCtx.receive" />
-                <os-button primary :label="$t('common.buttons.update')" @click="updateShipment" v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
+                <os-button primary :label="$t('shipments.save_draft')" @click="saveDraft"
+                  v-if="dataCtx.shipment.status == 'Pending'" />
+                <os-button primary :label="$t('shipments.ship')" @click="ship"
+                  v-if="dataCtx.ship || (!dataCtx.shipment.request && !dataCtx.shipment.id)" />
+                <os-button primary :label="$t('shipments.request')" @click="request"
+                  v-if="dataCtx.shipment.request && dataCtx.shipment.status == 'Pending'" />
+                <os-button primary :label="$t('shipments.receive')" @click="receiveShipment"
+                  v-if="dataCtx.receive" />
+                <os-button primary :label="$t('common.buttons.update')" @click="updateShipment"
+                  v-if="!dataCtx.ship && !dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
                 <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
               </div>
 
@@ -107,11 +113,13 @@
                 <os-button primary :label="$t('shipments.save_draft')" @click="saveDraft"
                   v-if="dataCtx.shipment.status == 'Pending'" />
                 <os-button primary :label="$t('shipments.ship')" @click="ship"
-                  v-if="dataCtx.shipment.status == 'Pending'" />
+                  v-if="dataCtx.ship || (!dataCtx.shipment.request && !dataCtx.shipment.id)" />
+                <os-button primary :label="$t('shipments.request')" @click="request"
+                  v-if="dataCtx.shipment.request && dataCtx.shipment.status == 'Pending'" />
                 <os-button primary :label="$t('shipments.receive')" @click="receiveShipment"
                   v-if="dataCtx.receive" />
                 <os-button primary :label="$t('common.buttons.update')" @click="updateShipment"
-                  v-if="!dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
+                  v-if="!dataCtx.ship && !dataCtx.receive && dataCtx.shipment.status != 'Pending'" />
                 <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
               </div>
             </div>
@@ -153,7 +161,7 @@ import shipSpecimensSchema  from '@/administrative/schemas/shipments/ship-specim
 import shipContainersSchema from '@/administrative/schemas/shipments/ship-containers.js';
 
 export default {
-  props: ['shipmentId', 'shipmentType', 'receive'],
+  props: ['shipmentId', 'shipmentType', 'action', 'receive'],
 
   inject: ['ui'],
 
@@ -180,6 +188,8 @@ export default {
       shipment: {},
 
       currentUser: ui.currentUser,
+
+      ship: props.action == 'ship',
 
       receive: props.receive,
 
@@ -374,7 +384,7 @@ export default {
 
     getAndAddContainers: async function({itemLabels}) {
       const shipment   = this.dataCtx.shipment;
-      const containers = await shipmentSvc.searchContainers(shipment.sendingSite, shipment.receivingSite, itemLabels);
+      const containers = await shipmentSvc.searchContainers(shipment, itemLabels);
 
       const notFound = [];
       for (let name of itemLabels) {
@@ -411,6 +421,12 @@ export default {
     saveDraft: function() {
       this.saveOrUpdate('Pending').then(
         shipment => shipment && alertSvc.success({code: 'shipments.draft_saved', args: shipment})
+      );
+    },
+
+    request: function() {
+      this.saveOrUpdate('Requested').then(
+        shipment => shipment && alertSvc.success({code: 'shipments.shipment_requested', args: shipment})
       );
     },
 

@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.events;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,9 +15,16 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -778300952449162194L;
 
 	private Long id;
+
+	private boolean request;
+
+	private UserSummary requester;
+
+	private Date requestDate;
 	
 	private String name;
 
@@ -57,8 +65,6 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 	private List<UserSummary> notifyUsers = new ArrayList<>();
 
 	private Integer specimensCount;
-
-	private SpecimenRequestSummary request;
 	
 	//
 	// For BO template
@@ -75,6 +81,30 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public boolean isRequest() {
+		return request;
+	}
+
+	public void setRequest(boolean request) {
+		this.request = request;
+	}
+
+	public UserSummary getRequester() {
+		return requester;
+	}
+
+	public void setRequester(UserSummary requester) {
+		this.requester = requester;
+	}
+
+	public Date getRequestDate() {
+		return requestDate;
+	}
+
+	public void setRequestDate(Date requestDate) {
+		this.requestDate = requestDate;
 	}
 
 	public String getName() {
@@ -237,14 +267,6 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		this.specimensCount = specimensCount;
 	}
 
-	public SpecimenRequestSummary getRequest() {
-		return request;
-	}
-
-	public void setRequest(SpecimenRequestSummary request) {
-		this.request = request;
-	}
-
 	public ShipmentSpecimenDetail getShipmentSpecimen() {
 		return shipmentSpecimen;
 	}
@@ -272,6 +294,9 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 	public static ShipmentDetail from(Shipment shipment) {
 		ShipmentDetail detail = new ShipmentDetail();
 		detail.setId(shipment.getId());
+		detail.setRequest(shipment.isRequest());
+		detail.setRequester(UserSummary.from(shipment.getRequester()));
+		detail.setRequestDate(shipment.getRequestDate());
 		detail.setName(shipment.getName());
 		detail.setType(shipment.getType().name());
 		detail.setCourierName(shipment.getCourierName());

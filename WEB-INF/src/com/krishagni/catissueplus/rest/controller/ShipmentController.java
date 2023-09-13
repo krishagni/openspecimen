@@ -210,12 +210,15 @@ public class ShipmentController {
 		@RequestParam(value = "name")
 		List<String> names,
 
+		@RequestParam(value = "request", required = false, defaultValue = "false")
+		boolean request,
+
 		@RequestParam(value = "sendingSite", required = false, defaultValue = "")
 		String sendSiteName,
 
 		@RequestParam(value = "receivingSite", required = false, defaultValue = "")
 		String recvSiteName) {
-		return shipmentSvc.getContainers(names, sendSiteName, recvSiteName);
+		return shipmentSvc.getContainers(names, request, sendSiteName, recvSiteName);
 	}
 	
 	private <T> RequestEvent<T> request(T payload) {

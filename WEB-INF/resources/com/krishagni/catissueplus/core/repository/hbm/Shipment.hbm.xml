@@ -12,6 +12,12 @@
         <param name="sequence">OS_SHIPMENTS_SEQ</param>
       </generator>
     </id>
+
+    <property name="request" column="REQUEST" not-null="true" />
+
+    <many-to-one name="requester" column="REQUESTER_ID" />
+
+    <property name="requestDate" column="REQUEST_DATE" />
     
     <property name="name" column="NAME"/>
 

@@ -60,8 +60,8 @@ class Shipment {
     return http.get('shipments/' + shipmentId + '/containers', params || {startAt: 0, maxResults: 25});
   }
 
-  async searchContainers(sendingSite, receivingSite, names) {
-    const params = {sendingSite: sendingSite, receivingSite: receivingSite, name: names};
+  async searchContainers({request, sendingSite, receivingSite}, names) {
+    const params = {request, sendingSite, receivingSite, name: names};
     return http.get('shipments/containers', params);
   }
 
