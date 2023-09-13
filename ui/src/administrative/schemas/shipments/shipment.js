@@ -12,6 +12,12 @@ export default {
       }
     },
     {
+      "type": "textarea",
+      "labelCode": "shipments.requester_comments",
+      "name": "shipment.requesterComments",
+      "showWhen": "shipment.request"
+    },
+    {
       "type": "text",
       "labelCode": "shipments.name",
       "name": "shipment.name",

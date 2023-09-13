@@ -21,6 +21,8 @@ public interface SubjectDao extends Dao<Subject> {
 	List<SubjectAccess> getAccessList(Long subjectId, Long cpId, String[]resources, String[] ops);
 
 	List<Long> getSubjectIds(Long cpId, String resource, String[] ops);
+
+	List<Long> getSubjectIds(Long instituteId, Long siteId, String resource, String[] ops);
 	
 	Integer removeRolesByCp(Long cpId);
 

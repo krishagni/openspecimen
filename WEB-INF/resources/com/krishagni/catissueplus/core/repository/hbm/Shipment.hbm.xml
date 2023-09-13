@@ -18,6 +18,8 @@
     <many-to-one name="requester" column="REQUESTER_ID" />
 
     <property name="requestDate" column="REQUEST_DATE" />
+
+    <property name="requesterComments" column="REQUESTER_COMMENTS" />
     
     <property name="name" column="NAME"/>
 

@@ -76,6 +76,16 @@ public class SubjectDaoImpl extends AbstractDao<Subject> implements SubjectDao {
 	}
 
 	@Override
+	public List<Long> getSubjectIds(Long instituteId, Long siteId, String resource, String[] ops) {
+		return createNamedQuery(GET_SITE_SUBJECT_IDS, Long.class)
+			.setParameter("instituteId", instituteId)
+			.setParameter("siteId", siteId)
+			.setParameter("resource", resource)
+			.setParameterList("operations", Arrays.asList(ops))
+			.list();
+	}
+
+	@Override
 	public Integer removeRolesByCp(Long cpId) {
 		return createNamedQuery(REMOVE_ROLES_BY_CP)
 			.setParameter("cpId", cpId)
@@ -103,6 +113,8 @@ public class SubjectDaoImpl extends AbstractDao<Subject> implements SubjectDao {
 	private static final String GET_ACCESS_LIST_COUNT = FQN + ".getAccessListCount";
 
 	private static final String GET_SUBJECT_IDS = FQN + ".getSubjectIds";
+
+	private static final String GET_SITE_SUBJECT_IDS = FQN + ".getSiteSubjectIds";
 	
 	private static final String REMOVE_ROLES_BY_CP = FQN + ".removeRolesByCp";
 }

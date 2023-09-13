@@ -951,6 +951,7 @@
     "receiving_site_required": "Receiving Site is mandatory",
     "request": "Submit Request",
     "requester": "Requester",
+    "requester_comments": "Requester Comments",
     "requester_required": "Requester is mandatory",
     "save_draft": "Save Draft",
     "scan_container_names": "Add containers by scanning names separated by a comma, tab, or newline.",

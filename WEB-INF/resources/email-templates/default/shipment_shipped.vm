@@ -9,11 +9,11 @@
             <tr>
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $shipment.receivingSite.name Coordinators,
+                  Hello $rcpt.formattedName(),
                   <br><br>
-                  $shipment.sender.firstName $shipment.sender.lastName has shipped $shipment.name specimens' shipment.
+                  $shipment.sender.formattedName() has dispatched shipment of #if ($shipment.type.name() == 'SPECIMEN') specimens #else containers #end to the site <b>$shipment.receivingSite.name</b>.
                   <br/><br/>
-                  A brief description of shipment is given below:
+                  Details of the dispatched shipment are given below:
                   <br><br>
                 </p>
               </td>
@@ -25,6 +25,26 @@
                     <td> Shipment Name </td>
                     <td> : $shipment.name </td>
                   </tr>
+                  #if ($shipment.request)
+                  <tr>
+                    <td> Requester </td>
+                    <td> : $shipment.requester.formattedName() </td>
+                  </tr>
+                  <tr>
+                    <td> Request Date </td>
+                    <td> : $dateFmt.format( $$shipment.requestDate ) </td>
+                  </tr>
+                  <tr>
+                    <td> Requester Comments </td>
+                    <td> :
+                      #if ($shipment.requesterComments)
+                      $shipment.requesterComments
+                      #else
+                      Not Specified
+                      #end
+                    </td>
+                  </tr>
+                  #end
                   <tr>
                     <td> Courier Name </td>
                     <td> : 
@@ -61,7 +81,7 @@
                   </tr>
                   <tr>
                     <td> Sender </td>
-                    <td> : $shipment.sender.firstName $shipment.sender.lastName </td>
+                    <td> : $shipment.sender.formattedName() </td>
                   </tr>
                   <tr>
                     <td> Shipped Date </td>

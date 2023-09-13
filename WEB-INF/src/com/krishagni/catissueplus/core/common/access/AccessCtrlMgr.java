@@ -377,6 +377,11 @@ public class AccessCtrlMgr {
 		return daoFactory.getSubjectDao().getSubjectIds(cpId, resource.getName(), opsStr);
 	}
 
+	public List<Long> getUserIds(Long instituteId, Long siteId, Resource resource, Operation[] ops) {
+		String[] opsStr = Arrays.stream(ops).map(Operation::getName).toArray(String[]::new);
+		return daoFactory.getSubjectDao().getSubjectIds(instituteId, siteId, resource.getName(), opsStr);
+	}
+
 	public void ensureCreateCpRights(CollectionProtocol cp) {
 		ensureCpObjectRights(cp, Operation.CREATE);
 	}

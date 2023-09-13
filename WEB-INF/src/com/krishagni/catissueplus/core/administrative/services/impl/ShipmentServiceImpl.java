@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer;
 import com.krishagni.catissueplus.core.administrative.domain.ShipmentSavedEvent;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
+import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentFactory;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
@@ -45,7 +47,9 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
+import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
@@ -65,6 +69,8 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 import edu.common.dynamicextensions.query.WideRowMode;
 
 public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
+	private static final String SHIPMENT_REQUESTED_EMAIL_TMPL = "shipment_requested";
+
 	private static final String SHIPMENT_SHIPPED_EMAIL_TMPL = "shipment_shipped";
 	
 	private static final String SHIPMENT_RECEIVED_EMAIL_TMPL = "shipment_received";
@@ -708,37 +714,67 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		}
 
 		if ((oldStatus == null || oldStatus == Status.PENDING) && shipment.isRequested()) {
-			// sendShipmentRequestedEmail(shipment);
+			sendShipmentRequestedEmail(shipment);
 		} else if ((oldStatus == null || oldStatus == Status.PENDING || oldStatus == Status.REQUESTED) && shipment.isShipped()) {
 			sendShipmentShippedEmail(shipment);
 		} else if (oldStatus == Status.SHIPPED && shipment.isReceived()) {
 			sendShipmentReceivedEmail(shipment);
 		}
 	}
-	
+
+	private void sendShipmentRequestedEmail(Shipment shipment) {
+		sendShipmentEmail(shipment, shipment.getSendingSite(), SHIPMENT_REQUESTED_EMAIL_TMPL);
+	}
+
 	private void sendShipmentShippedEmail(Shipment shipment) {
-		if (CollectionUtils.isEmpty(shipment.getNotifyUsers())) {
+		sendShipmentEmail(shipment, shipment.getReceivingSite(), SHIPMENT_SHIPPED_EMAIL_TMPL);
+	}
+
+	private void sendShipmentEmail(Shipment shipment, Site site, String emailTmpl) {
+		List<Long> userIds = AccessCtrlMgr.getInstance().getUserIds(
+			site.getInstitute().getId(), site.getId(),
+			Resource.SHIPPING_N_TRACKING, new Operation[] { Operation.UPDATE });
+
+		Set<User> notifyUsers = new HashSet<>();
+		if (!userIds.isEmpty()) {
+			notifyUsers = new HashSet<>(daoFactory.getUserDao().getByIds(userIds));
+		}
+
+		if (shipment.getNotifyUsers() != null && !shipment.getNotifyUsers().isEmpty()) {
+			notifyUsers.addAll(shipment.getNotifyUsers());
+		}
+
+		if (shipment.getRequester() != null) {
+			notifyUsers.add(shipment.getRequester());
+		}
+
+		if (notifyUsers.isEmpty()) {
 			return;
 		}
-		
-		Set<String> emailIds = Utility.<Set<String>>collect(shipment.getNotifyUsers(), "emailAddress", true);
-		emailIds.add(shipment.getSender().getEmailAddress());
-		String[] subjectParams = {shipment.getName()};
-		
-		Map<String, Object> props = new HashMap<String, Object>();
-		props.put("$subject", subjectParams);
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("$subject", new String[] { shipment.getName() });
 		props.put("shipment", shipment);
-		emailService.sendEmail(SHIPMENT_SHIPPED_EMAIL_TMPL, emailIds.toArray(new String[0]), props);
+		for (User user : notifyUsers) {
+			props.put("rcpt", user);
+			emailService.sendEmail(emailTmpl, new String[] { user.getEmailAddress() }, props);
+		}
 	}
 	
 	private void sendShipmentReceivedEmail(Shipment shipment) {
-		String[] emailIds = new String[] {shipment.getSender().getEmailAddress()};
- 		String[] subjectParams = {shipment.getName()};
-		
-		Map<String, Object> props = new HashMap<String, Object>();
-		props.put("$subject", subjectParams);
+		Set<User> notifyUsers = new HashSet<>(shipment.getNotifyUsers());
+		notifyUsers.add(shipment.getSender());
+		if (shipment.getRequester() != null) {
+			notifyUsers.add(shipment.getRequester());
+		}
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("$subject", new String[] { shipment.getName() });
 		props.put("shipment", shipment);
-		emailService.sendEmail(SHIPMENT_RECEIVED_EMAIL_TMPL, emailIds, props);
+		for (User user : notifyUsers) {
+			props.put("rcpt", user);
+			emailService.sendEmail(SHIPMENT_RECEIVED_EMAIL_TMPL, new String[] { user.getEmailAddress() }, props);
+		}
 	}
 	
 	private QueryDataExportResult exportShipmentReport(final Shipment shipment, SavedQuery query) {
@@ -763,24 +799,37 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			public void headers(OutputStream out) {
 				@SuppressWarnings("serial")
 				Map<String, String> headers = new LinkedHashMap<String, String>() {{
-					put(getMessage("shipment_name"),            shipment.getName());
+					put(getMessage("shipment_name"), shipment.getName());
+					put(getMessage("shipment_request"), MessageUtil.getInstance().getMessage(shipment.isRequest() ? "common_yes" : "common_no"));
+					if (shipment.getRequester() != null) {
+						put(getMessage("shipment_requester"), shipment.getRequester().formattedName());
+					}
+
+					if (shipment.getRequestDate() != null) {
+						put(getMessage("shipment_request_date"), Utility.getDateTimeString(shipment.getRequestDate()));
+					}
+
+					if (StringUtils.isNotBlank(shipment.getRequesterComments())) {
+						put(getMessage("shipment_requester_comments"), shipment.getRequesterComments());
+					}
+
 					put(getMessage("shipment_courier_name"),    shipment.getCourierName());
 					put(getMessage("shipment_tracking_number"), shipment.getTrackingNumber());
 					put(getMessage("shipment_tracking_url"),    shipment.getTrackingUrl());
 					put(getMessage("shipment_sending_site"),    shipment.getSendingSite().getName());
 					if (shipment.getSender() != null) {
-						put(getMessage("shipment_sender"),          shipment.getSender().formattedName());
+						put(getMessage("shipment_sender"),      shipment.getSender().formattedName());
 					}
 
 					if (shipment.getShippedDate() != null) {
-						put(getMessage("shipment_shipped_date"),    Utility.getDateTimeString(shipment.getShippedDate()));
+						put(getMessage("shipment_shipped_date"),Utility.getDateTimeString(shipment.getShippedDate()));
 					}
 
 					put(getMessage("shipment_sender_comments"), shipment.getSenderComments());
 					put(getMessage("shipment_recv_site"),       shipment.getReceivingSite().getName());
 					
 					if (shipment.getReceiver() != null) {
-						put(getMessage("shipment_receiver"), shipment.getReceiver().formattedName());
+						put(getMessage("shipment_receiver"),    shipment.getReceiver().formattedName());
 					}
 					
 					if (shipment.getReceivedDate() != null) {

@@ -84,6 +84,15 @@ export default {
       {
         "fields": [
           {
+            "name": "shipment.requesterComments",
+            "showWhen": "shipment.request"
+          }
+        ]
+      },
+
+      {
+        "fields": [
+          {
             "name": "shipment.shippedDate",
             "showWhen": "!shipment.request || ship || receive || (shipment.status != 'Pending' && shipment.status != 'Requested')"
           }

@@ -73,6 +73,8 @@ public class Shipment extends BaseEntity {
 
 	private Date requestDate;
 
+	private String requesterComments;
+
 	private String name;
 
 	private Type type;
@@ -135,6 +137,14 @@ public class Shipment extends BaseEntity {
 
 	public void setRequestDate(Date requestDate) {
 		this.requestDate = requestDate;
+	}
+
+	public String getRequesterComments() {
+		return requesterComments;
+	}
+
+	public void setRequesterComments(String requesterComments) {
+		this.requesterComments = requesterComments;
 	}
 
 	public String getName() {
@@ -297,9 +307,11 @@ public class Shipment extends BaseEntity {
 		if (isRequest()) {
 			setRequester(other.getRequester());
 			setRequestDate(other.getRequestDate());
+			setRequesterComments(other.getRequesterComments());
 		} else {
 			setRequester(null);
 			setRequestDate(null);
+			setRequesterComments(null);
 		}
 
 		setName(other.getName());

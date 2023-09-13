@@ -155,5 +155,20 @@
         (sa.site_id is null or sa.site_id = cpSiteInst.siteId) and
         s.activity_status != 'Disabled'
     </sql-query>
+
+    <sql-query name="getSiteSubjectIds">
+      <return-scalar column="subjectId" type="long"/>
+
+      select
+        distinct s.identifier as subjectId
+      from
+        catissue_user s
+        inner join rbac_subject_access_view rv on rv.subject_id = s.identifier
+        inner join catissue_institution i on i.identifier = s.institute_id
+      where
+        ((rv.site_id is null and i.identifier = :instituteId) or (rv.site_id is not null and rv.site_id = :siteId)) and
+        rv.resource_name = :resource and
+        rv.operation in (:operations)
+    </sql-query>
   </class>  
 </hibernate-mapping>

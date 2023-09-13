@@ -25,6 +25,8 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 	private UserSummary requester;
 
 	private Date requestDate;
+
+	private String requesterComments;
 	
 	private String name;
 
@@ -105,6 +107,14 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 
 	public void setRequestDate(Date requestDate) {
 		this.requestDate = requestDate;
+	}
+
+	public String getRequesterComments() {
+		return requesterComments;
+	}
+
+	public void setRequesterComments(String requesterComments) {
+		this.requesterComments = requesterComments;
 	}
 
 	public String getName() {
@@ -297,6 +307,7 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		detail.setRequest(shipment.isRequest());
 		detail.setRequester(UserSummary.from(shipment.getRequester()));
 		detail.setRequestDate(shipment.getRequestDate());
+		detail.setRequesterComments(shipment.getRequesterComments());
 		detail.setName(shipment.getName());
 		detail.setType(shipment.getType().name());
 		detail.setCourierName(shipment.getCourierName());

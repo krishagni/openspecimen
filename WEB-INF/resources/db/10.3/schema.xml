@@ -228,4 +228,10 @@
   <changeSet author="vpawar" id="Shipment request: Shipment date is not mandatory">
     <dropNotNullConstraint tableName="OS_SHIPMENTS" columnName="SHIPPED_DATE" columnDataType="${nullable.ts.type}" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request: requester comments">
+    <addColumn tableName="OS_SHIPMENTS">
+      <column name="REQUESTER_COMMENTS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

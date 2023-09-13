@@ -1122,6 +1122,43 @@
         </row>
 
         <row>
+          <booleanCheckBox>
+            <name>request</name>
+            <udn>request</udn>
+            <caption>#getMessage("specimen_shipment_request")</caption>
+            <column>REQUEST</column>
+          </booleanCheckBox>
+        </row>
+
+        <row>
+          <userField>
+            <name>requester</name>
+            <udn>requester</udn>
+            <caption>#getMessage("specimen_shipment_requester")</caption>
+            <column>REQUESTER_ID</column>
+          </userField>
+        </row>
+
+        <row>
+          <datePicker>
+            <name>requestDate</name>
+            <udn>requestDate</udn>
+            <caption>#getMessage("specimen_shipment_request_date")</caption>
+            <column>REQUEST_DATE</column>
+            <format>MM-dd-yyyy HH:mm</format>
+          </datePicker>
+        </row>
+
+        <row>
+          <textField>
+            <name>requesterComments</name>
+            <udn>requesterComments</udn>
+            <caption>#getMessage("specimen_shipment_requester_comments")</caption>
+            <column>REQUESTER_COMMENTS</column>
+          </textField>
+        </row>
+
+        <row>
           <textField>
             <name>courierName</name>
             <udn>courierName</udn>

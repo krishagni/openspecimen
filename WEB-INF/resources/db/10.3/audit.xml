@@ -39,4 +39,11 @@
       <column name="requestDate_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request: requester comments">
+    <addColumn tableName="OS_SHIPMENTS_AUD">
+      <column name="REQUESTER_COMMENTS" type="${text.type}(255)" />
+      <column name="requesterComments_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

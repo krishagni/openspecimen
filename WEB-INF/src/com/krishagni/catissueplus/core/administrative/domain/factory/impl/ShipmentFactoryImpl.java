@@ -82,6 +82,7 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		shipment.setRequest(detail.isRequest());
 		setRequester(detail, shipment, ose);
 		setRequestDate(detail, shipment, ose);
+		setRequesterComments(detail, shipment, ose);
 		setName(detail, shipment, ose);
 		setType(detail, shipment, ose);
 		setCourierName(detail, shipment, ose);
@@ -121,6 +122,14 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 			if (shipment.getRequestDate() == null) {
 				shipment.setRequestDate(Calendar.getInstance().getTime());
 			}
+		}
+	}
+
+	private void setRequesterComments(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
+		if (!detail.isRequest()) {
+			shipment.setRequesterComments(null);
+		} else {
+			shipment.setRequesterComments(detail.getRequesterComments());
 		}
 	}
 	
