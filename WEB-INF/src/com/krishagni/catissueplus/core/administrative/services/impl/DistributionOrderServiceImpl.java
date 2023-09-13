@@ -1474,12 +1474,8 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 				if (dataFile == null) {
 					return null;
 				}
-				if (isFileLargerThan1MB(dataFile)) {
-					String name = MimeUtility.encodeText(filename + ".csv");
-					return Pair.make("zip", zipFile(name, dataFile));
-				} else {
-					return Pair.make("csv", dataFile);
-				}
+
+				return Pair.make("zip", dataFile);
 			}
 			case MANIFEST -> {
 				File manifest = getManifest(order);
@@ -1496,11 +1492,11 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			case BOTH -> {
 				List<Pair<String, String>> inputFiles = new ArrayList<>();
 				String zipPath = null;
-				File csvFile = getCsvReport(order);
-				if (csvFile != null) {
-					String name = MimeUtility.encodeText(filename + ".csv");
-					inputFiles.add(Pair.make(csvFile.getAbsolutePath(), name));
-					zipPath = csvFile.getParent();
+				File dataFile = getCsvReport(order);
+				if (dataFile != null) {
+					String name = MimeUtility.encodeText(filename + ".zip");
+					inputFiles.add(Pair.make(dataFile.getAbsolutePath(), name));
+					zipPath = dataFile.getParent();
 				}
 				File pdfFile = getManifest(order);
 				if (pdfFile != null) {
