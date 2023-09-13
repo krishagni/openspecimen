@@ -1857,7 +1857,6 @@ public class QueryServiceImpl implements QueryService {
 
 			if (entryName.endsWith(".zip")) {
 				entryName = filename.substring(0, filename.lastIndexOf("."));
-				zipFilename = filename;
 			} else if (!entryName.endsWith(".csv") && !entryName.endsWith(".xlsx") && !entryName.endsWith(".xls")) {
 				int index = filename.lastIndexOf("_");
 				if (index == -1) {
