@@ -230,6 +230,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			if (status == Status.SHIPPED) {
 				createRecvSiteContainer(shipment);
 				shipment.ship();
+			} else if (status == Status.REQUESTED) {
+				shipment.setStatus(status);
 			}
 
 			getShipmentDao().saveOrUpdate(shipment, true);

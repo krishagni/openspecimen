@@ -299,6 +299,10 @@ export default {
             }
           }
 
+          if (this.ship && !dataCtx.shipment.shippedDate) {
+            dataCtx.shipment.shippedDate = new Date();
+          }
+
           if (this.receive) {
             dataCtx.shipment.receivedDate = new Date();
 
