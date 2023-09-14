@@ -344,6 +344,8 @@ export default {
         });
       }
 
+      const style = {'padding-top': '0.3rem!important', 'padding-bottom': '0.3rem!important'};
+      options.forEach(option => option.anchorStyle = style);
       return options;
     }
   },

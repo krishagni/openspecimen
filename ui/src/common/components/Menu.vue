@@ -5,7 +5,7 @@
     <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
       <template #item="{item}">
         <os-divider v-if="item.divider" />
-        <a class="os-menu-item p-menuitem-link" @click="item.command" v-else>
+        <a class="os-menu-item p-menuitem-link" :style="item.anchorStyle" @click="item.command" v-else>
           <Icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon"></Icon>
           <span>{{item.label}}</span>
         </a>
@@ -31,8 +31,8 @@ export default {
   computed: {
     items: function() {
       return this.options.map(
-        ({icon, caption, onSelect, divider}) =>
-          ({icon, label: caption, divider, command: (event) => this.exec(event, onSelect)})
+        ({icon, caption, onSelect, divider, anchorStyle}) =>
+          ({icon, label: caption, divider, anchorStyle, command: (event) => this.exec(event, onSelect)})
       );
     }
   },
