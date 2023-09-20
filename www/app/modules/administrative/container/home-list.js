@@ -1,5 +1,5 @@
 angular.module('os.administrative.container')
-  .controller('HomeContainersListCtrl', function($scope, Container) {
+  .controller('HomeContainersListCtrl', function($scope, Container, VueApp) {
     var ctx;
 
     function init(opts) {
@@ -38,5 +38,9 @@ angular.module('os.administrative.container')
           }
         }
       );
+    }
+
+    $scope.overviewUrl = function(container) {
+      return VueApp.getVueViewUrl('containers/' + container.id + '/detail/locations');
     }
   });

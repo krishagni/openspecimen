@@ -9,8 +9,9 @@
           </span>
         </td>
         <td class="col">
-          <a href="ui-app/#/containers/{{container.id}}/detail/locations">
-            <span>{{container.name}}</span>
+          <a href="{{overviewUrl(container)}}">
+            <span ng-show="!!container.displayName">{{container.displayName}} ({{container.name}})</span>
+            <span ng-show="!container.displayName">{{container.name}}</span>
           </a>
         </td>
       </tr>
