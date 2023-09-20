@@ -1,6 +1,6 @@
 
 angular.module('os.biospecimen.cpgroups')
-  .controller('CpGroupOverviewCtrl', function($scope, $state, group, CollectionProtocolGroup, Util, Alerts) {
+  .controller('CpGroupOverviewCtrl', function($scope, $state, group, osExportSvc, CollectionProtocolGroup, Util, Alerts) {
 
     var octx;
     function init() {
@@ -26,6 +26,11 @@ angular.module('os.biospecimen.cpgroups')
           );
         }
       });
+    }
+
+    $scope.exportCpRecords = function(objectType) {
+      var payload = {objectType: objectType, recordIds: group.cps.map(function(cp) { return cp.id; })};
+      osExportSvc.exportRecords(payload);
     }
 
     init();

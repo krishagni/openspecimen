@@ -35,12 +35,21 @@ angular.module('os.biospecimen.cpgroups', [])
         abstract: true,
         templateUrl: 'modules/biospecimen/cp-groups/detail.html',
         controller: function ($scope, group, AuthorizationService) {
-          var ctx = $scope.ctx = {group: group, editAllowed: true};
+          var ctx = $scope.ctx = {group: group, editAllowed: true, exportAllowed: true};
           var opts = {resource: 'CollectionProtocol', operations: ['Update']};
           for (var i = 0; i < group.cps.length; ++i) {
             opts.cp = group.cps[i].shortTitle;
             if (!AuthorizationService.isAllowed(opts)) {
               ctx.editAllowed = false;
+              break;
+            }
+          }
+
+          var eopts = {resource: 'CollectionProtocol', operations: ['Export Import']};
+          for (var i = 0; i < group.cps.length; ++i) {
+            eopts.cp = group.cps[i].shortTitle;
+            if (!AuthorizationService.isAllowed(eopts)) {
+              ctx.exportAllowed = false;
               break;
             }
           }
