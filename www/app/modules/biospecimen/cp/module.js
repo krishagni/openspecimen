@@ -52,6 +52,11 @@ angular.module('os.biospecimen.cp',
               operations: ['Update']
             });
 
+            var cpEximAllowed = AuthorizationService.isAllowed({
+              resource: 'CollectionProtocol',
+              operations: ['Export Import']
+            });
+
             var participantEximAllowed = AuthorizationService.isAllowed({
               resource: 'ParticipantPhi',
               operations: ['Export Import']
@@ -85,9 +90,11 @@ angular.module('os.biospecimen.cp',
             return {
               cpCreateAllowed: cpCreateAllowed,
               cpUpdateAllowed: cpCreateAllowed || cpUpdateAllowed,
+              cpImportAllowed: cpEximAllowed,
               participantImportAllowed: participantEximAllowed,
               visitImportAllowed: visitEximAllowed,
               specimenImportAllowed: spmnEximAllowed,
+              cpExportAllowed: cpEximAllowed,
               participantExportAllowed: participantEximAllowed,
               visitExportAllowed: visitEximAllowed,
               specimenExportAllowed: spmnEximAllowed,
@@ -139,6 +146,10 @@ angular.module('os.biospecimen.cp',
 
           allowedEntityTypes: function(cpsCtx) {
             var entityTypes = [];
+            if (cpsCtx.cpImportAllowed) {
+              entityTypes.push('CollectionProtocol');
+            }
+
             if (cpsCtx.participantImportAllowed) {
               entityTypes = entityTypes.concat(['CommonParticipant', 'Participant']);
             }
@@ -179,6 +190,7 @@ angular.module('os.biospecimen.cp',
         resolve: {
           importDetail: function(ImportUtil) {
             var objectTypes = [
+              'cp', 'cpe', 'sr',
               'cprMultiple', 'otherCpr', 'cpr', 'participant', 'consent', 'econsentsDocumentResponse',
               'visit', 'specimen', 'specimenDerivative', 'specimenAliquot',
               'masterSpecimen', 'containerSpecimen', 'specimenDisposal', 'extensions',
@@ -209,6 +221,11 @@ angular.module('os.biospecimen.cp',
 
           allowedEntityTypes: function(cp, cpsCtx) {
             var entityTypes = [];
+
+            if (cpsCtx.cpExportAllowed) {
+              entityTypes.push('CollectionProtocol');
+            }
+
             if (cpsCtx.participantExportAllowed) {
               entityTypes.push('CommonParticipant');
               entityTypes.push('Participant');

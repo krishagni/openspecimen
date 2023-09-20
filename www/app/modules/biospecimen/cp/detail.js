@@ -80,6 +80,10 @@ angular.module('os.biospecimen.cp.detail', ['os.biospecimen.models'])
       updateStatus('Active', 'cp.reopened');
     }
 
+    $scope.exportCpCsv = function() {
+      osExportSvc.exportRecords({objectType: 'cp', recordIds: [cp.id]});
+    }
+
     $scope.exportEvents = function() {
       osExportSvc.exportRecords({objectType: 'cpe', params: {cpId: cp.id}});
     }

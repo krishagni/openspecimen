@@ -75,6 +75,13 @@
           </li>
 
           <li show-if-allowed="cpResource.importOpts">
+            <a ng-click="exportCpCsv()">
+              <span class="fa fa-calendar"></span>
+              <span translate="cp.export_cp_csv">Collection Protocol (CSV)</span>
+            </a>
+          </li>
+
+          <li show-if-allowed="cpResource.importOpts">
             <a ng-click="exportEvents()">
               <span class="fa fa-list-alt"></span>
               <span translate="cp.export_events">Events (CSV)</span>

@@ -69,7 +69,9 @@ public enum SrErrorCode implements ErrorCode {
 
 	CLOSED,
 
-	HAS_SPECIMENS;
+	HAS_SPECIMENS,
+
+	ID_CODE_REQ;
 	
 	@Override
 	public String code() {

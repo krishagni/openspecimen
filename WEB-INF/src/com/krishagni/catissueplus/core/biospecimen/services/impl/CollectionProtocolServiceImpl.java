@@ -110,6 +110,7 @@ import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
+import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
@@ -373,11 +374,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	public ResponseEvent<CollectionProtocolDetail> updateCollectionProtocol(RequestEvent<CollectionProtocolDetail> req) {
 		try {
 			CollectionProtocolDetail detail = req.getPayload();
-			CollectionProtocol existingCp = daoFactory.getCollectionProtocolDao().getById(detail.getId());
-			if (existingCp == null) {
-				return ResponseEvent.userError(CpErrorCode.NOT_FOUND);
-			}
 
+			CollectionProtocol existingCp = getCollectionProtocol(detail.getId(), null, detail.getShortTitle());
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(existingCp);
 			CollectionProtocol cp = cpFactory.createCollectionProtocol(detail);
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
@@ -1049,11 +1047,26 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		try {
 			SpecimenRequirementDetail detail = req.getPayload();
 			Long srId = detail.getId();
-			SpecimenRequirement sr = daoFactory.getSpecimenRequirementDao().getById(srId);
-			if (sr == null) {
-				throw OpenSpecimenException.userError(SrErrorCode.NOT_FOUND);
+			String cpShortTitle = detail.getCpShortTitle();
+			String eventLabel = detail.getEventLabel();
+			String code = detail.getCode();
+
+			Object key = null;
+			SpecimenRequirement sr = null;
+			if (srId != null) {
+				key = srId;
+				sr = daoFactory.getSpecimenRequirementDao().getById(srId);
+			} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(eventLabel) && StringUtils.isNotBlank(code)) {
+				key = cpShortTitle + ":" + eventLabel + ":" + code;
+				sr = daoFactory.getSpecimenRequirementDao().getByCpEventLabelAndSrCode(cpShortTitle, eventLabel, code);
 			}
-			
+
+			if (key == null) {
+				return ResponseEvent.userError(SrErrorCode.ID_CODE_REQ);
+			} else if (sr == null) {
+				return ResponseEvent.userError(SrErrorCode.NOT_FOUND, key);
+			}
+
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(sr.getCollectionProtocol());
 			SpecimenRequirement partial = srFactory.createForUpdate(sr.getLineage(), detail);
 			if (isSpecimenClassOrTypeChanged(sr, partial)) {
@@ -1399,6 +1412,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		listSvc.registerListConfigurator("participant-list-view", this::getParticipantsListConfig);
 		listSvc.registerListConfigurator("specimen-list-view", this::getSpecimenListConfig);
 
+		exportSvc.registerObjectsGenerator("cp", this::getCpsGenerator);
 		exportSvc.registerObjectsGenerator("cpe", this::getEventsGenerator);
 		exportSvc.registerObjectsGenerator("sr", this::getSpecimenRequirementsGenerator);
 	}
@@ -1902,17 +1916,23 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	}
 
 	private CollectionProtocol getCollectionProtocol(Long id, String title, String shortTitle) {
+		Object key = null;
 		CollectionProtocol cp = null;
 		if (id != null) {
+			key = id;
 			cp = daoFactory.getCollectionProtocolDao().getById(id);
 		} else if (StringUtils.isNotBlank(title)) {
+			key = title;
 			cp = daoFactory.getCollectionProtocolDao().getCollectionProtocol(title);
 		} else if (StringUtils.isNoneBlank(shortTitle)) {
+			key = shortTitle;
 			cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(shortTitle);
 		}
 
-		if (cp == null) {
-			throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND);
+		if (key == null) {
+			throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
+		} else if (cp == null) {
+			throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND, key);
 		}
 
 		return cp;
@@ -2518,40 +2538,202 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		return reviewers;
 	}
 
-	private Function<ExportJob, List<? extends Object>> getEventsGenerator() {
-		return new Function<ExportJob, List<? extends Object>>() {
-			private boolean endOfEvents;
+	private Function<ExportJob, List<? extends Object>> getCpsGenerator() {
+		return new Function<>() {
+			private boolean paramsInited;
+
+			private boolean endOfCps;
+
+			private Long lastId;
+
+			private CpListCriteria crit;
 
 			@Override
-			public List<CollectionProtocolEventDetail> apply(ExportJob job) {
-				String cpIdStr = job.param("cpId");
-				if (endOfEvents || StringUtils.isBlank(cpIdStr)) {
+			public List<? extends Object> apply(ExportJob job) {
+				initParams(job);
+				if (endOfCps) {
 					return Collections.emptyList();
 				}
 
-				Long cpId = Long.parseLong(cpIdStr);
-				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
+				crit.lastId(lastId);
+				List<CollectionProtocol> cps = daoFactory.getCollectionProtocolDao().getCollectionProtocolsList(crit);
+				if (!cps.isEmpty()) {
+					lastId = cps.get(cps.size() - 1).getId();
+				}
 
-				endOfEvents = true;
-				return CollectionProtocolEventDetail.from(cp.getOrderedCpeList(), false);
+				endOfCps = cps.size() < crit.maxResults();
+				return CollectionProtocolDetail.from(cps);
+			}
+
+			private void initParams(ExportJob job) {
+				if (paramsInited) {
+					return;
+				}
+
+				Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
+				if ((siteCps != null && siteCps.isEmpty()) || !AccessCtrlMgr.getInstance().hasEximRights(null, Resource.CP.getName())) {
+					endOfCps = true;
+					return;
+				}
+
+				crit = new CpListCriteria()
+					.siteCps(siteCps)
+					.ids(job.getRecordIds())
+					.orderBy("cp.id");
+				paramsInited = true;
+			}
+		};
+	}
+
+	private Function<ExportJob, List<? extends Object>> getEventsGenerator() {
+		return new Function<>() {
+			private boolean paramsInited;
+
+			private boolean endOfEvents;
+
+			private Long lastCpId;
+
+			private CpListCriteria crit;
+
+			@Override
+			public List<CollectionProtocolEventDetail> apply(ExportJob job) {
+				initParams(job);
+				if (endOfEvents) {
+					return Collections.emptyList();
+				}
+
+				List<CollectionProtocolEventDetail> cpes = null;
+				while (true) {
+					CollectionProtocol cp = nextCp();
+					if (cp == null) {
+						endOfEvents = true;
+						cpes = Collections.emptyList();
+						break;
+					}
+
+					cpes = CollectionProtocolEventDetail.from(cp.getOrderedCpeList(), false);
+					if (!cpes.isEmpty()) {
+						break;
+					}
+				}
+
+				return cpes;
+			}
+
+			private void initParams(ExportJob job) {
+				if (paramsInited) {
+					return;
+				}
+
+				Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
+				if ((siteCps != null && siteCps.isEmpty()) || !AccessCtrlMgr.getInstance().hasEximRights(null, Resource.CP.getName())) {
+					endOfEvents = true;
+					return;
+				}
+
+				List<Long> cpIds = job.getRecordIds();
+				if (cpIds == null || cpIds.isEmpty()) {
+					String cpIdStr = job.param("cpId");
+					if (StringUtils.isNotBlank(cpIdStr) && !cpIdStr.trim().equals("-1")) {
+						cpIds = Collections.singletonList(Long.parseLong(cpIdStr));
+					}
+				}
+
+				crit = new CpListCriteria()
+					.siteCps(siteCps)
+					.ids(cpIds)
+					.maxResults(1)
+					.orderBy("cp.id");
+				paramsInited = true;
+			}
+
+			private CollectionProtocol nextCp() {
+				List<CollectionProtocol> cps = daoFactory.getCollectionProtocolDao().getCollectionProtocolsList(crit.lastId(lastCpId));
+				if (cps == null || cps.isEmpty()) {
+					return null;
+				} else {
+					CollectionProtocol cp = cps.iterator().next();
+					lastCpId = cp.getId();
+					return cp;
+				}
 			}
 		};
 	}
 
 	private Function<ExportJob, List<? extends Object>> getSpecimenRequirementsGenerator() {
-		return new Function<ExportJob, List<? extends Object>>() {
+		return new Function<>() {
+			private boolean paramsInited;
+
 			private boolean endOfSrs;
+
+			private Long lastCpId;
+
+			private CpListCriteria crit;
 
 			@Override
 			public List<SpecimenRequirementDetail> apply(ExportJob job) {
-				String cpIdStr = job.param("cpId");
-				if (endOfSrs || StringUtils.isBlank(cpIdStr)) {
+				initParams(job);
+				if (endOfSrs) {
 					return Collections.emptyList();
 				}
 
-				Long cpId = Long.parseLong(cpIdStr);
-				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
+				List<SpecimenRequirementDetail> srs = null;
+				while (true) {
+					CollectionProtocol cp = nextCp();
+					if (cp == null) {
+						endOfSrs = true;
+						srs = Collections.emptyList();
+						break;
+					}
 
+					srs = getSrs(cp);
+					if (!srs.isEmpty()) {
+						break;
+					}
+				}
+
+				return srs;
+			}
+
+			private void initParams(ExportJob job) {
+				if (paramsInited) {
+					return;
+				}
+
+				Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
+				if ((siteCps != null && siteCps.isEmpty()) || !AccessCtrlMgr.getInstance().hasEximRights(null, Resource.CP.getName())) {
+					endOfSrs = true;
+					return;
+				}
+
+				List<Long> cpIds = job.getRecordIds();
+				if (cpIds == null || cpIds.isEmpty()) {
+					String cpIdStr = job.param("cpId");
+					if (StringUtils.isNotBlank(cpIdStr) && !cpIdStr.trim().equals("-1")) {
+						cpIds = Collections.singletonList(Long.parseLong(cpIdStr));
+					}
+				}
+
+				crit = new CpListCriteria()
+					.siteCps(siteCps)
+					.ids(cpIds)
+					.maxResults(1)
+					.orderBy("cp.id");
+				paramsInited = true;
+			}
+
+			private CollectionProtocol nextCp() {
+				List<CollectionProtocol> cps = daoFactory.getCollectionProtocolDao().getCollectionProtocolsList(crit.lastId(lastCpId));
+				if (cps == null || cps.isEmpty()) {
+					return null;
+				} else {
+					CollectionProtocol cp = cps.iterator().next();
+					lastCpId = cp.getId();
+					return cp;
+				}
+			}
+
+			private List<SpecimenRequirementDetail> getSrs(CollectionProtocol cp) {
 				List<SpecimenRequirementDetail> result = new ArrayList<>();
 				for (CollectionProtocolEvent cpe : cp.getOrderedCpeList()) {
 					List<SpecimenRequirement> parents = new ArrayList<>(cpe.getOrderedTopLevelAnticipatedSpecimens());
@@ -2570,7 +2752,6 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 					}
 				}
 
-				endOfSrs = true;
 				return result;
 			}
 		};

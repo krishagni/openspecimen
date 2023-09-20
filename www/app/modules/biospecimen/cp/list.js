@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.cp.list', ['os.biospecimen.models'])
   .controller('CpListCtrl', function(
-    $scope, $state, cpsCtx, CollectionProtocol, DeleteUtil, AuthorizationService) {
+    $scope, $state, cpsCtx, osExportSvc, CollectionProtocol, DeleteUtil, AuthorizationService) {
 
     var ctx;
 
@@ -43,6 +43,12 @@ angular.module('os.biospecimen.cp.list', ['os.biospecimen.models'])
       }
 
       DeleteUtil.bulkDelete({bulkDelete: CollectionProtocol.bulkDelete}, getCpIds(cps), opts);
+    }
+
+    $scope.exportCpRecords = function(objectType) {
+      var cps = ctx.listCtrl.checkList.getSelectedItems();
+      var payload = {objectType: objectType, recordIds: getCpIds(cps)};
+      osExportSvc.exportRecords(payload);
     }
 
     $scope.setListCtrl = function(listCtrl) {

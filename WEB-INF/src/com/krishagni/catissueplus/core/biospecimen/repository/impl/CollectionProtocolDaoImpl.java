@@ -71,13 +71,21 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	}
 
 	@Override
+	public List<CollectionProtocol> getCollectionProtocolsList(CpListCriteria crit) {
+		Criteria<CollectionProtocol> query = getCpQuery(crit, CollectionProtocol.class);
+		return query.add(query.gt("cp.id", crit.lastId() != null ? crit.lastId() : 0L))
+			.addOrder(query.asc(StringUtils.isNotBlank(crit.orderBy()) ? crit.orderBy() : "cp.shortTitle"))
+			.list(crit.startAt(), crit.maxResults());
+	}
+
+	@Override
 	public List<Long> getAllCpIds() {
 		return createNamedQuery(GET_ALL_CP_IDS, Long.class).list();
 	}
 
 	@Override
 	public Long getCpCount(CpListCriteria criteria) {
-		return getCpQuery(criteria).getCount("cp.id");
+		return getCpQuery(criteria, CollectionProtocol.class).getCount("cp.id");
 	}
 
 	@Override
@@ -329,20 +337,20 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	}
 
 	private List<Object[]> getCpList(CpListCriteria crit) {
-		Criteria<Object[]> query = getCpQuery(crit);
+		Criteria<Object[]> query = getCpQuery(crit, Object[].class);
 		return addProjections(query, crit)
 			.addOrder(query.asc("shortTitle"))
 			.list(crit.startAt(), crit.maxResults());
 	}
 	
-	private Criteria<Object[]> getCpQuery(CpListCriteria crit) {
-		Criteria<Object[]> query = createCriteria(CollectionProtocol.class, Object[].class, "cp")
+	private <T> Criteria<T> getCpQuery(CpListCriteria crit, Class<T> klass) {
+		Criteria<T> query = createCriteria(CollectionProtocol.class, klass, "cp")
 			.join("cp.principalInvestigator", "pi");
 		query.add(query.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
 		return addSearchConditions(query, crit);
 	}
 
-	private Criteria<Object[]> addSearchConditions(Criteria<Object[]> query, CpListCriteria crit) {
+	private <T> Criteria<T> addSearchConditions(Criteria<T> query, CpListCriteria crit) {
 		String searchString = crit.query();
 		if (StringUtils.isBlank(searchString)) {
 			searchString = crit.title();
@@ -447,7 +455,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		return cp;
 	}
 
-	private void addSiteCpsCond(Criteria<Object[]> query, Collection<SiteCpPair> siteCps) {
+	private <T> void addSiteCpsCond(Criteria<T> query, Collection<SiteCpPair> siteCps) {
 		if (CollectionUtils.isEmpty(siteCps)) {
 			return;
 		}

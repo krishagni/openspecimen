@@ -19,6 +19,15 @@ angular.module('os.biospecimen.participant')
       return $translate.instant(key);
     }
 
+    function getCpTypes() {
+      var group = $translate.instant('cp.self');
+      return [
+        {group: group, type: 'cp', title: msg('cp.list'), '$$input': null },
+        {group: group, type: 'cpe', title: msg('cp.cpe_list'), '$$input': null },
+        {group: group, type: 'sr', title: msg('srs.list'), '$$input': null }
+      ];
+    }
+
     function getParticipantTypes(entityForms, cp, addConsent) {
       var group = $translate.instant('participant.title');
       var input = {'var': 'ppids', varName: 'participant.ppids', varDesc: 'participant.ppids_csv'};
@@ -108,6 +117,10 @@ angular.module('os.biospecimen.participant')
       );
 
       var exportTypes = [];
+      if ((!cp || cp.id == -1) && allowedEntityTypes.indexOf('CollectionProtocol') >= 0) {
+        exportTypes = exportTypes.concat(getCpTypes());
+      }
+
       if (!cp.specimenCentric && allowedEntityTypes.indexOf('Participant') >= 0) {
         exportTypes = exportTypes.concat(getParticipantTypes(entityForms, cp, allowedEntityTypes.indexOf('Consent') >= 0));
       } else if (!cp.specimenCentric && allowedEntityTypes.indexOf('Consent') >= 0) {

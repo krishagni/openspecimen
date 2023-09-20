@@ -66,6 +66,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.nutility.IoUtil;
+import liquibase.util.ObjectUtil;
 
 public class ExportServiceImpl implements ExportService, InitializingBean {
 	private static final LogUtil logger = LogUtil.getLogger(ExportServiceImpl.class);
@@ -739,8 +740,16 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 			try {
 				return BeanUtilsBean2.getInstance().getPropertyUtils().getProperty(object, propertyName);
 			} catch (Exception e) {
-				throw new IllegalArgumentException("Error obtaining value of property: " + propertyName, e);
+				try {
+					return getPropertyValue(object, propertyName);
+				} catch (Exception e1) {
+					throw new IllegalArgumentException("Error obtaining value of property: " + propertyName, e);
+				}
 			}
+		}
+
+		private Object getPropertyValue(Object object, String propertyName) {
+			return ObjectUtil.getProperty(object, propertyName);
 		}
 
 		private Collection<Object> getCollection(Object object, String propertyName) {

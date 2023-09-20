@@ -39,6 +39,15 @@ angular.module('os.biospecimen.participant')
       return importTypes;
     }
 
+    function getCpTypes() {
+      var group = $translate.instant('cp.self');
+      return [
+        {group: group, type: 'cp',  title: 'cp.list',     showImportType: true, showUpsert: false },
+        {group: group, type: 'cpe', title: 'cp.cpe_list', showImportType: true, showUpsert: false },
+        {group: group, type: 'sr',  title: 'srs.list',    showImportType: true, showUpsert: false }
+      ];
+    }
+
     function getParticipantTypes(entityForms, cp, addConsent) {
       var group = $translate.instant('participant.title');
 
@@ -194,6 +203,10 @@ angular.module('os.biospecimen.participant')
       });
 
       var importTypes = [];
+      if ((!cp || cp.id == -1) && allowedEntityTypes.indexOf('CollectionProtocol') >= 0) {
+        importTypes = importTypes.concat(getCpTypes());
+      }
+
       if (!cp.specimenCentric && allowedEntityTypes.indexOf('Participant') >= 0) {
         importTypes = importTypes.concat(getParticipantTypes(entityForms, cp, allowedEntityTypes.indexOf('Consent') >= 0));
       } else if (!cp.specimenCentric && allowedEntityTypes.indexOf('Consent') >= 0) {

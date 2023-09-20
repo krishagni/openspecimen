@@ -20,6 +20,8 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 
 	public List<CollectionProtocolSummary> getCollectionProtocols(CpListCriteria criteria);
 
+	List<CollectionProtocol> getCollectionProtocolsList(CpListCriteria crit);
+
 	public List<Long> getAllCpIds();
 
 	public Long getCpCount(CpListCriteria criteria);

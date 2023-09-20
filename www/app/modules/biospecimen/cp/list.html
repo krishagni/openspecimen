@@ -60,6 +60,33 @@
       <span class="fa fa-trash"></span>
       <span translate="common.buttons.delete">Delete</span>
     </button>
+
+    <div dropdown class="os-inline-btn" ng-if="cpsCtx.cpExportAllowed">
+      <button class="default dropdown-toggle">
+        <span translate="common.buttons.export">Export</span>
+        <span class="fa fa-caret-down"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a ng-click="exportCpRecords('cp')">
+            <span class="fa fa-calendar"></span>
+            <span translate="cp.list">Collection Protocols</span>
+          </a>
+        </li>
+        <li>
+          <a ng-click="exportCpRecords('cpe')">
+            <span class="fa fa-list-alt"></span>
+            <span translate="cp.cpe_list">Events</span>
+          </a>
+        </li>
+        <li>
+          <a ng-click="exportCpRecords('sr')">
+            <span class="fa fa-flask"></span>
+            <span translate="srs.list">Specimen Requirements</span>
+          </a>
+        </li>
+      </ul>
+    </div>
   </div>
 </script>
 

@@ -919,12 +919,23 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	}
 	
 	public void updateCpe(CollectionProtocolEvent cpe) {
-		CollectionProtocolEvent existing = getCpe(cpe.getId());
-		if (existing == null) {
-			throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, cpe.getId(), 1);
+		Object key = null;
+		CollectionProtocolEvent existing = null;
+		if (cpe.getId() != null) {
+			key = cpe.getId();
+			existing = getCpe(cpe.getId());
+		} else if (StringUtils.isNotBlank(cpe.getEventLabel())) {
+			key = cpe.getEventLabel();
+			existing = getCpe(cpe.getEventLabel());
 		}
 
-		if (!existing.getEventLabel().equals(cpe.getEventLabel())) {
+		if (key == null) {
+			throw OpenSpecimenException.userError(CpeErrorCode.LABEL_REQUIRED);
+		} else if (existing == null) {
+			throw OpenSpecimenException.userError(CpeErrorCode.NOT_FOUND, key, 1);
+		}
+
+		if (!existing.getEventLabel().equalsIgnoreCase(cpe.getEventLabel())) {
 			if (getCpe(cpe.getEventLabel()) != null) {
 				throw OpenSpecimenException.userError(CpeErrorCode.DUP_LABEL, cpe.getEventLabel());
 			}			

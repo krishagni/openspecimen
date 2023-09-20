@@ -46,18 +46,21 @@ public class ExtensionsUtil {
 					}
 				}
 			} else if (attrValue instanceof Map) {
-				Map<String, Object> fcv = (Map<String, Object>) attrValue;
-				if (Objects.equals(fcv.get("defile"), Boolean.TRUE)) {
-					Map<String, String> fileDetail = getFileDetail(filesDir, fcv);
-					if (fileDetail != null) {
-						attr.setValue(fileDetail);
-					}
-				} else if (Objects.equals(fcv.get("signature"), Boolean.TRUE)) {
-					String imageId = getImageId(filesDir, fcv);
-					if (imageId != null) {
-						attr.setValue(imageId);
-					}
-				}
+				uploadFileOrImage(filesDir, attr, (Map<String, Object>) attrValue);
+			}
+		}
+	}
+
+	private static void uploadFileOrImage(String filesDir, ExtensionDetail.AttrDetail attr, Map<String, Object> fcv) {
+		if (Objects.equals(fcv.get("defile"), Boolean.TRUE)) {
+			Map<String, String> fileDetail = getFileDetail(filesDir, fcv);
+			if (fileDetail != null) {
+				attr.setValue(fileDetail);
+			}
+		} else if (Objects.equals(fcv.get("signature"), Boolean.TRUE)) {
+			String imageId = getImageId(filesDir, fcv);
+			if (imageId != null) {
+				attr.setValue(imageId);
 			}
 		}
 	}
