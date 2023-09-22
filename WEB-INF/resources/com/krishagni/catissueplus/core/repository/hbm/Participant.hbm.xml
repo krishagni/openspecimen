@@ -71,46 +71,5 @@
     </set>
     
     <filter name="activeEntity"/>
-
-    <query name="getByUid">
-      from 
-        com.krishagni.catissueplus.core.biospecimen.domain.Participant p
-      where 
-        lower(p.uid) = :uid
-    </query>
- 
-    <query name="getByEmpi">
-      from 
-        com.krishagni.catissueplus.core.biospecimen.domain.Participant p
-      where 
-        lower(p.empi) = :empi
-    </query>
-
-    <query name="getByLnameAndDob">
-      from 
-        com.krishagni.catissueplus.core.biospecimen.domain.Participant p
-      where 
-        lower(p.lastName) = :lname and
-        birthDate between :dobStart and :dobEnd
-    </query>
-
-    <query name="getParticipantIdByUid">
-      select 
-        p.id 
-      from
-        com.krishagni.catissueplus.core.biospecimen.domain.Participant p
-      where 
-        lower(p.uid) = :uid
-    </query>
-
-    <query name="getPmiIdBySiteMrn">
-      select 
-        pmi.id 
-      from
-        com.krishagni.catissueplus.core.biospecimen.domain.ParticipantMedicalIdentifier pmi
-      where 
-        lower(pmi.site.name) = :siteName and
-        lower(pmi.medicalRecordNumber) = :mrn
-    </query>
   </class>
 </hibernate-mapping>

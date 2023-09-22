@@ -234,4 +234,22 @@
       <column name="REQUESTER_COMMENTS" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Function based lower case index on participant UID" dbms="oracle">
+    <createIndex tableName="CATISSUE_PARTICIPANT" indexName="OS_PART_LOWER_UID_IDX">
+      <column name="lower(SOCIAL_SECURITY_NUMBER)" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Function based lower case index on participant eMPI" dbms="oracle">
+    <createIndex tableName="CATISSUE_PARTICIPANT" indexName="OS_PART_LOWER_EMPI_IDX">
+      <column name="lower(EMPI_ID)" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Function based lower case index on participant MRN" dbms="oracle">
+    <createIndex tableName="CATISSUE_PART_MEDICAL_ID" indexName="OS_PMI_LOWER_MRN_IDX">
+      <column name="lower(MEDICAL_RECORD_NUMBER)" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

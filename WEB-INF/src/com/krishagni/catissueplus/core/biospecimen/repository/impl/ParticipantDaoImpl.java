@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
+import com.krishagni.catissueplus.core.biospecimen.domain.ParticipantMedicalIdentifier;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.ParticipantDao;
 import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
@@ -22,19 +23,27 @@ import com.krishagni.catissueplus.core.common.repository.SubQuery;
 public class ParticipantDaoImpl extends AbstractDao<Participant> implements ParticipantDao {
 	
 	@Override
-	public Participant getByUid(String uid) {		
-		List<Participant> participants = createNamedQuery(GET_BY_UID, Participant.class)
-			.setParameter("uid", uid.toLowerCase())
-			.list();
-		return participants == null || participants.isEmpty() ? null : participants.iterator().next();
+	public Participant getByUid(String uid) {
+		Criteria<Participant> query = createCriteria(Participant.class, "p");
+		if (isMySQL()) {
+			query.add(query.eq("p.uid", uid));
+		} else {
+			query.add(query.eq(query.lower("p.uid"), uid.toLowerCase()));
+		}
+
+		return query.uniqueResult();
 	}
 	
 	@Override
 	public Participant getByEmpi(String empi) {
-		List<Participant> participants = createNamedQuery(GET_BY_EMPI, Participant.class)
-			.setParameter("empi", empi.toLowerCase())
-			.list();
-		return participants == null || participants.isEmpty() ? null : participants.iterator().next();
+		Criteria<Participant> query = createCriteria(Participant.class, "p");
+		if (isMySQL()) {
+			query.add(query.eq("p.empi", empi));
+		} else {
+			query.add(query.eq(query.lower("p.empi"), empi.toLowerCase()));
+		}
+
+		return query.uniqueResult();
 	}
 
 	@Override
@@ -43,11 +52,14 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 		Date dobStart     = Date.from(zdt.with(LocalTime.MIN).toInstant());
 		Date dobEnd       = Date.from(zdt.with(LocalTime.MAX).toInstant());
 
-		return createNamedQuery(GET_BY_LNAME_AND_DOB, Participant.class)
-			.setParameter("lname", lname.toLowerCase())
-			.setParameter("dobStart", dobStart)
-			.setParameter("dobEnd", dobEnd)
-			.list();
+		Criteria<Participant> query = createCriteria(Participant.class, "p");
+		if (isMySQL()) {
+			query.add(query.eq("p.lastName", lname));
+		} else {
+			query.add(query.eq(query.lower("p.lastName"), lname.toLowerCase()));
+		}
+
+		return query.add(query.between("p.birthDate", dobStart, dobEnd)).list();
 	}
 
 	@Override
@@ -74,19 +86,30 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 	
 	@Override
 	public boolean isUidUnique(String uid) {
-		 return createNamedQuery(GET_PARTICIPANT_ID_BY_UID, Long.class)
-			 .setParameter("uid", uid.toLowerCase())
-			 .list()
-			 .isEmpty();
+		Criteria<Participant> query = createCriteria(Participant.class, "p");
+		if (isMySQL()) {
+			query.add(query.eq("p.uid", uid));
+		} else {
+			query.add(query.eq(query.lower("p.uid"), uid.toLowerCase()));
+		}
+
+		return query.getCount("p.id") == 0L;
 	}
 
 	@Override
 	public boolean isPmiUnique(String siteName, String mrn) {
-		return createNamedQuery(GET_PMI_ID_BY_SITE_MRN, Long.class)
-			.setParameter("siteName", siteName.toLowerCase())
-			.setParameter("mrn", mrn.toLowerCase())
-			.list()
-			.isEmpty();
+		Criteria<ParticipantMedicalIdentifier> query = createCriteria(ParticipantMedicalIdentifier.class, "pmi")
+			.join("pmi.site", "site");
+
+		if (isMySQL()) {
+			query.add(query.eq("site.name", siteName))
+				.add(query.eq("pmi.medicalRecordNumber", mrn));
+		} else {
+			query.add(query.eq(query.lower("site.name"), siteName.toLowerCase()))
+				.add(query.eq(query.lower("pmi.medicalRecordNumber"), mrn.toLowerCase()));
+		}
+
+		return query.getCount("pmi.id") == 0L;
 	}
 	
 	@Override
@@ -124,16 +147,4 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 
 		return added ? query.add(junction) : null;
 	}
-
-	private static final String FQN = Participant.class.getName();
-
-	private static final String GET_PARTICIPANT_ID_BY_UID = FQN + ".getParticipantIdByUid";
-
-	private static final String GET_PMI_ID_BY_SITE_MRN = FQN + ".getPmiIdBySiteMrn";
-	
-	private static final String GET_BY_UID = FQN + ".getByUid";
-	
-	private static final String GET_BY_EMPI = FQN + ".getByEmpi";
-
-	private static final String GET_BY_LNAME_AND_DOB = FQN + ".getByLnameAndDob";
 }
