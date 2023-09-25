@@ -376,6 +376,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			CollectionProtocolDetail detail = req.getPayload();
 
 			CollectionProtocol existingCp = getCollectionProtocol(detail.getId(), null, detail.getShortTitle());
+			detail.setId(existingCp.getId());
+
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(existingCp);
 			CollectionProtocol cp = cpFactory.createCollectionProtocol(detail);
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
