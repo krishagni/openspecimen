@@ -328,6 +328,8 @@
     "closing_event": "Closing Event...",
     "confirm_close_event": "Event '{{eventLabel}}' and its specimen requirements will be closed. Are you sure you want to proceed?",
 
+    "import_cp_json": "Import Collection Protocol (JSON)",
+    "import_bio_data": "Import Biospecimen Data",
     "bulk_import": "Biospecimen Data",
     "bulk_import_biospecimen_obj_jobs": "Import Biospecimen Objects Job List",
     "export": "Export",

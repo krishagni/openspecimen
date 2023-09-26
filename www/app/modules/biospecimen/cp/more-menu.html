@@ -11,14 +11,14 @@
     <li ng-if="cpsCtx.cpCreateAllowed">
       <a ui-sref="cp-import">
         <span class="fa fa-upload"></span>
-        <span translate="cp.self">Collection Protocol</span>
+        <span translate="cp.import_cp_json">Import Collection Protocol (JSON)</span>
       </a>
     </li>
 
     <li ng-if="cpsCtx.participantImportAllowed || cpsCtx.visitSpecimenImportAllowed">
       <a ui-sref="import-multi-cp-objs">
         <span class="fa fa-upload"></span>
-        <span translate="cp.bulk_import">Biospecimen Data</span>
+        <span translate="cp.import_bio_data">Import Biospecimen Data</span>
       </a>
     </li>
 

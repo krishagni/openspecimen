@@ -594,15 +594,15 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 			return;
 		}
 
+		if (input.getConsentsSource() == null) {
+			return;
+		}
+
 		result.setConsentsWaived(Boolean.TRUE.equals(input.getConsentsWaived()));
 		result.setVisitLevelConsents(Boolean.TRUE.equals(input.getVisitLevelConsents()));
 		if (Boolean.TRUE.equals(result.getVisitLevelConsents())) {
 			result.setConsentsSource(null);
 			ose.addError(CpErrorCode.VISIT_CONSENTS_ENABLED, result.getShortTitle());
-			return;
-		}
-
-		if (input.getConsentsSource() == null) {
 			return;
 		}
 
