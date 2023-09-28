@@ -122,6 +122,7 @@
       "generate": "Generate",
       "help":   "Help",
       "import": "Import",
+      "lookup": "Lookup",
       "more":   "More",
       "next":   "Next",
       "no":     "No",

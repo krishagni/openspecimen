@@ -4,13 +4,17 @@
     <table class="os-table">
       <thead>
         <tr>
+          <th v-if="readOnly && selectionMode == 'radio'">
+            <span>&nbsp;</span>
+          </th>
           <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" @click="sort(field)">
             <span v-if="field.displayLabel">{{field.displayLabel}}</span>
             <div v-else-if="field.icon" v-os-tooltip="field.tooltip"
               :class="{'align-icon': field.enableCopyFirstToAll && field.type == 'booleanCheckbox'}">
               <os-icon :name="field.icon" />
             </div>
-            <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
+            <span class="required-indicator" v-show="!readOnly && field.required"
+              v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
             <span v-if="field.tooltip && field.label">
@@ -48,6 +52,11 @@
         </tr>
 
         <tr v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
+          <td v-if="readOnly && selectionMode == 'radio'">
+            <RadioButton name="rowSelection" :value="itemIdx" v-model="ctx.selectedIdx"
+              @click="toggleSelection(itemIdx)" />
+          </td>
+
           <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
             <div :style="field.uiStyle">
               <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
@@ -79,6 +88,12 @@
       </tbody>
     </table>
 
+    <div v-if="requireSelection && ctx.showSelectRowError && !(ctx.selectedIdx >= 0)">
+      <os-message type="error">
+        <slot name="selectRowErrorMessage" />
+      </os-message>
+    </div>
+
     <os-divider v-if="$slots.default && $slots.default().length > 0" />
 
     <div class="buttons">
@@ -92,14 +107,20 @@
 import { reactive, watchEffect } from 'vue';
 import useVuelidate from '@vuelidate/core'
 
+import RadioButton from 'primevue/radiobutton';
+
 import alertSvc from '@/common/services/Alerts.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 
 export default {
-  props: ['schema', 'data', 'items', 'tab-direction', 'removeItems', 'copyItems'],
+  props: ['schema', 'data', 'items', 'tab-direction', 'removeItems', 'copyItems', 'readOnly', 'selectionMode', 'requireSelection'],
 
-  emits: ['input', 'form-validity', 'remove-item', 'copy-item'],
+  emits: ['input', 'form-validity', 'remove-item', 'copy-item', 'item-selected'],
+
+  components: {
+    RadioButton
+  },
 
   setup(props) {
     const ctx = reactive({
@@ -138,9 +159,13 @@ export default {
         }
 
         if (!field.component) {
-          let component = fieldFactory.getComponent(field.type);
+          let component = fieldFactory.getComponent(this.readOnly ? 'span' : field.type);
           if (component) {
             field = Object.assign({...field, component: component});
+          }
+
+          if (this.readOnly) {
+            field.displayType = field.displayType || field.type
           }
         }
 
@@ -240,7 +265,7 @@ export default {
   },
 
   validations() {
-    if (!this.itemModels) {
+    if (!this.itemModels || this.readOnly) {
       return {itemModels: []};
     }
 
@@ -273,6 +298,16 @@ export default {
     },
 
     validate: function() {
+      if (this.readOnly && this.selectionMode == 'radio' && this.requireSelection) {
+        this.ctx.showSelectRowError = true;
+        if (this.ctx.selectedIdx >= 0) {
+          return true;
+        }
+
+        alertSvc.error({code: 'common.form_validation_error'});
+        return false;
+      }
+
       this.v$.$touch();
 
       let invalid = this.v$.$invalid;
@@ -397,6 +432,22 @@ export default {
 
         this.ctx.selects[field.name] = this.itemModels.every(item => item[field.name] == true);
       }
+    },
+
+    toggleSelection: function(itemIdx) {
+      this.$emit('item-selected', {index: itemIdx});
+    },
+
+    clearSelection: function() {
+      this.ctx.selectedIdx = -1;
+    },
+
+    getSelection: function() {
+      if (this.ctx.selectedIdx >= 0) {
+        return this.items[this.ctx.selectedIdx];
+      }
+
+      return null;
     },
 
     getViewState() {

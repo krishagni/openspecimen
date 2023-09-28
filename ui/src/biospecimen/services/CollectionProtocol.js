@@ -5,6 +5,10 @@ class CollectionProtocol {
 
   workflows = {};
 
+  async getCpById(cpId) {
+    return http.get('collection-protocols/' + cpId);
+  }
+
   async getCps(filterOpts) {
     return http.get('collection-protocols', filterOpts || {});
   }

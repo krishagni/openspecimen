@@ -50,6 +50,9 @@ export default {
 
         case 'datetime':
           return this._getDate(this.inputValue, true);
+
+        case 'multiselect':
+          return (this.inputValue || []).join(', ');
       }
 
       if (this.customField) {

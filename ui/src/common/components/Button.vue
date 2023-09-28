@@ -21,10 +21,14 @@ export default {
     buttonClass: function() {
       let kls = this.size == 'small' ? 'btn btn-xs' : 'btn';
 
-      const types = ['primary', 'secondary', 'danger', 'text'];
-      for (const type of types) {
-        if (Object.prototype.hasOwnProperty.call(this.$attrs, type)) {
-          kls += ' ' + type;
+      if (this.$attrs.type) {
+        kls += ' ' + this.$attrs.type;
+      } else {
+        const types = ['primary', 'secondary', 'danger', 'text'];
+        for (const type of types) {
+          if (Object.prototype.hasOwnProperty.call(this.$attrs, type)) {
+            kls += ' ' + type;
+          }
         }
       }
 
