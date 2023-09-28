@@ -180,7 +180,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	public ResponseEvent<CollectionProtocolRegistrationDetail> getRegistration(RequestEvent<RegistrationQueryCriteria> req) {				
 		try {			
 			RegistrationQueryCriteria crit = req.getPayload();
-			CollectionProtocolRegistration cpr = getCpr(crit.getCprId(), crit.getCpId(), crit.getPpid());
+			CollectionProtocolRegistration cpr = getCpr(crit.getCprId(), crit.getCpId(), crit.getCpShortTitle(), crit.getPpid());
 			boolean allowPhiAccess = AccessCtrlMgr.getInstance().ensureReadCprRights(cpr);
 
 			List<CollectionProtocolRegistration> otherCprs = getOtherCprs(cpr);
