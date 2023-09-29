@@ -745,7 +745,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		} else {
 			classPv = getPv(SPECIMEN_CLASS, specimenClass, false);
 			if (classPv == null) {
-				ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_CLASS);
+				ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_CLASS, specimenClass);
 			}
 		}
 		
@@ -780,8 +780,13 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 
 		PermissibleValue typePv = getPv(SPECIMEN_CLASS, detail.getSpecimenClass(), type);
-		if (typePv == null) {
-			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE);
+		if (typePv == null || typePv.getParent() == null) {
+			String args = type;
+			if (StringUtils.isNotBlank(detail.getSpecimenClass())) {
+				args = detail.getSpecimenClass() + ": " + type;
+			}
+
+			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE, args);
 			return;
 		}
 		

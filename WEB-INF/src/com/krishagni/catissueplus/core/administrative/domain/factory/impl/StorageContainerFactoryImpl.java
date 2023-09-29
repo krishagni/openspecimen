@@ -796,7 +796,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		List<PermissibleValue> classPvs = daoFactory.getPermissibleValueDao()
 			.getPvs(SPECIMEN_CLASS, allowedSpecimenClasses);
 		if (classPvs.size() != allowedSpecimenClasses.size()) {
-			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_CLASS);
+			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_CLASS, String.join(", ", allowedSpecimenClasses));
 			return;
 		}
 
@@ -820,13 +820,13 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 		List<PermissibleValue> typePvs = daoFactory.getPermissibleValueDao()
 			.getPvs(SPECIMEN_CLASS, allowedSpecimenTypes);
 		if (typePvs.size() != allowedSpecimenTypes.size()) {
-			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE);
+			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE, String.join(", ", allowedSpecimenTypes));
 			return;
 		}
 
 		for (PermissibleValue typePv : typePvs) {
 			if (typePv.getParent() == null) {
-				ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE);
+				ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE, typePv.getValue());
 				return;
 			}
 		}

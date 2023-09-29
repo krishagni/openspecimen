@@ -114,8 +114,8 @@ public class DpRequirementFactoryImpl implements DpRequirementFactory {
 		}
 
 		PermissibleValue typePv = getPv(SPECIMEN_CLASS, detail.getSpecimenType(), false);
-		if (typePv == null) {
-			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE);
+		if (typePv == null || typePv.getParent() == null) {
+			ose.addError(SpecimenErrorCode.INVALID_SPECIMEN_TYPE, detail.getSpecimenType());
 			return;
 		}
 		
