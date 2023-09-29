@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.hibernate.envers.RelationTargetAuditMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
@@ -19,9 +21,11 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.repository.DaoFactory;
 
 import edu.common.dynamicextensions.query.QuerySpace;
 
+@Configurable
 @Audited
 public class SavedQuery extends BaseEntity {
 	private String title;
@@ -73,6 +77,10 @@ public class SavedQuery extends BaseEntity {
 	private boolean caseSensitive = true;
 
 	private Date deletedOn;
+
+	@Autowired
+	@JsonIgnore
+	private DaoFactory daoFactory;
 
 	public String getTitle() {
 		return title;
@@ -422,6 +430,20 @@ public class SavedQuery extends BaseEntity {
 		copy.setQueryDefJson(getQueryDefJson(true), true);
 		copy.selectList = curateSelectList(copy.selectList);
 		return copy;
+	}
+
+	public boolean canUpdateOrDelete(User user) {
+		if (user == null) {
+			return false;
+		} else if (user.isAdmin()) {
+			return true;
+		} else if (user.isInstituteAdmin()) {
+			return getCreatedBy() != null && user.getInstitute().equals(getCreatedBy().getInstitute());
+		} else if (user.equals(getCreatedBy())) {
+			return true;
+		} else {
+			return daoFactory.getSavedQueryDao().isQuerySharedWithUser(getId(), user.getId());
+		}
 	}
 
 	@Override

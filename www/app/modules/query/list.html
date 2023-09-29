@@ -180,7 +180,12 @@
     <div class="os-table-body os-query-folders">
       <div class="row">
         <div class="col col-xs-12 folder" ng-class="{'os-query-selected-folder': !folders.selectedFolder}">
-          <div ng-click="selectFolder(undefined)" translate="queries.all">All</div>
+          <div ng-click="selectFolder(undefined)" translate="queries.my_queries">My Queries</div>
+        </div>
+      </div>
+      <div class="row" ng-if="currentUser.admin || currentUser.instituteAdmin">
+        <div class="col col-xs-12 folder" ng-class="{'os-query-selected-folder': folders.selectedFolder.id <= 0}">
+          <div ng-click="selectFolder({id: -1})" translate="queries.all_queries">All Queries</div>
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Conjunction;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
@@ -169,17 +170,30 @@ public class SavedQueryDaoImpl extends AbstractDao<SavedQuery> implements SavedQ
 	private Criteria<Object[]> getSavedQueriesListQuery(ListSavedQueriesCriteria crit) {
 		Criteria<Object[]> query = createCriteria(SavedQuery.class, Object[].class, "s");
 		query.join("s.createdBy", "c")
+			.join("c.institute", "i")
 			.leftJoin("s.folders", "f")
 			.leftJoin("f.sharedWith", "su")
 			.leftJoin("f.sharedWithGroups", "sg")
 			.leftJoin("sg.users", "gu")
-			.add(query.isNull("s.deletedOn"))
-			.add(query.disjunction()
-				.add(query.eq("f.sharedWithAll", true))
-				.add(query.eq("c.id", crit.userId()))
-				.add(query.eq("su.id", crit.userId()))
-				.add(query.eq("gu.id", crit.userId()))
+			.add(query.isNull("s.deletedOn"));
+
+		if (crit.userId() != null) {
+			Conjunction creatorCond = query.conjunction();
+			creatorCond.add(query.eq("c.id", crit.userId()));
+			if (crit.instituteId() != null) {
+				creatorCond.add(query.eq("i.id", crit.instituteId()));
+			}
+
+			query.add(
+				query.disjunction()
+					.add(query.eq("f.sharedWithAll", true))
+					.add(creatorCond)
+					.add(query.eq("su.id", crit.userId()))
+					.add(query.eq("gu.id", crit.userId()))
 			);
+		} else if (crit.instituteId() != null) {
+			query.add(query.eq("i.id", crit.instituteId()));
+		}
 
 		addCpCondition(query, crit.cpId());
 		addSearchConditions(query, crit.query());

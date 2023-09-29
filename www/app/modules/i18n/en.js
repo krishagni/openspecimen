@@ -2055,6 +2055,8 @@
     "delete": "Delete",
 
     "all": "All",
+    "all_queries": "All Queries",
+    "my_queries": "My Queries",
     "all_current_n_future_users": "All Current and Future Users",
     "folders": "Folders",
     "my_folders": "My Folders",

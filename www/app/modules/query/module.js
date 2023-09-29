@@ -65,6 +65,10 @@ angular.module('os.query',
 
          folder: function($stateParams, folders) {
            if (!!$stateParams.folderId) {
+             if ($stateParams.folderId <= 0) {
+               return {id: -1}; // all queries
+             }
+
              return folders.find(function(folder) { return folder.id == $stateParams.folderId; });
            }
 

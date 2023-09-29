@@ -245,12 +245,23 @@ public class QueryServiceImpl implements QueryService {
 			if (crit.startAt() < 0 || crit.maxResults() <= 0) {
 				return ResponseEvent.userError(SavedQueryErrorCode.INVALID_PAGINATION_FILTER);
 			}
+			User user = AuthUtil.getCurrentUser();
+			if (user == null) {
+				return ResponseEvent.response(SavedQueriesList.create(Collections.emptyList(), 0L));
+			}
 
-			crit.userId(AuthUtil.getCurrentUser().getId());
+			if (user.isAdmin()) {
+				crit.instituteId(null);
+			} else if (user.isInstituteAdmin()) {
+				crit.instituteId(crit.instituteId());
+			} else {
+				crit.userId(user.getId());
+				crit.instituteId(user.getInstitute().getId());
+			}
 
 			List<SavedQuerySummary> queries = new ArrayList<>();
 			if (crit.orderByStarred()) {
-				List<Long> queryIds = starredItemSvc.getItemIds(getObjectName(), AuthUtil.getCurrentUser().getId());
+				List<Long> queryIds = starredItemSvc.getItemIds(getObjectName(), user.getId());
 				if (!queryIds.isEmpty()) {
 					crit.ids(queryIds);
 					queries.addAll(daoFactory.getSavedQueryDao().getQueries(crit));
@@ -284,7 +295,20 @@ public class QueryServiceImpl implements QueryService {
 			ensureReadRights();
 
 			ListSavedQueriesCriteria crit = req.getPayload();
-			crit.userId(AuthUtil.getCurrentUser().getId());
+			User user = AuthUtil.getCurrentUser();
+			if (user == null) {
+				return ResponseEvent.response(0L);
+			}
+
+			if (user.isAdmin()) {
+				crit.instituteId(null);
+			} else if (user.isInstituteAdmin()) {
+				crit.instituteId(crit.instituteId());
+			} else {
+				crit.userId(user.getId());
+				crit.instituteId(user.getInstitute().getId());
+			}
+
 			Long count = daoFactory.getSavedQueryDao().getQueriesCount(crit.ids(null).notInIds(null));
 			return ResponseEvent.response(count);
 		} catch (OpenSpecimenException ose) {
@@ -368,19 +392,17 @@ public class QueryServiceImpl implements QueryService {
 			}
 			
 			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !existing.getCreatedBy().equals(user)) {
+			if (!existing.canUpdateOrDelete(user)) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
-			
+
 			existing.update(savedQuery);
 			daoFactory.getSavedQueryDao().saveOrUpdate(existing);	
 			return ResponseEvent.response(SavedQueryDetail.fromSavedQuery(existing));
-		} catch (QueryParserException qpe) {
+		} catch (QueryParserException | IllegalArgumentException qpe) {
 			return ResponseEvent.userError(SavedQueryErrorCode.MALFORMED, qpe.getMessage());
 		} catch (QueryException qe) {
 			return ResponseEvent.userError(getErrorCode(qe.getErrorCode()), qe.getMessage());
-		} catch (IllegalArgumentException iae) {
-			return ResponseEvent.userError(SavedQueryErrorCode.MALFORMED, iae.getMessage());
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -401,7 +423,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 
 			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !query.getCreatedBy().equals(user)) {
+			if (!query.canUpdateOrDelete(user)) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 
@@ -1039,11 +1061,10 @@ public class QueryServiceImpl implements QueryService {
 			}
 			
 			User user = AuthUtil.getCurrentUser();
-			if (!query.getCreatedBy().equals(user) && 
-					!queryDao.isQuerySharedWithUser(queryId, user.getId())) {
+			if (!query.canUpdateOrDelete(user)) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
-			
+
 			String queryDef = query.getQueryDefJson(true);
 			return ResponseEvent.response(queryDef);			
 		} catch (Exception e) {

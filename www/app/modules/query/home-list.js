@@ -1,6 +1,6 @@
 
 angular.module('os.query')
-  .controller('HomeQueryListCtrl', function($scope, SavedQuery) {
+  .controller('HomeQueryListCtrl', function($scope, AuthorizationService, SavedQuery) {
     var ctx;
 
     function init(opts) {
@@ -18,7 +18,8 @@ angular.module('os.query')
         return;
       }
 
-      SavedQuery.query({searchString: searchTerm, orderByStarred: true, max: 25}).then(
+      var userId = AuthorizationService.currentUser().id;
+      SavedQuery.query({searchString: searchTerm, orderByStarred: true, userId: userId, max: 25}).then(
         function(queries) {
           ctx.queries = queries;
           if (!searchTerm) {

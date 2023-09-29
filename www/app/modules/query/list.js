@@ -23,7 +23,13 @@ angular.module('os.query.list', ['os.query.models'])
 
     function loadQueries(filterOpts) {
       $scope.selectedQueries = [];
-      if (!$scope.folders.selectedFolder) {
+      if (!$scope.folders.selectedFolder || $scope.folders.selectedFolder.id <= 0) {
+        if (!$scope.folders.selectedFolder) {
+          filterOpts.userId = currentUser.id;
+        } else {
+          filterOpts.userId = null;
+        }
+
         $scope.queryList = SavedQuery.list(filterOpts);
       } else {
         $scope.queryList = $scope.folders.selectedFolder.getQueries(filterOpts);
@@ -99,7 +105,7 @@ angular.module('os.query.list', ['os.query.models'])
      */
     $scope.selectFolder = function(folder, force) {
       var opts = (force && {reload: true}) || {};
-      $state.go('query-list', {folderId: (folder && folder.id) || -1}, opts);
+      $state.go('query-list', {folderId: folder && folder.id}, opts);
     };
 
     $scope.addSelectedQueriesToFolder = function(folder) {

@@ -60,6 +60,9 @@ public class SavedQueriesController {
 		@RequestParam(value = "cpId", required = false)
 		Long cpId,
 
+		@RequestParam(value = "userId", required = false)
+		Long userId,
+
 		@RequestParam(value = "searchString", required = false, defaultValue = "")
 		String searchString,
 
@@ -80,6 +83,7 @@ public class SavedQueriesController {
 		
 		ListSavedQueriesCriteria crit = new ListSavedQueriesCriteria()
 			.cpId(cpId)
+			.userId(userId)
 			.query(searchString)
 			.countReq(countReq)
 			.orderByStarred(orderByStarred)
@@ -96,11 +100,15 @@ public class SavedQueriesController {
 		@RequestParam(value = "cpId", required = false)
 		Long cpId,
 
+		@RequestParam(value = "userId", required = false)
+		Long userId,
+
 		@RequestParam(value = "searchString", required = false, defaultValue = "")
 		String searchString) {
 
 		ListSavedQueriesCriteria crit = new ListSavedQueriesCriteria()
 			.cpId(cpId)
+			.userId(userId)
 			.query(searchString);
 		Long count = response(querySvc.getSavedQueriesCount(request(crit)));
 		return Collections.singletonMap("count", count);

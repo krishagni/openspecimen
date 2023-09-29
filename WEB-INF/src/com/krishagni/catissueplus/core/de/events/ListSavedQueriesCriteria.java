@@ -9,6 +9,8 @@ public class ListSavedQueriesCriteria extends AbstractListCriteria<ListSavedQuer
 
 	private Long userId;
 
+	private Long instituteId;
+
 	public Long cpId() {
 		return cpId;
 	}
@@ -33,6 +35,15 @@ public class ListSavedQueriesCriteria extends AbstractListCriteria<ListSavedQuer
 
 	public ListSavedQueriesCriteria userId(Long userId) {
 		this.userId = userId;
+		return self();
+	}
+
+	public Long instituteId() {
+		return instituteId;
+	}
+
+	public ListSavedQueriesCriteria instituteId(Long instituteId) {
+		this.instituteId = instituteId;
 		return self();
 	}
 
