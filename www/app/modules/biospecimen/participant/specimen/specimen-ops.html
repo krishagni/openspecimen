@@ -47,7 +47,7 @@
         <span translate="specimen_list.ship">Ship</span>
       </a>
     </li>
-    <li ng-if="notCoordinatOrStoreAllowed" show-if-allowed="resourceOpts.specimenUpdateOpts">
+    <li ng-if="notCoordinatOrStoreAllowed && recvSpmnsWfId > 0" show-if-allowed="resourceOpts.specimenUpdateOpts">
       <a ng-click="receiveSpecimens()">
         <span class="fa fa-check-square-o"></span>
         <span translate="specimen_list.receive">Receive</span>

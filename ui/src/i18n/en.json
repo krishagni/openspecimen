@@ -1021,6 +1021,7 @@
     "not_stored": "Not Stored",
     "ppid": "PPID",
     "quantity": "Quantity",
+    "receive_wf_not_configured": "Receive specimens workflow is not configured.",
     "type": "Type"
   },
 

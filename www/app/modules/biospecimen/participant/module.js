@@ -82,7 +82,11 @@ angular.module('os.biospecimen.participant',
             return CollectionProtocol.getById($stateParams.cpId);
           },
 
-          cpViewCtx: function($q, $injector, cp, currentUser, authInit, AuthorizationService) {
+          receiveSpecimensWfId: function(CpConfigSvc) {
+            return CpConfigSvc.getCommonCfg(-1, 'receiveSpecimensWorkflow');
+          },
+
+          cpViewCtx: function($q, $injector, cp, currentUser, authInit, receiveSpecimensWfId, AuthorizationService) {
             var participantUpdateAllowed = AuthorizationService.isAllowed({
               resource: 'ParticipantPhi',
               operations: ['Update'],
@@ -179,6 +183,7 @@ angular.module('os.biospecimen.participant',
               consentsEximAllowed: consentsEximAllowed,
               visitLevelConsents: cp.visitLevelConsents == true && $injector.has('ecCpDocument'),
               queryReadAllowed: queryReadAllowed,
+              recvSpmnsWfId: receiveSpecimensWfId,
               getSurveys: function() {
                 if (surveys || !$injector.has('Survey')) {
                   var q = $q.defer();
@@ -292,7 +297,7 @@ angular.module('os.biospecimen.participant',
       })
       .state('cp-list-view-root', {
         templateUrl: 'modules/biospecimen/participant/list-view.html',
-        controller: function($scope, $state, cp, cpViewCtx, defSopDoc, defSopUrl, spmnListCfg, Alerts) {
+        controller: function($scope, $state, cp, cpViewCtx, defSopDoc, defSopUrl, spmnListCfg, VueApp, Alerts) {
           var ctx = $scope.listViewCtx = {
             sopDocDownloadUrl: cp.getSopDocDownloadUrl(),
             spmnListCfg: spmnListCfg,
@@ -324,7 +329,7 @@ angular.module('os.biospecimen.participant',
           }
 
           $scope.receiveSpecimens = function() {
-            $state.go('receive-specimens', {event: 'SpecimenReceivedEvent'});
+            VueApp.setVueView('task-manager/workflows/' + cpViewCtx.recvSpmnsWfId + '/create-instance');
           }
         },
         resolve: {

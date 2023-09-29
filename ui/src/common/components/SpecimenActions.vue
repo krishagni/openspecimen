@@ -59,6 +59,7 @@
 
 <script>
 
+import cpSvc       from '@/biospecimen/services/CollectionProtocol.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import alertsSvc   from '@/common/services/Alerts.js';
 import authSvc     from '@/common/services/Authorization.js';
@@ -250,6 +251,9 @@ export default {
         this.ctx.isDistAllowed = true;
       }
     }
+
+    cpSvc.getWorkflowProperty(-1, 'common', 'receiveSpecimensWorkflow')
+      .then(wfId => this.ctx.recvSpmnsWfId = wfId);
   },
 
   computed: {
@@ -304,7 +308,7 @@ export default {
         options.push({ icon: 'paper-plane', caption: i18n('common.specimen_actions.ship'), onSelect: () => this.shipSpecimens() });
       }
 
-      if (isSpmnUpdateAllowed && !this.ctx.isCoordinator) {
+      if (isSpmnUpdateAllowed && !this.ctx.isCoordinator && this.ctx.recvSpmnsWfId > 0) {
         options.push({ icon: 'check-square', caption: i18n('common.specimen_actions.receive'), onSelect: () => this.receiveSpecimens() });
       }
 
@@ -453,39 +457,26 @@ export default {
     },
 
     receiveSpecimens: async function() {
+      if (!(this.ctx.recvSpmnsWfId > 0)) {
+        alertsSvc.error({code: 'specimens.receive_wf_not_configured'});
+        return;
+      }
+
       const specimens = this.specimens;
       if (!specimens || specimens.length == 0) {
-        routerSvc.ngGoto('receive-specimens');
+        routerSvc.goto('tmWorkflowCreateInstance', {workflowId: this.ctx.recvSpmnsWfId});
         return;
       }
 
-      const ids = specimens.map(spmn => spmn.id);
-      const dbSpmns = await specimenSvc.getByIds(ids, true);
-
-      const nonPrimarySpmns = dbSpmns.filter(spmn => spmn.lineage != 'New');
-      if (nonPrimarySpmns.length > 0) {
-        this.showError('common.specimen_actions.not_primary', nonPrimarySpmns);
-        return;
-      }
-
-      const ncSpmns = dbSpmns.filter(spmn => spmn.status != 'Collected');
-      if (ncSpmns.length > 0) {
-        this.showError('common.specimen_actions.not_collected', ncSpmns);
-        return;
-      }
-
-      const rcvdSpmns = dbSpmns.filter(spmn => spmn.receivedEvent.receivedQuality != 'To be Received');
-      if (rcvdSpmns.length > 0) {
-        this.showError('common.specimen_actions.already_received', rcvdSpmns);
-        return;
-      }
-
-      for (let spmn of dbSpmns) {
-        extnsUtil.createExtensionFieldMap(spmn, true);
-      }
-
-      itemsSvc.ngSetItems('specimens', dbSpmns);
-      routerSvc.ngGoto('receive-specimens');
+      const payload = {
+        workflow: {id: this.ctx.recvSpmnsWfId},
+        inputItems: specimens.map(specimen => ({specimen: {id: specimen.id}}))
+      };
+      http.post('workflow-instances', payload).then(
+        (instance) => {
+          routerSvc.goto('tmWorkflowInstance', {wfInstanceId: instance.id});
+        }
+      );
     },
 
     poolSpecimens: async function() {

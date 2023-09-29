@@ -1,8 +1,8 @@
 angular.module('os.biospecimen.specimen')
   .directive('osSpecimenOps', function(
-    $state, $rootScope, $modal, $q, $window, Util, DistributionProtocol, DistributionOrder, Specimen, ExtensionsUtil,
-    SpecimensHolder, Alerts, DeleteUtil, SpecimenLabelPrinter, ParticipantSpecimensViewState,
-    AuthorizationService, SettingUtil) {
+    $state, $rootScope, $modal, $q, $window, $injector, Util, DistributionProtocol, DistributionOrder,
+    Specimen, ExtensionsUtil, SpecimensHolder, Alerts, DeleteUtil, SpecimenLabelPrinter, ParticipantSpecimensViewState,
+    AuthorizationService, SettingUtil, CpConfigSvc, VueApp) {
 
     var SPMN_TBR = 'To be Received';
 
@@ -63,6 +63,13 @@ angular.module('os.biospecimen.specimen')
           }
         };
       }
+
+      scope.recvSpmnsWfId = -1;
+      CpConfigSvc.getCommonCfg(-1, 'receiveSpecimensWorkflow').then(
+        function(wfId) {
+          scope.recvSpmnsWfId = wfId;
+        }
+      );
 
       initAllowSpecimenTransfers(scope);
       initAllowDistribution(scope);
@@ -498,33 +505,29 @@ angular.module('os.biospecimen.specimen')
         }
 
         scope.receiveSpecimens = function() {
+          if (!(scope.recvSpmnsWfId > 0)) {
+            Alerts.error('specimens.receive_wf_not_configured');
+            return;
+          }
+
+          if (!$injector.has('WorkflowInstance')) {
+            alert('Workflow module is not installed!');
+            return;
+          }
+
           var selectedSpmns = scope.specimens();
           if (!selectedSpmns || selectedSpmns.length == 0) {
-            $state.go('receive-specimens', {event: 'SpecimenReceivedEvent'});
+            VueApp.setVueView('task-manager/workflows/' + scope.recvSpmnsWfId + '/create-instance');
             return;
           }
 
           var specimenIds = selectedSpmns.map(function(spmn) {return spmn.id});
-          Specimen.getByIds(specimenIds, true).then(
-            function(spmns) {
-              var nonPrimarySpmns = spmns.filter(function(spmn) { return spmn.lineage != 'New'; });
-              if (nonPrimarySpmns.length > 0) {
-                return showError('specimens.non_primary_receive_na', nonPrimarySpmns);
-              }
+          var inputItems = selectedSpmns.map(function(spmn) { return {specimen: spmn}; });
 
-              var ncSpmns = spmns.filter(function(spmn) { return spmn.status != 'Collected'; });
-              if (ncSpmns.length > 0) {
-                return showError('specimens.not_collected', ncSpmns);
-              }
-
-              var rcvdSpmns = spmns.filter(function(spmn) { return spmn.receivedEvent.receivedQuality != SPMN_TBR; });
-              if (rcvdSpmns.length > 0) {
-                return showError('specimens.already_received', rcvdSpmns);
-              }
-
-              angular.forEach(spmns, function(spmn) { ExtensionsUtil.createExtensionFieldMap(spmn, true); });
-              SpecimensHolder.setSpecimens(spmns);
-              $state.go('receive-specimens', {event: 'SpecimenReceivedEvent'});
+          var wfInstance = $injector.get('WorkflowInstance');
+          new wfInstance({workflow: {id: scope.recvSpmnsWfId}, inputItems: inputItems}).$saveOrUpdate().then(
+            function(instance) {
+              VueApp.setVueView('task-manager/instances/' + instance.id);
             }
           );
         }

@@ -814,29 +814,6 @@ angular.module('os.biospecimen.specimen',
         },
         parent: 'signed-in'
       })
-      .state('receive-specimens', {
-        url: '/receive-specimens',
-        templateUrl: 'modules/biospecimen/participant/specimen/bulk-add-event.html',
-        controller: 'BulkAddEventCtrl',
-        resolve: {
-          events: function(CollectionProtocol) {
-            return new CollectionProtocol({id: -1}).getForms(['SpecimenEvent']);
-          },
-
-          event: function(events) {
-            return events.find(function(event) { return event.name == 'SpecimenReceivedEvent'; });
-          },
-
-          acceptablePv: function(PvManager) {
-            return PvManager.loadPvs('receive_quality', 'Acceptable', function(pv) { return pv; }).then(
-              function(pvs) {
-                return pvs.find(function(pv) { return pv.value == 'Acceptable'; });
-              }
-            );
-          }
-        },
-        parent: 'signed-in'
-      })
       .state('specimen-search', {
         url: '/specimen-search',
         templateUrl: 'modules/biospecimen/participant/specimen/search-result.html',

@@ -1001,6 +1001,7 @@
 
     "received_or_not_found": "Specimen {{label}} is either received or does not exist.",
     "m_received_or_not_found": "Specimens {{label}} are either received or do not exist.",
+    "receive_wf_not_configured": "Receive specimens workflow is not configured.",
 
     "rerun_auto_allocation_q": "Rerun container auto allocation?",
     "rerun_auto_allocation": "Specimens were either added or removed or their status changed. Do you want to rerun the container auto allocation?",
