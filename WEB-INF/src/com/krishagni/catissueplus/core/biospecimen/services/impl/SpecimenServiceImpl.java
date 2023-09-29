@@ -932,7 +932,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			}
 			
 			if (!labelGenerator.validate(labelTmpl, specimen, label)) {
-				ose.addError(SpecimenErrorCode.INVALID_LABEL, label);
+				ose.addError(SpecimenErrorCode.INVALID_LABEL, label, labelTmpl);
 				return;
 			}
 		}
