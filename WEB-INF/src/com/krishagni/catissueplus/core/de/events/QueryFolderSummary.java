@@ -3,8 +3,10 @@ package com.krishagni.catissueplus.core.de.events;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.QueryFolder;
 
 public class QueryFolderSummary {
@@ -15,6 +17,8 @@ public class QueryFolderSummary {
 	private UserSummary owner;
 	
 	private boolean sharedWithAll;
+
+	private boolean allowEditsBySharedUsers;
 
 	public Long getId() {
 		return id;
@@ -48,20 +52,25 @@ public class QueryFolderSummary {
 		this.sharedWithAll = sharedWithAll;
 	}
 
+	public boolean isAllowEditsBySharedUsers() {
+		return allowEditsBySharedUsers;
+	}
+
+	public void setAllowEditsBySharedUsers(boolean allowEditsBySharedUsers) {
+		this.allowEditsBySharedUsers = allowEditsBySharedUsers;
+	}
+
 	public static QueryFolderSummary from(QueryFolder queryFolder){
 		QueryFolderSummary folderSummary = new QueryFolderSummary();
 		folderSummary.setId(queryFolder.getId());
 		folderSummary.setName(queryFolder.getName());
 		folderSummary.setOwner(UserSummary.from(queryFolder.getOwner()));
-		folderSummary.setSharedWithAll(queryFolder.getSharedWithAll());
+		folderSummary.setSharedWithAll(queryFolder.isSharedWithAll());
+		folderSummary.setAllowEditsBySharedUsers(queryFolder.isAllowEditsBySharedUsers());
 		return folderSummary;
 	}
 	
 	public static List<QueryFolderSummary> from(Collection<QueryFolder> folders) {
-		List<QueryFolderSummary> result = new ArrayList<QueryFolderSummary>();
-		for (QueryFolder folder : folders) {
-			result.add(QueryFolderSummary.from(folder));
-		}
-		return result;
+		return Utility.nullSafeStream(folders).map(QueryFolderSummary::from).collect(Collectors.toList());
 	}
 }

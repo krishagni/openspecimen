@@ -1,15 +1,19 @@
-<div class="os-search">
-  <div class="os-head">
-    <h3 class="os-title">
-      <span translate="queries.filter.title">Query Filter</span>
-    </h3>
+<div>
+  <div class="os-search">
+    <div class="os-head">
+      <h3 class="os-title">
+        <span translate="queries.filter.title">Query Filter</span>
+      </h3>
+    </div>
+
+    <div class="os-body">
+      <div class="form-group">
+        <input os-md-input type="text" ng-model="filterOpts.searchString" class="form-control"
+          placeholder="{{'queries.filter.id_or_title' | translate}}">
+      </div>
+      <os-clear-filters opts="filterOpts"></os-clear-filters>
+    </div>
   </div>
 
-  <div class="os-body">
-    <div class="form-group">
-      <input os-md-input type="text" ng-model="filterOpts.searchString" class="form-control"
-        placeholder="{{'queries.filter.id_or_title' | translate}}">
-    </div>
-    <os-clear-filters opts="filterOpts"></os-clear-filters>
-  </div>
+  <os-list-page-size opts="pagerOpts" on-change="pageSizeChanged()"></os-list-page-size>
 </div>

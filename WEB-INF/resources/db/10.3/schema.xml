@@ -252,4 +252,10 @@
       <column name="lower(MEDICAL_RECORD_NUMBER)" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Query folder edit setting">
+    <addColumn tableName="CATISSUE_QUERY_FOLDERS">
+      <column name="ALLOW_EDITS_BY_SHARED_USERS" type="${boolean.type}" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

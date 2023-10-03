@@ -68,7 +68,7 @@ angular.module('openspecimen')
               angular.extend(pagerCtx, {showMore: false, viewSize: opts.currentPageRecs});
             }
 
-            if (angular.isDefined(opts.$$pageSizeChanged)) {
+            if (angular.isDefined(opts.$$pageSizeChanged) && opts.$$pageSizeChanged > 0) {
               opts.$$pageSizeChanged--;
             }
           }, true);

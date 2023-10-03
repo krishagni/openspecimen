@@ -5,6 +5,9 @@
         <span translate="queries.list">Queries</span>
       </h3>
     </div>
+    <div class="os-page-header-actions">
+      <os-list-pager opts="pagerOpts"></os-list-pager>
+    </div>
   </div>
 
   <div class="os-page-commands">
@@ -40,7 +43,16 @@
               </li>
             </ul>
           </li>
-          <li class="divider"></li>
+          <li class="divider" ng-if="folders.myFolders.length > 0 && folders.editableFolders.length > 0"></li>
+          <li ng-if="folders.editableFolders.length > 0">
+            <ul class="dropdown-menu-subgroup">
+              <li ng-repeat="folder in folders.editableFolders | filter: searchQueryFolder"
+                ng-click="addSelectedQueriesToFolder(folder)">
+                <a><span>{{folder.name}}</span></a>
+              </li>
+            </ul>
+          </li>
+          <li class="divider" ng-if="folders.myFolders.length > 0 || folders.editableFolders.length > 0"></li>
           <li ng-click="createNewFolder()">
             <a translate="queries.create_new_folder">Create New Folder</a>
           </li>
@@ -100,7 +112,7 @@
                 ng-click="toggleStar(query)">
               </span>
             </div>
-            <div class="pull-left" style="padding-left: 12px;">
+            <div style="padding-left: 36px;">
               <a ui-sref="query-results({queryId: query.id})" title="{{'queries.tooltip.view_records' | translate}}">
                 #{{query.id}} {{query.title}}
               </a>
@@ -211,7 +223,7 @@
               <button type="button" class="btn btn-xs btn-default" ng-click="editFolder(folder)"
                 os-tooltip="{{'queries.edit_folder' | translate}}" placement="bottom">
                 <span class="fa fa-pencil"></span>
-              </button> 
+              </button>
             </div>
           </div>
         </div>
@@ -244,8 +256,14 @@
               {{folder.name}}
             </div>
             <div class="pull-right">
+              <button type="button" class="btn btn-xs btn-default" ng-click="editFolder(folder)"
+                os-tooltip="{{'queries.edit_folder' | translate}}" placement="bottom"
+                ng-show="folder.editable">
+                <span class="fa fa-pencil"></span>
+              </button>
               <button class="btn btn-xs btn-default" ng-click="showFolderInfo(folder)"
-                os-tooltip="{{'queries.view_folder_details' | translate}}" placement="bottom">
+                os-tooltip="{{'queries.view_folder_details' | translate}}" placement="bottom"
+                ng-show="!folder.editable">
                 <span style="font-size: 14px;" class="fa fa-info-circle"></span>
               </button>
             </div>

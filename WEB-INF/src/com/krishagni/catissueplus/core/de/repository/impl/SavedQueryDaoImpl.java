@@ -93,18 +93,26 @@ public class SavedQueryDaoImpl extends AbstractDao<SavedQuery> implements SavedQ
 	}
 
 	@Override
-	public boolean isQuerySharedWithUser(Long queryId, Long userId) {
+	public boolean isQuerySharedWithUser(Long queryId, Long userId, boolean forEdits) {
 		Criteria<Long> query = createCriteria(SavedQuery.class, Long.class, "s");
 		query.join("s.createdBy", "c")
 			.join("s.folders", "f")
 			.leftJoin("f.sharedWith", "su")
+			.leftJoin("f.sharedWithGroups", "sg")
+			.leftJoin("sg.users", "gu")
 			.add(query.eq("s.id", queryId))
 			.add(query.isNull("s.deletedOn"))
 			.add(query.or(
+				query.eq("f.sharedWithAll", true),
 				query.eq("su.id", userId),
-				query.eq("f.sharedWithAll", true)))
-			.select(query.count("s.id"));
-		return query.uniqueResult() > 0;
+				query.eq("gu.id", userId)
+			));
+
+		if (forEdits) {
+			query.add(query.eq("f.allowEditsBySharedUsers", true));
+		}
+
+		return query.select(query.count("s.id")).uniqueResult() > 0;
 	}
 
 	@Override
@@ -170,17 +178,18 @@ public class SavedQueryDaoImpl extends AbstractDao<SavedQuery> implements SavedQ
 	private Criteria<Object[]> getSavedQueriesListQuery(ListSavedQueriesCriteria crit) {
 		Criteria<Object[]> query = createCriteria(SavedQuery.class, Object[].class, "s");
 		query.join("s.createdBy", "c")
-			.join("c.institute", "i")
+			.leftJoin("c.institute", "i") // system users do not have institute
 			.leftJoin("s.folders", "f")
 			.leftJoin("f.sharedWith", "su")
 			.leftJoin("f.sharedWithGroups", "sg")
 			.leftJoin("sg.users", "gu")
 			.add(query.isNull("s.deletedOn"));
 
-		if (crit.userId() != null) {
+		if (crit.userId() != null || crit.instituteId() != null) {
 			Conjunction creatorCond = query.conjunction();
-			creatorCond.add(query.eq("c.id", crit.userId()));
-			if (crit.instituteId() != null) {
+			if (crit.userId() != null) {
+				creatorCond.add(query.eq("c.id", crit.userId()));
+			} else {
 				creatorCond.add(query.eq("i.id", crit.instituteId()));
 			}
 
@@ -191,8 +200,6 @@ public class SavedQueryDaoImpl extends AbstractDao<SavedQuery> implements SavedQ
 					.add(query.eq("su.id", crit.userId()))
 					.add(query.eq("gu.id", crit.userId()))
 			);
-		} else if (crit.instituteId() != null) {
-			query.add(query.eq("i.id", crit.instituteId()));
 		}
 
 		addCpCondition(query, crit.cpId());

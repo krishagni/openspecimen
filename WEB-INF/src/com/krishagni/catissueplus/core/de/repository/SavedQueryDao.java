@@ -23,7 +23,7 @@ public interface SavedQueryDao extends Dao<SavedQuery>{
 	
 	List<SavedQuerySummary> getQueriesByFolderId(Long folderId, int startAt, int maxRecords, String searchString);
 	
-	boolean isQuerySharedWithUser(Long queryId, Long userId);
+	boolean isQuerySharedWithUser(Long queryId, Long userId, boolean forEdits);
 	
 	Map<String, Object> getQueryChangeLogDetails(String file);
 	

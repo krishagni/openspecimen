@@ -45,6 +45,18 @@
       </div>
     </div>
 
+    <div class="clearfix">
+      <div class="pull-left os-folder-share-with-all-cb">
+        <os-checkbox ng-checked="folder.allowEditsBySharedUsers" ng-model="folder.allowEditsBySharedUsers">
+        </os-checkbox>
+      </div>
+      <div class="pull-left">
+        <span translate="queries.allow_edit_by_shared_users">
+          Allow edits by shared users
+        </span>
+      </div>
+    </div>
+
     <div class="os-folder-users-section" ng-if="folder.sharedWithAll != 1 && folder.sharedWithAll != true">
       <label translate="queries.share_folder_with_users">Share folder with following users</label>
       <div class="users-select-container">
@@ -68,7 +80,7 @@
       <span translate="common.buttons.delete">Delete</span>
     </button>
     <button class="btn btn-primary" 
-      ng-disabled="folder.queries.length == 0 || !folder.name" 
+      ng-disabled="(!folder.id && folder.queries.length == 0) || !folder.name"
       ng-click="saveOrUpdateFolder()" 
       ng-switch on="!folder.id">
       <span ng-switch-when="true" translate="common.buttons.create">

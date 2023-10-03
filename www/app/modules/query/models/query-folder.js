@@ -3,6 +3,18 @@ angular.module('os.query.models.queryfolder', ['os.common.models'])
   .factory('QueryFolder', function($http, osModel, SavedQuery) {
     var QueryFolder = osModel('query-folders');
 
+    QueryFolder.prototype.query = function(filterOpts) {
+      return $http.get(QueryFolder.url() + this.$id() + '/saved-queries', {params: filterOpts}).then(
+        function(resp) {
+          return resp.data.queries.map(
+            function(query) {
+              return new SavedQuery(query);
+            }
+          );
+        }
+      );
+    };
+
     QueryFolder.prototype.getQueries = function(filterOpts) {
       var queryList = {count: 0, queries: []};
       var params = angular.extend({countReq: false}, filterOpts);
@@ -19,6 +31,14 @@ angular.module('os.query.models.queryfolder', ['os.common.models'])
       );
        
       return queryList;
+    };
+
+    QueryFolder.prototype.getCount = function(filterOpts) {
+      return $http.get(QueryFolder.url() + this.$id() + '/saved-queries-count', {params: filterOpts}).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
     };
 
     QueryFolder.prototype.addQueries = function(queries) {

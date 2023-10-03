@@ -17,6 +17,7 @@ angular.module('os.query.addeditfolder', ['os.query.models'])
         sharedWithAll: $scope.folder.sharedWithAll,
         sharedWith: sharedWith,
         sharedWithGroups: sharedWithGroups,
+        allowEditsBySharedUsers: $scope.folder.allowEditsBySharedUsers,
         queries: queries
       });
         

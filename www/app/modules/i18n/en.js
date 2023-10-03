@@ -2077,6 +2077,7 @@
     "view_folder_details": "View Folder Details",
     "remove_query_from_folder": "Remove query from folder",
     "share_folder_with_all": "Share folder with all current and future users",
+    "allow_edit_by_shared_users": "Allow edits by shared users",
     "share_folder_with_users": "Share with users",
     "share_folder_with_user_groups": "Share with user groups",
     "shared_with": "Shared with",

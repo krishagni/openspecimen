@@ -23,7 +23,9 @@ public class QueryFolder extends BaseEntity {
 
 	private User owner;
 	
-	private Boolean sharedWithAll;
+	private boolean sharedWithAll;
+
+	private boolean allowEditsBySharedUsers;
 
 	private Set<User> sharedWith = new HashSet<>();
 
@@ -46,14 +48,22 @@ public class QueryFolder extends BaseEntity {
 		this.name = name;
 	}
 
-	public Boolean getSharedWithAll() {
-		return sharedWithAll != null && sharedWithAll.equals(true);
+	public boolean isSharedWithAll() {
+		return sharedWithAll;
 	}
 
 	public void setSharedWithAll(Boolean sharedWithAll) {
 		this.sharedWithAll = sharedWithAll;
 	}
-	
+
+	public boolean isAllowEditsBySharedUsers() {
+		return allowEditsBySharedUsers;
+	}
+
+	public void setAllowEditsBySharedUsers(boolean allowEditsBySharedUsers) {
+		this.allowEditsBySharedUsers = allowEditsBySharedUsers;
+	}
+
 	@AuditJoinTable(name = "OS_QUERY_FOLDER_USERS_AUD")
 	public Set<User> getSharedWith() {
 		return sharedWith;
@@ -163,16 +173,18 @@ public class QueryFolder extends BaseEntity {
 		return newGroups;
 	}
 	
-	public boolean canUserAccess(Long userId) {
-		if (owner != null && userId.equals(owner.getId())) {
+	public boolean canUserAccess(User user, boolean forEdits) {
+		if (user == null || (forEdits && getOwner().isSysUser())) {
+			return false;
+		} else if (user.isAdmin()) {
 			return true;
-		}
-		
-		if (Boolean.TRUE.equals(sharedWithAll)) {
+		} else if (user.isInstituteAdmin()) {
+			return getOwner() != null && user.getInstitute().equals(getOwner().getInstitute());
+		} else if (user.equals(getOwner())) {
 			return true;
+		} else {
+			return daoFactory.getQueryFolderDao().isFolderSharedWithUser(getId(), user.getId(), forEdits);
 		}
-
-		return daoFactory.getQueryFolderDao().isFolderSharedWithUser(getId(), userId);
 	}
 		
 	public void update(QueryFolder folder) {
@@ -181,8 +193,9 @@ public class QueryFolder extends BaseEntity {
 		getSavedQueries().retainAll(folder.getSavedQueries());
 		getSavedQueries().addAll(folder.getSavedQueries());
 
-		setSharedWithAll(folder.getSharedWithAll());
-		if (folder.getSharedWithAll()) {
+		setSharedWithAll(folder.isSharedWithAll());
+		setAllowEditsBySharedUsers(folder.isAllowEditsBySharedUsers());
+		if (folder.isSharedWithAll()) {
 			getSharedWith().clear();
 			getSharedWithGroups().clear();
 		} else {

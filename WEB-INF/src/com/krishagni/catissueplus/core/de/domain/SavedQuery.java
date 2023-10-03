@@ -433,7 +433,7 @@ public class SavedQuery extends BaseEntity {
 	}
 
 	public boolean canUpdateOrDelete(User user) {
-		if (user == null) {
+		if (user == null || getCreatedBy().isSysUser()) {
 			return false;
 		} else if (user.isAdmin()) {
 			return true;
@@ -442,7 +442,7 @@ public class SavedQuery extends BaseEntity {
 		} else if (user.equals(getCreatedBy())) {
 			return true;
 		} else {
-			return daoFactory.getSavedQueryDao().isQuerySharedWithUser(getId(), user.getId());
+			return daoFactory.getSavedQueryDao().isQuerySharedWithUser(getId(), user.getId(), true);
 		}
 	}
 

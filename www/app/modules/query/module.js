@@ -51,7 +51,7 @@ angular.module('os.query',
        parent: 'signed-in'
      })
      .state('query-list', {
-       url: '/list?folderId&filters',
+       url: '/list?filters',
        templateUrl: 'modules/query/list.html',
        controller: 'QueryListCtrl',
        resolve: {
@@ -61,18 +61,6 @@ angular.module('os.query',
                return resp.allFolders;
              }
            );
-         },
-
-         folder: function($stateParams, folders) {
-           if (!!$stateParams.folderId) {
-             if ($stateParams.folderId <= 0) {
-               return {id: -1}; // all queries
-             }
-
-             return folders.find(function(folder) { return folder.id == $stateParams.folderId; });
-           }
-
-           return undefined;
          }
        },
        parent: 'query-root'

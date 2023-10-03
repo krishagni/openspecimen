@@ -61,7 +61,7 @@ angular.module('openspecimen')
           function() {
             var filters = angular.copy(newVal);
 
-            excludeParams = excludeParams || ['includeStats', 'maxResults'];
+            excludeParams = excludeParams || ['includeStats', 'maxResults', 'max'];
             angular.forEach(excludeParams, function(param) { delete filters[param]; });
 
             angular.forEach(filters,

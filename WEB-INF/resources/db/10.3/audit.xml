@@ -46,4 +46,11 @@
       <column name="requesterComments_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Query folder edit setting">
+    <addColumn tableName="CATISSUE_QUERY_FOLDERS_AUD">
+      <column name="ALLOW_EDITS_BY_SHARED_USERS" type="${boolean.type}" defaultValueBoolean="false" />
+      <column name="allowEditsBySharedUsers_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -17,6 +17,8 @@
 
     <property name="sharedWithAll" column="SHARED_WITH_ALL"/>
 
+    <property name="allowEditsBySharedUsers" column="ALLOW_EDITS_BY_SHARED_USERS" />
+
     <many-to-one name="owner" column="OWNER"/>
      
     <set name="sharedWith" table="CATISSUE_QFOLDER_SHARE_SETTING">
@@ -37,56 +39,5 @@
       <key column="FOLDER_ID"/>
       <many-to-many class="com.krishagni.catissueplus.core.de.domain.SavedQuery" column="QUERY_ID" />
     </set>
-	
-    <query name="getQueryFoldersByUser">
-      select 
-        distinct f 
-      from 
-        QueryFolder f
-        inner join f.owner owner
-        left join f.sharedWith sharedWith
-        left join f.sharedWithGroups sharedGroups
-        left join sharedGroups.users groupUser
-      where
-        f.sharedWithAll = true or owner.id = :userId or sharedWith.id = :userId or groupUser.id = :userId
-    </query>
-    
-    <query name="getQueryFolderByName">
-      from QueryFolder f where f.name = :name
-    </query>
-
-    <sql-query name="sharedWithUser">
-      <return-scalar column="folderId" type="long"/>
-
-      select
-        f.identifier as folderId
-      from
-        catissue_query_folders f
-      where
-        f.identifier = :folderId and
-        (
-          exists (
-            select
-              u.folder_id
-            from
-              catissue_qfolder_share_setting u
-            where
-              u.folder_id = f.identifier and
-              u.user_id = :userId
-          ) or
-          exists (
-            select
-              fg.folder_id
-            from
-              os_query_folder_shared_groups fg
-              inner join os_user_groups g on g.identifier = fg.group_id
-              inner join os_user_group_users gu on gu.group_id = g.identifier
-            where
-              fg.folder_id = f.identifier and
-              g.activity_status != 'Disabled' and
-              gu.user_id = :userId
-          )
-        )
-    </sql-query>
   </class> 
 </hibernate-mapping>

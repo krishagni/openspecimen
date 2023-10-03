@@ -612,8 +612,17 @@ public class QueryServiceImpl implements QueryService {
 	@PlusTransactional
 	public ResponseEvent<List<QueryFolderSummary>> getUserFolders(RequestEvent<?> req) {
 		try {
-			Long userId = AuthUtil.getCurrentUser().getId();			
-			List<QueryFolder> folders = daoFactory.getQueryFolderDao().getUserFolders(userId);			
+			User user = AuthUtil.getCurrentUser();
+			Long userId = null, instituteId = null;
+			if (user == null) {
+				return ResponseEvent.response(Collections.emptyList());
+			} else if (!user.isAdmin() && !user.isInstituteAdmin()) {
+				userId = user.getId();
+			} else if (user.isInstituteAdmin()) {
+				instituteId = user.getInstitute().getId();
+			}
+
+			List<QueryFolder> folders = daoFactory.getQueryFolderDao().getUserFolders(userId, instituteId);
 			return ResponseEvent.response(QueryFolderSummary.from(folders));
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
@@ -629,9 +638,8 @@ public class QueryServiceImpl implements QueryService {
 			if (folder == null) {
 				return ResponseEvent.userError(SavedQueryErrorCode.FOLDER_NOT_FOUND);
 			}
-			
-			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !folder.canUserAccess(user.getId())) {
+
+			if (!folder.canUserAccess(AuthUtil.getCurrentUser(), false)) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 
@@ -683,7 +691,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 			
 			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !existing.getOwner().equals(user)) {
+			if (!existing.canUserAccess(user, true) || existing.getOwner().isSysUser()) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 			
@@ -724,7 +732,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 			
 			User user = AuthUtil.getCurrentUser();			
-			if (!user.isAdmin() && !existing.getOwner().equals(user)) {
+			if (!existing.canUserAccess(user, true) || existing.getOwner().isSysUser()) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 			
@@ -748,7 +756,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 			
 			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !folder.canUserAccess(user.getId())) {
+			if (!folder.canUserAccess(user, false)) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 			
@@ -782,7 +790,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 
 			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !folder.canUserAccess(user.getId())) {
+			if (!folder.canUserAccess(user, false)) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 
@@ -806,7 +814,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 			
 			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !queryFolder.getOwner().equals(user)) {
+			if (!queryFolder.canUserAccess(user, true) || queryFolder.getOwner().isSysUser()) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 			
@@ -818,19 +826,17 @@ public class QueryServiceImpl implements QueryService {
 			} else {
 				savedQueries = daoFactory.getSavedQueryDao().getQueriesByIds(queryIds);
 			}
-			
+
+			for (SavedQuery query : savedQueries) {
+				if (!query.canUpdateOrDelete(user)) {
+					return ResponseEvent.userError(SavedQueryErrorCode.QUERIES_NOT_ACCESSIBLE);
+				}
+			}
+
 			switch (opDetail.getOp()) {
-				case ADD:
-					queryFolder.addQueries(savedQueries);
-					break;
-				
-				case UPDATE:
-					queryFolder.updateQueries(savedQueries);
-					break;
-				
-				case REMOVE:
-					queryFolder.removeQueries(savedQueries);
-					break;				
+				case ADD -> queryFolder.addQueries(savedQueries);
+				case UPDATE -> queryFolder.updateQueries(savedQueries);
+				case REMOVE -> queryFolder.removeQueries(savedQueries);
 			}
 			
 			daoFactory.getQueryFolderDao().saveOrUpdate(queryFolder);			
@@ -857,7 +863,7 @@ public class QueryServiceImpl implements QueryService {
 			}
 			
 			User user = AuthUtil.getCurrentUser();
-			if (!user.isAdmin() && !queryFolder.getOwner().equals(user)) {
+			if (!queryFolder.canUserAccess(user, true) || queryFolder.getOwner().isSysUser()) {
 				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
 			}
 			
@@ -870,19 +876,11 @@ public class QueryServiceImpl implements QueryService {
 				users = userDao.getUsersByIds(userIds);
 			}
 			
-			Collection<User> newUsers = null; 
+			Collection<User> newUsers = null;
 			switch (opDetail.getOp()) {
-				case ADD:
-					newUsers = queryFolder.addSharedUsers(users);
-					break;
-					
-				case UPDATE:
-					newUsers = queryFolder.updateSharedUsers(users);
-					break;
-					
-				case REMOVE:
-					queryFolder.removeSharedUsers(users);
-					break;					
+				case ADD -> newUsers = queryFolder.addSharedUsers(users);
+				case UPDATE -> newUsers = queryFolder.updateSharedUsers(users);
+				case REMOVE -> queryFolder.removeSharedUsers(users);
 			}
 											
 			daoFactory.getQueryFolderDao().saveOrUpdate(queryFolder);			

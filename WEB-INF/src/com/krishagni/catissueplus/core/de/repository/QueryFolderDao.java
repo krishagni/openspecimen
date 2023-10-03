@@ -6,7 +6,7 @@ import com.krishagni.catissueplus.core.common.repository.Dao;
 import com.krishagni.catissueplus.core.de.domain.QueryFolder;
 
 public interface QueryFolderDao extends Dao<QueryFolder> {		
-	List<QueryFolder> getUserFolders(Long userId);
+	List<QueryFolder> getUserFolders(Long userId, Long instituteId);
 	
 	QueryFolder getQueryFolder(Long folderId);
 	
@@ -14,5 +14,5 @@ public interface QueryFolderDao extends Dao<QueryFolder> {
 	
 	void deleteFolder(QueryFolder folder);
 
-	boolean isFolderSharedWithUser(Long folderId, Long userId);
+	boolean isFolderSharedWithUser(Long folderId, Long userId, boolean forEdits);
 }
