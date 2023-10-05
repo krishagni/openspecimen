@@ -51,37 +51,51 @@
           </td>
         </tr>
 
-        <tr v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
-          <td v-if="readOnly && selectionMode == 'radio'">
-            <RadioButton name="rowSelection" :value="itemIdx" v-model="ctx.selectedIdx"
-              @click="toggleSelection(itemIdx)" />
-          </td>
+        <template v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
+          <tr v-if="itemModel.show">
+            <td v-if="readOnly && selectionMode == 'radio'">
+              <RadioButton name="rowSelection" :value="itemIdx" v-model="ctx.selectedIdx"
+                @click="toggleSelection(itemIdx)" />
+            </td>
 
-          <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
-            <div :style="field.uiStyle">
-              <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
-                :md-type="true" v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
-                :tab-order="'' + (tabDirection == 'column' ? (itemIdx + numRows * fieldIdx) : (itemIdx * numCols + fieldIdx))"
-                :form="{...ctx.items[itemIdx], ...data, _formCache}"
-                :context="{...ctx.items[itemIdx], ...data, _formCache}"
-                @update:model-value="handleInput(itemIdx, field, itemModel, fieldIdx)">
-              </component>
-              <div v-if="v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
-                v$.itemModels[itemIdx][field.name].$error">
-                <os-inline-message>{{errorMessages[itemIdx][field.name]}}</os-inline-message>
+            <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
+              <div :style="field.uiStyle">
+                <div class="field-container">
+                  <div v-show="treeLayout && fieldIdx == 0" class="node-expander"
+                    :style="{'padding-left':  itemModel.depth + 'rem'}">
+                    <a @click="toggleNode(itemModel, itemIdx)">
+                      <os-icon v-show="itemModel.expanded" name="chevron-down" />
+                      <os-icon v-show="!itemModel.expanded" name="chevron-right" />
+                    </a>
+                  </div>
+                  <component class="field" :ref="'osField-' + field.name" :is="field.component" v-bind="field"
+                    :md-type="true" v-model="itemModel[field.name]" v-os-tooltip.bottom="field.tooltip"
+                    :tab-order="'' + (tabDirection == 'column' ? (itemIdx + numRows * fieldIdx) : (itemIdx * numCols + fieldIdx))"
+                    :form="{...ctx.items[itemIdx], ...data, _formCache}"
+                    :context="{...ctx.items[itemIdx], ...data, _formCache}"
+                    @update:model-value="handleInput(itemIdx, field, itemModel, fieldIdx)"
+                    v-if="!itemModel.hideFields[field.name]">
+                  </component>
+                  <os-span v-model="ctx.emptyString" :ref="'osField-' + field.name" v-else />
+                </div>
+                <div v-if="!itemModel.hideFields[field.name] &&
+                  v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
+                  v$.itemModels[itemIdx][field.name].$error">
+                  <os-inline-message>{{errorMessages[itemIdx][field.name]}}</os-inline-message>
+                </div>
               </div>
-            </div>
-          </td>
-          <td v-if="removeItems == true || copyItems == true">
-            <os-button-group style="min-width: 5rem;">
-              <os-button size="small" left-icon="copy" @click="copyItem(itemIdx)"
-                v-os-tooltip.bottom="$t('common.buttons.copy')" v-if="copyItems == true" />
+            </td>
+            <td v-if="removeItems == true || copyItems == true">
+              <os-button-group style="min-width: 5rem;">
+                <os-button size="small" left-icon="copy" @click="copyItem(itemIdx)"
+                  v-os-tooltip.bottom="$t('common.buttons.copy')" v-if="copyItems == true" />
 
-              <os-button size="small" left-icon="times" @click="removeItem(itemIdx)"
-                v-os-tooltip.bottom="$t('workflows.buttons.remove')" v-if="removeItems == true" />
-            </os-button-group>
-          </td>
-        </tr>
+                <os-button size="small" left-icon="times" @click="removeItem(itemIdx)"
+                  v-os-tooltip.bottom="$t('workflows.buttons.remove')" v-if="removeItems == true" />
+              </os-button-group>
+            </td>
+          </tr>
+        </template>
         <tr class="footer-row" v-if="$slots.footerRow">
           <slot name="footerRow" />
         </tr>
@@ -114,7 +128,18 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 
 export default {
-  props: ['schema', 'data', 'items', 'tab-direction', 'removeItems', 'copyItems', 'readOnly', 'selectionMode', 'requireSelection'],
+  props: [
+    'schema',
+    'data',
+    'items',
+    'tab-direction',
+    'removeItems',
+    'copyItems',
+    'readOnly',
+    'selectionMode',
+    'requireSelection',
+    'treeLayout'
+  ],
 
   emits: ['input', 'form-validity', 'remove-item', 'copy-item', 'item-selected'],
 
@@ -126,7 +151,8 @@ export default {
     const ctx = reactive({
       items: [],
       sort: { field: '', direction: '' },
-      selects: { }
+      selects: { },
+      emptyString: '-'
     });
 
     watchEffect(() => { ctx.items = props.items; });
@@ -198,8 +224,24 @@ export default {
       let models = [];
 
       for (let item of this.ctx.items) {
-        let model = {};
+        let model = {show: true, hideFields: {}};
+        if (this.treeLayout) {
+          model = {expanded: item.expanded, show: item.show, depth: item.depth, hideFields: {}};
+        }
+
         for (let field of this.fields) {
+          if (field.showCellWhen) {
+            if (typeof field.showCellWhen == 'function') {
+              if (!field.showCellWhen(item)) {
+                model.hideFields[field.name] = true;
+                continue;
+              }
+            } else if (!exprUtil.eval(item, field.showCellWhen)) {
+              model.hideFields[field.name] = true;
+              continue;
+            }
+          }
+
           if (typeof field.value == 'function') {
             model[field.name] = field.value(item);
           } else {
@@ -236,7 +278,7 @@ export default {
             this.v$.itemModels[itemIdx] &&
             this.v$.itemModels[itemIdx][field.name];
 
-          if (!validators) {
+          if (!validators || this.itemModels[itemIdx].hideFields[field.name]) {
             continue;
           }
 
@@ -270,7 +312,12 @@ export default {
     }
 
     return {
-      itemModels: this.itemModels.map(() => fieldFactory.getValidationRules(this.fields))
+      itemModels: this.itemModels.map(
+        (item) => {
+          const rowFields = this.fields.filter(field => !item.hideFields[field.name]);
+          return fieldFactory.getValidationRules(rowFields);
+        }
+      )
     }
   },
 
@@ -385,31 +432,43 @@ export default {
         return;
       }
 
+      //
+      // find the first row where the field is displayed or not hidden
+      // the value of such field will be used to copy to the rest of the rows
+      //
+      const firstRow = this.itemModels.findIndex(model => !model.hideFields[field.name]);
+      if (firstRow < 0) {
+        return;
+      }
+
       let value = null;
       if (typeof field.valueToCopy == 'function') {
-        value = field.valueToCopy(this.ctx.items[0]);
+        value = field.valueToCopy(this.ctx.items[firstRow]);
       } else if (field.type == 'storage-position') {
-        value = this.itemModels[0][field.name];
+        value = this.itemModels[firstRow][field.name];
         if (value && value.name) {
           value = {name: value.name, mode: value.mode};
         } else {
           value = {};
         }
       } else {
-        value = exprUtil.getValue(this.ctx.items[0], field.name);
+        value = exprUtil.getValue(this.ctx.items[firstRow], field.name);
       }
 
-      for (let idx = 1; idx < this.itemModels.length; ++idx) {
-        let toCopy = value;
+      for (let row = 0; row < this.itemModels.length; ++row) {
+        if (row == firstRow || this.itemModels[row].hideFields[field.name]) {
+          continue;
+        }
 
+        let toCopy = value;
         if (value instanceof Date) {
           toCopy = new Date(value.getTime());
         } else if (typeof value == 'object' && value) {
           toCopy = JSON.parse(JSON.stringify(value));
         }
 
-        this.itemModels[idx][field.name] = toCopy;
-        this.handleInput(idx, field, this.itemModels[idx]);
+        this.itemModels[row][field.name] = toCopy;
+        this.handleInput(row, field, this.itemModels[row]);
       }
     },
 
@@ -450,6 +509,21 @@ export default {
       return null;
     },
 
+    toggleNode: function(itemModel, start) {
+      let item = itemModel.$context;
+      let show = item.expanded = !item.expanded;
+      let ancestors = [item.uid];
+      for (let idx = start + 1; idx < this.itemModels.length; idx++) {
+        const descendant = this.itemModels[idx].$context;
+        if (ancestors.indexOf(descendant.parentUid) >= 0) {
+          descendant.show = show;
+          if (descendant.expanded) {
+            ancestors.push(descendant.uid);
+          }
+        }
+      }
+    },
+
     getViewState() {
       let result = [];
       for (let field of this.fields) {
@@ -460,7 +534,10 @@ export default {
             label = field.tooltip;
           }
 
-          result.push({label: label, values: uiFields.map(uiField => uiField.getDisplayValue())});
+          result.push({
+            label: label,
+            values: uiFields.map(uiField => uiField.getDisplayValue())
+          });
         }
       }
 
@@ -502,5 +579,28 @@ table th .align-icon {
 
 table th .more-options :deep(button) {
   padding: 2px 4px;
+}
+
+table td .field-container {
+  display: flex;
+}
+
+table td .field-container .field {
+  flex: 1;
+}
+
+table td .node-expander {
+  color: #6c757d;
+  padding-right: 0.5rem;
+  margin-right: 0.25rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  display: inline-block
+}
+
+table td .node-expander a {
+  color: #6c757d;
+  display: inline-block;
+  width: 0.80rem;
 }
 </style>
