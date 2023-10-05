@@ -170,10 +170,10 @@ export default {
 
       const qs = util.queryString(crit);
       if (!cache[qs]) {
-        cache[qs] = await http.get('storage-containers', crit);
+        cache[qs] = http.get('storage-containers', crit);
       }
 
-      return cache[qs];
+      return await cache[qs];
     },
  
     selectPosition: function() {
