@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,9 +43,6 @@ public class PermissibleValueController {
 		@RequestParam(value = "searchString", required = false)
 		String searchStr,
 
-		@RequestParam(value = "value", required = false)
-		List<String> values,
-			
 		@RequestParam(value = "includeParentValue", required = false, defaultValue="false")
 		boolean includeParentValue,
 
@@ -70,8 +68,17 @@ public class PermissibleValueController {
 		int startAt,
 						
 		@RequestParam(value = "maxResults", required = false, defaultValue = "1000")
-		int maxResults) {
-		
+		int maxResults,
+
+		HttpServletRequest httpReq) {
+
+		List<String> values = null;
+		String[] searchValues = httpReq.getParameterValues("value");
+		if (searchValues != null && searchValues.length > 0) {
+			values = Arrays.asList(searchValues);
+			searchStr = null;
+		}
+
 		ListPvCriteria crit = new ListPvCriteria()
 			.attribute(attribute)
 			.query(searchStr)
@@ -99,9 +106,6 @@ public class PermissibleValueController {
 		@RequestParam(value = "searchString", required = false)
 		String searchStr,
 
-		@RequestParam(value = "value", required = false)
-		List<String> values,
-
 		@RequestParam(value = "includeParentValue", required = false, defaultValue="false")
 		boolean includeParentValue,
 
@@ -127,12 +131,13 @@ public class PermissibleValueController {
 		int startAt,
 
 		@RequestParam(value = "maxResults", required = false, defaultValue = "1000")
-		int maxResults) {
+		int maxResults,
+
+		HttpServletRequest httpReq) {
 
 		return getPermissibleValues(
 			attribute,
 			searchStr,
-			values,
 			includeParentValue,
 			parentAttribute,
 			parentValue,
@@ -141,7 +146,8 @@ public class PermissibleValueController {
 			includeProps,
 			activityStatus,
 			startAt,
-			maxResults);
+			maxResults,
+			httpReq);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/v/{id}")
