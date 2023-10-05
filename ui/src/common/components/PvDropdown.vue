@@ -34,26 +34,31 @@ export default {
             opts || {maxResults: 100}
           );
 
+          let cache = (this.context && this.context._formCache) || {};
+          cache = cache['pvs'] = cache['pvs'] || {};
+
           if (opts.value || opts.value == 0) {
             try {
               let id = +opts.value;
               if (!isNaN(id)) {
-                return http.get('permissible-values/v/' + id).then(pv => [pv]);
+                let key = 'id: ' + id;
+                if (!cache[key]) {
+                  cache[key] = http.get('permissible-values/v/' + id).then(pv => [pv]);
+                }
+
+                return await cache[key];
               }
             } catch {
               console.log('PvDropdown: Error getting value: ' + opts.value);
             }
           }
 
-          let cache = (this.context && this.context._formCache) || {};
-          cache = cache['pvs'] = cache['pvs'] || {};
-
           let key = util.queryString(queryParams);
           if (!cache[key]) {
-            cache[key] = await http.get('permissible-values/v', queryParams);
+            cache[key] = http.get('permissible-values/v', queryParams);
           }
 
-          return cache[key];
+          return await cache[key];
         },
         selectProp: this.selectProp,
         displayProp: 'value'
