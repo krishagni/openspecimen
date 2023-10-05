@@ -41,7 +41,7 @@ export default {
       set(value) {
         if (value == '.') {
           value = '0.';
-        } else {
+        } else if (value !== undefined && value !== null && String(value).trim().length > 0) {
           value = +value;
         }
 
