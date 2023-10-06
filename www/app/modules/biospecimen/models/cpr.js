@@ -164,13 +164,13 @@ angular.module('os.biospecimen.models.cpr',
       for (var i = 0; i < rules.length; ++i) {
         var spec = rules[i];
         if (!spec.rule || spec.rule == 'any' || spec.rule == '*' || $parse(spec.rule)(input)) {
+          result = result || [];
           if (anticipatedEvents.matchType == 'any') {
             result = spec.events;
             break;
           } else if (anticipatedEvents.matchType == 'all') {
             angular.forEach(spec.events,
               function(event) {
-                result = result || [];
                 if (result.indexOf(event) == -1) {
                   result.push(event);
                 }
