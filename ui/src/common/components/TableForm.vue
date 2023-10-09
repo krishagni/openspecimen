@@ -7,6 +7,9 @@
           <th v-if="readOnly && selectionMode == 'radio'">
             <span>&nbsp;</span>
           </th>
+
+          <slot name="first-column-header" />
+
           <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" @click="sort(field)">
             <span v-if="field.displayLabel">{{field.displayLabel}}</span>
             <div v-else-if="field.icon" v-os-tooltip="field.tooltip"
@@ -58,14 +61,26 @@
                 @click="toggleSelection(itemIdx)" />
             </td>
 
+            <td v-if="firstColumn">
+              <div v-show="treeLayout" class="node-expander"
+                :style="{'padding-left':  itemModel.depth + 'rem'}">
+                <a @click="toggleNode(itemModel, itemIdx)">
+                  <os-icon v-show="itemModel.hasChildren && itemModel.expanded" name="chevron-down" />
+                  <os-icon v-show="itemModel.hasChildren && !itemModel.expanded" name="chevron-right" />
+                </a>
+              </div>
+              <slot ref="firstColumn" name="first-column" v-bind:item="itemModel.$context"
+                v-bind:model="itemModel"> </slot>
+            </td>
+
             <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
               <div :style="field.uiStyle">
                 <div class="field-container">
-                  <div v-show="treeLayout && fieldIdx == 0" class="node-expander"
+                  <div v-show="treeLayout && fieldIdx == 0 && !firstColumn" class="node-expander"
                     :style="{'padding-left':  itemModel.depth + 'rem'}">
                     <a @click="toggleNode(itemModel, itemIdx)">
-                      <os-icon v-show="itemModel.expanded" name="chevron-down" />
-                      <os-icon v-show="!itemModel.expanded" name="chevron-right" />
+                      <os-icon v-show="itemModel.hasChildren && itemModel.expanded" name="chevron-down" />
+                      <os-icon v-show="itemModel.hasChildren && !itemModel.expanded" name="chevron-right" />
                     </a>
                   </div>
                   <component class="field" :ref="'osField-' + field.name" :is="field.component" v-bind="field"
@@ -171,6 +186,15 @@ export default {
   },
 
   computed: {
+    firstColumn: function() {
+      if (this.$slots['first-column']) {
+        const result = this.$slots['first-column']();
+        return result && result.length > 0 && result[0];
+      }
+
+      return null;
+    },
+
     fields: function() {
       let result = [];
       for (let field of this.schema.columns) {
@@ -226,7 +250,13 @@ export default {
       for (let item of this.ctx.items) {
         let model = {show: true, hideFields: {}};
         if (this.treeLayout) {
-          model = {expanded: item.expanded, show: item.show, depth: item.depth, hideFields: {}};
+          model = {
+            expanded: item.expanded,
+            show: item.show,
+            depth: item.depth,
+            hasChildren: item.hasChildren,
+            hideFields: {}
+          };
         }
 
         for (let field of this.fields) {
@@ -568,7 +598,8 @@ table th .required-indicator {
   margin-right: 0.5rem;
 }
 
-table th {
+table th,
+table :deep(th) {
   padding-top: 20px!important;
 }
 

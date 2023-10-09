@@ -68,6 +68,7 @@ import SignaturePad from './SignaturePad.vue';
 import SiteDropdown from './SiteDropdown.vue';
 import Span from './Span.vue';
 import SpecimenActions from './SpecimenActions.vue';
+import SpecimenDescription from './SpecimenDescription.vue';
 import SpecimenMeasure from './SpecimenMeasure.vue';
 import SpecimenType from './SpecimenType.vue';
 import Star from './Star.vue';
@@ -160,6 +161,7 @@ export default {
     app.component('os-site-dropdown',    SiteDropdown);
     app.component('os-span',             Span);
     app.component('os-specimen-actions', SpecimenActions);
+    app.component('os-specimen-description', SpecimenDescription);
     app.component('os-specimen-measure', SpecimenMeasure);
     app.component('os-specimen-type',    SpecimenType);
     app.component('os-containers-dropdown', StorageContainerDropdown);
