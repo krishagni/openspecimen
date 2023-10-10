@@ -1,5 +1,7 @@
 
 import alertsSvc   from '@/common/services/Alerts.js';
+import cpSvc       from './CollectionProtocol.js';
+import exprUtil    from '@/common/services/ExpressionUtil.js';
 import http        from '@/common/services/HttpClient.js';
 import settingsSvc from '@/common/services/Setting.js';
 import ui          from '@/global.js';
@@ -44,16 +46,117 @@ class Specimen {
     return job;
   }
 
-  bulkUpdate(specimens) {
+  async bulkUpdate(specimens) {
     return http.put('specimens', specimens);
   }
 
-  bulkDelete(specimenIds, reason) {
+  async bulkDelete(specimenIds, reason) {
     return http.delete('specimens', {}, {id: specimenIds, reason: reason})
   }
 
-  bulkUpdateStatus(specs) {
+  async bulkUpdateStatus(specs) {
     return http.put('specimens/status', specs);
+  }
+
+  async allocatePositions(ctxt, items, reservationToCancel) {
+    const op = await this._getReservePositionsOp(ctxt, items);
+    op.reservationToCancel = reservationToCancel;
+    return http.post('storage-containers/reserve-positions', op).then(
+      (positions) => {
+        this._assignReservedPositions(op, positions);
+        return positions.length > 0 ? positions[0].reservationId : undefined;
+      }
+    );
+  }
+
+  async cancelReservation(reservationId) {
+    return http.delete('storage-containers/reserve-positions?reservationId=' + reservationId);
+  }
+
+  async _getAllocRule(ctxt, specimen) {
+    ctxt.allocRules = ctxt.allocRules || {};
+
+    let rules = ctxt.allocRules[specimen.cpId];
+    if (!rules) {
+      let allocRules = await cpSvc.getWorkflow(specimen.cpId, 'auto-allocation');
+      if (!allocRules || !allocRules.rules) {
+        allocRules = {rules: []};
+      }
+
+      rules = ctxt.allocRules[specimen.cpId] = allocRules.rules;
+    }
+
+    let result = -1;
+    for (let i = 0; i < rules.length; ++i) {
+      if (exprUtil.eval({ specimen }, rules[i].criteria)) {
+        result = i;
+        break;
+      }
+    }
+
+    return {index: result, rule: result != -1 ? rules[result] : undefined};
+  }
+
+  async _getReservePositionsOp(ctxt, items) {
+    const aliquots = {}, result = [];
+
+    for (let {specimen} of items) {
+      const {lineage, storageType, specimenClass, type} = specimen;
+      if (storageType == 'Virtual') {
+        continue;
+      }
+
+      let selectorCrit;
+      const allocRule = await this._getAllocRule(ctxt, specimen);
+      if (lineage == 'Aliquot') {
+        let st = (specimenClass || 'u') + '-' + (type || 'u');
+        let key = 'u-' + st + '-' + allocRule.index;
+        if (specimen.parentId) {
+          key = specimen.parentId + '-' + st + '-' + allocRule.index;
+        } else if (specimen.parentUid) {
+          key = specimen.parentUid + '-' + st + '-' + allocRule.index;
+        }
+
+        selectorCrit = aliquots[key];
+        if (!selectorCrit) {
+          aliquots[key] = selectorCrit = this._getSelectorCriteria(allocRule.rule, specimen);
+          result.push(selectorCrit);
+        }
+      } else {
+        selectorCrit = this._getSelectorCriteria(allocRule.rule, specimen);
+        result.push(selectorCrit);
+      }
+
+      selectorCrit.minFreePositions++;
+      selectorCrit.$$group.push(specimen);
+    }
+
+    return {criteria: result};
+  }
+
+  _getSelectorCriteria(allocRule, specimen) {
+    return {
+      cpId            : specimen.cpId,
+      specimen        : util.clone(specimen),
+      minFreePositions: 0,
+      ruleName        :   (allocRule && allocRule.name) || undefined,
+      ruleParams      : (allocRule && allocRule.params) || undefined,
+      '$$group'       : []
+    };
+  }
+
+  _assignReservedPositions(op, positions) {
+    if (!positions || positions.length <= 0) {
+      return;
+    }
+
+    let idx = 0;
+    op.criteria.forEach(
+      selectorCriteria =>
+        selectorCriteria.$$group.forEach(
+          specimen => specimen.storageLocation = positions[idx++]
+        )
+    );
   }
 }
 
