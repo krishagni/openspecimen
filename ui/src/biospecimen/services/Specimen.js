@@ -73,6 +73,34 @@ class Specimen {
     return http.delete('storage-containers/reserve-positions?reservationId=' + reservationId);
   }
 
+  async getLabelFormat(ctxt, specimen) {
+    if (specimen.labelFmt) {
+      return specimen.labelFmt;
+    }
+
+    ctxt.labelFormatRules = ctxt.labelFormatRules || {};
+
+    let rules = ctxt.labelFormatRules[specimen.cpId];
+    if (!rules) {
+      let wf = await cpSvc.getWorkflow(specimen.cpId, 'labelSettings');
+      rules = (wf && wf.specimen && wf.specimen.rules) || [];
+      rules = rules.map(
+        rule => ({criteria: rule.criteria && rule.criteria.replace(/#(specimen)|#(cpId)/g, '$1'), format: rule.format})
+      );
+
+      ctxt.labelFormatRules[specimen.cpId] = rules;
+    }
+
+    let input = {cpId: specimen.cpId, specimen};
+    for (let rule of rules) {
+      if (!rule.criteria || exprUtil.eval(input, rule.criteria)) {
+        return rule.format;
+      }
+    }
+
+    return null;
+  }
+
   async _getAllocRule(ctxt, specimen) {
     ctxt.allocRules = ctxt.allocRules || {};
 
