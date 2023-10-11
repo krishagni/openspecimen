@@ -54,9 +54,9 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 			.add(subQuery.eq(subQuery.key("props"), propName))
 			.add(subQuery.or(
 				subQuery.eq(subQuery.value("props"), propValue),
-				subQuery.ilike(subQuery.value("props"), propValue + "^%"),
-				subQuery.ilike(subQuery.value("props"), "%^" + propValue + "^%"),
-				subQuery.ilike(subQuery.value("props"), "%^" + propValue)
+				subQuery.ilike(subQuery.value("props"), propValue + "^%", false),
+				subQuery.ilike(subQuery.value("props"), "%^" + propValue + "^%", false),
+				subQuery.ilike(subQuery.value("props"), "%^" + propValue, false)
 			))
 			.select("pv.id");
 
