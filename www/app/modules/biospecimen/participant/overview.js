@@ -2,7 +2,7 @@
 angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
   .controller('ParticipantOverviewCtrl', function(
     $scope, $state, $stateParams, $injector, userRole, hasSde, hasDict, hasFieldsFn,
-    storePhi, cpDict, visitsTab, cp, cpr, consents, visits, tmWorkflowId,
+    storePhi, cpDict, visitsTab, cp, cpr, consents, visits, tmWorkflowId, collectPendingSpmnsWfId,
     Visit, CollectSpecimensSvc, SpecimenLabelPrinter, ExtensionsUtil, Util, Alerts, VueApp) {
 
     function init() {
@@ -134,6 +134,20 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
     }
 
     $scope.collectPending = function(visit) {
+      if (collectPendingSpmnsWfId > 0 && $injector.has('WorkflowInstance')) {
+        var wfInstance = $injector.get('WorkflowInstance');
+
+        var workflow = {id: collectPendingSpmnsWfId};
+        var inputItems = [{cpr: cpr, visit: visit}];
+        new wfInstance({workflow: workflow, inputItems: inputItems}).$saveOrUpdate().then(
+          function(instance) {
+            VueApp.setVueView('task-manager/instances/' + instance.id);
+          }
+        );
+
+        return;
+      }
+
       var retSt = {state: $state.current, params: $stateParams};
       CollectSpecimensSvc.collectPending(retSt, cp, cpr.id, visit);
     }

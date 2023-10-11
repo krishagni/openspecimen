@@ -922,6 +922,25 @@ angular.module('os.biospecimen.participant',
                 );
               }
             );
+          },
+          collectPendingSpmnsWfId: function($injector, cp, cpr, CpConfigSvc) {
+            if (!$injector.has('Workflow')) {
+              return -1;
+            }
+
+            return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
+              function(data) {
+                if (data && data.pendingCollectionWorkflowId > 0) {
+                  return data.pendingCollectionWorkflowId;
+                }
+
+                return CpConfigSvc.getWorkflowData(-1, 'specimenCollection').then(
+                  function(data) {
+                    return data && data.pendingCollectionWorkflowId;
+                  }
+                );
+              }
+            );
           }
         },
         controller: 'ParticipantOverviewCtrl',
