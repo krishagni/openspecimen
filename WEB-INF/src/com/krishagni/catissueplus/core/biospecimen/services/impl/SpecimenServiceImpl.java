@@ -1147,8 +1147,13 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		boolean pooling = specimen.getId() == null && detail != null && CollectionUtils.isNotEmpty(detail.getSpecimensPool());
 		specimen.updateAvailableStatus();
 		daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
-		specimen.addOrUpdateCollRecvEvents();
-		specimen.addOrUpdateExtension();
+
+		if (!specimen.isDeleted()) {
+			// update specimen events and custom fields only if it is not deleted
+			specimen.addOrUpdateCollRecvEvents();
+			specimen.addOrUpdateExtension();
+		}
+
 		if (pooling) {
 			for (SpecimenInfo poolSpmn : detail.getSpecimensPool()) {
 				boolean close = poolSpmn.getCloseAfterPooledCreation() == null || poolSpmn.getCloseAfterPooledCreation();

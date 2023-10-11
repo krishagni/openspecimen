@@ -143,7 +143,9 @@ public abstract class DeObject {
 				daoFactory.getFormDao().saveOrUpdateRecordEntry(re);
 			} else if (this.id != null) {
 				re = daoFactory.getFormDao().getRecordEntry(fcId, getObjectId(), getId());
-				re.setFormStatus(getDataEntryStatus());
+				if (re != null) {
+					re.setFormStatus(getDataEntryStatus());
+				}
 			}
 
 			attrs.clear();
