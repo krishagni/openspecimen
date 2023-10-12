@@ -28,12 +28,13 @@ public class SavedQueryDaoImpl extends AbstractDao<SavedQuery> implements SavedQ
 		
 	@Override
 	public Long getQueriesCount(ListSavedQueriesCriteria crit) {
-		return getSavedQueriesListQuery(crit).distinct().getCount("s.id");
+		Criteria<Long> query = getSavedQueriesListQuery(crit, Long.class);
+		return query.select(query.distinctCount("s.id")).uniqueResult();
 	}
 
 	@Override
 	public List<SavedQuerySummary> getQueries(ListSavedQueriesCriteria crit) {
-		Criteria<Object[]> query = getSavedQueriesListQuery(crit)
+		Criteria<Object[]> query = getSavedQueriesListQuery(crit, Object[].class)
 			.leftJoin("s.lastUpdatedBy", "m");
 		addProjectionFields(query.addOrder(query.desc("s.id")));
 		return getSavedQueries(query, crit.startAt(), crit.maxResults());
@@ -175,8 +176,8 @@ public class SavedQueryDaoImpl extends AbstractDao<SavedQuery> implements SavedQ
 		return rows.stream().map(this::getSavedQuerySummary).collect(Collectors.toList());
 	}
 
-	private Criteria<Object[]> getSavedQueriesListQuery(ListSavedQueriesCriteria crit) {
-		Criteria<Object[]> query = createCriteria(SavedQuery.class, Object[].class, "s");
+	private <T> Criteria<T> getSavedQueriesListQuery(ListSavedQueriesCriteria crit, Class<T> returnType) {
+		Criteria<T> query = createCriteria(SavedQuery.class, returnType, "s");
 		query.join("s.createdBy", "c")
 			.leftJoin("c.institute", "i") // system users do not have institute
 			.leftJoin("s.folders", "f")

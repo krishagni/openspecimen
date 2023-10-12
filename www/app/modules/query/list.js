@@ -91,12 +91,6 @@ angular.module('os.query.list', ['os.query.models'])
       );
     };
 
-    function loadFolderQueries(folder) {
-      $scope.folders.selectedFolder = folder;
-      $scope.filterOpts = {searchString: ''};
-      loadQueries($scope.filterOpts);
-    };
-
     function getQueriesCount() {
       if (!$scope.folders.selectedFolder || $scope.folders.selectedFolder.id <= 0) {
         var userId = null;
@@ -152,7 +146,7 @@ angular.module('os.query.list', ['os.query.models'])
 
       mi.result.then(
         function(result) {
-          loadFolderQueries($scope.folders.selectedFolder);     
+          loadQueries($scope.filterOpts);
           Alerts.success('queries.query_deleted', {queryTitle: query.title});
         }
       );

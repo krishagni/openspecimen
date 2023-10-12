@@ -11,7 +11,7 @@
   </div>
 
   <div class="os-page-commands">
-    <div class="left">
+    <div class="left" ng-if="!selectedQueries || selectedQueries.length == 0">
       <button class="default" show-if-allowed="permOpts.create" ui-sref="query-addedit({queryId: undefined})">
         <span class="fa fa-plus"></span>
         <span translate="common.buttons.create">Create</span>
@@ -24,7 +24,10 @@
         <span class="fa fa-list"></span>
         <span translate="queries.audit_logs.view_logs">View Audit Logs</span>
       </button>
-      <div dropdown ng-if="selectedQueries.length > 0" class="os-inline-btn">
+      <os-help class="os-btns btn default" link="query_help_link"></os-help>
+    </div>
+    <div class="left" ng-if="selectedQueries.length > 0">
+      <div dropdown class="os-inline-btn">
         <button class="default dropdown-toggle">
           <span class="fa fa-folder"></span>
           <span translate="queries.assign">Assign</span>
@@ -58,7 +61,6 @@
           </li>
         </ul>
       </div>
-      <os-help class="os-btns btn default" link="query_help_link"></os-help>
     </div>
     <div class="right">
       <button os-right-drawer-toggle class="default">
@@ -74,6 +76,9 @@
         <div ng-include src="'query_folders.html'"></div>
       </div>
       <div class="os-col-80">
+        <div class="alert alert-info os-lean-box" ng-show="selectedQueries.length > 0">
+          <span> {{'common.items_selected_info' | translate: {count: selectedQueries.length} }} </span>
+        </div>
         <div ng-include src="'query_list.html'"></div>
       </div>
     </div>
