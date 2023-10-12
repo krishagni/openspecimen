@@ -308,7 +308,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		if (CollectionUtils.isNotEmpty(criteria.entities())) {
 			Junction orCond = query.disjunction();
 			for (String entity : criteria.entities()) {
-				orCond.add(query.like("re.entityName", entity));
+				orCond.add(query.like("re.entityName", "%." + entity, false));
 			}
 
 			query.add(orCond);

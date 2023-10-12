@@ -277,8 +277,17 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 	}
 
 	public Restriction like(String attribute, String pattern) {
-		return Restriction.of(builder.like(getExpression(attribute), "%" + pattern + "%"));
+		return like(attribute, pattern, true);
 	}
+
+	public Restriction like(String attribute, String pattern, boolean addWildCards) {
+		if (addWildCards) {
+			pattern = "%" + pattern + "%";
+		}
+
+		return Restriction.of(builder.like(getExpression(attribute), pattern));
+	}
+
 	public Restriction ilike(String attribute, String pattern) {
 		return ilike(getExpression(attribute), pattern);
 	}
