@@ -962,6 +962,7 @@
     "sending_site": "Sending Site",
     "sending_site_required": "Sending Site is mandatory",
     "ship": "Ship",
+    "shipment": "Shipment",
     "shipment_request": "Shipment Request",
     "shipment_requested": "Shipment request '{name}' submitted.",
     "shipped": "Shipment '{name}' shipped.",

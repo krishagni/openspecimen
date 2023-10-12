@@ -261,6 +261,7 @@ export default {
         }
       } else {
         const shipment = dataCtx.shipment = {
+          name: this._autoGenerateName({}),
           type: this.shipmentType || 'SPECIMEN',
           shippedDate: new Date(),
           status: 'Pending',
@@ -327,11 +328,14 @@ export default {
     },
 
     handleInput: function({field, value, data}) {
-      Object.assign(this.dataCtx, data);
-      if (field.name == 'shipment.receivingInstitute' && this.dataCtx.receivingInstitute != value) {
-        this.dataCtx.receivingInstitute = value;
-        this.dataCtx.shipment.receivingSite = undefined;
-        this.dataCtx.shipment.notifyUsers = [];
+      const dataCtx = this.dataCtx;
+      Object.assign(dataCtx, data);
+      if (field.name == 'shipment.receivingInstitute' && dataCtx.receivingInstitute != value) {
+        dataCtx.receivingInstitute = value;
+        dataCtx.shipment.receivingSite = undefined;
+        dataCtx.shipment.notifyUsers = [];
+      } else if (field.name == 'shipment.request') {
+        dataCtx.shipment.name = this._autoGenerateName(dataCtx.shipment);
       }
     },
 
@@ -511,6 +515,13 @@ export default {
 
     cancel: function() {
       routerSvc.back();
+    },
+
+
+    _autoGenerateName: function(shipment) {
+      const dateFmt = this.$ui.global.locale.shortDateFmt;
+      const prefix = this.$t('shipments.' + ((!shipment || !shipment.request) ? 'shipment' : 'shipment_request'));
+      return prefix.replaceAll(/\s+/g, '_') + '_' + util.formatDate(new Date(), dateFmt + '_HH:mm:ss');
     }
   }
 }
