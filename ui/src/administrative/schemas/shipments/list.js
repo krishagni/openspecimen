@@ -133,6 +133,7 @@ export default {
         selectProp: 'value',
         displayProp: 'value',
         options: [
+          { value: 'Requested' },
           { value: 'Shipped' },
           { value: 'Received' },
           { value: 'Pending' }
