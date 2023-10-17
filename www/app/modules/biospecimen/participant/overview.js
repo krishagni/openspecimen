@@ -2,7 +2,7 @@
 angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
   .controller('ParticipantOverviewCtrl', function(
     $scope, $state, $stateParams, $injector, userRole, hasSde, hasDict, hasFieldsFn,
-    storePhi, cpDict, visitsTab, cp, cpr, consents, visits, tmWorkflowId, collectPendingSpmnsWfId,
+    storePhi, cpDict, visitsTab, cp, cpr, consents, visits, tmWorkflowId, workflows,
     Visit, CollectSpecimensSvc, SpecimenLabelPrinter, ExtensionsUtil, Util, Alerts, VueApp) {
 
     function init() {
@@ -133,11 +133,14 @@ angular.module('os.biospecimen.participant.overview', ['os.biospecimen.models'])
       CollectSpecimensSvc.collectVisit(retSt, cp, cpr.id, visit);
     }
 
-    $scope.collectPending = function(visit) {
-      if (collectPendingSpmnsWfId > 0 && $injector.has('WorkflowInstance')) {
-        var wfInstance = $injector.get('WorkflowInstance');
+    $scope.newVisit = function(visit) {
+      $state.go('visit-addedit', {visitId: visit.id, eventId: visit.eventId, newVisit: true});
+    }
 
-        var workflow = {id: collectPendingSpmnsWfId};
+    $scope.collectPending = function(visit) {
+      if (workflows.collectPendingSpecimens > 0) {
+        var wfInstance = $injector.get('WorkflowInstance');
+        var workflow = {id: workflows.collectPendingSpecimens};
         var inputItems = [{cpr: cpr, visit: visit}];
         new wfInstance({workflow: workflow, inputItems: inputItems}).$saveOrUpdate().then(
           function(instance) {

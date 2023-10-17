@@ -29,9 +29,11 @@ angular.module('os.biospecimen.participant',
                   '  <span ng-if="cp.draftMode && cpViewCtx.versioningEnabled" class="os-cp-draft-marker">DRAFT</span> ' +
                   '  <div ui-view></div> ' +
                   '</div>',
-        controller: function($scope, cp, cpViewCtx, SettingUtil) {
+        controller: function($scope, cp, cpViewCtx, workflows, SettingUtil) {
           $scope.cp = cp;
           $scope.cpViewCtx = cpViewCtx;
+          cpViewCtx.workflows = workflows;
+
           cpViewCtx.codingEnabled = $scope.global.appProps.cp_coding_enabled;
 
           var sites = cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
@@ -264,6 +266,30 @@ angular.module('os.biospecimen.participant',
           storeAllowed: function(cp, authInit, AuthorizationService) {
             var sites = cp.cpSites.map(function(cpSite) { return cpSite.siteName; });
             return AuthorizationService.isAllowed({sites: sites, resource: 'StorageContainer', operations: ['Read']});
+          },
+
+          hasWorkflowModule: function($injector) {
+            return $injector.has('WorkflowInstance');
+          },
+
+          workflows: function(cp, hasWorkflowModule, CpConfigSvc) {
+            if (!hasWorkflowModule) {
+              return {};
+            }
+
+            return CpConfigSvc.getWorkflowData(cp.id, 'workflows').then(
+              function(workflows) {
+                if (Object.keys(workflows || {}).length > 0) {
+                  return workflows;
+                }
+
+                return CpConfigSvc.getWorkflowData(-1, 'workflows').then(
+                  function(workflows) {
+                    return workflows || {};
+                  }
+                );
+              }
+            );
           }
         },
         parent: 'signed-in',
@@ -798,9 +824,13 @@ angular.module('os.biospecimen.participant',
               }
             );
           },
-          tmWorkflowId: function($injector, cp, cpr, hasConsentRules, CpConfigSvc) {
+          tmWorkflowId: function($injector, cp, cpr, hasConsentRules, workflows, CpConfigSvc) {
             if (!!cpr.id || !$injector.has('Workflow') || hasConsentRules) {
               return -1;
+            }
+
+            if (workflows.addVisit > 0) {
+              return workflows.addVisit;
             }
 
             return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
@@ -911,32 +941,13 @@ angular.module('os.biospecimen.participant',
 
             return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
               function(data) {
-                if (data && data.workflowId > 0) {
-                  return data.workflowId;
+                if (data && (data.workflowId > 0 || data.visitCollectionWorkflowId > 0)) {
+                  return data.workflowId || data.visitCollectionWorkflowId;
                 }
 
                 return CpConfigSvc.getWorkflowData(-1, 'specimenCollection').then(
                   function(data) {
-                    return data && data.workflowId;
-                  }
-                );
-              }
-            );
-          },
-          collectPendingSpmnsWfId: function($injector, cp, cpr, CpConfigSvc) {
-            if (!$injector.has('Workflow')) {
-              return -1;
-            }
-
-            return CpConfigSvc.getWorkflowData(cp.id, 'specimenCollection').then(
-              function(data) {
-                if (data && data.pendingCollectionWorkflowId > 0) {
-                  return data.pendingCollectionWorkflowId;
-                }
-
-                return CpConfigSvc.getWorkflowData(-1, 'specimenCollection').then(
-                  function(data) {
-                    return data && data.pendingCollectionWorkflowId;
+                    return data && (data.workflowId || data.visitCollectionWorkflowId);
                   }
                 );
               }

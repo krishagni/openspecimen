@@ -1,8 +1,9 @@
 
 angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
   .controller('ParticipantListCtrl', function(
-    $scope, $state, cp, twoStepReg, mobileDataEntryEnabled, addParticipantWorkflow,
-    ParticipantsHolder, PluginReg, DeleteUtil, CollectionProtocolRegistration) {
+    $scope, $state, $injector, cp, twoStepReg, mobileDataEntryEnabled,
+    addParticipantWorkflow, hasWorkflowModule, workflows,
+    ParticipantsHolder, PluginReg, DeleteUtil, CollectionProtocolRegistration, VueApp) {
 
     var ctrl = this;
 
@@ -27,7 +28,8 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
         headerActionsTmpl: 'modules/biospecimen/participant/list-pager.html',
         showPrimaryBtnDd: !!cp.bulkPartRegEnabled || (PluginReg.getTmpls('participant-list', 'primary-button').length > 0),
         showRapidRegistration: addParticipantWorkflow == 'rapid',
-        mobileDataEntryEnabled: mobileDataEntryEnabled
+        mobileDataEntryEnabled: mobileDataEntryEnabled,
+        showAddParticipantWf: hasWorkflowModule && workflows.addParticipant > 0
       });
     }
 
@@ -39,6 +41,15 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
       ctrl.listCtrl = $scope.ctx.listCtrl = listCtrl;
       $scope.listViewCtx.showSearch = listCtrl.haveFilters;
       $scope.listViewCtx.pagerOpts  =  listCtrl.pagerOpts;
+    }
+
+    ctrl.navToAddParticipantWf = function() {
+      var WorkflowInstance = $injector.get('WorkflowInstance');
+      new WorkflowInstance({workflow: {id: workflows.addParticipant}, params: {cpId: cp.id}}).$saveOrUpdate().then(
+        function(instance) {
+          VueApp.setVueView('task-manager/instances/' + instance.id, {});
+        }
+      );
     }
 
     ctrl.bulkEdit = function() {

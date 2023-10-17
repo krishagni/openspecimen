@@ -115,7 +115,7 @@
                           </a>
                         </li>
                         <li show-if-allowed="visitResource.updateOpts">
-                          <a ui-sref="visit-addedit({visitId: visit.id, eventId: visit.eventId, newVisit: true})"> 
+                          <a ng-click="newVisit(visit)">
                             <i class="fa fa-repeat"></i>
                             <span translate="visits.ctx_menu.new_visit">New Visit</span>
                           </a>
@@ -336,7 +336,7 @@
         </a>
       </li>
       <li show-if-allowed="visitResource.updateOpts">
-        <a ui-sref="visit-addedit({visitId: visit.id, eventId: visit.eventId, newVisit: true})"> 
+        <a ng-click="newVisit(visit)">
           <span class="fa fa-repeat"></span>
           <span translate="visits.ctx_menu.new_visit">New Visit</span>
         </a>

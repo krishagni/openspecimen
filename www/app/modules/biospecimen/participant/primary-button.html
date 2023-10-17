@@ -1,13 +1,22 @@
 <div ng-if="!cp.specimenCentric && listViewCtx.showPrimaryBtnDd"
   dropdown class="os-inline-btn" os-show-if-multiple-options-present>
 
-  <button class="default single-option" ng-if="cp.activityStatus != 'Closed' && !listViewCtx.showRapidRegistration"
+  <button class="default single-option"
+    ng-if="cp.activityStatus != 'Closed' && listViewCtx.showAddParticipantWf"
+    show-if-allowed="partRegOpts" ng-click="listViewCtx.ctrl.navToAddParticipantWf()">
+    <span class="fa fa-plus"></span>
+    <span translate="participant.buttons.register">Register</span>
+  </button>
+
+  <button class="default single-option"
+    ng-if="cp.activityStatus != 'Closed' && !listViewCtx.showRapidRegistration && !listViewCtx.showAddParticipantWf"
     show-if-allowed="partRegOpts" ui-sref="participant-addedit({cprId: -1, cpId: cp.id})">
     <span class="fa fa-plus"></span>
     <span translate="participant.buttons.register">Register</span>
   </button>
 
-  <button class="default single-option" ng-if="cp.activityStatus != 'Closed' && listViewCtx.showRapidRegistration"
+  <button class="default single-option"
+    ng-if="cp.activityStatus != 'Closed' && listViewCtx.showRapidRegistration && !listViewCtx.showAddParticipantWf"
     show-if-allowed="partRegOpts"
     ui-sref="rde-collect-specimens({startAt: 'rde-collect-participant-details', cpId: cp.id})">
     <span class="fa fa-plus"></span>
@@ -16,25 +25,32 @@
 
   <button class="default dropdown-toggle" title="{{'participant.tooltip.register' | translate}}">
     <span class="fa fa-plus"></span>
-    <span translate="participant.buttons.register" ng-show="!listViewCtx.showRapidRegistration">Register</span>
-    <span translate="participant.buttons.register_or_select" ng-show="!!listViewCtx.showRapidRegistration">Register</span>
+    <span translate="participant.buttons.register"
+      ng-show="!listViewCtx.showRapidRegistration && !listViewCtx.showAddParticipantWf">Register</span>
+    <span translate="participant.buttons.register_or_select"
+      ng-show="listViewCtx.showRapidRegistration || listViewCtx.showAddParticipantWf">Register</span>
   </button>
 
   <ul class="dropdown-menu">
-    <li ng-if="cp.activityStatus != 'Closed' && !listViewCtx.showRapidRegistration" show-if-allowed="partRegOpts">
+    <li ng-if="cp.activityStatus != 'Closed' && listViewCtx.showAddParticipantWf" show-if-allowed="partRegOpts">
+      <a ng-click="listViewCtx.ctrl.navToAddParticipantWf()">
+        <span class="fa fa-users"></span>
+        <span translate="participant.buttons.multiple">Multiple</span>
+      </a>
+    </li>
+    <li ng-if="cp.activityStatus != 'Closed' && !listViewCtx.showRapidRegistration && !listViewCtx.showAddParticipantWf" show-if-allowed="partRegOpts">
       <a ui-sref="participant-addedit({cprId: -1, cpId: cp.id})">
         <span class="fa fa-user"></span>
         <span translate="participant.buttons.single">Single</span>
       </a>
     </li>
-    <li ng-if="cp.activityStatus != 'Closed' && !!cp.bulkPartRegEnabled && !listViewCtx.showRapidRegistration"
-      show-if-allowed="partRegOpts">
+    <li ng-if="cp.activityStatus != 'Closed' && !!cp.bulkPartRegEnabled && !listViewCtx.showAddParticipantWf && !listViewCtx.showRapidRegistration" show-if-allowed="partRegOpts">
       <a ui-sref="participant-bulkreg">
         <span class="fa fa-users"></span>
         <span translate="participant.buttons.multiple">Multiple</span>
       </a>
     </li>
-    <li ng-if="cp.activityStatus != 'Closed' && listViewCtx.showRapidRegistration" show-if-allowed="partRegOpts">
+    <li ng-if="cp.activityStatus != 'Closed' && listViewCtx.showRapidRegistration && !listViewCtx.showAddParticipantWf" show-if-allowed="partRegOpts">
       <a ui-sref="rde-collect-specimens({startAt: 'rde-collect-participant-details', cpId: cp.id})">
         <span class="fa fa-users"></span>
         <span translate="participant.buttons.multiple">Multiple</span>
@@ -48,6 +64,14 @@
 <button ng-if="cp.activityStatus != 'Closed' && !cp.specimenCentric && !listViewCtx.showPrimaryBtnDd"
   show-if-allowed="partRegOpts" class="default" title="{{'participant.tooltip.register' | translate}}"
   ui-sref="participant-addedit({cprId: -1, cpId: cp.id})">
+  <span class="fa fa-plus"></span>
+  <span translate="participant.buttons.register">Register</span>
+</button>
+
+<button ng-if="cp.activityStatus != 'Closed' && !cp.specimenCentric && !listViewCtx.showPrimaryBtnDd &&
+  listViewCtx.showAddParticipantWf" show-if-allowed="partRegOpts" class="default"
+  title="{{'participant.tooltip.register' | translate}}"
+  ng-click="listViewCtx.ctrl.navToAddParticipantWf()">
   <span class="fa fa-plus"></span>
   <span translate="participant.buttons.register">Register</span>
 </button>
