@@ -20,7 +20,11 @@ public class ParticipantSummary {
 
 	private String emailAddress;
 
+	private Boolean emailOptIn;
+
 	private String phoneNumber;
+
+	private Boolean textOptIn;
 
 	private Date birthDate;
 
@@ -80,12 +84,28 @@ public class ParticipantSummary {
 		this.emailAddress = emailAddress;
 	}
 
+	public Boolean getEmailOptIn() {
+		return emailOptIn;
+	}
+
+	public void setEmailOptIn(Boolean emailOptIn) {
+		this.emailOptIn = emailOptIn;
+	}
+
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+
+	public Boolean getTextOptIn() {
+		return textOptIn;
+	}
+
+	public void setTextOptIn(Boolean textOptIn) {
+		this.textOptIn = textOptIn;
 	}
 
 	public Date getBirthDate() {
@@ -109,7 +129,9 @@ public class ParticipantSummary {
 		result.setEmpi(p.getEmpi());
 		result.setUid(p.getUid());
 		result.setEmailAddress(p.getEmailAddress());
+		result.setEmailOptIn(p.isEmailOptIn());
 		result.setPhoneNumber(p.getPhoneNumber());
+		result.setTextOptIn(p.isTextOptIn());
 		result.setBirthDate(p.getBirthDate());
 		return result;
 	}

@@ -5,17 +5,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.hibernate.envers.RelationTargetAuditMode;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
@@ -48,7 +45,11 @@ public class Participant extends BaseExtensionEntity {
 
 	private String emailAddress;
 
+	private Boolean emailOptIn;
+
 	private String phoneNumber;
+
+	private Boolean textOptIn;
 
 	private PermissibleValue gender;
 
@@ -136,12 +137,28 @@ public class Participant extends BaseExtensionEntity {
 		}
 	}
 
+	public boolean isEmailOptIn() {
+		return Boolean.TRUE.equals(emailOptIn);
+	}
+
+	public void setEmailOptIn(Boolean emailOptIn) {
+		this.emailOptIn = emailOptIn;
+	}
+
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+
+	public boolean isTextOptIn() {
+		return Boolean.TRUE.equals(textOptIn);
+	}
+
+	public void setTextOptIn(Boolean textOptIn) {
+		this.textOptIn = textOptIn;
 	}
 
 	public PermissibleValue getGender() {
@@ -284,7 +301,9 @@ public class Participant extends BaseExtensionEntity {
 		setUid(participant.getUid());
 		setEmpi(participant.getEmpi());
 		setEmailAddress(participant.getEmailAddress());
+		setEmailOptIn(participant.isEmailOptIn());
 		setPhoneNumber(participant.getPhoneNumber());
+		setTextOptIn(participant.isTextOptIn());
 		setActivityStatus(participant.getActivityStatus());
 		setSexGenotype(participant.getSexGenotype());
 		setVitalStatus(participant.getVitalStatus());

@@ -34,8 +34,18 @@
     </li>
 
     <li class="item">
+      <strong class="key key-sm" translate="participant.email_opt_in">Receive Emails</strong>
+      <span class="value value-md"> {{cpr.participant.emailOptIn | osBoolValue: 'common.yes': 'common.no'}} </span>
+    </li>
+
+    <li class="item">
       <strong class="key key-sm" translate="participant.phone_number">Phone Number</strong>
       <span class="value value-md"> {{cpr.participant.phoneNumber | osNoValue}} </span>
+    </li>
+
+    <li class="item">
+      <strong class="key key-sm" translate="participant.text_opt_in">Receive SMSes</strong>
+      <span class="value value-md"> {{cpr.participant.textOptIn | osBoolValue: 'common.yes': 'common.no'}} </span>
     </li>
 
     <li class="item">

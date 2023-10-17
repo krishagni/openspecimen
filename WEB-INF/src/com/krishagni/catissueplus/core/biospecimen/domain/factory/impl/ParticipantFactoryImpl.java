@@ -395,11 +395,23 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 
 			participant.setEmailAddress(detail.getEmailAddress());
 		}
+
+		if (StringUtils.isBlank(participant.getEmailAddress())) {
+			participant.setEmailOptIn(false);
+		} else if (!partial || detail.isAttrModified("emailOptIn")) {
+			participant.setEmailOptIn(detail.getEmailOptIn());
+		}
 	}
 
 	private void setPhoneNumber(ParticipantDetail detail, Participant participant, boolean partial, OpenSpecimenException ose) {
 		if (!partial || detail.isAttrModified("phoneNumber")) {
 			participant.setPhoneNumber(detail.getPhoneNumber());
+		}
+
+		if (StringUtils.isBlank(participant.getPhoneNumber())) {
+			participant.setTextOptIn(false);
+		} else if (!partial || detail.isAttrModified("textOptIn")) {
+			participant.setTextOptIn(detail.getTextOptIn());
 		}
 	}
 

@@ -724,8 +724,10 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 				} else if ("datetime".equals(field.getType())) {
 					result = getDateTimeString(value);
 				} else if ("defile".equals(field.getType()) && value instanceof Map) {
-					Map<String, String> fcv = (Map<String, String>)value;
+					Map<String, String> fcv = (Map<String, String>) value;
 					result = fcv.get("filename");
+				} else if ("boolean".equals(field.getType()) && value instanceof Boolean) {
+					result = MessageUtil.getInstance().getBooleanMsg((Boolean) value);
 				} else {
 					result = Objects.toString(value, "");
 				}

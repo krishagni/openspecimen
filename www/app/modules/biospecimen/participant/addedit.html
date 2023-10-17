@@ -426,6 +426,17 @@
       </div>
     </div>
 
+    <div class="form-group" style="margin-top: -20px;" ng-if="cpr.participant.emailAddress">
+      <div class="col-xs-offset-3 col-xs-6 os-text-checkbox">
+        <div class="checkbox">
+          <os-checkbox ng-model="cpr.participant.emailOptIn"></os-checkbox>
+        </div>
+        <div class="message os-ctrl-padding-top">
+          <span translate="participant.email_opt_in">Do you want to receive emails?</span>
+        </div>
+      </div>
+    </div>
+
     <div class="form-group">
       <label class="col-xs-3 control-label">
         <span translate="participant.phone_number">Phone Number</span>
@@ -433,6 +444,17 @@
       <div class="col-xs-6">
         <input type="text" ng-model="cpr.participant.phoneNumber" class="form-control"
           placeholder="{{'participant.phone_number' | translate}}"/>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top: -20px;" ng-if="cpr.participant.phoneNumber">
+      <div class="col-xs-offset-3 col-xs-6 os-text-checkbox">
+        <div class="checkbox">
+          <os-checkbox ng-model="cpr.participant.textOptIn"></os-checkbox>
+        </div>
+        <div class="message os-ctrl-padding-top">
+          <span translate="participant.text_opt_in">Do you want to receive text messages?</span>
+        </div>
       </div>
     </div>
 

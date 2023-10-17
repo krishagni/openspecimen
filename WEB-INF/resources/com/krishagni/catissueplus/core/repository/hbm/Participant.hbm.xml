@@ -23,7 +23,11 @@
 
     <property name="emailAddress" column="EMAIL_ADDRESS"/>
 
+    <property name="emailOptIn" column="EMAIL_OPT_IN" />
+
     <property name="phoneNumber" column="PHONE_NUMBER" />
+
+    <property name="textOptIn" column="TEXT_OPT_IN" />
 
     <property name="birthDate" column="BIRTH_DATE" type="date" />
 

@@ -51,6 +51,14 @@
       </textField>
     </row>
     <row>
+      <booleanCheckBox>
+        <name>emailOptIn</name>
+        <udn>emailOptIn</udn>
+        <caption>#getMessage("participant_email_opt_in")</caption>
+        <column>EMAIL_OPT_IN</column>
+      </booleanCheckBox>
+    </row>
+    <row>
       <textField>
         <name>phoneNumber</name>
         <udn>phoneNumber</udn>
@@ -58,6 +66,14 @@
         <column>PHONE_NUMBER</column>
         <phi>true</phi>
       </textField>
+    </row>
+    <row>
+      <booleanCheckBox>
+        <name>textOptIn</name>
+        <udn>textOptIn</udn>
+        <caption>#getMessage("participant_text_opt_in")</caption>
+        <column>TEXT_OPT_IN</column>
+      </booleanCheckBox>
     </row>
     <row>
       <datePicker>

@@ -37,7 +37,11 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 
 	private String emailAddress;
 
+	private Boolean emailOptIn;
+
 	private String phoneNumber;
+
+	private Boolean textOptIn;
 
 	private Date birthDate;
 
@@ -139,12 +143,28 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		this.emailAddress = emailAddress;
 	}
 
+	public Boolean getEmailOptIn() {
+		return emailOptIn;
+	}
+
+	public void setEmailOptIn(Boolean emailOptIn) {
+		this.emailOptIn = emailOptIn;
+	}
+
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+
+	public Boolean getTextOptIn() {
+		return textOptIn;
+	}
+
+	public void setTextOptIn(Boolean textOptIn) {
+		this.textOptIn = textOptIn;
 	}
 
 	public Date getBirthDate() {
@@ -355,7 +375,9 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		result.setLastName(excludePhi ? "###" : participant.getLastName());
 		result.setMiddleName(excludePhi ? "###" : participant.getMiddleName());
 		result.setEmailAddress(excludePhi ? "###" : participant.getEmailAddress());
+		result.setEmailOptIn(participant.isEmailOptIn());
 		result.setPhoneNumber(excludePhi ? "###" : participant.getPhoneNumber());
+		result.setTextOptIn(participant.isTextOptIn());
 		result.setActivityStatus(participant.getActivityStatus());
 		result.setBirthDate(excludePhi ? null : participant.getBirthDate());
 		result.setDeathDate(excludePhi ? null : participant.getDeathDate());

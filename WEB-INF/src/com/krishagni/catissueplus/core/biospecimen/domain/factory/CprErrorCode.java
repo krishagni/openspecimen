@@ -49,7 +49,11 @@ public enum CprErrorCode implements ErrorCode {
 
 	NO_EMAIL_ID,
 
+	NO_EMAIL_ID_OR_OPT_IN,
+
 	NO_PHONE,
+
+	NO_PHONE_OR_OPT_IN,
 
 	NO_EMAIL_ID_OR_PHONE,
 

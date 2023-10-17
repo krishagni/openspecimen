@@ -19,8 +19,20 @@
 </field>
 
 <field>
+  <type>boolean</type>
+  <caption>#getMessage("participant_email_opt_in")</caption>
+  <attribute>emailOptIn</attribute>
+</field>
+
+<field>
   <caption>#getMessage("participant_phone_number")</caption>
   <attribute>phoneNumber</attribute>
+</field>
+
+<field>
+  <type>boolean</type>
+  <caption>#getMessage("participant_text_opt_in")</caption>
+  <attribute>textOptIn</attribute>
 </field>
 
 <field>

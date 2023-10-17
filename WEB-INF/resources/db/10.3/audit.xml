@@ -53,4 +53,13 @@
       <column name="allowEditsBySharedUsers_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Email and Text Opt In">
+    <addColumn tableName="CATISSUE_PARTICIPANT_AUD">
+      <column name="EMAIL_OPT_IN" type="${boolean.type}" />
+      <column name="emailOptIn_MOD" type="${boolean.type}" />
+      <column name="TEXT_OPT_IN" type="${boolean.type}" />
+      <column name="textOptIn_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

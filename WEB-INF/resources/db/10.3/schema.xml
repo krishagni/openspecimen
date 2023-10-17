@@ -17,171 +17,6 @@
     </addColumn>
   </changeSet>
 
-  <changeSet author="vpawar" id="Part 1: Trigger to keep the queries registration table updated: New Registration" dbms="mysql" runOnChange="true">
-    <sql>
-      drop trigger if exists os_cpr_recs_ins;
-    </sql>
-
-    <sql endDelimiter="//">
-      create trigger os_cpr_recs_ins after insert on catissue_coll_prot_reg
-      for each row
-      begin
-        insert into
-          os_cpr_recs(
-            cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
-            email_address, phone_number, dob, ssn, activity_status, gender_id, registration_date,
-            ppid, vital_status_id, death_date, empi_id, barcode, consent_sign_date,
-            consent_witness, consent_comments, consent_document_name, external_subject_id,
-            site_id, creation_time, creator, update_time, updater, data_entry_status
-          )
-        select
-          cpr.identifier as cpr_id,
-          cpr.collection_protocol_id as cp_id,
-          cpr.participant_id,
-          p.first_name,
-          p.middle_name,
-          p.last_name,
-          p.email_address,
-          p.phone_number,
-          p.birth_date as dob,
-          p.social_security_number as ssn,
-          cpr.activity_status,
-          p.gender_id,
-          cpr.registration_date,
-          cpr.protocol_participant_id as ppid,
-          p.vital_status_id,
-          p.death_date,
-          p.empi_id,
-          cpr.barcode,
-          cpr.consent_sign_date,
-          cpr.consent_witness,
-          cpr.consent_comments,
-          cpr.consent_document_name,
-          cpr.external_subject_id,
-          cpr.site_id,
-          cpr.creation_time,
-          cpr.creator,
-          cpr.update_time,
-          cpr.updater,
-          cpr.data_entry_status
-        from
-          catissue_coll_prot_reg cpr
-          inner join catissue_participant p on p.identifier = cpr.participant_id
-        where
-          cpr.identifier = new.identifier;
-      end;
-      //
-    </sql>
-  </changeSet>
-
-  <changeSet author="vpawar" id="Part 1: Trigger to keep the queries registration table updated: New Registration" dbms="oracle" runOnChange="true">
-    <sql endDelimiter="//" splitStatements="false">
-      create or replace trigger os_cpr_recs_ins after insert on catissue_coll_prot_reg
-      for each row
-      begin
-        insert into
-          os_cpr_recs(
-            cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
-            email_address, phone_number, dob, ssn, activity_status, gender_id, registration_date,
-            ppid, vital_status_id, death_date, empi_id, barcode, consent_sign_date,
-            consent_witness, consent_comments, consent_document_name, external_subject_id,
-            site_id, creation_time, creator, update_time, updater, data_entry_status
-         )
-        select
-          :new.identifier as cpr_id,
-          :new.collection_protocol_id as cp_id,
-          :new.participant_id,
-          p.first_name,
-          p.middle_name,
-          p.last_name,
-          p.email_address,
-          p.phone_number,
-          p.birth_date as dob,
-          p.social_security_number as ssn,
-          :new.activity_status,
-          p.gender_id,
-          :new.registration_date,
-          :new.protocol_participant_id as ppid,
-          p.vital_status_id,
-          p.death_date,
-          p.empi_id,
-          :new.barcode,
-          :new.consent_sign_date,
-          :new.consent_witness,
-          :new.consent_comments,
-          :new.consent_document_name,
-          :new.external_subject_id,
-          :new.site_id,
-          :new.creation_time,
-          :new.creator,
-          :new.update_time,
-          :new.updater,
-          :new.data_entry_status
-        from
-          catissue_participant p
-        where
-          p.identifier = :new.participant_id;
-      end;
-      //
-    </sql>
-  </changeSet>
-
-  <changeSet author="vpawar" id="Part 3: Trigger to keep the queries registration table updated: Update Participant" dbms="mysql" runOnChange="true">
-    <sql>
-      drop trigger if exists os_cpr_recs_part_update;
-    </sql>
-
-    <sql endDelimiter="//">
-      create trigger os_cpr_recs_part_update after update on catissue_participant
-      for each row
-      begin
-        update
-          os_cpr_recs
-        set
-          first_name = new.first_name,
-          middle_name = new.middle_name,
-          last_name = new.last_name,
-          email_address = new.email_address,
-          phone_number = new.phone_number,
-          dob = new.birth_date,
-          ssn = new.social_security_number,
-          gender_id = new.gender_id,
-          vital_status_id = new.vital_status_id,
-          death_date = new.death_date,
-          empi_id = new.empi_id
-        where
-          participant_id = new.identifier;
-      end;
-      //
-    </sql>
-  </changeSet>
-
-  <changeSet author="vpawar" id="Part 3: Trigger to keep the queries registration table updated: Update Participant" dbms="oracle" runOnChange="true">
-    <sql endDelimiter="//" splitStatements="false">
-      create or replace trigger os_cpr_recs_part_update after update on catissue_participant
-      for each row
-      begin
-        update
-          os_cpr_recs
-        set
-          first_name = :new.first_name,
-          middle_name = :new.middle_name,
-          last_name = :new.last_name,
-          email_address = :new.email_address,
-          phone_number = :new.phone_number,
-          dob = :new.birth_date,
-          ssn = :new.social_security_number,
-          gender_id = :new.gender_id,
-          vital_status_id = :new.vital_status_id,
-          death_date = :new.death_date,
-          empi_id = :new.empi_id
-        where
-          participant_id = :new.identifier;
-      end;
-      //
-    </sql>
-  </changeSet>
-
   <changeSet author="vpawar" id="Dimensionless container types - no. of rows is optional">
     <dropNotNullConstraint tableName="OS_CONTAINER_TYPES" columnName="NO_OF_ROWS" columnDataType="${int.type}" />
   </changeSet>
@@ -257,5 +92,208 @@
     <addColumn tableName="CATISSUE_QUERY_FOLDERS">
       <column name="ALLOW_EDITS_BY_SHARED_USERS" type="${boolean.type}" defaultValueBoolean="false" />
     </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Email and Text Opt In">
+    <addColumn tableName="CATISSUE_PARTICIPANT">
+      <column name="EMAIL_OPT_IN" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="TEXT_OPT_IN" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query: Registration table with email / text opt-in settings">
+    <addColumn tableName="OS_CPR_RECS">
+      <column name="EMAIL_OPT_IN" type="${boolean.type}" />
+      <column name="TEXT_OPT_IN" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Part 1: Trigger to keep the queries registration table updated: New Registration" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_cpr_recs_ins;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_cpr_recs_ins after insert on catissue_coll_prot_reg
+      for each row
+      begin
+        insert into
+          os_cpr_recs(
+            cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
+            email_address, email_opt_in, phone_number, text_opt_in, dob, ssn,
+            activity_status, gender_id, registration_date,
+            ppid, vital_status_id, death_date, empi_id, barcode, consent_sign_date,
+            consent_witness, consent_comments, consent_document_name, external_subject_id,
+            site_id, creation_time, creator, update_time, updater, data_entry_status
+          )
+        select
+          cpr.identifier as cpr_id,
+          cpr.collection_protocol_id as cp_id,
+          cpr.participant_id,
+          p.first_name,
+          p.middle_name,
+          p.last_name,
+          p.email_address,
+          p.email_opt_in,
+          p.phone_number,
+          p.text_opt_in,
+          p.birth_date as dob,
+          p.social_security_number as ssn,
+          cpr.activity_status,
+          p.gender_id,
+          cpr.registration_date,
+          cpr.protocol_participant_id as ppid,
+          p.vital_status_id,
+          p.death_date,
+          p.empi_id,
+          cpr.barcode,
+          cpr.consent_sign_date,
+          cpr.consent_witness,
+          cpr.consent_comments,
+          cpr.consent_document_name,
+          cpr.external_subject_id,
+          cpr.site_id,
+          cpr.creation_time,
+          cpr.creator,
+          cpr.update_time,
+          cpr.updater,
+          cpr.data_entry_status
+        from
+          catissue_coll_prot_reg cpr
+          inner join catissue_participant p on p.identifier = cpr.participant_id
+        where
+          cpr.identifier = new.identifier;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Part 1: Trigger to keep the queries registration table updated: New Registration" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//" splitStatements="false">
+      create or replace trigger os_cpr_recs_ins after insert on catissue_coll_prot_reg
+      for each row
+      begin
+        insert into
+          os_cpr_recs(
+            cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
+            email_address, email_opt_in, phone_number, text_opt_in, dob, ssn, activity_status,
+            gender_id, registration_date, ppid, vital_status_id, death_date, empi_id, barcode,
+            consent_sign_date, consent_witness, consent_comments, consent_document_name,
+            external_subject_id, site_id, creation_time, creator, update_time, updater, data_entry_status
+          )
+        select
+          :new.identifier as cpr_id,
+          :new.collection_protocol_id as cp_id,
+          :new.participant_id,
+          p.first_name,
+          p.middle_name,
+          p.last_name,
+          p.email_address,
+          p.email_opt_in,
+          p.phone_number,
+          p.text_opt_in,
+          p.birth_date as dob,
+          p.social_security_number as ssn,
+          :new.activity_status,
+          p.gender_id,
+          :new.registration_date,
+          :new.protocol_participant_id as ppid,
+          p.vital_status_id,
+          p.death_date,
+          p.empi_id,
+          :new.barcode,
+          :new.consent_sign_date,
+          :new.consent_witness,
+          :new.consent_comments,
+          :new.consent_document_name,
+          :new.external_subject_id,
+          :new.site_id,
+          :new.creation_time,
+          :new.creator,
+          :new.update_time,
+          :new.updater,
+          :new.data_entry_status
+        from
+          catissue_participant p
+        where
+          p.identifier = :new.participant_id;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Part 3: Trigger to keep the queries registration table updated: Update Participant" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_cpr_recs_part_update;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_cpr_recs_part_update after update on catissue_participant
+      for each row
+      begin
+        update
+          os_cpr_recs
+        set
+          first_name = new.first_name,
+          middle_name = new.middle_name,
+          last_name = new.last_name,
+          email_address = new.email_address,
+          email_opt_in = new.email_opt_in,
+          phone_number = new.phone_number,
+          text_opt_in = new.text_opt_in,
+          dob = new.birth_date,
+          ssn = new.social_security_number,
+          gender_id = new.gender_id,
+          vital_status_id = new.vital_status_id,
+          death_date = new.death_date,
+          empi_id = new.empi_id
+        where
+          participant_id = new.identifier;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Part 3: Trigger to keep the queries registration table updated: Update Participant" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//" splitStatements="false">
+      create or replace trigger os_cpr_recs_part_update after update on catissue_participant
+      for each row
+      begin
+        update
+          os_cpr_recs
+        set
+          first_name = :new.first_name,
+          middle_name = :new.middle_name,
+          last_name = :new.last_name,
+          email_address = :new.email_address,
+          email_opt_in = :new.email_opt_in,
+          phone_number = :new.phone_number,
+          text_opt_in = :new.text_opt_in,
+          dob = :new.birth_date,
+          ssn = :new.social_security_number,
+          gender_id = :new.gender_id,
+          vital_status_id = :new.vital_status_id,
+          death_date = :new.death_date,
+          empi_id = :new.empi_id
+        where
+          participant_id = :new.identifier;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Automatic email opt-in for participants with pre-existing email addresses">
+    <sql>
+      update
+        catissue_participant
+      set
+        email_opt_in = 1
+      where
+        email_address is not null and email_address != ''
+    </sql>
   </changeSet>
 </databaseChangeLog>
