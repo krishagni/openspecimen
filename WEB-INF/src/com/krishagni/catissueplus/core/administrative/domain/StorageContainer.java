@@ -1674,7 +1674,7 @@ public class StorageContainer extends BaseExtensionEntity {
 			updateSite(site);
 		}
 
-		transferEvent.toLocation(site, parentContainer, position);
+		transferEvent.toLocation(site, !checkOut ? parentContainer : null, position);
 		getTransferEvents().add(transferEvent);
 
 		if (checkOut && oldPosition != null) {
