@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -552,8 +553,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 	}
 
 	@Override
-	public QueryDataExportResult exportSpecimenList(SpecimenListCriteria crit, BiConsumer<QueryResultData, OutputStream> qdConsumer) {
-		return exportSpecimenList0(crit, qdConsumer);
+	public QueryDataExportResult exportSpecimenList(SpecimenListCriteria crit, QueryService.ExportProcessor proc) {
+		return exportSpecimenList0(crit, proc);
 	}
 
 	@Override
@@ -823,7 +824,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		return specimenList;
 	}
 
-	private QueryDataExportResult exportSpecimenList0(SpecimenListCriteria crit, BiConsumer<QueryResultData, OutputStream> qdConsumer) {
+	private QueryDataExportResult exportSpecimenList0(SpecimenListCriteria crit, QueryService.ExportProcessor proc) {
 		final SpecimenList list = getSpecimenList(crit.specimenListId(), null);
 
 		Integer queryId = ConfigUtil.getInstance().getIntSetting("common", "cart_specimens_rpt_query", -1);
@@ -855,11 +856,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		op.setAql(query.getAql(restriction, "Specimen.specimenCarts.itemId asc"));
 		op.setWideRowMode(WideRowMode.DEEP.name());
 		op.setRunType("Export");
-		if (qdConsumer != null) {
-			return querySvc.exportQueryData(op, qdConsumer);
-		}
-
-		return querySvc.exportQueryData(op, new QueryService.ExportProcessor() {
+		return querySvc.exportQueryData(op, Objects.requireNonNullElseGet(proc, () -> new QueryService.ExportProcessor() {
 			@Override
 			public String filename() {
 				return "cart_" + list.getId() + "_" + UUID.randomUUID().toString();
@@ -867,14 +864,15 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 			@Override
 			public void headers(OutputStream out) {
-				Map<String, String> headers = new LinkedHashMap<String, String>() {{
+				Map<String, String> headers = new LinkedHashMap<>() {{
 					put(msg(LIST_NAME), list.isDefaultList() ? msg("specimen_list_default_list", list.getOwner().formattedName()) : list.getName());
 					put(msg(LIST_DESC), StringUtils.isNotBlank(list.getDescription()) ? list.getDescription() : msg("common_not_specified"));
 				}};
 
 				Utility.writeKeyValuesToCsv(out, headers);
 			}
-		});
+		}));
+
 	}
 
 	private void notifyUsersOnCreate(SpecimenList specimenList, Collection<User> users) {
