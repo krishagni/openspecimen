@@ -1765,6 +1765,7 @@ public class QueryServiceImpl implements QueryService {
 			task.ipAddress = AuthUtil.getRemoteAddr();
 			task.filename = getExportFilename(op, procFn == null ? proc : null);
 			task.query = getQuery(op);
+			task.proc = proc instanceof ExtendedExportProcessor ? (ExtendedExportProcessor) proc : null;
 			task.procFn = procFn;
 			task.fout = new FileOutputStream(new File(getExportDataDir(), task.filename));
 			out = task.fout;
@@ -1815,6 +1816,8 @@ public class QueryServiceImpl implements QueryService {
 
 		private ExecuteQueryEventOp op;
 
+		private ExtendedExportProcessor proc;
+
 		private BiConsumer<QueryResultData, OutputStream> procFn;
 
 		@Override
@@ -1830,14 +1833,18 @@ public class QueryServiceImpl implements QueryService {
 				progressFile.deleteOnExit();
 
 				QueryResponse resp;
-				if (procFn == null) {
+				if (procFn == null && proc == null) {
 					QueryResultExporter exporter = new QueryResultCsvExporter(Utility.getFieldSeparator());
 					resp = exporter.export(fout, query, getResultScreener(query));
 				} else {
 					resp = query.getData();
 					data = resp.getResultData();
 					data.setScreener(getResultScreener(query));
-					procFn.accept(data, fout);
+					if (procFn != null) {
+						procFn.accept(data, fout);
+					} else {
+						proc.output(data, fout);
+					}
 				}
 
 				insertAuditLog(user, ipAddress, op, resp);

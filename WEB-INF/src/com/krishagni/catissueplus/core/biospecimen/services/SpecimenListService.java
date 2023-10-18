@@ -1,8 +1,6 @@
 package com.krishagni.catissueplus.core.biospecimen.services;
 
-import java.io.OutputStream;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
@@ -20,8 +18,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
-
-import edu.common.dynamicextensions.query.QueryResultData;
+import com.krishagni.catissueplus.core.de.services.QueryService;
 
 public interface SpecimenListService {
 	ResponseEvent<List<SpecimenListSummary>> getSpecimenLists(RequestEvent<SpecimenListsCriteria> req);
@@ -72,7 +69,7 @@ public interface SpecimenListService {
 	//
 	// Used for internal consumption purpose.
 	//
-	QueryDataExportResult exportSpecimenList(SpecimenListCriteria crit, BiConsumer<QueryResultData, OutputStream> rptConsumer);
+	QueryDataExportResult exportSpecimenList(SpecimenListCriteria crit, QueryService.ExportProcessor proc);
 
 	boolean toggleStarredSpecimenList(Long listId, boolean starred);
 }

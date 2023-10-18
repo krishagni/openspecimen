@@ -105,7 +105,11 @@ public interface QueryService {
 		String filename();
 
 		void headers(OutputStream out);
-	}	
+	}
+
+	interface ExtendedExportProcessor extends ExportProcessor {
+		void output(QueryResultData data, OutputStream out);
+	}
 
 	QueryDataExportResult exportQueryData(ExecuteQueryEventOp opDetail, ExportProcessor processor);
 
