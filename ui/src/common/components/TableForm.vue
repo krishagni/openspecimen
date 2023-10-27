@@ -62,7 +62,7 @@
             </td>
 
             <td v-if="firstColumn">
-              <div v-show="treeLayout" class="node-expander"
+              <div v-show="treeLayout && !showFlat" class="node-expander"
                 :style="{'padding-left':  itemModel.depth + 'rem'}">
                 <a @click="toggleNode(itemModel, itemIdx)">
                   <os-icon v-show="itemModel.hasChildren && itemModel.expanded" name="chevron-down" />
@@ -284,6 +284,10 @@ export default {
       }
 
       return models;
+    },
+
+    showFlat: function() {
+      return this.itemModels.every(model => !model.depth);
     },
 
     numRows: function() {

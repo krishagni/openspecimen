@@ -33,7 +33,14 @@ class CollectionProtocol {
 
   async getWorkflowProperty(cpId, wfName, propName) {
     const wf = await this.getWorkflow(cpId, wfName);
-    return wf && wf[propName];
+    if (wf && wf[propName]) {
+      return wf[propName];
+    } else if (cpId == -1 || !cpId) {
+      return null;
+    }
+
+    const sysWf = await this.getWorkflow(-1, wfName);
+    return sysWf && sysWf[propName];
   }
 
   async loadWorkflows(cpId, wfName) {

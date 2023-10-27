@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 @ListenAttributeChanges
 public class SpecimenDetail extends SpecimenInfo {
 
+	@Serial
 	private static final long serialVersionUID = -752005520158376620L;
 
 	private CollectionEventDetail collectionEvent;
@@ -100,6 +102,8 @@ public class SpecimenDetail extends SpecimenInfo {
 	private StorageLocationSummary checkoutPosition;
 
 	private String kitLabel;
+
+	private boolean update;
 
 
 	public CollectionEventDetail getCollectionEvent() {
@@ -378,6 +382,14 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	public void setKitLabel(String kitLabel) {
 		this.kitLabel = kitLabel;
+	}
+
+	public boolean isUpdate() {
+		return update;
+	}
+
+	public void setUpdate(boolean update) {
+		this.update = update;
 	}
 
 	@JsonIgnore

@@ -676,7 +676,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 					break;
 					
 				case FILE:
-					if (setting != null && setting.startsWith("classpath:")) {
+					if (setting.startsWith("classpath:")) {
 						try (InputStream in = getClass().getResourceAsStream(setting.substring(10))) {
 							if (in == null) {
 								return false;

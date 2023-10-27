@@ -1013,7 +1013,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 
 		Specimen specimen = existing;
-		if (existing == null || !existing.isCollected()) {
+		if (existing == null || !existing.isCollected() || detail.isUpdate()) {
 			specimen = saveOrUpdate(detail, null, existing, parent);
 			if (specimen.getPreCreatedSpmnsMap() != null) {
 				reqSpmnsMap.putAll(specimen.getPreCreatedSpmnsMap());
