@@ -1368,10 +1368,6 @@ public class Specimen extends BaseExtensionEntity {
 				throw OpenSpecimenException.userError(VisitErrorCode.COMPL_VISIT_REQ);
 			} else {
 				if (getParentSpecimen() != null && !getParentSpecimen().isCollected()) {
-					if (!autoCollectParents) {
-						throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_PARENT_REQ);
-					}
-
 					autoCollectParentSpecimens(this);
 				}
 
@@ -1639,10 +1635,6 @@ public class Specimen extends BaseExtensionEntity {
 
 		specimen.setParentSpecimen(this);
 		if (!isCollected() && specimen.isCollected()) {
-			if (!specimen.autoCollectParents) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.COLL_PARENT_REQ);
-			}
-
 			autoCollectParentSpecimens(specimen);
 		}
 
@@ -2272,6 +2264,10 @@ public class Specimen extends BaseExtensionEntity {
 
 			Date createdOn = childSpmn.getCreatedOn();
 			if (parentSpmn.isPrimary()) {
+				if (!parentSpmn.getReceivedEvent().isReceived()) {
+					parentSpmn.getReceivedEvent().setQuality(getAcceptableReceiveQuality());
+				}
+
 				parentSpmn.addOrUpdateCollRecvEvents();
 
 				if (createdOn == null) {
@@ -2386,5 +2382,9 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		return result;
+	}
+
+	private PermissibleValue getAcceptableReceiveQuality() {
+		return daoFactory.getPermissibleValueDao().getPv("receive_quality", "Acceptable", true);
 	}
 }
