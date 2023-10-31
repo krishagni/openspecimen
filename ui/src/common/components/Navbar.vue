@@ -14,20 +14,20 @@
         </div>
       </div>
 
-      <div class="search">
+      <div class="search" v-if="!minimalLogin">
         <os-search />
       </div>
 
       <div class="buttons">
-        <os-new-stuff />
+        <os-new-stuff  v-if="!minimalLogin" />
 
-        <os-user-feedback />
+        <os-user-feedback v-if="!minimalLogin" />
 
         <os-about />
 
-        <os-notifs-overlay />
+        <os-notifs-overlay v-if="!minimalLogin" />
 
-        <div class="user-profile" v-os-tooltip.bottom="$t('common.user_profile')">
+        <div class="user-profile" v-os-tooltip.bottom="$t('common.user_profile')" v-if="authenticated">
           <button @click="toggleProfileMenu">
             <os-username-avatar :name="username" />
           </button>
@@ -70,6 +70,8 @@ import About         from '@/common/components/About';
 import NotifsOverlay from '@/common/components/NotifsOverlay';
 
 export default {
+  props: ['noLogin'],
+
   components: {
     'os-search': Search,
     'os-new-stuff': NewStuff,
@@ -93,6 +95,14 @@ export default {
   },
 
   computed: {
+    authenticated: function() {
+      return this.$ui.currentUser && this.$ui.currentUser.id > 0
+    },
+
+    minimalLogin: function() {
+      return this.noLogin || !this.authenticated;
+    },
+
     siteAssets: function() {
       return (this.$ui && this.$ui.global && this.$ui.global.siteAssets) || {};
     },

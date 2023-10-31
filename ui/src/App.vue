@@ -1,5 +1,9 @@
 <template>
-  <div class="os-root">
+  <div class="os-root" v-if="loading">
+    <span>Loading...</span>
+  </div>
+
+  <div class="os-root" v-else>
     <os-navbar />
 
     <div class="os-user-impersonate-warn" v-if="(ui.currentUser && (ui.currentUser.impersonated || (ui.currentUser.daysBeforePasswordExpiry >= 0 && ui.currentUser.daysBeforePasswordExpiry <= 5))) || ui.global.appProps.auditEnabled == 'false' || ui.global.appProps.auditEnabled == false">
@@ -20,10 +24,7 @@
       </div>
     </div>
 
-    <div class="os-app-body">
-      <Toast class="os-app-toast" />
-      <router-view/>
-    </div>
+    <os-app-body />
   </div>
 
   <teleport to="body">
@@ -32,12 +33,14 @@
 </template>
 
 <script>
-import Toast from "primevue/toast";
-
+import AppBody from '@/common/components/AppBody.vue';
 import Navbar from '@/common/components/Navbar.vue';
 
-import userSvc   from '@/administrative/services/User.js';
+import authSvc from '@/common/services/Authorization.js';
+import homePageSvc from '@/common/services/HomePageService.js';
 import routerSvc from '@/common/services/Router.js';
+import settingSvc from '@/common/services/Setting.js';
+import userSvc   from '@/administrative/services/User.js';
 import util      from '@/common/services/Util.js';
 
 export default {
@@ -46,320 +49,185 @@ export default {
   inject: ['ui'],
 
   components: {
-    Toast,
-    'os-navbar': Navbar
+    'os-navbar': Navbar,
+    'os-app-body': AppBody
   },
 
   setup() {
+  },
+
+  data() {
+    return {
+      loading: true
+    }
   },
 
   mounted() {
     util.setMask(this.$refs.mask);
   },
 
+  created() {
+    let currUserQ  = userSvc.getCurrentUser();
+    let usrStateQ  = userSvc.getUiState();
+    let usrRightsQ = authSvc.loadUserRights();
+    let spmnPropsQ = util.loadSpecimenTypeProps();
+    Promise.all([currUserQ, usrStateQ, usrRightsQ, spmnPropsQ]).then(
+      (resps) => {
+        this.$ui.currentUser = resps[0];
+        this.$ui.global.state = resps[1];
+        this.registerHomePageCards();
+
+        this.loading = false;
+      }
+    );
+  },
+
   methods: {
     returnToMyAccount: function() {
       userSvc.unpersonate().then(() => routerSvc.ngGoto(''));
+    },
+
+    registerHomePageCards: function() {
+      const t = this.$t;
+      const ui = this.$ui;
+      homePageSvc.registerCards([
+        {
+          showIf: {resource: 'CollectionProtocol', operations: ['Read']},
+          href: '#/cps',
+          icon: 'fa fa-calendar',
+          title: t('common.home.cps'),
+          description: t('common.home.cps_desc')
+        },
+
+        {
+          showIf: 'admin',
+          href: '#/institutes',
+          icon: 'fa fa-institution',
+          title: t('common.home.institutes'),
+          description: t('common.home.institutes_desc')
+        },
+
+        {
+          showIf: {resource: 'User', operations: ['Create', 'Update']},
+          href: '#/users',
+          icon: 'fa fa-user',
+          title: t('common.home.users'),
+          description: t('common.home.users_desc')
+        },
+
+        {
+          showIf: {resource: 'User', operations: ['Create', 'Update']},
+          href: '#/roles',
+          icon: 'fa fa-lock',
+          title: t('common.home.roles'),
+          description: t('common.home.roles_desc')
+        },
+
+        {
+          showIf: 'institute-admin',
+          href: '#/sites',
+          icon: 'fa fa-hospital-o',
+          title: t('common.home.sites'),
+          description: t('common.home.sites_desc')
+        },
+
+        {
+          showIf: {resource: 'StorageContainer', operations: ['Read']},
+          href: '#/containers',
+          icon: 'fa fa-dropbox',
+          title: t('common.home.containers'),
+          description: t('common.home.containers_desc')
+        },
+
+        {
+          showIf: {resource: 'Query', operations: ['Read']},
+          href: '#/queries/list',
+          icon: 'fa fa-dashboard',
+          title: t('common.home.queries'),
+          description: t('common.home.queries_desc')
+        },
+
+        {
+          showIf: {resources: ['Specimen', 'PrimarySpecimen'], operations: ['Read']},
+          href: '#/specimen-lists',
+          icon: 'fa fa-shopping-cart',
+          title: t('common.home.carts'),
+          description: t('common.home.carts_desc')
+        },
+
+        {
+          href: '#/forms',
+          icon: 'fa fa-copy',
+          title: t('common.home.forms'),
+          description: t('common.home.forms_desc'),
+          showIf: () => ui.currentUser.admin || ui.currentUser.instituteAdmin || ui.currentUser.manageForms
+        },
+
+        {
+          showIf: {resource: 'DistributionProtocol', operations: ['Read']},
+          href: '#/dps',
+          icon: 'fa fa-truck',
+          title: t('common.home.dps'),
+          description: t('common.home.dps_desc')
+        },
+
+        {
+          showIf: {resource: 'Order', operations: ['Read']},
+          href: '#/orders',
+          icon: 'fa fa-share',
+          title: t('common.home.orders'),
+          description: t('common.home.orders_desc')
+        },
+
+        {
+          showIf: {resource: 'ShippingAndTracking', operations: ['Read']},
+          href: '#/shipments',
+          icon: 'fa fa-paper-plane-o',
+          title: t('common.home.shipments'),
+          description: t('common.home.shipments_desc')
+        },
+
+        {
+          showIf: {resource: 'ScheduledJob', operations: ['Read']},
+          href: '#/jobs',
+          icon: 'fa fa-gears',
+          title: t('common.home.jobs'),
+          description: t('common.home.jobs_desc')
+        },
+
+        {
+          showIf: 'institute-admin',
+          href: '#/consent-statements',
+          icon: 'fa fa-file-text-o',
+          title: t('common.home.consents'),
+          description: t('common.home.consents_desc')
+        },
+
+        {
+          href: async () => {
+            let setting = await settingSvc.getSetting('training', 'training_url');
+            return setting[0].value;
+          },
+          icon: 'fa fa-graduation-cap',
+          title: t('common.home.training'),
+          description: t('common.home.training_desc'),
+          newTab: true
+        },
+
+        {
+          showIf: 'admin',
+          href: '#/settings/settings-list',
+          icon: 'fa fa-wrench',
+          title: t('common.home.settings'),
+          description: t('common.home.settings_desc'),
+        }
+      ]);
     }
   }
 }
 </script>
 
-<style>
-html {
-  height: 100%;
-}
-
-body {
-  margin: 0px;
-  height: calc(100% - 15px);
-  overflow: hidden;
-}
-
-#app {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.42857143;
-  color: #333333;
-  background-color: #fff;
-  height: 100%;
-  position: fixed;
-  width: 100%;
-}
-
-body .p-component,
-body .p-component .p-inputtext {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.42857143;
-  color: #333333;
-  background-color: #fff;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-
-a {
-  color: #337ab7;
-  text-decoration: none;
-}
-
-a:focus, a:hover {
-  color: #23527c;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.os-app-toast {
-  z-index: 1200!important;
-}
-
-.os-app-toast .p-toast-message {
-  margin: 0rem;
-}
-
-.os-app-toast .p-toast-message .p-toast-message-content {
-  word-break: break-word;
-}
-
-.os-hide {
-  display: none!important;
-}
-
-.os-table {
-  width: 100%;
-  display: table;
-  border-collapse: collapse;
-}
-
-.os-table.os-table-hover tbody tr:hover {
-  background-color: #f7f7f7;
-  cursor: pointer;
-}
-
-.os-table.muted-header thead th {
-  background: #f5f5f5;
-  color: #707070;
-  font-size: 12px;
-}
-
-.os-table thead th,
-.os-table tbody td {
-  padding: 10px 15px;
-  vertical-align: top;
-  text-align: left;
-}
-
-.os-table thead th {
-  border-bottom: 2px solid #ddd;
-}
-
-.os-table tbody td {
-  border-top: 1px solid #ddd;
-}
-
-.os-table tbody tr.error td {
-  background: #f8d7da;
-  border-top: 1px solid #f5c6cb;
-  color: #721c24;
-}
-
-.os-table.os-table-borderless thead th,
-.os-table.os-table-borderless tbody td {
-  border: 0;
-}
-
-.os-border {
-  border: 1px solid #ddd;
-}
-
-.os-key-values {
-  list-style-type: none;
-  margin: 0px 0px 20px 0px;
-  padding: 0;
-}
-
-.os-key-values:after {
-  content: '';
-  display: block;
-  clear: both;
-}
-
-.os-key-values .item {
-  margin: 2px 0px 0px 0px;
-  position: relative;
-  padding-left: 150px;
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
-  break-inside: avoid-column;
-  display: table;
-}
-
-.os-key-values.bg-col .item {
-  padding-left: 300px;
-}
-
-.os-key-values.md-col .item {
-  padding-left: 250px;
-}
-
-.os-one-col > .item {
-  width: 100%;
-}
-
-.os-key-values.os-two-cols {
-  column-count: 2;
-  -webkit-perspective: 1;
-}
-
-.os-key-values .item .key, .os-key-values .item .value {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 2px 5px 2px 5px;
-  line-height: 24px;
-  width: 100%;
-  float: left;
-  word-break: break-all;
-}
-
-.os-key-values .item .value img {
-  width: 100%;
-}
-
-.os-key-values .item .key {
-  color: #707070;
-  font-weight: normal;
-  clear: left;
-  margin-left: -150px;
-  width: 150px;
-}
-
-.os-key-values.md-col .item .key {
-  margin-left: -250px;
-  width: 250px;
-}
-
-.os-key-values.bg-col .item .key {
-  margin-left: -300px;
-  width: 300px;
-}
-
-.os-key-values.vertical .item {
-  padding-left: 0px;
-  width: 100%;
-}
-
-.os-key-values.vertical .item:after {
-  content: ' ';
-  display: inline-block;
-  border-bottom: 1px solid #ddd;
-  width: 100%;
-}
-
-.os-key-values.vertical .item:last-child:after {
-  width: 0%;
-}
-
-.os-key-values.vertical .item .key.key-sm {
-  margin-left: 0px;
-  width: 100%;
-}
-
-.os-key-values.vertical .item .key.key-sm.strong {
-  font-weight: 500;
-  font-style: italic;
-}
-
-@media only screen and (max-width: 768px) {
-  .os-key-values.os-two-cols {
-    column-count: 1;
-    -webkit-perspective: 1;
-  }
-}
-
-.os-root {
-  height: 100%;
-}
-
-.os-app-body {
-  position: relative;
-  height: calc(100% - 40px);
-  /*height: 100%;*/
-}
-
-.os-col-1 {
-  width: 8.33%;
-}
-
-.os-col-2 {
-  width: 16.67%;
-}
-
-.os-col-3 {
-  width: 25%;
-}
-
-.os-col-4 {
-  width: 33.33%;
-}
-
-.os-col-5 {
-  width: 41.67%;
-}
-
-.os-col-6 {
-  width: 50%;
-}
-
-.os-col-7 {
-  width: 58.33%;
-}
-
-.os-col-8 {
-  width: 66.67%;
-}
-
-.os-col-9 {
-  width: 75%;
-}
-
-.os-col-10 {
-  width: 83.33%;
-}
-
-.os-col-11 {
-  width: 91.67%;
-}
-
-.os-col-12 {
-  width: 100%;
-}
-
-.os-form-footer {
-  padding: 0.5rem;
-}
-
-.os-form-footer button {
-  margin-right: 0.5rem;
-}
-
-.p-tooltip.p-component {
-  background: transparent;
-}
-</style>
-
 <style scoped>
-
 .os-user-impersonate-warn {
   position: absolute;
   left: 0;

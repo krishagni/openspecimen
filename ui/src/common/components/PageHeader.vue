@@ -21,7 +21,7 @@
       </div>
     </sidebar>
 
-    <div class="nav-button" v-if="noNavButton != true">
+    <div class="nav-button" v-if="noNavButton != true && items.length > 1">
       <button @click="showNav = true">
         <os-icon name="bars" size="24px" />
       </button>

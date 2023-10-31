@@ -24,4 +24,8 @@ public interface UserAuthenticationService {
 	User getUser(Long userId);
 
 	ResponseEvent<AuthToken> impersonate(RequestEvent<LoginDetail> req);
+
+	ResponseEvent<Boolean> generateOtp(RequestEvent<LoginDetail> req);
+
+	ResponseEvent<Map<String, Object>> verifyOtp(RequestEvent<LoginDetail> req);
 }

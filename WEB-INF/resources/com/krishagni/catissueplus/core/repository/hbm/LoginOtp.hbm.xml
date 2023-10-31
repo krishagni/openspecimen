@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="com.krishagni.catissueplus.core.auth.domain.LoginOtp" table="OS_USER_LOGIN_OTPS"
+    entity-name="com.krishagni.catissueplus.core.auth.domain.LoginOtp">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_USER_LOGIN_OTPS_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="user" column="USER_ID" not-null="true" />
+
+    <property name="time" column="TIME" not-null="true" />
+
+    <property name="otp" column="OTP" not-null="true" />
+
+    <property name="ipAddress" column="IP_ADDRESS" />
+
+    <sql-query name="deleteUserOtps">
+      delete from os_user_login_otps where user_id = :userId
+    </sql-query>
+
+    <sql-query name="deleteExpiredUserOtps">
+      <![CDATA[
+        delete from os_user_login_otps where time < :expiryTime
+      ]]>
+    </sql-query>
+  </class>
+</hibernate-mapping>
+
+

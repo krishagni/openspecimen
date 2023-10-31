@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.auth.domain.AuthProvider;
 import com.krishagni.catissueplus.core.auth.domain.AuthToken;
 import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
+import com.krishagni.catissueplus.core.auth.domain.LoginOtp;
 import com.krishagni.catissueplus.core.auth.repository.AuthDao;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
@@ -186,6 +187,38 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 		createNamedQuery(DELETE_DANGLING_CREDS).executeUpdate();
 	}
 
+	@Override
+	public LoginOtp getLoginOtp(String emailAddress, String otp) {
+		Criteria<LoginOtp> query = createCriteria(LoginOtp.class, "loginOtp")
+			.join("loginOtp.user", "user");
+		return query.add(query.eq("loginOtp.otp", otp))
+			.add(query.eq("user.emailAddress", emailAddress))
+			.uniqueResult();
+	}
+
+	@Override
+	public void saveOrUpdate(LoginOtp otp) {
+		getCurrentSession().saveOrUpdate(otp);
+	}
+
+	@Override
+	public void deleteLoginOtps(Long userId) {
+		createNamedQuery(DELETE_USER_LOGIN_OTPS).setParameter("userId", userId).executeUpdate();
+	}
+
+	@Override
+	public void deleteLoginOtp(LoginOtp otp) {
+		getCurrentSession().delete(otp);
+	}
+
+	@Override
+	public void deleteExpiredLoginOtps() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MINUTE, -5);
+		createNamedQuery(DELETE_EXPIRED_USER_LOGIN_OTPS).setParameter("expiryTime", cal.getTime()).executeUpdate();
+	}
+
+
 	private static final String FQN = AuthDomain.class.getName();
 	
 	private static final String GET_AUTH_DOMAINS = FQN + ".getAuthDomains";
@@ -215,4 +248,8 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	private static final String DELETE_DANGLING_CREDS = AuthCredential.class.getName() + ".deleteDanglingCredentials";
 
 	private static final String DELETE_USER_AUTH_TOKENS_SQL = "delete from os_auth_tokens where user_id = :userId";
+
+	private static final String DELETE_USER_LOGIN_OTPS = LoginOtp.class.getName() + ".deleteUserOtps";
+
+	private static final String DELETE_EXPIRED_USER_LOGIN_OTPS = LoginOtp.class.getName() + ".deleteExpiredUserOtps";
 }

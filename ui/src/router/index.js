@@ -815,6 +815,12 @@ const routes = [
         props: (route) => ({statementId: route.params && route.params.statementId})
       }
     ]
+  },
+
+  {
+    path: '/',
+    name: 'NoLoginApp',
+    component: () => import('../NoLoginApp.vue')
   }
 ]
 

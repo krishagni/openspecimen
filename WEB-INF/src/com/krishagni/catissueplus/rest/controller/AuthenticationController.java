@@ -134,4 +134,47 @@ public class AuthenticationController {
 		AuthUtil.setImpersonateTokenCookie(httpReq, httpResp, null);
 		return Collections.singletonMap("impersonateUserToken", null);
 	}
+
+	@RequestMapping(method=RequestMethod.POST, value="/otp")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Boolean> generateOtp(@RequestBody LoginDetail loginDetail, HttpServletResponse httpResp) {
+		loginDetail.setIpAddress(Utility.getRemoteAddress(httpReq));
+		ResponseEvent.unwrap(userAuthService.generateOtp(RequestEvent.wrap(loginDetail)));
+		return Collections.singletonMap("status", true);
+	}
+
+	@RequestMapping(method=RequestMethod.POST, value="/verify-otp")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object>  verifyOtp(@RequestBody LoginDetail loginDetail, HttpServletResponse httpResp) {
+		loginDetail.setIpAddress(Utility.getRemoteAddress(httpReq));
+		loginDetail.setRequestMethod(RequestMethod.POST.name());
+		loginDetail.setApiUrl(httpReq.getRequestURI());
+
+		ResponseEvent<Map<String, Object>> resp = userAuthService.verifyOtp(RequestEvent.wrap(loginDetail));
+		if (!resp.isSuccessful()) {
+			AuthUtil.clearTokenCookie(httpReq, httpResp);
+			throw resp.getError();
+		}
+
+		String authToken = (String)resp.getPayload().get("token");
+		AuthUtil.setTokenCookie(httpReq, httpResp, authToken);
+
+		User user = (User) resp.getPayload().get("user");
+		Map<String, Object> detail = new HashMap<>();
+		if (user == null) {
+			detail.putAll(resp.getPayload());
+		} else {
+			detail.put("id", user.getId());
+			detail.put("firstName", user.getFirstName());
+			detail.put("lastName", user.getLastName());
+			detail.put("loginName", user.getLoginName());
+			detail.put("token", authToken);
+			detail.put("admin", user.isAdmin());
+			detail.put("instituteAdmin", user.isInstituteAdmin());
+		}
+
+		return detail;
+	}
 }

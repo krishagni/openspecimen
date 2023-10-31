@@ -296,4 +296,29 @@
         email_address is not null and email_address != ''
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="User login OTPs">
+    <createTable tableName="OS_USER_LOGIN_OTPS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="USER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_LOGIN_OTP_USER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="TIME" type="${timestamp.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="OTP" type="${text.type}(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="IP_ADDRESS" type="${text.type}(32)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="User login OTP ID generator">
+    <createSequence sequenceName="OS_USER_LOGIN_OTPS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
 </databaseChangeLog>

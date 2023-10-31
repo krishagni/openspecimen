@@ -2,7 +2,6 @@
 package com.krishagni.catissueplus.core.auth.services.impl;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -10,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +30,7 @@ import com.krishagni.catissueplus.core.auth.AuthConfig;
 import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
 import com.krishagni.catissueplus.core.auth.domain.AuthToken;
 import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
+import com.krishagni.catissueplus.core.auth.domain.LoginOtp;
 import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.events.TokenDetail;
 import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
@@ -62,6 +63,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	private static final String IMPERSONATE_USER_TMPL = "impersonate_user";
 
 	private static final String KILLED_SESSIONS_TMPL = "killed_sessions_notif";
+
+	private static final String USER_OTP_TMPL = "user_login_otp";
 
 	private DaoFactory daoFactory;
 
@@ -143,11 +146,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			authDetail.put("user", user);
 
 			AuthToken token = createToken(user, loginDetail, null);
-			if (token != null) {
-				authDetail.put("token", AuthUtil.encodeToken(token.getToken()));
-				authDetail.put("tokenObj", token);
-			}
-			
+			authDetail.put("token", AuthUtil.encodeToken(token.getToken()));
+			authDetail.put("tokenObj", token);
+
 			return ResponseEvent.response(authDetail);
 		} catch (OpenSpecimenException ose) {
 			if (user != null && user.isEnabled()) {
@@ -306,6 +307,104 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		}
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Boolean> generateOtp(RequestEvent<LoginDetail> req) {
+		try {
+			LoginDetail loginDetail = req.getPayload();
+			if (StringUtils.isBlank(loginDetail.getEmailAddress())) {
+				return ResponseEvent.userError(UserErrorCode.EMAIL_REQUIRED);
+			}
+
+			User user = daoFactory.getUserDao().getUserByEmailAddress(loginDetail.getEmailAddress());
+			if (user == null) {
+				return ResponseEvent.response(true);
+			}
+
+			if (!user.isAllowedAccessFrom(loginDetail.getIpAddress())) {
+				throw OpenSpecimenException.userError(AuthErrorCode.NA_IP_ADDRESS, loginDetail.getIpAddress());
+			}
+
+			if (!user.isAdmin() && isSystemLockedDown()) {
+				throw OpenSpecimenException.userError(AuthErrorCode.SYSTEM_LOCKDOWN);
+			}
+
+			if (user.getActivityStatus().equals(Status.ACTIVITY_STATUS_LOCKED.getStatus())) {
+				throw OpenSpecimenException.userError(AuthErrorCode.USER_LOCKED, loginDetail.getEmailAddress());
+			}
+
+			daoFactory.getAuthDao().deleteLoginOtps(user.getId());
+
+			LoginOtp loginOtp = new LoginOtp();
+			loginOtp.setUser(user);
+			loginOtp.setTime(Calendar.getInstance().getTime());
+			loginOtp.setIpAddress(loginDetail.getIpAddress());
+			loginOtp.setOtp(generateOtp());
+			daoFactory.getAuthDao().saveOrUpdate(loginOtp);
+
+			Map<String, Object> props = new HashMap<>();
+			props.put("user", loginOtp.getUser());
+			props.put("otp", loginOtp);
+			props.put("ccAdmin", false);
+			EmailUtil.getInstance().sendEmail(
+				USER_OTP_TMPL,
+				new String[] { user.getEmailAddress() },
+				null,
+				props);
+			return ResponseEvent.response(true);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Object>> verifyOtp(RequestEvent<LoginDetail> req) {
+		try {
+			LoginDetail loginDetail = req.getPayload();
+			Map<String, String> props = loginDetail.getProps();
+			if (props == null) {
+				props = Collections.emptyMap();
+			}
+
+			String otp = props.get("otp");
+			if (StringUtils.isBlank(otp)) {
+				return ResponseEvent.userError(AuthErrorCode.INVALID_CREDENTIALS);
+			}
+
+			LoginOtp loginOtp = daoFactory.getAuthDao().getLoginOtp(loginDetail.getEmailAddress(), otp);
+			if (loginOtp == null) {
+				return ResponseEvent.userError(AuthErrorCode.INVALID_CREDENTIALS);
+			}
+
+			if (!StringUtils.equals(loginOtp.getIpAddress(), loginDetail.getIpAddress())) {
+				return ResponseEvent.userError(AuthErrorCode.INVALID_CREDENTIALS);
+			}
+
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.MINUTE, -5);
+			if (cal.getTime().after(loginOtp.getTime())) {
+				daoFactory.getAuthDao().deleteLoginOtp(loginOtp);
+				return ResponseEvent.userError(AuthErrorCode.OTP_EXPIRED);
+			}
+
+			Map<String, Object> authDetail = new HashMap<>();
+			authDetail.put("user", loginOtp.getUser());
+
+			AuthToken token = createToken(loginOtp.getUser(), loginDetail, null);
+			authDetail.put("token", AuthUtil.encodeToken(token.getToken()));
+			authDetail.put("tokenObj", token);
+			daoFactory.getAuthDao().deleteLoginOtp(loginOtp);
+			return ResponseEvent.response(authDetail);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Scheduled(cron="0 0 12 ? * *")
 	@PlusTransactional
 	public void deleteInactiveAuthTokens() {
@@ -313,6 +412,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		cal.add(Calendar.MINUTE, -AuthConfig.getInstance().getTokenInactiveIntervalInMinutes());
 		daoFactory.getAuthDao().deleteInactiveAuthTokens(cal.getTime());
 		daoFactory.getAuthDao().deleteDanglingCredentials();
+		daoFactory.getAuthDao().deleteExpiredLoginOtps(); // deletes all login OTPs that are older than 5 minutes
 	}
 	
 	public String generateToken(User user, LoginDetail loginDetail) {
@@ -506,4 +606,15 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		notif.setMessage(MessageUtil.getInstance().getMessage(ACCOUNT_LOCKED_NOTIF_TMPL + "_subj", subjParams));
 		NotifUtil.getInstance().notify(notif, Collections.singletonMap("user-overview", rcpts));
 	}
+
+	private String generateOtp() {
+		Random randomGen = new Random();
+		StringBuilder otp = new StringBuilder();
+		for (int i = 0; i < 6; ++i) {
+			otp.append(randomGen.nextInt(100) % 10);
+		}
+
+		return otp.toString();
+	}
+
 }
