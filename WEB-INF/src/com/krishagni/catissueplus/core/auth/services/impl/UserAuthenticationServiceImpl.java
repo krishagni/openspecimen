@@ -390,6 +390,11 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				return ResponseEvent.userError(AuthErrorCode.OTP_EXPIRED);
 			}
 
+			//
+			// touch to initialise the user object proxy
+			//
+			loginOtp.getUser().getFirstName();
+
 			Map<String, Object> authDetail = new HashMap<>();
 			authDetail.put("user", loginOtp.getUser());
 
