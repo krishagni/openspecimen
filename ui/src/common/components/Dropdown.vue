@@ -131,6 +131,10 @@ export default {
           }
         );
         selected = (selected && [selected]) || [];
+      } else if (ls.initUsingSelectProp && ls.selectProp) {
+        selected = {};
+        selected[ls.selectProp] = this.modelValue;
+        selected = [selected];
       } else if (typeof ls.loadFn == 'function') {
         selected = await ls.loadFn({...searchOpts, context: this.context, _selected: this.modelValue});
       } else if (typeof ls.apiUrl == 'string') {
