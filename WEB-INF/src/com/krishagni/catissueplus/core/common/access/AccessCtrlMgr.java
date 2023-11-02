@@ -1333,8 +1333,8 @@ public class AccessCtrlMgr {
 		boolean noInstitute = StringUtils.isBlank(crit.institute());
 		return results.stream()
 			.filter(site -> noIds || crit.ids().contains(site.getId()))
-			.filter(site -> noIncTypes || crit.includeTypes().contains(site.getType()))
-			.filter(site -> noExlTypes || !crit.excludeTypes().contains(site.getType()))
+			.filter(site -> noIncTypes || crit.includeTypes().contains(site.getType().getValue()))
+			.filter(site -> noExlTypes || !crit.excludeTypes().contains(site.getType().getValue()))
 			.filter(site -> noSearchTerm || StringUtils.containsIgnoreCase(site.getName(), crit.query()))
 			.filter(site -> noInstitute || StringUtils.equalsIgnoreCase(site.getInstitute().getName(), crit.institute()))
 			.sorted(Comparator.comparing(Site::getName))
