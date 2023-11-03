@@ -65,6 +65,7 @@ import org.springframework.security.saml.processor.HTTPRedirectDeflateBinding;
 import org.springframework.security.saml.processor.HTTPSOAP11Binding;
 import org.springframework.security.saml.processor.SAMLBinding;
 import org.springframework.security.saml.processor.SAMLProcessorImpl;
+import org.springframework.security.saml.storage.EmptyStorageFactory;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.util.VelocityFactory;
@@ -329,9 +330,14 @@ public class SamlBootstrap {
 		ctxProvider.setServerPort(url.getPort());
 		ctxProvider.setContextPath(url.getPath());
 
-		String value = samlProps.get("includeServerPortInReqUrl");
-		if (StringUtils.isNotBlank(value)) {
-			ctxProvider.setIncludeServerPortInRequestURL(Boolean.parseBoolean(value));
+		String includeServerPortInReqUrl = samlProps.get("includeServerPortInReqUrl");
+		if (StringUtils.isNotBlank(includeServerPortInReqUrl)) {
+			ctxProvider.setIncludeServerPortInRequestURL(Boolean.parseBoolean(includeServerPortInReqUrl));
+		}
+
+		String validateInResponseTo = samlProps.get("validateInResponseTo");
+		if ("false".equalsIgnoreCase(validateInResponseTo)) {
+			ctxProvider.setStorageFactory(new EmptyStorageFactory());
 		}
 
 		ctxProvider.afterPropertiesSet();
