@@ -345,7 +345,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	}
 
 	private boolean isRecordableApi(HttpServletRequest httpReq) {
-		return !matches(httpReq, "/user-notifications/unread-count/**");
+		return !matches(httpReq, "/user-notifications/unread-count/**") &&
+			!matches(httpReq, "/label-print-jobs/items/**");
 	}
 
 	private boolean matches(HttpServletRequest httpReq, String url) {
