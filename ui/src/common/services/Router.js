@@ -62,6 +62,18 @@ class Router {
     const url = this.getUrl(name, params, query);
     return this.uiUrl + url;
   }
+
+  getLastRoute() {
+    return this.lastRoute;
+  }
+
+  setLastRoute(route) {
+    this.lastRoute = route;
+  }
+
+  eraseLastRoute() {
+    this.lastRoute = null;
+  }
 }
 
 export default new Router();

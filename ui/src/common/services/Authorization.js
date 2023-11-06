@@ -6,9 +6,9 @@ class Authorization {
 
   userRights = [];
 
-  async loadUserRights() {
+  async loadUserRights(errorHandler) {
     this.userRights = [];
-    return http.get('users/current-user-roles').then(
+    return http.get('users/current-user-roles', undefined, undefined, errorHandler).then(
       (userRoles) => {
         for (let userRole of userRoles) {
           let site = userRole.site ? userRole.site.name : null;

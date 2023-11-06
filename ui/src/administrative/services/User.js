@@ -5,8 +5,8 @@ import http from '@/common/services/HttpClient.js';
 
 class User {
 
-  async getCurrentUser() {
-    return http.get('/users/current-user');
+  async getCurrentUser(errorHandler) {
+    return http.get('/users/current-user', undefined, undefined, errorHandler);
   }
 
   async getUserById(userId) {
