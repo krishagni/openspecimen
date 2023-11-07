@@ -3194,7 +3194,7 @@
         "distribution_report_query": "Distribution Report ",
         "distribution_report_query_desc": "Saved query to use for creating distribution report when DP specific report is not configured",
         "import_max_records_per_txn": "Pre-validate Records Limit",
-        "import_max_records_per_txn_desc": "Maximum number of records that can be pre-validated before importing to database.",
+        "import_max_records_per_txn_desc": "Maximum number of records that can be pre-validated before importing to database. WARNING: Keep the limit below 15,000. With a higher limit, the system might become inaccessible to users.",
         "deployment_site_logo": "Deployment Site Logo",
         "deployment_site_logo_desc": "Image file of the deployment site logo to be displayed on OpenSpecimen navigation bar. File size should be between 20 to 40 KB.",
         "deployment_site_url": "Deployment Site URL",
