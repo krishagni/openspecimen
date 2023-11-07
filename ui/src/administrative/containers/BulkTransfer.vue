@@ -258,6 +258,7 @@ export default {
             transferredBy: container.transferredBy,
             transferDate: container.transferDate,
             transferComments: container.transferComments,
+            status: null,
             checkOut: this.checkout
           }
         }
