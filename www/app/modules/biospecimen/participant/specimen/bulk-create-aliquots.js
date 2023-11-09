@@ -143,10 +143,7 @@ angular.module('os.biospecimen.specimen')
     }
 
     function isValidCreatedOn(spec) {
-      if (spec.createdOn < spec.parent.createdOn) {
-        Alerts.error("specimens.errors.children_created_on_lt_parent", {parentLabel: spec.parent.label});
-        return false;
-      } else if (spec.createdOn > new Date().getTime()) {
+      if (spec.createdOn > new Date().getTime()) {
         Alerts.error("specimens.errors.children_created_on_gt_curr_time", {parentLabel: spec.parent.label});
         return false;
       } else {
