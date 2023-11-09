@@ -488,7 +488,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			key = detail.getCpId() + ":" + reqCode;
 			sr = daoFactory.getSpecimenRequirementDao().getByCpEventLabelAndSrCode(
 				detail.getCpId(), visit.getCpEvent().getEventLabel(), reqCode);
-		} else if (StringUtils.isNotBlank(detail.getCpShortTitle()) && StringUtils.isNotBlank(reqCode)) {
+		} else if (StringUtils.isNotBlank(detail.getCpShortTitle()) && StringUtils.isNotBlank(reqCode) && visit != null && visit.getCpEvent() != null) {
 			key = detail.getCpShortTitle() + ":" + reqCode;
 			sr = daoFactory.getSpecimenRequirementDao().getByCpEventLabelAndSrCode(
 				detail.getCpShortTitle(), visit.getCpEvent().getEventLabel(), reqCode);
