@@ -313,6 +313,9 @@ export default {
 
       const attrs = ['parent', 'childContainers', 'occupiedPositions', 'childContainersLoaded', 'hasChildren'];
       attrs.forEach(attr => delete container[attr]);
+      if (container.extensionDetail && container.extensionDetail.attrsMap) {
+        delete container.extensionDetail.attrsMap;
+      }
 
       this.trCtx.checkout = action == 'checkout';
       this.trCtx.checkin  = action == 'checkin';
