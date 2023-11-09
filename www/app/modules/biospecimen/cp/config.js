@@ -236,6 +236,34 @@ angular.module('openspecimen')
       }
     }
 
+    function addCustomFields(cpId, fields, type) {
+      type = type.split('.')[0];
+      return getCustomFields(cpId, type).then(
+        function(customFields) {
+          Array.prototype.push.apply(fields, customFields);
+          return fields;
+        }
+      );
+    };
+
+    function addCustomFieldsIfAbsent(cpId, fields) {
+      var types = ['cpr.participant', 'visit', 'specimen'];
+      var promises = [];
+      for (var i = 0; i < types.length; ++i) {
+        if (!hasCustomFields(fields, types[i] + '.extensionDetail.attrsMap')) {
+          promises.push(addCustomFields(cpId, fields, types[i]));
+        }
+      }
+
+      if (promises.length == 0) {
+        var d = $q.defer();
+        d.resolve([]);
+        promises.push(d.promise);
+      }
+
+      return $q.all(promises).then(function(result) { return result; });
+    }
+
     function getEntityCustomFields(cpId, entity) {
       return getCustomFields(cpId, entity);
     }
@@ -282,34 +310,6 @@ angular.module('openspecimen')
       },
 
       getDictionary: function(cpId, defValue) {
-        var addCustomFields = function(fields, type) {
-          type = type.split('.')[0];
-          return getCustomFields(cpId, type).then(
-            function(customFields) {
-              Array.prototype.push.apply(fields, customFields);
-              return fields;
-            }
-          );
-        };
-
-        var addCustomFieldsIfAbsent = function(fields) {
-          var types = ['cpr.participant', 'visit', 'specimen'];
-          var promises = [];
-          for (var i = 0; i < types.length; ++i) {
-            if (!hasCustomFields(fields, types[i] + '.extensionDetail.attrsMap')) {
-              promises.push(addCustomFields(fields, types[i]));
-            }
-          }
-
-          if (promises.length == 0) {
-            var d = $q.defer();
-            d.resolve([]);
-            promises.push(d.promise);
-          }
-
-          return $q.all(promises).then(function(result) { return result; });
-        }
-
         return getWorkflowData(cpId, 'dictionary').then(
           function(data) {
             var fields = angular.copy(data.fields || []);
@@ -318,7 +318,7 @@ angular.module('openspecimen')
             }
 
             if (fields && fields.length > 0) {
-              return addCustomFieldsIfAbsent(fields).then(function() { return fields; });
+              return addCustomFieldsIfAbsent(cpId, fields).then(function() { return fields; });
             }
          
             return getWorkflowData(-1, 'dictionary').then(
@@ -328,7 +328,7 @@ angular.module('openspecimen')
                   return fields;
                 }
 
-                return addCustomFieldsIfAbsent(fields).then(function() { return fields; });
+                return addCustomFieldsIfAbsent(cpId, fields).then(function() { return fields; });
               }
             );
           }
@@ -339,7 +339,12 @@ angular.module('openspecimen')
         return getWorkflowData(cpId, 'dictionary', {}).then(
           function(wfData) {
             if (wfData.fields && wfData.fields.length > 0) {
-              return {cpId: cpId, fields: wfData.fields};
+              if (cpId > 0) {
+                var fields = angular.copy(wfData.fields);
+                return addCustomFieldsIfAbsent(cpId, fields).then(function() { return {cpId: cpId, fields: fields} });
+              } else {
+                return {cpId: cpId, fields: wfData.fields};
+              }
             } else if (cpId == -1) {
               return getBulkUpdateDictionary();
             } else {
