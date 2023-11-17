@@ -2,6 +2,8 @@ package com.krishagni.catissueplus.rest.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -105,6 +107,11 @@ public class QueryController {
 		filename = Utility.cleanPath(Utility.stripWs(filename));
 		if (!filename.endsWith(".zip")) {
 			filename += ".zip";
+		}
+
+		if (filename.equals("QueryResults.zip") || filename.equals("QueryResults.csv.zip")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+			filename = "QueryResults_" + sdf.format(Calendar.getInstance().getTime()) + filename.substring(filename.indexOf("."));
 		}
 
 		File file = response(querySvc.getExportDataFile(request(fileId)));

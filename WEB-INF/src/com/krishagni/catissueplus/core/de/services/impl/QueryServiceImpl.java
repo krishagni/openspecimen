@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1726,7 +1727,8 @@ public class QueryServiceImpl implements QueryService {
 				queryId = 0L; // to indicate unsaved query
 			}
 
-			filename = "query_" + queryId + "_" + UUID.randomUUID();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+			filename = "query_" + queryId + "_" + sdf.format(Calendar.getInstance().getTime()) + "_" + UUID.randomUUID();
 		}
 
 		return filename;
