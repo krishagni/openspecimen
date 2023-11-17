@@ -3,6 +3,7 @@ import boxScanner       from './BoxScanner.js';
 import containerSvc     from './Container.js';
 import containerTypeSvc from './ContainerType.js';
 import instituteSvc     from './Institute.js';
+import orderSvc         from './Order.js';
 import roleSvc          from './Role.js';
 import siteSvc          from './Site.js';
 import userSvc          from './User.js';
@@ -16,6 +17,7 @@ export default {
       containerSvc:     containerSvc,
       containerTypeSvc: containerTypeSvc,
       instituteSvc:     instituteSvc,
+      orderSvc:         orderSvc,
       roleSvc:          roleSvc,
       siteSvc:          siteSvc,
       userSvc:          userSvc,

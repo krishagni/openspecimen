@@ -23,7 +23,12 @@ export default {
       "listSource": {
         "apiUrl": "distribution-protocols",
         "displayProp": "shortTitle",
-        "searchProp": "query"
+        "searchProp": "query",
+        "queryParams": {
+          "dynamic": {
+            "cp": "cpShortTitle"
+          }
+        }
       },
       "disableWhen": "order.status != 'PENDING'",
       "validations": {

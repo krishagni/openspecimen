@@ -31,6 +31,22 @@ export default {
       },
       {
         "fields": [ { "name": "order.comments" } ]
+      },
+      {
+        "fields": [ {
+          "name": "printLabels",
+          "type": "booleanCheckbox",
+          "labelCode": "orders.print_labels",
+          "showWhen": "mode == 'quick_distribution'"
+        } ]
+      },
+      {
+        "fields": [ {
+          "name": "closeSpecimens",
+          "type": "booleanCheckbox",
+          "labelCode": "orders.dispose_specimens",
+          "showWhen": "mode == 'quick_distribution'"
+        } ]
       }
     ]
   }
