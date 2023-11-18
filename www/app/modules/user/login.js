@@ -166,6 +166,11 @@ angular.module('openspecimen')
     }
 
     function gotoCatalog() {
+      if ($state.current.name == 'sc-catalog-dashboard') {
+        console.log('already on some catalog dashboard...');
+        return;
+      }
+
       var catalogId = $injector.get('scCatalog').defCatalogId;
       if (catalogId) {
         $state.go('sc-catalog-dashboard', {catalogId: catalogId}, {location: 'replace'});
