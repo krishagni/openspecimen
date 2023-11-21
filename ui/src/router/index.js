@@ -813,6 +813,32 @@ const routes = [
         name: 'ConsentStatementAddEdit',
         component: () => import(/* webpackChunkName: "consents" */ '../biospecimen/consents/AddEdit.vue'),
         props: (route) => ({statementId: route.params && route.params.statementId})
+      },
+
+
+      /** Biospecimen pages **/
+      {
+        path: 'cp-view',
+        name: 'CpViewRoot',
+        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/CpViewRoot.vue'),
+        children: [
+          {
+            path: ':cpId',
+            name: 'CpView',
+            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/CpView.vue'),
+            props: (route) => ({cpId: route.params && route.params.cpId}),
+            children: [
+              {
+                path: 'participants',
+                name: 'ParticipantsList',
+                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/List.vue'),
+                props: (route) => ({
+                  filters: route.query.filters
+                })
+              }
+            ]
+          }
+        ]
       }
     ]
   },

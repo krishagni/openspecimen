@@ -829,6 +829,11 @@
     "users": "Users"
   },
 
+  "participants": {
+    "collection_protocols": "Collection Protocols",
+    "list": "Participants"
+  },
+
   "pvs": {
     "not_specified": "Not Specified"
   },

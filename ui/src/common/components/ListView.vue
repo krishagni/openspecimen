@@ -278,6 +278,14 @@ export default {
       this.showFilters = !this.showFilters;
     },
 
+    displayFilters: function() {
+      this.showFilters = true;
+    },
+
+    hideFilters: function() {
+      this.showFilters = false;
+    },
+
     clearFilters: function() {
       if (this.searchFilters) {
         this.searchFilters.forEach(
