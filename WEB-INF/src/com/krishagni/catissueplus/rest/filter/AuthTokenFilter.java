@@ -195,7 +195,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		}
 
 		if (user == null) {
-			logger.info("No user details. Stopping the request processing: " + httpReq.getRequestURI());
+			logger.info("No user details. URL = " + httpReq.getRequestURI());
 			String clientHdr = httpReq.getHeader(OS_CLIENT_HDR);
 			if (clientHdr != null && clientHdr.equals("webui")) {
 				setUnauthorizedResp(httpReq, httpResp, chain, false);
