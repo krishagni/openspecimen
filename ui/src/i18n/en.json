@@ -830,8 +830,26 @@
   },
 
   "participants": {
+    "birth_date": "Birth Date",
     "collection_protocols": "Collection Protocols",
-    "list": "Participants"
+    "death_date": "Death  Date",
+    "email_address": "Email Address",
+    "empi": "Master Patient Index",
+    "ethnicities": "Ethnicities",
+    "external_subject_id": "External Subject ID",
+    "gender": "Gender",
+    "list": "Participants",
+    "medical_ids": "Medical Identifiers",
+    "mrn": "Medical Record Number",
+    "phone_number": "Phone Number",
+    "races": "Races",
+    "receive_emails": "Receive Emails",
+    "receive_smses": "Receive SMSes",
+    "registration_date": "Registration Date",
+    "registration_site": "Registration Site",
+    "site": "Site",
+    "uid": "SSN",
+    "vital_status": "Vital Status"
   },
 
   "pvs": {

@@ -3,6 +3,7 @@
     :schema="schema"
     :data="data"
     :allowSelection="allowSelection"
+    :selected="selected"
     :query="query"
     @filtersUpdated="loadList"
     @selectedRows="onRowsSelection"
@@ -20,7 +21,7 @@ import http     from '@/common/services/HttpClient.js';
 import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['name', 'objectId', 'url', 'newTab', 'allowSelection', 'query', 'autoSearchOpen'],
+  props: ['name', 'objectId', 'url', 'newTab', 'allowSelection', 'selected', 'query', 'autoSearchOpen'],
 
   emits: ['selectedRows', 'rowClicked', 'listLoaded'],
 
@@ -155,7 +156,7 @@ export default {
       );
       
       this.schema = {filters: this.filters};
-      this.schema.columns = this.list.columns.map(
+      const columns = this.schema.columns = this.list.columns.map(
         (column, idx) => {
           const result = {
             name: 'column.a_' + idx,
@@ -181,6 +182,18 @@ export default {
           return result;
         }
       );
+
+      const urlColumnIdx = columns.findIndex(column => column.href);
+      const urlColumn = urlColumnIdx >= 0 ? columns[urlColumnIdx] : null;
+      if (urlColumn) {
+        this.schema.summary = {
+          title: {
+            text: (ro) => exprUtil.eval(ro, urlColumn.name),
+            url: (ro) => ui.ngServer + exprUtil.eval(ro, this.url)
+          },
+          descriptions: columns.map(column => column.name).filter((column, index) => index != urlColumnIdx)
+        };
+      }
 
       this.data = this.list.rows.map(
         (row) => {
@@ -256,6 +269,14 @@ export default {
           orderDirection: event.sortOrder < 0 ? 'desc' : 'asc'
         });
       }
+    },
+
+    switchToSummaryView: function() {
+      this.$refs.listView.switchToSummaryView();
+    },
+
+    switchToTableView: function() {
+      this.$refs.listView.switchToTableView();
     }
   }
 }

@@ -245,13 +245,13 @@ export default {
               }
             }
           }
-        } else if (field.type == 'multiselect') {
+        } else if (field.type == 'multiselect' || (field.type == 'pv' && field.multiple == true)) {
           const ls = field.listSource || {};
           if (value instanceof Array) {
             if (value.length == 0) {
               value = null;
             } else {
-              value = value.map((e) => typeof e == 'object' ? e[ls.displayProp] : e).join(', ');
+              value = value.map((e) => (typeof e == 'object' && ls.displayProp) ? e[ls.displayProp] : e).join(', ');
             }
           }
         } else if (field.type == 'storage-position') {
