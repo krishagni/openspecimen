@@ -155,7 +155,11 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		User user = null;
 		String authToken = AuthUtil.getAuthTokenFromHeader(httpReq);
 		if (authToken == null) {
+			logger.info("No auth token in the header. Probing the cookie. URL = " + httpReq.getRequestURI());
 			authToken = AuthUtil.getTokenFromCookie(httpReq);
+			if (authToken != null) {
+				logger.info("Found the auth token in the cookie. URL = " + httpReq.getRequestURI());
+			}
 		}
 		
 		LoginAuditLog loginAuditLog = null;
@@ -169,15 +173,18 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 				user = atResp.getPayload().getUser();
 				loginAuditLog = atResp.getPayload().getLoginAuditLog();
 			} else {
-				setUnauthorizedResp(req, resp, chain, true);
+				logger.info("The auth token received in request is invalid. URL = " + httpReq.getRequestURI());
+				setUnauthorizedResp(httpReq, httpResp, chain, true);
 			}
 		} else if (httpReq.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			logger.info("No auth token in the request. Probing the authorization header for username/password details. URL = " + httpReq.getRequestURI());
 			AuthToken token = doBasicAuthentication(httpReq, httpResp);
 			if (token != null) {
 				user = token.getUser();
 				loginAuditLog = token.getLoginAuditLog();
 			} else {
-				setUnauthorizedResp(req, resp, chain, true);
+				logger.info("The credentials received in authorization header are invalid. URL = " + httpReq.getRequestURI());
+				setUnauthorizedResp(httpReq, httpResp, chain, true);
 			}
 		}
 
@@ -188,11 +195,12 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		}
 
 		if (user == null) {
+			logger.info("No user details. Stopping the request processing: " + httpReq.getRequestURI());
 			String clientHdr = httpReq.getHeader(OS_CLIENT_HDR);
 			if (clientHdr != null && clientHdr.equals("webui")) {
-				setUnauthorizedResp(req, resp, chain, false);
+				setUnauthorizedResp(httpReq, httpResp, chain, false);
 			} else {
-				setRequireAuthResp(req, resp, chain);
+				setRequireAuthResp(httpReq, httpResp, chain);
 			}
 
 			teardownReqDataProviders(httpReq, httpResp);
@@ -200,6 +208,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		}
 
 		if (user.isContact() || user.isClosed()) {
+			logger.info("Contact or archived users not allowed to access the resource. Stopping the request processing: " + httpReq.getRequestURI());
+
 			AuthUtil.clearTokenCookie(httpReq, httpResp);
 			httpResp.sendError(
 				HttpServletResponse.SC_UNAUTHORIZED,
@@ -218,6 +228,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		if (user.isAdmin() && !user.isSysUser()) {
 			String impUserToken = AuthUtil.getImpersonateUser(httpReq);
 			if (StringUtils.isNotBlank(impUserToken)) {
+				logger.info("Validating the credentials of the impersonate request by: " + user.formattedName() + ", URL = " + httpReq.getRequestURI());
 				TokenDetail tokenDetail = new TokenDetail();
 				tokenDetail.setToken(impUserToken);
 				tokenDetail.setIpAddress(Utility.getRemoteAddress(httpReq));
@@ -230,6 +241,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 					impersonatedUser = atResp.getPayload().getUser();
 					loginAuditLog = atResp.getPayload().getLoginAuditLog();
 				} catch (OpenSpecimenException ose) {
+					logger.error("Credentials of the impersonate request are either invalid or processing failed. URL = " + httpReq.getRequestURI(), ose);
 					if (ose.containsError(AuthErrorCode.IMP_TOKEN_EXP) || ose.containsError(AuthErrorCode.INVALID_TOKEN)) {
 						AuthUtil.clearTokenCookie(httpReq, httpResp);
 						httpResp.sendError(HttpServletResponse.SC_UNAUTHORIZED, ose.getMessage());
@@ -291,23 +303,22 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		return null;
 	}
 
-	private void setRequireAuthResp(ServletRequest req, ServletResponse resp, FilterChain chain)
+	private void setRequireAuthResp(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
 	throws IOException, ServletException {
 		if (requiresSignIn(req)) {
-			HttpServletResponse httpResp = (HttpServletResponse)resp;
-			httpResp.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OpenSpecimen\"");
+			resp.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OpenSpecimen\"");
 			setUnauthorizedResp(req, resp, chain, true);
 		} else {
 			chain.doFilter(req, resp);
 		}
 	}
 
-	private void setUnauthorizedResp(ServletRequest req, ServletResponse resp, FilterChain chain, boolean reqSignIn)
+	private void setUnauthorizedResp(HttpServletRequest req, HttpServletResponse resp, FilterChain chain, boolean reqSignIn)
 	throws IOException, ServletException {
 		if (reqSignIn || requiresSignIn(req)) {
-			HttpServletResponse httpResp = (HttpServletResponse)resp;
-			AuthUtil.clearTokenCookie((HttpServletRequest) req, httpResp);
-			httpResp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+			logger.info("The requested resource requires a valid signed-in session. Sending HTTP 401 to authenticate the user. URL = " + req.getRequestURI());
+			AuthUtil.clearTokenCookie(req, resp);
+			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
 				"You must supply valid credentials to access the OpenSpecimen REST API");
 		} else {
 			chain.doFilter(req, resp);
