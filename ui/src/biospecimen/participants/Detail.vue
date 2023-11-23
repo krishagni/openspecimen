@@ -134,7 +134,7 @@ export default {
   methods: {
     loadCpr: async function() {
       this.ctx.cpr = await cprSvc.getCpr(+this.cprId);
-      formUtil.createCustomFieldsMap(this.ctx.cpr, true);
+      formUtil.createCustomFieldsMap(this.ctx.cpr.participant, true);
     },
 
     getRoute: function(routeName, params, query) {

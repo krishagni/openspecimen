@@ -66,6 +66,26 @@ class FormUtil {
     ).flatMap(row => row).filter(field => !!field);
   }
 
+  sdeFieldsToDict(fields) {
+    return (fields || []).map(
+      (field) => {
+        const result = util.clone(field);
+        result.label = result.label || result.caption;
+        if (result.type == 'date') {
+          result.type = 'datePicker';
+        } else if (result.type == 'pvs') {
+          result.type = 'pv';
+          result.attribute = result.attr;
+        } else if (result.type == 'collection') {
+          result.type = 'subform';
+          result.fields = this.sdeFieldsToDict(result.fields);
+        }
+
+        return result;
+      }
+    );
+  }
+
   fromDeToStdSchema(formDef, namePrefix) {
     let schema = { rows: [] };
     let dvRec = {}; // default values record

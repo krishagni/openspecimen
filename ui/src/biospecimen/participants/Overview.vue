@@ -38,7 +38,7 @@ export default {
 
   async created() {
     this._setupCpr();
-    this.ctx.dict = await cprSvc.getDict();
+    this.ctx.dict = await cprSvc.getDict(this.cpr.cpId);
   },
 
   watch: {

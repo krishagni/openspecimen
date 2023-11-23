@@ -112,7 +112,7 @@ export default {
     fields: function() {
       let simpleFields = [], textAreaFields = [], subformFields = [];
       for (let field of this.schema) {
-        if (field.dataEntry) {
+        if (field.dataEntry || field.type == 'note') {
           continue;
         }
 
