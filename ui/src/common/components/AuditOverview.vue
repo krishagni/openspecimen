@@ -28,6 +28,7 @@
           <span class="value value-md">
             <span>{{ctx.auditTrail.revisionsCount}}</span>
             <a @click="showRevs" v-if="ctx.auditTrail.revisionsCount > 0">
+              <span>&nbsp;</span>
               <span v-t="'audit.view_revisions'">(View All)</span>
             </a>
           </span>

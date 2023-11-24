@@ -101,7 +101,7 @@ export default {
 
   computed: {
     hasPhiAccess: function() {
-      return authSvc.isAllowed({resources: ['ParticipantPhi'], cp: this.ctx.cp.shortTitle});
+      return authSvc.isAllowed({resources: ['ParticipantPhi'], cp: this.ctx.cp.shortTitle, operations: ['Read']});
     },
 
     participantName: function() {

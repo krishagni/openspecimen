@@ -840,7 +840,10 @@
     "gender": "Gender",
     "list": "Participants",
     "medical_ids": "Medical Identifiers",
+    "missed_or_not_collected_visits": "Missed/Not Collected Visits",
     "mrn": "Medical Record Number",
+    "occurred_visits": "Occurred Visits",
+    "pending_visits": "Pending Visits",
     "phone_number": "Phone Number",
     "races": "Races",
     "receive_emails": "Receive Emails",
@@ -1039,17 +1042,25 @@
 
   "specimens": {
     "barcode": "Barcode",
+    "collected": "Collected",
     "collected_in": "collected in {container}",
+    "closed": "Closed",
     "cp": "Collection Protocol",
+    "distributed": "Distributed",
     "extracted_from": "from {anatomicSite}",
     "label": "Label",
     "label_or_barcode": "Label (Barcode)",
     "location": "Location",
+    "missed_or_not_collected": "Missed/Not Collected",
+    "no_specimens": "No Specimens",
     "not_stored": "Not Stored",
+    "pending": "Pending",
     "ppid": "PPID",
     "quantity": "Quantity",
     "receive_wf_not_configured": "Receive specimens workflow is not configured.",
-    "type": "Type"
+    "stored": "Stored",
+    "type": "Type",
+    "unplanned": "Unplanned"
   },
 
   "user_groups": {
@@ -1170,7 +1181,13 @@
   },
 
   "visits": {
+    "collection_stats": "Collection Stats",
+    "date": "Date",
     "event": "Event",
+    "name": "Name",
+    "pending_specimens": "Pending Specimens",
+    "reason": "Reason",
+    "utilisation_stats": "Utilization Stats",
     "visit": "Visit",
     "visit_date": "Visit Date",
     "visit_name": "Visit Name",

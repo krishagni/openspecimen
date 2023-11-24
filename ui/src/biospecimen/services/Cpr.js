@@ -20,12 +20,17 @@ class CollectionProtocolRegistration {
       (dict) => {
         dict = dict || {};
 
-        const cprFields = (dict.fields || []).filter(field => field.name.indexOf('cpr.') == 0);
+        let cprFields = (dict.fields || []).filter(field => field.name.indexOf('cpr.') == 0);
         if (cprFields.length > 0) {
-          return formUtil.sdeFieldsToDict(cprFields);
+          cprFields = formUtil.sdeFieldsToDict(cprFields);
+        } else {
+          cprFields = util.clone(cprSchema.fields);
         }
 
-        Array.prototype.push.apply(cprFields, util.clone(cprSchema.fields));
+        if (cprFields.some(field => field.name.indexOf('cpr.participant.extensionDetail') == 0)) {
+          return cprFields;
+        }
+
         return this.getCustomFieldsForm(cpId).then(
           (formDef) => {
             let customFields = formUtil.deFormToDict(formDef, 'cpr.participant.extensionDetail.attrsMap.');

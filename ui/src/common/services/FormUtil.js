@@ -71,7 +71,9 @@ class FormUtil {
       (field) => {
         const result = util.clone(field);
         result.label = result.label || result.caption;
-        if (result.type == 'date') {
+        if (result.type == 'textArea') {
+          result.type = 'textarea';
+        } else if (result.type == 'date') {
           result.type = 'datePicker';
         } else if (result.type == 'pvs') {
           result.type = 'pv';

@@ -34,6 +34,14 @@ export default {
       this.$refs.op.toggle(event);
     },
 
+    show: function(event) {
+      this.$refs.op.show(event);
+    },
+
+    hide: function(event) {
+      this.$refs.op.hide(event);
+    },
+
     emitShowHide: function(visibility) {
       this.$emit(visibility ? 'show' : 'hide');
     }

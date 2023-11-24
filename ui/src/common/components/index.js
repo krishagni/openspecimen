@@ -42,6 +42,7 @@ import LoadingBar from './LoadingBar.vue';
 import Mask from './Mask.vue';
 import Menu from './Menu.vue';
 import Message from './Message.vue';
+import MultiProgressBar from './MultiProgressBar.vue';
 import MultiSelectDropdown from './MultiSelectDropdown.vue';
 import MultiSelectGroupDropdown from './MultiSelectGroupDropdown.vue';
 import NewTab from './NewTab.vue';
@@ -135,6 +136,7 @@ export default {
     app.component('os-mask',             Mask);
     app.component('os-menu',             Menu);
     app.component('os-message',          Message);
+    app.component('os-multi-progress-bar', MultiProgressBar);
     app.component('os-multi-select-dropdown', MultiSelectDropdown);
     app.component('os-multi-select-group-dropdown', MultiSelectGroupDropdown);
     app.component('os-new-tab',          NewTab);
