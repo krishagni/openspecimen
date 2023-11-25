@@ -1187,6 +1187,7 @@
     "name": "Name",
     "pending_specimens": "Pending Specimens",
     "reason": "Reason",
+    "unplanned_visit": "Unplanned Visit",
     "utilisation_stats": "Utilization Stats",
     "visit": "Visit",
     "visit_date": "Visit Date",

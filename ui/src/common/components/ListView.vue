@@ -364,11 +364,15 @@ export default {
       this.$emit('rowClicked', row.data.rowObject);
     },
 
-    caption: function({caption, captionCode}) {
+    caption: function({caption, captionCode, label, labelCode}) {
       if (captionCode) {
         return this.$t(captionCode);
+      } else if (labelCode) {
+        return this.$t(labelCode);
       } else if (caption) {
         return caption;
+      } else if (label) {
+        return label;
       }
 
       return '';
@@ -384,9 +388,10 @@ export default {
           let extra = {metadata: column, context: data.rowObject};
           if (column.type == 'user') {
             value = this.$filters.username(value, extra);
-          } else if (column.type == 'date') {
+          } else if (column.type == 'date' || (column.type == 'datePicker' && column.showTime != true)) {
             value = this.$filters.date(value, extra);
-          } else if (column.type == 'date-time' || column.type == 'dateTime') {
+          } else if (column.type == 'date-time' || column.type == 'dateTime' ||
+                      (column.type == 'datePicker' && column.showTime == true)) {
             value = this.$filters.dateTime(value, extra);
           } else if (column.type == 'storage-position') {
             value = this.$filters.storagePosition(value, extra);
@@ -704,6 +709,16 @@ export default {
 
 .os-list :deep(.actions .btn) {
   padding: 0px 6px;
+}
+
+.os-list.os-muted-list-header :deep(table.p-datatable-table > thead.p-datatable-thead > tr > th) {
+  background: #f5f5f5;
+  color: #707070;
+  font-size: 0.75rem;
+}
+
+.os-list.os-bordered-list :deep(table) {
+  border: 1px solid #ddd;
 }
 
 .filters .body .input-group {

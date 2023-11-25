@@ -1,42 +1,49 @@
 <template>
-  <table class="os-table muted-header os-border">
-    <thead>
-      <tr>
-        <th>
-          <span v-t="'visits.event'">Event Label</span>
-        </th>
-        <th>
-          <span v-t="'visits.date'">Date</span>
-        </th>
-        <th>
-          <span v-t="'visits.reason'">Reason</span>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="visit of missedVisits" :key="visit.id">
-        <td>
-          <span>{{visit.eventLabel}}</span>
-        </td>
-        <td>
-          <span>{{$filters.date(visit.visitDate)}}</span>
-        </td>
-        <td>
-          <span>{{$filters.noValue(visit.missedReason)}}</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="os-missed-visits-tab">
+    <os-list-view
+      class="os-muted-list-header os-bordered-list"
+      :data="missedVisits"
+      :schema="{columns: tabFields}"
+      @rowClicked="onVisitRowClick"
+      ref="listView" />
+  </div>
 </template>
 
 <script>
+
+import visitSvc from '@/biospecimen/services/Visit.js';
+
 export default {
-  props: ['visits'],
+  props: ['cpr', 'visits'],
+
+  data() {
+    return {
+      tabFields: []
+    }
+  },
+
+  created() {
+    visitSvc.getVisitsTab(this.cpr.cpId).then(
+      (visitsTab) => {
+        this.tabFields = visitsTab.missed || [];
+        if (this.tabFields.length == 0) {
+          this.tabFields = [].concat(visitSvc.getDefaultMissedVisitsTabFields());
+        }
+      }
+    );
+  },
 
   computed: {
     missedVisits: function() {
-      return (this.visits || []).filter(visit => ['Missed Collection', 'Not Collected'].indexOf(visit.status) >= 0);
+      return (this.visits || []).filter(visit => ['Missed Collection', 'Not Collected'].indexOf(visit.status) >= 0)
+        .map(visit => ({visit}));
     }
   }
 }
 </script>
+
+<style scoped>
+.os-missed-visits-tab :deep(.os-list .results .results-inner) {
+  padding-right: 0rem;
+}
+</style>

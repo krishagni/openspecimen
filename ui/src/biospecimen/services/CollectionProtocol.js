@@ -59,4 +59,3 @@ class CollectionProtocol {
 }
 
 export default new CollectionProtocol();
-

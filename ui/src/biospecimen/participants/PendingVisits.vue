@@ -1,44 +1,59 @@
 <template>
-  <div>
-    <table class="os-table muted-header os-border">
-      <thead>
-        <tr>
-          <th>
-            <span v-t="'visits.event'">Event Label</span>
-          </th>
-          <th>
-            <span v-t="'visits.date'">Date</span>
-          </th>
-          <th>
-            <span v-t="'visits.pending_specimens'">Pending Specimens</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(visit, $index) of pendingVisits" :key="$index">
-          <td>
-            <span>{{visit.eventLabel}}</span>
-          </td>
-          <td>
-            <span>{{$filters.date(visit.visitDate || visit.anticipatedVisitDate)}}</span>
-          </td>
-          <td>
-            <span>{{$filters.noValue(visit.pendingPrimarySpmns)}}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="os-pending-visits-tab">
+    <os-list-view
+      class="os-muted-list-header os-bordered-list"
+      :data="pendingVisits"
+      :schema="{columns: tabFields}"
+      :showRowActions="true"
+      @rowClicked="onVisitRowClick"
+      ref="listView" />
   </div>
 </template>
 
 <script>
+
+import visitSvc from '@/biospecimen/services/Visit.js';
+
 export default {
-  props: ['visits'],
+  props: ['cpr', 'visits'],
+
+  data() {
+    return {
+      tabFields: []
+    }
+  },
+
+  created() {
+    visitSvc.getVisitsTab(this.cpr.cpId).then(
+      (visitsTab) => {
+        this.tabFields = visitsTab.pending || [];
+        if (this.tabFields.length == 0) {
+          this.tabFields = [].concat(visitSvc.getDefaultPendingVisitsTabFields());
+        }
+      }
+    );
+  },
 
   computed: {
     pendingVisits: function() {
-      return (this.visits || []).filter(visit => !visit.status || visit.status == 'Pending');
+      return (this.visits || []).filter(visit => !visit.status || visit.status == 'Pending')
+        .map(visit => ({
+          visit: Object.assign(
+            visit, {cprId: this.cpr.id, anticipatedVisitDate: this._getAnticipatedVisitDate(visit)})
+        }));
+    }
+  },
+
+  methods: {
+    _getAnticipatedVisitDate(visit) {
+      return visit.visitDate || visit.anticipatedVisitDate;
     }
   }
 }
 </script>
+
+<style scoped>
+.os-pending-visits-tab :deep(.os-list .results .results-inner) {
+  padding-right: 0rem;
+}
+</style>

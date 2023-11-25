@@ -15,7 +15,7 @@
         </template>
 
         <template #content>
-          <OccurredVisits :visits="occurredVisits" />
+          <OccurredVisits :cpr="cpr" :visits="occurredVisits" />
         </template>
       </os-section>
 
@@ -25,7 +25,7 @@
         </template>
 
         <template #content>
-          <MissedVisits :visits="missedVisits" />
+          <MissedVisits :cpr="cpr" :visits="missedVisits" />
         </template>
       </os-section>
 
@@ -35,7 +35,7 @@
         </template>
 
         <template #content>
-          <PendingVisits :visits="pendingVisits" />
+          <PendingVisits :cpr="cpr" :visits="pendingVisits" />
         </template>
       </os-section>
 
