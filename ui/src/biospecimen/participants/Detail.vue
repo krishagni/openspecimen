@@ -5,16 +5,16 @@
         <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
-      <span class="os-title">
+      <span class="os-title" v-if="cpr && cpr.id > 0">
         <h3>
-          <span>{{ctx.cpr.ppid}}</span>
+          <span>{{cpr.ppid}}</span>
           <span v-if="hasPhiAccess && participantName"> ({{participantName}})</span>
         </h3>
-        <div class="accessories" v-if="ctx.cpr && ctx.cpr.id > 0">
+        <div class="accessories">
           <os-copy-link size="small"
-            :route="{name: 'ParticipantDetail.Overview', params: {cpId: ctx.cp.id, cprId: ctx.cpr.id}}" />
+            :route="{name: 'ParticipantDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id}}" />
           <os-new-tab size="small" 
-            :route="{name: 'ParticipantDetail.Overview', params: {cpId: ctx.cp.id, cprId: ctx.cpr.id}}" />
+            :route="{name: 'ParticipantDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id}}" />
         </div>
       </span>
     </os-page-head>
@@ -44,7 +44,7 @@
           </ul>
         </os-side-menu>
 
-        <router-view :cpr="ctx.cpr" v-if="ctx.cpr.id"> </router-view>
+        <router-view :cpr="cpr" v-if="cpr && cpr.id"> </router-view>
       </div>
     </os-page-body>
   </os-page>
@@ -55,22 +55,19 @@
 import { inject, reactive } from 'vue';
 
 import authSvc    from '@/common/services/Authorization.js';
-import cprSvc     from '@/biospecimen/services/Cpr.js';
-import formUtil   from '@/common/services/FormUtil.js';
 import i18n       from '@/common/services/I18n.js';
 import routerSvc  from '@/common/services/Router.js';
 
 export default {
-  props: ['cprId', 'noNavButton'],
+  props: ['cpr', 'noNavButton'],
 
   async setup() {
     const cpViewCtx = inject('cpViewCtx', {value: {}}).value;
+
     const cp = await cpViewCtx.getCp();
 
     const ctx = reactive({
       cp: cp,
-
-      cpr: {},
 
       bcrumb: [
         {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}, // TODO: CP conf list view
@@ -88,16 +85,6 @@ export default {
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
     }
-
-    this.loadCpr();
-  },
-
-  watch: {
-    cprId: function(newVal, oldVal) {
-      if (newVal != oldVal) {
-        this.loadCpr();
-      }
-    }
   },
 
   computed: {
@@ -106,7 +93,7 @@ export default {
     },
 
     participantName: function() {
-      const participant = this.ctx.cpr.participant;
+      const participant = this.cpr.participant;
       if (!participant) {
         return '';
       }
@@ -133,11 +120,6 @@ export default {
   },
 
   methods: {
-    loadCpr: async function() {
-      this.ctx.cpr = await cprSvc.getCpr(+this.cprId);
-      formUtil.createCustomFieldsMap(this.ctx.cpr.participant, true);
-    },
-
     getRoute: function(routeName, params, query) {
       return {
         name: this.detailRouteName + '.' + routeName,

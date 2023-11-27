@@ -53,6 +53,11 @@ class Router {
     router.go(router.currentRoute);
   }
 
+  getCurrentRoute() {
+    const route = router.currentRoute;
+    return (route && route.value) || {};
+  }
+
   getUrl(name, params, query) {
     let route = router.resolve({name: name, params: params, query: query});
     return route && route.href;

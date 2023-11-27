@@ -13,6 +13,10 @@ class CollectionProtocol {
     return http.get('collection-protocols', filterOpts || {});
   }
 
+  async getCpe(eventId) {
+    return http.get('collection-protocol-events/' + eventId);
+  }
+
   async getWorkflow(cpId, wfName) {
     let workflow = await this.loadWorkflows(cpId, wfName);
     if (workflow && workflow.data) {

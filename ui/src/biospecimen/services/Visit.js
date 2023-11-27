@@ -25,6 +25,10 @@ class Visit {
     );
   }
 
+  async getVisit(visitId) {
+    return http.get('visits/' + visitId);
+  }
+
   async getDict(cpId) {
     return cpSvc.getWorkflow(cpId, 'dictionary').then(
       (dict) => {
