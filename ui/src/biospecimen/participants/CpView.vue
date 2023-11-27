@@ -1,22 +1,31 @@
 <template>
-  <router-view :cp="cp" :key="'cp_view_' + cp.id" v-if="cp.id > 0" />
+  <router-view :key="'cp_view_' + cpId" v-if="cpId > 0" />
 </template>
 
 <script>
-
 import { provide, ref } from 'vue';
 
-import cpSvc from '../services/CollectionProtocol.js';
+import CpViewContext from './CpViewContext.js';
 
 export default {
   props: ['cpId'],
 
-  async setup(props) {
-    const cp = ref();
-    provide('cp', cp);
+  setup(props) {
+    const cpViewCtx = ref();
+    cpViewCtx.value = new CpViewContext(+props.cpId);
 
-    cp.value = await cpSvc.getCpById(props.cpId);
-    return { cp }
+    provide('cpViewCtx', cpViewCtx);
+    return { cpViewCtx }
+  },
+
+  watch: {
+    'cpId': function(newVal, oldVal) {
+      if (newVal == oldVal || this.cpViewCtx.cpId == newVal) {
+        return;
+      }
+
+      this.cpViewCtx = new CpViewContext(+newVal);
+    }
   }
 }
 </script>

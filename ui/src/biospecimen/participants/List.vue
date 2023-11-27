@@ -67,14 +67,16 @@ import routerSvc from '@/common/services/Router.js';
 export default {
   name: 'ParticipantsList',
 
-  inject: ['ui', 'cp'],
+  inject: ['ui'],
 
   props: ['filters', 'cprId'],
 
-  setup(props) {
+  async setup(props) {
     const ui = inject('ui');
 
-    const cp = inject('cp').value;
+    const cpViewCtx = inject('cpViewCtx').value;
+    const cp = await cpViewCtx.getCp();
+
     let ctx = reactive({
       ui: ui,
 

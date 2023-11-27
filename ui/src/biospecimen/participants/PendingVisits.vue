@@ -12,10 +12,10 @@
 
 <script>
 
-import visitSvc from '@/biospecimen/services/Visit.js';
-
 export default {
   props: ['cpr', 'visits'],
+
+  inject: ['cpViewCtx'],
 
   data() {
     return {
@@ -24,14 +24,7 @@ export default {
   },
 
   created() {
-    visitSvc.getVisitsTab(this.cpr.cpId).then(
-      (visitsTab) => {
-        this.tabFields = visitsTab.pending || [];
-        if (this.tabFields.length == 0) {
-          this.tabFields = [].concat(visitSvc.getDefaultPendingVisitsTabFields());
-        }
-      }
-    );
+    this.cpViewCtx.value.getPendingVisitsTabFields().then(tabFields => this.tabFields = tabFields);
   },
 
   computed: {

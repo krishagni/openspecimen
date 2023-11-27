@@ -15,7 +15,7 @@
         </template>
 
         <template #content>
-          <OccurredVisits :cpr="cpr" :visits="occurredVisits" />
+          <OccurredVisits :visits="occurredVisits" />
         </template>
       </os-section>
 
@@ -25,7 +25,7 @@
         </template>
 
         <template #content>
-          <MissedVisits :cpr="cpr" :visits="missedVisits" />
+          <MissedVisits :visits="missedVisits" />
         </template>
       </os-section>
 
@@ -35,7 +35,7 @@
         </template>
 
         <template #content>
-          <PendingVisits :cpr="cpr" :visits="pendingVisits" />
+          <PendingVisits :cpr="ctx.cpr" :visits="pendingVisits" />
         </template>
       </os-section>
 
@@ -48,7 +48,6 @@
 </template>
 
 <script>
-import cprSvc from '@/biospecimen/services/Cpr.js';
 import formUtil from '@/common/services/FormUtil.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 
@@ -64,6 +63,8 @@ export default {
     PendingVisits,
     OccurredVisits
   },
+
+  inject: ['cpViewCtx'],
 
   data() {
     return {
@@ -83,7 +84,7 @@ export default {
 
   async created() {
     this._setupCpr();
-    this.ctx.dict = await cprSvc.getDict(this.cpr.cpId);
+    this.ctx.dict = await this.cpViewCtx.value.getCprDict();
   },
 
   computed: {

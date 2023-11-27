@@ -63,8 +63,9 @@ import routerSvc  from '@/common/services/Router.js';
 export default {
   props: ['cprId', 'noNavButton'],
 
-  setup() {
-    const cp = inject('cp', {value: {}}).value;
+  async setup() {
+    const cpViewCtx = inject('cpViewCtx', {value: {}}).value;
+    const cp = await cpViewCtx.getCp();
 
     const ctx = reactive({
       cp: cp,

@@ -19,10 +19,10 @@
 
 <script>
 
-import visitSvc from '@/biospecimen/services/Visit.js';
-
 export default {
-  props: ['cpr', 'visits'],
+  props: ['visits'],
+
+  inject: ['cpViewCtx'],
 
   data() {
     return {
@@ -31,28 +31,7 @@ export default {
   },
 
   created() {
-    visitSvc.getVisitsTab(this.cpr.cpId).then(
-      (visitsTab) => {
-        this.tabFields = visitsTab.occurred || [];
-        if (this.tabFields.length == 0) {
-          this.tabFields = [].concat(visitSvc.getDefaultOccurredVisitsTabFields());
-        }
-
-        this.tabFields.push({
-          type: 'component',
-          captionCode: 'visits.collection_stats',
-          component: 'os-visit-specimen-collection-stats',
-          data: (rowObject) => rowObject
-        });
-
-        this.tabFields.push({
-          type: 'component',
-          captionCode: 'visits.utilisation_stats',
-          component: 'os-visit-specimen-utilisation-stats',
-          data: (rowObject) => rowObject
-        });
-      }
-    );
+    this.cpViewCtx.value.getOccurredVisitsTabFields().then(tabFields => this.tabFields = tabFields);
   },
 
   computed: {
