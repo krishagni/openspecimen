@@ -172,9 +172,10 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 			if (atResp.isSuccessful()) {
 				user = atResp.getPayload().getUser();
 				loginAuditLog = atResp.getPayload().getLoginAuditLog();
-			} else {
+			} else if (StringUtils.isBlank(httpReq.getHeader("X-OS-SURVEY-TOKEN")) && StringUtils.isBlank(httpReq.getParameter("X-OS-SURVEY-TOKEN"))) {
 				logger.info("The auth token received in request is invalid. URL = " + httpReq.getRequestURI());
 				setUnauthorizedResp(httpReq, httpResp, chain, true);
+				return;
 			}
 		} else if (httpReq.getHeader(HttpHeaders.AUTHORIZATION) != null) {
 			logger.info("No auth token in the request. Probing the authorization header for username/password details. URL = " + httpReq.getRequestURI());
