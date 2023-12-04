@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="'cp_view_' + cpId" v-if="cpId > 0" />
+  <router-view :key="$route.params.cpId" />
 </template>
 
 <script>

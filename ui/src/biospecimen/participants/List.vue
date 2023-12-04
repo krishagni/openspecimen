@@ -15,7 +15,7 @@
             <os-button v-if="ctx.detailView"
               size="small" left-icon="expand-alt"
               v-os-tooltip.bottom="$t('common.switch_to_table_view')"
-              @click="showTable"
+              @click="showTable(false)"
             />
 
             <os-list-size v-else
@@ -52,8 +52,8 @@
       </os-page>
     </os-screen-panel>
 
-    <os-screen-panel :width="9" v-if="$route.params && $route.params.cprId > 0 && ctx.selectedCpr">
-      <router-view :cprId="ctx.selectedCpr.id" :key="'cpr_view_' + $route.params.cprId" />
+    <os-screen-panel :width="9" v-if="$route.params && $route.params.cprId > 0">
+      <router-view :cprId="$route.params.cprId" :key="$route.params.cprId" />
     </os-screen-panel>
   </os-screen>
 </template>
@@ -88,6 +88,8 @@ export default {
 
       selectedCprs: [],
 
+      cprId: props.cprId,
+
       query: props.filters,
 
       listInfo: {
@@ -111,21 +113,26 @@ export default {
   },
 
   watch: {
-    'cprId': function(newValue, oldValue) {
+    '$route.params.cprId': function(newValue, oldValue) {
       if (newValue == oldValue) {
         return;
       }
 
+      this.ctx.cprId = newValue;
       if (newValue > 0) {
-        let selectedRow = this.cprs.find(rowObject => rowObject.id == this.cprId);
+        let selectedRow = this.cprs.find(rowObject => rowObject.id == this.ctx.cprId);
         if (!selectedRow) {
-          selectedRow = {id: this.cprId};
+          selectedRow = {id: this.ctx.cprId};
         }
 
         this.showDetails(selectedRow);
       } else {
         this.showTable(newValue == -2);
       }
+    },
+
+    '$route.query.filters': function(newValue) {
+      this.ctx.query = newValue;
     }
   },
 
@@ -140,7 +147,7 @@ export default {
 
     onParticipantRowClick: function(event) {
       const cprId = +event.hidden.cprId;
-      routerSvc.goto('ParticipantsListItemDetail.Overview', {cprId: cprId}, {filters: this.filters});
+      routerSvc.goto('ParticipantsListItemDetail.Overview', { cprId }, {filters: this.ctx.query});
     },
 
     showDetails: function(rowObject) {
@@ -154,7 +161,7 @@ export default {
     showTable: function(reload) {
       this.ctx.detailView = false;
       this.$refs.participantsList.switchToTableView();
-      routerSvc.goto('ParticipantsList', {cprId: -1}, {filters: this.filters});
+      routerSvc.goto('ParticipantsList', {cprId: -1}, {filters: this.ctx.query});
       if (reload) {
         this.reloadList();
       }
@@ -182,12 +189,12 @@ export default {
         }
       );
 
-      if (this.cprId <= 0) {
+      if (this.ctx.cprId <= 0) {
         routerSvc.goto('ParticipantsList', {cpId: cp.id, cprId: -1}, { filters });
       } else {
-        let selectedRow = this.cprs.find(row => row.id == this.cprId);
+        let selectedRow = this.cprs.find(row => row.id == this.ctx.cprId);
         if (!selectedRow) {
-          selectedRow = {id: this.cprId};
+          selectedRow = {id: this.ctx.cprId};
         }
 
         this.showDetails(selectedRow);
