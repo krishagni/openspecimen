@@ -27,6 +27,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ScheduledJobErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -119,29 +120,50 @@ public class AccessCtrlMgr {
 		ensureUserEximRights(user, true);
 	}
 
-	public void ensureCreateUpdateUserRolesRights(User user, Site roleSite) {
+	public void ensureCreateUpdateUserRolesRights(User user, Site roleSite, CollectionProtocol roleCp) {
 		//
-		// ensure the role site belongs to user's institute
+		// Constraint 1: The site on which the role is assigned should belong to the user institute
 		//
 		if (roleSite != null && !roleSite.getInstitute().equals(user.getInstitute())) {
 			throw OpenSpecimenException.userError(
 				SiteErrorCode.INVALID_SITE_INSTITUTE, roleSite.getName(), user.getInstitute().getName());
 		}
 
+		//
+		// Constraint 2: The CP for which the role is assigned should be active at one of the user institute site
+		//
+		if (roleCp != null && roleCp.getRepositories().stream().noneMatch(site -> site.getInstitute().equals(user.getInstitute()))) {
+			throw OpenSpecimenException.userError(
+				CpErrorCode.NOT_OF_INST, roleCp.getShortTitle(), user.getInstitute().getName());
+		}
+
 		if (AuthUtil.isAdmin()) {
+			//
+			// super admin can assign any role to any site and CP combination
+			//
 			return;
 		}
+
+		//
+		// Non-super admin users can assign roles to only their institute users
+		//
+		if (!user.getInstitute().equals(AuthUtil.getCurrentUserInstitute())) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
 		
-		if (AuthUtil.isInstituteAdmin() && user.getInstitute().equals(AuthUtil.getCurrentUserInstitute())) {
+		if (AuthUtil.isInstituteAdmin()) {
+			//
+			// institute admin can assign any role to any site (constraint 1) and any CP (constraint 2) to their institute users
+			//
 			return;
 		}
 
 
 		boolean allowed = false;
-		Set<SiteCpPair> currentSites = getSiteCps(Resource.USER, Operation.UPDATE);
+		Set<SiteCpPair> currentSites = getSiteCps(Resource.USER, Operation.UPDATE, false);
 		for (SiteCpPair currentSite : currentSites) {
 			if (roleSite == null) {
-				allowed = user.getInstitute().getId().equals(currentSite.getInstituteId());
+				allowed = currentSite.getSiteId() == null && user.getInstitute().getId().equals(currentSite.getInstituteId());
 			} else {
 				if (currentSite.getSiteId() != null) {
 					allowed = currentSite.getSiteId().equals(roleSite.getId());
@@ -151,7 +173,19 @@ public class AccessCtrlMgr {
 			}
 
 			if (allowed) {
-				break;
+				if (roleCp == null) {
+					allowed = currentSite.getCpId() == null;
+				} else {
+					if (currentSite.getCpId() != null) {
+						allowed = currentSite.getCpId().equals(roleCp.getId());
+					} else {
+						allowed = (roleSite == null || roleCp.getRepositories().contains(roleSite));
+					}
+				}
+
+				if (allowed) {
+					break;
+				}
 			}
 		}
 

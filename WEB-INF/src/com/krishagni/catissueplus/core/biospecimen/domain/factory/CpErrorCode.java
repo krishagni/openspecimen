@@ -121,7 +121,9 @@ public enum CpErrorCode implements ErrorCode {
 
 	CONSENTS_SOURCED,
 
-	VISIT_CONSENTS_ENABLED;
+	VISIT_CONSENTS_ENABLED,
+
+	NOT_OF_INST;
 	
 	@Override
 	public String code() {

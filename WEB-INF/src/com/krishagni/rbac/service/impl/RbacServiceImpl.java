@@ -411,29 +411,26 @@ public class RbacServiceImpl implements RbacService {
 			Map<String,Object> oldSrDetails = new HashMap<>();
 			SubjectRole sr = null;
 			switch (subjectRoleOp.getOp()) {
-				case ADD:
+				case ADD -> {
 					sr = createSubjectRole(subject, subjectRoleOp.getSubjectRole());
-					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite());
+					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite(), sr.getCollectionProtocol());
 					resp = subject.addRole(sr);
-					break;
-				
-				case UPDATE:
+				}
+				case UPDATE -> {
 					SubjectRole oldSr = subject.getRole(subjectRoleOp.getSubjectRole().getId());
-					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, oldSr.getSite());
+					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, oldSr.getSite(), oldSr.getCollectionProtocol());
 					oldSrDetails.put("site", oldSr.getSite());
 					oldSrDetails.put("collectionProtocol", oldSr.getCollectionProtocol());
 					oldSrDetails.put("role", oldSr.getRole());
-					
 					sr = createSubjectRole(subject, subjectRoleOp.getSubjectRole());
-					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite());
+					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite(), sr.getCollectionProtocol());
 					resp = subject.updateRole(sr);
-					break;
-				
-				case REMOVE:
+				}
+				case REMOVE -> {
 					SubjectRole role = subject.getRole(subjectRoleOp.getSubjectRole().getId());
-					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, role.getSite());
+					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, role.getSite(), role.getCollectionProtocol());
 					resp = subject.removeSubjectRole(role);
-					break;
+				}
 			}
 			
 			if (resp != null) {
@@ -500,17 +497,13 @@ public class RbacServiceImpl implements RbacService {
 		ArrayList<SubjectRole> subjectRoles = new ArrayList<>();
 		for (String role : roleNames) {
 			SubjectRole sr = createSubjectRole(site, cp, role, systemRole);
-			AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite());
-			SubjectRole resp = null;
-			switch (op) {
-				case ADD:
-					resp = subject.addRole(sr);
-					break;
-				case REMOVE:
-					resp = subject.removeSubjectRole(sr);
-					break;
-			}
-			
+			AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite(), sr.getCollectionProtocol());
+			SubjectRole resp = switch (op) {
+				case ADD -> subject.addRole(sr);
+				case REMOVE -> subject.removeSubjectRole(sr);
+				default -> null;
+			};
+
 			if (resp != null) {
 				subjectRoles.add(resp);
 			}
@@ -629,7 +622,7 @@ public class RbacServiceImpl implements RbacService {
 			if (CollectionUtils.isNotEmpty(rolesList.getRoles())) {
 				for (SubjectRolesList.Role srd : rolesList.getRoles()) {
 					SubjectRole sr = createSubjectRole(srd);
-					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite());
+					AccessCtrlMgr.getInstance().ensureCreateUpdateUserRolesRights(user, sr.getSite(), sr.getCollectionProtocol());
 					subject.addRole(sr);
 				}
 			}
