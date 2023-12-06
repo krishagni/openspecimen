@@ -29,7 +29,9 @@ public enum CommonErrorCode implements ErrorCode {
 
 	INTERVAL_EXCEEDS_ALLOWED,
 
-	DATE_PARSE_ERROR;
+	DATE_PARSE_ERROR,
+
+	EVAL_EXPR_ERROR;
 
 	@Override
 	public String code() {

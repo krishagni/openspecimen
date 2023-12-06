@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 public class ExpressionUtil {
@@ -28,13 +30,18 @@ public class ExpressionUtil {
 
 	@SuppressWarnings("unchecked")
 	public <T> T evaluate(String exprStr, Map<String, Object> variables) {
-		StandardEvaluationContext ctxt = new StandardEvaluationContext();
-		addMethods(ctxt);
-		ctxt.setVariables(variables);
-		ctxt.setVariable("collFns", new CollectionFunctions(variables));
+		try {
+			StandardEvaluationContext ctxt = new StandardEvaluationContext();
+			addMethods(ctxt);
+			ctxt.setVariables(variables);
+			ctxt.setVariable("collFns", new CollectionFunctions(variables));
 
-		SpelExpression expr = parse(exprStr);
-		return (T) expr.getValue(ctxt);
+			SpelExpression expr = parse(exprStr);
+			return (T) expr.getValue(ctxt);
+		} catch (Exception e) {
+			String error   = (e instanceof  NullPointerException ? "Null object access" : ExceptionUtils.getRootCauseMessage(e));
+			throw OpenSpecimenException.userError(CommonErrorCode.EVAL_EXPR_ERROR, exprStr, error);
+		}
 	}
 
 	private SpelExpression parse(String exprStr) {
