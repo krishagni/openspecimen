@@ -450,7 +450,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 	
 	private void addInstituteRestriction(AbstractCriteria<?, ?> query, String instituteName) {
-		query.join("u.institute", "institute");
+		query.leftJoin("u.institute", "institute");
 		if (StringUtils.isBlank(instituteName)) {
 			return;
 		}
