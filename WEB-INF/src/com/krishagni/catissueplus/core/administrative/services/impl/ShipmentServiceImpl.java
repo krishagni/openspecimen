@@ -367,12 +367,24 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 					result.setAllowedCollectionProtocols(s.getAllowedCps().stream().map(CollectionProtocol::getShortTitle).collect(Collectors.toSet()));
 				}
 
+				if (s.getCompAllowedCps() != null) {
+					result.setCalcAllowedCollectionProtocols(s.getCompAllowedCps().stream().map(CollectionProtocol::getShortTitle).collect(Collectors.toSet()));
+				}
+
 				if (s.getAllowedSpecimenClasses() != null) {
 					result.setAllowedSpecimenClasses(PermissibleValue.toValueSet(s.getAllowedSpecimenClasses()));
 				}
 
+				if (s.getCompAllowedSpecimenClasses() != null) {
+					result.setCalcAllowedSpecimenClasses(PermissibleValue.toValueSet(s.getCompAllowedSpecimenClasses()));
+				}
+
 				if (s.getAllowedSpecimenTypes() != null) {
 					result.setAllowedSpecimenTypes(PermissibleValue.toValueSet(s.getAllowedSpecimenTypes()));
+				}
+
+				if (s.getCompAllowedSpecimenTypes() != null) {
+					result.setCalcAllowedSpecimenTypes(PermissibleValue.toValueSet(s.getCompAllowedSpecimenTypes()));
 				}
 
 				result.setStoredSpecimens(spmnsCount.get(s.getId()));

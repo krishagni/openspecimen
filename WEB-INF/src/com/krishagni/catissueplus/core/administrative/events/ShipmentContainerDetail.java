@@ -67,12 +67,24 @@ public class ShipmentContainerDetail implements Comparable<ShipmentContainerDeta
 			container.setAllowedCollectionProtocols(shipmentContainer.getContainer().getAllowedCps().stream().map(CollectionProtocol::getShortTitle).collect(Collectors.toSet()));
 		}
 
+		if (shipmentContainer.getContainer().getCompAllowedCps() != null) {
+			container.setCalcAllowedCollectionProtocols(shipmentContainer.getContainer().getCompAllowedCps().stream().map(CollectionProtocol::getShortTitle).collect(Collectors.toSet()));
+		}
+
 		if (shipmentContainer.getContainer().getAllowedSpecimenClasses() != null) {
 			container.setAllowedSpecimenClasses(PermissibleValue.toValueSet(shipmentContainer.getContainer().getAllowedSpecimenClasses()));
 		}
 
+		if (shipmentContainer.getContainer().getCompAllowedSpecimenClasses() != null) {
+			container.setCalcAllowedSpecimenClasses(PermissibleValue.toValueSet(shipmentContainer.getContainer().getCompAllowedSpecimenClasses()));
+		}
+
 		if (shipmentContainer.getContainer().getAllowedSpecimenTypes() != null) {
 			container.setAllowedSpecimenTypes(PermissibleValue.toValueSet(shipmentContainer.getContainer().getAllowedSpecimenTypes()));
+		}
+
+		if (shipmentContainer.getContainer().getCompAllowedSpecimenTypes() != null) {
+			container.setCalcAllowedSpecimenTypes(PermissibleValue.toValueSet(shipmentContainer.getContainer().getCompAllowedSpecimenTypes()));
 		}
 
 		detail.setContainer(container);

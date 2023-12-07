@@ -23,8 +23,15 @@ export default {
       "captionCode": "shipments.container_cps",
       "type": "span",
       "value": ({container}) => {
-        let allowedCps = (container.allowedCollectionProtocols || []).join(', ');
-        return !allowedCps.trim() ? '-' : allowedCps;
+        if (container.usedFor == 'STORAGE') {
+          if (container.calcAllowedCollectionProtocols.length > 0) {
+            return container.calcAllowedCollectionProtocols.join(', ');
+          } else {
+            return 'All';
+          }
+        }
+
+        return '-';
       }
     },
     {
@@ -32,10 +39,22 @@ export default {
       "captionCode": "shipments.container_specimen_types",
       "type": "span",
       "value": ({container}) => {
-        let classTypes = [].concat(container.allowedSpecimenClasses || []);
-        classTypes.push.apply(classTypes, container.allowedSpecimenTypes || []);
-        let result = classTypes.join(', ');
-        return !result.trim() ? '-' : result;
+        if (container.usedFor == 'STORAGE') {
+          let types = [];
+          if (container.calcAllowedSpecimenClasses.length > 0) {
+            Array.prototype.push.apply(types, container.calcAllowedSpecimenClasses);
+          }
+
+          if (container.calcAllowedSpecimenTypes.length > 0) {
+            Array.prototype.push.apply(types, container.calcAllowedSpecimenTypes);
+          }
+
+          if (types.length > 0) {
+            return types.join(', ');
+          }
+        }
+
+        return '-';
       }
     },
     {
