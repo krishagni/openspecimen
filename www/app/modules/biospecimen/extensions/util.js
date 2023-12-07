@@ -256,8 +256,10 @@ angular.module('os.biospecimen.extensions.util', [])
 
       if (deField.type == 'stringTextField') {
         sdeField.type = 'text';
+        sdeField.defaultValue = deField.defaultValue;
       } else if (deField.type == 'numberField') {
         sdeField.type = 'text';
+        sdeField.defaultValue = deField.defaultValue;
         if (deField.noOfDigitsAfterDecimal) {
           sdeField.pattern = '/^([0-9]+|[0-9]*\\.?[0-9]+[e]?[+-]?[0-9]*)$/';
         } else {
@@ -265,11 +267,16 @@ angular.module('os.biospecimen.extensions.util', [])
         }
       } else if (deField.type == 'textArea') {
         sdeField.type = 'textarea';
+        sdeField.defaultValue = deField.defaultValue;
       } else if (deField.type == 'radiobutton') {
         sdeField.type = 'radio';
         sdeField.options = deField.pvs.map(function(pv) { return pv.value; });
+        sdeField.defaultValue = deField.defaultValue && deField.defaultValue.value;
       } else if (deField.type == 'booleanCheckbox') {
         sdeField.type = 'toggle-checkbox';
+        if (deField.defaultChecked) {
+          sdeField.defaultValue = true;
+        }
       } else if (deField.type == 'combobox' || deField.type == 'multiSelectListbox' || deField.type == 'checkbox') {
         sdeField.type = 'dropdown';
         sdeField.multiple = (deField.type != 'combobox');
@@ -283,6 +290,11 @@ angular.module('os.biospecimen.extensions.util', [])
             }
           }
         };
+
+        if (deField.defaultValue) {
+          var value = deField.defaultValue.value;
+          sdeField.defaultValue = (deField.type == 'combobox') ? value : [value];
+        }
       } else if (deField.type == 'datePicker') {
         sdeField.type = deField.format && deField.format.indexOf('HH:mm') != -1 ? 'datetime' : 'date';
         if (deField.defaultType == 'CURRENT_DATE') {
