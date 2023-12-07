@@ -33,6 +33,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolRegistrationFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
@@ -484,7 +485,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		if (reqId != null) {
 			key = reqId;
 			sr = daoFactory.getSpecimenRequirementDao().getById(reqId);
-		} else if (detail.getCpId() != null && StringUtils.isNotBlank(reqCode)) {
+		} else if (detail.getCpId() != null && StringUtils.isNotBlank(reqCode) && visit != null && visit.getCpEvent() != null) {
 			key = detail.getCpId() + ":" + reqCode;
 			sr = daoFactory.getSpecimenRequirementDao().getByCpEventLabelAndSrCode(
 				detail.getCpId(), visit.getCpEvent().getEventLabel(), reqCode);
@@ -495,6 +496,23 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 		
 		if (key != null && sr == null) {
+			if (reqId == null) {
+				CollectionProtocol cp = null;
+				Object cpKey = null;
+				if (detail.getCpId() != null) {
+					cp = daoFactory.getCollectionProtocolDao().getById(detail.getCpId());
+					cpKey = detail.getCpId();
+				} else if (StringUtils.isNotBlank(detail.getCpShortTitle())) {
+					cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(detail.getCpShortTitle());
+					cpKey = detail.getCpShortTitle();
+				}
+
+				if (cp == null && cpKey != null) {
+					ose.addError(CpErrorCode.NOT_FOUND, cpKey);
+					return null;
+				}
+			}
+
 			ose.addError(SrErrorCode.NOT_FOUND);
 			return null;
 		}
