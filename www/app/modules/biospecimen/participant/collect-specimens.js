@@ -380,6 +380,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             mrnAccessRestriction = $scope.mrnAccessRestriction;
 
         function init() {
+          var autoInit = spmnCollFields.autoInitVisit != 'false' && spmnCollFields.autoInitVisit != false;
+
           ignoreQtyWarning = CollectSpecimensSvc.ignoreQtyWarning();
           $scope.showCollVisitDetails = CollectSpecimensSvc.showCollVisitDetails();
           var uiOpts = $scope.uiOpts  = CollectSpecimensSvc.opts();
@@ -463,13 +465,13 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
 
           visit.cprId = cpr.id;
           delete visit.anticipatedVisitDate;
-          if (!!latestVisit) {
+          if (!!latestVisit && autoInit) {
             visit.clinicalDiagnoses = latestVisit.clinicalDiagnoses;
           }
 
           if (!!visit.site) {
             // visit.site = visit.site;
-          } else if (latestVisit) {
+          } else if (latestVisit && autoInit) {
             visit.site = latestVisit.site;
           } else if (cpr.participant.pmis && cpr.participant.pmis.length > 0) {
             visit.site = cpr.participant.pmis[0].siteName;
@@ -1630,6 +1632,8 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
             onValueChangeCb = $scope.onValueChangeCb;
 
         function init() {
+          var autoInit = spmnCollFields.autoInitVisit != 'false' && spmnCollFields.autoInitVisit != false;
+
           var specimens = $scope.specimens;
           var uiOpts = CollectSpecimensSvc.opts();
 
@@ -1672,12 +1676,12 @@ angular.module('os.biospecimen.participant.collect-specimens', ['os.biospecimen.
           $scope.visit = visit;
           if (visit) {
             isVisitCompleted = (visit.status == 'Complete');
-            if (!isVisitCompleted && !!latestVisit) {
+            if (!isVisitCompleted && !!latestVisit && autoInit) {
               visit.clinicalDiagnoses = latestVisit.clinicalDiagnoses;
             }
 
             if (!visit.site) {
-              if (!!latestVisit) {
+              if (!!latestVisit && autoInit) {
                 visit.site = latestVisit.site;
               } else if (cpr.participant.pmis && cpr.participant.pmis.length > 0) {
                 visit.site = cpr.participant.pmis[0].siteName;

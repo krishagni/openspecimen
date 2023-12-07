@@ -3,7 +3,7 @@ angular.module('os.biospecimen.visit.addedit', [])
   .controller('AddEditVisitCtrl', function(
     $scope, $state, $stateParams, $injector, userRole, cp, cpr, visit, latestVisit,
     extensionCtxt, hasDict, layout, onValueChangeCb, mrnAccessRestriction, spmnCollWfData,
-    ParticipantSpecimensViewState, PvManager, ExtensionsUtil, CollectSpecimensSvc, Alerts) {
+    ParticipantSpecimensViewState, PvManager, ExtensionsUtil, CollectSpecimensSvc, Alerts, Visit) {
 
     function loadPvs() {
       $scope.visitStatuses = PvManager.getPvs('visit-status');
@@ -11,9 +11,15 @@ angular.module('os.biospecimen.visit.addedit', [])
     };
 
     function init() {
-      var currVisit = $scope.currVisit = angular.copy(visit);
-      angular.extend(currVisit, {cprId: cpr.id, cpTitle: cpr.cpTitle});
+      var autoInit = spmnCollWfData.autoInitVisit != 'false' && spmnCollWfData.autoInitVisit != false;
+      var currVisit;
+      if (!visit.id || autoInit) {
+        currVisit = $scope.currVisit = angular.copy(visit);
+      } else {
+        currVisit = $scope.currVisit = new Visit();
+      }
 
+      angular.extend(currVisit, {cprId: cpr.id, cpTitle: cpr.cpTitle});
       var ctx = $scope.visitCtx = {
         obj: {visit: $scope.currVisit, cpr: cpr, cp: cp, userRole: userRole},
         opts: {viewCtx: $scope, layout: layout, onValueChange: onValueChangeCb, mdInput: false},
@@ -27,8 +33,8 @@ angular.module('os.biospecimen.visit.addedit', [])
         angular.extend(currVisit, {
           visitDate: defVisitDate,
           status: 'Complete',
-          clinicalDiagnoses: latestVisit ? latestVisit.clinicalDiagnoses : currVisit.clinicalDiagnoses,
-          site: getVisitSite(cpr, latestVisit, currVisit)
+          clinicalDiagnoses: (autoInit && latestVisit) ? latestVisit.clinicalDiagnoses : currVisit.clinicalDiagnoses,
+          site: getVisitSite(cpr, (autoInit && latestVisit) || null, currVisit)
         });
         ctx.pendingToStart = true;
         delete currVisit.anticipatedVisitDate;
