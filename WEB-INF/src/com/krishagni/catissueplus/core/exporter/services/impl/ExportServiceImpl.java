@@ -414,9 +414,9 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 				generateOutputZip(job);
 				completed();
 				return 0;
-			} catch (Exception e) {
+			} catch (Throwable t) {
 				failed();
-				logger.error("Error exporting records", e);
+				logger.error("Error exporting records", t);
 				return -1;
 			} finally {
 				ExporterContextHolder.getInstance().clearContext();
@@ -733,7 +733,7 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 				}
 
 				return result;
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				throw new IllegalArgumentException("Error obtaining value of property: " + field.getAttribute(), e);
 			}
 		}
@@ -741,10 +741,10 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 		private Object getObject(Object object, String propertyName) {
 			try {
 				return BeanUtilsBean2.getInstance().getPropertyUtils().getProperty(object, propertyName);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				try {
 					return getPropertyValue(object, propertyName);
-				} catch (Exception e1) {
+				} catch (Throwable e1) {
 					throw new IllegalArgumentException("Error obtaining value of property: " + propertyName, e);
 				}
 			}

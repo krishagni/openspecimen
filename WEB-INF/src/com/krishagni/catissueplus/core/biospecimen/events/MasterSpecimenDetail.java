@@ -35,7 +35,11 @@ public class MasterSpecimenDetail extends AttributeModifiedSupport {
 
 	private String emailAddress;
 
+	private Boolean emailOptIn;
+
 	private String phoneNumber;
+
+	private Boolean textOptIn;
 
 	private Date birthDate;
 
@@ -219,12 +223,28 @@ public class MasterSpecimenDetail extends AttributeModifiedSupport {
 		this.emailAddress = emailAddress;
 	}
 
+	public Boolean getEmailOptIn() {
+		return emailOptIn;
+	}
+
+	public void setEmailOptIn(Boolean emailOptIn) {
+		this.emailOptIn = emailOptIn;
+	}
+
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
 
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+
+	public Boolean getTextOptIn() {
+		return textOptIn;
+	}
+
+	public void setTextOptIn(Boolean textOptIn) {
+		this.textOptIn = textOptIn;
 	}
 
 	public Date getBirthDate() {
