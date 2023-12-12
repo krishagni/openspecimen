@@ -67,6 +67,14 @@ public class SubjectDaoImpl extends AbstractDao<Subject> implements SubjectDao {
 	}
 
 	@Override
+	public List<SubjectAccess> getAccessList(Long subjectId, String[] ops) {
+		return createNamedQuery(GET_OP_ACCESS_LIST, SubjectAccess.class)
+			.setParameter("subjectId", subjectId)
+			.setParameterList("operations", Arrays.asList(ops))
+			.list();
+	}
+
+	@Override
 	public List<Long> getSubjectIds(Long cpId, String resource, String[] ops) {
 		return createNamedQuery(GET_SUBJECT_IDS, Long.class)
 			.setParameter("cpId", cpId)
@@ -111,6 +119,8 @@ public class SubjectDaoImpl extends AbstractDao<Subject> implements SubjectDao {
 	private static final String GET_ACCESS_LIST_BY_CP = FQN + ".getAccessListByCp";
 
 	private static final String GET_ACCESS_LIST_COUNT = FQN + ".getAccessListCount";
+
+	private static final String GET_OP_ACCESS_LIST = FQN + ".getOpAccessList";
 
 	private static final String GET_SUBJECT_IDS = FQN + ".getSubjectIds";
 

@@ -54,6 +54,7 @@ import com.krishagni.catissueplus.core.audit.repository.RevisionsListCriteria;
 import com.krishagni.catissueplus.core.audit.services.AuditService;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -200,10 +201,15 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	}
 		
 	@Override
+	@PlusTransactional
 	public ResponseEvent<String> uploadImportJobFile(RequestEvent<InputStream> req) {
 		OutputStream out = null;
 		
 		try {
+			if (!AccessCtrlMgr.getInstance().isBulkImportAllowed()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
 			//
 			// 1. Ensure import directory is present
 			//

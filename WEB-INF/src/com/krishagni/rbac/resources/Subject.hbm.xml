@@ -77,6 +77,17 @@
         sa.operation in (:operations)
     </query>
 
+    <query name="getOpAccessList">
+      select
+        sa
+      from
+        com.krishagni.rbac.domain.Subject s
+        join s.accessList sa
+      where
+        s.id = :subjectId and
+        sa.operation in (:operations)
+    </query>
+
     <query name="removeRolesByCp">
       delete from
         com.krishagni.rbac.domain.SubjectRole role

@@ -27,7 +27,6 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ScheduledJobErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
-import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -1871,6 +1870,43 @@ public class AccessCtrlMgr {
 		}
 
 		return siteCps;
+	}
+
+	public Set<SiteCpPair> getSiteCps(String[] ops) {
+		if (AuthUtil.isAdmin()) {
+			return null;
+		}
+
+		Long userId = AuthUtil.getCurrentUser().getId();
+		Long instituteId = AuthUtil.getCurrentUserInstitute().getId();
+		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(userId, ops);
+		Set<SiteCpPair> siteCps = new HashSet<>();
+		for (SubjectAccess access : accessList) {
+			Long siteId = access.getSite() != null ? access.getSite().getId() : null;
+			Long cpId = access.getCollectionProtocol() != null ? access.getCollectionProtocol().getId() : null;
+			siteCps.add(SiteCpPair.make(access.getResource(), instituteId, siteId, cpId));
+		}
+
+		return siteCps;
+	}
+
+	public boolean isBulkImportAllowed() {
+		Set<SiteCpPair> siteCps = getSiteCps(new String[] { Operation.EXIM.getName() });
+		if (siteCps == null) {
+			return true;
+		}
+
+		boolean allowed = false;
+		for (SiteCpPair siteCp : siteCps) {
+			if (siteCp.getResource().equals(Resource.QUERY.getName())) {
+				continue;
+			}
+
+			allowed = true;
+			break;
+		}
+
+		return allowed;
 	}
 
 	private List<SiteCpPair> deDupSiteCpPairs(Collection<SiteCpPair> siteCps) {
