@@ -849,22 +849,26 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		List<Long> ids = printDetail.getVisitIds();
 		List<String> names = printDetail.getVisitNames();
 
+		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadVisitSiteCps(null);
+		if (siteCps != null && siteCps.isEmpty()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		VisitsListCriteria crit = new VisitsListCriteria().siteCps(siteCps != null ? new ArrayList<>(siteCps) : null);
+
 		List<Visit> visits = null;
-		Object key = null;
 		if (CollectionUtils.isNotEmpty(ids)) {
-			key = ids;
-			visits = daoFactory.getVisitsDao().getByIds(ids).stream()
+			visits = daoFactory.getVisitsDao().getVisitsList(crit.ids(ids)).stream()
 				.sorted(Comparator.comparingInt((v) -> ids.indexOf(v.getId())))
 				.collect(Collectors.toList());
 		} else if (CollectionUtils.isNotEmpty(names)) {
-			key = names;
-			visits = daoFactory.getVisitsDao().getByName(names).stream()
+			visits = daoFactory.getVisitsDao().getVisitsList(crit.names(names)).stream()
 				.sorted(Comparator.comparingInt((v) -> names.indexOf(v.getName())))
 				.collect(Collectors.toList());
 		}
 
 		if (CollectionUtils.isEmpty(visits)) {
-			throw OpenSpecimenException.userError(VisitErrorCode.NO_VISITS_TO_PRINT, key);
+			throw OpenSpecimenException.userError(VisitErrorCode.NO_VISITS_TO_PRINT);
 		}
 
 		return visits;

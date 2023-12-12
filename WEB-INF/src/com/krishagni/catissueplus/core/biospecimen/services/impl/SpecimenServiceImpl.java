@@ -1179,12 +1179,17 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	 * 2. Flattened list of specimens of a visit identified by either visit name or visit ID
 	 */
 	private List<Specimen> getSpecimensToPrint(PrintSpecimenLabelDetail detail) {
+		List<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+		if (siteCps != null && siteCps.isEmpty()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		List<Specimen> specimens = null;
 		if (CollectionUtils.isNotEmpty(detail.getSpecimenIds())) {
-			specimens = daoFactory.getSpecimenDao().getByIds(detail.getSpecimenIds());
+			specimens = daoFactory.getSpecimenDao().getSpecimens(new SpecimenListCriteria().ids(detail.getSpecimenIds()).siteCps(siteCps));
 			specimens = Specimen.sortByIds(specimens, detail.getSpecimenIds());
 		} else if (CollectionUtils.isNotEmpty(detail.getSpecimenLabels())) {
-			specimens = daoFactory.getSpecimenDao().getSpecimens(new SpecimenListCriteria().labels(detail.getSpecimenLabels()));
+			specimens = daoFactory.getSpecimenDao().getSpecimens(new SpecimenListCriteria().labels(detail.getSpecimenLabels()).siteCps(siteCps));
 			specimens = Specimen.sortByLabels(specimens, detail.getSpecimenLabels());
 		} else if (detail.getVisitId() != null) {
 			Visit visit = daoFactory.getVisitsDao().getById(detail.getVisitId());
@@ -1192,6 +1197,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, detail.getVisitId());
 			}
 
+			AccessCtrlMgr.getInstance().ensureReadSpecimenRights(visit.getRegistration(), false);
 			specimens = getFlattenedSpecimens(visit.getTopLevelSpecimens());
 		} else if (StringUtils.isNotBlank(detail.getVisitName())) {
 			Visit visit = daoFactory.getVisitsDao().getByName(detail.getVisitName());
@@ -1199,6 +1205,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, detail.getVisitName());
 			}
 
+			AccessCtrlMgr.getInstance().ensureReadSpecimenRights(visit.getRegistration(), false);
 			specimens = getFlattenedSpecimens(visit.getTopLevelSpecimens());
 		} else if (detail.getCprId() != null || (StringUtils.isNotBlank(detail.getCpShortTitle()) && StringUtils.isNotBlank(detail.getPpid()))) {
 			CollectionProtocolRegistration cpr = null;
@@ -1215,6 +1222,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, key, 1);
 			}
 
+			AccessCtrlMgr.getInstance().ensureReadSpecimenRights(cpr, false);
 			specimens = cpr.getVisits().stream()
 				.map(v -> getFlattenedSpecimens(v.getTopLevelSpecimens()))
 				.flatMap(List::stream)
