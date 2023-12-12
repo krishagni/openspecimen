@@ -285,12 +285,16 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		} else {
 			if (detail.getCpId() != null) {
 				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(detail.getCpId());
-				if (cp != null && cp.isSpecimenCentric()) {
+				if (cp == null) {
+					ose.addError(CpErrorCode.NOT_FOUND, detail.getCpId());
+				} else if (cp.isSpecimenCentric()) {
 					visit = getVisitFor(cp);
 				}
 			} else if (StringUtils.isNotBlank(detail.getCpShortTitle())) {
 				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(detail.getCpShortTitle());
-				if (cp != null && cp.isSpecimenCentric()) {
+				if (cp == null) {
+					ose.addError(CpErrorCode.NOT_FOUND, detail.getCpShortTitle());
+				} else if (cp.isSpecimenCentric()) {
 					visit = getVisitFor(cp);
 				}
 			}
