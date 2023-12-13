@@ -340,7 +340,7 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 
 			FileDetail fileDetail = new FileDetail();
 			fileDetail.setFileOut(file);
-			fileDetail.setFilename(visit.getName() + fileExtension);
+			fileDetail.setFilename(Utility.sanitizeFilename(visit.getName()) + fileExtension);
 			return ResponseEvent.response(fileDetail);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
