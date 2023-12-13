@@ -84,8 +84,8 @@ angular.module('os.biospecimen.participant',
             return CollectionProtocol.getById($stateParams.cpId);
           },
 
-          receiveSpecimensWfId: function(CpConfigSvc) {
-            return CpConfigSvc.getCommonCfg(-1, 'receiveSpecimensWorkflow');
+          receiveSpecimensWfId: function($stateParams, CpConfigSvc) {
+            return CpConfigSvc.getCommonCfg($stateParams.cpId, 'receiveSpecimensWorkflow');
           },
 
           cpViewCtx: function($q, $injector, cp, currentUser, authInit, receiveSpecimensWfId, AuthorizationService) {
