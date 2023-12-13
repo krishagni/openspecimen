@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
@@ -73,7 +75,17 @@ public class ShipmentSpecimen extends BaseEntity {
 			getSpecimen().updatePosition(position, null, shipment.getShippedDate(), "Shipment: " + shipment.getName());
 		}
 
-		shipment.addOnSaveProc(() -> addShippedEvent(this));
+
+		AtomicBoolean saved = new AtomicBoolean(false);
+		shipment.addOnSaveProc(
+			() -> {
+				if (!saved.get()) {
+					addShippedEvent(this);
+				}
+
+				saved.set(true);
+			}
+		);
 	}
 	
 	public void receive(ShipmentSpecimen other) {
