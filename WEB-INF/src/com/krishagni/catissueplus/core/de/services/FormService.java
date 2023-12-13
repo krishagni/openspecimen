@@ -119,5 +119,5 @@ public interface FormService {
 
 	void anonymizeRecord(Container form, Long recordId);
 
-	void addAccessChecker(String entityType, Function<FormContextBean, Boolean> checker);
+	void addAccessChecker(String entityType, FormAccessChecker checker);
 }

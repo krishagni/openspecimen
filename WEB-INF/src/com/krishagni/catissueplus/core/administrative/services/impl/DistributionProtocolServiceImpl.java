@@ -31,6 +31,7 @@ import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionOrderErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolFactory;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DpRequirementErrorCode;
@@ -81,6 +82,7 @@ import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
+import com.krishagni.catissueplus.core.de.services.FormAccessChecker;
 import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
@@ -641,15 +643,68 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		listSvc.registerListConfigurator(RESV_SPMNS_LIST_NAME, this::getReservedSpecimensConfig);
 		exportSvc.registerObjectsGenerator("distributionProtocol", this::getDpsGenerator);
 		formSvc.addAccessChecker(DistributionOrder.getExtnEntityType(),
-			(formCtxt) -> {
-				Long dpId = formCtxt.getEntityId();
-				if (dpId == null || dpId == -1L) {
-					return AuthUtil.isAdmin();
-				} else {
-					return AccessCtrlMgr.getInstance().hasCreateUpdateDpRights(dpId);
+			new FormAccessChecker() {
+				@Override
+				public boolean isUpdateAllowed(FormContextBean formCtxt) {
+					Long dpId = formCtxt.getEntityId();
+					if (dpId == null || dpId == -1L) {
+						return AuthUtil.isAdmin();
+					} else {
+						return AccessCtrlMgr.getInstance().hasCreateUpdateDpRights(dpId);
+					}
 				}
-			}
-		);
+
+				@Override
+				public boolean isDataReadAllowed(Object obj) {
+					try {
+						if (obj instanceof DistributionOrder) {
+							AccessCtrlMgr.getInstance().ensureReadDistributionOrderRights((DistributionOrder) obj);
+						} else {
+							return false;
+						}
+
+						return true;
+					} catch (Exception e) {
+						return false;
+					}
+				}
+
+				@Override
+				public boolean isDataReadAllowed(String entityType, Long objectId) {
+					return isDataReadAllowed(getOrder(objectId));
+				}
+
+
+				@Override
+				public boolean isDataUpdateAllowed(Object obj) {
+					try {
+						if (obj instanceof DistributionOrder) {
+							AccessCtrlMgr.getInstance().ensureUpdateDistributionOrderRights((DistributionOrder) obj);
+						} else {
+							return false;
+						}
+
+						return true;
+					} catch (Exception e) {
+						return false;
+					}
+				}
+
+				@Override
+				public boolean isDataUpdateAllowed(String entityType, Long objectId) {
+					return isDataUpdateAllowed(getOrder(objectId));
+				}
+
+				private DistributionOrder getOrder(Long orderId) {
+					DistributionOrder order = daoFactory.getDistributionOrderDao().getById(orderId);
+					if (order == null) {
+						throw OpenSpecimenException.userError(DistributionOrderErrorCode.NOT_FOUND, orderId);
+					}
+
+					return order;
+				}
+
+			});
 
 		FormEventsNotifier.getInstance().addListener(
 			new FormEventsListener() {

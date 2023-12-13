@@ -19,14 +19,18 @@ import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrder;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
+import com.krishagni.catissueplus.core.administrative.domain.DpRequirement;
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.DpRequirementErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ScheduledJobErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.SiteListCriteria;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
@@ -40,6 +44,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -103,6 +108,15 @@ public class AccessCtrlMgr {
 	public void ensureCreateUserRights(User user) {
 		ensureUserObjectRights(user, Operation.CREATE, true);
 		ensureUserEximRights(user, true);
+	}
+
+	public void ensureUpdateUserRights(Long userId) {
+		User user = bsDaoFactory.getUserDao().getById(userId);
+		if (user == null) {
+			throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, userId);
+		}
+
+		ensureUpdateUserRights(user);
 	}
 
 	public void ensureUpdateUserRights(User user) {
@@ -256,6 +270,15 @@ public class AccessCtrlMgr {
 	//          Site object access control helper methods                               //
 	//                                                                                  //
 	//////////////////////////////////////////////////////////////////////////////////////
+	public void ensureCreateUpdateDeleteSiteRights(Long siteId) {
+		Site site = bsDaoFactory.getSiteDao().getById(siteId);
+		if (site == null) {
+			throw OpenSpecimenException.userError(SiteErrorCode.NOT_FOUND, siteId);
+		}
+
+		ensureCreateUpdateDeleteSiteRights(site);
+	}
+
 	public void ensureCreateUpdateDeleteSiteRights(Site site) {
 		if (AuthUtil.isAdmin()) {
 			return;
@@ -284,8 +307,35 @@ public class AccessCtrlMgr {
 		return getSiteCps(Resource.DP, Operation.READ, true);
 	}
 
+	public void ensureReadDpRights(Long dpId) {
+		DistributionProtocol dp = bsDaoFactory.getDistributionProtocolDao().getById(dpId);
+		if (dp == null) {
+			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.NOT_FOUND, dpId);
+		}
+
+		ensureReadDpRights(dp);
+	}
+
+	public void ensureReadDpReqRights(Long dpReqId) {
+		DpRequirement dpReq = bsDaoFactory.getDistributionProtocolRequirementDao().getById(dpReqId);
+		if (dpReq == null) {
+			throw OpenSpecimenException.userError(DpRequirementErrorCode.NOT_FOUND, dpReqId);
+		}
+
+		ensureReadDpRights(dpReq.getDistributionProtocol());
+	}
+
 	public void ensureReadDpRights(DistributionProtocol dp) {
 		ensureDpObjectRights(dp, new Operation[] {Operation.READ}, false);
+	}
+
+	public void ensureUpdateDpRights(Long dpId) {
+		DistributionProtocol dp = bsDaoFactory.getDistributionProtocolDao().getById(dpId);
+		if (dp == null) {
+			throw OpenSpecimenException.userError(DistributionProtocolErrorCode.NOT_FOUND, dpId);
+		}
+
+		ensureCreateUpdateDpRights(dp);
 	}
 
 	public boolean hasCreateUpdateDpRights(Long dpId) {
@@ -295,6 +345,15 @@ public class AccessCtrlMgr {
 		}
 
 		return hasDpObjectRights(dp, new Operation[] { Operation.CREATE, Operation.UPDATE }, true);
+	}
+
+	public void ensureUpdateDpReqRights(Long dpReqId) {
+		DpRequirement dpReq = bsDaoFactory.getDistributionProtocolRequirementDao().getById(dpReqId);
+		if (dpReq == null) {
+			throw OpenSpecimenException.userError(DpRequirementErrorCode.NOT_FOUND, dpReqId);
+		}
+
+		ensureCreateUpdateDpRights(dpReq.getDistributionProtocol());
 	}
 
 	public void ensureCreateUpdateDpRights(DistributionProtocol dp) {
@@ -586,6 +645,10 @@ public class AccessCtrlMgr {
 		return ensureParticipantObjectRights(participant, Operation.READ);
 	}
 
+	public boolean ensureUpdateParticipantRights(Long participantId) {
+		return ensureParticipantObjectRights(participantId, Operation.UPDATE);
+	}
+
 	public boolean ensureUpdateParticipantRights(Participant participant) {
 		return ensureParticipantObjectRights(participant, Operation.UPDATE);
 	}
@@ -659,6 +722,10 @@ public class AccessCtrlMgr {
 
 	private boolean ensureParticipantObjectRights(Long participantId, Operation op) {
 		Participant participant = daoFactory.getParticipantDao().getById(participantId);
+		if (participant == null) {
+			throw OpenSpecimenException.userError(ParticipantErrorCode.NOT_FOUND, participantId);
+		}
+
 		return ensureParticipantObjectRights(participant, op);
 	}
 
@@ -1141,6 +1208,15 @@ public class AccessCtrlMgr {
 		ensureStorageContainerEximRights(container);
 	}
 
+	public void ensureReadContainerRights(Long containerId) {
+		StorageContainer container = bsDaoFactory.getStorageContainerDao().getById(containerId);
+		if (container == null) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, containerId);
+		}
+
+		ensureReadContainerRights(container);
+	}
+
 	public void ensureReadContainerRights(StorageContainer container) {
 		ensureStorageContainerObjectRights(container, Operation.READ);
 		ensureStorageContainerEximRights(container);
@@ -1170,6 +1246,15 @@ public class AccessCtrlMgr {
 				throw result;
 			}
 		}
+	}
+
+	public void ensureUpdateContainerRights(Long containerId) {
+		StorageContainer container = bsDaoFactory.getStorageContainerDao().getById(containerId);
+		if (container == null) {
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.NOT_FOUND, containerId);
+		}
+
+		ensureUpdateContainerRights(container);
 	}
 
 	public void ensureUpdateContainerRights(StorageContainer container) {
@@ -1372,6 +1457,15 @@ public class AccessCtrlMgr {
 			.filter(site -> noInstitute || StringUtils.equalsIgnoreCase(site.getInstitute().getName(), crit.institute()))
 			.sorted(Comparator.comparing(Site::getName))
 			.collect(Collectors.toList());
+	}
+
+	public boolean isAccessibleSite(Long siteId) {
+		Site site = daoFactory.getSiteDao().getById(siteId);
+		if (site == null) {
+			throw OpenSpecimenException.userError(SiteErrorCode.NOT_FOUND, siteId);
+		}
+
+		return isAccessible(site);
 	}
 
 	public boolean isAccessible(Site site) {

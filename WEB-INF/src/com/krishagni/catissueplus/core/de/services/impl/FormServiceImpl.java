@@ -26,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.krishagni.catissueplus.core.administrative.domain.FormDataDeleteEvent;
 import com.krishagni.catissueplus.core.administrative.domain.FormDataSavedEvent;
-import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
@@ -98,6 +97,7 @@ import com.krishagni.catissueplus.core.de.events.MoveFormRecordsOp;
 import com.krishagni.catissueplus.core.de.events.ObjectCpDetail;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
 import com.krishagni.catissueplus.core.de.repository.FormDao;
+import com.krishagni.catissueplus.core.de.services.FormAccessChecker;
 import com.krishagni.catissueplus.core.de.services.FormContextProcessor;
 import com.krishagni.catissueplus.core.de.services.FormService;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
@@ -150,7 +150,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 	private static Map<String, List<String>> editableEvents;
 
-	private Map<String, Function<FormContextBean, Boolean>> formAccessCheckers = new HashMap<>();
+	private Map<String, FormAccessChecker> formAccessCheckers = new HashMap<>();
 
 	static {
 		staticExtendedForms.add(PARTICIPANT_FORM);
@@ -212,17 +212,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		FormEventsNotifier.getInstance().addListener(new SystemFormUpdatePreventer(formDao));
 		exportSvc.registerObjectsGenerator("extensions", this::getFormRecordsGenerator);
 		exportSvc.registerObjectsGenerator("userExtensions", this::getFormRecordsGenerator);
-
-		Function<Long, Boolean> userFormsCheck = (entityId) -> {
-			if (AuthUtil.getCurrentUser().isAdmin()) {
-				return true;
-			}
-
-			Institute institute = AuthUtil.getCurrentUserInstitute();
-			return entityId != -1L &&
-				institute.getId().equals(entityId) &&
-				AuthUtil.getCurrentUser().isInstituteAdmin();
-		};
 
 		formAccessCheckers.put("CollectionProtocolExtension", SYS_FORMS_CHECKER);
 		formAccessCheckers.put("StorageContainerExtension", SYS_FORMS_CHECKER);
@@ -503,13 +492,8 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			ensureUpdateAllowed(formCtx);
 			notifyContextRemoved(formCtx);
 			switch (opDetail.getRemoveType()) {
-				case SOFT_REMOVE:
-					formCtx.setDeletedOn(Calendar.getInstance().getTime());
-					break;
-
-				case HARD_REMOVE:
-					formDao.delete(formCtx);
-					break;
+				case SOFT_REMOVE -> formCtx.setDeletedOn(Calendar.getInstance().getTime());
+				case HARD_REMOVE -> formDao.delete(formCtx);
 			}
 
 			return ResponseEvent.response(true);
@@ -530,26 +514,23 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			
 			Long entityId = opDetail.getEntityId();
 			switch (opDetail.getEntityType()) {
-			    case COLLECTION_PROTOCOL_REGISTRATION:
-			    	AccessCtrlMgr.getInstance().ensureReadCprRights(entityId);
+				case COLLECTION_PROTOCOL_REGISTRATION -> {
+					AccessCtrlMgr.getInstance().ensureReadCprRights(entityId);
 					forms = formDao.getParticipantForms(entityId);
 					forms.addAll(formDao.getCprForms(entityId));
-			    	break;
-			    	
-			    case SPECIMEN:
-			    	AccessCtrlMgr.getInstance().ensureReadSpecimenRights(entityId);
-			    	forms = formDao.getSpecimenForms(opDetail.getEntityId());
-			    	break;
-			    	
-			    case SPECIMEN_COLLECTION_GROUP:
-			    	AccessCtrlMgr.getInstance().ensureReadVisitRights(entityId);
-			    	forms = formDao.getScgForms(opDetail.getEntityId());
-			    	break;
-
-			    case SPECIMEN_EVENT :
-			    	AccessCtrlMgr.getInstance().ensureReadSpecimenRights(entityId);
-			    	forms = formDao.getSpecimenEventForms(opDetail.getEntityId());
-			    	break;
+				}
+				case SPECIMEN -> {
+					AccessCtrlMgr.getInstance().ensureReadSpecimenRights(entityId);
+					forms = formDao.getSpecimenForms(opDetail.getEntityId());
+				}
+				case SPECIMEN_COLLECTION_GROUP -> {
+					AccessCtrlMgr.getInstance().ensureReadVisitRights(entityId);
+					forms = formDao.getScgForms(opDetail.getEntityId());
+				}
+				case SPECIMEN_EVENT -> {
+					AccessCtrlMgr.getInstance().ensureReadSpecimenRights(entityId);
+					forms = formDao.getSpecimenEventForms(opDetail.getEntityId());
+				}
 			}
 			
 			return ResponseEvent.response(forms);			
@@ -756,41 +737,42 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			String entityType = recEntry.getEntityType();
 			Long objectId = recEntry.getObjectId();
 			Object object = null;
-			if (entityType.equals("Participant")) {
-				CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
-				if (cpr == null) {
-					throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
+			switch (entityType) {
+				case "Participant" -> {
+					CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(objectId);
+					if (cpr == null) {
+						throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
+					}
+					object = cpr;
 				}
-
-				AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
-				object = cpr;
-			} else if (entityType.equals("CommonParticipant")) {
-				Participant participant = daoFactory.getParticipantDao().getById(objectId);
-				if (participant == null) {
-					throw OpenSpecimenException.userError(ParticipantErrorCode.NOT_FOUND, objectId);
+				case "CommonParticipant" -> {
+					Participant participant = daoFactory.getParticipantDao().getById(objectId);
+					if (participant == null) {
+						throw OpenSpecimenException.userError(ParticipantErrorCode.NOT_FOUND, objectId);
+					}
+					object = participant;
 				}
-
-				AccessCtrlMgr.getInstance().ensureUpdateParticipantRights(participant);
-				object = participant;
-			} else if (entityType.equals("SpecimenCollectionGroup")) {
-				Visit visit = daoFactory.getVisitsDao().getById(objectId);
-				if (visit == null) {
-					throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, objectId);
+				case "SpecimenCollectionGroup" -> {
+					Visit visit = daoFactory.getVisitsDao().getById(objectId);
+					if (visit == null) {
+						throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, objectId);
+					}
+					object = visit;
 				}
-
-				AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(visit, false);
-				object = visit;
-			} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
-				Specimen specimen = ensureSpecimenUpdateRights(objectId, false);
-				object = specimen;
-			} else if (entityType.equals("User") || entityType.equals("UserProfile")) {
-				User user = daoFactory.getUserDao().getById(objectId);
-				if (user == null) {
-					throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, objectId);
+				case "Specimen", "SpecimenEvent" -> object = getSpecimen(objectId);
+				case "User", "UserProfile" -> {
+					User user = daoFactory.getUserDao().getById(objectId);
+					if (user == null) {
+						throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, objectId);
+					}
+					object = user;
 				}
+			}
 
-				AccessCtrlMgr.getInstance().ensureUpdateUserRights(user, entityType.equals("UserProfile"));
-				object = user;
+			String accessType = getCuratedEntityType(entityType);
+			FormAccessChecker accessChecker = formAccessCheckers.get(accessType);
+			if (accessChecker == null || (object != null && !accessChecker.isDataUpdateAllowed(object)) || (object == null && !accessChecker.isDataUpdateAllowed(accessType, objectId))) {
+				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 			}
 			
 			recEntry.delete();
@@ -837,20 +819,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			String entityType = input.getEntityType();
 			Long objectId = input.getObjectId();
 
-			if (entityType.equals("Participant")) {
-				AccessCtrlMgr.getInstance().ensureReadCprRights(objectId);
-			} else if (entityType.equals("SpecimenCollectionGroup")) {
-				AccessCtrlMgr.getInstance().ensureReadVisitRights(objectId);
-			} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
-				AccessCtrlMgr.getInstance().ensureReadSpecimenRights(objectId);
-			} else if (entityType.equals("User") || entityType.equals("UserProfile")) {
-				User user = daoFactory.getUserDao().getById(objectId);
-				if (user == null) {
-					throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, objectId);
-				}
-
-				// Only users who can update the forms can read it as well
-				AccessCtrlMgr.getInstance().ensureUpdateUserRights(user, entityType.equals("UserProfile"));
+			String accessType = getCuratedEntityType(entityType);
+			FormAccessChecker checker = formAccessCheckers.get(accessType);
+			if (checker == null || !checker.isDataReadAllowed(accessType, objectId)) {
+				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 			}
 
 			List<FormRecordsList> result = getFormRecords(entityType, input.getFormId(), objectId);
@@ -1052,7 +1024,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	@Override
-	public void addAccessChecker(String entityType, Function<FormContextBean, Boolean> checker) {
+	public void addAccessChecker(String entityType, FormAccessChecker checker) {
 		formAccessCheckers.put(entityType, checker);
 	}
 
@@ -1380,7 +1352,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
 				}
 
-				AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
 				object = cpr;
 				cp = cpr.getCollectionProtocol();
 			}
@@ -1390,7 +1361,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, objectId, 1);
 				}
 
-				AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
 				objectId = cpr.getParticipant().getId();
 				object = cpr;
 				cp = cpr.getCollectionProtocol();
@@ -1400,12 +1370,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				if (visit == null) {
 					throw OpenSpecimenException.userError(VisitErrorCode.NOT_FOUND, objectId);
 				}
-				AccessCtrlMgr.getInstance().ensureCreateOrUpdateVisitRights(visit, form.hasPhiFields());
+
 				object = visit;
 				cp = visit.getCollectionProtocol();
 			}
 			case "Specimen", "SpecimenEvent" -> {
-				Specimen specimen = ensureSpecimenUpdateRights(objectId, form.hasPhiFields());
+				Specimen specimen = getSpecimen(objectId);
 				object = specimen;
 				cp = specimen.getCollectionProtocol();
 				if (isCollectionOrReceivedEvent(form)) {
@@ -1432,9 +1402,15 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				if (user == null) {
 					throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND, objectId);
 				}
-				AccessCtrlMgr.getInstance().ensureUpdateUserRights(user, entityType.equals("UserProfile"));
+
 				object = user;
 			}
+		}
+
+		String accessType = getCuratedEntityType(entityType);
+		FormAccessChecker accessChecker = formAccessCheckers.get(accessType);
+		if (accessChecker == null || (object != null && !accessChecker.isDataUpdateAllowed(object)) || (object == null && !accessChecker.isDataUpdateAllowed(accessType, objectId))) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 
 		BaseEntity.DataEntryStatus dataEntryStatus = BaseEntity.DataEntryStatus.valueOf(formStatus);
@@ -1545,7 +1521,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			return;
 		}
 
-		Runnable accessChecker = null;
 		Map<String, Object> props = new HashMap<>();
 		props.put("user", AuthUtil.getCurrentUser());
 		props.put("form", ctxt.getForm().getCaption());
@@ -1553,16 +1528,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		props.put("added", added ? 1 : 0);
 		if (object instanceof CollectionProtocolRegistration) {
 			addEntityProps((CollectionProtocolRegistration) object, ctxt, fre, props);
-			accessChecker = () -> AccessCtrlMgr.getInstance().ensureReadCprRights((CollectionProtocolRegistration) object);
 		} else if (object instanceof Visit) {
 			addEntityProps((Visit) object, ctxt, fre, props);
-			accessChecker = () -> AccessCtrlMgr.getInstance().ensureReadVisitRights((Visit) object);
 		} else if (object instanceof Specimen) {
 			addEntityProps((Specimen) object, ctxt, fre, props);
-			accessChecker = () -> AccessCtrlMgr.getInstance().ensureReadSpecimenRights((Specimen) object);
 		} else if (object instanceof User) {
 			addEntityProps((User) object, ctxt, fre, props);
-			accessChecker = () -> AccessCtrlMgr.getInstance().ensureUpdateUserRights((User) object, false);
 		} else {
 			return;
 		}
@@ -1570,7 +1541,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		props.put("$subject", new Object[] { props.get("entityType"), props.get("entityName"), props.get("form"), added ? 1 : 0} );
 		List<User> dataRcpts = Collections.emptyList();
 		if (ctxt.isDataInNotif()) {
-			dataRcpts = filterByAccess(ctxt, accessChecker).stream()
+			dataRcpts = filterByAccess(ctxt, object).stream()
 				.filter(user -> !user.isDndEnabled() && user.isActive())
 				.collect(Collectors.toList());
 			if (CollectionUtils.isNotEmpty(dataRcpts)) {
@@ -1677,9 +1648,15 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		props.put("url", getUserRecordUrl(user, ctxt, fre));
 	}
 
-	private List<User> filterByAccess(FormContextBean ctxt, Runnable accessChecker) {
+	private List<User> filterByAccess(FormContextBean ctxt, Object object) {
 		List<User> result = new ArrayList<>();
 		Set<User> seen = new HashSet<>();
+
+		String accessType = getCuratedEntityType(ctxt.getEntityType());
+		FormAccessChecker checker = formAccessCheckers.get(accessType);
+		if (checker == null) {
+			return Collections.emptyList();
+		}
 
 		User currentUser = AuthUtil.getCurrentUser();
 		try {
@@ -1692,8 +1669,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					try {
 						seen.add(user);
 						AuthUtil.setCurrentUser(currentUser);
-						accessChecker.run();
-						result.add(user);
+						if (checker.isDataReadAllowed(object)) {
+							result.add(user);
+						}
 					} catch (Exception e) {
 						// the set user has no access
 					}
@@ -1890,6 +1868,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			entityType = record.getEntityType();
 		}
 
+		String accessType = getCuratedEntityType(entityType);
+		FormAccessChecker accessChecker = formAccessCheckers.get(accessType);
+		if (accessChecker == null || !accessChecker.isDataReadAllowed(accessType, objectId)) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		if (formData.getContainer().hasPhiFields() && !isPhiAccessAllowed(entityType, objectId)) {
 			formData.maskPhiFieldValues();
 		}
@@ -2002,7 +1986,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		return result;
 	}
 
-	private Specimen ensureSpecimenUpdateRights(Long objectId, boolean checkPhiAccess) {
+	private Specimen getSpecimen(Long objectId) {
 		Specimen specimen = daoFactory.getSpecimenDao().getById(objectId);
 		if (specimen == null) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_FOUND, objectId);
@@ -2010,8 +1994,16 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, specimen.getLabel());
 		}
 
-		AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen, checkPhiAccess);
 		return specimen;
+	}
+
+	private String getCuratedEntityType(String entityType) {
+		String accessType = entityType;
+		int hyphenIdx = entityType.indexOf("-");
+		if (hyphenIdx >= 0) {
+			accessType = entityType.substring(0, hyphenIdx);
+		}
+		return accessType;
 	}
 
 	private int moveRecords(Long formId, String entity, long srcCpId, long tgtCpId) {
@@ -2031,23 +2023,15 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		tgtFc.setDeletedOn(prev == null ? Calendar.getInstance().getTime() : null);
 		formDao.saveOrUpdate(tgtFc, true);
 
-		int count = 0;
-		switch (entity) {
-			case "Participant":
-			case "ParticipantExtension":
-				count = formDao.moveRegistrationRecords(cpId, srcFc.getIdentifier(), tgtFc.getIdentifier());
-				break;
-
-			case "SpecimenCollectionGroup":
-			case "VisitExtension":
-				count = formDao.moveVisitRecords(cpId, srcFc.getIdentifier(), tgtFc.getIdentifier());
-				break;
-
-			case "Specimen":
-			case "SpecimenExtension":
-				count = formDao.moveSpecimenRecords(cpId, srcFc.getIdentifier(), tgtFc.getIdentifier());
-				break;
-		}
+		int count = switch (entity) {
+			case "Participant", "ParticipantExtension" ->
+				formDao.moveRegistrationRecords(cpId, srcFc.getIdentifier(), tgtFc.getIdentifier());
+			case "SpecimenCollectionGroup", "VisitExtension" ->
+				formDao.moveVisitRecords(cpId, srcFc.getIdentifier(), tgtFc.getIdentifier());
+			case "Specimen", "SpecimenExtension" ->
+				formDao.moveSpecimenRecords(cpId, srcFc.getIdentifier(), tgtFc.getIdentifier());
+			default -> 0;
+		};
 
 		tgtFc.setDeletedOn(prev);
 		formDao.saveOrUpdate(tgtFc, true);
@@ -2078,24 +2062,15 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		return cp;
 	}
 
-	private FormContextBean getFormCtxt(Long formId, Long cpId, String entity) {
-		FormContextBean fc = formDao.getFormContext(formId, cpId, entity);
-		if (fc == null) {
-			throw OpenSpecimenException.userError(FormErrorCode.NO_ASSOCIATION, cpId, formId);
-		}
-
-		return fc;
-	}
-
 	private void ensureUpdateAllowed(FormContextBean formCtxt) {
 		if (formCtxt.getDeletedOn() != null) {
 			// ignore deleted associations
 			return;
 		}
 
-		String[] entityType = formCtxt.getEntityType().split("-");
-		Function<FormContextBean, Boolean> checker = formAccessCheckers.get(entityType[0]);
-		if (checker == null || !checker.apply(formCtxt)) {
+		String accessType = getCuratedEntityType(formCtxt.getEntityType());
+		FormAccessChecker checker = formAccessCheckers.get(accessType);
+		if (checker == null || !checker.isUpdateAllowed(formCtxt)) {
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 	}
@@ -2472,23 +2447,11 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	//
 	// form checkers
 	//
-	private static final Function<FormContextBean, Boolean> SYS_FORMS_CHECKER = (formCtxt) -> AuthUtil.isAdmin();
+	private static final FormAccessChecker SYS_FORMS_CHECKER = new SysFormAccessChecker();
 
-	private static final Function<FormContextBean, Boolean> CP_FORMS_CHECKER = (formCtxt) -> {
-		Long cpId = formCtxt.getCpId();
-		return ((cpId == null || cpId == -1L) && AuthUtil.isAdmin()) ||
-			(cpId != null && cpId != -1L && AccessCtrlMgr.getInstance().hasUpdateCpRights(cpId));
-	};
+	private static final FormAccessChecker CP_FORMS_CHECKER = new CpFormAccessChecker();
 
-	private static final Function<FormContextBean, Boolean> USER_FORM_CHECKER =  (formCtxt) -> {
-		if (AuthUtil.getCurrentUser().isAdmin()) {
-			return true;
-		}
-
-		return formCtxt.getEntityId() != -1L &&
-			AuthUtil.getCurrentUserInstitute().getId().equals(formCtxt.getEntityId()) &&
-			AuthUtil.getCurrentUser().isInstituteAdmin();
-	};
+	private static final FormAccessChecker USER_FORM_CHECKER =  new UserFormAccessChecker();
 
 	private static final String FORM_SAVE_NOTIF_TMPL = "form_data_save_notif";
 

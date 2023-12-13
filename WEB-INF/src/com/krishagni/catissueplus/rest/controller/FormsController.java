@@ -313,7 +313,7 @@ public class FormsController {
 		ResponseEvent<List<FormDataDetail>> resp = formSvc.getLatestRecords(getRequest(crit));
 		resp.throwErrorIfUnsuccessful();
 
-		boolean useUdn = Utility.escapeXss(includeUdn).toLowerCase().equals("true");
+		boolean useUdn = Utility.escapeXss(includeUdn).equalsIgnoreCase("true");
 		return resp.getPayload().stream().map(r -> r.getFormData().getFieldNameValueMap(useUdn)).collect(Collectors.toList());
 	}
 	
