@@ -343,25 +343,14 @@ public class ScheduledJob extends BaseEntity {
 	}
 
 	public Date getNextRunOn() {
-		switch (repeatSchedule) {
-			case MINUTELY:
-				return getNextMinutelyOccurence();
-				
-			case HOURLY:
-				return getNextHourlyOccurence();
-			
-			case DAILY:
-				return getNextDailyOccurence();
-
-			case MONTHLY:
-				return getNextMonthlyOccurence();
-			
-			case WEEKLY:
-				return getNextWeeklyOccurence();
-				
-			default:
-				return null;
-		}
+		return switch (repeatSchedule) {
+			case MINUTELY -> getNextMinutelyOccurence();
+			case HOURLY -> getNextHourlyOccurence();
+			case DAILY -> getNextDailyOccurence();
+			case MONTHLY -> getNextMonthlyOccurence();
+			case WEEKLY -> getNextWeeklyOccurence();
+			default -> null;
+		};
 	}
 	
 	public void delete() {

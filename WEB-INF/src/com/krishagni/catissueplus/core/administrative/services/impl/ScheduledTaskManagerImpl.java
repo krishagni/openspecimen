@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.administrative.services.impl;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,10 +86,6 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 	@Override
 	@PlusTransactional
 	public void schedule(ScheduledJob job) {
-		if (job.isOnDemand()) {
-			return;
-		}
-
 		User user = daoFactory.getUserDao().getSystemUser();
 		runJob(user, job, null, getNextScheduleInMin(job));
 	}
@@ -190,7 +187,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 	}
 
 	private boolean setLock(ScheduledJob job, boolean clear) {
-		return newTxTmpl.execute(
+		return Boolean.TRUE.equals(newTxTmpl.execute(
 			status -> {
 				Properties appProps = AppProperties.getInstance().getProperties();
 				String thisNode = appProps.getProperty("node.name", "thisNode");
@@ -206,7 +203,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 				daoFactory.getScheduledJobDao().updateRunByNode(job.getId(), clear ? "none" : thisNode);
 				return true;
 			}
-		);
+		));
 	}
 		
 	private void runJob(User user, ScheduledJob job, String args, Long minutesLater) {
@@ -216,6 +213,11 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 
 		if (!job.isActiveJob(true)) {
 			logger.info("The job " + job.getName() + " cannot be scheduled.");
+			return;
+		}
+
+		if (job.isOnDemand()) {
+			logger.info("The job " + job.getName() + " cannot be scheduled, as its repeat frequency is on demand");
 			return;
 		}
 
@@ -247,7 +249,12 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 	}
 	
 	private Long getNextScheduleInMin(ScheduledJob job) {
-		long delay = (job.getNextRunOn().getTime() - System.currentTimeMillis()) / (1000 * 60);
+		Date nextRunTime = job.getNextRunOn();
+		if (nextRunTime == null) {
+			return null;
+		}
+
+		long delay = (nextRunTime.getTime() - System.currentTimeMillis()) / (1000 * 60);
 		return delay < 0 ? 0 : delay;
 	}
 	
