@@ -72,6 +72,14 @@
       </datePicker>
     </row>
     <row>
+      <booleanCheckBox>
+        <name>specimenCentric</name>
+        <udn>specimenCentric</udn>
+        <caption>#getMessage("cp_specimen_centric")</caption>
+        <column>SPECIMEN_CENTRIC</column>
+      </booleanCheckBox>
+    </row>
+    <row>
       <dropDown>
         <name>activityStatus</name>
         <udn>activityStatus</udn>

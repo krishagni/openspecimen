@@ -70,6 +70,14 @@
           </textField>
         </row>
         <row>
+          <textField>
+            <name>eventCode</name>
+            <udn>eventCode</udn>
+            <caption>#getMessage("visit_cpe_event_code")</caption>
+            <column>CODE</column>
+          </textField>
+        </row>
+        <row>
           <numberField>
             <name>eventPoint</name>
             <udn>eventPoint</udn>
