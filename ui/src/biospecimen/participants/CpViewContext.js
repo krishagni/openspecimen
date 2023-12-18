@@ -1,6 +1,7 @@
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc from '@/biospecimen/services/Cpr.js';
+import specimenSvc from '@/biospecimen/services/Specimen.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 
 export default class CpViewContext {
@@ -10,7 +11,11 @@ export default class CpViewContext {
 
   cprDictQ = null;
 
+  visitDictQ = null;
+
   visitsTabQ = null;
+
+  specimenDictQ = null;
 
   constructor(cpId) {
     this.cpId = cpId;
@@ -30,6 +35,14 @@ export default class CpViewContext {
     }
 
     return this.cprDictQ;
+  }
+
+  getVisitDict() {
+    if (!this.visitDictQ) {
+      this.visitDictQ = visitSvc.getDict(this.cpId);
+    }
+
+    return this.visitDictQ;
   }
 
   getVisitsTab() {
@@ -91,5 +104,13 @@ export default class CpViewContext {
         return tabFields;
       }
     );
+  }
+
+  getSpecimenDict() {
+    if (!this.specimenDictQ) {
+      this.specimenDictQ = specimenSvc.getDict(this.cpId);
+    }
+
+    return this.specimenDictQ;
   }
 }

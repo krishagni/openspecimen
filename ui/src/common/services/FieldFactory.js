@@ -32,7 +32,8 @@ class FieldFactory {
     subform: 'os-subform',
     'storage-position': 'os-storage-position',
     note: 'os-note',
-    'add-specimens': 'os-add-specimens'
+    'add-specimens': 'os-add-specimens',
+    'specimen-description': 'os-specimen-description'
   };
 
   getComponent(fieldType) {

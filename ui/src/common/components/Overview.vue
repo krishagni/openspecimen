@@ -270,6 +270,15 @@ export default {
           }
 
           value = value || 'Not Stored';
+        } else if (field.type == 'specimen-quantity' || field.type == 'specimen-measure') {
+          const specimen = exprUtil.eval(object || {}, field.specimen || 'specimen');
+          const unit = util.getSpecimenMeasureUnit(specimen, field.measure || 'quantity');
+          value += ' ' + unit;
+        } else if (field.type == 'specimen-type') {
+          const specimen = exprUtil.eval(object || {}, field.specimen || 'specimen');
+          if (specimen.specimenClass) {
+            value += ' (' + specimen.specimenClass + ')';
+          }
         }
       }
 

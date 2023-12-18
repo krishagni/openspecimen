@@ -3,9 +3,13 @@ import alertsSvc   from '@/common/services/Alerts.js';
 import cpSvc       from './CollectionProtocol.js';
 import exprUtil    from '@/common/services/ExpressionUtil.js';
 import http        from '@/common/services/HttpClient.js';
+import formSvc     from '@/forms/services/Form.js';
+import formUtil    from '@/common/services/FormUtil.js';
 import settingsSvc from '@/common/services/Setting.js';
 import ui          from '@/global.js';
 import util        from '@/common/services/Util.js';
+
+import specimenSchema from '@/biospecimen/schemas/specimens/specimen.js';
 
 class Specimen {
   search(criteria) {
@@ -19,6 +23,10 @@ class Specimen {
       minimalInfo: minimalInfo || false,
       maxResults: ids.length
     });
+  }
+
+  getById(id) {
+    return http.get('specimens/' + id);
   }
 
   async printLabels(input, outputFilename) {
@@ -99,6 +107,44 @@ class Specimen {
     }
 
     return null;
+  }
+
+  async getDict(cpId) {
+    return cpSvc.getWorkflow(cpId, 'dictionary').then(
+      (dict) => {
+        dict = dict || {};
+
+        let spmnFields = (dict.fields || []).filter(field => field.name.indexOf('specimen.') == 0);
+        if (spmnFields.length > 0) {
+          spmnFields = formUtil.sdeFieldsToDict(spmnFields);
+        } else {
+          spmnFields = util.clone(specimenSchema.fields);
+        }
+
+        if (spmnFields.some(field => field.name.indexOf('specimen.extensionDetail') == 0)) {
+          return spmnFields;
+        }
+
+        return this.getCustomFieldsForm(cpId).then(
+          (formDef) => {
+            let customFields = formUtil.deFormToDict(formDef, 'specimen.extensionDetail.attrsMap.');
+            return spmnFields.concat(customFields);
+          }
+        );
+      }
+    );
+  }
+
+  async getCustomFieldsForm(cpId) {
+    return http.get('specimens/extension-form', { cpId }).then(
+      (resp) => {
+        if (!resp || !resp.formId) {
+          return null;
+        }
+
+        return formSvc.getDefinition(resp.formId);
+      }
+    );
   }
 
   async _getAllocRule(ctxt, specimen) {

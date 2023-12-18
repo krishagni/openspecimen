@@ -5,6 +5,8 @@ import formSvc  from '@/forms/services/Form.js';
 import formUtil from '@/common/services/FormUtil.js';
 import util     from '@/common/services/Util.js';
 
+import visitSchema from '@/biospecimen/schemas/visits/visit.js';
+
 class Visit {
   async getVisits(cpr, includeStats = true, sortByDates) {
     if (!cpr.$visitsQ) {
@@ -29,6 +31,10 @@ class Visit {
     return http.get('visits/' + visitId);
   }
 
+  async getSpecimens(cprId, eventId, visitId) {
+    return http.get('specimens', {cprId, eventId, visitId});
+  }
+
   async getDict(cpId) {
     return cpSvc.getWorkflow(cpId, 'dictionary').then(
       (dict) => {
@@ -38,7 +44,7 @@ class Visit {
         if (visitFields.length > 0) {
           visitFields = formUtil.sdeFieldsToDict(visitFields);
         } else {
-          visitFields = []; // util.clone(cprSchema.fields);
+          visitFields = util.clone(visitSchema.fields);
         }
 
         if (visitFields.some(field => field.name.indexOf('visit.extensionDetail') == 0)) {

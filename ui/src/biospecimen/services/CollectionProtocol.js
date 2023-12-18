@@ -57,6 +57,19 @@ class CollectionProtocol {
     return workflow[wfName];
   }
 
+  async getSpecimenTreeCfg(cpId) {
+    return this.getWorkflow(-1, 'specimenTree').then(
+      (sysTreeCfg) => {
+        const result = Object.assign({}, sysTreeCfg || {});
+        if (cpId == -1) {
+          return result;
+        }
+
+        return this.getWorkflow(cpId, 'specimenTree').then(cpTreeCfg => Object.assign(result, cpTreeCfg || {}));
+      }
+    );
+  }
+
   async isBarcodingEnabled() {
     return http.get('collection-protocols/barcoding-enabled').then(resp => resp == true || resp == 'true');
   }
