@@ -23,4 +23,6 @@ public interface ParticipantDao extends Dao<Participant> {
 	boolean isUidUnique(String uid);
 
 	boolean isPmiUnique(String siteName, String mrn);
+
+	List<Participant> getByPhoneNumber(String phoneNumber);
 }

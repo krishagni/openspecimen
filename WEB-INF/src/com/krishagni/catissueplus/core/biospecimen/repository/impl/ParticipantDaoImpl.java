@@ -111,7 +111,14 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 
 		return query.getCount("pmi.id") == 0L;
 	}
-	
+
+	@Override
+	public List<Participant> getByPhoneNumber(String phoneNumber) {
+		Criteria<Participant> query = createCriteria(Participant.class, "participant");
+		return query.add(query.eq("participant.phoneNumber", phoneNumber))
+			.list();
+	}
+
 	@Override
 	public Class<Participant> getType() {
 		return Participant.class;
