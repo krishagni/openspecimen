@@ -43,6 +43,8 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 
 	private Boolean textOptIn;
 
+	private Boolean textOptInConsent;
+
 	private Date birthDate;
 
 	private Date deathDate;
@@ -165,6 +167,14 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 
 	public void setTextOptIn(Boolean textOptIn) {
 		this.textOptIn = textOptIn;
+	}
+
+	public Boolean getTextOptInConsent() {
+		return textOptInConsent;
+	}
+
+	public void setTextOptInConsent(Boolean textOptInConsent) {
+		this.textOptInConsent = textOptInConsent;
 	}
 
 	public Date getBirthDate() {
@@ -378,6 +388,7 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		result.setEmailOptIn(participant.isEmailOptIn());
 		result.setPhoneNumber(excludePhi ? "###" : participant.getPhoneNumber());
 		result.setTextOptIn(participant.isTextOptIn());
+		result.setTextOptInConsent(participant.getTextOptInConsent());
 		result.setActivityStatus(participant.getActivityStatus());
 		result.setBirthDate(excludePhi ? null : participant.getBirthDate());
 		result.setDeathDate(excludePhi ? null : participant.getDeathDate());

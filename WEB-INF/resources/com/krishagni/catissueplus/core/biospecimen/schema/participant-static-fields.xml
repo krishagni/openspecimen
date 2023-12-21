@@ -36,6 +36,12 @@
 </field>
 
 <field>
+  <type>boolean</type>
+  <caption>#getMessage("participant_text_opt_in_consent")</caption>
+  <attribute>textOptInConsent</attribute>
+</field>
+
+<field>
   <type>dateOnly</type>
   <caption>#getMessage("participant_dob")</caption>
   <attribute>birthDate</attribute>

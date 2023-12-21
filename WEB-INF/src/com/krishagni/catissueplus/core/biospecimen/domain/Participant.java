@@ -51,6 +51,8 @@ public class Participant extends BaseExtensionEntity {
 
 	private Boolean textOptIn;
 
+	private Boolean textOptInConsent;
+
 	private PermissibleValue gender;
 
 	private String sexGenotype;
@@ -159,6 +161,14 @@ public class Participant extends BaseExtensionEntity {
 
 	public void setTextOptIn(Boolean textOptIn) {
 		this.textOptIn = textOptIn;
+	}
+
+	public Boolean getTextOptInConsent() {
+		return textOptInConsent;
+	}
+
+	public void setTextOptInConsent(Boolean textOptInConsent) {
+		this.textOptInConsent = textOptInConsent;
 	}
 
 	public PermissibleValue getGender() {
@@ -314,6 +324,12 @@ public class Participant extends BaseExtensionEntity {
 		CollectionUpdater.update(getEthnicities(), participant.getEthnicities());
 		CollectionUpdater.update(getRaces(), participant.getRaces());
 		updatePmis(participant);
+
+		if (Boolean.FALSE.equals(getTextOptInConsent())) {
+			if (isTextOptIn()) {
+				throw OpenSpecimenException.userError(ParticipantErrorCode.TEXT_OPT_OUT);
+			}
+		}
 	}
 
 	public void updateActivityStatus(String activityStatus) {

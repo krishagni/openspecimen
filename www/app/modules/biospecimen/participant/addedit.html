@@ -450,11 +450,15 @@
     <div class="form-group" style="margin-top: -20px;" ng-if="cpr.participant.phoneNumber">
       <div class="col-xs-offset-3 col-xs-6 os-text-checkbox">
         <div class="checkbox">
-          <os-checkbox ng-model="cpr.participant.textOptIn"></os-checkbox>
+          <os-checkbox ng-model="cpr.participant.textOptIn" ng-disabled="cpr.participant.textOptInConsent === false">
+          </os-checkbox>
         </div>
         <div class="message os-ctrl-padding-top">
           <span translate="participant.text_opt_in">Do you want to receive text messages?</span>
         </div>
+      </div>
+      <div class="col-xs-offset-3 col-xs-6 os-text-checkbox" ng-show="cpr.participant.textOptInConsent === false">
+        <span class="message" translate="participant.text_opted_out">Participant has chosen to "opt out" of receiving SMSes from OpenSpecimen</span>
       </div>
     </div>
 

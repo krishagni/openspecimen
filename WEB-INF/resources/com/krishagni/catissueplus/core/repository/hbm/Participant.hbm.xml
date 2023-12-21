@@ -29,6 +29,8 @@
 
     <property name="textOptIn" column="TEXT_OPT_IN" />
 
+    <property name="textOptInConsent" column="TEXT_OPT_IN_CONSENT" />
+
     <property name="birthDate" column="BIRTH_DATE" type="date" />
 
     <many-to-one name="gender" column="GENDER_ID" fetch="join"/>

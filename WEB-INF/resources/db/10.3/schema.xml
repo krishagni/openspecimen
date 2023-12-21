@@ -105,10 +105,22 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="vpawar" id="Track participant consent to receive SMSes">
+    <addColumn tableName="CATISSUE_PARTICIPANT">
+      <column name="TEXT_OPT_IN_CONSENT" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
   <changeSet author="vpawar" id="Query: Registration table with email / text opt-in settings">
     <addColumn tableName="OS_CPR_RECS">
       <column name="EMAIL_OPT_IN" type="${boolean.type}" />
       <column name="TEXT_OPT_IN" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query: Registration table with text opt-in consent settings">
+    <addColumn tableName="OS_CPR_RECS">
+      <column name="TEXT_OPT_IN_CONSENT" type="${boolean.type}" />
     </addColumn>
   </changeSet>
 
@@ -124,8 +136,8 @@
         insert into
           os_cpr_recs(
             cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
-            email_address, email_opt_in, phone_number, text_opt_in, dob, ssn,
-            activity_status, gender_id, registration_date,
+            email_address, email_opt_in, phone_number, text_opt_in, text_opt_in_consent,
+            dob, ssn, activity_status, gender_id, registration_date,
             ppid, vital_status_id, death_date, empi_id, barcode, consent_sign_date,
             consent_witness, consent_comments, consent_document_name, external_subject_id,
             site_id, creation_time, creator, update_time, updater, data_entry_status
@@ -141,6 +153,7 @@
           p.email_opt_in,
           p.phone_number,
           p.text_opt_in,
+          p.text_opt_in_consent,
           p.birth_date as dob,
           p.social_security_number as ssn,
           cpr.activity_status,
@@ -180,7 +193,7 @@
         insert into
           os_cpr_recs(
             cpr_id, cp_id, participant_id, first_name, middle_name, last_name,
-            email_address, email_opt_in, phone_number, text_opt_in, dob, ssn, activity_status,
+            email_address, email_opt_in, phone_number, text_opt_in, text_opt_in_consent, dob, ssn, activity_status,
             gender_id, registration_date, ppid, vital_status_id, death_date, empi_id, barcode,
             consent_sign_date, consent_witness, consent_comments, consent_document_name,
             external_subject_id, site_id, creation_time, creator, update_time, updater, data_entry_status
@@ -196,6 +209,7 @@
           p.email_opt_in,
           p.phone_number,
           p.text_opt_in,
+          p.text_opt_in_consent,
           p.birth_date as dob,
           p.social_security_number as ssn,
           :new.activity_status,
@@ -245,6 +259,7 @@
           email_opt_in = new.email_opt_in,
           phone_number = new.phone_number,
           text_opt_in = new.text_opt_in,
+          text_opt_in_consent = new.text_opt_in_consent,
           dob = new.birth_date,
           ssn = new.social_security_number,
           gender_id = new.gender_id,
@@ -273,6 +288,7 @@
           email_opt_in = :new.email_opt_in,
           phone_number = :new.phone_number,
           text_opt_in = :new.text_opt_in,
+          text_opt_in_consent = :new.text_opt_in_consent,
           dob = :new.birth_date,
           ssn = :new.social_security_number,
           gender_id = :new.gender_id,
