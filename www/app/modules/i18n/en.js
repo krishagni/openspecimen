@@ -567,6 +567,7 @@
     "email_opt_in": "Receive Emails",
     "phone_number": "Phone Number",
     "text_opt_in": "Receive SMSes",
+    "text_opted_out": "Participant has chosen to \"opt out\" of receiving SMSes from OpenSpecimen",
     "birth_date": "Birth Date",
     "uid": "National ID",
     "mpi": "Master Patient Index",

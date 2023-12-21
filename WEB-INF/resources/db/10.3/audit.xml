@@ -62,4 +62,12 @@
       <column name="textOptIn_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track participant consent to receive SMSes">
+    <addColumn tableName="CATISSUE_PARTICIPANT_AUD">
+      <column name="TEXT_OPT_IN_CONSENT" type="${boolean.type}" />
+      <column name="textOptInConsent_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

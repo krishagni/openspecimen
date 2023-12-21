@@ -76,6 +76,14 @@
       </booleanCheckBox>
     </row>
     <row>
+      <booleanCheckBox>
+        <name>textOptInConsent</name>
+        <udn>textOptInConsent</udn>
+        <caption>#getMessage("participant_text_opt_in_consent")</caption>
+        <column>TEXT_OPT_IN_CONSENT</column>
+      </booleanCheckBox>
+    </row>
+    <row>
       <datePicker>
         <name>dateOfBirth</name>
         <udn>dateOfBirth</udn>

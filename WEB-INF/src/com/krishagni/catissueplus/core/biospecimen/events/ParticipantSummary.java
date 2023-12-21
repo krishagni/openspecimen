@@ -26,6 +26,8 @@ public class ParticipantSummary {
 
 	private Boolean textOptIn;
 
+	private Boolean textOptInConsent;
+
 	private Date birthDate;
 
 	public Long getId() {
@@ -108,6 +110,14 @@ public class ParticipantSummary {
 		this.textOptIn = textOptIn;
 	}
 
+	public Boolean getTextOptInConsent() {
+		return textOptInConsent;
+	}
+
+	public void setTextOptInConsent(Boolean textOptInConsent) {
+		this.textOptInConsent = textOptInConsent;
+	}
+
 	public Date getBirthDate() {
 		return birthDate;
 	}
@@ -132,6 +142,7 @@ public class ParticipantSummary {
 		result.setEmailOptIn(p.isEmailOptIn());
 		result.setPhoneNumber(p.getPhoneNumber());
 		result.setTextOptIn(p.isTextOptIn());
+		result.setTextOptInConsent(p.getTextOptInConsent());
 		result.setBirthDate(p.getBirthDate());
 		return result;
 	}

@@ -56,7 +56,9 @@ public enum ParticipantErrorCode implements ErrorCode {
 
 	MULTI_MATCHES,
 
-	NO_MRN_MATCH;
+	NO_MRN_MATCH,
+
+	TEXT_OPT_OUT;
 
 	public String code() {
 		return "PARTICIPANT_" + this.name();
