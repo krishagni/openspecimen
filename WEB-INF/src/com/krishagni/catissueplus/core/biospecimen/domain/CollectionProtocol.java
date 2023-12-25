@@ -167,8 +167,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private CollectionProtocol consentsSource;
 
-	private UserGroup emailSenderGroup;
-
 	private Set<CpConsentTier> consentTier = new LinkedHashSet<>();
 	
 	private Set<User> coordinators = new HashSet<>();
@@ -621,14 +619,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.consentsSource = consentsSource;
 	}
 
-	public UserGroup getEmailSenderGroup() {
-		return emailSenderGroup;
-	}
-
-	public void setEmailSenderGroup(UserGroup emailSenderGroup) {
-		this.emailSenderGroup = emailSenderGroup;
-	}
-
 	public Set<CpConsentTier> getConsentTier() {
 		return consentTier;
 	}
@@ -771,7 +761,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setVisitNamePrintCopies(cp.getVisitNamePrintCopies());
 		setUnsignedConsentDocumentURL(cp.getUnsignedConsentDocumentURL());
 		setExtension(cp.getExtension());
-		setEmailSenderGroup(cp.getEmailSenderGroup());
 //		setCatalogId(cp.getCatalogId());
 		
 		updateSites(cp.getSites());
@@ -839,7 +828,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setAliquotsInSameContainer(getAliquotsInSameContainer());
 		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
 		cp.setDraftDataEntry(draftDataEntryEnabled());
-		cp.setEmailSenderGroup(getEmailSenderGroup());
 		cp.setActivityStatus(getActivityStatus());
 	}
 	
