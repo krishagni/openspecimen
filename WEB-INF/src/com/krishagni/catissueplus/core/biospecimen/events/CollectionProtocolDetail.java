@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
-import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.CpWorkflowTxnCache;
@@ -89,8 +89,6 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 	
 	private String spmnLabelPrePrintMode;
 
-	private UserGroupSummary emailSenderGroup;
-	
 	private List<CpSpecimenLabelPrintSettingDetail> spmnLabelPrintSettings;
 
 	private List<DistributionProtocolSummary> distributionProtocols;
@@ -394,14 +392,6 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		this.spmnLabelPrePrintMode = spmnLabelPrePrintMode;
 	}
 
-	public UserGroupSummary getEmailSenderGroup() {
-		return emailSenderGroup;
-	}
-
-	public void setEmailSenderGroup(UserGroupSummary emailSenderGroup) {
-		this.emailSenderGroup = emailSenderGroup;
-	}
-
 	public List<CpSpecimenLabelPrintSettingDetail> getSpmnLabelPrintSettings() {
 		return spmnLabelPrintSettings;
 	}
@@ -530,7 +520,6 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setSpmnLabelPrintSettings(CpSpecimenLabelPrintSettingDetail.from(cp.getSpmnLabelPrintSettings()));
 		result.setDistributionProtocols(DistributionProtocolSummary.from(cp.getDistributionProtocols()));
 		result.setCatalogId(cp.getCatalogId());
-		result.setEmailSenderGroup(UserGroupSummary.from(cp.getEmailSenderGroup()));
 		result.setActivityStatus(cp.getActivityStatus());
 		result.setCpSites(CollectionProtocolSiteDetail.from(cp.getSites()));
 		result.setExtensionDetail(ExtensionDetail.from(cp.getExtension()));

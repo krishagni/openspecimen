@@ -117,8 +117,6 @@
 
     <property name="draftMode" column="DRAFT_MODE" />
 
-    <many-to-one name="emailSenderGroup" column="EMAIL_SENDER_GROUP" />
-
     <many-to-one name="consentsSource" column="CONSENTS_SOURCE_CP_ID" />
 
     <set name="consentTier" table="CATISSUE_CONSENT_TIER" inverse="true" cascade="all-delete-orphan" order-by="id">

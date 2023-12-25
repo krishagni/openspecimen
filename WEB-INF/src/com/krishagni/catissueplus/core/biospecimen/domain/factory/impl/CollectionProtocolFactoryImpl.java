@@ -14,10 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
-import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -139,7 +137,6 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setDistributionProtocolSettings(input, cp, ose);
 		setActivityStatus(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
-		setEmailSenderGroup(input, cp, ose);
 		setConsentsSource(input, cp, ose);
 
 		ose.checkAndThrow();
@@ -185,7 +182,6 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		cp.setSopDocumentName(input.getSopDocumentName());
 		setDistributionProtocolSettings(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
-		setEmailSenderGroup(input, cp, ose);
 		ose.checkAndThrow();
 		return cp;
 	}
@@ -561,28 +557,6 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 	private void setCollectionProtocolExtension(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
 		DeObject extension = DeObject.createExtension(input.getExtensionDetail(), result);
 		result.setExtension(extension);
-	}
-
-	private void setEmailSenderGroup(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
-		if (input.getEmailSenderGroup() == null) {
-			return;
-		}
-
-		UserGroup senderGroup = null;
-		Object key = null;
-		if (input.getEmailSenderGroup().getId() != null) {
-			key = input.getEmailSenderGroup().getId();
-			senderGroup = daoFactory.getUserGroupDao().getById(input.getEmailSenderGroup().getId());
-		} else if (StringUtils.isNotBlank(input.getEmailSenderGroup().getName())) {
-			key = input.getEmailSenderGroup().getName();
-			senderGroup = daoFactory.getUserGroupDao().getByName(input.getEmailSenderGroup().getName());
-		}
-
-		if (key != null && senderGroup == null) {
-			ose.addError(UserGroupErrorCode.NOT_FOUND, key);
-		}
-
-		result.setEmailSenderGroup(senderGroup);
 	}
 
 	private void setConsentsSource(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
