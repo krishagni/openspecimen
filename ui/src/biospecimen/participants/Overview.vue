@@ -1,7 +1,7 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <span> Action buttons </span>
+      <os-button left-icon="user-secret" :label="$t('participants.anonymize')" @click="anonymize" />
     </template>
   </os-page-toolbar>
 
@@ -44,11 +44,24 @@
     <os-grid-column width="4">
       <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.cpr.id" />
     </os-grid-column>
+
+    <os-confirm ref="confirmAnonymizeDialog">
+      <template #title>
+        <span v-t="'participants.erase_phi_data'">Erase Participant PHI Data</span>
+      </template>
+      <template #message>
+        <span v-t="'participants.erase_phi_data_q'">Are you sure you want to erase all PHI data of participant?</span>
+      </template>
+    </os-confirm>
   </os-grid>
 </template>
 
 <script>
+import alertSvc from '@/common/services/Alerts.js';
 import formUtil from '@/common/services/FormUtil.js';
+import routerSvc from '@/common/services/Router.js';
+
+import cprSvc from '@/biospecimen/services/Cpr.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 
 import MissedVisits from './MissedVisits.vue';
@@ -110,6 +123,24 @@ export default {
   },
 
   methods: {
+    anonymize: function() {
+      this.$refs.confirmAnonymizeDialog.open().then(
+        (resp) => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          cprSvc.anonymize(this.cpr).then(
+            () => {
+              // TODO: Is there a better way to do this reload?
+              routerSvc.reload();
+              alertSvc.success({code: 'participants.anonymized_successfully'});
+            }
+          );
+        }
+      );
+    },
+
     _setupCpr: function() {
       const cpr = this.ctx.cpr = this.cpr;
       this.ctx.auditObjs = [

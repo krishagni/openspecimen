@@ -15,6 +15,10 @@ class CollectionProtocolRegistration {
     return http.get('collection-protocol-registrations/' + cprId);
   }
 
+  async anonymize(cpr) {
+    return http.put('collection-protocol-registrations/' + cpr.id + '/anonymize', cpr);
+  }
+
   async getDict(cpId) {
     return cpSvc.getWorkflow(cpId, 'dictionary').then(
       (dict) => {

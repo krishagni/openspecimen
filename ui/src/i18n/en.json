@@ -830,11 +830,15 @@
   },
 
   "participants": {
+    "anonymize": "Anonymize",
+    "anonymized_successfully": "Successfully erased participant PHI data",
     "birth_date": "Birth Date",
     "collection_protocols": "Collection Protocols",
     "death_date": "Death  Date",
     "email_address": "Email Address",
     "empi": "Master Patient Index",
+    "erase_phi_data": "Erase Participant PHI Data",
+    "erase_phi_data_q": "Are you sure you want to erase all PHI data of participant?",
     "ethnicities": "Ethnicities",
     "external_subject_id": "External Subject ID",
     "gender": "Gender",
