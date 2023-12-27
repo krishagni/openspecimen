@@ -374,7 +374,7 @@ export default {
         return;
       }
 
-      containerSvc.saveOrUpdate(this.trCtx.container).then(() => routerSvc.reload());
+      containerSvc.archive(this.trCtx.container).then(() => routerSvc.reload());
     },
 
     closeArchiveDialog: function() {
@@ -395,7 +395,7 @@ export default {
         return;
       }
 
-      containerSvc.saveOrUpdate(this.trCtx.container).then(() => routerSvc.reload());
+      containerSvc.unarchive(this.trCtx.container).then(() => routerSvc.reload());
     },
 
     closeUnarchiveDialog: function() {
