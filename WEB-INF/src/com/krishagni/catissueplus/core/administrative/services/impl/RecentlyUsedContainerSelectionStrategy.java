@@ -158,13 +158,13 @@ public class RecentlyUsedContainerSelectionStrategy implements ContainerSelectio
 			}
 
 			StorageContainer container = nextContainer(children.get(i), null, criteria, freeLocs, visited);
-			if (container != null) {
+			if (container != null && !container.isArchived()) {
 				return container;
 			}
 		}
 
 		logger.info("Probing whether container " + parent.getName() + " can satisfy request");
-		if (canContainSpecimen(parent, criteria, freeLocs)) {
+		if (!parent.isArchived() && canContainSpecimen(parent, criteria, freeLocs)) {
 			logger.info("Selected container " + parent.getName());
 			return parent;
 		} else if (visited.add(parent)) {
