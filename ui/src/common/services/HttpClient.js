@@ -44,6 +44,10 @@ class HttpClient {
     return this.promise('put', () => axios.put(this.getUrl(url), data, this.config(params, options)), errorHandler);
   }
 
+  async patch(url, data, params, options, errorHandler) {
+    return this.promise('patch', () => axios.patch(this.getUrl(url), data, this.config(params, options)), errorHandler);
+  }
+
   async delete(url, data, params, options, errorHandler) {
     const config = this.config(params, options);
     config.data = data;

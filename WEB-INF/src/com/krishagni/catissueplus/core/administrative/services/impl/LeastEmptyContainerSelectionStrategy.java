@@ -63,7 +63,7 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 					containersCache.get().put(containerId, container);
 				}
 
-				if (container.hasFreePositionsForReservation(reqPositions)) {
+				if (!container.isArchived() && container.hasFreePositionsForReservation(reqPositions)) {
 					return container;
 				}
 			}

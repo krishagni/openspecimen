@@ -44,6 +44,16 @@ class Container {
     }
   }
 
+  async archive(container) {
+    const payload = {id: container.id, activityStatus: 'Closed'};
+    return http.patch('storage-containers/' + container.id, payload);
+  }
+
+  async unarchive(container) {
+    const payload = {id: container.id, activityStatus: 'Active'};
+    return http.patch('storage-containers/' + container.id, payload);
+  }
+
   async bulkUpdate(containers) {
     return http.put('storage-containers/bulk-update', containers);
   }
