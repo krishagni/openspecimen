@@ -28,7 +28,7 @@
     </div>
 
     <div class="content-wrapper" :style="[noNavButton == true ? {'padding-left': '0px'} : {}]">
-      <slot name="breadcrumb" v-if="noNavButton != true"></slot>
+      <slot name="breadcrumb" v-if="noNavButton != true || showBreadcrumb"></slot>
       <div class="content">
         <div class="left">
           <slot></slot>
@@ -53,7 +53,7 @@ import homePageSvc from '@/common/services/HomePageService.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
-  props: ['noNavButton'],
+  props: ['noNavButton', 'showBreadcrumb'],
 
   inject: ['ui'],
 

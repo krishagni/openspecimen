@@ -1,6 +1,6 @@
 <template>
   <os-page>
-    <os-page-head :noNavButton="noNavButton">
+    <os-page-head :noNavButton="noNavButton" :showBreadcrumb="true">
       <template #breadcrumb>
         <os-breadcrumb :items="ctx.bcrumb" />
       </template>
