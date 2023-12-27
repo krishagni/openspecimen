@@ -2,6 +2,8 @@
   <os-page-toolbar>
     <template #default>
       <os-button left-icon="user-secret" :label="$t('participants.anonymize')" @click="anonymize" />
+
+      <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" />
     </template>
   </os-page-toolbar>
 
@@ -60,9 +62,11 @@
 import alertSvc from '@/common/services/Alerts.js';
 import formUtil from '@/common/services/FormUtil.js';
 import routerSvc from '@/common/services/Router.js';
+import util from '@/common/services/Util.js';
 
 import cprSvc from '@/biospecimen/services/Cpr.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
+import specimenSvc from '@/biospecimen/services/Specimen.js';
 
 import MissedVisits from './MissedVisits.vue';
 import PendingVisits from './PendingVisits.vue';
@@ -139,6 +143,13 @@ export default {
           );
         }
       );
+    },
+
+    printLabels: function() {
+      const cpr = this.ctx.cpr;
+      const ts = util.formatDate(new Date(), 'yyyyMMdd_HHmmss');
+      const outputFilename = [cpr.cpShortTitle, cpr.ppid, ts].join('_') + '.csv';
+      specimenSvc.printLabels({cprId: cpr.id}, outputFilename);
     },
 
     _setupCpr: function() {
