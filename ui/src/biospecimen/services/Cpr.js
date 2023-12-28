@@ -15,6 +15,14 @@ class CollectionProtocolRegistration {
     return http.get('collection-protocol-registrations/' + cprId);
   }
 
+  async saveOrUpdate(cpr) {
+    if (cpr.id > 0) {
+      return http.put('collection-protocol-registrations/' + cpr.id, cpr);
+    } else {
+      return http.post('collection-protocol-registrations/', cpr);
+    }
+  }
+
   async deleteCpr(cprId, forceDelete, reason) {
     return http.delete('collection-protocol-registrations/' + cprId, {}, {forceDelete, reason});
   }

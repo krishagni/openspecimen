@@ -13,6 +13,17 @@ class CollectionProtocol {
     return http.get('collection-protocols', filterOpts || {});
   }
 
+  async getCpsForRegistrations(sites, query) {
+    const filterOpts = {
+      siteName: sites,
+      resource: 'ParticipantPhi',
+      op: 'Create',
+      title: query
+    };
+
+    return http.get('collection-protocols/byop', filterOpts || {});
+  }
+
   async getCpe(eventId) {
     return http.get('collection-protocol-events/' + eventId);
   }

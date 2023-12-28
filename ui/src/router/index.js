@@ -853,6 +853,11 @@ const routes = [
                             path: 'overview',
                             name: 'ParticipantsListItemDetail.Overview',
                             component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/Overview.vue')
+                          },
+                          {
+                            path: 'newreg',
+                            name: 'ParticipantsListItemDetail.NewReg',
+                            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/NewRegistration.vue')
                           }
                         ]
                       },
@@ -918,6 +923,11 @@ const routes = [
                         path: 'overview',
                         name: 'ParticipantDetail.Overview',
                         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/Overview.vue')
+                      },
+                      {
+                        path: 'newreg',
+                        name: 'ParticipantDetail.NewReg',
+                        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/NewRegistration.vue')
                       }
                     ]
                   },

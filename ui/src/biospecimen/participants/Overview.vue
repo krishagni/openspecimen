@@ -1,6 +1,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
+      <os-button left-icon="plus" :label="$t('participants.add_to_another')" @click="addToAnother" />
+
       <os-button left-icon="user-secret" :label="$t('participants.anonymize')" @click="anonymize" />
 
       <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" />
@@ -131,6 +133,12 @@ export default {
   },
 
   methods: {
+    addToAnother: function() {
+      const route = this.$route.matched[this.$route.matched.length - 1];
+      const detailRouteName = route.name.split('.')[0];
+      routerSvc.goto(detailRouteName + '.NewReg');
+    },
+
     anonymize: function() {
       this.$refs.confirmAnonymizeDialog.open().then(
         (resp) => {
