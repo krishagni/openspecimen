@@ -15,8 +15,16 @@ class CollectionProtocolRegistration {
     return http.get('collection-protocol-registrations/' + cprId);
   }
 
+  async deleteCpr(cprId, forceDelete, reason) {
+    return http.delete('collection-protocol-registrations/' + cprId, {}, {forceDelete, reason});
+  }
+
   async anonymize(cpr) {
     return http.put('collection-protocol-registrations/' + cpr.id + '/anonymize', cpr);
+  }
+
+  async getDependents(cpr) {
+    return http.get('collection-protocol-registrations/' + cpr.id + '/dependent-entities');
   }
 
   async getDict(cpId) {

@@ -4,6 +4,8 @@
       <os-button left-icon="user-secret" :label="$t('participants.anonymize')" @click="anonymize" />
 
       <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" />
+
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCpr" />
     </template>
   </os-page-toolbar>
 
@@ -55,6 +57,8 @@
         <span v-t="'participants.erase_phi_data_q'">Are you sure you want to erase all PHI data of participant?</span>
       </template>
     </os-confirm>
+
+    <os-delete-object ref="deleteCprDialog" :input="ctx.deleteOpts" />
   </os-grid>
 </template>
 
@@ -152,12 +156,46 @@ export default {
       specimenSvc.printLabels({cprId: cpr.id}, outputFilename);
     },
 
+    deleteCpr: function() {
+      this.$refs.deleteCprDialog.execute().then(
+        (resp) => {
+          if (resp == 'deleted') {
+            routerSvc.goto('ParticipantsList', {cprId: -2}, this.ctx.routeQuery);
+          }
+        }
+      );
+    },
+
     _setupCpr: function() {
       const cpr = this.ctx.cpr = this.cpr;
+
       this.ctx.auditObjs = [
         {objectId: cpr.id, objectName: 'collection_protocol_registration'},
         {objectId: cpr.participant.id, objectName: 'participant'}
       ]
+
+      let name = '';
+      if (cpr.participant.firstName && cpr.participant.firstName != '###') {
+        name = cpr.participant.firstName;
+      }
+
+      if (cpr.participant.lastName && cpr.participant.lastName != '###') {
+        if (name) {
+          name += ' ';
+        }
+
+        name += cpr.participant.lastName;
+      }
+
+      name = cpr.ppid + (name ? ' (' + name + ')' : '');
+      this.ctx.deleteOpts = {
+        type: this.$t('participants.cpr'),
+        title: name,
+        dependents: () => cprSvc.getDependents(cpr),
+        forceDelete: true,
+        askReason: true,
+        deleteObj: (reason) => cprSvc.deleteCpr(cpr.id, true, reason)
+      };
 
       visitSvc.getVisits(this.cpr).then(
         visits => {

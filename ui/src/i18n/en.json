@@ -286,6 +286,8 @@
       "saved": "Signature saved."
     },
 
+    "specify_delete_reason": "Specify the reason, at least 10 characters in length, for deletion:",
+
     "specimen_actions": {
       "add_edit_event": "Add/Edit Event",
       "add_more_details": "Add More Details",
@@ -834,6 +836,7 @@
     "anonymized_successfully": "Successfully erased participant PHI data",
     "birth_date": "Birth Date",
     "collection_protocols": "Collection Protocols",
+    "cpr": "Participant Registration",
     "death_date": "Death  Date",
     "email_address": "Email Address",
     "empi": "Master Patient Index",
