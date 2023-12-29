@@ -125,6 +125,11 @@ export default {
         if (field.type == 'subform') {
           // convert into 2-d array of values: [ [1, "abc"], [2, "xyz"], [3, "abcxyz"] ]
           let values = this.getValue(this.object, field) || [];
+          if (values == undefined || values == null || values == '-' ||
+            (values instanceof Array && values.length == 0)) {
+            continue;
+          }
+
           if (values != '-') {
             values = values.map(
               element => field.fields.map(
@@ -143,6 +148,10 @@ export default {
           subformFields.push({...field, value: values});
         } else {
           let value = this.getValue(this.object, field);
+          if (value == null || value == undefined || value == '-') {
+            continue;
+          }
+
           let item = {...field, value: value};
           if (item.type == 'textarea') {
             item.value = util.linkify(item.value);
