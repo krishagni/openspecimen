@@ -41,6 +41,8 @@
 <script>
 
 import useVuelidate from '@vuelidate/core'
+
+import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 import i18n         from '@/common/services/I18n.js';
 
@@ -90,12 +92,15 @@ export default {
         }
 
         const fv = field.validations;
-        if (fv && fv.required) {
-          field.required = true;
-          field.requiredTooltip = (fv.required && fv.required.message) || 'Mandatory field';
-          const validator = fv.required || fv.requiredIf;
-          if (validator && validator.messageCode) {
-            field.requiredTooltip = this.$t(validator.messageCode);
+        if (fv && (fv.required || fv.requiredIf)) {
+          field.required = !!fv.required || exprUtil.eval(this, fv.requiredIf.expr);
+          if (field.required) {
+            const validator = fv.required || fv.requiredIf;
+            if (validator.messageCode) {
+              field.requiredTooltip = this.$t(validator.messageCode);
+            } else {
+              field.requiredTooltip = validator.message || 'Mandatory field'
+            }
           }
         }
 

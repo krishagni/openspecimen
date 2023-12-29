@@ -165,10 +165,10 @@ export default {
 
   methods: {
     label: function(field) {
-      if (field.labelCode) {
-        return this.$t(field.labelCode);
-      } else if (field.label) {
-        return field.label;
+      if (field.labelCode || field.inlineLabelCode) {
+        return this.$t(field.labelCode || field.inlineLabelCode);
+      } else if (field.label || field.inlineLabel) {
+        return field.label || field.inlineLabel;
       } else {
         return 'Unknown';
       }

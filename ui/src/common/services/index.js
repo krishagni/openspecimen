@@ -13,6 +13,7 @@ import itemsSvc       from './ItemsHolder.js';
 import i18nSvc        from './I18n.js';
 import notifSvc       from './Notif.js';
 import numConvUtil    from './NumberConverterUtil.js';
+import pvSvc          from './PermissibleValue.js';
 import pluginLoader   from './PluginLoader.js';
 import pluginViews    from './PluginViewsRegistry.js';
 import routerSvc      from './Router.js';
@@ -39,6 +40,7 @@ export default {
       i18nSvc:      i18nSvc,
       notifSvc:     notifSvc,
       numConvUtil:  numConvUtil,
+      pvSvc:        pvSvc,
       pluginLoader: pluginLoader,
       pluginViews:  pluginViews,
       routerSvc:    routerSvc,

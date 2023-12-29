@@ -932,6 +932,11 @@ const routes = [
                     ]
                   },
                   {
+                    path: 'addedit',
+                    name: 'ParticipantAddEdit',
+                    component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/AddEdit.vue')
+                  },
+                  {
                     path: 'visit/:visitId',
                     name: 'VisitRoot',
                     component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/DetailRoot.vue'),

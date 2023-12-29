@@ -37,6 +37,10 @@ export default class CpViewContext {
     return this.cprDictQ;
   }
 
+  getCprAddEditLayout() {
+    return this.getCprDict().then(dict => cprSvc.getLayout(this.cpId, dict));
+  }
+
   getVisitDict() {
     if (!this.visitDictQ) {
       this.visitDictQ = visitSvc.getDict(this.cpId);

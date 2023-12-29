@@ -7,8 +7,7 @@
 
       <span class="os-title" v-if="cpr && cpr.id > 0">
         <h3>
-          <span>{{cpr.ppid}}</span>
-          <span v-if="hasPhiAccess && participantName"> ({{participantName}})</span>
+          <span>{{participantName}}</span>
         </h3>
         <div class="accessories">
           <os-copy-link size="small"
@@ -58,6 +57,8 @@ import authSvc    from '@/common/services/Authorization.js';
 import i18n       from '@/common/services/I18n.js';
 import routerSvc  from '@/common/services/Router.js';
 
+import cprSvc from '@/biospecimen/services/Cpr.js';
+
 export default {
   props: ['cpr', 'noNavButton'],
 
@@ -93,29 +94,7 @@ export default {
     },
 
     participantName: function() {
-      const participant = this.cpr.participant;
-      if (!participant) {
-        return '';
-      }
-
-      let result = participant.firstName;
-      if (participant.middleName) {
-        if (result) {
-          result += ' ';
-        }
-
-        result += participant.middleName;
-      }
-
-      if (participant.lastName) {
-        if (result) {
-          result += ' ';
-        }
-
-        result += participant.lastName;
-      }
-
-      return result;
+      return cprSvc.getFormattedTitle(this.cpr);
     }
   },
 

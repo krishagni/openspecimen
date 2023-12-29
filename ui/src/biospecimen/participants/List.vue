@@ -28,6 +28,9 @@
         </os-page-head>
         <os-page-body v-if="ctx.inited">
           <os-page-toolbar v-if="!ctx.detailView">
+            <template #default>
+              <os-button left-icon="plus" :label="$t('participants.add_participant')" @click="addParticipant" />
+            </template>
             <template #right>
               <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
@@ -207,6 +210,10 @@ export default {
           pageSize: this.$refs.participantsList.pageSize
         }
       }, 0);
+    },
+
+    addParticipant: function() {
+      routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
     },
 
     openSearch: function () {

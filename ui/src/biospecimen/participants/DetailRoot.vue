@@ -1,6 +1,6 @@
 
 <template>
-  <router-view :cpr="cpr" :key="cpr.id" v-if="cpr.id > 0" />
+  <router-view :cpr="cpr" :key="cpr.id || -1" />
 </template>
 
 <script>
@@ -17,8 +17,12 @@ export default {
     const cpr = ref({});
     provide('cpr', cpr);
 
-    cpr.value = await cprSvc.getCpr(props.cprId);
-    formUtil.createCustomFieldsMap(cpr.value.participant, true);
+    if (props.cprId > 0) {
+      cpr.value = await cprSvc.getCpr(props.cprId);
+      formUtil.createCustomFieldsMap(cpr.value.participant, true);
+    } else {
+      cpr.value = {participant: {pmis: []}}
+    }
     
     return { cpr };
   },

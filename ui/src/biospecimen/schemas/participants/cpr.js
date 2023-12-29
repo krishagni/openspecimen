@@ -3,7 +3,24 @@ export default {
     {
       "type": "datePicker",
       "labelCode": "participants.registration_date",
-      "name": "cpr.registrationDate"
+      "name": "cpr.registrationDate",
+      "validations": {
+        "required": {
+          "messageCode": "participants.registration_date_req"
+        }
+      }
+    },
+    {
+      "type": "text",
+      "labelCode": "participants.ppid",
+      "name": "cpr.ppid",
+      "validations": {
+        "required": {
+          "messageCode": "participants.ppid_req"
+        }
+      },
+      "showWhen": "!!cpr.ppid || !cp.ppidFmt || cp.manualPpidEnabled",
+      "disableWhen": "!!cpr.ppid"
     },
     { 
       "type": "site",
@@ -21,17 +38,33 @@ export default {
     },
     {
       "type": "text",
+      "labelCode": "participants.first_name",
+      "name": "cpr.participant.firstName"
+    },
+    {
+      "type": "text",
+      "labelCode": "participants.middle_name",
+      "name": "cpr.participant.middleName"
+    },
+    {
+      "type": "text",
+      "labelCode": "participants.last_name",
+      "name": "cpr.participant.lastName"
+    },
+    {
+      "type": "text",
       "labelCode": "participants.email_address",
       "name": "cpr.participant.emailAddress"
     },
     {
       "type": "booleanCheckbox",
-      "labelCode": "participants.receive_emails",
+      "inlineLabelCode": "participants.receive_emails",
       "name": "cpr.participant.emailOptIn",
       "displayValues": {
         true: window.osSvc.i18nSvc.msg('common.yes'),
         false: window.osSvc.i18nSvc.msg('common.no')
-      }
+      },
+      "showWhen": "!!cpr.participant.emailAddress"
     },
     {
       "type": "text",
@@ -40,12 +73,13 @@ export default {
     },
     {
       "type": "booleanCheckbox",
-      "labelCode": "participants.receive_smses",
+      "inlineLabelCode": "participants.receive_smses",
       "name": "cpr.participant.textOptIn",
       "displayValues": {
         true: window.osSvc.i18nSvc.msg('common.yes'),
         false: window.osSvc.i18nSvc.msg('common.no')
-      }
+      },
+      "showWhen": "!!cpr.participant.phoneNumber"
     },
     {
       "type": "datePicker",
@@ -80,7 +114,8 @@ export default {
       "type": "datePicker",
       "labelCode": "participants.death_date",
       "name": "cpr.participant.deathDate",
-      "showInOverviewWhen": "cpr.participant.deathDate != undefined && cpr.participant.deathDate != null"
+      "showInOverviewWhen": "!!cpr.participant.deathDate",
+      "showWhen": "cpr.participant.dead"
     },
     {
       "type": "pv",
@@ -111,6 +146,12 @@ export default {
           "selectProp": "name",
           "listSource": {
             "selectProp": "name"
+          },
+          "validations": {
+            "requiredIf": {
+              "expr": "!!mrn",
+              "messageCode": "participants.site_req"
+            }
           }
         },
         {
