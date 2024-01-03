@@ -53,7 +53,11 @@ class Visit {
 
         return this.getCustomFieldsForm(cpId).then(
           (formDef) => {
-            let customFields = formUtil.deFormToDict(formDef, 'visit.extensionDetail.attrsMap.');
+            let customFields = formUtil.deFormToDict(formDef, 'visit.extensionDetail.attrsMap.')
+              .map(field => {
+                field.showWhen = "visit.status != 'Missed Collection' && visit.status != 'Not Collected'";
+                return field;
+              });
             return visitFields.concat(customFields);
           }
         );

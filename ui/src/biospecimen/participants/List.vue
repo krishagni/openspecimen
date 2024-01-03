@@ -117,7 +117,8 @@ export default {
 
   watch: {
     '$route.params.cprId': function(newValue, oldValue) {
-      if (newValue == oldValue) {
+      if (newValue == undefined || newValue == oldValue) {
+        // new value is undefined when the route changes
         return;
       }
 

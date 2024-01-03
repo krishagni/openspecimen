@@ -3,7 +3,14 @@ export default {
     {
       "type": "text",
       "labelCode": "visits.name",
-      "name": "visit.name"
+      "name": "visit.name",
+      "validations": {
+        "required": {
+          "messageCode": "visits.name_req"
+        }
+      },
+      "showWhen": "(!!visit.name || !cp.visitNameFmt || cp.manualVisitNameEnabled) && visit.status != 'Missed Collection' && visit.status != 'Not Collected'",
+      "disableWhen": "visit.id > 0 && !!visit.name"
     },
     { 
       "type": "dropdown",
@@ -18,12 +25,22 @@ export default {
           { "value": "Missed Collection" },
           { "value": "Not Collected" }
         ]
+      },
+      "validations": {
+        "required": {
+          "messageCode": "visits.status_req"
+        }
       }
     },
     {
       "type": "datePicker",
       "labelCode": "visits.visit_date",
-      "name": "visit.visitDate"
+      "name": "visit.visitDate",
+      "validations": {
+        "required": {
+          "messageCode": "visits.visit_date_req"
+        }
+      }
     },
     { 
       "type": "site",
@@ -32,7 +49,13 @@ export default {
       "selectProp": "name",
       "listSource": {
         "selectProp": "name"
-      }
+      },
+      "validations": {
+        "required": {
+          "messageCode": "visits.visit_site_req"
+        }
+      },
+      "showWhen": "visit.status != 'Missed Collection' && visit.status != 'Not Collected'",
     },
     {
       "type": "pv",
@@ -40,26 +63,30 @@ export default {
       "name": "visit.clinicalDiagnoses",
       "multiple": true,
       "attribute": "clinical_diagnosis",
-      "selectProp": "value"
+      "selectProp": "value",
+      "showWhen": "visit.status != 'Missed Collection' && visit.status != 'Not Collected'",
     },
     {
       "type": "pv",
       "labelCode": "visits.clinical_status",
       "name": "visit.clinicalStatus",
       "attribute": "clinical_status",
-      "selectProp": "value"
+      "selectProp": "value",
+      "showWhen": "visit.status != 'Missed Collection' && visit.status != 'Not Collected'",
     },
     {
       "type": "pv",
       "labelCode": "visits.cohort",
       "name": "visit.cohort",
       "attribute": "cohort",
-      "selectProp": "value"
+      "selectProp": "value",
+      "showWhen": "visit.status != 'Missed Collection' && visit.status != 'Not Collected'",
     },
     {
       "type": "text",
       "labelCode": "visits.surg_path_number",
-      "name": "visit.surgicalPathologyNumber"
+      "name": "visit.surgicalPathologyNumber",
+      "showWhen": "visit.status != 'Missed Collection' && visit.status != 'Not Collected'",
     },
     {
       "type": "user",

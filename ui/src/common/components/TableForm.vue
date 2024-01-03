@@ -16,7 +16,7 @@
               :class="{'align-icon': field.enableCopyFirstToAll && field.type == 'booleanCheckbox'}">
               <os-icon :name="field.icon" />
             </div>
-            <span class="required-indicator" v-show="!readOnly && field.required"
+            <span class="required-indicator" v-show="!readOnly && (field.required || field.requiredIf)"
               v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
@@ -225,11 +225,13 @@ export default {
         }
 
         const fv = field.validations;
-        if (fv && fv.required) {
+        if (fv && (fv.required || fv.requiredIf)) {
           field.required = true;
-          field.requiredTooltip = fv.required.message || 'Mandatory field'
-          if (fv.required.messageCode) {
-            field.requiredTooltip = this.$t(fv.required.messageCode);
+
+          const req = fv.required || fv.requiredIf;
+          field.requiredTooltip = req.message || 'Mandatory field'
+          if (req.messageCode) {
+            field.requiredTooltip = this.$t(req.messageCode);
           }
         }
 

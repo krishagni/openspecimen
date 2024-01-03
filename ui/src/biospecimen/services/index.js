@@ -3,6 +3,7 @@ import cartSvc        from './SpecimenCart.js';
 import consentStmtSvc from './ConsentStatement.js';
 import folderSvc      from './SpecimenCartsFolder.js';
 import specimenSvc    from './Specimen.js';
+import visitSvc       from './Visit.js';
 
 export default {
   install(app) {
@@ -12,7 +13,8 @@ export default {
       cartSvc       : cartSvc,
       cartFolderSvc : folderSvc,
       consentStmtSvc: consentStmtSvc,
-      specimenSvc   : specimenSvc
+      specimenSvc   : specimenSvc,
+      visitSvc      : visitSvc
     });
   }
 }
