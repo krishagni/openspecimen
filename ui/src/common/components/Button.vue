@@ -11,7 +11,7 @@
 import Icon from '@/common/components/Icon.vue';
 
 export default {
-  props: ['leftIcon', 'rightIcon', 'label', 'size'],
+  props: ['leftIcon', 'rightIcon', 'label', 'size', 'no-outline'],
 
   components: {
     'icon': Icon
@@ -30,6 +30,10 @@ export default {
             kls += ' ' + type;
           }
         }
+      }
+
+      if (this.noOutline) {
+        kls += ' no-outline';
       }
 
       return kls;
@@ -140,6 +144,11 @@ button:hover {
 .btn.text:hover {
   color: #2a6496;
   text-decoration: underline;
+}
+
+.btn.no-outline {
+  border: none;
+  background: transparent;
 }
 
 .btn[disabled] {

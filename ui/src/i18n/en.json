@@ -838,6 +838,7 @@
     "anonymized_successfully": "Successfully erased participant PHI data",
     "birth_date": "Birth Date",
     "collect": "Collect",
+    "collect_pending_specimens": "Collect Pending Specimens",
     "collection_protocols": "Collection Protocols",
     "cp": "Collection Protocol",
     "cp_req": "Collection Protocol is mandatory",
@@ -1243,6 +1244,6 @@
     "visit_date_req": "Visit Date is mandatory",
     "visit_name": "Visit Name",
     "visit_site": "Visit Site",
-    "visit_site_req": "Visit Site is mandatory",
+    "visit_site_req": "Visit Site is mandatory"
   }
 }
