@@ -56,11 +56,41 @@ export default {
     options: function(visit) {
       return [
         {
+          icon: 'redo',
+          caption: this.$t('participants.new_visit'),
+          onSelect: () => this.repeatVisit(visit)
+        },
+        {
           icon: 'flask',
           caption: this.$t('participants.collect_pending_specimens'),
           onSelect: () => this.collectPending(visit)
         }
       ];
+    },
+
+    repeatVisit: async function(visit) {
+      const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
+      if (wfInstanceSvc) {
+        let wfName = await this._getCollectVisitsWf(visit);
+        if (!wfName) {
+          wfName = 'sys-collect-visits';
+        }
+
+        let inputItem = {cpr: {id: visit.cprId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle}};
+        if (visit.eventId) {
+          inputItem.cpe = {id: visit.eventId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
+        }
+
+        if (visit.id > 0) {
+          inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
+        }
+
+        const opts = {inputType: 'visit', params: {repeatVisit: true}};
+        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
+        wfInstanceSvc.gotoInstance(instance.id);
+      } else {
+        alert('Workflow module not installed!');
+      }
     },
 
     collectPending: async function(visit) {
@@ -84,6 +114,10 @@ export default {
       } else {
         alert('Workflow module not installed!');
       }
+    },
+
+    _getCollectVisitsWf(visit) {
+      return cpSvc.getWorkflowProperty(visit.cpId, 'common', 'collectVisitsWf');
     },
 
     _getCollectPendingSpmnsWf(visit) {
