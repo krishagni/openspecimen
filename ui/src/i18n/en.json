@@ -864,6 +864,7 @@
     "phone_number": "Phone Number",
     "ppid": "PPID",
     "ppid_req": "PPID is mandatory",
+    "print_specimen_labels": "Print Specimen Labels",
     "races": "Races",
     "receive_emails": "Receive Emails",
     "receive_smses": "Receive SMSes",
@@ -874,6 +875,7 @@
     "site": "Site",
     "site_req": "Site is mandatory",
     "uid": "SSN",
+    "view_visit": "View Visit",
     "vital_status": "Vital Status"
   },
 

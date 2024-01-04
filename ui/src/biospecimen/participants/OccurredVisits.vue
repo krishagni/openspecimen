@@ -22,6 +22,9 @@
 <script>
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import specimenSvc from '@/biospecimen/services/Specimen.js';
+import routerSvc from '@/common/services/Router.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['visits'],
@@ -45,8 +48,8 @@ export default {
   },
 
   methods: {
-    onVisitRowClick: function(row) {
-      console.log(row);
+    onVisitRowClick: function({visit}) {
+      this.gotoVisit(visit);
     },
 
     showReport: function({visit}) {
@@ -56,16 +59,43 @@ export default {
     options: function(visit) {
       return [
         {
+          icon: 'eye',
+          caption: this.$t('participants.view_visit'),
+          onSelect: () => this.gotoVisit(visit)
+        },
+        {
           icon: 'redo',
           caption: this.$t('participants.new_visit'),
           onSelect: () => this.repeatVisit(visit)
         },
+        { divider: true },
         {
           icon: 'flask',
           caption: this.$t('participants.collect_pending_specimens'),
           onSelect: () => this.collectPending(visit)
+        },
+        {
+          icon: 'print',
+          caption: this.$t('participants.print_specimen_labels'),
+          onSelect: () => this.printLabels(visit)
         }
       ];
+    },
+
+    gotoVisit: function(visit) {
+      const route = routerSvc.getCurrentRoute();
+      const params = {
+        cpId: visit.cpId,
+        cprId: visit.cprId,
+        visitId: visit.id || -1,
+        eventId: visit.eventId
+      };
+
+      if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
+        routerSvc.goto('ParticipantsListItemVisitDetail.Overview', params);
+      } else {
+        routerSvc.goto('VisitDetail.Overview', params);
+      }
     },
 
     repeatVisit: async function(visit) {
@@ -114,6 +144,12 @@ export default {
       } else {
         alert('Workflow module not installed!');
       }
+    },
+
+    printLabels: function(visit) {
+      const ts = util.formatDate(new Date(), 'yyyyMMdd_HHmmss');
+      const outputFilename = [visit.cpShortTitle, visit.ppid, visit.name, ts].join('_') + '.csv';
+      specimenSvc.printLabels({visitId: visit.id}, outputFilename);
     },
 
     _getCollectVisitsWf(visit) {
