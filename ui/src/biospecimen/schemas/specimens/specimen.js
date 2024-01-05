@@ -8,22 +8,40 @@ export default {
         { "captionCode": "specimens.new", "value": "New" },
         { "captionCode": "specimens.derived", "value": "Derived" },
         { "captionCode": "specimens.aliquot", "value": "Aliquot" }
-      ]
+      ],
+      "optionsPerRow": 3,
+      "showInOverviewWhen": "true == true",
+      "showWhen": "true == false"
     },
     {
       "type": "text",
       "labelCode": "specimens.label",
-      "name": "specimen.label"
+      "name": "specimen.label",
+      "validations": {
+        "required": {
+          "messageCode": "specimens.label_req"
+        }
+      },
+      "showWhen": `!!specimen.label  || cp.manualSpecLabelEnabled ||
+        (specimen.lineage == 'New' && !cp.specimenLabelFmt) ||
+        (specimen.lineage == 'Derived' && !cp.derivativeLabelFmt) ||
+        (specimen.lineage == 'Aliquot' && !cp.aliquotLabelFmt)`,
+      "disableWhen": `!cp.manualSpecLabelEnabled && ((specimen.lineage == 'New' && cp.specimenLabelFmt) ||
+        (specimen.lineage == 'Derived' && cp.derivativeLabelFmt) ||
+        (specimen.lineage == 'Aliquot' && cp.aliquotLabelFmt))`
     },
     {
       "type": "text",
       "labelCode": "specimens.barcode",
-      "name": "specimen.barcode"
+      "name": "specimen.barcode",
+      "showWhen": "!!specimen.barcode || (cp.barcodingEnabled && !cp.specimenBarcodeFmt)"
     },
     {
       "type": "text",
       "labelCode": "specimens.additional_label",
-      "name": "specimen.additionalLabel"
+      "name": "specimen.additionalLabel",
+      "showWhen": "!!specimen.additionalLabel || !cp.additionalLabelFmt",
+      "disableWhen": "!!cp.additionalLabelFmt"
     },
     {
       "type": "dropdown",
@@ -38,71 +56,105 @@ export default {
         ],
         "selectProp": "name",
         "displayProp": "name"
+      },
+      "validations": {
+        "required": {
+          "messageCode": "specimens.collection_status_req"
+        }
       }
     },
     {
       "type": "specimen-type",
       "labelCode": "specimens.type",
-      "name": "specimen.type"
+      "name": "specimen.type",
+      "entity": "specimen",
+      "showWhen": "speimen.lineage != 'Aliquot'",
+      "showInOverviewWhen": "true == true"
     },
     {
       "type": "text",
       "labelCode": "specimens.image_id_url",
-      "name": "specimen.imageId"
+      "name": "specimen.imageId",
+      "showWhen": "cp.imagingEnabled && specimen.status == 'Collected'"
     },
     {
-      "type": "specimen-quantity",
+      "type": "specimen-measure",
       "labelCode": "specimens.initial_quantity",
       "name": "specimen.initialQty",
-      "specimen": "specimen"
+      "entity": "specimen",
+      "measure": "quantity",
+      "validations": {
+        "requiredIf": {
+          "expr": "specimen.lineage == 'Aliquot' && cp.aliquotQtyReq",
+          "messageCode": "specimens.initial_quantity_req"
+        }
+      }
     },
     {
-      "type": "specimen-quantity",
+      "type": "specimen-measure",
       "labelCode": "specimens.available_quantity",
       "name": "specimen.availableQty",
-      "specimen": "specimen"
+      "entity": "specimen",
+      "measure": "quantity",
+      "validations": {
+        "requiredIf": {
+          "expr": "specimen.lineage == 'Aliquot' && cp.aliquotQtyReq",
+          "messageCode": "specimens.available_quantity_req"
+        }
+      }
     },
     {
       "type": "specimen-measure",
       "labelCode": "specimens.concentration",
       "name": "specimen.concentration",
-      "specimen": "specimen",
+      "entity": "specimen",
       "measure": "concentration"
     },
     {
-      "type": "datetime",
+      "type": "datePicker",
       "labelCode": "specimens.created_on",
-      "name": "specimen.createdOn"
+      "name": "specimen.createdOn",
+      "showTime": true,
+      "showWhen": "!!specimen.createdOn || specimens.status == 'Collected'"
     },
     {
       "type": "storage-position",
       "labelCode": "specimens.location",
-      "name": "specimen.storageLocation"
+      "name": "specimen.storageLocation",
+      "showWhen": "specimen.status == 'Collected'"
     },
     {
       "type": "pv",
       "labelCode": "specimens.biohazards",
       "name": "specimen.biohazards",
       "attribute": "specimen_biohazard",
-      "multiple": true
+      "multiple": true,
+      "selectProp": "value",
+      "showWhen": "specimen.lineage != 'Aliquot'"
     },
     {
       "type": "pv",
       "labelCode": "specimens.pathology_status",
       "name": "specimen.pathology",
-      "attribute": "pathology_status"
+      "attribute": "pathology_status",
+      "selectProp": "value",
+      "showWhen": "specimen.lineage != 'Aliquot'"
     },
     {
       "type": "pv",
       "labelCode": "specimens.anatomic_site",
       "name": "specimen.anatomicSite",
-      "attribute": "anatomic_site"
+      "attribute": "anatomic_site",
+      "selectProp": "value",
+      "showWhen": "specimen.lineage != 'Aliquot'"
     },
     {
       "type": "pv",
       "labelCode": "specimens.laterality",
       "name": "specimen.laterality",
-      "attribute": "laterality"
+      "attribute": "laterality",
+      "selectProp": "value",
+      "showWhen": "specimen.lineage != 'Aliquot'"
     },
     {
       "type": "number",
@@ -113,6 +165,56 @@ export default {
       "type": "textarea",
       "labelCode": "specimens.comments",
       "name": "specimen.comments"
+    },
+    {
+      "type": "datePicker",
+      "labelCode": "specimens.collection_date",
+      "name": "specimen.collectionEvent.time",
+      "showTime": true,
+      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.time"
+    },
+    {
+      "type": "user",
+      "labelCode": "specimens.collector",
+      "name": "specimen.collectionEvent.user",
+      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.user"
+    },
+    {
+      "type": "pv",
+      "labelCode": "specimens.collection_procedure",
+      "name": "specimen.collectionEvent.procedure",
+      "attribute": "collection_procedure",
+      "selectProp": "value",
+      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.procedure"
+    },
+    {
+      "type": "pv",
+      "labelCode": "specimens.collection_container",
+      "name": "specimen.collectionEvent.container",
+      "attribute": "collection_container",
+      "selectProp": "value",
+      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.container"
+    },
+    {
+      "type": "datePicker",
+      "labelCode": "specimens.receive_date",
+      "name": "specimen.received.time",
+      "showTime": true,
+      "showWhen": "specimen.lineage == 'New' || !!specimen.receivedEvent.time"
+    },
+    {
+      "type": "user",
+      "labelCode": "specimens.receiver",
+      "name": "specimen.receivedEvent.user",
+      "showWhen": "specimen.lineage == 'New' || !!specimen.receivedEvent.user"
+    },
+    {
+      "type": "pv",
+      "labelCode": "specimens.receive_quality",
+      "name": "specimen.receivedEvent.receivedQuality",
+      "attribute": "receive_quality",
+      "selectProp": "value",
+      "showWhen": "specimen.lineage == 'New' || !!specimen.receivedEvent.receivedQuality"
     }
   ]
 }

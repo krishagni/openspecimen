@@ -68,8 +68,11 @@ export default {
               }
             }
 
-            return url;
-          }
+            const currentView = window.location.href;
+            const path = currentView.substring(0, currentView.indexOf('/#'));
+            return path + '/' + url;
+          },
+          hrefTarget: '_self'
         },
         {
           type: 'text',

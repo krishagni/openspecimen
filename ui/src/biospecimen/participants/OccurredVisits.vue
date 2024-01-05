@@ -75,6 +75,11 @@ export default {
           onSelect: () => this.collectPending(visit)
         },
         {
+          icon: 'plus',
+          caption: this.$t('participants.collect_unplanned_specimens'),
+          onSelect: () => this.addSpecimen(visit)
+        },
+        {
           icon: 'print',
           caption: this.$t('participants.print_specimen_labels'),
           onSelect: () => this.printLabels(visit)
@@ -146,6 +151,27 @@ export default {
       }
     },
 
+    addSpecimen: async function(visit) {
+      const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
+      if (wfInstanceSvc) {
+        let wfName = await this._getCollectUnplannedSpmnsWf(visit);
+        if (!wfName) {
+          wfName = 'sys-collect-adhoc-specimens';
+        }
+
+        let inputItem = {
+          cpr: {id: visit.cprId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle},
+          visit: {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle}
+        };
+
+        const opts = {inputType: 'visit'};
+        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
+        wfInstanceSvc.gotoInstance(instance.id);
+      } else {
+        alert('Workflow module not installed!');
+      }
+    },
+
     printLabels: function(visit) {
       const ts = util.formatDate(new Date(), 'yyyyMMdd_HHmmss');
       const outputFilename = [visit.cpShortTitle, visit.ppid, visit.name, ts].join('_') + '.csv';
@@ -158,6 +184,10 @@ export default {
 
     _getCollectPendingSpmnsWf(visit) {
       return cpSvc.getWorkflowProperty(visit.cpId, 'common', 'collectPendingSpecimensWf');
+    },
+
+    _getCollectUnplannedSpmnsWf(visit) {
+      return cpSvc.getWorkflowProperty(visit.cpId, 'common', 'collectUnplannedSpecimensWf');
     },
   }
 } 

@@ -27,6 +27,7 @@ class FieldFactory {
     site: 'os-site-dropdown',
     span: 'os-span',
     'specimen-measure': 'os-specimen-measure',
+    'specimen-quantity': 'os-specimen-measure',
     'specimen-type': 'os-specimen-type',
     storageContainer: 'os-containers-dropdown',
     subform: 'os-subform',

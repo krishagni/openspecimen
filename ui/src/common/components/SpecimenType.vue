@@ -104,12 +104,14 @@ export default {
     },
 
     _updateValue(value) {
-      if (this.entity) {
-        const option            = this.selectedOption = this._getSelectedOption(value);
-        const entityObj         = exprUtil.getValue(this.form || this.context || {}, this.entity) || {};
-        entityObj.specimenClass = option && option.specimenClass || null;
-        entityObj.type          = option && option.type || null;
-      }
+      const entity = this.entity || 'specimen';
+      const option = this.selectedOption = this._getSelectedOption(value);
+
+      const formData  = (this.form && this.form.formData) || this.form || this.context || {};
+      const entityObj = exprUtil.getValue(formData, entity) || {};
+
+      entityObj.specimenClass = option && option.specimenClass || null;
+      entityObj.type          = option && option.type || null;
     },
 
     _getSelectedOption(value) {

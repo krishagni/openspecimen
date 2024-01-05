@@ -95,11 +95,15 @@ class FormUtil {
         } else if (result.type == 'pvs') {
           result.type = 'pv';
           result.attribute = result.attr;
+          result.selectProp = 'value';
         } else if (result.type == 'collection') {
           result.type = 'subform';
           result.fields = this.sdeFieldsToDict(result.fields);
+        } else if (result.type == 'specimen-quantity') {
+          result.entity = 'specimen';
         }
 
+        console.log(result);
         return result;
       }
     );

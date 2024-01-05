@@ -1,7 +1,7 @@
 
 <template>
   <span :class="$attrs['md-type'] && 'md-type'">
-    <a v-if="link" :href="link" target="_blank" rel="noopener">
+    <a v-if="link" :href="link" :target="hrefTarget || '_blank'" rel="noopener">
       <span>{{displayText}}</span>
     </a>
     <span v-else>{{displayText}}</span>
@@ -13,7 +13,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'displayType', 'href', 'form', 'context'],
+  props: ['modelValue', 'displayType', 'href', 'hrefTarget', 'form', 'context'],
 
   created() {
     this.customField = this.$attrs.name && this.$attrs.name.indexOf('.extensionDetail.attrsMap.');
