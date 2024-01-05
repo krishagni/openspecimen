@@ -101,9 +101,35 @@ class FormUtil {
           result.fields = this.sdeFieldsToDict(result.fields);
         } else if (result.type == 'specimen-quantity') {
           result.entity = 'specimen';
+        } else if (result.type == 'radio') {
+          result.optionsPerRow = result.optionsPerRow || 5;
         }
 
-        console.log(result);
+        if (typeof result.showIf == 'string') {
+          result.showWhen = result.showIf;
+        } else if (result.showIf && typeof result.showIf == 'object') {
+          let conds = (result.showIf.rules || []).map(
+            (rule) => {
+              if (rule.op == 'exists') {
+                return '!!' + rule.field;
+              } else if (rule.op == 'not_exist') {
+                return '!' + rule.field;
+              } else {
+                return rule.field + ' ' + rule.op + ' ' + rule.value;
+              }
+            }
+          );
+
+          if (conds.length > 0) {
+            result.showWhen = (result.showIf.op == 'OR' ? conds.join(' || ') : conds.join(' && '));
+          }
+        }
+
+        result.showInOverviewWhen = result.showInOverviewIf == 'useShowIf' ? result.showWhen : result.showInOverviewIf;
+        if (!result.optional) {
+          result.validations = {required: {message: result.label + ' is mandatory'}};
+        }
+
         return result;
       }
     );
