@@ -63,11 +63,12 @@ export default {
           inputItem.cpe = {id: visit.eventId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
+        const opts = {params: {returnOnExit: 'current_view'}};
         if (visit.id > 0) {
+          opts.inputType = 'visit';
           inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
-        const opts = {params: {returnOnExit: 'current_view'}};
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);
       } else {
