@@ -22,13 +22,8 @@ export default {
           "messageCode": "specimens.label_req"
         }
       },
-      "showWhen": `!!specimen.label  || cp.manualSpecLabelEnabled ||
-        (specimen.lineage == 'New' && !cp.specimenLabelFmt) ||
-        (specimen.lineage == 'Derived' && !cp.derivativeLabelFmt) ||
-        (specimen.lineage == 'Aliquot' && !cp.aliquotLabelFmt)`,
-      "disableWhen": `!cp.manualSpecLabelEnabled && ((specimen.lineage == 'New' && cp.specimenLabelFmt) ||
-        (specimen.lineage == 'Derived' && cp.derivativeLabelFmt) ||
-        (specimen.lineage == 'Aliquot' && cp.aliquotLabelFmt))`
+      "showWhen": "!!specimen.label  || cp.manualSpecLabelEnabled || !specimen.labelFmt",
+      "disableWhen": "!cp.manualSpecLabelEnabled && specimen.labelFmt"
     },
     {
       "type": "text",

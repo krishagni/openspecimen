@@ -67,7 +67,8 @@ export default {
           inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
-        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem]);
+        const opts = {params: {returnOnExit: 'current_view'}};
+        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);
       } else {
         alert('Workflow module not installed!');
