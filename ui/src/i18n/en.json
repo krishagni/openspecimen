@@ -1085,6 +1085,7 @@
     "concentration": "Concentration",
     "closed": "Closed",
     "cp": "Collection Protocol",
+    "create_aliquots": "Create Aliquots",
     "created_on": "Created On",
     "derived": "Derived",
     "description": "Description",

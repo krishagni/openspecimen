@@ -39,7 +39,8 @@ export default {
           return this._getUser(this.inputValue);
 
         case 'specimen-quantity':
-          return this._getSpecimenMeasure(this.inputValue, this.$attrs, 'quantity');
+        case 'specimen-measure':
+          return this._getSpecimenMeasure(this.inputValue, this.$attrs, this.$attrs.measure || 'quantity');
 
         case 'specimen-description':
           return this._getSpecimenDescription(this.inputValue, this.$attrs);
@@ -127,7 +128,7 @@ export default {
         return '-';
       }
 
-      const specimen = exprUtil.eval(this.form || this.context || {}, attrs.specimen || 'specimen');
+      const specimen = exprUtil.eval(this.form || this.context || {}, attrs.entity || attrs.specimen || 'specimen');
       const unit = util.getSpecimenMeasureUnit(specimen, measure || 'quantity');
       return value + ' ' + unit;
     },
