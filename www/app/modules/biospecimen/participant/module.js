@@ -323,7 +323,10 @@ angular.module('os.biospecimen.participant',
       })
       .state('cp-list-view-root', {
         templateUrl: 'modules/biospecimen/participant/list-view.html',
-        controller: function($scope, $state, cp, cpViewCtx, defSopDoc, defSopUrl, spmnListCfg, VueApp, Alerts) {
+        controller: function(
+          $scope, $state, cp, cpViewCtx, defSopDoc, defSopUrl, spmnListCfg,
+          VueApp, Alerts, SettingUtil) {
+
           var ctx = $scope.listViewCtx = {
             sopDocDownloadUrl: cp.getSopDocDownloadUrl(),
             spmnListCfg: spmnListCfg,
@@ -346,6 +349,12 @@ angular.module('os.biospecimen.participant',
             }
           }
 
+          SettingUtil.getSetting('common', 'enable_beta_features').then(
+            function(setting) {
+              ctx.enableBetaFeatures = setting.value == 'true';
+            }
+          );
+
           $scope.generateCpReport = function() {
             cp.generateReport().then(
               function() {
@@ -356,6 +365,10 @@ angular.module('os.biospecimen.participant',
 
           $scope.receiveSpecimens = function() {
             VueApp.setVueView('task-manager/workflows/' + cpViewCtx.recvSpmnsWfId + '/create-instance');
+          }
+
+          $scope.switchToNewUi = function() {
+            VueApp.setVueView('cp-view/' + cp.id + '/participants/-1');
           }
         },
         resolve: {

@@ -48,6 +48,10 @@
       <span ng-if="!listViewCtx.ctrl.listCtrl.checkList || listViewCtx.ctrl.listCtrl.checkList.count == 0">
         <ng-include src="'modules/biospecimen/participant/more-menu.html'"></ng-include>
       </span>
+
+      <button class="default" ng-click="switchToNewUi()" ng-show="listViewCtx.enableBetaFeatures">
+        <span>Switch to New UI (Beta)</span>
+      </button>
     </div>
 
     <div class="right">
