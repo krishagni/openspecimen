@@ -3235,7 +3235,7 @@
         "max_audit_report_period": "Audit Report Period",
         "max_audit_report_period_desc": "Maximum period, in number of days, for which the audit reports can be generated. When not specified, the period of 90 days is used.",
         "enable_beta_features": "Beta Features",
-        "enable_beta_features": "Enable to try out the beta features, if any, shipped with the build."
+        "enable_beta_features_desc": "Enable to try out the beta features, if any, shipped with the build."
       },
 
       "email": {
