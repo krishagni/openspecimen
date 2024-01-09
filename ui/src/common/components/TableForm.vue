@@ -196,7 +196,7 @@ export default {
     },
 
     fields: function() {
-      console.log('Compute the fields to display in the table form...");
+      console.log("Compute the fields to display in the table form...");
 
       let result = [];
       for (let field of this.schema.columns) {
