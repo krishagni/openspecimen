@@ -17,7 +17,8 @@
           <tr v-for="(sfRowData, sfRdIdx) of inputValue" :key="sfRdIdx">
             <td v-for="(field, cidx) of sfFields" :key="cidx">
               <component :ref="'osField-' + cidx" :is="field.component" v-bind="field" v-model="sfRowData[field.name]"
-                :context="{...sfRowData}" @update:model-value="handleInput(sfRowData, sfRdIdx, field)">
+                :form="{...sfRowData}" :context="{...sfRowData}"
+                @update:model-value="handleInput(sfRowData, sfRdIdx, field)">
               </component>
               <div v-if="v$.inputValue[sfRdIdx][field.name] && v$.inputValue[sfRdIdx][field.name].$error">
                 <os-inline-message>{{errorMessages[sfRdIdx][field.name]}}</os-inline-message>

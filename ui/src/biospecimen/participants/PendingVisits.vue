@@ -31,12 +31,12 @@ export default {
   },
 
   created() {
-    this.cpViewCtx.value.getPendingVisitsTabFields().then(tabFields => this.tabFields = tabFields);
+    this.cpViewCtx.getPendingVisitsTabFields().then(tabFields => this.tabFields = tabFields);
   },
 
   computed: {
     cpId: function() {
-      return this.cpViewCtx.value.cpId;
+      return this.cpViewCtx.cpId;
     },
 
     pendingVisits: function() {

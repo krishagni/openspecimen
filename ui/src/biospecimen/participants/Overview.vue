@@ -109,7 +109,7 @@ export default {
 
   async created() {
     this._setupCpr();
-    this.ctx.dict = await this.cpViewCtx.value.getCprDict();
+    this.ctx.dict = await this.cpViewCtx.getCprDict();
   },
 
   computed: {

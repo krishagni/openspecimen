@@ -38,7 +38,7 @@ export default {
   },
 
   created() {
-    this.cpViewCtx.value.getOccurredVisitsTabFields().then(tabFields => this.tabFields = tabFields);
+    this.cpViewCtx.getOccurredVisitsTabFields().then(tabFields => this.tabFields = tabFields);
   },
 
   computed: {

@@ -52,7 +52,7 @@ export default {
 
   async created() {
     this._setupSpecimen();
-    this.ctx.dict = await this.cpViewCtx.value.getSpecimenDict();
+    this.ctx.dict = await this.cpViewCtx.getSpecimenDict();
   },
 
   watch: {
@@ -65,7 +65,7 @@ export default {
 
   methods: {
     _setupSpecimen: function() {
-      this.cpViewCtx.value.getCp().then(cp => this.ctx.cp = cp);
+      this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
 
       const specimen = this.ctx.specimen = this.specimen;
       if (specimen.id > 0) {

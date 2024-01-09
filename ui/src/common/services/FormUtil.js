@@ -105,6 +105,11 @@ class FormUtil {
           result.optionsPerRow = result.optionsPerRow || 5;
         }
 
+        const ls = result.listSource;
+        if (ls && ls.queryParams) {
+          ls.searchProp = ls.queryParams.search;
+        }
+
         if (typeof result.showIf == 'string') {
           result.showWhen = result.showIf;
         } else if (result.showIf && typeof result.showIf == 'object') {

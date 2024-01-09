@@ -55,7 +55,7 @@ export default {
   async created() {
     this._setupVisit();
     this._loadSpecimens();
-    this.ctx.dict = await this.cpViewCtx.value.getVisitDict();
+    this.ctx.dict = await this.cpViewCtx.getVisitDict();
   },
 
   watch: {
@@ -69,7 +69,7 @@ export default {
 
   methods: {
     _setupVisit: function() {
-      this.cpViewCtx.value.getCp().then(cp => this.ctx.cp = cp);
+      this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
 
       const visit = this.ctx.visit = this.visit;
       if (visit.id > 0) {

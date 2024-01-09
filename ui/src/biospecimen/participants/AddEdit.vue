@@ -52,7 +52,7 @@ export default {
 
     formUtil.createCustomFieldsMap(copy.participant);
 
-    this.cpViewCtx.value.getCp().then(
+    this.cpViewCtx.getCp().then(
       cp => {
         this.dataCtx.cp = cp;
         this.ctx.bcrumb[0].label = cp.shortTitle;
@@ -79,8 +79,8 @@ export default {
     const cpr = this.dataCtx.cpr;
     const p = cpr.participant;
 
-    const dictQ   = this.cpViewCtx.value.getCprDict();
-    const layoutQ = this.cpViewCtx.value.getCprAddEditLayout();
+    const dictQ   = this.cpViewCtx.getCprDict();
+    const layoutQ = this.cpViewCtx.getCprAddEditLayout();
     Promise.all([dictQ, layoutQ]).then(
       (answers) => {
         this.ctx.addEditFs = formUtil.getFormSchema(answers[0], answers[1]);

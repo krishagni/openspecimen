@@ -170,13 +170,31 @@ export default {
       let cache = (this.form || this.context || {})._formCache || {};
       cache = cache['dropdown'] = cache['dropdown'] || {};
 
-      const qs = util.queryString(Object.assign({url: this.listSource.apiUrl}, params || {}));
+      const url = this.extrapolateUrl(this.listSource.apiUrl);
+      const qs = util.queryString(Object.assign({url}, params || {}));
       let promise = cache[qs];
       if (!promise) {
-        promise = cache[qs] = http.get(this.listSource.apiUrl, params);
+        promise = cache[qs] = http.get(url, params);
       }
 
       return promise.then(options => options);
+    },
+
+    extrapolateUrl(url) {
+      const regex = /{{(.*?)}}/g;
+      const matches = [...url.matchAll(regex)];
+
+      let result = '';
+      let lastMatchIdx = 0;
+      let skip = 0;
+      for (let match of matches) {
+        result += "'" + url.substring(lastMatchIdx + skip, match.index) + "' + " + match[1] + " + ";
+        lastMatchIdx = match.index;
+        skip = match[0].length;
+      }
+
+      result += "'" + url.substring(lastMatchIdx + skip) + "'";
+      return exprUtil.eval(this.form, result);
     },
 
     dedup(options) {
