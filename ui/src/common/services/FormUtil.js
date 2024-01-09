@@ -126,7 +126,7 @@ class FormUtil {
         }
 
         result.showInOverviewWhen = result.showInOverviewIf == 'useShowIf' ? result.showWhen : result.showInOverviewIf;
-        if (!result.optional) {
+        if (result.optional == false) {
           result.validations = {required: {message: result.label + ' is mandatory'}};
         }
 
