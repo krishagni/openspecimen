@@ -833,12 +833,14 @@
 
   "participants": {
     "add_participant": "Add Participant",
+    "add_specimen": "Add Specimen",
     "add_to_another": "Add to Another",
     "anonymize": "Anonymize",
     "anonymized_successfully": "Successfully erased participant PHI data",
     "birth_date": "Birth Date",
     "collect": "Collect",
     "collect_pending_specimens": "Collect Pending Specimens",
+    "collect_specimens": "Collect Specimens",
     "collect_unplanned_specimens": "Collect Unplanned Specimens",
     "collection_protocols": "Collection Protocols",
     "cp": "Collection Protocol",

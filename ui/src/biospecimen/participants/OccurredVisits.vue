@@ -120,7 +120,8 @@ export default {
           inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
-        const opts = {inputType: 'visit', params: {repeatVisit: true, returnOnExit: 'current_view'}};
+        const params = {repeatVisit: true, ...this._getBatchParams(visit, this._getVisitDescription(visit))};
+        const opts = {inputType: 'visit', params};
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);
       } else {
@@ -144,7 +145,7 @@ export default {
           inputItem.cpe = {id: visit.eventId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
-        const opts = {params: {returnOnExit: 'current_view'}};
+        const opts = {params: this._getBatchParams(visit, this.$t('participants.collect_specimens'))};
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);
       } else {
@@ -165,7 +166,16 @@ export default {
           visit: {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle}
         };
 
-        const opts = {inputType: 'visit', params: {returnOnExit: 'current_view'}};
+        const params = this._getBatchParams(visit, this.$t('participants.add_specimen'));
+        params['breadcrumb-3'] = JSON.stringify({
+          label: this._getVisitDescription(visit),
+          route: {
+            name: 'ParticipantsListItemVisitDetail.Overview',
+            params: {cpId: visit.cpId, cprId: visit.cprId, visitId: visit.id}
+          }
+        });
+
+        const opts = {inputType: 'visit', params};
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);
       } else {
@@ -190,6 +200,33 @@ export default {
     _getCollectUnplannedSpmnsWf(visit) {
       return cpSvc.getWorkflowProperty(visit.cpId, 'common', 'collectUnplannedSpecimensWf');
     },
+
+    _getVisitDescription(visit) {
+      let description = visit.description || 'Unknown';
+      let idx = description.indexOf(' / ');
+      if (idx >= 0) {
+        description = description.substring(0, idx);
+      }
+
+      return description;
+    },
+
+    _getBatchParams(visit, title) {
+      return {
+        returnOnExit: 'current_view',
+        cpId: visit.cpId,
+        'breadcrumb-1': JSON.stringify({
+          label: visit.cpShortTitle,
+          route: {name: 'ParticipantsList', params: {cpId: visit.cpId, cprId: -1}}
+        }),
+        'breadcrumb-2': JSON.stringify({
+          label: visit.ppid,
+          route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: visit.cpId, cprId: visit.cprId}}
+        }),
+        batchTitle: title,
+        showOptions: false
+      };
+    }
   }
 } 
 </script>

@@ -63,7 +63,29 @@ export default {
           inputItem.cpe = {id: visit.eventId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
-        const opts = {params: {returnOnExit: 'current_view'}};
+        let description = visit.description || 'Unknown';
+        let dateIdx = description.indexOf(' / ');
+        if (dateIdx >= 0) {
+          description = visit.description.substring(0, dateIdx);
+        }
+
+        const opts = {
+          params: {
+            returnOnExit: 'current_view',
+            cpId: visit.cpId,
+            'breadcrumb-1': JSON.stringify({
+              label: visit.cpShortTitle,
+              route: {name: 'ParticipantsList', params: {cpId: visit.cpId, cprId: -1}}
+            }),
+            'breadcrumb-2': JSON.stringify({
+              label: visit.ppid,
+              route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: visit.cpId, cprId: visit.cprId}}
+            }),
+            batchTitle: description,
+            showOptions: false
+          }
+        }
+
         if (visit.id > 0) {
           opts.inputType = 'visit';
           inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};

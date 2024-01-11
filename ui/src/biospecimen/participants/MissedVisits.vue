@@ -92,7 +92,8 @@ export default {
           inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
-        const opts = {inputType: 'visit', params: {repeatVisit: true, returnOnExit: 'current_view'}};
+        const params = this._getBatchParams(visit, this._getVisitDescription(visit));
+        const opts = {inputType: 'visit', params: {repeatVisit: true, ...params}};
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);
       } else {
@@ -102,6 +103,33 @@ export default {
 
     _getCollectVisitsWf(visit) {
       return cpSvc.getWorkflowProperty(visit.cpId, 'common', 'collectVisitsWf');
+    },
+
+    _getVisitDescription(visit) {
+      let description = visit.description || 'Unknown';
+      let idx = description.indexOf(' / ');
+      if (idx >= 0) {
+        description = description.substring(0, idx);
+      }
+
+      return description;
+    },
+
+    _getBatchParams(visit, title) {
+      return {
+        returnOnExit: 'current_view',
+        cpId: visit.cpId,
+        'breadcrumb-1': JSON.stringify({
+          label: visit.cpShortTitle,
+          route: {name: 'ParticipantsList', params: {cpId: visit.cpId, cprId: -1}}
+        }),
+        'breadcrumb-2': JSON.stringify({
+          label: visit.ppid,
+          route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: visit.cpId, cprId: visit.cprId}}
+        }),
+        batchTitle: title,
+        showOptions: false
+      };
     }
   }
 }
