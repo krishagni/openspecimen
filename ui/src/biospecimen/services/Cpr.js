@@ -16,6 +16,20 @@ class CollectionProtocolRegistration {
     return http.get('collection-protocol-registrations/' + cprId);
   }
 
+  async getMatchingParticipants(cpr) {
+    cpr = cpr || {};
+    const participant = cpr.participant || {};
+    return http.post('participants/match', participant).then(
+      (matches) => {
+        if (!participant.id) {
+          return matches;
+        }
+
+        return matches.filter(match => match.participant.id != participant.id);
+      }
+    );
+  }
+
   async saveOrUpdate(cpr) {
     if (cpr.id > 0) {
       return http.put('collection-protocol-registrations/' + cpr.id, cpr);
@@ -122,6 +136,14 @@ class CollectionProtocolRegistration {
         return formSvc.getDefinition(resp.formId);
       }
     );
+  }
+
+  getDefaultLookupFields(fields) {
+    const defFields = [
+      'cpr.participant.empi', 'cpr.participant.uid', 'cpr.participant.pmis',
+      'cpr.participant.lastName', 'cpr.participant.birthDate'
+    ];
+    return fields.filter(field => defFields.indexOf(field.name) >= 0);
   }
 
   getFormattedTitle(cpr) {

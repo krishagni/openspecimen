@@ -25,10 +25,15 @@ export default {
     return {
       listSource: {
         loadFn: async (opts) => {
+          let pvAttr = this.attribute;
+          if (pvAttr == 'vital-status') {
+            pvAttr = 'vital_status';
+          }
+
           let queryParams = Object.assign(
             {
               searchString: opts.query || '',
-              attribute: this.attribute,
+              attribute: pvAttr,
               includeOnlyLeafValue: this.leafValue == true
             },
             opts || {maxResults: 100}

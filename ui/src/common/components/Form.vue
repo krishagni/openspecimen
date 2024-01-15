@@ -1,6 +1,6 @@
 
 <template>
-  <form novalidate>
+  <form novalidate ref="dataEntryForm">
     <div class="row" v-if="$slots.message && $slots.message().length > 0">
       <div class="field">
         <slot name="message"></slot>
@@ -234,6 +234,21 @@ export default {
        }
 
        return state;
+     },
+
+     scrollToTop() {
+       const that = this;
+       setTimeout(
+         () => {
+           let el = that.$refs.dataEntryForm;
+           if (el instanceof Array) {
+             el = el[0];
+           }
+
+           if (el) {
+             el.scrollIntoView({block: 'start', behaviour: 'smooth'});
+           }
+         }, 500);
      }
    },
 

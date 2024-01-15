@@ -3,6 +3,10 @@ import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc from '@/biospecimen/services/Cpr.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
+import settingSvc from '@/common/services/Setting.js';
+import util from '@/common/services/Util.js';
+
+import matchingTab from '@/biospecimen/schemas/participants/matching-participants.js';
 
 export default class CpViewContext {
   cpId = null;
@@ -39,6 +43,20 @@ export default class CpViewContext {
 
   getCprAddEditLayout() {
     return this.getCprDict().then(dict => cprSvc.getLayout(this.cpId, dict));
+  }
+
+  isTwoStepEnabled() {
+    return settingSvc.getSetting('biospecimen', 'two_step_patient_reg')
+      .then(settings => util.isTrue(settings[0].value));
+  }
+
+  isAddPatientOnLookupFailEnabled() {
+    return settingSvc.getSetting('biospecimen', 'add_patient_on_lookup_fail')
+      .then(settings => util.isTrue(settings[0].value));
+  }
+
+  async getSelectMatchTabSchema() {
+    return matchingTab;
   }
 
   getVisitDict() {
