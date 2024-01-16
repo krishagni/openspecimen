@@ -1,5 +1,6 @@
 
 import http from '@/common/services/HttpClient.js';
+import i18n from '@/common/services/I18n.js';
 
 class CollectionProtocol {
 
@@ -24,8 +25,31 @@ class CollectionProtocol {
     return http.get('collection-protocols/byop', filterOpts || {});
   }
 
+  async getCpes(cpId) {
+    return http.get('collection-protocol-events', {cpId});
+  }
+
   async getCpe(eventId) {
     return http.get('collection-protocol-events/' + eventId);
+  }
+
+  getEventDescription(event) {
+    let result = '';
+    if (event.eventLabel) {
+      if (event.eventPoint != null && event.eventPoint != undefined) {
+        result += ((event.eventPoint < 0) ? '-' : '') + 'T' + Math.abs(event.eventPoint);
+        result += event.eventPointUnit.charAt(0) + ': ';
+      }
+
+      result += event.eventLabel;
+      if (event.eventCode || event.code) {
+        result += ' (' + (event.eventCode || event.code) + ')';
+      }
+    } else {
+      result = i18n.msg('visits.unplanned_visit');
+    }
+
+    return result;
   }
 
   async getWorkflow(cpId, wfName) {

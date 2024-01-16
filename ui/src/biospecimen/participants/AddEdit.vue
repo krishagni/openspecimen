@@ -60,7 +60,13 @@
 
         <div>
           <os-button primary :label="$t(!dataCtx.cpr.id ? 'participants.add_participant' : 'common.buttons.update')"
-            @click="saveOrUpdate" />
+            @click="saveOrUpdate()" />
+
+          <os-button primary :label="$t('participants.proceed_to_collection')" @click="saveOrUpdate(cpEvents[0])"
+            v-if="!dataCtx.cpr.id && cpEvents.length == 1" />
+
+          <os-menu primary :label="$t('participants.proceed_to_collection')"
+            :options="cpEventOptions" v-else-if="!dataCtx.cpr.id && cpEvents.length > 1" />
 
           <os-button text :label="$t('common.buttons.back')" @click="back" v-if="ctx.history.length > 0" />
 
@@ -84,6 +90,7 @@
 
 <script>
 
+import cpSvc      from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc     from '@/biospecimen/services/Cpr.js';
 
 import alertsSvc  from '@/common/services/Alerts.js';
@@ -154,13 +161,19 @@ export default {
     const cpr = this.dataCtx.cpr;
     const p = cpr.participant || {};
 
-    const dictQ            = this.cpViewCtx.getCprDict();
-    const layoutQ          = this.cpViewCtx.getCprAddEditLayout();
-    const twoStepQ         = this.cpViewCtx.isTwoStepEnabled();
-    const addOnLookupFailQ = this.cpViewCtx.isAddPatientOnLookupFailEnabled();
-    const lockedFieldsQ    = this.cpViewCtx.getLockedParticipantFields(p.source);
-    Promise.all([dictQ, layoutQ, twoStepQ, addOnLookupFailQ, lockedFieldsQ]).then(
-      ([fields, layout, twoStep, addOnLookupFail, lockedFields]) => {
+    const cpCtx = this.cpViewCtx;
+    const promises = [
+      cpCtx.getCprDict(),
+      cpCtx.getCprAddEditLayout(),
+      cpCtx.isTwoStepEnabled(),
+      cpCtx.isAddPatientOnLookupFailEnabled(),
+      cpCtx.getLockedParticipantFields(p.source),
+      cpCtx.getCpEvents(),
+      cpCtx.getAnticipatedEventsRules()
+    ];
+
+    Promise.all(promises).then(
+      ([fields, layout, twoStep, addOnLookupFail, lockedFields, cpEvents, eventsRules]) => {
         this.ctx.addEditFs = formUtil.getFormSchema(fields, layout);
         this.ctx.twoStep = twoStep;
         this.ctx.addPatientOnLookupFail = addOnLookupFail;
@@ -173,6 +186,9 @@ export default {
 
         this.ctx.lookupFields = lookupFields;
         this.ctx.lookupFs = {rows: lookupFields.map(field => ({ fields: [field] }))};
+
+        this.ctx.allCpEvents = cpEvents;
+        this.ctx.eventsRules = eventsRules;
       }
     );
 
@@ -203,6 +219,18 @@ export default {
       }
 
       return 'none';
+    },
+
+    cpEvents: function() {
+      const {allCpEvents, eventsRules} = this.ctx;
+      const allowedEvents = cprSvc.getAllowedEvents(this.dataCtx.cpr, eventsRules);
+      return (allCpEvents || [])
+        .filter(cpEvent => !allowedEvents || !cpEvent.code || allowedEvents.indexOf(cpEvent.code) >= 0);
+    },
+
+    cpEventOptions: function() {
+      return (this.cpEvents || [])
+        .map(event => ({caption: cpSvc.getEventDescription(event), onSelect: () => this.saveOrUpdate(event)}));
     }
   },
 
@@ -253,12 +281,13 @@ export default {
       this._useSelectedMatch(this.ctx.selectedMatch);
     },
 
-    saveOrUpdate: function() {
+    saveOrUpdate: function(cpEvent) {
       if (!this.$refs.cprForm.validate()) {
         return;
       }
 
       const {cpr} = this.dataCtx;
+      this.ctx.selectedEvent = cpEvent;
       if (this.ctx.step == 'lookup') {
         cprSvc.getMatchingParticipants(cpr).then(
           matches => this._handleParticipantMatches(matches, {step: 'lookup', data: util.clone(cpr)})
@@ -311,16 +340,7 @@ export default {
     _saveOrUpdate: function(cpr) {
       const toSave = util.clone(cpr);
       toSave.participant.source = 'OpenSpecimen';
-
-      cprSvc.saveOrUpdate(toSave).then(
-        ({id, cpId, activityStatus}) => {
-          if (activityStatus == 'Active') {
-            routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId, cprId: id})
-          } else {
-            routerSvc.goto('ParticipantsList', {cpId, cprId: -1});
-          }
-        }
-      );
+      cprSvc.saveOrUpdate(toSave).then(savedCpr => this._navToNextView(savedCpr));
     },
 
     _handleParticipantMatches(matches, action) {
@@ -452,6 +472,60 @@ export default {
       }
 
       this.cpViewCtx.getSelectMatchTabSchema().then(schema => this.ctx.selectMatchTs = schema);
+    },
+
+    _navToNextView: function(savedCpr) {
+      if (savedCpr.activityStatus == 'Active') {
+        if (!this.ctx.selectedEvent || !this.ctx.selectedEvent.id) {
+          routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId: savedCpr.cpId, cprId: savedCpr.id})
+        } else {
+          this._navToCollectionWf(savedCpr);
+        }
+      } else {
+        routerSvc.goto('ParticipantsList', {cpId: savedCpr.cpId, cprId: -1});
+      }
+    },
+
+    _navToCollectionWf: async function(cpr) {
+      const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
+      if (wfInstanceSvc) {
+        let wfName = await cpSvc.getWorkflowProperty(cpr.cpId, 'common', 'collectVisitsWf');
+        if (!wfName) {
+          wfName = 'sys-collect-visits';
+        }
+
+        const cpe = this.ctx.selectedEvent;
+        let inputItem = {cpr, cpe};
+        const opts = {
+          params: {
+            returnOnExit: JSON.stringify({
+              name: 'ParticipantsListItemDetail.Overview',
+              params: {cpId: cpr.cpId, cprId: cpr.id}
+            }),
+            cpId: cpr.cpId,
+            'breadcrumb-1': JSON.stringify({
+              label: cpr.cpShortTitle,
+              route: {name: 'ParticipantsList', params: {cpId: cpr.cpId, cprId: -1}}
+            }),
+            'breadcrumb-2': JSON.stringify({
+              label: cpr.ppid,
+              route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: cpr.cpId, cprId: cpr.id}}
+            }),
+            batchTitle: cpSvc.getEventDescription(cpe),
+            showOptions: false
+          }
+        }
+
+        /*if (visit.id > 0) {
+          opts.inputType = 'visit';
+          inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
+        }*/
+
+        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
+        wfInstanceSvc.gotoInstance(instance.id);
+      } else {
+        routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId: cpr.cpId, cprId: cpr.id})
+      }
     }
   }
 }

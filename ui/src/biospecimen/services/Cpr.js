@@ -1,5 +1,6 @@
 
 import cpSvc    from '@/biospecimen/services/CollectionProtocol.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 import formSvc  from '@/forms/services/Form.js';
 import formUtil from '@/common/services/FormUtil.js';
 import http     from '@/common/services/HttpClient.js';
@@ -174,7 +175,36 @@ class CollectionProtocolRegistration {
     name = cpr.ppid + (name ? ' (' + name + ')' : '');
     return name;
   }
+
+  getAllowedEvents(cpr, anticipatedEvents) {
+    if (!anticipatedEvents) {
+      return null;
+    }
+
+    const {rules, matchType} = anticipatedEvents;
+    if (!rules || rules.length == 0) {
+      return null;
+    }
+
+    let result = null;
+    for (let spec of anticipatedEvents.rules) {
+      if (!spec.rule || spec.rule == 'any' || spec.rule == '*' || exprUtil.eval({cpr}, spec.rule)) {
+        result = result || [];
+        if (matchType == 'any') {
+          result = spec.events;
+          break;
+        } else if (matchType == 'all') {
+          for (let event of spec.events) {
+            if (result.indexOf(event) == -1) {
+              result.push(event);
+            }
+          }
+        }
+      }
+    }
+
+    return result;
+  }
 }
 
 export default new CollectionProtocolRegistration();
-

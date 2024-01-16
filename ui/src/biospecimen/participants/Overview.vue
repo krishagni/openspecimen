@@ -212,10 +212,23 @@ export default {
         deleteObj: (reason) => cprSvc.deleteCpr(cpr.id, true, reason)
       };
 
-      visitSvc.getVisits(this.cpr).then(
-        visits => {
-          this.ctx.visits = visits
-          for (let visit of visits) {
+      const eventRulesQ = this.cpViewCtx.getAnticipatedEventsRules();
+      const visitsQ = visitSvc.getVisits(this.cpr);
+      Promise.all([eventRulesQ, visitsQ]).then(
+        ([eventRules, visits]) => {
+          const allowedEvents = cprSvc.getAllowedEvents(this.ctx.cpr, eventRules);
+          this.ctx.visits = (visits || [])
+            .filter(
+              visit => {
+                if (visit.status && visit.status != 'Pending') {
+                  return true;
+                }
+
+                return !allowedEvents || !visit.eventCode || allowedEvents.indexOf(visit.eventCode) != -1;
+              }
+            );
+
+          for (let visit of this.ctx.visits) {
             formUtil.createCustomFieldsMap(visit, true);
           }
         }

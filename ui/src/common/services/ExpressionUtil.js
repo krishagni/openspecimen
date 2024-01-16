@@ -68,6 +68,11 @@ class ExpressionUtil {
       return 'this.fd(\'' + exprTree.name + '\')';
     } else if (exprTree.type == 'Literal') {
       return exprTree.raw;
+    } else if (exprTree.type == 'CallExpression') {
+      let object = this.decorate(exprTree.callee.object);
+      let method = exprTree.callee.property.name;
+      let args = (exprTree.arguments || []).map(arg => this.decorate(arg)).join(', ');
+      return '(' + object + ')?.' + method + '(' + args + ')';
     } else {
       console.log(exprTree);
       console.log('Could not identify the expression type: ' + exprTree.type + ', ' + JSON.stringify(exprTree));

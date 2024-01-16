@@ -2,7 +2,8 @@
 <template>
   <os-button :left-icon="icon"
     :label="label" :no-outline="noOutline"
-    :right-icon="label ? 'caret-down' : ''" @click="toggle" />
+    :right-icon="label ? 'caret-down' : ''"
+    v-bind="$attrs" @click="toggle" />
 
   <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
     <template #item="{item}">

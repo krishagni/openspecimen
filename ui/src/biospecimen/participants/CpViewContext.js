@@ -33,6 +33,15 @@ export default class CpViewContext {
     return this.cpQ;
   }
 
+  getCpEvents() {
+    if (!this.cpEventsQ) {
+      this.cpEventsQ = cpSvc.getCpes(this.cpId)
+        .then(events => events.filter(event => event.activityStatus == 'Active'));
+    }
+
+    return this.cpEventsQ;
+  }
+
   getCprDict() {
     if (!this.cprDictQ) {
       this.cprDictQ = cprSvc.getDict(this.cpId);
@@ -128,6 +137,21 @@ export default class CpViewContext {
         }
 
         return tabFields;
+      }
+    );
+  }
+
+  getAnticipatedEventsRules() {
+    return this.getVisitsTab().then(
+      (visitsTab) => {
+        const anticipatedEvents = {rules: [], matchType: 'any'};
+        if (visitsTab.anticipatedEvents instanceof Array) {
+          anticipatedEvents.rules = visitsTab.anticipatedEvents;
+        } else if (typeof visitsTab.anticipatedEvents == 'object') {
+          Object.assign(anticipatedEvents, visitsTab.anticipatedEvents);
+        }
+
+        return anticipatedEvents;
       }
     );
   }
