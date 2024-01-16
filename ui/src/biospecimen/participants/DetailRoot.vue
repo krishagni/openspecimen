@@ -21,7 +21,7 @@ export default {
       cpr.value = await cprSvc.getCpr(props.cprId);
       formUtil.createCustomFieldsMap(cpr.value.participant, true);
     } else {
-      cpr.value = {participant: {pmis: []}}
+      cpr.value = {participant: {pmis: [], source: 'OpenSpecimen'}}
     }
     
     return { cpr };

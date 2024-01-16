@@ -58,7 +58,7 @@ import i18n         from '@/common/services/I18n.js';
 import util         from '@/common/services/Util.js';
 
 export default {
-   props: ['schema', 'data'],
+   props: ['schema', 'data', 'disabled-fields'],
 
    emits: ['input', 'form-validity'],
 
@@ -286,6 +286,10 @@ export default {
 
            if (field.disableWhen) {
              field.disabled = exprUtil.eval(this, field.disableWhen);
+           }
+
+           if (!field.disabled && this.disabledFields instanceof Array) {
+             field.disabled = this.disabledFields.indexOf(field.name) >= 0;
            }
 
            const fv = field.validations;

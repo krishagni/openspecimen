@@ -2,11 +2,11 @@
 <template>
   <div v-if="!inputValue">
     <FileUpload ref="uploader" mode="basic" name="file" :auto="auto != false" :url="url" :tabindex="tabOrder"
-      @before-send="addHeaders" @upload="onUpload" @error="onError" />
+      :disabled="disabled" @before-send="addHeaders" @upload="onUpload" @error="onError" />
   </div>
   <div v-else class="os-selected-file">
     <span class="filename">{{inputValue.filename}}</span>
-    <Button left-icon="times" @click="removeFile"/>
+    <Button left-icon="times" :disabled="disabled" @click="removeFile"/>
   </div>
 </template>
 
@@ -18,7 +18,7 @@ import Button from '@/common/components/Button.vue';
 import alertSvc from '@/common/services/Alerts.js';
 
 export default {
-  props: ['name', 'url', 'modelValue', 'headers', 'auto', 'tabOrder'],
+  props: ['name', 'url', 'modelValue', 'headers', 'auto', 'tabOrder', 'disabled'],
 
   components: {
     Button,

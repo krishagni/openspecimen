@@ -48,7 +48,8 @@
         </os-table-form>
       </div>
 
-      <os-form ref="cprForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)" v-else>
+      <os-form ref="cprForm" :schema="ctx.addEditFs" :disabled-fields="ctx.lockedFields"
+        :data="dataCtx" @input="handleInput($event)" v-else>
         <template #message v-if="ctx.autoSelectedMatch">
           <os-message type="info">
             <span v-t="{path: 'participants.following_match_found', args: {cps: autoSelectedMatchCps}}">
@@ -97,7 +98,7 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
-    const copy = util.clone(this.cpr || {});
+    const copy = this.cpr ? util.clone(this.cpr) : {participant: {pmis: [], source: 'OpenSpecimen'}};
     if (!copy.id) {
       copy.registrationDate = new Date();
     }
@@ -142,6 +143,8 @@ export default {
 
         matches: [],
 
+        lockedFields: [],
+
         bcrumb: [{url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: ''}]
       }
     };
@@ -149,17 +152,19 @@ export default {
 
   created() {
     const cpr = this.dataCtx.cpr;
-    const p = cpr.participant;
+    const p = cpr.participant || {};
 
     const dictQ            = this.cpViewCtx.getCprDict();
     const layoutQ          = this.cpViewCtx.getCprAddEditLayout();
     const twoStepQ         = this.cpViewCtx.isTwoStepEnabled();
     const addOnLookupFailQ = this.cpViewCtx.isAddPatientOnLookupFailEnabled();
-    Promise.all([dictQ, layoutQ, twoStepQ, addOnLookupFailQ]).then(
-      ([fields, layout, twoStep, addOnLookupFail]) => {
+    const lockedFieldsQ    = this.cpViewCtx.getLockedParticipantFields(p.source);
+    Promise.all([dictQ, layoutQ, twoStepQ, addOnLookupFailQ, lockedFieldsQ]).then(
+      ([fields, layout, twoStep, addOnLookupFail, lockedFields]) => {
         this.ctx.addEditFs = formUtil.getFormSchema(fields, layout);
         this.ctx.twoStep = twoStep;
         this.ctx.addPatientOnLookupFail = addOnLookupFail;
+        this.ctx.lockedFields = lockedFields;
 
         let lookupFields = fields.filter(field => field.lookupParticipant == true);
         if (lookupFields.length == 0 && twoStep) {
@@ -304,7 +309,10 @@ export default {
     },
 
     _saveOrUpdate: function(cpr) {
-      cprSvc.saveOrUpdate(cpr).then(
+      const toSave = util.clone(cpr);
+      toSave.participant.source = 'OpenSpecimen';
+
+      cprSvc.saveOrUpdate(toSave).then(
         ({id, cpId, activityStatus}) => {
           if (activityStatus == 'Active') {
             routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId, cprId: id})
@@ -334,6 +342,7 @@ export default {
       );
 
       if (!matches || matches.length == 0) {
+        // no matches found
         if (this.dataCtx.cpr.id > 0) {
           // editing an existing participant, save the participant
           this._saveOrUpdate(this.dataCtx.cpr);
@@ -349,13 +358,16 @@ export default {
           }
         }
       } else if (this._isAutoSelect(matches)) {
+        // match is auto selected
         const {cpr} = this.dataCtx;
         const participant = ctx.autoSelectedMatch = matches[0].participant;
-        this._copyParticipantDetails(cpr, participant);
         if (ctx.twoStep) {
+          // 2 step registration
           const cpId = cpr.cpId;
           for (let regCp of (participant.registeredCps || [])) {
             if (regCp.cpId == cpId) {
+              // auto selected match is of the same CP as the current one
+              // navigate to the participant overview page
               routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId, cprId: regCp.cprId});
               return;
             }
@@ -365,6 +377,7 @@ export default {
         this._useSelectedMatch(matches[0]);
         this.ctx.history.unshift(action);
       } else {
+        // multiple matches or a single match that cannot be auto selected
         this.ctx.step = 'choose_match';
         this._loadSelectMatchTabSchema();
         this.ctx.history.unshift(action);
@@ -405,6 +418,7 @@ export default {
         formUtil.createCustomFieldsMap(dbCpr.participant);
       }
 
+      this.ctx.lockedFields = await this.cpViewCtx.getLockedParticipantFields(cpr.participant.source);
       this.ctx.step = 'register';
       setTimeout(() => this.$refs.cprForm.scrollToTop(), 500);
     },

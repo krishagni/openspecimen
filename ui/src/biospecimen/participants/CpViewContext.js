@@ -55,6 +55,10 @@ export default class CpViewContext {
       .then(settings => util.isTrue(settings[0].value));
   }
 
+  async getLockedParticipantFields(source) {
+    return cpSvc.getLockedFields(-1, 'participant', source);
+  }
+
   async getSelectMatchTabSchema() {
     return matchingTab;
   }

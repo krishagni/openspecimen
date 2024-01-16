@@ -3,12 +3,14 @@
   <div class="os-input-number" tabindex="-1">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <InputNumber v-model="inputValue" :mode="'decimal'" :tabindex="tabOrder"
-        :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits" @input="handleInput" />
+        :input-props="{disabled}" :minFractionDigits="maxFractionDigits"
+        :maxFractionDigits="maxFractionDigits" @input="handleInput" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
       <InputNumber v-model="inputValue" :placeholder="$attrs.placeholder" :tabindex="tabOrder"
-        :mode="'decimal'" :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits" />
+        :mode="'decimal'" :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits"
+        :input-props="{disabled}" />
     </div>
   </div>
 </template>
@@ -17,7 +19,7 @@
 import InputNumber from 'primevue/inputnumber';
 
 export default {
-  props: ['modelValue', 'maxFractionDigits', 'tabOrder'],
+  props: ['modelValue', 'maxFractionDigits', 'tabOrder', 'disabled'],
 
   components: {
     InputNumber

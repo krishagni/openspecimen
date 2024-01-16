@@ -84,6 +84,12 @@ class CollectionProtocol {
   async isBarcodingEnabled() {
     return http.get('collection-protocols/barcoding-enabled').then(resp => resp == true || resp == 'true');
   }
+
+  async getLockedFields(cpId, entityType, source) {
+    return this.getWorkflowProperty(cpId, 'locked-fields', entityType).then(
+      sources => sources && sources[source] instanceof Array ? sources[source] : []
+    );
+  }
 }
 
 export default new CollectionProtocol();

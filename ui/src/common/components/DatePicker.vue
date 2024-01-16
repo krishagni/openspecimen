@@ -4,13 +4,14 @@
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
-        :show-button-bar="true" :hide-on-date-time-select="true" />
+        :show-button-bar="true" :hide-on-date-time-select="true" :disabled="disabled" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
       <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
-        :show-button-bar="true" :hide-on-date-time-select="true" :placeholder="$attrs.placeholder" />
+        :show-button-bar="true" :hide-on-date-time-select="true" :placeholder="$attrs.placeholder"
+        :disabled="disabled"  />
     </div>
   </div>
 </template>
@@ -21,7 +22,7 @@ import Calendar from 'primevue/calendar';
 import utilSvc from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'showTime', 'tabOrder'],
+  props: ['modelValue', 'showTime', 'tabOrder', 'disabled'],
 
   inject: ['ui'],
 
@@ -137,5 +138,12 @@ export default {
 .os-date-picker .p-float-label :deep(.p-inputtext:not(:enabled:focus) ~ label) {
   color: #999;
   opacity: 1;
+}
+</style>
+
+<style>
+.p-calendar-disabled input {
+  opacity: 0.65;
+  pointer-events: none;
 }
 </style>

@@ -48,7 +48,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 import i18n         from '@/common/services/I18n.js';
 
 export default {
-  props: ['modelValue', 'fields'],
+  props: ['modelValue', 'fields', 'disabled'],
 
   setup() {
     return {
@@ -105,6 +105,7 @@ export default {
           }
         }
 
+        field.disabled = (this.disabled == 'true' || this.disabled == true);
         result.push(field);
       }
 
@@ -253,4 +254,8 @@ export default {
   background: #fff;
 }
 
+.os-subform[disabled="true"] button {
+  opacity: 0.65;
+  pointer-events: none;
+}
 </style>
