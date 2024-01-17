@@ -45,6 +45,7 @@
             :selected="ctx.selectedCpr"
             :include-count="includeCount"
             url="'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/detail/overview'"
+            :newUiUrl="true"
             :newTab="false"
             @selectedRows="onParticipantSelection"
             @rowClicked="onParticipantRowClick"

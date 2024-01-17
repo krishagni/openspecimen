@@ -21,7 +21,7 @@ import http     from '@/common/services/HttpClient.js';
 import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['name', 'objectId', 'url', 'newTab', 'allowSelection', 'selected', 'query', 'autoSearchOpen'],
+  props: ['name', 'objectId', 'url', 'newUiUrl', 'newTab', 'allowSelection', 'selected', 'query', 'autoSearchOpen'],
 
   emits: ['selectedRows', 'rowClicked', 'listLoaded'],
 
@@ -171,8 +171,11 @@ export default {
               result.type = 'specimen-measure';
               result.measure = mi.measure;
               result.entity = 'hidden';
-            } else if (mi.showLink == 'true' && this.url) {
-              result.href = (row) => ui.ngServer + exprUtil.eval(row.rowObject, this.url)
+            } else if (mi.showLink == 'true') {
+              if (this.url) {
+                result.href = (row) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(row.rowObject, this.url)
+              }
+
               if (this.newTab) {
                 result.hrefTarget = '_blank';
               }
@@ -189,7 +192,7 @@ export default {
         this.schema.summary = {
           title: {
             text: (ro) => exprUtil.eval(ro, urlColumn.name),
-            url: (ro) => ui.ngServer + exprUtil.eval(ro, this.url)
+            url: (ro) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(ro, this.url)
           },
           descriptions: columns.map(column => column.name).filter((column, index) => index != urlColumnIdx)
         };
