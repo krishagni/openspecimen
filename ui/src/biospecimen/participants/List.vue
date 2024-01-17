@@ -30,6 +30,8 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
               <os-button left-icon="plus" :label="$t('participants.add_participant')" @click="addParticipant" />
+
+              <os-button left-icon="eye" :label="'View Version'" @click="viewVersion" />
             </template>
             <template #right>
               <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
@@ -215,6 +217,23 @@ export default {
 
     addParticipant: function() {
       routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
+    },
+
+    viewVersion: function() {
+      this.$osSvc.http.get(
+        'https://demo.openspecimen.org/rest/ng/config-settings/app-props',
+        {},
+        {
+          transformRequest: (data, headers) => {
+            delete headers['X-OS-API-TOKEN'];
+            return data;
+          }
+        }
+      ).then(
+        resp => {
+          alert(JSON.stringify(resp));
+        }
+      );
     },
 
     openSearch: function () {
