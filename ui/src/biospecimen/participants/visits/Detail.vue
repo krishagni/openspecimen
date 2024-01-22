@@ -1,16 +1,20 @@
 <template>
   <os-page>
-    <os-page-head :noNavButton="noNavButton">
+    <os-page-head :noNavButton="noNavButton" :showBreadcrumb="true">
       <template #breadcrumb>
-        <os-breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="bcrumb" />
       </template>
 
-      <span class="os-title">
-        <os-breadcrumb :items="ctx.bcrumb" v-if="noNavButton" />
-
+      <span class="os-title" v-if="visit">
         <h3>
           <os-visit-event-desc :visit="visit" />
         </h3>
+        <div class="accessories">
+          <os-copy-link size="small"
+            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id}}" />
+          <os-new-tab size="small"
+            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id}}" />
+        </div>
       </span>
     </os-page-head>
     <os-page-body>
@@ -47,16 +51,18 @@
 
 <script>
 
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   props: ['cpr', 'visit', 'noNavButton'],
 
+  inject: ['cpViewCtx'],
+
   data() {
     const ctx = {
-      bcrumb: [
-        // {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}, // TODO: CP conf list view
-        // {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cpr.ppid}
-      ]
+      cp: {},
     };
+
 
     return { ctx };
   },
@@ -67,6 +73,27 @@ export default {
     this.query = {};
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
+    }
+
+    this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
+  },
+
+  computed: {
+    bcrumb: function() {
+      const cp = this.ctx.cp;
+      return [
+        {
+          url: routerSvc.getUrl('ParticipantsList', {cpId: cp.id, cprId: -1}),
+          label: cp.shortTitle
+        },
+        {
+          url: routerSvc.getUrl(
+                 this.noNavButton ? 'ParticipantsListItemDetail.Overview' : 'ParticipantDetail.Overview',
+                 {cpId: cp.id, cprId: this.cpr.id}
+               ),
+          label: this.cpr.ppid
+        }
+      ];
     }
   },
 
