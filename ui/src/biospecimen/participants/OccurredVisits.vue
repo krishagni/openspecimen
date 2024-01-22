@@ -22,9 +22,10 @@
 <script>
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
-import specimenSvc from '@/biospecimen/services/Specimen.js';
 import routerSvc from '@/common/services/Router.js';
+import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util from '@/common/services/Util.js';
+import wfSvc from '@/biospecimen/services/Workflow.js';
 
 export default {
   props: ['visits'],
@@ -154,33 +155,7 @@ export default {
     },
 
     addSpecimen: async function(visit) {
-      const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
-      if (wfInstanceSvc) {
-        let wfName = await this._getCollectUnplannedSpmnsWf(visit);
-        if (!wfName) {
-          wfName = 'sys-collect-adhoc-specimens';
-        }
-
-        let inputItem = {
-          cpr: {id: visit.cprId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle},
-          visit: {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle}
-        };
-
-        const params = this._getBatchParams(visit, this.$t('participants.add_specimen'));
-        params['breadcrumb-3'] = JSON.stringify({
-          label: this._getVisitDescription(visit),
-          route: {
-            name: 'ParticipantsListItemVisitDetail.Overview',
-            params: {cpId: visit.cpId, cprId: visit.cprId, visitId: visit.id}
-          }
-        });
-
-        const opts = {inputType: 'visit', params};
-        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
-        wfInstanceSvc.gotoInstance(instance.id);
-      } else {
-        alert('Workflow module not installed!');
-      }
+      wfSvc.addSpecimen(visit);
     },
 
     printLabels: function(visit) {

@@ -2,7 +2,7 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <span> Action buttons </span>
+      <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen" />
     </template>
   </os-page-toolbar>
 
@@ -24,6 +24,7 @@
 import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
 
 import visitSvc from '@/biospecimen/services/Visit.js';
+import wfSvc    from '@/biospecimen/services/Workflow.js';
 
 export default {
   props: ['visit'],
@@ -68,6 +69,10 @@ export default {
   },
 
   methods: {
+    addSpecimen: function() {
+      wfSvc.addSpecimen(this.visit);
+    },
+
     _setupVisit: function() {
       this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
 
