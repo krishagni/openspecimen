@@ -7,6 +7,8 @@
       <os-button left-icon="print" :label="$t('participants.print_specimen_labels')" @click="printLabels" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteVisit" />
+
+      <os-plugin-views page="visit-detail" view="more-menu" />
     </template>
   </os-page-toolbar>
 
