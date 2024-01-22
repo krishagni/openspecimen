@@ -5,6 +5,8 @@
       <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen" />
 
       <os-button left-icon="print" :label="$t('participants.print_specimen_labels')" @click="printLabels" />
+
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteVisit" />
     </template>
   </os-page-toolbar>
 
@@ -18,6 +20,8 @@
     <os-grid-column width="4">
       <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.visit.id > 0" />
     </os-grid-column>
+
+    <os-delete-object ref="deleteVisitDialog" :input="ctx.deleteOpts" />
   </os-grid>
 </template>
 
@@ -25,13 +29,14 @@
 
 import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
 
+import routerSvc   from '@/common/services/Router.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util        from '@/common/services/Util.js';
 import visitSvc    from '@/biospecimen/services/Visit.js';
 import wfSvc       from '@/biospecimen/services/Workflow.js';
 
 export default {
-  props: ['visit'],
+  props: ['cpr', 'visit'],
 
   components: {
     SpecimenTree
@@ -52,7 +57,7 @@ export default {
 
         routeQuery: this.$route.query,
 
-        specimens: []
+        specimens: [],
       }
     };
   },
@@ -83,6 +88,25 @@ export default {
       specimenSvc.printLabels({visitId: this.visit.id}, outputFilename);
     },
 
+    deleteVisit: function() {
+      this.$refs.deleteVisitDialog.execute().then(
+        (resp) => {
+          if (resp != 'deleted') {
+            return;
+          }
+
+          const route = routerSvc.getCurrentRoute();
+          if (route.name.indexOf('ParticipantsListItemVisitDetail') >= 0) {
+            routerSvc.goto('ParticipantsListItemDetail.Overview', this.visit);
+          } else {
+            routerSvc.goto('ParticipantDetail.Overview', this.visit);
+          }
+
+          visitSvc.clearVisits(this.cpr);
+        }
+      );
+    },
+
     _setupVisit: function() {
       this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
 
@@ -91,6 +115,15 @@ export default {
         this.ctx.auditObjs = [
           {objectId: visit.id, objectName: 'visit'}
         ]
+
+        this.ctx.deleteOpts = {
+          type: this.$t('visits.visit'),
+          title: visit.name,
+          dependents: () => visitSvc.getDependents(visit),
+          forceDelete: true,
+          askReason: true,
+          deleteObj: (reason) => visitSvc.deleteVisit(visit.id, true, reason)
+        };
       }
     },
 

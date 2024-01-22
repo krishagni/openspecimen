@@ -27,12 +27,24 @@ class Visit {
     );
   }
 
+  clearVisits(cpr) {
+    cpr.$visitsQ = null;
+  }
+
   async getVisit(visitId) {
     return http.get('visits/' + visitId);
   }
 
+  async deleteVisit(visitId, forceDelete, reason) {
+    return http.delete('visits/' + visitId, {}, {forceDelete, reason});
+  }
+
   async getSpecimens(cprId, eventId, visitId) {
     return http.get('specimens', {cprId, eventId, visitId});
+  }
+
+  async getDependents(visit) {
+    return http.get('visits/' + visit.id + '/dependent-entities');
   }
 
   async getDict(cpId) {
