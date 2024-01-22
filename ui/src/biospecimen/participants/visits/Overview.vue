@@ -3,6 +3,8 @@
   <os-page-toolbar>
     <template #default>
       <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen" />
+
+      <os-button left-icon="print" :label="$t('participants.print_specimen_labels')" @click="printLabels" />
     </template>
   </os-page-toolbar>
 
@@ -23,8 +25,10 @@
 
 import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
 
-import visitSvc from '@/biospecimen/services/Visit.js';
-import wfSvc    from '@/biospecimen/services/Workflow.js';
+import specimenSvc from '@/biospecimen/services/Specimen.js';
+import util        from '@/common/services/Util.js';
+import visitSvc    from '@/biospecimen/services/Visit.js';
+import wfSvc       from '@/biospecimen/services/Workflow.js';
 
 export default {
   props: ['visit'],
@@ -71,6 +75,12 @@ export default {
   methods: {
     addSpecimen: function() {
       wfSvc.addSpecimen(this.visit);
+    },
+
+    printLabels: function() {
+      const ts = util.formatDate(new Date(), 'yyyyMMdd_HHmmss');
+      const outputFilename = [this.visit.cpShortTitle, this.visit.ppid, this.visit.name, ts].join('_') + '.csv';
+      specimenSvc.printLabels({visitId: this.visit.id}, outputFilename);
     },
 
     _setupVisit: function() {
