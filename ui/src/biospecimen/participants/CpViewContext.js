@@ -80,6 +80,10 @@ export default class CpViewContext {
     return this.visitDictQ;
   }
 
+  async getVisitAddEditLayout() {
+    return this.getVisitDict().then(dict => visitSvc.getLayout(this.cpId, dict));
+  }
+
   getVisitsTab() {
     if (!this.visitsTabQ) {
       this.visitsTabQ = visitSvc.getVisitsTab(this.cpId);

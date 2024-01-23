@@ -2,6 +2,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
+      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editVisit" v-if="visit.id > 0" />
+
       <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen" />
 
       <os-button left-icon="print" :label="$t('participants.print_specimen_labels')" @click="printLabels" />
@@ -80,6 +82,10 @@ export default {
   },
 
   methods: {
+    editVisit: function() {
+      routerSvc.goto('VisitAddEdit', {cpId: this.ctx.cp.id, cprId: this.cpr.id, visitId: this.visit.id});
+    },
+
     addSpecimen: function() {
       wfSvc.addSpecimen(this.visit);
     },

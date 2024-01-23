@@ -10,8 +10,9 @@
 import Dropdown from '@/common/components/Dropdown.vue';
 import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 
-import http from '@/common/services/HttpClient.js';
-import util from '@/common/services/Util.js';
+import http  from '@/common/services/HttpClient.js';
+import pvSvc from '@/common/services/PermissibleValue.js';
+import util  from '@/common/services/Util.js';
 
 export default {
   props: ['modelValue', 'selectProp', 'attribute', 'leafValue', 'context', 'multiple', 'tabOrder'],
@@ -25,11 +26,7 @@ export default {
     return {
       listSource: {
         loadFn: async (opts) => {
-          let pvAttr = this.attribute;
-          if (pvAttr == 'vital-status') {
-            pvAttr = 'vital_status';
-          }
-
+          let pvAttr = pvSvc.getAttribute(this.attribute);
           let queryParams = Object.assign(
             {
               searchString: opts.query || '',
