@@ -1,6 +1,6 @@
 
 <template>
-  <span class="os-tag">
+  <span :class="containerClass">
     <Tag :value="value" :severity="type" :rounded="rounded"></Tag>
   </span>
 </template>
@@ -13,6 +13,12 @@ export default {
 
   components: {
     Tag
+  },
+
+  computed: {
+    containerClass: function() {
+      return ['os-tag', {'os-missed-tag': this.type == 'missed' || this.type == 'Missed'}]
+    }
   }
 }
 </script>
@@ -20,6 +26,11 @@ export default {
 <style scoped>
 .os-tag :deep(.p-tag.p-tag-warning) {
   background-color: #f59e0b;
+  color: #fff;
+}
+
+.os-tag.os-missed-tag :deep(.p-tag) {
+  background-color: #888;
   color: #fff;
 }
 </style>

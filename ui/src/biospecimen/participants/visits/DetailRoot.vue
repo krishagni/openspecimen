@@ -1,6 +1,6 @@
 
 <template>
-  <router-view :cpr="cpr" :visit="visit" :key="viewKey" v-if="viewKey" />
+  <router-view :cpr="cpr" :visit="visit" :key="viewKey" v-if="viewKey && loaded" />
 </template>
 
 <script>
@@ -15,10 +15,12 @@ import formUtil  from '@/common/services/FormUtil.js';
 export default {
   props: ['cpr', 'visitId', 'eventId'],
 
-  async setup() {
-    const visit = ref({});
+  setup(props) {
+    const visit = ref({id: props.visitId, eventId: props.eventId});
     provide('visit', visit);
-    return { visit };
+
+    const loaded = ref(false);
+    return { visit, loaded };
   },
 
   created() {
@@ -65,6 +67,7 @@ export default {
         visit => {
           this.visit = visit;
           formUtil.createCustomFieldsMap(this.visit, true);
+          this.loaded = true;
         }
       );
     },
@@ -84,6 +87,7 @@ export default {
 
           delete event.id;
           this.visit = event;
+          this.loaded = true;
         }
       );
     }

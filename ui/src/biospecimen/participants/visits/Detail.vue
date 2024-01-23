@@ -10,6 +10,7 @@
           <os-visit-event-desc :visit="visit" />
         </h3>
         <div class="accessories">
+          <os-tag :value="status" :rounded="true" :type="statusType" />
           <os-copy-link size="small"
             :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id},
               query: {eventId: visit.eventId}}" />
@@ -96,6 +97,24 @@ export default {
           label: this.cpr.ppid
         }
       ];
+    },
+
+    status: function() {
+      return this.visit.status || 'Pending';
+    },
+
+    statusType: function() {
+      switch (this.status) {
+        case 'Pending':
+          return 'warning';
+        case 'Missed Collection':
+        case 'Not Collected':
+          return 'missed';
+        case 'Complete':
+          return 'success';
+      }
+
+      return '';
     }
   },
 
