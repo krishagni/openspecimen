@@ -18,6 +18,7 @@
 <script>
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   props: ['cpr', 'visits'],
@@ -49,6 +50,10 @@ export default {
   },
 
   methods: {
+    onVisitRowClick: function({visit}) {
+      this._gotoVisit(visit);
+    },
+
     collectVisit: async function(rowObject) {
       const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
       const {visit} = rowObject;
@@ -104,6 +109,16 @@ export default {
 
     _getAnticipatedVisitDate(visit) {
       return visit.visitDate || visit.anticipatedVisitDate;
+    },
+
+    _gotoVisit: function({cpId, cprId, id, eventId}) {
+      const route = routerSvc.getCurrentRoute();
+      const params = {cpId, cprId, visitId: id || -1};
+      if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
+        routerSvc.goto('ParticipantsListItemVisitDetail.Overview', params, {eventId});
+      } else {
+        routerSvc.goto('VisitDetail.Overview', params, {eventId});
+      }
     }
   }
 }

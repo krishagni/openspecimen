@@ -49,7 +49,7 @@ export default {
         {
           icon: 'eye',
           caption: this.$t('participants.view_visit'),
-          onSelect: () => this.gotoVisit(visit)
+          onSelect: () => this._gotoVisit(visit)
         },
         {
           icon: 'redo',
@@ -57,22 +57,6 @@ export default {
           onSelect: () => this.repeatVisit(visit)
         }
       ];
-    },
-
-    gotoVisit: function(visit) {
-      const route = routerSvc.getCurrentRoute();
-      const params = {
-        cpId: visit.cpId,
-        cprId: visit.cprId,
-        visitId: visit.id || -1,
-        eventId: visit.eventId
-      };
-
-      if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-        routerSvc.goto('ParticipantsListItemVisitDetail.Overview', params);
-      } else {
-        routerSvc.goto('VisitDetail.Overview', params);
-      }
     },
 
     repeatVisit: async function(visit) {
@@ -99,6 +83,10 @@ export default {
       } else {
         alert('Workflow module not installed!');
       }
+    },
+
+    onVisitRowClick: function({visit}) {
+      this._gotoVisit(visit);
     },
 
     _getCollectVisitsWf(visit) {
@@ -130,7 +118,17 @@ export default {
         batchTitle: title,
         showOptions: false
       };
-    }
+    },
+
+    _gotoVisit: function({cpId, cprId, id, eventId}) {
+      const route = routerSvc.getCurrentRoute();
+      const params = {cpId, cprId, visitId: id || -1};
+      if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
+        routerSvc.goto('ParticipantsListItemVisitDetail.Overview', params, {eventId});
+      } else {
+        routerSvc.goto('VisitDetail.Overview', params, {eventId});
+      }
+    },
   }
 }
 </script>
