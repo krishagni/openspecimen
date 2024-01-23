@@ -11,9 +11,11 @@
         </h3>
         <div class="accessories">
           <os-copy-link size="small"
-            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id}}" />
+            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id},
+              query: {eventId: visit.eventId}}" />
           <os-new-tab size="small"
-            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id}}" />
+            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id},
+              query: {eventId: visit.eventId}}" />
         </div>
       </span>
     </os-page-head>
@@ -43,7 +45,7 @@
           </ul>
         </os-side-menu>
 
-        <router-view :cpr="cpr" :visit="visit" v-if="visit && visit.id > 0" />
+        <router-view :cpr="cpr" :visit="visit" v-if="visit && (visit.id > 0 || visit.eventId > 0)" />
       </div>
     </os-page-body>
   </os-page>

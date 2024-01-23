@@ -49,18 +49,14 @@ export default {
 
       let url = '';
       if (this.visit) {
+        const {cpId, eventId, cprId, id} = this.visit;
         const route = routerSvc.getCurrentRoute();
-        const params = {
-          cpId: this.visit.cpId,
-          cprId: this.visit.cprId,
-          visitId: this.visit.id || -1,
-          eventId: this.visit.eventId
-        };
+        const params = { cpId, cprId, visitId: id || -1};
 
         if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-          url = routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', params);
+          url = routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', params, {eventId});
         } else {
-          url = routerSvc.getUrl('VisitDetail.Overview', params);
+          url = routerSvc.getUrl('VisitDetail.Overview', params, {eventId});
         }
       } else if (this.event) {
         url = ui.ngServer + '#/cps/' + this.event.cpId + '/specimen-requirements?eventId=' + this.event.id;

@@ -865,7 +865,7 @@ const routes = [
                         path: 'visit/:visitId',
                         name: 'ParticipantsListItemVisitRoot',
                         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/DetailRoot.vue'),
-                        props: (route) => ({visitId: route.params && route.params.visitId}),
+                        props: ({params, query}) => ({ visitId: params && params.visitId, eventId: query.eventId}),
                         children: [
                           {
                             path: '',
@@ -940,7 +940,7 @@ const routes = [
                     path: 'visit/:visitId',
                     name: 'VisitRoot',
                     component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/DetailRoot.vue'),
-                    props: (route) => ({visitId: route.params && route.params.visitId}),
+                    props: ({params, query}) => ({visitId: params && params.visitId, eventId: query.eventId}),
                     children: [
                       {
                         path: 'detail',

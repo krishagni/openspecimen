@@ -2,15 +2,17 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editVisit" v-if="visit.id > 0" />
+      <span v-if="visit.id > 0">
+        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editVisit" />
 
-      <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen" />
+        <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen" />
 
-      <os-button left-icon="print" :label="$t('participants.print_specimen_labels')" @click="printLabels" />
+        <os-button left-icon="print" :label="$t('participants.print_specimen_labels')" @click="printLabels" />
 
-      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteVisit" />
+        <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteVisit" />
 
-      <os-plugin-views page="visit-detail" view="more-menu" />
+        <os-plugin-views page="visit-detail" view="more-menu" />
+      </span>
     </template>
   </os-page-toolbar>
 
@@ -142,8 +144,8 @@ export default {
         return;
       }
 
-      const {cprId, id, eventId} = visit;
-      visitSvc.getSpecimens(cprId, eventId, id).then(
+      const {id, eventId} = visit;
+      visitSvc.getSpecimens(this.cpr.id, eventId, id).then(
         (specimens) => {
           this.ctx.specimens = visit.$specimens = specimens;
         }
