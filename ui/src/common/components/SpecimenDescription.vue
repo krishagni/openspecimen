@@ -107,7 +107,7 @@ export default {
 }
 
 .status-ball {
-  display: inline-block;
+  flex: 0 0 0.75rem;
   height: 0.75rem;
   width: 0.75rem;
   border-radius: 50%;
