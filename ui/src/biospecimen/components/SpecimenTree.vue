@@ -1,15 +1,20 @@
 
 <template>
-  <os-table-form :ref="'spmnsTable'" :tree-layout="true" :read-only="true"
-    :data="{}" :items="items" :schema="{columns: fields}">
-  </os-table-form>
+  <os-panel>
+    <template #header>
+      <span v-t="'specimens.list'">Specimens</span>
+    </template>
+
+    <os-table-form ref="spmnsTable" :tree-layout="true" :read-only="true"
+      :data="{}" :items="items" :schema="{columns: fields}">
+    </os-table-form>
+  </os-panel>
 </template>
 
 <script>
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import formUtil from '@/common/services/FormUtil.js';
-import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
 
 export default {
@@ -43,36 +48,9 @@ export default {
         {
           type: 'specimen-description',
           name: 'specimen',
-          showStatus: true,
           labelCode: 'specimens.description',
-          displayType: 'specimen-description',
+          showStatus: true,
           detailed: false,
-          href: (args) => {
-            const specimen = args.specimen;
-
-            let url = '';
-            if (specimen) {
-              const route = routerSvc.getCurrentRoute();
-              const params = {
-                cpId: specimen.cpId,
-                cprId: specimen.cprId,
-                visitId: specimen.visitId,
-                eventId: specimen.eventId,
-                specimenId: specimen.id || -1
-              };
-
-              if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-                url = routerSvc.getUrl('ParticipantsListItemSpecimenDetail.Overview', params);
-              } else {
-                url = routerSvc.getUrl('VisitDetail.Overview', params);
-              }
-            }
-
-            const currentView = window.location.href;
-            const path = currentView.substring(0, currentView.indexOf('/#'));
-            return path + '/' + url;
-          },
-          hrefTarget: '_self'
         },
         {
           type: 'text',

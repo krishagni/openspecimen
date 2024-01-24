@@ -1,10 +1,16 @@
 
 <template>
   <span :class="$attrs['md-type'] && 'md-type'">
-    <a v-if="link" :href="link" :target="hrefTarget || '_blank'" rel="noopener">
-      <span>{{displayText}}</span>
-    </a>
-    <span v-else>{{displayText}}</span>
+    <span v-if="component">
+      <component :is="component" v-model="inputValue" v-bind="$attrs" />
+    </span>
+
+    <span v-else>
+      <a v-if="link" :href="link" :target="hrefTarget || '_blank'" rel="noopener">
+        <span>{{displayText}}</span>
+      </a>
+      <span v-else>{{displayText}}</span>
+    </span>
   </span>
 </template>
 
@@ -82,6 +88,22 @@ export default {
       }
 
       return this.href;
+    },
+
+    component: function() {
+      const dt = this.displayType;
+      if (!dt) {
+        return null;
+      }
+
+      if (dt.indexOf('component:') == 0) {
+        const component = dt.substring('component:'.length).trim();
+        return component.indexOf('os-') == 0 ? component : 'os-' + component;
+      } else if (dt == 'specimen-description') {
+        return 'os-' + dt;
+      }
+
+      return null;
     }
   },
 
@@ -131,35 +153,6 @@ export default {
       const specimen = exprUtil.eval(this.form || this.context || {}, attrs.entity || attrs.specimen || 'specimen');
       const unit = util.getSpecimenMeasureUnit(specimen, measure || 'quantity');
       return value + ' ' + unit;
-    },
-
-    _getSpecimenDescription: function(value, attrs) {
-      const ns = this.$t('pvs.not_specified');
-      const specimen = value || {};
-      const detailed = attrs.detailed == 'true' || attrs.detailed == true;
-
-      let result = '';
-      if (specimen.lineage == 'New' || detailed) {
-        if (specimen.pathology && specimen.pathology != ns) {
-          result += specimen.pathology + ' ';
-        }
-
-        result += specimen.type;
-
-        if (specimen.specimenClass == 'Tissue' && specimen.anatomicSite && specimen.anatomicSite != ns) {
-          result += ' ' + this.$t('specimens.extracted_from', {anatomicSite: specimen.anatomicSite});
-        }
-
-        if (specimen.specimenClass == 'Fluid' && specimen.collectionContainer && specimen.collectionContainer != ns) {
-          result += ' ' + this.$t('specimens.collected_in', {container: specimen.collectionContainer});
-        }
-      } else if (specimen.lineage == 'Derived') {
-        result += specimen.lineage + ' ' + specimen.type;
-      } else if (specimen.lineage == 'Aliquot') {
-        result += specimen.lineage;
-      }
-
-      return result;
     },
 
     _getDate: function(value, showTime) {
