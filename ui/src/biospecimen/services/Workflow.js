@@ -37,14 +37,27 @@ class Workflow {
   }
 
   async createAliquots(specimen) {
-    if (!this.wfInstanceSvc) {
-      alert('Workflow module not installed!');
-      return;
-    }
-
     let wfName = await this._getCreateAliquotsWf(specimen);
     if (!wfName) {
       wfName = 'sys-create-adhoc-aliquots';
+    }
+
+    this._createChildSpecimens(specimen, wfName, i18n.msg('specimens.create_aliquots'));
+  }
+
+  async createDerivedSpecimens(specimen) {
+    let wfName = await this._getCreateDerivativesWf(specimen);
+    if (!wfName) {
+      wfName = 'sys-create-adhoc-derivatives';
+    }
+
+    this._createChildSpecimens(specimen, wfName, i18n.msg('specimens.create_derived'));
+  }
+
+  async _createChildSpecimens(specimen, wfName, title) {
+    if (!this.wfInstanceSvc) {
+      alert('Workflow module not installed!');
+      return;
     }
 
     const inputItem = {
@@ -54,7 +67,7 @@ class Workflow {
     };
 
     const {cpId, cprId, visitId, id} = specimen;
-    const params = this._getVisitBreadcrumb(specimen, i18n.msg('specimens.create_aliquots'));
+    const params = this._getVisitBreadcrumb(specimen, title);
     params['breadcrumb-3'] = JSON.stringify({
       label: this._getVisitDescription(specimen),
       route: {
@@ -80,6 +93,10 @@ class Workflow {
 
   _getCreateAliquotsWf({cpId}) {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'createAliquotsWf');
+  }
+
+  _getCreateDerivativesWf({cpId}) {
+    return cpSvc.getWorkflowProperty(cpId, 'common', 'createDerivativesWf');
   }
 
   _getVisitBreadcrumb({cpId, cpShortTitle, cprId, ppid}, title) {

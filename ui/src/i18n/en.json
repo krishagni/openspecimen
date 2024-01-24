@@ -1099,6 +1099,7 @@
     "closed": "Closed",
     "cp": "Collection Protocol",
     "create_aliquots": "Create Aliquots",
+    "create_derived": "Create Derived Specimens",
     "created_on": "Created On",
     "derived": "Derived",
     "description": "Description",

@@ -5,6 +5,7 @@
       <span v-if="specimen.id > 0 && specimen.availabilityStatus == 'Available'">
         <os-menu icon="plus" :label="$t('common.buttons.create')"
           :options="[
+            {icon: 'flask',     caption: $t('specimens.derived'),  onSelect: createDerivatives},
             {icon: 'share-alt', caption: $t('specimens.aliquots'), onSelect: createAliquots}
           ]"
         />
@@ -73,6 +74,10 @@ export default {
   methods: {
     createAliquots: function() {
       wfSvc.createAliquots(this.ctx.specimen);
+    },
+
+    createDerivatives: function() {
+      wfSvc.createDerivedSpecimens(this.ctx.specimen);
     },
 
     _setupSpecimen: function() {
