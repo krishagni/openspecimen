@@ -9,6 +9,8 @@
             {icon: 'share-alt', caption: $t('specimens.aliquots'), onSelect: createAliquots}
           ]"
         />
+
+        <os-button left-icon="print" :label="$t('common.buttons.print')" @click="confirmPrint" />
       </span>
     </template>
   </os-page-toolbar>
@@ -24,12 +26,32 @@
       <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.specimen.id > 0" />
     </os-grid-column>
   </os-grid>
+
+  <os-dialog ref="printDialog">
+    <template #header>
+      <span v-t="'specimens.confirm_print'">Confirm Print</span>
+    </template>
+
+    <template #content>
+      <span v-t="'specimens.print_child_labels_q'">Do you want to print child specimen labels as well?</span>
+    </template>
+
+    <template #footer>
+      <os-button text      :label="$t('common.buttons.cancel')"  @click="cancelPrint" />
+      <os-button secondary :label="$t('specimens.no_print_current_specimen')" @click="printLabels(false)" />
+      <os-button primary   :label="$t('common.buttons.yes')" @click="printLabels(true)" />
+    </template>
+  </os-dialog>
 </template>
 
 <script>
 
 import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
+
+import specimenSvc from '@/biospecimen/services/Specimen.js';
 import wfSvc from '@/biospecimen/services/Workflow.js';
+
+import util  from '@/common/services/Util.js';
 
 export default {
   props: ['specimen'],
@@ -80,6 +102,29 @@ export default {
       wfSvc.createDerivedSpecimens(this.ctx.specimen);
     },
 
+    confirmPrint: function() {
+      this.$refs.printDialog.open();
+    },
+
+    printLabels: function(includeChildren) {
+      const {specimen, children} = this.ctx;
+      const ids = includeChildren ? this._getChildrenIds(children) : [];
+      ids.unshift(specimen.id);
+
+      const ts = util.formatDate(new Date(), 'yyyyMMdd_HHmmss');
+      const outputFilename = [
+        specimen.cpShortTitle, specimen.ppid,
+        specimen.visitName, specimen.label || specimen.id,
+        ts
+      ].join('_') + '.csv';
+      specimenSvc.printLabels({specimenIds: ids}, outputFilename);
+      this.$refs.printDialog.close();
+    },
+
+    cancelPrint: function() {
+      this.$refs.printDialog.close();
+    },
+
     _setupSpecimen: function() {
       this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
 
@@ -91,6 +136,16 @@ export default {
       }
 
       this.ctx.children = specimen.children || [];
+    },
+
+    _getChildrenIds: function(children) {
+      const result = [];
+      for (let child of (children || [])) {
+        result.push(child.id);
+        Array.prototype.push.apply(result, this._getChildrenIds(child.children));
+      }
+
+      return result;
     }
   }
 }
