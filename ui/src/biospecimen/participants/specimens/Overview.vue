@@ -2,7 +2,13 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <span> Action buttons </span>
+      <span v-if="specimen.id > 0 && specimen.availabilityStatus == 'Available'">
+        <os-menu icon="plus" :label="$t('common.buttons.create')"
+          :options="[
+            {icon: 'share-alt', caption: $t('specimens.aliquots'), onSelect: createAliquots}
+          ]"
+        />
+      </span>
     </template>
   </os-page-toolbar>
 
@@ -22,6 +28,7 @@
 <script>
 
 import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
+import wfSvc from '@/biospecimen/services/Workflow.js';
 
 export default {
   props: ['specimen'],
@@ -64,6 +71,10 @@ export default {
   },
 
   methods: {
+    createAliquots: function() {
+      wfSvc.createAliquots(this.ctx.specimen);
+    },
+
     _setupSpecimen: function() {
       this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
 

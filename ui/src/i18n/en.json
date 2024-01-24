@@ -1080,6 +1080,7 @@
   "specimens": {
     "additional_label": "Additional Label",
     "aliquot": "Aliquot",
+    "aliquots": "Aliquots",
     "anatomic_site": "Anatomic Site",
     "available_quantity": "Available Quantity",
     "available_quantity_req": "Available Quantity is mandatory",

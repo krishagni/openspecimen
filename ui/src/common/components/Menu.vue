@@ -28,7 +28,7 @@ export default {
 
   computed: {
     items: function() {
-      return this.options.map(
+      return (this.options || []).map(
         ({icon, caption, onSelect, divider, anchorStyle}) =>
           ({icon, label: caption, divider, anchorStyle, command: (event) => this.exec(event, onSelect)})
       );
