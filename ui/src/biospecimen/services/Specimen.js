@@ -121,6 +121,50 @@ class Specimen {
     return null;
   }
 
+  getEvents({id}) {
+    return http.get('specimens/' + id + '/events').then(
+      records => {
+        const result = [];
+        for (let ev of records) {
+          for (let record of ev.records) {
+            let user = null, time = null;
+            for (let {name, value} of record.fieldValues) {
+              if (name == 'user') {
+                user = value;
+              } else if (name == 'time') {
+                time = value && new Date(value);
+              }
+            }
+
+            result.push({
+              id: record.recordId,
+              formId: ev.id,
+              formCtxtId: record.fcId,
+              sysForm: record.sysForm,
+              name: ev.caption,
+              updatedBy: record.user,
+              updateTime: record.updateTime,
+              user: user,
+              time: time,
+              isEditable: !record.sysForm || ev.name == 'SpecimenCollectionEvent' || ev.name == 'SpecimenReceivedEvent'
+            });
+          }
+        }
+
+        result.sort(
+          (e1, e2) => {
+            const t1 = e1.time || 0;
+            const t2 = e2.time || 0;
+            const diff = t2 - t1;
+            return diff != 0 ? diff : (e2.id - e1.id);
+          }
+        );
+
+        return result;
+      }
+    );
+  }
+
   async getDict(cpId) {
     return cpSvc.getWorkflow(cpId, 'dictionary').then(
       (dict) => {

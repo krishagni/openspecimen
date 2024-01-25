@@ -15,6 +15,7 @@ export default {
       boolValue: boolValue.toString,
       date: dateFmt.date,
       dateTime: dateFmt.dateTime,
+      formatDate: dateFmt.formatDate,
       noValue: noValue.noValue,
       shortDateTime: dateFmt.shortDateTime,
       specimenMeasure: specimenMeasure.format,

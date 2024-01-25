@@ -30,6 +30,16 @@
 
     <os-grid-column width="4">
       <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.specimen.id > 0" />
+
+      <os-section v-if="ctx.events && ctx.events.length > 0">
+        <template #title>
+          <span v-t="'specimens.recent_activity'">Recent Activity</span>
+        </template>
+
+        <template #content>
+          <EventsSummaryList :events="ctx.events" />
+        </template>
+      </os-section>
     </os-grid-column>
   </os-grid>
 
@@ -54,6 +64,7 @@
 
 <script>
 
+import EventsSummaryList from './EventsSummaryList.vue';
 import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
 
 import specimenSvc from '@/biospecimen/services/Specimen.js';
@@ -62,10 +73,12 @@ import wfSvc from '@/biospecimen/services/Workflow.js';
 import routerSvc from '@/common/services/Router.js';
 import util  from '@/common/services/Util.js';
 
+
 export default {
   props: ['visit', 'specimen'],
 
   components: {
+    EventsSummaryList,
     SpecimenTree
   },
 
@@ -170,6 +183,10 @@ export default {
           askReason: true,
           deleteObj: (reason) => specimenSvc.deleteSpecimen(specimen.id, true, reason)
         };
+
+        if  (specimen.availabilityStatus && specimen.availabilityStatus != 'Pending') {
+          specimenSvc.getEvents(this.specimen).then(events => this.ctx.events = events);
+        }
       }
 
       this.ctx.children = specimen.children || [];

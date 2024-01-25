@@ -27,5 +27,13 @@ export default {
     }
 
     return format(new Date(date), ui.global.locale.dateFmt);
+  },
+
+  formatDate(date, fmt) {
+    if (!date) {
+      return '-';
+    }
+
+    return format(new Date(date), fmt);
   }
 }
