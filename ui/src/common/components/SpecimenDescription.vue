@@ -28,18 +28,23 @@ export default {
     },
 
     statusColor: function() {
-      const status = this.status || this.object.status;
-      if (this.object.activityStatus == 'Closed') {
-        return 'closed';
-      } else if (!status || status == 'Pending') {
-        return 'pending';
-      } else if (status == 'Missed Collection' || status == 'Not Collected') {
-        return 'not-collected';
-      } else if (status == 'Collected') {
-        return 'collected';
+      const status = this.status || this.object.availabilityStatus || this.object.status;
+      switch (status) {
+        case 'Distributed':
+          return 'distributed';
+        case 'Reserved':
+          return 'reserved';
+        case 'Closed':
+          return 'closed';
+        case 'Missed Collection':
+        case 'Not Collected':
+          return 'not-collected';
+        case 'Available':
+          return 'collected';
+        case 'Pending':
+        default:
+          return 'pending';
       }
-
-      return null;
     },
 
     description: function() {
@@ -131,6 +136,14 @@ export default {
 
 .status-ball.closed {
   background: #d9534f!important;
+}
+
+.status-ball.distributed {
+  background: #5bc0de;
+}
+
+.status-ball.reserved {
+  background: rgba(128, 0, 128, 0.7);
 }
 </style>
 
