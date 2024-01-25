@@ -21,6 +21,7 @@ class QuickSearch {
       url: ui.ngServer + '#/object-state-params-resolver?' +
            'stateName=participant-detail.overview&' +
            'objectName=collection_protocol_registration&' +
+           'vueView=ParticipantsListItemDetail.Overview&' +
            'key=id&' +
            'value=:entityId',
     },

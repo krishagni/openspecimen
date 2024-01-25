@@ -43,11 +43,17 @@ angular.module('os.common.search.service', [])
       return entitySearchMap[entity] && entitySearchMap[entity].state;
     }
 
+    function getVueView(entity) {
+      return entitySearchMap[entity] && entitySearchMap[entity].vueView;
+    }
+
     return {
       register: register,
 
       search: search,
 
-      getState: getState
+      getState: getState,
+
+      getVueView: getVueView
     };
   });

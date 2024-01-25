@@ -10,6 +10,13 @@ const routes = [
     },
     children: [
       {
+        path: 'resolve-view',
+        name: 'ResolveView',
+        component: () => import(/* webpackChunkName: "common" */ '../common/components/ResolveView.vue'),
+        props: (route) => ({params: route.query})
+      },
+
+      {
         path: 'users/:userId',
         name: 'UsersList',
         // route level code-splitting

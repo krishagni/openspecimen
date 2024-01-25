@@ -838,7 +838,11 @@ angular.module('os.biospecimen.specimen',
   })
 
   .run(function(QuickSearchSvc, ExtensionsUtil) {
-    var opts = {caption: 'entities.specimen', state: 'specimen-detail.overview'}
+    var opts = {
+      caption: 'entities.specimen',
+      state: 'specimen-detail.overview',
+      vueView: 'ParticipantsListItemSpecimenDetail.Overview'
+    };
     QuickSearchSvc.register('specimen', opts);
 
     ExtensionsUtil.registerView(

@@ -1236,6 +1236,10 @@ angular.module('os.biospecimen.participant',
     }
   })
   .run(function(QuickSearchSvc) {
-    var opts = {caption: 'entities.participant', state: 'participant-detail.overview'};
+    var opts = {
+      caption: 'entities.participant',
+      state: 'participant-detail.overview',
+      vueView: 'ParticipantsListItemDetail.Overview'
+    };
     QuickSearchSvc.register('collection_protocol_registration', opts);
   });

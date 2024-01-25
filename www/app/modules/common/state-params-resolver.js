@@ -13,9 +13,20 @@ angular.module('openspecimen')
   })
   .config(function($stateProvider) {
     $stateProvider.state('object-state-params-resolver', {
-      url: '/object-state-params-resolver?:stateName&:objectName&:key&:value',
-      controller: function($state, $stateParams, params) {
-        $state.go($stateParams.stateName || params.stateName, params, {location: 'replace'});
+      url: '/object-state-params-resolver?:stateName&:objectName&:key&:value&:vueView',
+      controller: function($state, $stateParams, params, VueApp, SettingUtil, QuickSearchSvc) {
+        var vueView = QuickSearchSvc.getVueView($stateParams.objectName);
+        SettingUtil.getSetting('common', 'enable_beta_features').then(
+          function(setting) {
+            if (setting.value == 'true' && vueView) {
+              params = angular.extend(params || {}, $stateParams);
+              params.vueView = vueView;
+              VueApp.setVueView('resolve-view', params);
+            } else {
+              $state.go($stateParams.stateName || params.stateName, params, {location: 'replace'});
+            }
+          }
+        );
       },
       resolve: {
         params: function($stateParams, ObjectStateParamsResolver) {
