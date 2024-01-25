@@ -29,6 +29,18 @@ class Specimen {
     return http.get('specimens/' + id);
   }
 
+  async deleteSpecimen(specimenId, forceDelete, reason) {
+    return http.delete('specimens/' + specimenId, {}, {forceDelete, reason});
+  }
+
+  async getDependents(specimen) {
+    return http.get('specimens/' + specimen.id + '/dependent-entities');
+  }
+
+  clearSpecimens(visit) {
+    visit.$specimens = null;
+  }
+
   async printLabels(input, outputFilename) {
     const job = await http.post('specimen-label-printer', input);
 

@@ -1135,6 +1135,7 @@
     "receive_quality": "Received Quality",
     "receiver": "Receiver",
     "receive_wf_not_configured": "Receive specimens workflow is not configured.",
+    "specimen": "Specimen",
     "stored": "Stored",
     "type": "Type",
     "unplanned": "Unplanned"

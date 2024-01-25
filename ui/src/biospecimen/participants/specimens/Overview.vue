@@ -12,6 +12,10 @@
 
         <os-button left-icon="print" :label="$t('common.buttons.print')" @click="confirmPrint" />
       </span>
+
+      <span v-if="specimen.id > 0">
+        <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteSpecimen" />
+      </span>
     </template>
   </os-page-toolbar>
 
@@ -42,6 +46,8 @@
       <os-button primary   :label="$t('common.buttons.yes')" @click="printLabels(true)" />
     </template>
   </os-dialog>
+
+  <os-delete-object ref="deleteSpmnDialog" :input="ctx.deleteOpts" />
 </template>
 
 <script>
@@ -51,10 +57,11 @@ import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import wfSvc from '@/biospecimen/services/Workflow.js';
 
+import routerSvc from '@/common/services/Router.js';
 import util  from '@/common/services/Util.js';
 
 export default {
-  props: ['specimen'],
+  props: ['visit', 'specimen'],
 
   components: {
     SpecimenTree
@@ -125,6 +132,25 @@ export default {
       this.$refs.printDialog.close();
     },
 
+    deleteSpecimen: function() {
+      this.$refs.deleteSpmnDialog.execute().then(
+        (resp) => {
+          if (resp != 'deleted') {
+            return;
+          }
+
+          const route = routerSvc.getCurrentRoute();
+          if (route.name.indexOf('ParticipantsListItemSpecimenDetail') >= 0) {
+            routerSvc.goto('ParticipantsListItemVisitDetail.Overview', this.specimen);
+          } else {
+            routerSvc.goto('VisitDetail.Overview', this.specimen);
+          }
+
+          specimenSvc.clearSpecimens(this.visit);
+        }
+      );
+    },
+
     _setupSpecimen: function() {
       this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
 
@@ -133,6 +159,15 @@ export default {
         this.ctx.auditObjs = [
           {objectId: specimen.id, objectName: 'specimen'}
         ]
+
+        this.ctx.deleteOpts = {
+          type: this.$t('specimens.specimen'),
+          title: specimen.label + (specimen.barcode ? ' (' + specimen.barcode + ')' : ''),
+          dependents: () => specimenSvc.getDependents(specimen),
+          forceDelete: true,
+          askReason: true,
+          deleteObj: (reason) => specimenSvc.deleteSpecimen(specimen.id, true, reason)
+        };
       }
 
       this.ctx.children = specimen.children || [];
