@@ -1,11 +1,16 @@
 angular.module('os.biospecimen.participant')
   .controller('SpecimensListViewCtrl', function(
-    $scope, $state, currentUser, cp, sdeConfigured, mobileDataEntryEnabled, spmnReqs,
-    PluginReg, Specimen, SpecimensHolder, Alerts) {
+    $scope, $state, currentUser, cp, sdeConfigured, mobileDataEntryEnabled, spmnReqs, enableBetaFeatures,
+    PluginReg, Specimen, SpecimensHolder, Alerts, VueApp) {
 
     var ctrl = this;
 
     function init() {
+      if (enableBetaFeatures) {
+        VueApp.setVueView('cp-view/' + cp.id + '/participants/-1');
+        return;
+      }
+
       ctrl.showAddSpmn = !sdeConfigured,
       ctrl.resourceOpts = {
         containerReadOpts: {resource: 'StorageContainer', operations: ['Read']},

@@ -290,6 +290,14 @@ angular.module('os.biospecimen.participant',
                 );
               }
             );
+          },
+
+          enableBetaFeatures: function(SettingUtil) {
+            return SettingUtil.getSetting('common', 'enable_beta_features').then(
+              function(setting) {
+                return setting.value == 'true';
+              }
+            );
           }
         },
         parent: 'signed-in',
@@ -297,7 +305,12 @@ angular.module('os.biospecimen.participant',
       })
       .state('cp-summary-view', {
         url: '/summary-view',
-        controller: function($state, cp, summaryView) {
+        controller: function($state, cp, summaryView, enableBetaFeatures, VueApp) {
+          if (enableBetaFeatures) {
+            VueApp.setVueView('cp-view/' + cp.id + '/participants/-1');
+            return;
+          }
+
           $state.go(summaryView, {cpId: cp.id}, {location: 'replace'});
         },
         resolve: {

@@ -2,12 +2,17 @@
 angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
   .controller('ParticipantListCtrl', function(
     $scope, $state, $injector, cp, twoStepReg, mobileDataEntryEnabled,
-    addParticipantWorkflow, hasWorkflowModule, workflows,
+    addParticipantWorkflow, hasWorkflowModule, workflows, enableBetaFeatures,
     ParticipantsHolder, PluginReg, DeleteUtil, CollectionProtocolRegistration, VueApp) {
 
     var ctrl = this;
 
     function init() {
+      if (enableBetaFeatures) {
+        VueApp.setVueView('cp-view/' + cp.id + '/participants/-1');
+        return;
+      }
+
       $scope.cpId = cp.id;
       $scope.ctx = {
         params: {
