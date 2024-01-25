@@ -68,6 +68,10 @@ export default {
   text-align: center;
 }
 
+.os-specimen-events .event .summary {
+  flex: 1;
+}
+
 .os-specimen-events .event .summary .title {
   margin-top: 0rem;
   color: #666;
@@ -76,6 +80,7 @@ export default {
 .os-specimen-events .event .summary .description {
   display: flex;
   flex-direction: column;
-  font-size: 0.8rem
+  font-size: 0.8rem;
+  justify-content: space-around;
 }
 </style>
