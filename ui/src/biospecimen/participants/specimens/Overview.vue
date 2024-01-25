@@ -2,18 +2,20 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <span v-if="specimen.id > 0 && specimen.availabilityStatus == 'Available'">
+      <span v-if="specimen.id > 0">
         <os-menu icon="plus" :label="$t('common.buttons.create')"
           :options="[
             {icon: 'flask',     caption: $t('specimens.derived'),  onSelect: createDerivatives},
             {icon: 'share-alt', caption: $t('specimens.aliquots'), onSelect: createAliquots}
           ]"
+
+          v-if="specimen.availabilityStatus == 'Available'"
         />
 
         <os-button left-icon="print" :label="$t('common.buttons.print')" @click="confirmPrint" />
-      </span>
 
-      <span v-if="specimen.id > 0">
+        <os-add-to-cart :specimens="[{id: specimen.id}]" />
+
         <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteSpecimen" />
       </span>
     </template>
