@@ -1,10 +1,10 @@
 
 <template>
   <ul class="os-breadcrumb">
-    <li class="ellipsis" v-if="items.length > 2">
+    <li class="ellipsis" v-if="items.length > 5">
       <span>...</span>
     </li>
-    <li v-for="(item, idx) of items" :key="idx" :class="{collapsed: (items.length - idx) > 2}">
+    <li v-for="(item, idx) of items" :key="idx" :class="{collapsed: (items.length - idx) > 5}">
       <a :href="item.url" :target="item.target">
         <span>{{item.label}}</span>
       </a>

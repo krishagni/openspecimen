@@ -1,13 +1,11 @@
 <template>
   <os-page>
-    <os-page-head :noNavButton="noNavButton">
+    <os-page-head :noNavButton="noNavButton" :showBreadcrumb="true">
       <template #breadcrumb>
-        <os-breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="bcrumb" />
       </template>
 
       <span class="os-title">
-        <os-breadcrumb :items="ctx.bcrumb" v-if="noNavButton" />
-
         <h3>
           <span>{{specimen.label || specimen.type}}</span>
         </h3>
@@ -61,21 +59,16 @@
 
 <script>
 
+import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   props: ['cpr', 'visit', 'specimen', 'noNavButton'],
 
   inject: ['cpViewCtx'],
 
   data() {
-    const ctx = {
-      cp: {},
-
-      bcrumb: [
-        // {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}, // TODO: CP conf list view
-        // {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cpr.ppid}
-      ]
-    };
-
+    const ctx = { cp: {} };
     return { ctx };
   },
 
@@ -91,6 +84,29 @@ export default {
   },
 
   computed: {
+    bcrumb: function() {
+      const cp = this.ctx.cp;
+      if (!cp) {
+        return [];
+      }
+
+      const {cpId, cprId, visitId, eventId} = this.specimen;
+      return [
+        {
+          url: routerSvc.getUrl('ParticipantsList', {cpId, cprId: -1}),
+          label: cp.shortTitle
+        },
+        {
+          url: routerSvc.getUrl('ParticipantsListItemDetail.Overview', {cpId, cprId}),
+          label: this.cpr.ppid
+        },
+        {
+          url: routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId, eventId}),
+          label: cpSvc.getEventDescription(this.visit)
+        }
+      ];
+    },
+
     status: function() {
       return this.specimen.availabilityStatus || 'Pending';
     },
