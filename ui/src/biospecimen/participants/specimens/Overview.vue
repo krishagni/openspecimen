@@ -18,6 +18,12 @@
 
         <os-add-to-cart :specimens="[{id: specimen.id}]" />
 
+        <os-button left-icon="times" :label="$t('common.buttons.close')" @click="closeSpecimen"
+          v-if="!specimen.reserved && specimen.activityStatus == 'Active' && specimen.status == 'Collected'" />
+
+        <os-button left-icon="check" :label="$t('common.buttons.reopen')" @click="reopenSpecimen"
+          v-if="specimen.activityStatus == 'Closed'" />
+
         <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteSpecimen" />
       </span>
     </template>
@@ -62,6 +68,8 @@
   </os-dialog>
 
   <os-delete-object ref="deleteSpmnDialog" :input="ctx.deleteOpts" />
+
+  <os-close-specimen ref="closeSpmnDialog" :specimens="[ctx.specimen]" />
 </template>
 
 <script>
@@ -77,14 +85,14 @@ import util  from '@/common/services/Util.js';
 
 
 export default {
-  props: ['visit', 'specimen'],
+  props: ['visit'],
 
   components: {
     EventsSummaryList,
     SpecimenTree
   },
 
-  inject: ['cpViewCtx'],
+  inject: ['cpViewCtx', 'specimen'],
 
   data() {
     return {
@@ -154,6 +162,28 @@ export default {
       this.$refs.printDialog.close();
     },
 
+    closeSpecimen: function() {
+      this.$refs.closeSpmnDialog.open().then(
+        (resp) => {
+          if (resp == 'closed') {
+            specimenSvc.clearSpecimens(this.visit);
+            this.specimen.availabilityStatus = this.specimen.activityStatus = 'Closed';
+            this._loadEvents(this.specimen);
+          }
+        }
+      );
+    },
+
+    reopenSpecimen: function() {
+      specimenSvc.saveOrUpdate({id: this.specimen.id, activityStatus: 'Active'}).then(
+        (saved) => {
+          specimenSvc.clearSpecimens(this.visit);
+          this.specimen.activityStatus = 'Active';
+          this.specimen.availabilityStatus = saved.availabilityStatus;
+        }
+      );
+    },
+
     deleteSpecimen: function() {
       this.$refs.deleteSpmnDialog.execute().then(
         (resp) => {
@@ -191,9 +221,7 @@ export default {
           deleteObj: (reason) => specimenSvc.deleteSpecimen(specimen.id, true, reason)
         };
 
-        if  (specimen.availabilityStatus && specimen.availabilityStatus != 'Pending') {
-          specimenSvc.getEvents(this.specimen).then(events => this.ctx.events = events);
-        }
+        this._loadEvents(specimen);
       }
 
       this.ctx.children = specimen.children || [];
@@ -207,6 +235,12 @@ export default {
       }
 
       return result;
+    },
+
+    _loadEvents: function(specimen) {
+      if (specimen.availabilityStatus && specimen.availabilityStatus != 'Pending') {
+        specimenSvc.getEvents(this.specimen).then(events => this.ctx.events = events);
+      }
     }
   }
 }
