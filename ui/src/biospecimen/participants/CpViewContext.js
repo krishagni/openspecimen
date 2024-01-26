@@ -167,4 +167,8 @@ export default class CpViewContext {
 
     return this.specimenDictQ;
   }
+
+  async getSpecimenAddEditLayout() {
+    return this.getSpecimenDict().then(dict => specimenSvc.getLayout(this.cpId, dict));
+  }
 }

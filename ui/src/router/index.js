@@ -966,6 +966,32 @@ const routes = [
                         path: 'addedit',
                         name: 'VisitAddEdit',
                         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/AddEdit.vue')
+                      },
+                      {
+                        path: 'specimen/:specimenId',
+                        name: 'SpecimenRoot',
+                        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/DetailRoot.vue'),
+                        props: (route) => ({specimenId: route.params && route.params.specimenId}),
+                        children: [
+                          {
+                            path: 'detail',
+                            name: 'SpecimenDetail',
+                            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Detail.vue'),
+                            props: () => ({noNavButton: false}),
+                            children: [
+                              {
+                                path: 'overview',
+                                name: 'SpecimenDetail.Overview',
+                                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Overview.vue')
+                              }
+                            ]
+                          },
+                          {
+                            path: 'addedit',
+                            name: 'SpecimenAddEdit',
+                            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/AddEdit.vue')
+                          }
+                        ]
                       }
                     ]
                   }

@@ -3,6 +3,8 @@
   <os-page-toolbar>
     <template #default>
       <span v-if="specimen.id > 0">
+        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="edit" />
+
         <os-menu icon="plus" :label="$t('common.buttons.create')"
           :options="[
             {icon: 'flask',     caption: $t('specimens.derived'),  onSelect: createDerivatives},
@@ -116,6 +118,11 @@ export default {
   },
 
   methods: {
+    edit: function() {
+      const {cpId, cprId, visitId, eventId, id} = this.specimen;
+      routerSvc.goto('SpecimenAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId});
+    },
+
     createAliquots: function() {
       wfSvc.createAliquots(this.ctx.specimen);
     },

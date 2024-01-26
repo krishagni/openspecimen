@@ -63,7 +63,7 @@ export default {
       "labelCode": "specimens.type",
       "name": "specimen.type",
       "entity": "specimen",
-      "showWhen": "speimen.lineage != 'Aliquot'",
+      "showWhen": "specimen.lineage != 'Aliquot'",
       "showInOverviewWhen": "true == true"
     },
     {
@@ -125,7 +125,8 @@ export default {
       "attribute": "specimen_biohazard",
       "multiple": true,
       "selectProp": "value",
-      "showWhen": "specimen.lineage != 'Aliquot'"
+      "showWhen": "specimen.lineage != 'Aliquot'",
+      "showInOverviewWhen": "true == true"
     },
     {
       "type": "pv",
@@ -133,7 +134,8 @@ export default {
       "name": "specimen.pathology",
       "attribute": "pathology_status",
       "selectProp": "value",
-      "showWhen": "specimen.lineage != 'Aliquot'"
+      "showWhen": "specimen.lineage != 'Aliquot'",
+      "showInOverviewWhen": "true == true"
     },
     {
       "type": "pv",
@@ -141,7 +143,8 @@ export default {
       "name": "specimen.anatomicSite",
       "attribute": "anatomic_site",
       "selectProp": "value",
-      "showWhen": "specimen.lineage != 'Aliquot'"
+      "showWhen": "specimen.lineage != 'Aliquot'",
+      "showInOverviewWhen": "true == true"
     },
     {
       "type": "pv",
@@ -149,7 +152,8 @@ export default {
       "name": "specimen.laterality",
       "attribute": "laterality",
       "selectProp": "value",
-      "showWhen": "specimen.lineage != 'Aliquot'"
+      "showWhen": "specimen.lineage != 'Aliquot'",
+      "showInOverviewWhen": "true == true"
     },
     {
       "type": "number",
@@ -166,13 +170,15 @@ export default {
       "labelCode": "specimens.collection_date",
       "name": "specimen.collectionEvent.time",
       "showTime": true,
-      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.time"
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.collectionEvent.time"
     },
     {
       "type": "user",
       "labelCode": "specimens.collector",
       "name": "specimen.collectionEvent.user",
-      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.user"
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.collectionEvent.user"
     },
     {
       "type": "pv",
@@ -180,7 +186,8 @@ export default {
       "name": "specimen.collectionEvent.procedure",
       "attribute": "collection_procedure",
       "selectProp": "value",
-      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.procedure"
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.collectionEvent.procedure"
     },
     {
       "type": "pv",
@@ -188,20 +195,23 @@ export default {
       "name": "specimen.collectionEvent.container",
       "attribute": "collection_container",
       "selectProp": "value",
-      "showWhen": "specimen.lineage == 'New' || !!specimen.collectionEvent.container"
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.collectionEvent.container"
     },
     {
       "type": "datePicker",
       "labelCode": "specimens.receive_date",
-      "name": "specimen.received.time",
+      "name": "specimen.receivedEvent.time",
       "showTime": true,
-      "showWhen": "specimen.lineage == 'New' || !!specimen.receivedEvent.time"
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.receivedEvent.time"
     },
     {
       "type": "user",
       "labelCode": "specimens.receiver",
       "name": "specimen.receivedEvent.user",
-      "showWhen": "specimen.lineage == 'New' || !!specimen.receivedEvent.user"
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.receivedEvent.user"
     },
     {
       "type": "pv",
@@ -209,7 +219,8 @@ export default {
       "name": "specimen.receivedEvent.receivedQuality",
       "attribute": "receive_quality",
       "selectProp": "value",
-      "showWhen": "specimen.lineage == 'New' || !!specimen.receivedEvent.receivedQuality"
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.receivedEvent.receivedQuality"
     }
   ]
 }
