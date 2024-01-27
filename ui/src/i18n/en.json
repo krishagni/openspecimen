@@ -1083,6 +1083,7 @@
   },
 
   "specimens": {
+    "add_event": "Add Event",
     "additional_label": "Additional Label",
     "aliquot": "Aliquot",
     "aliquots": "Aliquots",
@@ -1110,6 +1111,8 @@
     "derived": "Derived",
     "description": "Description",
     "distributed": "Distributed",
+    "event_deleted": "Event {eventName} deleted.",
+    "event_saved": "Event {eventName} saved.",
     "extracted_from": "from {anatomicSite}",
     "freeze_thaw_cycles": "Freeze/Thaw Cycles",
     "image_id_url": "Image ID/URL",
@@ -1144,7 +1147,8 @@
     "specimen": "Specimen",
     "stored": "Stored",
     "type": "Type",
-    "unplanned": "Unplanned"
+    "unplanned": "Unplanned",
+    "update_event": "Update Event"
   },
 
   "user_groups": {

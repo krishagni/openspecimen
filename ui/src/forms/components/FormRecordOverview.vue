@@ -58,6 +58,10 @@ export default {
     };
   },
 
+  created() {
+    this.loadRecord();
+  },
+
   watch: {
     'record': function(newVal, oldVal) {
       if (newVal == oldVal) {

@@ -26,6 +26,8 @@ export default {
     'dropdown-menu': Menu
   },
 
+  emits: ['menu-toggled'],
+
   computed: {
     items: function() {
       return (this.options || []).map(
@@ -38,6 +40,7 @@ export default {
   methods: {
     toggle(event) {
       this.$refs.menu.toggle(event);
+      this.$emit('menu-toggled');
     },
 
     exec: function(event, cmd) {

@@ -1,6 +1,7 @@
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc from '@/biospecimen/services/Cpr.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 import settingSvc from '@/common/services/Setting.js';
@@ -170,5 +171,34 @@ export default class CpViewContext {
 
   async getSpecimenAddEditLayout() {
     return this.getSpecimenDict().then(dict => specimenSvc.getLayout(this.cpId, dict));
+  }
+
+  async getSpecimenEventForms(context) {
+    const {specimen} = context;
+    return Promise.all([specimenSvc.getEventForms(specimen.id), specimenSvc.getFormDataEntryRules(this.cpId)]).then(
+      ([eventForms, rules]) => {
+        let matchingRule = null;
+        for (let rule of rules) {
+          if (!rule.when) {
+            continue;
+          }
+
+          try {
+            if (exprUtil.eval(context, rule.when)) {
+              matchingRule = rule;
+              break;
+            }
+          } catch (err) {
+            alert('Invalid form data entry rule expression: ' + rule.when + ': ' + err);
+          }
+        }
+
+        if (matchingRule && matchingRule.forms) {
+          eventForms = eventForms.filter(({formName}) => matchingRule.forms.indexOf(formName) > -1);
+        }
+
+        return eventForms;
+      }
+    );
   }
 }

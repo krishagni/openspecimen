@@ -18,6 +18,9 @@
 
         <os-add-to-cart :specimens="[{id: specimen.id}]" />
 
+        <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
+          @menu-toggled="loadEventForms" v-if="specimen.availabilityStatus == 'Available'" />
+
         <os-button left-icon="times" :label="$t('common.buttons.close')" @click="closeSpecimen"
           v-if="!specimen.reserved && specimen.activityStatus == 'Active' && specimen.status == 'Collected'" />
 
@@ -45,7 +48,8 @@
         </template>
 
         <template #content>
-          <EventsSummaryList :events="ctx.events" />
+          <EventsSummaryList :events="ctx.events" @click="showEvent($event)"
+            @edit-event="editEvent($event)" @delete-event="deleteEvent($event)" />
         </template>
       </os-section>
     </os-grid-column>
@@ -70,6 +74,22 @@
   <os-delete-object ref="deleteSpmnDialog" :input="ctx.deleteOpts" />
 
   <os-close-specimen ref="closeSpmnDialog" :specimens="[ctx.specimen]" />
+
+  <os-dialog ref="eventOverviewDialog">
+    <template #header>
+      <span>{{ctx.event.name}}: #{{ctx.event.id}}</span>
+    </template>
+    <template #content>
+      <os-form-record-overview :record="ctx.eventRecord" />
+    </template>
+    <template #footer>
+      <os-button danger :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
+        v-if="!ctx.event.sysForm" />
+      <os-button primary :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
+        v-if="ctx.event.isEditable" />
+      <os-button primary :label="$t('common.buttons.done')" @click="closeEventOverview()" />
+    </template>
+  </os-dialog>
 </template>
 
 <script>
@@ -80,12 +100,15 @@ import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import wfSvc from '@/biospecimen/services/Workflow.js';
 
+import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
 import util  from '@/common/services/Util.js';
 
+import formSvc from '@/forms/services/Form.js';
+
 
 export default {
-  props: ['visit'],
+  props: ['cpr', 'visit'],
 
   components: {
     EventsSummaryList,
@@ -107,7 +130,9 @@ export default {
 
         routeQuery: this.$route.query,
 
-        children: []
+        children: [],
+
+        eventForms: undefined
       }
     };
   },
@@ -160,6 +185,59 @@ export default {
 
     cancelPrint: function() {
       this.$refs.printDialog.close();
+    },
+
+    loadEventForms: function() {
+      if (this.ctx.eventForms) {
+        return;
+      }
+
+      const context = {cp: this.cp, cpr: this.cpr, visit: this.visit, specimen: this.specimen};
+      this.cpViewCtx.getSpecimenEventForms(context).then(
+        eventForms => {
+          this.ctx.eventForms = eventForms
+            .filter(f => !f.sysForm)
+            .map(eventForm => ({caption: eventForm.formCaption, onSelect: () => this.addEvent(eventForm)}));
+        }
+      );
+    },
+
+    addEvent: function(form) {
+      const {cpId, cprId, visitId, eventId, id} = this.specimen;
+      routerSvc.goto('SpecimenEventAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId, formId: form.formId, formCtxtId: form.formCtxtId});
+    },
+
+    editEvent: function(event) {
+      const {cpId, cprId, visitId, eventId, id} = this.specimen;
+      const {formId, formCtxtId, id: recordId} = event;
+      routerSvc.goto('SpecimenEventAddEdit', {cpId, cprId, visitId, specimenId: id}, {eventId, formId, formCtxtId, recordId});
+    },
+
+    showEvent: function(event) {
+      const {formId, id: recordId} = event;
+      formSvc.getRecord({formId, recordId}, {includeMetadata: true}).then(
+        (record) => {
+          this.ctx.event = event;
+          this.ctx.eventRecord = record;
+          this.$refs.eventOverviewDialog.open();
+        }
+      );
+    },
+
+    deleteEvent: function(event) {
+      const {formId, id: recordId} = event;
+      formSvc.deleteRecord({formId, recordId}).then(
+        () => {
+          this.closeEventOverview();
+          alertsSvc.success({code: 'specimens.event_deleted', args: {eventName: event.name}});
+          this._loadEvents(this.specimen);
+        }
+      );
+    },
+
+    closeEventOverview: function() {
+      this.$refs.eventOverviewDialog.close();
+      this.ctx.event = this.ctx.eventRecord = null;
     },
 
     closeSpecimen: function() {
@@ -241,7 +319,8 @@ export default {
       if (specimen.availabilityStatus && specimen.availabilityStatus != 'Pending') {
         specimenSvc.getEvents(this.specimen).then(events => this.ctx.events = events);
       }
-    }
+    },
+
   }
 }
 </script>

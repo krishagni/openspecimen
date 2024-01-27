@@ -1,6 +1,6 @@
 <template>
   <div class="os-specimen-events">
-    <div class="event" v-for="event of events" :key="event.id">
+    <div class="event" v-for="event of events" :key="event.id" @click="onClick(event)">
       <div class="date-time">
         <div class="month">
           <span>{{$filters.formatDate(event.time, 'MMM yyyy')}}</span>
@@ -19,6 +19,12 @@
         <div class="description">
           <span><i>by</i> {{event.user}}</span>
         </div>
+        <div class="action-buttons" v-if="event.isEditable">
+          <os-button-group>
+            <os-button left-icon="edit" size="small" @click="editEvent($event, event)" />
+            <os-button left-icon="trash" size="small" @click="deleteEvent($event, event)" v-if="!event.sysForm" />
+          </os-button-group>
+        </div>
       </div>
     </div>
   </div>
@@ -26,7 +32,25 @@
 
 <script>
 export default {
-  props: ['events']
+  props: ['events'],
+
+  emits: ['edit-event', 'delete-event', 'click'],
+
+  methods: {
+    editEvent: function(uiEvent, event) {
+      uiEvent.stopPropagation();
+      this.$emit('edit-event', event);
+    },
+
+    deleteEvent: function(uiEvent, event) {
+      uiEvent.stopPropagation();
+      this.$emit('delete-event', event);
+    },
+
+    onClick: function(event) {
+      this.$emit('click', event);
+    }
+  }
 }
 </script>
 
@@ -76,6 +100,7 @@ export default {
 .os-specimen-events .event .summary .title {
   margin-top: 0rem;
   color: #666;
+  margin-bottom: 0.5rem;
 }
 
 .os-specimen-events .event .summary .description {
@@ -83,5 +108,9 @@ export default {
   flex-direction: column;
   font-size: 0.8rem;
   justify-content: space-around;
+}
+
+.os-specimen-events .event .summary .action-buttons {
+  margin-top: 1rem;
 }
 </style>

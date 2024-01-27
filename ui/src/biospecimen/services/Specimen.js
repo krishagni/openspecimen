@@ -262,6 +262,14 @@ class Specimen {
     );
   }
 
+  async getEventForms(spmnId) {
+    return http.get('specimens/' + spmnId + '/forms', {entityType: 'SpecimenEvent'});
+  }
+
+  async getFormDataEntryRules(cpId) {
+    return cpSvc.getWorkflow(cpId, 'formDataEntryRules').then(wf => (wf && wf['specimen']) || []);
+  }
+
   async _getAllocRule(ctxt, specimen) {
     ctxt.allocRules = ctxt.allocRules || {};
 

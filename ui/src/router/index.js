@@ -990,6 +990,12 @@ const routes = [
                             path: 'addedit',
                             name: 'SpecimenAddEdit',
                             component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/AddEdit.vue')
+                          },
+                          {
+                            path: 'addedit-event',
+                            name: 'SpecimenEventAddEdit',
+                            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/AddEditEvent.vue'),
+                            props: (route) => ({...route.query})
                           }
                         ]
                       }
