@@ -17,6 +17,7 @@ class Visit {
     return cpr.$visitsQ.then(
       (visits) => {
         for (let visit of visits) {
+          visit.cprId = cpr.id;
           visit.totalPrimarySpmns = visit.pendingPrimarySpmns + visit.plannedPrimarySpmnsColl +
             visit.uncollectedPrimarySpmns + visit.unplannedPrimarySpmnsColl;
           visit.reqStorage = visit.storedSpecimens + visit.notStoredSpecimens +

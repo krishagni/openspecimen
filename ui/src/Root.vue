@@ -174,6 +174,7 @@ a:focus, a:hover {
   width: 100%;
   float: left;
   word-break: break-all;
+  white-space: break-spaces;
 }
 
 .os-key-values .item .value img {

@@ -6,6 +6,61 @@ class Workflow {
 
   wfInstanceSvc = window.osSvc.tmWfInstanceSvc;
 
+  async collectVisitSpecimens(visit, repeat) {
+    if (!this.wfInstanceSvc) {
+      alert('Workflow module not installed!');
+      return;
+    }
+
+    let wfName = await this._getCollectVisitsWf(visit);
+    if (!wfName) {
+      wfName = 'sys-collect-visits';
+    }
+
+    const {id, cprId, cpId, cpShortTitle, eventId} = visit;
+    let inputItem = {cpr: {id: cprId, cpId, cpShortTitle}};
+    if (eventId && eventId > 0) {
+      inputItem.cpe = {id: eventId, cpId, cpShortTitle};
+    }
+
+    let inputType = undefined;
+    if (id > 0) {
+      inputItem.visit = {id, cpId, cpShortTitle};
+      inputType = 'visit';
+    }
+
+    const params = {repeatVisit: repeat, ...this._getVisitBreadcrumb(visit, this._getVisitDescription(visit))};
+    const opts = {inputType, params};
+    const instance = await this.wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
+    this.wfInstanceSvc.gotoInstance(instance.id);
+  }
+
+  async collectPending(visit) {
+    if (!this.wfInstanceSvc) {
+      alert('Workflow module not installed!');
+      return;
+    }
+
+    let wfName = await this._getCollectPendingSpmnsWf(visit);
+    if (!wfName) {
+      wfName = 'sys-collect-pending-specimens';
+    }
+
+    const {cprId, cpId, cpShortTitle, id, eventId} = visit;
+    let inputItem = {
+      cpr:   {id: cprId, cpId, cpShortTitle},
+      visit: {id,        cpId, cpShortTitle}
+    };
+
+    if (eventId && eventId > 0) {
+      inputItem.cpe = {id: eventId, cpId, cpShortTitle};
+    }
+
+    const opts = {params: this._getVisitBreadcrumb(visit, this.osSvc.i18nSvc.msg('participants.collect_specimens'))};
+    const instance = await this.wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
+    this.wfInstanceSvc.gotoInstance(instance.id);
+  }
+
   async addSpecimen(visit) {
     if (!this.wfInstanceSvc) {
       alert('Workflow module not installed!');
@@ -85,6 +140,14 @@ class Workflow {
 
     const instance = await this.wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], {params});
     this.wfInstanceSvc.gotoInstance(instance.id);
+  }
+
+  _getCollectVisitsWf({cpId}) {
+    return cpSvc.getWorkflowProperty(cpId, 'common', 'collectVisitsWf');
+  }
+
+  _getCollectPendingSpmnsWf({cpId}) {
+    return cpSvc.getWorkflowProperty(cpId, 'common', 'collectPendingSpecimensWf');
   }
 
   _getCollectUnplannedSpmnsWf({cpId}) {

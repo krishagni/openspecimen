@@ -17,36 +17,15 @@
     <os-grid-column width="8">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
-      <os-section v-if="occurredVisits.length > 0">
+      <os-section v-if="ctx.visits && ctx.visits.length > 0">
         <template #title>
-          <span v-t="'participants.occurred_visits'">Occurred Visits</span>
+          <span v-t="'participants.visits'">Visits</span>
         </template>
 
         <template #content>
-          <OccurredVisits :visits="occurredVisits" />
+          <Visits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
         </template>
       </os-section>
-
-      <os-section v-if="missedVisits.length > 0">
-        <template #title>
-          <span v-t="'participants.missed_or_not_collected_visits'">Missed/Not Collected Visits</span>
-        </template>
-
-        <template #content>
-          <MissedVisits :visits="missedVisits" />
-        </template>
-      </os-section>
-
-      <os-section v-if="pendingVisits.length > 0">
-        <template #title>
-          <span v-t="'participants.pending_visits'">Pending Visits</span>
-        </template>
-
-        <template #content>
-          <PendingVisits :cpr="ctx.cpr" :visits="pendingVisits" />
-        </template>
-      </os-section>
-
     </os-grid-column>
 
     <os-grid-column width="4">
@@ -76,17 +55,13 @@ import cprSvc from '@/biospecimen/services/Cpr.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 
-import MissedVisits from './MissedVisits.vue';
-import PendingVisits from './PendingVisits.vue';
-import OccurredVisits from './OccurredVisits.vue';
+import Visits from './Visits.vue';
 
 export default {
   props: ['cpr'],
 
   components: {
-    MissedVisits,
-    PendingVisits,
-    OccurredVisits
+    Visits
   },
 
   inject: ['cpViewCtx'],
@@ -94,6 +69,8 @@ export default {
   data() {
     return {
       ctx: {
+        cp: {},
+
         cpr: {},
 
         dict: [],
@@ -102,7 +79,9 @@ export default {
 
         visits: [],
 
-        routeQuery: this.$route.query
+        routeQuery: this.$route.query,
+
+        visitDict: undefined
       }
     };
   },
@@ -110,20 +89,11 @@ export default {
   async created() {
     this._setupCpr();
     this.ctx.dict = await this.cpViewCtx.getCprDict();
+    this.ctx.cp = await this.cpViewCtx.getCp();
+    this.ctx.visitDict = await this.cpViewCtx.getVisitDict();
   },
 
   computed: {
-    occurredVisits: function() {
-      return (this.ctx.visits || []).filter(visit => visit.status == 'Complete');
-    },
-
-    missedVisits: function() {
-      return (this.ctx.visits || []).filter(visit => ['Not Collected', 'Missed Collection'].indexOf(visit.status) >= 0);
-    },
-
-    pendingVisits: function() {
-      return (this.ctx.visits || []).filter(visit => !visit.status || visit.status == 'Pending');
-    }
   },
 
   watch: {
