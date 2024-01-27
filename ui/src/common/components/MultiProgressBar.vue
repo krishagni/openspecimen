@@ -11,11 +11,29 @@
 export default {
   props: ['total', 'parts'],
 
-  computed: {
-    bars: function() {
-      return (this.parts || []).map(
+  data() {
+    return {
+      bars: []
+    }
+  },
+
+  created() {
+    this._computeWidth(true);
+    setTimeout(() => this._computeWidth(), 10);
+  },
+
+  watch: {
+    'parts': function() {
+      this._computeWidth();
+    }
+  },
+
+  methods: {
+    _computeWidth: function(initZero) {
+      this.bars = (this.parts || []).map(
         (part) => {
-          const style = Object.assign({width: (part.value / this.total) * 100 + "%"}, part.style || {});
+          const width = (initZero ? 0 : (part.value * 100 / this.total)) + '%'
+          const style = Object.assign({width}, part.style || {});
           return { style, value: part.value }
         }
       ).filter(bar => bar.value > 0);
@@ -46,7 +64,7 @@ export default {
   color: #fff;
   white-space: nowrap;
   background-color: #007bff;
-  transition: width 0.6s ease; 
+  transition: width 2s ease;
   overflow: hidden;
 }
 </style>
