@@ -38,7 +38,8 @@ export default {
   border: 0px solid #ddd;
   border-radius: 0.5rem;
   cursor: pointer;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  /*box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;*/
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .3),0 2px 6px 2px rgba(60, 64, 67, .15);
 }
 
 .os-specimen-events .event .date-time {
