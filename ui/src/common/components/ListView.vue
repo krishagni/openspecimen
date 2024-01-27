@@ -765,7 +765,8 @@ export default {
 }
 
 .os-list-items .item.active {
-  background: #e9ecef;
+  /*background: #e9ecef;*/
+  border: 0.125rem solid #428bca;
 }
 
 .os-list-items .item .header {
