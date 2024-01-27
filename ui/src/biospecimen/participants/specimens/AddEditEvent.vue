@@ -89,7 +89,7 @@ export default {
     },
 
     _navToOverview: function({cpId, cprId, visitId, id: specimenId}) {
-      if (id > 0) {
+      if (specimenId > 0) {
         routerSvc.goto('ParticipantsListItemSpecimenDetail.Overview', {cpId, cprId, visitId, specimenId});
       } else {
         routerSvc.back();
