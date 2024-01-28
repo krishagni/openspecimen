@@ -61,7 +61,7 @@
                 @click="toggleSelection(itemIdx)" />
             </td>
 
-            <td v-if="firstColumn">
+            <td v-if="firstColumn" :style="{display: treeLayout ? 'flex': ''}">
               <div v-show="treeLayout && !showFlat" class="node-expander"
                 :style="{'padding-left':  itemModel.depth + 'rem'}">
                 <a @click="toggleNode(itemModel, itemIdx)">
@@ -617,7 +617,7 @@ table th .align-icon {
 }
 
 table th .more-options :deep(button) {
-  padding: 2px 4px;
+  margin-left: 0.5rem;
 }
 
 table td .field-container {

@@ -16,22 +16,18 @@
             <span v-show="!!visit.name"> | {{visit.name}}</span>
           </h4>
           <div class="action-buttons" @click="$event.stopPropagation()">
-            <os-button-group>
-              <os-button left-icon="eye"  size="small" v-os-tooltip.bottom="$t('participants.view_visit')"
-                @click="gotoVisit(visit)" />
-              <os-button left-icon="redo" size="small" v-os-tooltip.bottom="$t('participants.new_visit')"
-                @click="repeatVisit(visit)" v-if="visit.status && visit.status != 'Pending'" />
-            </os-button-group>
-            <os-button-group>
-              <os-button left-icon="flask" size="small"
-                v-os-tooltip.bottom="$t('participants.collect_pending_specimens')" @click="collectPending(visit)"
-                v-if="!visit.status || visit.status == 'Pending' || visit.status == 'Complete' "/>
-              <os-button left-icon="plus" size="small"
-                v-os-tooltip.bottom="$t('participants.collect_unplanned_specimens')" @click="addSpecimen(visit)"
-                v-if="visit.status == 'Complete'" />
-              <os-button left-icon="print" size="small" v-os-tooltip.bottom="$t('participants.print_specimen_labels')"
-                @click="printLabels(visit)" v-if="visit.status == 'Complete'" />
-            </os-button-group>
+            <os-button left-icon="eye"  size="small" v-os-tooltip.bottom="$t('participants.view_visit')"
+              @click="gotoVisit(visit)" />
+            <os-button left-icon="redo" size="small" v-os-tooltip.bottom="$t('participants.new_visit')"
+              @click="repeatVisit(visit)" v-if="visit.status && visit.status != 'Pending'" />
+            <os-button left-icon="flask" size="small"
+              v-os-tooltip.bottom="$t('participants.collect_pending_specimens')" @click="collectPending(visit)"
+              v-if="!visit.status || visit.status == 'Pending' || visit.status == 'Complete' "/>
+            <os-button left-icon="plus" size="small"
+              v-os-tooltip.bottom="$t('participants.collect_unplanned_specimens')" @click="addSpecimen(visit)"
+              v-if="visit.status == 'Complete'" />
+            <os-button left-icon="print" size="small" v-os-tooltip.bottom="$t('participants.print_specimen_labels')"
+              @click="printLabels(visit)" v-if="visit.status == 'Complete'" />
           </div>
         </div>
         <div class="stats">
@@ -206,8 +202,8 @@ export default {
   display: flex;
 }
 
-.os-visit-card .headline .action-buttons :deep(.os-btn-group) {
-  margin-left: 0.5rem;
+.os-visit-card .headline .action-buttons :deep(.btn) {
+  margin-right: 0.5rem;
 }
 
 .os-visit-card .content .stats {

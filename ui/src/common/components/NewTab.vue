@@ -33,10 +33,12 @@ export default {
 a {
   border: 1px solid #ccc;
   color: #666;
-  padding: 1px 6px;
+  padding: 3px 7px 3px;
   line-height: inherit;
   display: inline-block;
   border-radius: 50%;
+  height: 1.75rem;
+  width: 1.75rem;
 }
 
 a:hover {

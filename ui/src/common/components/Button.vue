@@ -91,6 +91,8 @@ button.icon-btn {
   border-radius: 50%;
   font-size: 1rem;
   background: transparent;
+  height: 1.75rem;
+  width: 1.75rem;
 }
 
 .btn.btn-xs {
