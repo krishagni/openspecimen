@@ -3,8 +3,6 @@
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="edit" />
 
-      <os-button left-icon="plus" :label="$t('participants.add_to_another')" @click="addToAnother" />
-
       <os-button left-icon="user-secret" :label="$t('participants.anonymize')" @click="anonymize" />
 
       <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" />
@@ -108,12 +106,6 @@ export default {
     edit: function() {
       const cpr = this.ctx.cpr;
       routerSvc.goto('ParticipantAddEdit', {cpId: cpr.cpId, cprId: cpr.id});
-    },
-
-    addToAnother: function() {
-      const route = this.$route.matched[this.$route.matched.length - 1];
-      const detailRouteName = route.name.split('.')[0];
-      routerSvc.goto(detailRouteName + '.NewReg');
     },
 
     anonymize: function() {
