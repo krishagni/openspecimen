@@ -337,6 +337,11 @@ export default {
       this.ctx.step = step;
     },
 
+    cancel: function() {
+      this.ctx.selectedEvent = null;
+      this._navToNextView(this.dataCtx.cpr);
+    },
+
     _saveOrUpdate: function(cpr) {
       const toSave = util.clone(cpr);
       toSave.participant.source = 'OpenSpecimen';
