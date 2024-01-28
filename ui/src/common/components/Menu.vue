@@ -69,6 +69,9 @@ export default {
   max-width: 32rem;
   max-height: 35rem;
   overflow: auto;
+
+  border-radius: 1.25rem;
+  margin-top: 0.5rem;
 }
 
 </style>
