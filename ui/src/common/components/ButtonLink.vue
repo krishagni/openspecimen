@@ -46,6 +46,8 @@ export default {
   font-size: inherit;
   line-height: inherit;
   cursor: pointer;
+
+  border-radius: 1.25rem;
 }
 
 .os-page-toolbar a.button-link:hover {

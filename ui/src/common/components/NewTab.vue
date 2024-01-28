@@ -31,13 +31,16 @@ export default {
 <style scoped>
 
 a {
-  background: #f5f5f5!important;
   border: 1px solid #ccc;
   color: #666;
-  border-radius: 3px;
   padding: 1px 6px;
   line-height: inherit;
   display: inline-block;
+  border-radius: 50%;
 }
 
+a:hover {
+  background: #ddd;
+  border: 1px solid #a5a5a5;
+}
 </style>
