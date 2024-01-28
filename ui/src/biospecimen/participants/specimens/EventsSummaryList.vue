@@ -19,11 +19,14 @@
         <div class="description">
           <span><i>by</i> {{event.user}}</span>
         </div>
-        <div class="action-buttons" v-if="event.isEditable">
-          <os-button-group>
-            <os-button left-icon="edit" size="small" @click="editEvent($event, event)" />
-            <os-button left-icon="trash" size="small" @click="deleteEvent($event, event)" v-if="!event.sysForm" />
+        <div class="action-buttons" v-if="event.sysForm || event.isEditable">
+          <os-button-group class="buttons" v-if="event.isEditable">
+            <os-button left-icon="edit" size="small" v-os-tooltip.bottom="$t('specimens.edit_event')"
+              @click="editEvent($event, event)" />
+            <os-button left-icon="trash" size="small" v-os-tooltip.bottom="$t('specimens.delete_event')"
+              @click="deleteEvent($event, event)" v-if="!event.sysForm" />
           </os-button-group>
+          <os-tag class="info" type="info" :rounded="true" :value="$t('specimens.system_event')" v-if="event.sysForm" />
         </div>
       </div>
     </div>
@@ -112,5 +115,14 @@ export default {
 
 .os-specimen-events .event .summary .action-buttons {
   margin-top: 1rem;
+  display: flex;
+}
+
+.os-specimen-events .event .summary .action-buttons .buttons {
+  flex: 1;
+}
+
+.os-specimen-events .event .summary .action-buttons .info :deep(.p-tag-value) {
+  line-height: 1;
 }
 </style>

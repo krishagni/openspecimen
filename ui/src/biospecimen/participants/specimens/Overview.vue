@@ -83,13 +83,22 @@
       <os-form-record-overview :record="ctx.eventRecord" />
     </template>
     <template #footer>
-      <os-button danger :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
+      <os-button text   :label="$t('common.buttons.cancel')" @click="closeEventOverview()" />
+      <os-button danger left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
         v-if="!ctx.event.sysForm" />
-      <os-button primary :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
+      <os-button primary left-icon="edit" :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
         v-if="ctx.event.isEditable" />
-      <os-button primary :label="$t('common.buttons.done')" @click="closeEventOverview()" />
     </template>
   </os-dialog>
+
+  <os-confirm ref="eventDeleteConfirmDialog">
+    <template #title>
+      <span v-t="'common.delete_confirmation'">Confirm Delete</span>
+    </template>
+    <template #message>
+      <span v-t="{path: 'specimens.delete_event_q', args: ctx.event}"></span>
+    </template>
+  </os-confirm>
 </template>
 
 <script>
@@ -225,12 +234,21 @@ export default {
     },
 
     deleteEvent: function(event) {
-      const {formId, id: recordId} = event;
-      formSvc.deleteRecord({formId, recordId}).then(
-        () => {
-          this.closeEventOverview();
-          alertsSvc.success({code: 'specimens.event_deleted', args: {eventName: event.name}});
-          this._loadEvents(this.specimen);
+      this.ctx.event = event;
+      this.$refs.eventDeleteConfirmDialog.open().then(
+        resp => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          const {formId, id: recordId} = event;
+          formSvc.deleteRecord({formId, recordId}).then(
+            () => {
+              this.closeEventOverview();
+              alertsSvc.success({code: 'specimens.event_deleted', args: {eventName: event.name}});
+              this._loadEvents(this.specimen);
+            }
+          );
         }
       );
     },

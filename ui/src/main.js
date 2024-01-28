@@ -38,6 +38,7 @@ import CommonFilters     from '@/common/filters';
 import AdminServices     from '@/administrative/services';
 import BioSpmnComponents from '@/biospecimen/components';
 import BioSpmnServices   from '@/biospecimen/services';
+import DeFormComponents  from '@/forms/components';
 
 import Layout from '@/administrative/containers/Layout.vue';
 
@@ -49,7 +50,8 @@ const app = createApp(Root)
   .use(CommonFilters)
   .use(AdminServices)
   .use(BioSpmnComponents)
-  .use(BioSpmnServices);
+  .use(BioSpmnServices)
+  .use(DeFormComponents);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);
