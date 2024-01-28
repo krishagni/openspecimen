@@ -25,14 +25,14 @@
               </div>
             </td>
             <td class="actioncol">
-              <os-button class="inline-button" left-icon="times" @click="removeSfRow(sfRdIdx)" />
+              <os-button left-icon="times" @click="removeSfRow(sfRdIdx)" />
             </td>
           </tr>
         </tbody>
       </table> 
     </div>
 
-    <os-button class="inline-button" left-icon="plus"
+    <os-button text left-icon="plus"
       :label="inputValue && inputValue.length > 0 ? $t('common.buttons.add_another') : $t('common.buttons.add')"
       @click="addSfRow"
     />
@@ -246,12 +246,12 @@ export default {
 }
 
 .os-subform table .actioncol {
-  min-width: 5rem;
-  max-width: 5rem;
+  /*min-width: 5rem;
+  max-width: 5rem;*/
 }
 
 .os-subform table .actioncol :deep(button) {
-  background: #fff;
+  /*background: #fff;*/
 }
 
 .os-subform[disabled="true"] button {
