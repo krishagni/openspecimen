@@ -47,7 +47,9 @@ export default {
   line-height: inherit;
   cursor: pointer;
 
-  border-radius: 1.25rem;
+  border-radius: 1.125rem;
+  height: 2.25rem;
+  padding: 7px 16px;
 }
 
 .os-page-toolbar a.button-link:hover {

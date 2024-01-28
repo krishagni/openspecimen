@@ -72,7 +72,13 @@ button {
   font-size: inherit;
   line-height: inherit;
   cursor: pointer;
-  border-radius: 1.25rem;
+  border-radius: 1.125rem;
+}
+
+.os-page-toolbar button:not(.icon-btn),
+button:not(.icon-btn) {
+  height: 2.25rem;
+  padding: 0rem 1rem;
 }
 
 .os-page-toolbar button:hover,

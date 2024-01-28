@@ -22,12 +22,12 @@
   }
 
   .os-page-toolbar :deep(button) {
-    margin-right: 4px;
+    margin-right: 0.5rem;
   }
 
   .os-page-toolbar :deep(.os-btn-group) {
     display: inline-block;
-    margin-right: 4px;
+    margin-right: 0.5rem;
   }
 
   .os-page-toolbar :deep(.os-btn-group button) {

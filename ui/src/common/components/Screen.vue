@@ -19,11 +19,11 @@ export default {
 }
 
 .os-screen :deep(.os-page-header) {
-  border-bottom: 0;
+  /* border-bottom: 0; */
 }
 
 .os-screen :deep(> div:not(:last-child) .os-page) {
-  /* border-right: 1px solid #ddd; */
+  border-right: 1px solid #ddd;
 }
 
 .os-screen :deep(> div:not(:first-child)) {

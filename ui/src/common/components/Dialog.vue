@@ -62,7 +62,7 @@ export default {
 <style>
 
 .p-dialog .p-dialog-header {
-  height: 46px;
+  height: 52px;
   background-color: rgb(237, 239, 240);
   font-size: 18px;
   color: rgb(35, 35, 35);
@@ -70,7 +70,7 @@ export default {
 }
 
 .p-dialog .p-dialog-footer {
-  height: 46px;
+  height: 52px;
   background-color: rgb(237, 239, 240);
   text-align: right;
   padding: 0px;
