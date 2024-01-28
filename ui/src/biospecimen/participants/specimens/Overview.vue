@@ -83,7 +83,7 @@
       <os-form-record-overview :record="ctx.eventRecord" />
     </template>
     <template #footer>
-      <os-button text   :label="$t('common.buttons.cancel')" @click="closeEventOverview()" />
+      <os-button text   :label="$t('common.buttons.close')" @click="closeEventOverview()" />
       <os-button danger left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
         v-if="!ctx.event.sysForm" />
       <os-button primary left-icon="edit" :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
