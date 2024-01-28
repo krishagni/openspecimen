@@ -1,8 +1,12 @@
 <template>
   <div class="os-visit-card" v-for="(visit, index) of visits" :key="'v_' + index" @click="showVisitDetail(visit)">
     <div class="summary">
-      <div :class="dateClass(visit)">
-        <span class="month-year">{{$filters.formatDate(visit.visitDate || visit.anticipatedVisitDate, 'MMM yyyy', '?')}}</span>
+      <div :class="dateClass(visit)"
+        v-os-tooltip.bottom="$t(!visit.status || visit.status == 'Pending' ?
+          'participants.anticipated_visit_date' : 'participants.visit_date')">
+        <span class="month-year">
+          {{$filters.formatDate(visit.visitDate || visit.anticipatedVisitDate, 'MMM yyyy', '?')}}
+        </span>
         <span class="day">{{$filters.formatDate(visit.visitDate || visit.anticipatedVisitDate, 'dd', '?')}}</span>
       </div>
       <div class="content">
@@ -13,17 +17,20 @@
           </h4>
           <div class="action-buttons" @click="$event.stopPropagation()">
             <os-button-group>
-              <os-button left-icon="eye"  size="small" @click="gotoVisit(visit)" />
-              <os-button left-icon="redo" size="small" @click="repeatVisit(visit)"
-                v-if="visit.status && visit.status != 'Pending'" />
+              <os-button left-icon="eye"  size="small" v-os-tooltip.bottom="$t('participants.view_visit')"
+                @click="gotoVisit(visit)" />
+              <os-button left-icon="redo" size="small" v-os-tooltip.bottom="$t('participants.new_visit')"
+                @click="repeatVisit(visit)" v-if="visit.status && visit.status != 'Pending'" />
             </os-button-group>
             <os-button-group>
-              <os-button left-icon="flask" size="small" @click="collectPending(visit)"
+              <os-button left-icon="flask" size="small"
+                v-os-tooltip.bottom="$t('participants.collect_pending_specimens')" @click="collectPending(visit)"
                 v-if="!visit.status || visit.status == 'Pending' || visit.status == 'Complete' "/>
-              <os-button left-icon="plus" size="small" @click="addSpecimen(visit)"
+              <os-button left-icon="plus" size="small"
+                v-os-tooltip.bottom="$t('participants.collect_unplanned_specimens')" @click="addSpecimen(visit)"
                 v-if="visit.status == 'Complete'" />
-              <os-button left-icon="print" size="small" @click="printLabels(visit)"
-                v-if="visit.status == 'Complete'" />
+              <os-button left-icon="print" size="small" v-os-tooltip.bottom="$t('participants.print_specimen_labels')"
+                @click="printLabels(visit)" v-if="visit.status == 'Complete'" />
             </os-button-group>
           </div>
         </div>
@@ -210,10 +217,12 @@ export default {
 .os-visit-card .content .stats .collection {
   flex: 1;
   margin-right: 0.5rem;
+  max-width: calc(50% - 0.5rem);
 }
 .os-visit-card .content .stats .utilisation {
   flex: 1;
   margin-left: 0.5rem;
+  max-width: calc(50% - 0.5rem);
 }
 
 .os-visit-card .details {
