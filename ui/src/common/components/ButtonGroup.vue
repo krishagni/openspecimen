@@ -22,4 +22,8 @@ export default {
   border-bottom-left-radius: 0px;
   border-left: 0px;
 }
+
+.os-btn-group :deep(.icon-btn) {
+  border: 1px solid #ccc;
+}
 </style>

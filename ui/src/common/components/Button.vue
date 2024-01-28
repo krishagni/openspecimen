@@ -36,6 +36,10 @@ export default {
         kls += ' no-outline';
       }
 
+      if (!this.label) {
+        kls += ' icon-btn';
+      }
+
       return kls;
     },
 
@@ -63,18 +67,24 @@ button {
   background: #f5f5f5;
   border: 1px solid #ccc;
   vertical-align: initial;
-  border-radius: 3px;
   padding: 4px 10px;
   display: inline-block;
   font-size: inherit;
   line-height: inherit;
   cursor: pointer;
+  border-radius: 1.25rem;
 }
 
 .os-page-toolbar button:hover,
-button:hover {
+button:hover, button.icon-btn:hover {
   background: #ddd;
   border: 1px solid #a5a5a5;
+}
+
+button.icon-btn {
+  border-radius: 50%;
+  font-size: 1rem;
+  background: transparent;
 }
 
 .btn.btn-xs {
@@ -143,7 +153,8 @@ button:hover {
 
 .btn.text:hover {
   color: #2a6496;
-  text-decoration: underline;
+  text-decoration: none;
+  border: 1px solid #428bca;
 }
 
 .btn.no-outline {

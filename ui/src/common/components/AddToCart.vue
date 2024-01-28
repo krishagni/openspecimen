@@ -1,7 +1,7 @@
 <template>
   <os-button-group>
     <os-button left-icon="cart-plus" :label="$t('common.add_to_cart.title')" @click="addToMyDefaultCart" />
-    <os-button left-icon="caret-down" @click="toggleCartOptions" />
+    <os-button label="&#8203;" left-icon="caret-down" @click="toggleCartOptions" />
   </os-button-group>
 
   <os-overlay class="os-carts" ref="cartOptions" style="margin-left: -112px;">
