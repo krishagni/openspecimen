@@ -120,7 +120,7 @@ export default {
 .os-specimen-events .event .summary .action-buttons {
   margin-top: 1rem;
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 .os-specimen-events .event .summary .action-buttons .buttons {
