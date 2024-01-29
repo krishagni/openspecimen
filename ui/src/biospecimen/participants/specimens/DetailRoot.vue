@@ -5,7 +5,7 @@
 
 <script>
 
-import {provide, ref} from 'vue';
+import {provide, ref, watch, toRefs} from 'vue';
 
 import formUtil  from '@/common/services/FormUtil.js';
 import spmnSvc  from '@/biospecimen/services/Specimen.js';
@@ -16,21 +16,27 @@ export default {
   async setup(props) {
     const specimen = ref({});
     provide('specimen', specimen);
+    specimen.value = {};
 
-    specimen.value = await spmnSvc.getById(props.specimenId);
-    formUtil.createCustomFieldsMap(specimen.value, true);
-    return { specimen };
-  },
-
-  watch: {
-    specimenId: async function(newVal, oldVal) {
-      if (newVal == oldVal || newVal == this.specimen.id) {
-        return;
-      }
-
-      this.specimen = await spmnSvc.getById(newVal);
-      formUtil.createCustomFieldsMap(this.specimen, true);
+    const {specimenId} = toRefs(props);
+    const loadSpecimen = async (id) => {
+      specimen.value = await spmnSvc.getById(id);
+      formUtil.createCustomFieldsMap(specimen.value, true);
     }
+
+    loadSpecimen(specimenId.value);
+    watch(
+      specimenId,
+      async (newVal, oldVal) => {
+        if (newVal == oldVal || newVal == specimen.value.id) {
+          return;
+        }
+
+        loadSpecimen(newVal);
+      }
+    );
+
+    return { specimen };
   }
 }
 </script>
