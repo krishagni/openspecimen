@@ -6,8 +6,12 @@
     </template>
 
     <os-table-form ref="spmnsTable" :tree-layout="true" :read-only="true"
-      :data="{}" :items="items" :schema="{columns: fields}">
+      :data="{}" :items="items" :schema="{columns: fields}" v-if="items.length > 0">
     </os-table-form>
+
+    <os-message :type="info" v-else>
+      <span v-t="'specimens.no_specimens'"> </span>
+    </os-message>
   </os-panel>
 </template>
 

@@ -30,7 +30,7 @@ export default {
 <style scoped>
 
 .os-panel {
-  height: 100%;
+  max-height: 100%;
 }
 
 .os-panel :deep(.p-panel-header) {
