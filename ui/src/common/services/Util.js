@@ -125,7 +125,7 @@ class Util {
   }
 
   linkify(text) {
-    if (!text) {
+    if (!text || typeof text != 'string') {
       return text;
     }
 
