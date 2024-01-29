@@ -1,11 +1,11 @@
 
 <template>
-  <router-view :cpr="cpr" :visit="visit" :specimen="specimen" :key="specimen.id" v-if="specimen.id > 0" />
+  <router-view :cpr="cpr" :visit="visit" :specimen="specimen" :key="viewKey" v-if="viewKey && loaded" />
 </template>
 
 <script>
 
-import {provide, ref, watch, toRefs} from 'vue';
+import {provide, ref} from 'vue';
 
 import formUtil  from '@/common/services/FormUtil.js';
 import spmnSvc  from '@/biospecimen/services/Specimen.js';
@@ -13,30 +13,45 @@ import spmnSvc  from '@/biospecimen/services/Specimen.js';
 export default {
   props: ['cpr', 'visit', 'specimenId'],
 
-  async setup(props) {
+  async setup() {
     const specimen = ref({});
     provide('specimen', specimen);
-    specimen.value = {};
 
-    const {specimenId} = toRefs(props);
-    const loadSpecimen = async (id) => {
-      specimen.value = await spmnSvc.getById(id);
-      formUtil.createCustomFieldsMap(specimen.value, true);
+    const loaded = ref(false);
+    return { specimen, loaded };
+  },
+
+  created() {
+    if (this.specimenId > 0) {
+      this._loadSpecimen(this.specimenId);
     }
+  },
 
-    loadSpecimen(specimenId.value);
-    watch(
-      specimenId,
-      async (newVal, oldVal) => {
-        if (newVal == oldVal || newVal == specimen.value.id) {
-          return;
-        }
-
-        loadSpecimen(newVal);
+  computed: {
+    viewKey: function() {
+      if (this.specimenId > 0) {
+        return 's-' + this.specimenId;
       }
-    );
+      return '';
+    }
+  },
 
-    return { specimen };
+  watch: {
+    specimenId: function(newVal, oldVal) {
+      if (newVal == oldVal || newVal == this.specimen.id) {
+        return;
+      }
+
+      this._loadSpecimen(newVal);
+    }
+  },
+
+  methods: {
+    _loadSpecimen: async function(specimenId) {
+      this.specimen = await spmnSvc.getById(specimenId);
+      formUtil.createCustomFieldsMap(this.specimen, true);
+      this.loaded = true;
+    }
   }
 }
 </script>
