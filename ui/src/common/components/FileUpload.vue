@@ -1,10 +1,10 @@
 
 <template>
-  <div v-if="!inputValue">
+  <div class="os-file-upload" v-if="!inputValue">
     <FileUpload ref="uploader" mode="basic" name="file" :auto="auto != false" :url="url" :tabindex="tabOrder"
       :disabled="disabled" @before-send="addHeaders" @upload="onUpload" @error="onError" />
   </div>
-  <div v-else class="os-selected-file">
+  <div class="os-selected-file" v-else>
     <span class="filename">{{inputValue.filename}}</span>
     <Button left-icon="times" :disabled="disabled" @click="removeFile"/>
   </div>
@@ -112,6 +112,10 @@ export default {
 </script>
 
 <style scoped>
+.os-file-upload :deep(.p-fileupload .p-button) {
+  border-radius: 1.125rem;
+}
+
 .os-selected-file {
   display: flex;
 }
@@ -124,7 +128,6 @@ export default {
   border-radius: 4px;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
-  border-right: 0px;
 }
 
 .os-selected-file button.btn {
@@ -136,9 +139,11 @@ export default {
   margin-right: 0px!important;
   border: 1px solid;
   border-color: #007bff;
+  border-radius: 4px;
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
   background: #fff;
+  height: 38px;
 }
 
 .os-selected-file button.btn:hover {

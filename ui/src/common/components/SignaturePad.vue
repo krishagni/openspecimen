@@ -160,7 +160,7 @@ export default {
   padding: 0.5rem 0.75rem;
   border: 1px solid;
   border-color: #007bff;
-  border-radius: 4px
+  border-radius: 1.125rem;
 }
 
 </style>

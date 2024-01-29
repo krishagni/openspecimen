@@ -32,7 +32,7 @@
       </table> 
     </div>
 
-    <os-button text left-icon="plus"
+    <os-button class="inline-button" left-icon="plus"
       :label="inputValue && inputValue.length > 0 ? $t('common.buttons.add_another') : $t('common.buttons.add')"
       @click="addSfRow"
     />
