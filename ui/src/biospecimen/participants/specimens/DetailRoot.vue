@@ -29,15 +29,12 @@ export default {
 
   computed: {
     viewKey: function() {
-      if (this.specimenId > 0) {
-        return 's-' + this.specimenId;
-      }
-      return '';
+      return 's-' + (this.specimenId > 0 ? this.specimenId : 'unknown');
     }
   },
 
   watch: {
-    specimenId: function(newVal, oldVal) {
+    '$route.params.specimenId': function(newVal, oldVal) {
       if (newVal == oldVal || newVal == this.specimen.id) {
         return;
       }
