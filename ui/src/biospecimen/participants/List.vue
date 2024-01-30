@@ -103,6 +103,7 @@ export default {
     const cpViewCtx = inject('cpViewCtx').value;
     const cp = await cpViewCtx.getCp();
 
+    console.log('List view initialisation: ' + JSON.stringify(props));
     let ctx = reactive({
       ui: ui,
 
@@ -144,21 +145,23 @@ export default {
   },
 
   watch: {
-    '$route.params.cprId': function(newValue, oldValue) {
-      if (this.ctx.view != 'participants_list') {
-        return;
-      }
+    '$route.query.view': function(newValue) {
+      console.log('Detected change in view. View = ' + newValue + ', params = ' + JSON.stringify(this.$route.params));
+      this.ctx.view = newValue || 'participants_list';
+    },
 
-      if (newValue == undefined || newValue == oldValue) {
+    '$route.params.cprId': function(newValue, oldValue) {
+      console.log('Detected change in CPR ID. CPR ID = ' + newValue + ', params = ' + JSON.stringify(this.$route.params));
+      const cprId = this.ctx.cprId = newValue;
+      if (this.ctx.view != 'participants_list' || newValue == undefined || newValue == oldValue) {
         // new value is undefined when the route changes
         return;
       }
 
-      this.ctx.cprId = newValue;
       if (newValue > 0) {
-        let selectedRow = this.items.find(rowObject => rowObject.id == this.ctx.cprId);
+        let selectedRow = this.items.find(rowObject => rowObject.id == cprId);
         if (!selectedRow) {
-          selectedRow = {id: this.ctx.cprId};
+          selectedRow = {id: cprId};
         }
 
         this.showDetails(selectedRow);
@@ -168,11 +171,12 @@ export default {
     },
 
     '$route.params.specimenId': function(newValue, oldValue) {
+      console.log('Detected change in specimen ID. Specimen ID = ' + newValue + ', params = ' + JSON.stringify(this.$route.params));
+      const specimenId = this.ctx.specimenId = newValue;
       if (this.ctx.view != 'specimens_list') {
         return;
       }
 
-      this.ctx.specimenId = newValue;
       if (newValue == undefined || newValue == oldValue) {
         // new value is undefined when the route changes
         if (newValue == undefined && this.$route.params.cprId != -1) {
@@ -185,9 +189,9 @@ export default {
       }
 
       if (newValue > 0) {
-        let selectedRow = this.items.find(rowObject => rowObject.id == this.ctx.specimenId);
+        let selectedRow = this.items.find(rowObject => rowObject.id == specimenId);
         if (!selectedRow) {
-          selectedRow = {id: this.ctx.specimenId};
+          selectedRow = {id: specimenId};
         }
 
         this.showDetails(selectedRow);
@@ -198,10 +202,6 @@ export default {
 
     '$route.query.filters': function(newValue) {
       this.ctx.query = newValue;
-    },
-
-    '$route.query.view': function(newValue) {
-      this.ctx.view = newValue || 'participants_list';
     }
   },
 
@@ -227,10 +227,11 @@ export default {
 
     onItemRowClick: function(event) {
       const params = event.hidden || {};
-      if (this.ctx.view == 'participants_list') {
-        routerSvc.goto('ParticipantsListItemDetail.Overview', { ...params }, {filters: this.ctx.query});
+      const {view} = this.ctx;
+      if (view == 'participants_list') {
+        routerSvc.goto('ParticipantsListItemDetail.Overview', { ...params }, {filters: this.ctx.query, view});
       } else {
-        routerSvc.goto('ParticipantsListItemSpecimenDetail.Overview', {...params }, {filters: this.ctx.query, view: this.ctx.view});
+        routerSvc.goto('ParticipantsListItemSpecimenDetail.Overview', {...params }, {filters: this.ctx.query, view});
       }
     },
 

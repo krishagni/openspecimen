@@ -56,11 +56,12 @@ export default {
       let url = '';
       if (specimen) {
         const route = routerSvc.getCurrentRoute();
-        const params = {...specimen, specimenId: specimen.id || -1}
+        const params = {...specimen, specimenId: specimen.id || -1};
+        const query  = {view: this.$route.query.view};
         if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-          url = routerSvc.getUrl('ParticipantsListItemSpecimenDetail.Overview', params);
+          url = routerSvc.getUrl('ParticipantsListItemSpecimenDetail.Overview', params, query);
         } else {
-          url = routerSvc.getUrl('SpecimenDetail.Overview', params);
+          url = routerSvc.getUrl('SpecimenDetail.Overview', params, query);
         }
       }
 
