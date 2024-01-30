@@ -27,16 +27,6 @@ export default {
   margin-bottom: 0px;
 }
 
-.os-line-section > .title:after {
-  content: '';
-  display: block;
-  margin-top: -10px;
-  margin-bottom: 20px;
-  border: 0;
-  border-top: 1px solid ;
-  border-color: #E6E6E6;
-}
-
 .os-line-section > .title {
   background: #ffffff;
 }
