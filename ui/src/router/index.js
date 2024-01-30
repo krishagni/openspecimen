@@ -841,7 +841,9 @@ const routes = [
                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/List.vue'),
                 props: (route) => ({
                   cprId: route.params && route.params.cprId,
-                  filters: route.query.filters
+                  specimenId: route.params && route.params.specimenId,
+                  filters: route.query.filters,
+                  view: route.query.view || 'participants_list'
                 }),
                 children: [
                   {

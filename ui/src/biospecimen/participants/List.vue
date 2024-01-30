@@ -8,7 +8,8 @@
           </template>
 
           <span>
-            <h3 v-t="'participants.list'">Participants</h3>
+            <h3 v-t="'participants.list'" v-if="ctx.view == 'participants_list'">Participants</h3>
+            <h3 v-t="'specimens.list'" v-else>Specimens</h3>
           </span>
 
           <template #right>
@@ -22,14 +23,16 @@
               :list="ctx.listInfo.list"
               :page-size="ctx.listInfo.pageSize"
               :list-size="ctx.listInfo.size"
-              @updateListSize="getParticipantsCount"
+              @updateListSize="getListItemsCount"
             />
           </template>
         </os-page-head>
         <os-page-body v-if="ctx.inited">
           <os-page-toolbar v-if="!ctx.detailView">
-            <template #default>
+            <template #default v-if="ctx.view == 'participants_list'">
               <os-button left-icon="plus" :label="$t('participants.add_participant')" @click="addParticipant" />
+
+              <os-button left-icon="flask" :label="$t('participants.view_specimens')" @click="viewSpecimens" />
             </template>
             <template #right>
               <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
@@ -42,15 +45,34 @@
             :query="ctx.query"
             :auto-search-open="true"
             :allow-selection="true"
-            :selected="ctx.selectedCpr"
+            :selected="ctx.selectedItem"
             :include-count="includeCount"
-            url="'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/detail/overview'"
+            :url="itemUrl"
             :newUiUrl="true"
             :newTab="false"
-            @selectedRows="onParticipantSelection"
-            @rowClicked="onParticipantRowClick"
+            @selectedRows="onItemSelection"
+            @rowClicked="onItemRowClick"
             @listLoaded="onListLoad"
-            ref="participantsList"
+            ref="list"
+            v-if="ctx.view == 'participants_list'"
+          />
+
+          <os-query-list-view
+            name="specimen-list-view"
+            :object-id="ctx.cp.id"
+            :query="ctx.query"
+            :auto-search-open="true"
+            :allow-selection="true"
+            :selected="ctx.selectedItem"
+            :include-count="includeCount"
+            :url="itemUrl"
+            :newUiUrl="true"
+            :newTab="false"
+            @selectedRows="onItemSelection"
+            @rowClicked="onItemRowClick"
+            @listLoaded="onListLoad"
+            ref="list"
+            v-else
           />
         </os-page-body>
       </os-page>
@@ -73,7 +95,7 @@ export default {
 
   inject: ['ui'],
 
-  props: ['filters', 'cprId'],
+  props: ['filters', 'cprId', 'specimenId', 'view'],
 
   async setup(props) {
     const ui = inject('ui');
@@ -90,11 +112,15 @@ export default {
 
       detailView: false,
 
-      selectedCprs: [],
+      selectedItems: [],
 
       cprId: props.cprId,
 
+      specimenId: props.specimenId,
+
       query: props.filters,
+
+      view: props.view,
 
       listInfo: {
         list: [],
@@ -103,6 +129,7 @@ export default {
       },
 
       bcrumb: [ 
+        // TODO: change the breadcrumbs
         {url: routerSvc.ngUrl('cps', {}), label: i18n.msg('participants.collection_protocols')},
         {url: routerSvc.ngUrl('cp-view/' + cp.id + '/list-view', {}), label: cp.shortTitle}
       ]
@@ -118,6 +145,10 @@ export default {
 
   watch: {
     '$route.params.cprId': function(newValue, oldValue) {
+      if (this.ctx.view != 'participants_list') {
+        return;
+      }
+
       if (newValue == undefined || newValue == oldValue) {
         // new value is undefined when the route changes
         return;
@@ -125,7 +156,7 @@ export default {
 
       this.ctx.cprId = newValue;
       if (newValue > 0) {
-        let selectedRow = this.cprs.find(rowObject => rowObject.id == this.ctx.cprId);
+        let selectedRow = this.items.find(rowObject => rowObject.id == this.ctx.cprId);
         if (!selectedRow) {
           selectedRow = {id: this.ctx.cprId};
         }
@@ -136,46 +167,94 @@ export default {
       }
     },
 
+    '$route.params.specimenId': function(newValue, oldValue) {
+      if (this.ctx.view != 'specimens_list') {
+        return;
+      }
+
+      this.ctx.specimenId = newValue;
+      if (newValue == undefined || newValue == oldValue) {
+        // new value is undefined when the route changes
+        if (newValue == undefined && this.$route.params.cprId != -1) {
+          // typically happens when participant or visit overview link is clicked in specimens list view
+          this.ctx.view = 'participants_list';
+          this.ctx.cprId = +this.$route.params.cprId;
+        }
+
+        return;
+      }
+
+      if (newValue > 0) {
+        let selectedRow = this.items.find(rowObject => rowObject.id == this.ctx.specimenId);
+        if (!selectedRow) {
+          selectedRow = {id: this.ctx.specimenId};
+        }
+
+        this.showDetails(selectedRow);
+      } else {
+        this.showTable(newValue == -2);
+      }
+    },
+
     '$route.query.filters': function(newValue) {
       this.ctx.query = newValue;
+    },
+
+    '$route.query.view': function(newValue) {
+      this.ctx.view = newValue || 'participants_list';
+    }
+  },
+
+  computed: {
+    itemUrl: function() {
+      if (this.ctx.view == 'participants_list') {
+        return "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/detail/overview?view=participants_list'";
+      } else {
+        return "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/visit/' + hidden.visitId + '/specimen/' + hidden.specimenId + '/detail/overview?view=specimens_list'";
+      }
     }
   },
 
   methods: {
     reloadList: function() {
-      this.$refs.participantsList.reload();
+      this.$refs.list.reload();
     },
 
-    onParticipantSelection: function(participants) {
-      this.ctx.selectedCprs = participants.map(({rowObject}) => ({id: +rowObject.hidden.cprId}));
+    onItemSelection: function(items) {
+      const key = this.ctx.query == 'participants_list' ? 'cprId' : 'specimenId';
+      this.ctx.selectedItems = items.map(({rowObject}) => ({id: +rowObject.hidden[key]}));
     },
 
-    onParticipantRowClick: function(event) {
-      const cprId = +event.hidden.cprId;
-      routerSvc.goto('ParticipantsListItemDetail.Overview', { cprId }, {filters: this.ctx.query});
+    onItemRowClick: function(event) {
+      const params = event.hidden || {};
+      if (this.ctx.view == 'participants_list') {
+        routerSvc.goto('ParticipantsListItemDetail.Overview', { ...params }, {filters: this.ctx.query});
+      } else {
+        routerSvc.goto('ParticipantsListItemSpecimenDetail.Overview', {...params }, {filters: this.ctx.query, view: this.ctx.view});
+      }
     },
 
     showDetails: function(rowObject) {
-      this.ctx.selectedCpr = rowObject;
+      this.ctx.selectedItem = rowObject;
       if (!this.ctx.detailview) {
         this.ctx.detailView = true;
-        this.$refs.participantsList.switchToSummaryView();
+        this.$refs.list.switchToSummaryView();
       }
     },
 
     showTable: function(reload) {
       this.ctx.detailView = false;
-      this.$refs.participantsList.switchToTableView();
-      routerSvc.goto('ParticipantsList', {cprId: -1}, {filters: this.ctx.query});
+      this.$refs.list.switchToTableView();
+      routerSvc.goto('ParticipantsList', {cprId: -1}, {filters: this.ctx.query, view: this.ctx.view});
       if (reload) {
         this.reloadList();
       }
     },
 
-    getParticipantsCount: function() {
-      this.$refs.participantsList.loadListSize().then(
+    getListItemsCount: function() {
+      this.$refs.list.loadListSize().then(
         () => {
-          this.ctx.listInfo.size = this.$refs.participantsList.size;
+          this.ctx.listInfo.size = this.$refs.list.size;
         }
       );
     },
@@ -184,22 +263,23 @@ export default {
       const cp = this.ctx.cp;
 
       this.showListSize = true;
-      this.ctx.selectedCprs.length = 0;
-      this.cprs = widget.data;
-      this.cprs.forEach(
+      this.ctx.selectedItems.length = 0;
+      this.items = widget.data;
+      this.items.forEach(
         row => {
-          row.hidden = row.hidden || {};
-          row.hidden.cpId = cp.id;
-          row.id = row.hidden.cprId;
+          const hidden = row.hidden = row.hidden || {};
+          hidden.cpId = cp.id;
+          row.id = this.ctx.view == 'participants_list' ? hidden.cprId : hidden.specimenId;
         }
       );
 
       if (this.ctx.cprId <= 0) {
-        routerSvc.goto('ParticipantsList', {cpId: cp.id, cprId: -1}, { filters });
+        routerSvc.goto('ParticipantsList', {cpId: cp.id, cprId: -1}, { filters, view: this.ctx.view });
       } else {
-        let selectedRow = this.cprs.find(row => row.id == this.ctx.cprId);
+        const selectedItemId = this.ctx.view == 'participants_list' ? this.ctx.cprId : this.ctx.specimenId;
+        let selectedRow = this.items.find(row => row.id == selectedItemId);
         if (!selectedRow) {
-          selectedRow = {id: this.ctx.cprId};
+          selectedRow = {id: selectedItemId};
         }
 
         this.showDetails(selectedRow);
@@ -207,9 +287,9 @@ export default {
 
       setTimeout(() => {
         this.ctx.listInfo = {
-          list: this.$refs.participantsList.list.rows,
-          size: this.$refs.participantsList.size,
-          pageSize: this.$refs.participantsList.pageSize
+          list: this.$refs.list.list.rows,
+          size: this.$refs.list.size,
+          pageSize: this.$refs.list.pageSize
         }
       }, 0);
     },
@@ -218,8 +298,12 @@ export default {
       routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
     },
 
+    viewSpecimens: function() {
+      routerSvc.goto('ParticipantsList', {cpId: this.ctx.cp.id, cprId: -1}, {view: 'specimens_list'});
+    },
+
     openSearch: function () {
-      this.$refs.participantsList.toggleShowFilters();
+      this.$refs.list.toggleShowFilters();
     }
   }
 }
