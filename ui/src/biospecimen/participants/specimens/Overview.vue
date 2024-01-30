@@ -21,13 +21,7 @@
         <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
           @menu-toggled="loadEventForms" v-if="specimen.availabilityStatus == 'Available'" />
 
-        <os-button left-icon="times" :label="$t('common.buttons.close')" @click="closeSpecimen"
-          v-if="!specimen.reserved && specimen.activityStatus == 'Active' && specimen.status == 'Collected'" />
-
-        <os-button left-icon="check" :label="$t('common.buttons.reopen')" @click="reopenSpecimen"
-          v-if="specimen.activityStatus == 'Closed'" />
-
-        <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteSpecimen" />
+        <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
       </span>
     </template>
   </os-page-toolbar>
@@ -156,6 +150,24 @@ export default {
       if (newVal != oldVal) {
         this._setupSpecimen();
       }
+    }
+  },
+
+  computed: {
+    moreOptions: function() {
+      const {specimen} = this.ctx;
+      const options = [];
+      if (!specimen.reserved && specimen.activityStatus == 'Active' && specimen.status == 'Collected') {
+        options.push({icon: 'times', caption: this.$t('common.buttons.close'), onSelect: this.closeSpecimen});
+      } else if (specimen.activityStatus == 'Closed') {
+        options.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: this.reopenSpecimen});
+      }
+
+      if (specimen.id > 0) {
+        options.push({icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: this.deleteSpecimen});
+      }
+
+      return options;
     }
   },
 
