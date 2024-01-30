@@ -34,6 +34,9 @@
 
               <os-button left-icon="flask" :label="$t('participants.view_specimens')" @click="viewSpecimens" />
             </template>
+            <template #default v-else-if="ctx.view == 'specimens_list'">
+              <os-button left-icon="user-friends" :label="$t('participants.view_participants')" @click="viewParticipants" />
+            </template>
             <template #right>
               <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
@@ -301,6 +304,10 @@ export default {
 
     viewSpecimens: function() {
       routerSvc.goto('ParticipantsList', {cpId: this.ctx.cp.id, cprId: -1}, {view: 'specimens_list'});
+    },
+
+    viewParticipants: function() {
+      routerSvc.goto('ParticipantsList', {cpId: this.ctx.cp.id, cprId: -1}, {view: 'participants_list'});
     },
 
     openSearch: function () {
