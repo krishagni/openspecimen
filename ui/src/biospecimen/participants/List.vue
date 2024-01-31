@@ -100,6 +100,8 @@
     <os-screen-panel :width="9" v-if="$route.params && $route.params.cprId > 0">
       <router-view :cprId="$route.params.cprId" :key="$route.params.cprId" />
     </os-screen-panel>
+
+    <os-plugin-views ref="moreMenuPluginViews" page="participants-list" view="menu" :viewProps="ctx" />
   </os-screen>
 </template>
 
@@ -109,6 +111,7 @@ import { inject, reactive } from 'vue';
 import alertsSvc from '@/common/services/Alerts.js';
 import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import i18n      from '@/common/services/I18n.js';
+import pluginReg from '@/common/services/PluginViewsRegistry.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
@@ -287,6 +290,22 @@ export default {
         onSelect: this.navToCpDetail
       });
 
+      const pluginOptions = pluginReg.getOptions('participants-list', 'menu');
+      const ctxt = this.ctx;
+      for (let option of pluginOptions) {
+        if (typeof option.showIf == 'function' && !option.showIf(ctxt)) {
+          continue;
+        }
+
+        options.push({
+          icon: option.icon,
+          caption: option.caption,
+          onSelect: () => {
+            option.exec(this.wrapRefs(ctxt), ctxt)
+          }
+        });
+      }
+
       return options;
     },
   },
@@ -408,7 +427,11 @@ export default {
 
     navToCpDetail: function() {
       routerSvc.ngGoto('cps/' + this.ctx.cp.id + '/overview');
-    }
+    },
+
+    wrapRefs: function(ctxt) {
+      return {...ctxt, pluginViews: this.$refs.moreMenuPluginViews};
+    },
   }
 }
 </script>
