@@ -34,6 +34,8 @@
                 <os-button left-icon="plus" :label="$t('participants.add_participant')" @click="addParticipant" />
 
                 <os-button left-icon="flask" :label="$t('participants.view_specimens')" @click="viewSpecimens" />
+
+                <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
               </span>
             </template>
 
@@ -41,6 +43,8 @@
               <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
                 <os-button left-icon="user-friends" :label="$t('participants.view_participants')"
                   @click="viewParticipants" />
+
+                <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
               </span>
               <span v-else>
                 <os-specimen-actions :cp="ctx.cp" :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
@@ -233,7 +237,25 @@ export default {
       }
 
       return selectedItems;
-    }
+    },
+
+    moreOptions: function() {
+      const options = [];
+
+      options.push({
+        icon: 'upload',
+        caption: this.$t('participants.import_biospecimen_data'),
+        onSelect: this.navToBulkImport
+      });
+
+      options.push({
+        icon: 'list',
+        caption: this.$t('participants.view_past_imports'),
+        onSelect: this.navToViewPastImports
+      });
+
+      return options;
+    },
   },
 
   methods: {
@@ -330,6 +352,14 @@ export default {
 
     openSearch: function () {
       this.$refs.list.toggleShowFilters();
+    },
+
+    navToBulkImport: function() {
+      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/import-cp-objs');
+    },
+
+    navToViewPastImports: function() {
+      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/import-cp-jobs');
     }
   }
 }
