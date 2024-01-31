@@ -114,6 +114,11 @@ class CollectionProtocol {
       sources => sources && sources[source] instanceof Array ? sources[source] : []
     );
   }
+
+  async generateCpReport(cpId) {
+    const {status} = await http.post('collection-protocols/' + cpId + '/report', {});
+    return status;
+  }
 }
 
 export default new CollectionProtocol();

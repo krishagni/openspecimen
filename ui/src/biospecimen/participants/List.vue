@@ -106,6 +106,8 @@
 <script>
 import { inject, reactive } from 'vue';
 
+import alertsSvc from '@/common/services/Alerts.js';
+import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import i18n      from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
 
@@ -254,6 +256,37 @@ export default {
         onSelect: this.navToViewPastImports
       });
 
+      console.log(this.$t('common.buttons.export'));
+      let divider = true;
+      if (divider) {
+        options.push({divider: true});
+        divider = false;
+      }
+
+      options.push({
+        icon: 'download',
+        caption: this.$t('common.buttons.export'),
+        onSelect: this.navToExport
+      });
+
+      divider = true;
+      if (divider) {
+        options.push({divider: true});
+        divider = false;
+      }
+
+      options.push({
+        icon: 'file-pdf',
+        caption: this.$t('participants.generate_cp_report'),
+        onSelect: this.generateCpReport
+      });
+
+      options.push({
+        icon: 'calendar-alt',
+        caption: this.$t('participants.view_cp_details'),
+        onSelect: this.navToCpDetail
+      });
+
       return options;
     },
   },
@@ -360,6 +393,21 @@ export default {
 
     navToViewPastImports: function() {
       routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/import-cp-jobs');
+    },
+
+    navToExport: function() {
+      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/export-cp-objs');
+    },
+
+    generateCpReport: function() {
+      const status = cpSvc.generateCpReport(this.ctx.cp.id);
+      if (status) {
+        alertsSvc.success({code: 'participants.preparing_report', args: this.ctx.cp});
+      }
+    },
+
+    navToCpDetail: function() {
+      routerSvc.ngGoto('cps/' + this.ctx.cp.id + '/overview');
     }
   }
 }
