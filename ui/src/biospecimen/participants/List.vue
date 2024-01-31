@@ -44,6 +44,8 @@
               </span>
               <span v-else>
                 <os-specimen-actions :cp="ctx.cp" :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
+
+                <os-add-to-cart :specimens="selectedSpecimens" />
               </span>
             </template>
 
