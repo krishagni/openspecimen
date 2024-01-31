@@ -30,13 +30,23 @@
         <os-page-body v-if="ctx.inited">
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default v-if="ctx.view == 'participants_list'">
-              <os-button left-icon="plus" :label="$t('participants.add_participant')" @click="addParticipant" />
+              <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
+                <os-button left-icon="plus" :label="$t('participants.add_participant')" @click="addParticipant" />
 
-              <os-button left-icon="flask" :label="$t('participants.view_specimens')" @click="viewSpecimens" />
+                <os-button left-icon="flask" :label="$t('participants.view_specimens')" @click="viewSpecimens" />
+              </span>
             </template>
+
             <template #default v-else-if="ctx.view == 'specimens_list'">
-              <os-button left-icon="user-friends" :label="$t('participants.view_participants')" @click="viewParticipants" />
+              <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
+                <os-button left-icon="user-friends" :label="$t('participants.view_participants')"
+                  @click="viewParticipants" />
+              </span>
+              <span v-else>
+                <os-specimen-actions :cp="ctx.cp" :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
+              </span>
             </template>
+
             <template #right>
               <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
             </template>
@@ -176,18 +186,15 @@ export default {
     '$route.params.specimenId': function(newValue, oldValue) {
       console.log('Detected change in specimen ID. Specimen ID = ' + newValue + ', params = ' + JSON.stringify(this.$route.params));
       const specimenId = this.ctx.specimenId = newValue;
-      if (this.ctx.view != 'specimens_list') {
+      if (this.ctx.view != 'specimens_list' || newValue == oldValue) {
         return;
       }
 
-      if (newValue == undefined || newValue == oldValue) {
+      if (newValue == undefined && this.$route.params.cprId != -1) {
         // new value is undefined when the route changes
-        if (newValue == undefined && this.$route.params.cprId != -1) {
-          // typically happens when participant or visit overview link is clicked in specimens list view
-          this.ctx.view = 'participants_list';
-          this.ctx.cprId = +this.$route.params.cprId;
-        }
-
+        // cprId != -1 when participant or visit overview link is clicked in specimens list view
+        this.ctx.view = 'participants_list';
+        this.ctx.cprId = +this.$route.params.cprId;
         return;
       }
 
@@ -215,6 +222,15 @@ export default {
       } else {
         return "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/visit/' + hidden.visitId + '/specimen/' + hidden.specimenId + '/detail/overview?view=specimens_list'";
       }
+    },
+
+    selectedSpecimens: function() {
+      const {view, selectedItems} = this.ctx;
+      if (!view || view == 'participants_list') {
+        return;
+      }
+
+      return selectedItems;
     }
   },
 
@@ -225,7 +241,7 @@ export default {
 
     onItemSelection: function(items) {
       const key = this.ctx.query == 'participants_list' ? 'cprId' : 'specimenId';
-      this.ctx.selectedItems = items.map(({rowObject}) => ({id: +rowObject.hidden[key]}));
+      this.ctx.selectedItems = items.map(({rowObject}) => ({...rowObject.hidden, id: +rowObject.hidden[key]}));
     },
 
     onItemRowClick: function(event) {
