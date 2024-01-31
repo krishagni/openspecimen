@@ -10,7 +10,7 @@
       <os-divider v-if="item.divider" />
       <a class="os-menu-item p-menuitem-link" :style="item.anchorStyle" @click="item.command" v-else>
         <os-icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon" />
-        <span>{{item.label}}</span>
+        <span class="os-menu-item-label">{{item.label}}</span>
       </a>
     </template>
   </dropdown-menu>
@@ -60,6 +60,15 @@ export default {
   min-width: 12rem;
   padding: 0.5rem 1rem!important;
   color: inherit;
+  display: flex;
+}
+
+.os-menu .os-menu-item .os-menu-item-icon {
+  min-width: 2rem;
+}
+
+.os-menu .os-menu-item .os-menu-item-label {
+  flex: 1;
 }
 </style>
 
