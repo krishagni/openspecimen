@@ -55,7 +55,11 @@ export default {
   padding-right: 15px;
 }
 
-.os-panel :deep(.p-panel-header button) {
+.os-panel :deep(.p-panel-header button.btn) {
   margin-right: 0.25rem;
+}
+
+.os-panel :deep(.p-panel-header .os-btn-group button.btn) {
+  margin-right: 0rem;
 }
 </style>

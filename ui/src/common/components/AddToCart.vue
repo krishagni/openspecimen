@@ -1,7 +1,7 @@
 <template>
-  <os-button-group>
+  <os-button-group class="os-cart-split-button">
     <os-button left-icon="cart-plus" :label="$t('common.add_to_cart.title')" @click="addToMyDefaultCart" />
-    <os-button label="&#8203;" left-icon="caret-down" @click="toggleCartOptions" />
+    <os-button class="caret" label="&#8203;" left-icon="caret-down" @click="toggleCartOptions" />
   </os-button-group>
 
   <os-overlay class="os-carts" ref="cartOptions" style="margin-left: -112px;">
@@ -143,7 +143,7 @@ export default {
         return;
       }
 
-      cartsSvc.addToCart(cart, this.specimens).then(
+      cartsSvc.addToCart(cart, this.specimens.filter(({id}) => id > 0)).then(
         ({count}) => {
           if (count == 0) {
             alertsSvc.info({code: 'common.add_to_cart.no_specimens_added', args: {name: cart.displayName}});
@@ -218,5 +218,9 @@ export default {
 <style>
 .os-carts .p-overlaypanel-content {
   padding: 0.5rem 1.25rem;
+}
+
+.os-cart-split-button .caret {
+  padding: 0 0.5rem!important;
 }
 </style>

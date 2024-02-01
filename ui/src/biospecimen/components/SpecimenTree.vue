@@ -5,8 +5,13 @@
       <span v-t="'specimens.list'">Specimens</span>
     </template>
 
-    <os-table-form ref="spmnsTable" :tree-layout="true" :read-only="true"
-      :data="{}" :items="items" :schema="{columns: fields}" v-if="items.length > 0">
+    <template #actions>
+      <os-add-to-cart :specimens="selectedSpecimens"  v-if="selectedSpecimens.length > 0" />
+    </template>
+
+    <os-table-form ref="spmnsTable" :tree-layout="true" :read-only="true" selection-mode="checkbox"
+      :data="{}" :items="items" :schema="{columns: fields}" @selected-items="onItemsSelection($event)"
+      v-if="items.length > 0">
     </os-table-form>
 
     <os-message :type="info" v-else>
@@ -26,7 +31,11 @@ export default {
 
   data() {
     return {
-      treeCfg: {}
+      treeCfg: {},
+
+      ctx: {
+        selectedSpecimens: []
+      }
     }
   },
 
@@ -41,6 +50,10 @@ export default {
   computed: {
     items: function() {
       return this._flattenSpecimens(this.specimens || [], 0);
+    },
+
+    selectedSpecimens: function() {
+      return this.ctx.selectedSpecimens.map(({specimen}) => specimen);
     },
 
     fields: function() {
@@ -71,6 +84,10 @@ export default {
   },
 
   methods: {
+    onItemsSelection: function(items) {
+      this.ctx.selectedSpecimens = items;
+    },
+
     _flattenSpecimens: function(specimens, depth, parentUid) {
       let idx = 0;
       let result = [];

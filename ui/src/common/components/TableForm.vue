@@ -4,8 +4,11 @@
     <table class="os-table">
       <thead>
         <tr>
-          <th v-if="readOnly && selectionMode == 'radio'">
-            <span>&nbsp;</span>
+          <th class="selection" v-if="readOnly && (selectionMode == 'radio' || selectionMode == 'checkbox')">
+            <span v-if="selectionMode == 'radio'">&nbsp;</span>
+            <span v-if="selectionMode == 'checkbox'">
+              <os-boolean-checkbox v-model="ctx.allSelected" @change="toggleAllRowsSelection" />
+            </span>
           </th>
 
           <slot name="first-column-header" />
@@ -56,9 +59,12 @@
 
         <template v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
           <tr v-if="itemModel.show">
-            <td v-if="readOnly && selectionMode == 'radio'">
+            <td class="selection" v-if="readOnly && (selectionMode == 'radio' || selectionMode == 'checkbox')">
               <RadioButton name="rowSelection" :value="itemIdx" v-model="ctx.selectedIdx"
-                @click="toggleSelection(itemIdx)" />
+                @click="toggleSelection(itemIdx)" v-if="selectionMode == 'radio'" />
+
+              <os-boolean-checkbox v-model="ctx.selectedRows[itemIdx]"
+                @change="toggleSelection(itemIdx)" v-else />
             </td>
 
             <td v-if="firstColumn" :style="{display: treeLayout ? 'flex': ''}">
@@ -156,7 +162,7 @@ export default {
     'treeLayout'
   ],
 
-  emits: ['input', 'form-validity', 'remove-item', 'copy-item', 'item-selected'],
+  emits: ['input', 'form-validity', 'remove-item', 'copy-item', 'item-selected', 'selected-items'],
 
   components: {
     RadioButton
@@ -167,6 +173,8 @@ export default {
       items: [],
       sort: { field: '', direction: '' },
       selects: { },
+      selectedRows: [],
+      allSelected: false,
       emptyString: '-'
     });
 
@@ -532,19 +540,69 @@ export default {
     },
 
     toggleSelection: function(itemIdx) {
+      if (this.selectionMode == 'checkbox') {
+        const {selectedRows} = this.ctx
+        const selectedItems = [];
+
+        let index = 0;
+        let allSelected = true;
+        for (let row of selectedRows) {
+          if (row) {
+            selectedItems.push(this.items[index]);
+          } else {
+            allSelected = false;
+          }
+
+          ++index;
+        }
+
+        this.ctx.allSelected = allSelected;
+        this.$emit('selected-items', selectedItems);
+        return;
+      }
+
       this.$emit('item-selected', {index: itemIdx});
+    },
+
+    toggleAllRowsSelection: function() {
+      for (let index = 0; index < this.items.length; ++index) {
+        this.ctx.selectedRows[index] = this.ctx.allSelected;
+      }
+
+      this.toggleSelection(-1);
     },
 
     clearSelection: function() {
       this.ctx.selectedIdx = -1;
+      this.ctx.selectedRows = [];
     },
 
     getSelection: function() {
       if (this.ctx.selectedIdx >= 0) {
         return this.items[this.ctx.selectedIdx];
+      } else if (this.ctx.selectedRows && this.ctx.selectedRows.length > 0) {
+        const selected = [];
+        for (let idx = 0; idx < this.ctx.selectedRows.length; ++idx) {
+          if (this.ctx.selectedRows[idx]) {
+            selected.push(this.items[idx]);
+          }
+        }
+
+        return selected;
       }
 
       return null;
+    },
+
+    setSelection: function(selected) {
+      if (this.selectionMode == 'radio') {
+        this.ctx.selectedIdx = this.items.indexOf(selected);
+      } else if (this.selectionMode == 'checkbox') {
+        this.ctx.selectedRows = [];
+        for (let idx = 0; idx < this.items.length; ++idx) {
+          this.ctx.selectedRows[idx] = selected.indexOf(this.items[idx]) > -1;
+        }
+      }
     },
 
     toggleNode: function(itemModel, start) {
@@ -641,5 +699,11 @@ table td .node-expander a {
   color: #6c757d;
   display: inline-block;
   width: 0.80rem;
+}
+
+table th.selection,
+table td.selection {
+  padding: 10px 0px 10px 15px;
+  width: 1.25rem;
 }
 </style>
