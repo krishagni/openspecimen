@@ -35,6 +35,16 @@ export default {
 
 .os-panel :deep(.p-panel-header) {
   padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: row;
+  height: 3.375rem;
+}
+
+.os-panel :deep(.p-panel-header .p-panel-icons) {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
 }
 
 .os-panel :deep(.p-toggleable-content) {
@@ -55,7 +65,8 @@ export default {
   padding-right: 15px;
 }
 
-.os-panel :deep(.p-panel-header button.btn) {
+.os-panel :deep(.p-panel-header button.btn),
+.os-panel :deep(.p-panel-header .os-btn-group) {
   margin-right: 0.25rem;
 }
 

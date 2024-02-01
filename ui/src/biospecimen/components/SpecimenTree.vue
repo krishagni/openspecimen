@@ -6,7 +6,10 @@
     </template>
 
     <template #actions>
-      <os-add-to-cart :specimens="selectedSpecimens"  v-if="selectedSpecimens.length > 0" />
+      <os-add-to-cart :specimens="selectedExistingSpecimens"  v-if="selectedExistingSpecimens.length > 0" />
+
+      <os-specimen-actions :cp="cp" :specimens="selectedExistingSpecimens" @reloadSpecimens="reloadSpecimens"
+        v-if="selectedExistingSpecimens.length > 0" />
     </template>
 
     <os-table-form ref="spmnsTable" :tree-layout="true" :read-only="true" selection-mode="checkbox"
@@ -28,6 +31,8 @@ import util from '@/common/services/Util.js';
 
 export default {
   props: ['cp', 'specimens'],
+
+  emits: ['reload'],
 
   data() {
     return {
@@ -54,6 +59,10 @@ export default {
 
     selectedSpecimens: function() {
       return this.ctx.selectedSpecimens.map(({specimen}) => specimen);
+    },
+
+    selectedExistingSpecimens: function() {
+      return this.selectedSpecimens.filter(({id}) => id > 0);
     },
 
     fields: function() {
@@ -86,6 +95,12 @@ export default {
   methods: {
     onItemsSelection: function(items) {
       this.ctx.selectedSpecimens = items;
+    },
+
+    reloadSpecimens: function() {
+      this.$emit('reload');
+      this.ctx.selectedSpecimens = [];
+      this.$refs.spmnsTable.setSelection([]);
     },
 
     _flattenSpecimens: function(specimens, depth, parentUid) {

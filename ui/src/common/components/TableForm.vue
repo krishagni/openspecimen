@@ -706,4 +706,9 @@ table td.selection {
   padding: 10px 0px 10px 15px;
   width: 1.25rem;
 }
+
+table th.selection :deep(.p-field-checkbox),
+table td.selection :deep(.p-field-checkbox) {
+  margin-bottom: 0rem;
+}
 </style>

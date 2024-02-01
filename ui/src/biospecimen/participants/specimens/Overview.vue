@@ -30,7 +30,7 @@
     <os-grid-column width="8">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
-      <SpecimenTree :cp="ctx.cp" :specimens="ctx.children" v-if="ctx.cp.id > 0" />
+      <SpecimenTree :cp="ctx.cp" :specimens="ctx.children" @reload="reloadChildren" v-if="ctx.cp.id > 0" />
     </os-grid-column>
 
     <os-grid-column width="4">
@@ -309,6 +309,13 @@ export default {
           specimenSvc.clearSpecimens(this.visit);
         }
       );
+    },
+
+    reloadChildren: function() {
+      this.ctx.children = [];
+
+      const {specimen} = this.ctx;
+      specimenSvc.getById(specimen.id).then(dbSpmn => this.ctx.children = dbSpmn.children);
     },
 
     _setupSpecimen: function() {
