@@ -44,8 +44,10 @@
     <property name="checkoutComments" column="CHECKOUT_COMMENTS" />
 
     <sql-query name="getSpecimenIdByPosition">
+      <return-scalar column="specimen_id" type="long" />
+
       select
-        occupying_specimen_id
+        occupying_specimen_id as specimen_id
       from
         os_container_positions
       where
