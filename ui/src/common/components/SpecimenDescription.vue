@@ -1,6 +1,6 @@
 <template>
   <a class="description" :href="link" :target="hrefTarget || '_self'" rel="noopener">
-    <span class="status-ball" :class="statusColor" v-if="showStatus && statusColor"></span>
+    <os-specimen-status-icon :specimen="object" :status="status" v-if="showStatus" />
     <span>{{description}}</span>
   </a>
 </template>
@@ -112,39 +112,11 @@ export default {
   flex-direction: row;
 }
 
-.status-ball {
+.description :deep(.status-ball) {
   flex: 0 0 0.75rem;
-  height: 0.75rem;
-  width: 0.75rem;
-  border-radius: 50%;
-  background: #a0a0a0;
   margin-top: 0.25rem;
   margin-right: 0.25rem;
   margin-bottom: -0.0625rem;
-}
-
-.status-ball.collected {
-  background: #5cb85c;
-}
-
-.status-ball.not-collected {
-  background: #888;
-}
-
-.status-ball.pending {
-  background: #f0ad4e;
-}
-
-.status-ball.closed {
-  background: #d9534f!important;
-}
-
-.status-ball.distributed {
-  background: #5bc0de;
-}
-
-.status-ball.reserved {
-  background: rgba(128, 0, 128, 0.7);
 }
 </style>
 
