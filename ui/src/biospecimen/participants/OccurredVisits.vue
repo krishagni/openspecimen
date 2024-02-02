@@ -1,7 +1,7 @@
 <template>
   <div class="os-occurred-visits-tab">
     <os-list-view
-      class="os-muted-list-header os-bordered-list"
+      class="os-muted-list-header os-bordered-list1"
       :data="occurredVisits"
       :schema="{columns: tabFields}"
       :showRowActions="true"
@@ -209,5 +209,38 @@ export default {
 <style scoped>
 .os-occurred-visits-tab :deep(.os-list .results .results-inner) {
   padding-right: 0rem;
+}
+
+.os-occurred-visits-tab :deep(table) {
+  border: 0px;
+  border-collapse: separate;
+  border-spacing: 2px 15px;
+  margin-top: -0.5rem;
+}
+
+.os-occurred-visits-tab :deep(table > thead > tr > th) {
+  background: transparent!important;
+  border-bottom: 0;
+  padding: 0rem 1rem;
+  text-align: center;
+}
+
+.os-occurred-visits-tab :deep(table tbody tr td) {
+  border-top: 0;
+}
+
+.os-occurred-visits-tab :deep(table tbody tr){
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
+  border-radius: 0.5rem;
+  background: transparent;
+}
+
+.os-occurred-visits-tab :deep(table tbody tr:hover) {
+  background: transparent;
+}
+
+.os-occurred-visits-tab :deep(table tbody tr td) {
+  vertical-align: middle;
+  padding: 1rem;
 }
 </style>

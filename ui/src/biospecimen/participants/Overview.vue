@@ -21,6 +21,12 @@
         </template>
 
         <template #content>
+          <!-- OccurredVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
+
+          <MissedVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
+
+          <PendingVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" / -->
+
           <Visits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
         </template>
       </os-section>
@@ -53,12 +59,18 @@ import cprSvc from '@/biospecimen/services/Cpr.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 
+// import MissedVisits   from './MissedVisits.vue';
+// import OccurredVisits from './OccurredVisits.vue';
+// import PendingVisits  from './PendingVisits.vue';
 import Visits from './Visits.vue';
 
 export default {
   props: ['cpr'],
 
   components: {
+//     MissedVisits,
+//     OccurredVisits,
+//     PendingVisits,
     Visits
   },
 
