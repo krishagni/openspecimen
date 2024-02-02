@@ -38,6 +38,8 @@
                 <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
               </span>
               <span v-else>
+                <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editParticipants" />
+
                 <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteParticipants" />
               </span>
             </template>
@@ -120,6 +122,7 @@ import { inject, reactive } from 'vue';
 import alertsSvc from '@/common/services/Alerts.js';
 import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc    from '@/biospecimen/services/Cpr.js';
+import itemsSvc  from '@/common/services/ItemsHolder.js';
 import i18n      from '@/common/services/I18n.js';
 import pluginReg from '@/common/services/PluginViewsRegistry.js';
 import routerSvc from '@/common/services/Router.js';
@@ -402,6 +405,11 @@ export default {
 
     addParticipant: function() {
       routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
+    },
+
+    editParticipants: function() {
+      itemsSvc.ngSetItems('participants', this.ctx.selectedItems.map(({cprId}) => ({id: cprId})));
+      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/bulk-edit');
     },
 
     deleteParticipants: function() {
