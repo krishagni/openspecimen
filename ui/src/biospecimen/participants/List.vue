@@ -37,6 +37,9 @@
 
                 <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
               </span>
+              <span v-else>
+                <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteParticipants" />
+              </span>
             </template>
 
             <template #default v-else-if="ctx.view == 'specimens_list'">
@@ -102,6 +105,12 @@
     </os-screen-panel>
 
     <os-plugin-views ref="moreMenuPluginViews" page="participants-list" view="menu" :viewProps="ctx" />
+
+    <os-confirm-delete ref="deleteParticipantsDialog" :captcha="false" :collectReason="true">
+      <template #message>
+        <span v-t="'participants.delete_selected'">Are you sure you want to delete the selected participants along with their associated visits and specimens data?</span>
+      </template>
+    </os-confirm-delete>
   </os-screen>
 </template>
 
@@ -110,6 +119,7 @@ import { inject, reactive } from 'vue';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
+import cprSvc    from '@/biospecimen/services/Cpr.js';
 import i18n      from '@/common/services/I18n.js';
 import pluginReg from '@/common/services/PluginViewsRegistry.js';
 import routerSvc from '@/common/services/Router.js';
@@ -392,6 +402,25 @@ export default {
 
     addParticipant: function() {
       routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
+    },
+
+    deleteParticipants: function() {
+      this.$refs.deleteParticipantsDialog.open().then(
+        ({reason}) => {
+          const ids = this.ctx.selectedItems.map(({cprId}) => cprId);
+          cprSvc.bulkDelete(ids, reason).then(
+            ({completed}) => {
+              if (completed) {
+                alertsSvc.success({code: 'participants.many_deleted', args: {count: ids.length}});
+              } else {
+                alertsSvc.info({code: 'participants.delete_more_time'});
+              }
+
+              this.reloadList();
+            }
+          );
+        }
+      );
     },
 
     viewSpecimens: function() {

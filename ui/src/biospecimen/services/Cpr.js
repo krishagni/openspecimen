@@ -43,6 +43,10 @@ class CollectionProtocolRegistration {
     return http.delete('collection-protocol-registrations/' + cprId, {}, {forceDelete, reason});
   }
 
+  async bulkDelete(cprIds, reason) {
+    return http.delete('collection-protocol-registrations', {}, {id: cprIds, forceDelete: true, reason: reason})
+  }
+
   async anonymize(cpr) {
     return http.put('collection-protocol-registrations/' + cpr.id + '/anonymize', cpr);
   }
