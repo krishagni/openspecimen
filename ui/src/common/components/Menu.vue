@@ -79,7 +79,7 @@ export default {
   max-height: 35rem;
   overflow: auto;
 
-  border-radius: 1.25rem;
+  border-radius: 0.5rem;
   margin-top: 0.5rem;
 }
 
