@@ -2387,7 +2387,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		setListLimit(listReq, listCfg);
 
 		Boolean includeCount = (Boolean)listReq.get("includeCount");
-		listCfg.setIncludeCount(includeCount == null ? false : includeCount);
+		listCfg.setIncludeCount(includeCount != null && includeCount);
 		return listCfg;
 	}
 
