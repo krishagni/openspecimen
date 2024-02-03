@@ -121,7 +121,7 @@ class Workflow {
 
     let wfName = await this._getPooledSpmnWf({cpId});
     if (!wfName) {
-      wfName = 'pooled-specimens'; //'sys-collect-adhoc-specimens';
+      wfName = 'sys-create-pooled-specimen';
     }
 
     const params = {
