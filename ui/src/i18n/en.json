@@ -1119,6 +1119,7 @@
     "cp": "Collection Protocol",
     "create_aliquots": "Create Aliquots",
     "create_derived": "Create Derived Specimens",
+    "create_pooled_specimen": "Create Pooled Specimen",
     "created_on": "Created On",
     "delete_event": "Delete Event",
     "delete_event_q": "Are you sure you want to delete the event {name}: #{id}?",
@@ -1149,6 +1150,7 @@
     "no_print_current_specimen": "No, only this specimen",
     "not_stored": "Not Stored",
     "one_or_more_labels_req": "Scan or type one or more specimen labels separated by comma or newline or tab",
+    "participant": "Participant",
     "pathology_status": "Pathological Status",
     "pending": "Pending",
     "ppid": "PPID",
@@ -1159,12 +1161,14 @@
     "receiver": "Receiver",
     "receive_wf_not_configured": "Receive specimens workflow is not configured.",
     "recent_activity": "Recent Activity",
+    "select_participant": "Select participant...",
     "specimen": "Specimen",
     "stored": "Stored",
     "system_event": "System Event",
     "type": "Type",
     "unplanned": "Unplanned",
-    "update_event": "Update Event"
+    "update_event": "Update Event",
+    "select_visit": "Select visit..."
   },
 
   "user_groups": {

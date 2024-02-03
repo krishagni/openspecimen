@@ -2,12 +2,8 @@ import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import i18n  from '@/common/services/I18n.js';
 
 class Workflow {
-  osSvc = window.osSvc;
-
-  wfInstanceSvc = window.osSvc.tmWfInstanceSvc;
-
   async collectVisitSpecimens(visit, repeat) {
-    if (!this.wfInstanceSvc) {
+    if (!this._wfInstanceSvc()) {
       alert('Workflow module not installed!');
       return;
     }
@@ -31,12 +27,12 @@ class Workflow {
 
     const params = {repeatVisit: repeat, ...this._getVisitBreadcrumb(visit, this._getVisitDescription(visit))};
     const opts = {inputType, params};
-    const instance = await this.wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
-    this.wfInstanceSvc.gotoInstance(instance.id);
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, [inputItem], opts);
+    this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
   async collectPending(visit) {
-    if (!this.wfInstanceSvc) {
+    if (!this._wfInstanceSvc()) {
       alert('Workflow module not installed!');
       return;
     }
@@ -56,13 +52,13 @@ class Workflow {
       inputItem.cpe = {id: eventId, cpId, cpShortTitle};
     }
 
-    const opts = {params: this._getVisitBreadcrumb(visit, this.osSvc.i18nSvc.msg('participants.collect_specimens'))};
-    const instance = await this.wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
-    this.wfInstanceSvc.gotoInstance(instance.id);
+    const opts = {params: this._getVisitBreadcrumb(visit, i18n.msg('participants.collect_specimens'))};
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, [inputItem], opts);
+    this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
   async addSpecimen(visit) {
-    if (!this.wfInstanceSvc) {
+    if (!this._wfInstanceSvc()) {
       alert('Workflow module not installed!');
       return;
     }
@@ -87,8 +83,8 @@ class Workflow {
     });
 
     const opts = {inputType: 'visit', params};
-    const instance = await this.wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
-    this.wfInstanceSvc.gotoInstance(instance.id);
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, [inputItem], opts);
+    this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
   async createAliquots(specimen) {
@@ -109,8 +105,48 @@ class Workflow {
     this._createChildSpecimens(specimen, wfName, i18n.msg('specimens.create_derived'));
   }
 
+  async createPooledSpecimens(specimens) {
+    if (!this._wfInstanceSvc()) {
+      alert('Workflow module not installed!');
+      return;
+    }
+
+    let cpId = specimens && specimens[0].cpId;
+    for (let specimen of specimens) {
+      if (cpId != specimen.cpId) {
+        cpId = -1;
+        break;
+      }
+    }
+
+    let wfName = await this._getPooledSpmnWf({cpId});
+    if (!wfName) {
+      wfName = 'pooled-specimens'; //'sys-collect-adhoc-specimens';
+    }
+
+    const params = {
+      returnOnExit: 'current_view',
+      batchTitle: i18n.msg('specimens.create_pooled_specimen'),
+      showOptions: false
+    };
+
+    if (cpId >= 1) {
+      Object.assign(params, {
+        cpId: cpId,
+        'breadcrumb-1': JSON.stringify({
+          label: specimens[0].cpShortTitle,
+          route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
+        })
+      });
+    }
+
+    const inputItems = specimens.map(specimen => ({specimen}));
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, inputItems, {params});
+    this._wfInstanceSvc().gotoInstance(instance.id);
+  }
+
   async _createChildSpecimens(specimen, wfName, title) {
-    if (!this.wfInstanceSvc) {
+    if (!this._wfInstanceSvc()) {
       alert('Workflow module not installed!');
       return;
     }
@@ -138,8 +174,8 @@ class Workflow {
       }
     });
 
-    const instance = await this.wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], {params});
-    this.wfInstanceSvc.gotoInstance(instance.id);
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, [inputItem], {params});
+    this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
   _getCollectVisitsWf({cpId}) {
@@ -152,6 +188,10 @@ class Workflow {
 
   _getCollectUnplannedSpmnsWf({cpId}) {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'collectUnplannedSpecimensWf');
+  }
+
+  _getPooledSpmnWf({cpId}) {
+    return cpSvc.getWorkflowProperty(cpId, 'common', 'createPooledSpecimensWf');
   }
 
   _getCreateAliquotsWf({cpId}) {
@@ -187,6 +227,10 @@ class Workflow {
     }
 
     return description;
+  }
+
+  _wfInstanceSvc() {
+    return window.osSvc.tmWfInstanceSvc;
   }
 }
 

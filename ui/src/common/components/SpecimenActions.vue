@@ -61,6 +61,8 @@
 
 import cpSvc       from '@/biospecimen/services/CollectionProtocol.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
+import wfSvc       from '@/biospecimen/services/Workflow.js';
+
 import alertsSvc   from '@/common/services/Alerts.js';
 import authSvc     from '@/common/services/Authorization.js';
 import extnsUtil   from '@/common/services/ExtensionsUtil.js';
@@ -506,10 +508,7 @@ export default {
         return;
       }
 
-      const cprId   = this.cpr && this.cpr.id;
-      const visitId = this.visit && this.visit.id;
-      itemsSvc.ngSetItems('specimens', dbSpmns);
-      routerSvc.ngGoto('cp-view/' + cpId + '/add-pooled-specimen', {cprId: cprId, visitId: visitId});
+      wfSvc.createPooledSpecimens(dbSpmns);
     },
 
     showDistributionDialog: function(distAll) {
