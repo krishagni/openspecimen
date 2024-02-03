@@ -178,11 +178,11 @@ export default {
     },
 
     createAliquots: function() {
-      wfSvc.createAliquots(this.ctx.specimen);
+      wfSvc.createAliquots([this.ctx.specimen]);
     },
 
     createDerivatives: function() {
-      wfSvc.createDerivedSpecimens(this.ctx.specimen);
+      wfSvc.createDerivedSpecimens([this.ctx.specimen]);
     },
 
     confirmPrint: function() {

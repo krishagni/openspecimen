@@ -669,19 +669,21 @@ export default {
     },
 
     createAliquots: function() {
-      this.gotoNgView('bulk-create-aliquots', {}, 'common.specimen_actions.select_for_aliquots', false, false, true);
+      const navTo = (specimens) => wfSvc.createAliquots(specimens);
+      this.navToView('bulk-create-aliquots', navTo, {}, 'common.specimen_actions.select_for_aliquots', false, false, true);
     },
 
     createDerivatives: function() {
-      this.gotoNgView('bulk-create-derivatives', {}, 'common.specimen_actions.select_for_derived', false, false, true);
+      const navTo = (specimens) => wfSvc.createDerivedSpecimens(specimens);
+      this.navToView('bulk-create-derivatives', navTo, {}, 'common.specimen_actions.select_for_derived', false, false, true);
     },
 
     addEditEvent: function() {
-      this.gotoNgView('bulk-add-event', {}, 'common.specimen_actions.select_for_add_edit_event', false, false, false);
+      this.navToView('bulk-add-event', null, {}, 'common.specimen_actions.select_for_add_edit_event', false, false, false);
     },
 
     transferSpecimens: function() {
-      this.gotoNgView('bulk-transfer-specimens', {}, 'common.specimen_actions.select_for_transfer', false, false, true);
+      this.navToView('bulk-transfer-specimens', null, {}, 'common.specimen_actions.select_for_transfer', false, false, true);
     },
 
     showRetrieveSpecimensDialog: function() {
@@ -725,7 +727,7 @@ export default {
       alertsSvc.error({code: error, args: {labels: spmns.map(s => !s.label ? s.id : s.label).join(', ')}});
     },
 
-    gotoNgView: async function(url, params, msg, anyStatus, excludeExtensions, forbidClosedSpmns) {
+    navToView: async function(url, navTo, params, msg, anyStatus, excludeExtensions, forbidClosedSpmns) {
       if (!this.specimens || this.specimens.length == 0) {
         alertsSvc.error({code: msg});
         return;
@@ -748,6 +750,11 @@ export default {
             return;
           }
         }
+      }
+
+      if (navTo) {
+        navTo(dbSpmns);
+        return;
       }
 
       for (let spmn of dbSpmns) {

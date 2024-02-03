@@ -87,22 +87,40 @@ class Workflow {
     this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
-  async createAliquots(specimen) {
-    let wfName = await this._getCreateAliquotsWf(specimen);
+  async createAliquots(specimens) {
+    let {cpId, cpShortTitle} = specimens[0];
+    for (let specimen of specimens) {
+      if (specimen.cpId != cpId) {
+        cpId = -1;
+        cpShortTitle = null;
+        break;
+      }
+    }
+
+    let wfName = await this._getCreateAliquotsWf(cpId);
     if (!wfName) {
       wfName = 'sys-create-adhoc-aliquots';
     }
 
-    this._createChildSpecimens(specimen, wfName, i18n.msg('specimens.create_aliquots'));
+    this._createChildSpecimens(cpId, cpShortTitle, specimens, wfName, i18n.msg('specimens.create_aliquots'));
   }
 
-  async createDerivedSpecimens(specimen) {
-    let wfName = await this._getCreateDerivativesWf(specimen);
+  async createDerivedSpecimens(specimens) {
+    let {cpId, cpShortTitle} = specimens[0];
+    for (let specimen of specimens) {
+      if (specimen.cpId != cpId) {
+        cpId = -1;
+        cpShortTitle = null;
+        break;
+      }
+    }
+
+    let wfName = await this._getCreateDerivativesWf(cpId);
     if (!wfName) {
       wfName = 'sys-create-adhoc-derivatives';
     }
 
-    this._createChildSpecimens(specimen, wfName, i18n.msg('specimens.create_derived'));
+    this._createChildSpecimens(cpId, cpShortTitle, specimens, wfName, i18n.msg('specimens.create_derived'));
   }
 
   async createPooledSpecimens(specimens) {
@@ -145,36 +163,44 @@ class Workflow {
     this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
-  async _createChildSpecimens(specimen, wfName, title) {
+  async _createChildSpecimens(cpId, cpShortTitle, specimens, wfName, title) {
     if (!this._wfInstanceSvc()) {
       alert('Workflow module not installed!');
       return;
     }
 
-    const inputItem = {
-      cpr  :    {id: specimen.cprId,   cpId: specimen.cpId, cpShortTitle: specimen.cpShortTitle},
-      visit:    {id: specimen.visitId, cpId: specimen.cpId, cpShortTitle: specimen.cpShortTitle},
-      specimen: {id: specimen.id,      cpId: specimen.cpId, cpShortTitle: specimen.cpShortTitle}
-    };
+    const inputItems = specimens.map(
+      specimen => ({
+        cpr  :    {id: specimen.cprId,   cpId: specimen.cpId, cpShortTitle: specimen.cpShortTitle},
+        visit:    {id: specimen.visitId, cpId: specimen.cpId, cpShortTitle: specimen.cpShortTitle},
+        specimen: {id: specimen.id,      cpId: specimen.cpId, cpShortTitle: specimen.cpShortTitle}
+      })
+    );
 
-    const {cpId, cprId, visitId, id} = specimen;
-    const params = this._getVisitBreadcrumb(specimen, title);
-    params['breadcrumb-3'] = JSON.stringify({
-      label: this._getVisitDescription(specimen),
-      route: {
-        name: 'ParticipantsListItemVisitDetail.Overview',
-        params: {cpId, cprId, visitId}
-      }
-    });
-    params['breadcrumb-4'] = JSON.stringify({
-      label: specimen.label + (specimen.barcode ? ' (' + specimen.barcode + ')' : ''),
-      route: {
-        name: 'ParticipantsListItemSpecimenDetail.Overview',
-        params: {cpId, cprId, visitId, specimenId: id}
-      }
-    });
+    let params = {}
+    if (inputItems.length > 1) {
+      params = this._getCpBreadcrumb(cpId, cpShortTitle, title);
+    } else if (inputItems.length == 1) {
+      const specimen = specimens[0];
+      const {cpId, cprId, visitId, id} = specimen;
+      params = this._getVisitBreadcrumb(specimen, title);
+      params['breadcrumb-3'] = JSON.stringify({
+        label: this._getVisitDescription(specimen),
+        route: {
+          name: 'ParticipantsListItemVisitDetail.Overview',
+          params: {cpId, cprId, visitId}
+        }
+      });
+      params['breadcrumb-4'] = JSON.stringify({
+        label: specimen.label + (specimen.barcode ? ' (' + specimen.barcode + ')' : ''),
+        route: {
+          name: 'ParticipantsListItemSpecimenDetail.Overview',
+          params: {cpId, cprId, visitId, specimenId: id}
+        }
+      });
+    }
 
-    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, [inputItem], {params});
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, inputItems, {params});
     this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
@@ -194,11 +220,11 @@ class Workflow {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'createPooledSpecimensWf');
   }
 
-  _getCreateAliquotsWf({cpId}) {
+  _getCreateAliquotsWf(cpId) {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'createAliquotsWf');
   }
 
-  _getCreateDerivativesWf({cpId}) {
+  _getCreateDerivativesWf(cpId) {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'createDerivativesWf');
   }
 
@@ -217,6 +243,24 @@ class Workflow {
       batchTitle: title,
       showOptions: false
     };
+  }
+
+  _getCpBreadcrumb(cpId, cpShortTitle, title) {
+    const params = {
+      returnOnExit: 'current_view',
+      cpId: cpId,
+      batchTitle: title,
+      showOptions: false
+    };
+
+    if (cpId > 0) {
+      params['breadcrumb-1'] = JSON.stringify({
+        label: cpShortTitle,
+        route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
+      })
+    }
+
+    return params;
   }
 
   _getVisitDescription({description, visitDescription, eventLabel}) {
