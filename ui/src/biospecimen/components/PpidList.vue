@@ -36,20 +36,20 @@ export default {
     ddLs: function() {
       const ls = this.listSource;
       return {
-        loadFn: ({context, query, maxResults, _selected}) => {
+        loadFn: ({context, query:searchStr, maxResults, _selected}) => {
           let cache = (context || {})._formCache || {};
           cache = cache['ppidList'] = cache['ppidList'] || {};
 
           const displayLabel = typeof ls.displayLabel == 'function' ? ls.displayLabel : this._displayLabel;
           let promise;
           if (_selected) {
-            const oq = (ls.selectProp || 'query') + ':' + _selected;
+            const oq = (ls.selectProp || 'searchStr') + ':' + _selected;
             if (!cache[oq]) {
               const params = {};
               if (ls.selectProp == 'id') {
                 params.ids = [_selected];
               } else {
-                params[ls.selectProp || 'query'] = _selected;
+                params[ls.selectProp || 'searchStr'] = _selected;
               }
               
               cache[oq] = http.post('collection-protocol-registrations/list', params);
@@ -57,7 +57,7 @@ export default {
 
             promise = cache[oq];
           } else {
-            const params = {query, maxResults, ...util.queryParams(this.form || this.context || {}, ls || {})};
+            const params = {searchStr, maxResults, ...util.queryParams(this.form || this.context || {}, ls || {})};
             const qs = util.queryString(Object.assign(params || {}));
             promise = cache[qs];
             if (!promise) {

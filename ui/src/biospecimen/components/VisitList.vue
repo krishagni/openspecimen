@@ -59,6 +59,8 @@ export default {
 
           return promise.then(
             (visits) => {
+              const filterVisits = typeof ls.uiFilter == 'function' ? ls.uiFilter : () => true;
+              visits = visits.filter(filterVisits);
               visits.forEach(visit => visit.displayLabel = displayLabel({visit}));
               return visits;  
             }
