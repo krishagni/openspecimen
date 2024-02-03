@@ -137,7 +137,7 @@ class Workflow {
       }
     }
 
-    let wfName = await this._getPooledSpmnWf({cpId});
+    let wfName = await this._getPooledSpmnWf(cpId);
     if (!wfName) {
       wfName = 'sys-create-pooled-specimen';
     }
@@ -145,6 +145,46 @@ class Workflow {
     const params = {
       returnOnExit: 'current_view',
       batchTitle: i18n.msg('specimens.create_pooled_specimen'),
+      showOptions: false
+    };
+
+    if (cpId >= 1) {
+      Object.assign(params, {
+        cpId: cpId,
+        'breadcrumb-1': JSON.stringify({
+          label: specimens[0].cpShortTitle,
+          route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
+        })
+      });
+    }
+
+    const inputItems = specimens.map(specimen => ({specimen}));
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, inputItems, {params});
+    this._wfInstanceSvc().gotoInstance(instance.id);
+  }
+
+  async transferSpecimens(specimens) {
+    if (!this._wfInstanceSvc()) {
+      alert('Workflow module not installed!');
+      return;
+    }
+
+    let cpId = specimens && specimens[0].cpId;
+    for (let specimen of specimens) {
+      if (cpId != specimen.cpId) {
+        cpId = -1;
+        break;
+      }
+    }
+
+    let wfName = await this._getTransferSpmnsWf(cpId);
+    if (!wfName) {
+      wfName = 'sys-transfer-specimens';
+    }
+
+    const params = {
+      returnOnExit: 'current_view',
+      batchTitle: i18n.msg('specimens.transfer_specimens'),
       showOptions: false
     };
 
@@ -216,8 +256,12 @@ class Workflow {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'collectUnplannedSpecimensWf');
   }
 
-  _getPooledSpmnWf({cpId}) {
+  _getPooledSpmnWf(cpId) {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'createPooledSpecimensWf');
+  }
+
+  _getTransferSpmnsWf(cpId) {
+    return cpSvc.getWorkflowProperty(cpId, 'common', 'transferSpecimensWf');
   }
 
   _getCreateAliquotsWf(cpId) {

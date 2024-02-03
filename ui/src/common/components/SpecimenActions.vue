@@ -683,7 +683,8 @@ export default {
     },
 
     transferSpecimens: function() {
-      this.navToView('bulk-transfer-specimens', null, {}, 'common.specimen_actions.select_for_transfer', false, false, true);
+      const navTo = (specimens) => wfSvc.transferSpecimens(specimens);
+      this.navToView('bulk-transfer-specimens', navTo, {}, 'common.specimen_actions.select_for_transfer', false, false, true);
     },
 
     showRetrieveSpecimensDialog: function() {
