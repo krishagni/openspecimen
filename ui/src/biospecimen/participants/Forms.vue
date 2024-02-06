@@ -16,12 +16,23 @@
         :data="records"
         :schema="{columns: recordFields}"
         :expanded="expanded"
+        :showRowActions="true"
         @rowClicked="onRecordClick">
+
+        <template #rowActions="{rowObject}">
+          <os-button-group>
+            <os-button left-icon="trash" v-os-tooltip="$t('common.buttons.delete')" @click="deleteRecord(rowObject)"
+              v-if="!rowObject.sysForm" />
+          </os-button-group>
+        </template>
+
         <template #expansionRow>
           <FormRecordOverview :record="record" v-if="record" />
         </template>
       </os-list-view>
     </os-grid-column>
+
+    <DeleteFormRecord ref="deleteFormDialog" />
   </os-grid>
 </template>
 
@@ -31,6 +42,7 @@ import formSvc from '@/forms/services/Form.js';
 import routerSvc from '@/common/services/Router.js';
 import util   from '@/common/services/Util.js';
 
+import DeleteFormRecord   from '@/forms/components/DeleteFormRecord.vue';
 import FormRecordOverview from '@/forms/components/FormRecordOverview.vue';
 
 export default {
@@ -39,6 +51,7 @@ export default {
   inject: ['cpViewCtx'],
 
   components: {
+    DeleteFormRecord,
     FormRecordOverview
   },
 
@@ -120,6 +133,15 @@ export default {
       }
 
       routerSvc.goto(name, params, Object.assign(query, {formId, recordId}));
+    },
+
+    deleteRecord: function(record) {
+      this.$refs.deleteFormDialog.execute(record).then(
+        () => {
+          const idx = this.records.indexOf(record);
+          this.records.splice(idx, 1);
+        }
+      );
     },
 
     _loadRecord: function() {

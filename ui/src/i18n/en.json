@@ -189,6 +189,7 @@
     "file_not_selected": "File not selected.",
     "file_upload_error": "Error uploading the file.",
     "file_uploaded": "File uploaded.",
+    "form_record_deleted": "Form record #{recordId} {formCaption} deleted...",
     "form_validation_error": "There are validation errors as highlighted below. Please correct them.",
     "forms": "Forms",
 
