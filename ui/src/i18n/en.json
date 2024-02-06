@@ -75,6 +75,7 @@
       "version": "Version"
     },
 
+    "add_record": "Add Record",
     "add_specimens": {
       "dup_labels": "Duplicate labels scanned: {labels}",
       "multi_cp_specimens": "Specimens found in multiple protocols",
@@ -190,6 +191,7 @@
     "file_upload_error": "Error uploading the file.",
     "file_uploaded": "File uploaded.",
     "form_record_deleted": "Form record #{recordId} {formCaption} deleted...",
+    "form_record_saved": "Form record #{recordId} {formCaption} saved...",
     "form_validation_error": "There are validation errors as highlighted below. Please correct them.",
     "forms": "Forms",
 
@@ -346,8 +348,9 @@
 
     "switch_to_table_view": "Switch to table view",
     "update": "Update {name}",
-    "updated_by": "Updated By",
+    "update_record": "Update Record",
     "update_time": "Update Time",
+    "updated_by": "Updated By",
     "user_profile": "User Profile",
     "url_copied": "URL copied.",
     "yes": "Yes"

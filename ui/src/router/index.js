@@ -947,6 +947,12 @@ const routes = [
                     component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/AddEdit.vue')
                   },
                   {
+                    path: 'addedit-form',
+                    name: 'ParticipantAddEditFormRecord',
+                    component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/AddEditFormRecord.vue'),
+                    props: (route) => ({...route.query})
+                  },
+                  {
                     path: 'visit/:visitId',
                     name: 'VisitRoot',
                     component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/DetailRoot.vue'),

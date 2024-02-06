@@ -1,7 +1,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <span>Action buttons</span>
+      <os-menu left-icon="plus" :label="$t('common.buttons.add')" :options="participantForms"
+        @menu-toggled="loadForms" v-if="!this.forms || participantForms.length > 0" />
     </template>
   </os-page-toolbar>
 
@@ -20,9 +21,10 @@
         @rowClicked="onRecordClick">
 
         <template #rowActions="{rowObject}">
-          <os-button-group>
-            <os-button left-icon="trash" v-os-tooltip="$t('common.buttons.delete')" @click="deleteRecord(rowObject)"
-              v-if="!rowObject.sysForm" />
+          <os-button-group v-if="!rowObject.sysForm">
+            <os-button left-icon="edit" v-os-tooltip="$t('common.buttons.edit')" @click="editRecord(rowObject)" />
+
+            <os-button left-icon="trash" v-os-tooltip="$t('common.buttons.delete')" @click="deleteRecord(rowObject)" />
           </os-button-group>
         </template>
 
@@ -59,7 +61,7 @@ export default {
     return {
       loading: true,
 
-      forms: [],
+      forms: undefined,
 
       records: [],
 
@@ -69,15 +71,13 @@ export default {
 
   async created() {
     const promises = [];
-    promises.push(cprSvc.getForms(this.cpr));
     promises.push(cprSvc.getFormRecords(this.cpr));
     if (this.formId > 0 && this.recordId > 0) {
       promises.push(formSvc.getRecord({formId: this.formId, recordId: this.recordId}, {includeMetadata: true}));
     }
 
     Promise.all(promises).then(
-      ([forms, records, record]) => {
-        this.forms = forms;
+      ([records, record]) => {
         this.records = records;
         this.record = record;
         if (this.formId > 0 && this.recordId > 0) {
@@ -91,6 +91,11 @@ export default {
   },
 
   computed: {
+    participantForms: function() {
+      return (this.forms || []).filter(form => !form.sysForm && (form.noOfRecords == 0 || form.multiRecord))
+        .map(form => ({caption: form.formCaption, onSelect: () => this.addRecord(form)}));
+    },
+
     recordFields: function() {
       return [
         {
@@ -135,13 +140,35 @@ export default {
       routerSvc.goto(name, params, Object.assign(query, {formId, recordId}));
     },
 
+    addRecord: function({formId, formCtxtId}) {
+      const {cpId, id: cprId} = this.cpr;
+      routerSvc.goto('ParticipantAddEditFormRecord', {cpId, cprId}, {formId, formCtxtId});
+    },
+
+    editRecord: function({formId, fcId: formCtxtId, recordId}) {
+      const {cpId, id: cprId} = this.cpr;
+      routerSvc.goto('ParticipantAddEditFormRecord', {cpId, cprId}, {formId, formCtxtId, recordId});
+    },
+
     deleteRecord: function(record) {
       this.$refs.deleteFormDialog.execute(record).then(
         () => {
           const idx = this.records.indexOf(record);
           this.records.splice(idx, 1);
+          if (this.forms) {
+            const form = this.forms.find(form => form.formCtxtId == record.fcId);
+            form.noOfRecords -= 1;
+          }
         }
       );
+    },
+
+    loadForms: function() {
+      if (this.forms) {
+        return;
+      }
+
+      cprSvc.getForms(this.cpr).then(forms => this.forms = forms);
     },
 
     _loadRecord: function() {
