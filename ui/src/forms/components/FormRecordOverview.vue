@@ -120,4 +120,9 @@ export default {
   padding: 0.125rem 0.250rem;
 }
 
+.os-sf-table img {
+  height: 150px;
+  width: 300px;
+}
+
 </style>

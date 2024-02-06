@@ -800,4 +800,53 @@ export default {
 .os-list-items .item .descriptions > div:not(:last-child) {
   margin-bottom: 0.5rem;
 }
+
+.os-list-shadowed-rows.os-list .results .results-inner {
+  padding-right: 0rem;
+}
+
+.os-list-shadowed-rows :deep(table.p-datatable-table) {
+  border: 0px;
+  border-collapse: separate;
+  border-spacing: 2px 15px;
+  margin-top: -0.5rem;
+  margin-bottom: 0rem;
+  table-layout: fixed;
+}
+
+.os-list-shadowed-rows :deep(.os-key-values .item) {
+  border-spacing: 0px;
+}
+
+.os-list-shadowed-rows :deep(table.p-datatable-table > thead > tr > th) {
+  background: transparent!important;
+  border-bottom: 0;
+  padding: 0rem 1rem;
+  text-align: center;
+}
+
+.os-list-shadowed-rows :deep(table.p-datatable-table > thead > tr > th.row-actions) {
+  width: 90px;
+}
+
+.os-list-shadowed-rows :deep(table.p-datatable-table > tbody > tr > td) {
+  border-top: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.os-list-shadowed-rows :deep(table.p-datatable-table > tbody > tr) {
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
+  border-radius: 0.5rem;
+  background: transparent;
+}
+
+.os-list-shadowed-rows :deep(table.p-datatable-table > tbody > tr:hover) {
+  background: transparent;
+}
+
+.os-list-shadowed-rows :deep(table.p-datatable-table > tbody > tr > td) {
+  vertical-align: middle;
+  padding: 1rem;
+}
 </style>

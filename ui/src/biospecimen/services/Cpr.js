@@ -180,6 +180,28 @@ class CollectionProtocolRegistration {
     return name;
   }
 
+  getForms(cpr) {
+    return http.get('collection-protocol-registrations/' + cpr.id + '/forms');
+  }
+
+  getFormRecords(cpr) {
+    return http.get('collection-protocol-registrations/' + cpr.id + '/extension-records').then(
+      (formRecords) => {
+        const result = [];
+        for (let {id, caption, records} of formRecords) {
+          for (let record of records || []) {
+            record.formId = id;
+            record.formCaption = caption;
+            result.push(record);
+          }
+        }
+
+        result.sort(({updateTime: t1}, {updateTime: t2}) => +t2 - +t1);
+        return result;
+      }
+    );
+  }
+
   getAllowedEvents(cpr, anticipatedEvents) {
     if (!anticipatedEvents) {
       return null;

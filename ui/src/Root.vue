@@ -177,8 +177,9 @@ a:focus, a:hover {
   white-space: break-spaces;
 }
 
-.os-key-values .item .value img {
-  width: 100%;
+.os-key-values img {
+  height: 150px;
+  width: 300px;
 }
 
 .os-key-values .item .key {

@@ -190,6 +190,7 @@
     "file_upload_error": "Error uploading the file.",
     "file_uploaded": "File uploaded.",
     "form_validation_error": "There are validation errors as highlighted below. Please correct them.",
+    "forms": "Forms",
 
     "home": {
       "carts": "Carts",
@@ -279,6 +280,7 @@
 
     "reason": "Reason",
     "reason_required": "Reason is mandatory",
+    "record": "Record",
     "record_deleted": "{type} '{title}' deleted!",
 
     "signature": {
@@ -1153,6 +1155,7 @@
     "participant": "Participant",
     "pathology_status": "Pathological Status",
     "pending": "Pending",
+    "pooled": "Pooled",
     "ppid": "PPID",
     "print_child_labels_q": "Do you want to print child specimen labels as well?",
     "quantity": "Quantity",

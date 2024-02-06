@@ -309,4 +309,9 @@ export default {
   overflow-x: auto;
 }
 
+.os-sf-table img {
+  height: 150px;
+  width: 300px;
+}
+
 </style>

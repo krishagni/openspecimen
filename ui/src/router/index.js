@@ -864,9 +864,10 @@ const routes = [
                             component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/Overview.vue')
                           },
                           {
-                            path: 'newreg',
-                            name: 'ParticipantsListItemDetail.NewReg',
-                            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/NewRegistration.vue')
+                            path: 'forms',
+                            name: 'ParticipantsListItemDetail.Forms',
+                            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/Forms.vue'),
+                            props: ({query}) => ({formId: query.formId, recordId: query.recordId})
                           }
                         ]
                       },
