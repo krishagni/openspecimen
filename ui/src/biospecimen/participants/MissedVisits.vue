@@ -160,6 +160,7 @@ export default {
   border-spacing: 2px 15px;
   margin-top: -0.5rem;
   margin-bottom: 0rem;
+  table-layout: fixed;
 }
 
 .os-missed-visits-tab :deep(.os-key-values .item) {
@@ -176,6 +177,8 @@ export default {
 
 .os-missed-visits-tab :deep(table.p-datatable-table > tbody > tr > td) {
   border-top: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .os-missed-visits-tab :deep(table.p-datatable-table > tbody > tr){
