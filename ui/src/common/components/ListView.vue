@@ -35,7 +35,7 @@
               </span>
             </template>
           </column>
-          <column v-if="showRowActions">
+          <column class="row-actions" v-if="showRowActions">
             <template #body="slotProps">
               <div class="os-click-esc actions">
                 <slot name="rowActions" :rowObject="slotProps.data.rowObject"> </slot>

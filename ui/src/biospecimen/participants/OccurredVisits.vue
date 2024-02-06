@@ -246,6 +246,10 @@ export default {
   text-align: center;
 }
 
+.os-occurred-visits-tab :deep(table.p-datatable-table > thead > tr > th.row-actions) {
+  width: 90px;
+}
+
 .os-occurred-visits-tab :deep(table.p-datatable-table > tbody > tr > td) {
   border-top: 0;
   white-space: pre-wrap;
