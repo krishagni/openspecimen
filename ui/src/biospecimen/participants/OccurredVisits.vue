@@ -6,6 +6,7 @@
       :schema="{columns: tabFields}"
       :showRowActions="true"
       @rowClicked="onVisitRowClick"
+      :expanded="expandedVisits"
       ref="listView">
 
       <template #rowActions="{rowObject}">
@@ -14,6 +15,10 @@
 
           <os-menu icon="ellipsis-v" :no-outline="true" :options="options(rowObject.visit)" />
         </os-button-group>
+      </template>
+
+      <template class="visit-details" #expansionRow="{rowObject}">
+        <os-overview :schema="dict" :object="{cp, cpr, visit: rowObject.visit}" v-if="dict && dict.length > 0" />
       </template>
     </os-list-view>
   </div>
@@ -28,13 +33,17 @@ import util from '@/common/services/Util.js';
 import wfSvc from '@/biospecimen/services/Workflow.js';
 
 export default {
-  props: ['visits'],
+  props: ['cp', 'cpr', 'visits', 'dict'],
 
   inject: ['cpViewCtx'],
 
   data() {
     return {
-      tabFields: []
+      tabFields: [],
+
+      expandedVisits: [],
+
+      visit: {}
     }
   },
 
@@ -49,8 +58,13 @@ export default {
   },
 
   methods: {
-    onVisitRowClick: function({visit}) {
-      this.gotoVisit(visit);
+    onVisitRowClick: function(rowObject) {
+      const [prev] = this.expandedVisits;
+      this.expandedVisits.length = 0;
+      if (!prev || prev.visit != rowObject.visit) {
+        this.expandedVisits.push(rowObject);
+      }
+      // this.gotoVisit(visit);
     },
 
     showReport: function({visit}) {
@@ -211,35 +225,41 @@ export default {
   padding-right: 0rem;
 }
 
-.os-occurred-visits-tab :deep(table) {
+.os-occurred-visits-tab :deep(table.p-datatable-table) {
   border: 0px;
   border-collapse: separate;
   border-spacing: 2px 15px;
   margin-top: -0.5rem;
+  margin-bottom: 0rem;
 }
 
-.os-occurred-visits-tab :deep(table > thead > tr > th) {
+.os-occurred-visits-tab :deep(.os-key-values .item) {
+  border-collapse: collase;
+  border-spacing: 0px;
+}
+
+.os-occurred-visits-tab :deep(table.p-datatable-table > thead > tr > th) {
   background: transparent!important;
   border-bottom: 0;
   padding: 0rem 1rem;
   text-align: center;
 }
 
-.os-occurred-visits-tab :deep(table tbody tr td) {
+.os-occurred-visits-tab :deep(table.p-datatable-table > tbody > tr > td) {
   border-top: 0;
 }
 
-.os-occurred-visits-tab :deep(table tbody tr){
+.os-occurred-visits-tab :deep(table.p-datatable-table > tbody > tr) {
   box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
   border-radius: 0.5rem;
   background: transparent;
 }
 
-.os-occurred-visits-tab :deep(table tbody tr:hover) {
+.os-occurred-visits-tab :deep(table.p-datatable-table > tbody > tr:hover) {
   background: transparent;
 }
 
-.os-occurred-visits-tab :deep(table tbody tr td) {
+.os-occurred-visits-tab :deep(table.p-datatable-table > tbody > tr > td) {
   vertical-align: middle;
   padding: 1rem;
 }

@@ -15,19 +15,34 @@
     <os-grid-column width="8">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
-      <os-section v-if="ctx.visits && ctx.visits.length > 0">
+      <os-section v-if="hasOccurredVisits">
         <template #title>
-          <span v-t="'participants.visits'">Visits</span>
+          <span v-t="'participants.occurred_visits'">Visits</span>
         </template>
 
         <template #content>
-          <!-- OccurredVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
+          <OccurredVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
+        </template>
+      </os-section>
 
+      <os-section v-if="hasMissedVisits">
+        <template #title>
+          <span v-t="'participants.missed_or_not_collected_visits'">Visits</span>
+        </template>
+
+        <template #content>
           <MissedVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
+        </template>
+      </os-section>
 
-          <PendingVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" / -->
+      <os-section v-if="hasPendingVisits">
+        <template #title>
+          <span v-t="'participants.pending_visits'">Visits</span>
+        </template>
 
-          <Visits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
+        <template #content>
+          <PendingVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
+          <!-- Visits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" / -->
         </template>
       </os-section>
     </os-grid-column>
@@ -59,19 +74,19 @@ import cprSvc from '@/biospecimen/services/Cpr.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 
-// import MissedVisits   from './MissedVisits.vue';
-// import OccurredVisits from './OccurredVisits.vue';
-// import PendingVisits  from './PendingVisits.vue';
-import Visits from './Visits.vue';
+import MissedVisits   from './MissedVisits.vue';
+import OccurredVisits from './OccurredVisits.vue';
+import PendingVisits  from './PendingVisits.vue';
+// import Visits from './Visits.vue';
 
 export default {
   props: ['cpr'],
 
   components: {
-//     MissedVisits,
-//     OccurredVisits,
-//     PendingVisits,
-    Visits
+    MissedVisits,
+    OccurredVisits,
+    PendingVisits
+//     Visits
   },
 
   inject: ['cpViewCtx'],
@@ -104,6 +119,17 @@ export default {
   },
 
   computed: {
+    hasOccurredVisits: function() {
+      return (this.ctx.visits || []).some(visit => visit.status == 'Complete');
+    },
+
+    hasMissedVisits: function() {
+      return (this.ctx.visits || []).some(visit => visit.status == 'Missed Collection' || visit.status == 'Not Collected');
+    },
+
+    hasPendingVisits: function() {
+      return (this.ctx.visits || []).some(visit => !visit.status || visit.status == 'Pending');
+    }
   },
 
   watch: {

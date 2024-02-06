@@ -18,7 +18,7 @@
         <div v-if="selectedRows.length > 0" class="p-inline-message p-inline-message-info">
           <span v-t="{path: 'common.lists.records_selected', args: {count: selectedRows.length}}"></span>
         </div>
-        <data-table :value="list" v-model:selection="selectedRows" @row-click="rowClick($event)" @sort="sort($event)">
+        <data-table :value="list" v-model:expandedRows="expandedRows" v-model:selection="selectedRows" @row-click="rowClick($event)" @sort="sort($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
           <column v-for="column of schema.columns" :header="caption(column)" :key="column.name" :field="column.name"
             :style="column.uiStyle" :sortable="column.sortable">
@@ -44,6 +44,9 @@
           </column>
           <template #footer v-if="$slots.footerRow">
             <slot name="footerRow"> </slot>
+          </template>
+          <template #expansion="slotProps" v-if="$slots.expansionRow">
+            <slot name="expansionRow" :rowObject="slotProps.data.rowObject"> </slot>
           </template>
         </data-table>
       </div>
@@ -188,6 +191,7 @@ export default {
     'schema',
     'query',
     'selected',
+    'expanded',
     'allowSelection',
     'loading',
     'showRowActions'
@@ -488,6 +492,21 @@ export default {
         }
 
         result.push(row);
+      }
+
+      return result;
+    },
+
+    expandedRows: function() {
+      const result = [];
+      if (!this.expanded || this.expanded.length == 0) {
+        return [];
+      }
+
+      for (let row of this.list) {
+        if (this.expanded.indexOf(row.rowObject) != -1) {
+          result.push(row);
+        }
       }
 
       return result;
