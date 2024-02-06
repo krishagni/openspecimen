@@ -254,7 +254,8 @@ export default {
       }
     }
 
-    cpSvc.getWorkflowProperty(-1, 'common', 'receiveSpecimensWorkflow')
+    const cpId = (this.cp && this.cp.id) || -1
+    cpSvc.getWorkflowProperty(cpId, 'common', 'receiveSpecimensWorkflow')
       .then(wfId => this.ctx.recvSpmnsWfId = wfId);
   },
 

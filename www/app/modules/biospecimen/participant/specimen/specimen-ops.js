@@ -65,7 +65,7 @@ angular.module('os.biospecimen.specimen')
       }
 
       scope.recvSpmnsWfId = -1;
-      CpConfigSvc.getCommonCfg(-1, 'receiveSpecimensWorkflow').then(
+      CpConfigSvc.getCommonCfg((scope.cp && scope.cp.id) || -1, 'receiveSpecimensWorkflow').then(
         function(wfId) {
           scope.recvSpmnsWfId = wfId;
         }
