@@ -118,9 +118,9 @@ export default {
       if (value && typeof value == 'object') {
         let position = value;
         result = position.name;
-        if (position.mode == 'TWO_D') {
+        if (position.mode == 'TWO_D' && position.positionY && position.positionX) {
           result += ' (' + position.positionY + ', ' + position.positionX + ')';
-        } else if (position.mode == 'LINEAR') {
+        } else if (position.mode == 'LINEAR' && position.position > 0) {
           result += ' (' + position.position + ')';
         }
       }
