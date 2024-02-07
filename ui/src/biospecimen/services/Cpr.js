@@ -184,6 +184,21 @@ class CollectionProtocolRegistration {
     return cpSvc.getWorkflow(cpId, 'formDataEntryRules').then(wf => (wf && wf['participant']) || []);
   }
 
+  async getFormsOrderSpec(cpId) {
+    return cpSvc.getWorkflow(cpId, 'forms').then(
+      wf => {
+        if (!wf) {
+          wf = {};
+        }
+
+        return [
+          {type: 'CommonParticipant', forms: wf['CommonParticipant'] || []},
+          {type: 'Participant', forms: wf['Participant'] || []}
+        ];
+      }
+    );
+  }
+
   getForms(cpr) {
     return http.get('collection-protocol-registrations/' + cpr.id + '/forms');
   }

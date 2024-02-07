@@ -75,8 +75,14 @@ export default class CpViewContext {
 
   async getParticipantForms(context) {
     const {cpr} = context;
-    return Promise.all([cprSvc.getForms(cpr), cprSvc.getFormDataEntryRules(this.cpId)]).then(
-      ([forms, rules]) => this._getMatchingForms(forms, rules, context)
+    const promises = [
+      cprSvc.getForms(cpr),
+      cprSvc.getFormDataEntryRules(this.cpId),
+      cprSvc.getFormsOrderSpec(this.cpId)
+    ];
+
+    return Promise.all(promises).then(
+      ([forms, rules, orderSpec]) => this._sortForms(this._getMatchingForms(forms, rules, context), orderSpec)
     );
   }
 
@@ -215,5 +221,50 @@ export default class CpViewContext {
     }
 
     return forms;
+  }
+
+  _sortForms(forms, orderSpec) {
+    if (!orderSpec || orderSpec.length == 0) {
+      return forms;
+    }
+
+    const formsByType = {};
+    for (let form of forms) {
+      formsByType[form.entityType] = formsByType[form.entityType] || [];
+      formsByType[form.entityType].push(form);
+    }
+
+    const result = [];
+    for (let {type, forms: typeForms} of orderSpec) {
+      Array.prototype.push.apply(result, this._sortForms0(formsByType[type] || [], typeForms));
+      delete formsByType[type];
+    }
+
+    for (let form of forms) {
+      if (formsByType[form.entityType]) {
+        result.push(form);
+      }
+    }
+
+    return result;
+  }
+
+  _sortForms0(forms, orderSpec) {
+    const formsById = {};
+    for (let form of forms) {
+      formsById[form.formId] = form;
+    }
+
+    const result = [];
+    for (let {id} of orderSpec) {
+      let form = formsById[id];
+      if (form) {
+        result.push(form);
+        forms.splice(forms.indexOf(form), 1);
+      }
+    }
+
+    Array.prototype.push.apply(result, forms);
+    return result;
   }
 }
