@@ -16,7 +16,7 @@
 
     <os-page-body>
       <os-addedit-form-record :entity="cpr" :form-def="ctx.formDef" :form-id="formId"
-        :form-ctxt-id="formCtxtId" :record-id="recordId" :hide-panel="true"
+        :form-ctxt-id="formCtxtId" :record-id="recordId" :hide-panel="true" :show-next="!!this.ctx.nextForm"
         @saved="saved" @cancelled="saveCancelled" />
     </os-page-body>
   </os-page>
@@ -34,7 +34,6 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
-    this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
     return {
       ctx: {
         cp: {},
@@ -45,7 +44,7 @@ export default {
   },
 
   async created() {
-    this.ctx.formDef = await formSvc.getDefinition(this.formId);
+    this._setupForm();
   },
 
   computed: {
@@ -69,25 +68,72 @@ export default {
     }
   },
 
+  watch: {
+    '$props.formId': function() {
+      this._setupForm();
+    }
+  },
+
   methods: {
     saved: function(record) {
       alertsSvc.success({
         code: 'common.form_record_saved',
         args: {recordId: record.id, formCaption: this.ctx.formDef.caption}
       });
-      this._navToOverview(this.cpr, record);
+
+      if (record.nextForm) {
+        this._nextForm(this.ctx.nextForm);
+      } else {
+        this._navToOverview(this.cpr, record);
+      }
     },
 
     saveCancelled: function() {
       this._navToOverview(this.cpr);
     },
 
+    _setupForm: async function() {
+      formSvc.getDefinition(this.formId).then(formDef => this.ctx.formDef = formDef);
+      this.cpViewCtx.getCp().then(
+        async (cp) => {
+          this.ctx.cp = cp
+          if (!this.recordId) {
+            if (!this.forms) {
+              this.forms = await this.cpViewCtx.getParticipantForms({cp: cp, cpr: this.cpr});
+            }
+
+            let nextForm = undefined;
+            let cfFound  = false; // current form found?
+            for (let i = 0; i < this.forms.length - 1; ++i) {
+              let f = this.forms[i];
+              let nf = this.forms[i + 1];
+              if (!cfFound && f.formId == this.formId && f.formCtxtId == this.formCtxtId) {
+                cfFound = true;
+              }
+
+              if (cfFound && !nf.sysForm && (nf.multiRecord || nf.records.length == 0)) {
+                nextForm = nf;
+                break;
+              }
+            }
+
+            this.ctx.nextForm = nextForm;
+          }
+        }
+      );
+    },
+
     _navToOverview: function({cpId, id: cprId}, {containerId: formId, id: recordId}) {
       if (cprId > 0) {
         routerSvc.goto('ParticipantsListItemDetail.Forms', {cpId, cprId}, {formId, recordId});
       } else {
-        routerSvc.back();
+        routerSvc.goto('ParticipantsList', {cpId, cprId: -1});
       }
+    },
+
+    _nextForm: function({formId, formCtxtId}) {
+      const route = routerSvc.getCurrentRoute();
+      routerSvc.goto(route.name, route.params, {formId, formCtxtId});
     }
   }
 }

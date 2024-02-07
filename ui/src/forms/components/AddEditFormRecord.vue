@@ -6,7 +6,8 @@
     </template>
 
     <os-form ref="deForm" :schema="ctx.formSchema" :data="ctx.record" @input="handleChange($event)">
-      <os-button primary :label="$t('common.buttons.save')"   @click="saveRecord" />
+      <os-button primary :label="$t('common.buttons.save')"   @click="saveRecord(false)" />
+      <os-button primary :label="$t('common.buttons.save_n_next')"  @click="saveRecord(true)" v-if="showNext" />
       <os-button text    :label="$t('common.buttons.cancel')" @click="cancel" />
     </os-form>
   </os-panel>
@@ -24,7 +25,8 @@ export default {
     'formCtxtId',
     'formDef',
     'recordId',
-    'hidePanel'
+    'hidePanel',
+    'showNext'
   ],
 
   emits: ['saved', 'cancelled'],
@@ -92,7 +94,7 @@ export default {
       // console.log(event);
     },
 
-    saveRecord: function() {
+    saveRecord: function(next) {
       if (!this.$refs.deForm.validate()) {
         return;
       }
@@ -101,6 +103,7 @@ export default {
       formData.appData = {objectId: +this.entity.id, formCtxtId: +this.formCtxtId, formId: +this.formId};
       formSvc.saveOrUpdateRecord(formData).then(
         (savedData) => {
+          savedData.nextForm = next;
           this.$emit('saved', savedData);
         }
       );
