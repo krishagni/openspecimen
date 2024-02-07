@@ -180,6 +180,10 @@ class CollectionProtocolRegistration {
     return name;
   }
 
+  async getFormDataEntryRules(cpId) {
+    return cpSvc.getWorkflow(cpId, 'formDataEntryRules').then(wf => (wf && wf['participant']) || []);
+  }
+
   getForms(cpr) {
     return http.get('collection-protocol-registrations/' + cpr.id + '/forms');
   }

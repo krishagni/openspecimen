@@ -18,6 +18,7 @@
         :schema="{columns: recordFields}"
         :expanded="expanded"
         :showRowActions="true"
+        :noRecordsMsg="'common.no_form_records'"
         @rowClicked="onRecordClick">
 
         <template #rowActions="{rowObject}">
@@ -168,7 +169,12 @@ export default {
         return;
       }
 
-      cprSvc.getForms(this.cpr).then(forms => this.forms = forms);
+      this.cpViewCtx.getCp().then(
+        cp => {
+          const ctxt = {cp: cp, cpr: this.cpr};
+          this.cpViewCtx.getParticipantForms(ctxt).then(forms => this.forms = forms);
+        }
+      );
     },
 
     _loadRecord: function() {

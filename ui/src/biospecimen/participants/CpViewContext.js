@@ -73,6 +73,13 @@ export default class CpViewContext {
     return matchingTab;
   }
 
+  async getParticipantForms(context) {
+    const {cpr} = context;
+    return Promise.all([cprSvc.getForms(cpr), cprSvc.getFormDataEntryRules(this.cpId)]).then(
+      ([forms, rules]) => this._getMatchingForms(forms, rules, context)
+    );
+  }
+
   getVisitDict() {
     if (!this.visitDictQ) {
       this.visitDictQ = visitSvc.getDict(this.cpId);
@@ -182,29 +189,31 @@ export default class CpViewContext {
   async getSpecimenEventForms(context) {
     const {specimen} = context;
     return Promise.all([specimenSvc.getEventForms(specimen.id), specimenSvc.getFormDataEntryRules(this.cpId)]).then(
-      ([eventForms, rules]) => {
-        let matchingRule = null;
-        for (let rule of rules) {
-          if (!rule.when) {
-            continue;
-          }
-
-          try {
-            if (exprUtil.eval(context, rule.when)) {
-              matchingRule = rule;
-              break;
-            }
-          } catch (err) {
-            alert('Invalid form data entry rule expression: ' + rule.when + ': ' + err);
-          }
-        }
-
-        if (matchingRule && matchingRule.forms) {
-          eventForms = eventForms.filter(({formName}) => matchingRule.forms.indexOf(formName) > -1);
-        }
-
-        return eventForms;
-      }
+      ([eventForms, rules]) => this._getMatchingForms(eventForms, rules, context)
     );
+  }
+
+  _getMatchingForms(forms, rules, context) {
+    let matchingRule = null;
+    for (let rule of rules) {
+      if (!rule.when) {
+        continue;
+      }
+
+      try {
+        if (exprUtil.eval(context, rule.when)) {
+          matchingRule = rule;
+          break;
+        }
+      } catch (err) {
+        alert('Invalid form data entry rule expression: ' + rule.when + ': ' + err);
+      }
+    }
+
+    if (matchingRule && matchingRule.forms) {
+      forms = forms.filter(({formName}) => matchingRule.forms.indexOf(formName) > -1);
+    }
+
+    return forms;
   }
 }

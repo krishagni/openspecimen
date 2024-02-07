@@ -9,7 +9,7 @@
         </div>
         <div v-show="!loading && list.length == 0">
           <os-message type="info">
-            <span v-t="'common.lists.no_records'">No records to show</span>
+            <span v-t="noRecordsMsg || 'common.lists.no_records'">No records to show</span>
           </os-message>
         </div>
       </div>
@@ -194,7 +194,8 @@ export default {
     'expanded',
     'allowSelection',
     'loading',
-    'showRowActions'
+    'showRowActions',
+    'noRecordsMsg'
   ],
 
   emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked', 'sort', 'rowStarToggled'],
