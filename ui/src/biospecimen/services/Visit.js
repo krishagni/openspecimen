@@ -182,16 +182,25 @@ class Visit {
         captionCode: 'visits.event',
         type: 'component',
         component: 'os-visit-event-desc',
-        data: ({visit}) => ({visit, showLink: true})
+        data: ({visit}) => ({visit, showLink: true}),
+        uiStyle: {
+          width: '20%'
+        }
       },
       {
         name: 'visit.name',
-        captionCode: 'visits.name'
+        captionCode: 'visits.name',
+        uiStyle: {
+          width: '20%'
+        }
       },
       {
         name: 'visit.visitDate',
         captionCode: 'visits.date',
-        type: 'date'
+        type: 'date',
+        uiStyle: {
+          width: '15%'
+        }
       }
     ];
   }
@@ -203,16 +212,25 @@ class Visit {
         captionCode: 'visits.event',
         type: 'component',
         component: 'os-visit-event-desc',
-        data: ({visit}) => ({visit, showLink: true})
+        data: ({visit}) => ({visit, showLink: true}),
+        uiStyle: {
+          width: '30%'
+        }
       },
       {
         name: 'visit.visitDate',
         captionCode: 'visits.date',
-        type: 'date'
+        type: 'date',
+        uiStyle: {
+          width: '25%'
+        }
       },
       {
         name: 'visit.missedReason',
-        captionCode: 'visits.reason'
+        captionCode: 'visits.reason',
+        uiStyle: {
+          width: '25%'
+        }
       }
     ];
   }
@@ -224,16 +242,25 @@ class Visit {
         captionCode: 'visits.event',
         type: 'component',
         component: 'os-visit-event-desc',
-        data: ({visit}) => ({visit, showLink: true})
+        data: ({visit}) => ({visit, showLink: true}),
+        uiStyle: {
+          width: '30%'
+        }
       },
       {
         name: 'visit.anticipatedVisitDate',
         captionCode: 'visits.date',
-        type: 'date'
+        type: 'date',
+        uiStyle: {
+          width: '25%'
+        }
       },
       {
         name: 'visit.pendingPrimarySpmns',
-        captionCode: 'visits.pending_specimens'
+        captionCode: 'visits.pending_specimens',
+        uiStyle: {
+          width: '25%'
+        }
       }
     ];
   }
