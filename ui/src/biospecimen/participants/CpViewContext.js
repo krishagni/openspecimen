@@ -86,6 +86,15 @@ export default class CpViewContext {
     );
   }
 
+  async getSurveyForms() {
+    const {edcSurveySvc} = window.osSvc;
+    if (edcSurveySvc) {
+      return edcSurveySvc.getSurveys({cpId: this.cpId});
+    }
+
+    return [];
+  }
+
   getVisitDict() {
     if (!this.visitDictQ) {
       this.visitDictQ = visitSvc.getDict(this.cpId);

@@ -2,7 +2,10 @@
   <os-page-toolbar>
     <template #default>
       <os-menu left-icon="plus" :label="$t('common.buttons.add')" :options="participantForms"
-        @menu-toggled="loadForms" v-if="!this.forms || participantForms.length > 0" />
+        v-if="participantForms.length > 0" />
+
+      <os-menu left-icon="plus" :label="$t('forms.survey_mode')" :options="surveys"
+        v-if="surveys.length > 0" />
     </template>
   </os-page-toolbar>
 
@@ -36,6 +39,8 @@
     </os-grid-column>
 
     <DeleteFormRecord ref="deleteFormDialog" />
+
+    <os-edc-confirm-survey-mode ref="selectSurveyMode" :object="cpr" />
   </os-grid>
 </template>
 
@@ -64,6 +69,8 @@ export default {
 
       forms: undefined,
 
+      surveys: [],
+
       records: [],
 
       expanded: []
@@ -89,6 +96,8 @@ export default {
         this.loading = false;
       }
     );
+
+    this._loadForms();
   },
 
   computed: {
@@ -164,7 +173,11 @@ export default {
       );
     },
 
-    loadForms: function() {
+    switchToSurveyMode: function(survey) {
+      this.$refs.selectSurveyMode.gotoSurvey(survey);
+    },
+
+    _loadForms: function() {
       if (this.forms) {
         return;
       }
@@ -172,7 +185,30 @@ export default {
       this.cpViewCtx.getCp().then(
         cp => {
           const ctxt = {cp: cp, cpr: this.cpr};
-          this.cpViewCtx.getParticipantForms(ctxt).then(forms => this.forms = forms);
+
+          const promises = [
+            this.cpViewCtx.getParticipantForms(ctxt),
+            this.cpViewCtx.getSurveyForms()
+          ]
+
+          Promise.all(promises).then(
+            ([forms, surveys]) => {
+              this.forms = forms;
+              this.surveys = surveys.filter(
+                survey => {
+                  for (let form of forms) {
+                    if (form.entityType == survey.entityType && form.formCtxtId == survey.formCtxtId) {
+                      return !form.sysForm && (form.noOfRecords == 0 || form.multiRecord);
+                    }
+                  }
+
+                  return false;
+                }
+              ).map(
+                survey => ({caption: survey.formCaption, onSelect: () => this.switchToSurveyMode(survey)})
+              );
+            }
+          );
         }
       );
     },
@@ -190,7 +226,7 @@ export default {
         this.expanded.length = 0;
         this.record = null;
       }
-    }
+    },
   }
 }
 </script>

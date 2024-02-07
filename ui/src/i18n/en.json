@@ -827,6 +827,10 @@
     "visit_clinical_diagnosis": "Clinical Diagnosis"
   },
 
+  "forms": {
+    "survey_mode": "Survey Mode"
+  },
+
   "institutes": {
     "confirm_delete_selected": "Are you sure you want to delete the selected institutes?",
     "create": "Create Institute",
