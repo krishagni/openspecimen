@@ -105,14 +105,20 @@ export default class CpViewContext {
           type: 'component',
           captionCode: 'visits.collection_stats',
           component: 'os-visit-specimen-collection-stats',
-          data: (rowObject) => rowObject
+          data: (rowObject) => rowObject,
+          uiStyle: {
+            width: '20%'
+          }
         });
 
         tabFields.push({
           type: 'component',
           captionCode: 'visits.utilisation_stats',
           component: 'os-visit-specimen-utilisation-stats',
-          data: (rowObject) => rowObject
+          data: (rowObject) => rowObject,
+          uiStyle: {
+            width: '20%'
+          }
         });
 
         return tabFields;
