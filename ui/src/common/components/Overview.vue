@@ -1,6 +1,6 @@
 
 <template>
-  <ul class="os-key-values" :class="{'os-one-col': columns == 1, 'os-two-cols': columns != 1}">
+  <ul class="os-key-values" :class="{'os-one-col': columns == 1, 'os-two-cols': columns != 1, 'bg-col': bgCol}">
     <li class="item" v-for="(field, idx) of fields.simple" :key="idx">
       <strong class="key key-sm">
         <span>{{label(field)}}</span>
@@ -102,7 +102,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['object', 'schema', 'columns'],
+  props: ['object', 'schema', 'columns', 'bgCol'],
 
   components: {
     Section

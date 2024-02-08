@@ -1,17 +1,20 @@
 
 <template>
-  <div class="os-radio-buttons">
-    <div class="options-row" v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
-      <div class="option" v-for="(option, optionIdx) of optionsRow" :key="optionIdx">
-        <span class="p-field-radiobutton">
-          <label>
-            <RadioButton :name="name" :value="option.value" v-model="inputValue"
-              :tabindex="tabOrder" :disabled="disabled" />
-            <span>{{option.displayLabel}}</span>
-          </label>
-        </span>
+  <div class="os-radio-wrapper">
+    <div class="os-radio-buttons">
+      <div class="options-row" v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
+        <div class="option" v-for="(option, optionIdx) of optionsRow" :key="optionIdx">
+          <span class="p-field-radiobutton">
+            <label>
+              <RadioButton :name="name" :value="option.value" v-model="inputValue"
+                :tabindex="tabOrder" :disabled="disabled" />
+              <span>{{option.displayLabel}}</span>
+            </label>
+          </span>
+        </div>
       </div>
     </div>
+    <os-button size="small" left-icon="times" v-if="clearOption" @click="inputValue = null" />
   </div>
 </template>
 
@@ -20,7 +23,11 @@
 import RadioButton from 'primevue/radiobutton';
 
 export default {
-  props: ['name', 'options', 'modelValue', 'optionsPerRow', 'context', 'tabOrder', 'disabled'],
+  props: [
+    'name', 'options', 'modelValue',
+    'optionsPerRow', 'context', 'tabOrder',
+    'disabled', 'clearOption'
+  ],
 
   emits: ['change', 'update:modelValue'],
 
@@ -125,5 +132,14 @@ export default {
 
 .os-radio-buttons .options-row:not(:last-child) :deep(.p-field-radiobutton) {
   margin-bottom: 1rem;
+}
+
+.os-radio-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.os-radio-wrapper .os-radio-buttons {
+  flex: 1;
 }
 </style>

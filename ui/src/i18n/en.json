@@ -143,6 +143,7 @@
       "submit": "Submit",
       "unarchive": "Unarchive",
       "update": "Update",
+      "upload": "Upload",
       "yes":    "Yes"
     },
 
@@ -841,6 +842,24 @@
     "saved": "Institute '{name}' saved.",
     "singular": "Institute",
     "users": "Users"
+  },
+
+  "participant_consents": {
+    "choose_signed_consent_form": "Choose signed consent form...",
+    "comments": "Comments",
+    "confirm_form_delete": "Are you sure you want to delete the signed consent form: {consentDocumentName}?",
+    "consents_updated": "Consent responses updated.",
+    "delete_form": "Delete Form",
+    "edit_responses": "Edit Responses",
+    "list": "Consents",
+    "responses": "Responses",
+    "sign_date": "Signature Date",
+    "signed_consent_form": "Signed Consent Form",
+    "signed_form_deleted": "Consent form deleted.",
+    "signed_form_uploaded": "Consent form uploaded.",
+    "upload_form": "Upload Form",
+    "upload_new_form": "Upload New Form",
+    "witness": "Witness"
   },
 
   "participants": {

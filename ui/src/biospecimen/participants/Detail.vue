@@ -33,6 +33,12 @@
               </router-link>
             </li>
 
+            <li v-if="!ctx.cp.consentsWaived && !ctx.cp.visitLevelConsents">
+              <router-link :to="getRoute('Consents')">
+                <span v-t="'participant_consents.list'">Consents</span>
+              </router-link>
+            </li>
+
             <os-plugin-views page="participant-detail" view="tab-menu" />
           </ul>
         </os-tab-menu>

@@ -250,6 +250,22 @@ class CollectionProtocolRegistration {
 
     return result;
   }
+
+  getConsents({id: cprId}) {
+    return http.get('collection-protocol-registrations/' + cprId + '/consents');
+  }
+
+  updateConsents({id: cprId}, consent) {
+    return http.put('collection-protocol-registrations/' + cprId + '/consents', consent);
+  }
+
+  deleteConsentDoc({id: cprId}) {
+    return http.delete('collection-protocol-registrations/' + cprId + '/consent-form');
+  }
+
+  getConsentDocUrl({id: cprId}) {
+    return http.getUrl('collection-protocol-registrations/' + cprId + '/consent-form');
+  }
 }
 
 export default new CollectionProtocolRegistration();
