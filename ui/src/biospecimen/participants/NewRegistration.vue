@@ -149,9 +149,3 @@ export default {
   }
 }
 </script>
-
-<style>
-// .os-tab-menu {
-//  display: none;
-// }
-</style>
