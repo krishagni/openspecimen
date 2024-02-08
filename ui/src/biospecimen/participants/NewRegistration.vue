@@ -151,7 +151,7 @@ export default {
 </script>
 
 <style>
-.os-tab-menu {
-  display: none;
-}
+// .os-tab-menu {
+//  display: none;
+// }
 </style>
