@@ -270,6 +270,40 @@ class Specimen {
     return cpSvc.getWorkflow(cpId, 'formDataEntryRules').then(wf => (wf && wf['specimen']) || []);
   }
 
+  async getFormsOrderSpec(cpId) {
+    return cpSvc.getWorkflow(cpId, 'forms').then(
+      wf => {
+        if (!wf) {
+          wf = {};
+        }
+
+        return [ {type: 'Specimen', forms: wf['specimen'] || []} ];
+      }
+    );
+  }
+
+  getForms({id: specimenId}) {
+    return http.get('specimens/' + specimenId + '/forms');
+  }
+
+  getFormRecords({id: specimenId}) {
+    return http.get('specimens/' + specimenId + '/extension-records').then(
+      (formRecords) => {
+        const result = [];
+        for (let {id, caption, records} of formRecords) {
+          for (let record of records || []) {
+            record.formId = id;
+            record.formCaption = caption;
+            result.push(record);
+          }
+        }
+
+        result.sort(({updateTime: t1}, {updateTime: t2}) => +t2 - +t1);
+        return result;
+      }
+    );
+  }
+
   async _getAllocRule(ctxt, specimen) {
     ctxt.allocRules = ctxt.allocRules || {};
 

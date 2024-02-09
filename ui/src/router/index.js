@@ -922,6 +922,12 @@ const routes = [
                                     path: 'overview',
                                     name: 'ParticipantsListItemSpecimenDetail.Overview',
                                     component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Overview.vue')
+                                  },
+                                  {
+                                    path: 'forms',
+                                    name: 'ParticipantsListItemSpecimenDetail.Forms',
+                                    component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Forms.vue'),
+                                    props: ({query}) => ({formId: query.formId, recordId: query.recordId})
                                   }
                                 ]
                               }
@@ -1026,6 +1032,12 @@ const routes = [
                             path: 'addedit-event',
                             name: 'SpecimenEventAddEdit',
                             component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/AddEditEvent.vue'),
+                            props: (route) => ({...route.query})
+                          },
+                          {
+                            path: 'addedit-form',
+                            name: 'SpecimenAddEditFormRecord',
+                            component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/AddEditFormRecord.vue'),
                             props: (route) => ({...route.query})
                           }
                         ]

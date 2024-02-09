@@ -35,6 +35,12 @@
               </router-link>
             </li>
 
+            <li>
+              <router-link :to="getRoute('Forms')">
+                <span v-t="'common.forms'">Forms</span>
+              </router-link>
+            </li>
+
             <os-plugin-views page="visit-detail" view="tab-menu" />
           </ul>
         </os-tab-menu>

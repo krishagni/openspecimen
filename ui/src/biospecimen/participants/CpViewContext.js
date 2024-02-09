@@ -222,6 +222,19 @@ export default class CpViewContext {
     );
   }
 
+  async getSpecimenForms(context) {
+    const {specimen} = context;
+    const promises = [
+      specimenSvc.getForms(specimen),
+      specimenSvc.getFormDataEntryRules(this.cpId),
+      specimenSvc.getFormsOrderSpec(this.cpId)
+    ];
+
+    return Promise.all(promises).then(
+      ([forms, rules, orderSpec]) => this._sortForms(this._getMatchingForms(forms, rules, context), orderSpec)
+    );
+  }
+
   _getMatchingForms(forms, rules, context) {
     let matchingRule = null;
     for (let rule of rules) {
