@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import ConsentResponsesList from '@/biospecimen/consents/ConsentResponsesList';
+import ConsentResponsesList from '@/biospecimen/consents/ResponsesList';
 
 export default {
   props: ['cpr'],

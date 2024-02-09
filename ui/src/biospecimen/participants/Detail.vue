@@ -27,15 +27,15 @@
               </router-link>
             </li>
 
-            <li>
-              <router-link :to="getRoute('Forms')">
-                <span v-t="'common.forms'">Forms</span>
-              </router-link>
-            </li>
-
             <li v-if="!ctx.cp.consentsWaived && !ctx.cp.visitLevelConsents">
               <router-link :to="getRoute('Consents')">
                 <span v-t="'participant_consents.list'">Consents</span>
+              </router-link>
+            </li>
+
+            <li>
+              <router-link :to="getRoute('Forms')">
+                <span v-t="'common.forms'">Forms</span>
               </router-link>
             </li>
 
