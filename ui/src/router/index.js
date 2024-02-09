@@ -894,6 +894,12 @@ const routes = [
                                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/Overview.vue')
                               },
                               {
+                                path: 'forms',
+                                name: 'ParticipantsListItemVisitDetail.Forms',
+                                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/Forms.vue'),
+                                props: ({query}) => ({formId: query.formId, recordId: query.recordId})
+                              },
+                              {
                                 path: 'consents',
                                 name: 'ParticipantsListItemVisitDetail.Consents',
                                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/Consents.vue')
@@ -985,6 +991,12 @@ const routes = [
                         path: 'addedit',
                         name: 'VisitAddEdit',
                         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/AddEdit.vue')
+                      },
+                      {
+                        path: 'addedit-form',
+                        name: 'VisitAddEditFormRecord',
+                        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/AddEditFormRecord.vue'),
+                        props: (route) => ({...route.query})
                       },
                       {
                         path: 'specimen/:specimenId',

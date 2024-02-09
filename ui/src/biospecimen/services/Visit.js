@@ -264,6 +264,44 @@ class Visit {
       }
     ];
   }
+
+  async getFormDataEntryRules(cpId) {
+    return cpSvc.getWorkflow(cpId, 'formDataEntryRules').then(wf => (wf && wf['visit']) || []);
+  }
+
+  async getFormsOrderSpec(cpId) {
+    return cpSvc.getWorkflow(cpId, 'forms').then(
+      wf => {
+        if (!wf) {
+          wf = {};
+        }
+
+        return [ {type: 'SpecimenCollectionGroup', forms: wf['visit'] || []} ];
+      }
+    );
+  }
+
+  getForms({id: visitId}) {
+    return http.get('visits/' + visitId + '/forms');
+  }
+
+  getFormRecords({id: visitId}) {
+    return http.get('visits/' + visitId + '/extension-records').then(
+      (formRecords) => {
+        const result = [];
+        for (let {id, caption, records} of formRecords) {
+          for (let record of records || []) {
+            record.formId = id;
+            record.formCaption = caption;
+            result.push(record);
+          }
+        }
+
+        result.sort(({updateTime: t1}, {updateTime: t2}) => +t2 - +t1);
+        return result;
+      }
+    );
+  }
 }
 
 export default new Visit();

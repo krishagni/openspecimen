@@ -189,6 +189,20 @@ export default class CpViewContext {
     );
   }
 
+  async getVisitForms(context) {
+    const {visit} = context;
+    const promises = [
+      visitSvc.getForms(visit),
+      visitSvc.getFormDataEntryRules(this.cpId),
+      visitSvc.getFormsOrderSpec(this.cpId)
+    ];
+
+    return Promise.all(promises).then(
+      ([forms, rules, orderSpec]) => this._sortForms(this._getMatchingForms(forms, rules, context), orderSpec)
+    );
+  }
+
+
   getSpecimenDict() {
     if (!this.specimenDictQ) {
       this.specimenDictQ = specimenSvc.getDict(this.cpId);
