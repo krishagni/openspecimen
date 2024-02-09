@@ -1,86 +1,90 @@
 <template>
-  <os-page-toolbar v-if="!editMode && !cp.consentsSource">
-    <template #default>
-      <os-button left-icon="edit" :label="$t('participant_consents.edit_responses')"
-        @click="editResponses" />
+  <template v-if="!hasEc">
+    <os-page-toolbar v-if="!editMode && !cp.consentsSource">
+      <template #default>
+        <os-button left-icon="edit" :label="$t('participant_consents.edit_responses')"
+          @click="editResponses" />
 
-      <os-button left-icon="upload" :label="$t('participant_consents.upload_new_form')"
-        @click="showUploadDoc" v-if="consent.consentDocumentName"/>
+        <os-button left-icon="upload" :label="$t('participant_consents.upload_new_form')"
+          @click="showUploadDoc" v-if="consent.consentDocumentName"/>
 
-      <os-button left-icon="trash" :label="$t('participant_consents.delete_form')"
-        @click="deleteForm" v-if="consent.consentDocumentName" />
+        <os-button left-icon="trash" :label="$t('participant_consents.delete_form')"
+          @click="deleteForm" v-if="consent.consentDocumentName" />
 
-      <os-button left-icon="upload" :label="$t('participant_consents.upload_form')"
-        @click="showUploadDoc" v-if="!consent.consentDocumentName" />
-    </template>
-  </os-page-toolbar>
+        <os-button left-icon="upload" :label="$t('participant_consents.upload_form')"
+          @click="showUploadDoc" v-if="!consent.consentDocumentName" />
+      </template>
+    </os-page-toolbar>
 
-  <os-grid v-if="!editMode">
-    <os-grid-column width="12">
-      <os-section>
-        <template #title>
-          <span v-t="'participant_consents.signed_consent_form'">Signed Consent Form</span>
-        </template>
-        <template #content>
-          <div class="signed-form">
-            <div class="filename" v-if="consent.consentDocumentName">
-              <a :href="docUrl" target="_blank">{{consent.consentDocumentName}}</a>
-            </div>
-            <div v-else>
-              <span>-</span>
-            </div>
-          </div>
-        </template>
-      </os-section>
-      <os-section>
-        <template #title>
-          <span v-t="'participant_consents.responses'">Responses</span>
-        </template>
-        <template #content>
-          <os-overview :bg-col="true" :schema="headerFields" :object="{consent: consent}" :columns="1" />
-
-          <div class="responses">
-            <div class="response" v-for="(response, idx) of consent.responses" :key="idx">
-              <div class="statement">
-                <span>{{response.statement}}</span>
-                <span v-if="response.code">&nbsp; ({{response.code}})</span>
+    <os-grid v-if="!editMode">
+      <os-grid-column width="12">
+        <os-section>
+          <template #title>
+            <span v-t="'participant_consents.signed_consent_form'">Signed Consent Form</span>
+          </template>
+          <template #content>
+            <div class="signed-form">
+              <div class="filename" v-if="consent.consentDocumentName">
+                <a :href="docUrl" target="_blank">{{consent.consentDocumentName}}</a>
               </div>
-              <div class="answer">{{response.response || '-'}}</div>
+              <div v-else>
+                <span>-</span>
+              </div>
             </div>
-          </div>
-        </template>
-      </os-section>
-    </os-grid-column>
-  </os-grid>
+          </template>
+        </os-section>
+        <os-section>
+          <template #title>
+            <span v-t="'participant_consents.responses'">Responses</span>
+          </template>
+          <template #content>
+            <os-overview :bg-col="true" :schema="headerFields" :object="{consent: consent}" :columns="1" />
 
-  <os-form :schema="formSchema" :data="dataCtx" v-if="editMode">
-    <os-button primary :label="$t('common.buttons.update')" @click="updateResponses" />
-    <os-button text :label="$t('common.buttons.cancel')" @click="cancelEditResponses" />
-  </os-form>
+            <div class="responses">
+              <div class="response" v-for="(response, idx) of consent.responses" :key="idx">
+                <div class="statement">
+                  <span>{{response.statement}}</span>
+                  <span v-if="response.code">&nbsp; ({{response.code}})</span>
+                </div>
+                <div class="answer">{{response.response || '-'}}</div>
+              </div>
+            </div>
+          </template>
+        </os-section>
+      </os-grid-column>
+    </os-grid>
 
-  <os-confirm-delete ref="confirmDeleteFormDialog" :captcha="false">
-    <template #message>
-      <span v-t="{path: 'participant_consents.confirm_form_delete', args: consent}">Are you sure you want to delete the signed consent form: {{consent.consentDocumentName}}?</span>
-    </template>
-  </os-confirm-delete>
+    <os-form :schema="formSchema" :data="dataCtx" v-if="editMode">
+      <os-button primary :label="$t('common.buttons.update')" @click="updateResponses" />
+      <os-button text :label="$t('common.buttons.cancel')" @click="cancelEditResponses" />
+    </os-form>
 
-  <os-dialog ref="uploadDocDialog">
-    <template #header>
-      <span v-t="'participant_consents.upload_consent_form'">Upload Consent Form</span>
-    </template>
-    <template #content>
-      <div>
-        <os-label>
-          <span v-t="'participant_consents.choose_signed_consent_form'">Choose the signed consent form</span>
-        </os-label>
-        <os-file-upload ref="consentDocUploader" :url="docUrl" :auto="false" :headers="reqHeaders" />
-      </div>
-    </template>
-    <template #footer>
-      <os-button text    :label="$t('common.buttons.cancel')" @click="cancelDocUpload" />
-      <os-button primary :label="$t('common.buttons.upload')" @click="uploadDoc" />
-    </template>
-  </os-dialog>
+    <os-confirm-delete ref="confirmDeleteFormDialog" :captcha="false">
+      <template #message>
+        <span v-t="{path: 'participant_consents.confirm_form_delete', args: consent}">Are you sure you want to delete the signed consent form: {{consent.consentDocumentName}}?</span>
+      </template>
+    </os-confirm-delete>
+
+    <os-dialog ref="uploadDocDialog">
+      <template #header>
+        <span v-t="'participant_consents.upload_consent_form'">Upload Consent Form</span>
+      </template>
+      <template #content>
+        <div>
+          <os-label>
+            <span v-t="'participant_consents.choose_signed_consent_form'">Choose the signed consent form</span>
+          </os-label>
+          <os-file-upload ref="consentDocUploader" :url="docUrl" :auto="false" :headers="reqHeaders" />
+        </div>
+      </template>
+      <template #footer>
+        <os-button text    :label="$t('common.buttons.cancel')" @click="cancelDocUpload" />
+        <os-button primary :label="$t('common.buttons.upload')" @click="uploadDoc" />
+      </template>
+    </os-dialog>
+  </template>
+
+  <os-plugin-views page="participant-consents" view="list" :viewProps="{cp, cpr}" />
 </template>
 
 <script>
@@ -116,6 +120,10 @@ export default {
   },
 
   computed: {
+    hasEc: function() {
+      return this.$osSvc.ecDocSvc != null;
+    },
+
     docUrl: function() {
       return cprSvc.getConsentDocUrl(this.cpr);
     },

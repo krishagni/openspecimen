@@ -122,7 +122,9 @@
       "find": "Find",
       "generate": "Generate",
       "help":   "Help",
+      "history": "History",
       "import": "Import",
+      "lock": "Lock",
       "lookup": "Lookup",
       "more":   "More",
       "next":   "Next",
@@ -142,6 +144,7 @@
       "send":   "Send",
       "submit": "Submit",
       "unarchive": "Unarchive",
+      "unlock": "Unlock",
       "update": "Update",
       "upload": "Upload",
       "yes":    "Yes"
