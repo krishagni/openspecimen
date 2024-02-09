@@ -88,7 +88,7 @@ export default {
             cfFound = true;
           }
 
-          if (cfFound && !nf.sysForm && (nf.multiRecord || nf.records.length == 0)) {
+          if (cfFound && !nf.sysForm && (nf.multiRecord || nf.noOfRecords == 0)) {
             nextForm = nf;
             break;
           }
