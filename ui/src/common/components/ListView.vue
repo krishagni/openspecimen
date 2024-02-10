@@ -651,7 +651,7 @@ export default {
   margin-bottom: 30px;
 }
 
-.os-list :deep(table) {
+.os-list :deep(table.p-datatable-table) {
   width: 100%;
   margin-bottom: 20px;
   display: table;
@@ -659,13 +659,14 @@ export default {
   table-layout: inherit;
 }
 
-.os-list :deep(tr) {
+.os-list :deep(table.p-datatable-table > thead > tr),
+.os-list :deep(table.p-datatable-table > tbody > tr) {
   margin-right: 0px;
   margin-left: 0px;
 }
 
-.os-list :deep(thead tr th),
-.os-list :deep(tbody tr td) {
+.os-list :deep(table.p-datatable-table > thead > tr > th),
+.os-list :deep(table.p-datatable-table > tbody > tr > td) {
   padding: 8px;
   line-height: 1.42857143;
   vertical-align: top;
@@ -673,17 +674,17 @@ export default {
   word-break: break-word;
 }        
         
-.os-list :deep(thead tr th) {
+.os-list :deep(table.p-datatable-table > thead > tr > th) {
   vertical-align: bottom;
   border-bottom: 1px solid #ddd;
   font-weight: bold;
 }
 
-.os-list :deep(thead tr th) {
+.os-list :deep(table.p-datatable-table > thead > tr > th) {
   white-space: nowrap;
 }
     
-.os-list :deep(thead tr:first-child th) {
+.os-list :deep(table.p-datatable-table > thead > tr:first-child > th) {
   border-top: 0;
 }   
 
