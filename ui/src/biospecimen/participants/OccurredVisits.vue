@@ -11,7 +11,8 @@
 
       <template #rowActions="{rowObject}">
         <os-button-group>
-          <os-button left-icon="file" size="small" v-if="rowObject.visit.sprName" @click="showReport(rowObject)" />
+          <os-button left-icon="file" size="small" v-if="rowObject.visit.sprName"
+            v-os-tooltip.bottom="$t('participants.download_path_report')" @click="downloadReport(rowObject)" />
 
           <os-menu icon="ellipsis-v" :no-outline="true" :options="options(rowObject.visit)" />
         </os-button-group>
@@ -30,6 +31,7 @@ import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import routerSvc from '@/common/services/Router.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util from '@/common/services/Util.js';
+import visitSvc from '@/biospecimen/services/Visit.js';
 import wfSvc from '@/biospecimen/services/Workflow.js';
 
 export default {
@@ -67,8 +69,8 @@ export default {
       // this.gotoVisit(visit);
     },
 
-    showReport: function({visit}) {
-      alert('Show visit report: ' + visit.name);
+    downloadReport: function({visit}) {
+      visitSvc.downloadSpr(visit);
     },
 
     options: function(visit) {

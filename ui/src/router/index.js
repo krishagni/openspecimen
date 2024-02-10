@@ -903,7 +903,12 @@ const routes = [
                                 path: 'consents',
                                 name: 'ParticipantsListItemVisitDetail.Consents',
                                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/Consents.vue')
-                              }
+                              },
+                              {
+                                path: 'report',
+                                name: 'ParticipantsListItemVisitDetail.Report',
+                                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/Report.vue')
+                              },
                             ]
                           },
                           {

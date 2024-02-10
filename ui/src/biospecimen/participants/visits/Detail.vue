@@ -37,6 +37,12 @@
             </li>
 
             <li>
+              <router-link :to="getRoute('Report')">
+                <span v-t="'visits.path_report'">Path Report</span>
+              </router-link>
+            </li>
+
+            <li>
               <router-link :to="getRoute('Forms')">
                 <span v-t="'common.forms'">Forms</span>
               </router-link>

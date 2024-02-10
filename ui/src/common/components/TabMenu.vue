@@ -11,7 +11,7 @@
   margin: 0px;
   padding: 0px;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border-bottom: 1px solid #ddd;
 }
 

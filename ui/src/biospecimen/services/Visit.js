@@ -302,6 +302,34 @@ class Visit {
       }
     );
   }
+
+  getSprUploadUrl({id: visitId}) {
+    return http.getUrl('visits/' + visitId + '/spr-file');
+  }
+
+  getSprText({id: visitId}) {
+    return http.get('visits/' + visitId + '/spr-text');
+  }
+
+  downloadSpr({id: visitId}, type) {
+    http.downloadFile(http.getUrl('visits/' + visitId + '/spr-file', {query: { type }}));
+  }
+
+  updateSprText({id: visitId}, text) {
+    return http.put('visits/' + visitId + '/spr-text', {sprText: text});
+  }
+
+  lockSpr({id: visitId}) {
+    return http.put('visits/' + visitId + '/spr-lock', {locked: true});
+  }
+
+  unlockSpr({id: visitId}) {
+    return http.put('visits/' + visitId + '/spr-lock', {locked: false});
+  }
+
+  deleteSpr({id: visitId}) {
+    return http.delete('visits/' + visitId + '/spr-file');
+  }
 }
 
 export default new Visit();
