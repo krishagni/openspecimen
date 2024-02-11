@@ -35,6 +35,8 @@
       </template>
     </div>
 
+    <slot name="static-fields"></slot>
+
     <os-divider v-if="$slots.default && $slots.default().length > 0"></os-divider>
 
     <div class="row">
@@ -395,43 +397,50 @@ form {
   max-width: 100%;
 }
 
-.row {
+.row, :slotted(.row) {
   display: flex;
   flex-wrap: wrap;
 }
 
-.row .title {
+.row .title,
+:slotted(.row .title) {
   flex: 1 1 100%;
   padding: 0.5rem 1rem 0rem 1rem;
 }
 
-.row .field {
+.row .field,
+:slotted(.row .field) {
   flex: 1 1 0;
   padding: 0.5rem 1rem;
   overflow-x: auto;
 }
 
-.row .title ~ .field {
+.row .title ~ .field,
+:slotted(.row .title ~ .field) {
   padding-top: 0rem;
 }
 
-.row .title ~ .field label {
+.row .title ~ .field label,
+:slotted(.row .title ~ .field label) {
   font-size: 85%;
   font-weight: normal;
 }
 
-.row .field :deep(.btn) {
+.row .field :deep(.btn),
+:slotted(.row .field :deep(.btn)) {
   margin-right: 0.5rem;
 }
 
-.row .field .required-indicator {
+.row .field .required-indicator,
+:slotted(.row .field .required-indicator) {
   display: inline-block;
   padding: 0rem 0.25rem;
   color: red;
   cursor: help;
 }
 
-.row .field .help {
+.row .field .help,
+:slotted(.row .field .help) {
   display: inline-block;
   padding: 0.25rem;
 }
