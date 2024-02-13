@@ -337,4 +337,16 @@
   <changeSet author="vpawar" id="User login OTP ID generator">
     <createSequence sequenceName="OS_USER_LOGIN_OTPS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Index on participant phone number">
+    <createIndex tableName="CATISSUE_PARTICIPANT" indexName="OS_PARTICIPANT_PHONE_IDX">
+      <column name="PHONE_NUMBER" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on participant email address">
+    <createIndex tableName="CATISSUE_PARTICIPANT" indexName="OS_PARTICIPANT_EMAIL_ID_IDX">
+      <column name="EMAIL_ADDRESS" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

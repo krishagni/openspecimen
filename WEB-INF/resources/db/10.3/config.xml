@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Default ISD code to use for all phone numbers without the ISD code">
+    <sql>
+      call add_cfg_prop(
+        'common', 'default_isd_code',
+        'default_isd_code', 'default_isd_code_desc',
+        'STRING', '+1'
+      );
+    </sql>
+  </changeSet>
+</databaseChangeLog>
