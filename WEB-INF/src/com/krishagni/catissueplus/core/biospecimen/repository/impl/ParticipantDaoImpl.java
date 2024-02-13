@@ -4,6 +4,7 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 
 public class ParticipantDaoImpl extends AbstractDao<Participant> implements ParticipantDao {
 	
@@ -115,8 +117,20 @@ public class ParticipantDaoImpl extends AbstractDao<Participant> implements Part
 	@Override
 	public List<Participant> getByPhoneNumber(String phoneNumber) {
 		Criteria<Participant> query = createCriteria(Participant.class, "participant");
-		return query.add(query.eq("participant.phoneNumber", phoneNumber))
-			.list();
+
+		String defIsdCode = ConfigUtil.getInstance().getStrSetting("common", "default_isd_code", "+1");
+		List<String> phoneNumbers = new ArrayList<>();
+		phoneNumbers.add(phoneNumber);
+		if (phoneNumber.startsWith("+")) {
+			if (phoneNumber.startsWith(defIsdCode)) {
+				phoneNumber = phoneNumber.substring(defIsdCode.length());
+				phoneNumbers.add(phoneNumber);
+			}
+		} else {
+			phoneNumbers.add(defIsdCode + phoneNumber);
+		}
+
+		return query.add(query.in("participant.phoneNumber", phoneNumbers)).list();
 	}
 
 	@Override

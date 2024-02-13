@@ -3234,8 +3234,12 @@
 
         "max_audit_report_period": "Audit Report Period",
         "max_audit_report_period_desc": "Maximum period, in number of days, for which the audit reports can be generated. When not specified, the period of 90 days is used.",
+
         "enable_beta_features": "Beta Features",
-        "enable_beta_features_desc": "Enable to try out the beta features, if any, shipped with the build."
+        "enable_beta_features_desc": "Enable to try out the beta features, if any, shipped with the build.",
+
+        "default_isd_code": "Default ISD Code",
+        "default_isd_code_desc": "The ISD code that should be prefixed to all the phone numbers without ISD code when sending/receiving text messages."
       },
 
       "email": {
