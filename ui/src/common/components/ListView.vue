@@ -18,7 +18,8 @@
         <div v-if="selectedRows.length > 0" class="p-inline-message p-inline-message-info">
           <span v-t="{path: 'common.lists.records_selected', args: {count: selectedRows.length}}"></span>
         </div>
-        <data-table :value="list" v-model:expandedRows="expandedRows" v-model:selection="selectedRows" @row-click="rowClick($event)" @sort="sort($event)">
+        <data-table :value="list" v-model:expandedRows="expandedRows" v-model:selection="selectedRows"
+          :row-class="getRowClass" @row-click="rowClick($event)" @sort="sort($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
           <column v-for="column of schema.columns" :header="caption(column)" :key="column.name" :field="column.name"
             :style="column.uiStyle" :sortable="column.sortable">
@@ -195,7 +196,8 @@ export default {
     'allowSelection',
     'loading',
     'showRowActions',
-    'noRecordsMsg'
+    'noRecordsMsg',
+    'rowClass'
   ],
 
   emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked', 'sort', 'rowStarToggled'],
@@ -367,6 +369,17 @@ export default {
       }
 
       this.$emit('rowClicked', row.data.rowObject);
+    },
+
+    getRowClass: function(row) {
+      const {rowObject} = row;
+      if (typeof this.schema.rowClass == 'function') {
+        return this.schema.rowClass(rowObject);
+      } else if (typeof this.rowClass == 'function') {
+        return this.rowClass(rowObject);
+      }
+
+      return undefined;
     },
 
     caption: function({caption, captionCode, label, labelCode}) {
