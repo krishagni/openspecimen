@@ -35,7 +35,7 @@
 
                 <os-button left-icon="flask" :label="$t('participants.view_specimens')" @click="viewSpecimens" />
 
-                <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
+                <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
               </span>
               <span v-else>
                 <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editParticipants" />
@@ -51,7 +51,7 @@
                 <os-button left-icon="user-friends" :label="$t('participants.view_participants')"
                   @click="viewParticipants" />
 
-                <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
+                <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
               </span>
               <span v-else>
                 <os-specimen-actions :cp="ctx.cp" :specimens="selectedSpecimens" @reloadSpecimens="reloadList" />
@@ -172,7 +172,9 @@ export default {
         // TODO: change the breadcrumbs
         {url: routerSvc.ngUrl('cps', {}), label: i18n.msg('participants.collection_protocols')},
         {url: routerSvc.ngUrl('cp-view/' + cp.id + '/list-view', {}), label: cp.shortTitle}
-      ]
+      ],
+
+      moreOptions: []
     });
 
     return {
@@ -181,6 +183,7 @@ export default {
   },
 
   created() {
+    this._loadMoreOptions();
   },
 
   watch: {
@@ -257,71 +260,6 @@ export default {
       }
 
       return selectedItems;
-    },
-
-    moreOptions: function() {
-      const options = [];
-
-      options.push({
-        icon: 'upload',
-        caption: this.$t('participants.import_biospecimen_data'),
-        onSelect: this.navToBulkImport
-      });
-
-      options.push({
-        icon: 'list',
-        caption: this.$t('participants.view_past_imports'),
-        onSelect: this.navToViewPastImports
-      });
-
-      console.log(this.$t('common.buttons.export'));
-      let divider = true;
-      if (divider) {
-        options.push({divider: true});
-        divider = false;
-      }
-
-      options.push({
-        icon: 'download',
-        caption: this.$t('common.buttons.export'),
-        onSelect: this.navToExport
-      });
-
-      divider = true;
-      if (divider) {
-        options.push({divider: true});
-        divider = false;
-      }
-
-      options.push({
-        icon: 'file-pdf',
-        caption: this.$t('participants.generate_cp_report'),
-        onSelect: this.generateCpReport
-      });
-
-      options.push({
-        icon: 'calendar-alt',
-        caption: this.$t('participants.view_cp_details'),
-        onSelect: this.navToCpDetail
-      });
-
-      const pluginOptions = pluginReg.getOptions('participants-list', 'menu');
-      const ctxt = this.ctx;
-      for (let option of pluginOptions) {
-        if (typeof option.showIf == 'function' && !option.showIf(ctxt)) {
-          continue;
-        }
-
-        options.push({
-          icon: option.icon,
-          caption: option.caption,
-          onSelect: () => {
-            option.exec(this.wrapRefs(ctxt), ctxt)
-          }
-        });
-      }
-
-      return options;
     },
   },
 
@@ -471,6 +409,97 @@ export default {
     wrapRefs: function(ctxt) {
       return {...ctxt, pluginViews: this.$refs.moreMenuPluginViews};
     },
+
+    _loadMoreOptions: async function() {
+      const options = [];
+      options.push({
+        icon: 'upload',
+        caption: this.$t('participants.import_biospecimen_data'),
+        onSelect: this.navToBulkImport
+      });
+
+      options.push({
+        icon: 'list',
+        caption: this.$t('participants.view_past_imports'),
+        onSelect: this.navToViewPastImports
+      });
+
+      console.log(this.$t('common.buttons.export'));
+      let divider = true;
+      if (divider) {
+        options.push({divider: true});
+        divider = false;
+      }
+
+      options.push({
+        icon: 'download',
+        caption: this.$t('common.buttons.export'),
+        onSelect: this.navToExport
+      });
+
+      divider = true;
+      if (divider) {
+        options.push({divider: true});
+        divider = false;
+      }
+
+      options.push({
+        icon: 'file-pdf',
+        caption: this.$t('participants.generate_cp_report'),
+        onSelect: this.generateCpReport
+      });
+
+      options.push({
+        icon: 'calendar-alt',
+        caption: this.$t('participants.view_cp_details'),
+        onSelect: this.navToCpDetail
+      });
+
+      const promise = new Promise((resolve) => {
+        const pluginOptions = pluginReg.getOptions('participants-list', 'menu') || [];
+        const ctxt = this.ctx;
+
+        let count = pluginOptions.length;
+        for (let option of pluginOptions) {
+          if (typeof option.showIf == 'function') {
+            const ret = option.showIf(ctxt);
+            Promise.all([ret]).then(
+              ([answer]) => {
+                --count;
+                if (answer) {
+                  options.push({
+                    icon: option.icon,
+                    caption: option.caption,
+                    onSelect: () => {
+                      option.exec(this.wrapRefs(ctxt), ctxt)
+                    }
+                  });
+                }
+
+                if (count <= 0) {
+                  resolve(true);
+                }
+              }
+            );
+          } else {
+            options.push({
+              icon: option.icon,
+              caption: option.caption,
+              onSelect: () => {
+                option.exec(this.wrapRefs(ctxt), ctxt)
+              }
+            });
+            --count;
+          }
+        }
+
+        if (count <= 0) {
+          resolve(true);
+        }
+      });
+
+      promise.then(() => this.ctx.moreOptions = options);
+    }
   }
 }
 </script>
