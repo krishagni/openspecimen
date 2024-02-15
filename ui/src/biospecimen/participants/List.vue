@@ -41,6 +41,8 @@
                 <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editParticipants" />
 
                 <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteParticipants" />
+
+                <os-plugin-views page="participants-list" view="bulk-ops" :view-props="ctx" />
               </span>
             </template>
 
