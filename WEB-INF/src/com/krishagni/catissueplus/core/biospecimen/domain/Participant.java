@@ -23,10 +23,11 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.MpiGenerator;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
 @Audited
-public class Participant extends BaseExtensionEntity {
+public class Participant extends BaseEntity {
 	private static final String ENTITY_NAME = "participant";
 
 	public static final String DEF_SOURCE = "OpenSpecimen";
@@ -70,18 +71,18 @@ public class Participant extends BaseExtensionEntity {
 	private PermissibleValue vitalStatus;
 	
 	private String empi;
-	
+
 	private Set<ParticipantMedicalIdentifier> pmis = new HashSet<>();
 
 	private Set<CollectionProtocolRegistration> cprs = new HashSet<>();
-
-	private transient Long cpId = -1L;
 
 	private transient Set<Long> oldCprIds;
 
 	private transient Set<Long> newCprIds;
 
 	private transient Set<Long> kwAddedCprIds;
+
+	private transient CollectionProtocolRegistration cpr;
 
 	public String getSource() {
 		return StringUtils.isBlank(source) ? DEF_SOURCE : source;
@@ -304,6 +305,18 @@ public class Participant extends BaseExtensionEntity {
 		kwAddedCprIds.add(cprId);
 	}
 
+	public CollectionProtocolRegistration getCpr() {
+		return cpr;
+	}
+
+	public void setCpr(CollectionProtocolRegistration cpr) {
+		this.cpr = cpr;
+	}
+
+	public DeObject getExtension() {
+		return cpr != null ? cpr.getExtension() : null;
+	}
+
 	public void update(Participant participant) {
 		setFirstName(participant.getFirstName());
 		setLastName(participant.getLastName());
@@ -320,7 +333,6 @@ public class Participant extends BaseExtensionEntity {
 		setGender(participant.getGender());
 		setBirthDate(participant.getBirthDate());
 		setDeathDate(participant.getDeathDate());
-		setExtension(participant.getExtension());
 		CollectionUpdater.update(getEthnicities(), participant.getEthnicities());
 		CollectionUpdater.update(getRaces(), participant.getRaces());
 		updatePmis(participant);
@@ -384,20 +396,6 @@ public class Participant extends BaseExtensionEntity {
 		}
 		
 		setEmpi(generator.generateMpi());
-	}
-
-	@Override
-	public String getEntityType() {
-		return EXTN;
-	}
-
-	public void setCpId(Long cpId) {
-		this.cpId = cpId;
-	}
-
-	@Override
-	public Long getCpId() {
-		return cpId;
 	}
 
 	public List<ParticipantMedicalIdentifier> getPmisOrderedById() {

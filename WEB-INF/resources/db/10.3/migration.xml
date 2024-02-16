@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Add backup object ID column for the form record entries">
+    <addColumn tableName="CATISSUE_FORM_RECORD_ENTRY">
+      <column name="OLD_OBJECT_ID" type="${int.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Init the backup object ID field to the existing values">
+    <sql>
+      update catissue_form_record_entry set old_object_id = object_id
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update the object ID to CPR ID for CP specific custom fields form association" dbms="mysql">
+    <sql>
+      update
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+        inner join catissue_participant p on p.identifier = re.object_id
+        inner join catissue_coll_prot_reg cpr on cpr.participant_id = p.identifier and cpr.collection_protocol_id = fc.cp_id
+      set
+        re.object_id = cpr.identifier
+      where
+        fc.cp_id != -1 and
+        fc.entity_type = 'ParticipantExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update the object ID to first CPR of the participant for system level CPR custom fields form associations" dbms="mysql">
+    <sql>
+      update
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+        inner join (
+          select
+            p.identifier as participant_id, min(cpr.identifier) as cpr_id
+          from
+            catissue_participant p
+            inner join catissue_coll_prot_reg cpr on cpr.participant_id = p.identifier
+            left join catissue_form_context cfc on cfc.cp_id = cpr.collection_protocol_id and cfc.entity_type = 'ParticipantExtension' and cfc.deleted_on is null
+          where
+            cfc.identifier is null
+          group by
+            p.identifier
+        ) t on t.participant_id = re.object_id
+      set
+        re.object_id = t.cpr_id
+      where
+        fc.cp_id = -1 and
+        fc.entity_type = 'ParticipantExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update the object ID to CPR ID for CP specific custom fields form association" dbms="oracle">
+    <sql>
+      merge into
+        catissue_form_record_entry re
+      using (
+        select
+          ire.identifier fre_id, cpr.identifier as cpr_id
+        from
+          catissue_form_record_entry ire
+          inner join catissue_form_context fc on fc.identifier = ire.form_ctxt_id
+          inner join catissue_participant p on p.identifier = ire.object_id
+          inner join catissue_coll_prot_reg cpr on cpr.participant_id = p.identifier and cpr.collection_protocol_id = fc.cp_id
+        where
+          fc.cp_id != -1 and
+          fc.entity_type = 'ParticipantExtension' and
+          fc.deleted_on is null and
+          ire.activity_status = 'ACTIVE'
+      ) t on (re.identifier = t.fre_id)
+      when matched then
+        update set re.object_id = t.cpr_id
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update the object ID to first CPR of the participant for system level CPR custom fields form association" dbms="oracle">
+    <sql>
+      merge into
+        catissue_form_record_entry re
+      using (
+        select
+          ire.identifier as fre_id, t.cpr_id
+        from
+          catissue_form_record_entry ire
+          inner join catissue_form_context fc on fc.identifier = ire.form_ctxt_id
+          inner join (
+            select
+              p.identifier as participant_id, min(cpr.identifier) as cpr_id
+            from
+              catissue_participant p
+              inner join catissue_coll_prot_reg cpr on cpr.participant_id = p.identifier
+              left join catissue_form_context cfc on cfc.cp_id = cpr.collection_protocol_id and cfc.entity_type = 'ParticipantExtension' and cfc.deleted_on is null
+            where
+              cfc.identifier is null
+            group by
+              p.identifier
+          ) t on t.participant_id = ire.object_id
+        where
+          fc.cp_id = -1 and
+          fc.entity_type = 'ParticipantExtension' and
+          fc.deleted_on is null and
+          ire.activity_status = 'ACTIVE'
+      ) tt  on (re.identifier = tt.fre_id)
+      when matched then
+        update set re.object_id = tt.cpr_id
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Participant custom fields rec IDs">
+    <sql>
+      insert into
+        os_cpr_cust_fields (cpr_id, form_id, record_id)
+      select
+        re.object_id as cpr_id, fc.container_id as form_id, re.record_id as record_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+      where
+        fc.entity_type = 'ParticipantExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+</databaseChangeLog>

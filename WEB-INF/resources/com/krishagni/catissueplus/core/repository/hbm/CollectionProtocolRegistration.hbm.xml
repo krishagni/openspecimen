@@ -50,9 +50,9 @@
 
     <many-to-one name="consentWitness" column="CONSENT_WITNESS" />
 
-    <many-to-one name="participant" column="PARTICIPANT_ID" fetch="join"/>
-
     <many-to-one name="collectionProtocol" column="COLLECTION_PROTOCOL_ID" />
+
+    <many-to-one name="participant" column="PARTICIPANT_ID" fetch="join"/>
 
     <set name="consentResponses" table="CATISSUE_CONSENT_TIER_RESPONSE" inverse="true" cascade="all-delete-orphan">
       <key column="COLL_PROT_REG_ID" />

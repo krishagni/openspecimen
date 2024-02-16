@@ -13,9 +13,7 @@ public class VisitCustomFieldLabelToken extends AbstractCustomFieldLabelToken {
 		if (level.equals("visit")) {
 			return visit;
 		} else if (level.equals("cpr")) {
-			Participant participant = visit.getRegistration().getParticipant();
-			participant.setCpId(visit.getCpId());
-			return participant;
+			return visit.getRegistration();
 		} else if (level.equals("cp")) {
 			return visit.getCollectionProtocol();
 		}

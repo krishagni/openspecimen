@@ -173,6 +173,7 @@
   <include file="db/10.3/schema.xml" />
   <include file="db/10.3/config.xml"/>
   <include file="db/10.3/audit.xml" />
+  <include file="db/10.3/migration.xml" />
 
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>

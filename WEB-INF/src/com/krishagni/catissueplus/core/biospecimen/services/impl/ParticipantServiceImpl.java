@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
@@ -174,7 +173,6 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 
 		participant.setEmpiIfEmpty();
 		daoFactory.getParticipantDao().saveOrUpdate(participant, true);
-		participant.addOrUpdateExtension();
 		return participant;
 	}
 
@@ -202,7 +200,6 @@ public class ParticipantServiceImpl implements ParticipantService, ObjectAccesso
 		ose.checkAndThrow();
 		
 		existing.update(newParticipant);
-		existing.addOrUpdateExtension();
 		daoFactory.getParticipantDao().saveOrUpdate(existing);
 	}
 

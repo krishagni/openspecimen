@@ -349,4 +349,114 @@
       <column name="EMAIL_ADDRESS" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Participant/registration custom fields query table">
+    <createTable tableName="OS_CPR_CUST_FIELDS">
+      <column name="CPR_ID" type="${int.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="FORM_ID" type="${int.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="RECORD_ID" type="${int.type}">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on participant/registration custom fields query table">
+    <createIndex tableName="OS_CPR_CUST_FIELDS" indexName="OS_CPR_CUST_FIELDS_IDX">
+      <column name="CPR_ID" />
+      <column name="FORM_ID" />
+      <column name="RECORD_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to insert query entity DE form record IDs" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_ins_entity_form_record_id;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_ins_entity_form_record_id after insert on catissue_form_record_entry
+      for each row
+      begin
+        declare formId bigint;
+        declare entityType varchar(255);
+
+        select
+          container_id, entity_type into formId, entityType
+        from
+          catissue_form_context
+        where
+          identifier = new.form_ctxt_id;
+
+        if (entityType = 'CollectionProtocolExtension') then
+          insert into os_cp_cust_fields(cp_id, form_id, record_id) values(new.object_id, formId, new.record_id);
+        elseif (entityType = 'Participant') then
+          insert into os_cpr_extn_recs(cpr_id, form_id, record_id) values(new.object_id, formId, new.record_id);
+        elseif (entityType = 'CommonParticipant') then
+          insert into os_participant_extn_recs(participant_id, form_id, record_id) values(new.object_id, formId, new.record_id);
+        elseif (entityType = 'SpecimenCollectionGroup') then
+          insert into os_visit_extn_recs(visit_id, form_id, record_id) values(new.object_id, formId, new.record_id);
+        elseif (entityType = 'ParticipantExtension') then
+          insert into os_cpr_cust_fields(cpr_id, form_id, record_id) values(new.object_id, formId, new.record_id);
+        elseif (entityType = 'VisitExtension') then
+          insert into os_visit_cust_fields(visit_id, form_id, record_id) values(new.object_id, formId, new.record_id);
+        elseif (entityType = 'Specimen' || entityType = 'SpecimenEvent') then
+          insert into os_spmn_extn_recs(specimen_id, form_id, record_id) values (new.object_id, formId, new.record_id);
+        elseif (entityType = 'SpecimenExtension') then
+          insert into os_spmn_cust_fields(specimen_id, form_id, record_id) values (new.object_id, formId, new.record_id);
+        elseif (entityType = 'OrderExtension') then
+          insert into os_order_cust_fields(order_id, form_id, record_id) values (new.object_id, formId, new.record_id);
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to remove query entity DE form record IDs" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_del_entity_form_record_id;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_del_entity_form_record_id after update on catissue_form_record_entry
+      for each row
+      begin
+        declare formId bigint;
+        declare entityType varchar(255);
+
+        if (new.activity_status = 'CLOSED') then
+          select
+            container_id, entity_type into formId, entityType
+          from
+            catissue_form_context
+          where
+            identifier = new.form_ctxt_id;
+
+          if (entityType = 'CollectionProtocolExtension') then
+            delete from os_cp_cust_fields where cp_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'Participant') then
+            delete from os_cpr_extn_recs where cpr_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'CommonParticipant') then
+            delete from os_participant_extn_recs where participant_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'ParticipantExtension') then
+            delete from os_cpr_cust_fields where participant_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'SpecimenCollectionGroup') then
+            delete from os_visit_extn_recs where visit_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'VisitExtension') then
+            delete from os_visit_cust_fields where visit_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'Specimen' || entityType = 'SpecimenEvent') then
+            delete from os_spmn_extn_recs where specimen_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'SpecimenExtension') then
+            delete from os_spmn_cust_fields where specimen_id = new.object_id and form_id = formId and record_id = new.record_id;
+          elseif (entityType = 'OrderExtension') then
+            delete from os_order_cust_fields where order_id = new.object_id and form_id = formId and record_id = new.record_id;
+          end if;
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
 </databaseChangeLog>

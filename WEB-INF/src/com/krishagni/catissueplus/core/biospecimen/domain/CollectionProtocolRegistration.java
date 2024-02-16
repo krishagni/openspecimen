@@ -34,8 +34,10 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 @Configurable
 @Audited
-public class CollectionProtocolRegistration extends BaseEntity {
+public class CollectionProtocolRegistration extends BaseExtensionEntity {
 	private static final String ENTITY_NAME = "collection_protocol_registration";
+
+	private static final String EXTN = "ParticipantExtension";
 	
 	private String ppid;
 
@@ -125,6 +127,9 @@ public class CollectionProtocolRegistration extends BaseEntity {
 
 	public void setParticipant(Participant participant) {
 		this.participant = participant;
+		if (participant != null) {
+			participant.setCpr(this);
+		}
 	}
 
 	public CollectionProtocol getCollectionProtocol() {
@@ -139,25 +144,18 @@ public class CollectionProtocolRegistration extends BaseEntity {
 		return getCollectionProtocol().getShortTitle();
 	}
 
-	public Integer getExtensionRev() {
-		if (participant != null && participant.getExtensionRev() != null) {
-			return (extensionRev == null ? 0 : extensionRev) + participant.getExtensionRev();
-		} else {
-			return extensionRev;
-		}
-	}
-
 	public void setExtensionRev(Integer extensionRev) {
 		this.extensionRev = extensionRev;
 	}
 
-	public DeObject getExtension() {
-		if (participant == null) {
-			return null;
-		}
+	@Override
+	public String getEntityType() {
+		return EXTN;
+	}
 
-		participant.setCpId(getCollectionProtocol().getId());
-		return participant.getExtension();
+	@Override
+	public Long getCpId() {
+		return getCollectionProtocol().getId();
 	}
 
 	@NotAudited
@@ -378,6 +376,7 @@ public class CollectionProtocolRegistration extends BaseEntity {
 		setBarcode(cpr.getBarcode());
 		setExternalSubjectId(cpr.getExternalSubjectId());
 		setSite(cpr.getSite());
+		setExtension(cpr.getExtension());
 	}
 	
 	public void updateConsents(ConsentResponses consentResponses) {

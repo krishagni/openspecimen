@@ -96,7 +96,6 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 		boolean partial = false;
 		if (matchedId != null && matchedId > 0) {
 			Participant match = daoFactory.getParticipantDao().getById(matchedId);
-			match.setCpId(input.getCpId());
 			BeanUtils.copyProperties(match, participant, "cprs", "source");
 			participant.setId(matchedId);
 			partial = true;
@@ -110,7 +109,6 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 	
 	@Override
 	public Participant createParticipant(Participant existing, ParticipantDetail input) {
-		existing.setCpId(input.getCpId());
 		Long matchedId = copyMatchedParticipantFields(existing, input);
 
 		Participant participant = new Participant();
@@ -148,11 +146,6 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 		match.setCpId(input.getCpId());
 		if (!StringUtils.equalsIgnoreCase(input.getSource(), match.getSource())) {
 			Participant p = existing != null ? existing : new Participant();
-			p.setCpId(input.getCpId());
-			if (p.getCpId() != null) {
-				match.setExtensionDetail(ExtensionDetail.from(p.getExtension(), false));
-			}
-
 			copyLockedFields(match, input);
 		}
 
@@ -314,7 +307,6 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 		setRace(detail, participant, partial, ose);
 		setEthnicity(detail, participant, partial, ose);
 		setPmi(detail, participant, partial, ose);
-		setExtension(detail, participant, partial, ose);
 	}
 
 	private void setSource(ParticipantDetail detail, Participant participant, boolean partial, OpenSpecimenException ose) {
@@ -560,27 +552,6 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 		pmi.setSite(site);
 		pmi.setMedicalRecordNumber(pmiDetail.getMrn());
 		return pmi;
-	}
-	
-	private void setExtension(ParticipantDetail detail, Participant participant, boolean partial, OpenSpecimenException ose) {
-		participant.setCpId(detail.getCpId());
-		if (StringUtils.isBlank(detail.getDataEntryStatus())) {
-			participant.setDataEntryStatus(BaseEntity.DataEntryStatus.COMPLETE);
-		} else {
-			try {
-				participant.setDataEntryStatus(BaseEntity.DataEntryStatus.valueOf(detail.getDataEntryStatus()));
-			} catch (Exception e) {
-				ose.addError(CommonErrorCode.INVALID_INPUT, "Invalid data entry status: " + detail.getDataEntryStatus());
-			}
-		}
-
-		ExtensionDetail input = detail.getExtensionDetail();
-		if (input == null) {
-			input = new ExtensionDetail();
-		}
-
-		DeObject extension = DeObject.createExtension(input, participant);
-		participant.setExtension(extension);
 	}
 
 	private PermissibleValue getPv(String attr, String value, ErrorCode invErrorCode, OpenSpecimenException ose) {
