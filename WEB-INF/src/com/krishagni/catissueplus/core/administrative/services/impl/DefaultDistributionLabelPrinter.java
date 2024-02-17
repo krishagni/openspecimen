@@ -1,15 +1,12 @@
 package com.krishagni.catissueplus.core.administrative.services.impl;
 
-import org.springframework.context.ApplicationListener;
-
 import com.krishagni.catissueplus.core.administrative.domain.DistributionLabelPrintRule;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionOrderItem;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.AbstractLabelPrinter;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
-import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 
-public class DefaultDistributionLabelPrinter extends AbstractLabelPrinter<DistributionOrderItem> implements ApplicationListener<OpenSpecimenEvent> {
+public class DefaultDistributionLabelPrinter extends AbstractLabelPrinter<DistributionOrderItem> {
 	@Override
 	protected boolean isApplicableFor(LabelPrintRule rule, DistributionOrderItem orderItem, User user, String ipAddr) {
 		DistributionLabelPrintRule distLabelRule = (DistributionLabelPrintRule) rule;

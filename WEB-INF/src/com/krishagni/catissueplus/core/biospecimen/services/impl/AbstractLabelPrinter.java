@@ -11,16 +11,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
-import com.krishagni.catissueplus.core.administrative.domain.UserGroupSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.TransactionAwareInterceptor;
 import com.krishagni.catissueplus.core.common.TransactionEventListener;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
@@ -30,12 +26,7 @@ import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplTokenRegistrar;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
-import com.krishagni.catissueplus.core.common.domain.PrintRuleConfig;
-import com.krishagni.catissueplus.core.common.domain.PrintRuleEvent;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.events.EventCode;
-import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
-import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -53,9 +44,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 	private static final String TSTAMP_FMT = "yyyyMMddHHmm";
 
-	private AtomicInteger uniqueNum = new AtomicInteger();
-
-	protected List<? extends LabelPrintRule> rules = null;
+	private final AtomicInteger uniqueNum = new AtomicInteger();
 
 	protected DaoFactory daoFactory;
 
@@ -99,15 +88,9 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 	@Override
 	public LabelPrintJob print(List<PrintItem<T>> printItems) {
 		try {
+			List<? extends LabelPrintRule> rules = PrintRuleTxnCache.getInstance().getRules(getObjectType());
 			if (rules == null) {
-				synchronized (this) {
-					if (rules == null) {
-						loadRulesFromDb();
-						if (rules == null) {
-							return null;
-						}
-					}
-				}
+				return null;
 			}
 
 			String ipAddr = AuthUtil.getRemoteAddr();
@@ -172,40 +155,6 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 		}
 	}
 
-	public void onApplicationEvent(OpenSpecimenEvent event) {
-		EventCode code = event.getEventCode();
-		if (code == PrintRuleEvent.CREATED || code == PrintRuleEvent.UPDATED || code == PrintRuleEvent.DELETED) {
-			PrintRuleConfig ruleCfg = (PrintRuleConfig) event.getEventData();
-			if (ruleCfg.getObjectType().equals(getObjectType())) {
-				loadRulesFromDb();
-			}
-		} else if (event instanceof UserGroupSavedEvent && rules != null) {
-			UserGroup group = ((UserGroupSavedEvent) event).getEventData();
-			boolean cacheUpdated = false;
-
-			for (LabelPrintRule rule : rules) {
-				int idx = rule.getUserGroups().indexOf(group);
-				if (idx == -1) {
-					continue;
-				}
-
-				rule.getUserGroups().remove(idx);
-				if (!group.isDeleted()) {
-					rule.getUserGroups().add(group);
-				}
-
-				rule.recomputeEffectiveUsers();
-				cacheUpdated = true;
-			}
-
-			if (cacheUpdated) {
-				PrintRuleConfig ruleCfg = new PrintRuleConfig();
-				ruleCfg.setObjectType(getObjectType());
-				EventPublisher.getInstance().publish(PrintRuleEvent.CACHE_UPDATED, ruleCfg);
-			}
-		}
-	}
-
 	@Override
 	public void onFinishTransaction() {
 		Set<Long> printJobIds = jobIds.get();
@@ -222,20 +171,6 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 	protected abstract String getItemLabel(T obj);
 
 	protected abstract Long getItemId(T obj);
-
-	@PlusTransactional
-	protected void loadRulesFromDb() {
-		try {
-			logger.info("Loading print rules from database for: " + getObjectType());
-			rules = daoFactory.getPrintRuleConfigDao()
-				.getPrintRules(new PrintRuleConfigsListCriteria().objectType(getObjectType()))
-				.stream().map(PrintRuleConfig::getRule)
-				.collect(Collectors.toList());
-		} catch (Exception e) {
-			logger.error("Error loading print rules for: " + getObjectType(), e);
-			throw new RuntimeException("Error loading print rules for: " + getObjectType(), e);
-		}
-	}
 
 	private List<Map<String, Object>> generateCmdFileContent(LabelPrintJobItem jobItem, LabelPrintRule rule, Map<String, String> dataItems) {
 		if (StringUtils.isBlank(rule.getCmdFilesDir()) || rule.getCmdFilesDir().trim().equals("*")) {
