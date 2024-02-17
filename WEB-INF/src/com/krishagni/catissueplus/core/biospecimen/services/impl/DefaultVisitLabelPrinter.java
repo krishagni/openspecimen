@@ -1,16 +1,14 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.ApplicationListener;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
-import com.krishagni.catissueplus.core.common.events.OpenSpecimenEvent;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 
-public class DefaultVisitLabelPrinter extends AbstractLabelPrinter<Visit> implements ApplicationListener<OpenSpecimenEvent> {
+public class DefaultVisitLabelPrinter extends AbstractLabelPrinter<Visit> {
 	private static final LogUtil logger = LogUtil.getLogger(DefaultVisitLabelPrinter.class);
 	
 	private ConfigurationService cfgSvc;

@@ -43,6 +43,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorC
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenReturnEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.biospecimen.services.impl.CpWorkflowTxnCache;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
@@ -1778,7 +1779,9 @@ public class Specimen extends BaseExtensionEntity {
 
 		if (getCollectionProtocol().isKitLabelsEnabled() && getSpecimenRequirement() != null) {
 			setLabel(getKitLabel(getVisit(), getSpecimenRequirement()));
-			return;
+			if (StringUtils.isNotBlank(getLabel())) {
+				return;
+			}
 		}
 
 		String labelTmpl = getLabelTmpl();
@@ -2105,6 +2108,11 @@ public class Specimen extends BaseExtensionEntity {
 	private String getKitLabel(Visit visit, SpecimenRequirement sr) {
 		List<String> labels = daoFactory.getSpecimenDao().getKitLabels(visit, sr);
 		if (labels.isEmpty()) {
+			String validation = CpWorkflowTxnCache.getInstance().getValue(visit.getCollectionProtocol().getId(), "supplySettings", "barcodeValidation");
+			if (StringUtils.equalsIgnoreCase(validation, "relaxed")) {
+				return null;
+			}
+
 			throw OpenSpecimenException.userError(SpecimenErrorCode.NO_KIT_LABEL, visit.getDescription(), sr.getDescription());
 		} else if (labels.size() > 1) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.MULTI_KIT_LABELS, visit.getDescription(), sr.getDescription());

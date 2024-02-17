@@ -10,7 +10,7 @@ public class CustomFieldPpidToken extends AbstractCustomFieldLabelToken {
 	protected BaseExtensionEntity getObject(Object object, String level) {
 		CollectionProtocolRegistration cpr = (CollectionProtocolRegistration) object;
 		if (level.equals("cpr")) {
-			return cpr.getParticipant();
+			return cpr;
 		} else if (level.equals("cp")) {
 			return cpr.getCollectionProtocol();
 		}

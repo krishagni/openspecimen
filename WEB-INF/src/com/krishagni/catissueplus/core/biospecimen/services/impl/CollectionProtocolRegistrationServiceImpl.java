@@ -804,7 +804,8 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 		}
 
 		cpr.setPpidIfEmpty();
-		daoFactory.getCprDao().saveOrUpdate(cpr);
+		daoFactory.getCprDao().saveOrUpdate(cpr, true);
+		cpr.addOrUpdateExtension();
 
 		if (existing == null && cpr.isSpecimenLabelPrePrintOnRegEnabled()) {
 			addVisits(cpr, cpr.getCollectionProtocol().getOrderedCpeList(), collectionSite);

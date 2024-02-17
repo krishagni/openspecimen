@@ -840,17 +840,16 @@ public class Utility {
 		}
 	}
 
-	public static List<String> diff(BaseExtensionEntity obj1, BaseExtensionEntity obj2, List<String> fields) {
-		Map<String, Object> map1 = getExtnAttrValues(obj1);
-		Map<String, Object> map2 = getExtnAttrValues(obj2);
-
+	public static List<String> diff(BaseEntity obj1, BaseEntity obj2, List<String> fields) {
 		return fields.stream().filter(field -> {
 			if (!field.startsWith("extensionDetail.attrsMap.")) {
 				return !equals(obj1, obj2, field);
-			} else {
+			} /*else {
 				field = field.substring("extensionDetail.attrsMap.".length());
 				return !equals(map1.get(field), map2.get(field));
-			}
+			}*/
+
+			return false;
 		}).collect(Collectors.toList());
 	}
 

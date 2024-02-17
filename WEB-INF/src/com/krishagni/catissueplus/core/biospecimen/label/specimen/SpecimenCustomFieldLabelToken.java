@@ -17,9 +17,7 @@ public class SpecimenCustomFieldLabelToken extends AbstractCustomFieldLabelToken
 		} else if (level.equals("visit")) {
 			return specimen.getVisit();
 		} else if (level.equals("cpr")) {
-			Participant participant = specimen.getRegistration().getParticipant();
-			participant.setCpId(specimen.getCpId());
-			return participant;
+			return specimen.getRegistration();
 		} else if (level.equals("cp")) {
 			return specimen.getCollectionProtocol();
 		}

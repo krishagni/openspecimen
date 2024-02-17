@@ -11,6 +11,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegi
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
+import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
 @ListenAttributeChanges
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -194,20 +195,18 @@ public class CollectionProtocolRegistrationDetail extends AttributeModifiedSuppo
 	}
 
 	public static CollectionProtocolRegistrationDetail from(CollectionProtocolRegistration cpr, boolean excludePhi, List<CollectionProtocolRegistration> otherCprs) {
-		Participant participant = cpr.getParticipant();
-		if (participant != null) {
-			participant.setCpId(cpr.getCollectionProtocol().getId());
-		}
-
 		CollectionProtocolRegistrationDetail detail = new CollectionProtocolRegistrationDetail();
-		detail.setParticipant(ParticipantDetail.from(participant, excludePhi, otherCprs));
-		detail.setId(cpr.getId());		
+		detail.setParticipant(ParticipantDetail.from(cpr.getParticipant(), excludePhi, otherCprs));
+		detail.setId(cpr.getId());
 		detail.setActivityStatus(cpr.getActivityStatus());
 		detail.setDataEntryStatus(cpr.getDataEntryStatus().name());
 		detail.setBarcode(cpr.getBarcode());
 		detail.setPpid(cpr.getPpid());
 		detail.setRegistrationDate(cpr.getRegistrationDate());
 		detail.setExternalSubjectId(cpr.getExternalSubjectId());
+		if (detail.getParticipant() != null) {
+			detail.getParticipant().setExtensionDetail(ExtensionDetail.from(cpr.getExtension(), excludePhi));
+		}
 
 		if (cpr.getSite() != null) {
 			detail.setSite(cpr.getSite().getName());

@@ -137,6 +137,16 @@ export default {
         selected = [selected];
       } else if (typeof ls.loadFn == 'function') {
         selected = await ls.loadFn({...searchOpts, context: this.context, _selected: this.modelValue});
+
+        //
+        // special case: when the model value is not the select prop. for example - user email address
+        //
+        if (this.altSelectProp && !selected.find(s => s[this.selectProp] == this.modelValue)) {
+          const altSelected = selected.find(s => s[this.altSelectProp] == this.modelValue);
+          if (altSelected) {
+            this.selected = altSelected[this.selectProp];
+          }
+        }
       } else if (typeof ls.apiUrl == 'string') {
         Object.assign(searchOpts, this.queryParams(ls));
         selected = this.getFromBackend(searchOpts);
@@ -277,6 +287,10 @@ export default {
 
     selectProp: function() {
       return this.listSource.selectProp;
+    },
+
+    altSelectProp: function() {
+      return this.listSource.altSelectProp;
     },
 
     showClear: function() {

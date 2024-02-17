@@ -22,6 +22,8 @@ import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.de.domain.DeObject;
+import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
 
 public class CollectionProtocolRegistrationFactoryImpl implements CollectionProtocolRegistrationFactory {
@@ -47,6 +49,7 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 		
 		CollectionProtocolRegistration cpr = new CollectionProtocolRegistration();
+		cpr.setId(detail.getId());
 		cpr.setForceDelete(detail.isForceDelete());
 		cpr.setOpComments(detail.getOpComments());
 
@@ -59,6 +62,7 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		setActivityStatus(detail, existing, cpr, ose);
 		setDataEntryStatus(detail, existing, cpr, ose);
 		setParticipant(detail, existing, cpr, ose);
+		setExtension(detail, existing, cpr, ose);
 
 		ose.checkAndThrow();
 		return cpr;
@@ -304,4 +308,31 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		cpr.setParticipant(participant);
 	}
 
+	private void setExtension(CollectionProtocolRegistrationDetail detail, CollectionProtocolRegistration existing, CollectionProtocolRegistration cpr, OpenSpecimenException ose) {
+		if (existing == null || detail.isAttrModified("dataEntryStatus")) {
+			if (StringUtils.isBlank(detail.getDataEntryStatus())) {
+				cpr.setDataEntryStatus(BaseEntity.DataEntryStatus.COMPLETE);
+			} else {
+				try {
+					cpr.setDataEntryStatus(BaseEntity.DataEntryStatus.valueOf(detail.getDataEntryStatus()));
+				} catch (Exception e) {
+					ose.addError(CommonErrorCode.INVALID_INPUT, "Invalid data entry status: " + detail.getDataEntryStatus());
+				}
+			}
+		} else {
+			cpr.setDataEntryStatus(existing.getDataEntryStatus());
+		}
+
+		if (existing == null || detail.getParticipant().isAttrModified("extensionDetail")) {
+			ExtensionDetail input = detail.getParticipant().getExtensionDetail();
+			if (input == null) {
+				input = new ExtensionDetail();
+			}
+
+			DeObject extension = DeObject.createExtension(input, cpr);
+			cpr.setExtension(extension);
+		} else {
+			cpr.setExtension(existing.getExtension());
+		}
+	}
 }

@@ -24,9 +24,7 @@ public class CustomFieldPrintToken extends AbstractCustomFieldLabelToken {
 				case "visit":
 					return visit;
 				case "cpr":
-					Participant participant = visit.getRegistration().getParticipant();
-					participant.setCpId(visit.getCpId());
-					return participant;
+					return visit.getRegistration();
 				case "cp":
 					return visit.getCollectionProtocol();
 			}
@@ -40,9 +38,7 @@ public class CustomFieldPrintToken extends AbstractCustomFieldLabelToken {
 				case "visit":
 					return specimen.getVisit();
 				case "cpr":
-					Participant participant = specimen.getRegistration().getParticipant();
-					participant.setCpId(specimen.getCpId());
-					return participant;
+					return specimen.getRegistration();
 				case "cp":
 					return specimen.getCollectionProtocol();
 			}

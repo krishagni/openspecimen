@@ -402,7 +402,6 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		result.setVitalStatus(PermissibleValue.getValue(participant.getVitalStatus()));
 		result.setPhiAccess(!excludePhi);
 		result.setRegisteredCps(getCprSummaries(cprs));
-		result.setExtensionDetail(ExtensionDetail.from(participant.getExtension(), excludePhi));
 		return result;
 	}
 	

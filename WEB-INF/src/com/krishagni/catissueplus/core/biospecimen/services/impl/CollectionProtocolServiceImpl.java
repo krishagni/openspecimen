@@ -2463,12 +2463,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	private void createExtensions(List<CollectionProtocolRegistration> cprs) {
 		Map<CollectionProtocol, List<CollectionProtocolRegistration>> cpRegs = new HashMap<>();
 		cprs.forEach(cpr -> cpRegs.computeIfAbsent(cpr.getCollectionProtocol(), (k) -> new ArrayList<>()).add(cpr));
-		cpRegs.forEach((cp, regs) ->
-			DeObject.createExtensions(
-				true, Participant.EXTN, cp.getId(),
-				regs.stream().map(CollectionProtocolRegistration::getParticipant).collect(Collectors.toList())
-			)
-		);
+		cpRegs.forEach((cp, regs) -> DeObject.createExtensions(true, Participant.EXTN, cp.getId(), regs));
 	}
 
 	private CollectionProtocolPublishEvent createPublishEvent(CollectionProtocol cp, CollectionProtocolPublishDetail input, OpenSpecimenException ose) {
