@@ -70,6 +70,7 @@ export default {
           return promise.then(users => users);
         },
         selectProp: this.selectProp || (this.listSource && this.listSource.selectProp),
+        altSelectProp: 'emailAddress',
         displayProp: (user) => user.firstName + ' ' + user.lastName
       }
     }

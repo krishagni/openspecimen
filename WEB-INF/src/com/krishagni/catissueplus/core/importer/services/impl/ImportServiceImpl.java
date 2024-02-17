@@ -327,19 +327,50 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 		try {
 			FileRecordsDetail detail = req.getPayload();
 
-			ObjectSchema.Record schemaRec = new ObjectSchema.Record();
-			schemaRec.setFields(detail.getFields());
+			ObjectSchema schema = null;
+			if (detail.getFields() != null && !detail.getFields().isEmpty()) {
+				ObjectSchema.Record schemaRec = new ObjectSchema.Record();
+				schemaRec.setFields(detail.getFields());
 
-			ObjectSchema schema = new ObjectSchema();
-			schema.setRecord(schemaRec);
+				schema = new ObjectSchema();
+				schema.setRecord(schemaRec);
+			} else if (StringUtils.isNotBlank(detail.getSchema()) ){
+				schema = schemaFactory.getSchema(detail.getSchema(), detail.getParams());
+				if (schema == null) {
+					throw OpenSpecimenException.userError(ImportJobErrorCode.OBJ_SCHEMA_NOT_FOUND, detail.getSchema());
+				}
+			} else {
+				throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Schema name or fields list is required.");
+			}
+
+			Map<String, String> params = detail.getParams();
+			if (params == null) {
+				params = new HashMap<>();
+			}
+
+			String dateFormat = ConfigUtil.getInstance().getDeDateFmt();
+			if (StringUtils.isNotBlank(params.get("dateFormat"))) {
+				dateFormat = params.get("dateFormat");
+			}
+
+			String timeFormat = ConfigUtil.getInstance().getTimeFmt();
+			if (StringUtils.isNotBlank(params.get("timeFormat"))) {
+				timeFormat = params.get("timeFormat");
+			}
+
+			String tz = null;
+			if (StringUtils.isNotBlank(params.get("timeZone"))) {
+				tz = params.get("timeZone");
+			}
+
+			String separator = null;
+			if (StringUtils.isNotBlank(params.get("fieldSeparator"))) {
+				separator = params.get("fieldSeparator");
+			}
 
 			file = new File(getFilePath(detail.getFileId()));
-			reader = new ObjectReader(
-				file.getAbsolutePath(),
-				schema,
-				ConfigUtil.getInstance().getDeDateFmt(),
-				ConfigUtil.getInstance().getTimeFmt());
-
+			reader = new ObjectReader(file.getAbsolutePath(), schema, dateFormat, timeFormat, separator);
+			reader.setTimeZone(tz);
 			List<Map<String, Object>> records = new ArrayList<>();
 			Map<String, Object> record = null;
 			while ((record = (Map<String, Object>)reader.next()) != null) {
@@ -353,9 +384,9 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			return ResponseEvent.serverError(e);
 		} finally {
 			IOUtils.closeQuietly(reader);
-			if (file != null) {
-				file.delete();
-			}
+//			if (file != null) {
+//				file.delete();
+//			}
 		}
 	}
 

@@ -31,6 +31,7 @@
           <div v-if="v$.formModel[field.name] && v$.formModel[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
           </div>
+          <slot :name="field.name"></slot>
         </div>
       </template>
     </div>

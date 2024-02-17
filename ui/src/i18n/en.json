@@ -141,6 +141,7 @@
       "submit": "Submit",
       "unarchive": "Unarchive",
       "update": "Update",
+      "upload": "Upload",
       "yes":    "Yes"
     },
 
@@ -815,6 +816,16 @@
     "title_req": "Title is mandatory",
     "view_orders": "View Orders",
     "visit_clinical_diagnosis": "Clinical Diagnosis"
+  },
+
+  "import": {
+    "date_format": "Date Format",
+    "date_format_required": "Date format is mandatory",
+    "download_file_template": "Download File Template",
+    "field_separator": "Field Separator",
+    "file_required": "File is mandatory",
+    "time_format": "Time Format",
+    "time_format_required": "Time format is mandatory"
   },
 
   "institutes": {

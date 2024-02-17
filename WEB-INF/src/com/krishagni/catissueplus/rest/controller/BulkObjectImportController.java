@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,8 +96,11 @@ public class BulkObjectImportController {
 		RequestEvent<InputStream> req = new RequestEvent<>(file.getInputStream());
 		ResponseEvent<String> resp = importSvc.uploadImportJobFile(req);
 		resp.throwErrorIfUnsuccessful();
-		
-		return Collections.singletonMap("fileId", resp.getPayload());
+
+		Map<String, String> response = new HashMap<>();
+		response.put("fileId", resp.getPayload());
+		response.put("filename", file.getOriginalFilename());
+		return response;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/process-file-records")
