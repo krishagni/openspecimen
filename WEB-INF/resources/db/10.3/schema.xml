@@ -442,7 +442,7 @@
           elseif (entityType = 'CommonParticipant') then
             delete from os_participant_extn_recs where participant_id = new.object_id and form_id = formId and record_id = new.record_id;
           elseif (entityType = 'ParticipantExtension') then
-            delete from os_cpr_cust_fields where participant_id = new.object_id and form_id = formId and record_id = new.record_id;
+            delete from os_cpr_cust_fields where cpr_id = new.object_id and form_id = formId and record_id = new.record_id;
           elseif (entityType = 'SpecimenCollectionGroup') then
             delete from os_visit_extn_recs where visit_id = new.object_id and form_id = formId and record_id = new.record_id;
           elseif (entityType = 'VisitExtension') then
@@ -453,6 +453,407 @@
             delete from os_spmn_cust_fields where specimen_id = new.object_id and form_id = formId and record_id = new.record_id;
           elseif (entityType = 'OrderExtension') then
             delete from os_order_cust_fields where order_id = new.object_id and form_id = formId and record_id = new.record_id;
+          end if;
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to remove query entity DE form record IDs when entity form association is severed" dbms="mysql" runOnChange="true">
+    <sql>drop trigger if exists os_del_entity_record_ids;</sql>
+    <sql>drop trigger if exists os_addrm_entity_record_ids;</sql>
+
+    <sql endDelimiter="//">
+      create trigger os_addrm_entity_record_ids after update on catissue_form_context
+      for each row
+      begin
+        if (new.deleted_on is not null and old.deleted_on is null) then
+          if (new.entity_type = 'CollectionProtocolExtension') then
+            delete from
+              os_cp_cust_fields
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'Participant') then
+            delete from
+              os_cpr_extn_recs
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'CommonParticipant') then
+            delete from
+              os_participant_extn_recs
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'ParticipantExtension') then
+            delete from
+              os_cpr_cust_fields
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'SpecimenCollectionGroup') then
+            delete from
+              os_visit_extn_recs
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'VisitExtension') then
+            delete from
+              os_visit_cust_fields
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'Specimen' || new.entity_type = 'SpecimenEvent') then
+            delete from
+              os_spmn_extn_recs
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'SpecimenExtension') then
+            delete from
+              os_spmn_cust_fields
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          elseif (new.entity_type = 'OrderExtension') then
+            delete from
+              os_order_cust_fields
+            where
+              form_id = new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = new.identifier);
+          end if;
+        elseif (new.deleted_on is null and old.deleted_on is not null) then
+          if (new.entity_type = 'CollectionProtocolExtension') then
+            insert into
+              os_cp_cust_fields(cp_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          elseif (new.entity_type = 'Participant') then
+            insert into
+              os_cpr_extn_recs(cpr_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          elseif (new.entity_type = 'CommonParticipant') then
+            insert into
+              os_participant_extn_recs(participant_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          elseif (new.entity_type = 'ParticipantExtension') then
+            insert into
+              os_cpr_cust_fields(cpr_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.form_ctxt_id = new.identifier and
+              re.activity_status = 'ACTIVE';
+          elseif (new.entity_type = 'SpecimenCollectionGroup') then
+            insert into
+              os_visit_extn_recs(visit_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          elseif (new.entity_type = 'VisitExtension') then
+            insert into
+              os_visit_cust_fields(visit_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          elseif (new.entity_type = 'Specimen' || new.entity_type = 'SpecimenEvent') then
+            insert into
+              os_spmn_extn_recs(specimen_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          elseif (new.entity_type = 'SpecimenExtension') then
+            insert into
+              os_spmn_cust_fields(specimen_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          elseif (new.entity_type = 'OrderExtension') then
+            insert into
+              os_order_cust_fields(order_id, form_id, record_id)
+            select
+              re.object_id, new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = new.identifier;
+          end if;
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to insert query entity DE form record IDs" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//">
+      create or replace trigger os_ins_entity_form_record_id after insert on catissue_form_record_entry
+      for each row
+      declare
+        formId number;
+        entityType varchar2(255);
+      begin
+        select
+          container_id, entity_type into formId, entityType
+        from
+          catissue_form_context
+        where
+          identifier = :new.form_ctxt_id;
+
+        if (entityType = 'CollectionProtocolExtension') then
+          insert into os_cp_cust_fields(cp_id, form_id, record_id) values(:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'Participant') then
+          insert into os_cpr_extn_recs(cpr_id, form_id, record_id) values(:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'CommonParticipant') then
+          insert into os_participant_extn_recs(participant_id, form_id, record_id) values(:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'SpecimenCollectionGroup') then
+          insert into os_visit_extn_recs(visit_id, form_id, record_id) values(:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'ParticipantExtension') then
+          insert into os_cpr_cust_fields(cpr_id, form_id, record_id) values(:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'VisitExtension') then
+          insert into os_visit_cust_fields(visit_id, form_id, record_id) values(:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'Specimen' or entityType = 'SpecimenEvent') then
+          insert into os_spmn_extn_recs(specimen_id, form_id, record_id) values (:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'SpecimenExtension') then
+          insert into os_spmn_cust_fields(specimen_id, form_id, record_id) values (:new.object_id, formId, :new.record_id);
+        elsif (entityType = 'OrderExtension') then
+          insert into os_order_cust_fields(order_id, form_id, record_id) values (:new.object_id, formId, :new.record_id);
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to remove query entity DE form record IDs" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//">
+      create or replace trigger os_del_entity_form_record_id after update on catissue_form_record_entry
+      for each row
+      declare
+        formId number;
+        entityType varchar2(255);
+      begin
+        if (:new.activity_status = 'CLOSED') then
+          select
+            container_id, entity_type into formId, entityType
+          from
+            catissue_form_context
+          where
+            identifier = :new.form_ctxt_id;
+
+          if (entityType = 'CollectionProtocolExtension') then
+            delete from os_cp_cust_fields where cp_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'Participant') then
+            delete from os_cpr_extn_recs where cpr_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'CommonParticipant') then
+            delete from os_participant_extn_recs where participant_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'ParticipantExtension') then
+            delete from os_cpr_cust_fields where cpr_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'SpecimenCollectionGroup') then
+            delete from os_visit_extn_recs where visit_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'VisitExtension') then
+            delete from os_visit_cust_fields where visit_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'Specimen' or entityType = 'SpecimenEvent') then
+            delete from os_spmn_extn_recs where specimen_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'SpecimenExtension') then
+            delete from os_spmn_cust_fields where specimen_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          elsif (entityType = 'OrderExtension') then
+            delete from os_order_cust_fields where order_id = :new.object_id and form_id = formId and record_id = :new.record_id;
+          end if;
+        end if;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to remove query entity DE form record IDs when entity form association is severed" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//">
+      create or replace trigger os_addrm_entity_record_ids after update on catissue_form_context
+      for each row
+      begin
+        if (:new.deleted_on is not null) then
+          if (:new.entity_type = 'CollectionProtocolExtension') then
+            delete from
+              os_cp_cust_fields
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'Participant') then
+            delete from
+              os_cpr_extn_recs
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'CommonParticipant') then
+            delete from
+              os_participant_extn_recs
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'ParticipantExtension') then
+            delete from
+              os_cpr_cust_fields
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'SpecimenCollectionGroup') then
+            delete from
+              os_visit_extn_recs
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'VisitExtension') then
+            delete from
+              os_visit_cust_fields
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'Specimen' or :new.entity_type = 'SpecimenEvent') then
+            delete from
+              os_spmn_extn_recs
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'SpecimenExtension') then
+            delete from
+              os_spmn_cust_fields
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          elsif (:new.entity_type = 'OrderExtension') then
+            delete from
+              os_order_cust_fields
+            where
+              form_id = :new.container_id and
+              record_id in (select record_id from catissue_form_record_entry where form_ctxt_id = :new.identifier);
+          end if;
+        elsif (:new.deleted_on is null and :old.deleted_on is not null) then
+          if (:new.entity_type = 'CollectionProtocolExtension') then
+            insert into
+              os_cp_cust_fields(cp_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
+          elsif (:new.entity_type = 'Participant') then
+            insert into
+              os_cpr_extn_recs(cpr_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
+          elsif (:new.entity_type = 'CommonParticipant') then
+            insert into
+              os_participant_extn_recs(participant_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
+          elsif (:new.entity_type = 'ParticipantExtension') then
+            insert into
+              os_cpr_cust_fields(cpr_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.form_ctxt_id = :new.identifier and
+              re.activity_status = 'ACTIVE';
+          elsif (:new.entity_type = 'SpecimenCollectionGroup') then
+            insert into
+              os_visit_extn_recs(visit_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
+          elsif (:new.entity_type = 'VisitExtension') then
+            insert into
+              os_visit_cust_fields(visit_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
+          elsif (:new.entity_type = 'Specimen' or :new.entity_type = 'SpecimenEvent') then
+            insert into
+              os_spmn_extn_recs(specimen_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
+          elsif (:new.entity_type = 'SpecimenExtension') then
+            insert into
+              os_spmn_cust_fields(specimen_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
+          elsif (:new.entity_type = 'OrderExtension') then
+            insert into
+              os_order_cust_fields(order_id, form_id, record_id)
+            select
+              re.object_id, :new.container_id, re.record_id
+            from
+              catissue_form_record_entry re
+            where
+              re.activity_status = 'ACTIVE' and
+              re.form_ctxt_id = :new.identifier;
           end if;
         end if;
       end;
