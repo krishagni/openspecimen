@@ -41,6 +41,8 @@ public class MasterSpecimenDetail extends AttributeModifiedSupport {
 
 	private Boolean textOptIn;
 
+	private Boolean textOptInConsent;
+
 	private Date birthDate;
 
 	private Date deathDate;
@@ -245,6 +247,14 @@ public class MasterSpecimenDetail extends AttributeModifiedSupport {
 
 	public void setTextOptIn(Boolean textOptIn) {
 		this.textOptIn = textOptIn;
+	}
+
+	public Boolean getTextOptInConsent() {
+		return textOptInConsent;
+	}
+
+	public void setTextOptInConsent(Boolean textOptInConsent) {
+		this.textOptInConsent = textOptInConsent;
 	}
 
 	public Date getBirthDate() {
