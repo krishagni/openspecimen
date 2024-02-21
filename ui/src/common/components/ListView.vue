@@ -417,6 +417,8 @@ export default {
             value = this.$filters.specimenMeasure(value, extra);
           } else if (value instanceof Array) {
             value = value.join(', ');
+          } else if (column.type == 'booleanCheckbox') {
+            value = this.$filters.boolValue(value);
           }
         }
       }
