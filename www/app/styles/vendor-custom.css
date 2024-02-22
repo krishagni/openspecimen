@@ -192,3 +192,16 @@ body > .ui-select-bootstrap.open {
   content: "\f119";
 }
 
+@media only screen
+  and (min-device-width: 375px)
+  and (max-device-width: 812px)
+  and (-webkit-min-device-pixel-ratio: 3) {
+
+  .dropdown.open .dropdown-menu {
+    min-width: 208px;
+  }
+
+  .dropdown-menu > li > a {
+    white-space: pre-wrap;
+  }
+}
