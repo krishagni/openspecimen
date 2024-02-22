@@ -1,17 +1,17 @@
-
 <template>
   <div class="os-date-picker">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
-        :show-button-bar="true" :hide-on-date-time-select="true" :disabled="disabled" />
+        :show-button-bar="true" :hide-on-date-time-select="true"
+        :manual-input="true" :disabled="disabled" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
       <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true" :placeholder="$attrs.placeholder"
-        :disabled="disabled"  />
+        :manual-input="true" :disabled="disabled"  />
     </div>
   </div>
 </template>
@@ -145,5 +145,20 @@ export default {
 .p-calendar-disabled input {
   opacity: 0.65;
   pointer-events: none;
+}
+
+.p-datepicker.p-component {
+  max-width: 400px!important;
+  width: 400px!important;
+  min-width: 400px!important;
+}
+
+.p-datepicker table td > span {
+  height: auto;
+  width:  auto;
+}
+
+.p-datepicker .p-datepicker-buttonbar {
+  padding: 0.5rem 0;
 }
 </style>
