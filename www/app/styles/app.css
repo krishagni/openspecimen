@@ -125,6 +125,7 @@ pre {
   padding: 6px 12px;
 }
 
+
 .os-navbar-default ul.menu > li > a {
   color: #fff;
 }
@@ -1593,4 +1594,33 @@ form .form-group:empty {
   text-align: left;
   min-width: 150px;
   font-weight: normal;
+}
+
+@media only screen
+  and (min-device-width: 375px)
+  and (max-device-width: 812px)
+  and (-webkit-min-device-pixel-ratio: 3) {
+
+  .os-navbar ul.menu > li > a {
+    padding: 0px 6px;
+  }
+
+  .os-navbar ul.menu > li > a.btn {
+    padding: 3px 6px;
+  }
+
+  .os-navbar .logo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .os-navbar .logo img {
+    width: 80px;
+    height: 16px;
+  }
+
+  .os-navbar .logo .deploy-env {
+    position: initial;
+  }
 }

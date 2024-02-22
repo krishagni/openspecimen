@@ -2833,15 +2833,15 @@ edu.common.de.Signature = function(id, field, args) {
     this.imageEl = $('<img/>');
 
     this.removeBtn = $('<button/>')
-      .append($('<span/>').append('Remove Signature'))
+      .append($('<span/>').append('Remove'))
       .addClass('reset');
 
     this.saveBtn = $('<button/>')
-      .append($('<span/>').append('Save Signature'))
+      .append($('<span/>').append('Save'))
       .addClass('edit');
 
     this.clearBtn = $('<button/>')
-      .append($('<span/>').append('Clear Signature'))
+      .append($('<span/>').append('Clear'))
       .addClass('edit');
 
     var buttons = $('<div/>').addClass('actions')

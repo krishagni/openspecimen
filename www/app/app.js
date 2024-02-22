@@ -457,7 +457,7 @@ osApp.config(function(
     }
   })
   .run(function(
-    $rootScope, $window, $document, $http, $cookies, $q,  $state, $translate, $translatePartialLoader, $sce,
+    $rootScope, $window, $document, $http, $cookies, $q,  $state, $translate, $translatePartialLoader, $sce, $timeout,
     AuthService, AuthorizationService, HomePageSvc, LocationChangeListener,
     ApiUtil, Setting, PluginReg, Util, ItemsHolder, VueApp) {
 
@@ -598,4 +598,18 @@ osApp.config(function(
         $rootScope.global.siteAssets = resp;
       }
     );
+
+    var mediaQuery = $window.matchMedia(
+      'only screen and ' +
+      '(min-device-width: 375px) and ' +
+      '(max-device-width: 812px) and ' +
+      '(-webkit-min-device-pixel-ratio: 3)'
+    );
+
+    function setScreenType(query) {
+      $rootScope.mobileScreen = query.matches ? true : false;
+    }
+
+    setScreenType(mediaQuery);
+    mediaQuery.addEventListener('change', function() { $timeout(function() { setScreenType(mediaQuery); }, 0); });
   });
