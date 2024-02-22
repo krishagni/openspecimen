@@ -224,13 +224,13 @@ export default {
   color: #707070;
   background: #efefef;
   border-bottom: 1px solid #dee2e6;
-  font-weight: normal;
+  font-weight: bold;
   text-align: left;
 }
 
 .os-subform .required-indicator {
   display: inline-block;
-  padding: 0.25rem;
+  padding: 0rem 0.25rem;
   color: red;
   cursor: help;
 }
@@ -252,6 +252,7 @@ export default {
 
 .os-subform table .actioncol :deep(button) {
   /*background: #fff;*/
+  padding: 2px 6px;
 }
 
 .os-subform[disabled="true"] button {
