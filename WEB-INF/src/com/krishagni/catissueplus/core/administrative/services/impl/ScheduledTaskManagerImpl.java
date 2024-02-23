@@ -216,7 +216,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 			return;
 		}
 
-		if (job.isOnDemand()) {
+		if (minutesLater == null) {
 			logger.info("The job " + job.getName() + " cannot be scheduled, as its repeat frequency is on demand");
 			return;
 		}
