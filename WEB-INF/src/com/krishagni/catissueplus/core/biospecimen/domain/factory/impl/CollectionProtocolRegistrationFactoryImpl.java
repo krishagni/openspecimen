@@ -47,6 +47,9 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 	@Override
 	public CollectionProtocolRegistration createCpr(CollectionProtocolRegistration existing, CollectionProtocolRegistrationDetail detail) {
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+		if (detail.getParticipant() == null) {
+			detail.setParticipant(new ParticipantDetail());
+		}
 		
 		CollectionProtocolRegistration cpr = new CollectionProtocolRegistration();
 		cpr.setId(detail.getId());
