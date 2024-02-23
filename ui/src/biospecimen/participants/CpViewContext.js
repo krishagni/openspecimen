@@ -202,6 +202,15 @@ export default class CpViewContext {
     );
   }
 
+  async isSaveSprEnabled() {
+    const cp = await this.getCp();
+    if (cp.storeSprEnabled == null || cp.storeSprEnabled == undefined) {
+      return settingSvc.getSetting('biospecimen', 'store_spr')
+        .then(settings => util.isTrue(settings[0].value));
+    }
+
+    return cp.storeSprEnabled;
+  }
 
   getSpecimenDict() {
     if (!this.specimenDictQ) {

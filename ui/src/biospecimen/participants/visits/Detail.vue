@@ -36,7 +36,7 @@
               </router-link>
             </li>
 
-            <li>
+            <li v-if="ctx.showSpr && visit.status == 'Complete'">
               <router-link :to="getRoute('Report')">
                 <span v-t="'visits.path_report'">Path Report</span>
               </router-link>
@@ -82,6 +82,8 @@ export default {
   data() {
     const ctx = {
       cp: {},
+
+      showSpr: true
     };
 
 
@@ -97,6 +99,7 @@ export default {
     }
 
     this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
+    this.cpViewCtx.isSaveSprEnabled().then(showSpr => this.ctx.showSpr = showSpr);
   },
 
   computed: {
