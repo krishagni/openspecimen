@@ -288,14 +288,14 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 				if (cp == null) {
 					ose.addError(CpErrorCode.NOT_FOUND, detail.getCpId());
 				} else if (cp.isSpecimenCentric()) {
-					visit = getVisitFor(cp);
+					visit = cp.getVisit();
 				}
 			} else if (StringUtils.isNotBlank(detail.getCpShortTitle())) {
 				CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(detail.getCpShortTitle());
 				if (cp == null) {
 					ose.addError(CpErrorCode.NOT_FOUND, detail.getCpShortTitle());
 				} else if (cp.isSpecimenCentric()) {
-					visit = getVisitFor(cp);
+					visit = cp.getVisit();
 				}
 			}
 
@@ -311,41 +311,6 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 		
 		return visit;
-	}
-
-	private Visit getVisitFor(CollectionProtocol cp) {
-		String visitName = cp.getVisitName();
-		Visit cpVisit = daoFactory.getVisitsDao().getByName(visitName);
-		if (cpVisit != null) {
-			return cpVisit;
-		}
-
-		String ppid = cp.getPpid();
-		CollectionProtocolRegistration cpReg = daoFactory.getCprDao().getCprByPpid(cp.getId(), ppid);
-		if (cpReg == null) {
-			CollectionProtocolRegistrationDetail cprInput = new CollectionProtocolRegistrationDetail();
-			cprInput.setCpId(cp.getId());
-			cprInput.setPpid(ppid);
-			cprInput.setRegistrationDate(Calendar.getInstance().getTime());
-			cpReg = cprFactory.createCpr(cprInput);
-
-			daoFactory.getParticipantDao().saveOrUpdate(cpReg.getParticipant());
-			daoFactory.getCprDao().saveOrUpdate(cpReg);
-		}
-
-		VisitDetail visitInput = new VisitDetail();
-		visitInput.setCpId(cp.getId());
-		visitInput.setPpid(ppid);
-		visitInput.setName(visitName);
-		visitInput.setVisitDate(Calendar.getInstance().getTime());
-		visitInput.setSite(cp.getRepositories().iterator().next().getName());
-		if (cp.firstEvent() != null) {
-			visitInput.setEventLabel(cp.firstEvent().getEventLabel());
-		}
-
-		cpVisit = visitFactory.createVisit(visitInput);
-		daoFactory.getVisitsDao().saveOrUpdate(cpVisit);
-		return cpVisit;
 	}
 	
 	private void setLineage(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {

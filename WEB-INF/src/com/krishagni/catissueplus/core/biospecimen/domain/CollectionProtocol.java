@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,15 +17,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolRegistrationFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolRegistrationDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
@@ -33,6 +40,7 @@ import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
+@Configurable
 @Audited
 @AuditTable(value="CAT_COLLECTION_PROTOCOL_AUD")
 public class CollectionProtocol extends BaseExtensionEntity {
@@ -186,6 +194,15 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private boolean draftMode = false;
 
 	private Long catalogId;
+
+	@Autowired
+	private DaoFactory daoFactory;
+
+	@Autowired
+	private CollectionProtocolRegistrationFactory cprFactory;
+
+	@Autowired
+	private VisitFactory visitFactory;
 
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -1019,6 +1036,41 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	public String getEventName() {
 		return String.format(CP_EVENT_FMT, getId());
+	}
+
+	public Visit getVisit() {
+		String visitName = getVisitName();
+		Visit cpVisit = daoFactory.getVisitsDao().getByName(visitName);
+		if (cpVisit != null) {
+			return cpVisit;
+		}
+
+		String ppid = getPpid();
+		CollectionProtocolRegistration cpReg = daoFactory.getCprDao().getCprByPpid(getId(), ppid);
+		if (cpReg == null) {
+			CollectionProtocolRegistrationDetail cprInput = new CollectionProtocolRegistrationDetail();
+			cprInput.setCpId(getId());
+			cprInput.setPpid(ppid);
+			cprInput.setRegistrationDate(Calendar.getInstance().getTime());
+			cpReg = cprFactory.createCpr(cprInput);
+
+			daoFactory.getParticipantDao().saveOrUpdate(cpReg.getParticipant());
+			daoFactory.getCprDao().saveOrUpdate(cpReg);
+		}
+
+		VisitDetail visitInput = new VisitDetail();
+		visitInput.setCpId(getId());
+		visitInput.setPpid(ppid);
+		visitInput.setName(visitName);
+		visitInput.setVisitDate(Calendar.getInstance().getTime());
+		visitInput.setSite(getRepositories().iterator().next().getName());
+		if (firstEvent() != null) {
+			visitInput.setEventLabel(firstEvent().getEventLabel());
+		}
+
+		cpVisit = visitFactory.createVisit(visitInput);
+		daoFactory.getVisitsDao().saveOrUpdate(cpVisit);
+		return cpVisit;
 	}
 
 	private CpConsentTier getConsentTierById(Long ctId) {

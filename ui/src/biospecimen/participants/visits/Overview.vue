@@ -89,7 +89,7 @@ export default {
     },
 
     addSpecimen: function() {
-      wfSvc.addSpecimen(this.visit);
+      wfSvc.addSpecimen(this.ctx.cp, this.visit);
     },
 
     printLabels: function() {

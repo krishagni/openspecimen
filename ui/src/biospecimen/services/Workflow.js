@@ -57,7 +57,7 @@ class Workflow {
     this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
-  async addSpecimen(visit) {
+  async addSpecimen(cp, visit) {
     if (!this._wfInstanceSvc()) {
       alert('Workflow module not installed!');
       return;
@@ -72,15 +72,20 @@ class Workflow {
       cpr  : {id: visit.cprId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle},
       visit: {id: visit.id,    cpId: visit.cpId, cpShortTitle: visit.cpShortTitle}
     };
-          
-    const params = this._getVisitBreadcrumb(visit, i18n.msg('participants.add_specimen'));
-    params['breadcrumb-3'] = JSON.stringify({
-      label: this._getVisitDescription(visit),
-      route: { 
-        name: 'ParticipantsListItemVisitDetail.Overview',
-        params: {cpId: visit.cpId, cprId: visit.cprId, visitId: visit.id}
-      }
-    });
+
+    let params = null;
+    if (cp.specimenCentric) {
+      params = this._getCpBreadcrumb(cp.id, cp.shortTitle, i18n.msg('participants.add_specimen'));
+    } else {
+      params = this._getVisitBreadcrumb(visit, i18n.msg('participants.add_specimen'));
+      params['breadcrumb-3'] = JSON.stringify({
+        label: this._getVisitDescription(visit),
+        route: {
+          name: 'ParticipantsListItemVisitDetail.Overview',
+          params: {cpId: visit.cpId, cprId: visit.cprId, visitId: visit.id}
+        }
+      });
+    }
 
     const opts = {inputType: 'visit', params};
     const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, [inputItem], opts);

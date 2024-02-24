@@ -96,7 +96,31 @@ export default {
         return [];
       }
 
-      const {cpId, cprId, visitId, eventId} = this.specimen;
+      const {query} = routerSvc.getCurrentRoute();
+      const {cpId, cprId, visitId, eventId, parentId, parentLabel} = this.specimen;
+      const parentSpmnUrl = [];
+      if (parentId > 0) {
+        parentSpmnUrl.push({
+          url: routerSvc.getUrl(
+            'ParticipantsListItemSpecimenDetail.Overview',
+            {cpId, cprId, visitId, specimenId: parentId},
+            Object.assign({eventId}, query || {})
+          ),
+          label: parentLabel
+        });
+      }
+
+      if (cp.specimenCentric) {
+        return [
+          {
+            url: routerSvc.getUrl('ParticipantsList', {cpId, cprId: -1}, {view: 'specimens_list'}),
+            label: cp.shortTitle
+          },
+
+          ...parentSpmnUrl
+        ];
+      }
+
       return [
         {
           url: routerSvc.getUrl('ParticipantsList', {cpId, cprId: -1}),
@@ -109,7 +133,8 @@ export default {
         {
           url: routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId, eventId}),
           label: cpSvc.getEventDescription(this.visit)
-        }
+        },
+        ...parentSpmnUrl
       ];
     },
 

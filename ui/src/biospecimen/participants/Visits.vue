@@ -123,7 +123,7 @@ export default {
     },
 
     addSpecimen: async function(visit) {
-      wfSvc.addSpecimen(visit);
+      wfSvc.addSpecimen(this.cp, visit);
     },
 
     printLabels: function(visit) {

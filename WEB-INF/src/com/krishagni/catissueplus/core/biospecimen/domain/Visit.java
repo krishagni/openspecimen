@@ -46,7 +46,6 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
-import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 @Configurable
 @Audited

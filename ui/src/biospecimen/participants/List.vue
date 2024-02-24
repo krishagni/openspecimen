@@ -49,7 +49,10 @@
             <template #default v-else-if="ctx.view == 'specimens_list'">
               <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
                 <os-button left-icon="user-friends" :label="$t('participants.view_participants')"
-                  @click="viewParticipants" />
+                  @click="viewParticipants" v-if="!ctx.cp.specimenCentric" />
+
+                <os-button left-icon="plus" :label="$t('participants.add_specimen')"
+                  @click="addSpecimen" v-else />
 
                 <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
               </span>
@@ -128,6 +131,7 @@ import itemsSvc  from '@/common/services/ItemsHolder.js';
 import i18n      from '@/common/services/I18n.js';
 import pluginReg from '@/common/services/PluginViewsRegistry.js';
 import routerSvc from '@/common/services/Router.js';
+import wfSvc     from '@/biospecimen/services/Workflow.js';
 
 export default {
   name: 'ParticipantsList',
@@ -160,7 +164,7 @@ export default {
 
       query: props.filters,
 
-      view: props.view,
+      view: cp.specimenCentric ? 'specimens_list' : props.view,
 
       listInfo: {
         list: [],
@@ -377,6 +381,10 @@ export default {
 
     viewParticipants: function() {
       routerSvc.goto('ParticipantsList', {cpId: this.ctx.cp.id, cprId: -1}, {view: 'participants_list'});
+    },
+
+    addSpecimen: function() {
+      wfSvc.addSpecimen(this.ctx.cp, {cpId: this.ctx.cp.id});
     },
 
     openSearch: function () {
