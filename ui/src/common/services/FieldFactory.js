@@ -15,6 +15,7 @@ class FieldFactory {
     radio: 'os-radio-button',
     checkbox: 'os-checkbox',
     booleanCheckbox: 'os-boolean-checkbox',
+    'toggle-checkbox': 'os-boolean-checkbox',
     text: 'os-input-text',
     textarea: 'os-textarea',
     password: 'os-password',

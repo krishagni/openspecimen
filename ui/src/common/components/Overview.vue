@@ -288,6 +288,12 @@ export default {
           if (specimen.specimenClass) {
             value += ' (' + specimen.specimenClass + ')';
           }
+        } else if (field.type == 'booleanCheckbox' || field.type == 'toggle-checkbox') {
+          if (value == true || value == 'true') {
+            value = this.$t('common.yes');
+          } else if (value == false || value == 'false') {
+            value = this.$t('common.no');
+          }
         }
       }
 
