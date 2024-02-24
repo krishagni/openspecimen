@@ -84,6 +84,10 @@ class FormUtil {
 
         result = Object.assign(result, util.clone(field));
         result.label = result.label || result.caption;
+        if (result.width) {
+          const uiStyle = result.uiStyle = result.uiStyle || {};
+          uiStyle['width'] = result.width;
+        }
 
         if (result.type == 'textArea') {
           result.type = 'textarea';

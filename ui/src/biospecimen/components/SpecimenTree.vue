@@ -27,6 +27,7 @@
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import formUtil from '@/common/services/FormUtil.js';
+import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util from '@/common/services/Util.js';
 
 export default {
@@ -45,9 +46,18 @@ export default {
   },
 
   created() {
-    cpSvc.getSpecimenTreeCfg((this.cp && this.cp.id) || -1).then(
-      (treeCfg) => {
+    const treeCfgQ = cpSvc.getSpecimenTreeCfg((this.cp && this.cp.id) || -1);
+    const dictQ    = specimenSvc.getDict((this.cp && this.cp.id) || -1);
+    Promise.all([dictQ, treeCfgQ]).then(
+      ([dict, treeCfg]) => {
         this.treeCfg = util.clone(treeCfg || {});
+        this.treeCfg.fields = formUtil.sdeFieldsToDict(this.treeCfg.fields || [], dict);
+        for (let field of this.treeCfg.fields) {
+          if (field.type == 'specimen-description') {
+            field.showStatus = true;
+            break;
+          }
+        }
       }
     );
   },
