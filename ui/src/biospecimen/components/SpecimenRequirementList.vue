@@ -112,7 +112,7 @@ export default {
 
     _updateValue(value) {
       if (this.entity) {
-        const entityObj = exprUtil.getValue(this.form || this.context || {}, this.entity) || {};
+        const entityObj = exprUtil.eval(this.form || this.context || {}, this.entity) || {};
         if (!value) {
           entityObj.reqId = null;
           this._presetValues(entityObj, {lineage: entityObj.lineage});

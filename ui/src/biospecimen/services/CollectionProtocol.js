@@ -52,6 +52,10 @@ class CollectionProtocol {
     return result;
   }
 
+  async getSpecimenRequirements(cpId, eventId, includeChildrenReqs) {
+    return http.get('specimen-requirements', {cpId, eventId, includeChildReqs: includeChildrenReqs});
+  }
+
   async getWorkflow(cpId, wfName) {
     let workflow = await this.loadWorkflows(cpId, wfName);
     if (workflow && workflow.data) {
