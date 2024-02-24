@@ -204,7 +204,7 @@ export default {
       }
 
       result += "'" + url.substring(lastMatchIdx + skip) + "'";
-      return exprUtil.eval(this.form, result);
+      return exprUtil.eval(this.form || {}, result);
     },
 
     dedup(options) {
