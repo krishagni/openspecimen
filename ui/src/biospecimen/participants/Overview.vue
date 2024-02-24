@@ -15,6 +15,22 @@
     <os-grid-column width="8">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
+      <os-section v-if="ctx.cpr.participant.registeredCps.length > 0">
+        <template #title>
+          <span v-t="'participants.other_registered_cps'">Other Registered Protocols</span>
+        </template>
+
+        <template #content>
+          <ul class="os-other-protocols">
+            <li v-for="{cprId, cpId, cpShortTitle} in ctx.cpr.participant.registeredCps" :key="cprId">
+              <router-link :to="{name: 'ParticipantsListItemDetail.Overview', params: {cpId, cprId}}">
+                <span>{{cpShortTitle}}</span>
+              </router-link>
+            </li>
+          </ul>
+        </template>
+      </os-section>
+
       <os-section v-if="hasOccurredVisits">
         <template #title>
           <span v-t="'participants.occurred_visits'">Visits</span>
@@ -237,3 +253,20 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-other-protocols {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.os-other-protocols li {
+  display: inline-block;
+}
+
+.os-other-protocols li:not(:last-child):after {
+  content: ', ';
+  display: inline-block;
+}
+</style>
