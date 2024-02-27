@@ -602,8 +602,7 @@ osApp.config(function(
     var mediaQuery = $window.matchMedia(
       'only screen and ' +
       '(min-device-width: 375px) and ' +
-      '(max-device-width: 812px) and ' +
-      '(-webkit-min-device-pixel-ratio: 3)'
+      '(max-device-width: 812px)'
     );
 
     function setScreenType(query) {
