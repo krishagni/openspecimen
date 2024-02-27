@@ -1598,8 +1598,7 @@ form .form-group:empty {
 
 @media only screen
   and (min-device-width: 375px)
-  and (max-device-width: 812px)
-  and (-webkit-min-device-pixel-ratio: 3) {
+  and (max-device-width: 812px) {
 
   .os-navbar ul.menu > li > a {
     padding: 0px 6px;
