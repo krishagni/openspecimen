@@ -115,6 +115,11 @@ export default class CpViewContext {
     return this.visitsTabQ;
   }
 
+  async isMultiVisitsCollectionAllowed() {
+    const value = await cpSvc.getWorkflowProperty(this.cpId || -1, 'common', 'allowMultiVisitsCollection');
+    return value == true || value == 'true' || value == 1 || value == '1';
+  }
+
   getOccurredVisitsTabFields() {
     return this.getVisitsTab().then(
       (visitsTab) => {

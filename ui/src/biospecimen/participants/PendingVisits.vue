@@ -1,16 +1,23 @@
 <template>
   <div class="os-pending-visits-tab">
+    <div class="action-buttons">
+      <os-button :label="$t('participants.collect')" @click="collectVisits" v-if="selectedVisits.length > 0" />
+    </div>
+
     <os-list-view
       class="os-muted-list-header os-bordered-list1"
+      :allow-selection="allowSelection"
       :data="pendingVisits"
       :schema="{columns: tabFields}"
       :showRowActions="true"
-      @rowClicked="onVisitRowClick"
       :expanded="expandedVisits"
+      @rowClicked="onVisitRowClick"
+      @selectedRows="onVisitRowsSelection"
       ref="listView">
 
       <template #rowActions="slotProps">
-        <os-button size="small" :label="$t('participants.collect')" @click="collectVisit(slotProps.rowObject)" />
+        <os-button size="small" :label="$t('participants.collect')" @click="collectVisit(slotProps.rowObject)"
+          v-if="selectedVisits.length == 0" />
       </template>
 
       <template class="visit-details" #expansionRow="{rowObject}">
@@ -23,6 +30,7 @@
 <script>
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
@@ -34,12 +42,17 @@ export default {
     return {
       tabFields: [],
 
-      expandedVisits: []
+      selectedVisits: [],
+
+      expandedVisits: [],
+
+      allowSelection: false
     }
   },
 
   created() {
     this.cpViewCtx.getPendingVisitsTabFields().then(tabFields => this.tabFields = tabFields);
+    this.cpViewCtx.isMultiVisitsCollectionAllowed().then(allowSelection => this.allowSelection = allowSelection);
   },
 
   computed: {
@@ -66,49 +79,78 @@ export default {
       // this._gotoVisit(visit);
     },
 
-    collectVisit: async function(rowObject) {
+    onVisitRowsSelection: function(event) {
+      this.selectedVisits = event.map(({rowObject: {visit}}) => visit);
+    },
+
+    collectVisit: function({visit}) {
+      this._collectVisits([visit]);
+    },
+
+    collectVisits: function() {
+      this._collectVisits(this.selectedVisits);
+    },
+
+    _collectVisits: async function(visits) {
+      let somePrecreated = visits.some(visit => visit.id > 0);
+      let someNotCreated = visits.some(visit => !visit.id || visit.id == -1);
+      if (somePrecreated && someNotCreated) {
+        alertsSvc.error({code: 'participants.all_or_none_visits_precreated'});
+        return;
+      }
+
       const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
-      const {visit} = rowObject;
       if (wfInstanceSvc) {
         let wfName = await this._getCollectVisitsWf();
         if (!wfName) {
           wfName = 'sys-collect-visits';
         }
 
-        let inputItem = {cpr: {id: visit.cprId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle}};
-        if (visit.eventId) {
-          inputItem.cpe = {id: visit.eventId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
-        }
-
-        let description = visit.description || 'Unknown';
-        let dateIdx = description.indexOf(' / ');
-        if (dateIdx >= 0) {
-          description = visit.description.substring(0, dateIdx);
-        }
-
         const opts = {
           params: {
             returnOnExit: 'current_view',
-            cpId: visit.cpId,
+            cpId: this.cp.id,
             'breadcrumb-1': JSON.stringify({
-              label: visit.cpShortTitle,
-              route: {name: 'ParticipantsList', params: {cpId: visit.cpId, cprId: -1}}
+              label: this.cp.shortTitle,
+              route: {name: 'ParticipantsList', params: {cpId: this.cp.id, cprId: -1}}
             }),
             'breadcrumb-2': JSON.stringify({
-              label: visit.ppid,
-              route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: visit.cpId, cprId: visit.cprId}}
+              label: this.cpr.ppid,
+              route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: this.cp.id, cprId: this.cpr.id}}
             }),
-            batchTitle: description,
             showOptions: false
           }
         }
 
-        if (visit.id > 0) {
-          opts.inputType = 'visit';
-          inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
-        }
+        const inputItems = visits.map(
+          (visit) => {
+            let item = {cpr: {id: visit.cprId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle}};
+            if (visit.eventId) {
+              item.cpe = {id: visit.eventId, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
+            }
 
-        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
+            let description = visit.description || 'Unknown';
+            let dateIdx = description.indexOf(' / ');
+            if (dateIdx >= 0) {
+              description = visit.description.substring(0, dateIdx);
+            }
+
+            if (opts.params.batchTitle) {
+              opts.params.batchTitle = 'Collect Visits';
+            } else {
+              opts.params.batchTitle = description;
+            }
+
+            if (visit.id > 0) {
+              opts.inputType = 'visit';
+              item.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
+            }
+
+            return item;
+          }
+        );
+
+        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, inputItems, opts);
         wfInstanceSvc.gotoInstance(instance.id);
       } else {
         alert('Workflow module not installed!');
@@ -158,6 +200,10 @@ export default {
   text-align: center;
 }
 
+.os-pending-visits-tab :deep(table.p-datatable-table > thead > tr > th.os-selection-cb) {
+  width: 2.5rem;
+}
+
 .os-pending-visits-tab :deep(table.p-datatable-table > thead > tr > th.row-actions) {
   width: 75px;
 }
@@ -181,6 +227,13 @@ export default {
 .os-pending-visits-tab :deep(table.p-datatable-table > tbody > tr > td) {
   vertical-align: middle;
   padding: 1rem;
+}
+
+.os-pending-visits-tab :deep(table.p-datatable-table > tbody > tr > td.os-selection-cb.p-selection-column) {
+}
+
+.os-pending-visits-tab .action-buttons {
+  margin-bottom: 1.25rem;
 }
 
 </style>

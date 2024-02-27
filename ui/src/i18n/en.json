@@ -879,6 +879,7 @@
     "add_participant": "Add Participant",
     "add_specimen": "Add Specimen",
     "add_to_another": "Add to Another",
+    "all_or_none_visits_precreated": "Either all or none of the selected visits should be pre-created.",
     "anonymize": "Anonymize",
     "anonymized_successfully": "Successfully erased participant PHI data",
     "anticipated": "Anticipated",
