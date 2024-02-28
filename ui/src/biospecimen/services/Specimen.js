@@ -4,7 +4,6 @@ import cpSvc       from './CollectionProtocol.js';
 import exprUtil    from '@/common/services/ExpressionUtil.js';
 import http        from '@/common/services/HttpClient.js';
 import formSvc     from '@/forms/services/Form.js';
-import formUtil    from '@/common/services/FormUtil.js';
 import settingsSvc from '@/common/services/Setting.js';
 import ui          from '@/global.js';
 import util        from '@/common/services/Util.js';
@@ -175,79 +174,11 @@ class Specimen {
   }
 
   async getDict(cpId) {
-    return cpSvc.getWorkflow(cpId, 'dictionary').then(
-      (dict) => {
-        dict = dict || {};
-
-        let spmnFields = (dict.fields || []).filter(field => field.name.indexOf('specimen.') == 0);
-        if (spmnFields.length > 0) {
-          spmnFields = formUtil.sdeFieldsToDict(spmnFields);
-        } else {
-          spmnFields = util.clone(specimenSchema.fields);
-        }
-
-        if (spmnFields.some(field => field.name.indexOf('specimen.extensionDetail') == 0)) {
-          return spmnFields;
-        }
-
-        return this.getCustomFieldsForm(cpId).then(
-          (formDef) => {
-            let customFields = formUtil.deFormToDict(formDef, 'specimen.extensionDetail.attrsMap.');
-            return spmnFields.concat(customFields);
-          }
-        );
-      }
-    );
+    return cpSvc.getDictFor(cpId, 'specimen', 'specimen.extensionDetail', specimenSchema, this.getCustomFieldsForm);
   }
 
   async getLayout(cpId, specimenFields) {
-    return cpSvc.getWorkflow(cpId, 'dictionary').then(
-      (dict) => {
-        dict = dict || {};
-
-        const layout = util.clone(dict.layout || {});
-        layout.rows = (layout.rows || [])
-          .map(row => ({fields: row.fields.filter(field => field.name.indexOf('specimen.') == 0)}))
-          .filter(row => row.fields.length > 0);
-
-        if (layout.rows == 0) {
-          //
-          // CP or system level dictionary has no layout
-          //
-
-          if (dict.fields && dict.fields.some(field => field.name.indexOf('specimen.') == 0)) {
-            //
-            // CP or system level dictionary configured
-            // use the dictionary to create a default layout
-            //
-            layout.rows = specimenFields.map(field => ({fields: [ {name: field.name} ]}));
-          } else {
-            //
-            // no dictionary configured, use the default layout shipped with the app
-            //
-            layout.rows = util.clone(addEditLayout.layout.rows);
-          }
-        }
-
-        const rows = layout.rows;
-        if (rows.some(row => row.fields.some(field => field.name.indexOf('specimen.extensionDetail') == 0))) {
-          //
-          // layout has one or more custom fields. use it
-          //
-          return layout;
-        }
-
-
-        //
-        // append the custom fields to the configured or default layout
-        //
-        const customFields = (specimenFields || [])
-          .filter(field => field.name.indexOf('specimen.extensionDetail') == 0)
-          .map(field => ({fields: [ {name: field.name} ]}));
-        Array.prototype.push.apply(layout.rows, customFields);
-        return layout;
-      }
-    );
+    return cpSvc.getLayoutFor(cpId, 'specimen', 'specimen.extensionDetail', addEditLayout.layout, specimenFields);
   }
 
   async getCustomFieldsForm(cpId) {

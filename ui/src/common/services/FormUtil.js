@@ -53,9 +53,15 @@ class FormUtil {
     }
 
     return formDef.rows.map(
-      (row) => row.map(
-        (field) => {
-          let fieldSchema = {source: 'de', ...fieldFactory.getFieldSchema(field, namePrefix)};
+      (row, rowIdx) => row.map(
+        (field, colIdx) => {
+          let fieldSchema = {
+            source: 'de',
+            row: rowIdx,
+            column: colIdx,
+            ...fieldFactory.getFieldSchema(field, namePrefix)
+          };
+
           if (fieldSchema.type == 'subform') {
             fieldSchema.fields.forEach(field => field.source = 'de');
           }

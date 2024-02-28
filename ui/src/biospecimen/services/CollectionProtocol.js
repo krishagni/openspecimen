@@ -1,6 +1,8 @@
 
+import formUtil from '@/common/services/FormUtil.js';
 import http from '@/common/services/HttpClient.js';
 import i18n from '@/common/services/I18n.js';
+import util from '@/common/services/Util.js';
 
 class CollectionProtocol {
 
@@ -84,6 +86,116 @@ class CollectionProtocol {
 
     const sysWf = await this.getWorkflow(-1, wfName);
     return sysWf && sysWf[propName];
+  }
+
+  async getDictFor(cpId, objAlias, customFieldsAlias, defSchema, customFieldsFormFn) {
+    objAlias += '.';
+    if (customFieldsAlias) {
+      customFieldsAlias += '.attrsMap.';
+    }
+
+    defSchema = defSchema || {};
+    defSchema.fields = defSchema.fields || [];
+    return this.getWorkflow(cpId, 'dictionary').then(
+      (dict) => {
+        dict = dict || {};
+
+        let fields = (dict.fields || []).filter(field => field.name.indexOf(objAlias) == 0);
+        if (fields.length > 0) {
+          fields = formUtil.sdeFieldsToDict(fields);
+        } else {
+          fields = util.clone(defSchema.fields);
+        }
+
+        if (fields.some(field => field.name.indexOf(customFieldsAlias) == 0) || !customFieldsFormFn) {
+          return fields;
+        }
+
+        return customFieldsFormFn(cpId).then(
+          (formDef) => {
+            let customFields = formUtil.deFormToDict(formDef, customFieldsAlias);
+            return fields.concat(customFields);
+          }
+        );
+      }
+    );
+  }
+
+  async getLayoutFor(cpId, objAlias, customFieldsAlias, defLayout, objFields) {
+    objAlias += '.';
+    if (customFieldsAlias) {
+      customFieldsAlias += '.attrsMap.';
+    }
+
+    return this.getWorkflow(cpId, 'dictionary').then(
+      (dict) => {
+        dict = dict || {};
+
+        const layout = util.clone(dict.layout || []);
+
+        const result = {rows: []};
+        for (let section of layout) {
+          for (let row of section.rows) {
+            const outputRow = row.filter(field => field.indexOf(objAlias) == 0)
+              .map(field => ({name: field}));
+            if (outputRow.length > 0) {
+              result.rows.push({fields: outputRow});
+            }
+          }
+        }
+
+        if (result.rows.length == 0) {
+          //
+          // CP or system level dictionary has no layout
+          //
+          if (dict.fields && dict.fields.some(field => field.name.indexOf(objAlias) == 0)) {
+            //
+            // CP or system level dictionary configured
+            // use the dictionary to create a default layout
+            //
+            result.rows = objFields.map(field => ({fields: [ {name: field.name} ]}));
+          } else {
+            //
+            // no dictionary configured, use the default layout shipped with the app
+            //
+            result.rows = util.clone((defLayout && defLayout.rows) || []);
+          }
+        }
+
+        const rows = result.rows;
+        if (rows.some(row => row.fields.some(field => field.name.indexOf(customFieldsAlias) == 0))) {
+          //
+          // layout has one or more custom fields. use it
+          //
+          return result;
+        }
+
+
+        //
+        // append the custom fields to the configured or default layout
+        //
+        const customFieldRows = {};
+        for (let field of (objFields || [])) {
+          if (field.name.indexOf(customFieldsAlias) != 0) {
+            continue;
+          }
+
+          const {row, column} = field;
+          if (!customFieldRows[row]) {
+            customFieldRows[row] = [];
+          }
+
+          customFieldRows[row][column] = {name: field.name};
+        }
+
+        for (let rowIdx of Object.keys(customFieldRows).sort()) {
+          const fields = customFieldRows[rowIdx].filter(f => !!f);
+          result.rows.push({fields});
+        }
+
+        return result;
+      }
+    );
   }
 
   async loadWorkflows(cpId, wfName) {
