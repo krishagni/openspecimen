@@ -1,4 +1,5 @@
 
+import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 import util from '@/common/services/Util.js';
 
@@ -221,6 +222,29 @@ class FormUtil {
         return field;
       }
     );
+  }
+
+  setDefaultValues(formSchema, formData) {
+    for (let {fields} of formSchema.rows) {
+      for (let field of fields) {
+        if (field.type == 'subform' || field.defaultValue == undefined || field.defaultValue == null) {
+          continue;
+        }
+
+        let value = field.defaultValue;
+        if (value == 'current_date') {
+          value = new Date();
+        } else if (value == 'current_user') {
+          if (field.name.indexOf('extensionDetail') != -1) {
+            value = window.osUi.currentUser.id;
+          } else {
+            value = window.osUi.currentUser;
+          }
+        }
+
+        exprUtil.setValue(formData, field.name, value);
+      }
+    }
   }
 
   _createCustomFieldsMap(attrs, useDisplayValue) {

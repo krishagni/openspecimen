@@ -75,7 +75,14 @@ export default {
   created() {
     const cpCtx = this.cpViewCtx;
     const promises = [ cpCtx.getSpecimenDict(), cpCtx.getSpecimenAddEditLayout() ];
-    Promise.all(promises).then(([fields, layout]) => this.ctx.addEditFs = formUtil.getFormSchema(fields, layout));
+    Promise.all(promises).then(
+      ([fields, layout]) => {
+        const formSchema = this.ctx.addEditFs = formUtil.getFormSchema(fields, layout);
+        if (!this.specimen.id || this.specimen.id <= 0) {
+          formUtil.setDefaultValues(formSchema, this.dataCtx);
+        }
+      }
+    );
   },
 
   computed: {

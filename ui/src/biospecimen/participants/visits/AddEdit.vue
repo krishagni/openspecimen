@@ -73,7 +73,14 @@ export default {
   created() {
     const cpCtx = this.cpViewCtx;
     const promises = [ cpCtx.getVisitDict(), cpCtx.getVisitAddEditLayout() ];
-    Promise.all(promises).then(([fields, layout]) => this.ctx.addEditFs = formUtil.getFormSchema(fields, layout));
+    Promise.all(promises).then(
+      ([fields, layout]) => {
+        const formSchema = this.ctx.addEditFs = formUtil.getFormSchema(fields, layout)
+        if (!this.visit.id || this.visit.id <= 0) {
+          formUtil.setDefaultValues(formSchema, this.dataCtx);
+        }
+      }
+    );
   },
 
   computed: {

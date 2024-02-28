@@ -174,7 +174,11 @@ export default {
 
     Promise.all(promises).then(
       ([fields, layout, twoStep, addOnLookupFail, lockedFields, cpEvents, eventsRules]) => {
-        this.ctx.addEditFs = formUtil.getFormSchema(fields, layout);
+        const formSchema = this.ctx.addEditFs = formUtil.getFormSchema(fields, layout);
+        if (!cpr.id || cpr.id <= 0) {
+          formUtil.setDefaultValues(formSchema, this.dataCtx);
+        }
+
         this.ctx.twoStep = twoStep;
         this.ctx.addPatientOnLookupFail = addOnLookupFail;
         this.ctx.lockedFields = lockedFields;
