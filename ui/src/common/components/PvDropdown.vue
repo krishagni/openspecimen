@@ -63,7 +63,18 @@ export default {
           return await cache[key];
         },
         selectProp: this.selectProp || 'id',
-        displayProp: 'value'
+        displayProp: (pv) => {
+          if (typeof pv == 'string') {
+            return pv;
+          }
+
+          let result = pv.value;
+          if (pv.conceptCode) {
+            result += ' (' + pv.conceptCode + ')';
+          }
+
+          return result;
+        }
       }
     }
   },

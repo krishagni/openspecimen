@@ -245,7 +245,17 @@ export default {
 
     getDisplayValue() {
       const options = this.getSelectedOptions();
-      return options.map(option => this.displayProp ? option[this.displayProp] : option).join(', ');
+      return options.map(
+        option => {
+          if (typeof this.displayProp == 'function') {
+            return this.displayProp(option);
+          } else if (typeof this.displayProp == 'string') {
+            return option[this.displayProp];
+          } else {
+            return option;
+          }
+        }
+      ).join(', ');
     }
   },
 
