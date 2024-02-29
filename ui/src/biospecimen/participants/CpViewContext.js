@@ -123,7 +123,7 @@ export default class CpViewContext {
   getOccurredVisitsTabFields() {
     return this.getVisitsTab().then(
       (visitsTab) => {
-        const tabFields = visitsTab.occurred || [];
+        const tabFields = util.clone(visitsTab.occurred || []);
         if (tabFields.length == 0) {
           Array.prototype.push.apply(tabFields, visitSvc.getDefaultOccurredVisitsTabFields());
         }
@@ -156,7 +156,7 @@ export default class CpViewContext {
   getMissedVisitsTabFields() {
     return this.getVisitsTab().then(
       (visitsTab) => {
-        const tabFields = visitsTab.missed || [];
+        const tabFields = util.clone(visitsTab.missed || []);
         if (tabFields.length == 0) {
           Array.prototype.push.apply(tabFields, visitSvc.getDefaultMissedVisitsTabFields());
         }
@@ -169,7 +169,7 @@ export default class CpViewContext {
   getPendingVisitsTabFields() {
     return this.getVisitsTab().then(
       (visitsTab) => {
-        const tabFields = visitsTab.pending || [];
+        const tabFields = util.clone(visitsTab.pending || []);
         if (tabFields.length == 0) {
           Array.prototype.push.apply(tabFields, visitSvc.getDefaultPendingVisitsTabFields());
         }
