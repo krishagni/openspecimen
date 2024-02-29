@@ -186,7 +186,7 @@ export default {
     getValue: function(object, field) {
       let value = undefined;
 
-      if (field.source == 'de') {
+      if (field.source == 'de' || field.name.indexOf('extensionDetail') >= 0) {
         value = exprUtil.getValue(object, field.name);
         if (value != null && value != undefined && value != '') {
           switch (field.type) {
