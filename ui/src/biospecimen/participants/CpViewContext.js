@@ -2,9 +2,10 @@
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc from '@/biospecimen/services/Cpr.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
+import routerSvc from '@/common/services/Router.js';
+import settingSvc from '@/common/services/Setting.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
-import settingSvc from '@/common/services/Setting.js';
 import util from '@/common/services/Util.js';
 
 import matchingTab from '@/biospecimen/schemas/participants/matching-participants.js';
@@ -126,6 +127,8 @@ export default class CpViewContext {
         const tabFields = util.clone(visitsTab.occurred || []);
         if (tabFields.length == 0) {
           Array.prototype.push.apply(tabFields, visitSvc.getDefaultOccurredVisitsTabFields());
+        } else if (!tabFields[0].href) {
+          tabFields[0].href = ({rowObject: {visit}}) => this._getVisitUrl(visit)
         }
 
         tabFields.push({
@@ -159,6 +162,8 @@ export default class CpViewContext {
         const tabFields = util.clone(visitsTab.missed || []);
         if (tabFields.length == 0) {
           Array.prototype.push.apply(tabFields, visitSvc.getDefaultMissedVisitsTabFields());
+        } else if (!tabFields[0].href) {
+          tabFields[0].href = ({rowObject: {visit}}) => this._getVisitUrl(visit)
         }
 
         return tabFields;
@@ -172,6 +177,8 @@ export default class CpViewContext {
         const tabFields = util.clone(visitsTab.pending || []);
         if (tabFields.length == 0) {
           Array.prototype.push.apply(tabFields, visitSvc.getDefaultPendingVisitsTabFields());
+        } else if (!tabFields[0].href) {
+          tabFields[0].href = ({rowObject: {visit}}) => this._getVisitUrl(visit)
         }
 
         return tabFields;
@@ -316,5 +323,17 @@ export default class CpViewContext {
 
     Array.prototype.push.apply(result, forms);
     return result;
+  }
+
+  _getVisitUrl(visit) {
+    const {cpId, eventId, cprId, id} = visit;
+    const route = routerSvc.getCurrentRoute();
+    const params = { cpId, cprId, visitId: id || -1};
+
+    if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
+      return routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', params, {eventId});
+    } else {
+      return routerSvc.getUrl('VisitDetail.Overview', params, {eventId});
+    }
   }
 }
