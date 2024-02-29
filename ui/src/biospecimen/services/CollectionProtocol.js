@@ -153,7 +153,9 @@ class CollectionProtocol {
             // CP or system level dictionary configured
             // use the dictionary to create a default layout
             //
-            result.rows = objFields.map(field => ({fields: [ {name: field.name} ]}));
+            result.rows = objFields
+              .filter(field => field.name.indexOf(customFieldsAlias) == -1)
+              .map(field => ({fields: [ {name: field.name} ]}));
           } else {
             //
             // no dictionary configured, use the default layout shipped with the app

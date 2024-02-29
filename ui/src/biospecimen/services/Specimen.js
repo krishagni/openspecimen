@@ -174,7 +174,10 @@ class Specimen {
   }
 
   async getDict(cpId) {
-    return cpSvc.getDictFor(cpId, 'specimen', 'specimen.extensionDetail', specimenSchema, this.getCustomFieldsForm);
+    return cpSvc.getDictFor(
+      cpId, 'specimen', 'specimen.extensionDetail',
+      specimenSchema, this.getCustomFieldsForm
+    ).then(fields => fields.filter(field => field.name.indexOf('specimen.events') == -1));
   }
 
   async getLayout(cpId, specimenFields) {
