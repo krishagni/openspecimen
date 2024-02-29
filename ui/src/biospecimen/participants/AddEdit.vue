@@ -183,13 +183,16 @@ export default {
         this.ctx.addPatientOnLookupFail = addOnLookupFail;
         this.ctx.lockedFields = lockedFields;
 
-        let lookupFields = fields.filter(field => field.lookupParticipant == true);
+        let lookupFields = fields.filter(field => field.lookupParticipant == true || field.participantLookup == true);
         if (lookupFields.length == 0 && twoStep) {
           lookupFields = cprSvc.getDefaultLookupFields(fields);
         }
 
         this.ctx.lookupFields = lookupFields;
         this.ctx.lookupFs = {rows: lookupFields.map(field => ({ fields: [field] }))};
+        if (lookupFields.length == 0) {
+          this.ctx.twoStep = false;
+        }
 
         this.ctx.allCpEvents = cpEvents;
         this.ctx.eventsRules = eventsRules;
