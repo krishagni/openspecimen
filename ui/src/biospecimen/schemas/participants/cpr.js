@@ -20,7 +20,7 @@ export default {
         }
       },
       "showWhen": "!!cpr.ppid || !cp.ppidFmt || cp.manualPpidEnabled",
-      "disableWhen": "!!cpr.ppid"
+      "disableWhen": "cpr.id > 0 && !!cpr.ppid"
     },
     { 
       "type": "site",
