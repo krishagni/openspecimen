@@ -62,7 +62,7 @@ export default {
 
           return await cache[key];
         },
-        selectProp: this.selectProp,
+        selectProp: this.selectProp || 'id',
         displayProp: 'value'
       }
     }

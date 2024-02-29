@@ -273,6 +273,12 @@ export default {
   computed: {
     selected: {
       get() {
+        const {selectPropType: type} = this.listSource;
+        const mv = this.modelValue;
+        if (type == 'numeric' && typeof mv == 'string' && mv.length > 0 && !isNaN(mv)) {
+          return +mv;
+        }
+
         return this.modelValue;
       },
 

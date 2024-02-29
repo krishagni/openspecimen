@@ -177,12 +177,21 @@ class CollectionProtocol {
         // append the custom fields to the configured or default layout
         //
         const customFieldRows = {};
+        let lastRow = 1000, lastCol = 1000;
         for (let field of (objFields || [])) {
           if (field.name.indexOf(customFieldsAlias) != 0) {
             continue;
           }
 
-          const {row, column} = field;
+          let {row, column} = field;
+          if (!row && row != 0) {
+            row = lastRow++;
+          }
+
+          if (!column && column != 0) {
+            column = lastCol++;
+          }
+
           if (!customFieldRows[row]) {
             customFieldRows[row] = [];
           }
@@ -190,7 +199,7 @@ class CollectionProtocol {
           customFieldRows[row][column] = {name: field.name};
         }
 
-        for (let rowIdx of Object.keys(customFieldRows).sort()) {
+        for (let rowIdx of Object.keys(customFieldRows).sort((idx1, idx2) => +idx1 - +idx2)) {
           const fields = customFieldRows[rowIdx].filter(f => !!f);
           result.rows.push({fields});
         }
