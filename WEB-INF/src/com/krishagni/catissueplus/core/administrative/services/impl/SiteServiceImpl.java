@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +31,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
-import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
-import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -42,7 +39,6 @@ import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
-import com.krishagni.rbac.common.errors.RbacErrorCode;
 import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.service.RbacService;
 
@@ -78,15 +74,25 @@ public class SiteServiceImpl implements SiteService, ObjectAccessor, Initializin
 		try {
 			SiteListCriteria listCrit = req.getPayload();			
 			List<Site> sites = null;
-			
+
+			Function<SiteListCriteria, List<Site>> sitesFn = null;
 			if (AuthUtil.isAdmin()) {
 				sites = daoFactory.getSiteDao().getSites(listCrit);
+				sitesFn = daoFactory.getSiteDao()::getSites;
 			} else if (listCrit.listAll() && isAllSitesAllowed()) {
 				sites = daoFactory.getSiteDao().getSites(listCrit);
+				sitesFn = daoFactory.getSiteDao()::getSites;
 			} else {
 				sites = getAccessibleSites(listCrit);
+				sitesFn = this::getAccessibleSites;
 			}
-			
+
+			if (CollectionUtils.isEmpty(sites) && StringUtils.isNumeric(listCrit.query())) {
+				// The site custom field stores site ID instead of name
+				listCrit.ids(Collections.singletonList(Long.parseLong(listCrit.query())));
+				sites = sitesFn.apply(listCrit.query(null));
+			}
+
 			List<SiteSummary> result = SiteSummary.from(sites);
 			if (listCrit.includeStat()) {
 				addSiteStats(result);
