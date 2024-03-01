@@ -97,7 +97,7 @@
                     @update:model-value="handleInput(itemIdx, field, itemModel, fieldIdx)"
                     v-if="!itemModel.hideFields[field.name]">
                   </component>
-                  <os-span v-model="ctx.emptyString" :ref="'osField-' + field.name" v-else />
+                  <os-span v-model="itemModel[field.name]" :ref="'osField-' + field.name" v-else />
                 </div>
                 <div v-if="!itemModel.hideFields[field.name] &&
                   v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
@@ -273,14 +273,18 @@ export default {
 
         for (let field of this.fields) {
           if (field.showCellWhen) {
+            let show = true;
             if (typeof field.showCellWhen == 'function') {
-              if (!field.showCellWhen(item)) {
-                model.hideFields[field.name] = true;
+              show = field.showCellWhen(item);
+            } else {
+              show = exprUtil.eval(item, field.showCellWhen);
+            }
+
+            if (!show) {
+              model.hideFields[field.name] = true;
+              if (!field.showValue) {
                 continue;
               }
-            } else if (!exprUtil.eval(item, field.showCellWhen)) {
-              model.hideFields[field.name] = true;
-              continue;
             }
           }
 
