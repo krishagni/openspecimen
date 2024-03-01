@@ -55,7 +55,7 @@ export default {
 
   computed: {
     occurredVisits: function() {
-      return (this.visits || []).filter(visit => visit.status == 'Complete').map(visit => ({visit}));
+      return (this.visits || []).filter(visit => visit.status == 'Complete').map(visit => ({cpr: this.cpr, visit}));
     }
   },
 

@@ -185,6 +185,9 @@ export default {
 
     getValue: function(object, field) {
       let value = undefined;
+      if (field.name && field.name.indexOf('calc') == 0 && field.displayExpr) {
+        return exprUtil.eval({...object, fns: util.fns()}, field.displayExpr);
+      }
 
       if (field.source == 'de' || field.name.indexOf('extensionDetail') >= 0) {
         value = exprUtil.getValue(object, field.name);

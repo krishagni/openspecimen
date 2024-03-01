@@ -44,16 +44,16 @@ export default class CpViewContext {
     return this.cpEventsQ;
   }
 
-  getCprDict() {
+  getCprDict(dataEntry) {
     if (!this.cprDictQ) {
       this.cprDictQ = cprSvc.getDict(this.cpId);
     }
 
-    return this.cprDictQ;
+    return this.cprDictQ.then(fields => dataEntry ? fields.filter(field => field.name.indexOf('calc') != 0) : fields);
   }
 
   getCprAddEditLayout() {
-    return this.getCprDict().then(dict => cprSvc.getLayout(this.cpId, dict));
+    return this.getCprDict(true).then(dict => cprSvc.getLayout(this.cpId, dict));
   }
 
   isTwoStepEnabled() {
@@ -96,16 +96,16 @@ export default class CpViewContext {
     return [];
   }
 
-  getVisitDict() {
+  getVisitDict(dataEntry) {
     if (!this.visitDictQ) {
       this.visitDictQ = visitSvc.getDict(this.cpId);
     }
 
-    return this.visitDictQ;
+    return this.visitDictQ.then(fields => dataEntry ? fields.filter(field => field.name.indexOf('calc') != 0) : fields);
   }
 
   async getVisitAddEditLayout() {
-    return this.getVisitDict().then(dict => visitSvc.getLayout(this.cpId, dict));
+    return this.getVisitDict(true).then(dict => visitSvc.getLayout(this.cpId, dict));
   }
 
   getVisitsTab() {
@@ -129,6 +129,12 @@ export default class CpViewContext {
           Array.prototype.push.apply(tabFields, visitSvc.getDefaultOccurredVisitsTabFields());
         } else if (!tabFields[0].href) {
           tabFields[0].href = ({rowObject: {visit}}) => this._getVisitUrl(visit)
+        }
+
+        for (let field of tabFields) {
+          if (field.name.indexOf('calc') == 0 && field.displayExpr) {
+            field.value = (row) => exprUtil.eval({...row, fns: util.fns()}, field.displayExpr);
+          }
         }
 
         tabFields.push({
@@ -224,16 +230,16 @@ export default class CpViewContext {
     return cp.storeSprEnabled;
   }
 
-  getSpecimenDict() {
+  getSpecimenDict(dataEntry) {
     if (!this.specimenDictQ) {
       this.specimenDictQ = specimenSvc.getDict(this.cpId);
     }
 
-    return this.specimenDictQ;
+    return this.specimenDictQ.then(fields => dataEntry ? fields.filter(field => field.name.indexOf('calc') != 0) : fields);
   }
 
   async getSpecimenAddEditLayout() {
-    return this.getSpecimenDict().then(dict => specimenSvc.getLayout(this.cpId, dict));
+    return this.getSpecimenDict(true).then(dict => specimenSvc.getLayout(this.cpId, dict));
   }
 
   async getSpecimenEventForms(context) {

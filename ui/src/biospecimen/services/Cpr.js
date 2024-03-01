@@ -54,7 +54,7 @@ class CollectionProtocolRegistration {
   }
 
   async getDict(cpId) {
-    return cpSvc.getDictFor(cpId, 'cpr', 'cpr.participant.extensionDetail', cprSchema, this.getCustomFieldsForm);
+    return cpSvc.getDictFor(cpId, ['cpr', 'calcCpr'], 'cpr.participant.extensionDetail', cprSchema, this.getCustomFieldsForm);
   }
 
   async getLayout(cpId, cprFields) {

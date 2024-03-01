@@ -163,7 +163,7 @@ export default {
 
     const cpCtx = this.cpViewCtx;
     const promises = [
-      cpCtx.getCprDict(),
+      cpCtx.getCprDict(true),
       cpCtx.getCprAddEditLayout(),
       cpCtx.isTwoStepEnabled(),
       cpCtx.isAddPatientOnLookupFailEnabled(),

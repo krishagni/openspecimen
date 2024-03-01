@@ -34,6 +34,14 @@ export default {
       return noValue || '-';
     }
 
-    return format(new Date(date), fmt);
+    return format(new Date(date), fmt || ui.global.locale.dateFmt);
+  },
+
+  formatDateTime(date, fmt, noValue) {
+    if (!date) {
+      return noValue || '-';
+    }
+
+    return format(new Date(date), fmt || ui.global.locale.dateTimeFmt);
   }
 }

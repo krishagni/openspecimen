@@ -26,12 +26,13 @@
 <script>
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
 import formUtil from '@/common/services/FormUtil.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'specimens'],
+  props: ['cp', 'cpr', 'visit', 'specimens'],
 
   emits: ['reload'],
 
@@ -55,7 +56,10 @@ export default {
         for (let field of this.treeCfg.fields) {
           if (field.type == 'specimen-description') {
             field.showStatus = true;
-            break;
+          }
+
+          if (field.name.indexOf('calc') == 0 && field.displayExpr) {
+            field.value = (row) => exprUtil.eval({...row, fns: util.fns()}, field.displayExpr)
           }
         }
       }
@@ -120,7 +124,7 @@ export default {
         formUtil.createCustomFieldsMap(specimen, true);
 
         const uid = parentUid !== undefined && parentUid !== null ? parentUid + '_' + idx : idx;
-        const item = {specimen, depth, expanded: true, show: true, uid, parentUid};
+        const item = {cpr: this.cpr, visit: this.visit, specimen, depth, expanded: true, show: true, uid, parentUid};
         item.hasChildren = (specimen.children || []).length > 0;
         result.push(item);
         ++idx;

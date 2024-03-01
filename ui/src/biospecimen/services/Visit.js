@@ -58,7 +58,8 @@ class Visit {
   }
 
   async getDict(cpId) {
-    const fields = await cpSvc.getDictFor(cpId, 'visit', 'visit.extensionDetail', visitSchema, this.getCustomFieldsForm);
+    const aliases = ['visit', 'calcVisit'];
+    const fields = await cpSvc.getDictFor(cpId, aliases, 'visit.extensionDetail', visitSchema, this.getCustomFieldsForm);
 
     const cond = "visit.status != 'Missed Collection' && visit.status != 'Not Collected'";
     for (let field of fields) {

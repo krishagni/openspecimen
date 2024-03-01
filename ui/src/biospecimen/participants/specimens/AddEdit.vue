@@ -74,7 +74,7 @@ export default {
 
   created() {
     const cpCtx = this.cpViewCtx;
-    const promises = [ cpCtx.getSpecimenDict(), cpCtx.getSpecimenAddEditLayout() ];
+    const promises = [ cpCtx.getSpecimenDict(true), cpCtx.getSpecimenAddEditLayout() ];
     Promise.all(promises).then(
       ([fields, layout]) => {
         const formSchema = this.ctx.addEditFs = formUtil.getFormSchema(fields, layout);

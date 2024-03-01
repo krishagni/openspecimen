@@ -20,7 +20,8 @@
     <os-grid-column width="8">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
-      <SpecimenTree :cp="ctx.cp" :specimens="ctx.specimens" @reload="reloadSpecimens" v-if="ctx.cp.id > 0" />
+      <SpecimenTree :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimens="ctx.specimens"
+        @reload="reloadSpecimens" v-if="ctx.cp.id > 0" />
     </os-grid-column>
 
     <os-grid-column width="4">
@@ -54,6 +55,8 @@ export default {
     return {
       ctx: {
         cp: {},
+
+        cpr: this.cpr,
 
         visit: {},
 

@@ -2,6 +2,7 @@
 import { format } from 'date-fns';
 import useClipboard from 'vue-clipboard3'
 
+import dateFormatter from '@/common/filters/DateFormatter.js';
 import alertSvc from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
@@ -400,6 +401,10 @@ class Util {
     return new Promise((resolve) => resolve(result));
   }
 
+  fns() {
+    return this._fns;
+  }
+
   _getEscapeMap(str) {
     let map = {}, insideSgl = false, insideDbl = false;
     let lastIdx = -1;
@@ -437,6 +442,137 @@ class Util {
     }
 
     return token;
+  }
+
+  _fns = {
+    set: function(object, expr, value) {
+      exprUtil.setValue(object, expr, value)
+      return object;
+    },
+
+    get: function(object, expr) {
+      return exprUtil.eval(object, expr);
+    },
+
+    ifnull: function(cond, truth, falsy) {
+      return (cond == null || cond == undefined) ? truth : falsy;
+    },
+
+    ifNull: function(cond, truth, falsy) {
+      return (cond == null || cond == undefined) ? truth : falsy;
+    },
+
+    ifNotNull: function(cond, truth, falsy) {
+      return (cond !== null && cond !== undefined) ? truth : falsy;
+    },
+
+    split: function(inputStr, regex, limit) {
+      return (inputStr || '' ).split(regex, limit);
+    },
+
+    join: function(inputStrs, separator) {
+      return (inputStrs || []).join(separator);
+    },
+
+    concatList: function(list, expr, separator) {
+      return (list || []).map(e => exprUtil.eval(e, expr)).filter(e => !!e).join(separator);
+    },
+
+    concat: function() {
+      var result = '';
+      for (var i = 0; i < arguments.length; ++i) {
+        if (!arguments[i]) {
+          continue;
+        }
+
+        if (result.length > 0) {
+          result += ' ';
+        }
+
+        result += arguments[i];
+      }
+
+      return result;
+    },
+
+    minValue: function(coll, expr) {
+      let minValue = null;
+      for (let idx = 0; idx < coll.length; ++idx) {
+        const value = exprUtil.eval(coll[idx], expr);
+        if (idx == 0 || (value != null && value != undefined && value < minValue)) {
+          minValue = value;
+        }
+      }
+
+      return minValue;
+    },
+
+    toDateStr: function(input, fmt) {
+      return dateFormatter.formatDate(input, fmt);
+    },
+
+    toDateTimeStr: function(input, fmt) {
+      return dateFormatter.formatDateTime(input, fmt);
+    },
+
+    ageInYears: function(input, today) {
+      return this._dateDiffInYears(input, (today && new Date(today)) || new Date());
+    },
+
+    now: function() {
+      return new Date().getTime();
+    },
+
+    currentTime: function() {
+      return new Date().getTime();
+    },
+
+    dateDiffInYears: function(d1, d2) {
+      return this._dateDiffInYears(d1, d2);
+    },
+
+    dateDiffInDays: function(d1, d2) {
+      return Math.floor(this._dateDiffInMs(d1, d2) / (24 * 60 * 60 * 1000));
+    },
+
+    dateDiffInHours: function(d1, d2) {
+      return Math.floor(this._dateDiffInMs(d1, d2) / (60 * 60 * 1000));
+    },
+
+    dateDiffInMinutes: function(d1, d2, ignoreSeconds) {
+      return Math.floor(this._dateDiffInMs(d1, d2, ignoreSeconds) / (60 * 1000));
+    },
+
+    dateDiffInSeconds: function(d1, d2) {
+      return Math.floor(this._dateDiffInMs(d1, d2) /  1000);
+    },
+
+    _toUtc: function(dt, ignSecs) {
+      const seconds = ignSecs ? 0 : dt.getSeconds();
+      const ms      = ignSecs ? 0 : dt.getMilliseconds();
+
+      return Date.UTC(
+        dt.getFullYear(), dt.getMonth(), dt.getDate(),
+        dt.getHours(), dt.getMinutes(), seconds, ms
+      );
+    },
+
+    _dateDiffInMs: function(i1, i2, ignSecs) {
+      return this._toUtc(new Date(i2), ignSecs) - this._toUtc(new Date(i1), ignSecs);
+    },
+
+    _dateDiffInYears: function(i1, i2) {
+      const d1 = new Date(i1);
+      const d2 = new Date(i2);
+      let diff = d2.getFullYear() - d1.getFullYear();
+
+      const m = d2.getMonth() - d1.getMonth();
+      if (m < 0 || (m === 0 && d2.getDate() < d1.getDate())) {
+        --diff;
+      }
+
+      return diff;
+    }
   }
 }
 

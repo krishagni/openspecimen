@@ -72,7 +72,7 @@ export default {
 
   created() {
     const cpCtx = this.cpViewCtx;
-    const promises = [ cpCtx.getVisitDict(), cpCtx.getVisitAddEditLayout() ];
+    const promises = [ cpCtx.getVisitDict(true), cpCtx.getVisitAddEditLayout() ];
     Promise.all(promises).then(
       ([fields, layout]) => {
         const formSchema = this.ctx.addEditFs = formUtil.getFormSchema(fields, layout)

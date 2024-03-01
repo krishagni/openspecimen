@@ -89,7 +89,13 @@ class CollectionProtocol {
   }
 
   async getDictFor(cpId, objAlias, customFieldsAlias, defSchema, customFieldsFormFn) {
-    objAlias += '.';
+    let objAliases = [];
+    if (typeof objAlias == 'string') {
+      objAliases.push(objAlias + '.');
+    } else if (objAlias instanceof Array) {
+      objAliases = objAlias.map(alias => alias + '.');
+    }
+
     if (customFieldsAlias) {
       customFieldsAlias += '.attrsMap.';
     }
@@ -100,7 +106,7 @@ class CollectionProtocol {
       (dict) => {
         dict = dict || {};
 
-        let fields = (dict.fields || []).filter(field => field.name.indexOf(objAlias) == 0);
+        let fields = (dict.fields || []).filter(field => objAliases.some(alias => field.name.indexOf(alias) == 0));
         if (fields.length > 0) {
           fields = formUtil.sdeFieldsToDict(fields);
         } else {
