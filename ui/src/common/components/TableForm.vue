@@ -528,9 +528,15 @@ export default {
       }
 
       for (let idx = 0; idx < this.itemModels.length; ++idx) {
+        if (this.itemModels[idx].hideFields[field.name]) {
+          continue;
+        }
+
         this.itemModels[idx][field.name] = value;
         this.handleInput(idx, field, this.itemModels[idx]);
       }
+
+      this.ctx.selects[field.name] = value;
     },
 
     updateSelects: function() {
@@ -539,7 +545,9 @@ export default {
           continue;
         }
 
-        this.ctx.selects[field.name] = this.itemModels.every(item => item[field.name] == true);
+        this.ctx.selects[field.name] = this.itemModels.every(
+          item => item.hideFields[field.name] || item[field.name] == true
+        );
       }
     },
 
