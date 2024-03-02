@@ -391,27 +391,11 @@ export default {
       this.$refs.list.toggleShowFilters();
     },
 
-    navToBulkImport: function() {
-      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/import-cp-objs');
-    },
-
-    navToViewPastImports: function() {
-      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/import-cp-jobs');
-    },
-
-    navToExport: function() {
-      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/export-cp-objs');
-    },
-
     generateCpReport: function() {
       const status = cpSvc.generateCpReport(this.ctx.cp.id);
       if (status) {
         alertsSvc.success({code: 'participants.preparing_report', args: this.ctx.cp});
       }
-    },
-
-    navToCpDetail: function() {
-      routerSvc.ngGoto('cps/' + this.ctx.cp.id + '/overview');
     },
 
     wrapRefs: function(ctxt) {
@@ -423,16 +407,15 @@ export default {
       options.push({
         icon: 'upload',
         caption: this.$t('participants.import_biospecimen_data'),
-        onSelect: this.navToBulkImport
+        url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-objs')
       });
 
       options.push({
         icon: 'list',
         caption: this.$t('participants.view_past_imports'),
-        onSelect: this.navToViewPastImports
+        url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-jobs')
       });
 
-      console.log(this.$t('common.buttons.export'));
       let divider = true;
       if (divider) {
         options.push({divider: true});
@@ -442,7 +425,7 @@ export default {
       options.push({
         icon: 'download',
         caption: this.$t('common.buttons.export'),
-        onSelect: this.navToExport
+        url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/export-cp-objs')
       });
 
       divider = true;
@@ -460,7 +443,7 @@ export default {
       options.push({
         icon: 'calendar-alt',
         caption: this.$t('participants.view_cp_details'),
-        onSelect: this.navToCpDetail
+        url: routerSvc.ngUrl('cps/' + this.ctx.cp.id + '/overview')
       });
 
       const promise = new Promise((resolve) => {
@@ -475,10 +458,13 @@ export default {
               ([answer]) => {
                 --count;
                 if (answer) {
+                  const url = typeof option.url == 'function' ? option.url(this.wrapRefs(ctxt), ctxt) : option.url;
                   options.push({
                     icon: option.icon,
                     caption: option.caption,
+                    url: url,
                     onSelect: () => {
+                      if (url) return;
                       option.exec(this.wrapRefs(ctxt), ctxt)
                     }
                   });
@@ -490,10 +476,13 @@ export default {
               }
             );
           } else {
+            const url = typeof option.url == 'function' ? option.url(this.wrapRefs(ctxt), ctxt) : option.url;
             options.push({
               icon: option.icon,
               caption: option.caption,
+              url: url,
               onSelect: () => {
+                if (url) return;
                 option.exec(this.wrapRefs(ctxt), ctxt)
               }
             });
