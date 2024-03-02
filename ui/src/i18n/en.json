@@ -899,6 +899,7 @@
     "delete_more_time": "Deletion of selected participants is taking more time than anticipated. An email notification will be sent to you on completion of delete.",
     "delete_selected": "Are you sure you want to delete the selected participants along with their visits and specimens data?",
     "download_path_report": "Download Path Report",
+    "draft_watermark": "DRAFT",
     "email_address": "Email Address",
     "empi": "Master Patient Index",
     "erase_phi_data": "Erase Participant PHI Data",

@@ -55,14 +55,9 @@ export default {
       const specimen = this.object;
       let url = '';
       if (specimen) {
-        const route = routerSvc.getCurrentRoute();
         const params = {...specimen, specimenId: specimen.id || -1};
         const query  = {view: this.$route.query.view};
-        if (route.name && route.name.indexOf('ParticipantsListItem') >= 0) {
-          url = routerSvc.getUrl('ParticipantsListItemSpecimenDetail.Overview', params, query);
-        } else {
-          url = routerSvc.getUrl('SpecimenDetail.Overview', params, query);
-        }
+        url = routerSvc.getUrl('ParticipantsListItemSpecimenDetail.Overview', params, query);
       }
 
       const currentView = window.location.href;
