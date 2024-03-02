@@ -187,6 +187,20 @@ export default {
   margin-left: -12px;
 }
 
+.os-container-layout :deep(.occupant .specimen-icon.read-error) {
+  background: #a0a0a0;
+  color: #fff;
+}
+
+.os-container-layout :deep(.occupant .specimen-icon.read-error:after) {
+  content: '?';
+  display: block;
+  color: red;
+  font-size: 60px;
+  font-weight: 200;
+  margin-top: -60px;
+}
+
 .os-container-layout :deep(.occupant .name) {
   width: 100%;
   text-overflow: ellipsis;

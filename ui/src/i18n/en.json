@@ -451,6 +451,7 @@
     "box_name_not_specified": "Box name not specified.",
     "box_details": "Box Details",
     "bulk_deleted": "Containers deleted successfully.",
+    "cannot_read_barcodes": "Could not detect barcode of the specimens at the following locations: {locations}.",
     "capacity": "Capacity",
     "check_in": "Checkin {name}",
     "check_in_button": "Checkin",
