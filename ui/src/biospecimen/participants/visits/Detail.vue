@@ -12,11 +12,11 @@
         <div class="accessories">
           <os-tag :value="status" :rounded="true" :type="statusType" />
           <os-copy-link size="small"
-            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id},
-              query: {eventId: visit.eventId}}" />
-          <os-new-tab size="small"
-            :route="{name: 'VisitDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id},
-              query: {eventId: visit.eventId}}" />
+            :route="{
+              name: 'ParticipantsListItemVisitDetail.Overview',
+              params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id},
+              query: {eventId: visit.eventId}
+            }" />
         </div>
       </span>
     </os-page-head>

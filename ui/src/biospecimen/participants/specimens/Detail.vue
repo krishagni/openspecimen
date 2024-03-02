@@ -17,11 +17,6 @@
             name: 'ParticipantsListItemSpecimenDetail.Overview',
             params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id, specimenId: specimen.id},
             query: {eventId: visit.eventId, srId: specimen.reqId}}" />
-
-          <os-new-tab size="small" :route="{
-            name: 'ParticipantsListItemSpecimenDetail.Overview',
-            params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id, specimenId: specimen.id},
-            query: {eventId: visit.eventId, srId: specimen.reqId}}" />
         </div>
       </span>
     </os-page-head>

@@ -11,9 +11,7 @@
         </h3>
         <div class="accessories">
           <os-copy-link size="small"
-            :route="{name: 'ParticipantDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id}}" />
-          <os-new-tab size="small" 
-            :route="{name: 'ParticipantDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id}}" />
+            :route="{name: 'ParticipantsListItemDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id}}" />
         </div>
       </span>
     </os-page-head>

@@ -251,9 +251,9 @@ export default {
   computed: {
     itemUrl: function() {
       if (this.ctx.view == 'participants_list') {
-        return "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/detail/overview?view=participants_list'";
+        return "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/overview?view=participants_list'";
       } else {
-        return "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/visit/' + hidden.visitId + '/specimen/' + hidden.specimenId + '/detail/overview?view=specimens_list'";
+        return "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId + '/visit/' + hidden.visitId + '/specimen/' + hidden.specimenId + '/overview?view=specimens_list'";
       }
     },
 
