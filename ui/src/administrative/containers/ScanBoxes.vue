@@ -113,6 +113,10 @@
               <span v-t="{path: ctx.error, args: ctx.errorArgs}"></span>
             </os-message>
 
+            <os-message v-if="ctx.readError" type="error">
+              <span v-t="{path: ctx.readError, args: ctx.readErrorArgs}"></span>
+            </os-message>
+
             <span v-if="ctx.specimens.length > 0">
               <os-button left-icon="map" :label="$t('containers.view_map')" @click="showBoxMap" />
             </span>
@@ -179,7 +183,11 @@
           <Layout class="map" :container="ctx.boxMap.container" :occupants="ctx.boxMap.occupants">
             <template #occupant_specimen="slotProps">
               <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
-                <os-icon class="specimen-icon" :class="{'not-found': !slotProps.occupant.occupyingEntityId}"
+                <os-icon class="specimen-icon"
+                  :class="{
+                    'read-error': slotProps.occupant.readError,
+                    'not-found': !slotProps.occupant.readError && !slotProps.occupant.occupyingEntityId
+                  }"
                   name="vial" :style="slotProps.occupant.colorCode"
                   v-os-tooltip="slotProps.occupant.tooltip" />
 
@@ -439,6 +447,7 @@ export default {
       }
 
       ctx.error = null;
+      ctx.readError = null;
       promise.then(
         (container) => {
           ctx.box = box;
@@ -479,15 +488,28 @@ export default {
       this.loadBoxDetails(box);
 
       ctx.error = null;
+      ctx.readError = null;
+
       const spmnBarcodesMap = {};
       const spmnBarcodes = [];
+      const readErrors = [];
       for (let tube of tubes) {
         if (!tube.barcode) {
+          continue;
+        } else if (tube.barcode == 'READ_ERROR') {
+          readErrors.push({row: tube.row, column: tube.column});
           continue;
         }
 
         spmnBarcodesMap[tube.barcode.toLowerCase()] = tube;
         spmnBarcodes.push(tube.barcode);
+      }
+
+      if (readErrors.length > 0) {
+        ctx.readError = 'containers.cannot_read_barcodes';
+        ctx.readErrorArgs = {
+          locations: readErrors.map(({row, column}) => '(' + row + ', ' + column + ')').join(', ')
+        }
       }
 
       ctx.scannedBarcodes = spmnBarcodes;
@@ -505,8 +527,8 @@ export default {
               map[spmn.barcode.toLowerCase()] = spmn;
               return map;
             }, {});
-          const notFound = [];
 
+          const notFound = [];
           for (let tube of tubes) {
             if (!tube.barcode) {
               continue;
@@ -518,7 +540,9 @@ export default {
               ctx.specimens.push(spmn);
             } else {
               ctx.specimens.push({barcode: tube.barcode, storageLocation: {posOne: tube.column, posTwo: tube.row}});
-              notFound.push(tube);
+              if (tube.barcode != 'READ_ERROR') {
+                notFound.push(tube);
+              }
             }
           }
 
@@ -566,6 +590,15 @@ export default {
               colorCode = colorCoding[spmnClass + ':' + type] = util.getContainerColorCode(occupantProps) || {};
             }
 
+            let tooltip = null;
+            if (specimen.id) {
+              tooltip = (specimen.specimenClass + ', ' + specimen.type);
+            } else if (specimen.barcode == 'READ_ERROR') {
+              tooltip = 'Error detecting the barcode.';
+            } else {
+              tooltip = 'Specimen ' + specimen.barcode + ' not found.';
+            }
+
             return {
               mode: container.positionLabelingMode,
               posOne: specimen.storageLocation.posOne,
@@ -578,8 +611,9 @@ export default {
               occupantProps: occupantProps,
               cpShortTitle: specimen.cpShortTitle,
               colorCode: colorCode,
-              tooltip: specimen.id ? (specimen.specimenClass + ', ' + specimen.type) : 'Specimen ' + specimen.barcode + ' not found',
-              displayName: specimen.barcode
+              tooltip: tooltip,
+              displayName: specimen.barcode,
+              readError: specimen.barcode == 'READ_ERROR'
             };
           }
         )
