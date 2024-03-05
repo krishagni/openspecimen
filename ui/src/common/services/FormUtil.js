@@ -225,6 +225,8 @@ class FormUtil {
   }
 
   setDefaultValues(formSchema, formData) {
+    formSchema = formSchema || {};
+    formSchema.rows = formSchema.rows || [];
     for (let {fields} of formSchema.rows) {
       for (let field of fields) {
         if (field.type == 'subform' || field.defaultValue == undefined || field.defaultValue == null) {
