@@ -106,7 +106,7 @@
 
           <template #content>
             <os-message type="info">
-              <span v-t="{path: 'containers.scanned_barcodes', args: {count: ctx.scannedBarcodes.length}}"> </span>
+              <span v-t="{ path: 'containers.scan_barcodes_summary', args: ctx }"> </span>
             </os-message>
 
             <os-message v-if="ctx.error" type="error">
@@ -178,7 +178,7 @@
         </template>
         <template #content>
           <os-message type="info" style="margin-top: 0">
-            <span v-t="{path: 'containers.scanned_barcodes', args: {count: ctx.scannedBarcodes.length}}"> </span>
+            <span v-t="{ path: 'containers.scan_barcodes_summary', args: ctx }"></span>
           </os-message>
           <Layout class="map" :container="ctx.boxMap.container" :occupants="ctx.boxMap.occupants">
             <template #occupant_specimen="slotProps">
@@ -513,6 +513,9 @@ export default {
       }
 
       ctx.scannedBarcodes = spmnBarcodes;
+      ctx.scannedBarcodesCount = spmnBarcodes.length;
+      ctx.readErrorsCount = readErrors.length;
+      ctx.noTubesCount = tubes.length - spmnBarcodes.length - readErrors.length;
       if (spmnBarcodes.length == 0) {
         ctx.specimens = [];
         return;
