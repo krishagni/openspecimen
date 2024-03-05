@@ -602,6 +602,7 @@
     "save_n_scan_another": "Save and Scan Another",
     "scan": "Scan",
     "scan_barcodes": "Scan container barcodes separated by comma, newline or tab...",
+    "scan_barcodes_summary": "Detected Barcodes: {scannedBarcodesCount}, Undetected Barcodes: {readErrorsCount}, No Tubes: {noTubesCount}",
     "scan_boxes": "Scan Boxes",
     "scan_display_names": "Scan container display names separated by comma, newline or tab...",
     "scan_names_or_barcodes": "Scan container name or barcode separated by comma, newline or tab...",
