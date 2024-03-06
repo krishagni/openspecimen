@@ -22,7 +22,7 @@
     </div>
 
     <div class="search">
-      <os-button left-icon="search" @click="selectPosition"/>
+      <os-button size="small" left-icon="search" @click="selectPosition"/>
     </div>
 
     <os-storage-position-selector ref="positionSelector"
