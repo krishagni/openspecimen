@@ -224,13 +224,20 @@ class FormUtil {
     );
   }
 
-  setDefaultValues(formSchema, formData) {
+  setDefaultValues(formSchema, formData, setOnlyIfEmpty) {
     formSchema = formSchema || {};
     formSchema.rows = formSchema.rows || [];
     for (let {fields} of formSchema.rows) {
       for (let field of fields) {
         if (field.type == 'subform' || field.defaultValue == undefined || field.defaultValue == null) {
           continue;
+        }
+
+        if (setOnlyIfEmpty) {
+          const existingValue = exprUtil.eval(formData, field.name);
+          if (existingValue != null && existingValue != undefined && existingValue != '') {
+            continue;
+          }
         }
 
         let value = field.defaultValue;
