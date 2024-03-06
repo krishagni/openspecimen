@@ -37,7 +37,7 @@ export default {
   padding: 0.5rem 1rem;
   display: flex;
   flex-direction: row;
-  height: 3.375rem;
+  /*height: 3.375rem;*/
 }
 
 .os-panel :deep(.p-panel-header .p-panel-icons) {
