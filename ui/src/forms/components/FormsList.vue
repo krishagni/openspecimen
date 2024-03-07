@@ -1,5 +1,5 @@
 <template>
-  <os-page-toolbar>
+  <os-page-toolbar v-if="isUpdateAllowed && (formsList.length > 0 || surveys.length > 0)">
     <template #default>
       <os-menu left-icon="plus" :label="$t('common.buttons.add')" :options="formsList"
         v-if="formsList.length > 0" />
@@ -24,7 +24,7 @@
         :noRecordsMsg="'common.no_form_records'"
         @rowClicked="onRecordClick">
 
-        <template #rowActions="{rowObject}">
+        <template #rowActions="{rowObject}" v-if="isUpdateAllowed">
           <os-button-group v-if="!rowObject.sysForm">
             <os-button left-icon="edit" v-os-tooltip="$t('common.buttons.edit')" @click="editRecord(rowObject)" />
 
@@ -123,6 +123,10 @@ export default {
           type: 'date-time'
         }
       ]
+    },
+
+    isUpdateAllowed: function() {
+      return !this.api || !this.api.isUpdateAllowed || this.api.isUpdateAllowed()
     }
   },
 
