@@ -25,7 +25,7 @@
               </router-link>
             </li>
 
-            <li v-if="!ctx.cp.consentsWaived && !ctx.cp.visitLevelConsents">
+            <li v-if="!ctx.cp.consentsWaived && !ctx.cp.visitLevelConsents && isReadConsentAllowed">
               <router-link :to="getRoute('Consents')">
                 <span v-t="'participant_consents.list'">Consents</span>
               </router-link>
@@ -40,18 +40,6 @@
             <os-plugin-views page="participant-detail" view="tab-menu" />
           </ul>
         </os-tab-menu>
-
-        <os-side-menu v-else>
-          <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
-              <router-link :to="getRoute('Overview')">
-                <os-icon name="eye" />
-              </router-link>
-            </li>
-
-            <os-plugin-views page="participant-detail" view="side-menu" />
-          </ul>
-        </os-side-menu>
 
         <router-view :cpr="cpr" v-if="cpr && cpr.id"> </router-view>
       </div>
@@ -71,6 +59,8 @@ import cprSvc from '@/biospecimen/services/Cpr.js';
 
 export default {
   props: ['cpr', 'noNavButton'],
+
+  inject: ['cpViewCtx'],
 
   async setup() {
     const cpViewCtx = inject('cpViewCtx', {value: {}}).value;
@@ -105,6 +95,10 @@ export default {
 
     participantName: function() {
       return cprSvc.getFormattedTitle(this.cpr);
+    },
+
+    isReadConsentAllowed: function() {
+      return this.cpViewCtx.isReadConsentAllowed(this.cpr)
     }
   },
 

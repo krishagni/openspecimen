@@ -1,17 +1,18 @@
 <template>
-  <os-page-toolbar v-if="!editMode && !cp.consentsSource">
+  <os-page-toolbar v-if="!editMode && !cp.consentsSource &&
+                         (accessFns.isUpdateAllowed() || accessFns.isDeleteAllowed())">
     <template #default>
       <os-button left-icon="edit" :label="$t('participant_consents.edit_responses')"
-        @click="editResponses" />
+        @click="editResponses" v-if="accessFns.isUpdateAllowed()" />
 
       <os-button left-icon="upload" :label="$t('participant_consents.upload_new_form')"
-        @click="showUploadDoc" v-if="consent.consentDocumentName"/>
+        @click="showUploadDoc" v-if="consent.consentDocumentName && accessFns.isUpdateAllowed()" />
 
       <os-button left-icon="trash" :label="$t('participant_consents.delete_form')"
-        @click="deleteForm" v-if="consent.consentDocumentName" />
+        @click="deleteForm" v-if="consent.consentDocumentName && accessFns.isDeleteAllowed()" />
 
       <os-button left-icon="upload" :label="$t('participant_consents.upload_form')"
-        @click="showUploadDoc" v-if="!consent.consentDocumentName" />
+        @click="showUploadDoc" v-if="!consent.consentDocumentName && accessFns.isUpdateAllowed()" />
     </template>
   </os-page-toolbar>
 
@@ -92,7 +93,7 @@ import pvSvc from '@/common/services/PermissibleValue.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'cpr'],
+  props: ['cp', 'cpr', 'accessFns'],
 
   data() {
     return {

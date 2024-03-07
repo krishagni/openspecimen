@@ -30,6 +30,8 @@ export default class CpViewContext {
 
   access = null;
 
+  accessBasedOnMrn = false;
+
   constructor(cpId) {
     this.cpId = cpId;
   }
@@ -38,6 +40,12 @@ export default class CpViewContext {
     if (!this.cpQ) {
       this.cpQ = cpSvc.getCpById(this.cpId);
     }
+
+    settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled').then(
+      settings => {
+        this.accessBasedOnMrn = util.isTrue(settings[0].value);
+      }
+    );
 
     this.cpQ.then(
       cp => {
@@ -281,6 +289,10 @@ export default class CpViewContext {
   // Access control
   //
 
+  isAccessBasedOnMrnSite() {
+    return this.accessBasedOnMrn;
+  }
+
   isCreateParticipantAllowed() {
     return this.access && this.access.createParticipant;
   }
@@ -311,8 +323,28 @@ export default class CpViewContext {
     return this.access && this.access.createPrimarySpecimen;
   }
 
-  isUpdateConsentAllowed() {
-    return this.access && this.access.updateConsent;
+  isReadConsentAllowed(cpr) {
+    if (!this.access || !this.access.readConsent) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Consent', ['Read']);
+  }
+
+  isUpdateConsentAllowed(cpr) {
+    if (!this.access || !this.access.updateConsent) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Consent', ['Update']);
+  }
+
+  isDeleteConsentAllowed(cpr) {
+    if (!this.access || !this.access.deleteConsent) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Consent', ['Delete']);
   }
 
   _getMatchingForms(forms, rules, context) {
@@ -414,11 +446,24 @@ export default class CpViewContext {
 
       specimenExim: this._isAllowed('Specimen', ['Export Import']) || this._isAllowed('PrimarySpecimen', ['Export Import']),
 
-      updateConsent: this._isAllowed('Consent', ['Update'])
+      readConsent: this._isAllowed('Consent', ['Read']),
+
+      updateConsent: this._isAllowed('Consent', ['Update']),
+
+      deleteConsent: this._isAllowed('Consent', ['Delete']),
     }
   }
 
-  _isAllowed(resource, operations) {
-    return authSvc.isAllowed({resource, operations, cp: this.cp.shortTitle, sites: this.cpSites});
+  _isAllowed(resource, operations, sites) {
+    return authSvc.isAllowed({resource, operations, cp: this.cp.shortTitle, sites: sites || this.cpSites});
+  }
+
+  _isAccessBasedOnMrnAllowed(cpr, resource, operations) {
+    if (!this.accessBasedOnMrn || !cpr || !cpr.participant || (cpr.participant.pmis || []).length == 0) {
+      return true;
+    }
+
+    const mrnSites = cpr.participant.pmis.map(({siteName}) => siteName);
+    return this._isAllowed(resource, operations, mrnSites);
   }
 }
