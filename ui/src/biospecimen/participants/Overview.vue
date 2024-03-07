@@ -1,13 +1,17 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="edit" />
+      <os-button left-icon="edit" :label="$t('common.buttons.edit')"
+        @click="edit" v-if="isUpdateAllowed" />
 
-      <os-button left-icon="user-secret" :label="$t('participants.anonymize')" @click="anonymize" />
+      <os-button left-icon="user-secret" :label="$t('participants.anonymize')"
+        @click="anonymize" v-if="isUpdateAllowed" />
 
-      <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels" />
+      <os-button left-icon="print" :label="$t('common.buttons.print')"
+        @click="printLabels" v-if="isPrintSpecimenLabelsAllowed" />
 
-      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCpr" />
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')"
+        @click="deleteCpr" v-if="isDeleteAllowed" />
     </template>
   </os-page-toolbar>
 
@@ -145,6 +149,18 @@ export default {
 
     hasPendingVisits: function() {
       return (this.ctx.visits || []).some(visit => !visit.status || visit.status == 'Pending');
+    },
+
+    isUpdateAllowed: function() {
+      return this.cpViewCtx.isUpdateParticipantAllowed(this.cpr);
+    },
+
+    isDeleteAllowed: function() {
+      return this.cpViewCtx.isDeleteParticipantAllowed(this.cpr);
+    },
+
+    isPrintSpecimenLabelsAllowed: function() {
+      return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr);
     }
   },
 
@@ -227,6 +243,10 @@ export default {
         askReason: true,
         deleteObj: (reason) => cprSvc.deleteCpr(cpr.id, true, reason)
       };
+
+      if (!this.cpViewCtx.isReadVisitAllowed(cpr)) {
+        return;
+      }
 
       const eventRulesQ = this.cpViewCtx.getAnticipatedEventsRules();
       const visitsQ = visitSvc.getVisits(this.cpr);

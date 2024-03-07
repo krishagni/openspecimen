@@ -297,12 +297,20 @@ export default class CpViewContext {
     return this.access && this.access.createParticipant;
   }
 
-  isUpdateParticipantAllowed() {
-    return this.access && this.access.updateParticipant;
+  isUpdateParticipantAllowed(cpr) {
+    if (!this.access || !this.access.updateParticipant) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'ParticipantPhi', ['Update']);
   }
 
-  isDeleteParticipantAllowed() {
-    return this.access && this.access.deleteParticipant;
+  isDeleteParticipantAllowed(cpr) {
+    if (!this.access || !this.access.deleteParticipant) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'ParticipantPhi', ['Delete']);
   }
 
   isImportAllowed() {
@@ -315,8 +323,28 @@ export default class CpViewContext {
     return this.isImportAllowed();
   }
 
-  isReadSpecimenAllowed() {
-    return this.access && this.access.readSpecimen;
+  isReadVisitAllowed(cpr) {
+    if (!this.access || !this.access.readVisit) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Read']);
+  }
+
+  isReadSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.readSpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, ['PrimarySpecimen', 'Specimen'], ['Read']);
+  }
+
+  isPrintSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.readAllSpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Specimen', ['Read']);
   }
 
   isCreatePrimarySpecimenAllowed() {
@@ -438,11 +466,15 @@ export default class CpViewContext {
 
       participantExim: this._isAllowed('ParticipantPhi', ['Export Import']),
 
+      readVisit: this._isAllowed('Visit', ['Read']),
+
       visitExim: this._isAllowed('Visit', ['Export Import']),
 
       createPrimarySpecimen: this._isAllowed('PrimarySpecimen', ['Create']) || this._isAllowed('Specimen', ['Create']),
 
-      readSpecimen: this._isAllowed('Specimen', ['Read']) || this._isAllowed('PrimarySpecimen', ['Read']),
+      readSpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Read']),
+
+      readAllSpecimen: this._isAllowed('Specimen', ['Read']),
 
       specimenExim: this._isAllowed('Specimen', ['Export Import']) || this._isAllowed('PrimarySpecimen', ['Export Import']),
 
@@ -454,16 +486,20 @@ export default class CpViewContext {
     }
   }
 
-  _isAllowed(resource, operations, sites) {
-    return authSvc.isAllowed({resource, operations, cp: this.cp.shortTitle, sites: sites || this.cpSites});
+  _isAllowed(resources, operations, sites) {
+    if (typeof resources == 'string') {
+      resources = [resources];
+    }
+
+    return authSvc.isAllowed({resources, operations, cp: this.cp.shortTitle, sites: sites || this.cpSites});
   }
 
-  _isAccessBasedOnMrnAllowed(cpr, resource, operations) {
+  _isAccessBasedOnMrnAllowed(cpr, resources, operations) {
     if (!this.accessBasedOnMrn || !cpr || !cpr.participant || (cpr.participant.pmis || []).length == 0) {
       return true;
     }
 
     const mrnSites = cpr.participant.pmis.map(({siteName}) => siteName);
-    return this._isAllowed(resource, operations, mrnSites);
+    return this._isAllowed(resources, operations, mrnSites);
   }
 }
