@@ -1,7 +1,8 @@
 <template>
   <div class="os-pending-visits-tab">
     <div class="action-buttons">
-      <os-button :label="$t('participants.collect')" @click="collectVisits" v-if="selectedVisits.length > 0" />
+      <os-button :label="$t('participants.collect')" @click="collectVisits"
+        v-if="selectedVisits.length > 0 && isCreateOrUpdateVisitAllowed" />
     </div>
 
     <os-list-view
@@ -17,7 +18,7 @@
 
       <template #rowActions="slotProps">
         <os-button size="small" :label="$t('participants.collect')" @click="collectVisit(slotProps.rowObject)"
-          v-if="selectedVisits.length == 0" />
+          v-if="selectedVisits.length == 0 && isCreateOrUpdateVisitAllowed" />
       </template>
 
       <template class="visit-details" #expansionRow="{rowObject}">
@@ -66,6 +67,10 @@ export default {
           visit: Object.assign(
             visit, {cprId: this.cpr.id, anticipatedVisitDate: this._getAnticipatedVisitDate(visit)})
         }));
+    },
+
+    isCreateOrUpdateVisitAllowed: function() {
+      return this.cpViewCtx.isCreateOrUpdateVisitAllowed(this.cpr);
     }
   },
 

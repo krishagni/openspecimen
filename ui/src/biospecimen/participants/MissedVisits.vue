@@ -54,18 +54,23 @@ export default {
 
   methods: {
     options: function(visit) {
-      return [
+      const options = [
         {
           icon: 'eye',
           caption: this.$t('participants.view_visit'),
           onSelect: () => this._gotoVisit(visit)
-        },
-        {
+        }
+      ];
+
+      if (this.cpViewCtx.isCreateVisitAllowed(this.cpr)) {
+        options.push({
           icon: 'redo',
           caption: this.$t('participants.new_visit'),
           onSelect: () => this.repeatVisit(visit)
-        }
-      ];
+        });
+      }
+
+      return options;
     },
 
     repeatVisit: async function(visit) {

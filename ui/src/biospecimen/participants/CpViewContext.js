@@ -323,12 +323,36 @@ export default class CpViewContext {
     return this.isImportAllowed();
   }
 
+  isCreateVisitAllowed(cpr) {
+    if (!this.access || !this.access.createVisit) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Create']);
+  }
+
+  isCreateOrUpdateVisitAllowed(cpr) {
+    if (!this.access || !this.access.createUpdateVisit) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Create', 'Update']);
+  }
+
   isReadVisitAllowed(cpr) {
     if (!this.access || !this.access.readVisit) {
       return false;
     }
 
     return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Read']);
+  }
+
+  isCreateSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.createPrimarySpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, ['PrimarySpecimen', 'Specimen'], ['Create']);
   }
 
   isReadSpecimenAllowed(cpr) {
@@ -466,11 +490,15 @@ export default class CpViewContext {
 
       participantExim: this._isAllowed('ParticipantPhi', ['Export Import']),
 
+      createVisit: this._isAllowed('Visit', ['Create']),
+
+      createUpdateVisit: this._isAllowed('Visit', ['Create', 'Update']),
+
       readVisit: this._isAllowed('Visit', ['Read']),
 
       visitExim: this._isAllowed('Visit', ['Export Import']),
 
-      createPrimarySpecimen: this._isAllowed('PrimarySpecimen', ['Create']) || this._isAllowed('Specimen', ['Create']),
+      createPrimarySpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Create']),
 
       readSpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Read']),
 

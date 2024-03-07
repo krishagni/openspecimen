@@ -74,34 +74,56 @@ export default {
     },
 
     options: function(visit) {
-      return [
-        {
-          icon: 'eye',
-          caption: this.$t('participants.view_visit'),
-          onSelect: () => this.gotoVisit(visit)
-        },
-        {
+      const options = [];
+      options.push({
+        icon: 'eye',
+        caption: this.$t('participants.view_visit'),
+        onSelect: () => this.gotoVisit(visit)
+      });
+
+      if (this.cpViewCtx.isCreateVisitAllowed(this.cpr)) {
+        options.push({
           icon: 'redo',
           caption: this.$t('participants.new_visit'),
           onSelect: () => this.repeatVisit(visit)
-        },
-        { divider: true },
-        {
+        });
+      }
+
+
+      let divider = true;
+      if (this.cpViewCtx.isCreateSpecimenAllowed(this.cpr)) {
+        if (divider) {
+          options.push({ divider: true });
+          divider = false;
+        }
+
+        options.push({
           icon: 'flask',
           caption: this.$t('participants.collect_pending_specimens'),
           onSelect: () => this.collectPending(visit)
-        },
-        {
+        });
+
+        options.push({
           icon: 'plus',
           caption: this.$t('participants.collect_unplanned_specimens'),
           onSelect: () => this.addSpecimen(visit)
-        },
-        {
+        });
+      }
+
+      if (this.cpViewCtx.isPrintSpecimenAllowed(this.cpr)) {
+        if (divider) {
+          options.push({ divider: true });
+          divider = false;
+        }
+
+        options.push({
           icon: 'print',
           caption: this.$t('participants.print_specimen_labels'),
           onSelect: () => this.printLabels(visit)
-        }
-      ];
+        });
+      }
+
+      return options;
     },
 
     gotoVisit: function(visit) {
