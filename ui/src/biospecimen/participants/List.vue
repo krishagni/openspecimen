@@ -31,16 +31,20 @@
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default v-if="ctx.view == 'participants_list'">
               <span v-if="!ctx.selectedItems || ctx.selectedItems.length == 0">
-                <os-button left-icon="plus" :label="$t('participants.add_participant')" @click="addParticipant" />
+                <os-button left-icon="plus" :label="$t('participants.add_participant')"
+                  @click="addParticipant" v-if="ctx.cp.activityStatus != 'Closed' && ctx.access.regAllowed" />
 
-                <os-button left-icon="flask" :label="$t('participants.view_specimens')" @click="viewSpecimens" />
+                <os-button left-icon="flask" :label="$t('participants.view_specimens')"
+                  @click="viewSpecimens" v-if="ctx.access.viewSpecimensAllowed" />
 
                 <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
               </span>
               <span v-else>
-                <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editParticipants" />
+                <os-button left-icon="edit" :label="$t('common.buttons.edit')"
+                  @click="editParticipants" v-if="ctx.access.updateParticipantAllowed" />
 
-                <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteParticipants" />
+                <os-button left-icon="trash" :label="$t('common.buttons.delete')"
+                  @click="deleteParticipants" v-if="ctx.access.deleteParticipantAllowed" />
 
                 <os-plugin-views page="participants-list" view="bulk-ops" :view-props="ctx" />
               </span>
@@ -51,8 +55,8 @@
                 <os-button left-icon="user-friends" :label="$t('participants.view_participants')"
                   @click="viewParticipants" v-if="!ctx.cp.specimenCentric" />
 
-                <os-button left-icon="plus" :label="$t('participants.add_specimen')"
-                  @click="addSpecimen" v-else />
+                <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen"
+                  v-else-if="ctx.cp.activityStatus != 'Closed' && ctx.access.createPrimarySpecimensAllowed" />
 
                 <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
               </span>
@@ -178,11 +182,25 @@ export default {
         {url: routerSvc.ngUrl('cp-view/' + cp.id + '/list-view', {}), label: cp.shortTitle}
       ],
 
-      moreOptions: []
+      moreOptions: [],
+
+      access: {
+        regAllowed: cpViewCtx.isCreateParticipantAllowed(),
+
+        updateParticipantAllowed: cpViewCtx.isUpdateParticipantAllowed(),
+
+        deleteParticipantAllowed: cpViewCtx.isDeleteParticipantAllowed(),
+
+        createPrimarySpecimensAllowed: cpViewCtx.isCreatePrimarySpecimenAllowed(),
+
+        viewSpecimensAllowed: cpViewCtx.isReadSpecimenAllowed(),
+      }
     });
 
     return {
-      ctx
+      ctx,
+
+      cpViewCtx
     };
   },
 
@@ -404,31 +422,36 @@ export default {
 
     _loadMoreOptions: async function() {
       const options = [];
-      options.push({
-        icon: 'upload',
-        caption: this.$t('participants.import_biospecimen_data'),
-        url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-objs')
-      });
 
-      options.push({
-        icon: 'list',
-        caption: this.$t('participants.view_past_imports'),
-        url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-jobs')
-      });
+      if (this.cpViewCtx.isImportAllowed()) {
+        options.push({
+          icon: 'upload',
+          caption: this.$t('participants.import_biospecimen_data'),
+          url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-objs')
+        });
 
-      let divider = true;
+        options.push({
+          icon: 'list',
+          caption: this.$t('participants.view_past_imports'),
+          url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-jobs')
+        });
+      }
+
+      let divider = options.length > 0;
       if (divider) {
         options.push({divider: true});
         divider = false;
       }
 
-      options.push({
-        icon: 'download',
-        caption: this.$t('common.buttons.export'),
-        url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/export-cp-objs')
-      });
+      if (this.cpViewCtx.isExportAllowed()) {
+        options.push({
+          icon: 'download',
+          caption: this.$t('common.buttons.export'),
+          url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/export-cp-objs')
+        });
+      }
 
-      divider = true;
+      divider = options.length > 0;
       if (divider) {
         options.push({divider: true});
         divider = false;
@@ -448,7 +471,7 @@ export default {
 
       const promise = new Promise((resolve) => {
         const pluginOptions = pluginReg.getOptions('participants-list', 'menu') || [];
-        const ctxt = this.ctx;
+        const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
 
         let count = pluginOptions.length;
         for (let option of pluginOptions) {

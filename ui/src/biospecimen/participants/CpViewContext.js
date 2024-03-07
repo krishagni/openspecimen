@@ -1,4 +1,5 @@
 
+import authSvc from '@/common/services/Authorization.js';
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc from '@/biospecimen/services/Cpr.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
@@ -23,6 +24,12 @@ export default class CpViewContext {
 
   specimenDictQ = null;
 
+  cp = null;
+
+  cpSites = null;
+
+  access = null;
+
   constructor(cpId) {
     this.cpId = cpId;
   }
@@ -31,6 +38,14 @@ export default class CpViewContext {
     if (!this.cpQ) {
       this.cpQ = cpSvc.getCpById(this.cpId);
     }
+
+    this.cpQ.then(
+      cp => {
+        this.cp = cp;
+        this.cpSites = cp.cpSites.map(({siteName}) => siteName);
+        this._loadAccessRights();
+      }
+    );
 
     return this.cpQ;
   }
@@ -262,6 +277,44 @@ export default class CpViewContext {
     );
   }
 
+  //
+  // Access control
+  //
+
+  isCreateParticipantAllowed() {
+    return this.access && this.access.createParticipant;
+  }
+
+  isUpdateParticipantAllowed() {
+    return this.access && this.access.updateParticipant;
+  }
+
+  isDeleteParticipantAllowed() {
+    return this.access && this.access.deleteParticipant;
+  }
+
+  isImportAllowed() {
+    const {specimenCentric} = this.cp || {};
+    const {participantExim, visitExim, specimenExim} = this.access || {};
+    return (!specimenCentric && !!participantExim) || (!specimenCentric && !!visitExim) || !!specimenExim;
+  }
+
+  isExportAllowed() {
+    return this.isImportAllowed();
+  }
+
+  isReadSpecimenAllowed() {
+    return this.access && this.access.readSpecimen;
+  }
+
+  isCreatePrimarySpecimenAllowed() {
+    return this.access && this.access.createPrimarySpecimen;
+  }
+
+  isUpdateConsentAllowed() {
+    return this.access && this.access.updateConsent;
+  }
+
   _getMatchingForms(forms, rules, context) {
     let matchingRule = null;
     for (let rule of rules) {
@@ -341,5 +394,31 @@ export default class CpViewContext {
     } else {
       return routerSvc.getUrl('VisitDetail.Overview', params, {eventId});
     }
+  }
+
+  _loadAccessRights() {
+    this.access = {
+      createParticipant: this._isAllowed('ParticipantPhi', ['Create']),
+
+      updateParticipant: this._isAllowed('ParticipantPhi', ['Update']),
+
+      deleteParticipant: this._isAllowed('ParticipantPhi', ['Delete']),
+
+      participantExim: this._isAllowed('ParticipantPhi', ['Export Import']),
+
+      visitExim: this._isAllowed('Visit', ['Export Import']),
+
+      createPrimarySpecimen: this._isAllowed('PrimarySpecimen', ['Create']) || this._isAllowed('Specimen', ['Create']),
+
+      readSpecimen: this._isAllowed('Specimen', ['Read']) || this._isAllowed('PrimarySpecimen', ['Read']),
+
+      specimenExim: this._isAllowed('Specimen', ['Export Import']) || this._isAllowed('PrimarySpecimen', ['Export Import']),
+
+      updateConsent: this._isAllowed('Consent', ['Update'])
+    }
+  }
+
+  _isAllowed(resource, operations) {
+    return authSvc.isAllowed({resource, operations, cp: this.cp.shortTitle, sites: this.cpSites});
   }
 }
