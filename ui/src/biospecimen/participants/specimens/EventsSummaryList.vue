@@ -19,7 +19,7 @@
         <div class="description">
           <span><i>by</i> {{event.user}}</span>
         </div>
-        <div class="action-buttons" v-if="event.sysForm || event.isEditable">
+        <div class="action-buttons" v-if="!hideActions && (event.sysForm || event.isEditable)">
           <os-button-group class="buttons" v-if="event.isEditable">
             <os-button left-icon="edit" size="small" v-os-tooltip.bottom="$t('specimens.edit_event')"
               @click="editEvent($event, event)" />
@@ -35,7 +35,7 @@
 
 <script>
 export default {
-  props: ['events'],
+  props: ['events', 'hide-actions'],
 
   emits: ['edit-event', 'delete-event', 'click'],
 

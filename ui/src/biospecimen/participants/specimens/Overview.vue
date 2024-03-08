@@ -3,7 +3,8 @@
   <os-page-toolbar>
     <template #default>
       <span v-if="specimen.id > 0">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="edit" />
+        <os-button left-icon="edit" :label="$t('common.buttons.edit')"
+          @click="edit" v-if="isUpdateAllowed" />
 
         <os-menu icon="plus" :label="$t('common.buttons.create')"
           :options="[
@@ -11,17 +12,18 @@
             {icon: 'share-alt', caption: $t('specimens.aliquots'), onSelect: createAliquots}
           ]"
 
-          v-if="specimen.availabilityStatus == 'Available'"
+          v-if="specimen.availabilityStatus == 'Available' && isCreateChildrenAllowed"
         />
 
-        <os-button left-icon="print" :label="$t('common.buttons.print')" @click="confirmPrint" />
+        <os-button left-icon="print" :label="$t('common.buttons.print')"
+          @click="confirmPrint" v-if="isPrintAllowed" />
 
         <os-add-to-cart :specimens="[{id: specimen.id}]" />
 
         <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
-          @menu-toggled="loadEventForms" v-if="specimen.availabilityStatus == 'Available'" />
+          @menu-toggled="loadEventForms" v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
 
-        <os-menu :label="$t('common.buttons.more')" :options="moreOptions" />
+        <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
       </span>
     </template>
   </os-page-toolbar>
@@ -43,8 +45,8 @@
         </template>
 
         <template #content>
-          <EventsSummaryList :events="ctx.events" @click="showEvent($event)"
-            @edit-event="editEvent($event)" @delete-event="deleteEvent($event)" />
+          <EventsSummaryList :events="ctx.events" :hide-actions="!isUpdateAllowed"
+            @click="showEvent($event)" @edit-event="editEvent($event)" @delete-event="deleteEvent($event)" />
         </template>
       </os-section>
     </os-grid-column>
@@ -162,17 +164,40 @@ export default {
     moreOptions: function() {
       const {specimen} = this.ctx;
       const options = [];
-      if (!specimen.reserved && specimen.activityStatus == 'Active' && specimen.status == 'Collected') {
-        options.push({icon: 'times', caption: this.$t('common.buttons.close'), onSelect: this.closeSpecimen});
-      } else if (specimen.activityStatus == 'Closed') {
-        options.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: this.reopenSpecimen});
+
+      if (this.isUpdateAllowed) {
+        if (!specimen.reserved && specimen.activityStatus == 'Active' && specimen.status == 'Collected') {
+          options.push({icon: 'times', caption: this.$t('common.buttons.close'), onSelect: this.closeSpecimen});
+        } else if (specimen.activityStatus == 'Closed') {
+          options.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: this.reopenSpecimen});
+        }
       }
 
-      if (specimen.id > 0) {
+      if (specimen.id > 0 && this.isDeleteAllowed) {
         options.push({icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: this.deleteSpecimen});
       }
 
       return options;
+    },
+
+    isCreateChildrenAllowed: function() {
+      return this.cpViewCtx.isCreateAllSpecimenAllowed(this.cpr);
+    },
+
+    isUpdateAllowed: function() {
+      const vc = this.cpViewCtx;
+      const {specimen: {lineage}} = this.ctx;
+      return lineage == 'New' ? vc.isUpdateSpecimenAllowed(this.cpr) : vc.isUpdateAllSpecimenAllowed(this.cpr);
+    },
+
+    isDeleteAllowed: function() {
+      const vc = this.cpViewCtx;
+      const {specimen: {lineage}} = this.ctx;
+      return lineage == 'New' ? vc.isDeleteSpecimenAllowed(this.cpr) : vc.isDeleteAllSpecimenAllowed(this.cpr);
+    },
+
+    isPrintAllowed: function() {
+      return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr);
     }
   },
 

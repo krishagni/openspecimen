@@ -411,12 +411,52 @@ export default class CpViewContext {
     return this._isAccessBasedOnMrnAllowed(cpr, ['PrimarySpecimen', 'Specimen'], ['Create']);
   }
 
+  isCreateAllSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.createAllSpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Specimen', ['Create']);
+  }
+
   isReadSpecimenAllowed(cpr) {
     if (!this.access || !this.access.readSpecimen) {
       return false;
     }
 
     return this._isAccessBasedOnMrnAllowed(cpr, ['PrimarySpecimen', 'Specimen'], ['Read']);
+  }
+
+  isUpdateSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.updatePrimarySpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, ['PrimarySpecimen', 'Specimen'], ['Update']);
+  }
+
+  isUpdateAllSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.updateAllSpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Specimen', ['Update']);
+  }
+
+  isDeleteSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.deleteSpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, ['PrimarySpecimen', 'Specimen'], ['Delete']);
+  }
+
+  isDeleteAllSpecimenAllowed(cpr) {
+    if (!this.access || !this.access.deleteAllSpecimen) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Specimen', ['Delete']);
   }
 
   isPrintSpecimenAllowed(cpr) {
@@ -570,9 +610,19 @@ export default class CpViewContext {
 
       createPrimarySpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Create']),
 
+      updatePrimarySpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Update']),
+
       readSpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Read']),
 
+      deleteSpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Delete']),
+
+      createAllSpecimen: this._isAllowed('Specimen', ['Create']),
+
+      updateAllSpecimen: this._isAllowed('Specimen', ['Update']),
+
       readAllSpecimen: this._isAllowed('Specimen', ['Read']),
+
+      deleteAllSpecimen: this._isAllowed('Specimen', ['Delete']),
 
       specimenExim: this._isAllowed('Specimen', ['Export Import']) || this._isAllowed('PrimarySpecimen', ['Export Import']),
 
