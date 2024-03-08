@@ -30,7 +30,7 @@
               </router-link>
             </li>
 
-            <li v-if="!ctx.cp.consentsWaived && ctx.cp.visitLevelConsents">
+            <li v-if="!ctx.cp.consentsWaived && ctx.cp.visitLevelConsents && hasEc">
               <router-link :to="getRoute('Consents')">
                 <span v-t="'participant_consents.list'">Consents</span>
               </router-link>
@@ -51,18 +51,6 @@
             <os-plugin-views page="visit-detail" view="tab-menu" />
           </ul>
         </os-tab-menu>
-
-        <os-side-menu v-else>
-          <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
-              <router-link :to="getRoute('Overview')">
-                <os-icon name="eye" />
-              </router-link>
-            </li>
-
-            <os-plugin-views page="visit-detail" view="side-menu" />
-          </ul>
-        </os-side-menu>
 
         <router-view :cpr="cpr" :visit="visit" v-if="visit && (visit.id > 0 || visit.eventId > 0)" />
       </div>
@@ -136,6 +124,10 @@ export default {
       }
 
       return '';
+    },
+
+    hasEc: function() {
+      return this.$osSvc.ecDocSvc != null;
     }
   },
 

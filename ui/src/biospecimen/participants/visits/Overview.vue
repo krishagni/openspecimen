@@ -3,15 +3,20 @@
   <os-page-toolbar>
     <template #default>
       <span v-if="visit.id > 0">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editVisit" />
+        <os-button left-icon="edit" :label="$t('common.buttons.edit')"
+          @click="editVisit" v-if="isUpdateAllowed" />
 
-        <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen" />
+        <os-button left-icon="plus" :label="$t('participants.add_specimen')"
+          @click="addSpecimen" v-if="ctx.visit.status == 'Complete' && isCreateSpecimenAllowed" />
 
-        <os-button left-icon="print" :label="$t('participants.print_specimen_labels')" @click="printLabels" />
+        <os-button left-icon="print" :label="$t('participants.print_specimen_labels')"
+          @click="printLabels" v-if="isPrintSpecimenLabelAllowed" />
 
-        <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteVisit" />
+        <os-button left-icon="trash" :label="$t('common.buttons.delete')"
+          @click="deleteVisit" v-if="isDeleteAllowed" />
 
-        <os-plugin-views page="visit-detail" view="more-menu" />
+        <os-plugin-views page="visit-detail" view="more-menu"
+          :view-props="{cpr, visit, cpViewCtx}" />
       </span>
     </template>
   </os-page-toolbar>
@@ -21,7 +26,7 @@
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
       <SpecimenTree :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimens="ctx.specimens"
-        @reload="reloadSpecimens" v-if="ctx.cp.id > 0" />
+        @reload="reloadSpecimens" v-if="ctx.cp.id > 0 && isReadSpecimenAllowed" />
     </os-grid-column>
 
     <os-grid-column width="4">
@@ -83,6 +88,28 @@ export default {
         this._setupVisit();
         this._loadSpecimens();
       }
+    }
+  },
+
+  computed: {
+    isUpdateAllowed: function() {
+      return this.cpViewCtx.isUpdateVisitAllowed(this.cpr);
+    },
+
+    isDeleteAllowed: function() {
+      return this.cpViewCtx.isDeleteVisitAllowed(this.cpr);
+    },
+
+    isCreateSpecimenAllowed: function() {
+      return this.cpViewCtx.isCreateSpecimenAllowed(this.cpr);
+    },
+
+    isReadSpecimenAllowed: function() {
+      return this.cpViewCtx.isReadSpecimenAllowed(this.cpr);
+    },
+
+    isPrintSpecimenLabelAllowed: function() {
+      return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr);
     }
   },
 
@@ -148,6 +175,11 @@ export default {
     },
 
     _loadSpecimens: function() {
+      this.ctx.specimens = [];
+      if (!this.isReadSpecimenAllowed) {
+        return;
+      }
+
       const visit = this.ctx.visit;
       if (visit.$specimens) {
         this.ctx.specimens = visit.$specimens;

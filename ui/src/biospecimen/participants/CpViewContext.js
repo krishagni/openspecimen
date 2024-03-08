@@ -331,6 +331,14 @@ export default class CpViewContext {
     return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Create']);
   }
 
+  isUpdateVisitAllowed(cpr) {
+    if (!this.access || !this.access.updateVisit) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Update']);
+  }
+
   isCreateOrUpdateVisitAllowed(cpr) {
     if (!this.access || !this.access.createUpdateVisit) {
       return false;
@@ -345,6 +353,14 @@ export default class CpViewContext {
     }
 
     return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Read']);
+  }
+
+  isDeleteVisitAllowed(cpr) {
+    if (!this.access || !this.access.deleteVisit) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Delete']);
   }
 
   isCreateSpecimenAllowed(cpr) {
@@ -494,7 +510,11 @@ export default class CpViewContext {
 
       createUpdateVisit: this._isAllowed('Visit', ['Create', 'Update']),
 
+      updateVisit: this._isAllowed('Visit', ['Update']),
+
       readVisit: this._isAllowed('Visit', ['Read']),
+
+      deleteVisit: this._isAllowed('Visit', ['Delete']),
 
       visitExim: this._isAllowed('Visit', ['Export Import']),
 
