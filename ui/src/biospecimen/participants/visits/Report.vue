@@ -10,15 +10,17 @@
 
       <os-button left-icon="download" :label="$t('common.buttons.download')" @click="downloadReport" v-else />
 
-      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editReport"
-        v-if="hasTextReport && !visit.sprLocked" />
+      <os-button left-icon="edit" :label="$t('common.buttons.edit')"
+        @click="editReport" v-if="hasTextReport && !visit.sprLocked && isUpdateAllowed" />
 
-      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteReport"
-        v-if="!visit.sprLocked" />
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')"
+        @click="deleteReport" v-if="!visit.sprLocked && isDeleteAllowed" />
 
-      <os-button left-icon="lock"      :label="$t('common.buttons.lock')" @click="lockReport" v-if="!visit.sprLocked" />
+      <os-button left-icon="lock" :label="$t('common.buttons.lock')"
+        @click="lockReport" v-if="!visit.sprLocked && isLockAllowed" />
 
-      <os-button left-icon="lock-open" :label="$t('common.buttons.unlock')" @click="unlockReport" v-else />
+      <os-button left-icon="lock-open" :label="$t('common.buttons.unlock')"
+        @click="unlockReport" v-else-if="visit.sprLocked && isUnlockAllowed" />
     </template>
   </os-page-toolbar>
 
@@ -26,9 +28,11 @@
     <os-grid-column width="8" v-if="!editMode">
       <div v-if="!visit.sprName">
         <os-message type="info">
-          <span v-t="'visits.no_spr'"></span>
+          <span v-t="'visits.no_spr'" v-if="isUpdateAllowed"></span>
+          <span v-t="'visits.no_spr_no_upload'" v-else></span>
         </os-message>
-        <os-button left-icon="upload" :label="$t('common.buttons.upload')" @click="showUploadDialog" />
+        <os-button left-icon="upload" :label="$t('common.buttons.upload')"
+          @click="showUploadDialog" v-if="isUpdateAllowed" />
       </div>
       <div class="report-text-wrapper" v-else>
         <div class="report-text" v-if="hasTextReport">
@@ -130,6 +134,22 @@ export default {
 
     reqHeaders: function() {
       return http.headers;
+    },
+
+    isUpdateAllowed: function() {
+      return this.cpViewCtx.isUpdateSprAllowed(this.cpr);
+    },
+
+    isDeleteAllowed: function() {
+      return this.cpViewCtx.isDeleteSprAllowed(this.cpr);
+    },
+
+    isLockAllowed: function() {
+      return this.cpViewCtx.isLockSprAllowed(this.cpr);
+    },
+
+    isUnlockAllowed: function() {
+      return this.cpViewCtx.isUnlockSprAllowed(this.cpr);
     }
   },
 

@@ -87,7 +87,11 @@ export default {
     }
 
     this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
-    this.cpViewCtx.isSaveSprEnabled().then(showSpr => this.ctx.showSpr = showSpr);
+    this.cpViewCtx.isSaveSprEnabled().then(
+      showSpr => {
+        this.ctx.showSpr = showSpr && this.cpViewCtx.isReadSprAllowed(this.cpr);
+      }
+    );
   },
 
   computed: {

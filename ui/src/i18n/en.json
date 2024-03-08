@@ -1359,6 +1359,7 @@
     "name": "Name",
     "name_req": "Name is mandatory",
     "no_spr": "No path report for this visit. Add the report by clicking on the upload button.",
+    "no_spr_no_upload": "No path report for this visit.",
     "non_text_spr": "Path report cannot be displayed, as it is in non-text format.",
     "path_report": "Path Report",
     "path_report_deleted": "Path report deleted.",

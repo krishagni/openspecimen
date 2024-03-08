@@ -363,6 +363,46 @@ export default class CpViewContext {
     return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Delete']);
   }
 
+  isReadSprAllowed(cpr) {
+    if (!this.isReadVisitAllowed(cpr) || !this.access || !this.access.readSpr) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'SurgicalPathologyReport', ['Read']);
+  }
+
+  isUpdateSprAllowed(cpr) {
+    if (!this.isUpdateVisitAllowed(cpr) || !this.access || !this.access.updateSpr) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'SurgicalPathologyReport', ['Update']);
+  }
+
+  isDeleteSprAllowed(cpr) {
+    if (!this.isDeleteVisitAllowed(cpr) || !this.access || !this.access.deleteSpr) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'SurgicalPathologyReport', ['Delete']);
+  }
+
+  isLockSprAllowed(cpr) {
+    if (!this.isUpdateVisitAllowed(cpr) || !this.access || !this.access.lockSpr) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'SurgicalPathologyReport', ['Lock']);
+  }
+
+  isUnlockSprAllowed(cpr) {
+    if (!this.isUpdateVisitAllowed(cpr) || !this.access || !this.access.unlockSpr) {
+      return false;
+    }
+
+    return this._isAccessBasedOnMrnAllowed(cpr, 'SurgicalPathologyReport', ['Unlock']);
+  }
+
   isCreateSpecimenAllowed(cpr) {
     if (!this.access || !this.access.createPrimarySpecimen) {
       return false;
@@ -517,6 +557,16 @@ export default class CpViewContext {
       deleteVisit: this._isAllowed('Visit', ['Delete']),
 
       visitExim: this._isAllowed('Visit', ['Export Import']),
+
+      readSpr: this._isAllowed('SurgicalPathologyReport', ['Read']),
+
+      updateSpr: this._isAllowed('SurgicalPathologyReport', ['Update']),
+
+      deleteSpr: this._isAllowed('SurgicalPathologyReport', ['Delete']),
+
+      lockSpr: this._isAllowed('SurgicalPathologyReport', ['Lock']),
+
+      unlockSpr: this._isAllowed('SurgicalPathologyReport', ['Unlock']),
 
       createPrimarySpecimen: this._isAllowed(['PrimarySpecimen', 'Specimen'], ['Create']),
 
