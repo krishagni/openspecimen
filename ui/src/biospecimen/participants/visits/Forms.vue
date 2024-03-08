@@ -22,7 +22,8 @@ export default {
       getForms         : this._getForms,
       getSurveyForms   : this._getSurveyForms,
       getFormRecords   : this._getFormRecords,
-      addEditFormRecord: this._addEditFormRecord
+      addEditFormRecord: this._addEditFormRecord,
+      isUpdateAllowed  : this._isUpdateAllowed,
     }
   },
 
@@ -71,6 +72,10 @@ export default {
     _addEditFormRecord: function(formId, formCtxtId, recordId) {
       const {cpId, cprId, id: visitId, eventId} = this.visit;
       routerSvc.goto('VisitAddEditFormRecord', {cpId, cprId, visitId}, {formId, formCtxtId, recordId, eventId});
+    },
+
+    _isUpdateAllowed: function() {
+      return this.cpViewCtx.isUpdateVisitAllowed(this.cpr);
     }
   }
 }

@@ -21,7 +21,7 @@
         :schema="{columns: recordFields}"
         :expanded="expanded"
         :showRowActions="true"
-        :noRecordsMsg="'common.no_form_records'"
+        :noRecordsMsg="noRecordsMsg"
         @rowClicked="onRecordClick">
 
         <template #rowActions="{rowObject}" v-if="isUpdateAllowed">
@@ -127,6 +127,10 @@ export default {
 
     isUpdateAllowed: function() {
       return !this.api || !this.api.isUpdateAllowed || this.api.isUpdateAllowed()
+    },
+
+    noRecordsMsg: function() {
+      return this.isUpdateAllowed ? 'common.no_form_records' : 'common.no_form_records_no_add'
     }
   },
 

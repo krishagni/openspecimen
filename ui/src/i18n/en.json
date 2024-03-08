@@ -271,6 +271,7 @@
 
     "no": "No",
     "no_form_records": "No form records to display. Create a new record by clicking on the Add button...",
+    "no_form_records_no_add": "No form records to display.",
 
     "notifs": {
       "loading": "Loading notifications. Please wait for a moment..",
