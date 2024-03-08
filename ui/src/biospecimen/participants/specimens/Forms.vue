@@ -22,7 +22,8 @@ export default {
       getForms         : this._getForms,
       getSurveyForms   : this._getSurveyForms,
       getFormRecords   : this._getFormRecords,
-      addEditFormRecord: this._addEditFormRecord
+      addEditFormRecord: this._addEditFormRecord,
+      isUpdateAllowed  : this._isUpdateAllowed
     }
   },
 
@@ -71,7 +72,13 @@ export default {
     _addEditFormRecord: function(formId, formCtxtId, recordId) {
       const {cpId, cprId, visitId, eventId, id: specimenId} = this.specimen;
       routerSvc.goto('SpecimenAddEditFormRecord', {cpId, cprId, visitId, specimenId}, {formId, formCtxtId, recordId, eventId});
-    }
+    },
+
+    _isUpdateAllowed: function() {
+      const vc = this.cpViewCtx;
+      const {lineage} = this.specimen;
+      return lineage == 'New' ? vc.isUpdateSpecimenAllowed(this.cpr) : vc.isUpdateAllSpecimenAllowed(this.cpr);
+    },
   }
 }
 </script>
