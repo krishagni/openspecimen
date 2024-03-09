@@ -192,7 +192,7 @@ class Specimen {
               );
           } else if (field.name == 'specimen.storageLocation') {
             field.href = ({specimen: {storageLocation}}) => {
-              if (storageLocation.id > 0) {
+              if (storageLocation && storageLocation.id > 0) {
                 return routerSvc.getUrl('ContainerDetail.Locations', {containerId: storageLocation.id});
               } else {
                 return null;

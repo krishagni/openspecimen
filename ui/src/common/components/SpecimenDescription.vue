@@ -56,7 +56,7 @@ export default {
       let url = '';
       if (specimen) {
         const params = {...specimen, specimenId: specimen.id || -1};
-        const query  = {view: this.$route.query.view};
+        const query  = {view: this.$route.query.view, eventId: specimen.eventId, reqId: specimen.reqId};
         url = routerSvc.getUrl('ParticipantsListItemSpecimenDetail.Overview', params, query);
       }
 

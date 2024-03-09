@@ -915,7 +915,7 @@ const routes = [
                             path: 'specimen/:specimenId',
                             name: 'ParticipantsListItemSpecimenRoot',
                             component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/DetailRoot.vue'),
-                            props: (route) => ({specimenId: route.params && route.params.specimenId}),
+                            props: (route) => ({specimenId: route.params && route.params.specimenId, reqId: route.query.reqId}),
                             children: [
                               {
                                 path: '',

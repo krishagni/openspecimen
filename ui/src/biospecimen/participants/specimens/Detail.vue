@@ -52,7 +52,8 @@
           </ul>
         </os-side-menu>
 
-        <router-view :cpr="cpr" :visit="visit" :specimen="specimen" v-if="specimen && specimen.id > 0" />
+        <router-view :cpr="cpr" :visit="visit" :specimen="specimen"
+          v-if="specimen && (specimen.id > 0 || specimen.reqId > 0)" />
       </div>
     </os-page-body>
   </os-page>
@@ -126,7 +127,7 @@ export default {
           label: this.cpr.ppid
         },
         {
-          url: routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId, eventId}),
+          url: routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId}, {eventId}),
           label: cpSvc.getEventDescription(this.visit)
         },
         ...parentSpmnUrl
