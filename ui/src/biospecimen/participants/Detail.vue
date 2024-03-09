@@ -10,6 +10,8 @@
           <span>{{participantName}}</span>
         </h3>
         <div class="accessories">
+          <os-tag :value="$t('common.draft')" :rounded="true" :type="'warning'" v-if="cpr.dataEntryStatus == 'DRAFT'" />
+
           <os-copy-link size="small"
             :route="{name: 'ParticipantsListItemDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id}}" />
         </div>

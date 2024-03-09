@@ -175,6 +175,7 @@
     "delete_na": "Error: Cannot delete {title}",
     "delete_na_reason": "Cannot delete {type} '{title}' because of the following dependent objects:",
     "disabled": "Disabled",
+    "draft": "Draft",
     "enabled": "Enabled",
     "enter_delete_captcha": "Type 'DELETE ANYWAY' to continue.",
     "enter_delete_reason": "Specify the reason, at least 10 characters in length, for deletion:",

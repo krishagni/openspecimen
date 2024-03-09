@@ -1,6 +1,6 @@
 <template>
   <os-addedit-form-record-view :api="api" :object="specimen"
-    :form-id="formId" :form-ctxt-id="formCtxtId" :record-id="recordId" />
+    :form-id="formId" :form-ctxt-id="formCtxtId" :record-id="recordId" v-if="api" />
 </template>
 
 <script>
@@ -14,7 +14,7 @@ export default {
 
   data() {
     return {
-      api: {},
+      api: null,
 
       ctx: {
         cp: {},
@@ -25,12 +25,15 @@ export default {
   },
 
   async created() {
+    const cp = this.ctx.cp = await this.cpViewCtx.getCp();
     this.api = {
       getBreadcrumb: this._getBreadcrumb,
 
       getForms: this._getForms,
 
-      gotoOverview: this._gotoOverview
+      gotoOverview: this._gotoOverview,
+
+      isDraftDataEntryEnabled: () => cp.draftDataEntry
     };
   },
 
@@ -58,9 +61,7 @@ export default {
     },
 
     _getForms: async function() {
-      return this.cpViewCtx.getCp().then(
-        cp => this.cpViewCtx.getSpecimenForms({cp: cp, cpr: this.cpr, visit: this.visit, specimen: this.specimen})
-      );
+      return this.cpViewCtx.getSpecimenForms({cp: this.ctx.cp, cpr: this.cpr, visit: this.visit, specimen: this.specimen})
     },
 
     _gotoOverview: function(formId, recordId) {

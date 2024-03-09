@@ -108,8 +108,8 @@ export default {
         {
           name: 'recordName',
           label: this.$t('common.record'),
-          value: function({recordId, formCaption}) {
-            return '#' + recordId + ' ' + formCaption
+          value: function({recordId, formCaption, formStatus}) {
+            return '#' + recordId + ' ' + formCaption + (formStatus == 'DRAFT' ? ' (Draft)' : '')
           }
         },
         {

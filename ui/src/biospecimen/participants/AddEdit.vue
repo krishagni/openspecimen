@@ -59,6 +59,9 @@
         </template>
 
         <div>
+          <os-button primary :label="$t('common.buttons.save_draft')"
+            @click="saveOrUpdate(null, true)" v-if="dataCtx.cp.draftDataEntry" />
+
           <os-button primary :label="$t(!dataCtx.cpr.id ? 'participants.add_participant' : 'common.buttons.update')"
             @click="saveOrUpdate()" />
 
@@ -288,12 +291,13 @@ export default {
       this._useSelectedMatch(this.ctx.selectedMatch);
     },
 
-    saveOrUpdate: function(cpEvent) {
-      if (!this.$refs.cprForm.validate()) {
+    saveOrUpdate: function(cpEvent, saveAsDraft) {
+      if (!saveAsDraft && !this.$refs.cprForm.validate()) {
         return;
       }
 
       const {cpr} = this.dataCtx;
+      cpr.dataEntryStatus = saveAsDraft ? 'DRAFT' : 'COMPLETE';
       this.ctx.selectedEvent = cpEvent;
       if (this.ctx.step == 'lookup') {
         cprSvc.getMatchingParticipants(cpr).then(

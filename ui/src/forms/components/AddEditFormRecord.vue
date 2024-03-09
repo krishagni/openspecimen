@@ -7,6 +7,7 @@
 
     <os-form ref="deForm" :schema="ctx.formSchema" :data="ctx.record" @input="handleChange($event)">
       <os-button primary :label="$t('common.buttons.save')"   @click="saveRecord(false)" />
+      <os-button primary :label="$t('common.buttons.save_draft')" @click="saveRecord(false, true)" v-if="showDraft" />
       <os-button primary :label="$t('common.buttons.save_n_next')"  @click="saveRecord(true)" v-if="showNext" />
       <os-button text    :label="$t('common.buttons.cancel')" @click="cancel" />
     </os-form>
@@ -26,7 +27,8 @@ export default {
     'formDef',
     'recordId',
     'hidePanel',
-    'showNext'
+    'showNext',
+    'showDraft'
   ],
 
   emits: ['saved', 'cancelled'],
@@ -94,13 +96,14 @@ export default {
       // console.log(event);
     },
 
-    saveRecord: function(next) {
-      if (!this.$refs.deForm.validate()) {
+    saveRecord: function(next, saveAsDraft) {
+      if (!saveAsDraft && !this.$refs.deForm.validate()) {
         return;
       }
 
+      let formStatus = saveAsDraft ? 'DRAFT' : 'COMPLETE';
       let formData = this.ctx.record;
-      formData.appData = {objectId: +this.entity.id, formCtxtId: +this.formCtxtId, formId: +this.formId};
+      formData.appData = {objectId: +this.entity.id, formCtxtId: +this.formCtxtId, formId: +this.formId, formStatus};
       formSvc.saveOrUpdateRecord(formData).then(
         (savedData) => {
           savedData.nextForm = next;
