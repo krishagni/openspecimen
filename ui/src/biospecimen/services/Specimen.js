@@ -4,6 +4,7 @@ import cpSvc       from './CollectionProtocol.js';
 import exprUtil    from '@/common/services/ExpressionUtil.js';
 import http        from '@/common/services/HttpClient.js';
 import formSvc     from '@/forms/services/Form.js';
+import routerSvc   from '@/common/services/Router.js';
 import settingsSvc from '@/common/services/Setting.js';
 import ui          from '@/global.js';
 import util        from '@/common/services/Util.js';
@@ -178,7 +179,31 @@ class Specimen {
     return cpSvc.getDictFor(
       cpId, aliases, 'specimen.extensionDetail',
       specimenSchema, this.getCustomFieldsForm
-    ).then(fields => fields.filter(field => field.name.indexOf('specimen.events') == -1));
+    ).then(
+      fields => {
+        fields = fields.filter(field => field.name.indexOf('specimen.events') == -1)
+        for (let field of fields) {
+          if (field.name == 'specimen.parentLabel') {
+            field.href = ({specimen: {cpId, cprId, visitId, parentId, eventId}}) =>
+              routerSvc.getUrl(
+                'ParticipantsListItemSpecimenDetail.Overview',
+                {cpId, cprId, visitId, specimenId: parentId},
+                {eventId}
+              );
+          } else if (field.name == 'specimen.storageLocation') {
+            field.href = ({specimen: {storageLocation}}) => {
+              if (storageLocation.id > 0) {
+                return routerSvc.getUrl('ContainerDetail.Locations', {containerId: storageLocation.id});
+              } else {
+                return null;
+              }
+            }
+          }
+        }
+
+        return fields;
+      }
+    );
   }
 
   async getLayout(cpId, specimenFields) {
