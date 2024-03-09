@@ -76,7 +76,7 @@ export default {
       if (typeof this.href == 'function') {
         let ctx = this.form || this.context || {};
         let link = this.href(ctx.formData || ctx);
-        if (link.indexOf('#') == 0) {
+        if (link && link.indexOf('#') == 0) {
           link = this.$ui.ngServer + link;
         }
 
