@@ -106,11 +106,11 @@ export default {
     recordFields: function() {
       return [
         {
-          name: 'recordName',
+          name: 'recordDescription',
           label: this.$t('common.record'),
-          value: function({recordId, formCaption, formStatus}) {
-            return '#' + recordId + ' ' + formCaption + (formStatus == 'DRAFT' ? ' (Draft)' : '')
-          }
+          type: 'component',
+          component: 'os-form-record-description',
+          data: (record) => (record && {record}) || ({record: {}})
         },
         {
           name: 'user',
