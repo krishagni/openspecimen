@@ -57,13 +57,16 @@ export default {
     formUtil.createCustomFieldsMap(specimen);
 
     this.cpViewCtx.getCp().then(cp => this.dataCtx.cp = cp);
+    const userRole = this.cpViewCtx.getRole();
     return {
       dataCtx: {
         specimen,
 
         cp: {},
 
-        item: {cpr: this.cpr, visit: this.visit, specimen}
+        item: {cpr: this.cpr, visit: this.visit, specimen, userRole},
+
+        userRole
       },
 
       ctx: {

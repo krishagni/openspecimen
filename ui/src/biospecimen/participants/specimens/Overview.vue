@@ -142,7 +142,9 @@ export default {
 
         children: [],
 
-        eventForms: undefined
+        eventForms: undefined,
+
+        userRole: this.cpViewCtx.getRole()
       }
     };
   },

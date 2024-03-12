@@ -4,6 +4,8 @@ import http from '@/common/services/HttpClient.js';
 import i18n from '@/common/services/I18n.js';
 import util from '@/common/services/Util.js';
 
+import ui from '@/global.js';
+
 class CollectionProtocol {
 
   workflows = {};
@@ -255,6 +257,37 @@ class CollectionProtocol {
   async generateCpReport(cpId) {
     const {status} = await http.post('collection-protocols/' + cpId + '/report', {});
     return status;
+  }
+
+  getUserRoleOn(cp) {
+    const {currentUser} = ui;
+    if (currentUser.admin) {
+      return 'system-admin';
+    }
+
+    if (!currentUser.roles || currentUser.roles.length == 0) {
+      return null;
+    }
+
+    for (let sr of currentUser.roles) {
+      if (!sr.site && !sr.collectionProtocol) {
+        return sr.role.name;
+      } else if (!sr.site && sr.collectionProtocol) {
+        if (sr.collectionProtocol.id == cp.id) {
+          return sr.role.name;
+        }
+      } else if (sr.site && !sr.collectionProtocol) {
+        if (cp.cpSites.some(cpSite => cpSite.siteId == sr.site.id)) {
+          return sr.role.name;
+        }
+      } else {
+        if (sr.collectionProtocol.id == cp.id && cp.cpSites.some(cpSite => cpSite.siteId == sr.site.id)) {
+          return sr.role.name;
+        }
+      }
+    }
+
+    return null;
   }
 }
 

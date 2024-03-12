@@ -126,16 +126,19 @@ export default {
 
         routeQuery: this.$route.query,
 
-        visitDict: undefined
+        visitDict: undefined,
+
+        userRole: null
       }
     };
   },
 
   async created() {
     this._setupCpr();
-    this.ctx.dict = await this.cpViewCtx.getCprDict();
     this.ctx.cp = await this.cpViewCtx.getCp();
+    this.ctx.dict = await this.cpViewCtx.getCprDict();
     this.ctx.visitDict = await this.cpViewCtx.getVisitDict();
+    this.ctx.userRole = this.cpViewCtx.getRole();
   },
 
   computed: {

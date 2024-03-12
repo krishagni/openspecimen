@@ -72,6 +72,8 @@ export default {
         routeQuery: this.$route.query,
 
         specimens: [],
+
+        userRole: this.cpViewCtx.getRole()
       }
     };
   },

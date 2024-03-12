@@ -19,7 +19,8 @@
       </template>
 
       <template class="visit-details" #expansionRow="{rowObject}">
-        <os-overview :schema="dict" :object="{cp, cpr, visit: rowObject.visit}" v-if="dict && dict.length > 0" />
+        <os-overview :schema="dict" :object="{cp, cpr, visit: rowObject.visit, userRole}"
+          v-if="dict && dict.length > 0" />
       </template>
     </os-list-view>
   </div>
@@ -45,17 +46,21 @@ export default {
 
       expandedVisits: [],
 
-      visit: {}
+      visit: {},
+
+      userRole: null
     }
   },
 
   created() {
     this.cpViewCtx.getOccurredVisitsTabFields().then(tabFields => this.tabFields = tabFields);
+    this.userRole = this.cpViewCtx.getRole();
   },
 
   computed: {
     occurredVisits: function() {
-      return (this.visits || []).filter(visit => visit.status == 'Complete').map(visit => ({cpr: this.cpr, visit}));
+      return (this.visits || []).filter(visit => visit.status == 'Complete')
+        .map(visit => ({cpr: this.cpr, visit, userRole: this.userRole}));
     }
   },
 

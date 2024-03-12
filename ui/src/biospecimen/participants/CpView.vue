@@ -2,7 +2,7 @@
   <span class="os-cp-draft-marker" v-if="cp.draftMode">
     <span class="text" v-t="'participants.draft_watermark'">DRAFT</span>
   </span>
-  <router-view :key="$route.params.cpId" />
+  <router-view :key="$route.params.cpId" v-if="cp.id > 0" />
 </template>
 
 <script>

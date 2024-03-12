@@ -61,7 +61,9 @@ export default {
       dataCtx: {
         visit: visit,
 
-        cp: {}
+        cp: {},
+
+        userRole: this.cpViewCtx.getRole()
       },
 
       ctx: {

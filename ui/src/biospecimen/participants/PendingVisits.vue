@@ -22,7 +22,8 @@
       </template>
 
       <template class="visit-details" #expansionRow="{rowObject}">
-        <os-overview :schema="dict" :object="{cp, cpr, visit: rowObject.visit}" v-if="dict && dict.length > 0" />
+        <os-overview :schema="dict" :object="{cp, cpr, visit: rowObject.visit, userRole}"
+          v-if="dict && dict.length > 0" />
       </template>
     </os-list-view>
   </div>
@@ -47,13 +48,16 @@ export default {
 
       expandedVisits: [],
 
-      allowSelection: false
+      allowSelection: false,
+
+      userRole: null
     }
   },
 
   created() {
     this.cpViewCtx.getPendingVisitsTabFields().then(tabFields => this.tabFields = tabFields);
     this.cpViewCtx.isMultiVisitsCollectionAllowed().then(allowSelection => this.allowSelection = allowSelection);
+    this.userRole = this.cpViewCtx.getRole();
   },
 
   computed: {
@@ -65,7 +69,10 @@ export default {
       return (this.visits || []).filter(visit => !visit.status || visit.status == 'Pending')
         .map(visit => ({
           visit: Object.assign(
-            visit, {cprId: this.cpr.id, anticipatedVisitDate: this._getAnticipatedVisitDate(visit)})
+            visit,
+            {cprId: this.cpr.id, anticipatedVisitDate: this._getAnticipatedVisitDate(visit)}
+          ),
+          userRole: this.userRole
         }));
     },
 

@@ -135,7 +135,9 @@ export default {
       dataCtx: {
         cpr: copy,
 
-        cp: {}
+        cp: {},
+
+        userRole: this.cpViewCtx.getRole()
       },
 
       ctx: {

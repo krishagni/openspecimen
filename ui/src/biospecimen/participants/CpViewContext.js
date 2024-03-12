@@ -289,6 +289,11 @@ export default class CpViewContext {
   // Access control
   //
 
+  // needs to be invoked only after CP is loaded
+  getRole() {
+    return cpSvc.getUserRoleOn(this.cp);
+  }
+
   isAccessBasedOnMrnSite() {
     return this.accessBasedOnMrn;
   }
