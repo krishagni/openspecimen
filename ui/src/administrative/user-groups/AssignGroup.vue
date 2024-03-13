@@ -1,146 +1,161 @@
 
 <template>
-  <span>
-    <os-button left-icon="users" :label="$t('user_groups.add_to_group')" right-icon="caret-down" @click="toggle" />
+  <os-button left-icon="users" :label="$t('user_groups.add_to_group')" right-icon="caret-down"
+      @click="toggleGroupOptions" />
 
-    <dropdown-menu class="os-assign-user-group" ref="menu" :model="ctx.items" :popup="true">
-      <template #item="{item}">
-        <span v-if="item.search">
-          <os-input-text v-model="ctx.search" :placeholder="$t('user_groups.search_group')" />
-        </span>
-        <span v-else-if="item.items && item.items.length > 0">
-          <dropdown-menu :model="item.items" :popup="false" />
-        </span>
-      </template>
-    </dropdown-menu>
-  </span>
+  <os-overlay class="os-assign-user-group" ref="groupOptions">
+    <ul class="search">
+      <li>
+        <os-input-text v-model="searchTerm" :placeholder="$t('user_groups.search_group')"
+          @update:modelValue="searchGroups" />
+      </li>
+    </ul>
+    <ul class="groups">
+      <li v-for="(group, idx) of groups" :key="idx" @click="addToGroup($event, group)">
+        <a> {{group.name}} </a>
+      </li>
+
+      <li v-if="groups.length == 0">
+        <a class="no-click" v-t="'user_groups.no_groups'"> No groups to show </a>
+      </li>
+    </ul>
+    <ul class="actions">
+      <li>
+        <a @click="createNewGroup">
+          <span v-t="'user_groups.create_new'">Create New </span>
+        </a>
+      </li>
+      <li>
+        <a @click="viewGroups" v-if="groups.length > 0">
+          <span v-t="'user_groups.manage_groups'">Manage Groups </span>
+        </a>
+      </li>
+    </ul>
+  </os-overlay>
 </template>
 
 <script>
-import { reactive, ref } from 'vue';
-import Menu from 'primevue/menu';
-
-import i18n         from '@/common/services/I18n.js';
 import routerSvc    from '@/common/services/Router.js';
 import userGroupSvc from '@/administrative/services/UserGroup.js';
 
 export default {
   emits: ['addToGroup'],
 
-  components: {
-    'dropdown-menu': Menu
-  },
+  data() {
+    return {
+      searchTerm: '',
 
-  setup(props, { emit }) {
-    let ctx = reactive({});
-    let menu = ref();
-
-    ctx.items = [
-      {search: true},
-      {separator: true},
-      { label: '', items: [] },
-      {separator: true},
-      {
-        label: '',
-        items: [ 
-          {
-            label: i18n.msg('user_groups.create_new'),
-            command: () => {
-              menu.value.toggle();
-              emit('addToGroup')
-            }
-          },
-          {
-            label: i18n.msg('user_groups.manage_groups'),
-            command: () => routerSvc.goto('UserGroupsList')
-          }
-        ]
-      }
-    ];
-
-    const loadUserGroups = async function(searchTerm) {
-      if (!searchTerm && ctx.defGroups) {
-        return ctx.defGroups;
-      }
-
-      if (ctx.defGroups && ctx.defGroups.length < 100) {
-        return ctx.defGroups.filter(group => group.name.toLowerCase().indexOf(searchTerm.toLowerCase()) != -1);
-      }
-
-      return userGroupSvc.getGroups({query: searchTerm}).then(
-        groups => {
-          if (!searchTerm) {
-            ctx.defGroups = groups;
-          }
-
-          groups.forEach(group => {
-            group.label = group.name;
-            group.command = () => {
-              menu.value.toggle();
-              emit('addToGroup', group);
-            }
-          });
-
-          return groups;
-        }
-      );
+      groups: []
     }
-
-    const toggle = (event) => {
-      menu.value.toggle(event);
-      loadUserGroups(ctx.search).then(groups => ctx.items[2].items = groups);
-    }
-
-    return { ctx, menu, loadUserGroups, toggle };
   },
 
   methods: {
-    debounce: (function() {
-      let timeout = null;
-      return function(fn, delayMs) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => { fn(); }, delayMs || 500);
-      };
-    })()
-  },
+    toggleGroupOptions: function(event) {
+      this.$refs.groupOptions.toggle(event);
+      if (this.groupsLoaded) {
+        return;
+      }
 
-  watch: {
-    'ctx.search': function(searchTerm) {
-      let self = this;
-      this.debounce(() => self.loadUserGroups(searchTerm).then(groups => self.ctx.items[2].items = groups));
+      this.groupsLoaded = true;
+      this.searchGroups(null);
+    },
+
+    searchGroups: function(searchTerm) {
+      if (this.searchTimer) {
+        clearTimeout(this.searchTimer);
+        this.searchTimer = null;
+      }
+
+      if (!searchTerm && this.defGroups) {
+        this.groups = this.defGroups;
+        return;
+      }
+
+      this.searchTimer = setTimeout(
+        () => {
+          if (this.defGroups && this.defGroups.length < 100) {
+            searchTerm = searchTerm.toLowerCase();
+            this.groups = this.defGroups.filter(group => group.name.toLowerCase().indexOf(searchTerm) != -1);
+          } else {
+            this.getGroups(searchTerm).then(
+              groups => {
+                this.groups = groups;
+                if (!searchTerm) {
+                  this.defGroups = groups;
+                }
+              }
+            );
+          }
+        },
+        searchTerm ? 500 : 0
+      );
+    },
+
+    getGroups: function(searchTerm) {
+      return userGroupSvc.getGroups({query: searchTerm});
+    },
+
+    addToGroup: function(event, group) {
+      if (event) {
+        this.$refs.groupOptions.toggle(event);
+      }
+
+      this.$emit('addToGroup', group);
+    },
+
+    createNewGroup: function(event) {
+      this.addToGroup(event, null);
+    },
+
+    viewGroups: function() {
+      routerSvc.goto('UserGroupsList');
     }
   }
 }
 </script>
 
-<style>
-
-/* minimum width of the user group menu */
-.os-assign-user-group {
-  min-width: 250px!important;
-}
-
+<style scoped>
 .os-assign-user-group .os-input-text {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
 }
 
-/* make the search menu as big as the user group menu */
-.os-assign-user-group .os-input-text input {
+.os-assign-user-group ul {
+  margin: 0.5rem -1.25rem;
+  padding: 0rem;
+  padding-bottom: 0.5rem;
+  list-style: none;
+  border-bottom: 1px solid #ddd;
+}
+
+.os-assign-user-group ul.groups {
+  max-height: 190px;
+  overflow: scroll;
+}
+
+.os-assign-user-group ul:last-child {
+  margin-bottom: 0rem;
+  border-bottom: 0px;
+}
+
+.os-assign-user-group ul li a {
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  display: inline-block;
   width: 100%;
+  color: #212529;
 }
 
-/* fix the height of submenus to ensure a scroll appears */
-/* mostly for dynamic group names list */
-.os-assign-user-group .p-submenu-header {
-  padding: 0px;
-  max-height: 150px;
-  overflow: auto;
+.os-assign-user-group ul li a:hover:not(.no-click) {
+  background: #e9ecef;
 }
 
-.os-assign-user-group .p-submenu-header .p-menu {
-  border: 0px;
-  width: 100%;
-  padding: 0px;
+.os-assign-user-group ul li a.no-click {
+  cursor: initial;
 }
+</style>
 
+<style>
+.os-assign-user-group .p-overlaypanel-content {
+  padding: 0.5rem 1.25rem;
+}
 </style>

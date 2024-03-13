@@ -1249,6 +1249,7 @@
     "multi_institute_users_na": "Users of multiple institutes cannot be added to the same group.",
     "name": "Name",
     "name_required": "Name is mandatory",
+    "no_groups": "No user groups to show.",
     "search_group": "Search Group",
     "singular": "User Group",
     "updated": "User group '{name}' updated.",
