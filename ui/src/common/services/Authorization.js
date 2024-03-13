@@ -4,12 +4,15 @@ import http from '@/common/services/HttpClient.js';
 
 class Authorization {
 
+  userRoles  = [];
+
   userRights = [];
 
   async loadUserRights(errorHandler) {
     this.userRights = [];
     return http.get('users/current-user-roles', undefined, undefined, errorHandler).then(
       (userRoles) => {
+        this.userRoles = userRoles;
         for (let userRole of userRoles) {
           let site = userRole.site ? userRole.site.name : null;
           let cp = userRole.collectionProtocol ? userRole.collectionProtocol.shortTitle : null;
@@ -26,6 +29,10 @@ class Authorization {
         return this.userRights;
       }
     );
+  }
+
+  getUserRoles() {
+    return this.userRoles;
   }
 
   isAllowed(opts) {

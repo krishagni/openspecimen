@@ -1,4 +1,5 @@
 
+import authSvc from '@/common/services/Authorization.js';
 import formUtil from '@/common/services/FormUtil.js';
 import http from '@/common/services/HttpClient.js';
 import i18n from '@/common/services/I18n.js';
@@ -265,11 +266,12 @@ class CollectionProtocol {
       return 'system-admin';
     }
 
-    if (!currentUser.roles || currentUser.roles.length == 0) {
+    const roles = authSvc.getUserRoles();
+    if (!roles || roles.length == 0) {
       return null;
     }
 
-    for (let sr of currentUser.roles) {
+    for (let sr of roles) {
       if (!sr.site && !sr.collectionProtocol) {
         return sr.role.name;
       } else if (!sr.site && sr.collectionProtocol) {

@@ -21,10 +21,13 @@ export default {
     const dbCp = await cpSvc.getCpById(+props.cpId);
     const cp = reactive(dbCp);
 
-    const settings = await settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled')
-    const accessBasedOnMrn = util.isTrue(settings[0].value);
+    const mrnSetting = await settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled')
+    const accessBasedOnMrn = util.isTrue(mrnSetting[0].value);
 
-    const cpViewCtx = reactive(new CpViewContext(cp, accessBasedOnMrn));
+    const roleSetting = await settingSvc.getSetting('biospecimen', 'coordinator_role_name');
+    const coordinatorRole = roleSetting[0].value;
+
+    const cpViewCtx = reactive(new CpViewContext(cp, {accessBasedOnMrn, coordinatorRole}));
     return { cp, cpViewCtx };
   },
 
@@ -40,10 +43,14 @@ export default {
 
       const cp = this.cp = await cpSvc.getCpById(+newVal);
 
-      const settings = await settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled')
-      const accessBasedOnMrn = util.isTrue(settings[0].value);
+      const mrnSetting = await settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled')
+      const accessBasedOnMrn = util.isTrue(mrnSetting[0].value);
 
-      this.cpViewCtx = new CpViewContext(cp, accessBasedOnMrn);
+      const roleSetting = await settingSvc.getSetting('biospecimen', 'coordinator_role_name');
+      const coordinatorRole = roleSetting[0].value;
+
+
+      this.cpViewCtx = new CpViewContext(cp, {accessBasedOnMrn, coordinatorRole});
     }
   }
 }

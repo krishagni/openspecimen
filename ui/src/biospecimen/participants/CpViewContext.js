@@ -30,11 +30,14 @@ export default class CpViewContext {
 
   accessBasedOnMrn = false;
 
-  constructor(cp, accessBasedOnMrn) {
+  coordinatorRole = null;
+
+  constructor(cp, {accessBasedOnMrn, coordinatorRole}) {
     this.cp = cp;
     this.cpId = cp.id;
     this.cpSites = cp.cpSites.map(({siteName}) => siteName);
     this.accessBasedOnMrn = accessBasedOnMrn;
+    this.coordinatorRole = coordinatorRole;
     this._loadAccessRights();
   }
 
@@ -280,6 +283,17 @@ export default class CpViewContext {
 
   isAccessBasedOnMrnSite() {
     return this.accessBasedOnMrn;
+  }
+
+  isCoordinator() {
+    return this.getRole() == this.coordinatorRole;
+  }
+
+  notCoordinatOrStoreAllowed({storageLocation}) {
+    const storeAllowed = this._isAllowed('StorageContainer', ['Read']);
+    const {storageSiteBasedAccess} = this.cp;
+    storageLocation = storageLocation || {};
+    return !this.isCoordinator() || (storageSiteBasedAccess && storeAllowed && storageLocation.id > 0);
   }
 
   isCreateParticipantAllowed() {

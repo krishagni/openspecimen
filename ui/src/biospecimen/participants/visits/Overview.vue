@@ -113,7 +113,7 @@ export default {
     },
 
     isPrintSpecimenLabelAllowed: function() {
-      return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr);
+      return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr) && !this.cpViewCtx.isCoordinator();
     }
   },
 

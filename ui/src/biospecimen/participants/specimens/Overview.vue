@@ -4,7 +4,7 @@
     <template #default>
       <span v-if="specimen.id > 0">
         <os-button left-icon="edit" :label="$t('common.buttons.edit')"
-          @click="edit" v-if="isUpdateAllowed" />
+          @click="edit" v-if="isAnyUserUpdateAllowed" />
 
         <os-menu icon="plus" :label="$t('common.buttons.create')"
           :options="[
@@ -21,7 +21,8 @@
         <os-add-to-cart :specimens="[{id: specimen.id}]" />
 
         <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
-          @menu-toggled="loadEventForms" v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
+          @menu-toggled="loadEventForms"
+          v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
 
         <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
       </span>
@@ -82,9 +83,9 @@
     <template #footer>
       <os-button text   :label="$t('common.buttons.close')" @click="closeEventOverview()" />
       <os-button danger left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
-        v-if="!ctx.event.sysForm" />
+        v-if="!ctx.event.sysForm && isUpdateAllowed" />
       <os-button primary left-icon="edit" :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
-        v-if="ctx.event.isEditable" />
+        v-if="ctx.event.isEditable && isUpdateAllowed" />
     </template>
   </os-dialog>
 
@@ -187,10 +188,14 @@ export default {
       return this.cpViewCtx.isCreateAllSpecimenAllowed(this.cpr);
     },
 
-    isUpdateAllowed: function() {
+    isAnyUserUpdateAllowed: function() {
       const vc = this.cpViewCtx;
       const {specimen: {lineage}} = this.ctx;
       return lineage == 'New' ? vc.isUpdateSpecimenAllowed(this.cpr) : vc.isUpdateAllSpecimenAllowed(this.cpr);
+    },
+
+    isUpdateAllowed: function() {
+      return this.isAnyUserUpdateAllowed && this.notCoordinatOrStoreAllowed;
     },
 
     isDeleteAllowed: function() {
@@ -200,7 +205,11 @@ export default {
     },
 
     isPrintAllowed: function() {
-      return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr);
+      return this.cpViewCtx.isPrintSpecimenAllowed(this.cpr) && this.notCoordinatOrStoreAllowed;
+    },
+
+    notCoordinatOrStoreAllowed: function() {
+      return this.cpViewCtx.notCoordinatOrStoreAllowed(this.specimen || {});
     }
   },
 
