@@ -186,17 +186,19 @@ export default {
         }
       );
 
-      const urlColumnIdx = columns.findIndex(column => column.href);
-      const urlColumn = urlColumnIdx >= 0 ? columns[urlColumnIdx] : null;
-      if (urlColumn) {
-        this.schema.summary = {
-          title: {
-            text: (ro) => exprUtil.eval(ro, urlColumn.name),
-            url: (ro) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(ro, this.url)
-          },
-          descriptions: columns.map(column => column.name).filter((column, index) => index != urlColumnIdx)
-        };
+      let urlColumnIdx = columns.findIndex(column => column.href);
+      if (urlColumnIdx < 0) {
+        urlColumnIdx = 0;
       }
+
+      const urlColumn = columns[urlColumnIdx];
+      this.schema.summary = {
+        title: {
+          text: (ro) => exprUtil.eval(ro, urlColumn.name),
+          url:  (ro) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(ro, this.url)
+        },
+        descriptions: columns.map(column => column.name).filter((column, index) => index != urlColumnIdx)
+      };
 
       this.data = this.list.rows.map(
         (row) => {
