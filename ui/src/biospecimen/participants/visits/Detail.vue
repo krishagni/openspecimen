@@ -68,14 +68,14 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
-    const ctx = {
-      cp: {},
+    const cp = this.cpViewCtx.getCp();
+    return {
+      ctx: {
+        cp,
 
-      showSpr: true
+        showSpr: true
+      }
     };
-
-
-    return { ctx };
   },
 
   created() {
@@ -86,7 +86,6 @@ export default {
       Object.assign(this.query, {filters: this.$route.query.filters});
     }
 
-    this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
     this.cpViewCtx.isSaveSprEnabled().then(
       showSpr => {
         this.ctx.showSpr = showSpr && this.cpViewCtx.isReadSprAllowed(this.cpr);

@@ -56,12 +56,12 @@ export default {
 
     formUtil.createCustomFieldsMap(visit);
 
-    this.cpViewCtx.getCp().then(cp => this.dataCtx.cp = cp);
+    const cp = this.cpViewCtx.getCp();
     return {
       dataCtx: {
-        visit: visit,
+        visit,
 
-        cp: {},
+        cp,
 
         userRole: this.cpViewCtx.getRole()
       },

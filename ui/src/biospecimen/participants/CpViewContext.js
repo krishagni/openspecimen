@@ -14,8 +14,6 @@ import matchingTab from '@/biospecimen/schemas/participants/matching-participant
 export default class CpViewContext {
   cpId = null;
 
-  cpQ = null;
-
   cprDictQ = null;
 
   visitDictQ = null;
@@ -32,30 +30,16 @@ export default class CpViewContext {
 
   accessBasedOnMrn = false;
 
-  constructor(cpId) {
-    this.cpId = cpId;
+  constructor(cp, accessBasedOnMrn) {
+    this.cp = cp;
+    this.cpId = cp.id;
+    this.cpSites = cp.cpSites.map(({siteName}) => siteName);
+    this.accessBasedOnMrn = accessBasedOnMrn;
+    this._loadAccessRights();
   }
 
   getCp() {
-    if (!this.cpQ) {
-      this.cpQ = cpSvc.getCpById(this.cpId);
-    }
-
-    settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled').then(
-      settings => {
-        this.accessBasedOnMrn = util.isTrue(settings[0].value);
-      }
-    );
-
-    this.cpQ.then(
-      cp => {
-        this.cp = cp;
-        this.cpSites = cp.cpSites.map(({siteName}) => siteName);
-        this._loadAccessRights();
-      }
-    );
-
-    return this.cpQ;
+    return this.cp;
   }
 
   getCpEvents() {
@@ -244,7 +228,7 @@ export default class CpViewContext {
   }
 
   async isSaveSprEnabled() {
-    const cp = await this.getCp();
+    const cp = this.getCp();
     if (cp.storeSprEnabled == null || cp.storeSprEnabled == undefined) {
       return settingSvc.getSetting('biospecimen', 'store_spr')
         .then(settings => util.isTrue(settings[0].value));

@@ -108,7 +108,10 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
+    const cp = this.cpViewCtx.getCp();
+
     const copy = this.cpr ? util.clone(this.cpr) : {participant: {pmis: [], source: 'OpenSpecimen'}};
+    copy.cpId = cp.id;
     if (!copy.id) {
       copy.registrationDate = new Date();
     }
@@ -123,19 +126,11 @@ export default {
 
     formUtil.createCustomFieldsMap(copy.participant);
 
-    this.cpViewCtx.getCp().then(
-      cp => {
-        this.dataCtx.cp = cp;
-        this.ctx.bcrumb[0].label = cp.shortTitle;
-        copy.cpId = cp.id;
-      }
-    );
-
     return {
       dataCtx: {
         cpr: copy,
 
-        cp: {},
+        cp,
 
         userRole: this.cpViewCtx.getRole()
       },
@@ -157,7 +152,7 @@ export default {
 
         lockedFields: [],
 
-        bcrumb: [{url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: ''}]
+        bcrumb: [{url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}]
       }
     };
   },

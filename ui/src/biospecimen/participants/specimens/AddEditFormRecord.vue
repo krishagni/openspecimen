@@ -13,27 +13,23 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
+    const cp = this.cpViewCtx.getCp();
     return {
-      api: null,
+      api: {
+        getBreadcrumb: this._getBreadcrumb,
+
+        getForms: this._getForms,
+
+        gotoOverview: this._gotoOverview,
+
+        isDraftDataEntryEnabled: () => cp.draftDataEntry
+      },
 
       ctx: {
-        cp: {},
+        cp,
 
         formDef: {}
       }
-    };
-  },
-
-  async created() {
-    const cp = this.ctx.cp = await this.cpViewCtx.getCp();
-    this.api = {
-      getBreadcrumb: this._getBreadcrumb,
-
-      getForms: this._getForms,
-
-      gotoOverview: this._gotoOverview,
-
-      isDraftDataEntryEnabled: () => cp.draftDataEntry
     };
   },
 

@@ -6,32 +6,44 @@
 </template>
 
 <script>
-import { provide, reactive, ref } from 'vue';
+import { reactive } from 'vue';
+
+import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import settingSvc from '@/common/services/Setting.js';
+import util from '@/common/services/Util.js';
 
 import CpViewContext from './CpViewContext.js';
 
 export default {
   props: ['cpId'],
 
-  setup(props) {
-    const cpViewCtx = ref();
-    const ctx = cpViewCtx.value = new CpViewContext(+props.cpId);
+  async setup(props) {
+    const dbCp = await cpSvc.getCpById(+props.cpId);
+    const cp = reactive(dbCp);
 
-    const cp = reactive({});
-    ctx.getCp().then(p => Object.assign(cp, p));
+    const settings = await settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled')
+    const accessBasedOnMrn = util.isTrue(settings[0].value);
 
-    provide('cpViewCtx', cpViewCtx);
-    return { cp, cpViewCtx }
+    const cpViewCtx = reactive(new CpViewContext(cp, accessBasedOnMrn));
+    return { cp, cpViewCtx };
+  },
+
+  provide() {
+    return {cpViewCtx: this.cpViewCtx};
   },
 
   watch: {
-    'cpId': function(newVal, oldVal) {
+    'cpId': async function(newVal, oldVal) {
       if (newVal == oldVal || this.cpViewCtx.cpId == newVal) {
         return;
       }
 
-      this.cpViewCtx = new CpViewContext(+newVal);
-      this.cpViewCtx.getCp().then(cp => this.cp = cp);
+      const cp = this.cp = await cpSvc.getCpById(+newVal);
+
+      const settings = await settingSvc.getSetting('biospecimen', 'mrn_restriction_enabled')
+      const accessBasedOnMrn = util.isTrue(settings[0].value);
+
+      this.cpViewCtx = new CpViewContext(cp, accessBasedOnMrn);
     }
   }
 }

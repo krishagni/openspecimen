@@ -53,12 +53,9 @@ export default {
 
   methods: {
     _getForms: async function() {
-      return this.cpViewCtx.getCp().then(
-        cp => {
-          const ctxt = {cp: cp, cpr: this.cpr, visit: this.visit};
-          return this.cpViewCtx.getVisitForms(ctxt);
-        }
-      );
+      const cp = this.cpViewCtx.getCp();
+      const ctxt = {cp, cpr: this.cpr, visit: this.visit};
+      return this.cpViewCtx.getVisitForms(ctxt);
     },
 
     _getSurveyForms: async function() {

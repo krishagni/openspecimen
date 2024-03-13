@@ -51,8 +51,6 @@
 
 <script>
 
-import { inject, reactive } from 'vue';
-
 import authSvc    from '@/common/services/Authorization.js';
 import i18n       from '@/common/services/I18n.js';
 import routerSvc  from '@/common/services/Router.js';
@@ -64,21 +62,18 @@ export default {
 
   inject: ['cpViewCtx'],
 
-  async setup() {
-    const cpViewCtx = inject('cpViewCtx', {value: {}}).value;
+  data() {
+    const cp =  this.cpViewCtx.getCp();
+    return {
+      ctx: {
+        cp: cp,
 
-    const cp = await cpViewCtx.getCp();
-
-    const ctx = reactive({
-      cp: cp,
-
-      bcrumb: [
-        {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}, // TODO: CP conf list view
-        {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: i18n.msg('participants.list')}
-      ]
-    });
-
-    return { ctx };
+        bcrumb: [
+          {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}, // TODO: CP conf list view
+          {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: i18n.msg('participants.list')}
+        ]
+      }
+    }
   },
 
   created() {

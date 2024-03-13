@@ -70,13 +70,11 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
-    const ctx = { cp: {} };
-    return { ctx };
+    const cp = this.cpViewCtx.getCp();
+    return { ctx: { cp } };
   },
 
   created() {
-    this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
-
     const route = this.$route.matched[this.$route.matched.length - 1];
     this.detailRouteName = route.name.split('.')[0];
     this.query = {};
@@ -88,10 +86,6 @@ export default {
   computed: {
     bcrumb: function() {
       const cp = this.ctx.cp;
-      if (!cp) {
-        return [];
-      }
-
       const {query} = routerSvc.getCurrentRoute();
       const {cpId, cprId, visitId, eventId, parentId, parentLabel} = this.specimen;
       const parentSpmnUrl = [];

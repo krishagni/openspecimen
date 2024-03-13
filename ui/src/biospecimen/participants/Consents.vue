@@ -20,12 +20,8 @@ export default {
 
   data() {
     return {
-      cp: {}
+      cp: this.cpViewCtx.getCp()
     }
-  },
-
-  created() {
-    this.cpViewCtx.getCp().then(cp => this.cp = cp);
   },
 
   computed: {

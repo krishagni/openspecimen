@@ -57,9 +57,11 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
+    const cp = this.cpViewCtx.getCp();
+
     return {
       ctx: {
-        cp: {},
+        cp,
 
         cpr: this.cpr,
 
@@ -157,8 +159,6 @@ export default {
     },
 
     _setupVisit: function() {
-      this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
-
       const visit = this.ctx.visit = this.visit;
       if (visit.id > 0) {
         this.ctx.auditObjs = [

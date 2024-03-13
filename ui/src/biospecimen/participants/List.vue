@@ -126,8 +126,6 @@
 </template>
 
 <script>
-import { inject, reactive } from 'vue';
-
 import alertsSvc from '@/common/services/Alerts.js';
 import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc    from '@/biospecimen/services/Cpr.js';
@@ -140,21 +138,20 @@ import wfSvc     from '@/biospecimen/services/Workflow.js';
 export default {
   name: 'ParticipantsList',
 
-  inject: ['ui'],
+  inject: ['ui', 'cpViewCtx'],
 
   props: ['filters', 'cprId', 'specimenId', 'view'],
 
-  async setup(props) {
-    const ui = inject('ui');
+  data() {
+    const ui = this.ui;
+    const cpViewCtx = this.cpViewCtx;
+    const cp = cpViewCtx.getCp();
 
-    const cpViewCtx = inject('cpViewCtx').value;
-    const cp = await cpViewCtx.getCp();
+    console.log('List view initialisation: ' + JSON.stringify(this.$props));
+    let ctx = {
+      ui,
 
-    console.log('List view initialisation: ' + JSON.stringify(props));
-    let ctx = reactive({
-      ui: ui,
-
-      cp: cp,
+      cp,
 
       inited: true,
 
@@ -162,13 +159,13 @@ export default {
 
       selectedItems: [],
 
-      cprId: props.cprId,
+      cprId: this.cprId,
 
-      specimenId: props.specimenId,
+      specimenId: this.specimenId,
 
-      query: props.filters,
+      query: this.filters,
 
-      view: cp.specimenCentric ? 'specimens_list' : props.view,
+      view: cp.specimenCentric ? 'specimens_list' : this.view,
 
       listInfo: {
         list: [],
@@ -195,13 +192,9 @@ export default {
 
         viewSpecimensAllowed: cpViewCtx.isReadSpecimenAllowed(),
       }
-    });
-
-    return {
-      ctx,
-
-      cpViewCtx
     };
+
+    return { ctx };
   },
 
   created() {

@@ -124,9 +124,10 @@ export default {
   inject: ['cpViewCtx', 'specimen'],
 
   data() {
+    const cp = this.cpViewCtx.getCp();
     return {
       ctx: {
-        cp: {},
+        cp,
 
         cpr: this.cpr,
 
@@ -351,8 +352,6 @@ export default {
     },
 
     _setupSpecimen: function() {
-      this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
-
       const specimen = this.ctx.specimen = this.specimen;
       if (specimen.id > 0) {
         this.ctx.auditObjs = [

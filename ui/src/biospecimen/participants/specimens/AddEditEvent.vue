@@ -35,10 +35,10 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
-    this.cpViewCtx.getCp().then(cp => this.ctx.cp = cp);
+    const cp = this.cpViewCtx.getCp();
     return {
       ctx: {
-        cp: {},
+        cp,
 
         formDef: {}
       }

@@ -112,9 +112,10 @@ export default {
   inject: ['cpViewCtx'],
 
   data() {
+    const cp = this.cpViewCtx.getCp();
     return {
       ctx: {
-        cp: {},
+        cp,
 
         cpr: {},
 
@@ -135,7 +136,6 @@ export default {
 
   async created() {
     this._setupCpr();
-    this.ctx.cp = await this.cpViewCtx.getCp();
     this.ctx.dict = await this.cpViewCtx.getCprDict();
     this.ctx.visitDict = await this.cpViewCtx.getVisitDict();
     this.ctx.userRole = this.cpViewCtx.getRole();
