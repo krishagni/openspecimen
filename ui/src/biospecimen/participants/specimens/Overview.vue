@@ -97,6 +97,21 @@
       <span v-t="{path: 'specimens.delete_event_q', args: ctx.event}"></span>
     </template>
   </os-confirm>
+
+  <os-dialog ref="transferDialog">
+    <template #header>
+      <span v-t="transferCtx.checkout ? 'specimens.checkout_specimen' : 'specimens.checkin_specimen'"></span>
+    </template>
+    <template #content>
+      <os-form ref="transferForm" :schema="transferSchema.layout" :data="transferCtx" />
+    </template>
+    <template #footer>
+      <os-button text :label="$t('common.buttons.cancel')" @click="cancelTransfer" />
+
+      <os-button primary :label="$t(transferCtx.checkout ? 'specimens.checkout' : 'specimens.checkin')"
+        @click="transferSpecimen" />
+    </template>
+  </os-dialog>
 </template>
 
 <script>
@@ -112,6 +127,8 @@ import routerSvc from '@/common/services/Router.js';
 import util  from '@/common/services/Util.js';
 
 import formSvc from '@/forms/services/Form.js';
+
+import transferSchema from '@/biospecimen/schemas/specimens/transfer.js';
 
 
 export default {
@@ -147,6 +164,14 @@ export default {
         eventForms: undefined,
 
         userRole: this.cpViewCtx.getRole()
+      },
+
+      transferSchema,
+
+      transferCtx: {
+        checkout: false,
+
+        specimen: {}
       }
     };
   },
@@ -170,10 +195,19 @@ export default {
       const options = [];
 
       if (this.isUpdateAllowed) {
-        if (!specimen.reserved && specimen.activityStatus == 'Active' && specimen.status == 'Collected') {
+        const {reserved, activityStatus, status, storageLocation, checkoutPosition} = specimen;
+        if (!reserved && activityStatus == 'Active' && status == 'Collected') {
           options.push({icon: 'times', caption: this.$t('common.buttons.close'), onSelect: this.closeSpecimen});
-        } else if (specimen.activityStatus == 'Closed') {
+        } else if (activityStatus == 'Closed') {
           options.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: this.reopenSpecimen});
+        }
+
+        if (!reserved && activityStatus == 'Active' && storageLocation && storageLocation.id > 0) {
+          options.push({icon: 'sign-out-alt', caption: this.$t('specimens.checkout'), onSelect: this.checkoutSpecimen});
+        }
+
+        if (!reserved && activityStatus == 'Active' && checkoutPosition && checkoutPosition.id > 0) {
+          options.push({icon: 'sign-in-alt', caption: this.$t('specimens.checkin'), onSelect: this.checkinSpecimen});
         }
       }
 
@@ -351,6 +385,55 @@ export default {
           specimenSvc.clearSpecimens(this.visit);
         }
       );
+    },
+
+    checkoutSpecimen: function() {
+      this.transferCtx = {
+        checkout: true,
+        specimen: {
+          id: this.specimen.id,
+          storageLocation: null,
+          checkout: true,
+          transferUser: this.$ui.currentUser,
+          transferTime: Date.now()
+        }
+      };
+
+      this.$refs.transferDialog.open();
+    },
+
+    checkinSpecimen: function() {
+      this.transferCtx = {
+        specimen: {
+          id: this.specimen.id,                       //
+          specimenClass: this.specimen.specimenClass, // needed for select/load of containers in
+          type: this.specimen.type,                   // positions widget
+          cpId: this.specimen.cpId,                   //
+          storageLocation: {...this.specimen.checkoutPosition},
+          transferUser: this.$ui.currentUser,
+          transferTime: Date.now()
+        }
+      };
+
+      this.$refs.transferDialog.open();
+    },
+
+    transferSpecimen: function() {
+      if (!this.$refs.transferForm.validate()) {
+        return;
+      }
+
+      specimenSvc.saveOrUpdate(this.transferCtx.specimen).then(
+        ({storageLocation, checkedOut, checkoutPosition}) => {
+          Object.assign(this.specimen, {storageLocation, checkedOut, checkoutPosition});
+          this._loadEvents(this.specimen);
+          this.cancelTransfer();
+        }
+      );
+    },
+
+    cancelTransfer: function() {
+      this.$refs.transferDialog.close();
     },
 
     reloadChildren: function() {

@@ -13,6 +13,8 @@
         <div class="accessories">
           <os-tag :value="status" :rounded="true" :type="statusType" />
 
+          <os-tag :value="$t('specimens.checked_out')" :rounded="true" :type="'danger'" v-if="specimen.checkedOut" />
+
           <os-copy-link size="small" :route="{
             name: 'ParticipantsListItemSpecimenDetail.Overview',
             params: {cpId: ctx.cp.id, cprId: cpr.id, visitId: visit.id, specimenId: specimen.id},

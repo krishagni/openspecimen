@@ -177,7 +177,7 @@ export default {
   .os-page-header .content-wrapper .content .left :deep(.os-title .accessories) {
     position: absolute;
     display: inline-block;
-    width: 250px;
+    width: 400px;
   }
 
   .os-page-header .content-wrapper .content .left :deep(.os-title .os-tag) {
