@@ -4,9 +4,6 @@
       <os-button left-icon="edit" :label="$t('common.buttons.edit')"
         @click="edit" v-if="isUpdateAllowed" />
 
-      <os-button left-icon="user-secret" :label="$t('participants.anonymize')"
-        @click="anonymize" v-if="isUpdateAllowed" />
-
       <os-button left-icon="print" :label="$t('common.buttons.print')"
         @click="printLabels" v-if="isPrintSpecimenLabelsAllowed" />
 
@@ -71,21 +68,11 @@
       <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.cpr.id" />
     </os-grid-column>
 
-    <os-confirm ref="confirmAnonymizeDialog">
-      <template #title>
-        <span v-t="'participants.erase_phi_data'">Erase Participant PHI Data</span>
-      </template>
-      <template #message>
-        <span v-t="'participants.erase_phi_data_q'">Are you sure you want to erase all PHI data of participant?</span>
-      </template>
-    </os-confirm>
-
     <os-delete-object ref="deleteCprDialog" :input="ctx.deleteOpts" />
   </os-grid>
 </template>
 
 <script>
-import alertSvc from '@/common/services/Alerts.js';
 import formUtil from '@/common/services/FormUtil.js';
 import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
@@ -179,24 +166,6 @@ export default {
     edit: function() {
       const cpr = this.ctx.cpr;
       routerSvc.goto('ParticipantAddEdit', {cpId: cpr.cpId, cprId: cpr.id});
-    },
-
-    anonymize: function() {
-      this.$refs.confirmAnonymizeDialog.open().then(
-        (resp) => {
-          if (resp != 'proceed') {
-            return;
-          }
-
-          cprSvc.anonymize(this.cpr).then(
-            () => {
-              // TODO: Is there a better way to do this reload?
-              routerSvc.reload();
-              alertSvc.success({code: 'participants.anonymized_successfully'});
-            }
-          );
-        }
-      );
     },
 
     printLabels: function() {
