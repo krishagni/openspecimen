@@ -416,7 +416,20 @@ export default {
     _loadMoreOptions: async function() {
       const options = [];
 
+      const recvWfId = await this._getReceiveSpecimensWf();
+      if (recvWfId) {
+        options.push({
+          icon: 'check-square',
+          caption: this.$t('participants.receive'),
+          url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: recvWfId}, {cpId: this.ctx.cp.id})
+        });
+      }
+
       if (this.cpViewCtx.isImportAllowed()) {
+        if (options.length > 0) {
+          options.push({divider: true});
+        }
+
         options.push({
           icon: 'upload',
           caption: this.$t('participants.import_biospecimen_data'),
@@ -430,13 +443,11 @@ export default {
         });
       }
 
-      let divider = options.length > 0;
-      if (divider) {
-        options.push({divider: true});
-        divider = false;
-      }
-
       if (this.cpViewCtx.isExportAllowed()) {
+        if (options.length > 0) {
+          options.push({divider: true});
+        }
+
         options.push({
           icon: 'download',
           caption: this.$t('common.buttons.export'),
@@ -444,10 +455,8 @@ export default {
         });
       }
 
-      divider = options.length > 0;
-      if (divider) {
+      if (options.length > 0) {
         options.push({divider: true});
-        divider = false;
       }
 
       options.push({
@@ -512,6 +521,20 @@ export default {
       });
 
       promise.then(() => this.ctx.moreOptions = options);
+    },
+
+    _getReceiveSpecimensWf: async function() {
+      if (!this.$osSvc.tmWfSvc) {
+        return null;
+      }
+
+      const wfName = await cpSvc.getWorkflowProperty(this.ctx.cp.id, 'common', 'receiveSpecimensWorkflow');
+      if (wfName) {
+        const {id: wfId} = await this.$osSvc.tmWfSvc.getWorkflowByName(wfName);
+        return wfId;
+      }
+
+      return null;
     }
   }
 }
