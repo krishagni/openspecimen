@@ -416,22 +416,26 @@ export default {
     _loadMoreOptions: async function() {
       const options = [];
 
-      const rapidWfId = await this._getRapidCollectionWf();
-      if (rapidWfId) {
-        options.push({
-          icon: 'flask',
-          caption: this.$t('participants.rapid_collection'),
-          url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: rapidWfId}, {cpId: this.ctx.cp.id})
-        });
+      if (this.cpViewCtx.isCreateParticipantAllowed() && this.cpViewCtx.isUpdateAllSpecimenAllowed()) {
+        const rapidWfId = await this._getRapidCollectionWf();
+        if (rapidWfId) {
+          options.push({
+            icon: 'flask',
+            caption: this.$t('participants.rapid_collection'),
+            url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: rapidWfId}, {cpId: this.ctx.cp.id})
+          });
+        }
       }
 
-      const recvWfId = await this._getReceiveSpecimensWf();
-      if (recvWfId) {
-        options.push({
-          icon: 'check-square',
-          caption: this.$t('participants.receive'),
-          url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: recvWfId}, {cpId: this.ctx.cp.id})
-        });
+      if (!this.cpViewCtx.isCoordinator() && this.cpViewCtx.isUpdateAllSpecimenAllowed()) {
+        const recvWfId = await this._getReceiveSpecimensWf();
+        if (recvWfId) {
+          options.push({
+            icon: 'check-square',
+            caption: this.$t('participants.receive'),
+            url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: recvWfId}, {cpId: this.ctx.cp.id})
+          });
+        }
       }
 
       if (this.cpViewCtx.isImportAllowed()) {
