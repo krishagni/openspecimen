@@ -43,7 +43,7 @@ export default {
   },
 
   watch: {
-    specimenId: function(newVal, oldVal) {
+    '$route.params.specimenId': function(newVal, oldVal) {
       if (newVal == oldVal || newVal == this.specimen.id) {
         return;
       }
@@ -51,7 +51,7 @@ export default {
       this._loadSpecimen(newVal);
     },
 
-    reqId: function(newVal, oldVal) {
+    '$route.query.reqId': function(newVal, oldVal) {
       if (this.specimenId > 0 || newVal == oldVal || newVal == this.specimen.reqId) {
         return;
       }
