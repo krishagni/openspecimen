@@ -32,6 +32,8 @@ export default class CpViewContext {
 
   coordinatorRole = null;
 
+  wfIds = {};
+
   constructor(cp, {accessBasedOnMrn, coordinatorRole}) {
     this.cp = cp;
     this.cpId = cp.id;
@@ -498,6 +500,14 @@ export default class CpViewContext {
     return this._isAccessBasedOnMrnAllowed(cpr, 'Consent', ['Delete']);
   }
 
+  async getReceiveSpecimensWf() {
+    return this._getWorkflow('receiveSpecimensWorkflow');
+  }
+
+  async getRapidCollectionWf() {
+    return this._getWorkflow('rapidCollectionWorflow');
+  }
+
   _getMatchingForms(forms, rules, context) {
     let matchingRule = null;
     for (let rule of rules) {
@@ -652,5 +662,24 @@ export default class CpViewContext {
 
     const mrnSites = cpr.participant.pmis.map(({siteName}) => siteName);
     return this._isAllowed(resources, operations, mrnSites);
+  }
+
+  async _getWorkflow(propName) {
+    if (!this.wfIds[propName]) {
+      const {tmWfSvc} = window.osSvc;
+      if (!tmWfSvc) {
+        this.wfIds[propName] = -1;
+      } else {
+        const wfName = await cpSvc.getWorkflowProperty(this.cpId, 'common', propName);
+        if (wfName) {
+          const {id: wfId} = await tmWfSvc.getWorkflowByName(wfName);
+          this.wfIds[propName] = wfId;
+        } else {
+          this.wfIds[propName] = -1;
+        }
+      }
+    }
+
+    return this.wfIds[propName] == -1 ? null : this.wfIds[propName];
   }
 }

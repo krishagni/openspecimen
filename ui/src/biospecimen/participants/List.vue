@@ -416,6 +416,15 @@ export default {
     _loadMoreOptions: async function() {
       const options = [];
 
+      const rapidWfId = await this._getRapidCollectionWf();
+      if (rapidWfId) {
+        options.push({
+          icon: 'flask',
+          caption: this.$t('participants.rapid_collection'),
+          url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: rapidWfId}, {cpId: this.ctx.cp.id})
+        });
+      }
+
       const recvWfId = await this._getReceiveSpecimensWf();
       if (recvWfId) {
         options.push({
@@ -524,17 +533,11 @@ export default {
     },
 
     _getReceiveSpecimensWf: async function() {
-      if (!this.$osSvc.tmWfSvc) {
-        return null;
-      }
+      return this.cpViewCtx.getReceiveSpecimensWf();
+    },
 
-      const wfName = await cpSvc.getWorkflowProperty(this.ctx.cp.id, 'common', 'receiveSpecimensWorkflow');
-      if (wfName) {
-        const {id: wfId} = await this.$osSvc.tmWfSvc.getWorkflowByName(wfName);
-        return wfId;
-      }
-
-      return null;
+    _getRapidCollectionWf: async function() {
+      return this.cpViewCtx.getRapidCollectionWf();
     }
   }
 }
