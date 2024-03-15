@@ -14,9 +14,9 @@
 
   <os-grid>
     <os-grid-column width="8">
-      <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
+      <os-overview :schema="dict" :object="ctx" v-if="dict.length > 0" />
 
-      <os-section v-if="ctx.cpr.participant.registeredCps.length > 0">
+      <os-section v-if="ctx.cpr.participant && ctx.cpr.participant.registeredCps.length > 0">
         <template #title>
           <span v-t="'participants.other_registered_cps'">Other Registered Protocols</span>
         </template>
@@ -84,7 +84,6 @@ import specimenSvc from '@/biospecimen/services/Specimen.js';
 import MissedVisits   from './MissedVisits.vue';
 import OccurredVisits from './OccurredVisits.vue';
 import PendingVisits  from './PendingVisits.vue';
-// import Visits from './Visits.vue';
 
 export default {
   props: ['cpr'],
@@ -93,7 +92,6 @@ export default {
     MissedVisits,
     OccurredVisits,
     PendingVisits
-//     Visits
   },
 
   inject: ['cpViewCtx'],
@@ -105,6 +103,8 @@ export default {
         cp,
 
         cpr: {},
+
+        consents: null,
 
         dict: [],
 
@@ -121,14 +121,28 @@ export default {
     };
   },
 
-  async created() {
-    this._setupCpr();
-    this.ctx.dict = await this.cpViewCtx.getCprDict();
-    this.ctx.visitDict = await this.cpViewCtx.getVisitDict();
-    this.ctx.userRole = this.cpViewCtx.getRole();
+  created() {
+    Promise.all([
+      this.cpViewCtx.getCprDict(),
+      this.cpViewCtx.getConsentsDict(),
+      this.cpViewCtx.getVisitDict(),
+      this.cpViewCtx.getRole()
+    ]).then(
+      ([dict, consentsDict, visitDict, userRole]) => {
+        Object.assign(this.ctx, {dict, consentsDict, visitDict, userRole});
+        this._setupCpr();
+      }
+    );
   },
 
   computed: {
+    dict: function() {
+      const result = [];
+      Array.prototype.push.apply(result, this.ctx.dict || []);
+      Array.prototype.push.apply(result, this.ctx.consentsDict || []);
+      return result;
+    },
+
     hasOccurredVisits: function() {
       return (this.ctx.visits || []).some(visit => visit.status == 'Complete');
     },
@@ -215,6 +229,21 @@ export default {
         askReason: true,
         deleteObj: (reason) => cprSvc.deleteCpr(cpr.id, true, reason)
       };
+
+      if (this.ctx.consentsDict && this.ctx.consentsDict.length > 0 && this.cpViewCtx.isReadConsentAllowed(cpr)) {
+        cprSvc.getConsents(cpr).then(
+          consent => {
+            const codedResps = this.ctx.consents = {};
+            if (consent) {
+              for (let resp of consent.responses || []) {
+                codedResps[resp.code] = resp.response;
+              }
+            }
+          }
+        );
+      } else {
+        this.ctx.consents = null;
+      }
 
       if (!this.cpViewCtx.isReadVisitAllowed(cpr)) {
         return;

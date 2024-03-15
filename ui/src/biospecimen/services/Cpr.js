@@ -181,16 +181,30 @@ class CollectionProtocolRegistration {
     return result;
   }
 
-  getConsents({id: cprId}) {
-    return http.get('collection-protocol-registrations/' + cprId + '/consents');
+  getConsents(cpr) {
+    if (!cpr.$consentsQ) {
+      cpr.$consentsQ = http.get('collection-protocol-registrations/' + cpr.id + '/consents');
+    }
+
+    return cpr.$consentsQ;
   }
 
-  updateConsents({id: cprId}, consent) {
-    return http.put('collection-protocol-registrations/' + cprId + '/consents', consent);
+  updateConsents(cpr, consent) {
+    return http.put('collection-protocol-registrations/' + cpr.id + '/consents', consent).then(
+      savedConsent => {
+        cpr.$consentsQ = null;
+        return savedConsent;
+      }
+    );
   }
 
-  deleteConsentDoc({id: cprId}) {
-    return http.delete('collection-protocol-registrations/' + cprId + '/consent-form');
+  deleteConsentDoc(cpr) {
+    return http.delete('collection-protocol-registrations/' + cpr.id + '/consent-form').then(
+      status => {
+        cpr.$consentsQ = null;
+        return status;
+      }
+    );
   }
 
   getConsentDocUrl({id: cprId}) {

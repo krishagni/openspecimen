@@ -64,6 +64,14 @@ export default class CpViewContext {
     return this.cprDictQ.then(fields => dataEntry ? fields.filter(field => field.name.indexOf('calc') != 0) : fields);
   }
 
+  getConsentsDict() {
+    if (!this.consentsDictQ) {
+      this.consentsDictQ = cpSvc.getDictFor(this.cpId, ['consents']);
+    }
+
+    return this.consentsDictQ;
+  }
+
   getCprAddEditLayout() {
     return this.getCprDict(true).then(dict => cprSvc.getLayout(this.cpId, dict));
   }
