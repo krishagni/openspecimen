@@ -73,6 +73,11 @@ class ExpressionUtil {
       let method = exprTree.callee.property.name;
       let args = (exprTree.arguments || []).map(arg => this.decorate(arg)).join(', ');
       return '(' + object + ')?.' + method + '(' + args + ')';
+    } else if (exprTree.type == 'ConditionalExpression') {
+      const test = this.decorate(exprTree.test);
+      const consequent = this.decorate(exprTree.consequent);
+      const alternate = this.decorate(exprTree.alternate);
+      return '(' + test + ' ? ' + consequent + ' : ' + alternate + ')';
     } else {
       console.log(exprTree);
       console.log('Could not identify the expression type: ' + exprTree.type + ', ' + JSON.stringify(exprTree));
