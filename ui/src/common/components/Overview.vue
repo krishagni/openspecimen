@@ -285,6 +285,10 @@ export default {
         } else if (field.type == 'specimen-quantity' || field.type == 'specimen-measure') {
           const specimen = exprUtil.eval(object || {}, field.specimen || 'specimen');
           const unit = util.getSpecimenMeasureUnit(specimen, field.measure || 'quantity');
+          if (value != 0 && (value >= 1e6 || value <= 1e-5)) {
+            value = value.toExponential();
+          }
+
           value += ' ' + unit;
         } else if (field.type == 'specimen-type') {
           const specimen = exprUtil.eval(object || {}, field.specimen || 'specimen');
