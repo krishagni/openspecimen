@@ -49,7 +49,11 @@ public class SpecimenReceivedEvent extends SpecimenEvent {
 	public void setEventAttrs(Map<String, Object> attrValues) {
 		String qualityIdStr = (String) attrValues.get("quality");
 		if (StringUtils.isNotBlank(qualityIdStr)) {
-			this.quality = daoFactory.getPermissibleValueDao().getById(Long.parseLong(qualityIdStr));
+			if (StringUtils.isNumeric(qualityIdStr)) {
+				this.quality = daoFactory.getPermissibleValueDao().getById(Long.parseLong(qualityIdStr));
+			} else {
+				this.quality = daoFactory.getPermissibleValueDao().getByValue("receive_quality", qualityIdStr);
+			}
 		}
 	}
 	

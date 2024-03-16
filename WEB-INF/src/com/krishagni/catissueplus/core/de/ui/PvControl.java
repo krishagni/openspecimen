@@ -140,6 +140,7 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 		props.put("searchTermName", "searchString");
 		props.put("resultFormat", "{{value}}");
 		props.put("filters", filters);
+		props.put("useDisplayValue", "true");
 		return props;
 	}
 

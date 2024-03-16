@@ -180,7 +180,7 @@ class FieldFactory {
       fs.selectProp = 'id';
     } else if (field.type == 'pvField') {
       fs.type = 'pv';
-      fs.selectProp = 'id';
+      fs.selectProp = 'value';
       fs.attribute = field.attribute;
       fs.leafValue = field.leafValue;
     } else if (field.type == 'siteField') {

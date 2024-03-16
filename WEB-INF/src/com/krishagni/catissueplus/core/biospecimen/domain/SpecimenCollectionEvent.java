@@ -65,14 +65,20 @@ public class SpecimenCollectionEvent extends SpecimenEvent {
 		//
 		String procIdStr = (String)attrValues.get("procedure");
 		if (StringUtils.isNotBlank(procIdStr)) {
-			Long procId = Long.parseLong(procIdStr);
-			this.procedure = daoFactory.getPermissibleValueDao().getById(procId);
+			if (StringUtils.isNumeric(procIdStr)) {
+				this.procedure = daoFactory.getPermissibleValueDao().getById(Long.parseLong(procIdStr));
+			} else {
+				this.procedure = daoFactory.getPermissibleValueDao().getByValue("collection_procedure", procIdStr);
+			}
 		}
 
 		String contIdStr = (String)attrValues.get("container");
 		if (StringUtils.isNotBlank(contIdStr)) {
-			Long contId = Long.parseLong(contIdStr);
-			this.container = daoFactory.getPermissibleValueDao().getById(contId);
+			if (StringUtils.isNumeric(contIdStr)) {
+				this.container = daoFactory.getPermissibleValueDao().getById(Long.parseLong(contIdStr));
+			} else {
+				this.container = daoFactory.getPermissibleValueDao().getByValue("collection_container", contIdStr);
+			}
 		}
 	}
 	
