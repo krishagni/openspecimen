@@ -249,6 +249,9 @@ class FormUtil {
           } else {
             value = window.osUi.currentUser;
           }
+        } else if (typeof value == 'string' && value.indexOf('field:') == 0) {
+          const accessor = value.substring('field:'.length).trim();
+          value = exprUtil.eval(formData, accessor);
         }
 
         exprUtil.setValue(formData, field.name, value);
