@@ -113,9 +113,9 @@ export default {
     },
 
     _getStorageLocation: function(value) {
-      let result = value;
+      let result = undefined;
 
-      if (value && typeof value == 'object') {
+      if (value && typeof value == 'object' && value.id != -1) {
         let position = value;
         result = position.name;
         if (position.mode == 'TWO_D' && position.positionY && position.positionX) {

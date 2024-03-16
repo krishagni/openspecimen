@@ -97,8 +97,8 @@
                     @update:model-value="handleInput(itemIdx, field, itemModel, fieldIdx)"
                     v-if="!itemModel.hideFields[field.name]">
                   </component>
-                  <os-span v-model="itemModel[field.name]" :display-type="field.type"
-                    :ref="'osField-' + field.name" v-else />
+                  <os-span v-model="itemModel[field.name]" :display-type="field.displayType || field.type"
+                    :ref="'osField-' + field.name" :form="itemModel.$context" v-bind="field" v-else />
                 </div>
                 <div v-if="!itemModel.hideFields[field.name] &&
                   v$.itemModels[itemIdx] && v$.itemModels[itemIdx][field.name] &&
