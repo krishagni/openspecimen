@@ -134,7 +134,7 @@ export default {
     _presetValues(entityObj, req) {
       const attrs = [
         'specimenClass', 'type', 'lineage', 'anatomicSite', 'laterality',
-        'pathologyStatus', 'initialQty', 'concentration'
+        'pathologyStatus', 'initialQty', 'concentration', 'labelFmt'
       ];
 
       attrs.forEach(attr => entityObj[attr] = req[attr]);

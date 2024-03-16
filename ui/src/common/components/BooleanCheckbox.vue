@@ -34,7 +34,7 @@ export default {
 
     displayLabel: function() {
       if (this.inlineLabelCode) {
-        return this.$t(this.inlineLabelCode);
+        return this.$osSvc.i18nSvc.msg(this.inlineLabelCode);
       } else {
         return this.inlineLabel;
       }
@@ -43,7 +43,7 @@ export default {
 
   methods: {
     getDisplayValue: function() {
-      return this.$t(
+      return this.$osSvc.i18nSvc.msg(
         (this.modelValue == true || this.modelValue == 1 || this.modelValue == 'true') ? 'common.yes' : 'common.no'
       );
     }
