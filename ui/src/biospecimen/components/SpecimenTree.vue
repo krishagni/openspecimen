@@ -1,6 +1,6 @@
 
 <template>
-  <os-panel>
+  <os-panel ref="specimenTree">
     <template #header>
       <span v-t="'specimens.list'">Specimens</span>
     </template>
@@ -20,6 +20,8 @@
     <os-message :type="info" v-else>
       <span v-t="'specimens.no_specimens'"> </span>
     </os-message>
+
+    <os-button class="scroll-top" left-icon="arrow-circle-up" @click="scrollToTop" v-if="panelFixed" />
   </os-panel>
 </template>
 
@@ -39,6 +41,8 @@ export default {
   data() {
     return {
       treeCfg: {},
+
+      panelFixed: false,
 
       ctx: {
         selectedSpecimens: []
@@ -64,6 +68,12 @@ export default {
         }
       }
     );
+
+    window.addEventListener('wheel', this.onScroll);
+  },
+
+  unmounted() {
+    window.removeEventListener('wheel', this.onScroll);
   },
    
   computed: {
@@ -117,6 +127,23 @@ export default {
       this.$refs.spmnsTable.setSelection([]);
     },
 
+    onScroll: function() {
+      const treeEl = this.$refs.specimenTree.$el;
+      if (treeEl.getBoundingClientRect().top <= 100) {
+        const width = treeEl.offsetWidth + 'px';
+        const height = 'calc(100% - 120px)';
+        Object.assign(treeEl.style, {position: 'fixed', top: '100px', width, height, overflow: 'scroll'});
+        this.panelFixed = true;
+      }
+    },
+
+    scrollToTop: function() {
+      const treeEl = this.$refs.specimenTree.$el;
+      Object.assign(treeEl.style, {position: '', top: '', width: 'initial', height: '', overflow: 'visible'});
+      this.panelFixed = false;
+      setTimeout(() => window.scrollTo(0, 0));
+    },
+
     _flattenSpecimens: function(specimens, depth, parentUid) {
       let idx = 0;
       let result = [];
@@ -137,3 +164,17 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.scroll-top {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.5rem!important;
+  height: 2.625rem!important;
+  width: 2.625rem!important;
+  z-index: 100;
+  background: #fff!important;
+}
+</style>
