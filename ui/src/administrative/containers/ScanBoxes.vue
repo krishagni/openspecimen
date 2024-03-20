@@ -105,7 +105,7 @@
           </template>
 
           <template #content>
-            <os-message type="info">
+            <os-message type="info" v-if="!ctx.scanning">
               <span v-t="{ path: 'containers.scan_barcodes_summary', args: ctx }"> </span>
             </os-message>
 
@@ -133,17 +133,21 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(spmn, index) of ctx.specimens" :key="index" :class="{'error': !spmn.id}">
+                <tr v-for="(spmn, index) of ctx.specimens" :key="index + '_' + (spmn.id || 'nu')" :class="{'error': !spmn.id}">
                   <td>{{$filters.noValue(spmn.barcode)}}</td>
-                  <td>{{spmn.label}}</td>
-                  <td>{{spmn.cpShortTitle}}</td>
-                  <td>{{spmn.type}} ({{spmn.specimenClass}})</td>
+                  <td>{{$filters.noValue(spmn.label)}}</td>
+                  <td>{{$filters.noValue(spmn.cpShortTitle)}}</td>
+                  <td>
+                    <span>{{$filters.noValue(spmn.type)}}</span>
+                    <span v-show="spmn.type">&nbsp; ({{spmn.specimenClass}})</span>
+                  </td>
                   <td>
                     <os-specimen-measure v-model="spmn.availableQty" entity="specimen"
                       :context="{specimen: spmn}" :read-only="true" />
                   </td>
                   <td>
-                    <span>{{spmn.storageLocation.posTwo}}, {{spmn.storageLocation.posOne}}</span>
+                    <span v-if="spmn.storageLocation.mode=='LINEAR'">{{spmn.storageLocation.position}}</span>
+                    <span v-else>{{spmn.storageLocation.posTwo}}, {{spmn.storageLocation.posOne}}</span>
                   </td>
                 </tr>
               </tbody>
@@ -172,7 +176,7 @@
         </div>
       </div>
 
-      <os-dialog ref="boxMapView" :size="'lg'" :closable="true">
+      <os-dialog ref="boxMapView" :closable="true" :style="{width: '100vw'}">
         <template #header>
           <span>{{ctx.box.barcode}}</span>
         </template>
@@ -305,6 +309,7 @@ import scanner          from '@/administrative/services/BoxScanner.js';
 import cpSvc        from '@/biospecimen/services/CollectionProtocol.js';
 
 import alertsSvc from '@/common/services/Alerts.js';
+import boxUtil   from '@/common/services/BoxUtil.js';
 import http      from '@/common/services/HttpClient.js';
 import numUtil   from '@/common/services/NumberConverterUtil.js';
 import routerSvc from '@/common/services/Router.js';
@@ -415,68 +420,17 @@ export default {
       ctx.box.barcode = null;
     },
 
-    searchBox: function() {
-      if (!this.ctx.box.inputBarcode) {
-        alertsSvc.error({code: 'containers.box_' + this.ctx.scannedField + '_not_specified'});
-        return;
-      }
-
-      this.loadBoxDetails({barcode: this.ctx.box.inputBarcode}, true);
-    },
-
-    loadBoxDetails: async function(box, noBoxBarcode) {
+    searchBox: async function() {
       const ctx = this.ctx;
-      if (!box || !box.barcode) {
-        ctx.noBoxBarcode = true;
-        ctx.box = {
-          type: ctx.scanner.containerType,
-          allowedCollectionProtocols: [],
-          allowedTypes: []
-        };
-
-        alertsSvc.error({code: 'containers.box_' + this.ctx.scannedField + '_not_detected'});
+      if (!ctx.box.inputBarcode) {
+        alertsSvc.error({code: 'containers.box_' + ctx.scannedField + '_not_specified'});
         return;
       }
 
-      ctx.noBoxBarcode = noBoxBarcode || false;
-      let promise = null;
-      if (ctx.scannedField == 'name') {
-        promise = containerSvc.getContainerByName(box.barcode, false);
-      } else if (ctx.scannedField == 'barcode') {
-        promise = containerSvc.getContainerByBarcode(box.barcode, false);
-      }
-
-      ctx.error = null;
-      ctx.readError = null;
-      promise.then(
-        (container) => {
-          ctx.box = box;
-          if (container) {
-            box.id = container.id;
-            box.container = container;
-            box.type = container.typeName;
-            box.siteName = container.siteName;
-            box.allowedCollectionProtocols = container.allowedCollectionProtocols;
-            box.storageLocation = container.storageLocation;
-
-            const allowedTypes = box.allowedTypes = [];
-            for (let specimenClass of (container.allowedSpecimenClasses || [])) {
-              allowedTypes.push({specimenClass, type: 'All ' + specimenClass, all: true});
-            }
-
-            for (let type of (container.allowedSpecimenTypes || [])) {
-              allowedTypes.push({type});
-            }
-
-          } else {
-            box.id = box.container = null;
-            box.type = ctx.scanner.containerType;
-            box.allowedCollectionProtocols = [];
-            box.allowedTypes = [];
-          }
-        }
-      );
+      ctx.box = await this._loadBoxDetails({barcode: ctx.box.inputBarcode});
+      ctx.specimens = await this._loadTubeDetails(ctx.box, ctx.scannedTubes);
     },
+
 
     scan: async function() {
       const ctx = this.ctx;
@@ -484,79 +438,31 @@ export default {
         return;
       }
 
+      this.clear();
+      Object.assign(ctx, {scanning: true, noBoxBarcode: false,
+        readErrorsCount: 0, noTubesCount: 0, scannedBarcodesCount: 0});
+
       const {box, tubes} = await scanner.scan(ctx.scanner);
-      this.loadBoxDetails(box);
-
-      ctx.error = null;
-      ctx.readError = null;
-
-      const spmnBarcodesMap = {};
-      const spmnBarcodes = [];
-      const readErrors = [];
       for (let tube of tubes) {
         if (!tube.barcode) {
-          continue;
+          ctx.noTubesCount++;
         } else if (tube.barcode == 'READ_ERROR') {
-          readErrors.push({row: tube.row, column: tube.column});
-          continue;
-        }
-
-        spmnBarcodesMap[tube.barcode.toLowerCase()] = tube;
-        spmnBarcodes.push(tube.barcode);
-      }
-
-      if (readErrors.length > 0) {
-        ctx.readError = 'containers.cannot_read_barcodes';
-        ctx.readErrorArgs = {
-          locations: readErrors.map(({row, column}) => '(' + row + ', ' + column + ')').join(', ')
+          ctx.readErrorsCount++;
+        } else {
+          ctx.scannedBarcodesCount++;
         }
       }
 
-      ctx.scannedBarcodes = spmnBarcodes;
-      ctx.scannedBarcodesCount = spmnBarcodes.length;
-      ctx.readErrorsCount = readErrors.length;
-      ctx.noTubesCount = tubes.length - spmnBarcodes.length - readErrors.length;
-      if (spmnBarcodes.length == 0) {
-        ctx.specimens = [];
-        return;
+      ctx.scannedBox   = box;
+      ctx.scannedTubes = tubes;
+      ctx.specimensMap = await this._getSpecimens(tubes);
+      if (!box || !box.barcode) {
+        ctx.noBoxBarcode = true;
       }
 
-      containerSvc.searchSpecimens({barcode: spmnBarcodes}).then(
-        (specimens) => {
-          ctx.specimens = [];
-
-          const specimensMap = specimens.reduce(
-            (map, spmn) => {
-              map[spmn.barcode.toLowerCase()] = spmn;
-              return map;
-            }, {});
-
-          const notFound = [];
-          for (let tube of tubes) {
-            if (!tube.barcode) {
-              continue;
-            }
-
-            const spmn = specimensMap[tube.barcode.toLowerCase()];
-            if (spmn) {
-              spmn.storageLocation = {posOne: tube.column, posTwo: tube.row};
-              ctx.specimens.push(spmn);
-            } else {
-              ctx.specimens.push({barcode: tube.barcode, storageLocation: {posOne: tube.column, posTwo: tube.row}});
-              if (tube.barcode != 'READ_ERROR') {
-                notFound.push(tube);
-              }
-            }
-          }
-
-          if (notFound.length > 0) {
-            ctx.error = 'containers.specimens_not_found_ids';
-            ctx.errorArgs = {
-              ids: notFound.map(tube => tube.barcode + ' (' + tube.row + ', ' + tube.column + ')').join(', ')
-            }
-          }
-        }
-      );
+      ctx.box = await this._loadBoxDetails(box);
+      ctx.specimens = await this._loadTubeDetails(ctx.box, ctx.scannedTubes);
+      ctx.scanning = false;
     },
 
     showBoxMap: async function() {
@@ -802,7 +708,6 @@ export default {
       }
     },
 
-
     _getParentContainer: async function(container) {
       let parentContainer = null;
       if (container.storageLocation && container.storageLocation.name) {
@@ -906,6 +811,178 @@ export default {
       }
 
       return types;
+    },
+
+    _getContainerType: async function(type) {
+      this.containerTypes = this.containerTypes || {};
+      let containerType = this.containerTypes[type];
+      if (!containerType) {
+        containerType = this.containerTypes[type] = await containerTypeSvc.getTypeByName(type);
+      }
+
+      return containerType;
+    },
+
+    _getSpecimens: async function(tubes) {
+      const barcodes = [];
+      for (let tube of tubes) {
+        if (tube.barcode && tube.barcode != 'READ_ERROR') {
+          barcodes.push(tube.barcode);
+        }
+      }
+
+      return containerSvc.searchSpecimens({barcode: barcodes}).then(
+        (specimens) => {
+          return specimens.reduce(
+            (map, spmn) => {
+              map[spmn.barcode.toLowerCase()] = spmn;
+              return map;
+            },
+            {}
+          );
+        }
+      );
+    },
+
+    _assignPositions: function(tubes, containerType, container) {
+      const result = [];
+      const {
+        noOfRows, noOfColumns,
+        rowLabelingScheme, columnLabelingScheme,
+        positionAssignment, positionLabelingMode
+      } = container || containerType || {};
+
+      const assigner = boxUtil.getPositionAssigner(positionAssignment);
+      for (let {barcode, row, column} of tubes) {
+        const position = assigner.pos({row, col: column, nr: noOfRows, nc: noOfColumns})
+        result.push({
+          mode:     positionLabelingMode,
+          row:      numUtil.fromNumber(rowLabelingScheme, row),
+          column:   numUtil.fromNumber(columnLabelingScheme, column),
+          position: position,
+          barcode:  barcode
+        });
+      }
+
+      return result;
+    },
+
+    _loadBoxDetails: async function(box) {
+      const ctx = this.ctx;
+      if (!box || !box.barcode) {
+        ctx.box = {
+          type: ctx.scanner.containerType,
+          allowedCollectionProtocols: [],
+          allowedTypes: []
+        };
+
+        alertsSvc.error({code: 'containers.box_' + this.ctx.scannedField + '_not_detected'});
+        return ctx.box;
+      }
+
+      ctx.error = null;
+      ctx.readError = null;
+
+      let promise = null;
+      if (ctx.scannedField == 'name') {
+        promise = containerSvc.getContainerByName(box.barcode, false);
+      } else {
+        promise = containerSvc.getContainerByBarcode(box.barcode, false);
+      }
+
+      return promise.then(
+        (container) => {
+          ctx.box = box;
+          if (container) {
+            box.id = container.id;
+            box.container = container;
+            box.type = container.typeName;
+            box.siteName = container.siteName;
+            box.allowedCollectionProtocols = container.allowedCollectionProtocols;
+            box.storageLocation = container.storageLocation;
+
+            const allowedTypes = box.allowedTypes = [];
+            for (let specimenClass of (container.allowedSpecimenClasses || [])) {
+              allowedTypes.push({specimenClass, type: 'All ' + specimenClass, all: true});
+            }
+
+            for (let type of (container.allowedSpecimenTypes || [])) {
+              allowedTypes.push({type});
+            }
+          } else {
+            box.id = box.container = null;
+            box.type = ctx.scanner.containerType;
+            box.allowedCollectionProtocols = [];
+            box.allowedTypes = [];
+          }
+
+          return box;
+        }
+      );
+    },
+
+    _loadTubeDetails: async function(box, tubes) {
+      const ctx = this.ctx;
+      ctx.error = null;
+      ctx.readError = null;
+
+      const containerType = await this._getContainerType(box.type);
+      const container     = box.container;
+      tubes               = this._assignPositions(tubes, containerType, container);
+
+      const readErrors = [];
+      for (let tube of tubes) {
+        if (tube.barcode == 'READ_ERROR') {
+          readErrors.push({mode: tube.mode, position: tube.position, row: tube.row, column: tube.column});
+        }
+      }
+
+      if (readErrors.length > 0) {
+        ctx.readError = 'containers.cannot_read_barcodes';
+        ctx.readErrorArgs = {
+          locations: readErrors.map(
+            ({mode, position, row, column}) => mode == 'LINEAR' ? position :  ('(' + row + ', ' + column + ')')
+          ).join(', ')
+        }
+      }
+
+      const specimens = [];
+      if (ctx.scannedBarcodesCount == 0) {
+        return specimens;
+      }
+
+      const notFound = [];
+      for (let tube of tubes) {
+        if (!tube.barcode) {
+          continue;
+        }
+
+        const spmn = ctx.specimensMap[tube.barcode.toLowerCase()];
+        if (spmn) {
+          spmn.storageLocation = {mode: tube.mode, position: tube.position, posOne: tube.column, posTwo: tube.row};
+          specimens.push(spmn);
+        } else {
+          specimens.push({
+            barcode: tube.barcode,
+            storageLocation: {mode: tube.mode, position: tube.position, posOne: tube.column, posTwo: tube.row}
+          });
+
+          if (tube.barcode != 'READ_ERROR') {
+            notFound.push(tube);
+          }
+        }
+      }
+
+      if (notFound.length > 0) {
+        ctx.error = 'containers.specimens_not_found_ids';
+        ctx.errorArgs = {
+          ids: notFound.map(({barcode, mode, position, row, column}) =>
+            barcode + ' (' + (mode == 'LINEAR' ? position : (row + ', ' + column)) + ')'
+          ).join(', ')
+        }
+      }
+
+      return specimens;
     }
   }
 }

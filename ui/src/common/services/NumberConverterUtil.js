@@ -19,6 +19,8 @@ class NumberConverterUtil {
   }
 
   toNumber(scheme, str) {
+    str = '' + str;
+
     switch(scheme) {
       case 'Numbers':
         return this._fromNum(str);
