@@ -168,13 +168,13 @@ public class CpReportGenerator {
 	}
 
 	private String moveFileToReportsDir(CollectionProtocol cp, File file) {
-		String extn = ".csv";
+		String extn = ".csv.zip";
 		int extnStartIdx = file.getName().lastIndexOf('.');
 		if (extnStartIdx != -1) {
 			extn = file.getName().substring(extnStartIdx);
 		}
 
-		String fileId = UUID.randomUUID().toString() + extn;
+		String fileId = UUID.randomUUID() + extn;
 		file.renameTo(new File(getReportsDir(), cp.getId() + "-" + fileId));
 		return fileId;
 	}

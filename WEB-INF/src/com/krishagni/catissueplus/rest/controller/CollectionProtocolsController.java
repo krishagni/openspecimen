@@ -639,7 +639,8 @@ public class CollectionProtocolsController {
 			extn = file.getName().substring(extnStartIdx);
 		}
 
-		Utility.sendToClient(httpResp, "CpReport" + extn, file);
+		String filename = "CpReport_" + Utility.format(Calendar.getInstance().getTime(), "yyyyMMdd_HHmmss") + extn;
+		Utility.sendToClient(httpResp, filename, file);
 	}
 
 	//
