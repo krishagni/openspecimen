@@ -69,7 +69,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 			throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, formName, 1);
 		}
 		
-		return getObjectSchema(form, entityType);
+		return getObjectSchema(form, entityType, params.getOrDefault("useUdn", "true").equals("true"));
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 		return templates.toString();
 	}
 
-	private  ObjectSchema getObjectSchema(Container form, String entityType) {
+	private  ObjectSchema getObjectSchema(Container form, String entityType, boolean useUdn) {
 		Record record = new Record();  
 		
 		List<Field> fields = new ArrayList<Field>();
@@ -119,7 +119,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 		fields.add(getField("activityStatus", "Activity Status"));
 		record.setFields(fields);
 		
-		Record formValueMap = getFormRecord(form);
+		Record formValueMap = getFormRecord(form, useUdn);
 		formValueMap.setAttribute("formValueMap");
 		record.setSubRecords(Collections.singletonList(formValueMap));
 		
