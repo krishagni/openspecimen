@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
@@ -70,6 +71,8 @@ public class SpecimenAliquotsSpec {
 	private ExtensionDetail extensionDetail;
 
 	private boolean linkToReqs;
+
+	private String status;
 
 	private List<Long> reqIds;
 
@@ -288,6 +291,10 @@ public class SpecimenAliquotsSpec {
 	}
 
 	public boolean keepDerivedOpen() {
+		if (Specimen.PENDING.equals(getStatus())) {
+			return true;
+		}
+
 		return keepDerivedOpen != null && keepDerivedOpen;
 	}
 
@@ -335,6 +342,14 @@ public class SpecimenAliquotsSpec {
 
 	public void setLinkToReqs(boolean linkToReqs) {
 		this.linkToReqs = linkToReqs;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public List<Long> getReqIds() {

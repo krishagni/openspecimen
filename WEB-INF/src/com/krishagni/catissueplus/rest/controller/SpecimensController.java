@@ -324,7 +324,7 @@ public class SpecimensController {
 			Boolean includeChildren = (Boolean) payload.get("includeChildren");
 			String reason = (String) payload.get("reason");
 			crit = new SpecimenQueryCriteria(id.longValue());
-			crit.setIncludeChildren(includeChildren == null ? false : includeChildren);
+			crit.setIncludeChildren(includeChildren != null && includeChildren);
 			crit.setParams(Collections.singletonMap("comments", reason));
 		} catch (Exception e) {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, e.getMessage());

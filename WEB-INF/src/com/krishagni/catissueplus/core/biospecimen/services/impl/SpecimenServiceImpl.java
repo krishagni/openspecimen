@@ -562,7 +562,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				aliquot.setPrintLabel(spec.printLabel());
 				aliquot.setComments(spec.getComments());
 				aliquot.setExtensionDetail(spec.getExtensionDetail());
-				aliquot.setStatus(Specimen.COLLECTED);
+				aliquot.setStatus(StringUtils.isNotBlank(spec.getStatus()) ? spec.getStatus() : Specimen.COLLECTED);
 
 				if (i < reqIds.size()) {
 					aliquot.setReqId(reqIds.get(i));
@@ -633,7 +633,9 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		try {
 			SpecimenDetail spmnDetail = derivedReq.getPayload();
 			spmnDetail.setLineage(Specimen.DERIVED);
-			spmnDetail.setStatus(Specimen.COLLECTED);
+			if (StringUtils.isBlank(spmnDetail.getStatus())) {
+				spmnDetail.setStatus(Specimen.COLLECTED);
+			}
 
 			ResponseEvent<SpecimenDetail> resp = createSpecimen(new RequestEvent<SpecimenDetail>(spmnDetail));
 			if (resp.isSuccessful() && spmnDetail.closeParent()) {
