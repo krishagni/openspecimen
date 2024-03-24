@@ -20,5 +20,14 @@
     <property name="entityName" column="ENTITY_NAME"/>
 
     <property name="entityId" column="ENTITY_ID"/>
+
+    <sql-query name="getEntityNames">
+      <return-scalar column="entity_name" type="string" />
+
+      select
+        distinct entity_name
+      from
+        os_revision_entity_records
+    </sql-query>
   </class>
 </hibernate-mapping>

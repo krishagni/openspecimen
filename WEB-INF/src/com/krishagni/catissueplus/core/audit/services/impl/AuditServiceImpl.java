@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -146,8 +147,14 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		}
 
 		RevisionsListCriteria criteria = req.getPayload();
-		List<User> users = null;
+		if (StringUtils.isNotBlank(criteria.recordType())) {
+			criteria.reportTypes(Collections.singletonList("data"));
+			if (CollectionUtils.isEmpty(criteria.records())) {
+				return ResponseEvent.userError(AuditErrorCode.RECORDS_REQ);
+			}
+		}
 
+		List<User> users = null;
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
 			users = daoFactory.getUserDao().getByIds(criteria.userIds());
 
@@ -173,27 +180,30 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			return ResponseEvent.userError(AuditErrorCode.DATE_GT_TODAY, Utility.getDateTimeString(endDate));
 		}
 
-		int maxLimit = ConfigUtil.getInstance().getIntSetting("common", "max_audit_report_period", 90);
-		if (startDate != null && endDate != null) {
-			int days = Utility.daysBetween(startDate, endDate);
-			if (days > maxLimit) {
-				return ResponseEvent.userError(AuditErrorCode.DATE_INTERVAL_GT_ALLOWED, maxLimit);
-			}
-		} else if (startDate != null) {
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(startDate);
-			cal.add(Calendar.DAY_OF_MONTH, maxLimit);
-			endDate = cal.getTime().after(endOfDay) ? endOfDay : Utility.getEndOfDay(cal.getTime());
-		} else {
-			endDate = endDate != null ? endDate : endOfDay;
+		String recordType = criteria.recordType();
+		if (StringUtils.isBlank(recordType) || (!recordType.equals("form") && CollectionUtils.isEmpty(criteria.recordIds()))) {
+			int maxLimit = ConfigUtil.getInstance().getIntSetting("common", "max_audit_report_period", 90);
+			if (startDate != null && endDate != null) {
+				int days = Utility.daysBetween(startDate, endDate);
+				if (days > maxLimit) {
+					return ResponseEvent.userError(AuditErrorCode.DATE_INTERVAL_GT_ALLOWED, maxLimit);
+				}
+			} else if (startDate != null) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(startDate);
+				cal.add(Calendar.DAY_OF_MONTH, maxLimit);
+				endDate = cal.getTime().after(endOfDay) ? endOfDay : Utility.getEndOfDay(cal.getTime());
+			} else {
+				endDate = endDate != null ? endDate : endOfDay;
 
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(endDate);
-			cal.add(Calendar.DAY_OF_MONTH, -maxLimit);
-			startDate = Utility.chopTime(cal.getTime());
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(endDate);
+				cal.add(Calendar.DAY_OF_MONTH, -maxLimit);
+				startDate = Utility.chopTime(cal.getTime());
+			}
 		}
 
-		if (startDate.after(endDate)) {
+		if (startDate != null && endDate != null && startDate.after(endDate)) {
 			return ResponseEvent.userError(
 				AuditErrorCode.FROM_DT_GT_TO_DATE,
 				Utility.getDateTimeString(startDate),
@@ -237,6 +247,31 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	public ResponseEvent<File> getExportedRevisionsFile(RequestEvent<String> req) {
 		String filename = req.getPayload() + "_" + AuthUtil.getCurrentUser().getId();
 		return ResponseEvent.response(new File(getAuditDir(), filename));
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<Map<String, String>>> getRevisionEntities() {
+		try {
+			if (!AuthUtil.isAdmin()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			List<String> entityNames = daoFactory.getAuditDao().getRevisionEntityNames();
+			List<Map<String, String>> result = new ArrayList<>();
+			for (String entityName : entityNames) {
+				Map<String, String> entity = new HashMap<>();
+				entity.put("name", entityName);
+				entity.put("value", MessageUtil.getInstance().getMessage("audit_entity_" + entityName));
+				result.add(entity);
+			}
+
+			return ResponseEvent.response(result.stream().sorted(Comparator.comparing(e -> e.get("value"))).collect(Collectors.toList()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
 	}
 
 	@Override
@@ -308,18 +343,24 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			Date exportedOn = Calendar.getInstance().getTime();
 
 			if (criteria.includeReport("data")) {
-				logger.info("Exporting core objects' revisions... ");
-				File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
-				inputFiles.add(coreObjectsRevs);
+				if (StringUtils.isBlank(criteria.recordType()) || criteria.recordType().equals("core")) {
+					logger.info("Exporting core objects' revisions... ");
+					File coreObjectsRevs = new CoreObjectsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy).export(baseDir);
+					inputFiles.add(coreObjectsRevs);
+				}
 
 				FormsRevisionExporter formsExporter = new FormsRevisionExporter(criteria, exportedBy, exportedOn, revisionsBy);
-				logger.info("Exporting form revisions... ");
-				File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
-				inputFiles.add(formsRevs);
+				if (StringUtils.isBlank(criteria.recordType()) || criteria.recordType().equals("form")) {
+					logger.info("Exporting form revisions... ");
+					File formsRevs = formsExporter.exportMetadataRevisions(baseDir);
+					inputFiles.add(formsRevs);
+				}
 
-				logger.info("Exporting form data revisions... ");
-				File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
-				inputFiles.add(formsDataRevs);
+				if (StringUtils.isBlank(criteria.recordType()) || criteria.recordType().equals("form_data")) {
+					logger.info("Exporting form data revisions... ");
+					File formsDataRevs = formsExporter.exportDataRevisions(baseDir);
+					inputFiles.add(formsDataRevs);
+				}
 			}
 
 			if (criteria.includeReport("auth")) {
@@ -860,7 +901,17 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		emailProps.put("users",     !userNames.isEmpty() ? userNames : null);
 		emailProps.put("fileId",    getFileId(revisionsFile));
 		emailProps.put("rcpt",      exportedBy.formattedName());
-		emailProps.put("reportTypes", criteria.reportTypes().stream().map(t -> MessageUtil.getInstance().getMessage("audit_report_type_" + t)).collect(Collectors.joining(", ")));
+		emailProps.put("reportTypes", criteria.reportTypes().stream().map(t -> msg("audit_report_type_" + t)).collect(Collectors.joining(", ")));
+		emailProps.put("recordType", StringUtils.isNotBlank(criteria.recordType()) ? msg("audit_record_type_" + criteria.recordType()) : null);
+		if ("core".equals(criteria.recordType())) {
+			emailProps.put("records", Utility.nullSafeStream(criteria.records()).map(t -> msg("audit_entity_" + t)).collect(Collectors.joining(", ")));
+		} else {
+			emailProps.put("records", StringUtils.join(criteria.records(), ", "));
+		}
+
+		if (CollectionUtils.isNotEmpty(criteria.recordIds())) {
+			emailProps.put("recordIds", StringUtils.join(criteria.recordIds(), ", "));
+		}
 
 		EmailUtil.getInstance().sendEmail(
 			REV_EMAIL_TMPL,
@@ -868,6 +919,10 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			null,
 			emailProps
 		);
+	}
+
+	private String msg(String key) {
+		return MessageUtil.getInstance().getMessage(key);
 	}
 
 	private String getFileId(File revisionsFile) {

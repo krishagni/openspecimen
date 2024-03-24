@@ -17,6 +17,8 @@ public interface AuditDao extends Dao<UserApiCallLog> {
 
 	List<RevisionDetail> getRevisions(RevisionsListCriteria criteria);
 
+	List<String> getRevisionEntityNames();
+
 	List<FormDataRevisionDetail> getFormDataRevisions(RevisionsListCriteria criteria);
 
 	List<FormDataRevisionDetail> getFormRevisions(RevisionsListCriteria criteria);

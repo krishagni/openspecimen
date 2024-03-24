@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCriteria> {
-
 	private Date startDate;
 
 	private Date endDate;
@@ -25,6 +25,12 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 	private List<String> entities;
 
 	private List<String> reportTypes;
+
+	private String recordType; // core, form, form_data
+
+	private List<String> records; // Core object names or form names
+
+	private List<Long> recordIds;
 
 	@Override
 	public RevisionsListCriteria self() {
@@ -103,7 +109,37 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 	}
 
 	public boolean includeReport(String type) {
-		return reportTypes != null && reportTypes.indexOf(type) >= 0;
+		return reportTypes != null && reportTypes.contains(type);
+	}
+
+	public String recordType() {
+		return recordType;
+	}
+
+	@JsonProperty("recordType")
+	public RevisionsListCriteria recordType(String recordType) {
+		this.recordType = recordType;
+		return self();
+	}
+
+	public List<String> records() {
+		return records;
+	}
+
+	@JsonProperty("records")
+	public RevisionsListCriteria records(List<String> records) {
+		this.records = records;
+		return self();
+	}
+
+	public List<Long> recordIds() {
+		return recordIds;
+	}
+
+	@JsonProperty("recordIds")
+	public RevisionsListCriteria recordIds(List<Long> recordIds) {
+		this.recordIds = recordIds;
+		return self();
 	}
 
 	public String toString() {
@@ -111,7 +147,11 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 			.append("start date = ").append(startDate()).append(", ")
 			.append("end date = ").append(endDate()).append(", ")
 			.append("users = ").append(userIds()).append(", ")
-			.append("include modified props = ").append(includeModifiedProps())
+			.append("include modified props = ").append(includeModifiedProps()).append(", ")
+			.append("report types = ").append(StringUtils.join(reportTypes(), ";")).append(", ")
+			.append("record type = ").append(recordType()).append(", ")
+			.append("records = ").append(StringUtils.join(records(), ";")).append(", ")
+			.append("record ids = ").append(StringUtils.join(recordIds(), ";"))
 			.toString();
 	}
 

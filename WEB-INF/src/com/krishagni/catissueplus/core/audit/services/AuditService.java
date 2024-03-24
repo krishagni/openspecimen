@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.audit.services;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import com.krishagni.catissueplus.core.audit.domain.UserApiCallLog;
 import com.krishagni.catissueplus.core.audit.events.AuditDetail;
@@ -20,6 +21,8 @@ public interface AuditService {
 	ResponseEvent<ExportedFileDetail> exportRevisions(RequestEvent<RevisionsListCriteria> req);
 
 	ResponseEvent<File> getExportedRevisionsFile(RequestEvent<String> req);
+
+	ResponseEvent<List<Map<String, String>>> getRevisionEntities();
 
 	// Internal APIs
 

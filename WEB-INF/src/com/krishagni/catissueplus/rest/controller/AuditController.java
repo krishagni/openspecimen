@@ -126,4 +126,11 @@ public class AuditController {
 			IOUtils.closeQuietly(in);
 		}
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/revision-entities")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<Map<String, String>> getRevisionEntities() {
+		return ResponseEvent.unwrap(auditService.getRevisionEntities());
+	}
 }

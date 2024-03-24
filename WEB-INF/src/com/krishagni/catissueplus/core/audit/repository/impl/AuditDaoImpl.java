@@ -113,6 +113,11 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	@Override
+	public List<String> getRevisionEntityNames() {
+		return (List<String>) getCurrentSession().getNamedQuery(GET_ENTITY_NAMES).list();
+	}
+
+	@Override
 	public List<FormDataRevisionDetail> getFormDataRevisions(RevisionsListCriteria criteria) {
 		List<Object[]> rows = buildFormDataRevisionsQuery(criteria).list();
 
@@ -312,6 +317,12 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			}
 
 			query.add(orCond);
+		} else if (CollectionUtils.isNotEmpty(criteria.records())) {
+			query.add(query.in("re.entityName", criteria.records()));
+		}
+
+		if (CollectionUtils.isNotEmpty(criteria.recordIds())) {
+			query.add(query.in("re.entityId", criteria.recordIds()));
 		}
 	}
 
@@ -379,6 +390,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 		if (CollectionUtils.isNotEmpty(criteria.entities())) {
 			query.setParameterList("entities", criteria.entities());
+		} else if (CollectionUtils.isNotEmpty(criteria.records())) {
+			query.setParameterList("formNames", criteria.records());
 		}
 
 		return query;
@@ -405,6 +418,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 		if (CollectionUtils.isNotEmpty(criteria.entities())) {
 			whereClauses.add("r.identifier in (" + GET_ENTITY_FORMS_SQL + ")");
+		} else if (CollectionUtils.isNotEmpty(criteria.records())) {
+			whereClauses.add("r.identifier in (" + GET_FORM_IDS_SQL + ")");
 		}
 
 		String result = GET_FORM_REVISIONS_SQL;
@@ -448,6 +463,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 		if (CollectionUtils.isNotEmpty(criteria.entities())) {
 			query.setParameterList("entities", criteria.entities());
+		} else if (CollectionUtils.isNotEmpty(criteria.records())) {
+			query.setParameterList("formNames", criteria.records());
 		}
 
 		return query;
@@ -482,11 +499,13 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	private String buildQueryRestrictions(RevisionsListCriteria criteria) {
-		if (CollectionUtils.isEmpty(criteria.entities())) {
+		if (CollectionUtils.isNotEmpty(criteria.entities())) {
+			return "where fc.entity_type in :entities";
+		} else if (CollectionUtils.isNotEmpty(criteria.records())) {
+			return "where f.name in :formNames";
+		} else {
 			return StringUtils.EMPTY;
 		}
-
-		return "where fc.entity_type in :entities";
 	}
 
 	private void loadModifiedProps(RevisionDetail revision, Map<String, List<RevisionEntityRecordDetail>> entitiesMap) {
@@ -643,5 +662,9 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		"  fc.entity_type in :entities and " +
 		"  fc.deleted_on is null";
 
+	private static final String GET_FORM_IDS_SQL = "select f.identifier from dyextn_containers f where f.name in :formNames";
+
 	private static final String GET_LATEST_API_CALL_TIME = FQN + ".getLatestApiCallTime";
+
+	private static final String GET_ENTITY_NAMES = "com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord.getEntityNames";
 }

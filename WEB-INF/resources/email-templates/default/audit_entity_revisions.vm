@@ -50,8 +50,26 @@
                       #end
                     </td>
                   </tr>
+                  #if ($recordType)
                   <tr>
-                    <td> Report Types </td>
+                    <td> Report Type </td>
+                    <td> : $recordType </td>
+                  </tr>
+                  #end
+                  #if ($records)
+                  <tr>
+                    <td> Records </td>
+                    <td> : $records </td>
+                  </tr>
+                  #end
+                  #if ($recordIds)
+                  <tr>
+                    <td> Record IDs </td>
+                    <td> : $recordIds </td>
+                  </tr>
+                  #end
+                  <tr>
+                    <td> Include </td>
                     <td> : $reportTypes </td>
                   </tr>
                 </table>

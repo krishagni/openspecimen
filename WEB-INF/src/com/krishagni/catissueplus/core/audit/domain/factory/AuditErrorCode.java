@@ -10,7 +10,9 @@ public enum AuditErrorCode implements ErrorCode {
 
 	DATE_INTERVAL_GT_ALLOWED,
 
-	FROM_DT_GT_TO_DATE;
+	FROM_DT_GT_TO_DATE,
+
+	RECORDS_REQ;
 
 	@Override
 	public String code() {
