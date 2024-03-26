@@ -21,6 +21,7 @@ import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
@@ -361,6 +362,10 @@ public class Shipment extends BaseEntity {
 		//
 		// if we are here - it means the shipment is in pending state
 		//
+		if (getSender() == null) {
+			// OPSMN-6460 default the sender to the current user
+			setSender(AuthUtil.getCurrentUser());
+		}
 
 		if (isSpecimenShipment()) {
 			if (CollectionUtils.isEmpty(getShipmentSpecimens())) {
