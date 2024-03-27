@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Migrate system level specimen type units from PV props - Part 1: Specimen Class" dbms="mysql">
+    <sql>
+      insert into
+        os_specimen_type_units (specimen_class_id, quantity_unit_id, concentration_unit_id)
+      select
+        qu.identifier as specimen_class_id, qpv.identifier as quantity_unit_id, cpv.identifier as concentration_unit_id
+      from
+        (
+          select
+            sc.identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value sc
+            left join os_pv_props unit on unit.pv_id = sc.identifier and unit.name = 'quantity_unit'
+            left join os_pv_props sym on sym.pv_id = sc.identifier and sym.name = 'quantity_display_unit'
+          where
+            sc.public_id = 'specimen_type' and
+            sc.parent_identifier is null
+        ) qu left join (
+          select
+            sc.identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value sc
+            left join os_pv_props unit on unit.pv_id = sc.identifier and unit.name = 'concentration_unit'
+            left join os_pv_props sym on sym.pv_id = sc.identifier and sym.name = 'concentration_display_unit'
+          where
+            sc.public_id = 'specimen_type' and
+            sc.parent_identifier is null
+        ) cu on cu.identifier = qu.identifier
+        left join catissue_permissible_value qpv on qpv.value = qu.unit and qpv.public_id = 'specimen_unit'
+        left join catissue_permissible_value cpv on cpv.value = cu.unit and cpv.public_id = 'specimen_unit'
+      where
+        qpv.identifier is not null or cpv.identifier is not null
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Migrate system level specimen type units from PV props - Part 2: Specimen Type" dbms="mysql">
+    <sql>
+      insert into
+        os_specimen_type_units (specimen_class_id, specimen_type_id, quantity_unit_id, concentration_unit_id)
+      select
+        qu.parent_identifier as specimen_class_id, qu.identifier as specimen_type_id, qpv.identifier as quantity_unit_id, cpv.identifier as concentration_unit_id
+      from
+        (
+          select
+            st.identifier, st.parent_identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value st
+            left join os_pv_props unit on unit.pv_id = st.identifier and unit.name = 'quantity_unit'
+            left join os_pv_props sym on sym.pv_id = st.identifier and sym.name = 'quantity_display_unit'
+          where
+            st.public_id = 'specimen_type' and
+            st.parent_identifier is not null
+        ) qu left join (
+          select
+            st.identifier, st.parent_identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value st
+            left join os_pv_props unit on unit.pv_id = st.identifier and unit.name = 'concentration_unit'
+            left join os_pv_props sym on sym.pv_id = st.identifier and sym.name = 'concentration_display_unit'
+          where
+            st.public_id = 'specimen_type' and
+            st.parent_identifier is not null
+        ) cu on cu.identifier = qu.identifier
+        left join catissue_permissible_value qpv on qpv.value = qu.unit and qpv.public_id = 'specimen_unit'
+        left join catissue_permissible_value cpv on cpv.value = cu.unit and cpv.public_id = 'specimen_unit'
+      where
+        qpv.identifier is not null or cpv.identifier is not null
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Migrate system level specimen type units from PV props - Part 1: Specimen Class" dbms="oracle">
+    <sql>
+      insert into
+        os_specimen_type_units (identifier, specimen_class_id, quantity_unit_id, concentration_unit_id)
+      select
+        os_specimen_type_units_seq.nextval as identifier, qu.identifier as specimen_class_id, qpv.identifier as quantity_unit_id, cpv.identifier as concentration_unit_id
+      from
+        (
+          select
+            sc.identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value sc
+            left join os_pv_props unit on unit.pv_id = sc.identifier and unit.name = 'quantity_unit'
+            left join os_pv_props sym on sym.pv_id = sc.identifier and sym.name = 'quantity_display_unit'
+          where
+            sc.public_id = 'specimen_type' and
+            sc.parent_identifier is null
+        ) qu left join (
+          select
+            sc.identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value sc
+            left join os_pv_props unit on unit.pv_id = sc.identifier and unit.name = 'concentration_unit'
+            left join os_pv_props sym on sym.pv_id = sc.identifier and sym.name = 'concentration_display_unit'
+          where
+            sc.public_id = 'specimen_type' and
+            sc.parent_identifier is null
+        ) cu on cu.identifier = qu.identifier
+        left join catissue_permissible_value qpv on qpv.value = qu.unit and qpv.public_id = 'specimen_unit'
+        left join catissue_permissible_value cpv on cpv.value = cu.unit and cpv.public_id = 'specimen_unit'
+      where
+        qpv.identifier is not null or cpv.identifier is not null
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Migrate system level specimen type units from PV props - Part 2: Specimen Type" dbms="oracle">
+    <sql>
+      insert into
+        os_specimen_type_units (identifier, specimen_class_id, specimen_type_id, quantity_unit_id, concentration_unit_id)
+      select
+        os_specimen_type_units_seq.nextval as identifier, qu.parent_identifier as specimen_class_id, qu.identifier as specimen_type_id, qpv.identifier as quantity_unit_id, cpv.identifier as concentration_unit_id
+      from
+        (
+          select
+            st.identifier, st.parent_identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value st
+            left join os_pv_props unit on unit.pv_id = st.identifier and unit.name = 'quantity_unit'
+            left join os_pv_props sym on sym.pv_id = st.identifier and sym.name = 'quantity_display_unit'
+          where
+            st.public_id = 'specimen_type' and
+            st.parent_identifier is not null
+        ) qu left join (
+          select
+            st.identifier, st.parent_identifier, case when sym.value is not null then sym.value else unit.value end as unit
+          from
+            catissue_permissible_value st
+            left join os_pv_props unit on unit.pv_id = st.identifier and unit.name = 'concentration_unit'
+            left join os_pv_props sym on sym.pv_id = st.identifier and sym.name = 'concentration_display_unit'
+          where
+            st.public_id = 'specimen_type' and
+            st.parent_identifier is not null
+        ) cu on cu.identifier = qu.identifier
+        left join catissue_permissible_value qpv on qpv.value = qu.unit and qpv.public_id = 'specimen_unit'
+        left join catissue_permissible_value cpv on cpv.value = cu.unit and cpv.public_id = 'specimen_unit'
+      where
+        qpv.identifier is not null or cpv.identifier is not null
+    </sql>
+  </changeSet>
+</databaseChangeLog>

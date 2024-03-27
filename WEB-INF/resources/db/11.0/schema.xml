@@ -11,4 +11,36 @@
       <column name="ENTITY_ID" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP based specimen type quantity and concentration units">
+    <createTable tableName="OS_SPECIMEN_TYPE_UNITS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="CP_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_TYPE_UNIT_CP_ID"
+          referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SPECIMEN_CLASS_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_TYPE_UNIT_CLASS_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SPECIMEN_TYPE_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_TYPE_UNIT_TYPE_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="QUANTITY_UNIT_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_TYPE_UNIT_QTY_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CONCENTRATION_UNIT_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_TYPE_UNIT_CONC_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP based specimen type quantity and concentration unit ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_SPECIMEN_TYPE_UNITS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
 </databaseChangeLog>
