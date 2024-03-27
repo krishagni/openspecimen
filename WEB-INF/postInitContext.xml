@@ -73,6 +73,11 @@
     <property name="deInitializer" ref="deInitializer"/>
   </bean>
 
+  <bean class="com.krishagni.catissueplus.core.init.SpecimenUnitsLoader" depends-on="post-init-liquibase">
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+  </bean>
+
   <import resource="classpath*:pluginPostInitContext.xml"/>
 
   <bean id="late-init-liquibase" class="liquibase.integration.spring.SpringLiquibase">

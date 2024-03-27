@@ -177,7 +177,8 @@
   <include file="db/10.3/migration.xml" />
 
   <include file="db/11.0/schema.xml" />
-  <include file="db/11.0/config.xml"/>
+  <include file="db/11.0/seed-data.xml" />
+  <include file="db/11.0/config.xml" />
 
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
