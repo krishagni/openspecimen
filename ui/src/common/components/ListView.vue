@@ -85,8 +85,7 @@
               </span>
               <span v-else-if="filter.type == 'pv'">
                 <os-pv-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
-                  :attribute="filter.attribute" :leafValue="filter.leafValue" :selectProp="filter.selectProp">
-                </os-pv-dropdown>
+                  v-bind="filter" />
               </span>
               <span v-else-if="filter.type == 'site'">
                 <os-site-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
