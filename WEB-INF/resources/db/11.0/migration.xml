@@ -5,6 +5,10 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+  <changeSet author="vpawar" id="Move specimen units from PV properties to the PVs table">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.SpecimenUnitsLoader" />
+  </changeSet>
+
   <changeSet author="vpawar" id="Migrate system level specimen type units from PV props - Part 1: Specimen Class" dbms="mysql">
     <sql>
       insert into

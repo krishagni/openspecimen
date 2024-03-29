@@ -50,7 +50,9 @@ public interface DaoFactory {
 	SiteDao getSiteDao();
 
 	SpecimenDao getSpecimenDao();
-	
+
+	SpecimenTypeUnitDao getSpecimenTypeUnitDao();
+
 	SpecimenRequirementDao getSpecimenRequirementDao();
 
 	VisitsDao getVisitsDao();
