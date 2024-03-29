@@ -10,12 +10,17 @@
 import Dropdown from '@/common/components/Dropdown.vue';
 import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 
+import exprUtil from '@/common/services/ExpressionUtil.js';
 import http  from '@/common/services/HttpClient.js';
 import pvSvc from '@/common/services/PermissibleValue.js';
 import util  from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'attribute', 'leafValue', 'context', 'multiple', 'tabOrder'],
+  props: [
+    'modelValue', 'selectProp', 'attribute',
+    'rootValue', 'leafValue', 'parentValueExpr',
+    'context', 'multiple', 'tabOrder'
+  ],
 
   components: {
     Dropdown,
@@ -31,7 +36,9 @@ export default {
             {
               searchString: opts.query || '',
               attribute: pvAttr,
-              includeOnlyLeafValue: this.leafValue == true
+              parentValue: this.parentValueExpr && exprUtil.eval(this.context, this.parentValueExpr),
+              includeOnlyLeafValue: this.leafValue == true,
+              includeOnlyRootValue: this.rootValue == true
             },
             opts || {maxResults: 100}
           );
