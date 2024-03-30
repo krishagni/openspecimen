@@ -27,17 +27,20 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPreSaveEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenSavedEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
@@ -1435,7 +1438,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	}
 
 	private Function<ExportJob, List<? extends Object>> getSpecimensGenerator() {
-		return new Function<ExportJob, List<? extends Object>>() {
+		return new Function<>() {
 			private boolean endOfSpecimens;
 
 			private boolean paramsInited;
@@ -1445,6 +1448,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			private SpecimenListCriteria crit;
 
 			private Long maxId;
+
+			private Map<String, SpecimenTypeUnit> units = new HashMap<>();
 
 			@Override
 			public List<? extends Object> apply(ExportJob job) {
@@ -1462,6 +1467,12 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 							if (specimen.isPrimary()) {
 								detail.setCollectionEvent(CollectionEventDetail.from(specimen.getCollectionEvent()));
 								detail.setReceivedEvent(ReceivedEventDetail.from(specimen.getReceivedEvent()));
+							}
+
+							SpecimenTypeUnit unit = getUnit(specimen);
+							if (unit != null) {
+								detail.setQuantityUnit(PermissibleValue.getValue(unit.getQuantityUnit()));
+								detail.setConcentrationUnit(PermissibleValue.getValue(unit.getConcentrationUnit()));
 							}
 
 							records.add(detail);
@@ -1532,6 +1543,14 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				}
 
 				paramsInited = true;
+			}
+
+			private SpecimenTypeUnit getUnit(Specimen specimen) {
+				CollectionProtocol cp = specimen.getCollectionProtocol();
+				PermissibleValue specimenClass = specimen.getSpecimenClass();
+				PermissibleValue type = specimen.getSpecimenType();
+				String key = cp.getId() + ":" + specimenClass.getId() + ":" + type.getId();
+				return units.computeIfAbsent(key, (k) -> SpecimenUtil.getInstance().getUnit(cp, specimenClass, type));
 			}
 		};
 	}

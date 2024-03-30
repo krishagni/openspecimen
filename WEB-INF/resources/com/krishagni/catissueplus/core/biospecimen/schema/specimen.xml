@@ -99,6 +99,16 @@
     </field>
 
     <field>
+      <caption>#getMessage("specimen_quantity_unit")</caption>
+      <attribute>quantityUnit</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_concentration_unit")</caption>
+      <attribute>concentrationUnit</attribute>
+    </field>
+
+    <field>
       <multiple>true</multiple>
       <caption>#getMessage("specimen_biohazard")</caption>
       <attribute>biohazards</attribute>
