@@ -588,8 +588,6 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setInitialQty(specimen.getInitialQuantity());
 		result.setAvailableQty(specimen.getAvailableQuantity());
 		result.setConcentration(specimen.getConcentration());
-		result.setQuantityUnit(PermissibleValue.getValue(specimen.getQuantityUnit()));
-		result.setConcentrationUnit(PermissibleValue.getValue(specimen.getConcentrationUnit()));
 		if (specimen.getParentSpecimen() != null) {
 			result.setParentId(specimen.getParentSpecimen().getId());
 			result.setParentLabel(specimen.getParentSpecimen().getLabel());
@@ -675,8 +673,6 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setPathology(PermissibleValue.getValue(anticipated.getPathologyStatus()));
 		result.setInitialQty(anticipated.getInitialQuantity());
 		result.setConcentration(anticipated.getConcentration());
-		result.setQuantityUnit(PermissibleValue.getValue(anticipated.getQuantityUnit()));
-		result.setConcentrationUnit(PermissibleValue.getValue(anticipated.getConcentrationUnit()));
 		result.setParentId(null);
 		result.setCollector(UserSummary.from(anticipated.getCollector()));
 		result.setCollectionContainer(PermissibleValue.getValue(anticipated.getCollectionContainer()));

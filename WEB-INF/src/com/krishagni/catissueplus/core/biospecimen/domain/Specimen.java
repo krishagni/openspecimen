@@ -113,10 +113,6 @@ public class Specimen extends BaseExtensionEntity {
 
 	private BigDecimal concentration;
 
-	private PermissibleValue quantityUnit;
-
-	private PermissibleValue concentrationUnit;
-
 	private String label;
 
 	private String additionalLabel;
@@ -384,22 +380,6 @@ public class Specimen extends BaseExtensionEntity {
 		
 		this.concentration = concentration;
 		this.concentrationInit = true;
-	}
-
-	public PermissibleValue getQuantityUnit() {
-		return quantityUnit;
-	}
-
-	public void setQuantityUnit(PermissibleValue quantityUnit) {
-		this.quantityUnit = quantityUnit;
-	}
-
-	public PermissibleValue getConcentrationUnit() {
-		return concentrationUnit;
-	}
-
-	public void setConcentrationUnit(PermissibleValue concentrationUnit) {
-		this.concentrationUnit = concentrationUnit;
 	}
 
 	public String getLabel() {
@@ -1220,7 +1200,6 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void update(Specimen specimen) {
-		String unitKey = getUnitKey();
 		if (!StringUtils.equals(getLineage(), specimen.getLineage())) {
 			throw OpenSpecimenException.userError(
 				SpecimenErrorCode.CANNOT_CHG_LINEAGE, getLineage(), specimen.getLineage());
@@ -1305,11 +1284,6 @@ public class Specimen extends BaseExtensionEntity {
 		setSpecimenType(spmnToUpdateFrom.getSpecimenType());
 		updateBiohazards(spmnToUpdateFrom.getBiohazards());
 		setPathologicalStatus(spmnToUpdateFrom.getPathologicalStatus());
-		if (!unitKey.equals(getUnitKey())) {
-			setQuantityUnit(specimen.getQuantityUnit());
-			setConcentrationUnit(specimen.getConcentrationUnit());
-		}
-
 		setComment(specimen.getComment());
 		setExtension(specimen.getExtension());
 		setPrintLabel(specimen.isPrintLabel());
@@ -2418,9 +2392,5 @@ public class Specimen extends BaseExtensionEntity {
 
 	private PermissibleValue getAcceptableReceiveQuality() {
 		return daoFactory.getPermissibleValueDao().getPv("receive_quality", "Acceptable", true);
-	}
-
-	private String getUnitKey() {
-		return getCollectionProtocol().getShortTitle() + ":" + getSpecimenClass().getValue() + ":" + getSpecimenType().getValue();
 	}
 }

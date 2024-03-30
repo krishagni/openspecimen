@@ -184,7 +184,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 
 		ose.checkAndThrow();
-		return setUnits(specimen);
+		return specimen;
 	}
 
 	private void setAdditionalLabel(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
@@ -1323,16 +1323,5 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 
 	private List<PermissibleValue> getPvs(String attribute, Collection<String> values) {
 		return daoFactory.getPermissibleValueDao().getPvs(attribute, values);
-	}
-
-	private Specimen setUnits(Specimen specimen) {
-		SpecimenTypeUnit unit = SpecimenUtil.getInstance().getUnit(specimen.getCollectionProtocol(), specimen.getSpecimenClass(), specimen.getSpecimenType());
-		if (unit == null) {
-			return specimen;
-		}
-
-		specimen.setQuantityUnit(unit.getQuantityUnit());
-		specimen.setConcentrationUnit(unit.getConcentrationUnit());
-		return specimen;
 	}
 }

@@ -368,8 +368,6 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setStorageType(sr.getStorageType());
 		detail.setInitialQty(sr.getInitialQuantity());
 		detail.setConcentration(sr.getConcentration());
-		detail.setQuantityUnit(PermissibleValue.getValue(sr.getQuantityUnit()));
-		detail.setConcentrationUnit(PermissibleValue.getValue(sr.getConcentrationUnit()));
 		detail.setCollector(sr.getCollector() == null ? null : UserSummary.from(sr.getCollector()));
 		detail.setCollectionProcedure(PermissibleValue.getValue(sr.getCollectionProcedure()));
 		detail.setCollectionContainer(PermissibleValue.getValue(sr.getCollectionContainer()));

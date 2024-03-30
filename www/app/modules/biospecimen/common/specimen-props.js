@@ -201,29 +201,20 @@ angular.module('os.biospecimen.common.specimenprops', [])
       link: function(scope, element, attrs) {
         var measure = attrs.measure || 'quantity';
         var specimen = scope.specimen;
-        if (specimen.id > 0) {
-          element.html(measure == 'quantity' ? specimen.quantityUnit : specimen.concentrationUnit);
-        } else {
-          SpecimenTypeUnitSvc.getUnit(specimen, measure).then(
-            function(unit) {
-              element.html(unit);
-            }
-          );
-        }
+        SpecimenTypeUnitSvc.getUnit(specimen, measure).then(
+          function(unit) {
+            element.html(unit);
+          }
+        );
 
         var pristineType = specimen.cpShortTitle + ':' + specimen.specimenClass + ':' + specimen.type;
         scope.$watchGroup(['specimen.cpShortTitle', 'specimen.specimenClass', 'specimen.type'],
           function() {
-            var currentType = specimen.cpShortTitle + ':' + specimen.specimenClass + ':' + specimen.type;
-            if (pristineType != currentType) {
-              SpecimenTypeUnitSvc.getUnit(specimen, measure).then(
-                function(unit) {
-                  element.html(unit);
-                }
-              );
-            } else {
-              element.html(measure == 'quantity' ? specimen.quantityUnit : specimen.concentrationUnit);
-            }
+            SpecimenTypeUnitSvc.getUnit(specimen, measure).then(
+              function(unit) {
+                element.html(unit);
+              }
+            );
           }
         );
       }

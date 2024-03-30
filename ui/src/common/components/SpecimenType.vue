@@ -65,12 +65,6 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
       }
-    },
-
-    object: function() {
-      const entity = this.entity || 'specimen';
-      const formData  = (this.form && this.form.formData) || this.form || this.context || {};
-      return exprUtil.getValue(formData, entity) || {};
     }
   },
 
@@ -89,15 +83,12 @@ export default {
 
     this.options = classes;
     this._updateValue(this.selected);
-
-    const {cpShortTitle, specimenClass, type, quantityUnit, concentrationUnit} = this.object;
-    this.pristine = {digest: cpShortTitle + ':' + specimenClass + ':' + type, quantityUnit, concentrationUnit};
   },
 
   watch: {
     selected: function (newValue, oldValue) {
       if (newValue != oldValue) {
-        this._updateValue(newValue, true);
+        this._updateValue(newValue);
       }
     }
   },
@@ -112,7 +103,7 @@ export default {
       return option.type + ' (' + option.specimenClass + ')';
     },
 
-    _updateValue(value, changeDetected) {
+    _updateValue(value) {
       const entity = this.entity || 'specimen';
       const option = this.selectedOption = this._getSelectedOption(value);
 
@@ -121,16 +112,6 @@ export default {
 
       entityObj.specimenClass = option && option.specimenClass || null;
       entityObj.type          = option && option.type || null;
-
-      if (changeDetected) {
-        const currentDigest = entityObj.cpShortTitle + ':' + entityObj.specimenClass + ':' + entityObj.type;
-        if (currentDigest != this.pristine.digest) {
-          entityObj.quantityUnit = entityObj.concentrationUnit = null;
-        } else {
-          entityObj.quantityUnit      = this.pristine.quantityUnit;
-          entityObj.concentrationUnit = this.pristine.concentrationUnit;
-        }
-      }
     },
 
     _getSelectedOption(value) {

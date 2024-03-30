@@ -124,7 +124,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setActivityStatus(detail, requirement, ose);
 
 		ose.checkAndThrow();
-		return setUnits(requirement);
+		return requirement;
 	}
 
 	@Override
@@ -174,7 +174,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 
 		ose.checkAndThrow();
 		derived.setParentSpecimenRequirement(parent);
-		return setUnits(derived);
+		return derived;
 	}
 	
 	@Override
@@ -215,7 +215,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		}
 
 		ose.checkAndThrow();
-		return setUnits(sr);
+		return sr;
 	}
 	
 	@Override
@@ -269,7 +269,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 			aliquot.setParentSpecimenRequirement(parent);
 
 			ose.checkAndThrow();
-			aliquots.add(setUnits(aliquot));
+			aliquots.add(aliquot);
 		}
 
 		return aliquots;
@@ -429,17 +429,6 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setConcentration(detail.getConcentration(), sr, ose);
 	}
 
-	private SpecimenRequirement setUnits(SpecimenRequirement sr) {
-		SpecimenTypeUnit unit = SpecimenUtil.getInstance().getUnit(sr.getCollectionProtocol(), sr.getSpecimenClass(), sr.getSpecimenType());
-		if (unit == null) {
-			return sr;
-		}
-
-		sr.setQuantityUnit(unit.getQuantityUnit());
-		sr.setConcentrationUnit(unit.getConcentrationUnit());
-		return sr;
-	}
-	
 	private void setConcentration(BigDecimal concentration, SpecimenRequirement sr, OpenSpecimenException ose) {
 		if (concentration != null && NumUtil.lessThanZero(concentration)) {
 			ose.addError(CONCENTRATION_MUST_BE_POSITIVE);

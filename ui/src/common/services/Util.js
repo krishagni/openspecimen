@@ -242,11 +242,8 @@ class Util {
       .map(prop => ({specimenClass: prop.specimenClass, type: prop.type}));
   }
 
-  getSpecimenMeasureUnit({id, cpShortTitle, specimenClass, type, quantityUnit, concentrationUnit}, measure) {
-    if (id > 0 && (quantityUnit || concentrationUnit)) {
-      return (!measure || measure == 'quantity' ? quantityUnit : concentrationUnit) || '-';
-    }
-
+  getSpecimenMeasureUnit({cpShortTitle, specimenClass, type, specimenType}, measure) {
+    type = type || specimenType;
     const queries = [
       {cpShortTitle, specimenClass, type},
       {cpShortTitle, specimenClass, type: null},
