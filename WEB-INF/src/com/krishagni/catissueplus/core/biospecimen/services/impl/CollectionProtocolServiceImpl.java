@@ -1070,7 +1070,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			}
 
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(sr.getCollectionProtocol());
-			SpecimenRequirement partial = srFactory.createForUpdate(sr.getLineage(), detail);
+			SpecimenRequirement partial = srFactory.createForUpdate(sr, detail);
 			if (isSpecimenClassOrTypeChanged(sr, partial)) {
 				ensureSpecimensNotCollected(sr);
 			}

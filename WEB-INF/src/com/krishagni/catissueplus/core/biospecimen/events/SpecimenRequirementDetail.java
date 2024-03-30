@@ -42,6 +42,10 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	private BigDecimal initialQty;
 	
 	private BigDecimal concentration;
+
+	private String quantityUnit;
+
+	private String concentrationUnit;
 	
 	private UserSummary collector;
 	
@@ -167,6 +171,22 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 
 	public void setConcentration(BigDecimal concentration) {
 		this.concentration = concentration;
+	}
+
+	public String getQuantityUnit() {
+		return quantityUnit;
+	}
+
+	public void setQuantityUnit(String quantityUnit) {
+		this.quantityUnit = quantityUnit;
+	}
+
+	public String getConcentrationUnit() {
+		return concentrationUnit;
+	}
+
+	public void setConcentrationUnit(String concentrationUnit) {
+		this.concentrationUnit = concentrationUnit;
 	}
 
 	public UserSummary getCollector() {
@@ -348,6 +368,8 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setStorageType(sr.getStorageType());
 		detail.setInitialQty(sr.getInitialQuantity());
 		detail.setConcentration(sr.getConcentration());
+		detail.setQuantityUnit(PermissibleValue.getValue(sr.getQuantityUnit()));
+		detail.setConcentrationUnit(PermissibleValue.getValue(sr.getConcentrationUnit()));
 		detail.setCollector(sr.getCollector() == null ? null : UserSummary.from(sr.getCollector()));
 		detail.setCollectionProcedure(PermissibleValue.getValue(sr.getCollectionProcedure()));
 		detail.setCollectionContainer(PermissibleValue.getValue(sr.getCollectionContainer()));
@@ -357,6 +379,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setLabelPrintCopies(sr.getLabelPrintCopies());
 		detail.setSortOrder(sr.getSortOrder());
 		detail.setEventId(sr.getCollectionProtocolEvent().getId());
+		detail.setCpShortTitle(sr.getCollectionProtocol().getShortTitle());
 		detail.setActivityStatus(sr.getActivityStatus());
 		if (incChildren) {
 			detail.setChildren(from(sr.getChildSpecimenRequirements()));

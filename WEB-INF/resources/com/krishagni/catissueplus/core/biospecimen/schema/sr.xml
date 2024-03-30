@@ -80,7 +80,17 @@
       <caption>#getMessage("sr_concentration")</caption>
       <attribute>concentration</attribute>
     </field>
-    
+
+    <field>
+      <caption>#getMessage("sr_quantity_unit")</caption>
+      <attribute>quantityUnit</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("sr_concentration_unit")</caption>
+      <attribute>concentrationUnit</attribute>
+    </field>
+
     <record>
       <attribute>collector</attribute>
       <caption>#getMessage("sr_collector")</caption>

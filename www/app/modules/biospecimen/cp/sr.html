@@ -71,12 +71,7 @@
     </li>
     <li class="item">
       <strong class="key key-sm" translate="srs.concentration">Concentration</strong>
-      <div class="value value-md">
-        <span>{{childReq.concentration | osNumberInScientificNotation}}</span>
-        <os-specimen-unit specimen-class="childReq.specimenClass" type="childReq.type"
-          measure="concentration" ng-if="!!childReq.concentration || childReq.concentration == 0">
-        </os-specimen-unit>
-      </div>
+      <os-spmn-measure-val value="childReq.concentration" measure="'concentration'" specimen="childReq"></os-spmn-measure-val>
     </li>
     <li class="item">
       <strong class="key key-sm" translate="srs.storage_type">Storage Type</strong>

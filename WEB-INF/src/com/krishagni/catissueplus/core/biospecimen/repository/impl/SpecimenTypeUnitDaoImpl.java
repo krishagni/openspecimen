@@ -40,6 +40,37 @@ public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> imple
 			.uniqueResult();
 	}
 
+	@Override
+	public List<SpecimenTypeUnit> getMatchingUnits(Long cpId, Long specimenClassId, Long typeId) {
+		Criteria<SpecimenTypeUnit> query = createCriteria(SpecimenTypeUnit.class, "unit")
+			.leftJoin("unit.cp", "cp")
+			.leftJoin("unit.specimenClass", "specimenClass")
+			.leftJoin("unit.type", "type");
+
+		List<SpecimenTypeUnit> units = query.add(query.or(query.isNull("cp.id"), query.eq("cp.id", cpId)))
+			.add(query.eq("specimenClass.id", specimenClassId))
+			.add(query.or(query.isNull("type.id"), query.eq("type.id", typeId)))
+			.list();
+
+		units.sort((u1, u2) -> rank(u1) - rank(u2));
+		return units;
+	}
+
+	@Override
+	public List<SpecimenTypeUnit> getMatchingUnits(String cpShortTitle, String specimenClass, String type) {
+		Criteria<SpecimenTypeUnit> query = createCriteria(SpecimenTypeUnit.class, "unit")
+			.leftJoin("unit.cp", "cp")
+			.leftJoin("unit.specimenClass", "specimenClass")
+			.leftJoin("unit.type", "type");
+
+		List<SpecimenTypeUnit> units = query.add(query.or(query.isNull("cp.id"), query.eq("cp.shortTitle", cpShortTitle)))
+			.add(query.eq("specimenClass.value", specimenClass))
+			.add(query.or(query.isNull("type.value"), query.eq("type.value", type)))
+			.list();
+		units.sort((u1, u2) -> rank(u1) - rank(u2));
+		return units;
+	}
+
 	private Criteria<SpecimenTypeUnit> getQuery(SpecimenTypeUnitsListCriteria crit) {
 		Criteria<SpecimenTypeUnit> query = createCriteria(SpecimenTypeUnit.class, "unit")
 			.leftJoin("unit.cp", "cp")
@@ -63,5 +94,17 @@ public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> imple
 		}
 
 		return query;
+	}
+
+	private int rank(SpecimenTypeUnit unit) {
+		if (unit.getCp() != null && unit.getType() != null) {
+			return 0;
+		} else if (unit.getCp() != null) {
+			return 1;
+		} else if (unit.getType() != null) {
+			return 2;
+		} else {
+			return 3;
+		}
 	}
 }

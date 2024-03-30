@@ -47,6 +47,10 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 	private BigDecimal initialQuantity;
 	
 	private BigDecimal concentration;
+
+	private PermissibleValue quantityUnit;
+
+	private PermissibleValue concentrationUnit;
 	
 	private User collector;
 
@@ -165,6 +169,22 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 
 	public void setConcentration(BigDecimal concentration) {
 		this.concentration = concentration;
+	}
+
+	public PermissibleValue getQuantityUnit() {
+		return quantityUnit;
+	}
+
+	public void setQuantityUnit(PermissibleValue quantityUnit) {
+		this.quantityUnit = quantityUnit;
+	}
+
+	public PermissibleValue getConcentrationUnit() {
+		return concentrationUnit;
+	}
+
+	public void setConcentrationUnit(PermissibleValue concentrationUnit) {
+		this.concentrationUnit = concentrationUnit;
 	}
 
 	public User getCollector() {
@@ -347,6 +367,8 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		setLabelFormat(sr.getLabelFormat());
 		setLabelAutoPrintMode(sr.getLabelAutoPrintMode());
 		setLabelPrintCopies(sr.getLabelPrintCopies());
+		setQuantityUnit(sr.getQuantityUnit());
+		setConcentrationUnit(sr.getConcentrationUnit());
 
 		if (!isAliquot()) {
 			update(sr.getAnatomicSite(), sr.getLaterality(), sr.getConcentration(),

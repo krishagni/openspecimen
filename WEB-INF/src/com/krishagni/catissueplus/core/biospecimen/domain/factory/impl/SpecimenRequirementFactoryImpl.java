@@ -16,6 +16,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEven
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
@@ -122,7 +123,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setActivityStatus(detail, requirement, ose);
 
 		ose.checkAndThrow();
-		return requirement;
+		return setUnits(requirement);
 	}
 
 	@Override
@@ -172,16 +173,17 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 
 		ose.checkAndThrow();
 		derived.setParentSpecimenRequirement(parent);
-		return derived;
+		return setUnits(derived);
 	}
 	
 	@Override
-	public SpecimenRequirement createForUpdate(String lineage, SpecimenRequirementDetail req) {
+	public SpecimenRequirement createForUpdate(SpecimenRequirement existingSr, SpecimenRequirementDetail req) {
 		SpecimenRequirement sr = new SpecimenRequirement();
 		sr.setName(req.getName());
 		sr.setSortOrder(req.getSortOrder());
 		sr.setLabelPrintCopies(req.getLabelPrintCopies());
-		sr.setLineage(lineage);
+		sr.setLineage(existingSr.getLineage());
+		sr.setCollectionProtocolEvent(existingSr.getCollectionProtocolEvent());
 		
 		//
 		// Specimen class and type are set here so that properties dependent on these can
@@ -198,21 +200,21 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setConcentration(req, sr, ose);
 		setActivityStatus(req, sr, ose);
 
-		if (!lineage.equals(Specimen.ALIQUOT)) {
+		if (existingSr.isPrimary() || existingSr.isDerivative()) {
 			setPathologyStatus(req, sr, ose);
 			setAnatomicSite(req, sr, ose);
 			setLaterality(req, sr, ose);
 		}
 
-		if (lineage.equals(Specimen.NEW)) {
+		if (existingSr.isPrimary()) {
 			setCollector(req, sr, ose);
 			setCollectionProcedure(req, sr, ose);
 			setCollectionContainer(req, sr, ose);
 			setReceiver(req, sr, ose);
 		}
 
-		ose.checkAndThrow();	
-		return sr;		
+		ose.checkAndThrow();
+		return setUnits(sr);
 	}
 	
 	@Override
@@ -264,9 +266,9 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 			aliquot.setLabelPrintCopies(req.getLabelPrintCopies());
 			aliquot.setInitialQuantity(req.getQtyPerAliquot());
 			aliquot.setParentSpecimenRequirement(parent);
-			aliquots.add(aliquot);
-			
+
 			ose.checkAndThrow();
+			aliquots.add(setUnits(aliquot));
 		}
 
 		return aliquots;
@@ -424,6 +426,37 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 
 	private void setConcentration(SpecimenRequirementDetail detail, SpecimenRequirement sr, OpenSpecimenException ose) {
 		setConcentration(detail.getConcentration(), sr, ose);
+	}
+
+	private SpecimenRequirement setUnits(SpecimenRequirement sr) {
+		if (sr.getCollectionProtocol() == null || sr.getSpecimenClass() == null || sr.getSpecimenType() == null) {
+			return sr;
+		}
+
+		List<SpecimenTypeUnit> units = daoFactory.getSpecimenTypeUnitDao().getMatchingUnits(
+			sr.getCollectionProtocol().getId(),
+			sr.getSpecimenClass().getId(),
+			sr.getSpecimenType().getId()
+		);
+
+		boolean qtyInit = false, concInit = false;
+		for (SpecimenTypeUnit unit : units) {
+			if (!qtyInit && unit.getQuantityUnit() != null) {
+				sr.setQuantityUnit(unit.getQuantityUnit());
+				qtyInit = true;
+			}
+
+			if (!concInit && unit.getConcentrationUnit() != null) {
+				sr.setConcentrationUnit(unit.getConcentrationUnit());
+				concInit = true;
+			}
+
+			if (qtyInit && concInit) {
+				break;
+			}
+		}
+
+		return sr;
 	}
 	
 	private void setConcentration(BigDecimal concentration, SpecimenRequirement sr, OpenSpecimenException ose) {

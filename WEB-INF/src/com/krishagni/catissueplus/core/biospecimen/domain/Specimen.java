@@ -113,6 +113,10 @@ public class Specimen extends BaseExtensionEntity {
 
 	private BigDecimal concentration;
 
+	private PermissibleValue quantityUnit;
+
+	private PermissibleValue concentrationUnit;
+
 	private String label;
 
 	private String additionalLabel;
@@ -380,6 +384,22 @@ public class Specimen extends BaseExtensionEntity {
 		
 		this.concentration = concentration;
 		this.concentrationInit = true;
+	}
+
+	public PermissibleValue getQuantityUnit() {
+		return quantityUnit;
+	}
+
+	public void setQuantityUnit(PermissibleValue quantityUnit) {
+		this.quantityUnit = quantityUnit;
+	}
+
+	public PermissibleValue getConcentrationUnit() {
+		return concentrationUnit;
+	}
+
+	public void setConcentrationUnit(PermissibleValue concentrationUnit) {
+		this.concentrationUnit = concentrationUnit;
 	}
 
 	public String getLabel() {
