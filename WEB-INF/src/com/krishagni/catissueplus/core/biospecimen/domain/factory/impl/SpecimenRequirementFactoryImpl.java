@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelAutoPrintMode;
@@ -429,33 +430,13 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 	}
 
 	private SpecimenRequirement setUnits(SpecimenRequirement sr) {
-		if (sr.getCollectionProtocol() == null || sr.getSpecimenClass() == null || sr.getSpecimenType() == null) {
+		SpecimenTypeUnit unit = SpecimenUtil.getInstance().getUnit(sr.getCollectionProtocol(), sr.getSpecimenClass(), sr.getSpecimenType());
+		if (unit == null) {
 			return sr;
 		}
 
-		List<SpecimenTypeUnit> units = daoFactory.getSpecimenTypeUnitDao().getMatchingUnits(
-			sr.getCollectionProtocol().getId(),
-			sr.getSpecimenClass().getId(),
-			sr.getSpecimenType().getId()
-		);
-
-		boolean qtyInit = false, concInit = false;
-		for (SpecimenTypeUnit unit : units) {
-			if (!qtyInit && unit.getQuantityUnit() != null) {
-				sr.setQuantityUnit(unit.getQuantityUnit());
-				qtyInit = true;
-			}
-
-			if (!concInit && unit.getConcentrationUnit() != null) {
-				sr.setConcentrationUnit(unit.getConcentrationUnit());
-				concInit = true;
-			}
-
-			if (qtyInit && concInit) {
-				break;
-			}
-		}
-
+		sr.setQuantityUnit(unit.getQuantityUnit());
+		sr.setConcentrationUnit(unit.getConcentrationUnit());
 		return sr;
 	}
 	

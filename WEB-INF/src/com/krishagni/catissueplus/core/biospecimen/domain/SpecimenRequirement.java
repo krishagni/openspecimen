@@ -457,6 +457,8 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		specimen.setInitialQuantity(getInitialQuantity());
 		specimen.setAvailableQuantity(getInitialQuantity());
 		specimen.setConcentration(getConcentration());
+		specimen.setQuantityUnit(getQuantityUnit());
+		specimen.setConcentrationUnit(getConcentrationUnit());
 		specimen.setSpecimenRequirement(this);
 		return specimen;
 	}

@@ -88,6 +88,10 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private BigDecimal availableQty;
 	
 	private BigDecimal concentration;
+
+	private String quantityUnit;
+
+	private String concentrationUnit;
 	
 	private Long parentId;
 	
@@ -359,6 +363,22 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		this.concentration = concentration;
 	}
 
+	public String getQuantityUnit() {
+		return quantityUnit;
+	}
+
+	public void setQuantityUnit(String quantityUnit) {
+		this.quantityUnit = quantityUnit;
+	}
+
+	public String getConcentrationUnit() {
+		return concentrationUnit;
+	}
+
+	public void setConcentrationUnit(String concentrationUnit) {
+		this.concentrationUnit = concentrationUnit;
+	}
+
 	public Long getParentId() {
 		return parentId;
 	}
@@ -506,15 +526,15 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	}
 
 	// requires transactions
-	@JsonIgnore
-	public String getQuantityUnit() {
-		return PvUtil.getInstance().getSpecimenUnit("quantity", getSpecimenClass(), getType());
-	}
-
-	@JsonIgnore
-	public String getConcentrationUnit() {
-		return PvUtil.getInstance().getSpecimenUnit("concentration", getSpecimenClass(), getType());
-	}
+//	@JsonIgnore
+//	public String getQuantityUnit() {
+//		return PvUtil.getInstance().getSpecimenUnit("quantity", getSpecimenClass(), getType());
+//	}
+//
+//	@JsonIgnore
+//	public String getConcentrationUnit() {
+//		return PvUtil.getInstance().getSpecimenUnit("concentration", getSpecimenClass(), getType());
+//	}
 
 	//
 	// Do not serialise printLabel from interaction object to response JSON. Therefore @JsonIgnore
@@ -568,6 +588,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setInitialQty(specimen.getInitialQuantity());
 		result.setAvailableQty(specimen.getAvailableQuantity());
 		result.setConcentration(specimen.getConcentration());
+		result.setQuantityUnit(PermissibleValue.getValue(specimen.getQuantityUnit()));
+		result.setConcentrationUnit(PermissibleValue.getValue(specimen.getConcentrationUnit()));
 		if (specimen.getParentSpecimen() != null) {
 			result.setParentId(specimen.getParentSpecimen().getId());
 			result.setParentLabel(specimen.getParentSpecimen().getLabel());
@@ -653,6 +675,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setPathology(PermissibleValue.getValue(anticipated.getPathologyStatus()));
 		result.setInitialQty(anticipated.getInitialQuantity());
 		result.setConcentration(anticipated.getConcentration());
+		result.setQuantityUnit(PermissibleValue.getValue(anticipated.getQuantityUnit()));
+		result.setConcentrationUnit(PermissibleValue.getValue(anticipated.getConcentrationUnit()));
 		result.setParentId(null);
 		result.setCollector(UserSummary.from(anticipated.getCollector()));
 		result.setCollectionContainer(PermissibleValue.getValue(anticipated.getCollectionContainer()));

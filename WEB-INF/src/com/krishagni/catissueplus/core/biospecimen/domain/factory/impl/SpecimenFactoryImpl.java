@@ -23,6 +23,7 @@ import com.krishagni.catissueplus.core.administrative.events.StorageContainerDet
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
@@ -31,6 +32,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenExternalIdentifier;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolRegistrationFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
@@ -182,7 +184,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 
 		ose.checkAndThrow();
-		return specimen;
+		return setUnits(specimen);
 	}
 
 	private void setAdditionalLabel(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
@@ -701,7 +703,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			specimen.setConcentration(parent.getConcentration());
 		}
 	}
-	
+
 	private void setSpecimenClass(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
 		if (specimen.getParentSpecimen() != null && specimen.isAliquot()) {
 			specimen.setSpecimenClass(specimen.getParentSpecimen().getSpecimenClass());
@@ -1321,5 +1323,16 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 
 	private List<PermissibleValue> getPvs(String attribute, Collection<String> values) {
 		return daoFactory.getPermissibleValueDao().getPvs(attribute, values);
+	}
+
+	private Specimen setUnits(Specimen specimen) {
+		SpecimenTypeUnit unit = SpecimenUtil.getInstance().getUnit(specimen.getCollectionProtocol(), specimen.getSpecimenClass(), specimen.getSpecimenType());
+		if (unit == null) {
+			return specimen;
+		}
+
+		specimen.setQuantityUnit(unit.getQuantityUnit());
+		specimen.setConcentrationUnit(unit.getConcentrationUnit());
+		return specimen;
 	}
 }

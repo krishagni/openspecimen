@@ -43,6 +43,10 @@
     
     <property name="concentration" column="CONCENTRATION"/>
 
+    <many-to-one name="quantityUnit" column="QUANTITY_UNIT_ID" />
+
+    <many-to-one name="concentrationUnit" column="CONCENTRATION_UNIT_ID" />
+
     <many-to-one name="tissueSide" column="LATERALITY_ID" fetch="join"/>
 		
     <many-to-one name="tissueSite" column="ANATOMIC_SITE_ID" fetch="join"/>
