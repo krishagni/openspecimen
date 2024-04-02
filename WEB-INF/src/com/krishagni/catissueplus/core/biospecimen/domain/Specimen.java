@@ -1234,6 +1234,7 @@ public class Specimen extends BaseExtensionEntity {
 		setInitialQuantity(specimen.getInitialQuantity());
 		setAvailableQuantity(specimen.getAvailableQuantity());
 		setConcentration(specimen.getConcentration());
+
 		if (!getVisit().equals(specimen.getVisit())) {
 			if (isPrimary()) {
 				updateVisit(specimen.getVisit(), specimen.getSpecimenRequirement());
@@ -1285,6 +1286,7 @@ public class Specimen extends BaseExtensionEntity {
 		updateBiohazards(spmnToUpdateFrom.getBiohazards());
 		setPathologicalStatus(spmnToUpdateFrom.getPathologicalStatus());
 		setComment(specimen.getComment());
+
 		setExtension(specimen.getExtension());
 		setPrintLabel(specimen.isPrintLabel());
 		setFreezeThawCycles(specimen.getFreezeThawCycles());

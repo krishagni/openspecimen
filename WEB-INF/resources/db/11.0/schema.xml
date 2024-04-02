@@ -43,30 +43,4 @@
   <changeSet author="vpawar" id="CP based specimen type quantity and concentration unit ID generator" dbms="oracle">
     <createSequence sequenceName="OS_SPECIMEN_TYPE_UNITS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
-
-  <changeSet author="vpawar" id="Specimen quantity and concentration units">
-    <addColumn tableName="CATISSUE_SPECIMEN">
-      <column name="QUANTITY_UNIT_ID" type="${int.type}">
-        <constraints foreignKeyName="FK_SPECIMEN_QTY_UNIT_ID" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
-          referencedColumnNames="IDENTIFIER" />
-      </column>
-      <column name="CONCENTRATION_UNIT_ID" type="${int.type}">
-        <constraints foreignKeyName="FK_SPECIMEN_CONC_UNIT_ID" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
-          referencedColumnNames="IDENTIFIER" />
-      </column>
-    </addColumn>
-  </changeSet>
-
-  <changeSet author="vpawar" id="Specimen requirement quantity and concentration units">
-    <addColumn tableName="CATISSUE_CP_REQ_SPECIMEN">
-      <column name="QUANTITY_UNIT_ID" type="${int.type}">
-        <constraints foreignKeyName="FK_SR_QTY_UNIT_ID" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
-          referencedColumnNames="IDENTIFIER" />
-      </column>
-      <column name="CONCENTRATION_UNIT_ID" type="${int.type}">
-        <constraints foreignKeyName="FK_SR_CONC_UNIT_ID" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
-          referencedColumnNames="IDENTIFIER" />
-      </column>
-    </addColumn>
-  </changeSet>
 </databaseChangeLog>

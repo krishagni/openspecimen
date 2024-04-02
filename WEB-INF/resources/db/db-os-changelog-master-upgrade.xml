@@ -180,7 +180,6 @@
   <include file="db/11.0/seed-data.xml" />
   <include file="db/11.0/config.xml" />
   <include file="db/11.0/migration.xml" />
-  <include file="db/11.0/audit.xml" />
 
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>

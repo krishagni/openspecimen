@@ -525,17 +525,6 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		this.closeAfterPooledCreation = closeAfterPooledCreation;
 	}
 
-	// requires transactions
-//	@JsonIgnore
-//	public String getQuantityUnit() {
-//		return PvUtil.getInstance().getSpecimenUnit("quantity", getSpecimenClass(), getType());
-//	}
-//
-//	@JsonIgnore
-//	public String getConcentrationUnit() {
-//		return PvUtil.getInstance().getSpecimenUnit("concentration", getSpecimenClass(), getType());
-//	}
-
 	//
 	// Do not serialise printLabel from interaction object to response JSON. Therefore @JsonIgnore
 	// However, deserialise, if present, from input request JSON to interaction object. Hence @JsonProperty
