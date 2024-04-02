@@ -53,8 +53,8 @@ export default {
     list: {
       deep: true,
 
-      handler: function() {
-        if (this.list.length < this.pageSize || !this.showListSize) {
+      handler: function(newVal, oldVal) {
+        if (this.list.length < this.pageSize || !this.showListSize || newVal == oldVal) {
           return;
         }
 
