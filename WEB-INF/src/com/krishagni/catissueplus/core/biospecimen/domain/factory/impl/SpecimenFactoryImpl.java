@@ -24,7 +24,6 @@ import com.krishagni.catissueplus.core.administrative.events.StorageLocationSumm
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenEvent;
@@ -40,11 +39,9 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionEventDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolRegistrationDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ReceivedEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenEventDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -701,7 +698,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			specimen.setConcentration(parent.getConcentration());
 		}
 	}
-	
+
 	private void setSpecimenClass(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
 		if (specimen.getParentSpecimen() != null && specimen.isAliquot()) {
 			specimen.setSpecimenClass(specimen.getParentSpecimen().getSpecimenClass());

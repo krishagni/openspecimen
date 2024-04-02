@@ -4,7 +4,7 @@ angular.module('os.biospecimen.common.specimenprops', [])
     var specimenPropsMap = undefined;
 
     function initCall() {
-      callQ = $http.get(ApiUrls.getBaseUrl() + '/specimen-type-props');
+      callQ = $http.get(ApiUrls.getBaseUrl() + 'specimen-type-props');
       return callQ;
     }
 
@@ -71,6 +71,88 @@ angular.module('os.biospecimen.common.specimenprops', [])
       getPropsFromMap: getPropsFromMap
     }
   })
+  .factory('SpecimenTypeUnitSvc', function($http, $q, ApiUrls) {
+    var callQ = undefined;
+
+    var typeUnitsMap = {};
+
+    function loadUnits() {
+      if (callQ) {
+        return callQ;
+      }
+
+      callQ = $http.get(ApiUrls.getBaseUrl() + 'specimen-type-units', {params: {maxResults: 1000000}}).then(
+        function(resp) {
+          return resp.data;
+        }
+      );
+      return callQ;
+    }
+
+    function unitKey(entity) {
+      return (entity.cpShortTitle || '*') + ':' + entity.specimenClass + ':' + (entity.type || '*');
+    }
+
+    function loadTypeUnitsMap() {
+      if (Object.keys(typeUnitsMap).length > 0) {
+        var q = $q.defer();
+        q.resolve(typeUnitsMap);
+        return q.promise;
+      }
+
+      return loadUnits().then(
+        function(units) {
+          var unitsMap = {};
+          angular.forEach(units,
+            function(unit) {
+              unitsMap[unitKey(unit)] = unit;
+            }
+          );
+
+          typeUnitsMap = unitsMap;
+          return typeUnitsMap;
+        }
+      );
+    }
+
+    function getUnit(entity, measure) {
+      var queries = [
+        {cpShortTitle: entity.cpShortTitle, specimenClass: entity.specimenClass, type: entity.type},
+        {cpShortTitle: entity.cpShortTitle, specimenClass: entity.specimenClass, type: null},
+        {cpShortTitle: null, specimenClass: entity.specimenClass, type: entity.type},
+        {cpShortTitle: null, specimenClass: entity.specimenClass, type: null}
+      ];
+
+      for (var i = 0; i < queries.length; ++i) {
+        var unit = typeUnitsMap[unitKey(queries[i])];
+        if (!unit) {
+          continue;
+        }
+
+        if ((!measure || measure == 'quantity') && unit.quantityUnit) {
+          return unit.quantityUnit;
+        } else if (measure == 'concentration' && unit.concentrationUnit) {
+          return unit.concentrationUnit;
+        }
+      }
+
+      return '';
+    }
+
+    return {
+      getUnit: function(entity, measure) {
+        return loadTypeUnitsMap().then(
+          function() {
+            return getUnit(entity, measure);
+          }
+        );
+      },
+
+      getUnitFromMap: function(entity, measure) {
+        return getUnit(entity, measure);
+      }
+    }
+  })
   .directive('osSpecimenTypeProp', function(SpecimenPropsSvc) {
     return {
       restrict: 'E',
@@ -104,7 +186,7 @@ angular.module('os.biospecimen.common.specimenprops', [])
       }
     }
   })
-  .directive('osSpecimenUnit', function(SpecimenPropsSvc) {
+  .directive('osSpecimenUnit', function(SpecimenTypeUnitSvc) {
     return {
       restrict: 'E',
 
@@ -113,28 +195,28 @@ angular.module('os.biospecimen.common.specimenprops', [])
       replace: true,
 
       scope: {
-        specimenClass: '=',
-        type: '='
+        specimen: '='
       },
 
       link: function(scope, element, attrs) {
-        scope.$watchGroup(['specimenClass', 'type'], function(newVals) {
-          if (!scope.specimenClass) {
-            return;
+        var measure = attrs.measure || 'quantity';
+        var specimen = scope.specimen;
+        SpecimenTypeUnitSvc.getUnit(specimen, measure).then(
+          function(unit) {
+            element.html(unit);
           }
+        );
 
-          var measure = attrs.measure || 'quantity';
-          SpecimenPropsSvc.getProps(scope.specimenClass, scope.type).then(
-            function(specimenProps) {
-              var props = specimenProps.props;
-              if (measure == "quantity") {
-                element.html(props.qtyHtmlDisplayCode || props.qtyUnit);
-              } else {
-                element.html(props.concHtmlDisplayCode || props.concUnit);
+        var pristineType = specimen.cpShortTitle + ':' + specimen.specimenClass + ':' + specimen.type;
+        scope.$watchGroup(['specimen.cpShortTitle', 'specimen.specimenClass', 'specimen.type'],
+          function() {
+            SpecimenTypeUnitSvc.getUnit(specimen, measure).then(
+              function(unit) {
+                element.html(unit);
               }
-            }
-          );
-        });
+            );
+          }
+        );
       }
     }
   })
@@ -184,9 +266,8 @@ angular.module('os.biospecimen.common.specimenprops', [])
         }
 
         var unitEl = tElem.find('os-specimen-unit');
-        unitEl.attr('specimen-class', tAttrs.specimen + '.specimenClass');
-        unitEl.attr('type',           tAttrs.specimen + '.type');
-        unitEl.attr('measure',        tAttrs.measure || 'quantity');
+        unitEl.attr('specimen', tAttrs.specimen);
+        unitEl.attr('measure',  tAttrs.measure || 'quantity');
 
         if (tAttrs.mdInput != undefined) {
           tElem.addClass('os-input-addon-grp os-md-input');
@@ -216,15 +297,14 @@ angular.module('os.biospecimen.common.specimenprops', [])
         '<span class="value value-md" ng-switch="!!value || value == 0">' +
         '  <span ng-switch-when="true">' +
         '    {{value | osNumberInScientificNotation}} ' +
-        '    <os-specimen-unit specimen-class="specimen.specimenClass" type="specimen.type"' +
-        '      measure="{{measure || \'quantity\'}}">' +
+        '    <os-specimen-unit specimen="specimen" measure="{{measure || \'quantity\'}}">' +
         '    </os-specimen-unit>' +
         '  </span>' +
         '  <span ng-switch-default>{{value | osNoValue}}</span>' +
         '</span>'
     }
   })
-  .filter("osSpecimenQuantity", function(SpecimenPropsSvc, $filter) {
+  .filter("osSpecimenQuantity", function(SpecimenTypeUnitSvc, $filter) {
     var propsInited = false;
 
     return function(input, spmn, measure) {
@@ -233,7 +313,7 @@ angular.module('os.biospecimen.common.specimenprops', [])
       }
 
       if (!propsInited) {
-        SpecimenPropsSvc.getProps(spmn.specimenClass, spmn.type);
+        SpecimenTypeUnitSvc.getUnit(spmn, measure);
         propsInited = true;
         return input; // will be called again
       }
@@ -242,12 +322,7 @@ angular.module('os.biospecimen.common.specimenprops', [])
         return $filter('osNoValue')(input);
       }
 
-      var props = SpecimenPropsSvc.getPropsFromMap(spmn.specimenClass, spmn.type) || {};
-      props = props.props || {};
-      if (measure == 'quantity') {
-        return input + ' ' + (props.qtyHtmlDisplayCode || props.qtyUnit);
-      } else {
-        return input + ' ' + (props.concHtmlDisplayCode || props.concUnit);
-      }
+      var unit = SpecimenTypeUnitSvc.getUnitFromMap(spmn, measure) || '';
+      return input + ' ' + unit;
     }
   });

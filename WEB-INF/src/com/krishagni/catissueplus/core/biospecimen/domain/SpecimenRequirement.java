@@ -47,7 +47,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 	private BigDecimal initialQuantity;
 	
 	private BigDecimal concentration;
-	
+
 	private User collector;
 
 	private PermissibleValue collectionProcedure;

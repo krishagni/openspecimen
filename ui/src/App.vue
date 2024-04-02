@@ -71,7 +71,8 @@ export default {
     let usrStateQ  = userSvc.getUiState();
     let usrRightsQ = authSvc.loadUserRights();
     let spmnPropsQ = util.loadSpecimenTypeProps();
-    Promise.all([currUserQ, usrStateQ, usrRightsQ, spmnPropsQ]).then(
+    let spmnUnitsQ = util.loadSpecimenUnits();
+    Promise.all([currUserQ, usrStateQ, usrRightsQ, spmnPropsQ, spmnUnitsQ]).then(
       (resps) => {
         this.$ui.currentUser = resps[0];
         this.$ui.global.state = resps[1];

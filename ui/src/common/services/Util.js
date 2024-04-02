@@ -19,6 +19,8 @@ class Util {
 
   spmnTypeProps = null;
 
+  specimenTypeUnits = null;
+
   fileTypes = [
     'bmp', 'csv', 'css', 'doc', 'docx', 'gif', 'html', 'jar', 'java', 'jpeg', 'jpg',
     'js', 'json', 'pdf', 'png', 'tif', 'tiff', 'txt', 'xls', 'xlsx', 'xml', 'zip'
@@ -220,6 +222,19 @@ class Util {
     return this.spmnTypeProps;
   }
 
+  async loadSpecimenUnits() {
+    const resp = await http.get('specimen-type-units', {maxResults: 1000000});
+    this.specimenTypeUnits = resp.reduce(
+      (acc, unit) => {
+        acc[this._specimenUnitKey(unit)] = unit;
+        return acc;
+      },
+      {}
+    );
+
+    return this.specimenTypeUnits;
+  }
+      
   getSpecimenTypes() {
     const props = this.spmnTypeProps || {};
     return Object.values(props)
@@ -227,25 +242,37 @@ class Util {
       .map(prop => ({specimenClass: prop.specimenClass, type: prop.type}));
   }
 
-  getSpecimenMeasureUnit(specimen, measure) {
-    const specimenClass = (specimen && specimen.specimenClass);
-    const specimenType  = (specimen && specimen.specimenType);
-    const type          = (specimen && specimen.type) || specimenType;
-    if (!specimenClass || !type) {
-      return '-';
+  getSpecimenMeasureUnit({cpShortTitle, specimenClass, type, specimenType}, measure) {
+    type = type || specimenType;
+    const queries = [
+      {cpShortTitle, specimenClass, type},
+      {cpShortTitle, specimenClass, type: null},
+      {cpShortTitle: null, specimenClass, type},
+      {cpShortTitle: null, specimenClass, type: null}
+    ];
+
+    let result = '';
+    for (let query of queries) {
+      const unit = this.specimenTypeUnits[this._specimenUnitKey(query)];
+      if (!unit) {
+        continue;
+      }
+
+      if ((!measure || measure == 'quantity') && unit.quantityUnit) {
+        result = unit.quantityUnit;
+        break;
+      } else if (measure == 'concentration' && unit.concentrationUnit) {
+        result = unit.concentrationUnit;
+        break;
+      }
     }
 
-    let props = this.spmnTypeProps[specimenClass + ':' + type] || {};
-    let unit = this.getUnit(props, measure);
-    if (!unit) {
-      props = this.spmnTypeProps[specimenClass + ':*'] || {};
-      unit = this.getUnit(props, measure);
-    }
-
-    return unit || '-';
+    return result || '-';
   }
 
   getUnit(props, measure) {
+    alert('Deprecated method is called!');
+
     let unit = null;
 
     switch (measure) {
@@ -442,6 +469,10 @@ class Util {
     }
 
     return token;
+  }
+
+  _specimenUnitKey({cpShortTitle, specimenClass, type}) {
+    return (cpShortTitle || '*') + ':' + specimenClass + ':' + (type || '*');
   }
 
   _fns = {

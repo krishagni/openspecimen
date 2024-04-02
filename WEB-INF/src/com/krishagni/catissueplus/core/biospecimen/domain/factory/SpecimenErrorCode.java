@@ -174,7 +174,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	ALIQUOT_REQ,
 
-	CREATE_DISABLED_NA;
+	CREATE_DISABLED_NA,
+
+	INVALID_UNIT;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

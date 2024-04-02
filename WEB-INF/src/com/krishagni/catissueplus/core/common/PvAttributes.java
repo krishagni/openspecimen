@@ -40,4 +40,6 @@ public class PvAttributes {
 	public static final String MISSED_VISIT_REASON = "missed_visit_reason";
 	
 	public static final String COHORT = "cohort";
+
+	public static final String SPECIMEN_UNIT = "specimen_unit";
 }

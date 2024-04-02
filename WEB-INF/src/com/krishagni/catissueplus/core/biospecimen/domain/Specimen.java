@@ -1285,8 +1285,8 @@ public class Specimen extends BaseExtensionEntity {
 		setSpecimenType(spmnToUpdateFrom.getSpecimenType());
 		updateBiohazards(spmnToUpdateFrom.getBiohazards());
 		setPathologicalStatus(spmnToUpdateFrom.getPathologicalStatus());
-
 		setComment(specimen.getComment());
+
 		setExtension(specimen.getExtension());
 		setPrintLabel(specimen.isPrintLabel());
 		setFreezeThawCycles(specimen.getFreezeThawCycles());

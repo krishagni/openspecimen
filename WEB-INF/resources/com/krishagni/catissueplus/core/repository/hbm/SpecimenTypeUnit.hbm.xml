@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit" table="OS_SPECIMEN_TYPE_UNITS"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_SPECIMEN_TYPE_UNITS_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="cp" column="CP_ID" />
+
+    <many-to-one name="specimenClass" column="SPECIMEN_CLASS_ID" />
+
+    <many-to-one name="type" column="SPECIMEN_TYPE_ID" />
+
+    <many-to-one name="quantityUnit" column="QUANTITY_UNIT_ID" />
+
+    <many-to-one name="concentrationUnit" column="CONCENTRATION_UNIT_ID" />
+  </class>
+</hibernate-mapping>

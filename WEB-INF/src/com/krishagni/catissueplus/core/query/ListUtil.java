@@ -54,12 +54,17 @@ public class ListUtil {
 		cpId.setExpr("CollectionProtocol.id");
 		cpId.setCaption("cpId");
 
+		Column cpShortTitle = new Column();
+		cpShortTitle.setExpr("CollectionProtocol.shortTitle");
+		cpShortTitle.setCaption("cpShortTitle");
+
 		List<Column> hiddenColumns = new ArrayList<>();
 		hiddenColumns.add(id);
 		hiddenColumns.add(type);
 		hiddenColumns.add(specimenClass);
 		hiddenColumns.add(availabilityStatus);
 		hiddenColumns.add(cpId);
+		hiddenColumns.add(cpShortTitle);
 		hiddenColumns.add(cprId);
 		hiddenColumns.add(visitId);
 		cfg.setHiddenColumns(hiddenColumns);

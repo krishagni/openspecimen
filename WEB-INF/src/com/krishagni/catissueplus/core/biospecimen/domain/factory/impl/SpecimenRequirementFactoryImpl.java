@@ -176,12 +176,13 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 	}
 	
 	@Override
-	public SpecimenRequirement createForUpdate(String lineage, SpecimenRequirementDetail req) {
+	public SpecimenRequirement createForUpdate(SpecimenRequirement existingSr, SpecimenRequirementDetail req) {
 		SpecimenRequirement sr = new SpecimenRequirement();
 		sr.setName(req.getName());
 		sr.setSortOrder(req.getSortOrder());
 		sr.setLabelPrintCopies(req.getLabelPrintCopies());
-		sr.setLineage(lineage);
+		sr.setLineage(existingSr.getLineage());
+		sr.setCollectionProtocolEvent(existingSr.getCollectionProtocolEvent());
 		
 		//
 		// Specimen class and type are set here so that properties dependent on these can
@@ -198,21 +199,21 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setConcentration(req, sr, ose);
 		setActivityStatus(req, sr, ose);
 
-		if (!lineage.equals(Specimen.ALIQUOT)) {
+		if (existingSr.isPrimary() || existingSr.isDerivative()) {
 			setPathologyStatus(req, sr, ose);
 			setAnatomicSite(req, sr, ose);
 			setLaterality(req, sr, ose);
 		}
 
-		if (lineage.equals(Specimen.NEW)) {
+		if (existingSr.isPrimary()) {
 			setCollector(req, sr, ose);
 			setCollectionProcedure(req, sr, ose);
 			setCollectionContainer(req, sr, ose);
 			setReceiver(req, sr, ose);
 		}
 
-		ose.checkAndThrow();	
-		return sr;		
+		ose.checkAndThrow();
+		return sr;
 	}
 	
 	@Override
@@ -264,9 +265,9 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 			aliquot.setLabelPrintCopies(req.getLabelPrintCopies());
 			aliquot.setInitialQuantity(req.getQtyPerAliquot());
 			aliquot.setParentSpecimenRequirement(parent);
-			aliquots.add(aliquot);
-			
+
 			ose.checkAndThrow();
+			aliquots.add(aliquot);
 		}
 
 		return aliquots;
@@ -425,7 +426,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 	private void setConcentration(SpecimenRequirementDetail detail, SpecimenRequirement sr, OpenSpecimenException ose) {
 		setConcentration(detail.getConcentration(), sr, ose);
 	}
-	
+
 	private void setConcentration(BigDecimal concentration, SpecimenRequirement sr, OpenSpecimenException ose) {
 		if (concentration != null && NumUtil.lessThanZero(concentration)) {
 			ose.addError(CONCENTRATION_MUST_BE_POSITIVE);

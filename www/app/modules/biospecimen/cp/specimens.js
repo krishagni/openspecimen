@@ -158,7 +158,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
 
     $scope.showAddSr = function() {
       $scope.view = 'addedit_sr';
-      $scope.sr = new SpecimenRequirement({eventId: $scope.eventId, cpId: cp.id});
+      $scope.sr = new SpecimenRequirement({eventId: $scope.eventId, cpShortTitle: cp.shortTitle, cpId: cp.id});
       loadPvs();
     };
 
@@ -255,8 +255,14 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
         return;
       }
 
-      $scope.childReq = { $$storedInRepo: true, storageType: 'Manual' };
       $scope.parentSr = sr;
+      $scope.childReq = {
+        cpShortTitle: cp.shortTitle,
+        specimenClass: sr.specimenClass,
+        type: sr.type,
+        $$storedInRepo: true,
+        storageType: 'Manual'
+      };
       $scope.view = 'addedit_aliquot';
       loadPvs();
     };
@@ -324,7 +330,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
     $scope.showCreatePoolSpecimen = function(sr) {
       $scope.parentSr = sr;
       $scope.view = 'addedit_pool';
-      $scope.poolReq = new SpecimenRequirement({eventId: $scope.eventId});
+      $scope.poolReq = new SpecimenRequirement({cpShortTitle: cp.shortTitle, eventId: $scope.eventId});
     };
 
     $scope.showEditPooledSpmn = function(sr) {

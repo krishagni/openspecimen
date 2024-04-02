@@ -88,6 +88,10 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private BigDecimal availableQty;
 	
 	private BigDecimal concentration;
+
+	private String quantityUnit;
+
+	private String concentrationUnit;
 	
 	private Long parentId;
 	
@@ -359,6 +363,22 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		this.concentration = concentration;
 	}
 
+	public String getQuantityUnit() {
+		return quantityUnit;
+	}
+
+	public void setQuantityUnit(String quantityUnit) {
+		this.quantityUnit = quantityUnit;
+	}
+
+	public String getConcentrationUnit() {
+		return concentrationUnit;
+	}
+
+	public void setConcentrationUnit(String concentrationUnit) {
+		this.concentrationUnit = concentrationUnit;
+	}
+
 	public Long getParentId() {
 		return parentId;
 	}
@@ -503,17 +523,6 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	@JsonProperty
 	public void setCloseAfterPooledCreation(Boolean closeAfterPooledCreation) {
 		this.closeAfterPooledCreation = closeAfterPooledCreation;
-	}
-
-	// requires transactions
-	@JsonIgnore
-	public String getQuantityUnit() {
-		return PvUtil.getInstance().getSpecimenUnit("quantity", getSpecimenClass(), getType());
-	}
-
-	@JsonIgnore
-	public String getConcentrationUnit() {
-		return PvUtil.getInstance().getSpecimenUnit("concentration", getSpecimenClass(), getType());
 	}
 
 	//

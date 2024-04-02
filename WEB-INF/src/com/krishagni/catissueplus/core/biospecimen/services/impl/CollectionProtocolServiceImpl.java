@@ -39,12 +39,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.events.SiteSummary;
 import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.WorkflowUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -63,6 +65,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequire
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ConsentStatementErrorCode;
@@ -1070,7 +1073,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			}
 
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(sr.getCollectionProtocol());
-			SpecimenRequirement partial = srFactory.createForUpdate(sr.getLineage(), detail);
+			SpecimenRequirement partial = srFactory.createForUpdate(sr, detail);
 			if (isSpecimenClassOrTypeChanged(sr, partial)) {
 				ensureSpecimensNotCollected(sr);
 			}
@@ -2667,6 +2670,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 			private CpListCriteria crit;
 
+			private Map<String, SpecimenTypeUnit> units = new HashMap<>();
+
 			@Override
 			public List<SpecimenRequirementDetail> apply(ExportJob job) {
 				initParams(job);
@@ -2745,11 +2750,27 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 							detail.setParentSrCode(sr.getParentSpecimenRequirement().getCode());
 						}
 
+
+						SpecimenTypeUnit unit = getUnit(sr);
+						if (unit != null) {
+							detail.setQuantityUnit(PermissibleValue.getValue(unit.getQuantityUnit()));
+							detail.setConcentrationUnit(PermissibleValue.getValue(unit.getConcentrationUnit()));
+						}
+
 						result.add(detail);
 					}
 				}
 
 				return result;
+			}
+
+			private SpecimenTypeUnit getUnit(SpecimenRequirement sr) {
+				CollectionProtocol cp = sr.getCollectionProtocol();
+				PermissibleValue specimenClass = sr.getSpecimenClass();
+				PermissibleValue type = sr.getSpecimenType();
+
+				String key = cp.getId() + ":" + specimenClass.getId() + ":" + type.getId();
+				return units.computeIfAbsent(key, (k) -> SpecimenUtil.getInstance().getUnit(cp, specimenClass, type));
 			}
 		};
 	}
