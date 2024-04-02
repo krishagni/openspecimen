@@ -4,9 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@JsonFilter("withoutId")
 public class SpecimenTypeUnitDetail {
 	private Long id;
 

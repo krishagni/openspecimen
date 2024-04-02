@@ -91,6 +91,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
@@ -644,6 +645,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			importConsents(cpId, cpDetail.getConsents());
 			importEvents(cpDetail.getTitle(), cpDetail.getEvents());
 			importWorkflows(cpId, cpDetail.getWorkflows());
+			importSpecimenUnits(resp.getPayload().getShortTitle(), cpDetail.getUnits());
 			
 			return resp;
 		} catch (OpenSpecimenException ose) {
@@ -1588,6 +1590,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		cp.addOrUpdateExtension();
 		fixSopDocumentName(cp);
 		copyWorkflows(existing, cp);
+		copySpecimenUnits(existing, cp);
 		return cp;
 	}
 
@@ -1596,8 +1599,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	}
 	
 	private void ensureCreatorBelongToCpSites(CollectionProtocol cp) {
-		User user = AuthUtil.getCurrentUser();
-		if (user.isAdmin()) {
+		if (AuthUtil.isAdmin()) {
 			return;
 		}
 
@@ -1840,6 +1842,30 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			newConfig.setCp(dstCp);
 			newConfig.setWorkflows(srcWfCfg.getWorkflows());
 			daoFactory.getCollectionProtocolDao().saveCpWorkflows(newConfig);
+		}
+	}
+
+	private void importSpecimenUnits(String shortTitle, List<SpecimenTypeUnitDetail> units) {
+		for (SpecimenTypeUnitDetail unit : units) {
+			unit.setCpShortTitle(shortTitle);
+			SpecimenUtil.getInstance().saveUnit(unit);
+		}
+	}
+
+	private void copySpecimenUnits(CollectionProtocol srcCp, CollectionProtocol dstCp) {
+		if (srcCp == null) {
+			return;
+		}
+
+		List<SpecimenTypeUnit> units = SpecimenUtil.getInstance().getUnits(srcCp.getShortTitle());
+		for (SpecimenTypeUnit unit : units) {
+			SpecimenTypeUnit toSave = new SpecimenTypeUnit();
+			toSave.setCp(dstCp);
+			toSave.setSpecimenClass(unit.getSpecimenClass());
+			toSave.setType(unit.getType());
+			toSave.setQuantityUnit(unit.getQuantityUnit());
+			toSave.setConcentrationUnit(unit.getConcentrationUnit());
+			daoFactory.getSpecimenTypeUnitDao().saveOrUpdate(toSave);
 		}
 	}
 

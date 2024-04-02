@@ -10,8 +10,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
+import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.CpWorkflowTxnCache;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
@@ -111,6 +113,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 	private List<CollectionProtocolEventDetail> events;
 
 	private Map<String, WorkflowDetail> workflows;
+
+	private List<SpecimenTypeUnitDetail> units;
 
 	public List<UserSummary> getCoordinators() {
 		return coordinators;
@@ -472,6 +476,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		this.workflows = workflows;
 	}
 
+	public List<SpecimenTypeUnitDetail> getUnits() {
+		return units;
+	}
+
+	public void setUnits(List<SpecimenTypeUnitDetail> units) {
+		this.units = units;
+	}
+
 	public static CollectionProtocolDetail from(CollectionProtocol cp) {
 		return from(cp, false);
 	}
@@ -532,6 +544,9 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 			if (config.getCp() != null) {
 				result.setWorkflows(CpWorkflowCfgDetail.from(config).getWorkflows());
 			}
+
+			List<SpecimenTypeUnit> units = SpecimenUtil.getInstance().getUnits(cp.getShortTitle());
+			result.setUnits(SpecimenTypeUnitDetail.from(units));
 		}
 		
 		return result;

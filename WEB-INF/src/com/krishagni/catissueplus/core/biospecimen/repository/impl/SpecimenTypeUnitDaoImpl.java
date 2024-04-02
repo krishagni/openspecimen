@@ -9,6 +9,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenTypeUnitDa
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenTypeUnitsListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> implements SpecimenTypeUnitDao {
 	@Override
@@ -19,7 +20,8 @@ public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> imple
 	@Override
 	public List<SpecimenTypeUnit> getUnits(SpecimenTypeUnitsListCriteria crit) {
 		Criteria<SpecimenTypeUnit> query = getQuery(crit);
-		return query.addOrder(query.desc("unit.id")).list(crit.startAt(), crit.maxResults());
+		return query.addOrder(crit.asc() ? query.asc("unit.id") : query.desc("unit.id"))
+			.list(crit.startAt(), crit.maxResults());
 	}
 
 	@Override
@@ -83,6 +85,13 @@ public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> imple
 			} else {
 				query.add(query.eq("cp.shortTitle", crit.cpShortTitle()));
 			}
+		} else {
+			query.add(
+				query.or(
+					query.isNull("cp.id"),
+					query.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus())
+				)
+			);
 		}
 
 		if (StringUtils.isNotBlank(crit.specimenClass())) {
