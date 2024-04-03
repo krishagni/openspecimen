@@ -37,6 +37,7 @@ public class SpecimenUnitsLoader implements CustomTaskChange {
 					 continue;
 				 }
 
+				 logger.info("Adding specimen unit - " + unit);
 				 insertUnit(connection, isOracle ? INSERT_UNIT_PV_ORA : INSERT_UNIT_PV_MYSQL, unit);
 			 }
 
@@ -123,5 +124,5 @@ public class SpecimenUnitsLoader implements CustomTaskChange {
 		"insert into " +
 		"  catissue_permissible_value (identifier, public_id, value, activity_status) " +
 		"values " +
-		"  (os_specimen_type_units_seq.nextval, 'specimen_unit', ?, 'Active')";
+		"  (catissue_permi_value_seq.nextval, 'specimen_unit', ?, 'Active')";
 }
