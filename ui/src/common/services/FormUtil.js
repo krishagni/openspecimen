@@ -111,9 +111,11 @@ class FormUtil {
           result.type = 'subform';
           result.fields = this.sdeFieldsToDict(result.fields);
         } else if (result.type == 'specimen-quantity') {
-          result.entity = 'specimen';
+          result.entity = result.specimen || 'specimen';
         } else if (result.type == 'radio') {
           result.optionsPerRow = result.optionsPerRow || 5;
+        } else if (result.type == 'span') {
+          result.displayType = result.displayType || result.formatType;
         }
 
         const ls = result.listSource;
