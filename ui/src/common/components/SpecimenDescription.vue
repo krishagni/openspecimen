@@ -93,6 +93,12 @@ export default {
         result += specimen.lineage;
       }
 
+      if ((specimen.name || specimen.reqLabel) && specimen.lineage != 'Aliquot') {
+        result += ' (' + (specimen.name || specimen.reqLabel) + ')';
+      } else if (specimen.code || specimen.reqCode) {
+        result += ' (' + (specimen.code || specimen.reqCode) + ')';
+      }
+
       return result;
     }
   }
