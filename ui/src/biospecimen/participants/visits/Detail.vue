@@ -42,7 +42,7 @@
               </router-link>
             </li>
 
-            <li>
+            <li v-if="visit.id > 0">
               <router-link :to="getRoute('Forms')">
                 <span v-t="'common.forms'">Forms</span>
               </router-link>

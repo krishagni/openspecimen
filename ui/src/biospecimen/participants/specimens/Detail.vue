@@ -32,13 +32,13 @@
               </router-link>
             </li>
 
-            <li>
+            <li v-if="specimen.id > 0">
               <router-link :to="getRoute('Forms')">
                 <span v-t="'common.forms'">Forms</span>
               </router-link>
             </li>
 
-            <os-plugin-views page="visit-detail" view="tab-menu" />
+            <os-plugin-views page="specimen-detail" view="tab-menu" />
           </ul>
         </os-tab-menu>
 
