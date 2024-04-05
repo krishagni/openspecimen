@@ -106,7 +106,7 @@ class FormUtil {
         } else if (result.type == 'pvs') {
           result.type = 'pv';
           result.attribute = result.attr;
-          result.selectProp = (result.name && result.name.indexOf('extensionDetail.attrsMap') >= 0) ? 'id' : 'value';
+          result.selectProp = 'value';
         } else if (result.type == 'collection') {
           result.type = 'subform';
           result.fields = this.sdeFieldsToDict(result.fields);
