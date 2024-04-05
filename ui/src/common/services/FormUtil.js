@@ -1,6 +1,7 @@
 
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
+import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 class FormUtil {
@@ -114,8 +115,23 @@ class FormUtil {
           result.entity = result.specimen || 'specimen';
         } else if (result.type == 'radio') {
           result.optionsPerRow = result.optionsPerRow || 5;
+          result.options = (result.options || []).map(
+            (option) => {
+              if (typeof option != 'object') {
+                return {caption: option, value: option};
+              } else {
+                return {caption: option.caption, value: option.value};
+              }
+            }
+          );
         } else if (result.type == 'span') {
           result.displayType = result.displayType || result.formatType;
+        } else if (result.type == 'file' || result.type == 'fileUpload') {
+          result.type = 'fileUpload';
+          result.url = http.getUrl('form-files');
+          result.headers = http.headers;
+        } else if (result.type == 'dropdown' && result.multiple) {
+          result.type = 'multiselect';
         }
 
         const ls = result.listSource;
