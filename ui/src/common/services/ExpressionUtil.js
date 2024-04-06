@@ -70,14 +70,33 @@ class ExpressionUtil {
       return exprTree.raw;
     } else if (exprTree.type == 'CallExpression') {
       let object = this.decorate(exprTree.callee.object);
+      if (object instanceof Array) {
+        object = '[' + object + ']';
+      }
+
       let method = exprTree.callee.property.name;
-      let args = (exprTree.arguments || []).map(arg => this.decorate(arg)).join(', ');
+      let args = [];
+      for (let i = 0; i < (exprTree.arguments || []).length; ++i) {
+        if (i > 0) {
+          args += ',';
+        }
+
+        let arg = this.decorate(exprTree.arguments[i]);
+        if (arg instanceof Array) {
+          arg = '[' + arg + ']';
+        }
+
+        args += arg;
+      }
+
       return '(' + object + ')?.' + method + '(' + args + ')';
     } else if (exprTree.type == 'ConditionalExpression') {
       const test = this.decorate(exprTree.test);
       const consequent = this.decorate(exprTree.consequent);
       const alternate = this.decorate(exprTree.alternate);
       return '(' + test + ' ? ' + consequent + ' : ' + alternate + ')';
+    } else if (exprTree.type == 'ArrayExpression') {
+      return exprTree.elements.map(element => this.decorate(element));
     } else {
       console.log(exprTree);
       console.log('Could not identify the expression type: ' + exprTree.type + ', ' + JSON.stringify(exprTree));
