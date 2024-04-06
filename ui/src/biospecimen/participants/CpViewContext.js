@@ -326,6 +326,10 @@ export default class CpViewContext {
     return this._isAccessBasedOnMrnAllowed(cpr, 'ParticipantPhi', ['Delete']);
   }
 
+  isProceedToConsentAllowed() {
+    return this._isAllowed('Consent', ['Update']);
+  }
+
   isImportAllowed() {
     const {specimenCentric} = this.cp || {};
     const {participantExim, visitExim, specimenExim} = this.access || {};
