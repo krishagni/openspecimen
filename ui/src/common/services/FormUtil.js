@@ -160,8 +160,19 @@ class FormUtil {
         }
 
         result.showInOverviewWhen = result.showInOverviewIf == 'useShowIf' ? result.showWhen : result.showInOverviewIf;
+
+        const validations = result.validations = {};
         if (result.optional == false) {
-          result.validations = {required: {message: result.label + ' is mandatory'}};
+          validations['required'] = {message: result.label + ' is mandatory'};
+        }
+
+        if (result.pattern) {
+          let pattern = result.pattern;
+          if (pattern.startsWith('/') && pattern.endsWith('/')) {
+            pattern = pattern.substring(1, pattern.length - 1);
+          }
+
+          validations['pattern'] = {expr: pattern, message: result.label + ' is invalid. Input does not match the pattern: ' + pattern};
         }
 
         return result;

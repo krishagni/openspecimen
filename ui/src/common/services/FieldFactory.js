@@ -65,7 +65,7 @@ class FieldFactory {
         } else if (rule == 'required' && field.showWhen) {
           validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(field.showWhen)));
         } else if (rule == 'pattern') {
-          validations[rule] = (value) => new RegExp(fv.expr).test(value);
+          validations[rule] = (value) => this._isEmpty(value) || this._matches(fv.expr, value);
         } else if (rule == 'sameAs') {
           validations[rule] = (value, form) => form[fv.field] == value
         } else if (rule == 'lt' || rule == 'le' || rule == 'gt' || rule == 'ge') {
@@ -271,6 +271,14 @@ class FieldFactory {
     }
 
     return ls;
+  }
+
+  _isEmpty(input) {
+    return input == null || input == undefined || (typeof input == 'string' && input.trim().length == 0);
+  }
+
+  _matches(pattern, input) {
+    return typeof input == 'string' && new RegExp(pattern).test(input);
   }
 }
 
