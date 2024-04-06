@@ -65,6 +65,10 @@ export default {
           if (field.name.indexOf('calc') == 0 && field.displayExpr) {
             field.value = (row) => exprUtil.eval({...row, fns: util.fns()}, field.displayExpr)
           }
+
+          field.showCellWhen = field.showWhen;
+          field.showValue = true;
+          delete field.showWhen;
         }
       }
     );

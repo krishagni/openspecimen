@@ -161,7 +161,7 @@ export default {
         return showTime ? this.$filters.dateTime(value) : this.$filters.date(value);
       }
 
-      return value;
+      return value || '-';
     }
   }
 }
