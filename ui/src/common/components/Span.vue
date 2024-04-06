@@ -16,6 +16,7 @@
 
 <script>
 import exprUtil from '@/common/services/ExpressionUtil.js';
+import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
 
 export default {
@@ -83,7 +84,7 @@ export default {
         return link;
       } else if (this.displayType == 'storage-position') {
         if (this.inputValue && typeof this.inputValue == 'object' && +this.inputValue.id > 0) {
-          return this.$ui.ngServer + '#/containers/' + this.inputValue.id + '/locations';
+          return routerSvc.getFullUrl('ContainerDetail.Locations', {containerId: this.inputValue.id});
         }
       }
 
