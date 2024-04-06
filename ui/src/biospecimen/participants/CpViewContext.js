@@ -157,25 +157,29 @@ export default class CpViewContext {
           }
         }
 
-        tabFields.push({
-          type: 'component',
-          captionCode: 'visits.collection_stats',
-          component: 'os-visit-specimen-collection-stats',
-          data: (rowObject) => rowObject,
-          uiStyle: {
-            width: '20%'
-          }
-        });
+        if (visitsTab.hideCollectionStats != true && visitsTab.hideCollectionStats != 'true') {
+          tabFields.push({
+            type: 'component',
+            captionCode: 'visits.collection_stats',
+            component: 'os-visit-specimen-collection-stats',
+            data: (rowObject) => rowObject,
+            uiStyle: {
+              width: '150px'
+            }
+          });
+        }
 
-        tabFields.push({
-          type: 'component',
-          captionCode: 'visits.utilisation_stats',
-          component: 'os-visit-specimen-utilisation-stats',
-          data: (rowObject) => rowObject,
-          uiStyle: {
-            width: '20%'
-          }
-        });
+        if (visitsTab.hideUtilisationStats != true && visitsTab.hideUtilisationStats != 'true') {
+          tabFields.push({
+            type: 'component',
+            captionCode: 'visits.utilisation_stats',
+            component: 'os-visit-specimen-utilisation-stats',
+            data: (rowObject) => rowObject,
+            uiStyle: {
+              width: '150px'
+            }
+          });
+        }
 
         return tabFields;
       }
