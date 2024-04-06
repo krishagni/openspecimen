@@ -164,7 +164,11 @@ export default {
           inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
         }
 
-        const params = {repeatVisit: true, ...this._getBatchParams(visit, this._getVisitDescription(visit))};
+        const params = {
+          repeatVisit: true,
+          collectVisits: true,
+          ...this._getBatchParams(visit, this._getVisitDescription(visit))
+        };
         const opts = {inputType: 'visit', params};
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);

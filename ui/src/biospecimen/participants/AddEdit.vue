@@ -569,14 +569,10 @@ export default {
               route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: cpr.cpId, cprId: cpr.id}}
             }),
             batchTitle: cpSvc.getEventDescription(cpe),
-            showOptions: false
+            showOptions: false,
+            collectVisits: true
           }
         }
-
-        /*if (visit.id > 0) {
-          opts.inputType = 'visit';
-          inputItem.visit = {id: visit.id, cpId: visit.cpId, cpShortTitle: visit.cpShortTitle};
-        }*/
 
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
         wfInstanceSvc.gotoInstance(instance.id);

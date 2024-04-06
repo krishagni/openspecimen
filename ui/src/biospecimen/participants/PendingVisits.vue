@@ -130,7 +130,8 @@ export default {
               label: this.cpr.ppid,
               route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: this.cp.id, cprId: this.cpr.id}}
             }),
-            showOptions: false
+            showOptions: false,
+            collectVisits: true
           }
         }
 
