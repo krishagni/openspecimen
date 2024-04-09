@@ -164,19 +164,41 @@ export default {
     };
   },
 
-  created() {
+  async created() {
     const cpr = this.dataCtx.cpr;
     const p = cpr.participant || {};
 
     const cpCtx = this.cpViewCtx;
+    const {ecDocSvc, ecValidationSvc} = this.$osSvc;
+    if (ecDocSvc && !cpr.id && cpCtx.isProceedToConsentAllowed() && !this.dataCtx.cp.visitLevelConsents) {
+      const {count} = await ecDocSvc.getCpDocumentsCount(this.dataCtx.cp.id, {includeOnlyActive: true});
+      this.ctx.showProceedToConsent = count >= 1;
+      if (count >= 1) {
+        const cpRules = await ecValidationSvc.getCpRules(this.dataCtx.cp.id);
+        this.ctx.hasConsentRules = cpRules && cpRules.rules && cpRules.rules.length > 0;
+      }
+    } else {
+      this.ctx.showProceedToConsent = false;
+      this.ctx.hasConsentRules = false;
+    }
+
+    let cpEventsQ = null, eventRulesQ = null;
+    if (this.ctx.showProceedToConsent && this.ctx.hasConsentRules) {
+      cpEventsQ = new Promise((resolve) => resolve([]));
+      eventRulesQ = new Promise((resolve) => resolve(null));
+    } else {
+      cpEventsQ = cpCtx.getCpEvents();
+      eventRulesQ = cpCtx.getAnticipatedEventsRules();
+    }
+
     const promises = [
       cpCtx.getCprDict(true),
       cpCtx.getCprAddEditLayout(),
       cpCtx.isTwoStepEnabled(),
       cpCtx.isAddPatientOnLookupFailEnabled(),
       cpCtx.getLockedParticipantFields(p.source),
-      cpCtx.getCpEvents(),
-      cpCtx.getAnticipatedEventsRules()
+      cpEventsQ,
+      eventRulesQ
     ];
 
     Promise.all(promises).then(
@@ -216,16 +238,6 @@ export default {
       }
     );
 
-    const {ecDocSvc} = this.$osSvc;
-    if (ecDocSvc && !cpr.id && cpCtx.isProceedToConsentAllowed() && !this.dataCtx.cp.visitLevelConsents) {
-      ecDocSvc.getCpDocumentsCount(this.dataCtx.cp.id, {includeOnlyActive: true}).then(
-        ({count}) => {
-          this.ctx.showProceedToConsent = count >= 1;
-        }
-      );
-    } else {
-      this.ctx.showProceedToConsent = false;
-    }
   },
 
   computed: {
