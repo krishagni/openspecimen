@@ -234,7 +234,7 @@ export default {
         return this.modelValue;
       }
 
-      let options = this.$refs.selectWidget.options || [];
+      let options = (this.$refs.selectWidget && this.$refs.selectWidget.options) || [];
       let selectedOption = null;
       if (this.selectProp) {
         selectedOption = options.find(option => option[this.selectProp] == this.modelValue);

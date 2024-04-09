@@ -278,7 +278,7 @@ class FieldFactory {
   }
 
   _matches(pattern, input) {
-    return typeof input == 'string' && new RegExp(pattern).test(input);
+    return new RegExp(pattern).test(input);
   }
 }
 
