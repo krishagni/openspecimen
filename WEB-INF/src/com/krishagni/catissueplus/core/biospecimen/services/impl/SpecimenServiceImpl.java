@@ -88,6 +88,7 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
@@ -277,6 +278,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			SpecimenDetail detail = req.getPayload();
 			Specimen specimen = saveOrUpdate(detail, null, null, null);
 			getLabelPrinter().print(getSpecimenPrintItems(Collections.singleton(specimen)));
+			if (detail.closeParent()) {
+				closeParent(specimen, detail.getOpComments());
+			}
+
 			return ResponseEvent.response(SpecimenDetail.from(specimen, false, false));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -293,6 +298,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			Specimen existing = updateSpecimen(detail, ose);
 			ose.checkAndThrow();
+
+			if (detail.closeParent()) {
+				closeParent(existing, detail.getOpComments());
+			}
 			return ResponseEvent.response(SpecimenDetail.from(existing, false, false));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -903,6 +912,20 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		existing = saveOrUpdate(detail, null, existing, null);
 		getLabelPrinter().print(getSpecimenPrintItems(Collections.singleton(existing)));
 		return existing;
+	}
+
+	private void closeParent(Specimen specimen, String reason) {
+		if (specimen == null || specimen.isPrimary()) {
+			return;
+		}
+
+		specimen.getParentSpecimen().updateStatus(
+			Status.ACTIVITY_STATUS_CLOSED.getStatus(),
+			AuthUtil.getCurrentUser(),
+			Calendar.getInstance().getTime(),
+			reason,
+			false
+		);
 	}
 
 	private void ensureEditAllowed(Specimen existing) {
