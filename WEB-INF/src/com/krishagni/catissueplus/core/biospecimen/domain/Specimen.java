@@ -873,7 +873,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public boolean isActive() {
-		return Status.ACTIVITY_STATUS_ACTIVE.getStatus().equals(getActivityStatus());
+		return ClosedSpecimensTracker.getInstance().isActive(this);
 	}
 	
 	public boolean isClosed() {
@@ -893,7 +893,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public boolean isEditAllowed() {
-		return !isReserved() && isActive();
+		return !isReserved() && ClosedSpecimensTracker.getInstance().isActive(this);
 	}
 	
 	public boolean isAliquot() {
@@ -1169,6 +1169,7 @@ public class Specimen extends BaseExtensionEntity {
 		transferTo(holdingLocation, user, time, reason, false);
 		addDisposalEvent(user, time, reason, comments);
 		updateAvailableStatus();
+		ClosedSpecimensTracker.getInstance().add(this);
 	}
 	
 	public List<DependentEntityDetail> getDependentEntities() {

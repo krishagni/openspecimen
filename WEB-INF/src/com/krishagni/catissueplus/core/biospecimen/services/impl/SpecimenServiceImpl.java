@@ -61,6 +61,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -1371,6 +1372,20 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 					derived.setCloseAfterChildrenCreation(!spec.keepDerivedOpen());
 					return derived;
+				} else {
+					List<Pair<Specimen, SpecimenRequirement>> children = getChildren(Pair.make(parentSpecimen, parentSpecimen.getSpecimenRequirement()));
+					while (!children.isEmpty()) {
+						Pair<Specimen, SpecimenRequirement> child = children.remove(0);
+						List<Pair<Specimen, SpecimenRequirement>> found = findMatch(parentReq, child);
+						if (found != null) {
+							// create all specimens along the path from the parent specimen to the child's immediate parent
+							SpecimenDetail derived = createParent(parentSpecimen, found);
+							derived.setCloseAfterChildrenCreation(!spec.keepDerivedOpen());
+							return derived;
+						}
+
+						children.addAll(getChildren(Pair.make(child.first(), child.second())));
+					}
 				}
 			}
 		} else if (spec.useExistingDerived()) {
@@ -1396,7 +1411,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 		SpecimenDetail derived = new SpecimenDetail();
 		derived.setLineage(Specimen.DERIVED);
-		derived.setParentId(parentSpecimen.getId());
+		derived.setParentId(parentSpecimen != null ? parentSpecimen.getId() : null);
 		derived.setReqId(parentReq != null ? parentReq.getId() : null);
 		derived.setCreatedOn(spec.getCreatedOn());
 		derived.setCreatedBy(spec.getCreatedBy());
@@ -1405,6 +1420,74 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		derived.setStatus(Specimen.COLLECTED);
 		derived.setIncrParentFreezeThaw(spec.getIncrParentFreezeThaw());
 		derived.setCloseAfterChildrenCreation(!spec.keepDerivedOpen());
+		return derived;
+	}
+
+	private List<Pair<Specimen, SpecimenRequirement>> getChildren(Pair<Specimen, SpecimenRequirement> parent) {
+		Specimen parentSpecimen = parent.first();
+		SpecimenRequirement parentReq = parent.second();
+		List<Pair<Specimen, SpecimenRequirement>> children = new ArrayList<>();
+		if (parentSpecimen != null) {
+			children = parentSpecimen.getChildCollection().stream()
+				.map(s -> Pair.make(s, s.getSpecimenRequirement()))
+				.collect(Collectors.toList());
+			if (parentSpecimen.getSpecimenRequirement() != null) {
+				for (SpecimenRequirement childReq : parentSpecimen.getSpecimenRequirement().getChildSpecimenRequirements()) {
+					if (childReq.isClosed()) {
+						continue;
+					}
+
+					if (children.stream().noneMatch(c -> childReq.equals(c.second()))) {
+						children.add(Pair.make(null, childReq));
+					}
+				}
+			}
+		} else if (parentReq != null ){
+			children = parentReq.getChildSpecimenRequirements().stream()
+				.filter(r -> !r.isClosed())
+				.map(r -> Pair.make((Specimen) null, r))
+				.collect(Collectors.toList());
+		}
+
+		return children;
+	}
+
+	private List<Pair<Specimen, SpecimenRequirement>> findMatch(SpecimenRequirement parentReq, Pair<Specimen, SpecimenRequirement> child) {
+		if (parentReq.equals(child.second())) {
+			return Collections.singletonList(child);
+		}
+
+		List<Pair<Specimen, SpecimenRequirement>> grandChildren = getChildren(child);
+		if (grandChildren.isEmpty()) {
+			return null;
+		}
+
+		for (Pair<Specimen, SpecimenRequirement> grandChild : grandChildren) {
+			List<Pair<Specimen, SpecimenRequirement>> match = findMatch(parentReq, grandChild);
+			if (match != null) {
+				List<Pair<Specimen, SpecimenRequirement>> result = new ArrayList<>();
+				result.add(child);
+				result.addAll(match);
+				return result;
+			}
+		}
+
+		return null;
+	}
+
+	private SpecimenDetail createParent(Specimen parent, List<Pair<Specimen, SpecimenRequirement>> path) {
+		SpecimenDetail derived = SpecimenDetail.from(parent, true, false, true);
+		for (Pair<Specimen, SpecimenRequirement> sr : path) {
+			if (sr.first() != null) {
+				derived = SpecimenDetail.from(sr.first(), true, false, true);
+			} else if (sr.second() != null) {
+				SpecimenDetail input = SpecimenDetail.from(sr.second());
+				input.setStatus(Specimen.COLLECTED);
+				input.setParentId(derived.getId());
+				derived = ResponseEvent.unwrap(createSpecimen(RequestEvent.wrap(input)));
+			}
+		}
+
 		return derived;
 	}
 
