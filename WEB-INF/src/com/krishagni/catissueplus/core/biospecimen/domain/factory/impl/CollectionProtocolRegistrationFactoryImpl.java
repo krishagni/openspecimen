@@ -52,7 +52,7 @@ public class CollectionProtocolRegistrationFactoryImpl implements CollectionProt
 		}
 		
 		CollectionProtocolRegistration cpr = new CollectionProtocolRegistration();
-		cpr.setId(detail.getId());
+		cpr.setId(existing != null ? existing.getId() : detail.getId());
 		cpr.setForceDelete(detail.isForceDelete());
 		cpr.setOpComments(detail.getOpComments());
 
