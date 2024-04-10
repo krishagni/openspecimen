@@ -99,7 +99,8 @@ export default {
     'optionsAtBottom',
     'hideButtons',
     'modelValue',
-    'allowVisitNames'
+    'allowVisitNames',
+    'scanProp'
   ],
 
   emits: ['on-add', 'labels-scanned'],
@@ -122,6 +123,15 @@ export default {
 
   async created() {
     this.barcodingEnabled = await http.get('collection-protocols/barcoding-enabled');
+    if (this.scanProp == 'specimen-barcodes' && this.barcodingEnabled) {
+      this.useBarcode = true;
+      this.useVisitNames = false;
+    } else if (this.scanProp == 'visit-names' && this.allowVisitNames) {
+      this.useBarcode = false;
+      this.useVisitNames = true;
+    } else {
+      this.useBarcode = this.useVisitNames = false;
+    }
   },
 
   methods: {
