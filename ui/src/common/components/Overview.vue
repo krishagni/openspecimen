@@ -116,8 +116,8 @@ export default {
           continue;
         }
 
-        if (field.showWhen || field.showInOverviewWhen) {
-          if (!exprUtil.eval(this.object, field.showInOverviewWhen || field.showWhen)) {
+        if (field.showInOverviewWhen) {
+          if (!exprUtil.eval(this.object, field.showInOverviewWhen)) {
             continue;
           }
         }
