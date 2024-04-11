@@ -147,7 +147,18 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		}
 
 		RevisionsListCriteria criteria = req.getPayload();
+		if (StringUtils.isBlank(criteria.recordType()) || criteria.recordType().equals("form") || CollectionUtils.isEmpty(criteria.recordIds())) {
+			if (criteria.startDate() == null) {
+				return ResponseEvent.userError(AuditErrorCode.START_DATE_REQ);
+			}
+
+			if (criteria.endDate() == null) {
+				return ResponseEvent.userError(AuditErrorCode.END_DATE_REQ);
+			}
+		}
+
 		if (StringUtils.isNotBlank(criteria.recordType())) {
+			// When either of "core", "form" or "form_data" is chosen
 			criteria.reportTypes(Collections.singletonList("data"));
 			if (CollectionUtils.isEmpty(criteria.records())) {
 				return ResponseEvent.userError(AuditErrorCode.RECORDS_REQ);

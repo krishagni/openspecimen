@@ -12,7 +12,11 @@ public enum AuditErrorCode implements ErrorCode {
 
 	FROM_DT_GT_TO_DATE,
 
-	RECORDS_REQ;
+	RECORDS_REQ,
+
+	START_DATE_REQ,
+
+	END_DATE_REQ;
 
 	@Override
 	public String code() {
