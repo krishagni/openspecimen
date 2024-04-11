@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -166,11 +167,32 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 		}
 
 		if (userIds != null && !userIds.isEmpty()) {
-			result.put("userIds", userIds.stream().map(id -> id.toString()).collect(Collectors.joining(", ")));
+			result.put("userIds", userIds.stream().map(Object::toString).collect(Collectors.joining(", ")));
 		}
 
 		if (reportTypes != null && !reportTypes.isEmpty()) {
 			result.put("reportTypes", String.join(", ", reportTypes));
+		}
+
+		result.put("includeModifiedProps", String.valueOf(includeModifiedProps));
+		if (CollectionUtils.isNotEmpty(entities)) {
+			result.put("entities", StringUtils.join(entities, ", "));
+		}
+
+		if (CollectionUtils.isNotEmpty(reportTypes)) {
+			result.put("reportTypes", StringUtils.join(reportTypes, ", "));
+		}
+
+		if (StringUtils.isNotBlank(recordType)) {
+			result.put("recordType", recordType);
+		}
+
+		if (CollectionUtils.isNotEmpty(records)) {
+			result.put("records", StringUtils.join(records, ", "));
+		}
+
+		if (CollectionUtils.isNotEmpty(recordIds)) {
+			result.put("recordIds", StringUtils.join(recordIds, ", "));
 		}
 
 		return result;

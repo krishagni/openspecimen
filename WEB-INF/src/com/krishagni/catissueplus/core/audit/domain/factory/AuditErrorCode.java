@@ -16,7 +16,9 @@ public enum AuditErrorCode implements ErrorCode {
 
 	START_DATE_REQ,
 
-	END_DATE_REQ;
+	END_DATE_REQ,
+
+	REPORT_GEN_IN_PROGRESS;
 
 	@Override
 	public String code() {

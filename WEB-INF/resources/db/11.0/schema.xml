@@ -43,4 +43,17 @@
   <changeSet author="vpawar" id="CP based specimen type quantity and concentration unit ID generator" dbms="oracle">
     <createSequence sequenceName="OS_SPECIMEN_TYPE_UNITS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Table to keep track of locks on various entities by various nodes">
+    <createTable tableName="OS_LOCKS">
+      <column name="LOCK_ENTITY" type="${text.type}(32)">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="LOCKED" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="NODE_NAME" type="${text.type}(32)" />
+      <column name="LOCK_TIME" type="${nullable.ts.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

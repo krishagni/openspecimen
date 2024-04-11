@@ -13,4 +13,10 @@
         ('specimen_unit', 'Specimen Unit', 'Specimen Unit', '11.0', ${now});
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Locks for audit report generator">
+    <sql>
+      insert into os_locks(lock_entity, locked, node_name, lock_time) values ('audit_report', 0, null, null)
+    </sql>
+  </changeSet>
 </databaseChangeLog>

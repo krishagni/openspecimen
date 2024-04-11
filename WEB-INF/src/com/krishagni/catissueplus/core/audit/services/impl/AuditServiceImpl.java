@@ -13,8 +13,10 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -44,6 +46,9 @@ import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.persister.entity.EntityPersister;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.krishagni.catissueplus.core.administrative.domain.Password;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -63,6 +68,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.domain.Lock;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -98,6 +104,8 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 	private ThreadPoolTaskExecutor taskExecutor;
 
+	private TransactionTemplate newTxTmpl;
+
 	private List<AuditLogExporter> exporters = new ArrayList<>();
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
@@ -114,6 +122,11 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 	public void setTaskExecutor(ThreadPoolTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
+	}
+
+	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+		this.newTxTmpl = new TransactionTemplate(transactionManager);
+		this.newTxTmpl.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 	}
 
 	@Override
@@ -248,6 +261,10 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			throw ose;
 		} catch (Exception ie) {
 			logger.error("Encountered error exporting audit revisions", ie);
+			if (ie instanceof ExecutionException ee && ee.getCause() instanceof OpenSpecimenException ose) {
+				throw ose;
+			}
+
 			throw OpenSpecimenException.serverError(ie);
 		}
 
@@ -345,7 +362,12 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 	@PlusTransactional
 	private File exportRevisions(RevisionsListCriteria criteria, User exportedBy, String ipAddress, List<User> revisionsBy) {
+		boolean lockAcquired = false;
+
 		try {
+			acquireLock();
+			lockAcquired = true;
+
 			Date startTime = Calendar.getInstance().getTime();
 			List<File> inputFiles = new ArrayList<>();
 			AuthUtil.setCurrentUser(exportedBy, ipAddress);
@@ -414,7 +436,43 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			return result;
 		} finally {
 			AuthUtil.clearCurrentUser();
+			if (lockAcquired) {
+				relinquishLock();
+			}
 		}
+	}
+
+	private boolean acquireLock() {
+		return Boolean.TRUE.equals(newTxTmpl.execute(
+			status -> {
+				Lock lock = daoFactory.getLockDao().getLockForUpdate("audit_report");
+				if (Boolean.TRUE.equals(lock.getLocked())) {
+					throw OpenSpecimenException.userError(AuditErrorCode.REPORT_GEN_IN_PROGRESS);
+				}
+
+				lock.setLocked(true);
+				lock.setLockTime(Calendar.getInstance().getTime());
+				lock.setNode(Utility.getNodeName());
+				daoFactory.getLockDao().saveOrUpdate(lock, true);
+				return true;
+			}
+		));
+	}
+
+	private boolean relinquishLock() {
+		return Boolean.TRUE.equals(newTxTmpl.execute(
+			status -> {
+				Lock lock = daoFactory.getLockDao().getLockForUpdate("audit_report");
+				if (Objects.equals(lock.getNode(), Utility.getNodeName())) {
+					lock.setLocked(false);
+					lock.setLockTime(null);
+					lock.setNode(null);
+					daoFactory.getLockDao().saveOrUpdate(lock, true);
+				}
+
+				return true;
+			}
+		));
 	}
 
 	private File getAuditDir() {

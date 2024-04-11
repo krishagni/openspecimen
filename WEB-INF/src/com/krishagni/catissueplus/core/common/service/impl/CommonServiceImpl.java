@@ -154,6 +154,7 @@ public class CommonServiceImpl implements CommonService, InitializingBean {
 	}
 
 	@Override
+	@PlusTransactional
 	public void afterPropertiesSet() throws Exception {
 		taskMgr.scheduleWithFixedDelay(
 			() -> {
@@ -179,5 +180,7 @@ public class CommonServiceImpl implements CommonService, InitializingBean {
 			},
 			24 * 60
 		);
+
+		daoFactory.getLockDao().unlockAll();
 	}
 }

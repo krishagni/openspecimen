@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="com.krishagni.catissueplus.core.common.domain.Lock" table="OS_LOCKS"
+    entity-name="com.krishagni.catissueplus.core.common.domain.Lock">
+
+    <id name="type" column="LOCK_ENTITY" />
+
+    <property name="locked" column="LOCKED" />
+
+    <property name="node" column="NODE_NAME" />
+
+    <property name="lockTime" column="LOCK_TIME" />
+
+    <query name="getLock">
+      select
+        l
+      from
+        com.krishagni.catissueplus.core.common.domain.Lock l
+      where
+        l.type = :type
+    </query>
+
+    <sql-query name="unlockAll">
+      update os_locks set locked = 0, node_name = null, lock_time = null where node_name = :node
+    </sql-query>
+  </class>
+</hibernate-mapping>

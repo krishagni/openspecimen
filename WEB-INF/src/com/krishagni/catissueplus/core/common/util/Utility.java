@@ -91,6 +91,7 @@ import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
+import com.krishagni.catissueplus.core.init.AppProperties;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -1283,6 +1284,11 @@ public class Utility {
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
+	}
+
+	public static String getNodeName() {
+		Properties props = AppProperties.getInstance().getProperties();
+		return props.getProperty("node.name", "Unknown");
 	}
 
 	private static Integer getPeriodBetween(ChronoUnit unit, Date from, Date to) {
