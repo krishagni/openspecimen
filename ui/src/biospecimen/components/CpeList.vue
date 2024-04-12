@@ -19,6 +19,7 @@ export default {
   emits: ['update:modelValue'],
 
   data() {
+    this.seedObj = util.clone(exprUtil.getValue(this.form || this.context || {}, this.entity) || {});
     return { };
   },
 
@@ -126,9 +127,15 @@ export default {
     },
 
     _presetValues(entityObj, event) {
-      entityObj['clinicalDiagnoses'] = (event.clinicalDiagnosis && [event.clinicalDiagnosis]) || [];
-      entityObj['clinicalStatus'] = event.clinicalStatus;
-      entityObj['site'] = event.defaultSite;
+      const {clinicalDiagnoses, clinicalStatus, site} = this.seedObj;
+      if (clinicalDiagnoses && clinicalDiagnoses.length > 0) {
+        entityObj['clinicalDiagnoses'] = clinicalDiagnoses;
+      } else {
+        entityObj['clinicalDiagnoses'] = (event.clinicalDiagnosis && [event.clinicalDiagnosis]) || [];
+      }
+
+      entityObj['clinicalStatus'] = clinicalStatus || event.clinicalStatus;
+      entityObj['site'] = site || event.defaultSite;
     },
 
     _getSelectedEvent(value) {
