@@ -49,7 +49,7 @@
       <column name="LOCK_ENTITY" type="${text.type}(32)">
         <constraints primaryKey="true" nullable="false" />
       </column>
-      <column name="LOCKED" type="${boolean.type}" defaultValueBoolean="false">
+      <column name="LOCKED" type="${boolean.type}" defaultValueNumeric="0">
         <constraints nullable="false" />
       </column>
       <column name="NODE_NAME" type="${text.type}(32)" />
