@@ -48,13 +48,22 @@ export default {
     },
 
     optionsList: function() {
+      let result = [];
       if (this.options instanceof Array) {
-        return this.options;
+        result = this.options;
       } else if (typeof this.options == 'function') {
-        return this.options(this.context);
-      } else {
-        return [];
+        result = this.options(this.context);
       }
+
+      return (result || []).map(
+        option => {
+          if (typeof option == 'string') {
+            return {caption: option, value: option};
+          } else {
+            return option;
+          }
+        }
+      );
     },
 
     optionRows: function() {
