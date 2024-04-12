@@ -30,7 +30,7 @@
               <span v-show="ctx.sort.direction == 'ASC'"> &uarr; </span>
               <span v-show="ctx.sort.direction == 'DESC'"> &darr; </span>
             </span>
-            <span v-if="field.enableCopyFirstToAll && !field.options">
+            <span v-if="field.enableCopyFirstToAll && !field.menuOptions">
               <a v-if="field.type != 'booleanCheckbox'" @click="copyFirstToAll($event, field)">
                 <span v-t="'common.copy_first_to_all'"> (Copy first to all) </span>
               </a>
@@ -39,8 +39,8 @@
                   @change="copySelectToAll($event, field)" />
               </div>
             </span>
-            <span class="more-options" v-if="field.options && field.options.length > 0">
-              <os-menu :label="$t('common.buttons.more')" :options="field.options" />
+            <span class="more-options" v-if="field.menuOptions && field.menuOptions.length > 0">
+              <os-menu :label="$t('common.buttons.more')" :options="field.menuOptions" />
             </span>
           </th>
           <th v-if="removeItems == true || copyItems == true">
