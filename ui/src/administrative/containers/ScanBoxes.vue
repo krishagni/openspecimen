@@ -938,7 +938,7 @@ export default {
       }
 
       if (readErrors.length > 0) {
-       ctx.readError = 'containers.cannot_read_barcodes';
+        ctx.readError = 'containers.cannot_read_barcodes';
         ctx.readErrorArgs = {
           locations: readErrors.map(
             ({mode, position, row, column}) => mode == 'LINEAR' ? position :  ('(' + row + ', ' + column + ')')
