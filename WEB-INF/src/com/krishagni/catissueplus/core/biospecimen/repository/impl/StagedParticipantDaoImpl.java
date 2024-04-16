@@ -25,7 +25,7 @@ public class StagedParticipantDaoImpl extends AbstractDao<StagedParticipant> imp
 
 	@Override
 	public List<StagedParticipant> getByPmis(List<PmiDetail> pmis) {
-	    List<Long> participantIds = getMatchingParticipantIds(pmis);
+		List<Long> participantIds = getMatchingParticipantIds(pmis);
 		if (participantIds == null || participantIds.isEmpty()) {
 			return Collections.emptyList();
 		}
