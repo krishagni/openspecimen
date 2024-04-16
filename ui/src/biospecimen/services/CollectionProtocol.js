@@ -85,7 +85,7 @@ class CollectionProtocol {
 
   async getWorkflowProperty(cpId, wfName, propName) {
     const wf = await this.getWorkflow(cpId, wfName);
-    if (wf && wf[propName]) {
+    if (wf && (wf[propName] || wf[propName] == 'false' || wf[propName] == false)) {
       return wf[propName];
     } else if (cpId == -1 || !cpId) {
       return null;
