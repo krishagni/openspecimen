@@ -249,7 +249,7 @@ export default {
         }
 
         this.showDetails(selectedRow);
-      } else {
+      } else if (this.$route.query && !this.$route.query.reqId) {
         this.showTable(newValue == -2);
       }
     },

@@ -48,7 +48,9 @@ export default {
         return;
       }
 
-      this._loadSpecimen(newVal);
+      if (newVal > 0) {
+        this._loadSpecimen(newVal);
+      }
     },
 
     '$route.query.reqId': function(newVal, oldVal) {
