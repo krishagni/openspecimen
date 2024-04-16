@@ -26,6 +26,7 @@
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
       <SpecimenTree :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimens="ctx.specimens"
+        :ref-date="visit.status && visit.status != 'Pending' ? visit.visitDate : 0"
         @reload="reloadSpecimens" v-if="ctx.cp.id > 0 && isReadSpecimenAllowed" />
     </os-grid-column>
 

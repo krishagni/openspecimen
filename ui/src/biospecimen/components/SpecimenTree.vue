@@ -10,6 +10,10 @@
 
       <os-specimen-actions :cp="cp" :specimens="selectedExistingSpecimens" @reloadSpecimens="reloadSpecimens"
         v-if="selectedExistingSpecimens.length > 0" />
+
+      <os-button :label="$t('specimens.show_pending')" @click="showPending" v-if="haveOldSpecimens && pendingHidden" />
+
+      <os-button :label="$t('specimens.hide_pending')" @click="hidePending" v-if="haveOldSpecimens && !pendingHidden" />
     </template>
 
     <os-table-form ref="spmnsTable" :tree-layout="true" :read-only="true" selection-mode="checkbox"
@@ -30,11 +34,12 @@
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import formUtil from '@/common/services/FormUtil.js';
+import settingSvc from '@/common/services/Setting.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'cpr', 'visit', 'specimens'],
+  props: ['cp', 'cpr', 'visit', 'specimens', 'refDate'],
 
   emits: ['reload'],
 
@@ -43,6 +48,12 @@ export default {
       treeCfg: {},
 
       panelFixed: false,
+
+      hidePendingSpmnsInterval: 0,
+
+      haveOldSpecimens: false,
+
+      pendingHidden: true,
 
       ctx: {
         selectedSpecimens: []
@@ -73,6 +84,8 @@ export default {
       }
     );
 
+    settingSvc.getSetting('biospecimen', 'pending_spmns_disp_interval')
+      .then(([setting]) => this.hidePendingSpmnsInterval = setting.value ? +setting.value : 0);
     window.addEventListener('wheel', this.onScroll);
   },
 
@@ -81,6 +94,22 @@ export default {
   },
    
   computed: {
+    startDate: function() {
+      if (this.refDate) {
+        return new Date(this.refDate);
+      }
+
+      return Date.now();
+    },
+
+    oldTree: function() {
+      if (this.hidePendingSpmnsInterval <= 0) {
+        return false;
+      }
+
+      return Math.floor((Date.now() - this.startDate) / (1000 * 60 * 60 * 24)) > this.hidePendingSpmnsInterval;
+    },
+
     items: function() {
       return this._flattenSpecimens(this.specimens || [], 0);
     },
@@ -148,19 +177,34 @@ export default {
       setTimeout(() => window.scrollTo(0, 0));
     },
 
+    showPending: function() {
+      this.pendingHidden = false;
+    },
+
+    hidePending: function() {
+      this.pendingHidden = true;
+    },
+
     _flattenSpecimens: function(specimens, depth, parentUid) {
       let idx = 0;
       let result = [];
       for (let specimen of specimens) {
         formUtil.createCustomFieldsMap(specimen, true);
+        if (this.oldTree && (!specimen.status || specimen.status == 'Pending')) {
+          this.haveOldSpecimens = true;
+          if (this.pendingHidden) {
+            continue;
+          }
+        }
 
         const uid = parentUid !== undefined && parentUid !== null ? parentUid + '_' + idx : idx;
         const item = {cpr: this.cpr, visit: this.visit, specimen, depth, expanded: true, show: true, uid, parentUid};
-        item.hasChildren = (specimen.children || []).length > 0;
         result.push(item);
         ++idx;
       
-        Array.prototype.push.apply(result, this._flattenSpecimens(specimen.children || [], depth + 1, uid));
+        const children = this._flattenSpecimens(specimen.children || [], depth + 1, uid);
+        Array.prototype.push.apply(result, children);
+        item.hasChildren = (children || []).length > 0;
       }
 
       return result;
