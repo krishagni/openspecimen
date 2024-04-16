@@ -185,7 +185,7 @@ class Specimen {
         for (let field of fields) {
           if (field.name == 'specimen.parentLabel') {
             field.href = ({specimen: {cpId, cprId, visitId, parentId, eventId}}) =>
-              routerSvc.getFullUrl(
+              routerSvc.getUrl(
                 'ParticipantsListItemSpecimenDetail.Overview',
                 {cpId, cprId, visitId, specimenId: parentId},
                 {eventId}
@@ -193,7 +193,7 @@ class Specimen {
           } else if (field.name == 'specimen.storageLocation') {
             field.href = ({specimen: {storageLocation}}) => {
               if (storageLocation && storageLocation.id > 0) {
-                return routerSvc.getFullUrl('ContainerDetail.Locations', {containerId: storageLocation.id});
+                return routerSvc.getUrl('ContainerDetail.Locations', {containerId: storageLocation.id});
               } else {
                 return null;
               }
