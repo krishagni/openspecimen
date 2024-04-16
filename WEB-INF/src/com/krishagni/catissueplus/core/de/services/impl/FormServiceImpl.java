@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.web.multipart.MultipartFile;
@@ -122,6 +123,7 @@ import edu.common.dynamicextensions.napi.FileControlValue;
 import edu.common.dynamicextensions.napi.FormData;
 import edu.common.dynamicextensions.napi.FormDataManager;
 import edu.common.dynamicextensions.napi.FormEventsNotifier;
+import edu.common.dynamicextensions.napi.FormException;
 import edu.common.dynamicextensions.nutility.ContainerParser;
 import edu.common.dynamicextensions.nutility.ContainerPropsParser;
 import edu.common.dynamicextensions.nutility.FileUploadMgr;
@@ -316,6 +318,13 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
+		} catch (FormException fe) {
+			String rootCauseMsg = ExceptionUtils.getRootCauseMessage(fe);
+			if (StringUtils.contains(rootCauseMsg, "Row size too large")) {
+				return ResponseEvent.userError(FormErrorCode.TOO_MANY_FIELDS);
+			}
+
+			return ResponseEvent.serverError(fe);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
@@ -357,7 +366,16 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			}
 		}
 
-		return ResponseEvent.response(Container.createContainer(getUserContext(false), input, true));
+		try {
+			return ResponseEvent.response(Container.createContainer(getUserContext(false), input, true));
+		} catch (FormException e) {
+			String rootCauseMsg = ExceptionUtils.getRootCauseMessage(e);
+			if (StringUtils.contains(rootCauseMsg, "Row size too large")) {
+				return ResponseEvent.userError(FormErrorCode.TOO_MANY_FIELDS);
+			}
+
+			throw e;
+		}
 	}
     
 	@Override

@@ -53,7 +53,9 @@ public enum FormErrorCode implements ErrorCode {
 
 	INVALID_TOKEN,
 
-	INV_DATA_STATUS;
+	INV_DATA_STATUS,
+
+	TOO_MANY_FIELDS;
 
 	@Override
 	public String code() {
