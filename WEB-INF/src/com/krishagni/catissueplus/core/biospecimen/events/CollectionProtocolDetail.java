@@ -515,7 +515,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setManualVisitNameEnabled(cp.isManualVisitNameEnabled());
 		result.setManualSpecLabelEnabled(cp.isManualSpecLabelEnabled());
 		result.setKitLabelsEnabled(cp.isKitLabelsEnabled());
-		result.setBulkPartRegEnabled(cp.isBulkPartRegEnabled());
+//		result.setBulkPartRegEnabled(cp.isBulkPartRegEnabled());
 		result.setSpecimenCentric(cp.isSpecimenCentric());
 		result.setBarcodingEnabled(cp.isBarcodingEnabled());
 		result.setCloseParentSpecimens(cp.isCloseParentSpecimens());
