@@ -84,7 +84,7 @@ export default {
         return link;
       } else if (this.displayType == 'storage-position') {
         if (this.inputValue && typeof this.inputValue == 'object' && +this.inputValue.id > 0) {
-          return routerSvc.getFullUrl('ContainerDetail.Locations', {containerId: this.inputValue.id});
+          return routerSvc.getUrl('ContainerDetail.Locations', {containerId: this.inputValue.id});
         }
       }
 
