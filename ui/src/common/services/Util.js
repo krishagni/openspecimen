@@ -497,8 +497,13 @@ class Util {
       return (cond !== null && cond !== undefined) ? truth : falsy;
     },
 
-    split: function(inputStr, regex, limit) {
-      return (inputStr || '' ).split(regex, limit);
+    split: function(inputStr, regex, limit, retElIdx) {
+      const result = (inputStr || '' ).split(regex, limit);
+      if (typeof retElIdx == 'number') {
+        return retElIdx < result.length ? result[retElIdx] : undefined;
+      }
+
+      return result;
     },
 
     join: function(inputStrs, separator) {
