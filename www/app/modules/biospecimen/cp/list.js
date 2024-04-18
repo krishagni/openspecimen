@@ -1,7 +1,7 @@
 
 angular.module('os.biospecimen.cp.list', ['os.biospecimen.models'])
   .controller('CpListCtrl', function(
-    $scope, $state, cpsCtx, osExportSvc, CollectionProtocol, DeleteUtil, AuthorizationService) {
+    $scope, $state, cpsCtx, osExportSvc, CollectionProtocol, DeleteUtil, AuthorizationService, VueApp) {
 
     var ctx;
 
@@ -28,7 +28,7 @@ angular.module('os.biospecimen.cp.list', ['os.biospecimen.models'])
     }
 
     $scope.showCpSummary = function(row) {
-      $state.go('cp-summary-view', {cpId: row.hidden.cpId});
+      VueApp.setVueView('cp-view/' + row.hidden.cpId + '/participants/-1', {view: 'participants_list'});
     };
 
     $scope.deleteCps = function() {

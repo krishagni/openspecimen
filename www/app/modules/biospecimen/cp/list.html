@@ -28,7 +28,7 @@
    
   <div class="os-container-wrapper">
     <div>
-      <os-list params="ctx.params" item-sref="cp-summary-view({cpId: row.hidden.cpId})"
+      <os-list params="ctx.params" item-sref="cp-new-ui-list-view({cpId: row.hidden.cpId})"
         fixed-data-tmpl="modules/biospecimen/cp/list-view-fixed-data.html"
         action-buttons-tmpl="modules/biospecimen/cp/list-view-row-action-buttons.html"
         enable-selection="true" show-item="showCpSummary(row)" init-ctrl="setListCtrl($list)"
@@ -93,7 +93,7 @@
 <script type="text/ng-template" id="modules/biospecimen/cp/list-view-fixed-data.html">
   <span ng-show="$index == 0">
     <span ng-show="row.fixedData[$index] > -1">
-      <a ui-sref="participant-list({cpId: row.hidden.cpId})" os-tooltip="{{'cp.view_participants' | translate}}">
+      <a os-new-ui-url="{url: 'cp-view/:cpId/participants/-1', params: {cpId: row.hidden.cpId}, query: {view: 'participants_list'}}" os-tooltip="{{'cp.view_participants' | translate}}">
         {{row.fixedData[$index] | number: 0 | osNoValue}}</span>
       </a>
     </span>
@@ -102,7 +102,7 @@
     </span>
   </span>
   <span ng-show="$index == 1">
-    <a ui-sref="cp-specimens({cpId: row.hidden.cpId})" os-tooltip="{{'cp.view_specimens' | translate}}">
+    <a os-new-ui-url="{url: 'cp-view/:cpId/participants/-1', params: {cpId: row.hidden.cpId}, query: {view: 'specimens_list'}}" os-tooltip="{{'cp.view_specimens' | translate}}">
       {{row.fixedData[$index] | number: 0 | osNoValue}}</span>
     </a>
   </span>

@@ -303,29 +303,12 @@ angular.module('os.biospecimen.participant',
         parent: 'signed-in',
         abstract: true
       })
-      .state('cp-summary-view', {
-        url: '/summary-view',
-        controller: function($state, cp, summaryView, enableBetaFeatures, VueApp) {
-          if (enableBetaFeatures) {
-            VueApp.setVueView('cp-view/' + cp.id + '/participants/-1');
-            return;
-          }
-
-          $state.go(summaryView, {cpId: cp.id}, {location: 'replace'});
+      .state('cp-new-ui-list-view', {
+        url: '/cp-new-ui-list-view/:cpId',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('cp-view/' + $stateParams.cpId + '/participants/-1', {view: 'participants_list'});
         },
-        resolve: {
-          summaryView: function(listView, CpConfigSvc) {
-            var summaryView = listView;
-
-            var summarySt = CpConfigSvc.getSummaryState();
-            if (summarySt) {
-              summaryView = summarySt;
-            }
-
-            return summaryView;
-          }
-        },
-        parent: 'cp-view'
+        parent: 'signed-in'
       })
       .state('cp-list-view', {
         url: '/list-view',
