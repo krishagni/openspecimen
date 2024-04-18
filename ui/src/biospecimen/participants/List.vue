@@ -428,13 +428,17 @@ export default {
       }
 
       if (!this.cpViewCtx.isCoordinator() && this.cpViewCtx.isUpdateAllSpecimenAllowed()) {
-        const recvWfId = await this._getReceiveSpecimensWf();
-        if (recvWfId) {
-          options.push({
-            icon: 'check-square',
-            caption: this.$t('participants.receive'),
-            url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: recvWfId}, {cpId: this.ctx.cp.id})
-          });
+        try {
+          const recvWfId = await this._getReceiveSpecimensWf();
+          if (recvWfId) {
+            options.push({
+              icon: 'check-square',
+              caption: this.$t('participants.receive'),
+              url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: recvWfId}, {cpId: this.ctx.cp.id})
+            });
+          }
+        } catch {
+          alertsSvc.error({code: 'participants.invalid_receive_wf'});
         }
       }
 

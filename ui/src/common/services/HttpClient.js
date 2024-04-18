@@ -158,7 +158,7 @@ class HttpClient {
 
   promise(method, apiCall, errorHandler) {
     this.notifyStart(method);
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       apiCall()
         .then(resp => {
           this.notifyComplete(method, resp);
@@ -166,6 +166,7 @@ class HttpClient {
         })
         .catch(e => {
           this.notifyFail(method, e.response || e.message);
+          reject(e);
           if (typeof errorHandler == 'function') {
             errorHandler(resolve, e.response || e.message);
             return;

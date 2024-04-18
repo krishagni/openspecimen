@@ -913,6 +913,7 @@
     "generate_cp_report": "Generate CP Report",
     "ignore_matches_proceed": "Ignore Matches and Proceed",
     "import_biospecimen_data": "Import Biospecimen Data (CSV)",
+    "invalid_receive_wf": "Invalid receive workflow configured in the CP or system level JSON",
     "last_name": "Last Name",
     "list": "Participants",
     "many_deleted": "One participant deleted. | {count} participants deleted.",
