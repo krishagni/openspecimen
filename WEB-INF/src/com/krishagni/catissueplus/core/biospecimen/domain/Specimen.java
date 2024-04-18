@@ -873,6 +873,10 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public boolean isActive() {
+		return Status.ACTIVITY_STATUS_ACTIVE.getStatus().equals(getActivityStatus());
+	}
+
+	public boolean isTxnActive() {
 		return ClosedSpecimensTracker.getInstance().isActive(this);
 	}
 	

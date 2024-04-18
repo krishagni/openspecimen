@@ -493,7 +493,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			
 			if (!parentSpmn.isCollected()) {
 				return ResponseEvent.userError(SpecimenErrorCode.NOT_COLLECTED, parentSpmn.getLabel());
-			} else if (!parentSpmn.isActive()) {
+			} else if (!parentSpmn.isTxnActive()) {
 				return ResponseEvent.userError(SpecimenErrorCode.NOT_ACTIVE, parentSpmn.getLabel());
 			}
 
@@ -1381,7 +1381,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			} else if (parentSpecimen.getSpecimenRequirement() != null) {
 				Specimen existing = null;
 				for (Specimen child : parentSpecimen.getChildCollection()) {
-					if (parentReq.equals(child.getSpecimenRequirement()) && child.isActive()) {
+					if (parentReq.equals(child.getSpecimenRequirement()) && child.isTxnActive()) {
 						existing = child;
 						break;
 					}
@@ -1414,7 +1414,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		} else if (spec.useExistingDerived()) {
 			Specimen existing = parentSpecimen.getChildCollection().stream()
 				.filter(spmn -> {
-					if (!spmn.isDerivative() || !spmn.isCollected() || !spmn.isActive()) {
+					if (!spmn.isDerivative() || !spmn.isCollected() || !spmn.isTxnActive()) {
 						return false;
 					}
 
