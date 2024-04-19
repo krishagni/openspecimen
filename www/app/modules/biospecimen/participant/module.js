@@ -303,6 +303,13 @@ angular.module('os.biospecimen.participant',
         parent: 'signed-in',
         abstract: true
       })
+      .state('cp-summary-view', {
+        url: '/cp-summary-view/:cpId',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('cp-view/' + $stateParams.cpId + '/participants/-1', {view: 'participants_list'});
+        },
+        parent: 'signed-in'
+      })
       .state('cp-new-ui-list-view', {
         url: '/cp-new-ui-list-view/:cpId',
         controller: function($stateParams, VueApp) {
