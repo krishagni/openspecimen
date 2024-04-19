@@ -32,8 +32,14 @@ angular.module('os.biospecimen.specimen',
     $stateProvider
       .state('specimen', {
         url: '/specimens/:specimenId',
-        controller: function($state, params) {
-          $state.go('specimen-detail.overview', params, {location: 'replace'});
+        controller: function(params, VueApp) {
+          VueApp.setVueView(
+            'cp-view/' + params.cpId +
+            '/participants/' + params.cprId +
+            '/visit/' + params.visitId +
+            '/specimen/' + params.specimenId +
+            '/overview'
+          );
         },
         resolve: {
           params: function($stateParams, Specimen) {
