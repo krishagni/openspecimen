@@ -23,7 +23,7 @@ export default {
         }
       },
       "showWhen": "!!specimen.label  || cp.manualSpecLabelEnabled || !specimen.labelFmt",
-      "disableWhen": "!cp.manualSpecLabelEnabled && specimen.labelFmt"
+      "disableWhen": "!cp.manualSpecLabelEnabled && !!specimen.labelFmt"
     },
     {
       "type": "text",
