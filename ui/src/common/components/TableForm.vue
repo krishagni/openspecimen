@@ -11,9 +11,13 @@
             </span>
           </th>
 
-          <slot name="first-column-header" />
+          <th v-if="firstColumn" :class="stickyColumn" :style="firstColumnHeaderStyle">
+            <div v-show="treeLayout && !showFlat" style="width: 1.5rem; display: inline-block;"> </div>
+            <slot ref="firstColumnHeader" name="first-column-header"> </slot>
+          </th>
 
-          <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" @click="sort(field)">
+          <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" @click="sort(field)"
+            :class="!firstColumn && fieldIdx == 0 ? stickyColumn : []">
             <span v-if="field.displayLabel">{{field.displayLabel}}</span>
             <div v-else-if="field.icon" v-os-tooltip="field.tooltip"
               :class="{'align-icon': field.enableCopyFirstToAll && field.type == 'booleanCheckbox'}">
@@ -67,7 +71,7 @@
                 @change="toggleSelection(itemIdx)" v-else />
             </td>
 
-            <td v-if="firstColumn" :style="{display: treeLayout ? 'flex': ''}">
+            <td v-if="firstColumn" :style="{display: treeLayout ? 'flex': ''}" :class="stickyColumn">
               <div v-show="treeLayout && !showFlat" class="node-expander"
                 :style="{'padding-left':  itemModel.depth + 'rem'}">
                 <a @click="toggleNode(itemModel, itemIdx)">
@@ -79,7 +83,8 @@
                 v-bind:model="itemModel"> </slot>
             </td>
 
-            <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx">
+            <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx"
+              :class="!firstColumn && fieldIdx == 0 ? stickyColumn : []">
               <div :style="field.uiStyle">
                 <div class="field-container">
                   <div v-show="treeLayout && fieldIdx == 0 && !firstColumn" class="node-expander"
@@ -202,6 +207,23 @@ export default {
       }
 
       return null;
+    },
+
+    firstColumnHeaderStyle: function() {
+      if (this.$slots['first-column-header']) {
+        const result = this.$slots['first-column-header']();
+        return result && result.length > 0 && result[0].props && result[0].props.style;
+      }
+
+      return null;
+    },
+
+    stickyColumn: function() {
+      if (this.readOnly && (this.selectionMode == 'radio' || this.selectionMode == 'checkbox')) {
+        return ['sticky', 'left-offset'];
+      } else {
+        return ['sticky']
+      }
     },
 
     fields: function() {
@@ -658,8 +680,18 @@ export default {
 
 <style scoped>
 form {
+  height: 100%;
   width: 100%;
   overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+}
+
+table thead {
+  position: sticky;
+  background-color: #fff;
+  top: 0;
+  z-index: 2;
 }
 
 table th a {
@@ -691,6 +723,23 @@ table th .more-options :deep(button) {
   margin-left: 0.5rem;
 }
 
+table th.sticky,
+table :deep(th.sticky),
+table td.sticky,
+table :deep(td.sticky) {
+  position: sticky;
+  background-color: #fff;
+  left: 0px;
+  z-index: 1;
+}
+
+table th.sticky.left-offset,
+table :deep(th.sticky.left-offset),
+table td.sticky.left-offset,
+table :deep(td.sticky.left-offset) {
+  left: 35px;
+}
+
 table td .field-container {
   display: flex;
 }
@@ -718,6 +767,10 @@ table th.selection,
 table td.selection {
   padding: 10px 0px 10px 15px;
   width: 1.25rem;
+  position: sticky;
+  background-color: #fff;
+  left: 0;
+  z-index: 1;
 }
 
 table th.selection :deep(.p-field-checkbox),
