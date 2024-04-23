@@ -18,7 +18,8 @@
         <div v-if="selectedRows.length > 0" class="p-inline-message p-inline-message-info">
           <span v-t="{path: 'common.lists.records_selected', args: {count: selectedRows.length}}"></span>
         </div>
-        <data-table :value="list" v-model:expandedRows="expandedRows" v-model:selection="selectedRows"
+        <data-table scrollable scroll-height="flex" :value="list"
+          v-model:expandedRows="expandedRows" v-model:selection="selectedRows"
           :row-class="getRowClass" @row-click="rowClick($event)" @sort="sort($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
           <column v-for="column of schema.columns" :header="caption(column)" :key="column.name" :field="column.name"
