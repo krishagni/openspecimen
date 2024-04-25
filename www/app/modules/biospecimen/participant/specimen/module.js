@@ -844,12 +844,9 @@ angular.module('os.biospecimen.specimen',
   })
 
   .run(function(QuickSearchSvc, ExtensionsUtil) {
-    var opts = {
-      caption: 'entities.specimen',
-      state: 'specimen-detail.overview',
-      vueView: 'ParticipantsListItemSpecimenDetail.Overview'
-    };
+    var opts = { caption: 'entities.specimen', vueUrl: 'specimen-resolver/:entityId' };
     QuickSearchSvc.register('specimen', opts);
+
 
     ExtensionsUtil.registerView(
       'ContainerTransferEvent', 'modules/biospecimen/participant/specimen/transfer-event.html');

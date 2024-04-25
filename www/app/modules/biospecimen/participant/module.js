@@ -1226,10 +1226,6 @@ angular.module('os.biospecimen.participant',
     }
   })
   .run(function(QuickSearchSvc) {
-    var opts = {
-      caption: 'entities.participant',
-      state: 'participant-detail.overview',
-      vueView: 'ParticipantsListItemDetail.Overview'
-    };
+    var opts = { caption: 'entities.participant', vueUrl: 'cpr-resolver/:entityId' };
     QuickSearchSvc.register('collection_protocol_registration', opts);
   });

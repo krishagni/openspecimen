@@ -1,6 +1,6 @@
 
 angular.module('os.common.search.ctrl', [])
-  .controller('QuickSearchCtrl', function($scope, $state, $timeout, $window, SettingUtil, QuickSearchSvc) {
+  .controller('QuickSearchCtrl', function($scope, $state, $timeout, $window, SettingUtil, QuickSearchSvc, VueApp) {
 
     var ctx, closeHandler;
 
@@ -50,6 +50,13 @@ angular.module('os.common.search.ctrl', [])
         return;
       }
 
+      var vueUrl = QuickSearchSvc.getVueUrl(match.entity);
+      if (vueUrl) {
+        vueUrl = vueUrl.replace(':entityId', match.entityId);
+        VueApp.setVueView(vueUrl);
+        return;
+      }
+
       var state = QuickSearchSvc.getState(match.entity);
       var stateParams = {stateName: state, objectName: match.entity, key: 'id', value: match.entityId};
       $state.go('object-state-params-resolver', stateParams);
@@ -62,6 +69,14 @@ angular.module('os.common.search.ctrl', [])
     $scope.openInNewTab = function(event, match) {
       event.stopPropagation();
       event.preventDefault();
+
+      var vueUrl = QuickSearchSvc.getVueUrl(match.entity);
+      if (vueUrl) {
+        vueUrl = vueUrl.replace(':entityId', match.entityId);
+        vueUrl = VueApp.getVueViewUrl(vueUrl);
+        $window.open(vueUrl, '_blank');
+        return;
+      }
 
       var state = QuickSearchSvc.getState(match.entity);
       var stateParams = {stateName: state, objectName: match.entity, key: 'id', value: match.entityId};

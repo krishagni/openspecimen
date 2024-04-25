@@ -47,6 +47,10 @@ angular.module('os.common.search.service', [])
       return entitySearchMap[entity] && entitySearchMap[entity].vueView;
     }
 
+    function getVueUrl(entity) {
+      return entitySearchMap[entity] && entitySearchMap[entity].vueUrl;
+    }
+
     return {
       register: register,
 
@@ -54,6 +58,8 @@ angular.module('os.common.search.service', [])
 
       getState: getState,
 
-      getVueView: getVueView
+      getVueView: getVueView,
+
+      getVueUrl: getVueUrl
     };
   });

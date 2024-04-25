@@ -825,6 +825,24 @@ const routes = [
 
       /** Biospecimen pages **/
       {
+        path: 'cpr-resolver/:cprId',
+        name: 'CprResolver',
+        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/CprResolver.vue'),
+        props: (route) => ({cprId: route.params && route.params.cprId})
+      },
+      {
+        path: 'visit-resolver/:visitId',
+        name: 'VisitResolver',
+        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/VisitResolver.vue'),
+        props: (route) => ({visitId: route.params && route.params.visitId})
+      },
+      {
+        path: 'specimen-resolver/:specimenId',
+        name: 'SpecimenResolver',
+        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/SpecimenResolver.vue'),
+        props: (route) => ({specimenId: route.params && route.params.specimenId})
+      },
+      {
         path: 'cp-view',
         name: 'CpViewRoot',
         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/CpViewRoot.vue'),

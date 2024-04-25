@@ -17,33 +17,23 @@ class QuickSearch {
 
     'collection_protocol_registration': {
       caption: 'Participant',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=participant-detail.overview&' +
-           'objectName=collection_protocol_registration&' +
-           'vueView=ParticipantsListItemDetail.Overview&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'CprResolver',
+      params: {entityId: 'cprId'}
     },
 
     'visit': {
       caption: 'Visit',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=visit-detail.overview&' +
-           'objectName=visit&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'VisitResolver',
+      params: {entityId: 'visitId'}
     },
 
     'specimen': {
       caption: 'Specimen',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=specimen-detail.overview&' +
-           'objectName=specimen&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'SpecimenResolver',
+      params: {entityId: 'specimenId'}
     },
 
     'institute': {
