@@ -110,11 +110,11 @@
 
 <script type="text/ng-template" id="modules/biospecimen/cp/list-view-row-action-buttons.html">
   <div class="os-more-option-btns">
-    <button class="btn btn-xs btn-default" os-tooltip="{{'cp.view_details' | translate}}"
+    <button class="btn btn-xs btn-default os-click-esc" os-tooltip="{{'cp.view_details' | translate}}"
       ui-sref="cp-detail.overview({cpId: row.hidden.cpId})">
       <span class="fa fa-eye"></span>
     </button>
-    <button class="btn btn-xs btn-default" os-tooltip="{{'cp.view_catalog' | translate}}"
+    <button class="btn btn-xs btn-default os-click-esc" os-tooltip="{{'cp.view_catalog' | translate}}"
       ui-sref="ssc-catalog-dashboard({catalogId: row.hidden.catalogId, cpId: row.hidden.cpId})"
       ng-show="!!row.hidden.catalogId && $list.viewCtx.queryReadAllowed">
       <span class="fa fa-table"></span>
