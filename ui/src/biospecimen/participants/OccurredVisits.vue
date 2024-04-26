@@ -102,11 +102,13 @@ export default {
           divider = false;
         }
 
-        options.push({
-          icon: 'flask',
-          caption: this.$t('participants.collect_pending_specimens'),
-          onSelect: () => this.collectPending(visit)
-        });
+        if (visit.totalPendingSpmns > 0) {
+          options.push({
+            icon: 'flask',
+            caption: this.$t('participants.collect_pending_specimens'),
+            onSelect: () => this.collectPending(visit)
+          });
+        }
 
         options.push({
           icon: 'plus',
