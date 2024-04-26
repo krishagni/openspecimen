@@ -183,7 +183,11 @@ class CollectionProtocolRegistration {
 
   getConsents(cpr) {
     if (!cpr.$consentsQ) {
-      cpr.$consentsQ = http.get('collection-protocol-registrations/' + cpr.id + '/consents');
+      if (window.osSvc.ecDocRespSvc) {
+        cpr.$consentsQ = window.osSvc.ecDocRespSvc.getConsents(cpr.id);
+      } else {
+        cpr.$consentsQ = http.get('collection-protocol-registrations/' + cpr.id + '/consents');
+      }
     }
 
     return cpr.$consentsQ;
