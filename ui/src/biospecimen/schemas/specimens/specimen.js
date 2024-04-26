@@ -39,6 +39,13 @@ export default {
       "disableWhen": "!!cp.additionalLabelFmt"
     },
     {
+      "type": "text",
+      "labelCode": "specimens.parent_specimen",
+      "name": "specimen.parentLabel",
+      "showWhen": "true == false",
+      "showInOverviewWhen": "specimen.lineage != 'New' && !!specimen.parentLabel"
+    },
+    {
       "type": "dropdown",
       "labelCode": "specimens.collection_status",
       "name": "specimen.status",
