@@ -5,7 +5,8 @@ export default {
       "labelCode": "visits.name",
       "name": "visit.name",
       "validations": {
-        "required": {
+        "requiredIf": {
+          "expr": "cp.manualVisitNameEnabled",
           "messageCode": "visits.name_req"
         }
       },
