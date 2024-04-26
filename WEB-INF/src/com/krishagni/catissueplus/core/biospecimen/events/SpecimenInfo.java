@@ -24,7 +24,6 @@ import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.NameValuePair;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
-import com.krishagni.catissueplus.core.common.util.PvUtil;
 
 @ListenAttributeChanges
 public class SpecimenInfo extends AttributeModifiedSupport implements Comparable<SpecimenInfo>, Serializable {
@@ -106,6 +105,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private String collectionContainer;
 
 	private Date collectionDate;
+
+	private UserSummary receiver;
 
 	private String storageSite;
 	
@@ -435,6 +436,14 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		this.collectionDate = collectionDate;
 	}
 
+	public UserSummary getReceiver() {
+		return receiver;
+	}
+
+	public void setReceiver(UserSummary receiver) {
+		this.receiver = receiver;
+	}
+
 	public String getStorageSite() {
 		return storageSite;
 	}
@@ -632,6 +641,12 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 			result.setCollectionContainer(PermissibleValue.getValue(specimen.getSpecimenRequirement().getCollectionContainer()));
 		}
 
+		if (specimen.getCollRecvDetails() != null && !specimen.getCollRecvDetails().getRecvQuality().equals(Specimen.TO_BE_RECEIVED)) {
+			result.setReceiver(UserSummary.from(specimen.getCollRecvDetails().getReceiver()));
+		} else if (specimen.isPrimary() && specimen.getSpecimenRequirement() != null) {
+			result.setReceiver(UserSummary.from(specimen.getSpecimenRequirement().getReceiver()));
+		}
+
 		SpecimenChildrenEvent parentEvent = specimen.getParentEvent();
 		if (parentEvent != null) {
 			result.setCreatedBy(UserSummary.from(parentEvent.getUser()));
@@ -665,6 +680,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setParentId(null);
 		result.setCollector(UserSummary.from(anticipated.getCollector()));
 		result.setCollectionContainer(PermissibleValue.getValue(anticipated.getCollectionContainer()));
+		result.setReceiver(UserSummary.from(anticipated.getReceiver()));
 		result.setAvailabilityStatus(Specimen.PENDING);
 
 		StorageLocationSummary location = new StorageLocationSummary();
