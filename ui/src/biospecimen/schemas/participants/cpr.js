@@ -28,7 +28,12 @@ export default {
       "name": "cpr.site",
       "selectProp": "name",
       "listSource": {
-        "selectProp": "name"
+        "selectProp": "name",
+        "queryParams": {
+          "dynamic": {
+            "listAll": "!accessBasedOnMrn"
+          }
+        }
       }
     },
     {
@@ -145,7 +150,12 @@ export default {
           "name": "siteName",
           "selectProp": "name",
           "listSource": {
-            "selectProp": "name"
+            "selectProp": "name",
+            "queryParams": {
+              "dynamic": {
+                "listAll": "!accessBasedOnMrn"
+              }
+            }
           },
           "validations": {
             "requiredIf": {

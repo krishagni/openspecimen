@@ -137,7 +137,9 @@ export default {
 
         cp,
 
-        userRole: this.cpViewCtx.getRole()
+        userRole: this.cpViewCtx.getRole(),
+
+        accessBasedOnMrn: this.cpViewCtx.accessBasedOnMrn
       },
 
       ctx: {

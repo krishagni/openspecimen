@@ -49,7 +49,12 @@ export default {
       "name": "visit.site",
       "selectProp": "name",
       "listSource": {
-        "selectProp": "name"
+        "selectProp": "name",
+        "queryParams": {
+          "dynamic": {
+            "listAll": "!accessBasedOnMrn"
+          }
+        }
       },
       "validations": {
         "required": {
