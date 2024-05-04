@@ -16,7 +16,11 @@ angular.module('openspecimen')
       url: '/object-state-params-resolver?:stateName&:objectName&:key&:value&:vueView',
       controller: function($state, $stateParams, params, VueApp, SettingUtil, QuickSearchSvc) {
         params.vueView = QuickSearchSvc.getVueView($stateParams.objectName);
-        VueApp.setVueView('resolve-view', params);
+        if (params.vueView) {
+          VueApp.setVueView('resolve-view', params);
+        } else {
+          $state.go($stateParams.stateName || params.stateName, params, {location: 'replace'});
+        }
       },
       resolve: {
         params: function($stateParams, ObjectStateParamsResolver) {
