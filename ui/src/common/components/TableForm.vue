@@ -44,7 +44,7 @@
               </div>
             </span>
             <span class="more-options" v-if="field.menuOptions && field.menuOptions.length > 0">
-              <os-menu :label="$t('common.buttons.more')" :options="field.menuOptions" />
+              <os-menu icon="ellipsis-h" :label1="$t('common.buttons.more')" :options="field.menuOptions" />
             </span>
           </th>
           <th v-if="removeItems == true || copyItems == true">
