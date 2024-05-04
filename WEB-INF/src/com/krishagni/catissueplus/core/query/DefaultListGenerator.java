@@ -184,8 +184,12 @@ public class DefaultListGenerator implements ListGenerator {
 		for (Column criterion : searchCriteria) {
 			Column criterionCfg = filtersMap.get(criterion.getExpr());
 			if (criterionCfg == null) {
-				invalidFilters.add(criterion.getExpr());
-				continue;
+				if (cfg.getPrimaryColumn() == null || !criterion.getExpr().equals(cfg.getPrimaryColumn().getExpr())) {
+					invalidFilters.add(criterion.getExpr());
+					continue;
+				}
+
+				criterionCfg = cfg.getPrimaryColumn();
 			}
 
 			String criterionAql = getSearchCriterion(criterionCfg, criterion, formsCache);
@@ -200,7 +204,7 @@ public class DefaultListGenerator implements ListGenerator {
 			throw OpenSpecimenException.userError(ListError.INVALID_FILTERS, invalidFilters);
 		}
 
-		return aqls.stream().collect(Collectors.joining(" and "));
+		return String.join(" and ", aqls);
 	}
 
 	private String getSearchCriterion(Column criterionCfg, Column criterion, Map<String, Container> formsCache) {

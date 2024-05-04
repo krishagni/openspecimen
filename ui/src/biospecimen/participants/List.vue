@@ -133,6 +133,7 @@ import itemsSvc  from '@/common/services/ItemsHolder.js';
 import i18n      from '@/common/services/I18n.js';
 import pluginReg from '@/common/services/PluginViewsRegistry.js';
 import routerSvc from '@/common/services/Router.js';
+import util      from '@/common/services/Util.js';
 import wfSvc     from '@/biospecimen/services/Workflow.js';
 
 export default {
@@ -153,7 +154,7 @@ export default {
 
       cp,
 
-      inited: true,
+      inited: false,
 
       detailView: false,
 
@@ -198,6 +199,29 @@ export default {
   },
 
   created() {
+    let filters = {};
+    const {query, cp} = this.ctx;
+    if (query) {
+      filters = JSON.parse(decodeURIComponent(atob(query)));
+    }
+
+
+    const {params} = routerSvc.getCurrentRoute();
+    if (cp.specimenCentric) {
+      if (+params.specimenId > 0) {
+        filters['Specimen.id'] = [+params.specimenId, +params.specimenId];
+        this.ctx.reinit = true;
+      }
+    } else if (+params.cprId > 0) {
+      filters['Participant.id'] = [+params.cprId, +params.cprId];
+      this.ctx.reinit = true;
+    }
+
+    if (Object.keys(filters).length > 0) {
+      this.ctx.query = util.uriEncode(filters);
+    }
+
+    this.ctx.inited = true;
     this._loadMoreOptions();
   },
 
@@ -284,7 +308,7 @@ export default {
     },
 
     onItemSelection: function(items) {
-      const key = this.ctx.query == 'participants_list' ? 'cprId' : 'specimenId';
+      const key = this.ctx.view == 'participants_list' ? 'cprId' : 'specimenId';
       this.ctx.selectedItems = items.map(({rowObject}) => ({...rowObject.hidden, id: +rowObject.hidden[key]}));
     },
 
@@ -307,6 +331,13 @@ export default {
     },
 
     showTable: function(reload) {
+      if (this.ctx.reinit) {
+        this.ctx.reinit = null;
+        this.$refs.list.clearFilters();
+        // setTimeout(() => this.showTable(false));
+        // return;
+      }
+
       this.ctx.detailView = false;
       this.$refs.list.switchToTableView();
       routerSvc.goto('ParticipantsList', {cprId: -1}, {filters: this.ctx.query, view: this.ctx.view});

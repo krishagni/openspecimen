@@ -151,6 +151,12 @@
   </div>
 
   <div class="os-list-items" v-else-if="schema.summary">
+    <div v-show="!loading && list.length == 0">
+      <os-message type="info" style="margin: 0.25rem;">
+        <span v-t="noRecordsMsg || 'common.lists.no_records'">No records to show</span>
+      </os-message>
+    </div>
+
     <div class="item" :ref="'item' + idx" v-for="(item, idx) of list" :key="idx" @click="itemSelected($event, item)"
       :class="{active: selectedItem && item.rowObject == selectedItem}">
       <div class="header">
@@ -294,18 +300,7 @@ export default {
     },
 
     clearFilters: function() {
-      if (this.searchFilters) {
-        this.searchFilters.forEach(
-          filter => {
-            if (filter.range) {
-              delete this.filterValues[filter.name + '.$min'];
-              delete this.filterValues[filter.name + '.$max'];
-            } else {
-              delete this.filterValues[filter.name];
-            }
-          }
-        );
-      }
+      Object.keys(this.filterValues).forEach(key => delete this.filterValues[key]);
     },
 
     emitFiltersUpdated: function() {

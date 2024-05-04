@@ -258,6 +258,10 @@ export default {
       this.$refs.listView.reload();
     },
 
+    clearFilters: function() {
+      this.$refs.listView.clearFilters();
+    },
+
     loadListSize: async function() {
       if (this.includeCount) {
         return;
