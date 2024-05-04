@@ -19,7 +19,7 @@
           <th v-for="(field, fieldIdx) of fields" :key="fieldIdx" @click="sort(field)"
             :class="!firstColumn && fieldIdx == 0 ? stickyColumn : []">
             <span v-if="field.displayLabel">{{field.displayLabel}}</span>
-            <div v-else-if="field.icon" v-os-tooltip="field.tooltip"
+            <div v-else-if="field.icon" v-os-tooltip.bottom="field.tooltip"
               :class="{'align-icon': field.enableCopyFirstToAll && field.type == 'booleanCheckbox'}">
               <os-icon :name="field.icon" />
             </div>
@@ -35,9 +35,9 @@
               <span v-show="ctx.sort.direction == 'DESC'"> &darr; </span>
             </span>
             <span v-if="field.enableCopyFirstToAll && !field.menuOptions">
-              <a v-if="field.type != 'booleanCheckbox'" @click="copyFirstToAll($event, field)">
-                <span v-t="'common.copy_first_to_all'"> (Copy first to all) </span>
-              </a>
+              <os-button class="copy-first-to-all icon-btn" size="small" left-icon="copy"
+                @click="copyFirstToAll($event, field)" :hint="$t('common.copy_first_to_all')"
+                v-if="field.type != 'booleanCheckbox'" />
               <div v-else>
                 <os-boolean-checkbox v-model="ctx.selects[field.name]" style="margin-bottom: 0"
                   @change="copySelectToAll($event, field)" />
@@ -776,5 +776,9 @@ table td.selection {
 table th.selection :deep(.p-field-checkbox),
 table td.selection :deep(.p-field-checkbox) {
   margin-bottom: 0rem;
+}
+
+table th .copy-first-to-all {
+  margin-left: 0.25rem;
 }
 </style>

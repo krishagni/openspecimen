@@ -17,7 +17,7 @@
           <tr v-for="(sfRowData, sfRdIdx) of inputValue" :key="sfRdIdx">
             <td v-for="(field, cidx) of sfFields" :key="cidx">
               <component :ref="'osField-' + cidx" :is="field.component" v-bind="field" v-model="sfRowData[field.name]"
-                :form="{...sfRowData}" :context="{...sfRowData}"
+                :form="{...context, ...sfRowData}" :context="{...context, ...sfRowData}"
                 @update:model-value="handleInput(sfRowData, sfRdIdx, field)">
               </component>
               <div v-if="v$.inputValue[sfRdIdx][field.name] && v$.inputValue[sfRdIdx][field.name].$error">
@@ -48,7 +48,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 import i18n         from '@/common/services/I18n.js';
 
 export default {
-  props: ['modelValue', 'fields', 'disabled'],
+  props: ['modelValue', 'fields', 'disabled', 'context'],
 
   setup() {
     return {

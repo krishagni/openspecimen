@@ -165,7 +165,7 @@
     "completed": "Completed",
     "confirm_delete": "{type} '{title}' and any dependent data will be deleted. Are you sure you want to proceed?",
     "copied_to_clipboard": "Copied to clipboard",
-    "copy_first_to_all": "(Copy first to all)",
+    "copy_first_to_all": "Copy first to all",
     "copy_record_url": "Copy Record URL",
     "copy_to_clipboard": "Copy to Clipboard",
     "copy_to_clipboard_failed": "Error copying to clipboard",

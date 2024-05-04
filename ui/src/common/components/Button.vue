@@ -1,6 +1,6 @@
 
 <template>
-  <button type="button" :class="buttonClass">
+  <button type="button" :class="buttonClass" v-os-tooltip.bottom="hint">
     <icon v-if="leftIcon" :name="leftIcon" :class="leftIconClass" :size="iconSize" />
     <span>{{label}}</span>
     <icon v-if="rightIcon" :name="rightIcon" :class="rightIconClass" :size="iconSize" />
@@ -11,7 +11,7 @@
 import Icon from '@/common/components/Icon.vue';
 
 export default {
-  props: ['leftIcon', 'rightIcon', 'label', 'size', 'no-outline'],
+  props: ['leftIcon', 'rightIcon', 'label', 'size', 'no-outline', 'hint'],
 
   components: {
     'icon': Icon
