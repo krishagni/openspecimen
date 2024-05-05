@@ -1,6 +1,6 @@
 
 <template>
-  <os-button :left-icon="icon"
+  <os-button :size="!label ? 'small' : ''" :left-icon="icon"
     :label="label" :no-outline="noOutline"
     :right-icon="label ? 'caret-down' : ''"
     v-bind="$attrs" @click="toggle" />
