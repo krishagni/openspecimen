@@ -352,6 +352,7 @@ export default {
         (resp) => {
           if (resp == 'closed') {
             specimenSvc.clearSpecimens(this.visit);
+            this.specimen.storageLocation = null;
             this.specimen.availabilityStatus = this.specimen.activityStatus = 'Closed';
             this._loadEvents(this.specimen);
           }
