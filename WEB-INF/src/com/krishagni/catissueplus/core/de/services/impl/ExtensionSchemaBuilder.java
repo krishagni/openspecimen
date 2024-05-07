@@ -101,18 +101,19 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 		
 		List<Field> fields = new ArrayList<Field>();
 		fields.add(getField("recordId", form.getCaption() + " ID"));
-		
-		if (entityType.equals("Participant") || entityType.equals("CommonParticipant")) {
-			fields.add(getField("cpShortTitle", "Collection Protocol"));
-			fields.add(getField("ppid", "PPID"));
-		} else if (entityType.equals("SpecimenCollectionGroup")) {
-			fields.add(getField("visitName", "Visit Name"));
-		} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
-			fields.add(getField("cpShortTitle", "CP Short Title"));
-			fields.add(getField("specimenLabel", "Specimen Label"));
-			fields.add(getField("barcode", "Barcode"));
-		} else if (entityType.equals("User")) {
-			fields.add(getField("emailAddress", "Email Address"));
+
+		switch (entityType) {
+			case "Participant", "CommonParticipant" -> {
+				fields.add(getField("cpShortTitle", "Collection Protocol"));
+				fields.add(getField("ppid", "PPID"));
+			}
+			case "SpecimenCollectionGroup" -> fields.add(getField("visitName", "Visit Name"));
+			case "Specimen", "SpecimenEvent" -> {
+				fields.add(getField("cpShortTitle", "CP Short Title"));
+				fields.add(getField("specimenLabel", "Specimen Label"));
+				fields.add(getField("barcode", "Barcode"));
+			}
+			case "User" -> fields.add(getField("emailAddress", "Email Address"));
 		}
 
 		fields.add(getField("fdeStatus", "Status"));

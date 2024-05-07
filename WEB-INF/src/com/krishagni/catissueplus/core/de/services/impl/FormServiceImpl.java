@@ -627,7 +627,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		
 		try {
 			FormData formData = saveOrUpdateFormData(detail.getRecordId(), detail.getFormData(), detail.isPartial());
-			formData.getAppData().remove("object");
+			if (!Boolean.TRUE.equals(formData.getAppData().get("keepObject"))) {
+				formData.getAppData().remove("object");
+			}
+
 			return ResponseEvent.response(FormDataDetail.ok(formData.getContainer().getId(), formData.getRecordId(), formData));
 		} catch(IllegalArgumentException ex) {
 			return ResponseEvent.userError(FormErrorCode.INVALID_DATA, ex.getMessage());
@@ -647,7 +650,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			List<FormData> savedFormDataList = new ArrayList<>();
 			for (FormData formData : req.getPayload()) {
 				FormData savedFormData = saveOrUpdateFormData(formData.getRecordId(), formData, true);
-				savedFormData.getAppData().remove("object");
+				if (!Boolean.TRUE.equals(savedFormData.getAppData().get("keepObject"))) {
+					savedFormData.getAppData().remove("object");
+				}
+
 				savedFormDataList.add(savedFormData);
 			}
 
