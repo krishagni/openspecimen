@@ -350,9 +350,11 @@ export default {
     closeSpecimen: function() {
       this.$refs.closeSpmnDialog.open().then(
         (resp) => {
-          if (resp == 'closed') {
+          if (resp) {
             specimenSvc.clearSpecimens(this.visit);
             this.specimen.storageLocation = null;
+            this.specimen.initialQty = resp[0].initialQty;
+            this.specimen.availableQty = resp[0].availableQty;
             this.specimen.availabilityStatus = this.specimen.activityStatus = 'Closed';
             this._loadEvents(this.specimen);
           }

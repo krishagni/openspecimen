@@ -106,9 +106,9 @@ export default {
       const cs      = this.closeDetail;
       const payload = (this.specimens || []).map((specimen) => ({id: specimen.id, status: 'Closed', ...cs}));
       specimenSvc.bulkUpdateStatus(payload).then(
-        () => {
+        (response) => {
           this.$refs.dialogInstance.close();
-          this.resolve('closed');
+          this.resolve(response);
         }
       );
     },
