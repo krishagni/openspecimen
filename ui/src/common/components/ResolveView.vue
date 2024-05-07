@@ -7,12 +7,16 @@
 
 <script>
 import routerSvc from '@/common/services/Router.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['params'],
 
   created() {
-    routerSvc.goto(this.params.vueView, this.params, this.params);
+    const params = util.clone(this.params);
+    const view = params.vueView;
+    delete params.vueView;
+    routerSvc.goto(view, params);
   }
 }
 </script>

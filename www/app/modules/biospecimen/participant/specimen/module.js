@@ -844,7 +844,11 @@ angular.module('os.biospecimen.specimen',
   })
 
   .run(function(QuickSearchSvc, ExtensionsUtil) {
-    var opts = { caption: 'entities.specimen', vueUrl: 'specimen-resolver/:entityId' };
+    var opts = {
+      caption: 'entities.specimen',
+      vueUrl: 'specimen-resolver/:entityId',
+      vueView: 'ParticipantsListItemSpecimenDetail.Overview'
+    };
     QuickSearchSvc.register('specimen', opts);
 
 

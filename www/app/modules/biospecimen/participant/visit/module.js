@@ -290,6 +290,10 @@ angular.module('os.biospecimen.visit', [
   })
 
   .run(function(QuickSearchSvc) {
-    var opts = { caption: 'entities.visit', vueUrl: 'visit-resolver/:entityId' };
+    var opts = {
+      caption: 'entities.visit',
+      vueUrl: 'visit-resolver/:entityId',
+      vueView: 'ParticipantsListItemVisitDetail.Overview'
+    };
     QuickSearchSvc.register('visit', opts);
   });
