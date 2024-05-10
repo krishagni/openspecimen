@@ -497,10 +497,7 @@ export default {
 
     _loadMoreMenuOptions: function() {
       const options = this.moreOptions || [];
-      cosnt ctxt = this.pluginViewProps = {
-        cp: ctxt.cp, cpr: ctxt.cpr, visit: ctxt.visit, specimen: ctxt.specimen,
-        cpViewCtx: this.cpViewCtx, dict: ctxt.dict
-      }
+      const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
       util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'specimen-detail', 'more-menu', ctxt)
         .then(pluginOptions => this.ctx.moreOptions = options.concat(pluginOptions));
     }
