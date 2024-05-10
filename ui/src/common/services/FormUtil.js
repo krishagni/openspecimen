@@ -229,6 +229,18 @@ class FormUtil {
     return object;
   }
 
+  fromFormDataToCustomFieldsMap(formData, useDisplayValue) {
+    const {id: recordId, containerId, fields} = formData;
+    const object = {extensionDetail: {recordId, containerId, attrs: fields}};
+    for (let field of fields) {
+      if (field.type == 'subForm') {
+        field.value = (field.value || []).map(sfAttrs => sfAttrs.fields);
+      }
+    }
+
+    return this.createCustomFieldsMap(object, useDisplayValue);
+  }
+
   //
   // for now, meant only for readOnly in the Order specimens step
   //
@@ -291,7 +303,7 @@ class FormUtil {
   _createCustomFieldsMap(attrs, useDisplayValue) {
     let valueMap = {};
 
-    for (let attr of attrs) {
+    for (let attr of (attrs || [])) {
       let value = attr.value;
       if (attr.type == 'subForm') {
         value = (attr.value || []).map(sfAttrs => this._createCustomFieldsMap(sfAttrs, useDisplayValue));

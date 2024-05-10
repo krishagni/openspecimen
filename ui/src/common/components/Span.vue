@@ -5,7 +5,17 @@
       <component :is="component" v-model="inputValue" v-bind="$attrs" />
     </span>
 
-    <span v-else>
+    <span v-else-if="effDisplayType == 'signature' && inputValue">
+      <img :src="imageUrl">
+    </span>
+
+    <span v-else-if="effDisplayType == 'fileUpload' && inputValue">
+      <a :href="fileUrl" target="_blank" rel="noopener">
+        {{inputValue.filename}}
+      </a>
+    </span>
+
+    <span class="value-text" v-else>
       <a v-if="link" :href="link" :target="hrefTarget || '_blank'" rel="noopener">
         <span>{{displayText}}</span>
       </a>
@@ -16,11 +26,12 @@
 
 <script>
 import exprUtil from '@/common/services/ExpressionUtil.js';
+import http from '@/common/services/HttpClient.js';
 import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'displayType', 'href', 'hrefTarget', 'form', 'context'],
+  props: ['modelValue', 'displayType', 'displayTypeExpr', 'href', 'hrefTarget', 'form', 'context'],
 
   created() {
     this.customField = this.$attrs.name && this.$attrs.name.indexOf('.extensionDetail.attrsMap.');
@@ -37,40 +48,23 @@ export default {
       }
     },
 
+    effDisplayType: function() {
+      if (this.displayType) {
+        return this.displayType;
+      } else if (this.displayTypeExpr) {
+        return exprUtil.eval(this.form || this.context || {}, this.displayTypeExpr);
+      }
+
+      return undefined;
+    },
+
     displayText: function() {
-      switch (this.displayType) {
-        case 'storage-position':
-          return this._getStorageLocation(this.inputValue);
-
-        case 'user':
-          return this._getUser(this.inputValue);
-
-        case 'specimen-quantity':
-        case 'specimen-measure':
-          return this._getSpecimenMeasure(this.inputValue, this.$attrs, this.$attrs.measure || 'quantity');
-
-        case 'specimen-description':
-          return this._getSpecimenDescription(this.inputValue, this.$attrs);
-
-        case 'date':
-        case 'datePicker':
-          return this._getDate(this.inputValue);
-
-        case 'datetime':
-          return this._getDate(this.inputValue, true);
-
-        case 'multiselect':
-          return (this.inputValue || []).join(', ');
-      }
-
-      if (this.customField) {
-        const displayValue = exprUtil.eval(this.form, this.$attrs.name + '$displayValue');
-        if (displayValue) {
-          return displayValue;
-        }
-      }
-
-      return this.inputValue || '-';
+      return util.getFieldDisplayValue(
+        this.form || this.context || {},
+        this.$attrs,
+        this.inputValue,
+        this.effDisplayType
+      );
     },
 
     link: function() {
@@ -82,13 +76,24 @@ export default {
         }
 
         return link;
-      } else if (this.displayType == 'storage-position') {
+      } else if (this.effDisplayType == 'storage-position') {
         if (this.inputValue && typeof this.inputValue == 'object' && +this.inputValue.id > 0) {
           return routerSvc.getUrl('ContainerDetail.Locations', {containerId: this.inputValue.id});
         }
       }
 
       return this.href;
+    },
+
+    imageUrl: function() {
+      return http.getUrl('form-files/' + this.inputValue);
+    },
+
+    fileUrl: function() {
+      let file = this.inputValue;
+      return http.getUrl('form-files/' + file.fileId +
+        '?contentType=' + file.contentType + '&filename=' + file.filename
+      );
     },
 
     component: function() {
@@ -111,57 +116,6 @@ export default {
   methods: {
     getDisplayValue: function() {
       return this.displayText;
-    },
-
-    _getStorageLocation: function(value) {
-      let result = undefined;
-
-      if (value && typeof value == 'object' && value.id != -1) {
-        let position = value;
-        result = position.name;
-        if (position.mode == 'TWO_D' && position.positionY && position.positionX) {
-          result += ' (' + position.positionY + ', ' + position.positionX + ')';
-        } else if (position.mode == 'LINEAR' && position.position > 0) {
-          result += ' (' + position.position + ')';
-        }
-      }
-
-      return result || this.$t('specimens.not_stored');
-    },
-
-    _getUser: function(value) {
-      let result = value;
-      if (value && typeof value == 'object') {
-        let user = value;
-        result = user.firstName;
-        if (user.lastName) {
-          if (result) {
-            result += ' ';
-          }
-
-          result += user.lastName;
-        }
-      }
-
-      return result || '-';
-    },
-
-    _getSpecimenMeasure: function(value, attrs, measure) {
-      if (value == null || value == undefined) {
-        return '-';
-      }
-
-      const specimen = exprUtil.eval(this.form || this.context || {}, attrs.entity || attrs.specimen || 'specimen');
-      const unit = util.getSpecimenMeasureUnit(specimen, measure || 'quantity');
-      return value + ' ' + unit;
-    },
-
-    _getDate: function(value, showTime) {
-      if (value instanceof Date || typeof value == 'number') {
-        return showTime ? this.$filters.dateTime(value) : this.$filters.date(value);
-      }
-
-      return value || '-';
     }
   }
 }
@@ -172,6 +126,10 @@ export default {
 .md-type {
   display: inline-block;
   padding: 2px 0px;
+}
+
+.value-text {
+  white-space: pre;
 }
 
 </style>

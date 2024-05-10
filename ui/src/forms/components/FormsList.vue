@@ -16,7 +16,7 @@
       </os-message>
 
       <os-list-view v-else
-        class="os-list-shadowed-rows"
+        class="os-list-shadowed-rows records-list"
         :data="records"
         :schema="{columns: recordFields}"
         :expanded="expanded"
@@ -26,14 +26,23 @@
 
         <template #rowActions="{rowObject}" v-if="isUpdateAllowed">
           <os-button-group v-if="!rowObject.sysForm">
-            <os-button left-icon="edit" v-os-tooltip="$t('common.buttons.edit')" @click="editRecord(rowObject)" />
-
-            <os-button left-icon="trash" v-os-tooltip="$t('common.buttons.delete')" @click="deleteRecord(rowObject)" />
           </os-button-group>
         </template>
 
         <template #expansionRow>
-          <FormRecordOverview :record="record" v-if="record" />
+          <div v-if="record">
+            <div class="toolbar">
+              <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editRecord(rowObject)"
+                v-if="isUpdateAllowed && expanded.length > 0 && !expanded[0].sysForm" />
+
+              <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteRecord(rowObject)"
+                v-if="isUpdateAllowed && expanded.length > 0 && !expanded[0].sysForm" />
+
+              <os-plugin-views :page="page" :view="view" :viewProps="{...viewProps, record}" />
+            </div>
+
+            <FormRecordOverview :record="record" />
+          </div>
         </template>
       </os-list-view>
     </os-grid-column>
@@ -131,6 +140,18 @@ export default {
 
     noRecordsMsg: function() {
       return this.isUpdateAllowed ? 'common.no_form_records' : 'common.no_form_records_no_add'
+    },
+
+    page: function() {
+      return (this.api && typeof this.api.getPage == 'function' && this.api.getPage()) || undefined;
+    },
+
+    view: function() {
+      return (this.api && typeof this.api.getView == 'function' && this.api.getView()) || undefined;
+    },
+
+    viewProps: function() {
+      return (this.api && typeof this.api.getViewProps == 'function' && this.api.getViewProps()) || {};
     }
   },
 
@@ -227,3 +248,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.records-list .toolbar {
+  margin-bottom: 1.25rem;
+}
+
+.records-list .toolbar :deep(.btn) {
+  margin-right: 0.5rem;
+}
+</style>

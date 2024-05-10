@@ -131,7 +131,6 @@ import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc    from '@/biospecimen/services/Cpr.js';
 import itemsSvc  from '@/common/services/ItemsHolder.js';
 import i18n      from '@/common/services/I18n.js';
-import pluginReg from '@/common/services/PluginViewsRegistry.js';
 import routerSvc from '@/common/services/Router.js';
 import util      from '@/common/services/Util.js';
 import wfSvc     from '@/biospecimen/services/Workflow.js';
@@ -440,10 +439,6 @@ export default {
       }
     },
 
-    wrapRefs: function(ctxt) {
-      return {...ctxt, pluginViews: this.$refs.moreMenuPluginViews};
-    },
-
     _loadMoreOptions: async function() {
       const options = [];
 
@@ -519,56 +514,9 @@ export default {
         url: routerSvc.ngUrl('cps/' + this.ctx.cp.id + '/overview')
       });
 
-      const promise = new Promise((resolve) => {
-        const pluginOptions = pluginReg.getOptions('participants-list', 'menu') || [];
-        const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
-
-        let count = pluginOptions.length;
-        for (let option of pluginOptions) {
-          if (typeof option.showIf == 'function') {
-            const ret = option.showIf(ctxt);
-            Promise.all([ret]).then(
-              ([answer]) => {
-                --count;
-                if (answer) {
-                  const url = typeof option.url == 'function' ? option.url(this.wrapRefs(ctxt), ctxt) : option.url;
-                  options.push({
-                    icon: option.icon,
-                    caption: option.caption,
-                    url: url,
-                    onSelect: () => {
-                      if (url) return;
-                      option.exec(this.wrapRefs(ctxt), ctxt)
-                    }
-                  });
-                }
-
-                if (count <= 0) {
-                  resolve(true);
-                }
-              }
-            );
-          } else {
-            const url = typeof option.url == 'function' ? option.url(this.wrapRefs(ctxt), ctxt) : option.url;
-            options.push({
-              icon: option.icon,
-              caption: option.caption,
-              url: url,
-              onSelect: () => {
-                if (url) return;
-                option.exec(this.wrapRefs(ctxt), ctxt)
-              }
-            });
-            --count;
-          }
-        }
-
-        if (count <= 0) {
-          resolve(true);
-        }
-      });
-
-      promise.then(() => this.ctx.moreOptions = options);
+      const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
+      util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'participants-list', 'menu', ctxt)
+        .then(pluginOptions => this.ctx.moreOptions = options.concat(pluginOptions));
     },
 
     _getReceiveSpecimensWf: async function() {

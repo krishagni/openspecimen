@@ -81,6 +81,7 @@ import StoragePosition from './StoragePosition.vue';
 import StoragePositionSelector from './StoragePositionSelector.vue';
 import Subform from './Subform.vue';
 import TabMenu from './TabMenu.vue';
+import Table from './Table.vue';
 import TableForm from './TableForm.vue';
 import Tag from './Tag.vue';
 import Textarea from './Textarea.vue';
@@ -174,6 +175,7 @@ export default {
     app.component('os-storage-position-selector', StoragePositionSelector);
     app.component('os-subform',          Subform);
     app.component('os-tab-menu',         TabMenu);
+    app.component('os-table-span',       Table);
     app.component('os-table-form',       TableForm);
     app.component('os-tag',              Tag);
     app.component('os-textarea',         Textarea);

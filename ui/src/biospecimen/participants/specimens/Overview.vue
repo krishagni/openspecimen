@@ -24,7 +24,7 @@
           @menu-toggled="loadEventForms"
           v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
 
-        <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
+        <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" v-if="ctx.moreOptions.length > 0"/>
       </span>
     </template>
   </os-page-toolbar>
@@ -83,6 +83,7 @@
     </template>
     <template #footer>
       <os-button text   :label="$t('common.buttons.close')" @click="closeEventOverview()" />
+      <os-plugin-views page="specimen-detail" view="event-overview" :view-props="pluginViewProps" />
       <os-button danger left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
         v-if="!ctx.event.sysForm && isUpdateAllowed" />
       <os-button primary left-icon="edit" :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
@@ -113,6 +114,8 @@
         @click="transferSpecimen" />
     </template>
   </os-dialog>
+
+  <os-plugin-views ref="moreMenuPluginViews" page="specimen-detail" view="more-menu" :view-props="pluginViewProps" />
 </template>
 
 <script>
@@ -164,7 +167,12 @@ export default {
 
         eventForms: undefined,
 
-        userRole: this.cpViewCtx.getRole()
+        userRole: this.cpViewCtx.getRole(),
+
+        moreOptions: []
+      },
+
+      pluginViewProps: {
       },
 
       transferSchema,
@@ -180,12 +188,14 @@ export default {
   async created() {
     this._setupSpecimen();
     this.ctx.dict = await this.cpViewCtx.getSpecimenDict();
+    this._loadMoreMenuOptions();
   },
 
   watch: {
     specimen: function(newVal, oldVal) {
       if (newVal != oldVal) {
         this._setupSpecimen();
+        this._loadMoreMenuOptions();
       }
     }
   },
@@ -316,7 +326,7 @@ export default {
       formSvc.getRecord({formId, recordId}, {includeMetadata: true}).then(
         (record) => {
           this.ctx.event = event;
-          this.ctx.eventRecord = record;
+          this.ctx.eventRecord = this.pluginViewProps.record = record;
           this.$refs.eventOverviewDialog.open();
         }
       );
@@ -485,6 +495,15 @@ export default {
       }
     },
 
+    _loadMoreMenuOptions: function() {
+      const options = this.moreOptions || [];
+      cosnt ctxt = this.pluginViewProps = {
+        cp: ctxt.cp, cpr: ctxt.cpr, visit: ctxt.visit, specimen: ctxt.specimen,
+        cpViewCtx: this.cpViewCtx, dict: ctxt.dict
+      }
+      util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'specimen-detail', 'more-menu', ctxt)
+        .then(pluginOptions => this.ctx.moreOptions = options.concat(pluginOptions));
+    }
   }
 }
 </script>

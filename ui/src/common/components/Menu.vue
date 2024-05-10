@@ -1,19 +1,25 @@
 
 <template>
-  <os-button :size="!label ? 'small' : ''" :left-icon="icon"
-    :label="label" :no-outline="noOutline"
-    :right-icon="label ? 'caret-down' : ''"
-    v-bind="$attrs" @click="toggle" />
+  <template v-if="items.length > 1">
+    <os-button :size="!label ? 'small' : ''" :left-icon="icon"
+      :label="label" :no-outline="noOutline"
+      :right-icon="label ? 'caret-down' : ''"
+      v-bind="$attrs" @click="toggle" />
 
-  <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
-    <template #item="{item}">
-      <os-divider v-if="item.divider" />
-      <a class="os-menu-item p-menuitem-link" :href="item.url" :style="item.anchorStyle" @click="item.command" v-else>
-        <os-icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon" />
-        <span class="os-menu-item-label">{{item.label}}</span>
-      </a>
-    </template>
-  </dropdown-menu>
+    <dropdown-menu class="os-menu" ref="menu" :model="items" :popup="true">
+      <template #item="{item}">
+        <os-divider v-if="item.divider" />
+        <a class="os-menu-item p-menuitem-link" :href="item.url" :style="item.anchorStyle" @click="item.command" v-else>
+          <os-icon class="os-menu-item-icon" :name="item.icon" v-if="item.icon" />
+          <span class="os-menu-item-label">{{item.label}}</span>
+        </a>
+      </template>
+    </dropdown-menu>
+  </template>
+  <os-button v-else-if="items.length == 1 && !items[0].url"
+    :left-icon="items[0].icon" :label="items[0].label" @click="items[0].command" />
+  <os-button-link v-else-if="items.length == 1 && items[0].url"
+    :left-icon="items[0].icon" :label="items[0].label" :url="item[0].url" />
 </template>
 
 <script>
@@ -44,7 +50,10 @@ export default {
     },
 
     exec: function(event, cmd) {
-      this.$refs.menu.hide();
+      if (this.$refs.menu) {
+        this.$refs.menu.hide();
+      }
+
       if (cmd) {
         cmd(event);
       }

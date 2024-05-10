@@ -15,8 +15,7 @@
         <os-button left-icon="trash" :label="$t('common.buttons.delete')"
           @click="deleteVisit" v-if="isDeleteAllowed" />
 
-        <os-plugin-views page="visit-detail" view="more-menu"
-          :view-props="{cpr, visit, cpViewCtx}" />
+        <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
       </span>
     </template>
   </os-page-toolbar>
@@ -35,6 +34,8 @@
     </os-grid-column>
 
     <os-delete-object ref="deleteVisitDialog" :input="ctx.deleteOpts" />
+
+    <os-plugin-views ref="moreMenuPluginViews" page="visit-detail" view="more-menu" :view-props="ctx" />
   </os-grid>
 </template>
 
@@ -76,7 +77,9 @@ export default {
 
         specimens: [],
 
-        userRole: this.cpViewCtx.getRole()
+        userRole: this.cpViewCtx.getRole(),
+
+        moreOptions: []
       }
     };
   },
@@ -85,6 +88,10 @@ export default {
     this._setupVisit();
     this._loadSpecimens();
     this.ctx.dict = await this.cpViewCtx.getVisitDict();
+
+    const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
+    util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'visit-detail', 'more-menu', ctxt)
+      .then(pluginOptions => this.ctx.moreOptions = [].concat(pluginOptions));
   },
 
   watch: {
