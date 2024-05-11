@@ -94,4 +94,7 @@ export default {
   margin-top: 0.5rem;
 }
 
+.os-menu .p-divider.p-divider-horizontal {
+  margin: 0.5rem 0rem!important;
+}
 </style>
