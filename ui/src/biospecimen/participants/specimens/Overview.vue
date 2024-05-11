@@ -115,7 +115,7 @@
     </template>
   </os-dialog>
 
-  <os-plugin-views ref="moreMenuPluginViews" page="specimen-detail" view="more-menu" :view-props="pluginViewProps" />
+  <os-plugin-views ref="moreMenuPluginViews" page="specimen-detail" view="more-menu" :viewProps="ctx" />
 </template>
 
 <script>
@@ -172,8 +172,7 @@ export default {
         moreOptions: []
       },
 
-      pluginViewProps: {
-      },
+      pluginViewProps: { },
 
       transferSchema,
 
