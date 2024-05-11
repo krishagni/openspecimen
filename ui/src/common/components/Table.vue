@@ -1,5 +1,5 @@
 <template>
-  <span v-if="headerRow.length > 0 && bodyRows.length > 0">
+  <div class="os-table-wrapper" v-if="headerRow.length > 0 && bodyRows.length > 0">
     <table class="os-table muted-header os-border">
       <thead>
         <tr>
@@ -16,7 +16,7 @@
         </tr>
       </tbody>
     </table>
-  </span>
+  </div>
 </template>
 
 <script>
@@ -79,3 +79,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.os-table.muted-header th {
+  min-width: 150px;
+}
+</style>
