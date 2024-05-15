@@ -13,6 +13,8 @@ public class LabelPrintJobItemListCriteria extends AbstractListCriteria<LabelPri
 
 	private Date fromDate;
 
+	private Boolean includeData;
+
 	@Override
 	public LabelPrintJobItemListCriteria self() {
 		return this;
@@ -42,6 +44,15 @@ public class LabelPrintJobItemListCriteria extends AbstractListCriteria<LabelPri
 
 	public LabelPrintJobItemListCriteria fromDate(Date fromDate) {
 		this.fromDate = fromDate;
+		return self();
+	}
+
+	public Boolean includeData() {
+		return includeData;
+	}
+
+	public LabelPrintJobItemListCriteria includeData(Boolean includeData) {
+		this.includeData = includeData;
 		return self();
 	}
 }

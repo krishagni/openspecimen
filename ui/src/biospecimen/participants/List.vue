@@ -207,7 +207,7 @@ export default {
 
 
     const {params} = routerSvc.getCurrentRoute();
-    if (cp.specimenCentric) {
+    if (cp.specimenCentric || this.ctx.view == 'specimens_list') {
       if (+params.specimenId > 0) {
         filters['Specimen.id'] = [+params.specimenId, +params.specimenId];
         this.ctx.reinit = true;
@@ -229,6 +229,12 @@ export default {
     '$route.query.view': function(newValue) {
       console.log('Detected change in view. View = ' + newValue + ', params = ' + JSON.stringify(this.$route.params));
       this.ctx.view = newValue || 'participants_list';
+
+      //
+      // when the list view changes, reset the filters
+      // for example Specimen.id filter has no meaning in participants list view
+      //
+      this.ctx.query = util.uriEncode({});
     },
 
     '$route.params.cprId': function(newValue, oldValue) {

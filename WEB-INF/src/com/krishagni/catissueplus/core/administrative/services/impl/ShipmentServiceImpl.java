@@ -737,57 +737,52 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	}
 
 	private void sendShipmentRequestedEmail(Shipment shipment) {
-		sendShipmentEmail(shipment, shipment.getSendingSite(), SHIPMENT_REQUESTED_EMAIL_TMPL);
+		Set<User> notifyUsers = new HashSet<>();
+		Site sendingSite = shipment.getSendingSite();
+		if (CollectionUtils.isNotEmpty(sendingSite.getCoordinators())) {
+			notifyUsers = new HashSet<>(sendingSite.getCoordinators());
+		} else {
+			List<Long> userIds = AccessCtrlMgr.getInstance().getUserIds(
+				sendingSite.getInstitute().getId(), sendingSite.getId(),
+				Resource.SHIPPING_N_TRACKING, new Operation[] { Operation.UPDATE });
+			if (!userIds.isEmpty()) {
+				notifyUsers = new HashSet<>(daoFactory.getUserDao().getByIds(userIds));
+			}
+		}
+
+		sendShipmentEmail(SHIPMENT_REQUESTED_EMAIL_TMPL, shipment, notifyUsers);
 	}
 
 	private void sendShipmentShippedEmail(Shipment shipment) {
-		sendShipmentEmail(shipment, shipment.getReceivingSite(), SHIPMENT_SHIPPED_EMAIL_TMPL);
-	}
-
-	private void sendShipmentEmail(Shipment shipment, Site site, String emailTmpl) {
-		List<Long> userIds = AccessCtrlMgr.getInstance().getUserIds(
-			site.getInstitute().getId(), site.getId(),
-			Resource.SHIPPING_N_TRACKING, new Operation[] { Operation.UPDATE });
-
 		Set<User> notifyUsers = new HashSet<>();
-		if (!userIds.isEmpty()) {
-			notifyUsers = new HashSet<>(daoFactory.getUserDao().getByIds(userIds));
-		}
-
-		if (shipment.getNotifyUsers() != null && !shipment.getNotifyUsers().isEmpty()) {
-			notifyUsers.addAll(shipment.getNotifyUsers());
+		if (CollectionUtils.isNotEmpty(shipment.getNotifyUsers())) {
+			notifyUsers = new HashSet<>(shipment.getNotifyUsers());
 		}
 
 		if (shipment.getRequester() != null) {
 			notifyUsers.add(shipment.getRequester());
 		}
 
-		if (notifyUsers.isEmpty()) {
-			return;
+		sendShipmentEmail(SHIPMENT_SHIPPED_EMAIL_TMPL, shipment, notifyUsers);
+	}
+	
+	private void sendShipmentReceivedEmail(Shipment shipment) {
+		Set<User> notifyUsers = new HashSet<>();
+		notifyUsers.add(shipment.getSender());
+		if (shipment.getRequester() != null) {
+			notifyUsers.add(shipment.getRequester());
 		}
 
+		sendShipmentEmail(SHIPMENT_RECEIVED_EMAIL_TMPL, shipment, notifyUsers);
+	}
+
+	private void sendShipmentEmail(String emailTmpl, Shipment shipment, Set<User> notifyUsers) {
 		Map<String, Object> props = new HashMap<>();
 		props.put("$subject", new String[] { shipment.getName() });
 		props.put("shipment", shipment);
 		for (User user : notifyUsers) {
 			props.put("rcpt", user);
 			emailService.sendEmail(emailTmpl, new String[] { user.getEmailAddress() }, props);
-		}
-	}
-	
-	private void sendShipmentReceivedEmail(Shipment shipment) {
-		Set<User> notifyUsers = new HashSet<>(shipment.getNotifyUsers());
-		notifyUsers.add(shipment.getSender());
-		if (shipment.getRequester() != null) {
-			notifyUsers.add(shipment.getRequester());
-		}
-
-		Map<String, Object> props = new HashMap<>();
-		props.put("$subject", new String[] { shipment.getName() });
-		props.put("shipment", shipment);
-		for (User user : notifyUsers) {
-			props.put("rcpt", user);
-			emailService.sendEmail(SHIPMENT_RECEIVED_EMAIL_TMPL, new String[] { user.getEmailAddress() }, props);
 		}
 	}
 	
