@@ -112,18 +112,19 @@ export default {
 
     _updateValue(value) {
       if (this.entity) {
+        const cp = exprUtil.eval(this.form || this.context || {}, 'cp') || {};
         const entityObj = exprUtil.eval(this.form || this.context || {}, this.entity) || {};
         if (!value) {
           entityObj.reqId = null;
-          this._presetValues(entityObj, {lineage: entityObj.lineage});
+          this._presetValues(cp, entityObj, {lineage: entityObj.lineage});
         } else if (value < 0) {
           const req = (this.listSource.options || []).find(req => req.id == value);
-          this._presetValues(entityObj, req || {lineage: entityObj.lineage});
+          this._presetValues(cp, entityObj, req || {lineage: entityObj.lineage});
         } else {
           this._getSelectedReq(value).then(
             (reqs) => {
               if (reqs.length != 0) {
-                this._presetValues(entityObj, reqs[0]);
+                this._presetValues(cp, entityObj, reqs[0]);
               }
             }
           );
@@ -131,7 +132,7 @@ export default {
       }
     },
 
-    _presetValues(entityObj, req) {
+    _presetValues(cp, entityObj, req) {
       const attrs = [
         'specimenClass', 'type', 'lineage', 'anatomicSite', 'laterality',
         'pathologyStatus', 'initialQty', 'concentration', 'labelFmt'
@@ -148,6 +149,16 @@ export default {
       } else {
         delete entityObj.collectionEvent;
         delete entityObj.receivedEvent;
+      }
+
+      if (!req.labelFmt) {
+        if (req.lineage == 'Aliquot') {
+          entityObj.labelFmt = cp.aliquotLabelFmt;
+        } else if (req.lineage == 'Derived') {
+          entityObj.labelFmt = cp.derivativeLabelFmt;
+        } else {
+          entityObj.labelFmt = cp.specimenLabelFmt;
+        }
       }
     },
 
