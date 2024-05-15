@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJobItem;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LabelPrintJobItemDetail {
 	private Long id;
 
@@ -30,6 +32,8 @@ public class LabelPrintJobItemDetail {
 	private String labelType;
 
 	private String labelDesign;
+
+	private String data;
 
 	private List<Map<String, Object>> content;
 
@@ -113,6 +117,14 @@ public class LabelPrintJobItemDetail {
 		this.labelDesign = labelDesign;
 	}
 
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
+	}
+
 	public List<Map<String, Object>> getContent() {
 		return content;
 	}
@@ -121,7 +133,7 @@ public class LabelPrintJobItemDetail {
 		this.content = content;
 	}
 
-	public static LabelPrintJobItemDetail from(LabelPrintJobItem item) {
+	public static LabelPrintJobItemDetail from(LabelPrintJobItem item, boolean includeData) {
 		LabelPrintJobItemDetail result = new LabelPrintJobItemDetail();
 		result.setId(item.getId());
 		result.setJobId(item.getJob().getId());
@@ -133,11 +145,16 @@ public class LabelPrintJobItemDetail {
 		result.setPrinterName(item.getPrinterName());
 		result.setLabelType(item.getLabelType());
 		result.setLabelDesign(item.getLabelDesign());
-		result.setContent(StringUtils.isBlank(item.getContent()) ? null : Utility.jsonToObject(item.getContent(), List.class));
+
+		if (includeData) {
+			result.setData(item.getData());
+		} else {
+			result.setContent(StringUtils.isBlank(item.getContent()) ? null : Utility.jsonToObject(item.getContent(), List.class));
+		}
 		return result;
 	}
 
-	public static List<LabelPrintJobItemDetail> from(List<LabelPrintJobItem> items) {
-		return Utility.nullSafeStream(items).map(LabelPrintJobItemDetail::from).collect(Collectors.toList());
+	public static List<LabelPrintJobItemDetail> from(List<LabelPrintJobItem> items, boolean includeData) {
+		return Utility.nullSafeStream(items).map(item -> from(item, includeData)).collect(Collectors.toList());
 	}
 }

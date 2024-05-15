@@ -54,12 +54,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 	private LabelPrintFileSpooler labelPrintFilesSpooler;
 
-	private ThreadLocal<Set<Long>> jobIds = new ThreadLocal<Set<Long>>() {
-		@Override
-		protected Set<Long> initialValue() {
-			return new LinkedHashSet<>();
-		}
-	};
+	private final ThreadLocal<Set<Long>> jobIds = ThreadLocal.withInitial(LinkedHashSet::new);
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
