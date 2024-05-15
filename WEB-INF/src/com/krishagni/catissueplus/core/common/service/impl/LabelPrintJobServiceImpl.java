@@ -33,7 +33,7 @@ public class LabelPrintJobServiceImpl implements LabelPrintJobService {
 			}
 
 			List<LabelPrintJobItem> items = daoFactory.getLabelPrintJobDao().getPrintJobItems(req.getPayload());
-			return ResponseEvent.response(LabelPrintJobItemDetail.from(items));
+			return ResponseEvent.response(LabelPrintJobItemDetail.from(items, Boolean.TRUE.equals(req.getPayload().includeData())));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
