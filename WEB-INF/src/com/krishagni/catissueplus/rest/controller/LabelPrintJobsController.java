@@ -41,6 +41,9 @@ public class LabelPrintJobsController {
 		@RequestParam(value = "hasContent", required = false)
 		Boolean hasContent,
 
+		@RequestParam(value = "includeData", required = false)
+		Boolean includeData,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -51,6 +54,7 @@ public class LabelPrintJobsController {
 			.lastId(lastId)
 			.printerNames(printerNames)
 			.hasContent(hasContent)
+			.includeData(includeData)
 			.fromDate(from)
 			.startAt(startAt)
 			.maxResults(maxResults);
