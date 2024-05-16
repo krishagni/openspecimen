@@ -226,7 +226,9 @@ export default {
         value = exprUtil.getValue(object, field.name); // props.object[field.name];
         if (field.displayValues) {
           const dispValue = field.displayValues[value];
-          if (dispValue) {
+          if (typeof dispValue == 'function') {
+            value = dispValue();
+          } else {
             value = dispValue;
           }
         }
