@@ -29,7 +29,7 @@
           </os-button-group>
         </template>
 
-        <template #expansionRow>
+        <template #expansionRow="{rowObject}">
           <div v-if="record">
             <div class="toolbar">
               <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editRecord(rowObject)"
