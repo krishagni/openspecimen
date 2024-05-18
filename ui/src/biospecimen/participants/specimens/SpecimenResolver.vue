@@ -16,7 +16,7 @@ export default {
         if (view) {
           routerSvc.goto(view, {cpId, cprId, visitId, specimenId}, otherQuery);
         } else {
-          routerSvc.goto('ParticipantsListItemSpecimenDetail.Overview', {cpId, cprId, visitId, specimenId});
+          routerSvc.goto('ParticipantsListItemSpecimenDetail.Overview', {cpId, cprId, visitId, specimenId}, otherQuery);
         }
       }
     );

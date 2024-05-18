@@ -136,7 +136,7 @@ import transferSchema from '@/biospecimen/schemas/specimens/transfer.js';
 
 
 export default {
-  props: ['cpr', 'visit'],
+  props: ['cpr', 'visit', 'action'],
 
   components: {
     EventsSummaryList,
@@ -188,6 +188,15 @@ export default {
     this._setupSpecimen();
     this.ctx.dict = await this.cpViewCtx.getSpecimenDict();
     this._loadMoreMenuOptions();
+    if (typeof this.action == 'string') {
+      const [view, formId, recordId] = this.action.split(',');
+      if (view == 'show_event' && formId > 0 && recordId > 0) {
+        this.showEvent({formId, id: recordId});
+        const {name, params, query: {action, ...otherQuery}} = routerSvc.getCurrentRoute();
+        action == this.action;
+        routerSvc.goto(name, params, otherQuery);
+      }
+    }
   },
 
   watch: {
@@ -324,7 +333,7 @@ export default {
       const {formId, id: recordId} = event;
       formSvc.getRecord({formId, recordId}, {includeMetadata: true}).then(
         (record) => {
-          this.ctx.event = event;
+          this.ctx.event = {name: record.caption, id: record.id};
           this.ctx.eventRecord = this.pluginViewProps.record = record;
           this.$refs.eventOverviewDialog.open();
         }

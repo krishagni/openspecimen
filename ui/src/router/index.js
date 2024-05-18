@@ -944,7 +944,8 @@ const routes = [
                                   {
                                     path: 'overview',
                                     name: 'ParticipantsListItemSpecimenDetail.Overview',
-                                    component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Overview.vue')
+                                    component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Overview.vue'),
+                                    props: ({query}) => ({action: query.action})
                                   },
                                   {
                                     path: 'forms',
