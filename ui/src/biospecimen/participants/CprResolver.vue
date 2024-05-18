@@ -7,15 +7,25 @@ import http      from '@/common/services/HttpClient.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
-  props: ['cprId'],
+  props: ['cprId', 'query'],
 
   created() {
-    const query = {objectName: 'collection_protocol_registration', key: 'id', value: this.cprId};
-    http.get('object-state-params', query).then(
+    http.get('object-state-params', this._getQueryParams()).then(
       ({cpId, cprId}) => {
-        routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId, cprId});
+        const {view, ...otherQuery} = this.query || {};
+        if (view) {
+          routerSvc.goto(view, {cpId, cprId}, otherQuery);
+        } else {
+          routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId, cprId});
+        }
       }
     );
+  },
+
+  methods: {
+    _getQueryParams: function() {
+      return {objectName: 'collection_protocol_registration', key: 'id', value: this.cprId};
+    }
   }
 }
 </script>

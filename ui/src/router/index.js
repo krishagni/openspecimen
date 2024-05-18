@@ -828,19 +828,19 @@ const routes = [
         path: 'cpr-resolver/:cprId',
         name: 'CprResolver',
         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/CprResolver.vue'),
-        props: (route) => ({cprId: route.params && route.params.cprId})
+        props: (route) => ({cprId: route.params && route.params.cprId, query: route.query})
       },
       {
         path: 'visit-resolver/:visitId',
         name: 'VisitResolver',
         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/visits/VisitResolver.vue'),
-        props: (route) => ({visitId: route.params && route.params.visitId})
+        props: (route) => ({visitId: route.params && route.params.visitId, query: route.query})
       },
       {
         path: 'specimen-resolver/:specimenId',
         name: 'SpecimenResolver',
         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/SpecimenResolver.vue'),
-        props: (route) => ({specimenId: route.params && route.params.specimenId})
+        props: (route) => ({specimenId: route.params && route.params.specimenId, query: route.query})
       },
       {
         path: 'cp-view',
