@@ -277,7 +277,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 
 			existing.update(newShipment);
 			getShipmentDao().saveOrUpdate(existing, true);
-			sendEmailNotifications(newShipment, oldStatus, detail.isSendMail());
+			sendEmailNotifications(existing, oldStatus, detail.isSendMail());
 			EventPublisher.getInstance().publish(new ShipmentSavedEvent(existing));
 			return ResponseEvent.response(ShipmentDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
