@@ -239,11 +239,7 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 	}
 	
 	private void setSender(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
-		if (shipment.isRequested() || shipment.isPending()) {
-			return;
-		}
-
-		shipment.setSender(getUser(detail.getSender(), AuthUtil.getCurrentUser(), ose));
+		shipment.setSender(getUser(detail.getSender(), null, ose));
 	}
 	
 	private void setSenderComments(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
