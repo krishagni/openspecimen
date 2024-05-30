@@ -23,7 +23,10 @@ export default {
       getSurveyForms   : this._getSurveyForms,
       getFormRecords   : this._getFormRecords,
       addEditFormRecord: this._addEditFormRecord,
-      isUpdateAllowed  : this._isUpdateAllowed
+      isUpdateAllowed  : this._isUpdateAllowed,
+      getPage          : () => 'specimen-forms',
+      getView          : () => 'record-actions',
+      getViewProps     : () => ({cp: this.cpViewCtx.getCp(), cpr: this.cpr, visit: this.visit, specimen: this.specimen})
     }
   },
 

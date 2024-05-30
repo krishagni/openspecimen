@@ -6,6 +6,8 @@ import dateFormatter from '@/common/filters/DateFormatter.js';
 import alertSvc from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
+import i18n from '@/common/services/I18n.js';
+import pluginReg from '@/common/services/PluginViewsRegistry.js';
 
 
 class Util {
@@ -432,6 +434,100 @@ class Util {
     return this._fns;
   }
 
+  getPluginMenuOptions(menuRef, page, view, ctxt) {
+    const options = [];
+    return new Promise((resolve) => {
+      const pluginOptions = pluginReg.getOptions(page, view) || [];
+
+      let count = pluginOptions.length;
+      for (let option of pluginOptions) {
+        if (typeof option.showIf == 'function') {
+          const ret = option.showIf(ctxt);
+          Promise.all([ret]).then(
+            ([answer]) => {
+              --count;
+              if (answer) {
+                options.push(this._getPluginMenuOption(menuRef, ctxt, option));
+              }
+
+              if (count <= 0) {
+                resolve(options);
+              }
+            }
+          );
+        } else {
+          options.push(this._getPluginMenuOption(menuRef, ctxt, option));
+          --count;
+        }
+      }
+
+      if (count <= 0) {
+        resolve(options);
+      }
+    });
+  }
+
+  getFieldDisplayValue(form, field, inputValue, displayType) {
+    switch (displayType) {
+      case 'storage-position':
+        return this._getStorageLocation(inputValue);
+
+      case 'user':
+        return this._getUser(inputValue);
+
+      case 'specimen-quantity':
+      case 'specimen-measure':
+        return this._getSpecimenMeasure(form, inputValue, field, field.measure || 'quantity');
+
+      case 'date':
+      case 'datePicker':
+        return this._getDate(inputValue);
+
+      case 'datetime':
+        return this._getDate(inputValue, true);
+
+      case 'multiselect':
+      case 'pv':
+      case 'checkbox':
+        if (inputValue instanceof Array) {
+          return inputValue.join(', ');
+        }
+        break;
+
+      case 'subform':
+        if (inputValue instanceof Array && inputValue.length > 0) {
+          const result = {header: [], columnTypes: [], rows: []};
+
+          for (let sfField of field.fields) {
+            result.header.push(sfField.label);
+            result.columnTypes.push(sfField.displayType || sfField.type);
+          }
+
+          for (let sfRow of inputValue) {
+            const row = [];
+            for (let sfField of field.fields) {
+              row.push(sfRow[sfField.name]);
+            }
+
+            result.rows.push(row);
+          }
+
+          return result;
+        } else {
+          return '-';
+        }
+    }
+
+    if (field.name && field.name.indexOf('.extensionDetail.attrsMap.') >= 0) {
+      const displayValue = exprUtil.eval(form, field.name + '$displayValue');
+      if (displayValue) {
+        return displayValue;
+      }
+    }
+
+    return inputValue || '-';
+  }
+
   _getEscapeMap(str) {
     let map = {}, insideSgl = false, insideDbl = false;
     let lastIdx = -1;
@@ -473,6 +569,74 @@ class Util {
 
   _specimenUnitKey({cpShortTitle, specimenClass, type}) {
     return (cpShortTitle || '*') + ':' + specimenClass + ':' + (type || '*');
+  }
+
+  _getPluginMenuOption(menuRef, ctxt, option) {
+    const url = typeof option.url == 'function' ? option.url(this._wrapRefs(menuRef, ctxt), ctxt) : option.url;
+    return {
+      icon: option.icon,
+      caption: option.caption,
+      url: url,
+      onSelect: () => {
+        if (url) return;
+        option.exec(this._wrapRefs(menuRef, ctxt), ctxt)
+      }
+    };
+  }
+
+  _wrapRefs(elRef, ctxt) {
+    return {...ctxt, pluginViews: elRef};
+  }
+
+  _getStorageLocation(value) {
+    let result = undefined;
+
+    if (value && typeof value == 'object' && value.id != -1) {
+      let position = value;
+      result = position.name;
+      if (position.mode == 'TWO_D' && position.positionY && position.positionX) {
+        result += ' (' + position.positionY + ', ' + position.positionX + ')';
+      } else if (position.mode == 'LINEAR' && position.position > 0) {
+        result += ' (' + position.position + ')';
+      }
+    }
+
+    return result || i18n.msg('specimens.not_stored');
+  }
+
+  _getUser(value) {
+    let result = value;
+    if (value && typeof value == 'object') {
+      let user = value;
+      result = user.firstName;
+      if (user.lastName) {
+        if (result) {
+          result += ' ';
+        }
+
+        result += user.lastName;
+      }
+    }
+
+    return result || '-';
+  }
+
+  _getSpecimenMeasure(form, value, attrs, measure) {
+    if (value == null || value == undefined) {
+      return '-';
+    }
+
+    const specimen = exprUtil.eval(form || {}, attrs.entity || attrs.specimen || 'specimen');
+    const unit = this.getSpecimenMeasureUnit(specimen, measure || 'quantity');
+    return value + ' ' + unit;
+  }
+
+  _getDate(value, showTime) {
+    if (value instanceof Date || typeof value == 'number') {
+      return showTime ? dateFormatter.dateTime(value) : dateFormatter.date(value);
+    }
+
+    return value || '-';
   }
 
   _fns = {

@@ -32,7 +32,7 @@
       </type>
     </property>
 
-    <many-to-one name="formCtxt" column="FORM_CTXT_ID" not-found="ignore" update="false" insert="false"/>
+    <many-to-one name="formCtxt" column="FORM_CTXT_ID" not-found="ignore" update="false" insert="false" fetch="join" />
 
     <query name="getRecordEntryById">
       select

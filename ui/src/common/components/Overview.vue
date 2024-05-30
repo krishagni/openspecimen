@@ -48,6 +48,17 @@
     </Section>
   </template>
 
+  <template v-for="(field, idx) of fields.sections" :key="idx">
+    <Section>
+      <template #title>
+        <span>{{label(field)}}</span>
+      </template>
+      <template #content>
+        <component :is="field.component" v-bind="field.value" :form="object" :context="object" />
+      </template>
+    </Section>
+  </template>
+
   <template v-for="(field, idx) of fields.subform" :key="idx">
     <Section>
       <template #title>
@@ -110,7 +121,7 @@ export default {
 
   computed: {
     fields: function() {
-      let simpleFields = [], textAreaFields = [], subformFields = [];
+      let simpleFields = [], textAreaFields = [], subformFields = [], sectionFields = [];
       for (let field of this.schema) {
         if (field.dataEntry || field.type == 'note') {
           continue;
@@ -163,12 +174,16 @@ export default {
               item.value = util.linkify(item.value);
             }
 
-            simpleFields.push(item);
+            if (item.showInSeparateSection) {
+              sectionFields.push(item);
+            } else {
+              simpleFields.push(item);
+            }
           }
         }
       }
 
-      return {simple: simpleFields, textArea: textAreaFields, subform: subformFields};
+      return {simple: simpleFields, textArea: textAreaFields, subform: subformFields, sections: sectionFields};
     }
   },
 
@@ -211,7 +226,9 @@ export default {
         value = exprUtil.getValue(object, field.name); // props.object[field.name];
         if (field.displayValues) {
           const dispValue = field.displayValues[value];
-          if (dispValue) {
+          if (typeof dispValue == 'function') {
+            value = dispValue();
+          } else {
             value = dispValue;
           }
         }

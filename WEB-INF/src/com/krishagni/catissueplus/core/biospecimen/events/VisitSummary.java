@@ -20,6 +20,8 @@ public class VisitSummary extends AttributeModifiedSupport implements Comparable
 	
 	private Long eventId;
 
+	private Long cprId;
+
 	private String name;
 
 	private String eventCode;
@@ -80,6 +82,14 @@ public class VisitSummary extends AttributeModifiedSupport implements Comparable
 
 	public void setEventId(Long eventId) {
 		this.eventId = eventId;
+	}
+
+	public Long getCprId() {
+		return cprId;
+	}
+
+	public void setCprId(Long cprId) {
+		this.cprId = cprId;
 	}
 
 	public String getName() {
@@ -273,21 +283,10 @@ public class VisitSummary extends AttributeModifiedSupport implements Comparable
 
 	private void addInterval(Calendar cal, Integer interval, IntervalUnit intervalUnit) {
 		switch (intervalUnit) {
-			case DAYS:
-				cal.add(Calendar.DAY_OF_YEAR, interval);
-				break;
-
-			case WEEKS:
-				cal.add(Calendar.WEEK_OF_YEAR, interval);
-				break;
-
-			case MONTHS:
-				cal.add(Calendar.MONTH, interval);
-				break;
-
-			case YEARS:
-				cal.add(Calendar.YEAR, interval);
-				break;
+			case DAYS -> cal.add(Calendar.DAY_OF_YEAR, interval);
+			case WEEKS -> cal.add(Calendar.WEEK_OF_YEAR, interval);
+			case MONTHS -> cal.add(Calendar.MONTH, interval);
+			case YEARS -> cal.add(Calendar.YEAR, interval);
 		}
 	}
 

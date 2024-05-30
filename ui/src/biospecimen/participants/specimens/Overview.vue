@@ -21,10 +21,10 @@
         <os-add-to-cart :specimens="[{id: specimen.id}]" />
 
         <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
-          @menu-toggled="loadEventForms"
+          :lazy-load="true" @menu-toggled="loadEventForms"
           v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
 
-        <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
+        <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" v-if="ctx.moreOptions.length > 0"/>
       </span>
     </template>
   </os-page-toolbar>
@@ -83,6 +83,7 @@
     </template>
     <template #footer>
       <os-button text   :label="$t('common.buttons.close')" @click="closeEventOverview()" />
+      <os-plugin-views page="specimen-detail" view="event-overview" :view-props="pluginViewProps" />
       <os-button danger left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
         v-if="!ctx.event.sysForm && isUpdateAllowed" />
       <os-button primary left-icon="edit" :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
@@ -113,6 +114,8 @@
         @click="transferSpecimen" />
     </template>
   </os-dialog>
+
+  <os-plugin-views ref="moreMenuPluginViews" page="specimen-detail" view="more-menu" :viewProps="ctx" />
 </template>
 
 <script>
@@ -133,7 +136,7 @@ import transferSchema from '@/biospecimen/schemas/specimens/transfer.js';
 
 
 export default {
-  props: ['cpr', 'visit'],
+  props: ['cpr', 'visit', 'action'],
 
   components: {
     EventsSummaryList,
@@ -164,8 +167,12 @@ export default {
 
         eventForms: undefined,
 
-        userRole: this.cpViewCtx.getRole()
+        userRole: this.cpViewCtx.getRole(),
+
+        moreOptions: []
       },
+
+      pluginViewProps: { },
 
       transferSchema,
 
@@ -180,12 +187,23 @@ export default {
   async created() {
     this._setupSpecimen();
     this.ctx.dict = await this.cpViewCtx.getSpecimenDict();
+    this._loadMoreMenuOptions();
+    if (typeof this.action == 'string') {
+      const [view, formId, recordId] = this.action.split(',');
+      if (view == 'show_event' && formId > 0 && recordId > 0) {
+        this.showEvent({formId, id: recordId});
+        const {name, params, query: {action, ...otherQuery}} = routerSvc.getCurrentRoute();
+        action == this.action;
+        routerSvc.goto(name, params, otherQuery);
+      }
+    }
   },
 
   watch: {
     specimen: function(newVal, oldVal) {
       if (newVal != oldVal) {
         this._setupSpecimen();
+        this._loadMoreMenuOptions();
       }
     }
   },
@@ -315,8 +333,8 @@ export default {
       const {formId, id: recordId} = event;
       formSvc.getRecord({formId, recordId}, {includeMetadata: true}).then(
         (record) => {
-          this.ctx.event = event;
-          this.ctx.eventRecord = record;
+          this.ctx.event = {name: record.caption, id: record.id};
+          this.ctx.eventRecord = this.pluginViewProps.record = record;
           this.$refs.eventOverviewDialog.open();
         }
       );
@@ -485,6 +503,12 @@ export default {
       }
     },
 
+    _loadMoreMenuOptions: function() {
+      const options = this.moreOptions || [];
+      const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
+      util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'specimen-detail', 'more-menu', ctxt)
+        .then(pluginOptions => this.ctx.moreOptions = options.concat(pluginOptions));
+    }
   }
 }
 </script>

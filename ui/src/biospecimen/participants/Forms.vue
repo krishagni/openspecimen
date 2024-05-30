@@ -24,6 +24,9 @@ export default {
       getFormRecords   : this._getFormRecords,
       addEditFormRecord: this._addEditFormRecord,
       isUpdateAllowed  : this._isUpdateAllowed,
+      getPage          : () => 'participant-forms',
+      getView          : () => 'record-actions',
+      getViewProps     : () => ({cp: this.cpViewCtx.getCp(), cpr: this.cpr})
     }
   },
 

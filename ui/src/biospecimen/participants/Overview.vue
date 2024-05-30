@@ -9,6 +9,8 @@
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')"
         @click="deleteCpr" v-if="isDeleteAllowed" />
+
+      <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
     </template>
   </os-page-toolbar>
 
@@ -69,6 +71,8 @@
     </os-grid-column>
 
     <os-delete-object ref="deleteCprDialog" :input="ctx.deleteOpts" />
+
+    <os-plugin-views ref="moreMenuPluginViews" page="participant-detail" view="more-menu" :viewProps="ctx" />
   </os-grid>
 </template>
 
@@ -116,7 +120,9 @@ export default {
 
         visitDict: undefined,
 
-        userRole: null
+        userRole: null,
+
+        moreOptions: []
       }
     };
   },
@@ -131,6 +137,10 @@ export default {
       ([dict, consentsDict, visitDict, userRole]) => {
         Object.assign(this.ctx, {dict, consentsDict, visitDict, userRole});
         this._setupCpr();
+
+        const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
+        util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'participant-detail', 'more-menu', ctxt)
+          .then(pluginOptions => this.ctx.moreOptions = [].concat(pluginOptions));
       }
     );
   },

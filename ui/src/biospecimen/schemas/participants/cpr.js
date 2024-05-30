@@ -66,8 +66,8 @@ export default {
       "inlineLabelCode": "participants.receive_emails",
       "name": "cpr.participant.emailOptIn",
       "displayValues": {
-        true: window.osSvc.i18nSvc.msg('common.yes'),
-        false: window.osSvc.i18nSvc.msg('common.no')
+        true: () => window.osSvc.i18nSvc.msg('common.yes'),
+        false: () => window.osSvc.i18nSvc.msg('common.no')
       },
       "showWhen": "!!cpr.participant.emailAddress"
     },
@@ -81,8 +81,8 @@ export default {
       "inlineLabelCode": "participants.receive_smses",
       "name": "cpr.participant.textOptIn",
       "displayValues": {
-        true: window.osSvc.i18nSvc.msg('common.yes'),
-        false: window.osSvc.i18nSvc.msg('common.no')
+        true: () => window.osSvc.i18nSvc.msg('common.yes'),
+        false: () => window.osSvc.i18nSvc.msg('common.no')
       },
       "showWhen": "!!cpr.participant.phoneNumber"
     },

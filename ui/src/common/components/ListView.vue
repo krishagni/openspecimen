@@ -170,6 +170,9 @@
           <span>{{description}}</span>
         </div>
       </div>
+      <div class="status" v-if="item.$summary.status && item.$summary.status.component">
+        <component :is="item.$summary.status.component" v-bind="item.$summary.status.data" />
+      </div>
     </div>
   </div>
 </template>
@@ -462,7 +465,8 @@ export default {
         icon: () => '',
         titleText: () => '',
         url: () => '',
-        descriptions: []
+        descriptions: [],
+        status: () => null
       };
 
       if (this.schema.summary) {
@@ -471,6 +475,7 @@ export default {
         summaryFns.titleText = this.valueFn(title.text);
         summaryFns.url = this.valueFn(title.url);
         summaryFns.descriptions = (this.schema.summary.descriptions || []).map(desc => this.valueFn(desc));
+        summaryFns.status = typeof this.schema.summary.status == 'function' ? this.schema.summary.status : () => null
       }
 
       let input      = this.data || [];
@@ -498,7 +503,8 @@ export default {
             icon:         summaryFns.icon(row.rowObject),
             title:        summaryFns.titleText(row.rowObject),
             url:          summaryFns.url(row.rowObject, this.$route.query),
-            descriptions: summaryFns.descriptions.map(desc => desc(row.rowObject))
+            descriptions: summaryFns.descriptions.map(desc => desc(row.rowObject)),
+            status      : summaryFns.status(row.rowObject)
           };
         }
 
@@ -809,8 +815,16 @@ export default {
   margin-right: 0.5rem;
 }
 
+.os-list-items .item .descriptions {
+  white-space: pre-wrap;
+}
+
 .os-list-items .item .descriptions > div:not(:last-child) {
   margin-bottom: 0.5rem;
+}
+
+.os-list-items .item .status {
+  margin: 0.5rem 0rem;
 }
 
 .os-list-shadowed-rows.os-list .results .results-inner {
