@@ -1,6 +1,6 @@
 
 <template>
-  <template v-if="items.length > 1">
+  <template v-if="lazyLoad || items.length > 1">
     <os-button :size="!label ? 'small' : ''" :left-icon="icon"
       :label="label" :no-outline="noOutline"
       :right-icon="label ? 'caret-down' : ''"
@@ -16,9 +16,9 @@
       </template>
     </dropdown-menu>
   </template>
-  <os-button v-else-if="items.length == 1 && !items[0].url"
+  <os-button v-else-if="!lazyLoad && items.length == 1 && !items[0].url"
     :left-icon="items[0].icon" :label="items[0].label" @click="items[0].command" />
-  <os-button-link v-else-if="items.length == 1 && items[0].url"
+  <os-button-link v-else-if="!lazyLoad && items.length == 1 && items[0].url"
     :left-icon="items[0].icon" :label="items[0].label" :url="item[0].url" />
 </template>
 
@@ -26,7 +26,7 @@
 import Menu from 'primevue/menu';
 
 export default {
-  props: ['icon', 'label', 'options', 'no-outline'],
+  props: ['icon', 'label', 'options', 'no-outline', 'lazy-load'],
 
   components: {
     'dropdown-menu': Menu

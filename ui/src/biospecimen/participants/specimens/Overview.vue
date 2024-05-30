@@ -21,7 +21,7 @@
         <os-add-to-cart :specimens="[{id: specimen.id}]" />
 
         <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
-          @menu-toggled="loadEventForms"
+          :lazy-load="true" @menu-toggled="loadEventForms"
           v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
 
         <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" v-if="ctx.moreOptions.length > 0"/>
