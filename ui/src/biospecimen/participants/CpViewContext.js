@@ -521,7 +521,7 @@ export default class CpViewContext {
   }
 
   async getRapidCollectionWf() {
-    return this._getWorkflow('rapidCollectionWorflow');
+    return this._getWorkflow('rapidCollectionWorkflow');
   }
 
   _getMatchingForms(forms, rules, context) {
