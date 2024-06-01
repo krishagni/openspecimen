@@ -80,4 +80,6 @@ public interface SpecimenDao extends Dao<Specimen> {
 	List<String> getKitLabels(Visit visit, SpecimenRequirement sr);
 
 	Map<Long, String> getKitLabels(Visit visit);
+
+	List<Specimen> getDescendantSpecimens(List<Long> ancestorIds, String labelField, List<String> labels, String lineage, String status);
 }

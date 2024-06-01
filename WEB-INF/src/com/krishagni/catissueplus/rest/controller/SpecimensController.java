@@ -70,7 +70,7 @@ public class SpecimensController {
 		SpecimenQueryCriteria crit = new SpecimenQueryCriteria(cpShortTitle, label);
 		ResponseEvent<Boolean> resp = specimenSvc.doesSpecimenExists(getRequest(crit));
 		resp.throwErrorIfUnsuccessful();
-		if (resp.getPayload() == true) {
+		if (resp.getPayload()) {
 			return true;
 		}
 

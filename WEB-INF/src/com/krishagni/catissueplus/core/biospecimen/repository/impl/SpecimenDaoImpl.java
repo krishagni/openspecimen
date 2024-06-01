@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -394,6 +396,58 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		}
 
 		return labels;
+	}
+
+	@Override
+	public List<Specimen> getDescendantSpecimens(List<Long> ancestorIds, String labelField, List<String> labels, String lineage, String status) {
+		List<Object[]> result = createNamedQuery(GET_DESCENDANT_SPMN_IDS, Object[].class)
+			.setParameterList("parentIds", ancestorIds)
+			.list();
+		if (result.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		Map<Long, Long> descendantAncestorIdsMap = new HashMap<>();
+		for (Object[] pair : result) {
+			descendantAncestorIdsMap.put((Long) pair[1], (Long) pair[0]);
+		}
+
+		Criteria<Specimen> query = createCriteria(Specimen.class, "s");
+		query.add(query.in("s.id", descendantAncestorIdsMap.keySet()));
+		if (StringUtils.isBlank(labelField) || labelField.equals("specimen.label")) {
+			addInCond(query, "s.label", labels);
+		} else if (labelField.equals("specimen.barcode")) {
+			addInCond(query, "s.barcode", labels);
+		} else if (labelField.equals("specimen.additionalLabel")) {
+			addInCond(query, "s.additionalLabel", labels);
+		}
+
+		if (Specimen.ALIQUOT.equals(lineage)) {
+			query.add(query.eq("s.lineage", Specimen.ALIQUOT));
+		} else if (Specimen.DERIVED.equals(lineage)) {
+			query.add(query.eq("s.lineage", Specimen.DERIVED));
+		}
+
+		if (StringUtils.isNotBlank(status)) {
+			query.add(query.eq("s.collectionStatus", status));
+		}
+
+		List<Specimen> specimens = query.list();
+		if (StringUtils.isBlank(labelField) || labelField.equals("specimen.label")) {
+			specimens = Specimen.sortByLabels(specimens, labels);
+		} else if (labelField.equals("specimen.barcode")) {
+			specimens = Specimen.sortByBarcodes(specimens, labels);
+		} else if (labelField.equals("specimen.additionalLabel")) {
+			specimens = Specimen.sortByAdditionalLabels(specimens, labels);
+		} else {
+			specimens = specimens.stream().sorted(Comparator.comparing(BaseEntity::getId)).collect(Collectors.toList());
+		}
+
+		for (Specimen specimen : specimens) {
+			specimen.setAncestorId(descendantAncestorIdsMap.get(specimen.getId()));
+		}
+
+		return specimens;
 	}
 
 	private void addIdsCond(AbstractCriteria<?, ?> query, List<Long> ids) {
@@ -797,4 +851,6 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		"  ri.entityId = :visitId and " +
 		"  si.entityType = 'specimen' and " +
 		"  cpe.id = :eventId";
+
+	private static final String GET_DESCENDANT_SPMN_IDS = FQN + ".getDescendantSpecimenIds";
 }

@@ -105,6 +105,8 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	private boolean update;
 
+	private Long ancestorId;
+
 
 	public CollectionEventDetail getCollectionEvent() {
 		return collectionEvent;
@@ -392,6 +394,14 @@ public class SpecimenDetail extends SpecimenInfo {
 		this.update = update;
 	}
 
+	public Long getAncestorId() {
+		return ancestorId;
+	}
+
+	public void setAncestorId(Long ancestorId) {
+		this.ancestorId = ancestorId;
+	}
+
 	@JsonIgnore
 	public String getLogKey() {
 		String result = getId().toString();
@@ -480,6 +490,7 @@ public class SpecimenDetail extends SpecimenInfo {
 		result.setParentUid(specimen.getParentUid());
 		result.setCheckedOut(specimen.getCheckoutPosition() != null);
 		result.setCheckoutPosition(StorageLocationSummary.from(specimen.getCheckoutPosition()));
+		result.setAncestorId(specimen.getAncestorId());
 		return result;
 	}
 	

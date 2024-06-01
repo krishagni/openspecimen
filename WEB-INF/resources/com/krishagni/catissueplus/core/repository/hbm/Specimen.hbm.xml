@@ -392,5 +392,22 @@
             )
         )
     </sql-query>
+
+    <sql-query name="getDescendantSpecimenIds">
+      <return-scalar column="ancestor" type="long" />
+      <return-scalar column="descendant" type="long" />
+
+      select
+        p.identifier as ancestor, s.identifier as descendant
+      from
+        catissue_specimen p
+        inner join catissue_specimen_hierarchy h on h.ancestor_id = p.identifier
+        inner join catissue_specimen s on s.identifier = h.descendent_id
+      where
+        p.identifier in (:parentIds) and
+        p.activity_status != 'Disabled' and
+        s.activity_status != 'Disabled' and
+        p.identifier != s.identifier
+    </sql-query>
   </class>
 </hibernate-mapping>

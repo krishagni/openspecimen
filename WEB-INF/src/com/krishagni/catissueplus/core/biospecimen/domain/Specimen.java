@@ -258,6 +258,8 @@ public class Specimen extends BaseExtensionEntity {
 	//
 	private transient Map<Long, Specimen> preCreatedSpmnsMap;
 
+	private transient Long ancestorId;
+
 	public static String getEntityName() {
 		return ENTITY_NAME;
 	}
@@ -1959,6 +1961,14 @@ public class Specimen extends BaseExtensionEntity {
 		preCreatedSpmnsMap.putAll(createdSpmns.stream().collect(Collectors.toMap(Specimen::getReqId, s -> s)));
 	}
 
+	public Long getAncestorId() {
+		return ancestorId;
+	}
+
+	public void setAncestorId(Long ancestorId) {
+		this.ancestorId = ancestorId;
+	}
+
 	public void updateAvailableStatus() {
 		if (isActive()) {
 			if (isCollected()) {
@@ -2099,6 +2109,12 @@ public class Specimen extends BaseExtensionEntity {
 	public static List<Specimen> sortByBarcodes(Collection<Specimen> specimens, final List<String> barcodes) {
 		return specimens.stream()
 			.sorted(Comparator.comparingInt((s) -> barcodes.indexOf(s.getBarcode())))
+			.collect(Collectors.toList());
+	}
+
+	public static List<Specimen> sortByAdditionalLabels(Collection<Specimen> specimens, final List<String> additionalLabels) {
+		return specimens.stream()
+			.sorted(Comparator.comparingInt((s) -> additionalLabels.indexOf(s.getAdditionalLabel())))
 			.collect(Collectors.toList());
 	}
 
