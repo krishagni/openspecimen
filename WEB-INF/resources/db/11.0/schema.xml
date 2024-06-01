@@ -56,4 +56,8 @@
       <column name="LOCK_TIME" type="${nullable.ts.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add unique constraint on user email IDs">
+    <addUniqueConstraint constraintName="USER_EMAIL_ADDRESS_UQ" tableName="CATISSUE_USER" columnNames="EMAIL_ADDRESS" />
+  </changeSet>
 </databaseChangeLog>
