@@ -491,7 +491,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			Specimen parentSpmn = getSpecimen(spec.getParentId(), spec.getCpShortTitle(), spec.getParentLabel(), ose);
 			ose.checkAndThrow();
 			
-			if (!parentSpmn.isCollected()) {
+			if (!parentSpmn.isCollected() && !parentSpmn.isPending()) {
 				return ResponseEvent.userError(SpecimenErrorCode.NOT_COLLECTED, parentSpmn.getLabel());
 			} else if (!parentSpmn.isTxnActive()) {
 				return ResponseEvent.userError(SpecimenErrorCode.NOT_ACTIVE, parentSpmn.getLabel());

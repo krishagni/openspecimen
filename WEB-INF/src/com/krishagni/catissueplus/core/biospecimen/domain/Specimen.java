@@ -1523,6 +1523,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	private void updateCreatedBy(User user) {
+		setCreatedBy(user);
 		if (isPrimary() || user == null || getParentEvent() == null) {
 			return;
 		}
