@@ -1,6 +1,6 @@
 
 <template>
-  <form novalidate>
+  <form novalidate class="os-table-form">
     <table class="os-table">
       <thead>
         <tr>
@@ -9,6 +9,10 @@
             <span v-if="selectionMode == 'checkbox'">
               <os-boolean-checkbox v-model="ctx.allSelected" @change="toggleAllRowsSelection" />
             </span>
+          </th>
+
+          <th class="selection" v-else-if="removeItems == true">
+            <span>&nbsp;</span>
           </th>
 
           <th v-if="firstColumn" :class="stickyColumn" :style="firstColumnHeaderStyle">
@@ -71,16 +75,23 @@
                 @change="toggleSelection(itemIdx)" v-else />
             </td>
 
-            <td v-if="firstColumn" :style="{display: treeLayout ? 'flex': ''}" :class="stickyColumn">
-              <div v-show="treeLayout && !showFlat" class="node-expander"
-                :style="{'padding-left':  itemModel.depth + 'rem'}">
-                <a @click="toggleNode(itemModel, itemIdx)">
-                  <os-icon v-show="itemModel.hasChildren && itemModel.expanded" name="chevron-down" />
-                  <os-icon v-show="itemModel.hasChildren && !itemModel.expanded" name="chevron-right" />
-                </a>
+            <td class="selection" v-else-if="removeItems == true">
+              <os-button size="small" left-icon="times" @click="removeItem(itemIdx)"
+                v-os-tooltip.bottom="$t('workflows.buttons.remove')" />
+            </td>
+
+            <td v-if="firstColumn" :class="stickyColumn">
+              <div :style="{display: treeLayout ? 'flex' : ''}">
+                <div v-show="treeLayout && !showFlat" class="node-expander"
+                  :style="{'padding-left':  itemModel.depth + 'rem'}">
+                  <a @click="toggleNode(itemModel, itemIdx)">
+                    <os-icon v-show="itemModel.hasChildren && itemModel.expanded" name="chevron-down" />
+                    <os-icon v-show="itemModel.hasChildren && !itemModel.expanded" name="chevron-right" />
+                  </a>
+                </div>
+                <slot ref="firstColumn" name="first-column" v-bind:item="itemModel.$context"
+                  v-bind:model="itemModel"> </slot>
               </div>
-              <slot ref="firstColumn" name="first-column" v-bind:item="itemModel.$context"
-                v-bind:model="itemModel"> </slot>
             </td>
 
             <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx"
@@ -221,6 +232,8 @@ export default {
     stickyColumn: function() {
       if (this.readOnly && (this.selectionMode == 'radio' || this.selectionMode == 'checkbox')) {
         return ['sticky', 'left-offset'];
+      } else if (this.removeItems == true) {
+        return ['sticky', 'remove-btn-left-offset'];
       } else {
         return ['sticky']
       }
@@ -738,6 +751,13 @@ table :deep(th.sticky.left-offset),
 table td.sticky.left-offset,
 table :deep(td.sticky.left-offset) {
   left: 35px;
+}
+
+table th.sticky.remove-btn-left-offset,
+table :deep(th.sticky.remove-btn-left-offset),
+table td.sticky.remove-btn-left-offset,
+table :deep(td.sticky.remove-btn-left-offset) {
+  left: 43px;
 }
 
 table td .field-container {
