@@ -260,6 +260,7 @@
 
     "loading_form": "Loading the form. Please wait for a moment...",
     "logout": "Log Out",
+    "more_item_labels_scanned": "More labels scanned than the items present in the table...",
     "name": "Name",
     "navigate_to": "Navigate To",
 

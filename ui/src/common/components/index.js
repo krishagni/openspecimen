@@ -33,6 +33,7 @@ import IconTitle from './IconTitle.vue';
 import InlineMessage from './InlineMessage.vue';
 import InputNumber from './InputNumber.vue';
 import InputText from './InputText.vue';
+import ItemsLabelScanner from './ItemsLabelScanner.vue';
 import ItemsValidationDialog from './ItemsValidationDialog.vue';
 import Label from './Label.vue';
 import ListGroup from './ListGroup.vue';
@@ -130,6 +131,7 @@ export default {
     app.component('os-inline-message',   InlineMessage);
     app.component('os-input-number',     InputNumber);
     app.component('os-input-text',       InputText);
+    app.component('os-item-labels-scanner', ItemsLabelScanner);
     app.component('os-items-validation', ItemsValidationDialog);
     app.component('os-label',            Label);
     app.component('os-list-group',       ListGroup);
