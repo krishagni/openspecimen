@@ -43,6 +43,8 @@ public class ExecuteQueryEventOp  {
 
 	private int timeoutInSeconds = 55;
 
+	private String reportName;
+
 	public String getQuerySpace() {
 		return querySpace;
 	}
@@ -169,5 +171,13 @@ public class ExecuteQueryEventOp  {
 
 	public void setTimeout(int timeoutInSeconds) {
 		this.timeoutInSeconds = timeoutInSeconds;
+	}
+
+	public String getReportName() {
+		return reportName;
+	}
+
+	public void setReportName(String reportName) {
+		this.reportName = reportName;
 	}
 }

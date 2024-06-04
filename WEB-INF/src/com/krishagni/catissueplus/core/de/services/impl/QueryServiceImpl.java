@@ -134,6 +134,8 @@ public class QueryServiceImpl implements QueryService {
 	private static final Pattern SELECT_PATTERN = Pattern.compile("^(select\\s+distinct|select)\\s+.*$");
 	
 	private static final String QUERY_DATA_EXPORTED_EMAIL_TMPL = "query_export_data";
+
+	private static final String QUERY_REPORT_EMAIL_TMPL = "query_report";
 	
 	private static final String SHARE_QUERY_FOLDER_EMAIL_TMPL = "query_share_query_folder";
 
@@ -1521,21 +1523,34 @@ public class QueryServiceImpl implements QueryService {
 				TimeUnit.MILLISECONDS);						
 	}
 	
-	private void sendQueryDataExportedEmail(User user, SavedQuery query, String filename) {
+	private void sendQueryDataExportedEmail(User user, SavedQuery query, String filename, String reportName) {
 		String title = query != null ? query.getTitle() : "Unsaved query";
 		Map<String, Object> props = new HashMap<>();
 		props.put("user", user);
 		props.put("query", query);
 		props.put("filename", filename);
 		props.put("appUrl", ConfigUtil.getInstance().getAppUrl());
-		props.put("$subject", new String[] {title});
-		
-		emailService.sendEmail(QUERY_DATA_EXPORTED_EMAIL_TMPL, new String[] {user.getEmailAddress()}, props);
+
+
+		if (StringUtils.isNotBlank(reportName)) {
+			props.put("reportName", reportName);
+			props.put("$subject", new String[] { reportName });
+			emailService.sendEmail(QUERY_REPORT_EMAIL_TMPL, new String[] { user.getEmailAddress() }, props);
+		} else {
+			props.put("$subject", new String[] {title});
+			emailService.sendEmail(QUERY_DATA_EXPORTED_EMAIL_TMPL, new String[] {user.getEmailAddress()}, props);
+		}
 	}
 
-	private void notifyQueryDataExported(User user, SavedQuery query, String filename) {
-		String[] params = {query != null ? query.getTitle() : "Unsaved query"};
-		String msg = MessageUtil.getInstance().getMessage(QUERY_DATA_EXPORTED_EMAIL_TMPL + "_subj", params);
+	private void notifyQueryDataExported(User user, SavedQuery query, String filename, String reportName) {
+		String msg = null;
+		if (StringUtils.isNotBlank(reportName)) {
+			String[] params = {reportName};
+			msg = MessageUtil.getInstance().getMessage(QUERY_REPORT_EMAIL_TMPL + "_subj", params);
+		} else {
+			String[] params = {query != null ? query.getTitle() : "Unsaved query"};
+			msg = MessageUtil.getInstance().getMessage(QUERY_DATA_EXPORTED_EMAIL_TMPL + "_subj", params);
+		}
 
 		Notification notif = new Notification();
 		notif.setEntityId(query != null ? query.getId() : -1L);
@@ -1916,8 +1931,9 @@ public class QueryServiceImpl implements QueryService {
 				if (queryId != null) {
 					savedQuery = daoFactory.getSavedQueryDao().getQuery(queryId);
 				}
-				sendQueryDataExportedEmail(user, savedQuery, filename);
-				notifyQueryDataExported(user, savedQuery, filename);
+
+				sendQueryDataExportedEmail(user, savedQuery, filename, op.getReportName());
+				notifyQueryDataExported(user, savedQuery, filename, op.getReportName());
 			} catch (Exception e) {
 				logger.error("Error sending email with query exported data", e);
 			}

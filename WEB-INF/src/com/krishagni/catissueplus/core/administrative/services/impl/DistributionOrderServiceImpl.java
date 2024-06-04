@@ -1340,10 +1340,12 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 		queryOp.setWideRowMode(WideRowMode.DEEP.name());
 		queryOp.setRunType("Export");
 		queryOp.setSynchronous(waitForCompletion);
+		queryOp.setSavedQueryId(report.getId());
+		queryOp.setReportName(MessageUtil.getInstance().getMessage("dist_order_report", new String[] { order.getName() }));
 		return querySvc.exportQueryData(queryOp, new QueryService.ExportProcessor() {
 			@Override
 			public String filename() {
-				return "order_" + order.getId() + "_" + UUID.randomUUID().toString();
+				return "order_" + order.getId() + "_" + UUID.randomUUID();
 			}
 
 			@Override

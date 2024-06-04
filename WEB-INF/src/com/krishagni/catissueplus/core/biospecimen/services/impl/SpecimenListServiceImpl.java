@@ -856,6 +856,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		op.setAql(query.getAql(restriction, "Specimen.specimenCarts.itemId asc"));
 		op.setWideRowMode(WideRowMode.DEEP.name());
 		op.setRunType("Export");
+		op.setSavedQueryId(query.getId());
+		op.setReportName(MessageUtil.getInstance().getMessage("cart_report", new String[] { list.getDisplayName() }));
 		return querySvc.exportQueryData(op, Objects.requireNonNullElseGet(proc, () -> new QueryService.ExportProcessor() {
 			@Override
 			public String filename() {

@@ -797,6 +797,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		execReportOp.setAql(query.getAql(new Filter[] { filter }));
 		execReportOp.setWideRowMode(WideRowMode.DEEP.name());
 		execReportOp.setRunType("Export");
+		execReportOp.setSavedQueryId(query.getId());
+		execReportOp.setReportName(MessageUtil.getInstance().getMessage("shipment_report", new String[] { shipment.getName() }));
 		
 		return querySvc.exportQueryData(execReportOp, new QueryService.ExportProcessor() {
 			@Override

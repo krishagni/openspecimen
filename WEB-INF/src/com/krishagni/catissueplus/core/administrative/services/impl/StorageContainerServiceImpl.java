@@ -2258,6 +2258,15 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		execReportOp.setAql(query.getAql(new Filter[] { filter }));
 		execReportOp.setWideRowMode(WideRowMode.DEEP.name());
 		execReportOp.setRunType("Export");
+		execReportOp.setSavedQueryId(query.getId());
+
+		String name = container.getDisplayName();
+		if (StringUtils.isNotBlank(name)) {
+			name += " / " + container.getName();
+		} else {
+			name = container.getName();
+		}
+		execReportOp.setReportName(MessageUtil.getInstance().getMessage("container_specimens_report", new String[] { name }));
 		return querySvc.exportQueryData(execReportOp, new QueryService.ExportProcessor() {
 			@Override
 			public String filename() {
@@ -2266,12 +2275,15 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			@Override
 			public void headers(OutputStream out) {
-				Map<String, String> headers = new LinkedHashMap<String, String>() {{
+				Map<String, String> headers = new LinkedHashMap<>() {{
 					String notSpecified = msg("common_not_specified");
+
+					if (StringUtils.isNotBlank(container.getDisplayName())) {
+						put(msg("container_display_name"), container.getDisplayName());
+					}
 
 					put(msg("container_name"), container.getName());
 					put(msg("container_site"), container.getSite().getName());
-
 					if (container.getParentContainer() != null) {
 						put(msg("container_parent_container"), container.getParentContainer().getName());
 					}
