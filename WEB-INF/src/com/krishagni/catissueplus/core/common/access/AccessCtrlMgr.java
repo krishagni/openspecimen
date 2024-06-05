@@ -1094,7 +1094,7 @@ public class AccessCtrlMgr {
 		String[] ops = {Operation.READ.getName()};
 		List<SiteCpPair> siteCpPairs = new ArrayList<>(getVisitAndSpecimenSiteCps(cpId, ops));
 		if (addOrderSites) {
-			Set<SiteCpPair> orderSiteCps = getDistributionOrderSiteCps(ops);
+			Set<SiteCpPair> orderSiteCps = getDistributionOrderSiteCps(cpId, ops);
 			for (SiteCpPair orderSiteCp : orderSiteCps) {
 				orderSiteCp = orderSiteCp.copy();
 				orderSiteCp.setResource(Resource.SPECIMEN.getName());
@@ -1380,17 +1380,23 @@ public class AccessCtrlMgr {
 		}
 	}
 
-	private Set<SiteCpPair> getDistributionOrderSiteCps(String[] ops) {
+	private Set<SiteCpPair> getDistributionOrderSiteCps(Long cpId, String[] ops) {
 		Long userId = AuthUtil.getCurrentUser().getId();
-		Long instituteId = AuthUtil.getCurrentUserInstitute().getId();
-
 		String resource = Resource.ORDER.getName();
-		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(userId, resource, ops);
+		List<SubjectAccess> accessList = null;
+		if (cpId != null) {
+			accessList = daoFactory.getSubjectDao().getAccessList(userId, cpId, resource, ops);
+		} else {
+			accessList = daoFactory.getSubjectDao().getAccessList(userId, resource, ops);
+		}
 
 		Set<SiteCpPair> siteCps = new HashSet<>();
 		for (SubjectAccess access : accessList) {
-			Long siteId = access.getSite() != null ? access.getSite().getId() : null;
-			siteCps.add(SiteCpPair.make(instituteId, siteId, null));
+			siteCps.add(SiteCpPair.make(
+				AuthUtil.getCurrentUserInstitute().getId(),
+				access.getSite() != null ? access.getSite().getId() : null,
+				access.getCollectionProtocol() != null ? access.getCollectionProtocol().getId() : null
+			));
 		}
 
 		return siteCps;
