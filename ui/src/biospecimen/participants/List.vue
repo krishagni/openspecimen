@@ -394,8 +394,13 @@ export default {
       }, 0);
     },
 
-    addParticipant: function() {
-      routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
+    addParticipant: async function() {
+      const rapidWfId = await this._getRapidCollectionWf();
+      if (rapidWfId && rapidWfId > 0) {
+        routerSvc.goto('tmWorkflowCreateInstance', {workflowId: rapidWfId}, {cpId: this.ctx.cp.id});
+      } else {
+        routerSvc.goto('ParticipantAddEdit', {cpId: this.ctx.cp.id, cprId: -1});
+      }
     },
 
     editParticipants: function() {
@@ -447,18 +452,6 @@ export default {
 
     _loadMoreOptions: async function() {
       const options = [];
-
-      if (this.cpViewCtx.isCreateParticipantAllowed() && this.cpViewCtx.isUpdateAllSpecimenAllowed()) {
-        const rapidWfId = await this._getRapidCollectionWf();
-        if (rapidWfId) {
-          options.push({
-            icon: 'flask',
-            caption: this.$t('participants.rapid_collection'),
-            url: routerSvc.getUrl('tmWorkflowCreateInstance', {workflowId: rapidWfId}, {cpId: this.ctx.cp.id})
-          });
-        }
-      }
-
       if (!this.cpViewCtx.isCoordinator() && this.cpViewCtx.isUpdateAllSpecimenAllowed()) {
         try {
           const recvWfId = await this._getReceiveSpecimensWf();
