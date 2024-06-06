@@ -180,7 +180,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	public ResponseEvent<CollectionProtocolRegistrationDetail> getRegistration(RequestEvent<RegistrationQueryCriteria> req) {				
 		try {			
 			RegistrationQueryCriteria crit = req.getPayload();
-			CollectionProtocolRegistration cpr = getCpr(crit.getCprId(), crit.getCpId(), crit.getCpShortTitle(), crit.getPpid());
+			CollectionProtocolRegistration cpr = getCpr(crit.getCprId(), crit.getCpId(), crit.getCpShortTitle(), crit.getPpid(), crit.getEmpi());
 			boolean allowPhiAccess = AccessCtrlMgr.getInstance().ensureReadCprRights(cpr);
 
 			List<CollectionProtocolRegistration> otherCprs = getOtherCprs(cpr);
@@ -300,7 +300,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	public ResponseEvent<CollectionProtocolRegistrationDetail> anonymize(RequestEvent<RegistrationQueryCriteria> req) {
 		try {
 			RegistrationQueryCriteria detail = req.getPayload();
-			CollectionProtocolRegistration cpr = getCpr(detail.getCprId(), detail.getCpId(), null, detail.getPpid());
+			CollectionProtocolRegistration cpr = getCpr(detail.getCprId(), detail.getCpId(), null, detail.getPpid(), detail.getEmpi());
 			raiseErrorIfSpecimenCentric(cpr);
 			AccessCtrlMgr.getInstance().ensureUpdateCprRights(cpr);
 			anonymizer.anonymize(cpr);
@@ -339,7 +339,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	public ResponseEvent<CollectionProtocolRegistrationDetail> deleteRegistration(RequestEvent<CpEntityDeleteCriteria> req) {
 		try {
 			CpEntityDeleteCriteria crit = req.getPayload();
-			CollectionProtocolRegistration cpr = getCpr(crit.getId(), null, crit.getCpShortTitle(), crit.getName());
+			CollectionProtocolRegistration cpr = getCpr(crit.getId(), null, crit.getCpShortTitle(), crit.getName(), null);
 			raiseErrorIfSpecimenCentric(cpr);
 
 			AccessCtrlMgr.getInstance().ensureDeleteCprRights(cpr);
@@ -431,13 +431,14 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			FileDetail detail = req.getPayload();
 
 			Long cprId = detail.getId();
-			String cpShortTitle = null, ppid = null;
+			String cpShortTitle = null, ppid = null, empi = null;
 			if (detail.getObjectProps() != null) {
 				cpShortTitle = (String) detail.getObjectProps().get("cpShortTitle");
 				ppid         = (String) detail.getObjectProps().get("ppid");
+				empi         = (String) detail.getObjectProps().get("empi");
 			}
 
-			CollectionProtocolRegistration existing = getCpr(cprId, null, cpShortTitle, ppid);
+			CollectionProtocolRegistration existing = getCpr(cprId, null, cpShortTitle, ppid, empi);
 			CollectionProtocol consentsCp = existing.getCollectionProtocol().getConsentsSource();
 			if (consentsCp != null) {
 				return ResponseEvent.userError(CpErrorCode.CONSENTS_SOURCED, consentsCp.getShortTitle());
@@ -552,7 +553,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			ConsentDetail consentDetail = req.getPayload();
 
 			CollectionProtocolRegistration existing = getCpr(consentDetail.getCprId(),
-				consentDetail.getCpId(), consentDetail.getCpShortTitle(), consentDetail.getPpid());
+				consentDetail.getCpId(), consentDetail.getCpShortTitle(), consentDetail.getPpid(), consentDetail.getEmpi());
 			CollectionProtocol consentsCp = existing.getCollectionProtocol().getConsentsSource();
 			if (consentsCp != null) {
 				return ResponseEvent.userError(CpErrorCode.CONSENTS_SOURCED, consentsCp.getShortTitle());
@@ -738,7 +739,8 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 
 	private CollectionProtocolRegistrationDetail updateRegistration(CollectionProtocolRegistrationDetail input) {
-		CollectionProtocolRegistration existing = getCpr(input.getId(), input.getCpId(), input.getCpShortTitle(), input.getPpid());
+		String empi = input.getParticipant() != null ? input.getParticipant().getEmpi() : null;
+		CollectionProtocolRegistration existing = getCpr(input.getId(), input.getCpId(), input.getCpShortTitle(), input.getPpid(), empi);
 		return saveOrUpdateRegistration(input, existing, true);
 	}
 
@@ -1172,21 +1174,24 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 	
 	private CollectionProtocolRegistration getCpr(Long cprId, Long cpId, String ppid) {
-		return getCpr(cprId, cpId, null, ppid);
+		return getCpr(cprId, cpId, null, ppid, null);
 	}
 
-	private CollectionProtocolRegistration getCpr(Long cprId, Long cpId, String cpShortTitle, String ppid) {
+	private CollectionProtocolRegistration getCpr(Long cprId, Long cpId, String cpShortTitle, String ppid, String empi) {
 		CollectionProtocolRegistration cpr = null;
 		String key = null;
 		if (cprId != null) {
 			key = cprId.toString();
 			cpr = daoFactory.getCprDao().getById(cprId);
 		} else if (cpId != null && StringUtils.isNotBlank(ppid)) {
-			key = cpId.toString() + ":" + ppid;
+			key = cpId + ":" + ppid;
 			cpr = daoFactory.getCprDao().getCprByPpid(cpId, ppid);
 		} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(ppid)) {
 			key = cpShortTitle + ":" + ppid;
 			cpr = daoFactory.getCprDao().getCprByCpShortTitleAndPpid(cpShortTitle, ppid);
+		} else if (StringUtils.isNotBlank(cpShortTitle) && StringUtils.isNotBlank(empi)) {
+			key = cpShortTitle + ":" + empi;
+			cpr = daoFactory.getCprDao().getCprByEmpi(cpShortTitle, empi);
 		}
 		
 		if (cpr == null) {

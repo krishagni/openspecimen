@@ -55,6 +55,7 @@ public class ConsentImporter implements ObjectImporter<ConsentDetail, ConsentDet
 			Map<String, Object> objectProps = new HashMap<>();
 			objectProps.put("cpShortTitle", consentDetail.getCpShortTitle());
 			objectProps.put("ppid",         consentDetail.getPpid());
+			objectProps.put("empi",         consentDetail.getEmpi());
 
 			
 			FileDetail fileDetail = new FileDetail();
