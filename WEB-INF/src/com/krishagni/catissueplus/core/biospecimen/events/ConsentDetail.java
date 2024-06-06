@@ -33,6 +33,8 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 	private String cpShortTitle;
 	
 	private String ppid;
+
+	private String empi;
 	
 	private Date consentSignatureDate;
 
@@ -83,6 +85,14 @@ public class ConsentDetail extends AttributeModifiedSupport implements Mergeable
 
 	public void setPpid(String ppid) {
 		this.ppid = ppid;
+	}
+
+	public String getEmpi() {
+		return empi;
+	}
+
+	public void setEmpi(String empi) {
+		this.empi = empi;
 	}
 
 	public Date getConsentSignatureDate() {
