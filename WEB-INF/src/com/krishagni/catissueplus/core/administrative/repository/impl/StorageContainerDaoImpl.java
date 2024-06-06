@@ -1066,7 +1066,9 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 			String orderBy = "c.id asc";
 			if (StringUtils.equals(orderBy, "parent")) {
-				orderBy += "pc.id asc, c.id asc";
+				orderBy = "pc.id asc, c.id asc";
+			} else if (crit.parentContainerId() != null) {
+				orderBy = "pos.posTwoOrdinal, pos.posOneOrdinal";
 			}
 
 			String hql = select + " " + from + " " + where + " order by " + orderBy;
