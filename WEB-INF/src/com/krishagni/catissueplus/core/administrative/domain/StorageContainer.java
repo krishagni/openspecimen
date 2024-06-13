@@ -217,6 +217,8 @@ public class StorageContainer extends BaseExtensionEntity {
 	//
 	private transient Map<StorageContainerPosition, Pair<Integer, Integer>> newPositions;
 
+	private transient boolean createStoreList = true;
+
 	public StorageContainer() {
 		ancestorContainers.add(this);
 	}
@@ -467,6 +469,14 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void setCheckOut(Boolean checkOut) {
 		this.checkOut = checkOut;
+	}
+
+	public boolean isCreateStoreList() {
+		return createStoreList;
+	}
+
+	public void setCreateStoreList(boolean createStoreList) {
+		this.createStoreList = createStoreList;
 	}
 
 	@NotAudited

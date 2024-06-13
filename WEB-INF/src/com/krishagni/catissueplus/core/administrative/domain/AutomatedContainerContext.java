@@ -27,7 +27,7 @@ public class AutomatedContainerContext {
 
 	private static AutomatedContainerContext instance = new AutomatedContainerContext();
 
-	private ThreadLocal<Map<String, ContainerStoreList>> listsCtx = new ThreadLocal<Map<String, ContainerStoreList>>() {
+	private ThreadLocal<Map<String, ContainerStoreList>> listsCtx = new ThreadLocal<>() {
 		@Override
 		protected Map<String, ContainerStoreList> initialValue() {
 			TransactionalThreadLocals.getInstance().register(this);
@@ -50,7 +50,7 @@ public class AutomatedContainerContext {
 						logger.debug("Executing the queued container store lists");
 
 						setupUserAuthContext();
-						storageContainerSvc.processStoreLists(new Supplier<List<ContainerStoreList>>() {
+						storageContainerSvc.processStoreLists(new Supplier<>() {
 							private boolean supplied = false;
 
 							@Override
@@ -107,7 +107,7 @@ public class AutomatedContainerContext {
 	}
 
 	private void addSpecimen(StorageContainer container, Specimen specimen, ContainerStoreList.Op op) {
-		if (!container.isAutomated()) {
+		if (!container.isAutomated() || !container.isCreateStoreList()) {
 			return;
 		}
 
@@ -119,7 +119,6 @@ public class AutomatedContainerContext {
 		ContainerStoreListItem item = new ContainerStoreListItem();
 		item.setSpecimen(specimen);
 		item.setStoreList(storeList);
-
 
 		Runnable saveItem = () -> daoFactory.getContainerStoreListDao().saveOrUpdateItem(item);
 		if (specimen.getId() == null) {

@@ -43,6 +43,7 @@ import com.krishagni.catissueplus.core.common.repository.Conjunction;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.repository.Junction;
+import com.krishagni.catissueplus.core.common.repository.Order;
 import com.krishagni.catissueplus.core.common.repository.Query;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -743,6 +744,21 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		return query.add(query.eq("s.automated", true))
 			.add(query.isNull("pc.id"))
 			.list();
+	}
+
+	@Override
+	public StorageContainer getAutomatedFreezer(String propName, String propValue) {
+		Criteria<StorageContainer> query = createCriteria(StorageContainer.class, "s")
+			.join("s.autoFreezerProvider", "fp")
+			.joinMap("fp.props", "p")
+			.leftJoin("s.parentContainer", "pc");
+		List<StorageContainer> freezers = query.add(query.eq(query.key("p"), propName))
+			.add(query.eq(query.value("p"), propValue))
+			.add(query.isNull("pc.id"))
+			.add(query.eq("s.automated", true))
+			.addOrder(query.asc("s.id"))
+			.list();
+		return freezers.isEmpty() ? null : freezers.get(0);
 	}
 
 	@Override

@@ -77,6 +77,8 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 
 	List<StorageContainer> getAutomatedFreezers();
 
+	StorageContainer getAutomatedFreezer(String propName, String propValue);
+
 	Long getRootContainerId(Long containerId);
 
 	List<StorageContainerSummary> findEmptyPlaces(FindPlacesCriteria crit);

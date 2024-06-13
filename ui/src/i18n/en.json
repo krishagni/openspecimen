@@ -457,6 +457,8 @@
     "archived_by": "Archived By",
     "assigned_users": "Assigned Users",
     "assigned_users_required": "Assigned Users is mandatory",
+    "automated_freezer_q": "Automated Freezer?",
+    "automated_provider": "Automation Provider",
     "barcode": "Barcode",
     "barcodes": "Barcodes",
     "block": "Block",

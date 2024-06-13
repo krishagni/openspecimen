@@ -207,6 +207,12 @@ export default {
         "fields": [ { "name": "container.storeSpecimensEnabled" } ]
       },
       {
+        "fields": [ { "name": "container.automated" } ]
+      },
+      {
+        "fields": [ { "name": "container.autoFreezerProvider" } ]
+      },
+      {
         "fields": [
           {
             "name": "container.cellDisplayProp",

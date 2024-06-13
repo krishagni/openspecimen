@@ -9,7 +9,9 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 public class ContainerStoreListItem extends BaseEntity {
 	public enum Status {
 		PENDING,
+
 		STORED,
+
 		RETRIEVED
 	}
 

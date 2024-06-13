@@ -287,10 +287,35 @@ export default {
       "name": "container.storeSpecimensEnabled",
       "options": [
         { captionCode: 'common.yes', value: true },
-        { captionCode: 'common.no', value: false }
+        { captionCode: 'common.no',  value: false }
       ],
       "optionsPerRow": 2,
       "summary": true
+    },
+    {
+      "type": "radio",
+      "labelCode": "containers.automated_freezer_q",
+      "name": "container.automated",
+      "options": [
+        { captionCode: 'common.yes', value: true },
+        { captionCode: 'common.no',  value: false }
+      ],
+      "optionsPerRow": 2,
+      "showWhen": "container.storeSpecimensEnabled && !container.noOfRows && !container.noOfColumns",
+      "showInOverviewWhen": "container.storeSpecimensEnabled && !container.noOfRows && !container.noOfColumns"
+    },
+    {
+      "type": "dropdown",
+      "labelCode": "containers.automated_provider",
+      "name": "container.autoFreezerProvider",
+      "listSource": {
+        "apiUrl" : "auto-freezer-providers",
+        "selectProp": "name",
+        "displayProp": "name",
+        "searchProp": "name"
+      },
+      "showWhen": "container.automated",
+      "showInOverviewWhen": "container.automated"
     },
     {
       "type": "radio",
