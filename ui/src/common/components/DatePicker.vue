@@ -4,14 +4,14 @@
       <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true"
-        :manual-input="true" :disabled="disabled" />
+        :manual-input="true" :disabled="disabled" @today-click="onTodaySelect" />
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
       <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true" :placeholder="$attrs.placeholder"
-        :manual-input="true" :disabled="disabled"  />
+        :manual-input="true" :disabled="disabled"  @today-click="onTodaySelect" />
     </div>
   </div>
 </template>
@@ -93,6 +93,10 @@ export default {
       }
 
       return utilSvc.formatDate(this.inputValue, format);
+    },
+
+    onTodaySelect: function() {
+      this.$emit('update:modelValue', new Date());
     }
   }
 }
