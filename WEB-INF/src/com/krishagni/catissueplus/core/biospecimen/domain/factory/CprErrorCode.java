@@ -26,6 +26,8 @@ public enum CprErrorCode implements ErrorCode {
 	CP_REQUIRED,
 	
 	PPID_REQUIRED,
+
+	LOOKUP_KEY_REQ,
 	
 	CONSENT_WITNESS_NOT_FOUND,
 	

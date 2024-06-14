@@ -1193,8 +1193,10 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			key = cpShortTitle + ":" + empi;
 			cpr = daoFactory.getCprDao().getCprByEmpi(cpShortTitle, empi);
 		}
-		
-		if (cpr == null) {
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(CprErrorCode.LOOKUP_KEY_REQ);
+		} else if (cpr == null) {
 			throw OpenSpecimenException.userError(CprErrorCode.M_NOT_FOUND, key, 1);
 		}
 		
