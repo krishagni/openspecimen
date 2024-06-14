@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.events.PermissibleValueDetails;
@@ -68,6 +69,8 @@ public class VisitDetail extends VisitSummary {
 	// transient variables specifying action to be performed
 	//
 	private boolean forceDelete;
+
+	private boolean lookupVisitsByName;
 
 	@JsonIgnore
 	File sprFile;
@@ -222,6 +225,16 @@ public class VisitDetail extends VisitSummary {
 
 	public void setForceDelete(boolean forceDelete) {
 		this.forceDelete = forceDelete;
+	}
+
+	@JsonIgnore
+	public boolean isLookupVisitsByName() {
+		return lookupVisitsByName;
+	}
+
+	@JsonProperty
+	public void setLookupVisitsByName(boolean lookupVisitsByName) {
+		this.lookupVisitsByName = lookupVisitsByName;
 	}
 
 	public File getSprFile() {
