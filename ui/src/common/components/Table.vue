@@ -17,6 +17,9 @@
       </tbody>
     </table>
   </div>
+  <div v-else>
+    <span>-</span>
+  </div>
 </template>
 
 <script>
