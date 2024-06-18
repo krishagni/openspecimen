@@ -30,7 +30,7 @@
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column class="os-container-locations" :width="12">
+    <os-grid-column class="os-container-locations" :width="ctx.showTree ? 12 : 8">
       <div class="labels-scan-area" v-if="isSpecimenContainer && !anySelected && ctx.showLabelsScanArea">
         <os-add-specimens ref="specimensScanner" @labels-scanned="updateMap" :optionsAtBottom="true">
           <os-button primary :label="$t('containers.store')" @click="assignPositions" />
@@ -46,8 +46,8 @@
       </div>
 
       <Layout ref="layout" class="map" :container="ctx.container" :occupants="ctx.occupants" 
-        :selected-positions="ctx.selectedPositions" @occupant-clicked="showOccupantDetails"
-        v-if="!isDimensionless">
+        :selected-positions="ctx.selectedPositions" :focussed-occupant="ctx.focussedOccupant"
+        @occupant-clicked="showOccupantDetails" v-if="!isDimensionless">
         <template #occupant_container="slotProps">
           <a class="occupant" @click="showOccupantDetails($event, slotProps.occupant)">
             <os-icon class="blocked" name="ban" v-os-tooltip="$t('containers.blocked')"
@@ -112,27 +112,36 @@
       </div>
     </os-grid-column>
 
-    <os-overlay ref="occupantDetails">
-      <div class="os-container-occupant">
-        <div v-if="ctx.occupant.container">
-          <h4 class="title">
+    <os-grid-column class="os-container-occupant" :width="4" v-if="!ctx.showTree">
+      <div v-if="ctx.occupant.container">
+        <os-panel>
+          <template #header>
             <span v-t="'containers.singular'">Container</span>
-          </h4>
+          </template>
+
+          <template #actions>
+            <os-button left-icon="times" size="small" @click="closeOccupantDetails" />
+          </template>
 
           <os-overview :schema="ctx.containerDict" :object="ctx.occupant"
-            :columns="1" v-if="ctx.containerDict.length > 0" />
-        </div>
-
-        <div v-else-if="ctx.occupant.specimen">
-          <h4 class="title">
+            :columns="1" v-if="ctx.containerDict && ctx.containerDict.length > 0" />
+        </os-panel>
+      </div>
+      <div v-else-if="ctx.occupant.specimen">
+        <os-panel>
+          <template #header>
             <span v-t="'containers.specimen.singular'">Specimen</span>
-          </h4>
+          </template>
+
+          <template #actions>
+            <os-button left-icon="times" size="small" @click="closeOccupantDetails" />
+          </template>
 
           <os-overview :schema="ctx.specimenDict" :object="ctx.occupant"
-            :columns="1" v-if="ctx.specimenDict.length > 0" />
-        </div>
+            :columns="1" v-if="ctx.specimenDict && ctx.specimenDict.length > 0" />
+        </os-panel>
       </div>
-    </os-overlay>
+    </os-grid-column>
 
     <os-dialog ref="colorCoding">
       <template #header>
@@ -179,7 +188,9 @@ import { reactive } from 'vue';
 
 import containerSvc from '@/administrative/services/Container.js';
 import alertsSvc    from '@/common/services/Alerts.js';
+import formUtil     from '@/common/services/FormUtil.js';
 import routerSvc    from '@/common/services/Router.js';
+import specimenSvc  from '@/biospecimen/services/Specimen.js';
 import util         from '@/common/services/Util.js';
 
 import Layout             from './Layout.vue';
@@ -216,7 +227,11 @@ export default {
 
       labels: '',
 
-      showLabelsScanArea: false
+      showLabelsScanArea: false,
+
+      showTree: true,
+
+      focussedOccupant: null
     });
 
     return { ctx, containerResources };
@@ -322,7 +337,6 @@ export default {
         return;
       }
 
-      const currentTarget = event.currentTarget;
       this.ctx.occupant = {};
 
       const entityId = occupant.occupyingEntityId || occupant.blockedEntityId;
@@ -330,33 +344,49 @@ export default {
         return;
       }
 
+      this.$emit('toggle-container-tree', {show: false});
+      this.ctx.showTree = false;
+      this.ctx.focussedOccupant = occupant;
       if (occupant.occuypingEntity == 'container') {
         if (!this.ctx.containerDict) {
-          this.ctx.containerDict = containerSvc.getSummaryDict();
+          this.ctx.containerDict = await containerSvc.getDict();
         }
 
         this.containers = this.containers || {};
         let container = this.containers[entityId];
         if (!container) {
           container = this.containers[entityId] = await containerSvc.getContainer(entityId);
+          formUtil.createCustomFieldsMap(container, true);
         }
 
         this.ctx.occupant = {container: container};
       } else {
-        if (!this.ctx.specimenDict) {
-          this.ctx.specimenDict = containerSvc.getSpecimenDict();
-        }
-
+        this.ctx.specimenDict = null;
         this.specimens = this.specimens || {};
         let specimen = this.specimens[entityId];
         if (!specimen) {
           specimen = this.specimens[entityId] = await containerSvc.getSpecimen(entityId);
+          formUtil.createCustomFieldsMap(specimen, true);
+        }
+
+        if (specimen) {
+          this.specimenDicts = this.specimenDicts || {};
+          let specimenDict = this.specimenDicts[specimen.cpId];
+          if (!specimenDict) {
+            specimenDict = this.specimenDicts[specimen.cpId] = await specimenSvc.getDict(specimen.cpId);
+          }
+
+          this.ctx.specimenDict = specimenDict;
         }
 
         this.ctx.occupant = {specimen: specimen};
       }
+    },
 
-      setTimeout(() => this.$refs.occupantDetails.toggle({currentTarget}), 100);
+    closeOccupantDetails: function() {
+      this.ctx.occupant = this.ctx.focussedOccupant = null;
+      this.ctx.showTree = true;
+      this.$emit('toggle-container-tree', {show: true});
     },
 
     createContainer: function({position}) {
@@ -620,19 +650,9 @@ export default {
 </script>
 
 <style scoped>
-.os-container-occupant h4.title {
-  margin-top: 0;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 4px;
-}
-
-.os-container-occupant :deep(ul) {
-  margin-bottom: 0;
-}
-
-.os-container-occupant {
-  max-height: 375px;
-  overflow: auto;
+.os-container-occupant > div,
+.os-container-occupant > div :deep(.os-panel) {
+  height: 100%;
 }
 
 .os-container-locations {

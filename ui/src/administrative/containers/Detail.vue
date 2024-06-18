@@ -55,7 +55,7 @@
             <ContainerTree :container="ctx.container" @container-selected="selectContainer" v-if="ctx.container.id" />
           </os-grid-column>
           <os-grid-column :width="ctx.showTree ? 9 : 12">
-            <router-view :container="ctx.container" v-if="ctx.container.id"> </router-view>
+            <router-view :container="ctx.container" v-if="ctx.container.id" @toggle-container-tree="toggleTree" />
           </os-grid-column>
         </os-grid>
       </div>
@@ -168,6 +168,10 @@ export default {
     selectContainer: function(container) {
       const route = this.$route.matched[this.$route.matched.length - 1];
       this.$goto(route.name, {containerId: container.id});
+    },
+
+    toggleTree: function({show}) {
+      this.ctx.showTree = show;
     },
 
     getRoute: function(routeName, params, query) {

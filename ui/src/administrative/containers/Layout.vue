@@ -3,7 +3,8 @@
     <table>
       <tr v-for="(row, rowIdx) of locations" :key="rowIdx">
         <td v-for="(slot, colIdx) of row" :key="rowIdx + '_' + colIdx"
-          :class="{'occupied': !!slot.occupied, 'selected': selectedPositions && selectedPositions[slot.position]}">
+          :class="{'occupied': !!slot.occupied, 'selected': selectedPositions && selectedPositions[slot.position],
+            'focussed': focussedOccupant && focussedOccupant.position == slot.position}">
           <span class="coord" v-show="container.positionLabelingMode == 'TWO_D'">
             <span>({{slot.rowStr}}, {{slot.columnStr}})</span>
           </span>
@@ -32,7 +33,7 @@ import boxUtil from '@/common/services/BoxUtil.js';
 import numConvUtil from '@/common/services/NumberConverterUtil.js';
 
 export default {
-  props: ['container', 'occupants', 'selectedPositions'],
+  props: ['container', 'occupants', 'focussedOccupant', 'selectedPositions'],
 
   emits: ['occupant-clicked'],
 
@@ -132,6 +133,10 @@ export default {
 
 .os-container-layout table td.selected {
   background: #ffc;
+}
+
+.os-container-layout table td.focussed {
+  background: #d5d5d5;
 }
 
 .os-container-layout table td .coord {
