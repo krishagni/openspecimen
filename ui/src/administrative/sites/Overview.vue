@@ -5,21 +5,21 @@
         <os-button left-icon="edit" label="Edit" @click="$goto('SiteAddEdit', {siteId: ctx.site.id})" />
 
         <os-button left-icon="trash" label="Delete" @click="deleteSite" />
+
+        <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
       </span>
     </template>
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
-      <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
-    </os-grid-column>
-
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.siteObjs" v-if="ctx.site.id" />
+    <os-grid-column width="12">
+      <os-overview :schema="ctx.dict" :object="ctx" :columns="1" v-if="ctx.dict.length > 0" />
     </os-grid-column>
   </os-grid>
 
   <os-delete-object ref="deleteObj" :input="ctx.deleteOpts" />
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.siteObjs" />
 </template>
 
 <script>
@@ -79,6 +79,10 @@ export default {
           }
         }
       );
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     }
   }
 }

@@ -22,14 +22,12 @@
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="6">
+    <os-grid-column :width="ctx.storedSpmns > 0 ? 6 : 12">
       <os-overview :schema="ctx.dict" :object="ctx" :columns="1" v-if="ctx.dict.length > 0" />
     </os-grid-column>
 
-    <os-grid-column width="6">
-      <os-audit-overview :objects="ctx.containerObjs" v-if="ctx.container.id" />
-
-      <os-section v-if="ctx.storedSpmns > 0">
+    <os-grid-column width="6" v-if="ctx.storedSpmns > 0">
+      <os-section>
         <template #title>
           <span v-t="'containers.top_5_specimen_types'">Top 5 specimen types</span>
         </template>
@@ -126,6 +124,8 @@
       <os-button primary :label="$t('common.buttons.unarchive')" @click="unarchive" />
     </template>
   </os-dialog>
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.containerObjs" />
 </template>
 
 <script>
@@ -272,6 +272,12 @@ export default {
           onSelect: () => this.showArchiveForm()
         })
       }
+
+      if (ctx.moreOpts.length > 0) {
+        ctx.moreOpts.push({divider: true});
+      }
+
+      ctx.moreOpts.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
 
       if (!container.storageLocation || !container.storageLocation.name) {
         let types = Object.keys(container.specimensByType)
@@ -484,6 +490,10 @@ export default {
       }
 
       this.closeDefragForm();
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     }
   }
 }

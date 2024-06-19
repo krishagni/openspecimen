@@ -21,22 +21,20 @@
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="12">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
       <SpecimenTree :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimens="ctx.specimens"
         :ref-date="visit.status && visit.status != 'Pending' ? visit.visitDate : 0"
         @reload="reloadSpecimens" v-if="ctx.cp.id > 0 && isReadSpecimenAllowed" />
     </os-grid-column>
-
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.visit.id > 0" />
-    </os-grid-column>
-
-    <os-delete-object ref="deleteVisitDialog" :input="ctx.deleteOpts" />
-
-    <os-plugin-views ref="moreMenuPluginViews" page="visit-detail" view="more-menu" :view-props="ctx" />
   </os-grid>
+
+  <os-delete-object ref="deleteVisitDialog" :input="ctx.deleteOpts" />
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.auditObjs" />
+
+  <os-plugin-views ref="moreMenuPluginViews" page="visit-detail" view="more-menu" :view-props="ctx" />
 </template>
 
 <script>
@@ -89,9 +87,9 @@ export default {
     this._loadSpecimens();
     this.ctx.dict = await this.cpViewCtx.getVisitDict();
 
-    const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
-    util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'visit-detail', 'more-menu', ctxt)
-      .then(pluginOptions => this.ctx.moreOptions = [].concat(pluginOptions));
+    // Need to load menu options only after the above async call is finished
+    // Otherwise the plugin menu options ref is undefined (not available)
+    this._loadMoreMenuOptions();
   },
 
   watch: {
@@ -99,6 +97,7 @@ export default {
       if (newVal != oldVal) {
         this._setupVisit();
         this._loadSpecimens();
+        this._loadMoreMenuOptions();
       }
     }
   },
@@ -166,6 +165,10 @@ export default {
       this._loadSpecimens();
     },
 
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
+    },
+
     _setupVisit: function() {
       const visit = this.ctx.visit = this.visit;
       if (visit.id > 0) {
@@ -202,6 +205,23 @@ export default {
           this.ctx.specimens = visit.$specimens = specimens;
         }
       );
+    },
+
+    _loadMoreMenuOptions: function() {
+      const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
+      util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'visit-detail', 'more-menu', ctxt)
+        .then(
+          pluginOptions => {
+            const options = this.ctx.moreOptions = (this.moreOptions || []).concat(pluginOptions);
+            if (this.ctx.visit.id > 0) {
+              if (options.length > 0) {
+                options.push({divider: true});
+              }
+
+              options.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
+            }
+          }
+        );
     }
   }
 }

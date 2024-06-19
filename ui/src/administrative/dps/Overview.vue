@@ -18,16 +18,14 @@
         v-show-if-allowed="dpResources.orderOpts" />
 
       <os-plugin-views page="dp-overview" view="more-menu" :view-props="{dp: ctx.dp}" />
+
+      <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
     </template>
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="12">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
-    </os-grid-column>
-
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.dpObjs" v-if="ctx.dp.id" />
     </os-grid-column>
 
     <os-dialog ref="closeConfirmDialog">
@@ -44,6 +42,8 @@
     </os-dialog>
 
     <os-delete-object ref="deleteDp" :input="ctx.deleteOpts" />
+
+    <os-audit-trail ref="auditTrailDialog" :objects="ctx.dpObjs" />
   </os-grid>
 </template>
 
@@ -145,6 +145,10 @@ export default {
     viewOrders: function() {
       const fb = util.uriEncode({dpShortTitle: this.ctx.dp.shortTitle});
       routerSvc.goto('OrdersList', {orderId: -1}, {filters: fb});
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     }
   }
 }

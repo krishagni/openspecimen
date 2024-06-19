@@ -6,21 +6,21 @@
           @click="$goto('InstituteAddEdit', {instituteId: ctx.institute.id})" />
 
         <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteInstitute" />
+
+        <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
       </span>
     </template>
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="12">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
-    </os-grid-column>
-
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.instituteObjs" v-if="ctx.institute.id" />
     </os-grid-column>
   </os-grid>
 
   <os-delete-object ref="deleteObj" :input="ctx.deleteOpts" />
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.instituteObjs" />
 </template>
 
 <script>
@@ -72,6 +72,10 @@ export default {
           }
         }
       );
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     }
   }
 }

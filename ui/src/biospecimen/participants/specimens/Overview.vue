@@ -39,8 +39,6 @@
     </os-grid-column>
 
     <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.specimen.id > 0" />
-
       <os-section v-if="ctx.events && ctx.events.length > 0">
         <template #title>
           <span v-t="'specimens.recent_activity'">Recent Activity</span>
@@ -114,6 +112,8 @@
         @click="transferSpecimen" />
     </template>
   </os-dialog>
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.auditObjs" />
 
   <os-plugin-views ref="moreMenuPluginViews" page="specimen-detail" view="more-menu" :viewProps="ctx" />
 </template>
@@ -465,6 +465,10 @@ export default {
       specimenSvc.getById(specimen.id).then(dbSpmn => this.ctx.children = dbSpmn.children);
     },
 
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
+    },
+
     _setupSpecimen: function() {
       const specimen = this.ctx.specimen = this.specimen;
       if (specimen.id > 0) {
@@ -504,10 +508,20 @@ export default {
     },
 
     _loadMoreMenuOptions: function() {
-      const options = this.moreOptions || [];
       const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
       util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'specimen-detail', 'more-menu', ctxt)
-        .then(pluginOptions => this.ctx.moreOptions = options.concat(pluginOptions));
+        .then(
+          pluginOptions => {
+            const options = this.ctx.moreOptions = (this.moreOptions || []).concat(pluginOptions);
+            if (this.ctx.specimen.id > 0) {
+              if (options.length > 0) {
+                options.push({divider: true});
+              }
+
+              options.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
+            }
+          }
+        );
     }
   }
 }

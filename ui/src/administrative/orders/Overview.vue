@@ -10,16 +10,14 @@
         left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteOrder" />
 
       <os-plugin-views page="order-detail" view="more-menu" :view-props="{order: ctx.order}" />
+
+      <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
     </template>
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="12">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
-    </os-grid-column>
-
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.orderObjs" v-if="ctx.order.id" />
     </os-grid-column>
   </os-grid>
 
@@ -28,6 +26,8 @@
       <span v-t="{path: 'orders.confirm_delete_msg', args: ctx.order}">Order '{{order.name}}' and any dependent data will be deleted. Are you sure you want to proceed?</span>
     </template>
   </os-confirm-delete>
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.orderObjs" />
 </template>
 
 <script>
@@ -119,6 +119,10 @@ export default {
           routerSvc.goto('OrdersList', {orderId: -2}, this.ctx.routeQuery);
         }
       );
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     }
   }
 }

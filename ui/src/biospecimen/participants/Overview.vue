@@ -15,7 +15,7 @@
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="12">
       <os-overview :schema="dict" :object="ctx" v-if="dict.length > 0" />
 
       <os-section v-if="ctx.cpr.participant && ctx.cpr.participant.registeredCps.length > 0">
@@ -66,11 +66,9 @@
       </os-section>
     </os-grid-column>
 
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.auditObjs" v-if="ctx.cpr.id" />
-    </os-grid-column>
-
     <os-delete-object ref="deleteCprDialog" :input="ctx.deleteOpts" />
+
+    <os-audit-trail ref="auditTrailDialog" :objects="ctx.auditObjs" />
 
     <os-plugin-views ref="moreMenuPluginViews" page="participant-detail" view="more-menu" :viewProps="ctx" />
   </os-grid>
@@ -137,10 +135,7 @@ export default {
       ([dict, consentsDict, visitDict, userRole]) => {
         Object.assign(this.ctx, {dict, consentsDict, visitDict, userRole});
         this._setupCpr();
-
-        const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
-        util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'participant-detail', 'more-menu', ctxt)
-          .then(pluginOptions => this.ctx.moreOptions = [].concat(pluginOptions));
+        this._loadMoreMenuOptions();
       }
     );
   },
@@ -182,6 +177,7 @@ export default {
     cpr: function(newVal, oldVal) {
       if (newVal != oldVal) {
         this._setupCpr();
+        this._loadMoreMenuOptions();
       }
     }
   },
@@ -207,6 +203,10 @@ export default {
           }
         }
       );
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     },
 
     _setupCpr: function() {
@@ -280,6 +280,21 @@ export default {
           }
         }
       );
+    },
+
+    _loadMoreMenuOptions: function() {
+      const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
+      util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'participant-detail', 'more-menu', ctxt)
+        .then(
+          pluginOptions => {
+            const options = this.ctx.moreOptions = (this.moreOptions || []).concat(pluginOptions);
+            if (options.length > 0) {
+              options.push({divider: true});
+            }
+
+            options.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
+          }
+        );
     }
   }
 }

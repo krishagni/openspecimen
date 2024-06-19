@@ -18,16 +18,14 @@
         @click="deleteShipment" />
 
       <os-button left-icon="download" :label="$t('shipments.download_report')" @click="downloadReport" />
+
+      <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
     </template>
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="12">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
-    </os-grid-column>
-
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.shipmentObjs" v-if="ctx.shipment.id" />
     </os-grid-column>
   </os-grid>
 
@@ -36,6 +34,8 @@
       <span v-t="{path: 'shipments.confirm_delete_msg', args: ctx.shipment}">Shipment '{name}' and any dependent data will be deleted. Are you sure you want to proceed?</span>
     </template>
   </os-confirm-delete>
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.shipmentObjs" />
 </template>
 
 <script>
@@ -97,6 +97,10 @@ export default {
     downloadReport: function() {
       const reportFn = () => shipmentSvc.generateReport(this.shipment.id);
       util.downloadReport(reportFn, {filename: this.shipment.name + '.csv'})
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     }
   }
 }

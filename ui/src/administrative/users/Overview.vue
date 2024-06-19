@@ -52,6 +52,8 @@
           v-if="ctx.user.type != 'CONTACT' && ctx.user.activityStatus == 'Active' &&
             ui.currentUser.id != ctx.user.id && ui.currentUser.admin"
         />
+
+        <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
       </div>
       <div v-else-if="ctx.user.activityStatus == 'Pending' && ui.currentUser.admin">
         <os-button left-icon="check"
@@ -60,17 +62,15 @@
         <os-button left-icon="times"
           :label="$t('users.reject')" @click="deleteUser"
         />
+
+        <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
       </div>
     </template>
   </os-page-toolbar>
 
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="12">
       <os-overview :schema="userSchema.fields" :object="ctx" />
-    </os-grid-column>
-
-    <os-grid-column width="4">
-      <os-audit-overview :objects="ctx.userObjs" v-if="ctx.user.id" />
     </os-grid-column>
   </os-grid>
 
@@ -85,6 +85,8 @@
   </os-confirm>
 
   <os-delete-object ref="deleteObj" :input="ctx.deleteOpts" />
+
+  <os-audit-trail ref="auditTrailDialog" :objects="ctx.userObjs" />
 </template>
 
 <script>
@@ -201,6 +203,10 @@ export default {
           }
         }
       );
+    },
+
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
     }
   }
 }

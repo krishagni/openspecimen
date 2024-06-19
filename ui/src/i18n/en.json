@@ -3,6 +3,7 @@
     "download_revision": "Download Revision",
     "entered_by": "Entered By",
     "entered_on": "Entered On",
+    "loading_trail": "Loading audit trail. Please wait for a moment...",
     "no_of_revs": "Number of Revisions",
     "no_revs": "No revisions to show!",
     "no_trail": "No trail to show!",
