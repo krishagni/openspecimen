@@ -1,6 +1,6 @@
 <template>
   <suspense>
-    <router-view />
+    <router-view :key="$route.params.cpId" />
   </suspense>
 </template>
 

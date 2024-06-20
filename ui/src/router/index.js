@@ -972,7 +972,8 @@ const routes = [
                   {
                     path: 'addedit',
                     name: 'ParticipantAddEdit',
-                    component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/AddEdit.vue')
+                    component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/AddEdit.vue'),
+                    props: (route) => ({participantId: route.query.participantId})
                   },
                   {
                     path: 'addedit-form',

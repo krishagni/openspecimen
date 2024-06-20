@@ -29,6 +29,10 @@ class CollectionProtocolRegistration {
     );
   }
 
+  async getParticipant(participantId) {
+    return http.get('participants/' + participantId);
+  }
+
   async saveOrUpdate(cpr) {
     if (cpr.id > 0) {
       return http.put('collection-protocol-registrations/' + cpr.id, cpr);

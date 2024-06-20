@@ -108,13 +108,12 @@ import routerSvc  from '@/common/services/Router.js';
 import util       from '@/common/services/Util.js';
 
 export default {
-  props: ['cpr'],
+  props: ['cpr', 'participantId'],
 
   inject: ['cpViewCtx'],
 
   data() {
     const cp = this.cpViewCtx.getCp();
-
     const copy = this.cpr ? util.clone(this.cpr) : {participant: {pmis: [], source: 'OpenSpecimen'}};
     copy.cpId = cp.id;
     if (!copy.id) {
@@ -168,8 +167,12 @@ export default {
 
   async created() {
     const cpr = this.dataCtx.cpr;
-    const p = cpr.participant || {};
+    if (!cpr.id && this.participantId > 0) {
+      cpr.participant = await cprSvc.getParticipant(this.participantId);
+      this.ctx.step = 'register';
+    }
 
+    const p = cpr.participant || {};
     const cpCtx = this.cpViewCtx;
     const {ecDocSvc, ecValidationSvc} = this.$osSvc;
     if (ecDocSvc && !cpr.id && cpCtx.isProceedToConsentAllowed() && !this.dataCtx.cp.visitLevelConsents) {

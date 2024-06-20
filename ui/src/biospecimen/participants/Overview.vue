@@ -61,7 +61,6 @@
 
         <template #content>
           <PendingVisits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" />
-          <!-- Visits :cp="ctx.cp" :cpr="ctx.cpr" :visits="ctx.visits" :dict="ctx.visitDict" / -->
         </template>
       </os-section>
     </os-grid-column>
@@ -71,6 +70,19 @@
     <os-audit-trail ref="auditTrailDialog" :objects="ctx.auditObjs" />
 
     <os-plugin-views ref="moreMenuPluginViews" page="participant-detail" view="more-menu" :viewProps="ctx" />
+
+    <os-dialog ref="addToAnotherCpDialog">
+      <template #header>
+        <span v-t="'participants.add_to_another_cp'"></span>
+      </template>
+      <template #content>
+        <os-form ref="addToAnotherCpForm" :schema="anotherRegCtx.formSchema" :data="anotherRegCtx" />
+      </template>
+      <template #footer>
+        <os-button text :label="$t('common.buttons.cancel')" @click="cancelAnotherCpReg" />
+        <os-button primary :label="$t('common.buttons.proceed')" @click="proceedToAnotherCpReg" />
+      </template>
+    </os-dialog>
   </os-grid>
 </template>
 
@@ -79,6 +91,7 @@ import formUtil from '@/common/services/FormUtil.js';
 import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
 
+import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc from '@/biospecimen/services/Cpr.js';
 import visitSvc from '@/biospecimen/services/Visit.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
@@ -121,6 +134,14 @@ export default {
         userRole: null,
 
         moreOptions: []
+      },
+
+      anotherRegCtx: {
+        cpId: null,
+
+        defCpsList: null,
+
+        formSchema: this._getAddToAnotherCpFs()
       }
     };
   },
@@ -205,6 +226,24 @@ export default {
       );
     },
 
+    addToAnother: function() {
+      this.$refs.addToAnotherCpDialog.open();
+    },
+
+    proceedToAnotherCpReg: function() {
+      if (!this.$refs.addToAnotherCpForm.validate()) {
+        return;
+      }
+
+      const {cpId} = this.anotherRegCtx;
+      const {participant: {id: participantId}} = this.cpr;
+      routerSvc.goto('ParticipantAddEdit', {cpId, cprId: -1}, {participantId});
+    },
+
+    cancelAnotherCpReg: function() {
+      this.$refs.addToAnotherCpDialog.close();
+    },
+
     viewAuditTrail: function() {
       this.$refs.auditTrailDialog.open();
     },
@@ -282,12 +321,43 @@ export default {
       );
     },
 
-    _loadMoreMenuOptions: function() {
+    _getAddToOtherCps: async function({query}) {
+      if (!this.query) {
+        if (this.anotherRegCtx.defCpsList) {
+          return this.anotherRegCtx.defCpsList;
+        }
+      }
+
+      const {participant: {pmis, registeredCps}} = this.ctx.cpr;
+      const preRegisteredCps = (registeredCps || []).map(({cpShortTitle}) => cpShortTitle);
+      preRegisteredCps.push(this.ctx.cp.shortTitle);
+
+      let mrnSites = [];
+      if (this.cpViewCtx.isAccessBasedOnMrnSite()) {
+        mrnSites = (pmis || []).map(({siteName}) => siteName);
+      }
+
+      return cpSvc.getCpsForRegistrations(mrnSites, query).then(
+        cps => {
+          cps = cps.filter(cp => preRegisteredCps.indexOf(cp.shortTitle) == -1);
+          if (!this.query) {
+            this.anotherRegCtx.defCpsList = cps;
+          }
+
+          return cps;
+        }
+      );
+    },
+
+    _loadMoreMenuOptions: async function() {
       const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
+      const moreOptions = [
+        {icon: 'plus', caption: this.$t('participants.add_to_another_cp'), onSelect: this.addToAnother}
+      ];
       util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'participant-detail', 'more-menu', ctxt)
         .then(
           pluginOptions => {
-            const options = this.ctx.moreOptions = (this.moreOptions || []).concat(pluginOptions);
+            const options = this.ctx.moreOptions = moreOptions.concat(pluginOptions);
             if (options.length > 0) {
               options.push({divider: true});
             }
@@ -295,6 +365,30 @@ export default {
             options.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
           }
         );
+    },
+
+    _getAddToAnotherCpFs: function() {
+      return {
+        rows: [{
+          fields: [
+            {
+              type: 'dropdown',
+              labelCode: 'participants.select_cp',
+              name: 'cpId',
+              listSource: {
+                selectProp: 'id',
+                displayProp: 'shortTitle',
+                loadFn: ({query, maxResults}) => this._getAddToOtherCps({query, maxResults})
+              },
+              validations: {
+                required: {
+                  messageCode: 'participants.cp_req'
+                }
+              }
+            }
+          ]
+        }]
+      }
     }
   }
 }
