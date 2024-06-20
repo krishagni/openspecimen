@@ -373,7 +373,9 @@ export default {
           this.specimenDicts = this.specimenDicts || {};
           let specimenDict = this.specimenDicts[specimen.cpId];
           if (!specimenDict) {
-            specimenDict = this.specimenDicts[specimen.cpId] = await specimenSvc.getDict(specimen.cpId);
+            specimenDict = await specimenSvc.getDict(specimen.cpId);
+            specimenDict = this._addCpShortTitleAndPpid(specimenDict.filter(field => field.name.indexOf('calc') != 0));
+            this.specimenDicts[specimen.cpId] = specimenDict;
           }
 
           this.ctx.specimenDict = specimenDict;
@@ -644,6 +646,35 @@ export default {
 
     viewSpecimens: function() {
       routerSvc.goto('ContainerDetail.Specimens', {containerId: this.ctx.container.id});
+    },
+
+    _addCpShortTitleAndPpid: function(dict) {
+      const fixedFields = [
+        {
+          name: 'specimen.cpShortTitle',
+          labelCode: 'containers.cp',
+          href: ({specimen: {cpId}}) => routerSvc.getUrl('ParticipantsList', {cpId, cprId: -1}),
+          type: 'span'
+        },
+        {
+          name: 'specimen.ppid',
+          labelCode: 'containers.ppid',
+          type: 'span',
+          href: ({specimen: {cpId, cprId}}) => routerSvc.getUrl('ParticipantsListItemDetail.Overview', {cpId, cprId}),
+          showInOverviewWhen: 'specimen.ppid.indexOf("$$cp_reg_") != 0'
+        }
+      ];
+
+      for (let field of dict) {
+        for (let idx = 0; idx < fixedFields.length; ++idx) {
+          if (field.name == fixedFields[idx].name) {
+            fixedFields.splice(idx, 1);
+            break;
+          }
+        }
+      }
+
+      return fixedFields.concat(dict);
     }
   }
 }

@@ -183,7 +183,18 @@ class Specimen {
       fields => {
         fields = fields.filter(field => field.name.indexOf('specimen.events') == -1)
         for (let field of fields) {
-          if (field.name == 'specimen.parentLabel') {
+          if (field.href) {
+            continue;
+          }
+
+          if (field.name == 'specimen.label' || field.name == 'specimen.barcode') {
+            field.href = ({specimen: {cpId, cprId, visitId, id, eventId, reqId}}) =>
+              routerSvc.getUrl(
+                'ParticipantsListItemSpecimenDetail.Overview',
+                {cpId, cprId, visitId, specimenId: id},
+                {eventId, reqId}
+              );
+          } else if (field.name == 'specimen.parentLabel') {
             field.href = ({specimen: {cpId, cprId, visitId, parentId, eventId}}) =>
               routerSvc.getUrl(
                 'ParticipantsListItemSpecimenDetail.Overview',
