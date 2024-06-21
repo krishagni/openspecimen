@@ -322,7 +322,7 @@ export default {
     },
 
     _getAddToOtherCps: async function({query}) {
-      if (!this.query) {
+      if (!query) {
         if (this.anotherRegCtx.defCpsList) {
           return this.anotherRegCtx.defCpsList;
         }
