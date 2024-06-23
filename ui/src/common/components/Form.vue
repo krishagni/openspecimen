@@ -433,7 +433,7 @@ form {
 }
 
 .row .field .required-indicator,
-:slotted(.row .field .required-indicator) {
+:slotted(.row .field :deep(.required-indicator)) {
   display: inline-block;
   padding: 0rem 0.25rem;
   color: red;

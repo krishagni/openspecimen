@@ -974,6 +974,46 @@
     "not_specified": "Not Specified"
   },
 
+  "roles": {
+    "create_role": "Create Role",
+    "description": "Description",
+    "description_req": "Description is mandatory",
+    "list": "Roles",
+    "name": "Name",
+    "name_req": "Name is mandatory",
+    "ops": {
+      "Create": "Create",
+      "Delete": "Delete",
+      "Export Import": "Exp/Imp",
+      "Lock": "Lock",
+      "Read": "Read",
+      "Unlock": "Unlock",
+      "Update": "Update"
+    },
+    "permissions": "Permissions",
+    "resource": "Resource",
+    "resources": {
+      "Catalog": "Catalogs",
+      "CollectionProtocol": "Collection Protocols",
+      "Consent": "Consent Responses",
+      "DistributionProtocol": "Distribution Protocols",
+      "Order": "Orders",
+      "ParticipantDeid": "Participants (DeId)",
+      "ParticipantPhi": "Participants (PHI)",
+      "PrimarySpecimen": "Primary Specimens",
+      "Query": "Queries",
+      "ScheduledJob": "Scheduled Jobs",
+      "ShippingAndTracking": "Shipping and Tracking",
+      "Specimen": "Specimens",
+      "SpecimenGel": "Specimen Gels",
+      "StorageContainer": "Storage Containers",
+      "SurgicalPathologyReport": "Path Reports",
+      "User": "Users",
+      "Visit": "Visits"
+    },
+    "saved": "Role {name} saved."
+  },
+
   "orders": {
     "checkout_specimens": "Checkout Specimens",
     "confirm_delete_msg": "Order '{name}' and any dependent data will be deleted. Are you sure you want to proceed?",

@@ -247,6 +247,40 @@ const routes = [
 
       /*****************************
        *****************************
+       * User roles module         *
+       *****************************
+       *****************************/
+      {
+        path: 'user-roles/:roleId',
+        name: 'UserRolesList',
+        component: () => import(/* webpackChunkName: "user-roles" */ '../administrative/roles/List.vue'),
+        props: (route) => ({roleId: route.params && route.params.roleId, filters: route.query.filters}),
+        children: [
+          {
+            path: '',
+            name: 'UserRolesListItemDetail',
+            component: () => import(/* webpackChunkName: "user-roles" */ '../administrative/roles/Detail.vue'),
+            props: (route) => ({roleId: route.params && route.params.roleId, noNavButton: true}),
+            children: [
+              {
+                path: 'overview',
+                name: 'UserRolesListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "user-roles" */ '../administrative/roles/Overview.vue')
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        path: 'user-role-addedit/:roleId',
+        name: 'UserRoleAddEdit',
+        component: () => import(/* webpackChunkName: "user-roles" */ '../administrative/roles/AddEdit.vue'),
+        props: (route) => ({roleId: route.params && route.params.roleId})
+      },
+
+      /*****************************
+       *****************************
        * Sites module              *
        *****************************
        *****************************/
