@@ -1298,6 +1298,7 @@
             <caption>#getMessage("specimen_shipment_status")</caption>
             <column>STATUS</column>
             <options>
+              <option><value>Requested</value></option>
               <option><value>Pending</value></option>
               <option><value>Shipped</value></option>
               <option><value>Received</value></option>
