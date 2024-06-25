@@ -1164,6 +1164,7 @@
       "quantity": "Quantity",
       "type": "Type"
     },
+    "specimen_label_or_barcode_exact": "Specimen Label/Barcode (Exact match)",
     "specimen_shipments": "Specimen Shipments",
     "specimens": "Specimens",
     "specimens_not_present": "Failed: Specimens not present in the shipment",

@@ -55,7 +55,10 @@ public class ShipmentController {
 
 		@RequestParam(value = "status", required = false, defaultValue = "")
 		String status,
-			
+
+		@RequestParam(value = "labelOrBarcode", required = false)
+		String labelOrBarcode,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 				
@@ -71,6 +74,7 @@ public class ShipmentController {
 			.recvInstitute(recvInstitute)
 			.recvSite(recvSite)
 			.status(getStatus(status))
+			.labelOrBarcode(labelOrBarcode)
 			.startAt(startAt)
 			.maxResults(maxResults)
 			.includeStat(includeStats);
@@ -94,14 +98,18 @@ public class ShipmentController {
 		String recvSite,
 
 		@RequestParam(value = "status", required = false, defaultValue = "")
-		String status) {
+		String status,
+
+		@RequestParam(value = "labelOrBarcode", required = false)
+		String labelOrBarcode) {
 		
 		ShipmentListCriteria listCrit = new ShipmentListCriteria()
 			.name(name)
 			.sendingSite(sendingSite)
 			.recvInstitute(recvInstitute)
 			.recvSite(recvSite)
-			.status(getStatus(status));
+			.status(getStatus(status))
+			.labelOrBarcode(labelOrBarcode);
 		return Collections.singletonMap("count", response(shipmentSvc.getShipmentsCount(request(listCrit))));
 	}
 

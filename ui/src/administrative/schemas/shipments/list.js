@@ -126,6 +126,11 @@ export default {
       }
     },
     {
+      name: 'labelOrBarcode',
+      type: 'text',
+      captionCode: 'shipments.specimen_label_or_barcode_exact'
+    },
+    {
       name: 'status',
       type: 'dropdown',
       captionCode: 'shipments.status',
