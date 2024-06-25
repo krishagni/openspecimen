@@ -493,10 +493,6 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			if (formIds.contains(form.getId())) {
 				return;
 			}
-
-			if (!multipleForms) {
-				throw OpenSpecimenException.userError(CpGroupErrorCode.DUP_FORM, cp.getShortTitle(), level);
-			}
 		}
 
 		CollectionProtocolSummary cpSummary = new CollectionProtocolSummary();
