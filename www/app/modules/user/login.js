@@ -166,7 +166,8 @@ angular.module('openspecimen')
     }
 
     function gotoCatalog() {
-      if ($state.current.name == 'sc-catalog-dashboard') {
+      var currentState = $state.current.name;
+      if (['sc-catalog-dashboard', 'sc-catalog-search', 'sc-catalog-order'].indexOf(currentState) != -1) {
         console.log('already on some catalog dashboard...');
         return;
       }
