@@ -58,7 +58,7 @@ export default {
         cmd(event);
       }
     }
-  },
+  }
 }
 </script>
 

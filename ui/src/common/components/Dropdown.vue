@@ -187,7 +187,8 @@ export default {
         promise = cache[qs] = http.get(url, params);
       }
 
-      return promise.then(options => options);
+      const optionsAttr = this.listSource.listAttr;
+      return promise.then(options => (optionsAttr && options[optionsAttr]) || options);
     },
 
     extrapolateUrl(url) {

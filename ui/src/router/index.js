@@ -1064,6 +1064,32 @@ const routes = [
             ]
           }
         ]
+      },
+
+      /*****************************
+       *****************************
+       * Scheduled jobs module     *
+       *****************************
+       *****************************/
+      {
+        path: 'scheduled-jobs',
+        name: 'JobsList',
+        component: () => import(/* webpackChunkName: "scheduled-jobs" */ '../administrative/jobs/List.vue'),
+        props: (route) => ({filters: route.query.filters})
+      },
+
+      {
+        path: 'scheduled-jobs/:jobId/runs',
+        name: 'JobRunsList',
+        component: () => import(/* webpackChunkName: "scheduled-jobs" */ '../administrative/jobs/RunsList.vue'),
+        props: ({params, query}) => ({jobId: params && params.jobId, filters: query.filters})
+      },
+
+      {
+        path: 'scheduled-jobs/:jobId/addedit',
+        name: 'JobAddEdit',
+        component: () => import(/* webpackChunkName: "scheduled-jobs" */ '../administrative/jobs/AddEdit.vue'),
+        props: ({params}) => ({jobId: params && params.jobId})
       }
     ]
   },

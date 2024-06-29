@@ -190,7 +190,7 @@ export default {
 
         {
           showIf: {resource: 'ScheduledJob', operations: ['Read']},
-          href: '#/jobs',
+          href: routerSvc.getFullUrl('JobsList', {}),
           icon: 'fa fa-gears',
           title: t('common.home.jobs'),
           description: t('common.home.jobs_desc')

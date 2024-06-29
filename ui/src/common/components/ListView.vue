@@ -101,17 +101,18 @@
               <span v-else-if="filter.type == 'date'">
                 <div class="range" v-if="filter.range">
                   <os-date-picker md-type="true" :placeholder="'Min. ' + caption(filter)"
-                    v-model="filterValues[filter.name + '.$min']"
+                    v-model="filterValues[filter.name + '.$min']" :show-time="filter.showTime"
                     @update:model-value="handleDateInput(filter, filter.name + '.$min')">
                   </os-date-picker>
                   <os-date-picker md-type="true" :placeholder="'Max. ' + caption(filter)"
-                    v-model="filterValues[filter.name + '.$max']"
+                    v-model="filterValues[filter.name + '.$max']" :show-time="filter.showTime"
                     @update:model-value="handleDateInput(filter, filter.name + '.$max')">
                   </os-date-picker>
                 </div>
                 <div v-else>
                   <os-date-picker md-type="true" :placeholder="caption(filter)"
-                    v-model="filterValues[filter.name]" @update:model-value="handleDateInput(filter)">
+                    v-model="filterValues[filter.name]" :show-time="filter.showTime"
+                    @update:model-value="handleDateInput(filter)">
                   </os-date-picker>
                 </div>
               </span>

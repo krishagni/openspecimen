@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +22,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
+import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.events.JobExportDetail;
 import com.krishagni.catissueplus.core.administrative.events.JobRunsListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ScheduledJobDetail;
@@ -123,10 +124,27 @@ public class ScheduledJobsController {
 		@PathVariable(value = "jobId")
 		Long jobId,
 
-		@RequestParam
-		Map<String, String> params) {
+		@RequestParam(value = "fromDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+		Date fromDate,
 
-		JobRunsListCriteria criteria = new ObjectMapper().convertValue(params, JobRunsListCriteria.class).jobId(jobId);
+		@RequestParam(value = "toDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+		Date toDate,
+
+		@RequestParam(value = "status", required = false)
+		ScheduledJobRun.Status status,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+
+		JobRunsListCriteria criteria = new JobRunsListCriteria()
+			.jobId(jobId)
+			.fromDate(fromDate)
+			.toDate(toDate)
+			.status(status)
+			.startAt(0)
+			.maxResults(maxResults);
 		return response(jobSvc.getJobRuns(request(criteria)));
 	}
 	
