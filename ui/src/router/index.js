@@ -1090,6 +1090,18 @@ const routes = [
         name: 'JobAddEdit',
         component: () => import(/* webpackChunkName: "scheduled-jobs" */ '../administrative/jobs/AddEdit.vue'),
         props: ({params}) => ({jobId: params && params.jobId})
+      },
+
+      /*****************************
+       *****************************
+       * Settings                  *
+       *****************************
+       *****************************/
+      {
+        path: 'settings',
+        name: 'SettingsList',
+        component: () => import(/* webpackChunkName: "settings" */ '../administrative/settings/List.vue'),
+        props: ({query}) => ({module: query.module, property: query.property, search: query.search})
       }
     ]
   },

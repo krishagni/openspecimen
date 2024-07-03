@@ -57,6 +57,22 @@ class Setting {
     return setting.promise;
   }
 
+  getSettings(filterOpts) {
+    return http.get('config-settings', filterOpts);
+  }
+
+  getHistory(module, property) {
+    return http.get('config-settings/history', {module, property});
+  }
+
+  saveSetting(setting) {
+    return http.put('config-settings', setting);
+  }
+
+  getDownloadUrl(setting) {
+    return http.getUrl('config-settings/files', {query: {module: setting.module, property: setting.name}});
+  }
+
   async getByProp(module, property) {
     return http.get('config-settings', {module: module, property: property});
   }
