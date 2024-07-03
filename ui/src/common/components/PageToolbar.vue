@@ -13,6 +13,7 @@
 <style scoped>
   .os-page-toolbar {
     padding: 10px 0px 15px;
+    display: flex;
   }
 
   .os-page-toolbar:after {
@@ -35,13 +36,12 @@
   }
 
   .os-page-toolbar .left {
-    float: left;
     margin-right: 10px;
+    flex: 1;
   }
 
   .os-page-toolbar .right {
-    float: right;
-    margin-left: 10px;
+    margin-left: auto;
     margin-right: 15px;
   }
 </style>
