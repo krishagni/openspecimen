@@ -66,6 +66,7 @@ import RadioButton from './RadioButton.vue';
 import Screen from './Screen.vue';
 import ScreenPanel from './ScreenPanel.vue';
 import Section from './Section.vue';
+import SelectButton from './SelectButton.vue';
 import SideMenu from './SideMenu.vue';
 import SignaturePad from './SignaturePad.vue';
 import SiteDropdown from './SiteDropdown.vue';
@@ -165,6 +166,7 @@ export default {
     app.component('os-screen',           Screen);
     app.component('os-screen-panel',     ScreenPanel);
     app.component('os-section',          Section);
+    app.component('os-select-button',    SelectButton);
     app.component('os-side-menu',        SideMenu);
     app.component('os-signature-pad',    SignaturePad);
     app.component('os-site-dropdown',    SiteDropdown);

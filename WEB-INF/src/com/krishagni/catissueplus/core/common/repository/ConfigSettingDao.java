@@ -11,4 +11,6 @@ public interface ConfigSettingDao extends Dao<ConfigSetting> {
 	List<ConfigSetting> getAllSettingsByModule(String moduleName);
 
 	List<ConfigSetting> getSettingsLaterThan(Long settingId);
+
+	List<ConfigSetting> getHistory(String module, String property);
 }

@@ -53,5 +53,19 @@
         cs.activityStatus = 'Active' and
         cs.id > :settingId
     </query>
+
+    <query name="getAllPropertySettings">
+      select
+        cs
+      from
+        com.krishagni.catissueplus.core.common.domain.ConfigSetting cs
+        join cs.property prop
+        join prop.module module
+      where
+        module.name = :moduleName and
+        prop.name = :propName
+      order by
+        cs.id desc
+    </query>
   </class>
 </hibernate-mapping>

@@ -32,6 +32,14 @@ public class ConfigSettingDaoImpl extends AbstractDao<ConfigSetting> implements 
 			.list();
 	}
 
+	@Override
+	public List<ConfigSetting> getHistory(String module, String property) {
+		return createNamedQuery(GET_ALL_PROP_SETTINGS, ConfigSetting.class)
+			.setParameter("moduleName", module)
+			.setParameter("propName", property)
+			.list();
+	}
+
 	private static final String FQN = ConfigSetting.class.getName();
 	
 	private static final String GET_ALL = FQN + ".getAll";
@@ -39,4 +47,6 @@ public class ConfigSettingDaoImpl extends AbstractDao<ConfigSetting> implements 
 	private static final String GET_ALL_BY_MODULE = FQN + ".getAllByModule";
 
 	private static final String GET_ALL_LATER_THAN = FQN + ".getAllLaterThan";
+
+	private static final String GET_ALL_PROP_SETTINGS = FQN + ".getAllPropertySettings";
 }

@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import com.krishagni.catissueplus.core.common.domain.ConfigProperty;
 import com.krishagni.catissueplus.core.common.domain.ConfigProperty.DataType;
 import com.krishagni.catissueplus.core.common.domain.ConfigSetting;
 import com.krishagni.catissueplus.core.common.domain.Module;
 
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 	private String module;
 	
@@ -28,6 +31,8 @@ public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 	private String descCode;
 	
 	private Date activationDate;
+
+	private UserSummary activatedBy;
 	
 	private boolean secured;
 
@@ -94,7 +99,15 @@ public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 	public void setActivationDate(Date activationDate) {
 		this.activationDate = activationDate;
 	}
-	
+
+	public UserSummary getActivatedBy() {
+		return activatedBy;
+	}
+
+	public void setActivatedBy(UserSummary activatedBy) {
+		this.activatedBy = activatedBy;
+	}
+
 	public boolean isSecured() {
 		return secured;
 	}
@@ -112,8 +125,12 @@ public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 
 		return cmp;
 	}
-	
+
 	public static ConfigSettingDetail from(ConfigSetting setting) {
+		return from(setting, false);
+	}
+
+	public static ConfigSettingDetail from(ConfigSetting setting, boolean includeActivatedBy) {
 		ConfigSettingDetail result = new ConfigSettingDetail();
 		
 		ConfigProperty property = setting.getProperty();
@@ -128,10 +145,17 @@ public class ConfigSettingDetail implements Comparable<ConfigSettingDetail> {
 		result.setSecured(property.isSecured());
 		result.setValue(property.isSecured() ? "********" : setting.getValue());
 		result.setActivationDate(setting.getActivationDate());
+		if (includeActivatedBy) {
+			result.setActivatedBy(UserSummary.from(setting.getActivatedBy()));
+		}
 		return result;
 	}
 	
 	public static List<ConfigSettingDetail> from(Collection<ConfigSetting> settings) {
 		return settings.stream().map(ConfigSettingDetail::from).sorted().collect(Collectors.toList());
+	}
+
+	public static List<ConfigSettingDetail> from(Collection<ConfigSetting> settings, boolean includeActivatedBy) {
+		return settings.stream().map(s -> from(s, includeActivatedBy)).sorted().collect(Collectors.toList());
 	}
 }

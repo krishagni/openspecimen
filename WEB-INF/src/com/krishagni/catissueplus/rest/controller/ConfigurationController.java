@@ -64,6 +64,18 @@ public class ConfigurationController {
 		}
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "history")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<ConfigSettingDetail> getConfigSettingHistory(
+		@RequestParam(value = "module")
+		String module,
+
+		@RequestParam(value = "property")
+		String property) {
+		return response(cfgSvc.getSettingHistory(request(Pair.make(module, property))));
+	}
+
 	@RequestMapping(method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	

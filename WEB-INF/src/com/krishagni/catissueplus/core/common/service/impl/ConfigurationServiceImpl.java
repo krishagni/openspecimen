@@ -61,6 +61,7 @@ import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.importer.services.ImportService;
+import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class ConfigurationServiceImpl implements ConfigurationService, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
 	private static final LogUtil logger = LogUtil.getLogger(ConfigurationServiceImpl.class);
@@ -257,6 +258,29 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 			return ResponseEvent.serverError(e);
 		} finally {
 			IOUtils.closeQuietly(out);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<ConfigSettingDetail>> getSettingHistory(RequestEvent<Pair<String, String>> req) {
+		try {
+			if (!AuthUtil.isAdmin()) {
+				return ResponseEvent.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
+			}
+
+			Pair<String, String> payload = req.getPayload();
+			Map<String, ConfigSetting> moduleSettings = configSettings.get(payload.first());
+			if (moduleSettings == null || moduleSettings.get(payload.second()) == null) {
+				return ResponseEvent.response(Collections.emptyList());
+			}
+
+			List<ConfigSetting> settings = daoFactory.getConfigSettingDao().getHistory(payload.first(), payload.second());
+			return ResponseEvent.response(ConfigSettingDetail.from(settings, true));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
 		}
 	}
 
