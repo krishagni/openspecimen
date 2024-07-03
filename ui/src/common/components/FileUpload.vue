@@ -2,7 +2,11 @@
 <template>
   <div class="os-file-upload" v-if="!inputValue">
     <FileUpload ref="uploader" mode="basic" name="file" :auto="auto != false" :url="url" :tabindex="tabOrder"
-      :disabled="disabled" @before-send="addHeaders" @upload="onUpload" @error="onError" />
+      :disabled="disabled" @before-send="addHeaders" @upload="onUpload" @error="onError" @select="onFileSelect" />
+
+    <div v-if="selectedFile">
+      <os-button class="clear" :left-icon="'times'" :label="'Clear Selection'" @click="clear" />
+    </div>
   </div>
   <div class="os-selected-file" v-else>
     <span class="filename">{{inputValue.filename}}</span>
@@ -23,6 +27,12 @@ export default {
   components: {
     Button,
     FileUpload
+  },
+
+  data() {
+    return {
+      selectedFile: null
+    }
   },
 
   computed: {
@@ -51,8 +61,17 @@ export default {
       });
     },
 
+    clear: function() {
+      this.$refs.uploader.clear();
+      this.selectedFile = null;
+    },
+
     hasFiles: function() {
-      return this.$refs.uploader.hasFiles;
+      return this.$refs.uploader && this.$refs.uploader.hasFiles;
+    },
+
+    onFileSelect: function({files}) {
+      this.selectedFile = files;
     },
 
     addHeaders: function({xhr}) {
@@ -112,6 +131,14 @@ export default {
 </script>
 
 <style scoped>
+.os-file-upload {
+  display: flex;
+}
+
+.os-file-upload .clear {
+  margin-left: 0.5rem;
+}
+
 .os-file-upload :deep(.p-fileupload .p-button) {
   border-radius: 1.125rem;
 }
@@ -119,7 +146,7 @@ export default {
 .os-selected-file {
   display: flex;
 }
-  
+
 .os-selected-file .filename {
   flex: 1 1 auto;
   padding: 0.5rem 0.75rem;
