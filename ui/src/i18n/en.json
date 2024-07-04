@@ -1458,7 +1458,7 @@
     "email": {
       "title": "Email",
       "account_id": "OpenSpecimen Account",
-      "account_id_desc": "Account ID that is used for authentication with the email server to send and receive messages. E.g. openspecimen@mycenter.edu, apikey",
+      "account_id_desc": "Account ID that is used for authentication with the email server to send and receive messages. E.g. {'openspecimen@mycenter.edu'}, apikey",
       "account_password": "Account Password",
       "account_password_desc": "Password of the OpenSpecimen email account.",
       "admin_email_id": "Administrator Email Address",
