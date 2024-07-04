@@ -217,7 +217,7 @@ export default {
 
         {
           showIf: 'admin',
-          href: '#/settings/settings-list',
+          href: routerSvc.getFullUrl('SettingsList', {}),
           icon: 'fa fa-wrench',
           title: t('common.home.settings'),
           description: t('common.home.settings_desc'),
