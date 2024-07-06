@@ -26,6 +26,7 @@
     "vue": "^3.4.6",
     "vue-clipboard3": "^1.0.1",
     "vue-i18n": "^9.2.2",
+    "vue-draggable-next": "^2.0.0",
     "vue-router": "^4.0.14"
   },
   "devDependencies": {

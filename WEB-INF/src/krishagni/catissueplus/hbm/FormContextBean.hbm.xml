@@ -123,16 +123,19 @@
       <return-scalar column="cpId"          type="long"/>
       <return-scalar column="shortTitle"    type="string"/>
       <return-scalar column="title"         type="string"/>
+      <return-scalar column="institute_name" type="string" />
             
       select
         fctxt.identifier as ctxtId, fctxt.container_id as formId, fctxt.entity_type as entityLevel, 
         fctxt.entity_id as entityId, fctxt.is_multirecord as multirecord, fctxt.is_sys_form as sysForm,
         fctxt.notifs_enabled as notifsEnabled, fctxt.data_in_notif as dataInNotif,
-        cp.identifier as cpId, cp.short_title as shortTitle, cp.title as title
+        cp.identifier as cpId, cp.short_title as shortTitle, cp.title as title,
+        i.name as institute_name
       from
         catissue_form_context fctxt
         inner join dyextn_containers c on c.identifier = fctxt.container_id	
         left join catissue_collection_protocol cp on cp.identifier = fctxt.cp_id
+        left join catissue_institution i on i.identifier = fctxt.entity_id and fctxt.entity_type in ('User', 'UserProfile')
       where
         c.deleted_on is null and
         (cp.activity_status != 'Disabled' or fctxt.cp_id = -1) and

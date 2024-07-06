@@ -21,6 +21,7 @@ import org.hibernate.Session;
 
 import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.administrative.repository.FormListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
@@ -263,6 +264,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			cp.setShortTitle((String)row[++idx]);
 			cp.setTitle((String)row[++idx]);
 			formCtxt.setCollectionProtocol(cp);
+			formCtxt.setInstituteName((String)row[++idx]);
 			
 			formCtxts.add(formCtxt);
 		}
@@ -390,6 +392,12 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		result.setFormId((Long)row[0]);
 		result.setCaption((String)row[1]);
 		return result;		
+	}
+
+	@Override
+	public FormContextBean getFormContext(Long formCtxtId) {
+		Criteria<FormContextBean> query = createCriteria(FormContextBean.class, "fc");
+		return query.add(query.eq("fc.identifier", formCtxtId)).uniqueResult();
 	}
 
 	@Override
@@ -1045,6 +1053,15 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 					query.in("fc.cpId", crit.cpIds())
 				)
 			);
+		} else if (CollectionUtils.isNotEmpty(crit.cps())) {
+			SubQuery<Long> sq = query.createSubQuery(CollectionProtocol.class, Long.class, "cp");
+			sq.add(sq.in("cp.shortTitle", crit.cps())).select("cp.id");
+			query.add(
+				query.or(
+					query.eq("fc.cpId", -1L),
+					query.in("fc.cpId", sq)
+				)
+			);
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.entityIds())) {
@@ -1054,6 +1071,10 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 					query.in("fc.entityId", crit.entityIds())
 				)
 			);
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.formIds())) {
+			query.add(query.in("form.id", crit.formIds()));
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.names())) {

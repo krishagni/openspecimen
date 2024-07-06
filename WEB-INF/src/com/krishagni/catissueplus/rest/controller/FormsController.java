@@ -88,11 +88,17 @@ public class FormsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<FormSummary> getForms(
+		@RequestParam(value = "formId", required = false)
+		List<Long> formIds,
+
 		@RequestParam(value = "name", required= false, defaultValue = "")
 		String name,
 
 		@RequestParam(value = "cpId", required = false)
 		List<Long> cpIds,
+
+		@RequestParam(value = "cp", required = false)
+		List<String> cps,
 
 		@RequestParam(value = "entityId", required = false)
 		List<Long> entityIds,
@@ -114,7 +120,9 @@ public class FormsController {
 
 		FormListCriteria crit = new FormListCriteria()
 			.query(name)
+			.formIds(formIds)
 			.cpIds(cpIds)
+			.cps(cps)
 			.entityIds(entityIds)
 			.entityTypes(formTypes)
 			.excludeSysForm(excludeSysForms)
@@ -131,11 +139,17 @@ public class FormsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, Long> getFormsCount(
+		@RequestParam(value = "formId", required = false)
+		List<Long> formIds,
+
 		@RequestParam(value = "name", required= false, defaultValue = "")
 		String name,
 
 		@RequestParam(value = "cpId", required = false)
 		List<Long> cpIds,
+
+		@RequestParam(value = "cp", required = false)
+		List<String> cps,
 
 		@RequestParam(value = "entityId", required = false)
 		List<Long> entityIds,
@@ -147,8 +161,10 @@ public class FormsController {
 		Boolean excludeSysForms) {
 		
 		FormListCriteria crit = new FormListCriteria()
+			.formIds(formIds)
 			.query(name)
 			.cpIds(cpIds)
+			.cps(cps)
 			.entityIds(entityIds)
 			.entityTypes(formTypes)
 			.excludeSysForm(excludeSysForms);
@@ -362,6 +378,16 @@ public class FormsController {
 		
 		formCtxts.forEach(fc -> fc.setFormId(formId));
 		return ResponseEvent.unwrap(formSvc.addFormContexts(RequestEvent.wrap(formCtxts)));
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value="/contexts/{formCtxtId}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> removeFormContext(@PathVariable("formCtxtId") Long formCtxtId) {
+		RemoveFormContextOp op = new RemoveFormContextOp();
+		op.setFormContextId(formCtxtId);
+		op.setRemoveType(RemoveType.SOFT_REMOVE);
+		return Collections.singletonMap("status", ResponseEvent.unwrap(formSvc.removeFormContext(RequestEvent.wrap(op))));
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value="{id}/contexts")

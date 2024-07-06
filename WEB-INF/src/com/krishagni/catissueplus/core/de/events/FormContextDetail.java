@@ -9,6 +9,8 @@ public class FormContextDetail {
 	private Long formCtxtId;
 	
 	private CollectionProtocolSummary collectionProtocol;
+
+	private String instituteName;
 	
 	private String level;
 
@@ -42,6 +44,14 @@ public class FormContextDetail {
 
 	public void setCollectionProtocol(CollectionProtocolSummary collectionProtocol) {
 		this.collectionProtocol = collectionProtocol;
+	}
+
+	public String getInstituteName() {
+		return instituteName;
+	}
+
+	public void setInstituteName(String instituteName) {
+		this.instituteName = instituteName;
 	}
 
 	public String getLevel() {

@@ -491,16 +491,23 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			AccessCtrlMgr.getInstance().ensureFormUpdateRights();
 
 			RemoveFormContextOp opDetail = req.getPayload();
-			Long cpId = opDetail.getCpId();
-			Long entityId = opDetail.getEntityId();
-			FormContextBean formCtx = formDao.getFormContext(
-				entityId == null,
-				opDetail.getEntityType(),
-				entityId == null ? opDetail.getCpId() : entityId,
-				opDetail.getFormId());
-
-			if (formCtx == null) {
-				return ResponseEvent.userError(FormErrorCode.NO_ASSOCIATION, cpId, opDetail.getFormId()	);
+			FormContextBean formCtx = null;
+			if (opDetail.getFormContextId() != null) {
+				formCtx = formDao.getFormContext(opDetail.getFormContextId());
+				if (formCtx == null) {
+					return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, "Form context " + opDetail.getFormContextId() + " does not exist.");
+				}
+			} else {
+				Long cpId = opDetail.getCpId();
+				Long entityId = opDetail.getEntityId();
+				formCtx = formDao.getFormContext(
+					entityId == null,
+					opDetail.getEntityType(),
+					entityId == null ? opDetail.getCpId() : entityId,
+					opDetail.getFormId());
+				if (formCtx == null) {
+					return ResponseEvent.userError(FormErrorCode.NO_ASSOCIATION, cpId, opDetail.getFormId()	);
+				}
 			}
 
 			if (formCtx.isSysForm()) {

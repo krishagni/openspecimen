@@ -1102,6 +1102,42 @@ const routes = [
         name: 'SettingsList',
         component: () => import(/* webpackChunkName: "settings" */ '../administrative/settings/List.vue'),
         props: ({query}) => ({module: query.module, property: query.property, search: query.search})
+      },
+
+      /*****************************
+       *****************************
+       * Forms                     *
+       *****************************
+       *****************************/
+      {
+        path: 'forms/:formId',
+        name: 'FormsList',
+        component: () => import(/* webpackChunkName: "forms" */ '../administrative/forms/List.vue'),
+        props: ({params, query}) => ({formId: params.formId, filters: query.filters}),
+        children: [
+          {
+            path: '',
+            name: 'FormsListItemDetail',
+            component: () => import(/* webpackChunkName: "forms" */ '../administrative/forms/Detail.vue'),
+            children: [
+              {
+                path: 'overview',
+                name: 'FormsListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "forms" */ '../administrative/forms/Overview.vue')
+              },
+              {
+                path: 'preview',
+                name: 'FormsListItemDetail.Preview',
+                component: () => import(/* webpackChunkName: "forms" */ '../administrative/forms/Preview.vue')
+              },
+              {
+                path: 'associations',
+                name: 'FormsListItemDetail.Associations',
+                component: () => import(/* webpackChunkName: "forms" */ '../administrative/forms/Associations.vue')
+              }
+            ]
+          }
+        ]
       }
     ]
   },

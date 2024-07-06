@@ -81,8 +81,11 @@
               </span>
               <span v-else-if="filter.type == 'dropdown'">
                 <dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
-                  :list-source="filter.listSource">
+                  :list-source="filter.listSource" v-if="!filter.multiple">
                 </dropdown>
+                <multiselect md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
+                  :list-source="filter.listSource" v-else>
+                </multiselect>
               </span>
               <span v-else-if="filter.type == 'pv'">
                 <os-pv-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
@@ -188,6 +191,7 @@ import Col from '@/common/components/Col.vue';
 import InputText from '@/common/components/InputText.vue';
 import Label from '@/common/components/Label.vue';
 import Dropdown from '@/common/components/Dropdown.vue';
+import MultiSelectDropdown from '@/common/components/MultiSelectDropdown.vue';
 import Button from '@/common/components/Button.vue';
 import RadioButton from '@/common/components/RadioButton.vue';
 import Message from '@/common/components/Message.vue';
@@ -219,6 +223,7 @@ export default {
     'cell': Col,
     'input-text': InputText,
     'dropdown': Dropdown,
+    'multiselect': MultiSelectDropdown,
     'os-label': Label,
     'os-radio-button': RadioButton,
     'os-message': Message,

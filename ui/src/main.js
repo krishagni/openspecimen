@@ -14,6 +14,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 
+import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import BadgeDirective from 'primevue/badgedirective';
@@ -45,6 +46,7 @@ import Layout from '@/administrative/containers/Layout.vue';
 
 window['Vue'] = Vue;
 const app = createApp(Root)
+  .use(ConfirmationService)
   .use(ToastService)
   .use(CommonComponents)
   .use(CommonServices)

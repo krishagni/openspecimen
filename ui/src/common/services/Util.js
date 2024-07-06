@@ -528,6 +528,15 @@ class Util {
     return inputValue || '-';
   }
 
+  toSnakeCase(input) {
+    return (input || '').replaceAll(/^\d+|\W+/g, ' ') // convert whitespaces and other special character into a single space
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCaseID = camel Case ID
+      .trim()
+      .split(' ')
+      .join('_')
+      .toLowerCase();
+  }
+
   _getEscapeMap(str) {
     let map = {}, insideSgl = false, insideDbl = false;
     let lastIdx = -1;

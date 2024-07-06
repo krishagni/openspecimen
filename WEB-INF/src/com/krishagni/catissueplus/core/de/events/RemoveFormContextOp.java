@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.de.events;
 
 public class RemoveFormContextOp {
 	public enum RemoveType { SOFT_REMOVE, HARD_REMOVE };
+
+	private Long formContextId;
 	
 	private Long formId;
 	
@@ -12,8 +14,16 @@ public class RemoveFormContextOp {
 
 	private Long entityId;
 	
-	private RemoveType removeType; 
-	
+	private RemoveType removeType;
+
+	public Long getFormContextId() {
+		return formContextId;
+	}
+
+	public void setFormContextId(Long formContextId) {
+		this.formContextId = formContextId;
+	}
+
 	public Long getFormId() {
 		return formId;
 	}
