@@ -157,7 +157,7 @@ export default {
         },
 
         {
-          href: '#/forms',
+          href: routerSvc.getFullUrl('FormsList', {formId: -1}),
           icon: 'fa fa-copy',
           title: t('common.home.forms'),
           description: t('common.home.forms_desc'),

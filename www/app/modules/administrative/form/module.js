@@ -21,9 +21,11 @@ angular.module('os.administrative.form',
       })
       .state('form-list', {
         url: '/forms?filters',
-        templateUrl: 'modules/administrative/form/list.html',
-        controller: 'FormListCtrl',
-        parent: 'form-root'
+        template: '<div></div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('forms/-1', $stateParams);
+        },
+        parent: 'signed-in'
       })
       .state('form-addedit', {
         url: '/form-addedit/:formId',
