@@ -35,12 +35,12 @@ export default {
     },
     {
       "name": "form.createdBy",
-      "captionCode": "forms.created_by",
+      "captionCode": "common.created_by",
       "type": "user"
     },
     {
       "name": "form.updateTime",
-      "captionCode": "forms.update_time",
+      "captionCode": "common.update_time",
       "value": ({form}) => dateFmt.dateTime(form.modificationTime || form.creationTime),
       "type": "date-time"
     },
@@ -54,7 +54,7 @@ export default {
     {
       "name": "name",
       "type": "text",
-      "captionCode": "forms.name"
+      "captionCode": "forms.form_name"
     },
 
     {

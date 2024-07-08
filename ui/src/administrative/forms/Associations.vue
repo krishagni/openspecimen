@@ -4,7 +4,7 @@
     <os-page-toolbar>
       <template #default>
         <os-button left-icon="plus"    :label="$t('common.buttons.add')"   @click="showAddAssociationDialog" />
-        <os-button left-icon="history" :label="$t('forms.view_revisions')" @click="showAssociationRevisions" />
+        <os-button left-icon="history" :label="$t('audit.trail')" @click="showAssociationRevisions" />
       </template>
     </os-page-toolbar>
 
@@ -53,13 +53,13 @@
 
     <os-confirm-delete ref="confirmDeleteAssociationDialog" :captcha="false">
       <template #message>
-        <span v-t="{path: 'forms.confirm_delete_association', args: ctx.association}"></span>
+        <span v-t="{path: 'forms.confirm_delete_association', args: {level: ctx.association.level.entityTypeLabel, group: ctx.association.group}}"></span>
       </template>
     </os-confirm-delete>
 
     <os-dialog ref="revisionsDialog">
       <template #header>
-        <span v-t="{path: 'forms.association_revs', args: form}"></span> 
+        <span v-t="'audit.trail'"></span>
       </template>
       <template #content>
         <os-list-view :data="ctx.revisions" :schema="revsListSchema" />

@@ -2,12 +2,12 @@ export default {
   columns: [
     {
       "name": "revision.revBy",
-      "captionCode": "forms.updated_by",
+      "captionCode": "common.updated_by",
       "type": "user"
     },
     {
       "name": "revision.revTime",
-      "captionCode": "forms.update_time",
+      "captionCode": "common.update_time",
       "type": "date-time"
     }
   ]

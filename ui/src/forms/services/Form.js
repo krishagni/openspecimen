@@ -67,6 +67,10 @@ class Form {
     return http.delete('forms/' + formId);
   }
 
+  async getDependents(formId) {
+    return http.get('forms/' + formId + '/dependent-entities');
+  }
+
   async deleteForms(formIds) {
     return http.delete('forms', {}, {id: formIds});
   }

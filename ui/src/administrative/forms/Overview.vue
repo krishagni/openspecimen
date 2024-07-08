@@ -45,11 +45,7 @@
       </template>
     </os-dialog>
 
-    <os-confirm-delete ref="confirmDeleteForm" :captcha="false">
-      <template #message>
-        <span v-t="{path: 'forms.confirm_delete_form', args: form}"></span>
-      </template>
-    </os-confirm-delete>
+    <os-delete-object ref="deleteFormDialog" :input="ctx.deleteOpts" />
   </div>
 </template>
 
@@ -77,7 +73,9 @@ export default {
 
         revisions: [],
 
-        revSchema: {rows: []}
+        revSchema: {rows: []},
+
+        deleteOpts: {}
       },
 
       revsListSchema
@@ -86,6 +84,12 @@ export default {
 
   created() {
     formSvc.getDefinition(this.form.formId).then(formDef => this.ctx.formDef = formDef);
+    this.ctx.deleteOpts = {
+      dependents: this._getDependents,
+      deleteObj: this._deleteForm,
+      forceDelete: true,
+      title: this.form.caption
+    }
   },
 
   methods: {
@@ -94,10 +98,10 @@ export default {
     },
 
     deleteForm: function() {
-      this.$refs.confirmDeleteForm.open().then(
+      this.$refs.deleteFormDialog.execute().then(
         resp => {
-          if (resp == 'proceed') {
-            formSvc.deleteForm(this.form.formId).then(() => routerSvc.goto('FormsList', {formId: -1}));
+          if (resp == 'deleted') {
+            routerSvc.goto('FormsList', {formId: -1});
           }
         }
       );
@@ -139,6 +143,14 @@ export default {
 
     onSave: function({form: {caption}}) {
       Object.assign(this.form, {caption});
+    },
+
+    _getDependents: function() {
+      return formSvc.getDependents(this.form.formId);
+    },
+
+    _deleteForm: function() {
+      return formSvc.deleteForm(this.form.formId);
     }
   }
 }

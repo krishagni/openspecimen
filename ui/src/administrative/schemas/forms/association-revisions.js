@@ -9,17 +9,17 @@ export default {
     },
     {
       "name": "revision.action",
-      "captionCode": "forms.action",
+      "captionCode": "common.action",
       "value": ({revision: {revType}}) => i18n.msg('common.buttons.' + ['create', 'update', 'delete'][revType])
     },
     {
       "name": "revision.revBy",
-      "captionCode": "forms.updated_by",
+      "captionCode": "common.updated_by",
       "type": "user"
     },
     {
       "name": "revision.revTime",
-      "captionCode": "forms.update_time",
+      "captionCode": "common.update_time",
       "type": "date-time"
     }
   ]
