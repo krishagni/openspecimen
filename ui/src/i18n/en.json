@@ -884,6 +884,7 @@
     "multiple_records": "Multiple records allowed",
     "name": "Name",
     "no_associations": "This form is not used for data entry at any level. Start by adding an association...",
+    "no_fields_in_form": "Form does not have any fields. Nothing to show.",
     "not_applicable": "Not Applicable",
     "notify_users": "Notification Recipients",
     "preview": "Preview",
