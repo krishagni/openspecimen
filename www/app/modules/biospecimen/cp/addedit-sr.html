@@ -157,6 +157,17 @@
       </div>
       <div class="os-divider"></div>
       <div class="form-group">
+        <label class="control-label col-xs-4">
+          <span translate="srs.default_custom_field_values">Default Custom Field Values</span>
+        </label>
+        <div class="col-xs-8">
+          <textarea ng-model="sr.defaultCustomFieldValuesJson" class="form-control"
+            placeholder="{{'srs.default_custom_field_values' | translate}}" rows="5">
+          </textarea>
+        </div>
+      </div>
+      <div class="os-divider"></div>
+      <div class="form-group">
         <div class="col-xs-offset-4 col-xs-8">
           <button type="submit" class="btn btn-success" os-form-submit="createSr()" ng-if="!sr.id">
             <span translate="common.buttons.create">Create</span>

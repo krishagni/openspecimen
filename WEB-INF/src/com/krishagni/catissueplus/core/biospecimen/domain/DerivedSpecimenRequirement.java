@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 public class DerivedSpecimenRequirement {
 	private String cpShortTitle;
@@ -38,6 +39,8 @@ public class DerivedSpecimenRequirement {
 	private String code;
 
 	private Integer sortOrder;
+
+	private Map<String, Object> defaultCustomFieldValues;
 	
 	public String getCpShortTitle() {
 		return cpShortTitle;
@@ -181,5 +184,13 @@ public class DerivedSpecimenRequirement {
 
 	public void setSortOrder(Integer sortOrder) {
 		this.sortOrder = sortOrder;
+	}
+
+	public Map<String, Object> getDefaultCustomFieldValues() {
+		return defaultCustomFieldValues;
+	}
+
+	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
+		this.defaultCustomFieldValues = defaultCustomFieldValues;
 	}
 }

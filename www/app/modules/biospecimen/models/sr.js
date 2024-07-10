@@ -13,6 +13,10 @@ angular.module('os.biospecimen.models.sr', ['os.common.models'])
           );
         }
 
+        if (sr.defaultCustomFieldValues && typeof sr.defaultCustomFieldValues == 'object') {
+          sr.defaultCustomFieldValuesJson = JSON.stringify(sr.defaultCustomFieldValues, null, 2);
+        }
+
         if (sr.children) {
           sr.children = sr.children.map(
             function(child) {
@@ -42,6 +46,21 @@ angular.module('os.biospecimen.models.sr', ['os.common.models'])
       return Sr.query({cpId: cpId});
     };
 
+    Sr.prototype.$saveProps = function() {
+      if (this.defaultCustomFieldValuesJson) {
+        try {
+          this.defaultCustomFieldValues = JSON.parse(this.defaultCustomFieldValuesJson);
+        } catch (e) {
+          alert('Invalid default custom field values JSON: ' + e);
+          throw e;
+        }
+      } else {
+        this.defaultCustomFieldValues = null;
+      }
+
+      return this;
+    }
+
     Sr.prototype.isAliquot = function() {
       return this.lineage == 'Aliquot';
     };
@@ -56,12 +75,30 @@ angular.module('os.biospecimen.models.sr', ['os.common.models'])
 
     Sr.prototype.createAliquots = function(requirement) {
       var url = Sr.url();
+      if (requirement.defaultCustomFieldValuesJson) {
+        try {
+          requirement.defaultCustomFieldValues = JSON.parse(requirement.defaultCustomFieldValuesJson);
+        } catch (e) {
+          alert('Invalid aliquot default custom field values JSON. Error: ' + e);
+          throw e;
+        }
+      }
+
       return $http.post(url + this.$id() + '/aliquots', requirement)
                .then(Sr.modelArrayRespTransform);
     };
 
     Sr.prototype.createDerived = function(requirement) {
       var url = Sr.url();
+      if (requirement.defaultCustomFieldValuesJson) {
+        try {
+          requirement.defaultCustomFieldValues = JSON.parse(requirement.defaultCustomFieldValuesJson);
+        } catch (e) {
+          alert('Invalid derived specimen default custom field values JSON. Error: ' + e);
+          throw e;
+        }
+      }
+
       return $http.post(url + this.$id() + '/derived', requirement)
                .then(Sr.modelRespTransform);
     };

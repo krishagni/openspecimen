@@ -1168,6 +1168,7 @@
     "closing_sr": "Closing Requirement...",
     "confirm_close_sr": "Selected requirement and all its children will be closed. Are you sure you want to proceed?",
     "lbl_fmt_required_for_auto_print": "Pre-printing requires specimen label format to be specified either at CP level or requirement level",
+    "default_custom_field_values": "Default Custom Field Values",
     "ctx_menu": {
       "view": "View",
       "edit": "Edit",

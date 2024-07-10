@@ -103,6 +103,11 @@ export default {
       specimen.initialQty = req.initialQty;
       specimen.concentration = req.concentration;
       specimen.collectionContainer = req.collectionContainer;
+      specimen.extensionDetail = req.extensionDetail;
+      if (specimen.extensionDetail) {
+        formUtil.createCustomFieldsMap(specimen, true);
+      }
+
       delete req.id;
 
       specimen.children = [];

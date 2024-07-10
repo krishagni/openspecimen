@@ -3,10 +3,14 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
@@ -15,6 +19,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
 @JsonFilter("withoutId")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -62,6 +67,8 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	private Integer labelPrintCopies;
 	
 	private Integer sortOrder;
+
+	private Map<String, Object> defaultCustomFieldValues;
 	
 	private Long eventId;
 
@@ -76,6 +83,8 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	private String parentSrCode;
 
 	private String activityStatus;
+
+	private ExtensionDetail extensionDetail;
 
 	public Long getId() {
 		return id;
@@ -253,6 +262,32 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.sortOrder = sortOrder;
 	}
 
+	public Map<String, Object> getDefaultCustomFieldValues() {
+		return defaultCustomFieldValues;
+	}
+
+	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
+		this.defaultCustomFieldValues = defaultCustomFieldValues;
+	}
+
+	@JsonIgnore
+	public String getDefCustomFieldValuesJson() {
+		if (defaultCustomFieldValues == null) {
+			return null;
+		}
+
+		return Utility.mapToJson(defaultCustomFieldValues);
+	}
+
+	@JsonProperty
+	public void setDefCustomFieldValuesJson(String json) {
+		if (StringUtils.isBlank(json)) {
+			this.defaultCustomFieldValues = null;
+		} else {
+			this.defaultCustomFieldValues = Utility.jsonToMap(json);
+		}
+	}
+
 	public Long getEventId() {
 		return eventId;
 	}
@@ -309,6 +344,14 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.activityStatus = activityStatus;
 	}
 
+	public ExtensionDetail getExtensionDetail() {
+		return extensionDetail;
+	}
+
+	public void setExtensionDetail(ExtensionDetail extensionDetail) {
+		this.extensionDetail = extensionDetail;
+	}
+
 	@Override
 	public int compareTo(SpecimenRequirementDetail other) {
 		int cmp = NumUtil.compareTo(sortOrder, other.sortOrder);
@@ -328,7 +371,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		req.setParentSrId(parentSrId);
 		req.setQtyPerAliquot(getInitialQty());
 		req.setStorageType(getStorageType());
-		
+		req.setDefaultCustomFieldValues(getDefaultCustomFieldValues());
 		return req;		
 	}
 	
@@ -346,7 +389,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		req.setType(getType());
 		req.setCode(getCode());
 		req.setPathology(getPathology());
-		
+		req.setDefaultCustomFieldValues(getDefaultCustomFieldValues());
 		return req;
 	}
 	
@@ -376,6 +419,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setLabelAutoPrintMode(sr.getLabelAutoPrintMode() == null ? null : sr.getLabelAutoPrintMode().name());
 		detail.setLabelPrintCopies(sr.getLabelPrintCopies());
 		detail.setSortOrder(sr.getSortOrder());
+		detail.setDefaultCustomFieldValues(sr.getDefaultCustomFieldValues());
 		detail.setEventId(sr.getCollectionProtocolEvent().getId());
 		detail.setCpShortTitle(sr.getCollectionProtocol().getShortTitle());
 		detail.setActivityStatus(sr.getActivityStatus());

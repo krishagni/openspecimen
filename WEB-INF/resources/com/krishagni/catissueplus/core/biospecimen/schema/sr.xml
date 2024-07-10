@@ -142,6 +142,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("sr_default_custom_field_values")</caption>
+      <attribute>defCustomFieldValuesJson</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("sr_activity_status")</caption>
       <attribute>activityStatus</attribute>
     </field>

@@ -117,6 +117,12 @@
       </div>
     </li>
   </ul>
+  <div ng-if="childReq.defaultCustomFieldValuesJson">
+    <div class="os-section" style="margin-left: 0.5rem;">
+      <h3 class="os-sub-section-title" translate="srs.default_custom_field_values"></h3>
+      <pre>{{childReq.defaultCustomFieldValuesJson}}</pre>
+    </div>
+  </div>
 
   <div class="os-divider"></div>
 

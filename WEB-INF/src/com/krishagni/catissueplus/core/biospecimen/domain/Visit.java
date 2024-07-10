@@ -448,6 +448,9 @@ public class Visit extends BaseExtensionEntity {
 	public void addSpecimen(Specimen specimen) {
 		specimen.setVisit(this);
 		getSpecimens().add(specimen);
+		daoFactory.getSpecimenDao().saveOrUpdate(specimen);
+		specimen.addOrUpdateExtension();
+		EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 	}
 	
 	public CollectionProtocol getCollectionProtocol() {
@@ -683,10 +686,7 @@ public class Visit extends BaseExtensionEntity {
 		specimen.setCollectionStatus(Specimen.PENDING);
 		specimen.updateAvailableStatus();
 		specimen.setLabelIfEmpty();
-
 		addSpecimen(specimen);
-		daoFactory.getSpecimenDao().saveOrUpdate(specimen);
-		EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 
 		for (SpecimenRequirement childSr : sr.getOrderedChildRequirements()) {
 			Specimen childSpmn = createPendingSpecimen(childSr, specimen);

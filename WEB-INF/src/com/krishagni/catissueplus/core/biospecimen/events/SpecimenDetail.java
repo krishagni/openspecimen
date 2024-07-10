@@ -26,6 +26,7 @@ import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 
 @ListenAttributeChanges
@@ -514,6 +515,13 @@ public class SpecimenDetail extends SpecimenInfo {
 			result.setLabelAutoPrintMode(anticipated.getLabelAutoPrintModeToUse().name());
 		}
 		result.setReqCode(anticipated.getCode());
+
+		if (anticipated.getDefaultCustomFieldValues() != null && !anticipated.getDefaultCustomFieldValues().isEmpty()) {
+			Long cpId = anticipated.getCollectionProtocol().getId();
+			DeObject extn = DeObject.fromValueMap(cpId, Specimen.EXTN, anticipated.getDefaultCustomFieldValues());
+			result.setExtensionDetail(ExtensionDetail.from(extn, false, true));
+		}
+
 		return result;		
 	}
 

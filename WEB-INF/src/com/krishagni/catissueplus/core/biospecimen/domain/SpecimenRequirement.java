@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.domain.DeObject;
 
 @Audited
 public class SpecimenRequirement extends BaseEntity implements Comparable<SpecimenRequirement> {
@@ -65,6 +67,8 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 	private Integer labelPrintCopies;
 	
 	private Integer sortOrder;
+
+	private Map<String, Object> defaultCustomFieldValues;
 
 	private String activityStatus;
 			
@@ -264,6 +268,30 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		this.sortOrder = sortOrder;
 	}
 
+	public Map<String, Object> getDefaultCustomFieldValues() {
+		return defaultCustomFieldValues;
+	}
+
+	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
+		this.defaultCustomFieldValues = defaultCustomFieldValues;
+	}
+
+	public String getDefCustomFieldValuesJson() {
+		if (defaultCustomFieldValues == null) {
+			return null;
+		}
+
+		return Utility.mapToJson(defaultCustomFieldValues);
+	}
+
+	public void setDefCustomFieldValuesJson(String json) {
+		if (StringUtils.isBlank(json)) {
+			this.defaultCustomFieldValues = null;
+		} else {
+			this.defaultCustomFieldValues = Utility.jsonToMap(json);
+		}
+	}
+
 	public String getActivityStatus() {
 		return activityStatus;
 	}
@@ -347,6 +375,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		setLabelFormat(sr.getLabelFormat());
 		setLabelAutoPrintMode(sr.getLabelAutoPrintMode());
 		setLabelPrintCopies(sr.getLabelPrintCopies());
+		setDefaultCustomFieldValues(sr.getDefaultCustomFieldValues());
 
 		if (!isAliquot()) {
 			update(sr.getAnatomicSite(), sr.getLaterality(), sr.getConcentration(),
@@ -436,6 +465,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		specimen.setAvailableQuantity(getInitialQuantity());
 		specimen.setConcentration(getConcentration());
 		specimen.setSpecimenRequirement(this);
+		specimen.setExtension(DeObject.createExtension(getDefaultCustomFieldValues(), specimen));
 		return specimen;
 	}
 	

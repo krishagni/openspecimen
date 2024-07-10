@@ -58,7 +58,6 @@
             display-prop="displayName" select-prop="name" on-change="ensureLabelFmtSpecified(childReq, 'Aliquot')"
             os-md-input placeholder="{{'srs.when_to_print' | translate}}">
           </os-select>
-          <div os-field-warn="'srs.lbl_fmt_required_for_auto_print'" ng-if="!childReq.labelFmtSpecified"></div>
         </div>
       </div>
 
@@ -77,6 +76,20 @@
         <div class="message">
           <span translate="srs.storage_type">Stored in Repository?</span>
         </div>
+      </div>
+
+      <div class="col-xs-12">
+        <div class="form-group">
+          <textarea ng-model="childReq.defaultCustomFieldValuesJson" os-md-input class="form-control"
+            placeholder="{{'srs.default_custom_field_values' | translate}}" rows="5">
+          </textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group clearfix">
+      <div class="col-xs-12">
+        <div os-field-warn="'srs.lbl_fmt_required_for_auto_print'" ng-if="!childReq.labelFmtSpecified"></div>
       </div>
     </div>
 

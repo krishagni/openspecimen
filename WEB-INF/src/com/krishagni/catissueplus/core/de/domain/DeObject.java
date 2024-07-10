@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -379,6 +380,48 @@ public abstract class DeObject {
 		}
 	}
 
+	public static DeObject fromValueMap(Long cpId, String entityType, Map<String, Object> valueMap) {
+		DeObject extnObj = new DeObject() {
+			@Override
+			public Long getObjectId() {
+				return null;
+			}
+
+			@Override
+			public String getEntityType() {
+				return entityType;
+			}
+
+			@Override
+			public String getFormName() {
+				return getFormNameByEntityType();
+			}
+
+			@Override
+			public Long getCpId() {
+				return cpId;
+			}
+
+			@Override
+			public boolean isCpBased() {
+				return true;
+			}
+
+			@Override
+			public Long getEntityId() {
+				return null;
+			}
+
+			@Override
+			public void setAttrValues(Map<String, Object> attrValues) {
+
+			}
+		};
+
+		extnObj.loadRecord(FormData.getFormData(extnObj.getForm(), valueMap));
+		return extnObj;
+	}
+
 	//
 	// TODO: Used only by the LE plugin
 	//
@@ -463,6 +506,32 @@ public abstract class DeObject {
 			existingAttrs.remove(attr.getName());
 		}
 		
+		attrs.addAll(existingAttrs.values());
+		extension.setAttrs(attrs);
+		return extension;
+	}
+
+	public static DeObject createExtension(Map<String, Object> valueMap, BaseExtensionEntity entity) {
+		if (MapUtils.isEmpty(valueMap)) {
+			return null;
+		}
+
+		DeObject extension = entity.createExtension();
+		if (extension == null) {
+			return null;
+		}
+
+		Map<String, Attr> existingAttrs = new HashMap<>();
+		for (Attr attr : extension.getAttrs()) {
+			existingAttrs.put(attr.getName(), attr);
+		}
+
+		FormData formData = FormData.getFormData(extension.getForm(), valueMap, true, null);
+		List<Attr> attrs = extension.getAttrs(formData);
+		for (Attr attr : attrs) {
+			existingAttrs.remove(attr.getName());
+		}
+
 		attrs.addAll(existingAttrs.values());
 		extension.setAttrs(attrs);
 		return extension;

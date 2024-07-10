@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -128,6 +129,7 @@ import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
+import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.init.AppProperties;
@@ -983,7 +985,14 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			}
 			
 			AccessCtrlMgr.getInstance().ensureReadCpRights(sr.getCollectionProtocol());
-			return ResponseEvent.response(SpecimenRequirementDetail.from(sr));				
+
+			SpecimenRequirementDetail result = SpecimenRequirementDetail.from(sr);
+			if (MapUtils.isNotEmpty(sr.getDefaultCustomFieldValues())) {
+				DeObject extn = DeObject.fromValueMap(result.getCpId(), Specimen.EXTN, sr.getDefaultCustomFieldValues());
+				result.setExtensionDetail(ExtensionDetail.from(extn, false, true));
+			}
+
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

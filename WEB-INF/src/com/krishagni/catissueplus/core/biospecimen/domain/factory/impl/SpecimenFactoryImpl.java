@@ -393,9 +393,9 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 
 		parent.setLabelIfEmpty();
-		if (parent.isPrimary()) {
-			daoFactory.getSpecimenDao().saveOrUpdate(parent);
-		} else {
+		daoFactory.getSpecimenDao().saveOrUpdate(parent);
+		parent.addOrUpdateExtension();
+		if (!parent.isPrimary()) {
 			parent.setAutoCollectParents(true);
 			parent.getParentSpecimen().addChildSpecimen(parent);
 		}
@@ -1088,7 +1088,13 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			return;
 		}
 
-		DeObject extension = DeObject.createExtension(detail.getExtensionDetail(), specimen);
+		DeObject extension = null;
+		if (detail.getExtensionDetail() != null) {
+			extension = DeObject.createExtension(detail.getExtensionDetail(), specimen);
+		} else if (specimen.getSpecimenRequirement() != null) {
+			extension = DeObject.createExtension(specimen.getSpecimenRequirement().getDefaultCustomFieldValues(), specimen);
+		}
+
 		specimen.setExtension(extension);
 	}
 	

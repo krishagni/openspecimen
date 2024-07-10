@@ -629,6 +629,7 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		ensureValidAndUniqueVisitName(existing, visit, ose);
 		ose.checkAndThrow();
 
+		boolean createSpecimens = false;
 		if (existing == null) {
 			if (visit.isDeleted()) {
 				throw OpenSpecimenException.userError(VisitErrorCode.CREATE_DISABLED_NA);
@@ -638,12 +639,10 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 				throw OpenSpecimenException.userError(CpeErrorCode.CLOSED, visit.getCpEvent().getEventLabel());
 			}
 
-			if (visit.isMissed()) {
-				visit.createMissedSpecimens();
-			} else if (visit.isNotCollected()) {
-				visit.createNotCollectedSpecimens();
+			if (visit.isMissedOrNotCollected()) {
+				createSpecimens = true;
 			}
-			
+
 			existing = visit;
 		} else {
 			if (visit.isDeleted()) {
@@ -658,9 +657,17 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 		existing.addOrUpdateExtension();
 		if (existing.isDeleted()) {
 			DeleteLogUtil.getInstance().log(existing);
+			createSpecimens = false;
 		}
 
 		EventPublisher.getInstance().publish(new VisitSavedEvent(existing));
+		if (createSpecimens) {
+			if (existing.isMissed()) {
+				existing.createMissedSpecimens();
+			} else if (existing.isNotCollected()) {
+				existing.createNotCollectedSpecimens();
+			}
+		}
 
 		//
 		// this might result in creation of pending specimens

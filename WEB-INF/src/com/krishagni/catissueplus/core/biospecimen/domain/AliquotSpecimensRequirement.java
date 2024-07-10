@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 public class AliquotSpecimensRequirement {
 	private String cpShortTitle;
@@ -24,6 +25,8 @@ public class AliquotSpecimensRequirement {
 	private String labelAutoPrintMode;
 	
 	private Integer labelPrintCopies;
+
+	private Map<String, Object> defaultCustomFieldValues;
 	
 	public String getCpShortTitle() {
 		return cpShortTitle;
@@ -111,5 +114,13 @@ public class AliquotSpecimensRequirement {
 
 	public void setLabelPrintCopies(Integer labelPrintCopies) {
 		this.labelPrintCopies = labelPrintCopies;
+	}
+
+	public Map<String, Object> getDefaultCustomFieldValues() {
+		return defaultCustomFieldValues;
+	}
+
+	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
+		this.defaultCustomFieldValues = defaultCustomFieldValues;
 	}
 }
