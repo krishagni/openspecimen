@@ -1,17 +1,27 @@
 <template>
   <div class="os-date-picker">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
-      <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
+      <Calendar ref="cal" v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true"
-        :manual-input="true" :disabled="disabled" @today-click="onTodaySelect" />
+        :manual-input="true" :disabled="disabled"
+        @date-select="onDateSelect" @today-click="onTodaySelect">
+        <template #footer>
+          <os-button text :label="$t('common.buttons.done')" class="os-datepicker-done" @click="hideCalendar" />
+        </template>
+      </Calendar>
       <label>{{$attrs.placeholder}}</label>
     </div>
     <div v-else>
-      <Calendar v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
+      <Calendar ref="cal" v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true" :placeholder="$attrs.placeholder"
-        :manual-input="true" :disabled="disabled"  @today-click="onTodaySelect" />
+        :manual-input="true" :disabled="disabled"
+        @date-select="onDateSelect" @today-click="onTodaySelect">
+        <template #footer>
+          <os-button text :label="$t('common.buttons.done')" class="os-datepicker-done" @click="hideCalendar" />
+        </template>
+      </Calendar>
     </div>
   </div>
 </template>
@@ -97,13 +107,23 @@ export default {
 
     onTodaySelect: function() {
       this.$emit('update:modelValue', new Date());
+    },
+
+    onDateSelect: function(date) {
+      if (date && typeof date == 'object' && typeof date.setHours == 'function') {
+        date.setHours(this.$refs.cal.currentHour);
+      }
+    },
+
+    hideCalendar: function(event) {
+      this.$refs.cal.overlayVisible = false;
+      event.preventDefault();
     }
   }
 }
 </script>
 
 <style scoped>
-
 .os-date-picker :deep(.p-calendar) {
   width: 100%;
 }
@@ -143,6 +163,7 @@ export default {
   color: #999;
   opacity: 1;
 }
+
 </style>
 
 <style>
@@ -152,9 +173,21 @@ export default {
 }
 
 .p-datepicker.p-component {
-  max-width: 400px!important;
-  width: 400px!important;
-  min-width: 400px!important;
+  max-width: 350px!important;
+  width: 350px!important;
+  min-width: 350px!important;
+}
+
+.p-datepicker .p-datepicker-header {
+  padding: 0rem;
+}
+
+.p-datepicker table {
+  margin: 0rem;
+}
+
+.p-datepicker table td {
+  padding: 0.25rem;
 }
 
 .p-datepicker table td > span {
@@ -162,7 +195,37 @@ export default {
   width:  auto;
 }
 
+.p-datepicker .p-timepicker {
+  padding: 0rem;
+}
+
+.p-datepicker .p-timepicker span {
+  font-size: 1rem;
+}
+
+.p-datepicker .p-timepicker button {
+  height: 1rem;
+  width: 1rem;
+}
+
 .p-datepicker .p-datepicker-buttonbar {
-  padding: 0.5rem 0;
+  padding: 0rem;
+  justify-content: flex-start;
+}
+
+button.os-datepicker-done.btn.text {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  color: #007bff;
+}
+
+button.os-datepicker-done.btn.text:hover {
+  background: rgba(0, 123, 255, 0.04);
+  color: #007bff;
+  border-color: transparent;
+  border: 0px;
 }
 </style>
