@@ -150,6 +150,7 @@ export default {
       "name": "specimen.anatomicSite",
       "attribute": "anatomic_site",
       "selectProp": "value",
+      "leafValue": true,
       "showWhen": "specimen.lineage != 'Aliquot'",
       "showInOverviewWhen": "true == true"
     },
