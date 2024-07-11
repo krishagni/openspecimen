@@ -76,7 +76,7 @@ public class ContainerMapReport extends AbstractContainerReport implements Conta
 			if (rowMajor) {
 				cells.add(container.toColumnLabelingScheme(coord.second()));
 			} else {
-				cells.add(container.toColumnLabelingScheme(coord.first()));
+				cells.add(container.toRowLabelingScheme(coord.first()));
 			}
 		}
 
@@ -103,7 +103,7 @@ public class ContainerMapReport extends AbstractContainerReport implements Conta
 				rowLabel = container.toRowLabelingScheme(rowCoord.first());
 				cells.add(rowLabel);
 			} else {
-				rowLabel = container.toRowLabelingScheme(rowCoord.second());
+				rowLabel = container.toColumnLabelingScheme(rowCoord.second());
 			}
 
 			for (int i = 1; i <= container.getNoOfColumns(); ++i) {
