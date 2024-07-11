@@ -181,6 +181,10 @@
   <include file="db/11.0/config.xml" />
   <include file="db/11.0/migration.xml" />
 
+  <include file="db/11.2/schema.xml" />
+  <include file="db/11.2/audit.xml" />
+  <include file="db/11.2/migration.xml" />
+
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
 </databaseChangeLog>

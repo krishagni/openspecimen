@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Remove specimen gel resource and its associated ACL">
+    <sql>
+      delete from
+        rbac_role_access_list_ops
+      where acl_id in (
+        select
+          acl.identifier
+        from
+          rbac_role_access_list acl
+          inner join rbac_resources r on r.identifier = acl.resource_id
+        where
+          r.name = 'SpecimenGel'
+      )
+    </sql>
+
+    <sql>
+      delete from
+        rbac_role_access_list
+      where
+        resource_id in (
+          select identifier from rbac_resources where name = 'SpecimenGel'
+        )
+    </sql>
+
+    <sql>
+      delete from rbac_resources where name = 'SpecimenGel'
+    </sql>
+  </changeSet>
+</databaseChangeLog>
