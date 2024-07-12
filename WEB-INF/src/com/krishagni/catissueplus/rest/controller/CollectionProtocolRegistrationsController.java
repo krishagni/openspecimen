@@ -30,6 +30,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.ConsentDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpEntityDeleteCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.CprSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.MatchedRegistrationsList;
 import com.krishagni.catissueplus.core.biospecimen.events.RegistrationQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
@@ -78,6 +79,13 @@ public class CollectionProtocolRegistrationsController {
 		ResponseEvent<Long> resp = cpSvc.getRegisteredParticipantsCount(getRequest(crit.includePhi(true)));
 		resp.throwErrorIfUnsuccessful();
 		return Collections.singletonMap("count", resp.getPayload());
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value="/matches")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<MatchedRegistrationsList> getMatches(@RequestBody List<CollectionProtocolRegistrationDetail> regs) {
+		return ResponseEvent.unwrap(cprSvc.getMatches(RequestEvent.wrap(regs)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{cprId}")

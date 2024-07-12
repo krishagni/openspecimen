@@ -65,6 +65,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.CprSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipant;
 import com.krishagni.catissueplus.core.biospecimen.events.MatchedParticipantsList;
+import com.krishagni.catissueplus.core.biospecimen.events.MatchedRegistrationsList;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ParticipantRegistrationsList;
 import com.krishagni.catissueplus.core.biospecimen.events.PmiDetail;
@@ -684,6 +685,21 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 	}
 
 	@Override
+	public ResponseEvent<List<MatchedRegistrationsList>> getMatches(RequestEvent<List<CollectionProtocolRegistrationDetail>> req) {
+		try {
+			return ResponseEvent.response(
+				Utility.nullSafeStream(req.getPayload())
+					.map(this::getRegistrationMatches)
+					.collect(Collectors.toList())
+			);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
 	@PlusTransactional
 	public ResponseEvent<ParticipantRegistrationsList> createRegistrations(RequestEvent<ParticipantRegistrationsList> req) {
 		try {
@@ -819,6 +835,40 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 
 		EventPublisher.getInstance().publish(new CprSavedEvent(cpr));
 		return cpr;
+	}
+
+	private MatchedRegistrationsList getRegistrationMatches(CollectionProtocolRegistrationDetail input) {
+		MatchedRegistrationsList matches = new MatchedRegistrationsList();
+		matches.setInput(input);
+		matches.setCpr(getRegistrationMatch(input));
+		if (matches.getCpr() == null) {
+			matches.setParticipants(getParticipantMatches(input.getParticipant()));
+		}
+
+		return matches;
+	}
+
+	private CollectionProtocolRegistrationDetail getRegistrationMatch(CollectionProtocolRegistrationDetail input) {
+		RegistrationQueryCriteria crit = new RegistrationQueryCriteria();
+		crit.setCpId(input.getCpId());
+		crit.setCpShortTitle(input.getCpShortTitle());
+		crit.setPpid(input.getPpid());
+		crit.setEmpi(input.getParticipant() != null ? input.getParticipant().getEmpi() : null);
+
+		ResponseEvent<CollectionProtocolRegistrationDetail> resp = getRegistration(RequestEvent.wrap(crit));
+		return resp != null && resp.isSuccessful() ? resp.getPayload() : null;
+	}
+
+	private MatchedParticipantsList getParticipantMatches(ParticipantDetail input) {
+		MatchedParticipantsList result = new MatchedParticipantsList();
+		result.setCriteria(input);
+		if (input == null) {
+			return result;
+		}
+
+		RequestEvent<List<ParticipantDetail>> req = RequestEvent.wrap(Collections.singletonList(input));
+		ResponseEvent<List<MatchedParticipantsList>> resp = participantService.getMatchingParticipants(req);
+		return resp != null && resp.isSuccessful() && CollectionUtils.isNotEmpty(resp.getPayload()) ? resp.getPayload().get(0) :  result;
 	}
 
 	private ParticipantRegistrationsList saveOrUpdateRegistrations(ParticipantRegistrationsList input, boolean update) {
