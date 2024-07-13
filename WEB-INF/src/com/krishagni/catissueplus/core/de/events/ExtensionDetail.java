@@ -189,7 +189,7 @@ public class ExtensionDetail implements Serializable {
 							.map(ExtensionDetail::getAttrsMap).collect(Collectors.toList());
 					attrsMap.put(attr.getName(), sfAttrsMap);
 				}
-			} else if ("fileUpload".equals(attr.getType()) || attr.getValue() instanceof List) {
+			} else if ("fileUpload".equals(attr.getType()) || attr.getValue() instanceof List || "booleanCheckbox".equals(attr.getType())) {
 				attrsMap.put(attr.getName(), attr.getValue());
 			} else if ("datePicker".equals(attr.getType()) && ExporterContextHolder.getInstance().isExportOp()) {
 				attrsMap.put(attr.getName(), attr.getValue());
