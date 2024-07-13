@@ -112,8 +112,8 @@ export default {
 
     _updateValue(value) {
       if (this.entity) {
-        const cp = exprUtil.eval(this.form || this.context || {}, 'cp') || {};
-        const entityObj = exprUtil.eval(this.form || this.context || {}, this.entity) || {};
+        const cp = this._getFormDataItem('cp') || {};
+        const entityObj = this._getFormDataItem(this.entity) || {};
         if (!value) {
           entityObj.reqId = null;
           this._presetValues(cp, entityObj, {lineage: entityObj.lineage});
@@ -175,6 +175,15 @@ export default {
       }
 
       return cache[oq];
+    },
+
+    _getFormDataItem(attr) {
+      const form = this.form || this.context || {};
+      if (typeof form.fd == 'function') {
+        return form.fd(attr);
+      }
+
+      return exprUtil.getValue(form, attr);
     }
   }
 }

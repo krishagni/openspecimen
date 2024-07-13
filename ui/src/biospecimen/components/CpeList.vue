@@ -19,7 +19,7 @@ export default {
   emits: ['update:modelValue'],
 
   data() {
-    this.seedObj = util.clone(exprUtil.getValue(this.form || this.context || {}, this.entity) || {});
+    this.seedObj = util.clone(this._getFormDataItem(this.entity) || {});
     return { };
   },
 
@@ -110,7 +110,7 @@ export default {
 
     _updateValue(value) {
       if (this.entity) {
-        const entityObj = exprUtil.getValue(this.form || this.context || {}, this.entity) || {};
+        const entityObj = this._getFormDataItem(this.entity) || {};
         if (!value) {
           entityObj.eventId = null;
           this._presetValues(entityObj, {});
@@ -151,6 +151,15 @@ export default {
       }
 
       return cache[oq];
+    },
+
+    _getFormDataItem(attr) {
+      const form = this.form || this.context || {};
+      if (typeof form.fd == 'function') {
+        return form.fd(attr);
+      }
+
+      return exprUtil.getValue(form, attr);
     }
   }
 }
