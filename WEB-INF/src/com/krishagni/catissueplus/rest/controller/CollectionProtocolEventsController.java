@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CopyCpeOpDetail;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
+import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 
@@ -35,9 +37,16 @@ public class CollectionProtocolEventsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<CollectionProtocolEventDetail> getEvents(
-			@RequestParam(value = "cpId", required = true) 
-			Long cpId) {
-		ResponseEvent<List<CollectionProtocolEventDetail>> resp = cpSvc.getProtocolEvents(getRequest(cpId));
+		@RequestParam(value = "cpId")
+		Long cpId,
+
+		@RequestParam(value = "includeClosedEvents", required = false, defaultValue = "true")
+		boolean includeClosedEvents) {
+
+		EntityQueryCriteria crit = new EntityQueryCriteria(cpId);
+		crit.setParams(Collections.singletonMap("includeClosedEvents", includeClosedEvents));
+
+		ResponseEvent<List<CollectionProtocolEventDetail>> resp = cpSvc.getProtocolEvents(getRequest(crit));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
 	}

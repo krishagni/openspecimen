@@ -91,7 +91,7 @@ public interface CollectionProtocolService {
 	//
 	// Events API
 	//
-	public ResponseEvent<List<CollectionProtocolEventDetail>> getProtocolEvents(RequestEvent<Long> req);
+	public ResponseEvent<List<CollectionProtocolEventDetail>> getProtocolEvents(RequestEvent<EntityQueryCriteria> req);
 
 	public ResponseEvent<CollectionProtocolEventDetail> getProtocolEvent(RequestEvent<Long> req);
 

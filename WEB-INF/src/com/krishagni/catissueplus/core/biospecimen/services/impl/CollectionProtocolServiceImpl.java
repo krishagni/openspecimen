@@ -762,17 +762,22 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<List<CollectionProtocolEventDetail>> getProtocolEvents(RequestEvent<Long> req) {
-		Long cpId = req.getPayload();
+	public ResponseEvent<List<CollectionProtocolEventDetail>> getProtocolEvents(RequestEvent<EntityQueryCriteria> req) {
+		EntityQueryCriteria crit = req.getPayload();
 		
 		try {
-			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(cpId);
+			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(crit.getId());
 			if (cp == null) {
 				return ResponseEvent.userError(CpErrorCode.NOT_FOUND);
 			}
 
 			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
-			return ResponseEvent.response(CollectionProtocolEventDetail.from(cp.getOrderedCpeList()));
+
+			List<CollectionProtocolEvent> events = cp.getOrderedCpeList();
+			if (!Boolean.TRUE.equals(crit.paramBoolean("includeClosedEvents"))) {
+				events = events.stream().filter(event -> !event.isClosed()).collect(Collectors.toList());
+			}
+			return ResponseEvent.response(CollectionProtocolEventDetail.from(events));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

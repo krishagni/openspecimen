@@ -45,6 +45,10 @@ export default {
             promise = this._getSelectedEvent(_selected);
           } else {
             const params = {...util.queryParams(this.form || this.context || {}, ls || {})};
+            if (!Object.prototype.hasOwnProperty.call(params, 'includeClosedEvents')) {
+              params['includeClosedEvents'] = false;
+            }
+
             if (!params['cpId']) {
               console.log('Unknown CP. Returning empty events list.');
               promise = util.promise([]);
