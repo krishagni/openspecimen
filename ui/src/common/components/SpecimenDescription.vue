@@ -2,6 +2,8 @@
   <a class="description" :href="link" :target="hrefTarget || '_self'" rel="noopener">
     <os-specimen-status-icon :specimen="object" :status="status" v-if="showStatus" />
     <span>{{description}}</span>
+    <os-tag class="pooled-specimen" :value="$t('specimens.pooled')" :rounded="true"
+      v-if="showStatus && object.specimensPool && object.specimensPool.length > 0" />
   </a>
 </template>
 
@@ -118,6 +120,16 @@ export default {
   margin-top: 0.25rem;
   margin-right: 0.25rem;
   margin-bottom: -0.0625rem;
+}
+
+.description .pooled-specimen {
+  flex: 0 0 0.75rem;
+  margin-top: -0.25rem;
+  margin-left: 0.25rem;
+}
+
+.description .pooled-specimen :deep(.p-tag) {
+  background: #ff69b4;
 }
 </style>
 

@@ -13,6 +13,9 @@
         <div class="accessories">
           <os-tag :value="status" :rounded="true" :type="statusType" />
 
+          <os-tag class="os-pooled-specimen" :value="$t('specimens.pooled')" :rounded="true"
+            v-if="specimen.specimensPool && specimen.specimensPool.length > 0"/>
+
           <os-tag :value="$t('specimens.checked_out')" :rounded="true" :type="'danger'" v-if="specimen.checkedOut" />
 
           <os-copy-link size="small" :route="{
@@ -165,3 +168,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-pooled-specimen :deep(.p-tag) {
+  background: #ff69b4;
+}
+</style>
