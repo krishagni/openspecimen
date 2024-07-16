@@ -49,6 +49,8 @@ public interface CollectionProtocolRegistrationService {
 
 	ResponseEvent<List<MatchedRegistrationsList>> getMatches(RequestEvent<List<CollectionProtocolRegistrationDetail>> req);
 
+	ResponseEvent<List<CollectionProtocolRegistrationDetail>> getRegistrations(RequestEvent<List<Long>> req);
+
 	public ResponseEvent<ParticipantRegistrationsList> createRegistrations(RequestEvent<ParticipantRegistrationsList> req);
 	
 	public ResponseEvent<ParticipantRegistrationsList> updateRegistrations(RequestEvent<ParticipantRegistrationsList> req);

@@ -701,6 +701,19 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<CollectionProtocolRegistrationDetail>> getRegistrations(RequestEvent<List<Long>> req) {
+		List<CollectionProtocolRegistrationDetail> result = new ArrayList<>();
+		for (Long cprId : req.getPayload()) {
+			RegistrationQueryCriteria crit = new RegistrationQueryCriteria();
+			crit.setCprId(cprId);
+			result.add(ResponseEvent.unwrap(getRegistration(RequestEvent.wrap(crit))));
+		}
+
+		return ResponseEvent.response(result);
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<ParticipantRegistrationsList> createRegistrations(RequestEvent<ParticipantRegistrationsList> req) {
 		try {
 			return ResponseEvent.response(saveOrUpdateRegistrations(req.getPayload(), false));

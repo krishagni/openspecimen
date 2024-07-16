@@ -100,6 +100,13 @@ public class CollectionProtocolRegistrationsController {
 		return resp.getPayload();
 	}
 
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<CollectionProtocolRegistrationDetail> getRegistrations(@RequestParam(value = "id") List<Long> cprIds) {
+		return ResponseEvent.unwrap(cprSvc.getRegistrations(RequestEvent.wrap(cprIds)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value= "/{cprId}/latest-visit")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
