@@ -302,6 +302,7 @@ export default {
         {formId, excludeSysForms: true, includeStats: true, maxResults: this.ctx.pageSize},
         this.ctx.filterValues || {}
       );
+      opts.cpId = opts.allCps ? -1 : null;
 
       this.ctx.loading = true;
       return formsSvc.getForms(opts).then(

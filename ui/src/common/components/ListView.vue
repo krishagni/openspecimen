@@ -87,6 +87,10 @@
                   :list-source="filter.listSource" v-else>
                 </multiselect>
               </span>
+              <span v-else-if="filter.type == 'booleanCheckbox'">
+                <os-boolean-checkbox :inline-label="caption(filter)" v-model="filterValues[filter.name]"
+                  v-bind="filter" />
+              </span>
               <span v-else-if="filter.type == 'pv'">
                 <os-pv-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
                   v-bind="filter" />
@@ -313,6 +317,19 @@ export default {
     },
 
     emitFiltersUpdated: function() {
+      //
+      // first remove the filters that are hidden or not displayed
+      //
+      const searchFilters = this.searchFilters;
+      for (let filterKey of Object.keys(this.filterValues || {})) {
+        for (let {name} of searchFilters) {
+          if (name == filterKey || (name + '.$min') == filterKey || (name + '.$max') == filterKey) {
+            delete this.filterValues[filterKey];
+            break;
+          }
+        }
+      }
+
       const fb = util.uriEncode(this.filterValues);
       const event = {filters: this.filterValues, uriEncoding: fb, pageSize: this.pageSizeOpts.currentPageSize + 1};
       this.$emit('filtersUpdated', event);
@@ -536,10 +553,12 @@ export default {
     },
 
     searchFilters() {
-      const filters = this.schema.filters || [];
+      const filters      = this.schema.filters || [];
+      const filterValues = this.filterValues || {};
+      const context      = {...this.context, filterValues};
       return filters.filter(
         (filter) => {
-          if (filter.showWhen && !exprUtil.eval(this.context, filter.showWhen)) {
+          if (filter.showWhen && !exprUtil.eval(context, filter.showWhen)) {
             return false;
           }
 

@@ -58,6 +58,17 @@ export default {
     },
 
     {
+      "name": "formType",
+      "type": "dropdown",
+      "captionCode": "forms.level",
+      "listSource": {
+        "selectProp": "entityType",
+        "displayProp": "entityTypeLabel",
+        "loadFn": async () => formSvc.getEntityTypes()
+      }
+    },
+
+    {
       "name": "cp",
       "type": "dropdown",
       "multiple": true,
@@ -67,18 +78,14 @@ export default {
         "selectProp": "shortTitle",
         "displayProp": "shortTitle",
         "searchProp": "query"
-      }
+      },
+      showWhen: "!filterValues.allCps"
     },
 
     {
-      "name": "formType",
-      "type": "dropdown",
-      "captionCode": "forms.level",
-      "listSource": {
-        "selectProp": "entityType",
-        "displayProp": "entityTypeLabel",
-        "loadFn": async () => formSvc.getEntityTypes()
-      }
-    }
+      "name": "allCps",
+      "type": "booleanCheckbox",
+      "captionCode": "forms.all_cps"
+    },
   ]
 }
