@@ -322,11 +322,16 @@ export default {
       //
       const searchFilters = this.searchFilters;
       for (let filterKey of Object.keys(this.filterValues || {})) {
+        let found = false;
         for (let {name} of searchFilters) {
           if (name == filterKey || (name + '.$min') == filterKey || (name + '.$max') == filterKey) {
-            delete this.filterValues[filterKey];
+            found = true;
             break;
           }
+        }
+
+        if (!found) {
+          delete this.filterValues[filterKey];
         }
       }
 
