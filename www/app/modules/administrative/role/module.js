@@ -11,7 +11,7 @@ angular.module('os.administrative.role',
       .state('role-list', {
         url: '/roles',
         templateUrl: 'modules/administrative/role/list.html',
-        controller: 'RoleListCtrl'
+        controller: 'RoleListCtrl',
         parent: 'signed-in'
       })
       .state('role-addedit', {
