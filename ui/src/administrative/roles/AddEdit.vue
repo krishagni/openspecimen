@@ -88,11 +88,11 @@
                       </td>
                       <td v-if="showLockUnlock">
                         <os-boolean-checkbox v-model="el.lock"
-                          v-show="el.name == 'SurgicalPathologyReport' || el.name == 'Consent'" />
+                          v-show="el.name == 'SurgicalPathologyReport' || (hasEc && el.name == 'Consent')" />
                       </td>
                       <td v-if="showLockUnlock">
                         <os-boolean-checkbox v-model="el.unlock"
-                          v-show="el.name == 'SurgicalPathologyReport' || el.name == 'Consent'" />
+                          v-show="el.name == 'SurgicalPathologyReport' || (hasEc && el.name == 'Consent')" />
                       </td>
                       <td>
                         <os-button left-icon="times" size="small" @click="removeResource(idx)" />
@@ -206,6 +206,10 @@ export default {
   computed: {
     showLockUnlock: function() {
       return this._showLockUnlock(this.dataCtx.role);
+    },
+
+    hasEc: function() {
+      return !!this.$osSvc.ecDocSvc;
     }
   },
 
@@ -280,7 +284,7 @@ export default {
 
     _showLockUnlock: function(role) {
       for (let el of role.acl || []) {
-        if (el.name == 'SurgicalPathologyReport' || el.name == 'Consent') {
+        if (el.name == 'SurgicalPathologyReport' || (this.$osSvc.ecDocSvc && el.name == 'Consent')) {
           return true;
         }
       }
