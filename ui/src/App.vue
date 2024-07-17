@@ -118,7 +118,7 @@ export default {
 
         {
           showIf: {resource: 'User', operations: ['Create', 'Update']},
-          href: routerSvc.getFullUrl('UserRolesList', {roleId: -1}),
+          href: '#/roles',
           icon: 'fa fa-lock',
           title: t('common.home.roles'),
           description: t('common.home.roles_desc')
