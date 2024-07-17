@@ -10,8 +10,10 @@ angular.module('os.administrative.role',
     $stateProvider
       .state('role-list', {
         url: '/roles',
-        templateUrl: 'modules/administrative/role/list.html',
-        controller: 'RoleListCtrl',
+        template: '<div></div>',
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('user-roles/-1', $stateParams);
+        },
         parent: 'signed-in'
       })
       .state('role-addedit', {
