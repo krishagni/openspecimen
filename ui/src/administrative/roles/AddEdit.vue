@@ -81,16 +81,18 @@
                         <os-boolean-checkbox v-model="el.update" @update:model-value="updateToggled(el)" />
                       </td>
                       <td>
-                        <os-boolean-checkbox v-model="el.delete" />
+                        <os-boolean-checkbox v-model="el.del" />
                       </td>
                       <td>
-                        <os-boolean-checkbox v-model="el.export_import" />
+                        <os-boolean-checkbox v-model="el.expImp" />
                       </td>
                       <td v-if="showLockUnlock">
-                        <os-boolean-checkbox v-model="el.lock" />
+                        <os-boolean-checkbox v-model="el.lock"
+                          v-show="el.name == 'SurgicalPathologyReport' || el.name == 'Consent'" />
                       </td>
                       <td v-if="showLockUnlock">
-                        <os-boolean-checkbox v-model="el.unlock" />
+                        <os-boolean-checkbox v-model="el.unlock"
+                          v-show="el.name == 'SurgicalPathologyReport' || el.name == 'Consent'" />
                       </td>
                       <td>
                         <os-button left-icon="times" size="small" @click="removeResource(idx)" />
@@ -155,10 +157,17 @@ export default {
       currentUser: ui.currentUser
     });
 
+    const promises = [];
     if (props.roleId && +props.roleId > 0) {
-      roleSvc.getRole(+props.roleId).then(
-        role => {
-          dataCtx.role = role
+      promises.push(roleSvc.getRole(+props.roleId));
+    }
+
+    promises.push(roleSvc.getResources());
+    Promise.all(promises).then(
+      (resps) => {
+        let respIdx = -1;
+        if (promises.length > 1) {
+          const role = dataCtx.role = resps[++respIdx];
           for (let el of role.acl || []) {
             el.name = el.resourceName;
             for (let {operationName} of el.operations) {
@@ -185,11 +194,8 @@ export default {
 
           role.acl = role.acl.sort(({name: n1}, {name: n2}) => n1 < n2 ? -1 : (n1 > n2 ? 1 : 0));
         }
-      );
-    }
 
-    roleSvc.getResources().then(
-      resources => {
+        const resources = resps[++respIdx];
         ctx.resourcesLs.options = resources.map(({name}) => ({name, label: i18n.msg('roles.resources.' + name)}));
       }
     );
@@ -217,6 +223,7 @@ export default {
       }
 
       const payload = {id, name, description, acl: []};
+      const seenResources = [];
       for (let el of acl) {
         const operations = [];
         if (el.read)   { operations.push({operationName: 'Read'}) }
@@ -227,7 +234,13 @@ export default {
         if (el.lock)   { operations.push({operationName: 'Lock'}) }
         if (el.unlock) { operations.push({operationName: 'Unlock'}) }
 
+        if (seenResources.indexOf(el.name) != -1) {
+          alertSvc.error({code: 'roles.multiple_resource_acls', args: {resource: i18n.msg('roles.resources.' + el.name)}});
+          return;
+        }
+
         payload.acl.push({ id: el.id, resourceName: el.name, operations });
+        seenResources.push(el.name);
       } 
 
       const savedRole = await roleSvc.saveOrUpdate(payload);

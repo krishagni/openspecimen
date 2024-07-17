@@ -1131,6 +1131,7 @@
     "description": "Description",
     "description_req": "Description is mandatory",
     "list": "Roles",
+    "multiple_resource_acls": "Detected multiple permission rows for the resource {resource}. Ensure every resource has, at max, only one permission row.",
     "name": "Name",
     "name_req": "Name is mandatory",
     "ops": {
