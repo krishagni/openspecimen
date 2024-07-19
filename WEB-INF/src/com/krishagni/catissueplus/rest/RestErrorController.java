@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.TypeMismatchException;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.util.HtmlUtils;
@@ -27,6 +30,7 @@ import com.krishagni.catissueplus.core.common.errors.ParameterizedError;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 @ControllerAdvice
 public class RestErrorController extends ResponseEntityExceptionHandler {
@@ -76,6 +80,8 @@ public class RestErrorController extends ResponseEntityExceptionHandler {
 
 	@Override
 	public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+		dumpRequestBody(request, ex);
+
 		String msg = ex.getMessage();
 		if (StringUtils.isNotBlank(msg)) {
 			int idx = msg.indexOf('(');
@@ -88,30 +94,19 @@ public class RestErrorController extends ResponseEntityExceptionHandler {
 
 	@Override
 	public ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+		dumpRequestBody(request, ex);
+
 		ErrorMessage err = new ErrorMessage(CommonErrorCode.INVALID_REQUEST.name(), ex.getMessage());
 		return handleExceptionInternal(ex, Collections.singletonList(err), headers, status, request);
 	}
 
 	private HttpStatus getHttpStatus(ErrorType type) {
-		switch (type) {
-			case SYSTEM_ERROR:
-				return HttpStatus.INTERNAL_SERVER_ERROR;
-				
-			case USER_ERROR:
-				return HttpStatus.BAD_REQUEST;
-				
-			case UNKNOWN_ERROR:
-				return HttpStatus.INTERNAL_SERVER_ERROR;
-
-			case UNAUTHORIZED:
-				return HttpStatus.UNAUTHORIZED;
-				
-			case NONE:
-				return HttpStatus.OK;
-				
-			default:
-				throw new RuntimeException("Unknown error type: " + type);
-		}
+		return switch (type) {
+			case SYSTEM_ERROR, UNKNOWN_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+			case USER_ERROR -> HttpStatus.BAD_REQUEST;
+			case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+			case NONE -> HttpStatus.OK;
+		};
 	}
 
 	private ErrorMessage getMessage(ErrorCode error, Object[] params) {
@@ -140,5 +135,17 @@ public class RestErrorController extends ResponseEntityExceptionHandler {
 		}
 
 		return defValue;
+	}
+
+	private void dumpRequestBody(WebRequest request, Exception e) {
+		if (request instanceof ServletWebRequest) {
+			try {
+				ServletWebRequest servletWebRequest = (ServletWebRequest) request;
+				HttpServletRequest httpReq = (HttpServletRequest) servletWebRequest.getNativeRequest();
+				logger.info("Input Request: " + httpReq.getRequestURI() + "\n" + e.getMessage());
+			} catch (Throwable t) {
+				logger.error("Error reading the input request: " + t.getMessage(), t);
+			}
+		}
 	}
 }
