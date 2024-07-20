@@ -907,6 +907,37 @@ public class Utility {
 		}
 	}
 
+	public static File zipInputStreams(List<Pair<InputStream, String>> files, String zipFilePath) {
+		ZipOutputStream zout = null;
+		FileOutputStream fout = null;
+		File result = null;
+
+		try {
+			result = new File(zipFilePath);
+			fout = new FileOutputStream(result);
+			zout = new ZipOutputStream(fout);
+
+			for (Pair<InputStream, String> fd : files) {
+				try {
+					zout.putNextEntry(new ZipEntry(fd.second()));
+					IOUtils.copy(fd.first(), zout);
+				} finally {
+					zout.closeEntry();
+					IOUtils.closeQuietly(fd.first());
+				}
+			}
+
+			zout.finish();
+			zout.flush();
+			return result;
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			IOUtils.closeQuietly(fout);
+			IOUtils.closeQuietly(zout);
+		}
+	}
+
 	public static File gzip(File srcFile, File destFile) {
 		FileInputStream fin = null;
 		FileOutputStream fout = null;
