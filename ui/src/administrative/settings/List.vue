@@ -392,6 +392,7 @@ export default {
         savedSetting => {
           savedSetting.uiName = i18n.msg('settings.' + savedSetting.module + '.' + savedSetting.name);
           savedSetting.uiDesc = i18n.msg('settings.' + savedSetting.module + '.' + savedSetting.name + '_desc');
+          savedSetting.value  = savedSetting.value == undefined ? null : savedSetting.value;
           if (savedSetting.type == 'FILE') {
             savedSetting.fileUrl = this.downloadUrl(savedSetting);
             savedSetting.filename = savedSetting.value;
