@@ -43,7 +43,7 @@
         <span>{{label(field)}}</span>
       </template>
       <template #content>
-        <span v-if="field.value" v-html="field.value"></span>
+        <span class="os-textarea" v-if="field.value" v-html="field.value"></span>
       </template>
     </Section>
   </template>
@@ -342,6 +342,11 @@ export default {
 .os-sf-table img {
   height: 150px;
   width: 300px;
+}
+
+.os-textarea {
+  word-break: break-word;
+  white-space: break-spaces;
 }
 
 </style>

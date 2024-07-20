@@ -171,7 +171,7 @@ a:focus, a:hover {
   line-height: 24px;
   width: 100%;
   float: left;
-  word-break: break-all;
+  word-break: break-word;
   white-space: break-spaces;
 }
 
