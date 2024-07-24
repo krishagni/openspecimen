@@ -36,6 +36,11 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	}
 
 	@Override
+	public Long getPvsCount(ListPvCriteria crit) {
+		return getPvQuery(crit).getCount("pv.id");
+	}
+
+	@Override
 	public PermissibleValue getByValue(String attribute, String value) {
 		List<PermissibleValue> pvs = createNamedQuery(GET_BY_VALUE, PermissibleValue.class)
 			.setParameter("attribute", attribute)

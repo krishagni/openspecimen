@@ -23,7 +23,11 @@ public class PvDetail {
 	
 	private String conceptCode;
 
+	private String attribute;
+
 	private Map<String, String> props;
+
+	private String activityStatus = "Active";
 
 	public Long getId() {
 		return id;
@@ -69,12 +73,28 @@ public class PvDetail {
 		this.conceptCode = conceptCode;
 	}
 
+	public String getAttribute() {
+		return attribute;
+	}
+
+	public void setAttribute(String attribute) {
+		this.attribute = attribute;
+	}
+
 	public Map<String, String> getProps() {
 		return props;
 	}
 
 	public void setProps(Map<String, String> props) {
 		this.props = props;
+	}
+
+	public String getActivityStatus() {
+		return activityStatus;
+	}
+
+	public void setActivityStatus(String activityStatus) {
+		this.activityStatus = activityStatus;
 	}
 
 	public static PvDetail from(PermissibleValue pv, boolean includeParent) {
@@ -86,6 +106,8 @@ public class PvDetail {
 		result.setId(pv.getId());
 		result.setValue(pv.getValue());
 		result.setConceptCode(pv.getConceptCode());
+		result.setAttribute(pv.getAttribute());
+		result.setActivityStatus(pv.getActivityStatus());
 
 		if (includeParent && pv.getParent() != null) {
 			result.setParentId(pv.getParent().getId());

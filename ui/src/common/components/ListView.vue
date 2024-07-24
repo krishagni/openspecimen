@@ -166,7 +166,7 @@
     </div>
 
     <div class="item" :ref="'item' + idx" v-for="(item, idx) of list" :key="idx" @click="itemSelected($event, item)"
-      :class="{active: selectedItem && item.rowObject == selectedItem}">
+      :class="{active: selectedItem && (item.rowObject == selectedItem || (item.key && item.key == selectedItem.key))}">
       <div class="header">
         <os-icon :name="item.$summary.icon" v-if="item.$summary.icon" />
         <a class="os-click-esc" :href="item.$summary.url" v-if="item.$summary.url">
@@ -593,7 +593,12 @@ export default {
       handler(newVal) {
         if (newVal && this.selectedItem != newVal) {
           this.selectedItem = newVal;
-          const idx = this.list.findIndex(item => item.rowObject == this.selectedItem);
+          let idx = this.list.findIndex(item => item.rowObject == this.selectedItem);
+          if (idx == -1 && this.schema.key) {
+            const selectedKey = this.selectedItem.key = exprUtil.getValue(this.selectedItem, this.schema.key);
+            idx = this.list.findIndex(item => item.key && item.key == selectedKey);
+          }
+
           if (idx >= 0) {
             setTimeout(() => {
               let el = this.$refs['item' + idx];

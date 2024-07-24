@@ -2,7 +2,9 @@
 package com.krishagni.catissueplus.rest.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -95,6 +97,52 @@ public class PermissibleValueController {
 		return ResponseEvent.unwrap(pvSvc.getPermissibleValues(RequestEvent.wrap(crit)));
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/count")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Map<String, Long> getPermissibleValuesCount(
+		@RequestParam(value = "attribute", required = false)
+		String attribute,
+
+		@RequestParam(value = "searchString", required = false)
+		String searchStr,
+
+		@RequestParam(value = "parentAttribute", required = false)
+		String parentAttribute,
+
+		@RequestParam(value = "parentValue", required = false)
+		String parentValue,
+
+		@RequestParam(value = "includeOnlyLeafValue", required = false, defaultValue="false")
+		boolean includeOnlyLeafValue,
+
+		@RequestParam(value = "includeOnlyRootValue", required = false, defaultValue="false")
+		boolean includeOnlyRootValue,
+
+		@RequestParam(value = "activityStatus", required = false)
+		String activityStatus,
+
+		HttpServletRequest httpReq) {
+
+		List<String> values = null;
+		String[] searchValues = httpReq.getParameterValues("value");
+		if (searchValues != null && searchValues.length > 0) {
+			values = Arrays.asList(searchValues);
+			searchStr = null;
+		}
+
+		ListPvCriteria crit = new ListPvCriteria()
+			.attribute(attribute)
+			.query(searchStr)
+			.values(values)
+			.parentValue(parentValue)
+			.parentAttribute(parentAttribute)
+			.includeOnlyLeafValue(includeOnlyLeafValue)
+			.includeOnlyRootValue(includeOnlyRootValue)
+			.activityStatus(activityStatus);
+		return Collections.singletonMap("count", ResponseEvent.unwrap(pvSvc.getPermissibleValuesCount(RequestEvent.wrap(crit))));
+	}
+
 
 	@RequestMapping(method = RequestMethod.GET, value = "/v")
 	@ResponseBody
@@ -153,7 +201,15 @@ public class PermissibleValueController {
 	@RequestMapping(method = RequestMethod.GET, value = "/v/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public PvDetail getPermissibleValue(@PathVariable("id") Long pvId) {
-		return ResponseEvent.unwrap(pvSvc.getPermissibleValue(RequestEvent.wrap(new EntityQueryCriteria(pvId))));
+	public PvDetail getPermissibleValue(
+		@PathVariable("id")
+		Long pvId,
+
+		@RequestParam(value = "includeProps", required = false, defaultValue="false")
+		boolean includeProps) {
+
+		EntityQueryCriteria criteria = new EntityQueryCriteria(pvId);
+		criteria.setParams(Collections.singletonMap("includeProps", includeProps));
+		return ResponseEvent.unwrap(pvSvc.getPermissibleValue(RequestEvent.wrap(criteria)));
 	}
 }

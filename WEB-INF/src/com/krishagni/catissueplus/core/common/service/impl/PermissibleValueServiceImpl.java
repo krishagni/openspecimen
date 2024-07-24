@@ -32,6 +32,12 @@ public class PermissibleValueServiceImpl implements PermissibleValueService {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<Long> getPermissibleValuesCount(RequestEvent<ListPvCriteria> req) {
+		return ResponseEvent.response(daoFactory.getPermissibleValueDao().getPvsCount(req.getPayload()));
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<PvDetail> getPermissibleValue(RequestEvent<EntityQueryCriteria> req) {
 		EntityQueryCriteria crit = req.getPayload();
 		PermissibleValue value = daoFactory.getPermissibleValueDao().getById(crit.getId());
@@ -39,6 +45,7 @@ public class PermissibleValueServiceImpl implements PermissibleValueService {
 			throw OpenSpecimenException.userError(PvErrorCode.NOT_FOUND, crit.getId());
 		}
 
-		return ResponseEvent.response(PvDetail.from(value, Boolean.TRUE.equals(crit.paramBoolean("includeProps"))));
+		boolean includeProps = Boolean.TRUE.equals(crit.paramBoolean("includeProps"));
+		return ResponseEvent.response(PvDetail.from(value, includeProps, includeProps));
 	}
 }

@@ -12,5 +12,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 public interface PermissibleValueService {
 	ResponseEvent<List<PvDetail>> getPermissibleValues(RequestEvent<ListPvCriteria> req);
 
+	ResponseEvent<Long> getPermissibleValuesCount(RequestEvent<ListPvCriteria> req);
+
 	ResponseEvent<PvDetail> getPermissibleValue(RequestEvent<EntityQueryCriteria> req);
 }

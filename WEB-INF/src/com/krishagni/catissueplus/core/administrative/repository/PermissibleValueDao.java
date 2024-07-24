@@ -9,7 +9,9 @@ import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface PermissibleValueDao extends Dao<PermissibleValue>{
-	public List<PermissibleValue> getPvs(ListPvCriteria crit);	
+	public List<PermissibleValue> getPvs(ListPvCriteria crit);
+
+	Long getPvsCount(ListPvCriteria crit);
 	
 	public List<PermissibleValue> getSpecimenClasses();
 	
