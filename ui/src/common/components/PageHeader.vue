@@ -152,6 +152,8 @@ export default {
 
   .os-page-header .content-wrapper .content {
     margin-top: 7px;
+    display: flex;
+    flex-direction: row;
   }
 
   .os-page-header .content-wrapper .content:after {
@@ -161,8 +163,7 @@ export default {
   }
 
   .os-page-header .content-wrapper .content .left {
-    float: left;
-    width: 65%;
+    flex: 1;
   }
 
   .os-page-header .content-wrapper .content .left :deep(h3) {
@@ -190,9 +191,6 @@ export default {
   }
 
   .os-page-header .content-wrapper .content .right {
-    float: right;
-    width: 20%;
-    text-align: right;
   }
 
   .os-page-header :deep(h3) {
