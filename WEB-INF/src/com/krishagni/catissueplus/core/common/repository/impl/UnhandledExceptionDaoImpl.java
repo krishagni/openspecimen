@@ -21,7 +21,12 @@ public class UnhandledExceptionDaoImpl extends AbstractDao<UnhandledException> i
 		return query.orderBy(query.desc("e.timestamp"))
 			.list(listCrit.startAt(), listCrit.maxResults());
 	}
-	
+
+	@Override
+	public Long getUnhandledExceptionsCount(UnhandledExceptionListCriteria listCrit) {
+		return getUnhandledExceptionListQuery(listCrit).getCount("e.id");
+	}
+
 	private Criteria<UnhandledException> getUnhandledExceptionListQuery(UnhandledExceptionListCriteria listCrit) {
 		return addSearchCondition(createCriteria(UnhandledException.class, "e"), listCrit);
 	}

@@ -1,8 +1,10 @@
 package com.krishagni.catissueplus.rest.controller;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,18 +52,37 @@ public class UnhandledExceptionsController {
 		int maxResults) {
 		
 		UnhandledExceptionListCriteria crit  = new UnhandledExceptionListCriteria()
-			.fromDate(fromDate)
-			.toDate(toDate)
-			.startAt(startAt)
-			.maxResults(maxResults);
-		
-		RequestEvent<UnhandledExceptionListCriteria> req = new RequestEvent<>(crit);
-		ResponseEvent<List<UnhandledExceptionSummary>> resp = commonSvc.getUnhandledExceptions(req);
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+			.fromDate(fromDate).toDate(toDate)
+			.startAt(startAt).maxResults(maxResults);
+		return ResponseEvent.unwrap(commonSvc.getUnhandledExceptions(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "count")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Long> getUnhandledExceptionsCount(
+		@RequestParam(value = "fromDate", required = false)
+		@DateTimeFormat(pattern="yyyy-MM-dd")
+		Date fromDate,
+
+		@RequestParam(value = "toDate", required = false)
+		@DateTimeFormat(pattern="yyyy-MM-dd")
+		Date toDate) {
+
+		UnhandledExceptionListCriteria crit  = new UnhandledExceptionListCriteria()
+			.fromDate(fromDate).toDate(toDate);
+		return Collections.singletonMap("count", ResponseEvent.unwrap(commonSvc.getUnhandledExceptionsCount(RequestEvent.wrap(crit))));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/stack-trace")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> getStackTrace(@PathVariable("id") Long id) {
+		String trace = ResponseEvent.unwrap(commonSvc.getUnhandledExceptionLog(RequestEvent.wrap(id)));
+		return Collections.singletonMap("error", trace);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value="/{id}/log")
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/log")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public void getUnhandledExceptionLog(
@@ -70,15 +91,11 @@ public class UnhandledExceptionsController {
 		
 		HttpServletResponse httpResp) {
 
-		RequestEvent<Long> req = new RequestEvent<>(id);
-		ResponseEvent<String> resp = commonSvc.getUnhandledExceptionLog(req);
-		resp.throwErrorIfUnsuccessful();
-
+		String log = ResponseEvent.unwrap(commonSvc.getUnhandledExceptionLog(RequestEvent.wrap(id)));
 		Utility.sendToClient(
 			httpResp,
 			"unhandled-exception.log",
 			"text/plain",
-			IOUtils.toInputStream(resp.getPayload(), Charset.forName("UTF-8")));
+			IOUtils.toInputStream(log, StandardCharsets.UTF_8));
 	}
-
 }

@@ -77,7 +77,41 @@ public class CommonServiceImpl implements CommonService, InitializingBean {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Long> getUnhandledExceptionsCount(RequestEvent<UnhandledExceptionListCriteria> req) {
+		try {
+			User user = AuthUtil.getCurrentUser();
+			if (!user.isInstituteAdmin() && !user.isAdmin()) {
+				return ResponseEvent.userError(RbacErrorCode.ADMIN_RIGHTS_REQUIRED);
+			}
+
+			UnhandledExceptionListCriteria listCrit = req.getPayload();
+			if (listCrit.fromDate() != null) {
+				listCrit.fromDate(Utility.chopTime(listCrit.fromDate()));
+			}
+
+			if (listCrit.toDate() != null) {
+				listCrit.toDate(Utility.getEndOfDay(listCrit.toDate()));
+			}
+
+			if (!user.isAdmin()) {
+				//
+				// must be institute admin; therefore filter exception list based on
+				// exceptions received by institute users
+				//
+				listCrit.instituteId(user.getInstitute().getId());
+			}
+
+			return ResponseEvent.response(daoFactory.getUnhandledExceptionDao().getUnhandledExceptionsCount(listCrit));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<String> getUnhandledExceptionLog(RequestEvent<Long> req) {
@@ -97,7 +131,7 @@ public class CommonServiceImpl implements CommonService, InitializingBean {
 			}
 
 			String log = new StringBuilder()
-				.append("Input Arguments: \n").append(exception.getInputArgs()).append("\n")
+				.append("Input Arguments: \n").append(exception.getInputArgs()).append("\n\n")
 				.append("Stack Trace: \n").append(exception.getStackTrace()).append("\n")
 				.toString();
 			return ResponseEvent.response(log);

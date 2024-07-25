@@ -10,6 +10,8 @@ import com.krishagni.catissueplus.core.common.repository.UnhandledExceptionListC
 
 public interface CommonService {
 	ResponseEvent<List<UnhandledExceptionSummary>> getUnhandledExceptions(RequestEvent<UnhandledExceptionListCriteria> req);
+
+	ResponseEvent<Long> getUnhandledExceptionsCount(RequestEvent<UnhandledExceptionListCriteria> req);
 	
 	ResponseEvent<String> getUnhandledExceptionLog(RequestEvent<Long> req);
 	
