@@ -1294,6 +1294,10 @@
       "user_sign_up_desc": "Enable to let new users self sign-up for account to access OpenSpecimen. Accounts have to be approved by administrators."
     },
 
+    "all": {
+      "title": "All"
+    },
+
     "auth": {
       "title": "Authentication",
       "account_inactive_days": "Inactive Account",
@@ -1541,6 +1545,7 @@
     "list": "Settings",
     "modules": "Modules",
     "new_value": "New Value",
+    "no_match": "No settings matched the search text",
 
     "notifications": {
       "title": "Notifications",

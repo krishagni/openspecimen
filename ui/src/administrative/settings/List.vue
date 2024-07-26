@@ -14,7 +14,15 @@
         </template>
       </os-page-toolbar>
 
-      <os-grid>
+      <os-grid v-if="ctx.search && (!ctx.modules || ctx.modules.length == 0)">
+        <os-grid-column :width="12">
+          <os-message type="info">
+            <span v-t="'settings.no_match'">No settings matched the search string</span>
+          </os-message>
+        </os-grid-column>
+      </os-grid>
+
+      <os-grid v-else>
         <os-grid-column :width="3">
           <os-panel>
             <template #header>
@@ -59,7 +67,7 @@
                       <span>{{setting.uiName}}</span>
                     </td>
                     <td>
-                      <span>{{setting.uiDesc}}</span>
+                      <span v-html="setting.uiDesc"></span>
                     </td>
                     <td>
                       <ValueSpan :setting="setting" />
@@ -87,7 +95,7 @@
                         <os-label>
                           <span v-t="'settings.description'">Description</span>
                         </os-label>
-                        <span>{{ctx.selectedSetting.uiDesc}}</span>
+                        <span v-html="ctx.selectedSetting.uiDesc"></span>
                       </div>
                     </div>
                     <div class="row">
@@ -359,8 +367,7 @@ export default {
       if (this.module && this.property) {
         const moduleSettings = this.ctx.settings[this.module];
         if (!moduleSettings) {
-          alert('Invalid module: ' + this.module);
-          routerSvc.goto('SettingsList', {}, {module: undefined, property: undefined});
+          this.selectModule(this.ctx.modules[0]);
           return;
         }
 
@@ -377,8 +384,7 @@ export default {
       } else if (this.module) {
         const moduleSettings = this.ctx.settings[this.module];
         if (!moduleSettings) {
-          alert('Invalid module: ' + this.module);
-          routerSvc.goto('SettingsList', {}, {module: undefined, property: undefined});
+          this.selectModule(this.ctx.modules[0]);
           return;
         }
 
