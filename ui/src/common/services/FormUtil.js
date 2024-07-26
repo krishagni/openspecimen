@@ -310,7 +310,9 @@ class FormUtil {
       } else if (attr.type != 'fileUpload' && useDisplayValue && attr.displayValue) {
         value = attr.displayValue;
       } else if (attr.type == 'datePicker') {
-        if (!isNaN(attr.value) && !isNaN(parseInt(attr.value))) {
+        if (attr.value == 'current_date' || attr.value == 'current_time') {
+          value = Date.now();
+        } else if (!isNaN(attr.value) && !isNaN(parseInt(attr.value))) {
           value = new Date(parseInt(attr.value));
         } else if (!!attr.value || attr.value === 0) {
           value = new Date(attr.value);
