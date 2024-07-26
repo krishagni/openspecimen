@@ -13,10 +13,10 @@
       <img :src="imageUrl">
     </span>
     <span v-else-if="field.type == 'textArea' || field.type == 'stringTextField'">
-      <pre v-html="displayValue"></pre>
+      <span v-html="displayValue"></span>
     </span>
     <span v-else>
-      <span><pre>{{displayValue}}</pre></span>
+      <span><span>{{displayValue}}</span></span>
     </span>
   </span>
 </template>

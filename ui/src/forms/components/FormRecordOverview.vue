@@ -125,4 +125,10 @@ export default {
   width: 300px;
 }
 
+.os-sf-table td {
+  max-width: 300px;
+  word-break: break-word;
+  white-space: break-spaces;
+}
+
 </style>
