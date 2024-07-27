@@ -681,7 +681,6 @@ public abstract class DeObject {
 	}
 	
 	private FormData prepareFormData(Container container) {
-		logger.info("Custom field values - " + container.getName() + ", " + getAttrValues());
 		FormData formData = FormData.getFormData(container, getAttrValues(), useUdn, null);
 		formData.setRecordId(this.id);
 
