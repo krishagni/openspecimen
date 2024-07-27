@@ -154,13 +154,11 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 	}
 
 	private Long getIdByValue(String value) {
-		Long pvId = JdbcDaoFactory.getJdbcDao().getResultSet(
+		return JdbcDaoFactory.getJdbcDao().getResultSet(
 			GET_ID_BY_VALUE,
 			Arrays.asList(attribute, value, value),
 			(rs) -> rs.next() ? rs.getLong(1) : null
 		);
-		logger.info("Mapped PV value *" + value + "* of attribute *" + attribute + "* to *" + pvId);
-		return pvId;
 	}
 
 	private static final String PV_TABLE = "CATISSUE_PERMISSIBLE_VALUE";
