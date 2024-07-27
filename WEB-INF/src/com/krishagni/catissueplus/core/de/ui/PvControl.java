@@ -9,11 +9,15 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.common.util.LogUtil;
+
 import edu.common.dynamicextensions.domain.nui.AbstractLookupControl;
 import edu.common.dynamicextensions.ndao.JdbcDaoFactory;
 import edu.common.dynamicextensions.nutility.XmlUtil;
 
 public class PvControl extends AbstractLookupControl implements Serializable {
+	private static final LogUtil logger = LogUtil.getLogger(PvControl.class);
+
 	private static final long serialVersionUID = 1L;
 
 	private String attribute;
@@ -150,11 +154,13 @@ public class PvControl extends AbstractLookupControl implements Serializable {
 	}
 
 	private Long getIdByValue(String value) {
-		return JdbcDaoFactory.getJdbcDao().getResultSet(
+		Long pvId = JdbcDaoFactory.getJdbcDao().getResultSet(
 			GET_ID_BY_VALUE,
 			Arrays.asList(attribute, value, value),
 			(rs) -> rs.next() ? rs.getLong(1) : null
 		);
+		logger.info("Mapped PV value *" + value + "* of attribute *" + attribute + "* to *" + pvId);
+		return pvId;
 	}
 
 	private static final String PV_TABLE = "CATISSUE_PERMISSIBLE_VALUE";
