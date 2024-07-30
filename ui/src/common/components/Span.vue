@@ -15,6 +15,10 @@
       </a>
     </span>
 
+    <span v-else-if="effDisplayType == 'subform' && inputValue">
+      <os-table-span v-model="displayText" />
+    </span>
+
     <span class="value-text" v-else>
       <a v-if="link" :href="link" :target="hrefTarget || '_blank'" rel="noopener">
         <span>{{displayText}}</span>
