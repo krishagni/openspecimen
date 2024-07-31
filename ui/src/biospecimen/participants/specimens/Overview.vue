@@ -24,7 +24,7 @@
           :lazy-load="true" @menu-toggled="loadEventForms"
           v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
 
-        <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" v-if="ctx.moreOptions.length > 0"/>
+        <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
       </span>
     </template>
   </os-page-toolbar>
@@ -169,7 +169,7 @@ export default {
 
         userRole: this.cpViewCtx.getRole(),
 
-        moreOptions: []
+        pluginOptions: []
       },
 
       pluginViewProps: { },
@@ -187,7 +187,6 @@ export default {
   async created() {
     this._setupSpecimen();
     this.ctx.dict = await this.cpViewCtx.getSpecimenDict();
-    this._loadMoreMenuOptions();
     if (typeof this.action == 'string') {
       const [view, formId, recordId] = this.action.split(',');
       if (view == 'show_event' && formId > 0 && recordId > 0) {
@@ -199,11 +198,14 @@ export default {
     }
   },
 
+  mounted() {
+    this._loadMoreMenuPluginOptions();
+  },
+
   watch: {
     specimen: function(newVal, oldVal) {
       if (newVal != oldVal) {
         this._setupSpecimen();
-        this._loadMoreMenuOptions();
       }
     }
   },
@@ -232,6 +234,15 @@ export default {
 
       if (specimen.id > 0 && this.isDeleteAllowed) {
         options.push({icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: this.deleteSpecimen});
+      }
+
+      Array.prototype.push.apply(options, this.ctx.pluginOptions || []);
+      if (specimen.id > 0) {
+        if (options.length > 0) {
+          options.push({divider: true});
+        }
+
+        options.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
       }
 
       return options;
@@ -489,6 +500,7 @@ export default {
       }
 
       this.ctx.children = specimen.children || [];
+      this._loadMoreMenuPluginOptions();
     },
 
     _getChildrenIds: function(children) {
@@ -507,21 +519,14 @@ export default {
       }
     },
 
-    _loadMoreMenuOptions: function() {
+    _loadMoreMenuPluginOptions: function() {
+      if (!this.$refs.moreMenuPluginViews) {
+        return;
+      }
+
       const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
       util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'specimen-detail', 'more-menu', ctxt)
-        .then(
-          pluginOptions => {
-            const options = this.ctx.moreOptions = (this.moreOptions || []).concat(pluginOptions);
-            if (this.ctx.specimen.id > 0) {
-              if (options.length > 0) {
-                options.push({divider: true});
-              }
-
-              options.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
-            }
-          }
-        );
+        .then(pluginOptions => this.ctx.pluginOptions = pluginOptions);
     }
   }
 }
