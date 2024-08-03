@@ -189,14 +189,14 @@ class Specimen {
 
           if (field.name == 'specimen.label' || field.name == 'specimen.barcode') {
             field.href = ({specimen: {cpId, cprId, visitId, id, eventId, reqId}}) =>
-              id && routerSvc.getUrl(
+              id && routerSvc.getFullUrl(
                 'ParticipantsListItemSpecimenDetail.Overview',
                 {cpId, cprId, visitId, specimenId: id},
                 {eventId, reqId}
               );
           } else if (field.name == 'specimen.parentLabel') {
             field.href = ({specimen: {cpId, cprId, visitId, parentId, eventId}}) =>
-              parentId && routerSvc.getUrl(
+              parentId && routerSvc.getFullUrl(
                 'ParticipantsListItemSpecimenDetail.Overview',
                 {cpId, cprId, visitId, specimenId: parentId},
                 {eventId}
@@ -204,7 +204,7 @@ class Specimen {
           } else if (field.name == 'specimen.storageLocation') {
             field.href = ({specimen: {storageLocation}}) => {
               if (storageLocation && storageLocation.id > 0) {
-                return routerSvc.getUrl('ContainerDetail.Locations', {containerId: storageLocation.id});
+                return routerSvc.getFullUrl('ContainerDetail.Locations', {containerId: storageLocation.id});
               } else {
                 return null;
               }
