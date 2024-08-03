@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
@@ -36,6 +36,8 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 	private Set<SiteCpPair> siteCps;
 
 	private boolean useMrnSites;
+
+	List<String> empis;
 
 	private List<String> ppids;
 
@@ -157,6 +159,7 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 		return StringUtils.isNotBlank(name()) ||
 			StringUtils.isNotBlank(participantId()) ||
 			StringUtils.isNotBlank(uid()) ||
+			CollectionUtils.isNotEmpty(empis()) ||
 			dob() != null;
 	}
 
@@ -166,6 +169,16 @@ public class CprListCriteria extends AbstractListCriteria<CprListCriteria> {
 		}
 
 		return phiSiteCps().stream().map(SiteCpPair::getCpId).collect(Collectors.toSet());
+	}
+
+	@JsonProperty("empis")
+	public CprListCriteria empis(List<String> empis) {
+		this.empis = empis;
+		return self();
+	}
+
+	public List<String> empis() {
+		return empis;
 	}
 
 	public List<String> ppids() {

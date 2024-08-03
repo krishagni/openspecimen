@@ -89,7 +89,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		String orderBy = StringUtils.isNotBlank(crit.orderBy()) ? crit.orderBy() : "cpr.id";
 		query.addOrder(crit.asc() ? query.asc(orderBy) : query.desc(orderBy));
 
-		if (CollectionUtils.isEmpty(crit.ppids()) && CollectionUtils.isEmpty(crit.externalSubjectIds())) {
+		if (CollectionUtils.isEmpty(crit.ppids()) && CollectionUtils.isEmpty(crit.externalSubjectIds()) && CollectionUtils.isEmpty(crit.empis())) {
 			return query.list(crit.startAt(), crit.maxResults());
 		}
 
@@ -259,6 +259,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		addDobCondition(query, cprCrit);
 		addSpecimenCondition(query, cprCrit);
 		addSiteCpsCond(query, cprCrit);
+		addEmpisCond(query, cprCrit);
 		addPpidsCond(query, cprCrit);
 		addExternalSubjectIdsCond(query, cprCrit);
 		addIdsCond(query, cprCrit);
@@ -321,9 +322,9 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 		}
 
 		if (StringUtils.isNotBlank(crit.uid())) {
-			query.add(query.ilike("participant.uid", crit.uid()));
+			query.add(query.eq("participant.uid", crit.uid()));
 		}
-		
+
 		if (StringUtils.isNotBlank(crit.name())) {
 			query.add(query.disjunction()
 				.add(query.ilike("participant.firstName", crit.name()))
@@ -354,6 +355,12 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 					.add(query.ilike("specimen.barcode", crit.specimen())))
 			.add(query.ne("specimen.activityStatus", "Disabled"))
 			.add(query.ne("visit.activityStatus", "Disabled"));
+	}
+
+	private void addEmpisCond(Criteria<Object[]> query, CprListCriteria crit) {
+		if (CollectionUtils.isNotEmpty(crit.empis())) {
+			query.add(query.in("participant.empi", crit.empis()));
+		}
 	}
 
 	private void addPpidsCond(Criteria<Object[]> query, CprListCriteria crit) {
@@ -533,6 +540,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	private SubQuery<Long> getCprIdsQuery(CprListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
 		SubQuery<Long> subQuery = mainQuery.createSubQuery(CollectionProtocolRegistration.class, "cpr")
+			.join("cpr.participant", "participant")
 			.distinct().select("cpr.id");
 
 		if (crit.lastId() != null && crit.lastId() >= 0L) {
@@ -548,6 +556,10 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 			applyIdsFilter(subQuery, "cpr.id", crit.ids());
 		}
 
+		if (CollectionUtils.isNotEmpty(crit.empis())) {
+			subQuery.add(subQuery.in("participant.empi", crit.empis()));
+		}
+
 		if (CollectionUtils.isNotEmpty(crit.ppids())) {
 			subQuery.add(subQuery.in("cpr.ppid", crit.ppids()));
 		}
@@ -558,8 +570,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 		BiospecimenDaoHelper.getInstance().addSiteCpsCond(subQuery, crit.siteCps(), crit.useMrnSites(), false);
 		if (CollectionUtils.isEmpty(crit.siteCps()) && crit.includePhi()) {
-			subQuery.join("cpr.participant", "participant")
-				.leftJoin("participant.pmis", "pmi");
+			subQuery.leftJoin("participant.pmis", "pmi");
 		}
 
 		addCpRestrictions(subQuery, crit);

@@ -1514,7 +1514,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 			}
 
 			List<CollectionProtocolRegistration> cprs = daoFactory.getCprDao().getCprs(crit.lastId(lastId));
-			if (CollectionUtils.isNotEmpty(crit.ppids()) || CollectionUtils.isNotEmpty(crit.externalSubjectIds()) || cprs.size() < 100) {
+			if (CollectionUtils.isNotEmpty(crit.ppids()) || CollectionUtils.isNotEmpty(crit.externalSubjectIds()) || CollectionUtils.isNotEmpty(crit.empis()) || cprs.size() < 100) {
 				endOfCprs = true;
 			}
 
@@ -1563,7 +1563,7 @@ public class CollectionProtocolRegistrationServiceImpl implements CollectionProt
 					.siteCps(access.siteCps)
 					.useMrnSites(AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn());
 
-				if (CollectionUtils.isNotEmpty(crit.ppids()) || CollectionUtils.isNotEmpty(crit.externalSubjectIds())) {
+				if (CollectionUtils.isNotEmpty(crit.ppids()) || CollectionUtils.isNotEmpty(crit.externalSubjectIds()) || CollectionUtils.isNotEmpty(crit.empis())) {
 					crit.limitItems(false);
 				} else {
 					crit.limitItems(true).maxResults(100);
