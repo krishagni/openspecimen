@@ -289,6 +289,14 @@ class CollectionProtocol {
 
     return null;
   }
+
+  star(cp) {
+    return http.post('collection-protocols/' + cp.id + '/labels', {});
+  }
+
+  unstar(cp) {
+    return http.delete('collection-protocols/' + cp.id + '/labels');
+  }
 }
 
 export default new CollectionProtocol();

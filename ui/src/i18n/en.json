@@ -182,6 +182,7 @@
     "enter_delete_captcha": "Type 'DELETE ANYWAY' to continue.",
     "enter_delete_reason": "Specify the reason, at least 10 characters in length, for deletion:",
     "error": "Error",
+    "expand_to_show_more_details": "Expand to view more details",
 
     "feedback": {
       "failed_to_send": "Failed to send the feedback. Contact system administrator for further help!",
@@ -206,12 +207,14 @@
     "home": {
       "carts": "Carts",
       "carts_desc": "Create, share, and manage specimen carts",
+      "click_widgets_button": "Click on the \"Widgets\" button on the top right corner of this page",
       "consents": "Consents",
       "consents_desc": "Manage coded consent statements",
       "containers": "Containers",
       "containers_desc": "Manage containers and their restrictions",
       "cps": "Collection Protocols",
       "cps_desc": "Create, update SOP of visits and specimens",
+      "did_you_know": "Did you know you can configure the this page to display the modules you frequently use?",
       "dps": "Distribution Protocols",
       "dps_desc": "Create, update procedures for distributing specimens",
       "forms": "Forms",
@@ -221,12 +224,15 @@
       "institutes_desc": "Update information about institutes",
       "jobs": "Jobs",
       "jobs_desc": "Create, schedule, execute jobs",
+      "online_forums": "Online Forums",
       "orders": "Orders",
       "orders_desc": "Create, execute request orders for distributing specimens",
+      "past_webinars": "Past Webinars",
       "queries": "Queries",
       "queries_desc": "Create, share, and schedule queries",
       "roles": "Roles",
       "roles_desc": "Create, update user access controls",
+      "select_widgets": "Select Widgets...",
       "settings": "Settings",
       "settings_desc": "Manage application configuration settings",
       "shipments": "Shipments",
@@ -235,8 +241,23 @@
       "sites_desc": "Add and update sites",
       "training": "Training",
       "training_desc": "User manual and training videos portal",
+      "useful_links": "Useful Links",
+      "user_manual": "User Manual",
       "users": "Users",
-      "users_desc": "Add, rename and manage users"
+      "users_desc": "Add, rename and manage users",
+      "widget": "Widget",
+      "widget_width": "Width",
+      "widgets": {
+        "collection-protocols": "Collection Protocols",
+        "container-list": "Containers",
+        "dp-list": "Distribution Protocols",
+        "order-list": "Orders",
+        "query-list": "Queries",
+        "shipment-list": "Shipments",
+        "specimen-lists": "Carts"
+      },
+      "widgets_button": "Widgets",
+      "youtube": "YouTube"
     },
 
     "last_updated": "Last Updated",

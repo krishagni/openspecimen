@@ -41,6 +41,7 @@ import BioSpmnComponents from '@/biospecimen/components';
 import BioSpmnServices   from '@/biospecimen/services';
 import DeFormComponents  from '@/forms/components';
 import DeFormServices    from '@/forms/services';
+import HomeComponents    from '@/home/components';
 
 import Layout from '@/administrative/containers/Layout.vue';
 
@@ -55,7 +56,8 @@ const app = createApp(Root)
   .use(BioSpmnComponents)
   .use(BioSpmnServices)
   .use(DeFormComponents)
-  .use(DeFormServices);
+  .use(DeFormServices)
+  .use(HomeComponents);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-tooltip', Tooltip);

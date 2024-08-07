@@ -143,6 +143,14 @@ class DistributionProtocol {
     addEditFs.rows = addEditFs.rows.concat(schema.rows);
     return { schema: addEditFs, defaultValues };
   }
+
+  star(dp) {
+    return http.post('distribution-protocols/' + dp.id + '/labels', {});
+  }
+
+  unstar(dp) {
+    return http.delete('distribution-protocols/' + dp.id + '/labels');
+  }
 }
 
 export default new DistributionProtocol();

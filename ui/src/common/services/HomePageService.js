@@ -1,8 +1,13 @@
 
-class HomePageService {
+import authSvc from '@/common/services/Authorization.js';
+import http from '@/common/services/HttpClient.js';
+
+class HomePage {
   pageCards = [];
 
   sorted = false;
+
+  widgetRules = {};
 
   registerCards(cards) {
     cards.forEach(card => this.registerCard(card));
@@ -34,6 +39,35 @@ class HomePageService {
   showCards() {
     this.hidePageCards = false;
   }
+
+  registerWidget(name, showIf) {
+    this.widgetRules[name] = showIf;
+  }
+
+  registerWidgets(widgets) {
+    for (let {name, showIf} of widgets || []) {
+      this.widgetRules[name] = showIf;
+    }
+  }
+
+  getWidgets() {
+    const result = [];
+    for (let name of Object.keys(this.widgetRules)) {
+      if (authSvc.isAllowed(this.widgetRules[name])) {
+        result.push(name);
+      }
+    }
+
+    return result;
+  }
+
+  getAllWidgets() {
+    return Object.keys(this.widgetRules);
+  }
+
+  saveUserWidgets(widgets) {
+    return http.put('users/current-user-ui-state', {widgets});
+  }
 }
 
-export default new HomePageService();
+export default new HomePage();

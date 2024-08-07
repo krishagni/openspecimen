@@ -10,6 +10,7 @@ import Breadcrumb from './Breadcrumb.vue';
 import Button from './Button.vue';
 import ButtonGroup from './ButtonGroup.vue';
 import ButtonLink from './ButtonLink.vue';
+import Card from './Card.vue';
 import Chart from './Chart.vue';
 import Checkbox from './Checkbox.vue';
 import CloseSpecimen from './CloseSpecimen.vue';
@@ -110,6 +111,7 @@ export default {
     app.component('os-button',           Button);
     app.component('os-button-group',     ButtonGroup);
     app.component('os-button-link',      ButtonLink);
+    app.component('os-card',             Card);
     app.component('os-chart',            Chart);
     app.component('os-checkbox',         Checkbox);
     app.component('os-close-specimen',   CloseSpecimen);

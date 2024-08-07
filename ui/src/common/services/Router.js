@@ -45,6 +45,10 @@ class Router {
     return router.push({name: name, params: params || {}, query: query || {}});
   }
 
+  replace(name, params, query) {
+    return router.push({name: name, params: params || {}, query: query || {}, replace: true});
+  }
+
   back() {
     router.go(-1);
   }

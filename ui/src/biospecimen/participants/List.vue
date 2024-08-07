@@ -374,7 +374,7 @@ export default {
       );
 
       if (this.ctx.cprId <= 0) {
-        routerSvc.goto('ParticipantsList', {cpId: cp.id, cprId: -1}, { filters, view: this.ctx.view });
+        routerSvc.replace('ParticipantsList', {cpId: cp.id, cprId: -1}, { filters, view: this.ctx.view });
       } else {
         const selectedItemId = this.ctx.view == 'participants_list' ? this.ctx.cprId : this.ctx.specimenId;
         let selectedRow = this.items.find(row => row.id == selectedItemId);

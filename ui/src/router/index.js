@@ -17,6 +17,12 @@ const routes = [
       },
 
       {
+        path: 'home',
+        name: 'HomePage',
+        component: () => import(/* webpackChunkName: "common" */ '../home/views/Home.vue'),
+      },
+
+      {
         path: 'users/:userId',
         name: 'UsersList',
         // route level code-splitting
