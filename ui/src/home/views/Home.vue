@@ -13,12 +13,14 @@
     <os-page-body>
       <os-grid>
         <os-grid-column :width="10">
-          <span class="os-widgets-info" v-if="ctx.widgets.length == 0">
-            <span class="message">
-              <span class="question" v-t="'common.home.did_you_know'">Did you know you can configure the homepage to display the modules you frequently use?</span>
-              <span class="help" v-t="'common.home.click_widgets_button'">Click on the "Widgets" button on the top right corner of this page</span>
-            </span>
-          </span>
+          <os-card class="os-widgets-info" v-if="ctx.widgets.length == 0">
+            <template #body>
+              <span class="message">
+                <span class="question" v-t="'common.home.did_you_know'">Did you know you can configure the homepage to display the modules you frequently use?</span>
+                <span class="help" v-t="'common.home.click_widgets_button'">Click on the "Widgets" button on the top right corner of this page</span>
+              </span>
+            </template>
+          </os-card>
           <div class="os-widgets" v-else>
             <div :class="['widget', 'widget-' + (widget.width || 2)]" v-for="widget of widgets" :key="widget.name">
               <component :is="'os-home-' + widget.name" :widget="widget" />
@@ -189,9 +191,7 @@ export default {
 }
 
 .os-widgets-info .message {
-  padding: 2rem;
-  border: 1px solid #ddd;
-  border-radius: 1.25rem;
+  padding: 2.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
