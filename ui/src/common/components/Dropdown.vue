@@ -48,7 +48,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey', 'optional'],
 
   emits: ['update:modelValue'],
 
@@ -301,7 +301,7 @@ export default {
     },
 
     showClear: function() {
-      return true;
+      return !(this.optional == false || this.optional == 'false');
     }
   },
 
