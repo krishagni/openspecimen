@@ -104,7 +104,7 @@ export default {
           return item;
         });
 
-      items.splice(0, 0, {label: this.$t('common.home.home'), url: this.ui.ngServer + '#/home'});
+      items.splice(0, 0, {label: this.$t('common.home.home'), url: routerSvc.getUrl('HomePage')});
       return items;
     }
   }

@@ -157,8 +157,8 @@ osApp.config(function(
       })
       .state('home', {
         url: '/home',
-        templateUrl: 'modules/common/home.html',
-        controller: 'HomePageCtrl',
+        template: '<div></div>',
+        controller: function(VueApp) { VueApp.setVueView('home'); },
         parent: 'signed-in'
       })
       .state('admin-view', {
