@@ -10,9 +10,10 @@
           :label="$t('common.home.widgets_button')" @click="showWidgetsDialog" />
       </template>
     </os-page-head>
+
     <os-page-body>
       <os-grid>
-        <os-grid-column :width="10">
+        <os-grid-column :width="9" style="overflow-y: auto;">
           <os-card class="os-widgets-info" v-if="ctx.widgets.length == 0">
             <template #body>
               <span class="message">
@@ -28,36 +29,57 @@
           </div>
         </os-grid-column>
 
-        <os-grid-column :width="2">
-          <os-card class="os-quick-links">
-            <template #header>
-              <span class="title" v-t="'common.home.useful_links'">Useful Links</span>
-            </template>
-            <template #body>
-              <ul>
-                <li>
-                  <a href="https://openspecimen.atlassian.net/l/cp/ExVdshgT" target="_blank">
-                    <span v-t="'common.home.user_manual'">User Manual</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="https://forums.openspecimen.org" target="_blank">
-                    <span v-t="'common.home.online_forums'">Online Forums</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="https://www.youtube.com/channel/UCWRN3KN0G5k9WmTiQIwuA8g" target="_blank">
-                    <span v-t="'common.home.youtube'">YouTube</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="https://www.openspecimen.org/webinars/" target="_blank">
-                    <span v-t="'common.home.past_webinars'">Past Webinars</span>
-                  </a>
-                </li>
-              </ul>
-            </template>
-          </os-card>
+        <os-grid-column :width="3" style="overflow-y: auto;">
+          <div class="os-widgets">
+            <div class="widget widget-6" v-if="ctx.favorites && ctx.favorites.length > 0">
+              <os-home-list-card class="os-favorite-links" :icon="'heart'" :title="$t('common.home.favorites')"
+                :show-star="false" :list="ctx.favorites" :hide-search="true">
+                <template #actions="slotProps">
+                  <os-button size="small" left-icon="trash" @click="confirmRemoveFavorite(slotProps.item)" />
+                </template>
+              </os-home-list-card>
+            </div>
+
+            <div class="widget widget-6" style="padding-bottom: 0px;" v-else>
+              <os-card class="os-quick-links">
+                <template #body>
+                  <span v-t="'common.home.no_favorites'">No favorite links</span>
+                </template>
+              </os-card>
+            </div>
+
+            <div class="widget widget-6" style="padding-bottom: 0px;">
+              <os-card class="os-quick-links">
+                <template #header>
+                  <span class="title" v-t="'common.home.useful_links'">Useful Links</span>
+                </template>
+                <template #body>
+                  <ul>
+                    <li>
+                      <a href="https://openspecimen.atlassian.net/l/cp/ExVdshgT" target="_blank">
+                        <span v-t="'common.home.user_manual'">User Manual</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="https://forums.openspecimen.org" target="_blank">
+                        <span v-t="'common.home.online_forums'">Online Forums</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="https://www.youtube.com/channel/UCWRN3KN0G5k9WmTiQIwuA8g" target="_blank">
+                        <span v-t="'common.home.youtube'">YouTube</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="https://www.openspecimen.org/webinars/" target="_blank">
+                        <span v-t="'common.home.past_webinars'">Past Webinars</span>
+                      </a>
+                    </li>
+                  </ul>
+                </template>
+              </os-card>
+            </div>
+          </div>
         </os-grid-column>
       </os-grid>
     </os-page-body>
@@ -101,6 +123,12 @@
         <os-button primary :label="$t('common.buttons.save')" @click="saveWidgets" />
       </template>
     </os-dialog>
+
+    <os-confirm-delete ref="deleteFavoriteConfirm" :captcha="false" :collect-reason="false">
+      <template #message>
+        <span v-t="'common.home.rm_from_favorites'"></span>
+      </template>
+    </os-confirm-delete>
   </os-page>
 </template>
 
@@ -121,7 +149,9 @@ export default {
   data() {
     return {
       ctx: {
-        widgets: []
+        widgets: [],
+
+        favorites: []
       }
     }
   },
@@ -129,6 +159,8 @@ export default {
   created() {
     const {widgets} = this.$ui.global.state || {};
     this.ctx.widgets = widgets;
+    this._loadFavorites();
+    homePageSvc.registerFavoritesListener(() => this._loadFavorites());
   },
 
   watch: {
@@ -177,6 +209,35 @@ export default {
           this.closeWidgetsDialog();
         }
       );
+    },
+
+    confirmRemoveFavorite: function(favorite) {
+      this.$refs.deleteFavoriteConfirm.open().then(
+        async (resp) => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          homePageSvc.deleteFavorite(favorite.id);
+        }
+      );
+    },
+
+    _loadFavorites: function() {
+      homePageSvc.getFavorites().then(
+        favorites => {
+          this.ctx.favorites = favorites.map(
+            favorite => (
+              {
+                id: favorite.id,
+                displayName: favorite.title,
+                url: favorite.viewUrl,
+                title: favorite.title
+              }
+            )
+          );
+        }
+      );
     }
   }
 }
@@ -209,6 +270,7 @@ export default {
 
 .os-quick-links {
   min-width: 200px;
+  margin-bottom: 1.25rem;
 }
 
 .os-quick-links ul {
@@ -237,6 +299,32 @@ export default {
 .os-widgets .widget :deep(.os-card .body) {
   height: 340px;
   overflow-y: auto;
+}
+
+.os-widgets .widget .os-quick-links :deep(.body) {
+  height: auto;
+}
+
+.os-widgets .widget .os-favorite-links :deep(.body) {
+  height: auto;
+  max-height: 340px;
+}
+
+.os-favorite-links :deep(.title .os-icon-wrapper) {
+  color: orangered;
+}
+
+.os-favorite-links :deep(tr button.btn.btn-xs) {
+  display: none;
+  height: 1rem;
+  width: 1rem;
+  font-size: 0.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.os-favorite-links :deep(tr:hover button.btn.btn-xs) {
+  display: inline-block;
 }
 
 .os-widgets .widget-1 {

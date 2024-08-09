@@ -9,6 +9,10 @@ class HomePage {
 
   widgetRules = {};
 
+  favorites = null;
+
+  favoritesListeners = [];
+
   registerCards(cards) {
     cards.forEach(card => this.registerCard(card));
   }
@@ -67,6 +71,47 @@ class HomePage {
 
   saveUserWidgets(widgets) {
     return http.put('users/current-user-ui-state', {widgets});
+  }
+
+  async getFavorites() {
+    if (this.favorites) {
+      return this.favorites;
+    }
+
+    return http.get('user-favorites').then(favorites => this._setFavorites(favorites));
+  }
+
+  addFavorite(favorite) {
+    return http.post('user-favorites', favorite).then(favorites => this._setFavorites(favorites));
+  }
+
+  deleteFavorite(favoriteId) {
+    return http.delete('user-favorites/' + favoriteId).then(favorites => this._setFavorites(favorites));
+  }
+
+  registerFavoritesListener(callback) {
+    if (callback) {
+      this.favoritesListeners.push(callback);
+    }
+  }
+
+  _setFavorites(favorites) {
+    if (!this.favorites) {
+      this.favorites = [];
+    }
+
+    this.favorites.length = 0;
+    Array.prototype.push.apply(this.favorites, favorites);
+
+    for (let listener of this.favoritesListeners) {
+      try {
+        listener(this.favorites);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    return this.favorites;
   }
 }
 

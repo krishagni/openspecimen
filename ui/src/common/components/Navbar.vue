@@ -19,6 +19,8 @@
       </div>
 
       <div class="buttons">
+        <os-add-to-favorites v-if="!minimalLogin" />
+
         <os-new-stuff  v-if="!minimalLogin" />
 
         <os-user-feedback v-if="!minimalLogin" />
@@ -63,21 +65,23 @@ import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
 import routerSvc from '@/common/services/Router.js';
 
-import Search        from '@/common/components/Search';
-import NewStuff      from '@/common/components/NewStuff';
-import Feedback      from '@/common/components/Feedback';
-import About         from '@/common/components/About';
-import NotifsOverlay from '@/common/components/NotifsOverlay';
+import About          from '@/common/components/About';
+import AddToFavorites from '@/common/components/AddToFavorites.vue';
+import Feedback       from '@/common/components/Feedback';
+import NewStuff       from '@/common/components/NewStuff';
+import NotifsOverlay  from '@/common/components/NotifsOverlay';
+import Search         from '@/common/components/Search';
 
 export default {
   props: ['noLogin'],
 
   components: {
-    'os-search': Search,
-    'os-new-stuff': NewStuff,
-    'os-user-feedback': Feedback,
     'os-about': About,
-    'os-notifs-overlay': NotifsOverlay
+    'os-add-to-favorites': AddToFavorites,
+    'os-user-feedback': Feedback,
+    'os-new-stuff': NewStuff,
+    'os-notifs-overlay': NotifsOverlay,
+    'os-search': Search
   },
 
   data() {

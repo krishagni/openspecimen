@@ -10,4 +10,29 @@
       <column name="DEFAULT_CUSTOM_FIELD_VALUES" type="${clob.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="User favorites">
+    <createTable tableName="OS_USER_FAVORITES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="TITLE" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="VIEW_URL" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="OLD_VIEW" type="${boolean.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="USER_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_FAVORITE_VIEW_USER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="User favorites ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_USER_FAVORITES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
 </databaseChangeLog>

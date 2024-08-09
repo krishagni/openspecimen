@@ -33,6 +33,7 @@ import com.krishagni.catissueplus.core.common.repository.StarredItemDao;
 import com.krishagni.catissueplus.core.common.repository.UnhandledExceptionDao;
 import com.krishagni.catissueplus.core.common.repository.UniqueIdGenerator;
 import com.krishagni.catissueplus.core.common.repository.UpgradeLogDao;
+import com.krishagni.catissueplus.core.common.repository.UserFavoriteDao;
 import com.krishagni.catissueplus.core.common.repository.UserNotificationDao;
 
 public interface DaoFactory {
@@ -137,4 +138,6 @@ public interface DaoFactory {
 	PdeAuditLogDao getPdeAuditLogDao();
 
 	LockDao getLockDao();
+
+	UserFavoriteDao getUserFavoriteDao();
 } 

@@ -76,6 +76,7 @@ import com.krishagni.catissueplus.core.common.repository.StarredItemDao;
 import com.krishagni.catissueplus.core.common.repository.UnhandledExceptionDao;
 import com.krishagni.catissueplus.core.common.repository.UniqueIdGenerator;
 import com.krishagni.catissueplus.core.common.repository.UpgradeLogDao;
+import com.krishagni.catissueplus.core.common.repository.UserFavoriteDao;
 import com.krishagni.catissueplus.core.common.repository.UserNotificationDao;
 import com.krishagni.catissueplus.core.common.repository.impl.ConfigSettingDaoImpl;
 import com.krishagni.catissueplus.core.common.repository.impl.ExternalAppIdDaoImpl;
@@ -88,6 +89,7 @@ import com.krishagni.catissueplus.core.common.repository.impl.StarredItemDaoImpl
 import com.krishagni.catissueplus.core.common.repository.impl.UnhandledExceptionDaoImpl;
 import com.krishagni.catissueplus.core.common.repository.impl.UniqueIdGeneratorImpl;
 import com.krishagni.catissueplus.core.common.repository.impl.UpgradeLogDaoImpl;
+import com.krishagni.catissueplus.core.common.repository.impl.UserFavoriteDaoImpl;
 import com.krishagni.catissueplus.core.common.repository.impl.UserNotificationDaoImpl;
 
 public class DaoFactoryImpl implements DaoFactory {
@@ -459,6 +461,13 @@ public class DaoFactoryImpl implements DaoFactory {
 	@Override
 	public LockDao getLockDao() {
 		LockDaoImpl dao = new LockDaoImpl();
+		setSessionFactory(dao);
+		return dao;
+	}
+
+	@Override
+	public UserFavoriteDao getUserFavoriteDao() {
+		UserFavoriteDaoImpl dao = new UserFavoriteDaoImpl();
 		setSessionFactory(dao);
 		return dao;
 	}

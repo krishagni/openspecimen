@@ -8,9 +8,9 @@
         </span>
         <span class="actions">
           <os-button size="small" left-icon="search" @click="showSearchText"
-            v-os-tooltip="$t('common.buttons.search')" />
+            v-os-tooltip.bottom="$t('common.buttons.search')" v-if="!hideSearch" />
           <os-button size="small" left-icon="expand" @click="showDetailedList"
-            v-os-tooltip="$t('common.expand_to_show_more_details')" v-if="listUrl" />
+            v-os-tooltip.bottom="$t('common.expand_to_show_more_details')" v-if="listUrl" />
         </span>
       </div>
       <div class="toolbar" v-else>
@@ -32,6 +32,9 @@
                 <span>{{item.displayName}}</span>
               </a>
             </td>
+            <td class="col" v-if="$slots.actions">
+              <slot name="actions" v-bind:item="item" v-bind:model="item"> </slot>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -44,7 +47,7 @@
 import routerSvc from '@/common/services/Router.js';
 
 export default {
-  props: ['icon', 'title', 'show-star', 'list-url', 'list'],
+  props: ['icon', 'title', 'show-star', 'list-url', 'list', 'hide-search'],
 
   emits: ['search', 'toggle-star'],
 
