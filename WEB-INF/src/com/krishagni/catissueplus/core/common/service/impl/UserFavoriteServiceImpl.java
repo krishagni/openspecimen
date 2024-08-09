@@ -32,7 +32,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
 	public List<UserFavoriteDetail> addFavorite(UserFavoriteDetail input) {
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 
-		Long count = daoFactory.getUserFavoriteDao().getFavoritesCount(AuthUtil.getCurrentUserInstitute().getId());
+		Long count = daoFactory.getUserFavoriteDao().getFavoritesCount(AuthUtil.getCurrentUser().getId());
 		if (count >= 25L) {
 			ose.addError(UserFavoriteError.MAX_LIMIT_REACHED, count);
 		}

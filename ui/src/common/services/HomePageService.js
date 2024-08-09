@@ -1,6 +1,7 @@
 
 import authSvc from '@/common/services/Authorization.js';
 import http from '@/common/services/HttpClient.js';
+import routerSvc from '@/common/services/Router.js';
 
 class HomePage {
   pageCards = [];
@@ -102,6 +103,11 @@ class HomePage {
 
     this.favorites.length = 0;
     Array.prototype.push.apply(this.favorites, favorites);
+    for (let favorite of this.favorites) {
+      if (favorite.oldView) {
+        favorite.viewUrl = routerSvc.ngUrl(favorite.viewUrl.substring(2));
+      }
+    }
 
     for (let listener of this.favoritesListeners) {
       try {

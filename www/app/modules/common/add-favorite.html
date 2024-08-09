@@ -1,0 +1,27 @@
+<form name="addFavoriteForm" class="form-horizontal"
+  os-form-validator="addFavoriteForm" validator="addFavoriteFormValidator" novalidate>
+  <div class="os-modal">
+    <div class="os-modal-header">
+      <span translate="common.favorite.add_favorite">Add Favorite</span>
+    </div>
+
+    <div class="os-modal-body">
+      <div class="form-group">
+        <label class="col-xs-12" translate="common.favorite.title">Title</label>
+        <div class="col-xs-12">
+          <input type="text" name="title" ng-model="favorite.title" class="form-control" required>
+          <div os-field-error field="addFavoriteForm.title"></div>
+        </div>
+      </div>  
+    </div>
+
+    <div class="os-modal-footer">
+      <button class="btn os-btn-text" ng-click="cancel()">
+        <span translate="common.buttons.cancel">Cancel</span>
+      </button>
+      <button class="btn btn-primary" os-form-submit="add()">
+        <span translate="common.buttons.add">Add</span>
+      </button>
+    </div>
+  </div>
+</form>

@@ -191,6 +191,15 @@
       "dismiss": "Dismiss",
       "widgets": "Widgets",
       "set": "Set"
+    },
+
+    "favorite": {
+      "add_favorite": "Add Favorite",
+      "add_this_page": "Add this page to Favorites",
+      "confirm_delete_favorite": "Are you sure you want to remove this page from Favorites list?",
+      "remove_this_page": "Remove this page from Favorites",
+      "title": "Title",
+      "unsaved_query_favorite_na": "Unsaved query results cannot be added to favorites."
     }
   },
 

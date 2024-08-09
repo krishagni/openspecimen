@@ -1,0 +1,24 @@
+<li class="os-addrm-favorite dropdown" dropdown>
+  <a class="dropdown-toggle">
+    <span class="fa fa-heart" ng-show="!currentPageFavorite"></span>
+    <span class="fa fa-heart" style="color: orangered;" ng-show="currentPageFavorite"></span>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-right" role="menu" style="max-height: 80vh; overflow-y: auto;">
+    <li>
+      <a ng-click="showAddFavoriteForm()" ng-if="!currentPageFavorite">
+        <span translate="common.favorite.add_this_page">Add this page to Favorites<span>
+      </a>
+      <a ng-click="confirmDeleteFavorite()" ng-if="currentPageFavorite">
+        <span translate="common.favorite.remove_this_page">Remove this page from Favorites<span>
+      </a>
+    </li>
+
+    <li class="divider" ng-if="favorites.length > 0"></li>
+
+    <li ng-repeat="favorite in favorites">
+      <a href="{{favorite.url}}">
+        <span>{{favorite.title}}</span>
+      </a>
+    </li>
+  </ul>
+</li>
