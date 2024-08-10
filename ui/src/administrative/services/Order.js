@@ -101,8 +101,8 @@ class Order {
     return containers.length > 0;
   }
 
-  async getCosts(dpId, spmnIds) {
-    return http.get('distribution-costs/' + dpId + '/costs', {specimenId: spmnIds});
+  async getCosts(dpId, specimenIds) {
+    return http.post('distribution-costs/' + dpId + '/costs', {specimenIds: specimenIds || []});
   }
 
   async getDict(dp) {
