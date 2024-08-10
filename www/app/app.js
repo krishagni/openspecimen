@@ -439,7 +439,13 @@ osApp.config(function(
       }
 
       if (query) {
-        url += '?' + query;
+        if (url.indexOf('?') == -1) {
+          url += '?';
+        } else {
+          url += '&';
+        }
+
+        url += query;
       }
 
       return url;
