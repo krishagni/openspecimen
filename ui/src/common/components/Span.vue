@@ -74,12 +74,7 @@ export default {
     link: function() {
       if (typeof this.href == 'function') {
         let ctx = this.form || this.context || {};
-        let link = this.href(ctx.formData || ctx);
-        if (link && link.indexOf('#') == 0) {
-          link = this.$ui.ngServer + link;
-        }
-
-        return link;
+        return this.href(ctx.formData || ctx);
       } else if (this.effDisplayType == 'storage-position') {
         if (this.inputValue && typeof this.inputValue == 'object' && +this.inputValue.id > 0) {
           return routerSvc.getUrl('ContainerDetail.Locations', {containerId: this.inputValue.id});
