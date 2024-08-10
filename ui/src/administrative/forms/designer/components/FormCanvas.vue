@@ -125,13 +125,6 @@
       </span>
 
       <Button
-        v-if="form.type != 'subForm'"
-        label="Done"
-        class="p-button-secondary"
-        style="margin-left: 0.5em"
-        @click="done"
-      />
-      <Button
         v-if="form.type == 'subForm'"
         icon="pi pi-arrow-left"
         label="Go Back"
@@ -550,10 +543,6 @@ export default {
       emit("save", data);
     };
 
-    let done = function () {
-      emit("done");
-    };
-
     let capitalise = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
     let fieldMetadata = computed(() => (field) =>
@@ -617,7 +606,6 @@ export default {
       goBackToMainForm,
       onReturnToMainForm,
       onSubFormSave,
-      done,
       onMoveField,
       titleRef,
       changeFieldType
