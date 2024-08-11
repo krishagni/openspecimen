@@ -75,7 +75,11 @@ export default {
     Promise.all([currUserQ, usrStateQ, usrRightsQ, spmnPropsQ, spmnUnitsQ]).then(
       (resps) => {
         this.$ui.currentUser = resps[0];
-        this.$ui.global.state = resps[1];
+        const state = this.$ui.global.state = resps[1] || {};
+        if (!state.widgets) {
+          state.widgets = [];
+        }
+
         this.registerHomePageCards();
 
         this.loading = false;

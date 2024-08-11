@@ -157,8 +157,8 @@ export default {
   },
 
   created() {
-    const {widgets} = this.$ui.global.state || {};
-    this.ctx.widgets = widgets;
+    const {widgets} = this.$ui.global.state || {widgets: []};
+    this.ctx.widgets = widgets || [];
     this._loadFavorites();
     homePageSvc.registerFavoritesListener(() => this._loadFavorites());
   },
