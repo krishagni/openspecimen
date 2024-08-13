@@ -1,5 +1,6 @@
 
 import i18n from '@/common/services/I18n.js';
+import settingSvc from '@/common/services/Setting.js';
 
 class Alerts {
 
@@ -21,9 +22,14 @@ class Alerts {
     this.add('warn', message, timeout, id);
   }
 
-  add(type, message, timeout, id) {
+  async add(type, message, timeout, id) {
     if (typeof message == 'object') {
       message = i18n.msg(message.code, message.args || {});
+    }
+
+    if (!timeout) {
+      const [setting] = await settingSvc.getSetting('common', 'toast_disp_time');
+      timeout = +setting.value > 0 ? +setting.value * 1000 : 5000;
     }
 
     this.toastSvc.add({severity: type, detail: message, life: timeout < 0 ? undefined : (timeout || 5000), group: id});
