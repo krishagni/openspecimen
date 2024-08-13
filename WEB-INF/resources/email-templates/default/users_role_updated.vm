@@ -103,7 +103,7 @@
 	            #foreach( $ac in $sr.role.acl )
 		      <tr style="padding-top: 10px; padding-bottom: 10px;">
 		        #set($resourceKey = "$prefix$ac.resource.name")
-	                <td>$messageSource.getMessage($resourceKey.toLowerCase(), null, $locale)</td>
+	                <td>$messageSource.getMessage($resourceKey.toLowerCase(), null, $resourceKey.toLowerCase(), $locale)</td>
 	                <td>
 		          #set( $operations = [] )
 		          #foreach( $resourceInstantOp in $ac.operations )
