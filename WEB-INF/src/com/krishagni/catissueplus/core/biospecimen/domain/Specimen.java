@@ -2379,8 +2379,15 @@ public class Specimen extends BaseExtensionEntity {
 
 	private List<Specimen> createPendingSpecimens(SpecimenRequirement sr, Specimen parent) {
 		List<Specimen> result = new ArrayList<>();
+		if (sr == null || sr.isClosed()) {
+			return result;
+		}
 
 		for (SpecimenRequirement childSr : sr.getOrderedChildRequirements()) {
+			if (childSr.isClosed()) {
+				continue;
+			}
+
 			Specimen specimen = childSr.getSpecimen();
 			specimen.setParentSpecimen(parent);
 			specimen.setVisit(parent.getVisit());
