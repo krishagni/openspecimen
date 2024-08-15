@@ -119,6 +119,7 @@ public class AutomatedContainerContext {
 		ContainerStoreListItem item = new ContainerStoreListItem();
 		item.setSpecimen(specimen);
 		item.setStoreList(storeList);
+		item.setComments(specimen.getTransferComments());
 
 		Runnable saveItem = () -> daoFactory.getContainerStoreListDao().saveOrUpdateItem(item);
 		if (specimen.getId() == null) {

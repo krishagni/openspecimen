@@ -176,7 +176,19 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	CREATE_DISABLED_NA,
 
-	INVALID_UNIT;
+	INVALID_UNIT,
+
+	STORED_IN_AF_DIST_NA,
+
+	STORED_IN_AF_SHIP_NA,
+
+	STORED_IN_AF_DELETE_NA,
+
+	STORED_IN_AF_CLOSE_NA,
+
+	STORED_IN_AF_TRANSFER_NA,
+
+	STORED_IN_AF_CHECK_OUT_NA;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

@@ -35,4 +35,10 @@
   <changeSet author="vpawar" id="User favorites ID generator" dbms="oracle">
     <createSequence sequenceName="OS_USER_FAVORITES_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Container store list item comments">
+    <addColumn tableName="OS_CONTAINER_STORE_LIST_ITEMS">
+      <column name="COMMENTS" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

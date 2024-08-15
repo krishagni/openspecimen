@@ -120,7 +120,7 @@ public abstract class SpecimenEvent extends DeObject {
 
 	@Override
 	public Long getCpId() {
-		return specimen.getVisit().getCollectionProtocol().getId();
+		return specimen.getCollectionProtocol().getId();
 	}
 
 	@Override

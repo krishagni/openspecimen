@@ -26,5 +26,7 @@
     <property name="ackTime" column="ACK_TIME"/>
 
     <property name="error" column="ERROR"/>
+
+    <property name="comments" column="COMMENTS" />
   </class>
 </hibernate-mapping>

@@ -25,6 +25,8 @@ public class ContainerStoreListItem extends BaseEntity {
 
 	private String error;
 
+	private String comments;
+
 	public ContainerStoreList getStoreList() {
 		return storeList;
 	}
@@ -63,5 +65,13 @@ public class ContainerStoreListItem extends BaseEntity {
 
 	public void setError(String error) {
 		this.error = error;
+	}
+
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 }

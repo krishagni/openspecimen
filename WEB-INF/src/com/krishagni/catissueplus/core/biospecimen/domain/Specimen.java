@@ -226,6 +226,8 @@ public class Specimen extends BaseExtensionEntity {
 
 	private transient Boolean checkout;
 
+	private transient Boolean retrievedNotif;
+
 	private transient boolean autoCollectParents;
 
 	private transient boolean updated;
@@ -790,6 +792,14 @@ public class Specimen extends BaseExtensionEntity {
 		this.checkout = checkout;
 	}
 
+	public Boolean getRetrievedNotif() {
+		return retrievedNotif;
+	}
+
+	public void setRetrievedNotif(Boolean retrievedNotif) {
+		this.retrievedNotif = retrievedNotif;
+	}
+
 	public boolean isAutoCollectParents() {
 		return autoCollectParents;
 	}
@@ -946,11 +956,19 @@ public class Specimen extends BaseExtensionEntity {
 		return getCollectionProtocol().storageSiteBasedAccessRightsEnabled();
 	}
 
+	public boolean isStoredInAutoFreezer() {
+		return getPosition() != null && getPosition().getContainer() != null && getPosition().getContainer().isAutomated();
+	}
+
 	public void disable() {
 		disable(!isForceDelete());
 	}
 
 	public void disable(boolean checkChildSpecimens) {
+		if (isStoredInAutoFreezer()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_DELETE_NA, getLabel(), getPosition().toString());
+		}
+
 		if (getActivityStatus().equals(Status.ACTIVITY_STATUS_DISABLED.getStatus())) {
 			return;
 		}
@@ -1169,6 +1187,10 @@ public class Specimen extends BaseExtensionEntity {
 	public void close(User user, Date time, String reason, String comments) {
 		if (!getActivityStatus().equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus())) {
 			return;
+		}
+
+		if (isStoredInAutoFreezer()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_CLOSE_NA, getLabel(), getPosition().toString());
 		}
 
 		setActivityStatus(Status.ACTIVITY_STATUS_CLOSED.getStatus());
@@ -1392,6 +1414,10 @@ public class Specimen extends BaseExtensionEntity {
 		if (!isCollected() || isClosed()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_AVAILABLE_FOR_DIST, getLabel());
 		}
+
+		if (isStoredInAutoFreezer()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_DIST_NA, getLabel(), getPosition().toString());
+		}
 		
 		//
 		// Deduct distributed quantity from available quantity
@@ -1557,6 +1583,15 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	private void transferTo(StorageContainerPosition newPosition, User user, Date time, String comments, boolean checkout) {
+		setTransferComments(comments);
+		if (isStoredInAutoFreezer()) {
+			if (newPosition != null) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_TRANSFER_NA, getLabel(), getPosition().toString());
+			} else if (checkout) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_CHECK_OUT_NA, getLabel(), getPosition().toString());
+			}
+		}
+
 		StorageContainerPosition oldPosition = getPosition();
 		setOldPosition(oldPosition);
 		if (StorageContainerPosition.areSame(oldPosition, newPosition)) {
@@ -1596,8 +1631,11 @@ public class Specimen extends BaseExtensionEntity {
 			oldPosition.update(newPosition);			
 		} else if (oldPosition != null) {
 			oldPosition.getContainer().retrieveSpecimen(this);
-			transferEvent.setFromLocation(oldPosition);
+			if (isStoredInAutoFreezer() && !Boolean.TRUE.equals(retrievedNotif)) {
+				return;
+			}
 
+			transferEvent.setFromLocation(oldPosition);
 			if (checkout) {
 				StorageContainerPosition checkoutPos = new StorageContainerPosition();
 				checkoutPos.setPosOneOrdinal(oldPosition.getPosOneOrdinal());

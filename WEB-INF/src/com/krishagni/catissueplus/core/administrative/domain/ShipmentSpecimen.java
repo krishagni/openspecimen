@@ -12,7 +12,9 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenShipmentReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenShipmentShippedEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 @Configurable
 @Audited
@@ -75,6 +77,9 @@ public class ShipmentSpecimen extends BaseEntity {
 			getSpecimen().updatePosition(position, null, shipment.getShippedDate(), "Shipment: " + shipment.getName());
 		}
 
+		if (getSpecimen().isStoredInAutoFreezer()) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_SHIP_NA, getSpecimen().getLabel(), getSpecimen().getPosition().toString());
+		}
 
 		AtomicBoolean saved = new AtomicBoolean(false);
 		shipment.addOnSaveProc(
