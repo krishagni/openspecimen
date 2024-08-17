@@ -12,6 +12,14 @@ export default {
       }
     },
     {
+      "type": "pv",
+      "labelCode": "shipments.request_status",
+      "name": "shipment.requestStatus",
+      "showWhen": "shipment.request && shipment.id > 0",
+      "attribute": "shipment_request_status",
+      "selectProp": "value"
+    },
+    {
       "type": "textarea",
       "labelCode": "shipments.requester_comments",
       "name": "shipment.requesterComments",

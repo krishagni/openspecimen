@@ -80,3 +80,8 @@
   <caption>#getMessage("shipment_status")</caption>
   <attribute>status</attribute>
 </field>
+
+ <field>
+   <caption>#getMessage("shipment_request_status")</caption>
+   <attribute>requestStatus</attribute>
+ </field>

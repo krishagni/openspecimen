@@ -28,6 +28,8 @@ public interface ShipmentService {
 	ResponseEvent<ShipmentDetail> updateShipment(RequestEvent<ShipmentDetail> req);
 
 	ResponseEvent<ShipmentDetail> deleteShipment(RequestEvent<Long> req);
+
+	ResponseEvent<ShipmentDetail> updateShipmentRequestStatus(RequestEvent<ShipmentDetail> req);
 	
 	ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req);
 

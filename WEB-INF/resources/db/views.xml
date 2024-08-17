@@ -63,7 +63,7 @@
         s.sending_site_id, s.sender_id, s.shipped_date, s.sender_comments,
         s.receiving_site_id, s.received_date, s.receiver_id, s.receiver_comments,
         ss.received_quality_id, c.name as container_name, s.status as status,
-        ss.specimen_id as specimen_id
+        ss.specimen_id as specimen_id, sc.identifier as shipment_container_id
       from
         os_shipments s
         inner join os_shipment_specimens ss on ss.shipment_id = s.identifier

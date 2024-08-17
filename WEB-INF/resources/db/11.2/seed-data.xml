@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Shipment request status">
+    <sql>
+      insert into catissue_cde
+        (public_id, long_name, definition, version, last_updated)
+      values
+        ('shipment_request_status', 'Shipment Request Status', 'Shipment Request Status', '11.2', ${now});
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status - Approved" dbms="mysql">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (default, 'shipment_request_status', 'Approved', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status - In Progress" dbms="mysql">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (default, 'shipment_request_status', 'In Progress', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status - Fulfilled" dbms="mysql">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (default, 'shipment_request_status', 'Fulfilled', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status - Approved" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'shipment_request_status', 'Approved', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status - In Progress" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'shipment_request_status', 'In Progress', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status - Fulfilled" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'shipment_request_status', 'Fulfilled', 'Active');
+    </sql>
+  </changeSet>
+</databaseChangeLog>

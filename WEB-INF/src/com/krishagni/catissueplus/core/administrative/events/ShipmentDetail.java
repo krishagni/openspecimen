@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
@@ -57,6 +58,8 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 	private String receiverComments;
 	
 	private String status;
+
+	private String requestStatus;
 	
 	private String activityStatus;
 	
@@ -237,6 +240,14 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		this.status = status;
 	}
 
+	public String getRequestStatus() {
+		return requestStatus;
+	}
+
+	public void setRequestStatus(String requestStatus) {
+		this.requestStatus = requestStatus;
+	}
+
 	public String getActivityStatus() {
 		return activityStatus;
 	}
@@ -323,6 +334,7 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		detail.setReceiver(shipment.getReceiver() == null ? null : UserSummary.from(shipment.getReceiver()));
 		detail.setReceiverComments(shipment.getReceiverComments());
 		detail.setStatus(shipment.getStatus().getName());
+		detail.setRequestStatus(PermissibleValue.getValue(shipment.getRequestStatus()));
 		detail.setActivityStatus(shipment.getActivityStatus());
 		detail.setNotifyUsers(UserSummary.from(shipment.getNotifyUsers()));
 		return detail;

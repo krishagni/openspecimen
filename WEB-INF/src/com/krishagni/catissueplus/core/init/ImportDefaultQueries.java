@@ -16,7 +16,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.common.events.ConfigSettingDetail;
@@ -93,13 +92,15 @@ public class ImportDefaultQueries implements InitializingBean {
 			
 			if (result == null) {
 				SavedQuery query = insertQuery(filename, content, newDigest);
-				if(query != null){
+				if(query.getId() != null){
 					queries.add(query);
 
 					if (resource.getFilename().equals(DISTRIBUTION_REPORT_QUERY)) {
 						configureDistributionReportQuery(query);
 					} else if (resource.getFilename().equals(SHIPMENT_REPORT_QUERY)) {
 						configureShipmentReportQuery(query);
+					} else if (resource.getFilename().equals(CONTAINER_SHIPMENT_REPORT_QUERY)) {
+						configureContainerShipmentReportQuery(query);
 					} else if (resource.getFilename().equals(SPECIMEN_KIT_REPORT_QUERY)) {
 						configureKitReportQuery(query);
 					} else if (resource.getFilename().equals(CONTAINER_SPECIMENS_REPORT_QUERY)) {
@@ -182,6 +183,10 @@ public class ImportDefaultQueries implements InitializingBean {
 		saveDefaultQuerySetting(query, "common", "shipment_export_report");
 	}
 
+	private void configureContainerShipmentReportQuery(SavedQuery query) {
+		saveDefaultQuerySetting(query, "common", "shipment_container_report");
+	}
+
 	private void configureKitReportQuery(SavedQuery query) {
 		saveDefaultQuerySetting(query, "common", "specimen_kit_export_report");
 	}
@@ -223,6 +228,8 @@ public class ImportDefaultQueries implements InitializingBean {
 	private static final String DISTRIBUTION_REPORT_QUERY = "DistributionReport.json";
 
 	private static final String SHIPMENT_REPORT_QUERY = "ShipmentReport.json";
+
+	private static final String CONTAINER_SHIPMENT_REPORT_QUERY = "ContainerShipmentReport.json";
 
 	private static final String SPECIMEN_KIT_REPORT_QUERY = "SpecimenKitReport.json";
 

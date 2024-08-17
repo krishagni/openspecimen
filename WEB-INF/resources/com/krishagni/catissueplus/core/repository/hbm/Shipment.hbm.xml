@@ -58,6 +58,8 @@
         <param name="type">12</param>
       </type>
     </property>
+
+    <many-to-one name="requestStatus" column="REQUEST_STATUS" fetch="join" />
     
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
     

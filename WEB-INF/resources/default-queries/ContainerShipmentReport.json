@@ -1,0 +1,69 @@
+{
+  "title": "Container shipment report",
+  "filters": [
+    {
+      "id": 1,
+      "field": "Specimen.specimenShipments.container",
+      "op": "EXISTS",
+      "values": [
+        null
+      ],
+      "expr": null,
+      "subQueryId": null,
+      "desc": "",
+      "parameterized": false,
+      "hideOptions": false
+    }
+  ],
+  "queryExpression": [
+    {
+      "nodeType": "FILTER",
+      "value": 1
+    }
+  ],
+  "selectList": [
+    {
+      "name": "Specimen.specimenShipments.containerItemId",
+      "displayLabel": null,
+      "aggFns": null
+    },
+    {
+      "name": "Specimen.specimenShipments.container",
+      "displayLabel": null,
+      "aggFns": null
+    },
+    {
+      "name": "Specimen.specimenShipments.receivedQuality",
+      "displayLabel": null,
+      "aggFns": null
+    },
+    {
+      "name": "Specimen.specimenShipments.status",
+      "displayLabel": null,
+      "aggFns": null
+    },
+    {
+      "name": "Specimen.label",
+      "displayLabel": null,
+      "aggFns": [
+        {
+          "name": "count",
+          "desc": "Specimens"
+        }
+      ]
+    }
+  ],
+  "havingClause": null,
+  "reporting": {
+    "type": "none",
+    "params": {}
+  },
+  "subQueries": [],
+  "dependentQueries": [],
+  "folders": null,
+  "scheduledJobs": [],
+  "wideRowMode": "DEEP",
+  "outputColumnExprs": false,
+  "caseSensitive": true,
+  "deletedOn": null
+}

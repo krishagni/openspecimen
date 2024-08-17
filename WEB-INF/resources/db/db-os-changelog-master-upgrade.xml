@@ -182,7 +182,9 @@
   <include file="db/11.0/migration.xml" />
 
   <include file="db/11.2/schema.xml" />
+  <include file="db/11.2/seed-data.xml" />
   <include file="db/11.2/audit.xml" />
+  <include file="db/11.2/config.xml" />
   <include file="db/11.2/migration.xml" />
 
   <!-- Views are created always at the last -->

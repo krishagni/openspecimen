@@ -4,6 +4,9 @@
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" v-show-if-allowed="shipmentResources.updateOpts"
         @click="$goto('ShipmentAddEdit', {shipmentId: ctx.shipment.id}, {shipmentType: ctx.shipment.type})" />
 
+      <os-menu :label="$t('shipments.request_status')" :options="ctx.reqStatuses"
+        v-show-if-allowed="shipmentResources.updateOpts" />
+
       <os-button left-icon="paper-plane" :label="$t('shipments.ship')"
         v-if="(!ctx.shipment.request && ctx.shipment.status == 'Pending') || ctx.shipment.status == 'Requested'"
         v-show-if-allowed="shipmentResources.updateOpts"
@@ -42,7 +45,9 @@
 import util from '@/common/services/Util.js';
 import shipmentSvc  from '@/administrative/services/Shipment.js';
 import alertsSvc    from '@/common/services/Alerts.js';
+import pvSvc        from '@/common/services/PermissibleValue.js';
 import routerSvc    from '@/common/services/Router.js';
+
 
 import shipmentResources from './Resources.js';
 
@@ -58,7 +63,9 @@ export default {
 
         shipmentObjs: [],
 
-        dict: []
+        dict: [],
+
+        reqStatuses: []
       },
 
       shipmentResources
@@ -69,6 +76,15 @@ export default {
     this.ctx.shipment = this.shipment;
     this.ctx.shipmentObjs = [{objectName: 'shipment', objectId: this.shipment.id}];
     shipmentSvc.getDict().then(dict => this.ctx.dict = dict);
+    if (this.shipment.request) {
+      pvSvc.getPvs('shipment_request_status', null, {maxResults: 1000}).then(
+        (statuses) => {
+          this.ctx.reqStatuses = statuses.map(
+            status => ({caption: status.value, onSelect: () => this.changeReqStatus(status.value)})
+          );
+        }
+      );
+    }
   },
 
   watch: {
@@ -101,6 +117,15 @@ export default {
 
     viewAuditTrail: function() {
       this.$refs.auditTrailDialog.open();
+    },
+
+    changeReqStatus: function(status) {
+      shipmentSvc.updateRequestStatus(this.ctx.shipment, status).then(
+        savedShipment => {
+          Object.assign(this.ctx.shipment, savedShipment);
+          alertsSvc.success({code: 'shipments.request_status_updated', args: this.ctx.shipment});
+        }
+      );
     }
   }
 }

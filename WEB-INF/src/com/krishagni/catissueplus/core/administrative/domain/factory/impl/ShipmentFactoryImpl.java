@@ -19,6 +19,7 @@ import com.krishagni.catissueplus.core.administrative.domain.ShipmentSpecimen;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.PvErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentFactory;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
@@ -91,6 +92,7 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		setSendingSite(detail, shipment, ose);
 		setReceivingSite(detail, shipment, ose);
 		setStatus(detail, status, shipment, ose);
+		setRequestStatus(detail, shipment, ose);
 		setShippedDate(detail, shipment, ose);
 		setSender(detail, shipment, ose);
 		setSenderComments(detail, shipment, ose);
@@ -217,6 +219,19 @@ public class ShipmentFactoryImpl implements ShipmentFactory {
 		}
 		
 		shipment.setStatus(status);
+	}
+
+	private void setRequestStatus(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {
+		if (!shipment.isRequest() || StringUtils.isBlank(detail.getRequestStatus())) {
+			return;
+		}
+
+		PermissibleValue status = daoFactory.getPermissibleValueDao().getByValue("shipment_request_status", detail.getRequestStatus());
+		if (status == null) {
+			ose.addError(ShipmentErrorCode.INV_REQ_STATUS, detail.getRequestStatus());
+		}
+
+		shipment.setRequestStatus(status);
 	}
 	
 	private void setShippedDate(ShipmentDetail detail, Shipment shipment, OpenSpecimenException ose) {

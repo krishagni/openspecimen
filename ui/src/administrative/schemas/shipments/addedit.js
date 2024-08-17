@@ -14,6 +14,10 @@ export default {
       },
 
       {
+        "fields": [ { "name": "shipment.requestStatus" } ]
+      },
+
+      {
         "fields": [ { "name": "shipment.name" } ]
       },
 

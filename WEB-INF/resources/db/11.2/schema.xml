@@ -41,4 +41,13 @@
       <column name="COMMENTS" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status">
+    <addColumn tableName="OS_SHIPMENTS">
+      <column name="REQUEST_STATUS" type="${int.type}">
+        <constraints foreignKeyName="FK_SHIPMENT_REQ_STATUS"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

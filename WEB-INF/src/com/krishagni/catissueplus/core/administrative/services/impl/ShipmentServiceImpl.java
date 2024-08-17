@@ -76,6 +76,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	private static final String SHIPMENT_RECEIVED_EMAIL_TMPL = "shipment_received";
 	
 	private static final String SHIPMENT_QUERY_REPORT_SETTING = "shipment_export_report";
+
+	private static final String SHIPMENT_CONTAINER_REPORT_SETTING = "shipment_container_report";
 	
 	private DaoFactory daoFactory;
 	
@@ -304,6 +306,37 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<ShipmentDetail> updateShipmentRequestStatus(RequestEvent<ShipmentDetail> req) {
+		try {
+			ShipmentDetail detail = req.getPayload();
+			Shipment existing = getShipment(detail.getId(), detail.getName());
+			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(existing);
+			if (!existing.isRequest()) {
+				return ResponseEvent.userError(ShipmentErrorCode.NOT_REQUEST, existing.getName());
+			}
+
+			String reqStatus = detail.getRequestStatus();
+			if (StringUtils.isBlank(reqStatus)) {
+				existing.setRequestStatus(null);
+			} else {
+				PermissibleValue status = daoFactory.getPermissibleValueDao().getPv("shipment_request_status", reqStatus);
+				if (status == null) {
+					return ResponseEvent.userError(ShipmentErrorCode.INV_REQ_STATUS, reqStatus);
+				}
+
+				existing.setRequestStatus(status);
+			}
+
+			return ResponseEvent.response(ShipmentDetail.from(existing));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req) {
 		Shipment shipment = getShipmentDao().getById(req.getPayload());
 		if (shipment == null) {
@@ -311,7 +344,16 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		}
 		
 		AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
-		Integer queryId = ConfigUtil.getInstance().getIntSetting("common", SHIPMENT_QUERY_REPORT_SETTING, -1);
+
+		Integer queryId = null;
+		if (shipment.isContainerShipment()) {
+			queryId = ConfigUtil.getInstance().getIntSetting("common", SHIPMENT_CONTAINER_REPORT_SETTING, -1);
+		}
+
+		if (queryId == null || queryId == -1) {
+			queryId = ConfigUtil.getInstance().getIntSetting("common", SHIPMENT_QUERY_REPORT_SETTING, -1);
+		}
+
 		if (queryId == -1) {
 			return ResponseEvent.userError(ShipmentErrorCode.RPT_TMPL_NOT_CONF);
 		}

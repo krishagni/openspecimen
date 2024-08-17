@@ -1272,6 +1272,15 @@
         </row>
 
         <row>
+          <numberField>
+            <name>containerItemId</name>
+            <udn>containerItemId</udn>
+            <caption>#getMessage("specimen_shipment_container_id")</caption>
+            <column>SHIPMENT_CONTAINER_ID</column>
+          </numberField>
+        </row>
+
+        <row>
           <dropDown>
             <name>container</name>
             <udn>container</udn>

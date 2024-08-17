@@ -11,4 +11,11 @@
       <column name="defCustomFieldValuesJson_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Shipment request status">
+    <addColumn tableName="OS_SHIPMENTS_AUD">
+      <column name="REQUEST_STATUS" type="${int.type}" />
+      <column name="requestStatus_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

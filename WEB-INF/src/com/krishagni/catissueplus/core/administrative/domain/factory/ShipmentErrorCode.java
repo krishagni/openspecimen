@@ -77,7 +77,11 @@ public enum ShipmentErrorCode implements ErrorCode {
 
 	CONT_NAMES_REQ,
 
-	REQ_INV_CREATE_STATUS
+	REQ_INV_CREATE_STATUS,
+
+	INV_REQ_STATUS,
+
+	NOT_REQUEST
 	
 	;
 	

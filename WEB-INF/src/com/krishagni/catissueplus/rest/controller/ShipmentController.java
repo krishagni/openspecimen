@@ -204,6 +204,14 @@ public class ShipmentController {
 		return response(shipmentSvc.deleteShipment(request(id)));
 	}
 
+	@RequestMapping(method = RequestMethod.PUT, value="/{id}/request-status")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ShipmentDetail updateShipmentRequestStatus(@PathVariable("id") Long id, @RequestBody ShipmentDetail input) {
+		input.setId(id);
+		return response(shipmentSvc.updateShipmentRequestStatus(request(input)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/report")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

@@ -103,6 +103,8 @@ public class Shipment extends BaseEntity {
 	private String receiverComments;
 	
 	private Status status;
+
+	private PermissibleValue requestStatus;
 	
 	private String activityStatus;
 	
@@ -260,6 +262,14 @@ public class Shipment extends BaseEntity {
 		this.status = status;
 	}
 
+	public PermissibleValue getRequestStatus() {
+		return requestStatus;
+	}
+
+	public void setRequestStatus(PermissibleValue requestStatus) {
+		this.requestStatus = requestStatus;
+	}
+
 	public String getActivityStatus() {
 		return activityStatus;
 	}
@@ -335,6 +345,9 @@ public class Shipment extends BaseEntity {
 		updateShipmentContainers(other);
 		updateNotifyUsers(other);
 		updateStatus(other);
+		if (isRequested()) {
+			setRequestStatus(other.getRequestStatus());
+		}
 	}
 
 	public void delete() {

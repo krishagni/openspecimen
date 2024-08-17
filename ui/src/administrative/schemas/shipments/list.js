@@ -69,6 +69,14 @@ export default {
     {
       "name": "shipment.status",
       "captionCode": "shipments.status",
+      "value": ({shipment: {status, request, requestStatus}}) => {
+        let result = status;
+        if ((status == 'PENDING' || status == 'REQUESTED') && request && requestStatus) {
+          result += ' (' + requestStatus + ')';
+        }
+
+        return result;
+      },
       "uiStyle": {
         "min-width": "80px"
       }
