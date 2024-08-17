@@ -1131,6 +1131,17 @@
         </row>
 
         <row>
+          <pvField>
+            <name>requestStatus</name>
+            <udn>requestStatus</udn>
+            <caption>#getMessage("specimen_shipment_request_status")</caption>
+            <column>REQUEST_STATUS</column>
+            <attribute>shipment_request_status</attribute>
+            <leafValue>true</leafValue>
+          </pvField>
+        </row>
+
+        <row>
           <userField>
             <name>requester</name>
             <udn>requester</udn>

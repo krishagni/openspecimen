@@ -58,7 +58,7 @@
     <createView viewName="OS_SPECIMEN_SHIPMENTS_VIEW" replaceIfExists="true">
       select
         s.identifier as shipment_id, s.name as shipment_name, s.type as shipment_type,
-        s.request, s.requester_id, s.request_date, s.requester_comments,
+        s.request, s.request_status, s.requester_id, s.request_date, s.requester_comments,
         s.courier_name, s.tracking_number, s.tracking_url,
         s.sending_site_id, s.sender_id, s.shipped_date, s.sender_comments,
         s.receiving_site_id, s.received_date, s.receiver_id, s.receiver_comments,
