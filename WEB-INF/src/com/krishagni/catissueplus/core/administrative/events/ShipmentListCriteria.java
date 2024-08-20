@@ -18,6 +18,8 @@ public class ShipmentListCriteria extends AbstractListCriteria<ShipmentListCrite
 	private String labelOrBarcode;
 
 	private Shipment.Status status;
+
+	private String requestStatus;
 	
 	private Set<SiteCpPair> sites;
 	
@@ -77,6 +79,15 @@ public class ShipmentListCriteria extends AbstractListCriteria<ShipmentListCrite
 
 	public ShipmentListCriteria status(Shipment.Status status) {
 		this.status = status;
+		return self();
+	}
+
+	public String requestStatus() {
+		return requestStatus;
+	}
+
+	public ShipmentListCriteria requestStatus(String requestStatus) {
+		this.requestStatus = requestStatus;
 		return self();
 	}
 	

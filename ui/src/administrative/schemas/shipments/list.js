@@ -71,7 +71,7 @@ export default {
       "captionCode": "shipments.status",
       "value": ({shipment: {status, request, requestStatus}}) => {
         let result = status;
-        if ((status == 'PENDING' || status == 'REQUESTED') && request && requestStatus) {
+        if (request && requestStatus) {
           result += ' (' + requestStatus + ')';
         }
 
@@ -152,6 +152,13 @@ export default {
           { value: 'Pending' }
         ]
       }
+    },
+    {
+      name: 'requestStatus',
+      type: 'pv',
+      captionCode: 'shipments.request_status',
+      attribute: 'shipment_request_status',
+      selectProp: 'value'
     }
   ]
 }

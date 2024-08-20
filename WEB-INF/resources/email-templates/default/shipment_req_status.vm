@@ -1,0 +1,100 @@
+#set ( $url = "$appUrl/#/shipments/${shipment.id}/overview" )
+
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
+  <tbody>
+    <tr>
+      <td style="border-collapse:collapse;">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;line-height:20px">
+          <tbody>
+            <tr>
+              <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
+                <p style="margin:10px 0 0 0">
+                  Hello $rcpt.formattedName(),
+                  <br><br>
+                  $user.formattedName() has changed the status of the shipment request #if ($oldStatus)from <s style="color: maroon; background-color: #ffe7e7; padding: 8px; border-radius: 20px;">$oldStatus</s>#end to <b style="color: green; background-color: #ddfade; padding: 8px; border-radius: 20px;">$newStatus</b>.
+                  <br/><br/>
+                  Details of the shipment are given below:
+                  <br><br>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td> Shipment Name </td>
+                      <td> : $shipment.name </td>
+                    </tr>
+                    <tr>
+                      <td> Requester </td>
+                      <td> : $shipment.requester.formattedName() </td>
+                    </tr>
+                    <tr>
+                      <td> Request Date </td>
+                      <td> : $dateFmt.format( $shipment.requestDate ) </td>
+                    </tr>
+                    <tr>
+                      <td> Requester Comments </td>
+                      <td> :
+                        #if ($shipment.requesterComments)
+                          $shipment.requesterComments
+                        #else
+                          Not Specified
+                        #end
+                      </td>
+                    </tr>
+                    <tr>
+                      <td> Sending Site </td>
+                      <td> : $shipment.sendingSite.name </td>
+                    </tr>
+                    #if ($shipment.shippedDate)
+                    <tr>
+                      <td> Shipped Date </td>
+                      <td> : $dateFmt.format( $shipment.shippedDate ) </td>
+                    </tr>
+                    #end
+                    <tr>
+                      <td> Receiving Site </td>
+                      <td> : $shipment.receivingSite.name </td>
+                    </tr>
+                    #if ($shipment.receivedDate)
+                    <tr>
+                      <td> Received On </td>
+                      <td> : $dateFmt.format( $shipment.receivedDate ) </td>
+                    </tr>
+                    #end
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="height:15px;line-height:5px;">&nbsp;</td>
+            </tr>
+            <tr>
+              <td style="border-collapse:collapse;padding-bottom:10px">
+                <table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;color:#333">
+                  <tbody>
+                    <tr>
+                      <td style="background:#3068a2;background:-moz-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:-webkit-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:-o-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:-ms-linear-gradient(top,#4687ce 0%,#3068a2 100%);background:linear-gradient(top,#4687ce 0%,#3068a2 100%);padding:0px;border-collapse:collapse;border-radius:3px;padding:5px;margin:0px">
+                        <a style="color:#3b73af;text-decoration:none;color:#fff;font-weight:bold;padding:6px;font-size:14px;line-height:1.429;font-family:Arial,sans-serif" href="$url" target="_blank">View Shipment Details</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="height:5px;line-height:5px;">&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        #parse( $footer )
+      </td>
+    </tr>
+  </tbody>
+</table>

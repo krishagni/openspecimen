@@ -54,6 +54,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -74,6 +75,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	private static final String SHIPMENT_SHIPPED_EMAIL_TMPL = "shipment_shipped";
 	
 	private static final String SHIPMENT_RECEIVED_EMAIL_TMPL = "shipment_received";
+
+	private static final String SHIPMENT_REQ_STATUS_EMAIL_TMPL = "shipment_req_status";
 	
 	private static final String SHIPMENT_QUERY_REPORT_SETTING = "shipment_export_report";
 
@@ -237,7 +240,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			}
 
 			getShipmentDao().saveOrUpdate(shipment, true);
-			sendEmailNotifications(shipment, null, detail.isSendMail());
+			sendEmailNotifications(shipment, null, shipment.getRequestStatus(), detail.isSendMail());
 			EventPublisher.getInstance().publish(new ShipmentSavedEvent(shipment));
 			return ResponseEvent.response(ShipmentDetail.from(shipment));
 		} catch (OpenSpecimenException ose) {
@@ -273,13 +276,14 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			ose.checkAndThrow();
 			
 			Status oldStatus = existing.getStatus();
+			PermissibleValue oldReqStatus = existing.getRequestStatus();
 			if (newShipment.getStatus() == Status.SHIPPED) {
 				createRecvSiteContainer(newShipment);
 			}
 
 			existing.update(newShipment);
 			getShipmentDao().saveOrUpdate(existing, true);
-			sendEmailNotifications(existing, oldStatus, detail.isSendMail());
+			sendEmailNotifications(existing, oldStatus, oldReqStatus, detail.isSendMail());
 			EventPublisher.getInstance().publish(new ShipmentSavedEvent(existing));
 			return ResponseEvent.response(ShipmentDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
@@ -315,6 +319,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 				return ResponseEvent.userError(ShipmentErrorCode.NOT_REQUEST, existing.getName());
 			}
 
+			PermissibleValue oldReqStatus = existing.getRequestStatus();
 			String reqStatus = detail.getRequestStatus();
 			if (StringUtils.isBlank(reqStatus)) {
 				existing.setRequestStatus(null);
@@ -327,6 +332,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 				existing.setRequestStatus(status);
 			}
 
+			sendEmailNotifications(existing, existing.getStatus(), oldReqStatus, detail.isSendMail());
 			return ResponseEvent.response(ShipmentDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -764,7 +770,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 		return site;
 	}
 
-	private void sendEmailNotifications(Shipment shipment, Status oldStatus, boolean sendNotif) {
+	private void sendEmailNotifications(Shipment shipment, Status oldStatus, PermissibleValue oldReqStatus, boolean sendNotif) {
 		if (!sendNotif) {
 			return;
 		}
@@ -775,6 +781,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			sendShipmentShippedEmail(shipment);
 		} else if (oldStatus == Status.SHIPPED && shipment.isReceived()) {
 			sendShipmentReceivedEmail(shipment);
+		} else if (!StringUtils.equals(PermissibleValue.getValue(shipment.getRequestStatus()), PermissibleValue.getValue(oldReqStatus))) {
+			sendShipmentRequestStatusEmail(shipment, oldReqStatus);
 		}
 	}
 
@@ -792,7 +800,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			}
 		}
 
-		sendShipmentEmail(SHIPMENT_REQUESTED_EMAIL_TMPL, shipment, notifyUsers);
+		sendShipmentEmail(SHIPMENT_REQUESTED_EMAIL_TMPL, shipment, notifyUsers, null);
 	}
 
 	private void sendShipmentShippedEmail(Shipment shipment) {
@@ -805,7 +813,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			notifyUsers.add(shipment.getRequester());
 		}
 
-		sendShipmentEmail(SHIPMENT_SHIPPED_EMAIL_TMPL, shipment, notifyUsers);
+		sendShipmentEmail(SHIPMENT_SHIPPED_EMAIL_TMPL, shipment, notifyUsers, null);
 	}
 	
 	private void sendShipmentReceivedEmail(Shipment shipment) {
@@ -815,13 +823,38 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			notifyUsers.add(shipment.getRequester());
 		}
 
-		sendShipmentEmail(SHIPMENT_RECEIVED_EMAIL_TMPL, shipment, notifyUsers);
+		sendShipmentEmail(SHIPMENT_RECEIVED_EMAIL_TMPL, shipment, notifyUsers, null);
 	}
 
-	private void sendShipmentEmail(String emailTmpl, Shipment shipment, Set<User> notifyUsers) {
+	private void sendShipmentRequestStatusEmail(Shipment shipment, PermissibleValue oldStatus) {
+		Set<User> notifyUsers = new HashSet<>();
+		if (CollectionUtils.isNotEmpty(shipment.getNotifyUsers())) {
+			notifyUsers = new HashSet<>(shipment.getNotifyUsers());
+		}
+
+		if (shipment.getRequester() != null) {
+			notifyUsers.add(shipment.getRequester());
+		}
+
+		if (shipment.getSender() != null) {
+			notifyUsers.add(shipment.getSender());
+		}
+
+		Map<String, Object> props = new HashMap<>();
+		props.put("oldStatus", PermissibleValue.getValue(oldStatus));
+		props.put("newStatus", PermissibleValue.getValue(shipment.getRequestStatus()));
+		props.put("user", AuthUtil.getCurrentUser());
+		sendShipmentEmail(SHIPMENT_REQ_STATUS_EMAIL_TMPL, shipment, notifyUsers, props);
+	}
+
+	private void sendShipmentEmail(String emailTmpl, Shipment shipment, Set<User> notifyUsers, Map<String, Object> inputProps) {
 		Map<String, Object> props = new HashMap<>();
 		props.put("$subject", new String[] { shipment.getName() });
 		props.put("shipment", shipment);
+		if (inputProps != null) {
+			props.putAll(inputProps);
+		}
+
 		for (User user : notifyUsers) {
 			props.put("rcpt", user);
 			emailService.sendEmail(emailTmpl, new String[] { user.getEmailAddress() }, props);

@@ -182,6 +182,7 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		addSendSiteRestrictions(query, crit);
 		addRecvSiteRestrictions(query, crit);
 		addStatusRestrictions(query, crit);
+		addRequestStatusRestrictions(query, crit);
 		addLabelOrBarcodeRestrictions(query, crit);
 		addSiteRestrictions(query, crit);
 		return query;
@@ -220,6 +221,15 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		}
 
 		query.add(query.eq("shipment.status", crit.status()));
+	}
+
+	private void addRequestStatusRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {
+		if (StringUtils.isBlank(crit.requestStatus())) {
+			return;
+		}
+
+		query.createAlias("shipment.requestStatus", "reqStatus")
+			.add(query.eq("reqStatus.value", crit.requestStatus()));
 	}
 
 	private void addLabelOrBarcodeRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {

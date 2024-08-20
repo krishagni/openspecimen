@@ -81,10 +81,10 @@
               </span>
               <span v-else-if="filter.type == 'dropdown'">
                 <dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
-                  :list-source="filter.listSource" v-if="!filter.multiple">
+                  :list-source="filter.listSource" :context="filtersContext" v-if="!filter.multiple">
                 </dropdown>
                 <multiselect md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
-                  :list-source="filter.listSource" v-else>
+                  :list-source="filter.listSource" :context="filtersContext" v-else>
                 </multiselect>
               </span>
               <span v-else-if="filter.type == 'booleanCheckbox'">
@@ -93,7 +93,7 @@
               </span>
               <span v-else-if="filter.type == 'pv'">
                 <os-pv-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
-                  v-bind="filter" />
+                  v-bind="filter" :context="filtersContext" />
               </span>
               <span v-else-if="filter.type == 'site'">
                 <os-site-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
@@ -254,7 +254,7 @@ export default {
 
       filterValues: { },
 
-      filtersContext: { },
+      filtersContext: { _formCache: {} },
 
       selectedRows: [],
 
