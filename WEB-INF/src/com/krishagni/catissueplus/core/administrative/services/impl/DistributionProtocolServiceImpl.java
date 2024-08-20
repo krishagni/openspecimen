@@ -1289,7 +1289,9 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 			throw OpenSpecimenException.userError(SpecimenListErrorCode.ACCESS_NOT_ALLOWED);
 		}
 
-		String restriction = "Specimen.specimenResv.dpShortTitle = \"" + dp.getShortTitle() + "\"";
+		String restriction =
+			"Specimen.specimenResv.dpShortTitle = \"" + dp.getShortTitle() + "\" and " +
+			"Specimen.availabilityStatus = \"Reserved\"";
 
 		boolean useMrnSites = AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn();
 		String cpSitesCond = BiospecimenDaoHelper.getInstance().getSiteCpsCondAql(siteCps, useMrnSites);

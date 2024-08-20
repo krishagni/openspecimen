@@ -362,7 +362,7 @@ public class DefaultListGenerator implements ListGenerator {
 		op.setDrivingForm(StringUtils.isBlank(drivingForm) ? "Participant" : drivingForm);
 		op.setWideRowMode("OFF");
 		op.setDisableAccessChecks(true);
-		op.setCaseSensitive(false);
+		op.setCaseSensitive(Utility.isMySQL());
 
 		RequestEvent<ExecuteQueryEventOp> req = new RequestEvent<>(op);
 		ResponseEvent<QueryExecResult> resp = querySvc.executeQuery(req);

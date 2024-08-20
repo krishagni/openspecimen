@@ -1322,6 +1322,14 @@ public class Utility {
 		return props.getProperty("node.name", "Unknown");
 	}
 
+	public static boolean isOracle() {
+		return getDbType().equals("oracle");
+	}
+
+	public static boolean isMySQL() {
+		return getDbType().equals("mysql");
+	}
+
 	private static Integer getPeriodBetween(ChronoUnit unit, Date from, Date to) {
 		if (from == null) {
 			return null;
@@ -1456,6 +1464,11 @@ public class Utility {
 
 	private static String divide(BigDecimal dividend, long divisor, String unit) {
 		return dividend.divide(BigDecimal.valueOf(divisor), 2, RoundingMode.HALF_UP) + unit;
+	}
+
+	private static String getDbType() {
+		return AppProperties.getInstance().getProperties()
+			.getProperty("database.type", "mysql").toLowerCase();
 	}
 
 	private static final String GET_DATA_DIR =

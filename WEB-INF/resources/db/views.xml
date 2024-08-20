@@ -368,4 +368,20 @@
         p.checkout_specimen_id is not null
     </createView>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen reservation view" runOnChange="true">
+    <createView viewName="OS_SPECIMEN_RESV_VIEW" replaceIfExists="true">
+      select
+        re.identifier as identifier,
+        re.specimen_id as specimen_id,
+        dp.short_title as dp_short_title,
+        re.event_time as event_time
+      from
+        os_spmn_reserved_events re
+        left join catissue_distribution_protocol dp on dp.identifier = re.dp_id
+      where
+        re.identifier not in (select cre.cancelled_event_id from os_spmn_reserved_events cre where cre.cancelled_event_id is not null) and
+        re.cancelled_event_id is null
+    </createView>
+  </changeSet>
 </databaseChangeLog>
