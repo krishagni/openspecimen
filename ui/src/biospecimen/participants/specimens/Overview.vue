@@ -33,7 +33,7 @@
     <os-grid-column width="8">
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
-      <SpecimenTree :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimens="ctx.children"
+      <SpecimenTree :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimen="ctx.specimen" :specimens="ctx.children"
         :ref-date="ctx.specimen.status && ctx.specimen.status != 'Pending' ? ctx.specimen.createdOn : 0"
         @reload="reloadChildren" v-if="ctx.cp.id > 0" />
     </os-grid-column>

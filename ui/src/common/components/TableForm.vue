@@ -195,7 +195,7 @@ export default {
       emptyString: '-'
     });
 
-    watchEffect(() => { ctx.items = props.items; });
+    watchEffect(() => { ctx.items = props.items; ctx.selectedRows = new Array(props.items.length); });
     return {
       v$: useVuelidate(),
       ctx

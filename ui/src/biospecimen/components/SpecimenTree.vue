@@ -6,6 +6,9 @@
     </template>
 
     <template #actions>
+      <os-button primary :left-icon="'plus'" :label="$t('participants.collect')" @click="collectSpecimens"
+        v-if="(!specimen || specimen.status == 'Collected') && selectedPendingSpecimens.length > 0" />
+
       <os-add-to-cart :specimens="selectedExistingSpecimens"  v-if="selectedExistingSpecimens.length > 0" />
 
       <os-specimen-actions :cp="cp" :specimens="selectedExistingSpecimens" @reloadSpecimens="reloadSpecimens"
@@ -39,7 +42,7 @@ import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'cpr', 'visit', 'specimens', 'refDate'],
+  props: ['cp', 'cpr', 'visit', 'specimen', 'specimens', 'refDate'],
 
   emits: ['reload'],
 
@@ -118,6 +121,10 @@ export default {
       return this.ctx.selectedSpecimens.map(({specimen}) => specimen);
     },
 
+    selectedPendingSpecimens: function() {
+      return this.ctx.selectedSpecimens.filter(({specimen: {status}}) => !status || status == 'Pending');
+    },
+
     selectedExistingSpecimens: function() {
       return this.selectedSpecimens.filter(({id}) => id > 0);
     },
@@ -152,6 +159,52 @@ export default {
   methods: {
     onItemsSelection: function(items) {
       this.ctx.selectedSpecimens = items;
+    },
+
+    collectSpecimens: async function() {
+      const specimenIds = this.selectedPendingSpecimens.map(({specimen: {id}}) => id).filter(id => id > 0);
+      const reqIds = this.selectedPendingSpecimens
+        .filter(({specimen: {id, reqId}}) => !id && reqId > 0)
+        .map(({specimen: {reqId}}) => reqId);
+
+      if (specimenIds.length == 0 && reqIds.length == 0) {
+        alert('Nothing to collect');
+        return;
+      }
+
+      const reqOrSpmnIds = {specimens: specimenIds, requirements: reqIds};
+      const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
+      if (wfInstanceSvc) {
+        let wfName;
+        if (!this.visit.id || !this.visit.status || this.visit.status == 'Pending') {
+          wfName = await this._getCollectVisitsWf();
+        } else {
+          wfName = await this._getCollectPendingSpmnsWf();
+        }
+
+        let inputItem = {
+          cpr:   {id: this.cpr.id, cpId: this.cp.id, cpShortTitle: this.cp.shortTitle},
+          visit: {id: this.visit.id, cpId: this.cp.id, cpShortTitle: this.cp.shortTitle}
+        };
+
+        if (this.visit.eventId) {
+          inputItem.cpe = {id: this.visit.eventId, cpId: this.cp.id, cpShortTitle: this.cp.shortTitle};
+        }
+
+        if (this.specimen) {
+          inputItem.specimen = {id: this.specimen.id};
+        }
+
+        const opts = {params: this._getBatchParams(this.$t('participants.collect_specimens'), reqOrSpmnIds)};
+        if (this.specimen) {
+          opts.inputType = 'specimen';
+        }
+
+        const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
+        wfInstanceSvc.gotoInstance(instance.id);
+      } else {
+        alert('Workflow module not installed!');
+      }
     },
 
     reloadSpecimens: function() {
@@ -208,6 +261,47 @@ export default {
       }
 
       return result;
+    },
+
+    _getCollectPendingSpmnsWf() {
+      return cpSvc.getWorkflowProperty(this.visit.cpId, 'common', 'collectPendingSpecimensWf')
+        .then(wfName => wfName || 'sys-collect-pending-specimens');
+    },
+
+    _getCollectVisitsWf() {
+      return cpSvc.getWorkflowProperty(this.visit.cpId, 'common', 'collectVisitsWf')
+        .then(wfName => wfName || 'sys-collect-visits');
+    },
+
+    _getBatchParams(title, reqOrSpmnIds) {
+      let returnOnExit = 'current_view';
+      if (!this.visit.id) {
+        returnOnExit = JSON.stringify({
+          name: 'ParticipantsListItemDetail.Overview',
+          params: {cpId: this.cp.id, cprId: this.cpr.id}
+        });
+      }
+
+      let breadCrumb2 = null;
+      if (!this.cp.specimenCentric) {
+        breadCrumb2 = JSON.stringify({
+          label: this.cpr.ppid,
+          route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: this.cp.id, cprId: this.cpr.id}}
+        });
+      }
+
+      return {
+        returnOnExit,
+        cpId: this.cp.id,
+        'breadcrumb-1': JSON.stringify({
+          label: this.cp.shortTitle,
+          route: {name: 'ParticipantsList', params: {cpId: this.cp.id, cprId: -1}}
+        }),
+        'breadcrumb-2': breadCrumb2,
+        batchTitle: title,
+        showOptions: false,
+        reqOrSpmnIds: JSON.stringify(reqOrSpmnIds || {})
+      };
     }
   }
 }
