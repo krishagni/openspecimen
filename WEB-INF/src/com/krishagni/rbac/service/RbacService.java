@@ -1,9 +1,7 @@
 package com.krishagni.rbac.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -59,6 +57,8 @@ public interface RbacService {
 	//
 	
 	ResponseEvent<List<RoleDetail>> getRoles(RequestEvent<RoleListCriteria> req);
+
+	ResponseEvent<Long> getRolesCount(RequestEvent<RoleListCriteria> req);
 	
 	ResponseEvent<RoleDetail> getRole(RequestEvent<Long> req);
 

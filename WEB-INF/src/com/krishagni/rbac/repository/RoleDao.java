@@ -6,9 +6,11 @@ import com.krishagni.catissueplus.core.common.repository.Dao;
 import com.krishagni.rbac.domain.Role;
 
 public interface RoleDao extends Dao<Role> {
-	public List<Role> getRoles(RoleListCriteria listCriteria);
-	
-	public List<Role> getRolesByNames(List<String> roleNames);
+	List<Role> getRoles(RoleListCriteria listCriteria);
 
-	public Role getRoleByName(String roleName);
+	Long getRolesCount(RoleListCriteria listCriteria);
+	
+	List<Role> getRolesByNames(List<String> roleNames);
+
+	Role getRoleByName(String roleName);
 }

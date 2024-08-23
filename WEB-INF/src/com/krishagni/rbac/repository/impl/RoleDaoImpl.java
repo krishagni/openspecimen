@@ -24,6 +24,16 @@ public class RoleDaoImpl extends AbstractDao<Role> implements RoleDao {
 	}
 
 	@Override
+	public Long getRolesCount(RoleListCriteria listCriteria) {
+		Criteria<Role> query = createCriteria(Role.class, "r");
+		if (StringUtils.isNotBlank(listCriteria.query())) {
+			query.add(query.ilike("r.name", listCriteria.query()));
+		}
+
+		return query.getCount("r.id");
+	}
+
+	@Override
 	public List<Role> getRolesByNames(List<String> roleNames) {
 		return createNamedQuery(GET_ROLES_BY_NAMES, Role.class)
 			.setParameterList("roleNames", roleNames)

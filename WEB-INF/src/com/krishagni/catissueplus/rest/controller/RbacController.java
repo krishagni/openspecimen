@@ -1,6 +1,8 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -203,6 +205,14 @@ public class RbacController {
 		ResponseEvent<List<RoleDetail>> resp = rbacSvc.getRoles(getRequest(criteria));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value="/roles/count")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Long> getRolesCount(@RequestParam(value = "name", required = false) String name) {
+		RoleListCriteria criteria = new RoleListCriteria().query(name);
+		return Collections.singletonMap("count", ResponseEvent.unwrap(rbacSvc.getRolesCount(RequestEvent.wrap(criteria))));
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value="/roles/{id}")

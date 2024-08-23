@@ -147,6 +147,14 @@ export default {
       this.$refs.cartInfoOverlay.toggle(event);
     },
 
+    getSpecimensCount: function() {
+      this.$refs.specimensList.loadListSize().then(
+        () => {
+          this.listInfo.size = this.$refs.specimensList.size;
+        }
+      );
+    },
+
     onSpecimenRowClick: function(rowObject) {
       routerSvc.ngGoto('specimens/' + rowObject.hidden.specimenId);
     },

@@ -301,6 +301,16 @@ public class RbacServiceImpl implements RbacService {
 			return ResponseEvent.serverError(e);
 		}
 	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Long> getRolesCount(RequestEvent<RoleListCriteria> req) {
+		try {
+			return ResponseEvent.response(daoFactory.getRoleDao().getRolesCount(req.getPayload()));
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 	
 	@Override
 	@PlusTransactional
