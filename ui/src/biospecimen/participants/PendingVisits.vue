@@ -18,7 +18,7 @@
 
       <template #rowActions="slotProps">
         <os-button size="small" :label="$t('participants.collect')" @click="collectVisit(slotProps.rowObject)"
-          v-if="selectedVisits.length == 0 && isCreateOrUpdateVisitAllowed" />
+          v-if="cpr.hasConsented && selectedVisits.length == 0 && isCreateOrUpdateVisitAllowed" />
       </template>
 
       <template class="visit-details" #expansionRow="{rowObject}">

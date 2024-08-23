@@ -84,7 +84,8 @@ export default {
     this.detailRouteName = route.name.split('.')[0];
     this.query = {};
     if (this.$route.query) {
-      Object.assign(this.query, {filters: this.$route.query.filters});
+      const {filters, view} = this.$route.query;
+      Object.assign(this.query, {filters, view});
     }
   },
 

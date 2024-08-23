@@ -7,7 +7,7 @@
           @click="editVisit" v-if="isUpdateAllowed" />
 
         <os-button left-icon="plus" :label="$t('participants.add_specimen')"
-          @click="addSpecimen" v-if="ctx.visit.status == 'Complete' && isCreateSpecimenAllowed" />
+          @click="addSpecimen" v-if="cpr.hasConsented && ctx.visit.status == 'Complete' && isCreateSpecimenAllowed" />
 
         <os-button left-icon="print" :label="$t('participants.print_specimen_labels')"
           @click="printLabels" v-if="isPrintSpecimenLabelAllowed" />

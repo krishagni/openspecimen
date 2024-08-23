@@ -13,18 +13,16 @@ import cprSvc   from '@/biospecimen/services/Cpr.js';
 export default {
   props: ['cprId'],
 
-  async setup(props) {
+  inject: ['cpViewCtx'],
+
+  setup() {
     const cpr = ref({});
     provide('cpr', cpr);
-
-    if (props.cprId > 0) {
-      cpr.value = await cprSvc.getCpr(props.cprId);
-      formUtil.createCustomFieldsMap(cpr.value.participant, true);
-    } else {
-      cpr.value = {participant: {pmis: [], source: 'OpenSpecimen'}}
-    }
-    
     return { cpr };
+  },
+
+  created() {
+    this._setupCpr();
   },
 
   watch: {
@@ -33,8 +31,31 @@ export default {
         return;
       }
 
-      this.cpr = await cprSvc.getCpr(newVal);
+      this._setupCpr();
+    }
+  },
+
+  methods: {
+    _setupCpr: async function() {
+      if (!this.cprId || this.cprId <= 0) {
+        this.cpr = {participant: {pmis: [], source: 'OpenSpecimen'}};
+        return;
+      }
+
+      this.cpr = await cprSvc.getCpr(this.cprId);
       formUtil.createCustomFieldsMap(this.cpr.participant, true);
+
+      if (this.$osSvc.ecValidationSvc) {
+        const cp = this.cpViewCtx.getCp();
+        if (cp.visitLevelConsents) {
+          this.cpr.hasConsented = true;
+        } else {
+          const {status} = await this.$osSvc.ecValidationSvc.getParticipantStatus(this.cprId);
+          this.cpr.hasConsented = status;
+        }
+      } else {
+        this.cpr.hasConsented = true;
+      }
     }
   }
 }

@@ -86,7 +86,7 @@ export default {
         onSelect: () => this.gotoVisit(visit)
       });
 
-      if (this.cpViewCtx.isCreateVisitAllowed(this.cpr)) {
+      if (this.cpr.hasConsented && this.cpViewCtx.isCreateVisitAllowed(this.cpr)) {
         options.push({
           icon: 'redo',
           caption: this.$t('participants.new_visit'),
@@ -96,7 +96,7 @@ export default {
 
 
       let divider = true;
-      if (this.cpViewCtx.isCreateSpecimenAllowed(this.cpr)) {
+      if (this.cpr.hasConsented && this.cpViewCtx.isCreateSpecimenAllowed(this.cpr)) {
         if (divider) {
           options.push({ divider: true });
           divider = false;
