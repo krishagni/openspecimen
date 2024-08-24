@@ -157,34 +157,14 @@ export default {
       
       this.schema = {filters: this.filters};
       const columns = this.schema.columns = this.list.columns.map(
-        (column, idx) => {
-          const result = {
-            name: 'column.a_' + idx,
-            caption: column.caption,
-            $column: column,
-            sortable: true
-          };
-
-          const mi = column.metainfo;
-          if (mi) {
-            if (mi.showUnit == 'true') {
-              result.type = 'specimen-measure';
-              result.measure = mi.measure;
-              result.entity = 'hidden';
-            } else if (mi.showLink == 'true') {
-              if (this.url) {
-                result.href = (row) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(row.rowObject, this.url)
-              }
-
-              if (this.newTab) {
-                result.hrefTarget = '_blank';
-              }
-            }
-          }
-
-          return result;
-        }
-      );
+        (column, idx) => this._getResultColumn(column, idx));
+      const startIdx = columns.length;
+      if (this.list.fixedColumns instanceof Array) {
+        Array.prototype.push.apply(
+          columns,
+          this.list.fixedColumns.map((column, idx) => this._getResultColumn(column, startIdx + idx, false))
+        );
+      }
 
       let urlColumnIdx = columns.findIndex(column => column.href);
       if (urlColumnIdx < 0) {
@@ -203,6 +183,13 @@ export default {
       this.data = this.list.rows.map(
         (row) => {
           const columnData = row.data.reduce((acc, item, idx) => { acc['a_' + idx] = item; return acc; }, {});
+          if (row.fixedData instanceof Array) {
+            const fixedData = row.fixedData.reduce(
+              (acc, item, idx) => { acc['a_' + (startIdx + idx)] = item; return acc; }, {}
+            );
+            Object.assign(columnData, fixedData);
+          }
+
           return {
             column: columnData,
             hidden: row.hidden
@@ -306,6 +293,35 @@ export default {
 
     switchToTableView: function() {
       this.$refs.listView.switchToTableView();
+    },
+
+
+    _getResultColumn: function(column, idx, sortable) {
+      const result = {
+        name: 'column.a_' + idx,
+        caption: column.caption,
+        $column: column,
+        sortable: sortable != false && sortable != 'false'
+      };
+
+      const mi = column.metainfo;
+      if (mi) {
+        if (mi.showUnit == 'true') {
+          result.type = 'specimen-measure';
+          result.measure = mi.measure;
+          result.entity = 'hidden';
+        } else if (mi.showLink == 'true') {
+          if (this.url) {
+            result.href = (row) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(row.rowObject, this.url)
+          }
+
+          if (this.newTab) {
+            result.hrefTarget = '_blank';
+          }
+        }
+      }
+
+      return result;
     }
   }
 }

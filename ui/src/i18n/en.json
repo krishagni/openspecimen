@@ -758,6 +758,10 @@
     "view_specimens": "View Specimens"
   },
 
+  "cps": {
+    "list": "Collection Protocols"
+  },
+
   "cprs": {
     "cp": "Collection Protocol",
     "participant_name": "Name",

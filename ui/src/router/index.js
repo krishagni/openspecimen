@@ -863,6 +863,18 @@ const routes = [
       },
 
 
+      /*****************************
+       *****************************
+       * CP module                 *
+       *****************************
+       *****************************/
+      {
+        path: 'cps/:cpId',
+        name: 'CpsList',
+        component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/List.vue'),
+        props: (route) => ({filters: route.query.filters, cpId: route.params && route.params.cpId})
+      },
+
       /** Biospecimen pages **/
       {
         path: 'cpr-resolver/:cprId',
