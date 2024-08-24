@@ -144,8 +144,8 @@
                   <span translate="queries.download_def"></span>
                 </a>
               </li>
-              <li ng-show="permOpts.createJobAllowed">
-                <a ui-sref="job-addedit({queryId: query.id})">
+              <li ng-show="permOpts.createJobAllowed" ng-click="scheduleQuery(query)">
+                <a>
                   <span class="fa fa-clock-o"></span>
                   <span translate="queries.schedule"></span>
                 </a>

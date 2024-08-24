@@ -2,7 +2,7 @@
 angular.module('os.query.list', ['os.query.models'])
   .controller('QueryListCtrl', function(
     $scope, $state, $modal, currentUser, queryGlobal, folders,
-    Util, SavedQuery, QueryFolder, Alerts, ListPagerOpts) {
+    Util, SavedQuery, QueryFolder, Alerts, ListPagerOpts, VueApp) {
 
     var filterOpts, pagerOpts;
 
@@ -131,6 +131,10 @@ angular.module('os.query.list', ['os.query.models'])
           $scope.selectedQueries.splice(idx, 1);
         }
       }
+    };
+
+    $scope.scheduleQuery = function(query) {
+      VueApp.setVueView('scheduled-jobs/-1/addedit', {queryId: query.id});
     };
 
     $scope.deleteQuery = function(query) {

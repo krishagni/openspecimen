@@ -37,12 +37,13 @@
 
 <script>
 import alertSvc     from '@/common/services/Alerts.js';
+import http         from '@/common/services/HttpClient.js';
 import i18n         from '@/common/services/I18n.js';
 import jobsSvc      from '@/administrative/services/ScheduledJob.js';
 import routerSvc    from '@/common/services/Router.js';
 
 export default {
-  props: ['jobId'],
+  props: ['jobId', 'queryId'],
 
   data() {
     return {
@@ -107,7 +108,25 @@ export default {
       if (jobId > 0) {
         jobsSvc.getJob(jobId).then(job => this.dataCtx.job = job);
       } else {
-        this.dataCtx.job = {};
+        if (this.queryId > 0) {
+          http.get('saved-queries/' + this.queryId).then(
+            query => {
+              this.dataCtx.job = {
+                name: query.title,
+                type: 'QUERY',
+                savedQuery: query,
+                repeatSchedule: 'ONDEMAND',
+                startDate: Date.now()
+              }
+            }
+          );
+        } else {
+          this.dataCtx.job = {
+            type: 'INTERNAL',
+            repeatSchedule: 'ONDEMAND',
+            startDate: Date.now()
+          };
+        }
       }
     }
   }

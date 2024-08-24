@@ -1095,7 +1095,7 @@ const routes = [
         path: 'scheduled-jobs/:jobId/addedit',
         name: 'JobAddEdit',
         component: () => import(/* webpackChunkName: "scheduled-jobs" */ '../administrative/jobs/AddEdit.vue'),
-        props: ({params}) => ({jobId: params && params.jobId})
+        props: ({params, query}) => ({jobId: params && params.jobId, queryId: query.queryId})
       },
 
       /*****************************
