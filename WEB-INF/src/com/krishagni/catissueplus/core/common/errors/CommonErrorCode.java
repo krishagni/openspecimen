@@ -31,7 +31,11 @@ public enum CommonErrorCode implements ErrorCode {
 
 	DATE_PARSE_ERROR,
 
-	EVAL_EXPR_ERROR;
+	EVAL_EXPR_ERROR,
+
+	CONTENT_DETECT_FAILED,
+
+	FILE_TYPE_DETECT_FAILED;
 
 	@Override
 	public String code() {

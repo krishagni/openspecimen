@@ -74,6 +74,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
@@ -101,6 +105,8 @@ public class Utility {
 	private static String algorithm = null;
 
 	private static FileTypeMap fileTypesMap = null;
+
+	private static volatile TikaConfig tikaConfig = null;
 
 	private static final ThreadLocal<ObjectMapper> om = new ThreadLocal<ObjectMapper>() {
 		@Override
@@ -458,6 +464,18 @@ public class Utility {
 		return getContentType(file.getName());
 	}
 
+	public static String getContentType(InputStream in) {
+		MediaType mediaType = getMediaType(in);
+		return mediaType != null ? mediaType.toString() : null;
+	}
+
+	public static String getFileType(String contentType) {
+		try {
+			return getTikaConfig().getMimeRepository().forName(contentType).getExtension();
+		} catch (Exception e) {
+			throw OpenSpecimenException.userError(CommonErrorCode.FILE_TYPE_DETECT_FAILED, e.getLocalizedMessage());
+		}
+	}
 
 	public static String getFileText(File file) {
 		FileInputStream in = null;
@@ -1469,6 +1487,31 @@ public class Utility {
 	private static String getDbType() {
 		return AppProperties.getInstance().getProperties()
 			.getProperty("database.type", "mysql").toLowerCase();
+	}
+
+	private static MediaType getMediaType(InputStream in) {
+		try {
+			Metadata metadata = new Metadata();
+			return getTikaConfig().getDetector().detect(TikaInputStream.get(in), metadata);
+		} catch (Exception e) {
+			throw OpenSpecimenException.userError(CommonErrorCode.CONTENT_DETECT_FAILED, e.getLocalizedMessage());
+		}
+	}
+
+	private static TikaConfig getTikaConfig() {
+		try {
+			if (tikaConfig == null) {
+				synchronized (Utility.class) {
+					if (tikaConfig == null) {
+						tikaConfig = new TikaConfig();
+					}
+				}
+			}
+
+			return tikaConfig;
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(CommonErrorCode.SERVER_ERROR, "Error initialising the configuration for content detection");
+		}
 	}
 
 	private static final String GET_DATA_DIR =
