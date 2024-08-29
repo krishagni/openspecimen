@@ -24,8 +24,6 @@ import com.krishagni.catissueplus.core.de.events.FileDetail;
 import com.krishagni.catissueplus.core.de.events.GetFileDetailOp;
 import com.krishagni.catissueplus.core.de.services.FormService;
 
-import edu.common.dynamicextensions.nutility.DeConfiguration;
-
 @Controller
 @RequestMapping("/form-files")
 public class FormFilesController {
@@ -49,24 +47,12 @@ public class FormFilesController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public void downloadFile(
-		@RequestParam(value = "formId")
-		Long formId,
-
-		@RequestParam(value = "ctrlName")
-		String ctrlName,
-
-		@RequestParam(value = "recordId", required = false)
-		Long recordId,
-
-		@RequestParam(value = "fileId", required = false)
+		@RequestParam(value = "fileId")
 		String fileId,
 
 		HttpServletResponse response) {
-		
+
 		GetFileDetailOp req = new GetFileDetailOp();
-		req.setFormId(formId);
-		req.setCtrlName(ctrlName);
-		req.setRecordId(recordId);
 		req.setFileId(fileId);
 		
 		FileDetail file = response(formSvc.getFileDetail(request(req)));
@@ -75,35 +61,20 @@ public class FormFilesController {
 
 	@RequestMapping(method = RequestMethod.GET, value="/{fileId:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public void downloadFile(
+	public void downloadFilePathParam(
 		@PathVariable("fileId")
 		String fileId,
 
-		@RequestParam(value = "contentType", required = false)
-		String contentType,
-
-		@RequestParam(value = "filename", required = false)
-		String filename,
-
 		HttpServletResponse response) {
 
-		fileId    = Utility.cleanPath(fileId);
-		filename  = Utility.cleanPath(filename);
-		File file = new File(DeConfiguration.getInstance().fileUploadDir() + File.separator + fileId);
-		if (!file.exists()) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-
-		Utility.sendToClient(response, filename, contentType, file);
+		downloadFile(fileId, response);
 	}
 
 	private <T> RequestEvent<T> request(T payload) {
-		return new RequestEvent<T>(payload);				
+		return RequestEvent.wrap(payload);
 	}
 
 	private <T> T response(ResponseEvent<T> resp) {
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		return ResponseEvent.unwrap(resp);
 	}
 }

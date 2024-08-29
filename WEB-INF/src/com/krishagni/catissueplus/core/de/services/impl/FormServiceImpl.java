@@ -680,18 +680,22 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	@PlusTransactional
 	public ResponseEvent<FileDetail> getFileDetail(RequestEvent<GetFileDetailOp> req) {
 		GetFileDetailOp op = req.getPayload();
-
-		FileControlValue fcv = null;
-		if (op.getRecordId() != null) {
-			fcv = formDataMgr.getFileControlValue(op.getFormId(), op.getRecordId(), op.getCtrlName());
-		} else if (StringUtils.isNotBlank(op.getFileId())) {
-			fcv = formDataMgr.getFileControlValue(op.getFormId(), op.getCtrlName(), op.getFileId());
-		}
-
+		FileControlValue fcv = formDataMgr.getFileMetadata(op.getFileId());
 		if (fcv == null) {
 			return ResponseEvent.userError(FormErrorCode.FILE_NOT_FOUND);
 		}
-		
+
+		FormRecordEntryBean re = deDaoFactory.getFormDao().getRecordEntry(fcv.getFormId(), fcv.getRecordId());
+		if (re == null) {
+			return ResponseEvent.userError(FormErrorCode.REC_NOT_FOUND);
+		}
+
+		FormContextBean fc = re.getFormCtxt();
+		FormAccessChecker checker = formAccessCheckers.get(fc.getEntityType());
+		if (checker == null || !checker.isDataReadAllowed(fc.getEntityType(), re.getObjectId())) {
+			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		return ResponseEvent.response(FileDetail.from(fcv));
 	}
 	
