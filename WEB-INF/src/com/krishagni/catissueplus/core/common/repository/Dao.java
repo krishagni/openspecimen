@@ -12,12 +12,8 @@ public interface Dao<T> {
 	<R> void delete(R t);
 	
 	T getById(Long id);
-	
-	T getById(Long id, String activeCondition);
 
 	List<T> getByIds(Collection<Long> ids);
-
-	List<T> getByIds(Collection<Long> ids, String activeCondition);
 	
 	void flush();
 }

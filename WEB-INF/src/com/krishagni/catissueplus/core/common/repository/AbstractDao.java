@@ -65,27 +65,13 @@ public class AbstractDao<T> implements Dao<T> {
 
 	@Override
 	public T getById(Long id) {
-		return getById(id, null);
-	}
-
-	public T getById(Long id, String activeCondition) {
-		List<T> result = getByIds(Collections.singleton(id), activeCondition);
-		return result.isEmpty() ? null : result.iterator().next();
+		Criteria<?> query = createCriteria(getType(), "t");
+		return (T) query.add(query.eq("t.id", id)).uniqueResult();
 	}
 
 	public List<T> getByIds(Collection<Long> ids) {
-		return getByIds(ids, null);
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<T> getByIds(Collection<Long> ids, String activeCondition) {
-		String hql = "from " + getType().getName() + " t0 where t0.id in (:ids)";
-
-		if (activeCondition != null) {
-			hql += " and " + activeCondition;
-		}
-
-		return getCurrentSession().createQuery(hql).setParameterList("ids", ids).list();
+		Criteria<?> query = createCriteria(getType(), "t");
+		return (List<T>) query.add(query.in("t.id", ids)).list();
 	}
 
 	public Class<?> getType() {

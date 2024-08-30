@@ -62,7 +62,10 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	
 	@Override
 	public FormContextBean getById(Long id) {
-		return getById(id, "deletedOn is null");
+		Criteria<FormContextBean> query = createCriteria(FormContextBean.class, "fc");
+		return query.add(query.eq("fc.identifier", id))
+			.add(query.isNull("fc.deletedOn"))
+			.uniqueResult();
 	}
 
 	@Override

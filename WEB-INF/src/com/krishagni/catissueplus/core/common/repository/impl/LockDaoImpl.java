@@ -20,17 +20,7 @@ public class LockDaoImpl extends AbstractDao<Lock> implements LockDao {
 	}
 
 	@Override
-	public Lock getById(Long id, String activeCondition) {
-		throw new UnsupportedOperationException("Locks cannot be obtained by IDs");
-	}
-
-	@Override
 	public List<Lock> getByIds(Collection<Long> ids) {
-		throw new UnsupportedOperationException("Locks cannot be obtained by IDs");
-	}
-
-	@Override
-	public List<Lock> getByIds(Collection<Long> ids, String activeCondition) {
 		throw new UnsupportedOperationException("Locks cannot be obtained by IDs");
 	}
 
