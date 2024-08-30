@@ -17,7 +17,7 @@
     </div>
   </div>
   <div v-else>
-    <span v-html="fm.caption"></span>
+    <os-html :content="fm.caption" />
   </div>
 </template>
 

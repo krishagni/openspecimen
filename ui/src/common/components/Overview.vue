@@ -24,7 +24,7 @@
             </a>
           </span>
           <span v-else-if="field.type == 'text'">
-            <span v-html="field.value"></span>
+            <os-html :content="field.value" />
           </span>
           <span v-else-if="field.type == 'component'">
             <component :is="field.component" v-bind="field.value" />
@@ -43,7 +43,7 @@
         <span>{{label(field)}}</span>
       </template>
       <template #content>
-        <span class="os-textarea" v-if="field.value" v-html="field.value"></span>
+        <os-html class="os-textarea" v-if="field.value" :content="field.value" />
       </template>
     </Section>
   </template>
@@ -90,7 +90,7 @@
                       <img :src="colValue.url">
                     </span>
                     <span v-else-if="field.fields[colIdx].type == 'text' || field.fields[colIdx].type == 'textarea'">
-                      <span v-html="colValue"></span>
+                      <os-html :content="colValue" />
                     </span>
                     <span v-else>
                       <span>{{colValue}}</span>

@@ -4,6 +4,43 @@ import jsep from 'jsep/dist/jsep.js';
 class ExpressionUtil {
   cachedExprs = {};
 
+  /** Picked from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects **/
+  builtInObjs = {
+    /** Value Properties **/
+    Infinity, NaN, undefined,
+
+    /** Function Properties **/
+    isFinite, isNaN, parseFloat, parseInt, decodeURI, decodeURIComponent, encodeURI, encodeURIComponent,
+    escape, unescape, console,
+
+    /** Fundamental Objects **/
+    Object, Function, Boolean, Symbol,
+
+    /** Error objects **/
+    Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError,
+
+    /** Numbers and Dates **/
+    Number, Math, Date,
+
+    /** Text Processing **/
+    String, RegExp,
+
+    /** Indexed Collections **/
+    Array,
+
+    /** Keyed Collections **/
+    Map, Set, WeakMap, WeakSet,
+
+    /** Structured data **/
+    ArrayBuffer, JSON,
+
+    /** Control abstraction objects **/
+    Promise,
+
+    /** Internationalization **/
+    Intl
+  };
+
   constructor() {
     jsep.addBinaryOp('or',  1);
     jsep.addBinaryOp('and', 2);
@@ -20,6 +57,25 @@ class ExpressionUtil {
     }
 
     return new Function('return ' + this.parse(expr)).call(context);
+  }
+
+  evalJavaScript(src, context) {
+    context = context || {};
+
+    function has() {
+      return true;
+    }
+
+    function get(target, key) {
+      return key == Symbol.unscopables ? undefined : target[key];
+    }
+
+    const jsSrc  = 'with (sandbox) {' + src + '}'
+    const jsCode = new Function('sandbox', jsSrc);
+    return (function(sandbox) {
+      const sandboxProxy = new Proxy(sandbox, {has, get})
+      return jsCode(sandboxProxy)
+    })({...this.builtInObjs, ...context, osSvc: window.osSvc, osUi: window.osUi});
   }
 
   parse(expr) {

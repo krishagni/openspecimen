@@ -1,5 +1,6 @@
 
 import { format } from 'date-fns';
+import sanitizeHtml from "sanitize-html";
 import useClipboard from 'vue-clipboard3'
 
 import dateFormatter from '@/common/filters/DateFormatter.js';
@@ -8,7 +9,6 @@ import http from '@/common/services/HttpClient.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import i18n from '@/common/services/I18n.js';
 import pluginReg from '@/common/services/PluginViewsRegistry.js';
-
 
 class Util {
   httpsRe = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
@@ -535,6 +535,30 @@ class Util {
       .split(' ')
       .join('_')
       .toLowerCase();
+  }
+
+  sanitizeHtml(content) {
+    if (!content) {
+      return content;
+    }
+
+    return sanitizeHtml(
+      content,
+      {
+        allowedAttributes: {
+          "*": ["style"],
+          "a": ["href", "target"]
+        },
+        allowedStyles: {
+          "*": {
+            "color": [/^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
+            "text-align": [/^left$/, /^right$/, /^center$/],
+            "font-size": [/^\d+(?:px|em|%)$/],
+            "background-color": [/^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/]
+          }
+        }
+      }
+    );
   }
 
   _getEscapeMap(str) {

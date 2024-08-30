@@ -123,7 +123,7 @@ export default {
        if (field.labelCode) {
          return this.$t(field.labelCode);
        } else if (field.label) {
-         return field.label;
+         return util.sanitizeHtml(field.label);
        } else {
          return 'Unknown';
        }

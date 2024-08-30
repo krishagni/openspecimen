@@ -1,6 +1,6 @@
 
 <template>
-  <span v-html="note"></span>
+  <os-html :content="note" />
 </template>
 
 <script>

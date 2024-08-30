@@ -15,7 +15,7 @@
         <a class="os-search-no-match" :href="trainingLink + slotProps.item.key" target="_blank" rel="noopener"
           v-if="slotProps.item.id == -1">
           <os-icon name="graduation-cap" />
-          <span v-html="slotProps.item.caption"></span>
+          <os-html :content="slotProps.item.caption" />
         </a>
 
         <div class="os-search-match" v-else>
@@ -25,7 +25,7 @@
           <div class="match">
             <div class="id">
               <span class="text">
-                <span v-html="slotProps.item.matchedText"></span>
+                <os-html :content="slotProps.item.matchedText" />
               </span>
               <a class="link" :href="slotProps.item.url" target="_blank" rel="noopener">
                 <os-icon name="external-link-alt"/>

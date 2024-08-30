@@ -5,7 +5,7 @@
         <thead>
           <tr>
             <th v-for="(field, idx) of sfFields" :key="idx">
-              <span v-html="label(field)"></span>
+              <os-html :content="label(field)" />
               <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
                 <span>*</span>
               </span>

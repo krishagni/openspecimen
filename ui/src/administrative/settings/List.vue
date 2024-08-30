@@ -67,7 +67,7 @@
                       <span>{{setting.uiName}}</span>
                     </td>
                     <td>
-                      <span v-html="setting.uiDesc"></span>
+                      <os-html :content="setting.uiDesc" />
                     </td>
                     <td>
                       <ValueSpan :setting="setting" />
@@ -95,7 +95,7 @@
                         <os-label>
                           <span v-t="'settings.description'">Description</span>
                         </os-label>
-                        <span v-html="ctx.selectedSetting.uiDesc"></span>
+                        <os-html :content="ctx.selectedSetting.uiDesc" />
                       </div>
                     </div>
                     <div class="row">

@@ -13,7 +13,7 @@
       <img :src="imageUrl">
     </span>
     <span v-else-if="field.type == 'textArea' || field.type == 'stringTextField'">
-      <span v-html="displayValue"></span>
+      <os-html :content="displayValue" />
     </span>
     <span v-else>
       <span><span>{{displayValue}}</span></span>

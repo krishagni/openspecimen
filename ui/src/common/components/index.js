@@ -30,6 +30,7 @@ import Form from './Form.vue';
 import FormGroup from './FormGroup.vue';
 import Grid from './Grid.vue';
 import GridColumn from './GridColumn.vue';
+import Html from './Html.vue';
 import Icon from './Icon.vue';
 import IconTitle from './IconTitle.vue';
 import InlineMessage from './InlineMessage.vue';
@@ -131,6 +132,7 @@ export default {
     app.component('os-form-group',       FormGroup);
     app.component('os-grid',             Grid);
     app.component('os-grid-column',      GridColumn);
+    app.component('os-html',             Html);
     app.component('os-icon',             Icon);
     app.component('os-icon-title',       IconTitle);
     app.component('os-inline-message',   InlineMessage);

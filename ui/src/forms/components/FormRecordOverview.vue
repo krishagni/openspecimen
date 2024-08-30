@@ -3,7 +3,7 @@
     <ul class="os-key-values bg-col os-one-col" :class="{'vertical': ctx.verticalLayout}">
       <li class="item" v-for="field in ctx.simpleFields" :key="field.udn">
         <strong class="key key-sm strong">
-          <span v-html="field.caption"></span>
+          <os-html :content="field.caption" />
         </strong>
         <span class="value value-md" v-if="field.type != 'label'">
           <FormFieldValue :field="field" />
@@ -14,7 +14,7 @@
     <template v-for="sf in ctx.sfFields" :key="sf.udn">
       <os-section>
         <template #title>
-          <span v-html="sf.caption"></span>
+          <os-html :content="sf.caption" />
         </template>
         <template #content>
           <div class="os-sf-table">
@@ -22,7 +22,7 @@
               <thead>
                 <tr>
                   <th v-for="field in sf.value[0].fields" :key="field.udn">
-                    <span v-html="field.caption"></span>
+                    <os-html :content="field.caption" />
                   </th>
                 </tr>
               </thead>

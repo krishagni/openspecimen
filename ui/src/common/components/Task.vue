@@ -39,7 +39,7 @@ export default {
           task.component = 'os-' + task.type + '-task';
           if (!task.jsonConfig && task.configuration) {
             try {
-              task.configuration = eval('(' + task.configuration + ')');
+              task.configuration = this.$osSvc.exprUtil.evalJavaScript('return (' + task.configuration + ')');
             } catch (e) {
               console.log(e);
               this.$osSvc.alertsSvc.error({code: 'workflows.task_js_parse_error'});
