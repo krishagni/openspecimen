@@ -127,7 +127,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		HttpServletResponse httpResp = (HttpServletResponse)resp;
 
 		String origin = Utility.getHeader(httpReq, "Origin");
-		if (!isOriginAllowed(origin)) {
+		String requestUrl = httpReq.getRequestURL() != null ? httpReq.getRequestURL().toString() : null;
+		if (!isOriginAllowed(requestUrl, origin)) {
 			httpResp.sendError(
 				HttpServletResponse.SC_METHOD_NOT_ALLOWED,
 				"Requests from the origin server "  + Utility.escapeXss(origin) + " not allowed");
@@ -422,12 +423,12 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		return authService.getUser(impUserId);
 	}
 
-	private boolean isOriginAllowed(String origin) {
-		if (StringUtils.isBlank(origin)) {
+	private boolean isOriginAllowed(String requestUrl, String origin) {
+		if (StringUtils.isBlank(requestUrl) || StringUtils.isBlank(origin)) {
 			return true;
 		}
 
-		return getAllowedOrigins().isEmpty() || getAllowedOrigins().contains("*") || getAllowedOrigins().contains(origin.trim());
+		return requestUrl.contains(origin) || getAllowedOrigins().contains("*") || getAllowedOrigins().contains(origin.trim());
 	}
 
 	private Set<String> getAllowedOrigins() {
