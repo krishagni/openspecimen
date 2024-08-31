@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,8 +29,6 @@ import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFactory {
-	private static final Pattern funArgs = Pattern.compile("^(.+?)\\((.+?)\\)$");
-
 	protected DaoFactory daoFactory;
 
 	protected LabelTmplTokenRegistrar printLabelTokensRegistrar;
@@ -313,12 +309,21 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 	}
 
 	private Pair<String, List<String>> parseFunctionToken(String tokenStr) {
-		Matcher matcher = funArgs.matcher(tokenStr);
-		if (matcher.find()) {
-			return Pair.make(matcher.group(1), parseCsv(matcher.group(2)));
-		} else {
+		tokenStr = tokenStr.trim();
+
+		int openIdx = tokenStr.indexOf('(');
+		if (openIdx == -1) {
 			return Pair.make(tokenStr, new ArrayList<>());
 		}
+
+		int closeIdx = tokenStr.lastIndexOf(')');
+		if (closeIdx == -1 || openIdx > closeIdx) {
+			return Pair.make(tokenStr, new ArrayList<>());
+		}
+
+		String tokenName = tokenStr.substring(0, openIdx);
+		String args = tokenStr.substring(openIdx + 1, closeIdx);
+		return Pair.make(tokenName, parseCsv(args));
 	}
 
 	private List<String> parseCsv(String args) {

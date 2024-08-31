@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -71,6 +72,7 @@ import com.krishagni.catissueplus.core.common.service.ConfigurationService;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.StarredItemService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.CsvFileWriter;
 import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
@@ -365,8 +367,10 @@ public class DistributionProtocolServiceImpl implements DistributionProtocolServ
 		try {
 			DistributionOrderStatListCriteria crit = req.getPayload();
 			List<DistributionOrderStat> orderStats = getOrderStats(crit);
-			
-			tempFile = File.createTempFile("dp-order-stats", null);
+
+			tempFile = new File(ConfigUtil.getInstance().getTempDir(), "dp-order-stats-" + UUID.randomUUID());
+			tempFile.deleteOnExit();
+
 			csvWriter = CsvFileWriter.createCsvFileWriter(tempFile);
 			
 			if (crit.dpId() != null && !orderStats.isEmpty()) {

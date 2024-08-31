@@ -398,7 +398,6 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		try {
 			return new ObjectMapper().writeValueAsString(body);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return unknownError;
 		}
 	}

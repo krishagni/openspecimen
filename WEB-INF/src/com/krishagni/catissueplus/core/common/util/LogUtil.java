@@ -28,8 +28,8 @@ public class LogUtil {
             LoggerContext context = (LoggerContext) LogManager.getContext(false);
             context.setConfigLocation(url.toURI());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error configuring the logger");
+            String error = Utility.getErrorMessage(e);
+            throw new RuntimeException("Error configuring the logger. Error = " + error, e);
         }
     }
 

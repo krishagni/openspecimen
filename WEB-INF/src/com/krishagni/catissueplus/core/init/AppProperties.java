@@ -157,7 +157,6 @@ public class AppProperties implements FactoryBean<Properties> {
 			return props;
 		} catch (Exception e) {
 			logger.error("Error loading build properties", e);
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
 			IOUtils.closeQuietly(in);
@@ -182,7 +181,6 @@ public class AppProperties implements FactoryBean<Properties> {
 			return props;
 		} catch (Exception e) {
 			logger.error("Error loading external config properties for " + contextName, e);
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
 			IOUtils.closeQuietly(in);
@@ -196,7 +194,6 @@ public class AppProperties implements FactoryBean<Properties> {
 		} catch (NameNotFoundException nfe) {
 			externalConfigPath = String.format(DEF_CFG_LOC, tomcatDir, contextName);
 		} catch (NamingException e) {
-			e.printStackTrace();
 			throw new RuntimeException("Error doing config property resource lookup", e);
 		}
 

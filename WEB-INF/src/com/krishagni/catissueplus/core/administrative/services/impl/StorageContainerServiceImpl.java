@@ -2517,8 +2517,9 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		int failedLists = 0, maxLists = 100;
 		int failedToStore = 0, failedToRetrieve = 0;
 		try {
-			File dataDir = new File(ConfigUtil.getInstance().getDataDir());
-			File file = File.createTempFile("auto-freezer-report-", ".csv", dataDir);
+			File file = new File(ConfigUtil.getInstance().getTempDir(), "auto-freezer-report-" + UUID.randomUUID() + ".csv");
+			file.deleteOnExit();
+
 			csvWriter = CsvFileWriter.createCsvFileWriter(file);
 			csvWriter.writeNext(getAutoFreezerReportHeader());
 

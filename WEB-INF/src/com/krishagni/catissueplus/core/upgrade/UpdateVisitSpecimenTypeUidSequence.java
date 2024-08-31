@@ -6,6 +6,8 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.krishagni.catissueplus.core.common.util.LogUtil;
+
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
@@ -15,6 +17,8 @@ import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 
 public class UpdateVisitSpecimenTypeUidSequence implements CustomTaskChange {
+	private static final LogUtil logger = LogUtil.getLogger(UpdateVisitSpecimenTypeUidSequence.class);
+
 	@Override
 	public void execute(Database database) throws CustomChangeException {
 		JdbcConnection conn = (JdbcConnection) database.getConnection();
@@ -61,7 +65,7 @@ public class UpdateVisitSpecimenTypeUidSequence implements CustomTaskChange {
 				updateKeySeq.executeBatch();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Encountered error updating VISIT_SP_TYPE_UID key values", e);
 			throw new CustomChangeException(e);
 		}
 

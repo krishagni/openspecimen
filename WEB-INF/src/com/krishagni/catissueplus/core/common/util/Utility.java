@@ -422,8 +422,14 @@ public class Utility {
 	}
 
 	public static void inflateZip(InputStream in, String destination) {
-		ZipInputStream zipIn = null;
+		int ALLOWED_ENTRIES = 100;
+		int MAX_INFLATED_SIZE = 1024 * 1024 * 1024;
+		int MAX_COMPRESSION_RATIO = 10;
 
+		int totalEntries = 0;
+		int totalSize = 0;
+
+		ZipInputStream zipIn = null;
 		try {
 			File destinationDir = new File(destination);
 			zipIn = new ZipInputStream(in);
@@ -434,11 +440,48 @@ public class Utility {
 						break;
 					}
 
+					++totalEntries;
+					if (totalEntries > ALLOWED_ENTRIES) {
+						FileUtils.deleteDirectory(destinationDir);
+						throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The count of entries in the input ZIP file exceeds the allowed limit. Bailing out assuming the input is ZIP bomb attack.");
+					}
+
 					if (zipEntry.isDirectory()) {
 						continue;
 					}
 
-					inflateZipEntry(zipIn, zipEntry.getName(), destinationDir);
+					Path entryPath = destinationDir.toPath().resolve(zipEntry.getName());
+					if (!entryPath.normalize().startsWith(destinationDir.toPath())) {
+						FileUtils.deleteDirectory(destinationDir);
+						throw new IOException("Zip entry contains path traversal");
+					}
+
+					if (entryPath.getParent() != null) {
+						Files.createDirectories(entryPath.getParent());
+					}
+
+					try (FileOutputStream fout = new FileOutputStream(entryPath.toFile())) {
+						byte[] buffer = new byte[8 * 1024]; // 8 KB
+						int entrySize = 0;
+
+						int nBytes = -1;
+						while ((nBytes = zipIn.read(buffer)) > 0) {
+							fout.write(buffer, 0, nBytes);
+							entrySize += nBytes;
+							totalSize += nBytes;
+
+							long compressionRatio = entrySize / zipEntry.getCompressedSize();
+							if (compressionRatio > MAX_COMPRESSION_RATIO) {
+								FileUtils.deleteDirectory(destinationDir);
+								throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Compression ratio of the one or more ZIP file entries exceed the allowed limit. Bailing out assuming the input is ZIP bomb attack.");
+							}
+
+							if (totalSize > MAX_INFLATED_SIZE) {
+								FileUtils.deleteDirectory(destinationDir);
+								throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Uncompressed file exceeds the max allowed limit. Bailing out assuming the input is ZIP bomb attack.");
+							}
+						}
+					}
 				} finally {
 					zipIn.closeEntry();
 				}
@@ -738,7 +781,6 @@ public class Utility {
 			byte[] decodedValue = Base64.getDecoder().decode(value.getBytes());
 			return new String(cipher.doFinal(decodedValue));
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException("Error decrypting the value: " + e.getMessage(), e);
 		}
 	}
@@ -1457,26 +1499,6 @@ public class Utility {
 		} else {
 			ConfigurationService cfgSvc = OpenSpecimenAppCtxProvider.getBean(CFG_SVC_BEAN);
 			return cfgSvc.getDataDir();
-		}
-	}
-
-	private static void inflateZipEntry(ZipInputStream zipIn, String entryName, File destination)
-	throws IOException {
-		FileOutputStream fout = null;
-		try {
-			Path entryPath = destination.toPath().resolve(entryName);
-			if (!entryPath.normalize().startsWith(destination.toPath())) {
-				throw new IOException("Zip entry contains path traversal");
-			}
-
-			if (entryPath.getParent() != null) {
-				Files.createDirectories(entryPath.getParent());
-			}
-
-			fout = new FileOutputStream(entryPath.toFile());
-			IOUtils.copy(zipIn, fout);
-		} finally {
-			IOUtils.closeQuietly(fout);
 		}
 	}
 

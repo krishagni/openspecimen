@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -182,7 +183,10 @@ public class TransactionalInterceptor {
 		PrintStream ps = null;
 		File tmpFile = null;
 		try {
-			tmpFile = File.createTempFile("exception_" + sdf.format(Calendar.getInstance().getTime()), ".log");
+			int count = errorCount.incrementAndGet();
+			tmpFile = new File(
+				ConfigUtil.getInstance().getTempDir(),
+				"exception_" + sdf.format(Calendar.getInstance().getTime()) + "_" + count + ".log");
 			ps = new PrintStream(tmpFile);
 			t.printStackTrace(ps);
 			return tmpFile;
@@ -282,6 +286,8 @@ public class TransactionalInterceptor {
 	//
 	// Error notification variables
 	//
+	private static AtomicInteger errorCount = new AtomicInteger(0);
+
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
 	private static Map<StackTraceElement, List<Long>> errorNotifTimes = new HashMap<>();

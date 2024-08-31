@@ -27,10 +27,14 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class BaseEntity {
+
+	private static final LogUtil logger = LogUtil.getLogger(BaseEntity.class);
+
 	private static final Map<String, Set<String>> entityProperties = new ConcurrentHashMap<>();
 
 	private static final Map<String, Boolean> entityNameProperties = new ConcurrentHashMap<>();
@@ -265,8 +269,8 @@ public class BaseEntity {
 			Object value = bean.getPropertyValue(prop);
 			result = toObjectString(value);
 		} catch (Exception e) {
-			e.printStackTrace();
 			result = "Error - " + e.getMessage();
+			logger.error("Encountered error when obtaining the value of the property " + prop + " on bean", e);
 		}
 
 		return result;
@@ -322,7 +326,7 @@ public class BaseEntity {
 
 			return collStr.length() > 0 ? "[" + collStr.toString() + "]" : null;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error converting the collection of elements to string", e);
 			return null;
 		}
 	}

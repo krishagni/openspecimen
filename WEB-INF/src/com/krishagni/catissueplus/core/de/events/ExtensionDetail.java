@@ -13,12 +13,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.DeObject.Attr;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
 
 public class ExtensionDetail implements Serializable {
+	private static final LogUtil logger = LogUtil.getLogger(ExtensionDetail.class);
+
 	private Long id;
 	
 	private Long objectId;
@@ -126,7 +129,7 @@ public class ExtensionDetail implements Serializable {
 					long time = Long.parseLong((String) attr.getValue());
 					return new Date(time);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("Error converting the value " + attr.getValue() + " to date object. Error: " + e.getMessage(), e);
 				}
 			} else if (attr.getValue() instanceof Number) {
 				return new Date(((Number) attr.getValue()).longValue());

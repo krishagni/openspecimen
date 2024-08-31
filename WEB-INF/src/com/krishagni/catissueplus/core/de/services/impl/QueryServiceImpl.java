@@ -31,8 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -130,8 +128,6 @@ public class QueryServiceImpl implements QueryService {
 	private static final String cpForm = "CollectionProtocol";
 
 	private static final String cprForm = "Participant";
-
-	private static final Pattern SELECT_PATTERN = Pattern.compile("^(select\\s+distinct|select)\\s+.*$");
 	
 	private static final String QUERY_DATA_EXPORTED_EMAIL_TMPL = "query_export_data";
 
@@ -1319,17 +1315,27 @@ public class QueryServiceImpl implements QueryService {
 	}
 	
 	private String getAqlWithCpIdInSelect(User user, boolean isCount, String aql) {
+		aql = aql.trim();
 		if (user.isAdmin() || isCount) {
 			return aql;
 		} else {
-			aql = aql.trim();
-			Matcher matcher = SELECT_PATTERN.matcher(aql);
-			if (matcher.matches()) {
-				String select = matcher.group(1);
-				return select + " " + cpForm + ".id, " + aql.substring(select.length());
+			String[] aqlParts = aql.split("\\s+", 3);
+			if (aqlParts.length < 2 || !aqlParts[0].equals("select")) {
+				return aql;
 			} else {
-				String afterSelect = aql.trim().substring("select".length());
-				return "select " + cpForm + ".id, " + afterSelect;
+				StringBuilder result = new StringBuilder("select ");
+				int idx = 1;
+				if (aqlParts[idx].equals("distinct")) {
+					result.append("distinct ");
+					++idx;
+				}
+
+				result.append(cpForm).append(".id, ");
+				for (int j = idx; j < aqlParts.length; ++j) {
+					result.append(aqlParts[j]).append(" ");
+				}
+
+				return result.toString().trim();
 			}
 		}
 	}

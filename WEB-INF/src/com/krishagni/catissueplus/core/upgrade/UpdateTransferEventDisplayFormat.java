@@ -81,7 +81,6 @@ public class UpdateTransferEventDisplayFormat implements CustomTaskChange {
 				pstmt.executeBatch();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			logger.error("Encountered error updating transfer event from/to positions display formats", e);
 			throw new CustomChangeException(e);
 		}

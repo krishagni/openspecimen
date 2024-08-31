@@ -106,7 +106,6 @@ public class SamlFilter extends FilterChainProxy {
 			field.setAccessible(true);
 			field.set(this, filterChains);
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw OpenSpecimenException.serverError(e);
 		}
 	}

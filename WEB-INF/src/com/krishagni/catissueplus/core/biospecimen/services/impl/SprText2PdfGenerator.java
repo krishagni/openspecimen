@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.context.MessageSource;
@@ -21,13 +22,13 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.services.SprPdfGenerator;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class SprText2PdfGenerator implements SprPdfGenerator {
@@ -43,7 +44,7 @@ public class SprText2PdfGenerator implements SprPdfGenerator {
 		FileOutputStream out = null;
 		Document document = new Document();
 		try {
-			File sprReport = File.createTempFile("spr-report", ".pdf");
+			File sprReport = new File(ConfigUtil.getInstance().getTempDir(), "spr-report-" + UUID.randomUUID() + ".pdf");
 			out= new FileOutputStream(sprReport);
 			
 			PdfWriter pdfWriter = PdfWriter.getInstance(document, out);

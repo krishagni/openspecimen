@@ -40,6 +40,8 @@ import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
 import com.krishagni.catissueplus.core.de.events.FormContextDetail;
@@ -72,6 +74,8 @@ import edu.common.dynamicextensions.nutility.IoUtil;
 @Controller
 @RequestMapping("/forms")
 public class FormsController {
+
+	private static LogUtil logger = LogUtil.getLogger(FormsController.class);
 
 	private static AtomicInteger formCnt = new AtomicInteger();
 	
@@ -487,7 +491,7 @@ public class FormsController {
 			try {
 				FileUtils.deleteDirectory(tmpDir);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Encountered error when attempting to the delete the temporary directory: " + tmpDir.getAbsolutePath(), e);
 			}
 		}
 	}
@@ -677,8 +681,10 @@ public class FormsController {
 	}
 	
 	private String getTmpDirName() {
-		return new StringBuilder().append(System.getProperty("java.io.tmpdir")).append(File.separator)
-				.append(System.currentTimeMillis()).append(formCnt.incrementAndGet()).append("create").toString();
+		return new File(
+			ConfigUtil.getInstance().getTempDir(),
+			"form_xml_" + System.currentTimeMillis() + "_" + formCnt.incrementAndGet()
+		).getAbsolutePath();
 	}
   
 	private <T> RequestEvent<T> getRequest(T payload) {

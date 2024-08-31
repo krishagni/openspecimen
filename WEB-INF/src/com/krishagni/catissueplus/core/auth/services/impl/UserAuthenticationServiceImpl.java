@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.auth.services.impl;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -9,7 +10,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -613,13 +613,6 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	}
 
 	private String generateOtp() {
-		Random randomGen = new Random();
-		StringBuilder otp = new StringBuilder();
-		for (int i = 0; i < 6; ++i) {
-			otp.append(randomGen.nextInt(100) % 10);
-		}
-
-		return otp.toString();
+		return String.format("%06d", new SecureRandom().nextInt(999999));
 	}
-
 }

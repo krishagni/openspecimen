@@ -585,11 +585,25 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 			}
 		}
 
-		String text = getText(message);
-		text = text.replaceAll("\r\n", "\n")
-			.replaceAll(STRIP_EMAIL_REPLY_PATTERN, "")
-			.trim();
-		email.setBody(text);
+		String text = getText(message).replaceAll("\r\n", "\n");
+		List<String> lines = new ArrayList<>();
+		for (String line : text.split("\n")) {
+			line = line.trim();
+			if (line.trim().startsWith(">")) {
+				continue;
+			}
+
+			if (line.startsWith("On ")) {
+				int idx = line.lastIndexOf(" wrote:");
+				if (idx > -1) {
+					line = line.substring(idx + " wrote:".length());
+				}
+			}
+
+			lines.add(line);
+		}
+
+		email.setBody(String.join("\n", lines));
 		return email;
 	}
 
@@ -682,9 +696,4 @@ public class EmailServiceImpl implements EmailService, ConfigChangeListener, Ini
 	private Integer getPollInterval() {
 		return cfgSvc.getIntSetting(MODULE, "imap_poll_interval", 5);
 	}
-
-	private final static String STRIP_EMAIL_REPLY_PATTERN =
-		"(?m)"   + // turn on multi-line regex matching
-		"^>.*$|" + // any line starting with > is ignored
-		"^On\\s+.*\\s+wrote:"; // strip On Wed, Mar 6, 2019 at 11:25 AM XYZ wrote:
 }
