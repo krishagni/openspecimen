@@ -218,7 +218,8 @@ class Util {
         }
 
         return acc;
-      }
+      },
+      {}
     );
 
     return this.spmnTypeProps;
