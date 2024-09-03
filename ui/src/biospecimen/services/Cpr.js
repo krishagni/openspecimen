@@ -133,7 +133,11 @@ class CollectionProtocolRegistration {
     );
   }
 
-  getForms(cpr) {
+  async getForms(cpr) {
+    if (!cpr || !cpr.id) {
+      return [];
+    }
+
     return http.get('collection-protocol-registrations/' + cpr.id + '/forms');
   }
 

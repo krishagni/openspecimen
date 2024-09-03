@@ -241,6 +241,10 @@ class Specimen {
     return cpSvc.getWorkflow(cpId, 'formDataEntryRules').then(wf => (wf && wf['specimen']) || []);
   }
 
+  async getEventFormRules(cpId) {
+    return cpSvc.getWorkflow(cpId, 'formDataEntryRules').then(wf => (wf && wf['specimenEvent']) || []);
+  }
+
   async getFormsOrderSpec(cpId) {
     return cpSvc.getWorkflow(cpId, 'forms').then(
       wf => {

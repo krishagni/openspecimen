@@ -319,7 +319,7 @@ export default {
         return;
       }
 
-      const context = {cp: this.cp, cpr: this.cpr, visit: this.visit, specimen: this.specimen};
+      const context = {cp: this.ctx.cp, cpr: this.cpr, visit: this.visit, specimen: this.specimen};
       this.cpViewCtx.getSpecimenEventForms(context).then(
         eventForms => {
           this.ctx.eventForms = eventForms

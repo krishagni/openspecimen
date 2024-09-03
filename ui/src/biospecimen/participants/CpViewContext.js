@@ -268,7 +268,7 @@ export default class CpViewContext {
 
   async getSpecimenEventForms(context) {
     const {specimen} = context;
-    return Promise.all([specimenSvc.getEventForms(specimen.id), specimenSvc.getFormDataEntryRules(this.cpId)]).then(
+    return Promise.all([specimenSvc.getEventForms(specimen.id), specimenSvc.getEventFormRules(this.cpId)]).then(
       ([eventForms, rules]) => this._getMatchingForms(eventForms, rules, context)
     );
   }
