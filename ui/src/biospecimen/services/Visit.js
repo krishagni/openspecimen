@@ -59,20 +59,7 @@ class Visit {
 
   async getDict(cpId) {
     const aliases = ['visit', 'calcVisit'];
-    const fields = await cpSvc.getDictFor(cpId, aliases, 'visit.extensionDetail', visitSchema, this.getCustomFieldsForm);
-
-    const cond = "visit.status != 'Missed Collection' && visit.status != 'Not Collected'";
-    for (let field of fields) {
-      if (field.name.indexOf('visit.extensionDetail.attrsMap.') == 0) {
-        if (!field.showWhen) {
-          field.showWhen = cond;
-        } else {
-          field.showWhen = '(' + field.showWhen + ') &&' + cond;
-        }
-      }
-    }
-
-    return fields;
+    return cpSvc.getDictFor(cpId, aliases, 'visit.extensionDetail', visitSchema, this.getCustomFieldsForm);
   }
 
   async getLayout(cpId, visitFields) {
