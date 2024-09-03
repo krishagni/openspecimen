@@ -1,6 +1,6 @@
 <template>
   <os-addedit-form-record-view :api="api" :object="cpr"
-    :form-id="formId" :form-ctxt-id="formCtxtId" :record-id="recordId" v-if="api" />
+    :form-id="formId" :form-ctxt-id="formCtxtId" :record-id="recordId" v-if="api && cpr && cpr.id > 0" />
 </template>
 
 <script>

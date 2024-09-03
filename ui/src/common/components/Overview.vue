@@ -204,7 +204,7 @@ export default {
         return exprUtil.eval({...object, fns: util.fns()}, field.displayExpr);
       }
 
-      if (field.source == 'de' || field.name.indexOf('extensionDetail') >= 0) {
+      if (field.type == 'fileUpload' || field.type == 'signature') {
         value = exprUtil.getValue(object, field.name);
         if (value != null && value != undefined && value != '') {
           switch (field.type) {

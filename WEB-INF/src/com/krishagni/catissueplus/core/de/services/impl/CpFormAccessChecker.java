@@ -46,11 +46,8 @@ public class CpFormAccessChecker implements FormAccessChecker {
 
 		try {
 			switch (entityType) {
-				case "Participant" ->
+				case "Participant", "ParticipantExtension" ->
 					AccessCtrlMgr.getInstance().ensureReadCprRights(objectId);
-
-				case "ParticipantExtension" ->
-					AccessCtrlMgr.getInstance().ensureReadParticipantRights(objectId);
 
 				case "VisitExtension", "SpecimenCollectionGroup" ->
 					AccessCtrlMgr.getInstance().ensureReadVisitRights(objectId);
