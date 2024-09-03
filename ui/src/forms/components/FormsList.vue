@@ -2,10 +2,10 @@
   <os-page-toolbar v-if="isUpdateAllowed && (formsList.length > 0 || surveys.length > 0)">
     <template #default>
       <os-menu left-icon="plus" :label="$t('common.buttons.add')" :options="formsList"
-        v-if="formsList.length > 0" />
+        :lazy-load="true" v-if="formsList.length > 0" />
 
       <os-menu left-icon="plus" :label="$t('forms.survey_mode')" :options="surveys"
-        v-if="surveys.length > 0" />
+        :lazy-load="true" v-if="surveys.length > 0" />
     </template>
   </os-page-toolbar>
 
