@@ -75,7 +75,7 @@ class ExpressionUtil {
     return (function(sandbox) {
       const sandboxProxy = new Proxy(sandbox, {has, get})
       return jsCode(sandboxProxy)
-    })({...this.builtInObjs, ...context, osSvc: window.osSvc, osUi: window.osUi});
+    })({...this.builtInObjs, ...context, osSvc: {}, osUi: {...window.osUi}});
   }
 
   parse(expr) {
