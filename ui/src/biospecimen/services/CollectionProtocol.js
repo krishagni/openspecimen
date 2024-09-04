@@ -65,6 +65,14 @@ class CollectionProtocol {
     return http.get('specimen-requirements/' + reqId);
   }
 
+  async starCp(cpId) {
+    return http.post('collection-protocols/' + cpId + '/labels', {});
+  }
+
+  async unstarCp(cpId) {
+    return http.delete('collection-protocols/' + cpId + '/labels');
+  }
+
   async getWorkflow(cpId, wfName) {
     let workflow = await this.loadWorkflows(cpId, wfName);
     if (workflow && workflow.data) {

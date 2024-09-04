@@ -44,8 +44,10 @@
             :url="itemUrl"
             :newUiUrl="true"
             :newTab="false"
+            :allowStarring="true"
             @selectedRows="onItemSelection"
             @rowClicked="onItemRowClick"
+            @rowStarToggled="onItemRowStarToggle"
             @listLoaded="onListLoad"
             ref="list"
           />
@@ -60,8 +62,12 @@
 </template>
 
 <script>
+import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
+
 import routerSvc from '@/common/services/Router.js';
 import util      from '@/common/services/Util.js';
+
+
 
 export default {
   name: 'CpsList',
@@ -158,6 +164,11 @@ export default {
     onItemRowClick: function(event) {
       const params = event.hidden || {};
       alert(JSON.stringify(params));
+    },
+
+    onItemRowStarToggle: function(event) {
+      const promise = event.starred ? cpSvc.unstarCp(event.hidden.cpId) : cpSvc.starCp(event.hidden.cpId);
+      promise.then(() => event.starred = !event.starred);
     },
 
     showDetails: function(rowObject) {

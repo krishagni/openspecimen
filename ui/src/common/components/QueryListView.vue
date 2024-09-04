@@ -8,6 +8,7 @@
     @filtersUpdated="loadList"
     @selectedRows="onRowsSelection"
     @rowClicked="rowClicked"
+    @rowStarToggled="rowStarToggled"
     @sort="sort"
     ref="listView"
   />
@@ -21,9 +22,20 @@ import http     from '@/common/services/HttpClient.js';
 import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['name', 'objectId', 'url', 'newUiUrl', 'newTab', 'allowSelection', 'selected', 'query', 'autoSearchOpen'],
+  props: [
+    'name',
+    'objectId',
+    'url',
+    'newUiUrl',
+    'newTab',
+    'allowSelection',
+    'selected',
+    'query',
+    'autoSearchOpen',
+    'allowStarring'
+  ],
 
-  emits: ['selectedRows', 'rowClicked', 'listLoaded'],
+  emits: ['selectedRows', 'rowClicked', 'listLoaded', 'rowStarToggled'],
 
   data() {
     return {
@@ -190,9 +202,11 @@ export default {
             Object.assign(columnData, fixedData);
           }
 
+          const hidden = row.hidden || {};
           return {
             column: columnData,
-            hidden: row.hidden
+            hidden: hidden,
+            ...hidden
           }
         }
       );
@@ -230,6 +244,10 @@ export default {
             }
           });
         }
+      }
+
+      if (this.allowStarring) {
+        this.schema.columns.unshift({type: 'component', component: 'os-star', data: ({starred}) => ({starred})});
       }
 
       const hasFilters = this.hasFilters() && Object.values(filters || {}).length == 0;
@@ -273,6 +291,10 @@ export default {
 
     rowClicked: function(event) {
       this.$emit('rowClicked', event);
+    },
+
+    rowStarToggled: function(event) {
+      this.$emit('rowStarToggled', event);
     },
 
     sort: function(event) {
