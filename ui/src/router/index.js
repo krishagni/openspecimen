@@ -874,6 +874,13 @@ const routes = [
         component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/List.vue'),
         props: (route) => ({filters: route.query.filters, cpId: route.params && route.params.cpId})
       },
+      {
+        path: 'cp-addedit/:cpId',
+        name: 'CpAddEdit',
+        component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEdit.vue'),
+        props: (route) => ({cpId: route.params && route.params.cpId})
+      },
+
 
       /** Biospecimen pages **/
       {

@@ -9,7 +9,7 @@
     </div>
   </div>
   <div class="os-selected-file" v-else>
-    <span class="filename">{{inputValue.filename}}</span>
+    <span class="filename">{{inputValue.filename || inputValue}}</span>
     <Button left-icon="times" :disabled="disabled" @click="removeFile"/>
   </div>
 </template>

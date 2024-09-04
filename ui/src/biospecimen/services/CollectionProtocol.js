@@ -1,5 +1,9 @@
 
+import cpSchema      from '@/biospecimen/schemas/cps/cp.js';
+import addEditLayout from '@/biospecimen/schemas/cps/addedit.js';
+
 import authSvc from '@/common/services/Authorization.js';
+import formSvc  from '@/forms/services/Form.js';
 import formUtil from '@/common/services/FormUtil.js';
 import http from '@/common/services/HttpClient.js';
 import i18n from '@/common/services/I18n.js';
@@ -63,6 +67,14 @@ class CollectionProtocol {
 
   async getSpecimenRequirement(reqId) {
     return http.get('specimen-requirements/' + reqId);
+  }
+
+  async saveOrUpdate(cp) {
+    if (cp.id > 0) {
+      return http.put('collection-protocols/' + cp.id, cp);
+    } else {
+      return http.post('collection-protocols', cp);
+    }
   }
 
   async starCp(cpId) {
@@ -304,6 +316,26 @@ class CollectionProtocol {
 
   unstar(cp) {
     return http.delete('collection-protocols/' + cp.id + '/labels');
+  }
+
+  async getCustomFieldsForm() {
+    const extnInfo = await http.get('collection-protocols/extension-form');
+    if (!extnInfo || !extnInfo.formId) {
+      return null;
+    }
+
+    return formSvc.getDefinition(extnInfo.formId);
+  }
+
+  async getAddEditFormSchema() {
+    return this.getCustomFieldsForm().then(
+      function(formDef) {
+        const addEditFs = formUtil.getFormSchema(cpSchema.fields, addEditLayout.layout);
+        const { schema, defaultValues } = formUtil.fromDeToStdSchema(formDef, 'cp.extensionDetail.attrsMap.');
+        addEditFs.rows = addEditFs.rows.concat(schema.rows);
+        return { schema: addEditFs, defaultValues };
+      }
+    );
   }
 }
 
