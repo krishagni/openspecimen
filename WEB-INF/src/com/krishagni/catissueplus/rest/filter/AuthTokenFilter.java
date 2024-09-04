@@ -129,6 +129,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		String origin = Utility.getHeader(httpReq, "Origin");
 		String requestUrl = httpReq.getRequestURL() != null ? httpReq.getRequestURL().toString() : null;
 		if (!isOriginAllowed(requestUrl, origin)) {
+			logger.error("Requests from the origin " + origin + " are not allowed to the URL: " + requestUrl);
 			httpResp.sendError(
 				HttpServletResponse.SC_METHOD_NOT_ALLOWED,
 				"Requests from the origin server "  + Utility.escapeXss(origin) + " not allowed");
