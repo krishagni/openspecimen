@@ -10,7 +10,7 @@
                 <span>*</span>
               </span>
             </th>
-            <th class="actioncol">&nbsp;</th>
+            <th class="actioncol" v-if="readOnlyCollection != true">&nbsp;</th>
           </tr>
         </thead>
         <tbody>
@@ -24,18 +24,20 @@
                 <os-inline-message>{{errorMessages[sfRdIdx][field.name]}}</os-inline-message>
               </div>
             </td>
-            <td class="actioncol">
+            <td class="actioncol" v-if="readOnlyCollection != true">
               <os-button left-icon="times" @click="removeSfRow(sfRdIdx)" />
             </td>
           </tr>
         </tbody>
       </table> 
     </div>
+    <div v-else-if="readOnlyCollection == true">
+      <span>-</span>
+    </div>
 
     <os-button class="inline-button" left-icon="plus"
       :label="inputValue && inputValue.length > 0 ? $t('common.buttons.add_another') : $t('common.buttons.add')"
-      @click="addSfRow"
-    />
+      @click="addSfRow" v-if="readOnlyCollection != true" />
   </div>
 </template>
 
@@ -48,7 +50,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 import i18n         from '@/common/services/I18n.js';
 
 export default {
-  props: ['modelValue', 'fields', 'disabled', 'context'],
+  props: ['modelValue', 'fields', 'disabled', 'context', 'read-only-collection'],
 
   setup() {
     return {
