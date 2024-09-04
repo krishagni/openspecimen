@@ -79,26 +79,26 @@ public class MigrateFormFiles implements InitializingBean {
 	private void migrateFormFiles(Form form) {
 		Container formDef = getFormDef(form.getName());
 		if (formDef != null) {
-			migrateFormFiles(formDef, "IDENTIFIER");
+			migrateFormFiles(formDef, form.getId(), "IDENTIFIER");
 		}
 	}
 
 	@PlusTransactional
-	private void migrateFormFiles(Container formDef, String recordIdColumn) {
+	private void migrateFormFiles(Container formDef, Long formId, String recordIdColumn) {
 		if (!hasFileOrSignature(formDef)) {
 			return;
 		}
 
 		for (Control ctrl : formDef.getOrderedControlList()) {
 			if (ctrl instanceof FileUploadControl || ctrl instanceof SignatureControl) {
-				migrateFormFiles(formDef, ctrl, recordIdColumn);
+				migrateFormFiles(formDef, ctrl, formId, recordIdColumn);
 			} else if (ctrl instanceof SubFormControl) {
-				migrateFormFiles(((SubFormControl) ctrl).getSubContainer(), "PARENT_RECORD_ID");
+				migrateFormFiles(((SubFormControl) ctrl).getSubContainer(), formId, "PARENT_RECORD_ID");
 			}
 		}
 	}
 
-	private void migrateFormFiles(Container formDef, Control ctrl, String recordIdColumn) {
+	private void migrateFormFiles(Container formDef, Control ctrl, Long formId, String recordIdColumn) {
 		List<String> columns = new ArrayList<>(ctrl.getColumnDefs().stream().map(ColumnDef::getColumnName).toList());
 		columns.add(0, recordIdColumn);
 
@@ -134,7 +134,7 @@ public class MigrateFormFiles implements InitializingBean {
 				}
 
 				if (StringUtils.isNotBlank(file.getFileId())) {
-					file.setFormId(formDef.getId());
+					file.setFormId(formId);
 					files.add(file);
 				}
 			}
