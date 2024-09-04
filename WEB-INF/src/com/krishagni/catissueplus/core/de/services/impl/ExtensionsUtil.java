@@ -71,7 +71,7 @@ public class ExtensionsUtil {
 			return null;
 		}
 
-		return uploadFile(filesDir, filename, null);
+		return uploadFile(filesDir, filename, false);
 	}
 
 	private static String getImageId(String filesDir, Map<String, Object> fcv) {
@@ -80,32 +80,27 @@ public class ExtensionsUtil {
 			return null;
 		}
 
-		int idx = filename.lastIndexOf(".");
-		String extn = null;
-		if (idx != -1) {
-			extn = filename.substring(idx + 1);
-		}
-
-		if (StringUtils.isBlank(extn)) {
-			extn = "png";
-		}
-
-		Map<String, String> imageDetail = uploadFile(filesDir, filename, extn);
-		return imageDetail != null ? imageDetail.get("fileId") : null;
+		Map<String, String> imageDetail = uploadFile(filesDir, filename, true);
+		return imageDetail.get("fileId");
 	}
 
-	private static Map<String, String> uploadFile(String filesDir, String filename, String extn) {
+	private static Map<String, String> uploadFile(String filesDir, String filename, boolean saveExtn) {
 		FileInputStream fin = null;
 		try {
 			File fileToUpload = new File(filesDir + File.separator + filename);
+			String contentType = Utility.ensureFileUploadAllowed(fileToUpload);
+			String extn = null;
+			if (saveExtn) {
+				extn = Utility.getFileType(contentType).substring(1).toLowerCase();
+			}
+
 			fin = new FileInputStream(fileToUpload);
 			String fileId = FileUploadMgr.getInstance().saveFile(fin, extn);
 
 			Map<String, String> fileDetail = new HashMap<>();
 			fileDetail.put("filename", filename);
 			fileDetail.put("fileId", fileId);
-			fileDetail.put("contentType", Utility.getContentType(fileToUpload));
-
+			fileDetail.put("contentType", contentType);
 			return fileDetail;
 		} catch (FileNotFoundException fnfe) {
 			throw OpenSpecimenException.userError(FormErrorCode.UPLOADED_FILE_NOT_FOUND, filename);

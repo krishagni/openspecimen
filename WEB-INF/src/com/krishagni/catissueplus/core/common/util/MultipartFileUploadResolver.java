@@ -5,49 +5,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemHeaders;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
-import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
 public class MultipartFileUploadResolver extends CommonsMultipartResolver {
 
 	protected CommonsMultipartFile createMultipartFile(FileItem fileItem) {
 		try {
-			final String contentType = Utility.getContentType(fileItem.getInputStream());
-			String detectedFileType = Utility.getFileType(contentType).substring(1).toLowerCase();
-			String allowedTypesStr = ConfigUtil.getInstance().getStrSetting("common", "allowed_file_types", "");
-			Set<String> allowedTypes = Arrays.stream(allowedTypesStr.split(","))
-				.map(type -> type.trim().toLowerCase())
-				.collect(Collectors.toSet());
-			if (!allowedTypes.contains(detectedFileType)) {
-				throw OpenSpecimenException.userError(
-					CommonErrorCode.INVALID_INPUT,
-					"File with content type '" + contentType + "' is not allowed.");
-			}
-
-			String fileType = FilenameUtils.getExtension(fileItem.getName());
-			if (StringUtils.isBlank(fileType)) {
-				throw OpenSpecimenException.userError(
-					CommonErrorCode.INVALID_INPUT,
-					"File without extensions are not allowed. Filename:  " + fileItem.getName());
-			}
-
-			if (!allowedTypes.contains(fileType.toLowerCase())) {
-				throw OpenSpecimenException.userError(
-					CommonErrorCode.INVALID_INPUT,
-					"File with extension '" + fileType + "' is not allowed.");
-			}
-
+			String contentType = Utility.ensureFileUploadAllowed(fileItem.getName(), fileItem.getInputStream());
 			return super.createMultipartFile(new FileItemWrapper(fileItem, contentType));
 		} catch (IOException e) {
 			throw OpenSpecimenException.serverError(e);

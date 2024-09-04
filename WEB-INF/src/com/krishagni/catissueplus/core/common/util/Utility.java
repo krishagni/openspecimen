@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
@@ -518,6 +519,43 @@ public class Utility {
 		} catch (Exception e) {
 			throw OpenSpecimenException.userError(CommonErrorCode.FILE_TYPE_DETECT_FAILED, e.getLocalizedMessage());
 		}
+	}
+
+	public static String ensureFileUploadAllowed(File file) {
+		try (FileInputStream fin = new FileInputStream(file)) {
+			return ensureFileUploadAllowed(file.getName(), fin);
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		}
+	}
+
+	public static String ensureFileUploadAllowed(String filename, InputStream in) {
+		final String contentType = getContentType(in);
+		String detectedFileType = getFileType(contentType).substring(1).toLowerCase();
+		String allowedTypesStr = ConfigUtil.getInstance().getStrSetting("common", "allowed_file_types", "");
+		Set<String> allowedTypes = Arrays.stream(allowedTypesStr.split(","))
+			.map(type -> type.trim().toLowerCase())
+			.collect(Collectors.toSet());
+		if (!allowedTypes.contains(detectedFileType)) {
+			throw OpenSpecimenException.userError(
+				CommonErrorCode.INVALID_INPUT,
+				"File with content type '" + contentType + "' is not allowed.");
+		}
+
+		String fileType = FilenameUtils.getExtension(filename);
+		if (StringUtils.isBlank(fileType)) {
+			throw OpenSpecimenException.userError(
+				CommonErrorCode.INVALID_INPUT,
+				"File without extensions are not allowed. Filename:  " + filename);
+		}
+
+		if (!allowedTypes.contains(fileType.toLowerCase())) {
+			throw OpenSpecimenException.userError(
+				CommonErrorCode.INVALID_INPUT,
+				"File with extension '" + fileType + "' is not allowed.");
+		}
+
+		return contentType;
 	}
 
 	public static String getFileText(File file) {
