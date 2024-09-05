@@ -45,7 +45,7 @@ import routerSvc  from '@/common/services/Router.js';
 import util  from '@/common/services/Util.js';
 
 export default {
-  props: ['cpId'],
+  props: ['cpId', 'copyOf'],
 
   inject: ['ui'],
 
@@ -75,7 +75,13 @@ export default {
       if (newVal != oldVal) {
         this._setupCp();
       }
-    }
+    },
+
+    copyOf: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this._setupCp();
+      }
+    },
   },
 
   computed: {
@@ -117,12 +123,23 @@ export default {
     },
 
     saveOrUpdate: function() {
+      if (!this.$refs.cpForm.validate()) {
+        return;
+      }
+
       const toSave = util.clone(this.dataCtx.cp);
       if (toSave.storeSprEnabled == 'use_system_setting') {
         toSave.storeSprEnabled = null;
       }
 
-      cpSvc.saveOrUpdate(toSave).then((savedCp) => routerSvc.goto('CpsListItemDetail.Overview', {cpId: savedCp.id}));
+      let promise = null;
+      if (this.copyOf > 0) {
+        promise = cpSvc.copyCp(this.copyOf, toSave);
+      } else {
+        promise = cpSvc.saveOrUpdate(toSave);
+      }
+
+      promise.then((savedCp) => routerSvc.goto('CpsListItemDetail.Overview', {cpId: savedCp.id}));
     },
 
     cancel: function() {
@@ -137,24 +154,34 @@ export default {
         this.ctx.defaultValues = defaultValues;
       }
 
+      let cp;
       if (!this.cpId || +this.cpId < 0) {
-        const cp = this.ctx.cp = {cpSites: [], sites: [], storeSprEnabled: 'use_system_setting'};
-        if (Object.keys(this.ctx.defaultValues).length > 0) {
-          cp.extensionDetail = {attrsMap: this.ctx.defaultValues};
+        if (this.copyOf > 0) {
+          cp = this.ctx.cp = await this._getCp(this.copyOf);
+          cp.id = cp.shortTitle = cp.title = cp.code = null;
+          cp.cpSites.forEach(cpSite => cpSite.id = null);
+        } else {
+          cp = this.ctx.cp = {cpSites: [], sites: [], storeSprEnabled: 'use_system_setting'};
+          if (Object.keys(this.ctx.defaultValues).length > 0) {
+            cp.extensionDetail = {attrsMap: this.ctx.defaultValues};
+          }
         }
-
-        this.dataCtx.cp = cp;
-        return;
+      } else {
+        cp = this.ctx.cp = await this._getCp(this.cpId);
       }
 
-      const cp = this.ctx.cp = await cpSvc.getCpById(this.cpId);
+      this.dataCtx.cp = util.clone(cp);
+    },
+
+    _getCp: async function(cpId) {
+      const cp = await cpSvc.getCpById(cpId);
       cp.sites = cp.cpSites.map(({siteName}) => siteName);
       formUtil.createCustomFieldsMap(cp);
       if (cp.storeSprEnabled != true && cp.storeSprEnabled != false) {
         cp.storeSprEnabled = 'use_system_setting';
       }
 
-      this.dataCtx.cp = util.clone(cp);
+      return cp;
     }
   }
 }

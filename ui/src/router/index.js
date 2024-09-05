@@ -893,7 +893,7 @@ const routes = [
         path: 'cp-addedit/:cpId',
         name: 'CpAddEdit',
         component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEdit.vue'),
-        props: (route) => ({cpId: route.params && route.params.cpId})
+        props: (route) => ({cpId: route.params && route.params.cpId, copyOf: route.query.copyOf})
       },
 
 

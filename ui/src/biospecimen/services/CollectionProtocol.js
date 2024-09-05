@@ -77,6 +77,10 @@ class CollectionProtocol {
     }
   }
 
+  async copyCp(cpId, cp) {
+    return http.post('collection-protocols/' + cpId + '/copy', cp);
+  }
+
   async starCp(cpId) {
     return http.post('collection-protocols/' + cpId + '/labels', {});
   }

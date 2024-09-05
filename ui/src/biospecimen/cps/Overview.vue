@@ -3,6 +3,9 @@
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editCp"
         v-show-if-allowed="cpResources.updateOpts" />
+
+      <os-button left-icon="copy" :label="$t('common.buttons.clone')" @click="cloneCp"
+        v-show-if-allowed="cpResources.createOpts" />
     </template>
   </os-page-toolbar>
 
@@ -45,6 +48,10 @@ export default {
   methods: {
     editCp: function() {
       routerSvc.goto('CpAddEdit', {cpId: this.cp.id});
+    },
+
+    cloneCp: function() {
+      routerSvc.goto('CpAddEdit', {cpId: -1}, {copyOf: this.cp.id});
     }
   }
 }
