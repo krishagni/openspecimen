@@ -762,11 +762,13 @@
     "list": "Collection Protocols",
     "code": "Code",
     "coordinators": "Coordinators",
+    "create_cp": "Create Collection Protocol",
     "end_date": "End Date",
     "expected_registrations": "Expected Registrations",
     "extract_spr_text": "Extract Text from SPR PDF Docs?",
     "hide_site_code_info": "Hide Site Code Information",
     "irb_id": "IRB ID",
+    "participant_centric": "Participant Centric",
     "pi": "Principal Investigator",
     "pi_req": "Principal Investigator is mandatory",
     "short_title": "Short Title",
@@ -775,12 +777,15 @@
     "site": "Site",
     "sites": "Sites",
     "sites_req": "Sites are mandatory",
+    "specimen_centric": "Specimen Centric",
     "sop_doc": "SOP Document",
     "sop_doc_url": "SOP Document URL",
     "start_date": "Start Date",
     "store_spr": "Store SPRs?",
     "title": "Title",
-    "title_req": "Title is mandatory"
+    "title_req": "Title is mandatory",
+    "type": "Type",
+    "use_system_setting": "Use System Setting"
   },
 
   "cprs": {

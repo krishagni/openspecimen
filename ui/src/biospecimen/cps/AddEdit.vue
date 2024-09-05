@@ -16,7 +16,7 @@
     <os-page-body>
       <os-form ref="cpForm" :schema="ctx.addEditFs" :data="dataCtx" @input="handleInput($event)">
         <template v-slot:[`cp.sites`]>
-          <span>
+          <span v-if="dataCtx.codingEnabled">
             <a v-if="!dataCtx.showSiteCodeInfo" @click="toggleSiteCodeInfo">
               <span v-t="'cps.show_site_code_info'">Show Site Code Information</span>
             </a>
@@ -47,15 +47,18 @@ import util  from '@/common/services/Util.js';
 export default {
   props: ['cpId'],
 
-  inject: ['cpViewCtx'],
+  inject: ['ui'],
 
   data() {
+    const {global: {appProps}} = this.ui;
     return {
       ctx: {
         addEditFs: {rows: []}
       },
 
       dataCtx: {
+        codingEnabled: appProps.cp_coding_enabled,
+
         showSiteCodeInfo: false,
 
         cp: { }

@@ -5,6 +5,7 @@
     :allowSelection="allowSelection"
     :selected="selected"
     :query="query"
+    :loading="loading"
     @filtersUpdated="loadList"
     @selectedRows="onRowsSelection"
     @rowClicked="rowClicked"
@@ -51,7 +52,9 @@ export default {
 
       data: [],
 
-      selectedSpecimens: []
+      selectedSpecimens: [],
+
+      loading: true
     };
   },
 
@@ -155,6 +158,7 @@ export default {
       this.searchFilters  = filters;
       this.search         = this.searchReq(filters);
 
+      this.loading = true;
       this.list = await http.post(
         'lists/data',
         this.search,
@@ -166,6 +170,7 @@ export default {
           maxResults: pageSize
         }
       );
+      this.loading = false;
       
       this.schema = {filters: this.filters};
       const columns = this.schema.columns = this.list.columns.map(

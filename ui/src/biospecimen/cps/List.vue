@@ -25,7 +25,8 @@
         <os-page-body v-if="ctx.inited">
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <span>Action buttons</span>
+              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createCp"
+                v-show-if-allowed="cpResources.createOpts" />
             </template>
 
             <template #right>
@@ -67,7 +68,7 @@ import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import routerSvc from '@/common/services/Router.js';
 import util      from '@/common/services/Util.js';
 
-
+import cpResources from './Resources.js';
 
 export default {
   name: 'CpsList',
@@ -78,7 +79,7 @@ export default {
 
   data() {
     const ui = this.ui;
-    let ctx = {
+    const ctx = {
       ui,
 
       inited: false,
@@ -98,7 +99,7 @@ export default {
       }
     };
 
-    return { ctx };
+    return { ctx, cpResources };
   },
 
   created() {
@@ -251,6 +252,10 @@ export default {
 
     openSearch: function () {
       this.$refs.list.toggleShowFilters();
+    },
+
+    createCp: function() {
+      routerSvc.goto('CpAddEdit', {cpId: -1});
     }
   }
 }
