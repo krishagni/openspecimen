@@ -122,7 +122,7 @@ export default {
         toSave.storeSprEnabled = null;
       }
 
-      cpSvc.saveOrUpdate(toSave).then(() => routerSvc.goto('CpsList', {cpId: -1}));
+      cpSvc.saveOrUpdate(toSave).then((savedCp) => routerSvc.goto('CpsListItemDetail.Overview', {cpId: savedCp.id}));
     },
 
     cancel: function() {

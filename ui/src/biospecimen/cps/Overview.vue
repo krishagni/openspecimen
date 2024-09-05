@@ -1,7 +1,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <span>Action Buttons</span>
+      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editCp"
+        v-show-if-allowed="cpResources.updateOpts" />
     </template>
   </os-page-toolbar>
 
@@ -14,7 +15,9 @@
 
 <script>
 
-// import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import routerSvc from '@/common/services/Router.js';
+
+import cpResources from './Resources.js';
 
 export default {
   props: ['cp'],
@@ -25,7 +28,9 @@ export default {
     return {
       ctx: {
         dict: []
-      }
+      },
+
+      cpResources
     };
   },
 
@@ -38,6 +43,9 @@ export default {
   },
 
   methods: {
+    editCp: function() {
+      routerSvc.goto('CpAddEdit', {cpId: this.cp.id});
+    }
   }
 }
 </script>
