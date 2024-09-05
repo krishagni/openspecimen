@@ -1,6 +1,7 @@
 
 import cpSchema      from '@/biospecimen/schemas/cps/cp.js';
 import addEditLayout from '@/biospecimen/schemas/cps/addedit.js';
+import publishForm   from '@/biospecimen/schemas/cps/publish.js';
 
 import authSvc from '@/common/services/Authorization.js';
 import formSvc  from '@/forms/services/Form.js';
@@ -79,6 +80,10 @@ class CollectionProtocol {
 
   async copyCp(cpId, cp) {
     return http.post('collection-protocols/' + cpId + '/copy', cp);
+  }
+
+  async publishCp(cpId, publishDetail) {
+    return http.post('collection-protocols/' + cpId + '/published-events', publishDetail);
   }
 
   async starCp(cpId) {
@@ -347,6 +352,10 @@ class CollectionProtocol {
         return { schema: addEditFs, defaultValues };
       }
     );
+  }
+
+  getPublishFormSchema() {
+    return util.clone(publishForm.layout);
   }
 }
 
