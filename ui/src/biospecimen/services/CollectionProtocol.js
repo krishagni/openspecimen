@@ -327,6 +327,13 @@ class CollectionProtocol {
     return formSvc.getDefinition(extnInfo.formId);
   }
 
+  async getDict() {
+    const result  = util.clone(cpSchema.fields);
+    const formDef = await this.getCustomFieldsForm();
+    const customFields = formUtil.deFormToDict(formDef, 'cp.extensionDetail.attrsMap.');
+    return result.concat(customFields);
+  }
+
   async getAddEditFormSchema() {
     return this.getCustomFieldsForm().then(
       function(formDef) {

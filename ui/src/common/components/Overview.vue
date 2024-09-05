@@ -77,7 +77,7 @@
             <tbody class="os-table-body">
               <tr class="row" v-for="(rowValue, rowIdx) of field.value" :key="rowIdx">
                 <td class="col" v-for="(colValue, colIdx) of rowValue" :key="colIdx">
-                  <span v-if="!colValue && colValue != 0">
+                  <span v-if="(!colValue && colValue != 0) || colValue == '-'">
                     <span>-</span>
                   </span>
                   <span v-else>
@@ -205,8 +205,15 @@ export default {
       }
 
       if (field.type == 'fileUpload' || field.type == 'signature') {
-        value = exprUtil.getValue(object, field.name);
-        if (value != null && value != undefined && value != '') {
+        if (typeof field.value == 'function') {
+          value = field.value(object);
+        } else {
+          value = exprUtil.getValue(object, field.name);
+        }
+
+        if (value && typeof field.href == 'function') {
+          value = {filename: value, url: field.href(object, value)};
+        } else if (value != null && value != undefined && value != '') {
           switch (field.type) {
             case 'fileUpload':
               value.url = http.getUrl('form-files/' + value.fileId +
@@ -238,7 +245,7 @@ export default {
         } else if (field.type == 'user') {
           if (value instanceof Array) {
             value = value.map(user => user.firstName + ' ' + user.lastName).join(', ') || '-';
-          } else {
+          } else if (value.firstName || value.lastName) {
             value = value.firstName + ' ' + value.lastName;
           }
         } else if (field.type == 'site') {

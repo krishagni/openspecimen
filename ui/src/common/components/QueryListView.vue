@@ -5,6 +5,7 @@
     :allowSelection="allowSelection"
     :selected="selected"
     :query="query"
+    :idFilter="idFilter"
     :loading="loading"
     @filtersUpdated="loadList"
     @selectedRows="onRowsSelection"
@@ -32,6 +33,7 @@ export default {
     'allowSelection',
     'selected',
     'query',
+    'idFilter',
     'autoSearchOpen',
     'allowStarring'
   ],

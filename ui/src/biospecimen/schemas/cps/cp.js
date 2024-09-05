@@ -141,6 +141,7 @@ export default {
 
         return cp.sopDocumentName;
       },
+      "href": ({cp}) => http.getUrl("collection-protocols/" + cp.id + "/sop-document"),
       "showWhen": "!cp.sopDocumentUrl",
     },
     {

@@ -215,7 +215,8 @@ export default {
     'loading',
     'showRowActions',
     'noRecordsMsg',
-    'rowClass'
+    'rowClass',
+    'idFilter'
   ],
 
   emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked', 'sort', 'rowStarToggled'],
@@ -330,7 +331,7 @@ export default {
           }
         }
 
-        if (!found) {
+        if (!found && filterKey != this.idFilter) {
           delete this.filterValues[filterKey];
         }
       }

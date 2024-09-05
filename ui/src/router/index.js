@@ -872,7 +872,22 @@ const routes = [
         path: 'cps/:cpId',
         name: 'CpsList',
         component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/List.vue'),
-        props: (route) => ({filters: route.query.filters, cpId: route.params && route.params.cpId})
+        props: (route) => ({filters: route.query.filters, cpId: route.params && route.params.cpId}),
+        children: [
+          {
+            path: '',
+            name: 'CpsListItemDetail',
+            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Detail.vue'),
+            props: (route) => ({cpId: route.params && route.params.cpId, filters: route.query.filters}),
+            children: [
+              {
+                path: 'overview',
+                name: 'CpsListItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Overview.vue')
+              }
+            ]
+          }
+        ]
       },
       {
         path: 'cp-addedit/:cpId',

@@ -38,6 +38,7 @@
             name="cp-list-view"
             :object-id="-1"
             :query="ctx.query"
+            :id-filter="'CollectionProtocol.id'"
             :auto-search-open="true"
             :allow-selection="true"
             :selected="ctx.selectedItem"
@@ -57,7 +58,7 @@
     </os-screen-panel>
 
     <os-screen-panel :width="9" v-if="$route.params && $route.params.cpId > 0">
-      <span>CP detail</span>
+      <router-view :cpId="$route.params.cpId" :key="$route.params.cpId" />
     </os-screen-panel>
   </os-screen>
 </template>
@@ -100,6 +101,12 @@ export default {
     };
 
     return { ctx, cpResources };
+  },
+
+  provide() {
+    return {
+      cpDict: this.cpDictFn()
+    }
   },
 
   created() {
@@ -163,8 +170,8 @@ export default {
     },
 
     onItemRowClick: function(event) {
-      const params = event.hidden || {};
-      alert(JSON.stringify(params));
+      const {cpId} = event.hidden || {};
+      routerSvc.goto('CpsListItemDetail.Overview', { cpId }, {filters: this.ctx.query});
     },
 
     onItemRowStarToggle: function(event) {
@@ -256,6 +263,18 @@ export default {
 
     createCp: function() {
       routerSvc.goto('CpAddEdit', {cpId: -1});
+    },
+
+    cpDictFn: function() {
+      const dict = [];
+      return async () => {
+        if (dict.length > 0) {
+          return dict;
+        }
+
+        Array.prototype.push.apply(dict, await cpSvc.getDict());
+        return dict;
+      }
     }
   }
 }
