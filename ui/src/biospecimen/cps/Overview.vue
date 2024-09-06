@@ -75,6 +75,10 @@
         <os-button primary :label="$t('common.buttons.import')" @click="importWorkflows" />
       </template>
     </os-dialog>
+
+    <os-audit-trail ref="auditTrailDialog" :objects="auditObjs" />
+
+    <os-plugin-views ref="moreMenuPluginViews" page="cp-detail" view="more-menu" :viewProps="{cp, ctx}" />
   </os-grid>
 </template>
 
@@ -118,6 +122,12 @@ export default {
   },
 
   computed: {
+    auditObjs: function() {
+      return [
+        {objectId: this.cp.id, objectName: 'collection_protocol'}
+      ]
+    },
+
     workflowsUploadUrl: function() {
       return http.getUrl('collection-protocols/' + this.cp.id + '/workflows-file');
     },
@@ -256,6 +266,10 @@ export default {
       );
     },
 
+    viewAuditTrail: function() {
+      this.$refs.auditTrailDialog.open();
+    },
+
     _loadMoreMenuOptions: function() {
       const moreOptions = [];
       if (authSvc.isAllowed(cpResources.importOpts)) {
@@ -274,7 +288,23 @@ export default {
         moreOptions.push({icon: 'file-code', caption: this.$t('cps.import_workflows'), onSelect: this.showImportWorkflowsDialog});
       }
 
-      this.ctx.moreOptions = moreOptions;
+      const ctxt = {...this.ctx, cp: this.cp};
+      util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'cp-detail', 'more-menu', ctxt)
+        .then(
+          pluginOptions => {
+            if (moreOptions.length > 0 && pluginOptions.length > 0) {
+              moreOptions.push({divider: true});
+            }
+
+            Array.prototype.push.apply(moreOptions, pluginOptions);
+            if (moreOptions.length > 0) {
+              moreOptions.push({divider: true});
+            }
+
+            moreOptions.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
+            this.ctx.moreOptions = moreOptions;
+          }
+        );
     }
   }
 }
