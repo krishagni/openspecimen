@@ -6,7 +6,7 @@ class ExportService {
 
   exportRecords(input) {
     alerts.info('Export records has been initiated. Records file download should start in a few moments..', -1, 'ei1');
-    http.post('export-jobs', input).then(
+    return http.post('export-jobs', input).then(
       function(savedJob) {
         alerts.remove('ei1');
         if (savedJob.status == 'COMPLETED') {
@@ -17,6 +17,8 @@ class ExportService {
         } else {
           alerts.info('Export records job ' + savedJob.id + ' is taking longer time to finish. Link to download records file will be sent to you by e-mail');
         }
+
+        return savedJob;
       }
     );
   }

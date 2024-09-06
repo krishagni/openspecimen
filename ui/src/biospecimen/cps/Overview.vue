@@ -118,6 +118,9 @@ export default {
     this.ctx.cp = this.cp;
     this.cpDict().then(dict => this.ctx.dict = dict);
     this.ctx.publishSchema = cpSvc.getPublishFormSchema();
+  },
+
+  mounted() {
     this._loadMoreMenuOptions();
   },
 
