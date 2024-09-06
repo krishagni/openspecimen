@@ -4,6 +4,7 @@ import addEditLayout from '@/biospecimen/schemas/cps/addedit.js';
 import publishForm   from '@/biospecimen/schemas/cps/publish.js';
 
 import authSvc from '@/common/services/Authorization.js';
+import exportSvc from '@/common/services/ExportService.js';
 import formSvc  from '@/forms/services/Form.js';
 import formUtil from '@/common/services/FormUtil.js';
 import http from '@/common/services/HttpClient.js';
@@ -333,6 +334,26 @@ class CollectionProtocol {
 
   unstar(cp) {
     return http.delete('collection-protocols/' + cp.id + '/labels');
+  }
+
+  exportJson(cp) {
+    http.downloadFile(http.getUrl('collection-protocols/' + cp.id + '/definition'));
+  }
+
+  exportCsv(cp) {
+    exportSvc.exportRecords({objectType: 'cp', recordIds: [cp.id]});
+  }
+
+  exportEvents(cp) {
+    exportSvc.exportRecords({objectType: 'cpe', params: {cpId: cp.id}});
+  }
+
+  exportSpecimenReqs(cp) {
+    exportSvc.exportRecords({objectType: 'sr', params: {cpId: cp.id}});
+  }
+
+  exportWorkflows(cp) {
+    http.downloadFile(http.getUrl('collection-protocols/' + cp.id + '/workflows-file'));
   }
 
   async getCustomFieldsForm() {

@@ -761,6 +761,7 @@
 
   "cps": {
     "list": "Collection Protocols",
+    "choose_workflows_json_file": "Select workflows JSON file",
     "close_cp_q": "Close Collection Protocol?",
     "closed": "Closed",
     "code": "Code",
@@ -774,8 +775,14 @@
     "create_cp": "Create Collection Protocol",
     "end_date": "End Date",
     "expected_registrations": "Expected Registrations",
+    "export_csv": "Export Collection Protocol (CSV)",
+    "export_events": "Export Events",
+    "export_json": "Export Collection Protocol (JSON)",
+    "export_srs": "Export Specimen Requirements",
+    "export_workflows": "Export Workflows",
     "extract_spr_text": "Extract Text from SPR PDF Docs?",
     "hide_site_code_info": "Hide Site Code Information",
+    "import_workflows": "Import Workflows",
     "irb_id": "IRB ID",
     "participant_centric": "Participant Centric",
     "pi": "Principal Investigator",
@@ -802,7 +809,10 @@
     "title": "Title",
     "title_req": "Title is mandatory",
     "type": "Type",
-    "use_system_setting": "Use System Setting"
+    "use_system_setting": "Use System Setting",
+    "view_participants": "View Participants",
+    "view_specimens": "View Specimens",
+    "workflows_imported": "Collection Protocol {shortTitle} workflows JSON imported"
   },
 
   "cprs": {
