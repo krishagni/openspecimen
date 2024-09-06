@@ -15,6 +15,9 @@
 
       <os-button left-icon="check" :label="$t('common.buttons.reopen')" @click="reopenCp"
         v-show-if-allowed="cpResources.updateOpts" v-if="cp.activityStatus == 'Closed'" />
+
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCp"
+        v-show-if-allowed="cpResources.deleteOpts" />
     </template>
   </os-page-toolbar>
 
@@ -44,6 +47,8 @@
         <span v-t="'cps.confirm_close_cp_q'">New participants cannot be registered to the closed collection protocols. Are you sure you want to proceed with closing the collection protocol?</span>
       </template>
     </os-confirm>
+
+    <os-delete-object ref="deleteCpDialog" :input="ctx.deleteOpts" />
   </os-grid>
 </template>
 
@@ -142,6 +147,28 @@ export default {
         () => {
           this.$emit('cp-saved');
           alertSvc.success({code: 'cps.cp_reopened', args: this.cp});
+        }
+      );
+    },
+
+    deleteCp: function() {
+      this.ctx.deleteOpts = {
+        type: this.$t('cps.cp'),
+        title: this.cp.shortTitle,
+        dependents: () => cpSvc.getDependents(this.cp),
+        forceDelete: true,
+        askReason: true,
+        deleteObj: (reason) => cpSvc.deleteCp(this.cp.id, true, reason)
+      }
+      setTimeout(
+        async () => {
+          const resp = await this.$refs.deleteCpDialog.execute();
+          if (resp == 'deleted') {
+            routerSvc.goto('CpsList', {cpId: -1});
+          } else if (resp == 'in_progress') {
+            alertSvc.info({code: 'cps.cp_delete_in_progress', args: this.cp});
+            routerSvc.goto('CpsList', {cpId: -1});
+          }
         }
       );
     }

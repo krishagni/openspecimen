@@ -78,6 +78,14 @@ class CollectionProtocol {
     }
   }
 
+  async getDependents(cp) {
+    return http.get('collection-protocols/' + cp.id + '/dependent-entities');
+  }
+
+  async deleteCp(cpId, forceDelete, reason) {
+    return http.delete('collection-protocols/' + cpId, {}, {forceDelete, reason});
+  }
+
   async copyCp(cpId, cp) {
     return http.post('collection-protocols/' + cpId + '/copy', cp);
   }

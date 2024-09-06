@@ -99,10 +99,19 @@ export default {
     proceed: function() {
       let self = this;
       if (typeof this.input.deleteObj == 'function') {
-        this.input.deleteObj(this.ctx.reason).then(() => {
-          alertSvc.success({code: 'common.record_deleted', args: self.input});
-          self.close('deleted');
-        });
+        this.input.deleteObj(this.ctx.reason).then(
+          (resp) => {
+            if (resp && typeof resp == 'object' && Object.prototype.hasOwnProperty.call(resp, 'completed')) {
+              if (!resp.completed) {
+                self.close('in_progress');
+                return;
+              }
+            }
+
+            alertSvc.success({code: 'common.record_deleted', args: self.input});
+            self.close('deleted');
+          }
+        );
       } else {
         this.cancel();
       }
