@@ -18,6 +18,12 @@
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCp"
         v-show-if-allowed="cpResources.deleteOpts" />
+
+      <os-button left-icon="users" :label="$t('cps.view_participants')" @click="viewParticipants"
+        v-if="!cp.specimenCentric" />
+
+      <os-button left-icon="flask" :label="$t('cps.view_specimens')" @click="viewSpecimens"
+        v-if="cp.specimenCentric" />
     </template>
   </os-page-toolbar>
 
@@ -171,6 +177,14 @@ export default {
           }
         }
       );
+    },
+
+    viewParticipants: function() {
+      routerSvc.goto('ParticipantsList', {cprId: -1});
+    },
+
+    viewSpecimens: function() {
+      routerSvc.goto('ParticipantsList', {cprId: -1}, {view: 'specimens_list'});
     }
   }
 }
