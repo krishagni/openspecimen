@@ -8,6 +8,8 @@
         <div class="accessories">
           <os-tag :value="$t('common.draft')" :rounded="true" :type="'warning'" v-if="ctx.cp.draftMode" />
 
+          <os-tag :value="$t('cps.closed')" :rounded="true" :type="'danger'" v-if="ctx.cp.activityStatus == 'Closed'" />
+
           <os-copy-link size="small" :route="{name: 'CpsListItemDetail.Overview', params: {cpId: ctx.cp.id}}" />
         </div>
       </span>

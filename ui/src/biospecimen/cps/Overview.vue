@@ -5,10 +5,16 @@
         v-show-if-allowed="cpResources.updateOpts" />
 
       <os-button left-icon="check" :label="$t('cps.publish')" @click="showPublishCpDialog"
-        v-show-if-allowed="cpResources.updateOpts" v-if="cp.draftMode" />
+        v-show-if-allowed="cpResources.updateOpts" v-if="cp.draftMode && cp.activityStatus == 'Active'" />
 
       <os-button left-icon="copy" :label="$t('common.buttons.clone')" @click="cloneCp"
         v-show-if-allowed="cpResources.createOpts" />
+
+      <os-button left-icon="ban" :label="$t('common.buttons.close')" @click="closeCp"
+        v-show-if-allowed="cpResources.updateOpts" v-if="cp.activityStatus == 'Active'" />
+
+      <os-button left-icon="check" :label="$t('common.buttons.reopen')" @click="reopenCp"
+        v-show-if-allowed="cpResources.updateOpts" v-if="cp.activityStatus == 'Closed'" />
     </template>
   </os-page-toolbar>
 
@@ -29,6 +35,15 @@
         <os-button text :label="$t('common.buttons.cancel')" @click="hidePublishCpDialog" />
       </template>
     </os-dialog>
+
+    <os-confirm ref="closeCpConfirmDialog">
+      <template #title>
+        <span v-t="'cps.close_cp_q'">Close Collection Protocol?</span>
+      </template>
+      <template #message>
+        <span v-t="'cps.confirm_close_cp_q'">New participants cannot be registered to the closed collection protocols. Are you sure you want to proceed with closing the collection protocol?</span>
+      </template>
+    </os-confirm>
   </os-grid>
 </template>
 
@@ -37,6 +52,7 @@
 import alertSvc from '@/common/services/Alerts.js';
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import routerSvc from '@/common/services/Router.js';
+import util from '@/common/services/Util.js';
 
 import cpResources from './Resources.js';
 
@@ -98,6 +114,36 @@ export default {
 
     cloneCp: function() {
       routerSvc.goto('CpAddEdit', {cpId: -1}, {copyOf: this.cp.id});
+    },
+
+    closeCp: function() {
+      this.$refs.closeCpConfirmDialog.open().then(
+        resp => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          const toSave = util.clone(this.cp);
+          toSave.activityStatus = 'Closed';
+          cpSvc.saveOrUpdate(toSave).then(
+            () => {
+              this.$emit('cp-saved');
+              alertSvc.success({code: 'cps.cp_closed', args: this.cp});
+            }
+          );
+        }
+      );
+    },
+
+    reopenCp: function() {
+      const toSave = util.clone(this.cp);
+      toSave.activityStatus = 'Active';
+      cpSvc.saveOrUpdate(toSave).then(
+        () => {
+          this.$emit('cp-saved');
+          alertSvc.success({code: 'cps.cp_reopened', args: this.cp});
+        }
+      );
     }
   }
 }

@@ -761,9 +761,14 @@
 
   "cps": {
     "list": "Collection Protocols",
+    "close_cp_q": "Close Collection Protocol?",
+    "closed": "Closed",
     "code": "Code",
+    "confirm_close_cp_q": "New participants cannot be registered to the closed collection protocols. Are you sure you want to proceed with closing the collection protocol?",
     "coordinators": "Coordinators",
+    "cp_closed": "Collection Protocol {shortTitle} closed!",
     "cp_published": "Collection Protocol {shortTitle} published!",
+    "cp_reopened": "Collection Protocol {shortTitle} reopened!",
     "create_cp": "Create Collection Protocol",
     "end_date": "End Date",
     "expected_registrations": "Expected Registrations",
