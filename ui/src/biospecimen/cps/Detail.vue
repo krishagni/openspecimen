@@ -23,6 +23,11 @@
                 <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
+            <li>
+              <router-link :to="getRoute('Events')">
+                <span v-t="'cps.events'">Events</span>
+              </router-link>
+            </li>
           </ul>
         </os-tab-menu>
 

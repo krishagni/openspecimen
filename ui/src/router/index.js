@@ -886,6 +886,24 @@ const routes = [
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Overview.vue')
               },
               {
+                path: 'events',
+                name: 'CpsListItemDetail.Events',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Events.vue'),
+                children: [
+                  {
+                    path: 'list',
+                    name: 'CpsListItemDetail.Events.List',
+                    component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/EventsList.vue')
+                  },
+                  {
+                    path: 'addedit',
+                    name: 'CpsListItemDetail.Events.AddEdit',
+                    component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEditEvent.vue'),
+                    props: ({query}) => ({eventId: query.eventId, copyOf: query.copyOf})
+                  }
+                ]
+              },
+              {
                 path: 'import-jobs',
                 name: 'CpsListItemDetail.ImportJobs',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ImportJobs.vue')

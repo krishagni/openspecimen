@@ -1,7 +1,7 @@
 <template>
   <div class="os-occurred-visits-tab">
     <os-list-view
-      class="os-muted-list-header os-bordered-list1"
+      class="os-muted-list-header"
       :data="occurredVisits"
       :schema="{columns: tabFields}"
       :showRowActions="true"
@@ -270,7 +270,7 @@ export default {
 }
 
 .os-occurred-visits-tab :deep(.os-key-values .item) {
-  border-collapse: collase;
+  border-collapse: collapse;
   border-spacing: 0px;
 }
 

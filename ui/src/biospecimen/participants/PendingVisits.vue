@@ -6,7 +6,7 @@
     </div>
 
     <os-list-view
-      class="os-muted-list-header os-bordered-list1"
+      class="os-muted-list-header"
       :allow-selection="allowSelection"
       :data="pendingVisits"
       :schema="{columns: tabFields}"
@@ -202,7 +202,7 @@ export default {
 }
 
 .os-pending-visits-tab :deep(.os-key-values .item) {
-  border-collapse: collase;
+  border-collapse: collapse;
   border-spacing: 0px;
 }
 

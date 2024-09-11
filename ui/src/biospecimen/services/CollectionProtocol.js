@@ -3,6 +3,8 @@ import cpSchema      from '@/biospecimen/schemas/cps/cp.js';
 import addEditLayout from '@/biospecimen/schemas/cps/addedit.js';
 import publishForm   from '@/biospecimen/schemas/cps/publish.js';
 
+import eventAddEditLayout from '@/biospecimen/schemas/cps/event-addedit.js';
+
 import authSvc from '@/common/services/Authorization.js';
 import exportSvc from '@/common/services/ExportService.js';
 import formSvc  from '@/forms/services/Form.js';
@@ -61,6 +63,20 @@ class CollectionProtocol {
     }
 
     return result;
+  }
+
+  saveOrUpdateCpe(cpe, copyOf) {
+    if (copyOf > 0) {
+      return http.post('collection-protocol-events/' + copyOf + '/copy', cpe);
+    } else if (cpe.id > 0) {
+      return http.put('collection-protocol-events/' + cpe.id, cpe);
+    } else {
+      return http.post('collection-protocol-events', cpe);
+    }
+  }
+
+  deleteCpe(cpe) {
+    return http.delete('collection-protocol-events/' + cpe.id);
   }
 
   async getSpecimenRequirements(cpId, eventId, includeChildrenReqs) {
@@ -385,6 +401,10 @@ class CollectionProtocol {
 
   getPublishFormSchema() {
     return util.clone(publishForm.layout);
+  }
+
+  getEventAddEditFormSchema() {
+    return eventAddEditLayout.layout;
   }
 }
 
