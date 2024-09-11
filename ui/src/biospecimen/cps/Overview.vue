@@ -58,6 +58,21 @@
 
     <os-delete-object ref="deleteCpDialog" :input="ctx.deleteOpts" />
 
+    <os-dialog ref="importerDialog">
+      <template #header>
+        <span v-t="ctx.importRecords">Import Records</span>
+      </template>
+      <template #content>
+        <div>
+          <os-import-records ref="importer" :object-type="ctx.importObjType" :object-params="importParams" />
+        </div>
+      </template>
+      <template #footer>
+        <os-button text    :label="$t('common.buttons.cancel')" @click="hideImporterDialog" />
+        <os-button primary :label="$t('common.buttons.import')" @click="importRecords" />
+      </template>
+    </os-dialog>
+
     <os-dialog ref="importWorkflowsDialog">
       <template #header>
         <span v-t="'cps.import_workflows'">Import Workflows JSON</span>
@@ -138,6 +153,10 @@ export default {
     reqHeaders: function() {
       return http.headers;
     },
+
+    importParams: function() {
+      return {cpId: this.cp.id};
+    }
   },
 
   methods: {
@@ -232,6 +251,39 @@ export default {
       routerSvc.goto('ParticipantsList', {cprId: -1}, {view: 'specimens_list'});
     },
 
+    showImportEventsDialog: function() {
+      this.ctx.importRecords = 'cps.import_events';
+      this.ctx.importObjType = 'cpe';
+      this.$refs.importerDialog.open();
+    },
+
+    showImportSrsDialog: function() {
+      this.ctx.importRecords = 'cps.import_srs';
+      this.ctx.importObjType = 'sr';
+      this.$refs.importerDialog.open();
+    },
+
+    hideImporterDialog: function() {
+      this.$refs.importerDialog.close();
+    },
+
+    viewPastImports: function() {
+      routerSvc.goto('CpsListItemDetail.ImportJobs', {cpId: this.cp.id});
+    },
+
+    importRecords: function() {
+      this.$refs.importer.importRecords().then(
+        resp => {
+          if (!resp) {
+            return;
+          }
+
+          this.hideImporterDialog();
+          this.viewPastImports();
+        }
+      );
+    },
+
     exportCpJson: function() {
       cpSvc.exportJson(this.cp);
     },
@@ -276,6 +328,13 @@ export default {
     _loadMoreMenuOptions: function() {
       const moreOptions = [];
       if (authSvc.isAllowed(cpResources.importOpts)) {
+        if (authSvc.isAllowed(cpResources.updateOpts)) {
+          moreOptions.push({icon: 'list-alt', caption: this.$t('cps.import_events'), onSelect: this.showImportEventsDialog});
+          moreOptions.push({icon: 'flask', caption: this.$t('cps.import_srs'), onSelect: this.showImportSrsDialog});
+          moreOptions.push({icon: 'table', caption: this.$t('import.view_past_imports'), onSelect: this.viewPastImports});
+          moreOptions.push({divider: true});
+        }
+
         moreOptions.push({icon: 'calendar', caption: this.$t('cps.export_json'),   onSelect: this.exportCpJson});
         moreOptions.push({icon: 'calendar', caption: this.$t('cps.export_csv'),    onSelect: this.exportCpCsv});
         moreOptions.push({icon: 'list-alt', caption: this.$t('cps.export_events'), onSelect: this.exportCpEvents});

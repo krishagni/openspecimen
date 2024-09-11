@@ -136,6 +136,7 @@
       "print":  "Print",
       "proceed": "Proceed",
       "reactivate": "Reactivate",
+      "refresh": "Refresh",
       "remove": "Remove",
       "reopen": "Reopen",
       "save":   "Save",
@@ -782,6 +783,8 @@
     "export_workflows": "Export Workflows",
     "extract_spr_text": "Extract Text from SPR PDF Docs?",
     "hide_site_code_info": "Hide Site Code Information",
+    "import_events": "Import Events",
+    "import_srs": "Import Specimen Requirements",
     "import_workflows": "Import Workflows",
     "irb_id": "IRB ID",
     "participant_centric": "Participant Centric",
@@ -983,13 +986,58 @@
   },
 
   "import": {
+    "confirm_stop_job": "Are you sure you want to stop the job #{id}?",
+    "confirm_txn_per_record": "Only {maxTxnSize} records can be pre-validated before importing into database. However, input file contains {totalRecords} records. Do you want to proceed with option of importing only valid records into database; whilst rejecting invalid records?",
+    "create": "Create",
+    "date": "Date",
     "date_format": "Date Format",
     "date_format_required": "Date format is mandatory",
-    "download_file_template": "Download File Template",
+    "date_n_time_format": "Date & Time Formats",
+    "download_template": "Download template file",
+    "download_status": "Download Import Status",
+    "failed": "Failed",
     "field_separator": "Field Separator",
     "file_required": "File is mandatory",
+    "finish_time": "Finish Time",
+    "import_type": "Import Type",
+    "import_type_req": "Import Type is mandatory",
+    "input_records_file": "Input Records File",
+    "input_records_file_req": "Input Records File is mandatory",
+    "job_completed": "Import job #{id} has run to completion.",
+    "job_created": "Import job #{id} created",
+    "job_id": "Job ID",
+    "job_stop_in_progress": "It is taking more time than anticipated to stop import job #{id}. Please refresh this list after some time to view latest status.",
+    "job_stopped": "Import job #{id} stopped.",
+    "jobs_list": "Bulk Import Jobs",
+    "object_types": {
+      "cpe": "Events",
+      "sr": "Specimen Requirements"
+    },
+    "ops": {
+      "CREATE": "Create",
+      "UPDATE": "Update",
+      "UPSERT": "Upsert"
+    },
+    "update": "Update",
+    "upsert": "Upsert",
+    "view_past_imports": "View Past Imports",
+    "status": "Status",
+    "statuses": {
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "IN_PROGRESS": "In Progress",
+      "QUEUED": "Queued",
+      "STOPPED": "Stopped"
+    },
+    "stop_job": "Stop job",
+    "stop_job_q": "Stop job #{id}?",
+    "submit_time": "Submit Time",
+    "submitted_by": "Submitted By",
+    "success": "Success",
+    "time": "Time",
     "time_format": "Time Format",
-    "time_format_required": "Time format is mandatory"
+    "time_format_required": "Time format is mandatory",
+    "txn_exceeded": "Pre-validate Records Limit Exceeded"
   },
 
   "institutes": {

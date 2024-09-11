@@ -884,6 +884,11 @@ const routes = [
                 path: 'overview',
                 name: 'CpsListItemDetail.Overview',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Overview.vue')
+              },
+              {
+                path: 'import-jobs',
+                name: 'CpsListItemDetail.ImportJobs',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ImportJobs.vue')
               }
             ]
           }

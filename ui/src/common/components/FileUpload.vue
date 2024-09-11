@@ -1,7 +1,7 @@
 
 <template>
   <div class="os-file-upload" v-if="!inputValue">
-    <FileUpload ref="uploader" mode="basic" name="file" :auto="auto != false" :url="url" :tabindex="tabOrder"
+    <FileUpload ref="uploader" mode="basic" name="file" :auto="auto != false" :url="uploadUrl" :tabindex="tabOrder"
       :disabled="disabled" @before-send="addHeaders" @upload="onUpload" @error="onError" @select="onFileSelect" />
 
     <div v-if="selectedFile">
@@ -44,6 +44,14 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
       }
+    },
+
+    uploadUrl: function() {
+      if (typeof this.url == 'function') {
+        return this.url();
+      }
+
+      return this.url;
     }
   },
 
@@ -75,8 +83,9 @@ export default {
     },
 
     addHeaders: function({xhr}) {
-      if (this.headers) {
-        Object.keys(this.headers).forEach((name) => xhr.setRequestHeader(name, this.headers[name]));
+      const headers = typeof this.headers == 'function' ? this.headers() : (this.headers || {});
+      if (headers) {
+        Object.keys(headers).forEach((name) => xhr.setRequestHeader(name, headers[name]));
       }
     },
 
