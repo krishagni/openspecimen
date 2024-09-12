@@ -12,7 +12,7 @@
 import routerSvc from '@/common/services/Router.js';
 
 export default {
-  props: ['model-value', 'specimen', 'show-status', 'status', 'href-target'],
+  props: ['model-value', 'specimen', 'show-status', 'status', 'href-target', 'no-link'],
 
   computed: {
     inputValue: {
@@ -54,6 +54,10 @@ export default {
     },
 
     link: function() {
+      if (this.noLink) {
+        return null;
+      }
+
       const specimen = this.object;
       let url = '';
       if (specimen) {

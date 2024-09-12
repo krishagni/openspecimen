@@ -140,7 +140,7 @@ a:focus, a:hover {
 .os-key-values .item {
   margin: 2px 0px 0px 0px;
   position: relative;
-  padding-left: 150px;
+  margin-left: 150px;
   -webkit-column-break-inside: avoid;
   page-break-inside: avoid;
   break-inside: avoid-column;

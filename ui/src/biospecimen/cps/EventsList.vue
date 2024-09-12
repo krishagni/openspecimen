@@ -22,7 +22,18 @@
       </template>
 
       <template class="event-details" #expansionRow="{rowObject: {cpe}}">
-        <pre>{{cpe.reqs}}</pre>
+        <os-table-form ref="reqsTable" :tree-layout="true" :read-only="true"
+          :data="{}" :items="cpe.reqs" :expanded="ctx.expandedReqs"
+          :schema="reqsListSchema" :show-row-actions="true"
+          @row-clicked="onReqClick($event.item)" v-if="cpe.reqs && cpe.reqs.length > 0">
+          <template #row-actions="{rowItem}">
+            <os-button size="small" left-icon="ellipsis-v" @click="onReqClick(rowItem.item)" />
+          </template>
+
+          <template #expanded-row>
+            <os-overview :schema="reqSchema.fields" :object="reqCtx" />
+          </template>
+        </os-table-form>
       </template>
     </os-list-view>
   </div>
@@ -49,6 +60,8 @@
 <script>
 
 import eventsListSchema from '@/biospecimen/schemas/cps/events-list.js';
+import reqsListSchema from '@/biospecimen/schemas/cps/reqs-list.js';
+import reqSchema from '@/biospecimen/schemas/cps/req.js';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
@@ -65,17 +78,43 @@ export default {
       ctx: {
         events: [],
 
-        expandedEvents: []
+        expandedEvents: [],
+
+        expandedReqs: []
       },
 
       cpResources,
 
-      eventsListSchema
+      eventsListSchema,
+
+      reqSchema
     }
   },
 
   created() {
     this._loadEvents();
+  },
+
+  computed: {
+    reqsListSchema: function() {
+      const result = util.clone(reqsListSchema);
+      for (let field of result.columns) {
+        if (field.name == 'sr' && field.type == 'specimen-description') {
+          field.showStatus = true;
+          field.noLink = true;
+        }
+      }
+
+      return result;
+    },
+
+    reqCtx: function() {
+      if (this.ctx.expandedReqs.length > 0) {
+        return {cp: this.cp, cpe: this.ctx.expandedEvents[0].cpe, sr: this.ctx.expandedReqs[0].sr};
+      }
+
+      return {};
+    }
   },
 
   methods: {
@@ -87,7 +126,7 @@ export default {
 
         const {cpe} = rowObject;
         if (!cpe.reqs) {
-          cpSvc.getSpecimenRequirements(this.cp.id, cpe.id, true).then(reqs => cpe.reqs = reqs);
+          cpSvc.getSpecimenRequirements(this.cp.id, cpe.id, true).then(reqs => cpe.reqs = this._flattenReqs(cpe, reqs, 0));
         }
       }
     },
@@ -141,8 +180,30 @@ export default {
       }
     },
 
+    onReqClick: function(item) {
+      const [prev] = this.ctx.expandedReqs;
+      this.ctx.expandedReqs.length = 0;
+      if (!prev || prev != item) {
+        this.ctx.expandedReqs = [item];
+      }
+    },
+
     _loadEvents: function() {
       cpSvc.getCpes(this.cp.id).then(cpes => this.ctx.events = cpes.map(cpe => ({cpe})));
+    },
+
+    _flattenReqs: function(cpe, reqs, depth) {
+      let result = [];
+      for (let req of reqs) {
+        const item = {cp: this.cp, event: cpe, sr: req, depth, expanded: true, show: true};
+        result.push(item);
+
+        const children = this._flattenReqs(cpe, req.children || [], depth + 1);
+        Array.prototype.push.apply(result, children);
+        item.hasChildren = (children || []).length > 0;
+      }
+
+      return result;
     }
   }
 }

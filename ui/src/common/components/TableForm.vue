@@ -51,7 +51,7 @@
               <os-menu icon="ellipsis-h" :label1="$t('common.buttons.more')" :options="field.menuOptions" />
             </span>
           </th>
-          <th v-if="removeItems == true || copyItems == true">
+          <th v-if="removeItems == true || copyItems == true || showRowActions ==  true">
             <span>&nbsp;</span>
           </th>
         </tr>
@@ -80,7 +80,7 @@
                 v-os-tooltip.bottom="$t('workflows.buttons.remove')" />
             </td>
 
-            <td v-if="firstColumn" :class="stickyColumn">
+            <td v-if="firstColumn" :class="stickyColumn" @click="rowClicked(itemModel.$context)">
               <div :style="{display: treeLayout ? 'flex' : ''}">
                 <div v-show="treeLayout && !showFlat" class="node-expander"
                   :style="{'padding-left':  itemModel.depth + 'rem'}">
@@ -95,7 +95,7 @@
             </td>
 
             <td v-for="(field, fieldIdx) of fields" :key="itemIdx + '_' + fieldIdx"
-              :class="!firstColumn && fieldIdx == 0 ? stickyColumn : []">
+              :class="!firstColumn && fieldIdx == 0 ? stickyColumn : []" @click="rowClicked(itemModel.$context)">
               <div :style="field.uiStyle">
                 <div class="field-container">
                   <div v-show="treeLayout && fieldIdx == 0 && !firstColumn" class="node-expander"
@@ -123,14 +123,21 @@
                 </div>
               </div>
             </td>
-            <td v-if="removeItems == true || copyItems == true">
+            <td v-if="removeItems == true || copyItems == true || showRowActions == true">
               <os-button-group style="min-width: 5rem;">
                 <os-button size="small" left-icon="copy" @click="copyItem(itemIdx)"
                   v-os-tooltip.bottom="$t('common.buttons.copy')" v-if="copyItems == true" />
 
                 <os-button size="small" left-icon="times" @click="removeItem(itemIdx)"
                   v-os-tooltip.bottom="$t('workflows.buttons.remove')" v-if="removeItems == true" />
+
+                <slot name="row-actions" :rowItem="{item: itemModel.$context}" />
               </os-button-group>
+            </td>
+          </tr>
+          <tr class="expanded-row" v-if="itemModel.show && expanded && expanded.indexOf(itemModel.$context) >= 0">
+            <td :colspan="columnsCount">
+              <slot name="expanded-row" :rowItem="{item: itemModel.$context}" />
             </td>
           </tr>
         </template>
@@ -173,13 +180,15 @@ export default {
     'tab-direction',
     'removeItems',
     'copyItems',
+    'showRowActions',
     'readOnly',
     'selectionMode',
     'requireSelection',
-    'treeLayout'
+    'treeLayout',
+    'expanded'
   ],
 
-  emits: ['input', 'form-validity', 'remove-item', 'copy-item', 'item-selected', 'selected-items'],
+  emits: ['input', 'form-validity', 'remove-item', 'copy-item', 'item-selected', 'selected-items', 'row-clicked'],
 
   components: {
     RadioButton
@@ -290,6 +299,27 @@ export default {
       }
 
       return result;
+    },
+
+    columnsCount: function() {
+      let count = 0;
+      if (this.readOnly && (this.selectionMode == 'radio' || this.selectionMode == 'checkbox')) {
+        ++count;
+      } else if (this.removeItems) {
+        ++count;
+      }
+
+      if (this.firstColumn) {
+        ++count;
+      }
+
+      count += this.fields.length;
+
+      if (this.removeItems == true || this.copyItems == true || this.showRowActions == true) {
+        ++count;
+      }
+
+      return count;
     },
 
     itemModels: function() {
@@ -475,6 +505,10 @@ export default {
 
     copyItem: function(idx) {
       this.$emit('copy-item', {item: this.ctx.items[idx], idx: idx});
+    },
+
+    rowClicked: function(item) {
+      this.$emit('row-clicked', {item});
     },
 
     sort: function(field) {
