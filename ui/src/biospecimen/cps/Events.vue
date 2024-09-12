@@ -21,8 +21,8 @@ export default {
   methods: {
     _gotoEventsList: function() {
       const {name} = routerSvc.getCurrentRoute();
-      if (name == 'CpsListItemDetail.Events') {
-        routerSvc.goto('CpsListItemDetail.Events.List');
+      if (name == 'CpDetail.Events') {
+        routerSvc.goto('CpDetail.Events.List');
       }
     }
   }

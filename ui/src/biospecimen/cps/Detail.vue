@@ -1,6 +1,6 @@
 <template>
   <os-page>
-    <os-page-head :noNavButton="true">
+    <os-page-head :noNavButton="false">
       <span class="os-title" v-if="ctx.cp.id > 0">
         <h3>
           <span>{{ctx.cp.shortTitle}}</span>
@@ -10,26 +10,26 @@
 
           <os-tag :value="$t('cps.closed')" :rounded="true" :type="'danger'" v-if="ctx.cp.activityStatus == 'Closed'" />
 
-          <os-copy-link size="small" :route="{name: 'CpsListItemDetail.Overview', params: {cpId: ctx.cp.id}}" />
+          <os-copy-link size="small" :route="{name: 'CpDetail.Overview', params: {cpId: ctx.cp.id}}" />
         </div>
       </span>
     </os-page-head>
     <os-page-body>
       <div>
-        <os-tab-menu>
+        <os-side-menu>
           <ul>
-            <li>
+            <li v-os-tooltip.right="$t('common.overview')">
               <router-link :to="getRoute('Overview')">
-                <span v-t="'common.overview'">Overview</span>
+                <os-icon name="eye" />
               </router-link>
             </li>
-            <li>
+            <li v-os-tooltip.right="$t('cps.events')">
               <router-link :to="getRoute('Events')">
-                <span v-t="'cps.events'">Events</span>
+                <os-icon name="list-alt" />
               </router-link>
             </li>
           </ul>
-        </os-tab-menu>
+        </os-side-menu>
 
         <router-view :cp="ctx.cp" v-if="ctx.cp && ctx.cp.id > 0" @cp-saved="loadCp" :key="ctx.cp.id"> </router-view>
       </div>
@@ -81,7 +81,7 @@ export default {
 
     getRoute: function(routeName, params, query) {
       return {
-        name: 'CpsListItemDetail.' + routeName,
+        name: 'CpDetail.' + routeName,
         params: params,
         query: {...this.query, query}
       }

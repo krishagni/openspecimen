@@ -869,49 +869,49 @@ const routes = [
        *****************************
        *****************************/
       {
-        path: 'cps/:cpId',
+        path: 'cps',
         name: 'CpsList',
         component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/List.vue'),
-        props: (route) => ({filters: route.query.filters, cpId: route.params && route.params.cpId}),
+        props: (route) => ({filters: route.query.filters})
+      },
+
+      {
+        path: 'cps/:cpId/detail',
+        name: 'CpDetail',
+        component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Detail.vue'),
+        props: (route) => ({cpId: route.params && route.params.cpId}),
         children: [
           {
-            path: '',
-            name: 'CpsListItemDetail',
-            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Detail.vue'),
-            props: (route) => ({cpId: route.params && route.params.cpId, filters: route.query.filters}),
+            path: 'overview',
+            name: 'CpDetail.Overview',
+            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Overview.vue')
+          },
+          {
+            path: 'events',
+            name: 'CpDetail.Events',
+            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Events.vue'),
             children: [
               {
-                path: 'overview',
-                name: 'CpsListItemDetail.Overview',
-                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Overview.vue')
+                path: 'list',
+                name: 'CpDetail.Events.List',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/EventsList.vue')
               },
               {
-                path: 'events',
-                name: 'CpsListItemDetail.Events',
-                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Events.vue'),
-                children: [
-                  {
-                    path: 'list',
-                    name: 'CpsListItemDetail.Events.List',
-                    component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/EventsList.vue')
-                  },
-                  {
-                    path: 'addedit',
-                    name: 'CpsListItemDetail.Events.AddEdit',
-                    component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEditEvent.vue'),
-                    props: ({query}) => ({eventId: query.eventId, copyOf: query.copyOf})
-                  }
-                ]
-              },
-              {
-                path: 'import-jobs',
-                name: 'CpsListItemDetail.ImportJobs',
-                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ImportJobs.vue')
+                path: 'addedit',
+                name: 'CpDetail.Events.AddEdit',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEditEvent.vue'),
+                props: ({query}) => ({eventId: query.eventId, copyOf: query.copyOf})
               }
             ]
+          },
+          {
+            path: 'import-jobs',
+            name: 'CpDetail.ImportJobs',
+            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ImportJobs.vue')
           }
         ]
       },
+
       {
         path: 'cp-addedit/:cpId',
         name: 'CpAddEdit',

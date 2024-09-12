@@ -1,6 +1,6 @@
 <template>
   <os-screen>
-    <os-screen-panel :width="ctx.detailView ? 3 : 12">
+    <os-screen-panel :width="12">
       <os-page>
         <os-page-head>
           <span>
@@ -8,13 +8,7 @@
           </span>
 
           <template #right>
-            <os-button v-if="ctx.detailView"
-              size="small" left-icon="expand-alt"
-              v-os-tooltip.bottom="$t('common.switch_to_table_view')"
-              @click="showTable(false)"
-            />
-
-            <os-list-size v-else
+            <os-list-size
               :list="ctx.listInfo.list"
               :page-size="ctx.listInfo.pageSize"
               :list-size="ctx.listInfo.size"
@@ -23,7 +17,7 @@
           </template>
         </os-page-head>
         <os-page-body v-if="ctx.inited">
-          <os-page-toolbar v-if="!ctx.detailView">
+          <os-page-toolbar>
             <template #default>
               <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createCp"
                 v-show-if-allowed="cpResources.createOpts" />
@@ -56,10 +50,6 @@
         </os-page-body>
       </os-page>
     </os-screen-panel>
-
-    <os-screen-panel :width="9" v-if="$route.params && $route.params.cpId > 0">
-      <router-view :cpId="$route.params.cpId" :key="$route.params.cpId" />
-    </os-screen-panel>
   </os-screen>
 </template>
 
@@ -76,7 +66,7 @@ export default {
 
   inject: ['ui'],
 
-  props: ['filters', 'cpId'],
+  props: ['filters'],
 
   data() {
     const ui = this.ui;
@@ -85,11 +75,7 @@ export default {
 
       inited: false,
 
-      detailView: false,
-
       selectedItems: [],
-
-      cpId: this.cpId,
 
       query: this.filters,
 
@@ -103,23 +89,11 @@ export default {
     return { ctx, cpResources };
   },
 
-  provide() {
-    return {
-      cpDict: this.cpDictFn()
-    }
-  },
-
   created() {
     let filters = {};
     const {query} = this.ctx;
     if (query) {
       filters = JSON.parse(decodeURIComponent(atob(query)));
-    }
-
-    const {params} = routerSvc.getCurrentRoute();
-    if (+params.cpId > 0) {
-      filters['CollectionProtocol.id'] = [+params.cpId, +params.cpId];
-      this.ctx.reinit = true;
     }
 
     if (Object.keys(filters).length > 0) {
@@ -130,25 +104,6 @@ export default {
   },
 
   watch: {
-    '$route.params.cpId': function(newValue, oldValue) {
-      const cpId = this.ctx.cpId = newValue;
-      if (newValue == undefined || newValue == oldValue) {
-        // new value is undefined when the route changes
-        return;
-      }
-
-      if (newValue > 0) {
-        let selectedRow = this.items.find(rowObject => rowObject.id == cpId);
-        if (!selectedRow) {
-          selectedRow = {id: cpId};
-        }
-
-        this.showDetails(selectedRow);
-      } else {
-        this.showTable(newValue == -2);
-      }
-    },
-
     '$route.query.filters': function(newValue) {
       this.ctx.query = newValue;
     }
@@ -171,34 +126,12 @@ export default {
 
     onItemRowClick: function(event) {
       const {cpId} = event.hidden || {};
-      routerSvc.goto('CpsListItemDetail.Overview', { cpId }, {filters: this.ctx.query});
+      routerSvc.goto('CpDetail.Overview', { cpId }, {filters: this.ctx.query});
     },
 
     onItemRowStarToggle: function(event) {
       const promise = event.starred ? cpSvc.unstarCp(event.hidden.cpId) : cpSvc.starCp(event.hidden.cpId);
       promise.then(() => event.starred = !event.starred);
-    },
-
-    showDetails: function(rowObject) {
-      this.ctx.selectedItem = rowObject;
-      if (!this.ctx.detailview) {
-        this.ctx.detailView = true;
-        this.$refs.list.switchToSummaryView();
-      }
-    },
-
-    showTable: function(reload) {
-      if (this.ctx.reinit) {
-        this.ctx.reinit = null;
-        this.$refs.list.clearFilters();
-      }
-
-      this.ctx.detailView = false;
-      this.$refs.list.switchToTableView();
-      routerSvc.goto('CpsList', {cpId: -1}, {filters: this.ctx.query});
-      if (reload) {
-        this.reloadList();
-      }
     },
 
     getListItemsCount: function() {
@@ -210,14 +143,13 @@ export default {
     },
 
     onListLoad: function({widget, filters}) {
-      const numFormatter = Intl.NumberFormat().format;
+      const numFormatter         = Intl.NumberFormat().format;
       const participantsCountIdx = widget.list.columns.length;
       const specimensCountIdx    = widget.list.columns.length + 1;
       widget.schema.columns[participantsCountIdx].href = ({rowObject: {id}}) => 
         routerSvc.getUrl('ParticipantsList', {cpId: id, cprId: -1});
       widget.schema.columns[specimensCountIdx].href = ({rowObject: {id}}) => 
         routerSvc.getUrl('ParticipantsList', {cpId: id, cprId: -1}, {view: 'specimens_list'});
-
 
       this.showListSize = true;
       this.ctx.selectedItems.length = 0;
@@ -237,17 +169,7 @@ export default {
         }
       );
 
-      if (this.ctx.cpId <= 0) {
-        routerSvc.replace('CpsList', {cpId: -1}, { filters });
-      } else {
-        let selectedRow = this.items.find(row => row.id == this.ctx.cpId);
-        if (!selectedRow) {
-          selectedRow = {id: this.ctx.cpId};
-        }
-
-        this.showDetails(selectedRow);
-      }
-
+      routerSvc.replace('CpsList', {}, { filters });
       setTimeout(() => {
         this.ctx.listInfo = {
           list: this.$refs.list.list.rows,

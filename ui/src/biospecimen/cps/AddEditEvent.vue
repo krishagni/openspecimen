@@ -59,7 +59,7 @@ export default {
     },
 
     cancel: function() {
-      routerSvc.goto('CpsListItemDetail.Events.List', {cpId: this.cp.id});
+      routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id});
     },
 
     _getIntervalUnits: async function() {

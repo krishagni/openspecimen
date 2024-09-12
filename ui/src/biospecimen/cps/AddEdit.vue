@@ -134,12 +134,12 @@ export default {
 
       let promise = null;
       if (this.copyOf > 0) {
-        promise = cpSvc.copyCp(this.copyOf, toSave);
+        promise = cpSvc.copy(this.copyOf, toSave);
       } else {
         promise = cpSvc.saveOrUpdate(toSave);
       }
 
-      promise.then((savedCp) => routerSvc.goto('CpsListItemDetail.Overview', {cpId: savedCp.id}));
+      promise.then((savedCp) => routerSvc.goto('CpDetail.Overview', {cpId: savedCp.id}));
     },
 
     cancel: function() {

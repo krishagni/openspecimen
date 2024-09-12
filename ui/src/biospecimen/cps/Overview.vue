@@ -102,6 +102,7 @@
 import alertSvc from '@/common/services/Alerts.js';
 import authSvc from '@/common/services/Authorization.js';
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import formUtil from '@/common/services/FormUtil.js';
 import http  from '@/common/services/HttpClient.js';
 import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
@@ -110,8 +111,6 @@ import cpResources from './Resources.js';
 
 export default {
   props: ['cp'],
-
-  inject: ['cpDict'],
 
   emits: ['cp-saved'],
 
@@ -131,7 +130,7 @@ export default {
 
   created() {
     this.ctx.cp = this.cp;
-    this.cpDict().then(dict => this.ctx.dict = dict);
+    cpSvc.getDict().then(dict => this.ctx.dict = dict);
     this.ctx.publishSchema = cpSvc.getPublishFormSchema();
   },
 
@@ -199,6 +198,7 @@ export default {
           }
 
           const toSave = util.clone(this.cp);
+          formUtil.createCustomFieldsMap(toSave);
           toSave.activityStatus = 'Closed';
           cpSvc.saveOrUpdate(toSave).then(
             () => {
@@ -212,6 +212,7 @@ export default {
 
     reopenCp: function() {
       const toSave = util.clone(this.cp);
+      formUtil.createCustomFieldsMap(toSave);
       toSave.activityStatus = 'Active';
       cpSvc.saveOrUpdate(toSave).then(
         () => {
@@ -268,7 +269,7 @@ export default {
     },
 
     viewPastImports: function() {
-      routerSvc.goto('CpsListItemDetail.ImportJobs', {cpId: this.cp.id});
+      routerSvc.goto('CpDetail.ImportJobs', {cpId: this.cp.id});
     },
 
     importRecords: function() {

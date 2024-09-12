@@ -21,8 +21,8 @@
         </os-button-group>
       </template>
 
-      <template class="event-details" #expansionRow="{rowObject}">
-        <pre>Show specimen requirements of {{rowObject.cpe.eventLabel}}</pre>
+      <template class="event-details" #expansionRow="{rowObject: {cpe}}">
+        <pre>{{cpe.reqs}}</pre>
       </template>
     </os-list-view>
   </div>
@@ -84,6 +84,11 @@ export default {
       this.ctx.expandedEvents.length = 0;
       if (!prev || prev != rowObject) {
         this.ctx.expandedEvents = [rowObject];
+
+        const {cpe} = rowObject;
+        if (!cpe.reqs) {
+          cpSvc.getSpecimenRequirements(this.cp.id, cpe.id, true).then(reqs => cpe.reqs = reqs);
+        }
       }
     },
 
@@ -97,15 +102,15 @@ export default {
     },
 
     addEvent: function() {
-      routerSvc.goto('CpsListItemDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1});
+      routerSvc.goto('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1});
     },
 
     editEvent: function(cpe) {
-      routerSvc.goto('CpsListItemDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: cpe.id});
+      routerSvc.goto('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: cpe.id});
     },
 
     copyEvent: function(cpe) {
-      routerSvc.goto('CpsListItemDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1, copyOf: cpe.id});
+      routerSvc.goto('CpDetail.Events.AddEdit', {cpId: this.cp.id}, {eventId: -1, copyOf: cpe.id});
     },
 
     deleteEvent: async function(cpe) {

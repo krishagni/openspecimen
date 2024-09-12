@@ -103,11 +103,11 @@ class CollectionProtocol {
     return http.delete('collection-protocols/' + cpId, {}, {forceDelete, reason});
   }
 
-  async copyCp(cpId, cp) {
+  async copy(cpId, cp) {
     return http.post('collection-protocols/' + cpId + '/copy', cp);
   }
 
-  async publishCp(cpId, publishDetail) {
+  async publish(cpId, publishDetail) {
     return http.post('collection-protocols/' + cpId + '/published-events', publishDetail);
   }
 
