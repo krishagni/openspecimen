@@ -740,7 +740,7 @@ export default {
   border-top: 0;
 }   
 
-.os-list-hover :deep(tbody tr:hover) {
+.os-list-hover :deep(tbody.p-datatable-tbody > tr:hover) {
   background: #f7f7f7;
   cursor: pointer;
 }

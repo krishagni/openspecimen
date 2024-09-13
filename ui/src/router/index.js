@@ -894,7 +894,8 @@ const routes = [
               {
                 path: 'list',
                 name: 'CpDetail.Events.List',
-                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/EventsList.vue')
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/EventsList.vue'),
+                props: ({query}) => ({eventId: query.eventId})
               },
               {
                 path: 'addedit',

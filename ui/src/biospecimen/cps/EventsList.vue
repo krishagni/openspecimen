@@ -12,7 +12,7 @@
       :schema="eventsListSchema"
       :expanded="ctx.expandedEvents"
       :showRowActions="true"
-      @rowClicked="onRowClick"
+      @rowClicked="onEventRowClick"
       ref="listView">
 
       <template #rowActions="{rowObject}" v-show-if-allowed="cpResources.updateOpts">
@@ -26,8 +26,9 @@
           :data="{}" :items="cpe.reqs" :expanded="ctx.expandedReqs"
           :schema="reqsListSchema" :show-row-actions="true"
           @row-clicked="onReqClick($event.item)" v-if="cpe.reqs && cpe.reqs.length > 0">
-          <template #row-actions="{rowItem}">
-            <os-button size="small" left-icon="ellipsis-v" @click="onReqClick(rowItem.item)" />
+
+          <template #row-actions="{rowItem}" v-show-if-allowed="cpResources.updateOpts">
+            <os-menu icon="ellipsis-v" :lazy-load="true" :options="reqOps(rowItem.item)" />
           </template>
 
           <template #expanded-row>
@@ -71,7 +72,7 @@ import util      from '@/common/services/Util.js';
 import cpResources from './Resources.js';
 
 export default {
-  props: ['cp'],
+  props: ['cp', 'eventId'],
 
   data() {
     return {
@@ -92,7 +93,15 @@ export default {
   },
 
   created() {
-    this._loadEvents();
+    this._loadEvents().then(() => this.autoSelectEvent());
+  },
+
+  watch: {
+    eventId: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this.autoSelectEvent();
+      }
+    }
   },
 
   computed: {
@@ -118,17 +127,39 @@ export default {
   },
 
   methods: {
-    onRowClick: function(rowObject) {
+    autoSelectEvent: function() {
+      let event = null;
+      if (this.eventId > 0 ) {
+        event = this.ctx.events.find(({cpe}) => cpe.id == this.eventId);
+        if (event == null) {
+          alert('Invalid event ID');
+          routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {});
+          return;
+        }
+
+        this.onEventRowClick(event, true);
+      }
+
       const [prev] = this.ctx.expandedEvents;
       this.ctx.expandedEvents.length = 0;
-      if (!prev || prev != rowObject) {
-        this.ctx.expandedEvents = [rowObject];
+      if (event && (!prev || prev != event)) {
+        this.ctx.expandedEvents = [event];
 
-        const {cpe} = rowObject;
+        const {cpe} = event;
         if (!cpe.reqs) {
-          cpSvc.getSpecimenRequirements(this.cp.id, cpe.id, true).then(reqs => cpe.reqs = this._flattenReqs(cpe, reqs, 0));
+          cpSvc.getSpecimenRequirements(this.cp.id, cpe.id, true).then(
+            reqs => cpe.reqs = this._flattenReqs(cpe, reqs, 0)
+          );
         }
       }
+    },
+
+    onEventRowClick: function({cpe: {id: eventId}}, auto) {
+      if (auto) {
+        return;
+      }
+
+      routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, eventId == this.eventId ? {} : {eventId});
     },
 
     eventOps: function({cpe}) {
@@ -180,6 +211,19 @@ export default {
       }
     },
 
+    reqOps: function({sr}) {
+      return [
+        {icon: 'edit',  caption: this.$t('common.buttons.edit'),   onSelect: () => this.editSr(sr)},
+        {icon: 'copy',  caption: this.$t('common.buttons.copy'),   onSelect: () => this.copySr(sr)},
+        {divider: true},
+        {icon: 'share-alt',  caption: this.$t('cps.create_aliquots'),   onSelect: () => this.createAliquots(sr)},
+        {icon: 'flask',  caption: this.$t('cps.create_derivative'),   onSelect: () => this.createDerivative(sr)},
+        {divider: true},
+        {icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: () => this.deleteSr(sr)},
+        {icon: 'ban',   caption: this.$t('common.buttons.close'),  onSelect: () => this.closeSr(sr)}
+      ];
+    },
+
     onReqClick: function(item) {
       const [prev] = this.ctx.expandedReqs;
       this.ctx.expandedReqs.length = 0;
@@ -189,7 +233,12 @@ export default {
     },
 
     _loadEvents: function() {
-      cpSvc.getCpes(this.cp.id).then(cpes => this.ctx.events = cpes.map(cpe => ({cpe})));
+      return cpSvc.getCpes(this.cp.id).then(
+        cpes => {
+          this.ctx.events = cpes.map(cpe => ({cpe}));
+          return this.ctx.events;
+        }
+      );
     },
 
     _flattenReqs: function(cpe, reqs, depth) {

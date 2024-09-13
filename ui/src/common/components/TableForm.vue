@@ -66,7 +66,7 @@
         </tr>
 
         <template v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
-          <tr v-if="itemModel.show">
+          <tr v-if="itemModel.show" :class="expanded && expanded.indexOf(itemModel.$context) >= 0 && 'expanded-row'">
             <td class="selection" v-if="readOnly && (selectionMode == 'radio' || selectionMode == 'checkbox')">
               <RadioButton name="rowSelection" :value="itemIdx" v-model="ctx.selectedIdx"
                 @click="toggleSelection(itemIdx)" v-if="selectionMode == 'radio'" />
@@ -135,7 +135,7 @@
               </os-button-group>
             </td>
           </tr>
-          <tr class="expanded-row" v-if="itemModel.show && expanded && expanded.indexOf(itemModel.$context) >= 0">
+          <tr class="expanded-row-child" v-if="itemModel.show && expanded && expanded.indexOf(itemModel.$context) >= 0">
             <td :colspan="columnsCount">
               <slot name="expanded-row" :rowItem="{item: itemModel.$context}" />
             </td>
@@ -835,4 +835,21 @@ table td.selection :deep(.p-field-checkbox) {
 table th .copy-first-to-all {
   margin-left: 0.25rem;
 }
+
+tr.expanded-row td {
+  border-top: 0px;
+}
+
+tr.expanded-row:hover, tr.expanded-row td {
+  background: #edeff0;
+}
+
+tr.expanded-row, tr.expanded-row-child {
+  border: 1px solid #ddd;
+}
+
+tr.expanded-row-child:hover {
+  background: #fff!important;
+}
+
 </style>
