@@ -1,10 +1,10 @@
-
 export default {
   fields: [
     {
       "type": "text",
       "name": "sr.name",
-      "labelCode": "cps.req_name"
+      "labelCode": "cps.req_name",
+      "showWhen": "sr.lineage == 'New'"
     },
     {
       "type": "text",
@@ -16,8 +16,14 @@ export default {
       "name": "sr.type",
       "labelCode": "cps.type",
       "specimen": "sr",
+      "entity": "sr",
       "showWhen": "sr.lineage != 'Aliquot'",
-      "showInOverviewWhen": "true == true"
+      "showInOverviewWhen": "true == true",
+      "validations": {
+        "required": {
+          "messageCode": "cps.type_req"
+        }
+      }
     },
     {
       "type": "pv",
@@ -26,7 +32,12 @@ export default {
       "name": "sr.anatomicSite",
       "labelCode": "cps.anatomic_site",
       "showWhen": "sr.lineage != 'Aliquot'",
-      "showInOverviewWhen": "true == true"
+      "showInOverviewWhen": "true == true",
+      "validations": {
+        "required": {
+          "messageCode": "cps.anatomic_site_req"
+        }
+      }
     },
     {
       "type": "pv",
@@ -35,7 +46,12 @@ export default {
       "name": "sr.laterality",
       "labelCode": "cps.laterality",
       "showWhen": "sr.lineage != 'Aliquot'",
-      "showInOverviewWhen": "true == true"
+      "showInOverviewWhen": "true == true",
+      "validations": {
+        "required": {
+          "messageCode": "cps.laterality_req"
+        }
+      }
     },
     {
       "type": "pv",
@@ -44,27 +60,37 @@ export default {
       "name": "sr.pathology",
       "labelCode": "cps.pathology_status",
       "showWhen": "sr.lineage != 'Aliquot'",
-      "showInOverviewWhen": "true == true"
+      "showInOverviewWhen": "true == true",
+      "validations": {
+        "required": {
+          "messageCode": "cps.pathology_status_req"
+        }
+      }
     },
     {
       "type": "specimen-measure",
       "name": "sr.initialQty",
       "labelCode": "cps.quantity",
       "specimen": "sr",
-      "measure": "quantity"
+      "entity": "sr",
+      "measure": "quantity",
+      "showWhen": "sr.id > 0 || sr.lineage != 'Aliquot'"
     },
     {
       "type": "specimen-measure",
       "name": "sr.concentration",
       "labelCode": "cps.concentration",
       "specimen": "sr",
-      "measure": "concentration"
+      "entity": "sr",
+      "measure": "concentration",
+      "showWhen": "sr.lineage != 'Aliquot'",
     },
     {
       "type": "number",
       "maxFractionDigits": "0",
       "name": "sr.sortOrder",
-      "labelCode": "cps.sort_order"
+      "labelCode": "cps.sort_order",
+      "showWhen": "sr.lineage != 'Aliquot'",
     },
     {
       "type": "radio",
@@ -74,7 +100,12 @@ export default {
         { "value": "Manual", "captionCode": "common.yes" },
         { "value": "Virtual", "captionCode": "common.no" }
       ],
-      "optionsPerRow": 2
+      "optionsPerRow": 2,
+      "validations": {
+        "required": {
+          "messageCode": "cps.storage_type_req"
+        }
+      }
     },
     {
       "type": "user",
@@ -131,9 +162,8 @@ export default {
     },
     {
       "type": "textarea",
-      "name": "sr.defaultCustomFieldValues",
-      "labelCode": "cps.def_custom_field_values",
-      "value": ({sr}) => sr.defaultCustomFieldValues ? JSON.stringify(sr.defaultCustomFieldValues, null, 2) : null
+      "name": "sr.defaultCustomFieldValuesJson",
+      "labelCode": "cps.def_custom_field_values"
     }
   ]
 }

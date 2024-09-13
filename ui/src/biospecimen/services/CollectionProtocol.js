@@ -5,6 +5,9 @@ import publishForm   from '@/biospecimen/schemas/cps/publish.js';
 
 import eventAddEditLayout from '@/biospecimen/schemas/cps/event-addedit.js';
 
+import reqAddEditLayout   from '@/biospecimen/schemas/cps/req-addedit.js';
+import reqSchema          from '@/biospecimen/schemas/cps/req.js';
+
 import authSvc from '@/common/services/Authorization.js';
 import exportSvc from '@/common/services/ExportService.js';
 import formSvc  from '@/forms/services/Form.js';
@@ -85,6 +88,30 @@ class CollectionProtocol {
 
   async getSpecimenRequirement(reqId) {
     return http.get('specimen-requirements/' + reqId);
+  }
+
+  async saveOrUpdateSpecimenRequirement(sr) {
+    if (sr.id > 0) {
+      return http.put('specimen-requirements/' + sr.id, sr);
+    } else {
+      return http.post('specimen-requirements', sr);
+    }
+  }
+
+  async createDerivedRequirement(parentReqId, sr) {
+    return http.post('specimen-requirements/' + parentReqId + '/derived', sr);
+  }
+
+  async createAliquots(parentReqId, sr) {
+    return http.post('specimen-requirements/' + parentReqId + '/aliquots', sr);
+  }
+
+  async copyRequirement(copyOf) {
+    return http.post('specimen-requirements/' + copyOf + '/copy');
+  }
+
+  async deleteRequirement(req) {
+    return http.delete('specimen-requirements/' + req.id);
   }
 
   async saveOrUpdate(cp) {
@@ -405,6 +432,10 @@ class CollectionProtocol {
 
   getEventAddEditFormSchema() {
     return eventAddEditLayout.layout;
+  }
+
+  getReqAddEditFormSchema() {
+    return formUtil.getFormSchema(reqSchema.fields, reqAddEditLayout.layout);
   }
 }
 

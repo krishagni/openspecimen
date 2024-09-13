@@ -28,7 +28,7 @@
           @row-clicked="onReqClick($event.item)" v-if="cpe.reqs && cpe.reqs.length > 0">
 
           <template #row-actions="{rowItem}" v-show-if-allowed="cpResources.updateOpts">
-            <os-menu icon="ellipsis-v" :lazy-load="true" :options="reqOps(rowItem.item)" />
+            <os-menu icon="ellipsis-v" :lazy-load="true" :options="reqOps(cpe, rowItem.item)" />
           </template>
 
           <template #expanded-row>
@@ -54,6 +54,24 @@
     </template>
     <template #message>
       <span v-t="{path: 'cps.confirm_close_event', args: ctx.event}"></span>
+    </template>
+  </os-confirm>
+
+  <os-confirm ref="confirmDeleteReqDialog">
+    <template #title>
+      <span v-t="'cps.delete_req_q'">Delete Requirement?</span>
+    </template>
+    <template #message>
+      <span v-t="{path: 'cps.confirm_delete_req', args: ctx.req}"></span>
+    </template>
+  </os-confirm>
+
+  <os-confirm ref="confirmCloseReqDialog">
+    <template #title>
+      <span v-t="'cps.close_req_q'">Close Requirement?</span>
+    </template>
+    <template #message>
+      <span v-t="{path: 'cps.confirm_close_req', args: ctx.req}"></span>
     </template>
   </os-confirm>
 </template>
@@ -147,9 +165,7 @@ export default {
 
         const {cpe} = event;
         if (!cpe.reqs) {
-          cpSvc.getSpecimenRequirements(this.cp.id, cpe.id, true).then(
-            reqs => cpe.reqs = this._flattenReqs(cpe, reqs, 0)
-          );
+          this._loadReqs(cpe);
         }
       }
     },
@@ -167,7 +183,9 @@ export default {
         {icon: 'edit',  caption: this.$t('common.buttons.edit'),   onSelect: () => this.editEvent(cpe)},
         {icon: 'copy',  caption: this.$t('common.buttons.copy'),   onSelect: () => this.copyEvent(cpe)},
         {icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: () => this.deleteEvent(cpe)},
-        {icon: 'ban',   caption: this.$t('common.buttons.close'),  onSelect: () => this.closeEvent(cpe)}
+        {icon: 'ban',   caption: this.$t('common.buttons.close'),  onSelect: () => this.closeEvent(cpe)},
+        {divider: true},
+        {icon: 'flask', caption: this.$t('cps.add_req'),  onSelect: () => this.addReq(cpe)}
       ];
     },
 
@@ -211,25 +229,115 @@ export default {
       }
     },
 
-    reqOps: function({sr}) {
-      return [
-        {icon: 'edit',  caption: this.$t('common.buttons.edit'),   onSelect: () => this.editSr(sr)},
-        {icon: 'copy',  caption: this.$t('common.buttons.copy'),   onSelect: () => this.copySr(sr)},
-        {divider: true},
-        {icon: 'share-alt',  caption: this.$t('cps.create_aliquots'),   onSelect: () => this.createAliquots(sr)},
-        {icon: 'flask',  caption: this.$t('cps.create_derivative'),   onSelect: () => this.createDerivative(sr)},
-        {divider: true},
-        {icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: () => this.deleteSr(sr)},
-        {icon: 'ban',   caption: this.$t('common.buttons.close'),  onSelect: () => this.closeSr(sr)}
-      ];
-    },
-
     onReqClick: function(item) {
       const [prev] = this.ctx.expandedReqs;
       this.ctx.expandedReqs.length = 0;
       if (!prev || prev != item) {
         this.ctx.expandedReqs = [item];
       }
+    },
+
+    reqOps: function(cpe, {sr}) {
+      const ops = [];
+      if (sr.activityStatus == 'Active') {
+        ops.push({icon: 'edit', caption: this.$t('common.buttons.edit'), onSelect: () => this.editReq(sr)});
+        ops.push({icon: 'copy', caption: this.$t('common.buttons.copy'), onSelect: () => this.copyReq(cpe, sr)});
+        ops.push({divider: true});
+        ops.push({icon: 'share-alt', caption: this.$t('cps.create_aliquots'), onSelect: () => this.createAliquots(cpe, sr)});
+        ops.push({icon: 'flask', caption: this.$t('cps.create_derivative'), onSelect: () => this.createDerivative(cpe, sr)});
+        ops.push({divider: true});
+        ops.push({icon: 'ban', caption: this.$t('common.buttons.close'), onSelect: () => this.closeReq(cpe, sr)});
+      } else {
+        ops.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: () => this.reopenReq(cpe, sr)});
+      }
+
+      ops.push({icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: () => this.deleteReq(cpe, sr)});
+      return ops;
+    },
+
+    addReq: function(cpe) {
+      routerSvc.goto('CpDetail.Events.AddEditReq', {cpId: this.cp.id}, {eventId: cpe.id});
+    },
+
+    editReq: function(sr) {
+      routerSvc.goto('CpDetail.Events.AddEditReq', {cpId: this.cp.id}, {eventId: sr.eventId, reqId: sr.id});
+    },
+
+    copyReq: function(cpe, sr) {
+      cpSvc.copyRequirement(sr.id).then(
+        savedReq => {
+          alertsSvc.success({code: 'cps.req_copy_created', args: sr});
+          this._loadReqs(cpe).then(
+            () => {
+              routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: sr.eventId, reqId: savedReq.id});
+            }
+          );
+        }
+      );
+    },
+
+    createAliquots: function(cpe, sr) {
+      routerSvc.goto('CpDetail.Events.CreateAliquots', {cpId: this.cp.id}, {eventId: cpe.id, parentReqId: sr.id});
+    },
+
+    createDerivative: function(cpe, sr) {
+      routerSvc.goto('CpDetail.Events.CreateDerivedReq', {cpId: this.cp.id}, {eventId: cpe.id, parentReqId: sr.id});
+    },
+
+    deleteReq: async function(cpe, sr) {
+      this.ctx.req = sr;
+      const resp = await this.$refs.confirmDeleteReqDialog.open();
+      if (resp != 'proceed') {
+        return;
+      }
+
+      cpSvc.deleteRequirement(sr).then(
+        () => {
+          alertsSvc.success({code: 'cps.req_deleted', args: sr});
+          this._loadReqs(cpe).then(
+            () => {
+              routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: sr.eventId});
+            }
+          );
+        }
+      );
+    },
+
+    closeReq: async function(cpe, sr) {
+      this.ctx.req = sr;
+      const resp = await this.$refs.confirmCloseReqDialog.open();
+      if (resp != 'proceed') {
+        return;
+      }
+
+      const toSave = util.clone(sr);
+      toSave.children = null;
+      toSave.activityStatus = 'Closed';
+      cpSvc.saveOrUpdateSpecimenRequirement(toSave).then(
+        () => {
+          alertsSvc.success({code: 'cps.req_closed', args: sr});
+          this._loadReqs(cpe).then(
+            () => {
+              routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: sr.eventId, reqId: sr.id});
+            }
+          );
+        }
+      );
+    },
+
+    reopenReq: async function(cpe, sr) {
+      const toSave = util.clone(sr);
+      toSave.children = null;
+      toSave.activityStatus = 'Active';
+      cpSvc.saveOrUpdateSpecimenRequirement(toSave).then(
+        () => {
+          this._loadReqs(cpe).then(
+            () => {
+              routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: sr.eventId, reqId: sr.id});
+            }
+          );
+        }
+      );
     },
 
     _loadEvents: function() {
@@ -241,13 +349,27 @@ export default {
       );
     },
 
-    _flattenReqs: function(cpe, reqs, depth) {
-      let result = [];
+    _loadReqs: async function(cpe) {
+      const reqs = await cpSvc.getSpecimenRequirements(this.cp.id, cpe.id, true);
+      cpe.reqs = this._flattenReqs(cpe, reqs, 0);
+      return cpe.reqs;
+    },
+
+    _flattenReqs: function(cpe, reqs, depth, parentUid) {
+      let result = [], idx = 0;
       for (let req of reqs) {
-        const item = {cp: this.cp, event: cpe, sr: req, depth, expanded: true, show: true};
+        ++idx;
+
+        const uid = parentUid !== undefined && parentUid !== null ? (parentUid + '_' + idx) : ('' + idx);
+        const item = {cp: this.cp, event: cpe, sr: req, depth, expanded: false, show: !parentUid, parentUid, uid};
         result.push(item);
 
-        const children = this._flattenReqs(cpe, req.children || [], depth + 1);
+        req.status = req.activityStatus == 'Closed' ? 'Closed' : 'Pending';
+        if (req.defaultCustomFieldValues) {
+          req.defaultCustomFieldValuesJson = JSON.stringify(req.defaultCustomFieldValues, null, 2);
+        }
+
+        const children = this._flattenReqs(cpe, req.children || [], depth + 1, uid);
         Array.prototype.push.apply(result, children);
         item.hasChildren = (children || []).length > 0;
       }
