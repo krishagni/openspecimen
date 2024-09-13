@@ -84,7 +84,7 @@
               <div :style="{display: treeLayout ? 'flex' : ''}">
                 <div v-show="treeLayout && !showFlat" class="node-expander"
                   :style="{'padding-left':  itemModel.depth + 'rem'}">
-                  <a @click="toggleNode(itemModel, itemIdx)">
+                  <a @click="toggleNode($event, itemModel, itemIdx)">
                     <os-icon v-show="itemModel.hasChildren && itemModel.expanded" name="chevron-down" />
                     <os-icon v-show="itemModel.hasChildren && !itemModel.expanded" name="chevron-right" />
                   </a>
@@ -100,7 +100,7 @@
                 <div class="field-container">
                   <div v-show="treeLayout && fieldIdx == 0 && !firstColumn" class="node-expander"
                     :style="{'padding-left':  itemModel.depth + 'rem'}">
-                    <a @click="toggleNode(itemModel, itemIdx)">
+                    <a @click="toggleNode($event, itemModel, itemIdx)">
                       <os-icon v-show="itemModel.hasChildren && itemModel.expanded" name="chevron-down" />
                       <os-icon v-show="itemModel.hasChildren && !itemModel.expanded" name="chevron-right" />
                     </a>
@@ -687,7 +687,11 @@ export default {
       }
     },
 
-    toggleNode: function(itemModel, start) {
+    toggleNode: function(event, itemModel, start) {
+      if (event) {
+        event.stopPropagation();
+      }
+
       let item = itemModel.$context;
       let show = item.expanded = !item.expanded;
       let ancestors = [item.uid];
