@@ -23,6 +23,11 @@
                 <os-icon name="eye" />
               </router-link>
             </li>
+            <li v-os-tooltip.right="$t('cps.consents')">
+              <router-link :to="getRoute('Consents')">
+                <os-icon name="file-signature" />
+              </router-link>
+            </li>
             <li v-os-tooltip.right="$t('cps.events')">
               <router-link :to="getRoute('Events')">
                 <os-icon name="list-alt" />

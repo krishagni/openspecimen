@@ -374,4 +374,16 @@ export default {
     font-size: 0.75rem;
     margin-top: -0.40rem;
   }
+
+  .os-dropdown :deep(.p-dropdown-label) {
+    white-space: initial;
+    overflow: initial;
+  }
+</style>
+
+<style>
+  .p-dropdown-item-label {
+    max-width: calc(50vw - 8rem);
+    white-space: pre-wrap;
+  }
 </style>

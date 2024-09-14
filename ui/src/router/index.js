@@ -924,6 +924,11 @@ const routes = [
             ]
           },
           {
+            path: 'consents',
+            name: 'CpDetail.Consents',
+            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Consents.vue')
+          },
+          {
             path: 'import-jobs',
             name: 'CpDetail.ImportJobs',
             component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ImportJobs.vue')

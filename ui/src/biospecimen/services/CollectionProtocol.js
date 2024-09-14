@@ -41,6 +41,38 @@ class CollectionProtocol {
     return http.get('collection-protocols/byop', filterOpts || {});
   }
 
+  async saveOrUpdate(cp) {
+    if (cp.id > 0) {
+      return http.put('collection-protocols/' + cp.id, cp);
+    } else {
+      return http.post('collection-protocols', cp);
+    }
+  }
+
+  async getDependents(cp) {
+    return http.get('collection-protocols/' + cp.id + '/dependent-entities');
+  }
+
+  async deleteCp(cpId, forceDelete, reason) {
+    return http.delete('collection-protocols/' + cpId, {}, {forceDelete, reason});
+  }
+
+  async copy(cpId, cp) {
+    return http.post('collection-protocols/' + cpId + '/copy', cp);
+  }
+
+  async publish(cpId, publishDetail) {
+    return http.post('collection-protocols/' + cpId + '/published-events', publishDetail);
+  }
+
+  async starCp(cpId) {
+    return http.post('collection-protocols/' + cpId + '/labels', {});
+  }
+
+  async unstarCp(cpId) {
+    return http.delete('collection-protocols/' + cpId + '/labels');
+  }
+
   async getCpes(cpId) {
     return http.get('collection-protocol-events', {cpId});
   }
@@ -114,36 +146,36 @@ class CollectionProtocol {
     return http.delete('specimen-requirements/' + req.id);
   }
 
-  async saveOrUpdate(cp) {
-    if (cp.id > 0) {
-      return http.put('collection-protocols/' + cp.id, cp);
+  async getConsentTiers(cpId) {
+    return http.get('collection-protocols/' + cpId + '/consent-tiers');
+  }
+
+  async saveOrUpdateConsentTier(tier) {
+    if (tier.id > 0) {
+      return http.put('collection-protocols/' + tier.cpId + '/consent-tiers/' + tier.id, tier);
     } else {
-      return http.post('collection-protocols', cp);
+      return http.post('collection-protocols/' + tier.cpId + '/consent-tiers', tier);
     }
   }
 
-  async getDependents(cp) {
-    return http.get('collection-protocols/' + cp.id + '/dependent-entities');
+  async deleteConsentTier(tier) {
+    return http.delete('collection-protocols/' + tier.cpId + '/consent-tiers/' + tier.id);
   }
 
-  async deleteCp(cpId, forceDelete, reason) {
-    return http.delete('collection-protocols/' + cpId, {}, {forceDelete, reason});
+  async getConsentTierDependents(tier) {
+    return http.get('collection-protocols/' + tier.cpId + '/consent-tiers/' + tier.id + '/dependent-entities');
   }
 
-  async copy(cpId, cp) {
-    return http.post('collection-protocols/' + cpId + '/copy', cp);
+  async waiveConsents(cpId) {
+    return http.put('collection-protocols/' + cpId + '/consents-waived', {consentsWaived: true});
   }
 
-  async publish(cpId, publishDetail) {
-    return http.post('collection-protocols/' + cpId + '/published-events', publishDetail);
+  async undoWaiveConsents(cpId) {
+    return http.put('collection-protocols/' + cpId + '/consents-waived', {consentsWaived: false});
   }
 
-  async starCp(cpId) {
-    return http.post('collection-protocols/' + cpId + '/labels', {});
-  }
-
-  async unstarCp(cpId) {
-    return http.delete('collection-protocols/' + cpId + '/labels');
+  async setConsentsCp(cpId, source) {
+    return http.put('collection-protocols/' + cpId + '/consents-source', source);
   }
 
   async getWorkflow(cpId, wfName) {
