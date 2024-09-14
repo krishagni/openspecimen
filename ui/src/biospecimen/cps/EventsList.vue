@@ -22,7 +22,7 @@
       </template>
 
       <template class="event-details" #expansionRow="{rowObject: {cpe}}">
-        <os-table-form ref="reqsTable" :tree-layout="true" :read-only="true"
+        <os-table-form class="os-cp-reqs-tab" ref="reqsTable" :tree-layout="true" :read-only="true"
           :data="{}" :items="cpe.reqs" :expanded="ctx.expandedReqs"
           :schema="reqsListSchema" :show-row-actions="true"
           @row-clicked="onReqClick($event.item)" v-if="cpe.reqs && cpe.reqs.length > 0">
@@ -35,6 +35,22 @@
             <os-overview :schema="reqSchema.fields" :object="reqCtx" />
           </template>
         </os-table-form>
+
+        <div v-else-if="cpe.reqs && cpe.reqs.length == 0">
+          <div v-if="cpe.activityStatus == 'Active'">
+            <os-message type="info">
+              <span v-t="'cps.no_reqs_add_new'">No specimen requirements to show. Create a new specimen requirement by click on the Add Requirement button below</span>
+            </os-message>
+
+            <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(cpe)" />
+          </div>
+
+          <div v-else>
+            <os-message type="info">
+              <span v-t="'cps.no_reqs'">No specimen requirements to show.</span>
+            </os-message>
+          </div>
+        </div>
       </template>
     </os-list-view>
   </div>
@@ -424,5 +440,10 @@ export default {
 .os-cp-events-tab :deep(table.p-datatable-table > tbody > tr > td) {
   vertical-align: middle;
   padding: 1rem;
+}
+
+.os-cp-reqs-tab {
+  max-height: 55vh;
+  overflow-y: auto;
 }
 </style>

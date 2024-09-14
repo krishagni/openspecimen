@@ -830,6 +830,8 @@
     "laterality": "Laterality",
     "laterality_req": "Laterality is mandatory",
     "months": "Months",
+    "no_reqs": "No specimen requirements to show.",
+    "no_reqs_add_new": "No specimen requirements to show. Create a new specimen requirement by click on the Add Requirement button below...",
     "parent_quantity": "Parent Quantity",
     "pathology_status": "Pathology Status",
     "pathology_status_req": "Pathology Status is mandatory",
