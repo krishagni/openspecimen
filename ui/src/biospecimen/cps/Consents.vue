@@ -25,13 +25,13 @@
             </div>
           </div>
 
-          <os-message type="info" v-if="!ctx.tiers || ctx.tiers.length == 0">
+          <os-message type="info" v-if="noDocsAndTiers">
             <span v-t="'cps.no_consents_in_source_cp'">No consents to display</span>
           </os-message>
         </template>
       </os-card>
   
-      <os-card v-else-if="!ctx.tiers || ctx.tiers.length == 0">
+      <os-card v-else-if="noDocsAndTiers">
         <template #body>
           <div>
             <span v-t="'cps.waive_consents_q'" v-if="!cp.consentsWaived">Do you want to waive the consents?</span>
@@ -47,7 +47,7 @@
         </template>
       </os-card>
 
-      <os-card v-if="!cp.consentsWaived && !cp.consentsSource && (!ctx.tiers || ctx.tiers.length == 0)">
+      <os-card v-if="!cp.consentsWaived && !cp.consentsSource && noDocsAndTiers">
         <template #body>
           <div>
             <span v-t="'cps.source_from_another_cp'">
@@ -87,7 +87,8 @@
       </os-grid-column>
     </os-grid>
 
-    <os-plugin-views v-else page="cp-detail" view="consents" :viewProps="{cp, ctx}" />
+    <os-plugin-views v-else page="cp-detail" view="consents" :viewProps="{cp, filters, ctx}"
+      @consent-documents="ctx.hasDocs = $event && $event.length > 0" />
 
     <os-dialog ref="addEditConsentTierDialog">
       <template #header>
@@ -132,7 +133,7 @@ import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['cp'],
+  props: ['cp', 'filters'],
 
   data() {
     return {
@@ -145,7 +146,9 @@ export default {
 
         cp: null,
 
-        hasEc: false
+        hasEc: !!this.$osSvc.ecDocSvc,
+
+        hasDocs: false
       },
 
       addEditFs: consentSchema.layout,
@@ -161,6 +164,10 @@ export default {
   computed: {
     consentsSourceUrl: function() {
       return routerSvc.getUrl('CpDetail.Consents', {cpId: this.cp.consentsSource.id});
+    },
+
+    noDocsAndTiers: function() {
+      return !this.ctx.hasDocs && (!this.ctx.tiers || this.ctx.tiers.length == 0);
     }
   },
 
@@ -260,6 +267,10 @@ export default {
 </script>
 
 <style scoped>
+.os-consents {
+  height: 100%;
+}
+
 .os-consents :deep(.os-card) {
   margin-bottom: 1rem;
 }

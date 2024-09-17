@@ -5,7 +5,7 @@
     :view="view"
     :query="query"
     :is="pluginView.component"
-    v-bind="viewProps"
+    v-bind="bindAttrs"
     v-for="pluginView of views"
     :key="pluginView.name"
     :ref="pluginView.name"
@@ -22,6 +22,12 @@ export default {
   computed: {
     views: function() {
       return pluginViewsReg.getViews(this.page, this.view);
+    },
+
+    bindAttrs: function() {
+      const attrs = {};
+      Object.assign(attrs, this.$attrs || {});
+      return Object.assign(attrs, this.viewProps || {});
     }
   }
 }
