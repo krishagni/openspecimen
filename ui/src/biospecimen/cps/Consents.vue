@@ -1,13 +1,13 @@
 <template>
   <div class="os-consents">
-    <os-page-toolbar v-if="!cp.consentsSource && ctx.tiers && ctx.tiers.length > 0">
+    <os-page-toolbar v-if="!ctx.hasEc && !cp.consentsSource && ctx.tiers && ctx.tiers.length > 0">
       <template #default>
         <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddEditConsentTierDialog({})" />
       </template>
     </os-page-toolbar>
 
-    <div v-if="cp.consentsSource">
-      <os-card>
+    <div>
+      <os-card v-if="cp.consentsSource">
         <template #body>
           <div>
             <span>
@@ -24,17 +24,52 @@
                 style="margin-left: 1rem;" />
             </div>
           </div>
+
+          <os-message type="info" v-if="!ctx.tiers || ctx.tiers.length == 0">
+            <span v-t="'cps.no_consents_in_source_cp'">No consents to display</span>
+          </os-message>
+        </template>
+      </os-card>
+  
+      <os-card v-else-if="!ctx.tiers || ctx.tiers.length == 0">
+        <template #body>
+          <div>
+            <span v-t="'cps.waive_consents_q'" v-if="!cp.consentsWaived">Do you want to waive the consents?</span>
+            <span v-t="'cps.collect_consents_q'" v-else>Consents are waived. Do you want to start collecting consents?</span>
+          </div>
+
+          <os-divider />
+
+          <div>
+            <os-button :label="$t('common.buttons.yes')" @click="waiveConsents" v-if="!cp.consentsWaived" />
+            <os-button :label="$t('common.buttons.yes')" @click="undoWaiveConsents" v-else />
+          </div>
         </template>
       </os-card>
 
-      <os-message type="info" v-if="!ctx.tiers || ctx.tiers.length == 0">
-        <span v-t="'cps.no_consents_in_source_cp'">No consents to display</span>
-      </os-message>
+      <os-card v-if="!cp.consentsWaived && !cp.consentsSource && (!ctx.tiers || ctx.tiers.length == 0)">
+        <template #body>
+          <div>
+            <span v-t="'cps.source_from_another_cp'">
+              Do you want to source consents from another collection protocol?
+            </span>
+          </div>
+
+          <os-divider />
+
+          <div>
+            <os-button :label="$t('common.buttons.yes')" @click="showSelectCpDialog" />
+          </div>
+        </template>
+      </os-card>
     </div>
 
-    <os-grid v-if="ctx.tiers && ctx.tiers.length > 0">
+    <os-grid v-if="!ctx.hasEc">
       <os-grid-column :width="12">
-        <os-card v-for="tier of ctx.tiers" :key="tier.id">
+        <os-button left-icon="plus" :label="$t('cps.add_consent_tier')" @click="showAddEditConsentTierDialog({})"
+          v-if="!cp.consentsWaived && !cp.consentsSource && (!ctx.tiers || ctx.tiers.length == 0)" />
+
+        <os-card v-for="tier of ctx.tiers" :key="tier.id" v-else>
           <template #body>
             <div class="os-consent-tier">
               <div class="statement">
@@ -52,45 +87,7 @@
       </os-grid-column>
     </os-grid>
 
-    <div v-else>
-      <os-card v-if="!cp.consentsSource">
-        <template #body>
-          <div>
-            <span v-t="'cps.waive_consents_q'" v-if="!cp.consentsWaived">Do you want to waive the consents?</span>
-            <span v-t="'cps.collect_consents_q'" v-else>Consents are waived. Do you want to start collecting consents?</span>
-          </div>
-
-          <os-divider />
-
-          <div>
-            <os-button :label="$t('common.buttons.yes')" @click="waiveConsents" v-if="!cp.consentsWaived" />
-            <os-button :label="$t('common.buttons.yes')" @click="undoWaiveConsents" v-else />
-          </div>
-        </template>
-      </os-card>
-
-      <div v-if="!cp.consentsWaived && !cp.consentsSource">
-        <os-card>
-          <template #body>
-            <div>
-              <span v-t="'cps.source_from_another_cp'">
-               Do you want to source consents from another collection protocol?
-              </span>
-            </div>
-
-            <os-divider />
-
-            <div>
-              <os-button :label="$t('common.buttons.yes')" @click="showSelectCpDialog" />
-            </div>
-          </template>
-        </os-card>
-
-        <div>
-          <os-button left-icon="plus" :label="$t('cps.add_consent_tier')" @click="showAddEditConsentTierDialog({})" />
-        </div>
-      </div>
-    </div>
+    <os-plugin-views v-else page="cp-detail" view="consents" :viewProps="{cp, ctx}" />
 
     <os-dialog ref="addEditConsentTierDialog">
       <template #header>
@@ -146,7 +143,9 @@ export default {
 
         deleteOpts: null,
 
-        cp: null
+        cp: null,
+
+        hasEc: false
       },
 
       addEditFs: consentSchema.layout,
