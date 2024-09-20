@@ -57,24 +57,37 @@ export default {
       }
 
       const {cpId, cprId, visitId, eventId, id: specimenId} = this.specimen;
-      return [
+      const bcrumb = [
         {
           url: routerSvc.getUrl('ParticipantsList', {cpId, cprId: -1}),
           label: cp.shortTitle
-        },
-        {
-          url: routerSvc.getUrl('ParticipantsListItemDetail.Overview', {cpId, cprId}),
-          label: this.cpr.ppid
-        },
-        {
-          url: routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId, eventId}),
-          label: cpSvc.getEventDescription(this.visit)
-        },
+        }
+      ];
+
+      if (!cp.specimenCentric) {
+        bcrumb.push(
+          {
+            url: routerSvc.getUrl('ParticipantsListItemDetail.Overview', {cpId, cprId}),
+            label: this.cpr.ppid
+          }
+        );
+
+        bcrumb.push(
+          {
+            url: routerSvc.getUrl('ParticipantsListItemVisitDetail.Overview', {cpId, cprId, visitId, eventId}),
+            label: cpSvc.getEventDescription(this.visit)
+          }
+        );
+      }
+
+      bcrumb.push(
         {
           url: routerSvc.getUrl('ParticipantsListItemSpecimenDetail.Overview', {cpId, cprId, visitId, eventId, specimenId}),
           label: this.specimen.label
         }
-      ];
+      );
+
+      return bcrumb;
     }
   },
 

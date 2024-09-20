@@ -223,10 +223,10 @@ class Workflow {
     );
 
     let params = {}
-    if (inputItems.length > 1) {
+    const specimen = specimens.length == 1 ? specimens[0] : null;
+    if (inputItems.length > 1 || (specimen && specimen.ppid == ('$$cp_reg_' + specimen.cpId + '$$'))) {
       params = this._getCpBreadcrumb(cpId, cpShortTitle, title);
     } else if (inputItems.length == 1) {
-      const specimen = specimens[0];
       const {cpId, cprId, visitId, id} = specimen;
       params = this._getVisitBreadcrumb(specimen, title);
       params['breadcrumb-3'] = JSON.stringify({
