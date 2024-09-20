@@ -680,10 +680,20 @@ export default {
       if (this.selectionMode == 'radio') {
         this.ctx.selectedIdx = this.items.indexOf(selected);
       } else if (this.selectionMode == 'checkbox') {
-        this.ctx.selectedRows = [];
+        const selectedRows = this.ctx.selectedRows = [];
         for (let idx = 0; idx < this.items.length; ++idx) {
-          this.ctx.selectedRows[idx] = selected.indexOf(this.items[idx]) > -1;
+          selectedRows[idx] = selected.indexOf(this.items[idx]) > -1;
         }
+
+        let allSelected = true;
+        for (let row of selectedRows) {
+          if (!row) {
+            allSelected = false;
+            break;
+          }
+        }
+
+        this.ctx.allSelected = allSelected;
       }
     },
 

@@ -159,7 +159,36 @@ export default {
 
   methods: {
     onItemsSelection: function(items) {
+      const prevSelectedItems = this.prevSelectedItems || [];
+
+      // new items = items not present in previous selection
+      const newItems = items.filter(item => prevSelectedItems.indexOf(item) == -1);
+
+      // removed items = items present in previous selection but not in the current selection
+      const rmItems  = prevSelectedItems.filter(item => items.indexOf(item) == -1);
+
+      const added = [];
+      for (let item of newItems) {
+        if (!item.expanded) {
+          // when an item is selected in collapsed mode, select all its descendants as well
+          Array.prototype.push.apply(added, this._getDescendants(this.items, item));
+        }
+      }
+
+      const removed = [];
+      for (let item of rmItems) {
+        if (!item.expanded) {
+          // when an item is de-selected in collapsed mode, de-select all its descendants as well
+          Array.prototype.push.apply(removed, this._getDescendants(this.items, item));
+        }
+      }
+
+      items = items.concat(added.filter(item => items.indexOf(item) == -1)) // add new items
+        .filter(item => removed.indexOf(item) == -1); // filter the removed items
+
       this.ctx.selectedSpecimens = items;
+      this.prevSelectedItems = items;
+      this.$refs.spmnsTable.setSelection(items);
     },
 
     collectSpecimens: async function() {
@@ -259,6 +288,22 @@ export default {
         const children = this._flattenSpecimens(specimen.children || [], depth + 1, uid);
         Array.prototype.push.apply(result, children);
         item.hasChildren = (children || []).length > 0;
+      }
+
+      return result;
+    },
+
+    _getDescendants: function(items, item) {
+      const result = [];
+      const workingList = [item];
+      while (workingList.length > 0) {
+        let parentItem = workingList.shift();
+        result.push(parentItem);
+
+        for (let child of parentItem.specimen.children || []) {
+          let childItem = items.find(({specimen}) => specimen == child);
+          workingList.push(childItem);
+        }
       }
 
       return result;
