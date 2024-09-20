@@ -50,6 +50,8 @@ angular.module('openspecimen')
       var fromState = sci && sci.fromState;
       if (fromState && fromState.name && fromState.data && fromState.data.vueView) {
         $injector.get('$state').go(sci.fromState.name, sci.fromParams);
+      } else if ($window.history.length == 1) {
+        $injector.get('$state').go('home');
       } else {
         $window.history.back();
       }
