@@ -285,11 +285,11 @@ export default {
       }
 
       if (typeof this.displayProp == 'function') {
-        return selected.map(s => this.displayProp(s)).join(', ');
+        return (selected || []).map(s => this.displayProp(s)).join(', ');
       } else if (this.displayProp) {
-        return selected.map(s => (typeof s == 'object' && s[this.displayProp]) || s).join(', ');
+        return (selected || []).map(s => (typeof s == 'object' && s[this.displayProp]) || s).join(', ');
       } else {
-        return selected.join(', ');
+        return (selected || []).join(', ');
       }
     },
 
