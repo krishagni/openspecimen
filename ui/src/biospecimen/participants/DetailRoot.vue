@@ -16,7 +16,7 @@ export default {
   inject: ['cpViewCtx'],
 
   setup() {
-    const cpr = ref({});
+    const cpr = ref({participant: {pmis: [], source: 'OpenSpecimen'}});
     provide('cpr', cpr);
     return { cpr };
   },
