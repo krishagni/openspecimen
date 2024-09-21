@@ -167,6 +167,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<UserSummary>> getUsers(RequestEvent<UserListCriteria> req) {
+		if (AuthUtil.getCurrentUser() == null) {
+			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		UserListCriteria crit = req.getPayload();
 		validateTypes(crit.type());
 		validateTypes(crit.excludeTypes());
@@ -181,6 +185,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Long> getUsersCount(RequestEvent<UserListCriteria> req) {
+		if (AuthUtil.getCurrentUser() == null) {
+			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		UserListCriteria crit = req.getPayload();
 		validateTypes(crit.type());
 		validateTypes(crit.excludeTypes());
@@ -246,11 +254,15 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	@Override
 	@PlusTransactional
 	public ResponseEvent<UserDetail> getUser(RequestEvent<Long> req) {
+		if (AuthUtil.getCurrentUser() == null) {
+			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
 		User user = daoFactory.getUserDao().getById(req.getPayload());
 		if (user == null) {
 			return ResponseEvent.userError(UserErrorCode.NOT_FOUND);
 		}
-		
+
 		return ResponseEvent.response(UserDetail.from(user));
 	}
 	
