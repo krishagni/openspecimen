@@ -716,6 +716,13 @@ export default {
       }
     },
 
+    scrollExpandedIntoView: function() {
+      setTimeout(
+        () => this.$el && this.$el.querySelector('.expanded-row')
+                .scrollIntoView({ behavior: 'smooth', block: 'center'})
+      );
+    },
+
     getViewState() {
       let result = [];
       for (let field of this.fields) {

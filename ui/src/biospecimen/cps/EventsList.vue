@@ -106,7 +106,7 @@ import util      from '@/common/services/Util.js';
 import cpResources from './Resources.js';
 
 export default {
-  props: ['cp', 'eventId'],
+  props: ['cp', 'eventId', 'reqId'],
 
   data() {
     return {
@@ -127,18 +127,37 @@ export default {
   },
 
   created() {
-    this._loadEvents().then(() => this.autoSelectEvent());
+    this._loadEvents().then(() => this.autoSelectEvent().then(reqs => this.autoSelectReq(reqs)));
   },
 
   watch: {
-    eventId: function(newVal, oldVal) {
-      if (newVal != oldVal) {
-        this.autoSelectEvent();
-      }
+    eventSr: {
+      handler: function(newVal, oldVal) {
+        const {eventId: oldEventId, reqId: oldReqId} = oldVal || {};
+        const {eventId: newEventId, reqId: newReqId} = newVal || {};
+
+        if (newEventId != oldEventId) {
+          this.autoSelectEvent().then(
+            (reqs) => {
+              this.autoSelectReq(reqs);
+            }
+          );
+        } else if (newReqId != oldReqId) {
+          const [eventItem] = this.ctx.expandedEvents;
+          const {cpe} = eventItem || {cpe: {}};
+          this.autoSelectReq(cpe.reqs);
+        }
+      },
+
+      deep: true
     }
   },
 
   computed: {
+    eventSr: function() {
+      return {eventId: this.eventId, reqId: this.reqId};
+    },
+
     reqsListSchema: function() {
       const result = util.clone(reqsListSchema);
       for (let field of result.columns) {
@@ -161,7 +180,7 @@ export default {
   },
 
   methods: {
-    autoSelectEvent: function() {
+    autoSelectEvent: async function() {
       let event = null;
       if (this.eventId > 0 ) {
         event = this.ctx.events.find(({cpe}) => cpe.id == this.eventId);
@@ -176,12 +195,52 @@ export default {
 
       const [prev] = this.ctx.expandedEvents;
       this.ctx.expandedEvents.length = 0;
+
+      let reqs = null;
       if (event && (!prev || prev != event)) {
         this.ctx.expandedEvents = [event];
 
         const {cpe} = event;
-        if (!cpe.reqs) {
-          this._loadReqs(cpe);
+        reqs = cpe.reqs;
+        if (!reqs) {
+          reqs = await this._loadReqs(cpe);
+        }
+      }
+
+      return reqs;
+    },
+
+    autoSelectReq: function(reqs) {
+      let req = null;
+      if (this.reqId > 0 && reqs) {
+        req = reqs.find(({sr}) => sr.id == this.reqId);
+        if (req == null) {
+          alert('Invalid SR ID');
+          routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.eventId});
+          return;
+        }
+
+        if (!this.ctx.expandedReqs || this.ctx.expandedReqs.length == 0 || this.ctx.expandedReqs[0] != req) {
+          this.onReqClick(req);
+          req.show = true;
+          setTimeout(
+            () => {
+              let parent = req.parent;
+              while (parent) {
+                parent.show = parent.expanded = true;
+                if (parent) {
+                  for (let sibling of reqs) {
+                    if (sibling.parentUid == parent.uid) {
+                      sibling.show = true;
+                    }
+                  }
+                }
+                parent = parent.parent;
+              }
+
+              this.$refs.reqsTable.scrollExpandedIntoView();
+            }
+          );
         }
       }
     },
@@ -250,6 +309,9 @@ export default {
       this.ctx.expandedReqs.length = 0;
       if (!prev || prev != item) {
         this.ctx.expandedReqs = [item];
+        routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.eventId, reqId: item.sr.id});
+      } else {
+        routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.eventId});
       }
     },
 
@@ -371,13 +433,14 @@ export default {
       return cpe.reqs;
     },
 
-    _flattenReqs: function(cpe, reqs, depth, parentUid) {
+    _flattenReqs: function(cpe, reqs, depth, parent) {
       let result = [], idx = 0;
       for (let req of reqs) {
         ++idx;
 
+        const parentUid = parent && parent.uid;
         const uid = parentUid !== undefined && parentUid !== null ? (parentUid + '_' + idx) : ('' + idx);
-        const item = {cp: this.cp, event: cpe, sr: req, depth, expanded: false, show: !parentUid, parentUid, uid};
+        const item = {cp: this.cp, event: cpe, sr: req, depth, expanded: false, show: !parentUid, parentUid, uid, parent};
         result.push(item);
 
         req.status = req.activityStatus == 'Closed' ? 'Closed' : 'Pending';
@@ -385,7 +448,7 @@ export default {
           req.defaultCustomFieldValuesJson = JSON.stringify(req.defaultCustomFieldValues, null, 2);
         }
 
-        const children = this._flattenReqs(cpe, req.children || [], depth + 1, uid);
+        const children = this._flattenReqs(cpe, req.children || [], depth + 1, item);
         Array.prototype.push.apply(result, children);
         item.hasChildren = (children || []).length > 0;
       }
