@@ -431,6 +431,14 @@ class CollectionProtocol {
     http.downloadFile(http.getUrl('collection-protocols/' + cp.id + '/workflows-file'));
   }
 
+  getRevisions(cp, opts) {
+    return http.get('collection-protocols/' + cp.id + '/published-events', opts || {});
+  }
+
+  downloadRevisionJson(cp, versionId) {
+    return http.downloadFile(http.getUrl('collection-protocols/' + cp.id + '/published-versions/' + versionId));
+  }
+
   async getCustomFieldsForm() {
     const extnInfo = await http.get('collection-protocols/extension-form');
     if (!extnInfo || !extnInfo.formId) {

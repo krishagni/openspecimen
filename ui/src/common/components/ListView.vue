@@ -432,7 +432,11 @@ export default {
         if (value || value == 0) {
           let extra = {metadata: column, context: data.rowObject};
           if (column.type == 'user') {
-            value = this.$filters.username(value, extra);
+            if (value instanceof Array) {
+              value = value.map(u => this.$filters.username(u, extra)).join(', ');
+            } else {
+              value = this.$filters.username(value, extra);
+            }
           } else if (column.type == 'date' || (column.type == 'datePicker' && column.showTime != true)) {
             value = this.$filters.date(value, extra);
           } else if (column.type == 'date-time' || column.type == 'dateTime' ||

@@ -933,6 +933,11 @@ const routes = [
             path: 'import-jobs',
             name: 'CpDetail.ImportJobs',
             component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ImportJobs.vue')
+          },
+          {
+            path: 'revisions',
+            name: 'CpDetail.Revisions',
+            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Revisions.vue')
           }
         ]
       },

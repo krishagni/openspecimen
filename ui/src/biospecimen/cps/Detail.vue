@@ -33,6 +33,11 @@
                 <os-icon name="list-alt" />
               </router-link>
             </li>
+            <li v-os-tooltip.right="$t('cps.revisions')" v-if="ctx.versioningEnabled">
+              <router-link :to="getRoute('Revisions')">
+                <os-icon name="history" />
+              </router-link>
+            </li>
           </ul>
         </os-side-menu>
 
@@ -46,6 +51,7 @@
 
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import formUtil from '@/common/services/FormUtil.js';
+import settingSvc from '@/common/services/Setting.js';
 
 export default {
   props: ['cpId'],
@@ -63,6 +69,12 @@ export default {
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
     }
+
+    settingSvc.getSetting('biospecimen', 'cp_versioning_enabled').then(
+      ([setting]) => {
+        this.ctx.versioningEnabled = setting.value == 'true' || setting.value == true
+      }
+    );
 
     this.loadCp();
   },
