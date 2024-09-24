@@ -148,11 +148,11 @@ a:focus, a:hover {
 }
 
 .os-key-values.bg-col .item {
-  padding-left: 300px;
+  margin-left: 300px;
 }
 
 .os-key-values.md-col .item {
-  padding-left: 250px;
+  margin-left: 250px;
 }
 
 .os-one-col > .item {
