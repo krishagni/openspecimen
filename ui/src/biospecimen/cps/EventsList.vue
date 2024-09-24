@@ -1,13 +1,16 @@
 <template>
   <os-page-toolbar>
-    <template #default>
+    <template #default v-show-if-allowed="cpResources.updateOpts">
       <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addEvent"
-        v-show-if-allowed="cpResources.updateOpts" />
+        v-if="!cp.specimenCentric" />
+
+      <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(ctx.events[0].cpe)" v-else-if="hasReqs" />
     </template>
   </os-page-toolbar>
 
   <div class="os-cp-events-tab">
     <os-list-view class="os-muted-list-header"
+      :class="cp.specimenCentric ? ['os-cp-hide-events'] : []"
       :data="ctx.events"
       :schema="eventsListSchema"
       :expanded="ctx.expandedEvents"
@@ -176,6 +179,13 @@ export default {
       }
 
       return {};
+    },
+
+    hasReqs: function() {
+      const {events} = this.ctx;
+      const {cpe} = events && events.length > 0 ? events[0] : {};
+      const reqs = (cpe && cpe.reqs) || [];
+      return reqs.length > 0;
     }
   },
 
@@ -191,6 +201,12 @@ export default {
         }
 
         this.onEventRowClick(event, true);
+      } else if (this.cp.specimenCentric) {
+        event = this.ctx.events.length > 0 ? this.ctx.events[0] : null;
+        if (event && event.cpe && event.cpe.id > 0) {
+          this.onEventRowClick(event, false);
+          return;
+        }
       }
 
       const [prev] = this.ctx.expandedEvents;
@@ -421,7 +437,11 @@ export default {
     _loadEvents: function() {
       return cpSvc.getCpes(this.cp.id).then(
         cpes => {
-          this.ctx.events = cpes.map(cpe => ({cpe}));
+          const events = this.ctx.events = cpes.map(cpe => ({cpe}));
+          if (events.length == 0 && this.cp.specimenCentric) {
+            events.push({cpe: {reqs: [], activityStatus: 'Active'}});
+          }
+
           return this.ctx.events;
         }
       );
@@ -508,5 +528,14 @@ export default {
 .os-cp-reqs-tab {
   max-height: 55vh;
   overflow-y: auto;
+}
+
+.os-cp-hide-events .os-cp-reqs-tab {
+  max-height: calc(100vh - 230px);
+}
+
+.os-cp-hide-events :deep(table.p-datatable-table > thead),
+.os-cp-hide-events :deep(table.p-datatable-table > tbody > tr:not(.p-datatable-row-expansion)) {
+  display: none;
 }
 </style>

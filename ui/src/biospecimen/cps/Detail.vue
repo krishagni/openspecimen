@@ -23,12 +23,12 @@
                 <os-icon name="eye" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('cps.consents')">
+            <li v-os-tooltip.right="$t('cps.consents')" v-if="!ctx.cp.specimenCentric">
               <router-link :to="getRoute('Consents')">
                 <os-icon name="file-signature" />
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('cps.events')">
+            <li v-os-tooltip.right="$t(ctx.cp.specimenCentric ? 'cps.reqs': 'cps.events')">
               <router-link :to="getRoute('Events')">
                 <os-icon name="list-alt" />
               </router-link>

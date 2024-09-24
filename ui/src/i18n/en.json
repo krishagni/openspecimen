@@ -858,6 +858,7 @@
     "req_deleted": "Specimen requirement {type} deleted.",
     "req_name": "Name",
     "req_saved": "Specimen requirement {type} saved.",
+    "reqs": "Requirements",
     "reviewers": "Reviewers",
     "reviewers_req": "Reviewers are mandatory",
     "select_cp": "Select Collection Protocol",
