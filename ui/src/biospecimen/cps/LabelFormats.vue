@@ -6,7 +6,7 @@
 
     <template #actions>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="switchToEditMode"
-        v-if="!editMode" />
+        v-show-if-allowed="cpResources.updateOpts" v-if="!editMode" />
 
       <os-button-link class="btn" left-icon="question-circle" :label="$t('common.buttons.help')"
         url="https://openspecimen.atlassian.net/wiki/x/TgBvG" :new-tab="true" />
@@ -48,6 +48,8 @@ import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import formUtil  from '@/common/services/FormUtil.js';
 import util      from '@/common/services/Util.js';
 
+import cpResources from './Resources.js';
+
 export default {
   props: ['cp'],
 
@@ -69,7 +71,9 @@ export default {
 
       ctx: {},
 
-      dataCtx: {}
+      dataCtx: {},
+
+      cpResources
     }
   },
 
