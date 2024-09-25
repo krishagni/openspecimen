@@ -938,6 +938,18 @@ const routes = [
             path: 'revisions',
             name: 'CpDetail.Revisions',
             component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Revisions.vue')
+          },
+          {
+            path: 'settings',
+            name: 'CpDetail.Settings',
+            component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Settings.vue'),
+            children: [
+              {
+                path: 'label-formats',
+                name: 'CpDetail.Settings.LabelFormats',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/LabelFormats.vue')
+              }
+            ]
           }
         ]
       },

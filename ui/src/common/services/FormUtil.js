@@ -26,7 +26,7 @@ class FormUtil {
       }
 
       if (fields.length > 0) {
-        result.rows.push({label: row.label, labelCode: row.labelCode, fields: fields});
+        result.rows.push({...row, fields});
       }
     }
 

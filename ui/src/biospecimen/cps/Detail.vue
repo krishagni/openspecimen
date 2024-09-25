@@ -33,6 +33,11 @@
                 <os-icon name="list-alt" />
               </router-link>
             </li>
+            <li v-os-tooltip.right="$t('cps.settings')">
+              <router-link :to="getRoute('Settings')">
+                <os-icon name="cogs" />
+              </router-link>
+            </li>
             <li v-os-tooltip.right="$t('cps.revisions')" v-if="ctx.versioningEnabled">
               <router-link :to="getRoute('Revisions')">
                 <os-icon name="history" />
