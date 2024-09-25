@@ -8,6 +8,10 @@
     </div>
 
     <div class="row" v-for="(formRow, rowIdx) of formRows" :key="rowIdx">
+      <div class="section" v-if="formRow.sectionLabel || formRow.sectionLabelCode">
+        <span>{{toLabelText(formRow.sectionLabelCode, formRow.sectionLabel)}}</span>
+      </div>
+
       <div class="title" v-if="formRow.label || formRow.labelCode">
         <os-label>
           <span>{{label(formRow)}}</span>
@@ -120,10 +124,14 @@ export default {
      },
 
      label: function(field) {
-       if (field.labelCode) {
-         return this.$t(field.labelCode);
-       } else if (field.label) {
-         return util.sanitizeHtml(field.label);
+       return this.toLabelText(field.labelCode, field.label);
+     },
+
+     toLabelText: function(labelCode, label) {
+       if (labelCode) {
+         return this.$t(labelCode);
+       } else if (label) {
+         return util.sanitizeHtml(label);
        } else {
          return 'Unknown';
        }
@@ -316,7 +324,7 @@ export default {
          }
 
          if (formRow.length > 0) {
-           result.push({label: row.label, labelCode: row.labelCode, fields: formRow});
+           result.push({...row, fields: formRow});
          }
        }
 
@@ -401,6 +409,22 @@ form {
 .row, :slotted(.row) {
   display: flex;
   flex-wrap: wrap;
+}
+
+.row .section,
+:slotted(.row .section) {
+  flex: 1 1 100%;
+  padding: 0.5rem 1rem 0rem 1rem;
+  border-top: 1px solid #ddd;
+  font-weight: bold;
+  color: #959595;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  padding-top: 5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: 100%;
 }
 
 .row .title,
