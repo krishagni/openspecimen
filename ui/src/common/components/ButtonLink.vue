@@ -35,6 +35,7 @@ export default {
 </script>
 
 <style scoped>
+a.btn,
 .os-page-toolbar a.button-link {
   color: #666666;
   background: #f5f5f5;
@@ -52,6 +53,7 @@ export default {
   padding: 7px 16px;
 }
 
+a.btn:hover,
 .os-page-toolbar a.button-link:hover {
   text-decoration: none;
   background: #ddd;
