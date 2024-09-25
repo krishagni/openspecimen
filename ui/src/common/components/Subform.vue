@@ -50,7 +50,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 import i18n         from '@/common/services/I18n.js';
 
 export default {
-  props: ['modelValue', 'fields', 'disabled', 'context', 'read-only-collection'],
+  props: ['modelValue', 'fields', 'disabled', 'context', 'read-only-collection', 'disabled-fields'],
 
   setup() {
     return {
@@ -108,6 +108,10 @@ export default {
         }
 
         field.disabled = (this.disabled == 'true' || this.disabled == true);
+        if (!field.disabled) {
+          field.disabled = (this.disabledFields && this.disabledFields.indexOf(field.name) != -1);
+        }
+
         result.push(field);
       }
 
