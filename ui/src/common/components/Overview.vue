@@ -113,7 +113,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['object', 'schema', 'columns', 'bgCol'],
+  props: ['object', 'schema', 'columns', 'bgCol', 'showEmptyFields'],
 
   components: {
     Section
@@ -136,8 +136,10 @@ export default {
         if (field.type == 'subform') {
           // convert into 2-d array of values: [ [1, "abc"], [2, "xyz"], [3, "abcxyz"] ]
           let values = this.getValue(this.object, field) || [];
-          if (values == undefined || values == null || values == '-' ||
-            (values instanceof Array && values.length == 0)) {
+          if (!this.showEmptyFields &&
+              (values == undefined || values == null || values == '-' ||
+                (values instanceof Array && values.length == 0))
+             ) {
             continue;
           }
 
@@ -159,7 +161,7 @@ export default {
           subformFields.push({...field, value: values});
         } else {
           let value = this.getValue(this.object, field);
-          if (value == null || value == undefined || value == '-') {
+          if (!this.showEmptyFields && (value == null || value == undefined || value == '-')) {
             continue;
           }
 
