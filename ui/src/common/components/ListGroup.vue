@@ -5,7 +5,13 @@
       <slot name="header"></slot>
     </template>
 
-    <div class="os-list-group">
+    <template #actions>
+      <slot name="actions"></slot>
+    </template>
+
+    <slot name="empty-list" v-if="!list || list.length == 0" />
+
+    <div class="os-list-group" v-else>
       <a v-for="(item, idx) of list" :key="idx"
         class="item" :class="{active: item == selected}"
         @click="$emit('on-item-select', {item: item, index: idx})">

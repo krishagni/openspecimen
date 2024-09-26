@@ -14,13 +14,6 @@
         </template>
       </os-card>
     </router-link>
-    <router-link :to="{name: 'CpDetail.Settings.Distribution', params: {cpId: cp.id}}">
-      <os-card>
-        <template #body>
-          <span v-t="'cps.distribution'">Distribution</span>
-        </template>
-      </os-card>
-    </router-link>
   </div>
 
   <router-view :cp="cp" v-else-if="cp && cp.id > 0" :key="cp.id" @cp-saved="onSave($event)" />
