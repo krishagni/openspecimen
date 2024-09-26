@@ -948,6 +948,11 @@ const routes = [
                 path: 'label-formats',
                 name: 'CpDetail.Settings.LabelFormats',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/LabelFormats.vue')
+              },
+              {
+                path: 'containers',
+                name: 'CpDetail.Settings.Container',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ContainerSettings.vue')
               }
             ]
           }

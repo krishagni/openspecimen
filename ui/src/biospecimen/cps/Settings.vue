@@ -7,6 +7,13 @@
         </template>
       </os-card>
     </router-link>
+    <router-link :to="{name: 'CpDetail.Settings.Container', params: {cpId: cp.id}}">
+      <os-card>
+        <template #body>
+          <span v-t="'cps.container'">Container</span>
+        </template>
+      </os-card>
+    </router-link>
   </div>
 
   <router-view :cp="cp" v-else-if="cp && cp.id > 0" :key="cp.id" @cp-saved="onSave($event)" />
@@ -52,14 +59,15 @@ export default {
 <style scoped>
 .os-cp-settings {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
-.os-cp-settings :deep(.os-card) {
+.os-cp-settings a {
   width: 20%;
   text-align: center;
   font-size: 1rem;
   cursor: pointer;
+  margin: 0.75rem;
 }
 
 .os-cp-settings a {

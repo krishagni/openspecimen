@@ -308,6 +308,7 @@
     "no_form_records": "No form records to display. Create a new record by clicking on the Add button...",
     "no_form_records_no_add": "No form records to display.",
     "none": "None",
+    "not_specified": "Not Specified",
 
     "notifs": {
       "loading": "Loading notifications. Please wait for a moment..",
@@ -772,6 +773,15 @@
     "aliquots_created": "Aliquots created.",
     "anatomic_site": "Anatomic Site",
     "anatomic_site_req": "Anatomic Site is mandatory",
+    "auto_allocation": "Auto Allocation",
+    "auto_allocation_help": {
+      "least-empty": "The container with the least number of vacant positions that can store the specimens in question is chosen first. This helps users to back fill positions freed up by specimens that are given away.",
+      "recently-used": "The container that was recently used to store specimens of the same type and CP, is chosen first."
+    },
+    "auto_allocation_methods": {
+      "least-empty": "Least Empty Container",
+      "recently-used": "Recently Used Container"
+    },
     "barcode_fmt": "Barcode Format",
     "change_summary": "Summary of Changes",
     "change_reason": "Reason",
@@ -802,6 +812,9 @@
     "consent_tier_saved": "Consent {statementCode} saved.",
     "consents": "Consents",
     "consents_sourced_from": "Consents are sourced from the collection protocol - ",
+    "container": "Container",
+    "container_settings": "Container Settings",
+    "container_settings_saved": "Container Settings saved.",
     "coordinators": "Coordinators",
     "cp": "Collection Protocol",
     "cp_closed": "Collection Protocol {shortTitle} closed!",
@@ -925,6 +938,8 @@
     "storage_site_based_access": "Storage Site Based Access",
     "storage_type": "Stored in Repository?",
     "storage_type_req": "Choose the appropriate option",
+    "store_aliquots_in_same_box": "Store aliquots in the same box",
+    "store_aliquots_in_same_box_help": "All aliquots being created at once under a parent are stored in the same box.",
     "store_spr": "Store SPRs?",
     "summary_of_changes": "Summary of Changes",
     "summary_of_changes_req": "Summary of Changes is mandatory",
