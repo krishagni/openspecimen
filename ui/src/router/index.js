@@ -953,6 +953,11 @@ const routes = [
                 path: 'containers',
                 name: 'CpDetail.Settings.Container',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/ContainerSettings.vue')
+              },
+              {
+                path: 'distribution-protocols',
+                name: 'CpDetail.Settings.Distribution',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/DistributionSettings.vue')
               }
             ]
           }
