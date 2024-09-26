@@ -72,6 +72,7 @@ import SelectButton from './SelectButton.vue';
 import SideMenu from './SideMenu.vue';
 import SignaturePad from './SignaturePad.vue';
 import SiteDropdown from './SiteDropdown.vue';
+import SortList from './SortList.vue';
 import Span from './Span.vue';
 import SpecimenActions from './SpecimenActions.vue';
 import SpecimenDescription from './SpecimenDescription.vue';
@@ -174,6 +175,7 @@ export default {
     app.component('os-side-menu',        SideMenu);
     app.component('os-signature-pad',    SignaturePad);
     app.component('os-site-dropdown',    SiteDropdown);
+    app.component('os-sort-list',        SortList);
     app.component('os-span',             Span);
     app.component('os-specimen-actions', SpecimenActions);
     app.component('os-specimen-description', SpecimenDescription);
