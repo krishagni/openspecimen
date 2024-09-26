@@ -958,6 +958,11 @@ const routes = [
                 path: 'distribution-protocols',
                 name: 'CpDetail.Settings.Distribution',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/DistributionSettings.vue')
+              },
+              {
+                path: 'forms',
+                name: 'CpDetail.Settings.Forms',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Forms.vue')
               }
             ]
           }

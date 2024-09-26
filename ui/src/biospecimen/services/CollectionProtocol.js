@@ -178,6 +178,19 @@ class CollectionProtocol {
     return http.put('collection-protocols/' + cpId + '/consents-source', source);
   }
 
+  async getForms(cpId, entityTypes) {
+    return http.get('collection-protocols/' + cpId + '/forms', {entityType: entityTypes || []});
+  }
+
+  async saveWorkflow(cpId, wfName, wfData) {
+    return http.patch('collection-protocols/' + cpId + '/workflows', [{name: wfName, data: wfData}]).then(
+      ({workflows}) => {
+        this.workflows[cpId] = workflows;
+        return (workflows[wfName] && workflows[wfName].data) || {}
+      }
+    );
+  }
+
   async getWorkflow(cpId, wfName) {
     let workflow = await this.loadWorkflows(cpId, wfName);
     if (workflow && workflow.data) {
