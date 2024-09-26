@@ -129,48 +129,27 @@ a:focus, a:hover {
   list-style-type: none;
   margin: 0px 0px 20px 0px;
   padding: 0;
-}
-
-.os-key-values:after {
-  content: '';
-  display: block;
-  clear: both;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .os-key-values .item {
-  margin: 2px 0px 0px 0px;
-  position: relative;
-  margin-left: 150px;
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
-  break-inside: avoid-column;
-  display: table;
-}
-
-.os-key-values.bg-col .item {
-  margin-left: 300px;
-}
-
-.os-key-values.md-col .item {
-  margin-left: 250px;
+  display: flex;
+  flex-direction: row;
 }
 
 .os-one-col > .item {
-  width: 100%;
+  flex: 100%;
 }
 
-.os-key-values.os-two-cols {
-  column-count: 2;
-  -webkit-perspective: 1;
+.os-two-cols > .item {
+  flex: 50%;
 }
 
 .os-key-values .item .key, .os-key-values .item .value {
-  overflow: hidden;
-  text-overflow: ellipsis;
   padding: 2px 5px 2px 5px;
   line-height: 24px;
-  width: 100%;
-  float: left;
   word-break: break-word;
   white-space: break-spaces;
 }
@@ -183,40 +162,38 @@ a:focus, a:hover {
 .os-key-values .item .key {
   color: #707070;
   font-weight: normal;
-  clear: left;
-  margin-left: -150px;
   width: 150px;
 }
 
+.os-key-values .item .value {
+  flex: 1;
+}
+
 .os-key-values.md-col .item .key {
-  margin-left: -250px;
   width: 250px;
 }
 
 .os-key-values.bg-col .item .key {
-  margin-left: -300px;
   width: 300px;
 }
 
 .os-key-values.vertical .item {
-  padding-left: 0px;
-  width: 100%;
+  flex: 100%;
+  flex-direction: column;
+  padding: 0.5rem;
 }
 
 .os-key-values.vertical .item:after {
   content: ' ';
   display: inline-block;
   border-bottom: 1px solid #ddd;
-  width: 100%;
 }
 
 .os-key-values.vertical .item:last-child:after {
-  width: 0%;
+  border-bottom: 0px;
 }
 
 .os-key-values.vertical .item .key.key-sm {
-  margin-left: 0px;
-  width: 100%;
 }
 
 .os-key-values.vertical .item .key.key-sm.strong {
@@ -225,9 +202,8 @@ a:focus, a:hover {
 }
 
 @media only screen and (max-width: 768px) {
-  .os-key-values.os-two-cols {
-    column-count: 1;
-    -webkit-perspective: 1;
+  .os-key-values.os-two-cols > .item {
+    flex: 100%;
   }
 }
 
