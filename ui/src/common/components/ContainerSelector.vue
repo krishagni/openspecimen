@@ -17,10 +17,12 @@
       </div>
       <table v-else class="os-table os-boxed">
         <thead>
-          <th v-t="'containers.name'">Name</th>
-          <th v-t="'containers.dimension'">Dimension</th>
-          <th v-t="'containers.free_locations'">Free Locations</th>
-          <th>&nbsp;</th>
+          <tr>
+            <th v-t="'containers.name'">Name</th>
+            <th v-t="'containers.dimension'">Dimension</th>
+            <th v-t="'containers.free_locations'">Free Locations</th>
+            <th>&nbsp;</th>
+          </tr>
         </thead>
         <tbody>
           <tr v-for="cont of containerTree" :key="cont.id">

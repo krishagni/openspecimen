@@ -1,5 +1,5 @@
 
-import jsep from 'jsep/dist/jsep.js';
+import jsep from 'jsep';
 
 class ExpressionUtil {
   cachedExprs = {};
