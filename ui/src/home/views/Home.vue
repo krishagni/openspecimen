@@ -97,25 +97,25 @@
               <th v-t="'common.home.widget_width'">Width</th>
             </tr>
           </thead>
-            <draggable v-model="ctx.availableWidgets" tag="tbody" handle=".os-widget-row-grip" class="os-table-body">
-              <tr class="row os-widget-row-grip" v-for="widget of ctx.availableWidgets" :key="widget.name">
-                <td class="col os-widget-selector">
-                  <os-boolean-checkbox v-model="widget.selected" />
-                </td>
-                <td class="col">
-                  <span>{{widget.displayLabel}}</span>
-                </td>
-                <td class="col">
-                  <os-dropdown v-model="widget.width" :md-type="true" :optional="false"
-                    :list-source="{
-                      'displayProp': 'value',
-                      'selectProp': 'value',
-                      'options': [{'value': 1}, {'value': 2}, {'value': 3}, {'value': 4}, {'value': 5}, {'value': 6}]
-                    }"
-                  />
-                </td>
-              </tr>
-            </draggable>
+          <draggable v-model="ctx.availableWidgets" tag="tbody" handle=".os-widget-row-grip" class="os-table-body">
+            <tr class="row os-widget-row-grip" v-for="widget of ctx.availableWidgets" :key="widget.name">
+              <td class="col os-widget-selector">
+                <os-boolean-checkbox v-model="widget.selected" />
+              </td>
+              <td class="col">
+                <span>{{widget.displayLabel}}</span>
+              </td>
+              <td class="col">
+                <os-dropdown v-model="widget.width" :md-type="true" :optional="false"
+                  :list-source="{
+                    'displayProp': 'value',
+                    'selectProp': 'value',
+                    'options': [{'value': 1}, {'value': 2}, {'value': 3}, {'value': 4}, {'value': 5}, {'value': 6}]
+                  }"
+                />
+              </td>
+            </tr>
+          </draggable>
         </table>
       </template>
       <template #footer>
