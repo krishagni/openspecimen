@@ -28,6 +28,8 @@
         </template>
       </os-card>
     </router-link>
+
+    <os-plugin-views page="cp-detail" view="settings" :viewProps="{cp}" />
   </div>
 
   <router-view :cp="cp" v-else-if="cp && cp.id > 0" :key="cp.id" @cp-saved="onSave($event)" />
@@ -74,14 +76,16 @@ export default {
 .os-cp-settings {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
-.os-cp-settings a {
-  width: 25%;
+.os-cp-settings > a,
+.os-cp-settings :deep(> a) {
+  margin: 0.75rem;
+  width: calc(25% - 1.5rem);
   text-align: center;
   font-size: 1rem;
   cursor: pointer;
-  margin: 0.75rem;
   color: #333;
   text-decoration: none;
 }
