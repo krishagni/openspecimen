@@ -33,6 +33,10 @@
             <span>{{field.value}}</span>
           </span>
         </span>
+
+        <div class="help">
+          <slot :name="field.name"></slot>
+        </div>
       </span>
     </li>
   </ul>
