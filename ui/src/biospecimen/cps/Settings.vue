@@ -77,14 +77,11 @@ export default {
 }
 
 .os-cp-settings a {
-  width: 20%;
+  width: 25%;
   text-align: center;
   font-size: 1rem;
   cursor: pointer;
   margin: 0.75rem;
-}
-
-.os-cp-settings a {
   color: #333;
   text-decoration: none;
 }
