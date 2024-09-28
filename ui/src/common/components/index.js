@@ -25,6 +25,7 @@ import DeleteObject from './DeleteObject.vue';
 import Dialog from './Dialog.vue';
 import Divider from './Divider.vue';
 import Dropdown from './Dropdown.vue';
+import Editor from './Editor.vue';
 import FileUpload from './FileUpload.vue';
 import Form from './Form.vue';
 import FormGroup from './FormGroup.vue';
@@ -128,6 +129,7 @@ export default {
     app.component('os-dialog',           Dialog);
     app.component('os-divider',          Divider);
     app.component('os-dropdown',         Dropdown);
+    app.component('os-editor',           Editor);
     app.component('os-file-upload',      FileUpload);
     app.component('os-form',             Form);
     app.component('os-form-group',       FormGroup);

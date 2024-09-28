@@ -9,6 +9,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 class FieldFactory {
 
   fieldTypes = {
+    editor: 'os-editor',
     dropdown: 'os-dropdown',
     multiselect: 'os-multi-select-dropdown',
     groupselect: 'os-multi-select-group-dropdown',
