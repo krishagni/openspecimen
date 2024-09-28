@@ -14,8 +14,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(sfRowData, sfRdIdx) of inputValue" :key="sfRdIdx">
-            <td v-for="(field, cidx) of sfFields" :key="cidx">
+          <tr v-for="(sfRowData, sfRdIdx) of inputValue" :key="'sf_'+ sfRdIdx">
+            <td v-for="(field, cidx) of sfFields" :key="'sf_' + sfRdIdx + '_' + cidx">
               <component :ref="'osField-' + cidx" :is="field.component" v-bind="field" v-model="sfRowData[field.name]"
                 :form="{...context, ...sfRowData}" :context="{...context, ...sfRowData}"
                 @update:model-value="handleInput(sfRowData, sfRdIdx, field)">
@@ -45,9 +45,10 @@
 
 import useVuelidate from '@vuelidate/core'
 
-import exprUtil from '@/common/services/ExpressionUtil.js';
+import exprUtil     from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
 import i18n         from '@/common/services/I18n.js';
+import util         from '@/common/services/Util.js';
 
 export default {
   props: ['modelValue', 'fields', 'disabled', 'context', 'read-only-collection', 'disabled-fields'],
@@ -85,8 +86,9 @@ export default {
     },
 
     sfFields: function() {
+      const fields = util.clone(this.fields);
       const result = [];
-      for (let field of this.fields) {
+      for (let field of fields) {
         if (!field.component) {
           const component = fieldFactory.getComponent(field.type);
           if (component) {
