@@ -9,6 +9,7 @@
 <script>
 
 import tinymce from 'tinymce/tinymce';
+import 'tinymce/models/dom';
 
 import 'tinymce/themes/silver/theme';
 
@@ -16,7 +17,6 @@ import 'tinymce/plugins/image';
 import 'tinymce/plugins/importcss';
 import 'tinymce/plugins/link';
 import 'tinymce/plugins/lists';
-import 'tinymce/plugins/textcolor';
 import 'tinymce/plugins/table';
 import 'tinymce/plugins/fullscreen';
 
@@ -35,7 +35,7 @@ export default {
   },
 
   created() {
-    this.id = Date.now() + '_' + Math.ceil(Math.random(100000));
+    this.id = 'editor_' + Date.now() + '_' + Math.ceil(Math.random(100000));
   },
 
   mounted() {
@@ -49,8 +49,8 @@ export default {
       menubar: '',
       branding: false,
       elementpath: false,
-      plugins: 'image, link, lists, textcolor, table, fullscreen',
-      toolbar1: 'undo redo | formatselect | fontselect | fontsizeselect | removeformat | fullscreen',
+      plugins: 'image, link, lists, table, fullscreen',
+      toolbar1: 'undo redo | blocks | fontfamily | fontsize | removeformat | fullscreen',
       toolbar2: 'bold italic underline | insertfile link image | forecolor backcolor | ' +
                 'bullist numlist | table | outdent indent | ' +
                 'alignleft aligncenter alignright alignjustify '
@@ -99,5 +99,23 @@ export default {
 
 .tox .tox-statusbar {
   display: none!important;
+}
+
+.tox .tox-promotion {
+  display: none!important;
+}
+
+.tox .tox-menubar {
+  display: none!important;
+}
+
+.tox .tox-editor-header {
+  box-shadow: none!important;
+  border-bottom: 1px solid #ced4da!important;
+}
+
+.tox .tox-edit-area::before {
+  border: 1px solid #007bff!important;
+  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
 }
 </style>
