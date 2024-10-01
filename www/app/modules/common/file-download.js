@@ -8,9 +8,7 @@ angular.module('os.common')
     })
   })
   .controller('FileDownloadCtrl',
-    function($timeout, $stateParams, $state, $window, Alerts) {
-      $state.go('home');
-      Alerts.info('common.download_initiated');
-      $timeout(function() { $window.open($stateParams.downloadUrl, '_self') }, 500);
+    function($stateParams, VueApp) {
+      VueApp.setVueView('download-file', {downloadUrl: $stateParams.downloadUrl});
     }
   );

@@ -198,6 +198,7 @@
       "title": "Your feedback counts!"
     },
 
+    "file_download_initiated": "File download initiated. Please wait for a moment...",
     "file_not_selected": "File not selected.",
     "file_upload_error": "Error uploading the file.",
     "file_uploaded": "File uploaded.",
