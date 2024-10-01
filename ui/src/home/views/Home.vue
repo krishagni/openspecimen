@@ -75,6 +75,11 @@
                         <span v-t="'common.home.past_webinars'">Past Webinars</span>
                       </a>
                     </li>
+                    <li>
+                      <a :href="ctx.trainingUrl" target="_blank">
+                        <span v-t="'common.home.training'">Training</span>
+                      </a>
+                    </li>
                   </ul>
                 </template>
               </os-card>
@@ -138,6 +143,7 @@ import { VueDraggableNext } from "vue-draggable-next";
 
 import homePageSvc from '@/common/services/HomePageService.js';
 import i18n from '@/common/services/I18n.js';
+import settingSvc from '@/common/services/Setting.js';
 
 export default {
   name: 'HomePage',
@@ -151,7 +157,9 @@ export default {
       ctx: {
         widgets: [],
 
-        favorites: []
+        favorites: [],
+
+        trainingUrl: ''
       }
     }
   },
@@ -161,6 +169,12 @@ export default {
     this.ctx.widgets = widgets || [];
     this._loadFavorites();
     homePageSvc.registerFavoritesListener(() => this._loadFavorites());
+
+    settingSvc.getSetting('training', 'training_url').then(
+      ([setting]) => {
+        this.ctx.trainingUrl = setting.value || 'http://training.openspecimen.org';
+      }
+    );
   },
 
   watch: {
