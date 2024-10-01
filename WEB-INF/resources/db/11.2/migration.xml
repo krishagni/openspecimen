@@ -33,4 +33,30 @@
       delete from rbac_resources where name = 'SpecimenGel'
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Cleanup training link configurations">
+    <sql>
+      delete from
+        os_cfg_settings
+      where
+        property_id in (
+          select
+            p.identifier
+          from
+            os_cfg_props p
+            inner join os_modules m on m.identifier = p.module_id
+          where
+            m.name = 'training' and
+            p.name not in ('training_url', 'release_notes', 'manual_search_link')
+        )
+    </sql>
+
+    <sql>
+      delete from
+        os_cfg_props
+      where
+        module_id in (select identifier from os_modules where name = 'training') and
+        name not in ('training_url', 'release_notes', 'manual_search_link')
+    </sql>
+  </changeSet>
 </databaseChangeLog>

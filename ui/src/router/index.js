@@ -17,6 +17,13 @@ const routes = [
       },
 
       {
+        path: 'download-file',
+        name: 'DownloadFileView',
+        component: () => import(/* webpackChunkName: "common" */ '../common/components/DownloadFileView.vue'),
+        props: (route) => ({downloadUrl: route.query.downloadUrl})
+      },
+
+      {
         path: 'home',
         name: 'HomePage',
         component: () => import(/* webpackChunkName: "common" */ '../home/views/Home.vue'),
