@@ -132,7 +132,7 @@
             </cell>
           </form-group>
 
-          <form-group>
+          <form-group v-if="!hidePageSizeSelector">
             <cell :width="12">
               <os-label class="underlined">
                 <span v-t="'common.lists.records_to_display'">Records to Display</span>
@@ -216,10 +216,18 @@ export default {
     'showRowActions',
     'noRecordsMsg',
     'rowClass',
-    'idFilter'
+    'idFilter',
+    'hidePageSizeSelector'
   ],
 
-  emits: ['selectedRows', 'filtersUpdated', 'pageSizeChanged', 'rowClicked', 'sort', 'rowStarToggled'],
+  emits: [
+    'selectedRows',
+    'filtersUpdated',
+    'pageSizeChanged',
+    'rowClicked',
+    'sort',
+    'rowStarToggled'
+  ],
 
   components: {
     'data-table': DataTable,
