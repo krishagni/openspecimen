@@ -21,7 +21,9 @@ export default {
 
   computed: {
     views: function() {
-      return pluginViewsReg.getViews(this.page, this.view);
+      const views = [...pluginViewsReg.getViews(this.page, this.view)];
+      views.sort(({name: name1}, {name: name2}) => name1.localeCompare(name2));
+      return views;
     },
 
     bindAttrs: function() {
