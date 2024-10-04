@@ -3,6 +3,8 @@
   <Panel class="os-panel">
     <template #header>
       <slot name="header"></slot>
+
+      <slot name="primary-actions"></slot>
     </template>
 
     <template #icons>
@@ -33,6 +35,10 @@ export default {
   max-height: 100%;
 }
 
+.os-panel.os-full-height-panel {
+  height: 100%;
+}
+
 .os-panel :deep(.p-panel-header) {
   padding: 0.5rem 1rem;
   display: flex;
@@ -52,7 +58,7 @@ export default {
 }
 
 .os-panel :deep(.p-panel-header + .p-toggleable-content) {
-  height: calc(100% - 2.375rem);
+  height: calc(100% - 3.375rem);
 }
 
 .os-panel :deep(.p-panel-content) {
