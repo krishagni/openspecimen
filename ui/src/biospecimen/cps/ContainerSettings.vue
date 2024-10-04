@@ -1,10 +1,10 @@
 <template>
   <os-panel>
     <template #header>
-      <span v-t="'cps.container_settings'">Container Settings</span>
+      <span class="title" v-t="'cps.container_settings'">Container Settings</span>
     </template>
 
-    <template #actions>
+    <template #primary-actions>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="switchToEditMode"
         v-show-if-allowed="cpResources.updateOpts" v-if="!editMode" />
 

@@ -1,10 +1,10 @@
 <template>
-  <os-panel>
+  <os-panel class="os-full-height-panel">
     <template #header>
-      <span v-t="'cps.label_fmt_n_print'">Label Format and Print</span>
+      <span class="title" v-t="'cps.label_fmt_n_print'">Label Format and Print</span>
     </template>
 
-    <template #actions>
+    <template #primary-actions>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="switchToEditMode"
         v-show-if-allowed="cpResources.updateOpts" v-if="!editMode" />
 

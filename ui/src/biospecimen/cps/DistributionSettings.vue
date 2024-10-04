@@ -1,10 +1,10 @@
 <template>
   <os-panel>
     <template #header>
-      <span v-t="'cps.distribution'">Distribution</span>
+      <span class="title" v-t="'cps.distribution'">Distribution</span>
     </template>
 
-    <template #actions>
+    <template #primary-actions>
       <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="switchToEditMode"
         v-show-if-allowed="cpResources.updateOpts"
         v-if="!editMode && (!cp.distributionProtocols || cp.distributionProtocols.length == 0)" />
