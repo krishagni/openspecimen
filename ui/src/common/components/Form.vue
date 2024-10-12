@@ -187,11 +187,16 @@ export default {
          fieldRef = fieldRef[0];
        }
 
+       let resp = null;
        if (fieldRef) {
-         return fieldRef.upload();
+         if (!fieldRef.hasFiles()) {
+           alertSvc.error({code: 'common.file_not_selected'});
+         } else {
+           resp = fieldRef.upload();
+         }
        }
 
-       return null;
+       return resp;
      },
 
      callStarted: function({method}) {
