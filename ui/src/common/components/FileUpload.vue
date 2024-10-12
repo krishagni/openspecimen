@@ -105,11 +105,14 @@ export default {
 
     onError: function({xhr}) {
       try {
+        this.selectedFile = null;
+
         const errors = JSON.parse(xhr.responseText);
-        if (this.reject) {
+        this.reject = undefined;
+        /* if (this.reject) {
           this.reject(errors);
           this.reject = undefined;
-        }
+        }*/
 
         if (errors instanceof Array) {
           let msg = errors.map(err => err.message + ' (' + err.code + ')').join(',');
