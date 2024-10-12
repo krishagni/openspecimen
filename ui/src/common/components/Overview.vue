@@ -102,6 +102,11 @@
                   </span>
                 </td>
               </tr>
+              <tr class="row" v-if="!field.value || field.value.length == 0">
+                <td class="col" :colspan="field.fields.length">
+                  <span v-t="'common.none'">None</span>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
