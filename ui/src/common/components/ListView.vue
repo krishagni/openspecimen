@@ -462,6 +462,10 @@ export default {
         }
       }
 
+      if ((value == undefined || value == null) && typeof column.empty == 'function') {
+        return column.empty(data.rowObject);
+      }
+
       return value || (value === 0 ? value : '-');
     },
 
