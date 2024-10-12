@@ -10,6 +10,7 @@
                 :tabindex="tabOrder" :disabled="disabled" />
               <span>{{option.displayLabel}}</span>
             </label>
+            <os-icon name="question-circle" v-os-tooltip="$t(option.tooltipCode)" v-if="option.tooltipCode" />
           </span>
         </div>
       </div>
