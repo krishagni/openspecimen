@@ -57,6 +57,10 @@ class CollectionProtocol {
     return http.delete('collection-protocols/' + cpId, {}, {forceDelete, reason});
   }
 
+  async deleteCps(cpIds, reason) {
+    return http.delete('collection-protocols', {}, {id: cpIds, forceDelete: true, reason});
+  }
+
   async copy(cpId, cp) {
     return http.post('collection-protocols/' + cpId + '/copy', cp);
   }

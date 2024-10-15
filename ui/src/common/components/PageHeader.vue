@@ -99,6 +99,9 @@ export default {
                 }
               );
             }
+          } else if (card.route && typeof card.route == 'object') {
+            const {name, params, query} = card.route;
+            item.url = routerSvc.getUrl(name, params, query);
           }
 
           return item;

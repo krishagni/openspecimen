@@ -98,7 +98,7 @@ export default {
       homePageSvc.registerCards([
         {
           showIf: {resource: 'CollectionProtocol', operations: ['Read']},
-          href: '#/cps',
+          route: {name: 'CpsList'},
           icon: 'fa fa-calendar',
           title: t('common.home.cps'),
           description: t('common.home.cps_desc')

@@ -2,18 +2,23 @@
   <os-list-view
     :schema="schema"
     :data="data"
-    :allowSelection="allowSelection"
+    :allow-selection="allowSelection"
     :selected="selected"
     :query="query"
-    :idFilter="idFilter"
+    :id-filter="idFilter"
     :loading="loading"
-    @filtersUpdated="loadList"
-    @selectedRows="onRowsSelection"
-    @rowClicked="rowClicked"
-    @rowStarToggled="rowStarToggled"
+    :show-row-actions="showRowActions"
+    @filters-updated="loadList"
+    @selected-rows="onRowsSelection"
+    @row-clicked="rowClicked"
+    @row-start-toggled="rowStarToggled"
     @sort="sort"
-    ref="listView"
-  />
+    ref="listView">
+
+    <template #rowActions="{rowObject}" v-if="showRowActions">
+      <slot name="actions" :row-object="rowObject" />
+    </template>
+  </os-list-view>
 </template>
 
 <script>
@@ -35,7 +40,8 @@ export default {
     'query',
     'idFilter',
     'autoSearchOpen',
-    'allowStarring'
+    'allowStarring',
+    'showRowActions'
   ],
 
   emits: ['selectedRows', 'rowClicked', 'listLoaded', 'rowStarToggled'],

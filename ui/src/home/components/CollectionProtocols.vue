@@ -1,6 +1,6 @@
 <template>
   <os-home-list-card :icon="'calendar-alt'" :title="$t('common.home.cps')"
-    :show-star="true" :list-url="{ngState: 'cps'}" :list="ctx.cps"
+    :show-star="true" :list-url="{name: 'CpsList'}" :list="ctx.cps"
     @search="search($event)" @toggle-star="toggleStar($event)" />
 </template>
 

@@ -107,10 +107,12 @@ angular.module('os.biospecimen.cp',
         parent: 'signed-in'
       })
       .state('cp-list', {
-        url: '?filters', 
-        templateUrl: 'modules/biospecimen/cp/list.html',
-        controller: 'CpListCtrl',
-        parent: 'cps'
+        url: '/cps',
+        template: '<div>Discontinued</div>',
+        controller: function(VueApp) {
+          VueApp.setVueView('cps');
+        },
+        parent: 'signed-in'
       })
       .state('cp-addedit', {
         url: '/addedit/:cpId?mode',
@@ -258,19 +260,13 @@ angular.module('os.biospecimen.cp',
         parent: 'cps'
       })
       .state('cp-detail', {
-        url: '/:cpId',
-        templateUrl: 'modules/biospecimen/cp/detail.html',
-        parent: 'cps',
-        resolve: {
-          cp: function($stateParams, CollectionProtocol) {
-            return CollectionProtocol.getById($stateParams.cpId);
-          }
+        url: '/cps/:cpId',
+        template: '<div>Unused</div>',
+        controller: function($state, $stateParams, VueApp) {
+          console.log($stateParams);
+          VueApp.setVueView('cps/' + $stateParams.cpId + '/detail/overview');
         },
-        controller: 'CpDetailCtrl',
-        breadcrumb: {
-          title: '{{cp.title}}',
-          state: 'cp-detail.overview'
-        }
+        parent: 'signed-in'
       })
       .state('cp-detail.overview', {
         url: '/overview',
@@ -473,7 +469,10 @@ angular.module('os.biospecimen.cp',
     .run(function(UrlResolver, QuickSearchSvc) {
       UrlResolver.regUrlState('cp-overview', 'cp-detail.overview', 'cpId');
 
-      var opts = {caption: 'entities.collection_protocol', state: 'cp-detail.overview'};
+      var opts = {
+        caption: 'entities.collection_protocol',
+        vueUrl: 'cps/:entityId/detail/overview'
+      };
       QuickSearchSvc.register('collection_protocol', opts);
     });
   

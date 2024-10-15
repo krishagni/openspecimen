@@ -1,6 +1,10 @@
 <template>
   <os-page>
     <os-page-head :noNavButton="false">
+      <template #breadcrumb>
+        <os-breadcrumb :items="bcrumb" />
+      </template>
+
       <span class="os-title" v-if="ctx.cp.id > 0">
         <h3>
           <span>{{ctx.cp.shortTitle}}</span>
@@ -54,8 +58,10 @@
 
 <script>
 
-import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
-import formUtil from '@/common/services/FormUtil.js';
+import cpSvc      from '@/biospecimen/services/CollectionProtocol.js';
+import formUtil   from '@/common/services/FormUtil.js';
+import i18n       from '@/common/services/I18n.js';
+import routerSvc  from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
 
 export default {
@@ -93,6 +99,9 @@ export default {
   },
 
   computed: {
+    bcrumb: function() {
+      return [{url: routerSvc.getUrl('CpsList'), label: i18n.msg('cps.list')}];
+    }
   },
 
   methods: {

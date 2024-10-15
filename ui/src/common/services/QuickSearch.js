@@ -7,12 +7,9 @@ class QuickSearch {
   searchEntities = {
     'collection_protocol': {
       caption: 'Collection Protocol',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-        'stateName=cp-detail.overview&' +
-        'objectName=collection_protocol&' +
-        'key=id&' +
-        'value=:entityId',
+      ngView: false,
+      viewName: 'CpDetail.Overview',
+      params: {entityId: 'cpId'}
     },
 
     'collection_protocol_registration': {

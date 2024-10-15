@@ -177,7 +177,7 @@ export default {
 
       bcrumb: [ 
         // TODO: change the breadcrumbs
-        {url: routerSvc.ngUrl('cps', {}), label: i18n.msg('participants.collection_protocols')},
+        {url: routerSvc.getUrl('CpsList'), label: i18n.msg('participants.collection_protocols')},
         {url: routerSvc.ngUrl('cp-view/' + cp.id + '/list-view', {}), label: cp.shortTitle}
       ],
 
@@ -414,7 +414,7 @@ export default {
       this.$refs.deleteParticipantsDialog.open().then(
         ({reason}) => {
           const ids = this.ctx.selectedItems.map(({cprId}) => cprId);
-          cprSvc.bulkDelete(ids, reason).then(
+          cprSvc.deleteCps(ids, reason).then(
             ({completed}) => {
               if (completed) {
                 alertsSvc.success({code: 'participants.many_deleted', args: {count: ids.length}});
@@ -512,7 +512,7 @@ export default {
       options.push({
         icon: 'calendar-alt',
         caption: this.$t('participants.view_cp_details'),
-        url: routerSvc.ngUrl('cps/' + this.ctx.cp.id + '/overview')
+        url: routerSvc.getUrl('CpDetail.Overview', {cpId: this.ctx.cp.id})
       });
 
       const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
