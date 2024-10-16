@@ -305,15 +305,12 @@
         count(r.identifier) as recordCnt
       from
         catissue_form_context fc
-        left join (
-          catissue_coll_prot_reg reg
-          inner join catissue_specimen_coll_group scg on scg.collection_protocol_reg_id = reg.identifier
-          inner join catissue_specimen specimen on specimen.specimen_collection_group_id = scg.identifier) 
-          on reg.collection_protocol_id = fc.cp_id
         inner join dyextn_containers c on c.identifier = fc.container_id
         inner join catissue_user u on u.identifier = c.created_by
-        left join catissue_form_record_entry r 
+        left join catissue_form_record_entry r
           on r.form_ctxt_id = fc.identifier and r.object_id = :specimenId and r.activity_status = 'ACTIVE'
+        left join catissue_specimen specimen
+          on specimen.collection_protocol_id = fc.cp_id and specimen.identifier = :specimenId
       where
         c.deleted_on is null and 
         fc.deleted_on is null and
