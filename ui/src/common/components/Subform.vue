@@ -182,6 +182,9 @@ export default {
           (acc, field) => {
             if (field.defaultValue) {
               acc[field.name] = field.defaultValue;
+              if (field.defaultValue == 'current_date') {
+                acc[field.name] = new Date();
+              }
             }
 
             return acc;
