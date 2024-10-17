@@ -4,6 +4,7 @@ export default {
       "type": "datePicker",
       "labelCode": "participants.registration_date",
       "name": "cpr.registrationDate",
+      "dateOnly": true,
       "validations": {
         "required": {
           "messageCode": "participants.registration_date_req"
@@ -89,7 +90,8 @@ export default {
     {
       "type": "datePicker",
       "labelCode": "participants.birth_date",
-      "name": "cpr.participant.birthDate"
+      "name": "cpr.participant.birthDate",
+      "dateOnly": true
     },
     {
       "type": "text",
@@ -119,6 +121,7 @@ export default {
       "type": "datePicker",
       "labelCode": "participants.death_date",
       "name": "cpr.participant.deathDate",
+      "dateOnly": true,
       "showInOverviewWhen": "!!cpr.participant.deathDate",
       "showWhen": "cpr.participant.dead"
     },
