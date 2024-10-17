@@ -1,6 +1,9 @@
 package com.krishagni.catissueplus.core.de.events;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -124,12 +127,24 @@ public class ExtensionDetail implements Serializable {
 		}
 
 		if ("datePicker".equals(attr.getType())) {
-			if (attr.getValue() instanceof String) {
+			if (attr.getValue() instanceof String valueStr) {
 				try {
-					long time = Long.parseLong((String) attr.getValue());
+					long time = Long.parseLong(valueStr);
 					return new Date(time);
 				} catch (Exception e) {
-					logger.error("Error converting the value " + attr.getValue() + " to date object. Error: " + e.getMessage(), e);
+					try {
+						// let's assume the input is in ISO format - yyyy-MM-dd'T'HH:mm:ss.SSSZ
+						return Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(valueStr)));
+					} catch (Exception e1) {
+						try {
+							// let's assume the input is in ISO format - yyyy-MM-dd
+							return new SimpleDateFormat("yyyy-MM-dd").parse(valueStr);
+						} catch (Exception e2) {
+							logger.error("Error converting the value " + attr.getValue() + " to date object. Error: " + e.getMessage(), e);
+							logger.error("Error converting the value " + attr.getValue() + " to date object. Error: " + e1.getMessage(), e1);
+							logger.error("Error converting the value " + attr.getValue() + " to date object. Error: " + e2.getMessage(), e2);
+						}
+					}
 				}
 			} else if (attr.getValue() instanceof Number) {
 				return new Date(((Number) attr.getValue()).longValue());
