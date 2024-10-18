@@ -470,7 +470,7 @@ export default {
 
       this.containerTypes = this.containerTypes || {};
       let containerType = this.containerTypes[ctx.box.type];
-      if (!containerType) {
+      if (!containerType && ctx.box.type) {
         containerType = this.containerTypes[ctx.box.type] = await containerTypeSvc.getTypeByName(ctx.box.type);
       }
 
@@ -926,7 +926,7 @@ export default {
       ctx.error = null;
       ctx.readError = null;
 
-      const containerType = await this._getContainerType(box.type);
+      const containerType = box.type ? await this._getContainerType(box.type) : null;
       const container     = box.container;
       tubes               = this._assignPositions(tubes, containerType, container);
 

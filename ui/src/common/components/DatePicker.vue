@@ -32,7 +32,7 @@ import Calendar from 'primevue/calendar';
 import utilSvc from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'showTime', 'tabOrder', 'disabled'],
+  props: ['modelValue', 'showTime', 'tabOrder', 'disabled', 'dateOnly'],
 
   inject: ['ui'],
 
@@ -68,6 +68,14 @@ export default {
       },
 
       set(value) {
+        if (value && this.dateOnly) {
+          const dt = new Date(value);
+          const year  = "" + dt.getFullYear();
+          const month = (dt.getMonth() < 9 ? "0" : "") + (dt.getMonth() + 1);
+          const date  = (dt.getDate() < 10 ? "0" : "") + dt.getDate();
+          value = year + "-" + month + "-" + date;
+        }
+
         this.$emit('update:modelValue', value);
       }
     },

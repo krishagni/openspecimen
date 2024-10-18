@@ -529,6 +529,43 @@ class Util {
     return inputValue || '-';
   }
 
+  getSpecimenDescription(specimen, opts) {
+    specimen = specimen || {};
+    opts = opts || {};
+
+    const ns = i18n.msg('pvs.not_specified');
+    const detailed = opts.detailed == 'true' || opts.detailed == true;
+
+    let result = '';
+    if (specimen.lineage == 'New' || detailed) {
+      if (specimen.pathology && specimen.pathology != ns) {
+        result += specimen.pathology + ' ';
+      }
+
+      result += specimen.type;
+
+      if (specimen.specimenClass == 'Tissue' && specimen.anatomicSite && specimen.anatomicSite != ns) {
+        result += ' ' + i18n.msg('specimens.extracted_from', {anatomicSite: specimen.anatomicSite});
+      }
+
+      if (specimen.specimenClass == 'Fluid' && specimen.collectionContainer && specimen.collectionContainer != ns) {
+        result += ' ' + i18n.msg('specimens.collected_in', {container: specimen.collectionContainer});
+      }
+    } else if (specimen.lineage == 'Derived') {
+      result += specimen.lineage + ' ' + specimen.type;
+    } else if (specimen.lineage == 'Aliquot') {
+      result += specimen.lineage;
+    }
+
+    if ((specimen.name || specimen.reqLabel) && specimen.lineage != 'Aliquot') {
+      result += ' (' + (specimen.name || specimen.reqLabel) + ')';
+    } else if (specimen.code || specimen.reqCode) {
+      result += ' (' + (specimen.code || specimen.reqCode) + ')';
+    }
+
+    return result;
+  }
+
   toSnakeCase(input) {
     return (input || '').replaceAll(/^\d+|\W+/g, ' ') // convert whitespaces and other special character into a single space
       .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCaseID = camel Case ID

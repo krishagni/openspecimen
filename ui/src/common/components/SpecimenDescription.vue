@@ -10,6 +10,7 @@
 <script>
 
 import routerSvc from '@/common/services/Router.js';
+import util      from '@/common/services/Util.js';
 
 export default {
   props: ['model-value', 'specimen', 'show-status', 'status', 'href-target', 'no-link'],
@@ -74,38 +75,7 @@ export default {
 
   methods: {
     _getDescription: function(value, attrs) {
-      const ns = this.$t('pvs.not_specified');
-      const specimen = value || {};
-      const detailed = attrs.detailed == 'true' || attrs.detailed == true;
-
-      let result = '';
-      if (specimen.lineage == 'New' || detailed) {
-        if (specimen.pathology && specimen.pathology != ns) {
-          result += specimen.pathology + ' ';
-        }
-
-        result += specimen.type;
-
-        if (specimen.specimenClass == 'Tissue' && specimen.anatomicSite && specimen.anatomicSite != ns) {
-          result += ' ' + this.$t('specimens.extracted_from', {anatomicSite: specimen.anatomicSite});
-        }
-
-        if (specimen.specimenClass == 'Fluid' && specimen.collectionContainer && specimen.collectionContainer != ns) {
-          result += ' ' + this.$t('specimens.collected_in', {container: specimen.collectionContainer});
-        }
-      } else if (specimen.lineage == 'Derived') {
-        result += specimen.lineage + ' ' + specimen.type;
-      } else if (specimen.lineage == 'Aliquot') {
-        result += specimen.lineage;
-      }
-
-      if ((specimen.name || specimen.reqLabel) && specimen.lineage != 'Aliquot') {
-        result += ' (' + (specimen.name || specimen.reqLabel) + ')';
-      } else if (specimen.code || specimen.reqCode) {
-        result += ' (' + (specimen.code || specimen.reqCode) + ')';
-      }
-
-      return result;
+      return util.getSpecimenDescription(value, attrs);
     }
   }
 }

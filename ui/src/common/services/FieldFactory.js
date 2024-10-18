@@ -167,7 +167,7 @@ class FieldFactory {
     } else if (field.type == 'datePicker') {
       fs.type = 'datePicker';
       fs.showTime = field.format && field.format.indexOf('HH:mm') > 0;
-      if (field.defaultType == 'CURRENT_DATE') {
+      if (field.defaultType == 'CURRENT_DATE' || field.defaultValue == 'current_date') {
         fs.defaultValue = '' + new Date().getTime();
       }
     } else if (field.type == 'fileUpload') {

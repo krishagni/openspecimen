@@ -496,7 +496,17 @@ export default {
     },
 
     sort: function(event) {
-      this.$emit('sort', event);
+      const {sortField} = event;
+      const sortOrders = this.sortOrders = this.sortOrders || {};
+
+      let sortOrder = null;
+      if (sortOrders[sortField] == 1) {
+        sortOrder = sortOrders[sortField] = -1;
+      } else {
+        sortOrder = sortOrders[sortField] = 1;
+      }
+
+      this.$emit('sort', {...event, sortOrder});
     },
 
     rowStarToggled: function({rowObject}) {
