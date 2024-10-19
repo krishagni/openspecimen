@@ -820,7 +820,7 @@ angular.module('os.biospecimen.specimen',
           }
 
           var cpId = spmns[0].cpId;
-          if (spmns.some(spmn => spmn.cpId != cpId)) {
+          if (spmns.some(function(spmn) { return spmn.cpId != cpId; })) {
             cpId = -1;
           }
 
