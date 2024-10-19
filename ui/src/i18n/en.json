@@ -2029,6 +2029,7 @@
   },
 
   "specimens": {
+    "add_edit_events": "Bulk Events",
     "add_event": "Add Event",
     "additional_label": "Additional Label",
     "aliquot": "Aliquot",

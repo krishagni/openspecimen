@@ -803,20 +803,56 @@ angular.module('os.biospecimen.specimen',
       })
       .state('bulk-add-event', {
         url: '/bulk-add-event',
-        templateUrl: 'modules/biospecimen/participant/specimen/bulk-add-event.html',
-        controller: 'BulkAddEventCtrl',
-        resolve: {
-          events: function(CollectionProtocol) {
-            return new CollectionProtocol({id: -1}).getForms(['SpecimenEvent']);
-          },
-
-          event: function() {
-            return null;
-          },
-
-          acceptablePv: function() {
-            return null;
+        template: '<div>Navigating to the new UI</div>',
+        controller: function($scope, $injector, CpConfigSvc, SpecimensHolder, VueApp) {
+          if (!$injector.has('WorkflowInstance')) {
+            alert('Workflow module is not installed!');
+            $scope.back();
+            return;
           }
+
+          var spmns = SpecimensHolder.getSpecimens() || [];
+          SpecimensHolder.setSpecimens(null);
+
+          if (spmns.length == 0) {
+            $scope.back();
+            return;
+          }
+
+          var cpId = spmns[0].cpId;
+          if (spmns.some(spmn => spmn.cpId != cpId)) {
+            cpId = -1;
+          }
+
+          CpConfigSvc.getCommonCfg(cpId, 'addEditSpecimenEventsWf').then(
+            function(wfName) {
+              if (!wfName) {
+                wfName = 'sys-addedit-specimen-events';
+              }
+
+              var wfInstance = $injector.get('WorkflowInstance');
+              var workflow = {name: wfName};
+              var inputItems = spmns.map(function(spmn) { return {specimen: spmn}; });
+              var params = {
+                batchTitle: 'Bulk Events',
+                showOptions: false
+              };
+  
+              if (cpId >= 1) {
+                params.cpId = cpId;
+                params['breadcrumb-1'] = JSON.stringify({
+                  label: spmns[0].cpShortTitle,
+                  route: {name: 'ParticipantsList', params: {cpId: cpId, cprId: -1}}
+                });
+              } 
+
+              new wfInstance({workflow: workflow, inputItems: inputItems, params: params}).$saveOrUpdate().then(
+                function(instance) {
+                  VueApp.setVueView('task-manager/instances/' + instance.id);
+                } 
+              );
+            }
+          );
         },
         parent: 'signed-in'
       })

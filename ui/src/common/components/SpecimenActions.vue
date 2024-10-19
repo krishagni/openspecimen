@@ -680,7 +680,8 @@ export default {
     },
 
     addEditEvent: function() {
-      this.navToView('bulk-add-event', null, {}, 'common.specimen_actions.select_for_add_edit_event', false, false, false);
+      const navTo = (specimens) => wfSvc.bulkAddEditEvents(specimens);
+      this.navToView('bulk-add-event', navTo, {}, 'common.specimen_actions.select_for_add_edit_event', false, false, false);
     },
 
     transferSpecimens: function() {

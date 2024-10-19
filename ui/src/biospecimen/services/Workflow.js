@@ -208,6 +208,46 @@ class Workflow {
     this._wfInstanceSvc().gotoInstance(instance.id);
   }
 
+  async bulkAddEditEvents(specimens) {
+    if (!this._wfInstanceSvc()) {
+      alert('Workflow module not installed!');
+      return;
+    }
+
+    let cpId = specimens && specimens[0].cpId;
+    for (let specimen of specimens) {
+      if (cpId != specimen.cpId) {
+        cpId = -1;
+        break;
+      }
+    }
+
+    let wfName = await this._getAddEditSpmnEventsWf(cpId);
+    if (!wfName) {
+      wfName = 'sys-addedit-specimen-events';
+    }
+
+    const params = {
+      returnOnExit: 'current_view',
+      batchTitle: i18n.msg('specimens.add_edit_events'),
+      showOptions: false
+    };
+
+    if (cpId >= 1) {
+      Object.assign(params, {
+        cpId: cpId,
+        'breadcrumb-1': JSON.stringify({
+          label: specimens[0].cpShortTitle,
+          route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
+        })
+      });
+    }
+
+    const inputItems = specimens.map(specimen => ({specimen}));
+    const instance = await this._wfInstanceSvc().createInstance({name: wfName}, null, null, null, inputItems, {params});
+    this._wfInstanceSvc().gotoInstance(instance.id);
+  }
+
   async _createChildSpecimens(cpId, cpShortTitle, specimens, wfName, title) {
     if (!this._wfInstanceSvc()) {
       alert('Workflow module not installed!');
@@ -267,6 +307,10 @@ class Workflow {
 
   _getTransferSpmnsWf(cpId) {
     return cpSvc.getWorkflowProperty(cpId, 'common', 'transferSpecimensWf');
+  }
+
+  _getAddEditSpmnEventsWf(cpId) {
+    return cpSvc.getWorkflowProperty(cpId, 'common', 'addEditSpecimenEventsWf');
   }
 
   _getCreateAliquotsWf(cpId) {
