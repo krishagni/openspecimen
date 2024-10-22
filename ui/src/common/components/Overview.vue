@@ -255,6 +255,10 @@ export default {
             value = typeof value == 'object' ? value.name : value;
           }
         } else if (field.type == 'date' || (field.type == 'datePicker' && field.showTime != true)) {
+          if (field.dateOnly) {
+            value = util.getLocalDate(value);
+          }
+
           value = this.$filters.date(value);
         } else if (field.type == 'datetime' || (field.type == 'datePicker' && field.showTime == true)) {
           value = this.$filters.dateTime(value);
