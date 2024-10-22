@@ -9,6 +9,7 @@ import http from '@/common/services/HttpClient.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import i18n from '@/common/services/I18n.js';
 import pluginReg from '@/common/services/PluginViewsRegistry.js';
+import ui from '@/global.js';
 
 class Util {
   httpsRe = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
@@ -480,6 +481,17 @@ class Util {
       case 'specimen-measure':
         return this._getSpecimenMeasure(form, inputValue, field, field.measure || 'quantity');
 
+      case 'dateOnly':
+        if (inputValue instanceof Date) {
+          return this._getDate(this._getLocalDate(inputValue.getTime()));
+        } else if (typeof inputValue == 'number') {
+          return this._getDate(this._getLocalDate(inputValue));
+        } else if (typeof inputValue == 'string' && ('' + parseInt(inputValue)) == inputValue) {
+          return this._getDate(this._getLocalDate(parseInt(inputValue)));
+        }
+
+        return inputValue;
+
       case 'date':
       case 'datePicker':
         return this._getDate(inputValue);
@@ -527,6 +539,10 @@ class Util {
     }
 
     return inputValue || '-';
+  }
+
+  getLocalDate(timeInMillisSinceEpoch) {
+    return this._getLocalDate(timeInMillisSinceEpoch);
   }
 
   getSpecimenDescription(specimen, opts) {
@@ -708,6 +724,12 @@ class Util {
     }
 
     return value || '-';
+  }
+
+  _getLocalDate(timeInMillisSinceEpoch) {
+    const tzOffset = new Date(timeInMillisSinceEpoch).getTimezoneOffset() * 60 * 1000;
+    const adjustment = (12 * 60 * 60 * 1000);
+    return new Date(timeInMillisSinceEpoch - ui.global.locale.utcOffset + tzOffset + adjustment);
   }
 
   _fns = {

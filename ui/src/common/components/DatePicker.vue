@@ -50,15 +50,25 @@ export default {
       get() {
         if (typeof this.modelValue == 'string') {
           try {
+            if (this.dateOnly && this.modelValue.length == 10 && this.modelValue[4] == '-') {
+              const [year, month, day] = this.modelValue.split('-');
+              return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            }
+
             const intValue = parseInt(this.modelValue);
             if (intValue.toString().length == this.modelValue.trim().length) {
               return new Date(intValue);
             }
+
             return new Date(this.modelValue);
           } catch {
             return new Date(this.modelValue);
           }
         } else if (typeof this.modelValue == 'number') {
+          if (this.dateOnly) {
+            return utilSvc.getLocalDate(this.modelValue);
+          }
+
           return new Date(this.modelValue);
         } else if (this.modelValue instanceof Date) {
           return this.modelValue;
