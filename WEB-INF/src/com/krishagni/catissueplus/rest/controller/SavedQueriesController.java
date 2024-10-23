@@ -66,11 +66,11 @@ public class SavedQueriesController {
 		@RequestParam(value = "searchString", required = false, defaultValue = "")
 		String searchString,
 
-		@RequestParam(value = "start", required = false, defaultValue = "0")
-		int start,
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
 			
-		@RequestParam(value = "max", required = false, defaultValue = "25")
-		int max,
+		@RequestParam(value = "maxResults", required = false, defaultValue = "25")
+		int maxResults,
 
 		@RequestParam(value = "countReq", required = false, defaultValue = "false")
 		boolean countReq,
@@ -87,8 +87,8 @@ public class SavedQueriesController {
 			.query(searchString)
 			.countReq(countReq)
 			.orderByStarred(orderByStarred)
-			.startAt(start)
-			.maxResults(max);
+			.startAt(startAt)
+			.maxResults(maxResults);
 		SavedQueriesList list = response(querySvc.getSavedQueries(request(crit)));
 		return returnList ? list.getQueries() : list;
 	}

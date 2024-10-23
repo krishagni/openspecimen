@@ -1056,14 +1056,9 @@ public class QueryServiceImpl implements QueryService {
 			if (query == null) {
 				return ResponseEvent.userError(SavedQueryErrorCode.NOT_FOUND, queryId);
 			}
-			
-			User user = AuthUtil.getCurrentUser();
-			if (!query.canUpdateOrDelete(user)) {
-				return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED);
-			}
 
-			String queryDef = query.getQueryDefJson(true);
-			return ResponseEvent.response(queryDef);			
+			AccessCtrlMgr.getInstance().ensureReadQueryRights();
+			return ResponseEvent.response(query.getQueryDefJson(true));
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}

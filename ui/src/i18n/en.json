@@ -1562,6 +1562,16 @@
     "view_dps": "View Distribution Protocols"
   },
 
+  "queries": {
+    "confirm_delete_query": "Are you sure you want to delete the query - #{id} {title}?",
+    "delete_query": "Delete Query",
+    "deleted": "Query #{id} {title} deleted!",
+    "id_or_title": "Query ID / Title",
+    "list": "Queries",
+    "schedule": "Schedule",
+    "title": "Title"
+  },
+
   "settings": {
     "administrative": {
       "title": "Administrative",
