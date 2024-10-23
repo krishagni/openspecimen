@@ -249,13 +249,19 @@ public class QueryServiceImpl implements QueryService {
 				return ResponseEvent.response(SavedQueriesList.create(Collections.emptyList(), 0L));
 			}
 
-			if (user.isAdmin()) {
-				crit.instituteId(null);
-			} else if (user.isInstituteAdmin()) {
-				crit.instituteId(crit.instituteId());
-			} else {
+			Long folderId = crit.folderId();
+			if (folderId == null) {
 				crit.userId(user.getId());
 				crit.instituteId(user.getInstitute().getId());
+			} else if (folderId == -1L) {
+				if (user.isAdmin()) {
+					crit.instituteId(null);
+				} else if (user.isInstituteAdmin()) {
+					crit.instituteId(user.getInstitute().getId());
+				} else {
+					crit.userId(user.getId());
+					crit.instituteId(user.getInstitute().getId());
+				}
 			}
 
 			List<SavedQuerySummary> queries = new ArrayList<>();
@@ -299,13 +305,19 @@ public class QueryServiceImpl implements QueryService {
 				return ResponseEvent.response(0L);
 			}
 
-			if (user.isAdmin()) {
-				crit.instituteId(null);
-			} else if (user.isInstituteAdmin()) {
-				crit.instituteId(crit.instituteId());
-			} else {
+			Long folderId = crit.folderId();
+			if (folderId == null) {
 				crit.userId(user.getId());
 				crit.instituteId(user.getInstitute().getId());
+			} else if (folderId == -1L) {
+				if (user.isAdmin()) {
+					crit.instituteId(null);
+				} else if (user.isInstituteAdmin()) {
+					crit.instituteId(user.getInstitute().getId());
+				} else {
+					crit.userId(user.getId());
+					crit.instituteId(user.getInstitute().getId());
+				}
 			}
 
 			Long count = daoFactory.getSavedQueryDao().getQueriesCount(crit.ids(null).notInIds(null));

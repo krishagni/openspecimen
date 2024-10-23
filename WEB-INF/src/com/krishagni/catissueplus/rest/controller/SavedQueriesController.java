@@ -63,6 +63,9 @@ public class SavedQueriesController {
 		@RequestParam(value = "userId", required = false)
 		Long userId,
 
+		@RequestParam(value = "folderId", required = false)
+		Long folderId,
+
 		@RequestParam(value = "searchString", required = false, defaultValue = "")
 		String searchString,
 
@@ -84,6 +87,7 @@ public class SavedQueriesController {
 		ListSavedQueriesCriteria crit = new ListSavedQueriesCriteria()
 			.cpId(cpId)
 			.userId(userId)
+			.folderId(folderId)
 			.query(searchString)
 			.countReq(countReq)
 			.orderByStarred(orderByStarred)
@@ -104,12 +108,16 @@ public class SavedQueriesController {
 		Long userId,
 
 		@RequestParam(value = "searchString", required = false, defaultValue = "")
-		String searchString) {
+		String searchString,
+
+		@RequestParam(value = "folderId", required = false)
+		Long folderId) {
 
 		ListSavedQueriesCriteria crit = new ListSavedQueriesCriteria()
 			.cpId(cpId)
 			.userId(userId)
-			.query(searchString);
+			.query(searchString)
+			.folderId(folderId);
 		Long count = response(querySvc.getSavedQueriesCount(request(crit)));
 		return Collections.singletonMap("count", count);
 	}

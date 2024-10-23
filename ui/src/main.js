@@ -44,6 +44,8 @@ import DeFormServices    from '@/forms/services';
 import HomeComponents    from '@/home/components';
 import ImportComponents  from '@/importer/components';
 
+import queryRoutes from '@/queries/routes.js';
+
 import Layout from '@/administrative/containers/Layout.vue';
 
 window['Vue'] = Vue;
@@ -102,6 +104,9 @@ if (params.get('token')) {
 if (!http.headers['X-OS-API-TOKEN']) {
   delete http.headers['X-OS-API-TOKEN'];
 }
+
+// register query routes
+app.use(queryRoutes, {router, osSvc: app.config.globalProperties.$osSvc});
 
 let appPropsQ  = settingSvc.getAppProps();
 let localeQ    = settingSvc.getLocale();

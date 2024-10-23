@@ -1563,13 +1563,25 @@
   },
 
   "queries": {
+    "allow_edits_by_shared_users": "Allow edits by shared users",
+    "confirm_delete_folder": "Are you sure you want to delete the folder - {name}?",
     "confirm_delete_query": "Are you sure you want to delete the query - #{id} {title}?",
+    "delete_folder": "Delete Folder",
     "delete_query": "Delete Query",
     "deleted": "Query #{id} {title} deleted!",
+    "folder_deleted": "Folder {name} deleted!",
+    "folder_details": "Folder Details",
+    "folder_updated": "Folder {name} updated.",
     "id_or_title": "Query ID / Title",
     "list": "Queries",
+    "name": "Name",
+    "name_req": "Name is mandatory",
     "schedule": "Schedule",
-    "title": "Title"
+    "share_folder_with_all": "Share folder with all current and future users",
+    "share_with_user_groups": "Share with user groups",
+    "share_with_users": "Share with users",
+    "title": "Title",
+    "update_folder": "Update Folder"
   },
 
   "settings": {

@@ -9,7 +9,7 @@ export default {
           path: 'list',
           name: 'QueriesList',
           component: () => import(/* webpackChunkName: "queries" */ './views/List.vue'),
-          props: (route) => ({filters: route.query.filters})
+          props: (route) => ({filters: route.query.filters, folderId: route.query.folderId})
         },
 
         {

@@ -203,6 +203,10 @@ public class SavedQueryDaoImpl extends AbstractDao<SavedQuery> implements SavedQ
 			);
 		}
 
+		if (crit.folderId() != null && crit.folderId() >= 0L) {
+			query.add(query.eq("f.id", crit.folderId()));
+		}
+
 		addCpCondition(query, crit.cpId());
 		addSearchConditions(query, crit.query());
 
