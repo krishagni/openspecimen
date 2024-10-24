@@ -363,6 +363,10 @@ export default {
           queryFolderSvc.deleteFolder(this.ctx.folder).then(
             () => {
               alertsSvc.success({code: 'queries.folder_deleted', args: this.ctx.folder});
+              if (this.folderId == this.ctx.folder.id) {
+                this.selectFolder(null);
+              }
+
               this._loadFolders();
               this.hideUpdateFolderDialog();
             }
