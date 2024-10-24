@@ -20,6 +20,16 @@ class QueryFolder {
   deleteFolder(folder) {
     return http.delete('query-folders/' + folder.id);
   }
+
+  addQueriesToFolder(folder, queries) {
+    const queryIds = (queries || []).map(query => query.id);
+    return http.put('query-folders/' + folder.id + '/saved-queries', queryIds, {operation: 'ADD'});
+  }
+
+  rmQueriesFromFolder(folder, queries) {
+    const queryIds = (queries || []).map(query => query.id);
+    return http.put('query-folders/' + folder.id + '/saved-queries', queryIds, {operation: 'REMOVE'});
+  }
 }
 
 export default new QueryFolder();

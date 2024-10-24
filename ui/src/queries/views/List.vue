@@ -18,7 +18,16 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <span>actions</span>
+          <span v-if="!ctx.selectedQueries || ctx.selectedQueries.length == 0">
+            <span>actions</span>
+          </span>
+          <span v-else>
+            <AssignFolder :my-folders="ctx.myFolders" :shared-folders="ctx.sharedFolders"
+              @add-to-folder="addToFolder($event)" @create-new-folder="showCreateFolderDialog" />
+
+            <os-button left-icon="times" :label="$t('queries.rm_from_folder')"
+              @click="removeFromFolder" v-if="selectedFolder && selectedFolder.editable" />
+          </span>
         </template>
 
         <template #right>
@@ -120,15 +129,17 @@
 
       <os-dialog ref="updateFolderDialog">
         <template #header>
-          <span v-t="'queries.update_folder'">Update Folder</span>
+          <span v-t="'queries.update_folder'" v-if="ctx.folder.id > 0">Update Folder</span>
+          <span v-t="'queries.create_folder'" v-else>Create Folder</span>
         </template>
         <template #content>
           <os-form ref="folderForm" :schema="folderAddEditFs" :data="ctx" />
         </template>
         <template #footer>
-          <os-button text :label="$t('common.buttons.cancel')" @click="hideUpdateFolderDialog" />
-          <os-button danger :label="$t('common.buttons.delete')" @click="deleteFolder" />
-          <os-button primary :label="$t('common.buttons.update')" @click="updateFolder" />
+          <os-button text    :label="$t('common.buttons.cancel')" @click="hideUpdateFolderDialog" />
+          <os-button danger  :label="$t('common.buttons.delete')" @click="deleteFolder" v-if="ctx.folder.id > 0"/>
+          <os-button primary :label="$t('common.buttons.update')" @click="updateFolder" v-if="ctx.folder.id > 0"/>
+          <os-button primary :label="$t('common.buttons.create')" @click="updateFolder" v-else />
         </template>
       </os-dialog>
 
@@ -157,10 +168,15 @@ import queryFolderSvc from '@/queries/services/QueryFolder.js';
 import routerSvc      from '@/common/services/Router.js';
 import savedQuerySvc  from '@/queries/services/SavedQuery.js';
 
+import AssignFolder   from './AssignFolder.vue';
 import queryResources from './Resources.js';
 
 export default {
   props: ['filters', 'folderId'],
+
+  components: {
+    AssignFolder
+  },
 
   data() {
     const folderAddEditFs = formUtil.getFormSchema(folderSchema.fields, folderAddEditLayout.layout);
@@ -202,6 +218,21 @@ export default {
     }
   },
 
+  computed: {
+    selectedFolder: function() {
+      if (!this.folderId || this.folderId == -1) {
+        return null;
+      }
+
+      let folder = (this.ctx.myFolders || []).find(folder => folder.id == this.folderId);
+      if (!folder) {
+        folder = (this.ctx.sharedFolders || []).find(folder => folder.id == this.folderId);
+      }
+
+      return folder;
+    }
+  },
+
   methods: {
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
@@ -222,7 +253,7 @@ export default {
 
       this.ctx.queries = queries.map(query => ({ query }));
       this.ctx.loading = false;
-      this.ctx.selectedQueries = [];
+      this.ctx.selectedQueries.length = 0;
       return this.ctx.queries;
     },
 
@@ -314,7 +345,8 @@ export default {
 
       queryFolderSvc.saveOrUpdate(this.ctx.folder).then(
         savedFolder => {
-          alertsSvc.success({code: 'queries.folder_updated', args: savedFolder});
+          const msg = this.ctx.folder.id > 0 ? 'queries.folder_updated' : 'queries.folder_created';
+          alertsSvc.success({code: msg, args: savedFolder});
           this._loadFolders();
           this.hideUpdateFolderDialog();
         }
@@ -354,6 +386,29 @@ export default {
       this.$refs.folderDetailsDialog.close();
     },
 
+    addToFolder: function(folder) {
+      const queries = this.ctx.selectedQueries.map(({rowObject: {query}}) => query);
+      queryFolderSvc.addQueriesToFolder(folder, queries).then(
+        () => alertsSvc.success({code: 'queries.added_to_folder', args: folder})
+      );
+    },
+
+    removeFromFolder: function() {
+      const queries = this.ctx.selectedQueries.map(({rowObject: {query}}) => query);
+      queryFolderSvc.rmQueriesFromFolder(this.selectedFolder, queries).then(
+        () => {
+          alertsSvc.success({code: 'queries.removed_from_folder', args: this.selectedFolder});
+          this.reloadQueries();
+        }
+      );
+    },
+
+    showCreateFolderDialog: function() {
+      const queries = this.ctx.selectedQueries.map(({rowObject: {query}}) => query);
+      this.ctx.folder = {queries};
+      this.$refs.updateFolderDialog.open();
+    },
+
     _editQuery: function(query) {
       routerSvc.goto('QueryDetail.AddEdit', {queryId: query.id});
     },
@@ -389,6 +444,7 @@ export default {
       const myFolders = [], sharedFolders = [];
       for (const folder of folders) {
         if (folder.owner.id == this.$ui.currentUser.id) {
+          folder.editable = true;
           myFolders.push(folder);
         } else {
           if (folder.owner.loginName != '$system') {
