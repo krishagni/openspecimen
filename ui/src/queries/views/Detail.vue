@@ -1,9 +1,11 @@
 <template>
-  <router-view :query="query" :key="query.id" v-if="query" />
+  <router-view :query="query" :key="query.id" v-if="query" @query-saved="reloadQuery" />
 </template>
 
 <script>
-import savedQuerySvc from '../services/SavedQuery.js';
+
+import routerSvc from '@/common/services/Router.js';
+import savedQuerySvc from '@/queries/services/SavedQuery.js';
 
 export default {
   props: ['queryId'],
@@ -27,6 +29,11 @@ export default {
   },
 
   methods: {
+    reloadQuery: function(query) {
+      const {name} = routerSvc.getCurrentRoute();
+      routerSvc.goto(name, {queryId: query.id});
+    },
+
     _loadQuery: function() {
       if (!this.queryId || this.queryId == -1) {
         this.query = {};

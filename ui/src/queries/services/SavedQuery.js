@@ -18,6 +18,14 @@ class SavedQuery {
     return http.downloadFile(http.getUrl('saved-queries/' + queryId + '/definition-file'));
   }
 
+  saveOrUpdate(query) {
+    if (query.id > 0) {
+      return http.put('saved-queries/' + query.id, query);
+    } else {
+      return http.post('saved-queries', query);
+    }
+  }
+
   deleteQuery(queryId) {
     return http.delete('saved-queries/' + queryId);
   }

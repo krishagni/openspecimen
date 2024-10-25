@@ -13,7 +13,10 @@
       </span>
 
       <template #right>
-        <div class="counters" v-if="ctx.counters">
+        <div v-if="ctx.loadingCounters">
+          <span v-t="'common.loading'">Loading</span>
+        </div>
+        <div class="counters" v-else-if="ctx.counters">
           <os-card class="counter">
             <template #body>
               <span>
@@ -43,36 +46,62 @@
     </os-page-head>
 
     <os-page-body>
+      <os-page-toolbar>
+        <template #default>
+          <os-menu :label="$t('queries.actions')" :options="actionsMenuOpts" />
+        </template>
+      </os-page-toolbar>
+
       <div>
+        <os-message type="info" v-if="ctx.loadingRecords">
+          <span v-t="'queries.loading_records'">Loading records...</span>
+        </os-message>
+
         <AgGridVue class="results-grid" :theme="theme"
           :row-data="ctx.records" :column-defs="ctx.columns"
           :rowSelection="{mode: 'multiRow', headerCheckbox: false}"
           :pinnedBottomRowData="ctx.footerRow"
-        />
+          v-else />
       </div>
 
       <os-column-url />
     </os-page-body>
   </os-page>
+
+  <SaveQuery ref="saveQueryDialog" />
+
+  <DefineView ref="defineViewDialog" />
 </template>
 
 <script>
 import { themeQuartz } from 'ag-grid-community';
 import { AgGridVue }   from 'ag-grid-vue3'
 
+import alertsSvc from '@/common/services/Alerts.js';
+import authSvc   from '@/common/services/Authorization.js';
 import i18n      from '@/common/services/I18n.js';
-import routerSvc from '@/common/services/Router.js';
 import querySvc  from '@/queries/services/Query.js';
+import routerSvc from '@/common/services/Router.js';
+
+import queryResources from './Resources.js';
 
 import ColumnUrl from './ColumnUrl.vue';
+import DefineView from './DefineView.vue';
+import SaveQuery from './SaveQuery.vue';
 
 export default {
   props: ['query'],
 
+  emits: ['query-saved'],
+
   components: {
     AgGridVue,
 
-    'os-column-url': ColumnUrl
+    'os-column-url': ColumnUrl,
+
+    DefineView,
+
+    SaveQuery
   },
 
   data() {
@@ -102,7 +131,63 @@ export default {
     this._loadRecords();
   },
 
+  computed: {
+    actionsMenuOpts: function() {
+      const options = [];
+      if (authSvc.isAllowed(queryResources.updateOpts)) {
+        options.push({icon: 'edit', caption: this.$t('common.buttons.edit'), onSelect: () => this.editQuery()});
+      }
+
+      if (authSvc.isAllowed(queryResources.createOpts) || authSvc.isAllowed(queryResources.updateOpts)) {
+        options.push({icon: 'save', caption: this.$t('common.buttons.save'), onSelect: () => this.showSaveQueryDialog()});
+      }
+
+      options.push({icon: 'columns', caption: this.$t('queries.columns'), onSelect: () => this.showDefineViewDialog()});
+      options.push({icon: 'redo', caption: this.$t('queries.rerun'), onSelect: () => this.rerun()});
+
+      if (authSvc.isAllowed(queryResources.importOpts)) {
+        options.push({icon: 'download', caption: this.$t('common.buttons.export'), onSelect: () => this.exportQueryData()});
+      }
+
+      return options;
+    }
+  },
+
   methods: {
+    editQuery: function() {
+      if (this.query.id > 0) {
+        routerSvc.goto('QueryDetail.AddEdit', {queryId: this.query.id});
+      } else {
+        routerSvc.back();
+      }
+    },
+
+    showSaveQueryDialog: function() {
+      this.$refs.saveQueryDialog.save(this.query).then(
+        ({status, query}) => {
+          if (status != 'saved') {
+            return;
+          }
+
+          alertsSvc.success({code: 'queries.saved', args: query});
+          this.$emit('query-saved', query);
+        }
+      );
+    },
+
+    rerun: function() {
+      this._loadCounters();
+      this._loadRecords();
+    },
+
+    showDefineViewDialog: function() {
+      this.$refs.defineViewDialog.open();
+    },
+
+    exportQueryData: function() {
+      querySvc.exportData(this.query);
+    },
+
     _loadCounters: async function() {
       this.ctx.loadingCounters = true;
       const {cprs, visits, specimens} = await querySvc.getCount(this.query);
