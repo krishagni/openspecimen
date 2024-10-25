@@ -1,5 +1,5 @@
 <template>
-  <router-view :query="query" :key="query.id" />
+  <router-view :query="query" :key="query.id" v-if="query" />
 </template>
 
 <script>
@@ -10,7 +10,7 @@ export default {
 
   data() {
     return {
-      query: {}
+      query: null
     }
   },
 
