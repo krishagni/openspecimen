@@ -69,13 +69,14 @@ class Util {
 
     const selectClause = this._getSelectClause(filtersMap, query.selectList, addPropIds);
     const whereClause  = await this._getWhereClause(query.cpId, filtersMap, query.queryExpression);
+    const reportClause = this._getRptExpr(query.selectList, query.reporting);
 
     let aql = 'select ' + selectClause + ' where ' + whereClause;
     if (addLimit) {
       aql += ' limit 0, 1000';
     }
 
-    return aql;
+    return aql + ' ' + reportClause;
   }
 
   _getSelectClause(filtersMap, selectedFields, addPropIds) {
@@ -155,6 +156,55 @@ class Util {
     }
 
     return whereClause;
+  }
+
+  _getRptExpr(selectedFields, reporting) {
+    const {type, params} = reporting || {type: 'none', params: {}};
+    if (!type || type == 'none') {
+      return '';
+    }
+
+    if (type == 'specimenqty') {
+      return 'specimenqty("' +
+          params.restrictBy + '", "' +
+          (params.minQty || -1) + '", "' +
+          (params.maxQty || - 1) + '"' +
+        ')';
+    }
+
+    const rptFields = this._getReportFields(selectedFields, true);
+    if (type == 'columnsummary') {
+      return this._getColumnSummaryRptExpr(rptFields, reporting);
+    }
+
+    if (type != 'crosstab') {
+      return type;
+    }
+
+    let rowIdx = this._getFieldIndices(rptFields, params.groupRowsBy);
+    let colIdx = this._getFieldIndices(rptFields, [params.groupColBy]);
+    colIdx = colIdx.length > 0 ? colIdx[0] : undefined;
+
+    let summaryIdx    = this._getFieldIndices(rptFields, params.summaryFields);
+    let rollupExclIdx = this._getFieldIndices(rptFields, params.rollupExclFields);
+
+    let includeSubTotals = '';
+    if (params.includeSubTotals) {
+      includeSubTotals = ', true';
+    }
+
+    for (let i = 0; i < summaryIdx.length; ++i) {
+      if (rollupExclIdx.indexOf(summaryIdx[i]) != -1) {
+        summaryIdx[i] = -1 * summaryIdx[i];
+      }
+    }
+
+    return 'crosstab(' +
+      '(' + rowIdx.join(',') + '), ' +
+      colIdx + ', ' +
+      '(' + summaryIdx.join(',') + ') ' +
+      includeSubTotals +
+    ')';
   }
 
   _getFieldExpr(filtersMap, field, includeDesc) {
@@ -245,6 +295,73 @@ class Util {
     }   
           
     return expr + ' ' + filterValue;
+  }
+
+  _getReportFields(selectedFields, fresh) {
+    const reportFields = [];
+    for (let field of selectedFields) {
+      let isAgg = false;
+      for (let aggFn of field.aggFns || []) {
+        if (fresh || aggFn.opted) {
+          reportFields.push({
+            id: field.name + '$' + aggFn.name,
+            name: field.name,
+            value: aggFn.desc,
+            aggFn: aggFn.name
+          });
+          isAgg = true;
+        }
+      }
+
+      if (!isAgg) {
+        reportFields.push({
+          id: field.name,
+          name: field.name,
+          value: field.form + ": " + field.label
+        });
+      }
+    }
+
+    return reportFields;
+  }
+
+  _getColumnSummaryRptExpr(rptFields, {params}) {
+    let expr = 'columnsummary(';
+    let addComma = false;
+    if (params.sum && params.sum.length > 0) {
+      expr += '"sum", "' + params.sum.length + '",';
+      expr += this._getFieldIndices(rptFields, params.sum).map(idx => '"' + idx + '"').join(',');
+      addComma = true;
+    }
+
+    if (params.avg && params.avg.length > 0) {
+      if (addComma) {
+        expr += ", ";
+      }
+
+      expr += '"avg","' + params.avg.length + '",';
+      expr += this._getFieldIndices(rptFields, params.avg).map(idx => '"' + idx + '"').join(',');
+    }
+
+    expr += ')';
+    return expr;
+  }
+
+  _getFieldIndices(fields, reportFields) {
+    reportFields = reportFields || [];
+
+    const indices = [];
+    for (const rptField of reportFields) {
+      for (let idx = 0; idx < fields.length; ++idx) {
+        const selField = typeof fields[idx] == 'string' ? fields[idx] : fields[idx].id;
+        if (selField == rptField.id) {
+          indices.push(idx + 1);
+          break;
+        }
+      }
+    }
+
+    return indices;
   }
 
   _isUndef(value) {

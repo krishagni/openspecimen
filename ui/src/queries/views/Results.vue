@@ -47,6 +47,7 @@
         <AgGridVue class="results-grid" :theme="theme"
           :row-data="ctx.records" :column-defs="ctx.columns"
           :rowSelection="{mode: 'multiRow', headerCheckbox: false}"
+          :pinnedBottomRowData="ctx.footerRow"
         />
       </div>
 
@@ -119,15 +120,20 @@ export default {
       this.ctx.loadingRecords = true;
       const {columnLabels, columnMetadata, columnTypes, columnUrls, rows} = await this._getData();
 
+      const {type, params} = this.query.reporting || {type: 'none', params: {}};
+      let pinnedColumns = 0;
+      if (type == 'crosstab') {
+        pinnedColumns = (params.groupRowsBy || []).length;
+      }
+
       this.ctx.columns = columnLabels
         .map((label, idx) => {
-          const column = {field: label, name: columnMetadata[idx].expr};
+          const column = {field: label, name: columnMetadata[idx].expr, pinned: idx < pinnedColumns && 'left'};
           if (columnUrls[idx]) {
             column.cellRenderer = 'os-column-url';
           } else if (columnTypes[idx] == 'DATE') {
             column.valueFormatter = this._formatDate;
           }
-
 
           return column;
         })
@@ -143,6 +149,12 @@ export default {
             {}
           )
       );
+
+      if (type == 'columnsummary') {
+        this.ctx.footerRow = this.ctx.records.splice(this.ctx.records.length - 1, 1);
+      } else {
+        this.ctx.footerRow = [];
+      }
 
       this.ctx.loadingRecords = false;
     },
