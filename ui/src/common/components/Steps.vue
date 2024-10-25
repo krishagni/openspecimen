@@ -36,6 +36,10 @@ export default {
       return this.steps[this.currentStep] == step;
     },
 
+    isFirstStep: function() {
+      return this.currentStep == 0;
+    },
+
     isLastStep: function(step) {
       let idx = this.currentStep;
       if (step) {
