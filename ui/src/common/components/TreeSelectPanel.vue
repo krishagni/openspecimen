@@ -1,5 +1,6 @@
 <template>
-  <os-tree-select :nodes="ctx.nodes" @selection-changed="handleSelections" />
+  <os-tree-select v-model="ctx.nodes"
+    @selection-changed="handleSelections" @order-changed="handleSelections" />
 </template>
 
 <script>
@@ -17,12 +18,12 @@ export default {
   },
 
   created() {
-    this.ctx.nodes = this._getNodes(null, this.items, this.selected || []);
+    this.ctx.nodes = this._getSortedNodes(this.items, this.selected || []);
   },
 
   watch: {
     hierarchyKey: function() {
-      this.ctx.nodes = this._getNodes(null, this.items, this.selected || []);
+      this.ctx.nodes = this._getSortedNodes(this.items, this.selected || []);
     }
   },
 
@@ -35,7 +36,6 @@ export default {
   methods: {
     handleSelections: function() {
       const selected = [];
-
       const working = [...this.ctx.nodes];
       while (working.length > 0) {
         const node = working.shift();
@@ -46,11 +46,20 @@ export default {
         if (!node.children || node.children.length == 0) {
           selected.push(node.item);
         } else {
-          Array.prototype.push.apply(working, node.children || []);
+          Array.prototype.unshift.apply(working, node.children || []);
         }
       }
 
       this.$emit('selected-items', selected);
+    },
+
+    _getSortedNodes: function(items, selected) {
+      const nodes = this._getNodes(null, items, selected);
+      if (selected && selected.length > 0) {
+        this._sortNodes(nodes, (selected || []).map(({id}) => id));
+      }
+
+      return nodes;
     },
 
     _getNodes: function(parent, items, selected) {
@@ -76,6 +85,22 @@ export default {
       }
 
       return selected.some(({id}) => id == node.id) || node.children.some(child => this._isSelected(child, selected));
+    },
+
+    _sortNodes: function(nodes, selected) {
+      for (const node of nodes || []) {
+        if (node.children && node.children.length > 0) {
+          node.sortSeq = this._sortNodes(node.children, selected);
+        } else {
+          node.sortSeq = selected.indexOf(node.id);
+          if (node.sortSeq == -1) {
+            node.sortSeq = 999999;
+          }
+        }
+      }
+
+      nodes.sort((n1, n2) => n1.sortSeq - n2.sortSeq);
+      return nodes.length == 0 ? 999999 : nodes[0].sortSeq;
     }
   }
 }

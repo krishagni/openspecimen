@@ -1,7 +1,7 @@
 <template>
   <div class="os-tree">
-    <ul>
-      <li v-for="node of nodes" :key="node.id">
+    <draggable v-model="nodes" tag="ul" handle=".node-grip" @update:model-value="orderChanged">
+      <li class="node-grip" v-for="node of nodes" :key="node.id">
         <div class="node">
           <span v-if="node.children && node.children.length > 0">
             <os-icon class="expand"   name="plus"  @click="expandNode(node)"   v-if="!node.expanded" />
@@ -12,18 +12,24 @@
           <span> {{node.label}} </span>
         </div>
 
-        <os-tree-select :nodes="node.children" @selection-changed="selectionChanged"
+        <os-tree-select v-model="node.children" @selection-changed="selectionChanged" @order-changed="orderChanged"
           v-show="node.expanded && node.children.length > 0" />
       </li>
-    </ul> 
+    </draggable>
   </div>
 </template>
 
 <script>
-export default {
-  props: ['nodes'],
+import { VueDraggableNext } from "vue-draggable-next";
 
-  emits: ['selection-changed'],
+export default {
+  props: ['modelValue'],
+
+  emits: ['selection-changed', 'order-changed'],
+
+  components: {
+    draggable: VueDraggableNext
+  },
 
   data() {
     return {
@@ -32,7 +38,16 @@ export default {
     };
   },
 
-  created() {
+  computed: {
+    nodes: {
+      get() {
+        return this.modelValue;
+      },
+
+      set(value) {
+        this.$emit('update:modelValue', value);
+      }
+    }
   },
 
   methods: {
@@ -50,6 +65,10 @@ export default {
 
     selectionChanged: function() {
       this.$emit('selection-changed');
+    },
+
+    orderChanged: function() {
+      this.$emit('order-changed');
     },
 
     _selectNode: function(node) {
@@ -107,6 +126,10 @@ export default {
 
 .os-tree ul li {
   margin-bottom: 0.25rem;
+}
+
+.os-tree ul li.node-grip {
+  cursor: grab;
 }
 
 .os-tree .node {
