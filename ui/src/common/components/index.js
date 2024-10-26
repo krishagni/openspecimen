@@ -95,6 +95,8 @@ import Textarea from './Textarea.vue';
 import TabView from './TabView.vue';
 import TabPanel from './TabPanel.vue';
 import Task from './Task.vue';
+import TreeSelect from './TreeSelect.vue';
+import TreeSelectPanel from './TreeSelectPanel.vue';
 import Unknown from './Unknown.vue';
 import UserDropdown from './UserDropdown.vue';
 import UsernameAvatar from './UsernameAvatar.vue';
@@ -196,6 +198,8 @@ export default {
     app.component('os-tabs',             TabView);
     app.component('os-tab',              TabPanel);
     app.component('os-task',             Task);
+    app.component('os-tree-select',      TreeSelect);
+    app.component('os-tree-select-panel',TreeSelectPanel);
     app.component('os-unknown',          Unknown);
     app.component('os-username-avatar',  UsernameAvatar);
     app.component('os-user-dropdown',    UserDropdown);
