@@ -280,8 +280,8 @@ class Util {
     }
         
     expr += ' ' + this.symbols[filter.op];
-      
-    let filterValue = '';
+
+    let filterValue = filter.values.length > 0 ? filter.values[0] : '';
     if (field.type == 'STRING' || field.type == 'DATE') {
       if (filter.op == 'IN' || filter.op == 'NOT_IN' || filter.op == 'BETWEEN') {
         filterValue = filter.values.map(item => this._stringLiteral(item));
