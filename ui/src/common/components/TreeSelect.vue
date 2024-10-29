@@ -142,6 +142,7 @@ export default {
 .os-tree .node .collapse,
 .os-tree .node .filler {
   margin-right: 0.25rem;
+  cursor: pointer;
 }
 
 .os-tree .node .expand :deep(svg),
