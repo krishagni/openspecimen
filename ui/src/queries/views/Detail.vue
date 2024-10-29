@@ -31,6 +31,8 @@ export default {
   methods: {
     reloadQuery: function(query) {
       const {name} = routerSvc.getCurrentRoute();
+      this.query = query;
+
       routerSvc.goto(name, {queryId: query.id});
     },
 

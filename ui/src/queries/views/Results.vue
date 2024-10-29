@@ -181,7 +181,16 @@ export default {
     },
 
     showDefineViewDialog: function() {
-      this.$refs.defineViewDialog.open();
+      this.$refs.defineViewDialog.open(this.query).then(
+        resp => {
+          if (resp == 'cancel') {
+            return;
+          }
+
+          this.$emit('query-saved', {...this.query, selectList: resp.selectedFields});
+          setTimeout(() => this._loadRecords()); // to allow the query to be updated
+        }
+      );
     },
 
     exportQueryData: function() {
