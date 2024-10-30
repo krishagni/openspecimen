@@ -67,7 +67,7 @@
           </div>
         </os-step>
         <os-step :title="$t('queries.reporting_options')">
-          <span>Choose reporting options - pivot, column summary etc</span>
+          <os-form :schema="reportingSchema.layout" :data="ctx.query" v-if="ctx.query" />
         </os-step>
       </os-steps>
     </template>
@@ -84,6 +84,8 @@
 </template>
 
 <script>
+import reportingSchema from '@/queries/schemas/reporting.js';
+
 import util from '@/common/services/Util.js';
 import formsCache from '@/queries/services/FormsCache.js';
 
@@ -97,18 +99,37 @@ export default {
   data() {
     return {
       ctx: {
+        query: {
+          reporting: {type: 'none', params: {}},
+
+          getPivotTableFields: (type) => this._getPivotTableFields(type),
+
+          getValueFields: () => this._getValueFields(),
+
+          getColumnSummaryTableFields: (type) => this._getColumnSummaryTableFields(type)
+        },
+
         fieldsTree: []
-      }
+      },
+
+      reportingSchema
     }
   },
 
   methods: {
     open: async function(query) {
       const self = this;
-      this.ctx.query = util.clone(query);
-      this.ctx.fieldsTree     = await self._getFieldsTree(self.ctx.query);
+      query = this.ctx.query = util.clone(query);
+      const reporting = query.reporting = query.reporting || {type: 'none'};
+      const params = reporting.params = reporting.params || {};
+
+      query.getPivotTableFields = (type) => this._getPivotTableFields(type);
+      query.getValueFields    = () => this._getValueFields();
+      query.getColumnSummaryTableFields = (type) => this._getColumnSummaryTableFields(type);
+
+      this.ctx.fieldsTree     = await self._getFieldsTree(query);
       this.ctx.fieldsTreeMap  = this._getFieldsTreeMap({}, this.ctx.fieldsTree);
-      this.ctx.selectedFields = (this.ctx.query.selectList || []).map(
+      this.ctx.selectedFields = (query.selectList || []).map(
         selectedField => {
           let result = {};
           if (typeof selectedField == 'string') {
@@ -124,6 +145,30 @@ export default {
         }
       );
       this.ctx.aggregateField = {};
+
+      if (params && params.groupRowsBy) {
+        params.groupRowsBy = params.groupRowsBy.map(
+          field => {
+            let result = {...field};
+            result.field = this.ctx.fieldsTreeMap[result.name || result.id];
+            return result;
+          }
+        );
+      }
+
+      if (params && params.groupColBy) {
+        params.groupColBy.field = this.ctx.fieldsTreeMap[params.groupColBy.name || params.groupColBy.id];
+      }
+
+      if (params && params.summaryFields) {
+        params.summaryFields = params.summaryFields.map(
+          field => {
+            let result = {...field};
+            result.field = this.ctx.fieldsTreeMap[result.name || result.id];
+            return result;
+          }
+        );
+      }
 
       return new Promise((resolve) => {
         self.resolve = resolve;
@@ -161,7 +206,9 @@ export default {
     },
 
     done: function() {
-      this.resolve({selectedFields: this.ctx.selectedFields});
+      const {selectedFields, query} = this.ctx;
+      const {havingClause, reporting} = query;
+      this.resolve({selectedFields, havingClause, reporting});
       this.$refs.columnsDialog.close();
     },
 
@@ -240,9 +287,76 @@ export default {
       }
 
       return map;
+    },
+
+    _getPivotTableFields: async function(type) {
+      const {reporting: {params: {groupRowsBy, groupColBy, summaryFields}}} = this.ctx.query;
+
+      let result = [];
+      for (let field of this.ctx.selectedFields) {
+        if (field.aggFns && field.aggFns.length > 0) {
+          for (let aggFn of field.aggFns) {
+            result.push({id: field.id + '$' + aggFn.name, displayLabel: aggFn.desc});
+          }
+        } else {
+          result.push(field);
+        }
+      }
+
+      if (type == 'column_fields' || type == 'value_fields') {
+        if (groupRowsBy && groupRowsBy.length > 0) {
+          result = result.filter(field => groupRowsBy.every(c => c.id != field.id));
+        }
+      }
+
+      if (type == 'row_fields' || type == 'value_fields') {
+        if (groupColBy) {
+          result = result.filter(field => groupColBy.id != field.id);
+        }
+      }
+
+      if (type == 'row_fields' || type == 'column_fields') {
+        if (summaryFields && summaryFields.length > 0) {
+          result = result.filter(field => summaryFields.every(c => c.id != field.id));
+        }
+      }
+
+      return result;
+    },
+
+    _getValueFields: async function() {
+      const {reporting: {params: {summaryFields}}} = this.ctx.query;
+      return summaryFields || [];
+    },
+
+    _getColumnSummaryTableFields: async function(type) {
+      const {reporting: {params: {sum, avg}}} = this.ctx.query;
+
+      let result = [];
+      for (let field of this.ctx.selectedFields) {
+        if (field.aggFns && field.aggFns.length > 0) {
+          for (let aggFn of field.aggFns) {
+            result.push({id: field.id + '$' + aggFn.name, displayLabel: aggFn.desc});
+          }
+        } else if (field.field && (field.field.type == 'INTEGER' || field.field.type == 'FLOAT')) {
+          result.push(field);
+        }
+      }
+
+      if (type == 'sum') {
+        if (avg && avg.length > 0) {
+          result = result.filter(field => avg.every(c => c.id != field.id));
+        }
+      }
+
+      if (type == 'avg') {
+        if (sum && sum.length > 0) {
+          result = result.filter(field => sum.every(c => c.id != field.id));
+        }
+      }
+
+      return result;
     }
   }
 }
 </script>
-
-

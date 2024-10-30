@@ -67,11 +67,14 @@ class Util {
       {}
     );
 
+    addPropIds = addPropIds && (!query.reporting || query.reporting.type != 'crosstab');
+
     const selectClause = this._getSelectClause(filtersMap, query.selectList, addPropIds);
     const whereClause  = await this._getWhereClause(query.cpId, filtersMap, query.queryExpression);
+    const havingClause = this._getHavingClause(query.havingClause);
     const reportClause = this._getRptExpr(query.selectList, query.reporting);
 
-    let aql = 'select ' + selectClause + ' where ' + whereClause;
+    let aql = 'select ' + selectClause + ' where ' + whereClause + ' ' + havingClause;
     if (addLimit) {
       aql += ' limit 0, 1000';
     }
@@ -156,6 +159,16 @@ class Util {
     }
 
     return whereClause;
+  }
+
+  _getHavingClause(havingClause) {
+    if (!havingClause) {
+      return '';
+    }
+
+    havingClause = havingClause.replace(/count\s*\(/g, 'count(distinct ');
+    havingClause = havingClause.replace(/c_count\s*\(/g, 'c_count(distinct ');
+    return 'having ' + havingClause;
   }
 
   _getRptExpr(selectedFields, reporting) {

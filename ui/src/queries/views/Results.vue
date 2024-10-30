@@ -187,7 +187,8 @@ export default {
             return;
           }
 
-          this.$emit('query-saved', {...this.query, selectList: resp.selectedFields});
+          const {selectedFields: selectList, havingClause, reporting} = resp;
+          this.$emit('query-saved', {...this.query, selectList, havingClause, reporting});
           setTimeout(() => this._loadRecords()); // to allow the query to be updated
         }
       );
