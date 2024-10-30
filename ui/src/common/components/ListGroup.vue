@@ -73,4 +73,8 @@ export default {
   color: inherit;
 }
 
+.os-list-group .item.active :deep(.os-badge) {
+  color: #337ab7;
+  background-color: #fff;
+}
 </style>
