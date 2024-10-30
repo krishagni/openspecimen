@@ -11,10 +11,60 @@
             @selected-items="onFieldsSelection" />
         </os-step>
         <os-step :title="$t('queries.field_labels')">
-          <span>UI to assign names to the selected fields</span>
+          <table class="os-table">
+            <thead>
+              <tr>
+                <th v-t="'queries.field'">Field</th>
+                <th v-t="'queries.label'">Label</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="selectedField of ctx.selectedFields" :key="selectedField.id">
+                <td v-if="selectedField.field">
+                  <span>{{selectedField.field.formCaption}}: {{selectedField.field.label}}</span>
+                </td>
+                <td>
+                  <os-input-text v-model="selectedField.displayLabel" :md-type="true" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </os-step>
         <os-step :title="$t('queries.aggregates')">
-          <span>Choose aggregate functions</span>
+          <div style="display: flex; flex-direction: row;">
+            <os-list-group :list="ctx.selectedFields" :selected="ctx.aggregateField"
+              @on-item-select="onAggFieldSelection($event)" style="flex: 1; margin: 0.5rem;">
+              <template #header>
+                <span v-t="'queries.selected_fields'">Selected Fields</span>
+              </template>
+              <template #default="{item}">
+                <div style="display: flex;">
+                  <div style="flex: 1;">
+                    <span v-if="item.displayLabel">
+                      {{item.displayLabel}}
+                    </span>
+                    <span v-else-if="item.field">
+                      <span>{{item.field.formCaption}}: {{item.field.label}}</span>
+                    </span>
+                  </div>
+                  <div>
+                    <os-badge>{{(item.aggFns || []).length}}</os-badge>
+                  </div>
+                </div>
+              </template>
+            </os-list-group>
+            <os-panel style="flex: 1; margin: 0.5rem;">
+              <template #header>
+                <span v-t="'queries.aggregate_functions'"></span>
+              </template>
+              <div>
+                <AggregateFunctionSelector v-model="ctx.aggregateField.aggFns" :field="ctx.aggregateField.field"
+                  :label="ctx.aggregateField.displayLabel || ctx.aggregateField.field.label"
+                  v-if="ctx.aggregateField && ctx.aggregateField.id" />
+                <span v-else>Select field on the left side panel</span>
+              </div>
+            </os-panel>
+          </div>
         </os-step>
         <os-step :title="$t('queries.reporting_options')">
           <span>Choose reporting options - pivot, column summary etc</span>
@@ -37,7 +87,13 @@
 import util from '@/common/services/Util.js';
 import formsCache from '@/queries/services/FormsCache.js';
 
+import AggregateFunctionSelector from '@/queries/views/AggregateFunctionSelector.vue';
+
 export default {
+  components: {
+    AggregateFunctionSelector
+  },
+
   data() {
     return {
       ctx: {
@@ -51,9 +107,23 @@ export default {
       const self = this;
       this.ctx.query = util.clone(query);
       this.ctx.fieldsTree     = await self._getFieldsTree(self.ctx.query);
+      this.ctx.fieldsTreeMap  = this._getFieldsTreeMap({}, this.ctx.fieldsTree);
       this.ctx.selectedFields = (this.ctx.query.selectList || []).map(
-        field => ({...field, id: field.name})
+        selectedField => {
+          let result = {};
+          if (typeof selectedField == 'string') {
+            result = {id: selectedField, name: selectedField};
+          } else {
+            result = {...selectedField, id: selectedField.name};
+          }
+
+          const field = this.ctx.fieldsTreeMap[result.id];
+          result.field = field;
+          result.aggFns = result.aggFns || [];
+          return result;
+        }
       );
+      this.ctx.aggregateField = {};
 
       return new Promise((resolve) => {
         self.resolve = resolve;
@@ -105,15 +175,20 @@ export default {
       );
 
       const result = [];
-      for (let field of selectedFields) {
-        if (fieldsMap[field.id]) {
-          result.push(fieldsMap[field.id]);
+      for (let selectedField of selectedFields) {
+        if (fieldsMap[selectedField.id]) {
+          result.push(fieldsMap[selectedField.id]);
         } else {
-          result.push({name: field.id, displayLabel: null, aggFns: null, id: field.id});
+          let field = this.ctx.fieldsTreeMap[selectedField.id];
+          result.push({name: selectedField.id, displayLabel: null, aggFns: [], id: selectedField.id, field});
         }
       }
 
       this.ctx.selectedFields = result;
+    },
+
+    onAggFieldSelection: function({item}) {
+      this.ctx.aggregateField = item;
     },
 
     _getFieldsTree: async function(query) {
@@ -134,19 +209,37 @@ export default {
       const subTree = [];
       for (let field of fields) {
         if (field.type == 'SUBFORM') {
-          const children = this._getFieldsTree0(rootForm, form, prefix + '.' + field.name, field.subFields);
           if (field.name == 'extensions' || field.name == 'customFields') {
-            Array.prototype.push.apply(subTree, children);
+            for (let extnForm of field.subFields) {
+              const extnFormPrefix = prefix + '.' + field.name + '.' + extnForm.name;
+
+              const children     = this._getFieldsTree0(rootForm, extnForm, extnFormPrefix, extnForm.subFields || []);
+              const extnFormTree = {id: extnFormPrefix, label: extnForm.caption, children: children};
+              subTree.push(extnFormTree);
+            }
           } else {
+            const children = this._getFieldsTree0(rootForm, form, prefix + '.' + field.name, field.subFields);
             subTree.push({id: prefix + '.' + field.name, label: field.caption, children});
           }
         } else {
-          subTree.push({id: prefix + '.' + field.name, label: field.caption, children: []});
+          const formCaption = rootForm.caption + (form ? ': ' + form.caption : '');
+          subTree.push({id: prefix + '.' + field.name, label: field.caption, formCaption, type: field.type});
         }
       }
 
       subTree.sort((n1, n2) => n1.label < n2.label ? -1 : (n1.label > n2.label ? 1 : 0));
       return subTree;
+    },
+
+    _getFieldsTreeMap: function(map, tree) {
+      for (let node of tree) {
+        map[node.id] = node;
+        if (node.children && node.children.length > 0) {
+          this._getFieldsTreeMap(map, node.children);
+        }
+      }
+
+      return map;
     }
   }
 }

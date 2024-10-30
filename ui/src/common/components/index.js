@@ -5,6 +5,7 @@ import AuditOverview from './AuditOverview.vue';
 import AuditRevisions from './AuditRevisions.vue';
 import AuditTrail from './AuditTrail.vue';
 import Avatar from './Avatar.vue';
+import Badge from './Badge.vue';
 import BooleanCheckbox from './BooleanCheckbox.vue';
 import Breadcrumb from './Breadcrumb.vue';
 import Button from './Button.vue';
@@ -111,6 +112,7 @@ export default {
     app.component('os-audit-revisions',  AuditRevisions);
     app.component('os-audit-trail',      AuditTrail);
     app.component('os-avatar',           Avatar);
+    app.component('os-badge',            Badge);
     app.component('os-boolean-checkbox', BooleanCheckbox);
     app.component('os-breadcrumb',       Breadcrumb);
     app.component('os-button',           Button);
