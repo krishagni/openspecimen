@@ -307,8 +307,6 @@ class FormUtil {
       let value = attr.value;
       if (attr.type == 'subForm') {
         value = (attr.value || []).map(sfAttrs => this._createCustomFieldsMap(sfAttrs, useDisplayValue));
-      } else if (attr.type != 'fileUpload' && useDisplayValue && attr.displayValue) {
-        value = attr.displayValue;
       } else if (attr.type == 'datePicker') {
         if (attr.value == 'current_date' || attr.value == 'current_time') {
           value = Date.now();
@@ -317,6 +315,8 @@ class FormUtil {
         } else if (!!attr.value || attr.value === 0) {
           value = new Date(attr.value);
         }
+      } else if (attr.type != 'fileUpload' && useDisplayValue && attr.displayValue) {
+        value = attr.displayValue;
       }
 
       valueMap[attr.name] = value;
