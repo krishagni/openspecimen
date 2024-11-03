@@ -284,6 +284,12 @@ class FormUtil {
         let value = field.defaultValue;
         if (value == 'current_date') {
           value = new Date();
+          if (field.dateOnly) {
+            const year  = value.getFullYear();
+            const month = (value.getMonth() < 9 ? '0' : '') + (value.getMonth() + 1);
+            const date  = (value.getDate() <= 9 ? '0' : '') + value.getDate();
+            value = year + '-' + month + '-' + date;
+          }
         } else if (value == 'current_user') {
           if (field.name.indexOf('extensionDetail') != -1) {
             value = window.osUi.currentUser.id;

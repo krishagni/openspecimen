@@ -117,7 +117,11 @@ export default {
     const copy = this.cpr ? util.clone(this.cpr) : {participant: {pmis: [], source: 'OpenSpecimen'}};
     copy.cpId = cp.id;
     if (!copy.id) {
-      copy.registrationDate = new Date();
+      const cd    = new Date();
+      const year  = cd.getFullYear();
+      const month = (cd.getMonth() < 9 ? '0' : '') + (cd.getMonth() + 1);
+      const date  = (cd.getDate() <= 9 ? '0' : '') + cd.getDate();
+      copy.registrationDate = year + '-' + month + '-' + date;
     }
 
     if (copy.participant.extensionDetail) {

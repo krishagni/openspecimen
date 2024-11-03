@@ -270,9 +270,13 @@ export default {
             value = util.getLocalDate(value);
           }
 
-          value = this.$filters.date(value);
+          if (typeof value != 'string' || ('' + parseInt(value)) == value) {
+            value = this.$filters.date(value);
+          }
         } else if (field.type == 'datetime' || (field.type == 'datePicker' && field.showTime == true)) {
-          value = this.$filters.dateTime(value);
+          if (typeof value != 'string' || ('' + parseInt(value)) == value) {
+            value = this.$filters.dateTime(value);
+          }
         } else if (field.options instanceof Array) {
           let option = field.options.find((option) => option.value == value);
           if (option) {
