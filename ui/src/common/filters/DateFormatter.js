@@ -2,46 +2,38 @@
 import { format } from 'date-fns';
 import ui from '@/global.js';
 
+const _format = function(date, fmt, noValue) {
+  if (!date) {
+    return noValue || '-';
+  }
+
+  try {
+    return format(new Date(date), fmt);
+  } catch (e) {
+    console.log('Error converting ' + date + ' (' + (typeof date) + ') to date object: ' + e);
+    return date;
+  }
+};
+
 export default {
   dateTime(date, noValue) {
-    if (!date) {
-      return noValue || '-';
-    }
-
-    const dt = new Date(date);
-    return format(dt, ui.global.locale.dateTimeFmt);
+    return _format(date, ui.global.locale.dateTimeFmt, noValue);
   },
 
   shortDateTime(date, noValue) {
-    if (!date) {
-      return noValue || '-';
-    }
-
-    const locale = ui.global.locale;
-    return format(new Date(date), locale.shortDateFmt + ' ' + locale.timeFmt);
+    const {shortDateFmt, timeFmt} = ui.global.locale;
+    return _format(date, shortDateFmt + ' ' + timeFmt, noValue);
   },
 
   date(date, noValue) {
-    if (!date) {
-      return noValue || '-';
-    }
-
-    return format(new Date(date), ui.global.locale.dateFmt);
+    return _format(date, ui.global.locale.dateFmt, noValue);
   },
 
   formatDate(date, fmt, noValue) {
-    if (!date) {
-      return noValue || '-';
-    }
-
-    return format(new Date(date), fmt || ui.global.locale.dateFmt);
+    return _format(date, fmt || ui.global.locale.dateFmt, noValue);
   },
 
   formatDateTime(date, fmt, noValue) {
-    if (!date) {
-      return noValue || '-';
-    }
-
-    return format(new Date(date), fmt || ui.global.locale.dateTimeFmt);
+    return format(date, fmt || ui.global.locale.dateTimeFmt, noValue);
   }
 }
