@@ -86,6 +86,7 @@ class Util {
     const addedIds = {};
 
     let result = '';
+    const propIdsList = [];
     for (let field of selectedFields) {
       let fieldName = null;
 
@@ -127,7 +128,7 @@ class Util {
                 return;
               }
 
-              result += idField.expr + ' as "' + idField.caption + '", ';
+              propIdsList.push(idField.expr + ' as "' + idField.caption + '"');
               addedIds[idField.expr] = true;
             }
           );
@@ -139,6 +140,10 @@ class Util {
 
     if (result) {
       result = result.substring(0, result.length - 2);
+    }
+
+    if (propIdsList.length > 0) {
+      result += ', ' + propIdsList.join(', ');
     }
 
     return result;
