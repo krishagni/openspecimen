@@ -1,5 +1,5 @@
 <template>
-  <os-menu :label="$t('common.specimen_actions.title')" :options="options" />
+  <os-menu :label="$t(label || 'common.specimen_actions.title')" :options="options" />
 
   <os-confirm-delete ref="deleteSpecimensDialog" :captcha="false" :collectReason="true">
     <template #message>
@@ -74,7 +74,7 @@ import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'cpr', 'visit', 'specimens', 'cartId'],
+  props: ['cp', 'cpr', 'visit', 'specimens', 'cartId', 'label'],
 
   emits: ['reloadSpecimens'],
 
