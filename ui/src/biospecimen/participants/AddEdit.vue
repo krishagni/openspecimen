@@ -378,9 +378,7 @@ export default {
       if (step == 'register' || step == 'lookup') {
         this.ctx.autoSelectedMatch = null;
         this.dataCtx.cpr = data;
-      } /* else if (step == 'lookup') {
-        this.ctx.matches = data;
-      } */
+      }
 
       this.ctx.step = step;
     },
