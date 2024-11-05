@@ -49,6 +49,27 @@
       <os-page-toolbar>
         <template #default>
           <os-menu :label="$t('queries.actions')" :options="actionsMenuOpts" />
+
+          <span v-if="ctx.showAddSpecimens">
+            <os-button left-icon="check" :label="$t('queries.select_all')" @click="selectAllRows"
+              v-if="!ctx.allRowsSelected" />
+
+            <os-button left-icon="times" :label="$t('queries.unselect_all')" @click="unselectAllRows"
+              v-if="ctx.allRowsSelected" />
+          </span>
+
+          <span v-if="ctx.showAddSpecimens && ctx.selectedRows.length > 0">
+            <os-specimen-actions label="queries.specimen_actions"
+              :specimens="selectedSpecimens" @reloadSpecimens="rerun" />
+
+            <os-add-to-cart :specimens="selectedSpecimens" />
+          </span>
+        </template>
+
+        <template #right v-if="selectedSpecimens.length > 0">
+          <os-message class="selected-rows-msg" type="info">
+            <span v-t="{path: 'queries.specimens_selected', args: {count: selectedSpecimens.length}}" />
+          </os-message>
         </template>
       </os-page-toolbar>
 
@@ -59,8 +80,8 @@
 
         <AgGridVue class="results-grid" :theme="theme"
           :row-data="ctx.records" :column-defs="ctx.columns"
-          :rowSelection="{mode: 'multiRow', headerCheckbox: false}"
-          :pinnedBottomRowData="ctx.footerRow"
+          :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow"
+          @gridReady="onGridReady" @selectionChanged="onRowSelection"
           v-else />
       </div>
 
@@ -121,7 +142,13 @@ export default {
 
         columns: null,
 
-        records: null
+        records: null,
+
+        showAddSpecimens: false,
+
+        allRowsSelected: false,
+
+        selectedRows: []
       }
     }
   },
@@ -150,6 +177,18 @@ export default {
       }
 
       return options;
+    },
+
+    rowSelection: function() {
+      if (!this.ctx.showAddSpecimens) {
+        return null;
+      }
+
+      return {mode: 'multiRow', headerCheckbox: false, enableClickSelection: false, checkboxes: true};
+    },
+
+    selectedSpecimens: function() {
+      return this.ctx.selectedRows.map(row => ({id: +row['$specimenId'], cpId: +row['$cpId']}));
     }
   },
 
@@ -196,6 +235,26 @@ export default {
 
     exportQueryData: function() {
       querySvc.exportData(this.query);
+    },
+
+    onGridReady: function({api}) {
+      this.ctx.api = api;
+    },
+
+    onRowSelection: function({api}) {
+      const {ctx} = this;
+      ctx.selectedRows = api.getSelectedRows();
+      ctx.allRowsSelected = (ctx.selectedRows.length == ctx.records.length)
+    },
+
+    selectAllRows: function() {
+      this.ctx.api.selectAll();
+      this.ctx.allRowsSelected = true;
+    },
+
+    unselectAllRows: function() {
+      this.ctx.api.deselectAll();
+      this.ctx.allRowsSelected = false;
     },
 
     _loadCounters: async function() {
@@ -245,10 +304,23 @@ export default {
           )
       );
 
+      this.ctx.allRowsSelected = false;
+      this.ctx.selectedRows = [];
+
       if (type == 'columnsummary') {
         this.ctx.footerRow = this.ctx.records.splice(this.ctx.records.length - 1, 1);
       } else {
         this.ctx.footerRow = [];
+      }
+
+      this.ctx.showAddSpecimens = false;
+      if (type != 'crosstab' && columnMetadata && columnMetadata.length) {
+        for (const {expr} of columnMetadata) {
+          if (expr == 'Specimen.label' || expr == 'Specimen.barcode') {
+            this.ctx.showAddSpecimens = true;
+            break;
+          }
+        }
       }
 
       this.ctx.loadingRecords = false;
@@ -293,5 +365,13 @@ export default {
 .results-grid {
   width: 100%;
   height: 100%;
+}
+
+.selected-rows-msg {
+  margin: 0;
+}
+
+.selected-rows-msg :deep(.p-message-wrapper) {
+  padding: 0.25rem;
 }
 </style>
