@@ -38,7 +38,7 @@ export default {
             labelCode: 'queries.group_rows',
             listSource: {
               displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
-              loadFn: ({context}) => context.formData.getSelectedFields('row_fields')
+              loadFn: ({context}) => context.formData.getPivotTableFields('row_fields')
             },
             showWhen: 'reporting.type == "crosstab"'
           }
@@ -52,7 +52,7 @@ export default {
             labelCode: 'queries.group_columns',
             listSource: {
               displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
-              loadFn: ({context}) => context.formData.getSelectedFields('column_fields')
+              loadFn: ({context}) => context.formData.getPivotTableFields('column_fields')
             },
             showWhen: 'reporting.type == "crosstab"'
           }
@@ -66,7 +66,7 @@ export default {
             labelCode: 'queries.value_fields',
             listSource: {
               displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
-              loadFn: ({context}) => context.formData.getSelectedFields('value_fields')
+              loadFn: ({context}) => context.formData.getPivotTableFields('value_fields')
             },
             showWhen: 'reporting.type == "crosstab"'
           }
