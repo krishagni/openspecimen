@@ -4,6 +4,7 @@
 
 <script>
 
+import formCache from '@/queries/services/FormsCache.js';
 import routerSvc from '@/common/services/Router.js';
 import savedQuerySvc from '@/queries/services/SavedQuery.js';
 
@@ -36,13 +37,29 @@ export default {
       routerSvc.goto(name, {queryId: query.id});
     },
 
-    _loadQuery: function() {
+    _loadQuery: async function() {
       if (!this.queryId || this.queryId == -1) {
         this.query = {};
         return;
       }
 
-      savedQuerySvc.getQueryById(this.queryId).then(query => this.query = query);
+      const query = await savedQuerySvc.getQueryById(this.queryId);
+      await this._hydrateFilters(query);
+      this.query = query;
+    },
+
+    _hydrateFilters: async function(query) {
+      for (const filter of query.filters) {
+        if (filter.expr) {
+          return;
+        }
+
+        filter.fieldObj = await formCache.getField(query.cpId, query.cpGroupId, filter.field);
+        if (filter.subQueryId > 0) {
+          const subQuery = await savedQuerySvc.getQueryById(filter.subQueryId);
+          filter.subQuery = {id: subQuery.id, title: subQuery.title};
+        }
+      }
     }
   }
 }

@@ -17,7 +17,12 @@ class FormsCache {
   getFields(form, cpId, cpGroupId) {
     const key = (cpId > 0 ? 'cp_' + cpId : (cpGroupId > 0 ? 'cpg_' + cpGroupId : 'none')) + '_' + form.formId;
     if (!this.fieldsQ[key]) {
-      this.fieldsQ[key] = http.get('forms/' + form.formId + '/fields', {cpId, cpGroupId, extendedFields: true});
+      this.fieldsQ[key] = http.get('forms/' + form.formId + '/fields', {cpId, cpGroupId, extendedFields: true}).then(
+        (fields) => {
+          this._addFormCaption(form, null, form.name, fields);
+          return fields;
+        }
+      );
     }
 
     return this.fieldsQ[key];
@@ -59,6 +64,23 @@ class FormsCache {
     }
 
     return null;
+  }
+
+  _addFormCaption(rootForm, form, prefix, fields) {
+    for (const field of fields) {
+      if (field.type == 'SUBFORM') {
+        if (field.name == 'customFields' || field.name == 'extensions') {
+          for (let sf of field.subFields || []) {
+            this._addFormCaption(rootForm, sf, prefix + '.' + field.name + '.' + sf.name, sf.subFields);
+          }
+        } else {
+          this._addFormCaption(rootForm, form, prefix + '.' + field.name, field.subFields);
+        }
+      } else {
+        field.formCaption = form ? [rootForm.caption, form.caption] : [rootForm.caption];
+        field.id = prefix + '.' + field.name;
+      }
+    }
   }
 }
 

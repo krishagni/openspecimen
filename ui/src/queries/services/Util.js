@@ -1,3 +1,5 @@
+import i18n from '@/common/services/I18n.js';
+
 import formsCache from './FormsCache.js';
 
 class Util {
@@ -80,6 +82,77 @@ class Util {
     }
 
     return aql + ' ' + reportClause;
+  }
+
+  getFilterDesc(filter) {
+    filter = filter || {};
+    if (filter.expr) {
+      return filter.desc || i18n.msg('queries.unknown');
+    } else if (filter.fieldObj) {
+      const {formCaption, caption} = filter.fieldObj;
+      const op = i18n.msg('queries.ops.' + filter.op);
+
+      let desc = formCaption.join(' >> ') + ' >> ' + caption + ' ' + op;
+      if (filter.values) {
+        desc += ' ' + filter.values.join(', ');
+      } else if (filter.subQuery) {
+        desc += ' ' + filter.subQuery.title;
+      } else if (filter.subQueryId) {
+        desc += ' ' + filter.subQueryId;
+      }
+
+      return desc;
+    } else {
+      return filter.id || i18n.msg('queries.unknown');
+    }
+  }
+
+  isValidExpr(exprNodes) {
+    let parenCnt = 0, next = 'FILTER', last = 'FILTER';
+    for (let i = 0; i < exprNodes.length; ++i) {
+      const {nodeType, value} = exprNodes[i];
+      if (nodeType == 'PARENTHESIS' && value == 'LEFT') {
+        ++parenCnt;
+        continue;
+      } else if (nodeType == 'PARENTHESIS' && value == 'RIGHT' && last != 'OPERATOR') {
+        --parenCnt;
+        if (parenCnt < 0) {
+          return false;
+        }
+        continue;
+      } else if (nodeType == 'OPERATOR' && value == 'NTHCHILD' && next == 'FILTER') { 
+        if (i + 1 < exprNodes.length) {
+          const nextToken = exprNodes[i + 1];
+          if (nextToken.nodeType == 'PARENTHESIS' && nextToken.value == 'LEFT') {
+            ++parenCnt;
+            ++i;
+            last = 'OPERATOR';
+            continue;
+          }
+        }
+
+        return false;
+      } else if (nodeType == 'OPERATOR' && value == 'NOT' && next == 'FILTER') {
+        last = 'OPERATOR';
+        continue;
+      } else if (nodeType == 'OPERATOR' && next != 'OPERATOR') {
+        return false;
+      } else if (nodeType == 'FILTER' && next != 'FILTER') {
+        return false;
+      } else if (nodeType == 'OPERATOR' && next == 'OPERATOR' && value != 'NOT' && value != 'NTHCHILD') {
+        next = 'FILTER';
+        last = 'OPERATOR';
+        continue;
+      } else if (nodeType == 'FILTER' && next == 'FILTER') {
+        next = 'OPERATOR';
+        last = 'FILTER';
+        continue;
+      } else {
+        return false;
+      }
+    }
+
+    return parenCnt == 0 && last == 'FILTER';
   }
 
   _getSelectClause(filtersMap, selectedFields, addPropIds) {
