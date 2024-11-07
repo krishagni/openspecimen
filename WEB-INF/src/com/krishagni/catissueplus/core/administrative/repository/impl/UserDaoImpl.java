@@ -377,7 +377,8 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 				query.or(
 					query.ilike("u.firstName", searchString),
 					query.ilike("u.lastName",  searchString),
-					query.ilike("u.emailAddress", searchString)
+					query.ilike("u.emailAddress", searchString),
+					query.eq(query.concat(query.getExpression("u.firstName"), query.concat(" ", query.getExpression("u.lastName"))), searchString)
 				)
 			);
 		}

@@ -320,6 +320,18 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		return createSubQuery(fromClass, Long.class, alias);
 	}
 
+	public Expression<String> concat(Expression<String> expr, String value) {
+		return builder.concat(expr, value);
+	}
+
+	public Expression<String> concat(String value, Expression<String> expr) {
+		return builder.concat(value, expr);
+	}
+
+	public Expression<String> concat(Expression<String> expr1, Expression<String> expr2) {
+		return builder.concat(expr1, expr2);
+	}
+
 	public Property locate(String attribute, String value) {
 		return Property.of(builder.locate(getExpression(attribute), value));
 	}
