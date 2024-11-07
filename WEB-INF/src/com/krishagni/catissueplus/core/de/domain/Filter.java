@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.de.domain;
 
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -167,24 +168,14 @@ public class Filter {
 			return true;
 		}
 
-		switch (getOp()) {
-			case NE:
-			case GT:
-			case LT:
-			case CONTAINS:
-			case STARTS_WITH:
-			case ENDS_WITH:
-			case NOT_IN:
-			case NOT_EXISTS:
-				return false;
-
-			default:
-				return true;
-		}
+		return switch (getOp()) {
+			case NE, GT, LT, CONTAINS, STARTS_WITH, ENDS_WITH, NOT_IN, NOT_EXISTS -> false;
+			default -> true;
+		};
 	}
 
 	private void addEqualCondition(List<Object> values) {
-		String[] cond = values.stream().filter(val -> val != null).map(val -> val.toString()).toArray(String[]::new);
+		String[] cond = values.stream().filter(Objects::nonNull).map(Object::toString).toArray(String[]::new);
 		if (cond.length == 0) {
 			return;
 		}

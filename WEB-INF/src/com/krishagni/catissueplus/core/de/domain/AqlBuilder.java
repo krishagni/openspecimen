@@ -187,7 +187,7 @@ public class AqlBuilder {
 		}
 
 		int endIdx = select.length() - 2;
-		return select.substring(0, endIdx < 0 ? 0 : endIdx);
+		return select.substring(0, Math.max(endIdx, 0));
 	}
 	
 	private String getFieldExpr(Map<Integer, Filter> filterMap, SelectField field, boolean includeDesc) {
