@@ -79,6 +79,10 @@ export default {
         this.ctx.query.id = this.ctx.queryId;
       }
 
+      for (let filter of this.ctx.query.filters) {
+        delete filter.fieldObj;
+      }
+
       savedQuerySvc.saveOrUpdate(this.ctx.query).then(
         savedQuery => {
           this.resolve({status: 'saved', query: savedQuery});

@@ -30,11 +30,14 @@ export default {
   },
 
   methods: {
-    reloadQuery: function(query) {
+    reloadQuery: async function(query) {
       const {name} = routerSvc.getCurrentRoute();
-      this.query = query;
-
-      routerSvc.goto(name, {queryId: query.id});
+      if (this.queryId == query.id) {
+        await this._hydrateFilters(query);
+        this.query = query;
+      } else {
+        routerSvc.goto(name, {queryId: query.id});
+      }
     },
 
     _loadQuery: async function() {
@@ -51,7 +54,7 @@ export default {
     _hydrateFilters: async function(query) {
       for (const filter of query.filters) {
         if (filter.expr) {
-          return;
+          continue;
         }
 
         filter.fieldObj = await formCache.getField(query.cpId, query.cpGroupId, filter.field);

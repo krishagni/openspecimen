@@ -16,7 +16,9 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <span>actions</span>
+          <os-button left-icon="save" :label="$t('common.buttons.save')" @click="saveQuery" />
+          <os-button left-icon="tachometer-alt" :label="$t('queries.get_count')" />
+          <os-button left-icon="table" :label="$t('queries.view_records')" />
         </template>
       </os-page-toolbar>
 
@@ -34,8 +36,8 @@
               <div class="body">
                 <ExpressionEditor :query="ctx.query" v-model="ctx.query.queryExpression" />
 
-                <div style="flex: 1; overflow-y: auto; border: 1px solid red; margin: 1rem 0rem;">
-                  <pre>{{query}}</pre>
+                <div style="flex: 1; overflow-y: auto; margin: 1rem 0rem;">
+                  <FiltersList v-model="ctx.query" />
                 </div>
               </div>
             </template>
@@ -44,19 +46,28 @@
       </os-grid>
     </os-page-body>
   </os-page>
+
+  <SaveQuery ref="saveQueryDialog" />
 </template>
 
 <script>
+import alertsSvc from '@/common/services/Alerts.js';
 import i18n      from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
 
 import ExpressionEditor from '@/queries/views/ExpressionEditor.vue';
+import FiltersList from '@/queries/views/FiltersList.vue';
+import SaveQuery   from '@/queries/views/SaveQuery.vue';
 
 export default {
   props: ['query'],
 
   components: {
-    ExpressionEditor
+    ExpressionEditor,
+
+    FiltersList,
+
+    SaveQuery
   },
 
   data() {
@@ -71,6 +82,27 @@ export default {
 
   created() {
     this.ctx.query = this.query;
+  },
+
+  watch: {
+    query: function(newQuery) {
+      this.ctx.query = newQuery;
+    }
+  },
+
+  methods: {
+    saveQuery: function() {
+      this.$refs.saveQueryDialog.save(this.ctx.query).then(
+        ({status, query}) => {
+          if (status != 'saved') {
+            return;
+          }
+
+          alertsSvc.success({code: 'queries.saved', args: query});
+          this.$emit('query-saved', query);
+        }
+      );
+    }
   }
 }
 </script>

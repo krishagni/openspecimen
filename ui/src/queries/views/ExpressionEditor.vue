@@ -12,7 +12,7 @@
     </div>
 
     <draggable :class="classList" v-model="ctx.queryExpression" tag="div" handle=".node">
-      <div class="node" v-for="(node, idx) of ctx.queryExpression" :key="idx">
+      <div class="node" v-for="(node, idx) of nodes" :key="idx">
         <div class="filter" v-if="node.nodeType == 'FILTER'" v-os-tooltip.bottom="filterDesc(node.value)">
           <span>{{node.value}}</span>
           <span class="parameterized" v-if="isParameterized(node.value)"
