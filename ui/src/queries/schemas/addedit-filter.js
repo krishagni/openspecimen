@@ -169,7 +169,6 @@ export default {
             name: 'filter.dateValue',
             labelCode: 'queries.condition_value',
             showWhen: 'valueType == "date"',
-            dateOnly: true,
             validations: {
               required: {
                 messageCode: 'queries.condition_value_req'

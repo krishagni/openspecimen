@@ -46,7 +46,7 @@ class Util {
       {}
     );
 
-    let whereClause = await this._getWhereClause(query.cpId, filtersMap, query.queryExpression);
+    let whereClause = await this._getWhereClause(query, filtersMap);
     return '' +
       'select ' +
       ' count(distinct Participant.id) as "cprCnt", ' +
@@ -71,10 +71,10 @@ class Util {
 
     addPropIds = addPropIds && (!query.reporting || query.reporting.type != 'crosstab');
 
-    const selectClause = this._getSelectClause(filtersMap, query.selectList, addPropIds);
-    const whereClause  = await this._getWhereClause(query.cpId, filtersMap, query.queryExpression);
-    const havingClause = this._getHavingClause(query.havingClause);
-    const reportClause = this._getRptExpr(query.selectList, query.reporting);
+    const selectClause = this._getSelectClause(query, filtersMap, addPropIds);
+    const whereClause  = await this._getWhereClause(query, filtersMap);
+    const havingClause = this._getHavingClause(query);
+    const reportClause = this._getRptExpr(query);
 
     let aql = 'select ' + selectClause + ' where ' + whereClause + ' ' + havingClause;
     if (addLimit) {
@@ -155,12 +155,12 @@ class Util {
     return parenCnt == 0 && last == 'FILTER';
   }
 
-  _getSelectClause(filtersMap, selectedFields, addPropIds) {
+  _getSelectClause(query, filtersMap, addPropIds) {
     const addedIds = {};
 
     let result = '';
     const propIdsList = [];
-    for (let field of selectedFields) {
+    for (let field of query.selectList || []) {
       let fieldName = null;
 
       if (typeof field == 'string') {
@@ -222,15 +222,15 @@ class Util {
     return result;
   }
 
-  async _getWhereClause(cpId, filtersMap, expressionNodes) {
+  async _getWhereClause(query, filtersMap) {
     let whereClause = '';
-    for (const {nodeType, value} of expressionNodes) {
+    for (const {nodeType, value} of query.queryExpression || []) {
       if (nodeType == 'OPERATOR') {
         whereClause += value.toLowerCase();
       } else if (nodeType == 'PARENTHESIS') {
         whereClause += (value == 'LEFT' ? '(' : ')');
       } else if (nodeType == 'FILTER') {
-        whereClause += await this._getFilterExpr(cpId, filtersMap, value);
+        whereClause += await this._getFilterExpr(query.cpId, query.cpGroupId, filtersMap, value);
       }
 
       whereClause += ' ';
@@ -239,18 +239,18 @@ class Util {
     return whereClause;
   }
 
-  _getHavingClause(havingClause) {
-    if (!havingClause) {
+  _getHavingClause(query) {
+    if (!query.havingClause) {
       return '';
     }
 
-    havingClause = havingClause.replace(/count\s*\(/g, 'count(distinct ');
+    let havingClause = query.havingClause.replace(/count\s*\(/g, 'count(distinct ');
     havingClause = havingClause.replace(/c_count\s*\(/g, 'c_count(distinct ');
     return 'having ' + havingClause;
   }
 
-  _getRptExpr(selectedFields, reporting) {
-    const {type, params} = reporting || {type: 'none', params: {}};
+  _getRptExpr(query) {
+    const {type, params} = query.reporting || {type: 'none', params: {}};
     if (!type || type == 'none') {
       return '';
     }
@@ -263,9 +263,9 @@ class Util {
         ')';
     }
 
-    const rptFields = this._getReportFields(selectedFields, true);
+    const rptFields = this._getReportFields(query.selectList, true);
     if (type == 'columnsummary') {
-      return this._getColumnSummaryRptExpr(rptFields, reporting);
+      return this._getColumnSummaryRptExpr(rptFields, query.reporting);
     }
 
     if (type != 'crosstab') {
@@ -320,7 +320,7 @@ class Util {
     return expr;
   }
 
-  async _getFilterExpr(cpId, filtersMap, filterId) {
+  async _getFilterExpr(cpId, cpGroupId, filtersMap, filterId) {
     const filter = filtersMap[filterId];
     if (filter == null) {
       alert('Invalid filter: ' + filterId);
@@ -350,7 +350,7 @@ class Util {
       return filter.expr;
     }
 
-    const field = await formsCache.getField(cpId, null, filter.field);
+    const field = await formsCache.getField(cpId, cpGroupId, filter.field);
     if (!field) {
       return '';
     }
@@ -361,9 +361,9 @@ class Util {
       return expr;
     }
 
-    if (filter.hasSq) {
+    if (filter.hasSq || filter.subQueryId > 0) {
       alert('TODO');
-      return '';
+      return '(1 = 1)';
     }
 
     if (this._isUndef(filter.values) && (field.type == 'DATE' || field.type == 'INTEGER' || field.type == 'FLOAT')) {

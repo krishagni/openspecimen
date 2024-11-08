@@ -9,7 +9,7 @@
       <os-form ref="addEditFilterForm" :schema="addEditFilterFs" :data="ctx" @input="handleInput">
         <div>
           <os-button primary :label="$t('common.buttons.edit')" v-if="ctx.filter.id > 0" @click="saveFilter" />
-          <os-button primary :label="$t('common.buttons.add')" v-else />
+          <os-button primary :label="$t('common.buttons.add')" v-else @click="saveFilter" />
           <os-button :label="$t('common.buttons.cancel')" @click="cancel" />
         </div>
       </os-form>
@@ -182,7 +182,7 @@ export default {
         }
       } else if ((fieldObj.lookupProps || fieldObj.pvs) && ['CONTAINS', 'STARTS_WITH', 'ENDS_WITH'].indexOf(op) < 0) {
         this.ctx.valueType = 'dropdown';
-        this.ctx.filter.valuePv = (values && values.length > 0 && values[0]); 
+        this.ctx.filter.valuePv = (values && values.length > 0 && values[0]) || undefined;
       } else if (op == 'BETWEEN') {
         if (fieldObj.type == 'DATE') {
           this.ctx.valueType = 'dateRange';
@@ -190,15 +190,15 @@ export default {
           this.ctx.filter.maxDateValue = this._parseDate((values && values.length > 1 && values[1]));
         } else {
           this.ctx.valueType = 'numericRange';
-          this.ctx.filter.minNumValue = (values && values.length > 0 && values[0]);
-          this.ctx.filter.maxNumValue = (values && values.length > 1 && values[1]);
+          this.ctx.filter.minNumValue = (values && values.length > 0 && values[0]) || undefined;
+          this.ctx.filter.maxNumValue = (values && values.length > 1 && values[1]) || undefined;
         }
       } else if (fieldObj.type == 'DATE') {
         this.ctx.valueType = 'date';
         this.ctx.filter.dateValue = this._parseDate((values && values.length > 0 && values[0]));
       } else {
         this.ctx.valueType = 'text';
-        this.ctx.filter.value = (values && values.length > 0 && values[0]);
+        this.ctx.filter.value = (values && values.length > 0 && values[0]) || undefined;
       }
     },
 
