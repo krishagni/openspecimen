@@ -1,3 +1,5 @@
+import Accordion from './Accordion.vue';
+import AccordionTab from './AccordionTab.vue';
 import AddItems from './AddItems.vue';
 import AddSpecimens from './AddSpecimens.vue';
 import AddToCart from './AddToCart.vue';
@@ -105,6 +107,8 @@ import UtilisationBar from './UtilisationBar.vue';
 
 export default {
   install(app) {
+    app.component('os-accordion',        Accordion);
+    app.component('os-accordion-tab',    AccordionTab);
     app.component('os-add-items',        AddItems);
     app.component('os-add-specimens',    AddSpecimens);
     app.component('os-add-to-cart',      AddToCart);
