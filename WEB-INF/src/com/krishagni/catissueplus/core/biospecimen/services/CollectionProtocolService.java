@@ -45,6 +45,8 @@ public interface CollectionProtocolService {
 
 	public ResponseEvent<Long> getProtocolsCount(RequestEvent<CpListCriteria> req);
 
+	ResponseEvent<List<Map<String, Object>>> getCpsAndGroups(RequestEvent<String> req);
+
 	public ResponseEvent<CollectionProtocolDetail> getCollectionProtocol(RequestEvent<CpQueryCriteria> req);
 
 	public ResponseEvent<String> getCollectionProtocolDefinition(RequestEvent<CpQueryCriteria> req);

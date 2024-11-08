@@ -50,6 +50,7 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 			query.add(query.in("group.id", allowedGroups));
 		}
 
+		applyIdsFilter(query, "group.id", crit.ids());
 		return query.addOrder(query.asc("group.name")).list(crit.startAt(), crit.maxResults());
 	}
 

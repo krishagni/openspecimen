@@ -52,6 +52,7 @@ import com.krishagni.catissueplus.core.biospecimen.WorkflowUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.AliquotSpecimensRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolPublishEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolPublishedVersion;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
@@ -95,6 +96,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDet
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolDao;
+import com.krishagni.catissueplus.core.biospecimen.repository.CpGroupListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
@@ -257,6 +259,66 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			return ResponseEvent.response(daoFactory.getCollectionProtocolDao().getCpCount(crit));
 		} catch (OpenSpecimenException oce) {
 			return ResponseEvent.error(oce);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<Map<String, Object>>> getCpsAndGroups(RequestEvent<String> req) {
+		try {
+			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.response(Collections.emptyList());
+			}
+
+			List<Map<String, Object>> result = new ArrayList<>();
+
+			String query = req.getPayload();
+			CpListCriteria cpCrit = new CpListCriteria().query(query).siteCps(siteCps);
+			CpGroupListCriteria cpGroupCrit = new CpGroupListCriteria().query(query).siteCps(siteCps);
+			if (query != null && query.trim().length() > 0) {
+				if (query.startsWith("cp_")) {
+					Long cpId = Long.parseLong(query.substring(3));
+					cpCrit.query(null).ids(Collections.singletonList(cpId));
+					cpGroupCrit = null;
+				} else if (query.startsWith("cpg_")) {
+					Long groupId = Long.parseLong(query.substring(4));
+					cpGroupCrit.query(null).ids(Collections.singletonList(groupId));
+					cpCrit = null;
+				}
+			}
+
+			if (cpCrit != null) {
+				List<CollectionProtocolSummary> cps = daoFactory.getCollectionProtocolDao().getCollectionProtocols(cpCrit);
+				for (CollectionProtocolSummary cp : cps) {
+					Map<String, Object> cpMap = new HashMap<>();
+					cpMap.put("id", "cp_" + cp.getId());
+					cpMap.put("cpId", cp.getId());
+					cpMap.put("label", cp.getShortTitle());
+					cpMap.put("group", "Collection Protocols");
+					result.add(cpMap);
+				}
+			}
+
+			if (result.size() < 100 && cpGroupCrit != null) {
+				cpGroupCrit.maxResults(100 - result.size());
+
+				List<CollectionProtocolGroup> groups = daoFactory.getCpGroupDao().getGroups(cpGroupCrit);
+				for (CollectionProtocolGroup group : groups) {
+					Map<String, Object> groupMap = new HashMap<>();
+					groupMap.put("id", "cpg_" + group.getId());
+					groupMap.put("cpGroupId", group.getId());
+					groupMap.put("label", group.getName());
+					groupMap.put("group", "Collection Protocol Groups");
+					result.add(groupMap);
+				}
+			}
+
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}

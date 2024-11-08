@@ -23,6 +23,7 @@ import ConfirmDelete from './ConfirmDelete.vue';
 import CopyLink from './CopyLink.vue';
 import ContainerPositionSelector from './ContainerPositionSelector.vue';
 import ContainerSelector from './ContainerSelector.vue';
+import CpsAndGroups from '@/common/components/CpsAndGroups.vue';
 import DatePicker from './DatePicker.vue';
 import DeleteObject from './DeleteObject.vue';
 import Dialog from './Dialog.vue';
@@ -132,6 +133,7 @@ export default {
     app.component('os-container-position-selector', ContainerPositionSelector);
     app.component('os-confirm-delete',   ConfirmDelete);
     app.component('os-copy-link',        CopyLink);
+    app.component('os-cp-n-groups',      CpsAndGroups);
     app.component('os-date-picker',      DatePicker);
     app.component('os-delete-object',    DeleteObject);
     app.component('os-dialog',           Dialog);

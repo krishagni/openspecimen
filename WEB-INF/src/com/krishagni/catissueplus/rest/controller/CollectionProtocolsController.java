@@ -192,6 +192,13 @@ public class CollectionProtocolsController {
 		return Collections.singletonMap("count", resp.getPayload());
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/cps-n-groups")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<Map<String, Object>> getCpsAndGroups(@RequestParam(value = "query", required = false)  String query) {
+		return ResponseEvent.unwrap(cpSvc.getCpsAndGroups(RequestEvent.wrap(query)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
