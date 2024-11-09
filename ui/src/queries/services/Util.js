@@ -1,6 +1,7 @@
 import i18n from '@/common/services/I18n.js';
 
-import formsCache from './FormsCache.js';
+import formsCache    from './FormsCache.js';
+import savedQuerySvc from './SavedQuery.js';
 
 class Util {
   symbols = {
@@ -38,15 +39,8 @@ class Util {
       return '';
     }
 
-    const filtersMap = query.filters.reduce(
-      (map, filter) => {
-        map[filter.id] = filter;
-        return map;
-      },
-      {}
-    );
-
-    let whereClause = await this._getWhereClause(query, filtersMap);
+    const filtersMap = this._getFiltersMap(query);
+    const whereClause = await this._getWhereClause(query, filtersMap);
     return '' +
       'select ' +
       ' count(distinct Participant.id) as "cprCnt", ' +
@@ -61,14 +55,7 @@ class Util {
       return '';
     }
 
-    const filtersMap = query.filters.reduce(
-      (map, filter) => {
-        map[filter.id] = filter;
-        return map;
-      },
-      {}
-    );
-
+    const filtersMap = this._getFiltersMap(query);
     addPropIds = addPropIds && (!query.reporting || query.reporting.type != 'crosstab');
 
     const selectClause = this._getSelectClause(query, filtersMap, addPropIds);
@@ -222,6 +209,16 @@ class Util {
     return result;
   }
 
+  _getFiltersMap(query) {
+    return (query.filters || []).reduce(
+      (map, filter) => {
+        map[filter.id] = filter;
+        return map;
+      },
+      {}
+    );
+  }
+
   async _getWhereClause(query, filtersMap) {
     let whereClause = '';
     for (const {nodeType, value} of query.queryExpression || []) {
@@ -362,8 +359,13 @@ class Util {
     }
 
     if (filter.hasSq || filter.subQueryId > 0) {
-      alert('TODO');
-      return '(1 = 1)';
+      const subQuery = await savedQuerySvc.getQueryById(filter.subQueryId);
+      const sqFiltersMap = this._getFiltersMap(subQuery);
+      const sqWhere = await this._getWhereClause(subQuery, sqFiltersMap);
+
+      expr += ' ' + this.symbols[filter.op] + ' ';
+      expr += '(select ' + filter.field + ' where ' + sqWhere + ')';
+      return expr;
     }
 
     if (this._isUndef(filter.values) && (field.type == 'DATE' || field.type == 'INTEGER' || field.type == 'FLOAT')) {

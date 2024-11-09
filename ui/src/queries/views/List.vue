@@ -19,7 +19,17 @@
       <os-page-toolbar>
         <template #default>
           <span v-if="!ctx.selectedQueries || ctx.selectedQueries.length == 0">
-            <span>actions</span>
+            <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createQuery"
+              v-show-if-allowed="queryResources.createOpts" />
+
+            <os-button left-icon="upload" :label="$t('common.buttons.import')" @click="showImportQueryDialog"
+              v-show-if-allowed="queryResources.createOpts" />
+
+            <os-button left-icon="list" :label="$t('queries.view_audit_logs')" @click="viewAuditLogs"
+              v-show-if-allowed="'institute-admin'" />
+
+            <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
+              url="https://openspecimen.atlassian.net/l/cp/2AHMwCtu" new-tab="true" />
           </span>
           <span v-else>
             <AssignFolder :my-folders="ctx.myFolders" :shared-folders="ctx.sharedFolders"
@@ -151,6 +161,19 @@
           <span v-t="{path: 'queries.confirm_delete_folder', args: ctx.folder}"></span>
         </template>
       </os-confirm>
+
+      <os-dialog ref="importQueryDialog">
+        <template #header>
+          <span v-t="'queries.import_query'">Import Query</span>
+        </template>
+        <template #content>
+          <os-form ref="queryImporter" :schema="importQueryFs" :data="{}" />
+        </template>
+        <template #footer>
+          <os-button text    :label="$t('common.buttons.cancel')" @click="hideImportQueryDialog" />
+          <os-button primary :label="$t('common.buttons.import')" @click="uploadQueryJson" />
+        </template>
+      </os-dialog>
     </os-page-body>
   </os-page>
 </template>
@@ -159,6 +182,7 @@
 
 import folderAddEditLayout from '@/queries/schemas/addedit-folder.js';
 import folderSchema        from '@/queries/schemas/folder.js';
+import importSchema        from '@/queries/schemas/import-query.js';
 import listSchema          from '@/queries/schemas/list.js';
 
 import alertsSvc      from '@/common/services/Alerts.js';
@@ -200,9 +224,13 @@ export default {
 
       listSchema,
 
+      importQueryFs: importSchema.layout,
+
       folderSchema,
 
-      folderAddEditFs
+      folderAddEditFs,
+
+      queryResources
     };
   },
 
@@ -411,6 +439,35 @@ export default {
       const queries = this.ctx.selectedQueries.map(({rowObject: {query}}) => query);
       this.ctx.folder = {queries};
       this.$refs.updateFolderDialog.open();
+    },
+
+    createQuery: function() {
+      routerSvc.goto('QueryDetail.AddEdit', {queryId: -1});
+    },
+
+    showImportQueryDialog: function() {
+      this.$refs.importQueryDialog.open();
+    },
+
+    hideImportQueryDialog: function() {
+      this.$refs.importQueryDialog.close();
+    },
+
+    uploadQueryJson: function() {
+      this.$refs.queryImporter.uploadFile('file').then(
+        savedQuery => {
+          if (!savedQuery) {
+            return;
+          }
+
+          alertsSvc.success({code: 'queries.saved', args: savedQuery});
+          routerSvc.goto('QueryDetail.AddEdit', {queryId: savedQuery.id});
+        }
+      );
+    },
+
+    viewAuditLogs: function() {
+      routerSvc.goto('QueryAuditLogs');
     },
 
     _editQuery: function(query) {

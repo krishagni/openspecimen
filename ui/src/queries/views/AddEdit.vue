@@ -15,10 +15,10 @@
 
     <os-page-body>
       <os-page-toolbar>
-        <template #default>
+        <template #default v-if="query.filters.length > 0">
           <os-button left-icon="save" :label="$t('common.buttons.save')" @click="saveQuery" />
-          <os-button left-icon="tachometer-alt" :label="$t('queries.get_count')" />
-          <os-button left-icon="table" :label="$t('queries.view_records')" />
+          <os-button left-icon="tachometer-alt" :label="$t('queries.get_count')" @click="viewCounts" />
+          <os-button left-icon="table" :label="$t('queries.view_records')" @click="viewRecords" />
         </template>
       </os-page-toolbar>
 
@@ -76,12 +76,17 @@
               <span v-t="'queries.expressions_n_filters'">Expressions and Filters</span>
             </template>
             <template #default>
-              <div class="body">
+              <div class="body" v-if="ctx.query.filters.length > 0">
                 <ExpressionEditor :query="ctx.query" v-model="ctx.query.queryExpression" />
 
                 <div style="flex: 1; overflow-y: auto; margin: 1rem 0rem;">
                   <FiltersList v-model="ctx.query" />
                 </div>
+              </div>
+              <div class="body" v-else>
+                <os-message type="info">
+                  <span v-t="'queries.add_filters_to_start'"></span>
+                </os-message>
               </div>
             </template>
           </os-panel>
@@ -89,6 +94,54 @@
       </os-grid>
     </os-page-body>
   </os-page>
+
+  <os-overlay class="count-po-wrapper" ref="countsOverlay" :dismissable="false" :show-close-icon="false">
+    <div class="count-po">
+      <div class="title">
+        <span v-t="'queries.count_results'"></span>
+      </div>
+      <div>
+        <table class="os-table" v-if="!ctx.counts">
+          <tbody>
+            <tr>
+              <td v-t="'common.loading'"> Loading... </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table class="os-table" v-else>
+          <tbody>
+            <tr>
+              <td>
+                <os-icon name="users" />
+                <span v-t="'queries.participants'"></span>
+              </td>
+              <td>{{ctx.counts.cprs}}</td>
+            </tr>
+            <tr>
+              <td>
+                <os-icon name="calendar" />
+                <span v-t="'queries.visits'"></span>
+              </td>
+              <td>{{ctx.counts.visits}}</td>
+            </tr>
+            <tr>
+              <td>
+                <os-icon name="flask" />
+                <span v-t="'queries.specimens'"></span>
+              </td>
+              <td>{{ctx.counts.specimens}}</td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <os-button success :label="$t('common.buttons.ok')" @click="closeCountsOverlay" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </os-overlay>
 
   <SaveQuery ref="saveQueryDialog" />
 
@@ -101,6 +154,7 @@ import i18n      from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
 
 import formsCache from '@/queries/services/FormsCache.js';
+import querySvc   from '@/queries/services/Query.js';
 
 import AddEditFilter from './AddEditFilter.vue';
 import ExpressionEditor from '@/queries/views/ExpressionEditor.vue';
@@ -205,6 +259,21 @@ export default {
       );
     },
 
+    viewCounts: async function(event) {
+      this.$refs.countsOverlay.show(event);
+
+      this.ctx.counts = null;
+      this.ctx.counts = await querySvc.getCount(this.ctx.query);
+    },
+
+    closeCountsOverlay: function(event) {
+      this.$refs.countsOverlay.hide(event);
+    },
+
+    viewRecords: function() {
+      routerSvc.goto('QueryDetail.Results', {queryId: this.ctx.query.id});
+    },
+
     onFormOpen: function({index}) {
       const form = this.ctx.forms[index];
       const {query: {cpId, cpGroupId}} = this.ctx;
@@ -254,7 +323,10 @@ export default {
 
           filter.id = maxId + 1;
           filters.push(filter);
-          queryExpression.push({nodeType: 'OPERATOR', value: 'AND'});
+          if (filters.length > 1) {
+            queryExpression.push({nodeType: 'OPERATOR', value: 'AND'});
+          }
+
           queryExpression.push({nodeType: 'FILTER', value: filter.id});
         }
       );
@@ -309,6 +381,26 @@ export default {
 </script>
 
 <style scoped>
+.count-po {
+  width: 300px;
+  margin: -1.25rem;
+}
+
+.count-po .title {
+  padding: 0.5rem 1rem;
+  background: #efefef;
+}
+
+.count-po :deep(.os-icon-wrapper) {
+  width: 1.25rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+.count-po :deep(button) {
+  width: 100%;
+}
+
 .cp-forms {
   display: flex;
   flex-direction: column;

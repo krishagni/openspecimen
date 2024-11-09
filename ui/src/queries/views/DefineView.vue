@@ -73,7 +73,8 @@
     </template>
 
     <template #footer>
-      <os-button text :label="$t('common.buttons.cancel')" @click="closeColumnsDialog" />
+      <os-button text :label="$t('common.buttons.cancel')" @click="closeColumnsDialog"
+        :disabled="!ctx.selectedFields || ctx.selectedFields.length == 0" />
       <os-button secondary :label="$t('common.buttons.previous')" @click="previous" v-if="!isFirstStep()" />
       <os-button primary :label="$t('common.buttons.next')" @click="next" v-if="!isLastStep()"
         :disabled="!ctx.selectedFields || ctx.selectedFields.length == 0" />

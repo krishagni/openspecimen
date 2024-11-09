@@ -13,6 +13,13 @@ export default {
         },
 
         {
+          path: 'audit-logs',
+          name: 'QueryAuditLogs',
+          component: () => import(/* webpackChunkName: "queries" */ './views/AuditLogsList.vue'),
+          props: (route) => ({filters: route.query.filters})
+        },
+
+        {
           path: ':queryId',
           name: 'QueryDetail',
           component: () => import(/* webpackChunkName: "queries" */ './views/Detail.vue'),

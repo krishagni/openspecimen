@@ -32,7 +32,7 @@ export default {
   methods: {
     reloadQuery: async function(query) {
       const {name} = routerSvc.getCurrentRoute();
-      if (this.queryId == query.id) {
+      if (this.queryId == query.id || ((!this.queryId || this.queryId < 0) && !query.id)) {
         await this._hydrateFilters(query);
         this.query = query;
       } else {
@@ -42,7 +42,7 @@ export default {
 
     _loadQuery: async function() {
       if (!this.queryId || this.queryId == -1) {
-        this.query = {};
+        this.query = {queryExpression: [], filters: [], selectList: []};
         return;
       }
 

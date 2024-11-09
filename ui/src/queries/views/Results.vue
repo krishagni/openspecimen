@@ -153,9 +153,14 @@ export default {
     }
   },
 
-  created() {
+  mounted() {
     this._loadCounters();
-    this._loadRecords();
+
+    if (!this.query.selectList || this.query.selectList.length == 0) {
+      this.showDefineViewDialog();
+    } else {
+      this._loadRecords();
+    }
   },
 
   computed: {
@@ -283,6 +288,9 @@ export default {
       this.ctx.columns = columnLabels
         .map((label, idx) => {
           const column = {field: label, name: columnMetadata[idx].expr, pinned: idx < pinnedColumns && 'left'};
+          column.headerName = label.substring(label.lastIndexOf('#') + 1);
+          column.url = columnUrls[idx];
+
           if (columnUrls[idx]) {
             column.cellRenderer = 'os-column-url';
           } else if (columnTypes[idx] == 'DATE') {
