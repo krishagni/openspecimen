@@ -242,12 +242,18 @@ export default {
     _getFieldsTree: async function(query) {
       const forms = await formsCache.getForms();
       const tree = [];
-      for (let form of forms) {
+      for (const form of forms) {
         const fields = await formsCache.getFields(form, query.cpId, query.cpGroupId);
 
         const item = {id: form.name, label: form.caption, children: []};
         item.children = this._getFieldsTree0(form, null, form.name, fields);
         tree.push(item);
+      }
+
+      for (const filter of query.filters) {
+        if (filter.expr) {
+          tree.push({id: '$temporal.' + filter.id, label: filter.desc});
+        }
       }
 
       return tree;
