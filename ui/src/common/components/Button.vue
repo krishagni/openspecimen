@@ -24,7 +24,7 @@ export default {
       if (this.$attrs.type) {
         kls += ' ' + this.$attrs.type;
       } else {
-        const types = ['primary', 'secondary', 'danger', 'text'];
+        const types = ['primary', 'secondary', 'danger', 'text', 'success'];
         for (const type of types) {
           if (Object.prototype.hasOwnProperty.call(this.$attrs, type)) {
             kls += ' ' + type;
@@ -138,6 +138,19 @@ button.icon-btn {
   color: #fff;
   background: #777;
   border-color: #555;
+}
+
+.btn.success {
+  color: #fff;
+  background: #5cb85c;
+  border-color: #4cae4c;
+}
+
+.btn.success:hover,
+.btn.success:focus {
+  color: #fff;
+  background: #449d44;
+  border-color: #398439;
 }
 
 .btn.danger {
