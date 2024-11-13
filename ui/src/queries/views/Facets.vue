@@ -1,6 +1,6 @@
 <template>
   <os-accordion class="facets" @tab-opened="facets[$event.index].loadValues = true">
-    <os-accordion-tab class="facet" v-for="(facet, facetIdx) of facets" :key="facet.id">
+    <os-accordion-tab class="facet" v-for="facet of facets" :key="facet.id">
       <template #header>
         <span>
           <span>{{facet.caption}}</span>
@@ -22,9 +22,7 @@
 
 <script>
 
-import querySvc  from '@/queries/services/Query.js';
 import queryUtil from '@/queries/services/Util.js';
-
 
 import EqualityFacet from '@/queries/views/EqualityFacet.vue';
 import RangeFacet    from '@/queries/views/RangeFacet.vue';
