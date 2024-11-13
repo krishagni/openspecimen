@@ -30,9 +30,9 @@ export default {
 </script>
 
 <style scoped>
-
 .os-panel {
-  max-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .os-panel.os-full-height-panel {
@@ -43,7 +43,6 @@ export default {
   padding: 0.5rem 1rem;
   display: flex;
   flex-direction: row;
-  /*height: 3.375rem;*/
 }
 
 .os-panel :deep(.p-panel-header .p-panel-icons) {
@@ -54,17 +53,12 @@ export default {
 }
 
 .os-panel :deep(.p-toggleable-content) {
-  height: 100%;
-}
-
-.os-panel :deep(.p-panel-header + .p-toggleable-content) {
-  height: calc(100% - 3.375rem);
+  flex: 1;
+  overflow-y: auto;
 }
 
 .os-panel :deep(.p-panel-content) {
   padding: 1rem;
-  height: 100%;
-  overflow-y: auto;
 }
 
 .os-panel :deep(.p-panel-header .title) {
