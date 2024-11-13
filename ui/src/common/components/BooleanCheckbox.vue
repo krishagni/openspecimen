@@ -1,6 +1,6 @@
 
 <template>
-  <div class="p-field-checkbox">
+  <div class="os-boolean-checkbox p-field-checkbox">
     <Checkbox :name="name" v-model="inputValue" :binary="true" :disabled="disabled" :tabindex="tabOrder" />
     <span class="inline-message" v-if="displayLabel"> {{ displayLabel }} </span>
     <slot></slot>
