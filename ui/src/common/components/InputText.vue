@@ -16,7 +16,9 @@
 import InputText from 'primevue/inputtext';
 
 export default {
-  props: ['modelValue', 'tabOrder'],
+  props: ['modelValue', 'tabOrder', 'debounce'],
+
+  emits: ['change', 'update:modelValue'],
 
   components: {
     'p-input-text': InputText
@@ -35,6 +37,11 @@ export default {
 
       set(value) {
         this.$emit('update:modelValue', value);
+        if (this.debounceTimer) {
+          clearTimeout(this.debounceTimer);
+        }
+
+        this.debounceTimer = setTimeout(() => this.$emit('change', value), this.debounce);
       }
     }
   },
