@@ -59,8 +59,12 @@ export default {
 
         filter.fieldObj = await formCache.getField(query.cpId, query.cpGroupId, filter.field);
         if (filter.subQueryId > 0) {
-          const subQuery = await savedQuerySvc.getQueryById(filter.subQueryId);
-          filter.subQuery = {id: subQuery.id, title: subQuery.title};
+          const queryCache = this.queryCache = this.queryCache || {};
+          if (!queryCache[filter.subQueryId]) {
+            queryCache[filter.subQueryId] = savedQuerySvc.getQueryById(filter.subQueryId);
+          }
+
+          filter.subQuery = await queryCache[filter.subQueryId];
         }
       }
     }
