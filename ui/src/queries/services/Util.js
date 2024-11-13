@@ -34,13 +34,13 @@ class Util {
                          ]
   };
 
-  async getCountAql(query) {
+  async getCountAql(query, facets) {
     if (!query.filters || !query.queryExpression) {
       return '';
     }
 
     const filtersMap = this._getFiltersMap(query);
-    const whereClause = await this._getWhereClause(query, filtersMap);
+    const whereClause = await this._getWhereClause(query, filtersMap, facets);
     return '' +
       'select ' +
       ' count(distinct Participant.id) as "cprCnt", ' +
@@ -50,7 +50,7 @@ class Util {
         whereClause;
   }
 
-  async getDataAql(query, addPropIds, addLimit) {
+  async getDataAql(query, facets, addPropIds, addLimit) {
     if (!query.filters || !query.queryExpression) {
       return '';
     }
@@ -59,7 +59,7 @@ class Util {
     addPropIds = addPropIds && (!query.reporting || query.reporting.type != 'crosstab');
 
     const selectClause = this._getSelectClause(query, filtersMap, addPropIds);
-    const whereClause  = await this._getWhereClause(query, filtersMap);
+    const whereClause  = await this._getWhereClause(query, filtersMap, facets);
     const havingClause = this._getHavingClause(query);
     const reportClause = this._getRptExpr(query);
 
@@ -69,6 +69,15 @@ class Util {
     }
 
     return aql + ' ' + reportClause;
+  }
+
+  async getWhereAql(query) {
+    const filtersMap = this._getFiltersMap(query);
+    return this._getWhereClause(query, filtersMap);
+  }
+
+  parseTemporalExpression(expr) {
+    return this._getTemporalExprObj(expr);
   }
 
   getFilterDesc(filter) {
@@ -219,7 +228,7 @@ class Util {
     );
   }
 
-  async _getWhereClause(query, filtersMap) {
+  async _getWhereClause(query, filtersMap, facets) {
     let whereClause = '';
     for (const {nodeType, value} of query.queryExpression || []) {
       if (nodeType == 'OPERATOR') {
@@ -227,7 +236,7 @@ class Util {
       } else if (nodeType == 'PARENTHESIS') {
         whereClause += (value == 'LEFT' ? '(' : ')');
       } else if (nodeType == 'FILTER') {
-        whereClause += await this._getFilterExpr(query.cpId, query.cpGroupId, filtersMap, value);
+        whereClause += await this._getFilterExpr(query.cpId, query.cpGroupId, filtersMap, facets, value);
       }
 
       whereClause += ' ';
@@ -317,7 +326,7 @@ class Util {
     return expr;
   }
 
-  async _getFilterExpr(cpId, cpGroupId, filtersMap, filterId) {
+  async _getFilterExpr(cpId, cpGroupId, filtersMap, facets, filterId) {
     const filter = filtersMap[filterId];
     if (filter == null) {
       alert('Invalid filter: ' + filterId);
@@ -328,28 +337,34 @@ class Util {
       const tObj = this._getTemporalExprObj(filter.expr);
       if (this._isUndef(tObj.lhs) && this._isUndef(tObj.op)) {
         return filter.expr;
-      }
-            
-      if (this._isUndef(tObj.lhs) || this._isUndef(tObj.op)) {
+      } else if (this._isUndef(tObj.lhs) || this._isUndef(tObj.op)) {
         alert('Invalid temporal expression: ' + filter.expr);
         return '1 = 0';  
       }
       
-      if (this._isUndef(tObj.rhs)) {
+      const facetExpr = this._getFacetExpr(filter, tObj.lhs, facets);
+      if (facetExpr) {
+        return facetExpr;
+      } else if (this._isUndef(tObj.rhs)) {
         if (!filter.parameterized) {
           alert('Invalid temporal expression: ' + filter.expr + '. No RHS and not parameterized.');
           return '1 = 0';
         } else {
           return tObj.lhs + ' any ';
         }
+      } else {
+        return filter.expr;
       }
-      
-      return filter.expr;
     }
 
     const field = await formsCache.getField(cpId, cpGroupId, filter.field);
     if (!field) {
       return '';
+    }
+
+    const facetExpr = this._getFacetExpr(filter, filter.field, facets);
+    if (facetExpr) {
+      return facetExpr;
     }
 
     let expr = filter.field;
@@ -388,6 +403,33 @@ class Util {
     }   
           
     return expr + ' ' + filterValue;
+  }
+
+  _getFacetExpr(filter, lhs, facets) {
+    const facet = (facets || []).find(f => f.id == filter.id);
+    if (!facet || !facet.values || facet.values.length == 0) {
+      return null;
+    }
+
+    let expr = null;
+    if (facet.type == 'INTEGER' || facet.type == 'FLOAT' || facet.type == 'DATE') {
+      const {minValue, maxValue} = facet.values;
+      const literal = facet.type == 'DATE' ? (l) => this._stringLiteral(l) : (l) => l;
+
+      if ((minValue || minValue === 0) && (maxValue || maxValue === 0)) {
+        expr = '(' + lhs + ' >= ' + literal(minValue) + ' and ' + lhs + ' <= ' + literal(maxValue) + ')';
+      } else if (minValue || minValue === 0) {
+        const relOp = facet.op == 'GT' ? ' > ' : ' >= ';
+        expr = '(' + lhs + relOp + literal(minValue) + ')';
+      } else if (maxValue || maxValue === 0) {
+        const relOp = facet.op == 'LT' ? ' < ' : ' <= ';
+        expr = '(' + lhs + relOp + literal(maxValue) + ')';
+      }
+    } else {
+      expr = lhs + ' in ("' + facet.values.join('", "') + '")';
+    }
+
+    return expr;
   }
 
   _getReportFields(selectedFields, fresh) {

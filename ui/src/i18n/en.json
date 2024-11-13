@@ -123,6 +123,7 @@
       "export": "Export",
       "find": "Find",
       "generate": "Generate",
+      "go": "Go",
       "help":   "Help",
       "history": "History",
       "import": "Import",

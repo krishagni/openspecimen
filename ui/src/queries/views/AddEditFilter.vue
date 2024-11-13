@@ -21,6 +21,7 @@
 import {format, parse} from 'date-fns';
 
 import pvSvc   from '@/common/services/PermissibleValue.js';
+import siteSvc from '@/administrative/services/Site.js';
 import userSvc from '@/administrative/services/User.js';
 import util    from '@/common/services/Util.js';
 
@@ -156,6 +157,10 @@ export default {
         } else if (apiUrl.indexOf('users') >= 0) {
           return userSvc.getUsers({...filters, searchString: searchTerm}).then(
             users => users.map(({firstName, lastName}) => ({name: firstName + ' ' + lastName, value: firstName + ' ' + lastName}))
+          );
+        } else if (apiUrl.indexOf('sites') >= 0) {
+          return siteSvc.getSites({...filters, name: searchTerm}).then(
+            sites => sites.map(site => ({name: site.name, value: site.name}))
           );
         }
 

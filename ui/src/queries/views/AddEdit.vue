@@ -80,7 +80,7 @@
                 <ExpressionEditor :query="ctx.query" v-model="ctx.query.queryExpression" />
 
                 <div style="flex: 1; overflow-y: auto; margin: 1rem 0rem;">
-                  <FiltersList v-model="ctx.query" />
+                  <FiltersList v-model="ctx.query" @update:modelValue="onFilterEdit($event)" />
                 </div>
               </div>
               <div class="body" v-else>
@@ -328,8 +328,14 @@ export default {
           }
 
           queryExpression.push({nodeType: 'FILTER', value: filter.id});
+          this.$emit('query-saved', this.ctx.query);
         }
       );
+    },
+
+    onFilterEdit: function(query) {
+      this.ctx.query = query;
+      this.$emit('query-saved', query);
     },
 
     _loadForms: function() {

@@ -73,17 +73,23 @@
         </template>
       </os-page-toolbar>
 
-      <div>
-        <os-message type="info" v-if="ctx.loadingRecords">
-          <span v-t="'queries.loading_records'">Loading records...</span>
-        </os-message>
+      <os-grid>
+        <os-grid-column style="flex: 0;">
+          <Facets :query="query" @facets-selected="onFacetsSelection" />
+        </os-grid-column>
 
-        <AgGridVue class="results-grid" :theme="theme"
-          :row-data="ctx.records" :column-defs="ctx.columns"
-          :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow"
-          @gridReady="onGridReady" @selectionChanged="onRowSelection"
-          v-else />
-      </div>
+        <os-grid-column>
+          <os-message type="info" v-if="ctx.loadingRecords">
+            <span v-t="'queries.loading_records'">Loading records...</span>
+          </os-message>
+
+          <AgGridVue class="results-grid" :theme="theme"
+            :row-data="ctx.records" :column-defs="ctx.columns"
+            :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow"
+            @gridReady="onGridReady" @selectionChanged="onRowSelection"
+            v-else />
+        </os-grid-column>
+      </os-grid>
 
       <os-column-url />
     </os-page-body>
@@ -108,6 +114,7 @@ import queryResources from './Resources.js';
 
 import ColumnUrl from './ColumnUrl.vue';
 import DefineView from './DefineView.vue';
+import Facets from './Facets.vue';
 import SaveQuery from './SaveQuery.vue';
 
 export default {
@@ -119,6 +126,8 @@ export default {
     AgGridVue,
 
     'os-column-url': ColumnUrl,
+
+    Facets,
 
     DefineView,
 
@@ -262,9 +271,15 @@ export default {
       this.ctx.allRowsSelected = false;
     },
 
-    _loadCounters: async function() {
+    onFacetsSelection: function(selectedFacets) {
+      const facets = selectedFacets.map(({facet, values}) => ({id: facet.id, type: facet.type, values}));
+      this._loadCounters(facets);
+      this._loadRecords(facets);
+    },
+
+    _loadCounters: async function(facets) {
       this.ctx.loadingCounters = true;
-      const {cprs, visits, specimens} = await querySvc.getCount(this.query);
+      const {cprs, visits, specimens} = await querySvc.getCount(this.query, facets);
 
       this.ctx.loadingCounters = false;
       const formatter = new Intl.NumberFormat();
@@ -275,9 +290,9 @@ export default {
       };
     },
 
-    _loadRecords: async function() {
+    _loadRecords: async function(facets) {
       this.ctx.loadingRecords = true;
-      const {columnLabels, columnMetadata, columnTypes, columnUrls, rows} = await this._getData();
+      const {columnLabels, columnMetadata, columnTypes, columnUrls, rows} = await this._getData(facets);
 
       const {type, params} = this.query.reporting || {type: 'none', params: {}};
       let pinnedColumns = 0;
@@ -334,8 +349,8 @@ export default {
       this.ctx.loadingRecords = false;
     },
 
-    _getData: function() {
-      return querySvc.getData(this.query, true, true);
+    _getData: function(facets) {
+      return querySvc.getData(this.query, facets, true, true);
     },
 
     _formatDate: function(params) {

@@ -4,7 +4,7 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/queries/services/Util.js';
 
 class Query {
-  async getCount(query) {
+  async getCount(query, facets) {
     const payload = {
       savedQueryId: query.id,
       cpId: query.cpId,
@@ -12,7 +12,7 @@ class Query {
       drivingForm: 'Participant',
       caseSensitive: query.caseSensitive,
       runType: 'Count',
-      aql: await util.getCountAql(query)
+      aql: await util.getCountAql(query, facets)
     };
 
     return http.post('query', payload).then(
@@ -29,14 +29,14 @@ class Query {
     );
   }
 
-  async getData(query, addPropIds, addLimit) {
+  async getData(query, facets, addPropIds, addLimit) {
     const payload = {
       savedQueryId: query.id,
       cpId: query.cpId,
       cpGroupId: query.cpGroupId,
       drivingForm: 'Participant',
       runType: 'Data',
-      aql: await util.getDataAql(query, addPropIds, addLimit),
+      aql: await util.getDataAql(query, facets, addPropIds, addLimit),
       wideRowMode: query.wideRowMode || 'OFF',
       outputIsoDateTime: true, // TODO: (outputIsoFmt || false),
       outputColumnExprs: query.outputColumnExprs || false,
@@ -72,6 +72,19 @@ class Query {
         alertsSvc.info({code: 'queries.results_csv_downloaded', args: query});
       }
     );
+  }
+
+  async getFacetValues(query, facet, searchTerm) {
+    const restriction = await util.getWhereAql(query);
+    const payload = {
+      cpId: query.cpId,
+      cpGroupId: query.cpGroupId,
+      facets: [facet],
+      searchTerm,
+      restriction
+    };
+
+    return http.post('query/facet-values', payload).then(values => values && values.length > 0 ? values[0] : null);
   }
 }
 
