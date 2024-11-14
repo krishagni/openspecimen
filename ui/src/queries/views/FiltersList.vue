@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <AddEditFilter ref="addEditFilterOverlay" />
+  <AddEditFilter ref="addEditFilterOverlay" align="left" />
 </template>
 
 <script>

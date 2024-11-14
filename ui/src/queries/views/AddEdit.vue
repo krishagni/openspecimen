@@ -145,7 +145,7 @@
 
   <SaveQuery ref="saveQueryDialog" />
 
-  <AddEditFilter ref="addEditFilterOverlay" />
+  <AddEditFilter ref="addEditFilterOverlay" align="right" />
 </template>
 
 <script>

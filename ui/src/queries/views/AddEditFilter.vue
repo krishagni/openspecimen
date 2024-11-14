@@ -1,5 +1,5 @@
 <template>
-  <os-overlay ref="addEditOverlay">
+  <os-popover ref="addEditOverlay" :align="align">
     <div class="filter-po">
       <div class="title">
         <span v-if="ctx.filter.id > 0" v-t="'queries.edit_filter'">Edit Filter</span>
@@ -14,7 +14,7 @@
         </div>
       </os-form>
     </div>
-  </os-overlay>
+  </os-popover>
 </template>
 
 <script>
@@ -28,6 +28,8 @@ import util    from '@/common/services/Util.js';
 import addEditFilter from '@/queries/schemas/addedit-filter.js';
 
 export default {
+  props: ['align'],
+
   data() {
     return {
       ctx: {
@@ -53,7 +55,7 @@ export default {
       this._setValueType();
       return new Promise((resolve) => {
         self.ctx.resolve = resolve;
-        self.$refs.addEditOverlay.show(event);
+        self.$refs.addEditOverlay.open(event);
       });
     },
 
@@ -106,11 +108,11 @@ export default {
       }
 
       this.ctx.resolve(filter);
-      this.$refs.addEditOverlay.hide();
+      this.$refs.addEditOverlay.close();
     },
 
     cancel: function() {
-      this.$refs.addEditOverlay.hide();
+      this.$refs.addEditOverlay.close();
     },
 
     _getAllowedOps: function() {
