@@ -66,6 +66,7 @@ import Pager from './Pager.vue';
 import Panel from './Panel.vue';
 import Password from './Password.vue';
 import PluginViews from './PluginViews.vue';
+import Popover from './Popover.vue';
 import ProgressBar from './ProgressBar.vue';
 import PvDropdown from './PvDropdown.vue';
 import QueryListView from './QueryListView.vue';
@@ -176,6 +177,7 @@ export default {
     app.component('os-panel',            Panel);
     app.component('os-password',         Password);
     app.component('os-plugin-views',     PluginViews);
+    app.component('os-popover',          Popover);
     app.component('os-progress-bar',     ProgressBar);
     app.component('os-pv-dropdown',      PvDropdown);
     app.component('os-radio-button',     RadioButton);
