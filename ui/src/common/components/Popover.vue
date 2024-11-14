@@ -29,33 +29,48 @@ export default {
   methods: {
     open: function(event) {
       this.show = true;
+      this.currentTarget = event.currentTarget;
+      if (this.dimensionObserver) {
+        this.dimensionObserver.disconnect();
+        this.dimensionObserver = null;
+      }
 
-      const currentTarget = event.currentTarget;
-      setTimeout(() => {
-        const {top, height, width, left} = currentTarget.getBoundingClientRect();
-
-        const adjustedTop  = top +  (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
-        const adjustedLeft = left + (window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0);
-
-        const style = this.style = {};
-        if (this.align == 'right') {
-          style.top  = (adjustedTop - this.$el.clientHeight / 2 + height / 2) + 'px';
-          style.left = (adjustedLeft + width + 11) + 'px';
-        } else if (this.align == 'top') {
-          style.top = (adjustedTop - this.$el.clientHeight - 11) + 'px';
-          style.left = (adjustedLeft - (this.$el.clientWidth / 2) + width / 2) + 'px';
-        } else if (this.align == 'bottom') {
-          style.top = (adjustedTop + height + 11) + 'px';
-          style.left = (adjustedLeft - (this.$el.clientWidth / 2) + width / 2) + 'px';
-        } else {
-          style.top  = (adjustedTop - this.$el.clientHeight / 2 + height / 2) + 'px';
-          style.left = (adjustedLeft - this.$el.clientWidth - 11) + 'px';
-        }
-      }, 100);
+      setTimeout(
+        () => {
+          this.dimensionObserver = new ResizeObserver(() => this.alignPopover());
+          this.dimensionObserver.observe(this.$el);
+          this.alignPopover()
+        },
+        200
+      );
     },
 
-    hide: function() {
+    close: function() {
       this.show = false;
+      this.dimensionObserver.disconnect();
+      this.dimensionObserver = null;
+    },
+
+    alignPopover: function() {
+      const {top, height, width, left} = this.currentTarget.getBoundingClientRect();
+
+      const adjustedTop  = top +  (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
+      const adjustedLeft = left + (window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0);
+
+      const style = this.style = {};
+      if (this.align == 'right') {
+        style.top  = (adjustedTop - this.$el.clientHeight / 2 + height / 2) + 'px';
+        style.left = (adjustedLeft + width + 11) + 'px';
+      } else if (this.align == 'top') {
+        style.top = (adjustedTop - this.$el.clientHeight - 11) + 'px';
+        style.left = (adjustedLeft - (this.$el.clientWidth / 2) + width / 2) + 'px';
+      } else if (this.align == 'bottom') {
+        style.top = (adjustedTop + height + 11) + 'px';
+        style.left = (adjustedLeft - (this.$el.clientWidth / 2) + width / 2) + 'px';
+      } else {
+        style.top  = (adjustedTop - this.$el.clientHeight / 2 + height / 2) + 'px';
+        style.left = (adjustedLeft - this.$el.clientWidth - 11) + 'px';
+      }
     }
   }
 }
@@ -70,6 +85,7 @@ export default {
   border-radius: 4px;
   box-shadow: none;
   z-index: 1001;
+  padding: 1.25rem;
 }
 
 .os-popover .arrow {
