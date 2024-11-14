@@ -19,6 +19,7 @@
           <os-button left-icon="save" :label="$t('common.buttons.save')" @click="saveQuery" />
           <os-button left-icon="tachometer-alt" :label="$t('queries.get_count')" @click="viewCounts" />
           <os-button left-icon="table" :label="$t('queries.view_records')" @click="viewRecords" />
+          <os-button left-icon="calculator" :label="$t('queries.calculated_filter')" @click="showAddCalcFilter" />
         </template>
       </os-page-toolbar>
 
@@ -146,6 +147,8 @@
   <SaveQuery ref="saveQueryDialog" />
 
   <AddEditFilter ref="addEditFilterOverlay" align="right" />
+
+  <AddEditCalcFilter ref="addEditCalcFilterOverlay" align="bottom" />
 </template>
 
 <script>
@@ -157,6 +160,7 @@ import formsCache from '@/queries/services/FormsCache.js';
 import querySvc   from '@/queries/services/Query.js';
 
 import AddEditFilter from './AddEditFilter.vue';
+import AddEditCalcFilter from './AddEditCalcFilter.vue';
 import ExpressionEditor from '@/queries/views/ExpressionEditor.vue';
 import FiltersList from '@/queries/views/FiltersList.vue';
 import SaveQuery   from '@/queries/views/SaveQuery.vue';
@@ -166,6 +170,8 @@ export default {
 
   components: {
     AddEditFilter,
+
+    AddEditCalcFilter,
 
     ExpressionEditor,
 
@@ -315,27 +321,20 @@ export default {
     },
 
     showAddFilter: function(event, field) {
-      const {query: {filters, queryExpression}} = this.ctx;
-
       this.$refs.addEditFilterOverlay.open(event, {field: field.id, fieldObj: field}).then(
-        filter => {
-          const maxId = (filters || []).reduce((max, filter) => filter.id > max ? filter.id : max, 0);
-
-          filter.id = maxId + 1;
-          filters.push(filter);
-          if (filters.length > 1) {
-            queryExpression.push({nodeType: 'OPERATOR', value: 'AND'});
-          }
-
-          queryExpression.push({nodeType: 'FILTER', value: filter.id});
-          this.$emit('query-saved', this.ctx.query);
-        }
+        filter => this._addFilter(filter)
       );
     },
 
     onFilterEdit: function(query) {
       this.ctx.query = query;
       this.$emit('query-saved', query);
+    },
+
+    showAddCalcFilter: function(event) {
+      this.$refs.addEditCalcFilterOverlay.open(event).then(
+        filter => this._addFilter(filter)
+      );
     },
 
     _loadForms: function() {
@@ -381,6 +380,19 @@ export default {
 
     _isExtensionOrCustomField: function(field) {
       return !!field && (field.indexOf('extensions') >= 0 || field.indexOf('customFields') >= 0);
+    },
+
+    _addFilter: function(filter) {
+      const {query: {filters, queryExpression}} = this.ctx;
+      const maxId = (filters || []).reduce((max, filter) => filter.id > max ? filter.id : max, 0);
+      filter.id = maxId + 1;
+      filters.push(filter);
+      if (filters.length > 1) {
+        queryExpression.push({nodeType: 'OPERATOR', value: 'AND'});
+      }
+
+      queryExpression.push({nodeType: 'FILTER', value: filter.id});
+      this.$emit('query-saved', this.ctx.query);
     }
   }
 }

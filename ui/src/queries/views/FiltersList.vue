@@ -23,12 +23,15 @@
   </div>
 
   <AddEditFilter ref="addEditFilterOverlay" align="left" />
+
+  <AddEditCalcFilter ref="addEditCalcFilterOverlay" align="left" />
 </template>
 
 <script>
 import util      from '@/common/services/Util.js';
 
 import AddEditFilter from './AddEditFilter.vue';
+import AddEditCalcFilter from './AddEditCalcFilter.vue';
 import FilterDesc from './FilterDesc.vue';
 
 export default {
@@ -36,6 +39,8 @@ export default {
 
   components: {
     AddEditFilter,
+
+    AddEditCalcFilter,
 
     FilterDesc
   },
@@ -81,7 +86,15 @@ export default {
   methods: {
     showEditFilter: function(event, idx) {
       const filter = this.query.filters[idx];
-      this.$refs.addEditFilterOverlay.open(event, filter).then(savedFilter => this.query.filters[idx] = savedFilter);
+
+      let promise = null;
+      if (filter.expr) {
+        promise = this.$refs.addEditCalcFilterOverlay.open(event, this.query.cpId, this.query.cpGroupId, filter);
+      } else {
+        promise = this.$refs.addEditFilterOverlay.open(event, filter);
+      }
+
+      promise.then(savedFilter => this.query.filters[idx] = savedFilter);
     },
 
     deleteFilter: function(idx) {

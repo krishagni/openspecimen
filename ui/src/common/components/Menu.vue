@@ -1,7 +1,7 @@
 
 <template>
   <template v-if="lazyLoad || items.length > 1">
-    <os-button :size="!label ? 'small' : ''" :left-icon="icon"
+    <os-button :size="buttonSize" :left-icon="icon"
       :label="label" :no-outline="noOutline"
       :right-icon="label ? 'caret-down' : ''"
       v-bind="$attrs" @click="toggle" />
@@ -26,7 +26,7 @@
 import Menu from 'primevue/menu';
 
 export default {
-  props: ['icon', 'label', 'options', 'no-outline', 'lazy-load'],
+  props: ['icon', 'label', 'options', 'no-outline', 'lazy-load', 'size'],
 
   components: {
     'dropdown-menu': Menu
@@ -40,6 +40,10 @@ export default {
         ({icon, caption, onSelect, url, divider, anchorStyle}) =>
           ({icon, label: caption, url, divider, anchorStyle, command: (event) => this.exec(event, onSelect)})
       );
+    },
+
+    buttonSize: function() {
+      return !this.label ? 'small' : this.size
     }
   },
 
