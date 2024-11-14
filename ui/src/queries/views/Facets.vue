@@ -94,10 +94,10 @@ export default {
     },
 
     _loadFacets: function() {
-      this.facets = this._getFacets(this.query);
+      this.facets = this._getFacets('', this.query);
     },
 
-    _getFacets: function(query) {
+    _getFacets: function(prefix, query) {
       const facets = [];
 
       for (const filter of query.filters || []) {
@@ -111,7 +111,7 @@ export default {
           // values are loaded instead of loading only those that satisfy
           // the query criteria
           //
-          const sqFacets = this._getFacets(filter.subQuery);
+          const sqFacets = this._getFacets(prefix + filter.id + '.', filter.subQuery);
           if (sqFacets.length > 0) {
             this.hasSqFacets = true;
             Array.prototype.push.apply(facets, sqFacets);
@@ -165,13 +165,13 @@ export default {
             continue;
         }
 
-        facets.push(this._getFacet(filter, expr, type, op, values));
+        facets.push(this._getFacet(prefix, filter, expr, type, op, values));
       }
 
       return facets;
     },
 
-    _getFacet: function(filter, expr, type, op, values) {
+    _getFacet: function(prefix, filter, expr, type, op, values) {
       let facetValues = undefined;
       if (type == 'INTEGER' || type == 'FLOAT' || type == 'DATE') {
         let minValue = null, maxValue = null;
@@ -208,7 +208,7 @@ export default {
       }
 
       return {
-        id: filter.id,
+        id: prefix + filter.id,
         caption: filter.desc || filter.fieldObj.caption,
         type: type,
         isRange: type == 'INTEGER' || type == 'FLOAT' || type == 'DATE',

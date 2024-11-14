@@ -40,7 +40,7 @@ class Util {
     }
 
     const filtersMap = this._getFiltersMap(query);
-    const whereClause = await this._getWhereClause(query, filtersMap, facets);
+    const whereClause = await this._getWhereClause('', query, filtersMap, facets);
     return '' +
       'select ' +
       ' count(distinct Participant.id) as "cprCnt", ' +
@@ -59,7 +59,7 @@ class Util {
     addPropIds = addPropIds && (!query.reporting || query.reporting.type != 'crosstab');
 
     const selectClause = this._getSelectClause(query, filtersMap, addPropIds);
-    const whereClause  = await this._getWhereClause(query, filtersMap, facets);
+    const whereClause  = await this._getWhereClause('', query, filtersMap, facets);
     const havingClause = this._getHavingClause(query);
     const reportClause = this._getRptExpr(query);
 
@@ -73,7 +73,7 @@ class Util {
 
   async getWhereAql(query) {
     const filtersMap = this._getFiltersMap(query);
-    return this._getWhereClause(query, filtersMap);
+    return this._getWhereClause('', query, filtersMap);
   }
 
   parseTemporalExpression(expr) {
@@ -228,7 +228,7 @@ class Util {
     );
   }
 
-  async _getWhereClause(query, filtersMap, facets) {
+  async _getWhereClause(prefix, query, filtersMap, facets) {
     let whereClause = '';
     for (const {nodeType, value} of query.queryExpression || []) {
       if (nodeType == 'OPERATOR') {
@@ -236,7 +236,7 @@ class Util {
       } else if (nodeType == 'PARENTHESIS') {
         whereClause += (value == 'LEFT' ? '(' : ')');
       } else if (nodeType == 'FILTER') {
-        whereClause += await this._getFilterExpr(query.cpId, query.cpGroupId, filtersMap, facets, value);
+        whereClause += await this._getFilterExpr(prefix, query.cpId, query.cpGroupId, filtersMap, facets, value);
       }
 
       whereClause += ' ';
@@ -326,7 +326,7 @@ class Util {
     return expr;
   }
 
-  async _getFilterExpr(cpId, cpGroupId, filtersMap, facets, filterId) {
+  async _getFilterExpr(prefix, cpId, cpGroupId, filtersMap, facets, filterId) {
     const filter = filtersMap[filterId];
     if (filter == null) {
       alert('Invalid filter: ' + filterId);
@@ -342,7 +342,7 @@ class Util {
         return '1 = 0';  
       }
       
-      const facetExpr = this._getFacetExpr(filter, tObj.lhs, facets);
+      const facetExpr = this._getFacetExpr(prefix, filter, tObj.lhs, facets);
       if (facetExpr) {
         return facetExpr;
       } else if (this._isUndef(tObj.rhs)) {
@@ -362,7 +362,7 @@ class Util {
       return '';
     }
 
-    const facetExpr = this._getFacetExpr(filter, filter.field, facets);
+    const facetExpr = this._getFacetExpr(prefix, filter, filter.field, facets);
     if (facetExpr) {
       return facetExpr;
     }
@@ -376,7 +376,7 @@ class Util {
     if (filter.hasSq || filter.subQueryId > 0) {
       const subQuery = await savedQuerySvc.getQueryById(filter.subQueryId);
       const sqFiltersMap = this._getFiltersMap(subQuery);
-      const sqWhere = await this._getWhereClause(subQuery, sqFiltersMap);
+      const sqWhere = await this._getWhereClause(prefix + filter.id + '.', subQuery, sqFiltersMap, facets);
 
       expr += ' ' + this.symbols[filter.op] + ' ';
       expr += '(select ' + filter.field + ' where ' + sqWhere + ')';
@@ -405,8 +405,9 @@ class Util {
     return expr + ' ' + filterValue;
   }
 
-  _getFacetExpr(filter, lhs, facets) {
-    const facet = (facets || []).find(f => f.id == filter.id);
+  _getFacetExpr(prefix, filter, lhs, facets) {
+    const facetId = prefix + filter.id;
+    const facet = (facets || []).find(f => f.id == facetId);
     if (!facet || !facet.values || facet.values.length == 0) {
       return null;
     }

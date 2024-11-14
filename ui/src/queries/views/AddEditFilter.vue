@@ -80,8 +80,9 @@ export default {
       const {valueType} = this.ctx;
       if (valueType == 'none') {
         filter.values = [];
-      } else if (filter.hasSq && filter.subQuery) {
-        filter.subQueryId = filter.subQuery.id;
+        if (filter.hasSq && filter.subQuery) {
+          filter.subQueryId = filter.subQuery.id;
+        }
       } else if (valueType == 'textarea') {
         filter.values = util.splitStr(filter.valuesCsv, /,|\t|\n/, true);
       } else if (valueType == 'dropdown') {

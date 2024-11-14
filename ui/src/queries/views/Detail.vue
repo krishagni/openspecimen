@@ -65,6 +65,7 @@ export default {
           }
 
           filter.subQuery = await queryCache[filter.subQueryId];
+          await this._hydrateFilters(filter.subQuery);
         }
       }
     }
