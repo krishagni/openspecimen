@@ -21,7 +21,8 @@
             <tbody>
               <tr v-for="selectedField of ctx.selectedFields" :key="selectedField.id">
                 <td v-if="selectedField.field">
-                  <span>{{selectedField.field.formCaption}}: {{selectedField.field.label}}</span>
+                  <span v-show="!!selectedField.field.formCaption">{{selectedField.field.formCaption}}:&nbsp;</span>
+                  <span>{{selectedField.field.label}}</span>
                 </td>
                 <td>
                   <os-input-text v-model="selectedField.displayLabel" :md-type="true" />
@@ -44,7 +45,8 @@
                       {{item.displayLabel}}
                     </span>
                     <span v-else-if="item.field">
-                      <span>{{item.field.formCaption}}: {{item.field.label}}</span>
+                      <span v-show="!!item.field.formCaption">{{item.field.formCaption}}:&nbsp;</span>
+                      <span>{{item.field.label}}</span>
                     </span>
                   </div>
                   <div>
