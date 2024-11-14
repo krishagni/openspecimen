@@ -24,7 +24,7 @@
 
   <AddEditFilter ref="addEditFilterOverlay" align="left" />
 
-  <AddEditCalcFilter ref="addEditCalcFilterOverlay" align="left" />
+  <AddEditCalcFilter ref="addEditCalcFilterOverlay" />
 </template>
 
 <script>

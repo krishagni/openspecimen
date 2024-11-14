@@ -2,7 +2,7 @@
   <div ref="po" :class="classList" :style="style" v-if="show">
     <slot> </slot>
 
-    <div class="arrow" />
+    <div :class="arrowClassList" />
   </div>
 </template>
 
@@ -16,19 +16,48 @@ export default {
 
       style: {},
 
-      arrowStyle: {}
+      arrowBottom: false,
+
+      arrowTop: false,
+
+      arrowLeft: false,
+
+      arrowRight: false
     }
   },
 
   computed: {
     classList: function() {
       return ['os-popover', this.align || 'left'];
-    }
+    },
+
+    arrowClassList: function() {
+      const classList = ['arrow'];
+      if (this.arrowBottom) {
+        classList.push('bottom');
+      } else if (this.arrowTop) {
+        classList.push('top');
+      } else if (this.arrowLeft) {
+        classList.push('left');
+      } else if (this.arrowRight) {
+        classList.push('right');
+      }
+
+      return classList;
+    },
   },
 
   methods: {
     open: function(event) {
+      if (this.show) {
+        this.show = false;
+        const {currentTarget} = event;
+        setTimeout(() => this.open({currentTarget}));
+        return;
+      }
+
       this.show = true;
+      this.arrowBottom = this.arrowTop = this.arrowLeft = this.arrowRight = false;
       this.currentTarget = event.currentTarget;
       if (this.dimensionObserver) {
         this.dimensionObserver.disconnect();
@@ -41,7 +70,7 @@ export default {
           this.dimensionObserver.observe(this.$el);
           this.alignPopover()
         },
-        200
+        100
       );
     },
 
@@ -67,9 +96,32 @@ export default {
       } else if (this.align == 'bottom') {
         style.top = (adjustedTop + height + 11) + 'px';
         style.left = (adjustedLeft - (this.$el.clientWidth / 2) + width / 2) + 'px';
-      } else {
+      } else if (this.align == 'left') {
         style.top  = (adjustedTop - this.$el.clientHeight / 2 + height / 2) + 'px';
         style.left = (adjustedLeft - this.$el.clientWidth - 11) + 'px';
+      }
+
+      this.arrowBottom = this.arrowTop = this.arrowRight = this.arrowLeft = false;
+      if (this.align == 'right' || this.align == 'left') {
+        const y = (adjustedTop - this.$el.clientHeight / 2 + height / 2);
+        const h = this.$el.clientHeight;
+        if ((y + h) > window.innerHeight) {
+          style.top = (adjustedTop - this.$el.clientHeight + height) + 'px';
+          this.arrowBottom = true;
+        } else if (y < 0) {
+          style.top = adjustedTop + 'px';
+          this.arrowTop = true;
+        }
+      } else if (this.align == 'top' || this.align == 'bottom') {
+        const x = (adjustedLeft - this.$el.clientWidth / 2 + width / 2);
+        const w = this.$el.clientWidth;
+        if ((x + w) > window.innerWidth) {
+          style.left = (adjustedLeft - this.$el.clientWidth + width) + 'px';
+          this.arrowRight = true;
+        } else if (x < 0) {
+          style.left = adjustedLeft + 'px';
+          this.arrowLeft = true;
+        }
       }
     }
   }
@@ -140,6 +192,22 @@ export default {
   border-left-color: #999999;
   border-left-color: rgba(0, 0, 0, 0.25);
   border-right-width: 0;
+}
+
+.os-popover .arrow.top {
+  top: 11px;
+}
+
+.os-popover .arrow.bottom {
+  top: calc(100% - 11px);
+}
+
+.os-popover .arrow.left {
+  left: 11px;
+}
+
+.os-popover .arrow.right {
+  left: calc(100% - 11px);
 }
 
 .os-popover.top .arrow:after {

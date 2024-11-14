@@ -148,7 +148,7 @@
 
   <AddEditFilter ref="addEditFilterOverlay" align="right" />
 
-  <AddEditCalcFilter ref="addEditCalcFilterOverlay" align="bottom" />
+  <AddEditCalcFilter ref="addEditCalcFilterOverlay" />
 </template>
 
 <script>
