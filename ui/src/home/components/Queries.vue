@@ -1,6 +1,6 @@
 <template>
   <os-home-list-card :icon="'tachometer-alt'" :title="$t('common.home.queries')"
-    :show-star="true" :list-url="{ngState: 'queries/list'}" :list="ctx.queries"
+    :show-star="true" :list-url="{name: 'QueriesList'}" :list="ctx.queries"
     @search="search($event)" @toggle-star="toggleStar($event)" />
 </template>
 

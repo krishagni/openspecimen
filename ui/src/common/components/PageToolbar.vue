@@ -22,6 +22,7 @@
     display: block;
   }
 
+  .os-page-toolbar :deep(a.button-link),
   .os-page-toolbar :deep(button) {
     margin-right: 0.5rem;
   }

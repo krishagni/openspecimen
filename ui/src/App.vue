@@ -146,7 +146,7 @@ export default {
 
         {
           showIf: {resource: 'Query', operations: ['Read']},
-          href: '#/queries/list',
+          route: {name: 'QueriesList'},
           icon: 'fa fa-dashboard',
           title: t('common.home.queries'),
           description: t('common.home.queries_desc')

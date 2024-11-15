@@ -397,7 +397,7 @@ angular.module('openspecimen')
 
   })
 
-  .run(function(HomePageSvc) {
+  .run(function(HomePageSvc, VueApp) {
     HomePageSvc.registerCards(
       [
         {
@@ -450,7 +450,7 @@ angular.module('openspecimen')
 
         {
           showIf: {resource: 'Query', operations: ['Read']},
-          sref: 'query-list',
+          href: VueApp.getVueViewUrl('queries/list'),
           icon: 'fa fa-dashboard',
           title: 'menu.queries',
           description: 'menu.queries_desc'
