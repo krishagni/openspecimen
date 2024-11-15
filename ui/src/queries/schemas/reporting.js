@@ -37,7 +37,7 @@ export default {
             name: 'reporting.params.groupRowsBy',
             labelCode: 'queries.group_rows',
             listSource: {
-              displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
+              displayProp: ({value, displayLabel, field}) => value || displayLabel || ((field.formCaption ? (field.formCaption + ': ') : '') + field.label),
               loadFn: ({context}) => context.formData.getPivotTableFields('row_fields')
             },
             showWhen: 'reporting.type == "crosstab"'
@@ -51,7 +51,7 @@ export default {
             name: 'reporting.params.groupColBy',
             labelCode: 'queries.group_columns',
             listSource: {
-              displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
+              displayProp: ({value, displayLabel, field}) => value || displayLabel || ((field.formCaption ? (field.formCaption + ': ') : '') + field.label),
               loadFn: ({context}) => context.formData.getPivotTableFields('column_fields')
             },
             showWhen: 'reporting.type == "crosstab"'
@@ -65,7 +65,7 @@ export default {
             name: 'reporting.params.summaryFields',
             labelCode: 'queries.value_fields',
             listSource: {
-              displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
+              displayProp: ({value, displayLabel, field}) => value || displayLabel || ((field.formCaption ? (field.formCaption + ': ') : '') + field.label),
               loadFn: ({context}) => context.formData.getPivotTableFields('value_fields')
             },
             showWhen: 'reporting.type == "crosstab"'
@@ -79,7 +79,7 @@ export default {
             name: 'reporting.params.rollupExclFields',
             labelCode: 'queries.exclude_rollup_for',
             listSource: {
-              displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
+              displayProp: ({value, displayLabel, field}) => value || displayLabel || ((field.formCaption ? (field.formCaption + ': ') : '') + field.label),
               loadFn: ({context}) => context.formData.getValueFields()
             },
             showWhen: 'reporting.type == "crosstab"'
@@ -103,7 +103,7 @@ export default {
             name: 'reporting.params.sum',
             labelCode: 'queries.total_fields',
             listSource: {
-              displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
+              displayProp: ({value, displayLabel, field}) => value || displayLabel || ((field.formCaption ? (field.formCaption + ': ') : '') + field.label),
               loadFn: ({context}) => context.formData.getColumnSummaryTableFields('sum')
             },
             showWhen: 'reporting.type == "columnsummary"'
@@ -117,7 +117,7 @@ export default {
             name: 'reporting.params.avg',
             labelCode: 'queries.avg_fields',
             listSource: {
-              displayProp: (option) => option.value || option.displayLabel || (option.field.formCaption + ': ' + option.field.label),
+              displayProp: ({value, displayLabel, field}) => value || displayLabel || ((field.formCaption ? (field.formCaption + ': ') : '') + field.label),
               loadFn: ({context}) => context.formData.getColumnSummaryTableFields('avg')
             },
             showWhen: 'reporting.type == "columnsummary"'
