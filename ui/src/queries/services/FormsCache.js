@@ -6,6 +6,16 @@ class FormsCache {
 
   fieldsQ = {};
 
+  init() {
+    this.formsQ = null;
+    this.fieldsQ = {};
+  }
+
+  destroy() {
+    this.formsQ = null;
+    this.fieldsQ = {};
+  }
+
   getForms() {
     if (!this.formsQ) { 
       this.formsQ = http.get('forms', {formType: 'Query'});
