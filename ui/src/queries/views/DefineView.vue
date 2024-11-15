@@ -7,8 +7,16 @@
     <template #content>
       <os-steps ref="columnsWizard">
         <os-step :title="$t('queries.select_fields')">
-          <os-tree-select-panel :items="ctx.fieldsTree" :selected="ctx.selectedFields"
-            @selected-items="onFieldsSelection" />
+          <div class="fields-selection">
+            <os-tree-select-panel :items="ctx.fieldsTree" :selected="ctx.selectedFields"
+              :expand-selected="false" @selected-items="onFieldsSelection" />
+
+            <div class="settings">
+              <os-boolean-checkbox v-model="ctx.query.wideRowEnabled" :inlineLabel="$t('queries.enable_wide_rows')" />
+              <os-boolean-checkbox v-model="ctx.query.outputColumnExprs" :inlineLabel="$t('queries.display_field_names')" />
+              <os-boolean-checkbox v-model="ctx.query.caseSensitive" :inlineLabel="$t('queries.case_sensitive_search')" />
+            </div>
+          </div>
         </os-step>
         <os-step :title="$t('queries.field_labels')">
           <table class="os-table">
@@ -123,6 +131,8 @@ export default {
     open: async function(query) {
       const self = this;
       query = this.ctx.query = util.clone(query);
+      query.wideRowEnabled = query.wideRowMode === 'DEEP';
+
       const reporting = query.reporting = query.reporting || {type: 'none'};
       const params = reporting.params = reporting.params || {};
 
@@ -209,9 +219,10 @@ export default {
     },
 
     done: function() {
-      const {selectedFields, query} = this.ctx;
-      const {havingClause, reporting} = query;
-      this.resolve({selectedFields, havingClause, reporting});
+      const {selectedFields:selectList, query} = this.ctx;
+      const {havingClause, reporting, wideRowEnabled, outputColumnExprs, caseSensitive} = query;
+      const wideRowMode = wideRowEnabled ? 'DEEP' : 'SHALLOW';
+      this.resolve({selectList, havingClause, reporting, wideRowMode, outputColumnExprs, caseSensitive});
       this.$refs.columnsDialog.close();
     },
 
@@ -369,3 +380,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.fields-selection .settings {
+  margin-top: 1.25rem;
+  padding-left: 1rem;
+}
+</style>

@@ -92,7 +92,7 @@
           </os-message>
 
           <AgGridVue class="results-grid" :theme="theme"
-            :row-data="ctx.records" :column-defs="ctx.columns"
+            :row-data="ctx.records" :column-defs="ctx.columns" :suppressFieldDotNotation="true"
             :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow"
             @gridReady="onGridReady" @selectionChanged="onRowSelection"
             v-if="!ctx.loadingRecords" />
@@ -250,8 +250,7 @@ export default {
             return;
           }
 
-          const {selectedFields: selectList, havingClause, reporting} = resp;
-          this.$emit('query-saved', {...this.query, selectList, havingClause, reporting});
+          this.$emit('query-saved', {...this.query, ...resp});
           setTimeout(() => this._loadRecords()); // to allow the query to be updated
         }
       );

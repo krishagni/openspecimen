@@ -5,7 +5,7 @@
 
 <script>
 export default {
-  props: ['items', 'selected'],
+  props: ['items', 'selected', 'expand-selected'],
 
   emits: ['selected-items'],
 
@@ -70,7 +70,7 @@ export default {
         node.children = this._getNodes(node, item.children || [], selected);
         if (this._isSelected(node, selected)) {
           node.selected = true;
-          node.expanded = true;
+          node.expanded = this.expandSelected;
         }
 
         nodes.push(node);

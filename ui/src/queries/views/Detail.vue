@@ -42,7 +42,15 @@ export default {
 
     _loadQuery: async function() {
       if (!this.queryId || this.queryId == -1) {
-        this.query = {queryExpression: [], filters: [], selectList: []};
+        this.query = {
+          queryExpression: [],
+          filters: [],
+          selectList: [],
+          wideRowMode: 'DEEP',
+          outputIsoDateTime: true,
+          caseSensitive: true
+        };
+
         return;
       }
 
