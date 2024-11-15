@@ -74,11 +74,11 @@
       </os-page-toolbar>
 
       <os-grid>
-        <os-grid-column style="flex: 0;">
-          <Facets :query="query" @facets-selected="onFacetsSelection" />
+        <os-grid-column :width="3" v-show="ctx.hasFacets">
+          <Facets :query="query" @facets-loaded="onFacetsLoad" @facets-selected="onFacetsSelection" />
         </os-grid-column>
 
-        <os-grid-column>
+        <os-grid-column :width="ctx.hasFacets ? 9 : 12">
           <os-message type="info" v-if="ctx.loadingRecords">
             <span v-t="'queries.loading_records'">Loading records...</span>
           </os-message>
@@ -157,7 +157,9 @@ export default {
 
         allRowsSelected: false,
 
-        selectedRows: []
+        selectedRows: [],
+
+        hasFacets: false
       }
     }
   },
@@ -269,6 +271,10 @@ export default {
     unselectAllRows: function() {
       this.ctx.api.deselectAll();
       this.ctx.allRowsSelected = false;
+    },
+
+    onFacetsLoad: function(facets) {
+      this.ctx.hasFacets = facets && facets.length > 0;
     },
 
     onFacetsSelection: function(selectedFacets) {

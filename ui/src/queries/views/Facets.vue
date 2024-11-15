@@ -2,9 +2,9 @@
   <os-accordion class="facets" @tab-opened="facets[$event.index].loadValues = true">
     <os-accordion-tab class="facet" v-for="facet of facets" :key="facet.id">
       <template #header>
-        <span>
-          <span>{{facet.caption}}</span>
-          <os-button left-icon="times" @click="clearFacetValues($event, facet)"
+        <span class="facet-header">
+          <span class="label">{{facet.caption}}</span>
+          <os-button left-icon="times" size="small" @click="clearFacetValues($event, facet)"
             v-if="selectedFacets[facet.id] && selectedFacets[facet.id].values" />
         </span>
       </template>
@@ -34,6 +34,8 @@ const RANGE_FACETED_OPS  = ['LT', 'LE', 'GT', 'GE', 'EQ', 'BETWEEN', 'EXISTS', '
 export default {
   props: ['query'],
 
+  emits: ['facets-loaded', 'facets-selected'],
+
   components: {
     EqualityFacet,
 
@@ -55,6 +57,10 @@ export default {
   },
 
   methods: {
+    hasFacets: function() {
+      return this.facets && this.facets.length > 0;
+    },
+
     addRangeLimit: function({facet, range}) {
       const {minValue, maxValue, selected} = range || {};
       if (selected) {
@@ -95,6 +101,7 @@ export default {
 
     _loadFacets: function() {
       this.facets = this._getFacets('', this.query);
+      this.$emit('facets-loaded', this.facets);
     },
 
     _getFacets: function(prefix, query) {
@@ -107,7 +114,7 @@ export default {
 
         if (filter.subQuery) {
           //
-          // if the sub-query has parameterised filters then all the facet
+          // TODO: if the sub-query has parameterised filters then all the facet
           // values are loaded instead of loading only those that satisfy
           // the query criteria
           //
@@ -245,6 +252,18 @@ export default {
 
 <style scoped>
 .facets {
-  width: 30vw;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.facet-header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.facet-header .label {
+  flex: 1;
 }
 </style>

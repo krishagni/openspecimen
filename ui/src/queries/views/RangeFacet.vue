@@ -2,17 +2,17 @@
 <template>
   <ul class="range-facet">
     <li class="input" v-if="facet.type == 'INTEGER' || facet.type == 'FLOAT'">
-      <os-input-number :md-type="true" :placeholder="$t('queries.min_value')" v-model="minValue" v-if="showMinLimit" />
+      <os-input-number :md-type="true" :placeholder="$t('queries.min')" v-model="minValue" v-if="showMinLimit" />
 
-      <os-input-number :md-type="true" :placeholder="$t('queries.max_value')" v-model="maxValue" v-if="showMaxLimit" />
+      <os-input-number :md-type="true" :placeholder="$t('queries.max')" v-model="maxValue" v-if="showMaxLimit" />
 
       <os-button success :label="$t('common.buttons.go')" @click="addLimit" />
     </li>
 
     <li class="input" v-if="facet.type == 'DATE'">
-      <os-date-picker :md-type="true" :placeholder="$t('queries.min_value')" v-model="minValue" v-if="showMinLimit" />
+      <os-date-picker :md-type="true" :placeholder="$t('queries.min')" v-model="minValue" v-if="showMinLimit" />
 
-      <os-date-picker :md-type="true" :placeholder="$t('queries.max_value')" v-model="maxValue" v-if="showMaxLimit" />
+      <os-date-picker :md-type="true" :placeholder="$t('queries.max')" v-model="maxValue" v-if="showMaxLimit" />
 
       <os-button success :label="$t('common.buttons.go')" @click="addDateLimit" />
     </li>
