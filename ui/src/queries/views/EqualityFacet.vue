@@ -78,11 +78,7 @@ export default {
       }
 
       if (facet.values) {
-        this.list = facet.values;
-        if (this.searchTerm) {
-          const searchTerm = this.searchTerm.toLowerCase();
-          this.list = facet.values.filter(value => value.toLowerCase().indexOf(searchTerm) >= 0);
-        }
+        this.list = this._getFilteredFacetValues(facet.values, this.searchTerm);
       } else {
         if (!this.searchTerm) {
           if (!this.baseList) {
@@ -91,7 +87,11 @@ export default {
 
           this.list = this.baseList;
         } else {
-          this.list = await this._getFacetValues(this.searchTerm);
+          if (this.baseList && this.baseList.length < 500) {
+            this.list = this._getFilteredFacetValues(this.baseList, this.searchTerm);
+          } else {
+            this.list = await this._getFacetValues(this.searchTerm);
+          }
         }
       }
     },
@@ -99,8 +99,16 @@ export default {
     _getFacetValues: async function(searchTerm) {
       const {values} = await querySvc.getFacetValues(this.query, this.facet.expr, searchTerm);
       return values;
-    }
+    },
 
+    _getFilteredFacetValues: function(values, searchTerm) {
+      searchTerm = (searchTerm || '').toLowerCase();
+      if (!searchTerm) {
+        return values;
+      }
+
+      return values.filter(value => value.toLowerCase().indexOf(searchTerm) >= 0);
+    }
   }
 }
 </script>
