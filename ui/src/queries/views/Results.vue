@@ -78,16 +78,24 @@
           <Facets :query="query" @facets-loaded="onFacetsLoad" @facets-selected="onFacetsSelection" />
         </os-grid-column>
 
-        <os-grid-column :width="ctx.hasFacets ? 9 : 12">
+        <os-grid-column class="results-panel" :width="ctx.hasFacets ? 9 : 12">
           <os-message type="info" v-if="ctx.loadingRecords">
             <span v-t="'queries.loading_records'">Loading records...</span>
+          </os-message>
+
+          <os-message type="warn" v-if="!ctx.loadingRecords && ctx.dbHasMoreRecords">
+            <span v-t="'queries.export_to_get_all'"></span>
+            <a href="https://openspecimen.atlassian.net/wiki/x/ogYR" target="_blank">
+              <span>&nbsp;</span>
+              <span v-t="'queries.click_export_has_more_records'"></span>
+            </a>
           </os-message>
 
           <AgGridVue class="results-grid" :theme="theme"
             :row-data="ctx.records" :column-defs="ctx.columns"
             :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow"
             @gridReady="onGridReady" @selectionChanged="onRowSelection"
-            v-else />
+            v-if="!ctx.loadingRecords" />
         </os-grid-column>
       </os-grid>
 
@@ -298,7 +306,7 @@ export default {
 
     _loadRecords: async function(facets) {
       this.ctx.loadingRecords = true;
-      const {columnLabels, columnMetadata, columnTypes, columnUrls, rows} = await this._getData(facets);
+      const {columnLabels, columnMetadata, columnTypes, columnUrls, rows, dbRowsCount} = await this._getData(facets);
 
       const {type, params} = this.query.reporting || {type: 'none', params: {}};
       let pinnedColumns = 0;
@@ -306,6 +314,7 @@ export default {
         pinnedColumns = (params.groupRowsBy || []).length;
       }
 
+      this.ctx.dbHasMoreRecords = dbRowsCount >= 1000;
       this.ctx.columns = columnLabels
         .map((label, idx) => {
           const column = {field: label, name: columnMetadata[idx].expr, pinned: idx < pinnedColumns && 'left'};
@@ -391,9 +400,19 @@ export default {
   margin-right: 0.5rem;
 }
 
+.results-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.results-panel :deep(.os-message) {
+  margin-top: 0;
+}
+
 .results-grid {
   width: 100%;
-  height: 100%;
+  flex: 1;
 }
 
 .selected-rows-msg {
