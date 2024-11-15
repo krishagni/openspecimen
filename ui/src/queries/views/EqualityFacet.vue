@@ -1,24 +1,33 @@
 <template>
-  <ul class="equality-facet">
-    <li class="input">
+  <div class="equality-facet">
+    <div class="search-items" v-if="facet.hideOptions">
+      <os-textarea :rows="2" :placeholder="$t('queries.search_filter_value')" v-model="searchTerm" />
+
+      <os-button success size="small" :label="$t('common.buttons.go')" @click="addConditions" />
+    </div>
+
+    <div class="search-items" v-else>
       <os-input-text :md-type="true" :placeholder="$t('common.buttons.search')"
         v-model="searchTerm" :debounce="500" @change="_loadFacetValues" />
-    </li>
-        
-    <li v-for="(item, itemIdx) of items" :key="itemIdx">
-      <os-boolean-checkbox v-model="item.selected" @change="toggleSelection(item)"/>
-      <span>{{item.value}}</span>
-    </li>
-  </ul>
+    </div>
+
+    <ul class="items" v-if="items.length > 0">
+      <li v-for="(item, itemIdx) of items" :key="itemIdx">
+        <os-boolean-checkbox v-model="item.selected" @change="toggleSelection(item)"/>
+        <span>{{item.value}}</span>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
 import querySvc from '@/queries/services/Query.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: ['query', 'facet', 'selected'],
 
-  emits: ['value-selected', 'value-unselected'],
+  emits: ['values-selected', 'values-unselected'],
 
   data() {
     return {
@@ -50,15 +59,21 @@ export default {
   methods: {
     toggleSelection: function(item) {
       if (item.selected) {
-        this.$emit('value-selected', {facet: this.facet, value: item.value});
+        this.$emit('values-selected', {facet: this.facet, values: [item.value]});
       } else {
-        this.$emit('value-unselected', {facet: this.facet, value: item.value});
+        this.$emit('values-unselected', {facet: this.facet, values: [item.value]});
       }
+    },
+
+    addConditions: function() {
+      this.list = util.splitStr(this.searchTerm || '', /,|\t|\n/, false);
+      this.searchTerm = null;
+      this.$emit('values-added', {facet: this.facet, values: this.list});
     },
 
     _loadFacetValues: async function() {
       const facet = this.facet;
-      if (!facet.loadValues) {
+      if (!facet.loadValues || facet.hideOptions) {
         return;
       }
 
@@ -91,26 +106,24 @@ export default {
 </script>
 
 <style scoped>
-.equality-facet {
+.equality-facet .search-items {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.equality-facet ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }       
         
-.equality-facet li {
+.equality-facet ul li {
   display: flex;
   flex-direction: row;
 }       
       
-.equality-facet li.input {
-  margin-bottom: 1.25rem;
-}
-            
-.equality-facet li.input :deep(.os-input-text) {
-  width: 100%;
-}
-  
-.equality-facet li :deep(.os-boolean-checkbox) {
+.equality-facet ul li :deep(.os-boolean-checkbox) {
   margin-right: 1rem;
 }
 </style>

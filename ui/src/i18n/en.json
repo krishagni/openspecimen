@@ -1684,6 +1684,7 @@
     "save_query": "Save Query",
     "saved": "Query #{id} {title} saved.",
     "schedule": "Schedule",
+    "search_filter_value": "Enter filter values separated by comma, tab, or newline...",
     "search_folder": "Search Folder",
     "select_all": "Select All",
     "select_fields": "Select Fields",

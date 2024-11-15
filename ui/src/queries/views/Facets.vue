@@ -14,7 +14,8 @@
           @range-selected="addRangeLimit($event)" v-if="facet.isRange" />
 
         <EqualityFacet :query="this.query" :facet="facet" :selected="selectedFacets[facet.id]"
-          @value-selected="addValue($event)" @value-unselected="removeValue($event)" v-else />
+          @values-added="addValues($event, true)" @values-selected="addValues($event)"
+          @values-unselected="removeValues($event)" v-else />
       </template>
     </os-accordion-tab>
   </os-accordion>
@@ -72,17 +73,19 @@ export default {
       this.$emit('facets-selected', Object.values(this.selectedFacets));
     },
 
-    addValue: function({facet, value}) {
-      const selectedFacet = this.selectedFacets[facet.id] = this.selectedFacets[facet.id] || {facet, values: []};
-      selectedFacet.values.push(value);
+    addValues: function({facet, values}, newList) {
+      const selectedFacet = this.selectedFacets[facet.id] = (!newList && this.selectedFacets[facet.id]) || {facet, values: []};
+      Array.prototype.push.apply(selectedFacet.values, values);
       this.$emit('facets-selected', Object.values(this.selectedFacets));
     },
 
-    removeValue: function({facet, value}) {
+    removeValues: function({facet, values}) {
       const selectedFacet = this.selectedFacets[facet.id] = this.selectedFacets[facet.id] || {facet, values: []};
-      const idx = selectedFacet.values.indexOf(value);
-      if (idx >= 0) {
-        selectedFacet.values.splice(idx, 1);
+      for (const value of values) {
+        const idx = selectedFacet.values.indexOf(value);
+        if (idx >= 0) {
+          selectedFacet.values.splice(idx, 1);
+        }
       }
 
       if (selectedFacet.values.length == 0) {
@@ -221,6 +224,7 @@ export default {
         isRange: type == 'INTEGER' || type == 'FLOAT' || type == 'DATE',
         op: op,
         expr,
+        hideOptions: filter.hideOptions,
         values: facetValues
       }
     },
