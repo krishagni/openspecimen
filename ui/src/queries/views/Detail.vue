@@ -5,6 +5,7 @@
 <script>
 
 import formCache from '@/queries/services/FormsCache.js';
+import queriesCache from '@/queries/services/QueriesCache.js';
 import routerSvc from '@/common/services/Router.js';
 import savedQuerySvc from '@/queries/services/SavedQuery.js';
 
@@ -21,9 +22,19 @@ export default {
     this._loadQuery();
   },
 
+  mounted() {
+    queriesCache.init();
+  },
+
+  unmounted() {
+    queriesCache.destroy();
+  },
+
   watch: {
     queryId: function(newVal, oldVal) {
       if (newVal != oldVal) {
+        queriesCache.destroy();
+        queriesCache.init();
         this._loadQuery();
       }
     }
@@ -67,12 +78,7 @@ export default {
 
         filter.fieldObj = await formCache.getField(query.cpId, query.cpGroupId, filter.field);
         if (filter.subQueryId > 0) {
-          const queryCache = this.queryCache = this.queryCache || {};
-          if (!queryCache[filter.subQueryId]) {
-            queryCache[filter.subQueryId] = savedQuerySvc.getQueryById(filter.subQueryId);
-          }
-
-          filter.subQuery = await queryCache[filter.subQueryId];
+          filter.subQuery = await queriesCache.getQuery(filter.subQueryId);
           await this._hydrateFilters(filter.subQuery);
         }
       }

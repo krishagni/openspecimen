@@ -1,7 +1,7 @@
 import i18n from '@/common/services/I18n.js';
 
 import formsCache    from './FormsCache.js';
-import savedQuerySvc from './SavedQuery.js';
+import queriesCache  from './QueriesCache.js';
 
 class Util {
   symbols = {
@@ -374,7 +374,7 @@ class Util {
     }
 
     if (filter.hasSq || filter.subQueryId > 0) {
-      const subQuery = await savedQuerySvc.getQueryById(filter.subQueryId);
+      const subQuery = await queriesCache.getQuery(filter.subQueryId);
       const sqFiltersMap = this._getFiltersMap(subQuery);
       const sqWhere = await this._getWhereClause(prefix + filter.id + '.', subQuery, sqFiltersMap, facets);
 
