@@ -72,4 +72,20 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
+
+.os-accordion {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.os-accordion :deep(.p-accordion-tab) {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+.os-accordion :deep(.p-accordion-tab .p-toggleable-content) {
+  flex: 1;
+  overflow-y: auto;
+}
 </style>
