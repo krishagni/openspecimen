@@ -1654,11 +1654,11 @@
       "EXISTS": "Exists",
       "GE": "Greater Than or Equals",
       "GT": "Greater Than",
-      "IN": "In",
+      "IN": "Is One Of",
       "LE": "Less Than or Equals",
       "LT": "Less Than",
       "NE": "Not Equals",
-      "NOT_IN": "Not In",
+      "NOT_IN": "Is Not One Of",
       "NOT_EXISTS": "Not Exists",
       "STARTS_WITH": "Starts With"
     },
