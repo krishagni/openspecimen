@@ -397,7 +397,7 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 
 	private void setPhoneNumber(ParticipantDetail detail, Participant participant, boolean partial, OpenSpecimenException ose) {
 		if (!partial || detail.isAttrModified("phoneNumber")) {
-			participant.setPhoneNumber(detail.getPhoneNumber());
+			participant.setPhoneNumber(Utility.normalizePhoneNumber(detail.getPhoneNumber()));
 		}
 
 		if (StringUtils.isBlank(participant.getPhoneNumber())) {

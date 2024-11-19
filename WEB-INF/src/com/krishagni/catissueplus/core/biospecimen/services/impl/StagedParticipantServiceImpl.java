@@ -33,6 +33,7 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class StagedParticipantServiceImpl implements StagedParticipantService {
 	private static final LogUtil logger = LogUtil.getLogger(StagedParticipantServiceImpl.class);
@@ -212,7 +213,7 @@ public class StagedParticipantServiceImpl implements StagedParticipantService {
 		participant.setMiddleName(detail.getMiddleName());
 		participant.setLastName(detail.getLastName());
 		participant.setEmailAddress(detail.getEmailAddress());
-		participant.setPhoneNumber(detail.getPhoneNumber());
+		participant.setPhoneNumber(Utility.normalizePhoneNumber(detail.getPhoneNumber()));
 		participant.setBirthDate(detail.getBirthDate());
 		participant.setDeathDate(detail.getDeathDate());
 		participant.setGender(getPv(PvAttributes.GENDER, detail.getGender(), ParticipantErrorCode.INVALID_GENDER));
