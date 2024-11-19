@@ -7,5 +7,6 @@
 
   <include file="db/data-type-definitions.xml"/>
 
-  <include file="db/5.2/post-init.xml"/>
+  <include file="db/5.2/post-init.xml" />
+  <include file="db/11.2/post-init.xml" />
 </databaseChangeLog>

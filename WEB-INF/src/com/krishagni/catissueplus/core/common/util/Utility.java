@@ -1239,6 +1239,15 @@ public class Utility {
 		return Collections.emptyMap();
 	}
 
+	public static String normalizePhoneNumber(String phoneNumber) {
+		if (StringUtils.isNotBlank(phoneNumber)) {
+			// remove - (, ), -, whitespaces
+			phoneNumber = phoneNumber.replaceAll("[-|\\s|)|(]+", "");
+		}
+
+		return phoneNumber;
+	}
+
 	private static boolean equals(Object obj1, Object obj2, String fieldName) {
 		try {
 			Object val1 = PropertyUtils.getProperty(obj1, fieldName);

@@ -1,0 +1,14 @@
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Update forms skip logic: Change assignment operator to equality operator">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.UpdateFormsSkipLogic"></customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Sanitise/normalise participant phone numbers - remove hyphens, parenthesis, whitespaces etc">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.SanitiseParticipantPhoneNumbers"></customChange>
+  </changeSet>
+</databaseChangeLog>
