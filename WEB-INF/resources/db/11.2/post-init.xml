@@ -7,4 +7,8 @@
   <changeSet author="vpawar" id="Update forms skip logic: Change assignment operator to equality operator">
     <customChange class="com.krishagni.catissueplus.core.upgrade.UpdateFormsSkipLogic"></customChange>
   </changeSet>
+
+  <changeSet author="vpawar" id="Sanitise/normalise participant phone numbers - remove hyphens, parenthesis, whitespaces etc">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.SanitiseParticipantPhoneNumbers"></customChange>
+  </changeSet>
 </databaseChangeLog>

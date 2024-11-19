@@ -226,7 +226,7 @@ public class UpdateFormsSkipLogic implements CustomTaskChange {
 				obj.close();
 			}
 		} catch (Exception e) {
-			logger.warn("Encountered error when closing the result/statement. Error = " + e.getMessage() + ". Ignoring the error." e);
+			logger.warn("Encountered error when closing the result/statement. Error = " + e.getMessage() + ". Ignoring the error.", e);
 		}
 	}
 
