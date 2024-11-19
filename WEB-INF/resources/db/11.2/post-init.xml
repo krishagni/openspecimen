@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <include file="db/data-type-definitions.xml"/>
-
-  <include file="db/5.2/post-init.xml" />
-  <include file="db/11.2/post-init.xml" />
+  <changeSet author="vpawar" id="Update forms skip logic: Change assignment operator to equality operator">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.UpdateFormsSkipLogic"></customChange>
+  </changeSet>
 </databaseChangeLog>
