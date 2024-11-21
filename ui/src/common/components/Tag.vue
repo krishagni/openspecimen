@@ -20,7 +20,8 @@ export default {
       return ['os-tag', {
         'os-missed-tag': this.type == 'missed' || this.type == 'Missed',
         'os-distributed-tag': this.type == 'distributed' || this.type == 'Distributed',
-        'os-reserved-tag': this.type == 'reserved' || this.type == 'Reserved'
+        'os-reserved-tag': this.type == 'reserved' || this.type == 'Reserved',
+        'os-closed-tag': this.type == 'closed' || this.type == 'Closed'
       }]
     }
   }
@@ -45,6 +46,11 @@ export default {
 
 .os-tag.os-reserved-tag :deep(.p-tag) {
   background-color: rgba(128, 0, 128, 0.7);
+  color: #fff;
+}
+
+.os-tag.os-closed-tag :deep(.p-tag) {
+  background-color: #d9534f;
   color: #fff;
 }
 </style>
