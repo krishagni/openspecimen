@@ -265,7 +265,7 @@ export default {
     },
 
     _sortForms: async function(forms) {
-      const formsOrder = this.formsOrder = await cpSvc.getWorkflow(this.cp.id, 'forms');
+      const formsOrder = this.formsOrder = await cpSvc.getWorkflow(this.cp.id, 'forms') || {};
       const map = forms.reduce(
         (acc, f) => {
           const entityForms = acc[f.entityType] = acc[f.entityType] || [];
