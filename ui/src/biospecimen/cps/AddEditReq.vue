@@ -26,8 +26,12 @@ export default {
           cpShortTitle: this.cp.shortTitle,
           eventId: this.eventId,
           lineage: this.lineage || 'New',
+          anatomicSite: 'Not Specified',
+          laterality: 'Not Specified',
+          pathology: 'Not Specified',
           collectionProcedure: 'Not Specified',
-          collectionContainer: 'Not Specified'
+          collectionContainer: 'Not Specified',
+          storageType: this.lineage == 'Aliquot' ? 'Manual' : 'Virtual'
         },
 
         addEditFs: {rows: []}

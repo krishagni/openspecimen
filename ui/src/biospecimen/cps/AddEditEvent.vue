@@ -21,7 +21,11 @@ export default {
   data() {
     return {
       ctx: {
-        cpe: {cpShortTitle: this.cp.shortTitle},
+        cpe: {
+          cpShortTitle: this.cp.shortTitle,
+          clinicalDiagnosis: 'Not Specified',
+          clinicalStatus: 'Not Specified'
+        },
 
         addEditFs: {rows: []},
 
