@@ -38,7 +38,7 @@
               <os-icon-title icon="eye" :title="$t('common.overview')" />
             </template>
 
-            <ul class="os-key-values">
+            <ul class="os-key-values os-one-col">
               <li class="item">
                 <strong class="key key-sm" v-t="'common.about.version'">Version</strong>
                 <span class="value">{{$ui.global.appProps.build_version}}</span>
