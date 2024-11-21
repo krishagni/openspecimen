@@ -22,12 +22,14 @@ export default {
           {
             type: "booleanCheckbox",
             inlineLabelCode: "cps.ppid_full",
-            name: "cp.manualPpidEnabled"
+            name: "cp.manualPpidEnabled",
+            showWhen: "!cp.specimenCentric"
           },
           {
             type: "booleanCheckbox",
             inlineLabelCode: "cps.visit_names",
-            name: "cp.manualVisitNameEnabled"
+            name: "cp.manualVisitNameEnabled",
+            showWhen: "!cp.specimenCentric"
           },
           {
             type: "booleanCheckbox",

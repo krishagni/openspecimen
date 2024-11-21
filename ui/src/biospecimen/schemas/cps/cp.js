@@ -119,7 +119,9 @@ export default {
       "type": "number",
       "labelCode": "cps.expected_registrations",
       "name": "cp.anticipatedParticipantsCount",
-      "maxFractionDigits": 0
+      "maxFractionDigits": 0,
+      "showWhen": "!cp.specimenCentric",
+      "showInOverviewWhen": "!cp.specimenCentric"
     },
     {
       "type": "text",
@@ -162,7 +164,9 @@ export default {
           "value": "use_system_setting"
         }
       ],
-      "optionsPerRow": 3
+      "optionsPerRow": 3,
+      "showWhen": "!cp.specimenCentric",
+      "showInOverviewWhen": "!cp.specimenCentric"
     },
     {
       "type": "radio",
@@ -178,7 +182,9 @@ export default {
           "value": false
         }
       ],
-      "optionsPerRow": 2
+      "optionsPerRow": 2,
+      "showWhen": "!cp.specimenCentric",
+      "showInOverviewWhen": "!cp.specimenCentric"
     }
   ]
 }

@@ -4,13 +4,15 @@ export default {
       "type": "text",
       "name": "cp.ppidFmt",
       "labelCode": "cps.ppid",
-      "showWhen": "!cp.specimenCentric"
+      "showWhen": "!cp.specimenCentric",
+      "showInOverviewWhen": "!cp.specimenCentric"
     },
     {
       "type": "text",
       "name": "cp.visitNameFmt",
       "labelCode": "cps.visit",
-      "showWhen": "!cp.specimenCentric"
+      "showWhen": "!cp.specimenCentric",
+      "showInOverviewWhen": "!cp.specimenCentric"
     },
     {
       "type": "text",

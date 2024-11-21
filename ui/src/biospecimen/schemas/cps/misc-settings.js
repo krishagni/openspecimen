@@ -69,7 +69,9 @@ export default {
         { "captionCode": "cps.show_primary_specimens", "value": "PRIMARY_SPMNS" },
         { "captionCode": "cps.show_all_specimens",     "value": "ALL_SPMNS" }
       ],
-      "optionsPerRow": 2
+      "optionsPerRow": 2,
+      "showWhen": "!cp.specimenCentric",
+      "showInOverviewWhen": "!cp.specimenCentric"
     },
     {
       "type": "radio",
@@ -83,7 +85,9 @@ export default {
         { "captionCode": "cps.on_shipment_receive",   "value": "ON_SHIPMENT_RECV" },
         { "captionCode": "cps.none",                  "value": "NONE" }
       ],
-      "optionsPerRow": 3
+      "optionsPerRow": 3,
+      "showWhen": "!cp.specimenCentric",
+      "showInOverviewWhen": "!cp.specimenCentric"
     },
     {
       "type": "radio",
