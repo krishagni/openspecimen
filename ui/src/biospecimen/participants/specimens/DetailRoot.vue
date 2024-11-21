@@ -64,12 +64,14 @@ export default {
 
   methods: {
     _loadSpecimen: async function(specimenId) {
+      this.specimen = {};
       this.specimen = await spmnSvc.getById(specimenId);
       formUtil.createCustomFieldsMap(this.specimen, true);
       this.loaded = true;
     },
 
     _loadRequirement: async function(reqId) {
+      this.specimen = {};
       const req = await cpSvc.getSpecimenRequirement(reqId);
       this.specimen = this._toSpecimen(req);
       this.loaded = true;

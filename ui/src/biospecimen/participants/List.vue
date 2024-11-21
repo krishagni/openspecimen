@@ -281,7 +281,7 @@ export default {
 
         this.showDetails(selectedRow);
       } else if (this.$route.query && !this.$route.query.reqId) {
-        this.showTable(newValue == -2);
+        this.showTable(newValue == -2 || this.$route.query.reload);
       }
     },
 

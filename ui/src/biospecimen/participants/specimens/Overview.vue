@@ -408,11 +408,11 @@ export default {
             return;
           }
 
-          const route = routerSvc.getCurrentRoute();
-          if (route.name.indexOf('ParticipantsListItemSpecimenDetail') >= 0) {
-            routerSvc.goto('ParticipantsListItemVisitDetail.Overview', this.specimen);
+          const {cp} = this.ctx;
+          if (cp.specimenCentric) {
+            routerSvc.goto('ParticipantsList', {cpId: cp.id, cprId: -1}, {view: 'specimens_list', reload: true});
           } else {
-            routerSvc.goto('VisitDetail.Overview', this.specimen);
+            routerSvc.goto('ParticipantsListItemVisitDetail.Overview', this.specimen);
           }
 
           specimenSvc.clearSpecimens(this.visit);
