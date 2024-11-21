@@ -270,14 +270,22 @@ export default {
     },
 
     eventOps: function({cpe}) {
-      return [
-        {icon: 'edit',  caption: this.$t('common.buttons.edit'),   onSelect: () => this.editEvent(cpe)},
-        {icon: 'copy',  caption: this.$t('common.buttons.copy'),   onSelect: () => this.copyEvent(cpe)},
-        {icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: () => this.deleteEvent(cpe)},
-        {icon: 'ban',   caption: this.$t('common.buttons.close'),  onSelect: () => this.closeEvent(cpe)},
-        {divider: true},
-        {icon: 'flask', caption: this.$t('cps.add_req'),  onSelect: () => this.addReq(cpe)}
-      ];
+      const ops = [];
+      if (cpe.activityStatus != 'Closed') {
+        ops.push({icon: 'edit',  caption: this.$t('common.buttons.edit'),   onSelect: () => this.editEvent(cpe)});
+        ops.push({icon: 'copy',  caption: this.$t('common.buttons.copy'),   onSelect: () => this.copyEvent(cpe)});
+      }
+
+      ops.push({icon: 'trash', caption: this.$t('common.buttons.delete'), onSelect: () => this.deleteEvent(cpe)});
+      if (cpe.activityStatus != 'Closed') {
+        ops.push({icon: 'ban',   caption: this.$t('common.buttons.close'),  onSelect: () => this.closeEvent(cpe)});
+        ops.push({divider: true});
+        ops.push({icon: 'flask', caption: this.$t('cps.add_req'),  onSelect: () => this.addReq(cpe)});
+      } else {
+        ops.push({icon: 'check', caption: this.$t('common.buttons.reopen'), onSelect: () => this.reopenEvent(cpe)});
+      }
+
+      return ops;
     },
 
     addEvent: function() {
@@ -309,8 +317,10 @@ export default {
       this.ctx.event = cpe;
       const resp = await this.$refs.confirmCloseEventDialog.open();
       if (resp == 'proceed') {
-        const toSave = util.clone(cpe);
+        const toSave = {...cpe};
         toSave.activityStatus = 'Closed';
+        delete toSave.reqs;
+
         cpSvc.saveOrUpdateCpe(toSave).then(
           () => {
             alertsSvc.success({code: 'cps.event_closed', args: cpe});
@@ -318,6 +328,19 @@ export default {
           }
         );
       }
+    },
+
+    reopenEvent: async function(cpe) {
+      const toSave = {...cpe};
+      toSave.activityStatus = 'Active';
+      delete toSave.reqs;
+
+      cpSvc.saveOrUpdateCpe(toSave).then(
+        () => {
+          alertsSvc.success({code: 'cps.event_reopened', args: cpe});
+          this._loadEvents();
+        }
+      );
     },
 
     onReqClick: function(item) {

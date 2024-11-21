@@ -1,5 +1,8 @@
 <template>
-  <span>
+  <span class="os-event-description">
+    <span class="status" v-show="showStatus">
+      <os-specimen-status-icon :status="input.activityStatus" />
+    </span>
     <span v-if="!href">{{description}}</span>
     <a v-else :href="href">
       <span>{{description}}</span>
@@ -14,7 +17,7 @@ import routerSvc from '@/common/services/Router.js';
 import ui from '@/global.js';
 
 export default {
-  props: ['visit', 'event', 'showLink'],
+  props: ['visit', 'event', 'showLink', 'showStatus'],
 
   computed: {
     input: function() {
@@ -67,3 +70,16 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.os-event-description {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.os-event-description .status {
+  margin-right: 0.5rem;
+  width: 1rem;
+}
+</style>

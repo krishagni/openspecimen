@@ -7,7 +7,7 @@ export default {
       captionCode: "cps.event",
       type: "component",
       component: 'os-visit-event-desc',
-      data: ({cpe}) => ({event: cpe})
+      data: ({cpe}) => ({event: cpe, showStatus: true})
     },
 
     {
