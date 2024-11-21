@@ -11,7 +11,7 @@
     @filters-updated="loadList"
     @selected-rows="onRowsSelection"
     @row-clicked="rowClicked"
-    @row-start-toggled="rowStarToggled"
+    @row-star-toggled="rowStarToggled"
     @sort="sort"
     ref="listView">
 
@@ -265,7 +265,7 @@ export default {
 
       const hasFilters = this.hasFilters() && Object.values(filters || {}).length == 0;
       if (this.autoSearchOpen == true && this.data.length > 12 && hasFilters) {
-        this.$refs.listView.displayFilters();
+        setTimeout(() => this.$refs.listView.displayFilters(), 0);
       }
 
       const fb = util.uriEncode(filters || {});
