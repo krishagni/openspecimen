@@ -855,6 +855,7 @@
     "event_label": "Event Label",
     "event_label_req": "Event Label is mandatory",
     "event_point": "Event Time Point",
+    "event_reopened": "Event {eventLabel} reopened.",
     "event_saved": "Event {eventLabel} saved.",
     "events": "Events",
     "expected_registrations": "Expected Registrations",
