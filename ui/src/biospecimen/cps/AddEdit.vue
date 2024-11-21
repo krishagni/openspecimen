@@ -143,7 +143,11 @@ export default {
     },
 
     cancel: function() {
-      routerSvc.goto('CpsList', {cpId: -1});
+      if (this.cpId > 0) {
+        routerSvc.goto('CpDetail.Overview', {cpId: this.cpId});
+      } else {
+        routerSvc.goto('CpsList', {cpId: -1});
+      }
     },
 
     _setupCp: async function() {
