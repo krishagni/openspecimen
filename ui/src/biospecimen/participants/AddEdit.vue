@@ -138,6 +138,10 @@ export default {
       dataCtx: {
         cpr: copy,
 
+        objName: 'cpr',
+
+        objCustomFields: 'cpr.participant.extensionDetail.attrsMap',
+
         cp,
 
         userRole: this.cpViewCtx.getRole(),
