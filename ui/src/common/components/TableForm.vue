@@ -488,7 +488,16 @@ export default {
         return object;
       }
 
+      const {objName, objCustomFields} = this.data;
+      if (name.indexOf('$extendedObj') == 0) {
+        name = name.replaceAll('$extendedObj', objName);
+      }
+
       let props = name.split('.');
+      if (objCustomFields && props.length == 1) {
+        props = (objCustomFields + '.' + name).split('.');
+      }
+
       for (let i = 0; i < props.length; ++i) {
         if (!object) {
           return undefined;
