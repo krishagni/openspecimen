@@ -691,7 +691,8 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		}
 
 		FormContextBean fc = re.getFormCtxt();
-		FormAccessChecker checker = formAccessCheckers.get(fc.getEntityType());
+		String accessType = getCuratedEntityType(fc.getEntityType());
+		FormAccessChecker checker = formAccessCheckers.get(accessType);
 		if (checker == null || !checker.isDataReadAllowed(fc.getEntityType(), re.getObjectId())) {
 			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
 		}
