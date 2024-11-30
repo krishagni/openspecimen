@@ -22,7 +22,7 @@ import Button from '@/common/components/Button.vue';
 import alertSvc from '@/common/services/Alerts.js';
 
 export default {
-  props: ['name', 'url', 'modelValue', 'headers', 'auto', 'tabOrder', 'disabled'],
+  props: ['url', 'modelValue', 'headers', 'auto', 'tabOrder', 'disabled'],
 
   components: {
     Button,
