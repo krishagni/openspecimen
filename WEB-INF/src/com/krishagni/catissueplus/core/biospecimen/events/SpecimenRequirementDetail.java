@@ -86,6 +86,10 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 
 	private ExtensionDetail extensionDetail;
 
+	private String uid;
+
+	private String parentUid;
+
 	public Long getId() {
 		return id;
 	}
@@ -352,6 +356,22 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.extensionDetail = extensionDetail;
 	}
 
+	public String getUid() {
+		return uid;
+	}
+
+	public void setUid(String uid) {
+		this.uid = uid;
+	}
+
+	public String getParentUid() {
+		return parentUid;
+	}
+
+	public void setParentUid(String parentUid) {
+		this.parentUid = parentUid;
+	}
+
 	@Override
 	public int compareTo(SpecimenRequirementDetail other) {
 		int cmp = NumUtil.compareTo(sortOrder, other.sortOrder);
@@ -423,6 +443,13 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setEventId(sr.getCollectionProtocolEvent().getId());
 		detail.setCpShortTitle(sr.getCollectionProtocol().getShortTitle());
 		detail.setActivityStatus(sr.getActivityStatus());
+		if (sr.getId() != null) {
+			detail.setUid("sr_" + sr.getId());
+			if (sr.getParentSpecimenRequirement() != null) {
+				detail.setParentUid("sr_" + sr.getParentSpecimenRequirement().getId());
+			}
+		}
+
 		if (incChildren) {
 			detail.setChildren(from(sr.getChildSpecimenRequirements()));
 		}

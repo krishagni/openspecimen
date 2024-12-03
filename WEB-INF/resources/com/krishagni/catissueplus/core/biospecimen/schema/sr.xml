@@ -150,5 +150,15 @@
       <caption>#getMessage("sr_activity_status")</caption>
       <attribute>activityStatus</attribute>
     </field>
+
+    <field>
+      <caption>#getMessage("sr_parent_uid")</caption>
+      <attribute>parentUid</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("sr_uid")</caption>
+      <attribute>uid</attribute>
+    </field>
   </record>
 </object-schema>
