@@ -494,15 +494,21 @@ export default {
       }
 
       let props = name.split('.');
-      if (objCustomFields && props.length == 1) {
-        props = (objCustomFields + '.' + name).split('.');
-      }
-
       for (let i = 0; i < props.length; ++i) {
         if (!object) {
-          return undefined;
+          break;
         }
         object = object[props[i]];
+      }
+
+      if (!object && objCustomFields && props.length == 1) {
+        props = (objCustomFields + '.' + name).split('.');
+        for (let i = 0; i < props.length; ++i) {
+          if (!object) {
+            break;
+          }
+          object = object[props[i]];
+        }
       }
 
       return object;
