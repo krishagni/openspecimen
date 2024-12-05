@@ -41,6 +41,7 @@
 
 import SpecimenTree from '@/biospecimen/components/SpecimenTree.vue';
 
+import i18n        from '@/common/services/I18n.js';
 import routerSvc   from '@/common/services/Router.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util        from '@/common/services/Util.js';
@@ -177,7 +178,7 @@ export default {
         ]
 
         this.ctx.deleteOpts = {
-          type: this.$t('visits.visit'),
+          type: i18n.msg('visits.visit'),
           title: visit.name,
           dependents: () => visitSvc.getDependents(visit),
           forceDelete: true,
@@ -218,7 +219,7 @@ export default {
                 options.push({divider: true});
               }
 
-              options.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
+              options.push({icon: 'history', caption: i18n.msg('audit.trail'), onSelect: this.viewAuditTrail});
             }
           }
         );

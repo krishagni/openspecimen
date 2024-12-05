@@ -14,13 +14,15 @@
         <input type="button" :value="$t('common.buttons.clear')"  @click="clear" />
         <input type="button" :value="$t('common.buttons.cancel')" @click="cancel" />
       </div>
-      <div class="actions" v-else>
+      <div class="actions" v-else-if="!disabled">
         <input type="button" :value="$t('common.buttons.edit')" @click="edit" />
         <input type="button" :value="$t('common.buttons.remove')" @click="remove"/>
       </div>
     </div>
     <div class="os-signature-add" v-show="!editMode && !imageData && !imageSrc" >
-      <Button left-icon="plus" :label="$t('common.buttons.add')" :tabindex="tabOrder" @click="edit" />
+      <Button left-icon="plus" :label="$t('common.buttons.add')" :tabindex="tabOrder"
+        @click="edit" v-show="!disabled" />
+      <span v-t="'common.none'" v-show="disabled"></span>
     </div>
   </div>
 </template>
@@ -33,7 +35,7 @@ import Button from '@/common/components/Button.vue';
 import alertSvc from '@/common/services/Alerts.js';
 
 export default {
-  props: ['name', 'modelValue', 'headers', 'uploader', 'imageUrl', 'tabOrder'],
+  props: ['modelValue', 'headers', 'uploader', 'imageUrl', 'tabOrder', 'disabled'],
 
   components: {
     Button
@@ -162,5 +164,4 @@ export default {
   border-color: #007bff;
   border-radius: 1.125rem;
 }
-
 </style>

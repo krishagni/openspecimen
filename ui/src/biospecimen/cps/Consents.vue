@@ -88,7 +88,8 @@
     </os-grid>
 
     <os-plugin-views v-else page="cp-detail" view="consents" :viewProps="{cp, filters, ctx}"
-      @consent-documents="ctx.hasDocs = $event && $event.length > 0" />
+      @consent-documents="ctx.hasDocs = $event && $event.length > 0"
+      @cp-saved="$emit('cp-saved', $event)" />
 
     <os-dialog ref="addEditConsentTierDialog">
       <template #header>

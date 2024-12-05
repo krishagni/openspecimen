@@ -50,7 +50,7 @@
           </ul>
         </os-side-menu>
 
-        <router-view :cp="ctx.cp" v-if="ctx.cp && ctx.cp.id > 0" @cp-saved="loadCp" :key="ctx.cp.id"> </router-view>
+        <router-view :cp="ctx.cp" v-if="ctx.cp && ctx.cp.id > 0" @cp-saved="loadCp" :key="ctx.cp.id" />
       </div>
     </os-page-body>
   </os-page>
