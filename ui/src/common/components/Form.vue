@@ -93,6 +93,8 @@ export default {
 
          if (!object && objCustomFields && props.length == 1) {
            props = (objCustomFields + '.' + name).split('.');
+           object = ctx.formData;
+
            for (let i = 0; i < props.length; ++i) {
              if (!object) {
                break;
@@ -200,6 +202,8 @@ export default {
 
        if (!object && objCustomFields && props.length == 1) {
          props = (objCustomFields + '.' + name).split('.');
+         object = ctx.formData;
+
          for (let i = 0; i < props.length; ++i) {
            if (!object) {
              break;
