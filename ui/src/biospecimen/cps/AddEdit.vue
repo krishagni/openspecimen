@@ -61,7 +61,11 @@ export default {
 
         showSiteCodeInfo: false,
 
-        cp: { }
+        cp: { },
+
+        objName: 'cp',
+
+        objCustomFields: 'cp.extensionDetail.attrsMap'
       }
     }
   },

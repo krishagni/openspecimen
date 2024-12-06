@@ -99,7 +99,11 @@ export default {
 
       uniqueNames: '',
 
-      barcodes: ''
+      barcodes: '',
+
+      objName: 'container',
+
+      objCustomFields: 'container.extensionDetail.attrsMap'
     });
 
     return { ctx, dataCtx };

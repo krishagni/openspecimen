@@ -57,7 +57,11 @@ export default {
     let dataCtx = reactive({
       dp: {distributingSites: []},
 
-      currentUser: ui.currentUser
+      currentUser: ui.currentUser,
+
+      objName: 'dp',
+
+      objCustomFields: 'dp.extensionDetail.attrsMap'
     });
 
     let promises = [ dpSvc.getAddEditFormSchema() ];

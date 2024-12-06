@@ -56,7 +56,11 @@ export default {
     let dataCtx = reactive({
       site: {},
 
-      currentUser: ui.currentUser
+      currentUser: ui.currentUser,
+
+      objName: 'site',
+
+      objCustomFields: 'site.extensionDetail.attrsMap'
     });
 
     let promises = [ siteSvc.getAddEditFormSchema() ];

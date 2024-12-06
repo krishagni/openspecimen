@@ -23,7 +23,11 @@ export default {
       dataCtx: {
         requirement: {dp: {id: this.dp.id}},
 
-        invoicingEnabled: ui.global.appProps.plugins.indexOf('distribution-invoicing') != -1
+        invoicingEnabled: ui.global.appProps.plugins.indexOf('distribution-invoicing') != -1,
+
+        objName: 'requirement',
+
+        objCustomFields: 'requirement.extensionDetail.attrsMap'
       },
 
       ctx: {
