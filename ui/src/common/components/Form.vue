@@ -79,7 +79,7 @@ export default {
          }
 
          const {objName, objCustomFields} = ctx.formData;
-         if (name.indexOf('$extendedObj') == 0) {
+         if (objName && name.indexOf('$extendedObj') == 0) {
            name = name.replaceAll('$extendedObj', objName);
          }
 
@@ -188,7 +188,7 @@ export default {
        }
 
        const {objName, objCustomFields} = this.ctx.formData;
-       if (name.indexOf('$extendedObj') == 0) {
+       if (objName && name.indexOf('$extendedObj') == 0) {
          name = name.replaceAll('$extendedObj', objName);
        }
 
@@ -202,7 +202,7 @@ export default {
 
        if (!object && objCustomFields && props.length == 1) {
          props = (objCustomFields + '.' + name).split('.');
-         object = ctx.formData;
+         object = this.ctx.formData;
 
          for (let i = 0; i < props.length; ++i) {
            if (!object) {

@@ -489,7 +489,7 @@ export default {
       }
 
       const {objName, objCustomFields} = this.data;
-      if (name.indexOf('$extendedObj') == 0) {
+      if (objName && name.indexOf('$extendedObj') == 0) {
         name = name.replaceAll('$extendedObj', objName);
       }
 
