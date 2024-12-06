@@ -309,8 +309,8 @@ class Specimen {
     const aliquots = {}, result = [];
 
     for (let {specimen} of items) {
-      const {lineage, storageType, specimenClass, type} = specimen;
-      if (storageType == 'Virtual') {
+      const {lineage, storageType, specimenClass, type, status} = specimen;
+      if (storageType == 'Virtual' || status != 'Collected') {
         continue;
       }
 
