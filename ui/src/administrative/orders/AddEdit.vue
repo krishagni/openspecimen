@@ -153,7 +153,11 @@ export default {
 
       receivingInstitute: undefined,
 
-      invoicingEnabled: ui.global.appProps.plugins.indexOf('distribution-invoicing') != -1
+      invoicingEnabled: ui.global.appProps.plugins.indexOf('distribution-invoicing') != -1,
+
+      objName: 'order',
+
+      objCustomFields: 'order.extensionDetail.attrsMap'
     });
 
     return { ctx, dataCtx };

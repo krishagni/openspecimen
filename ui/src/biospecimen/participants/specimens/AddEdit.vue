@@ -62,6 +62,10 @@ export default {
       dataCtx: {
         specimen,
 
+        objName: 'specimen',
+
+        objCustomFields: 'specimen.extensionDetail.attrsMap',
+
         cp,
 
         item: {cpr: this.cpr, visit: this.visit, specimen, userRole},

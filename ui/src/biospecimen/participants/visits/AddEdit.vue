@@ -61,6 +61,10 @@ export default {
       dataCtx: {
         visit,
 
+        objName: 'visit',
+
+        objCustomFields: 'visit.extensionDetail.attrsMap',
+
         cp,
 
         userRole: this.cpViewCtx.getRole()
