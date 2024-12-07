@@ -158,7 +158,6 @@ export default {
       objName: 'order',
 
       objCustomFields: 'order.extensionDetail.attrsMap'
-
     });
 
     return { ctx, dataCtx };
