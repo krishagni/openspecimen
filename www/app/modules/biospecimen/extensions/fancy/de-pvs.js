@@ -95,6 +95,13 @@ openspecimen.ui.fancy.Pvs = edu.common.de.LookupSvc.extend({
       'X-OS-API-TOKEN': $http.defaults.headers.common['X-OS-API-TOKEN'],
       'X-OS-SURVEY-TOKEN': $http.defaults.headers.common['X-OS-SURVEY-TOKEN']
     };
+  },
+
+  getQueryParams: function(id, field) {
+    return {
+      key: 'attribute=' + field.attribute + '_value=' + id,
+      query: {attribute: field.attribute}
+    }
   }
 });
 
