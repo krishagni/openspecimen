@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.rest.controller;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
 import com.krishagni.catissueplus.core.administrative.events.PvDetail;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -203,13 +206,28 @@ public class PermissibleValueController {
 	@ResponseStatus(HttpStatus.OK)
 	public PvDetail getPermissibleValue(
 		@PathVariable("id")
-		Long pvId,
+		Object pv,
 
 		@RequestParam(value = "includeProps", required = false, defaultValue="false")
-		boolean includeProps) {
+		boolean includeProps,
 
-		EntityQueryCriteria criteria = new EntityQueryCriteria(pvId);
-		criteria.setParams(Collections.singletonMap("includeProps", includeProps));
+		@RequestParam(value = "attribute", required = false)
+		String attribute) {
+
+		EntityQueryCriteria criteria = null;
+		Map<String, Object> props = new HashMap<>();
+		props.put("includeProps", includeProps);
+
+		if (pv instanceof Number) {
+			criteria = new EntityQueryCriteria(((Number) pv).longValue());
+		} else if (pv instanceof String) {
+			criteria = new EntityQueryCriteria(pv.toString());
+			props.put("attribute", attribute);
+		} else {
+			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT);
+		}
+
+		criteria.setParams(props);
 		return ResponseEvent.unwrap(pvSvc.getPermissibleValue(RequestEvent.wrap(criteria)));
 	}
 }

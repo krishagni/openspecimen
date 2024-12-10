@@ -2544,7 +2544,7 @@ edu.common.de.LookupField = function(params, callback) {
   };
 
   this.lookup = function(id) {
-    return this.svc.getEntity(id);
+    return this.svc.getEntity(id, params.field);
   };
 
   this.search = function(qTerm) {
@@ -2640,9 +2640,18 @@ edu.common.de.LookupSvc = function(params) {
     return deferred.promise();
   };
 
-  this.getEntity = function(id) {
+  this.getEntity = function(id, field) {
     var deferred = $.Deferred(); 
-    var entity = entitiesMap[id];
+
+    var key = id;
+    var query = {};
+    if (typeof this.getQueryParams == 'function') {
+      var params = this.getQueryParams(id, field);
+      query = params.query || {};
+      key = params.key || id;
+    }
+
+    var entity = entitiesMap[key];
     if (entity) {
       deferred.resolve(entity);
       return deferred.promise();
@@ -2655,18 +2664,17 @@ edu.common.de.LookupSvc = function(params) {
       }
     }
 
-    var xhr = entitiesMap[id + '_xhr'];
+    var xhr = entitiesMap[key + '_xhr'];
     if (!xhr) {
-      var baseUrl = this.getApiUrl();
-      xhr = $.ajax({type: 'GET', url: baseUrl + id, headers: this.getHeaders()})
-      entitiesMap[id + '_xhr'] = xhr;
+      xhr = $.ajax({type: 'GET', url: this.getApiUrl() + id, data: query, headers: this.getHeaders()})
+      entitiesMap[key + '_xhr'] = xhr;
     }
 
     var that = this;
     xhr
       .done(function(data) {
         var result = that.formatResult(data);
-        entitiesMap[id] = result;
+        entitiesMap[key] = result;
         deferred.resolve(result);
       })
       .fail(function(data) {

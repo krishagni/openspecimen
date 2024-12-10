@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.common.service.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.factory.PvErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.ListPvCriteria;
@@ -40,9 +42,20 @@ public class PermissibleValueServiceImpl implements PermissibleValueService {
 	@PlusTransactional
 	public ResponseEvent<PvDetail> getPermissibleValue(RequestEvent<EntityQueryCriteria> req) {
 		EntityQueryCriteria crit = req.getPayload();
-		PermissibleValue value = daoFactory.getPermissibleValueDao().getById(crit.getId());
-		if (value == null) {
-			throw OpenSpecimenException.userError(PvErrorCode.NOT_FOUND, crit.getId());
+		PermissibleValue value = null;
+		Object key = null;
+		if (crit.getId() != null) {
+			value = daoFactory.getPermissibleValueDao().getById(crit.getId());
+			key = crit.getId();
+		} else if (StringUtils.isNotBlank(crit.getName()) && StringUtils.isNotBlank(crit.paramString("attribute"))) {
+			value = daoFactory.getPermissibleValueDao().getByValue(crit.paramString("attribute"), crit.getName());
+			key = crit.paramString("attribute") + ": " + crit.getName();
+		}
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(PvErrorCode.VALUE_REQUIRED);
+		} else if (value == null) {
+			throw OpenSpecimenException.userError(PvErrorCode.NOT_FOUND, key);
 		}
 
 		boolean includeProps = Boolean.TRUE.equals(crit.paramBoolean("includeProps"));
