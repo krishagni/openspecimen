@@ -52,6 +52,8 @@
             </ul>
           </os-overlay>
         </div>
+
+        <slot :authenticated="authenticated" :minimal-login="minimalLogin" />
       </div>
     </div>
 
