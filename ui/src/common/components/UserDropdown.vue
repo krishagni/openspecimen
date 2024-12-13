@@ -39,7 +39,7 @@ export default {
             if (!isNaN(id)) {
               let promise = cache[id];
               if (!promise) {
-                promise = cache[id] = http.get('users/' + id);
+                promise = cache[id] = http.get('users/byid/' + id);
               }
 
               return promise.then(user => [user]);
