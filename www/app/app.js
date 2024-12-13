@@ -172,13 +172,18 @@ osApp.config(function(
         parent: 'signed-in'
       })
       .state('vue-view', {
-        url: '/vue-view?url',
+        url: '/vue-view?url&relative',
         template: '<div ui-view></div>',
-        controller: function($state, $stateParams, $sce, $rootScope) {
+        controller: function($state, $stateParams, $sce, $rootScope, authInit, translationsReady, VueApp) {
           if (!$stateParams.url) {
             $state.go('home');
           } else {
-            window.location.href = $rootScope.vueUrl = $sce.trustAsResourceUrl($stateParams.url);
+            var url = $stateParams.url;
+            if ($stateParams.relative == 'true') {
+              url = VueApp.getVueViewUrl(url);
+            }
+
+            window.location.href = $rootScope.vueUrl = $sce.trustAsResourceUrl(url);
           }
         },
         parent: 'signed-in'
