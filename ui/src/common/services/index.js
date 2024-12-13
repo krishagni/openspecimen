@@ -11,6 +11,7 @@ import homePageSvc    from './HomePageService.js';
 import http           from './HttpClient.js';
 import itemsSvc       from './ItemsHolder.js';
 import i18nSvc        from './I18n.js';
+import loginSvc       from './Login.js';
 import notifSvc       from './Notif.js';
 import numConvUtil    from './NumberConverterUtil.js';
 import pvSvc          from './PermissibleValue.js';
@@ -38,6 +39,7 @@ export default {
       http:         http,
       itemsSvc:     itemsSvc,
       i18nSvc:      i18nSvc,
+      loginSvc:     loginSvc,
       notifSvc:     notifSvc,
       numConvUtil:  numConvUtil,
       pvSvc:        pvSvc,

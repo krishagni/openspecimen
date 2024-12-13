@@ -22,6 +22,7 @@ import BadgeDirective from 'primevue/badgedirective';
 import router from './router'
 import ui from './global.js';
 import Root from './Root.vue'
+import NoLoginApp from './NoLoginApp.vue';
 
 import alerts from '@/common/services/Alerts.js';
 import http from '@/common/services/HttpClient.js';
@@ -68,6 +69,7 @@ app.directive('os-tooltip', Tooltip);
 app.directive('os-badge', BadgeDirective);
 
 app.component('os-container-layout', Layout);
+app.component('os-no-login-app', NoLoginApp);
 
 app.config.globalProperties.$goto =
   (name, params, query) => routerSvc.goto(name, params, query);
