@@ -1,6 +1,6 @@
 
 import i18n from '@/common/services/I18n.js';
-import settingSvc from '@/common/services/Setting.js';
+import ui from '@/global.js';
 
 class Alerts {
 
@@ -28,8 +28,8 @@ class Alerts {
     }
 
     if (!timeout) {
-      const [setting] = await settingSvc.getSetting('common', 'toast_disp_time');
-      timeout = +setting.value > 0 ? +setting.value * 1000 : 5000;
+      const {appProps: {toast_disp_time: dispTime}} = ui.global;
+      timeout = +dispTime > 0 ? +dispTime * 1000 : 5000;
     }
 
     this.toastSvc.add({severity: type, detail: message, life: timeout < 0 ? undefined : (timeout || 5000), group: id});
