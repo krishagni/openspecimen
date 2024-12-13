@@ -20,6 +20,7 @@
 import NotificationsList from '@/common/components/NotificationsList';
 
 import notifSvc from '@/common/services/Notif.js';
+import ui from '@/global.js';
 
 export default {
   components: {
@@ -34,26 +35,35 @@ export default {
 
   mounted() {
     let self = this;
-    let timeout;
     function getUnreadNotifCount() {
-      if (timeout) {
-        clearTimeout(timeout);
+      if (self.timeout) {
+        clearTimeout(self.timeout);
+      }
+
+      if (!ui.currentUser) {
+        return;
       }
 
       if (self.notifsOpen) {
-        timeout = setTimeout(getUnreadNotifCount, 10000);
+        self.timeout = setTimeout(getUnreadNotifCount, 10000);
         return;
       }
 
       notifSvc.getUnreadCount().then(
         (result) => {
           self.unreadNotifCount = result.count;
-          timeout = setTimeout(getUnreadNotifCount, 10000);
+          self.timeout = setTimeout(getUnreadNotifCount, 10000);
         }
       );
     }
 
     getUnreadNotifCount();
+  },
+
+  unmounted() {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
   },
 
   methods: {
