@@ -133,6 +133,13 @@ public class SitesController {
 		
 		return resp.getPayload();
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/byid/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public SiteDetail getSiteById(@PathVariable Long id) {
+		return this.getSite(id);
+	}
 	
 	@RequestMapping(method = RequestMethod.GET, value="/byname")
 	@ResponseBody
