@@ -62,7 +62,7 @@ export default {
     },
 
     _getSurveyForms: async function() {
-      return [];
+      return this.cpViewCtx.getSurveyForms();
     },
 
     _getFormRecords: async function() {
