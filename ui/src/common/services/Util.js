@@ -1,7 +1,8 @@
 
 import { format } from 'date-fns';
 import sanitizeHtml from "sanitize-html";
-import useClipboard from 'vue-clipboard3'
+import useClipboard from 'vue-clipboard3';
+import { compile } from '@vue/compiler-dom';
 
 import dateFormatter from '@/common/filters/DateFormatter.js';
 import alertSvc from '@/common/services/Alerts.js';
@@ -613,6 +614,16 @@ class Util {
         }
       }
     );
+  }
+
+  render(template, context) {
+    try {
+      const renderFn = new Function(compile(template).code).call();
+      return renderFn(context || {});
+    } catch (e) {
+      console.log(e);
+      alert('Unable to parse the document template. Details in the browser console log');
+    }
   }
 
   _getEscapeMap(str) {
