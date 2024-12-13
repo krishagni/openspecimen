@@ -3,6 +3,7 @@ import AccordionTab from './AccordionTab.vue';
 import AddItems from './AddItems.vue';
 import AddSpecimens from './AddSpecimens.vue';
 import AddToCart from './AddToCart.vue';
+import AppBody from './AppBody.vue';
 import AuditOverview from './AuditOverview.vue';
 import AuditRevisions from './AuditRevisions.vue';
 import AuditTrail from './AuditTrail.vue';
@@ -54,6 +55,7 @@ import Message from './Message.vue';
 import MultiProgressBar from './MultiProgressBar.vue';
 import MultiSelectDropdown from './MultiSelectDropdown.vue';
 import MultiSelectGroupDropdown from './MultiSelectGroupDropdown.vue';
+import Navbar from './Navbar.vue';
 import NewTab from './NewTab.vue';
 import Note from './Note.vue';
 import Overlay from './Overlay.vue';
@@ -114,6 +116,8 @@ export default {
     app.component('os-add-items',        AddItems);
     app.component('os-add-specimens',    AddSpecimens);
     app.component('os-add-to-cart',      AddToCart);
+    app.component('os-app-body',         AppBody);
+
     app.component('os-audit-overview',   AuditOverview);
     app.component('os-audit-revisions',  AuditRevisions);
     app.component('os-audit-trail',      AuditTrail);
@@ -165,6 +169,7 @@ export default {
     app.component('os-multi-progress-bar', MultiProgressBar);
     app.component('os-multi-select-dropdown', MultiSelectDropdown);
     app.component('os-multi-select-group-dropdown', MultiSelectGroupDropdown);
+    app.component('os-navbar',           Navbar);
     app.component('os-new-tab',          NewTab);
     app.component('os-note',             Note);
     app.component('os-overlay',          Overlay);
