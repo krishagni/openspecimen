@@ -45,6 +45,12 @@ export default {
     }
   },
 
+  mounted() {
+    if (!this.inputValue && Object.prototype.hasOwnProperty.call(this.$attrs, 'default-current-date')) {
+      this.inputValue = new Date();
+    }
+  },
+
   computed: {
     inputValue: {
       get() {

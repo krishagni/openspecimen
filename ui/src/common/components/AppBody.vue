@@ -1,7 +1,7 @@
 <template>
   <div class="os-app-body">
     <Toast class="os-app-toast" />
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
