@@ -472,6 +472,15 @@ class Util {
 
   getFieldDisplayValue(form, field, inputValue, displayType) {
     switch (displayType) {
+      case 'booleanCheckbox':
+        if (inputValue == 1 || inputValue == true || inputValue == 'true') {
+          return i18n.msg('common.yes');
+        } else if (inputValue == 0 || inputValue == false || inputValue == 'false') {
+          return i18n.msg('common.no');
+        } else {
+          return inputValue || '-';
+        }
+
       case 'storage-position':
         return this._getStorageLocation(inputValue);
 

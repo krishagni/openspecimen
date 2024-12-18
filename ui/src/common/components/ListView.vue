@@ -25,7 +25,7 @@
           <column v-for="column of schema.columns" :header="caption(column)" :key="column.name" :field="column.name"
             :style="column.uiStyle" :sortable="column.sortable">
             <template #body="slotProps">
-              <span v-if="column.href">
+              <span v-if="column.href && column.href(slotProps.data, $route.query)">
                 <a :href="column.href(slotProps.data, $route.query)" :target="column.hrefTarget">
                   <span>{{columnValue(slotProps.data, column)}}</span>
                 </a>
@@ -102,7 +102,7 @@
               </span>
               <span v-else-if="filter.type == 'user'">
                 <os-user-dropdown md-type="true" :placeholder="caption(filter)" v-model="filterValues[filter.name]"
-                  :select-prop="filter.selectProp" :context="filtersContext">
+                  :list-source="filter.listSource" :select-prop="filter.selectProp" :context="filtersContext">
                 </os-user-dropdown>
               </span>
               <span v-else-if="filter.type == 'date'">
