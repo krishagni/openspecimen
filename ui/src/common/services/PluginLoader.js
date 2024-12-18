@@ -28,6 +28,17 @@ class PluginLoader {
       });
 
       document.head.appendChild(script);
+
+      const style = document.createElement('link');
+      style.setAttribute('rel', 'stylesheet');
+      style.href = 'plugins/' + name + '/' + name + '.css';
+      style.async = true;
+
+      style.addEventListener('error', () => {
+        console.warn('No CSS for plugin: ' + name);
+      });
+
+      document.head.appendChild(style);
     });
 
     return window[lookupName];
