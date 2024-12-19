@@ -336,6 +336,30 @@ public class FormsController {
 		boolean useUdn = Utility.escapeXss(includeUdn).equalsIgnoreCase("true");
 		return resp.getPayload().stream().map(r -> r.getFormData().getFieldNameValueMap(useUdn)).collect(Collectors.toList());
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value="{id}/latest-record")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Object> getLatestRecord(
+		@PathVariable(value = "id")
+		Long formId,
+
+		@RequestParam(value = "entityType")
+		String entityType,
+
+		@RequestParam(value = "objectId")
+		Long objectId,
+
+		@RequestParam(value="includeUdn", required=false, defaultValue="false")
+		String includeUdn) {
+
+		List<Map<String, Object>> records = getLatestRecords(formId, entityType, Collections.singletonList(objectId), includeUdn);
+		if (records == null || records.isEmpty()) {
+			return Collections.emptyMap();
+		} else {
+			return records.iterator().next();
+		}
+	}
 	
 	@RequestMapping(method = RequestMethod.POST, value="{id}/data")
 	@ResponseStatus(HttpStatus.OK)

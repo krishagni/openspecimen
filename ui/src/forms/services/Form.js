@@ -51,6 +51,10 @@ class Form {
     return http.delete('forms/' + record.formId + '/data/' + record.recordId);
   }
 
+  async getLatestRecord(formId, entityType, objectId) {
+    return http.get('forms/' + formId + '/latest-record', {entityType, objectId});
+  }
+
   async getForms(filterOpts) {
     return http.get('forms', filterOpts || {});
   }
