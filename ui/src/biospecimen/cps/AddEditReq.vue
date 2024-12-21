@@ -98,7 +98,7 @@ export default {
           }
         );
       } else {
-        cpSvc.saveOrUpdateSpecimenRequirement(this.ctx.sr).then(
+        cpSvc.saveOrUpdateSpecimenRequirement(toSave).then(
           savedReq => {
             alertsSvc.success({code: 'cps.req_saved', args: savedReq});
             this.cancel(savedReq);
