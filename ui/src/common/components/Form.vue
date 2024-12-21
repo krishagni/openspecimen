@@ -73,37 +73,7 @@ export default {
      let ctx = reactive({
        formData: props.data || {},
        fd: function(name) {
-         let object = ctx.formData;
-         if (!name) {
-           return object;
-         }
-
-         const {objName, objCustomFields} = ctx.formData;
-         if (objName && name.indexOf('$extendedObj') == 0) {
-           name = name.replaceAll('$extendedObj', objName);
-         }
-
-         let props = name.split('.');
-         for (let i = 0; i < props.length; ++i) {
-           if (!object) {
-             break;
-           }
-           object = object[props[i]];
-         }
-
-         if (!object && objCustomFields && props.length == 1) {
-           props = (objCustomFields + '.' + name).split('.');
-           object = ctx.formData;
-
-           for (let i = 0; i < props.length; ++i) {
-             if (!object) {
-               break;
-             }
-             object = object[props[i]];
-           }
-         }
-
-         return object;
+         return util.fd(ctx.formData, name);
        }
      });
 
@@ -182,37 +152,7 @@ export default {
      },
 
      fd: function(name) {
-       let object = this.ctx.formData;
-       if (!name) {
-         return object;
-       }
-
-       const {objName, objCustomFields} = this.ctx.formData;
-       if (objName && name.indexOf('$extendedObj') == 0) {
-         name = name.replaceAll('$extendedObj', objName);
-       }
-
-       let props = name.split('.');
-       for (let i = 0; i < props.length; ++i) {
-         if (!object) {
-           break;
-         }
-         object = object[props[i]];
-       }
-
-       if (!object && objCustomFields && props.length == 1) {
-         props = (objCustomFields + '.' + name).split('.');
-         object = this.ctx.formData;
-
-         for (let i = 0; i < props.length; ++i) {
-           if (!object) {
-             break;
-           }
-           object = object[props[i]];
-         }
-       }
-
-       return object;
+       return util.fd(this.ctx.formData, name);
      },
 
      uploadFile: async function(fieldName) {
