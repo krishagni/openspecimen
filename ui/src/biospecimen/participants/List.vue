@@ -414,7 +414,7 @@ export default {
       this.$refs.deleteParticipantsDialog.open().then(
         ({reason}) => {
           const ids = this.ctx.selectedItems.map(({cprId}) => cprId);
-          cprSvc.deleteCps(ids, reason).then(
+          cprSvc.bulkDelete(ids, reason).then(
             ({completed}) => {
               if (completed) {
                 alertsSvc.success({code: 'participants.many_deleted', args: {count: ids.length}});
