@@ -172,11 +172,13 @@ osApp.config(function(
             if (reqState) {
               var state = JSON.parse(reqState);
               $state.go(state.name, state.params);
+            } else {
+              $state.go('home');
             }
           } catch(e) {
             console.log('Error navigating to requested state: ' + reqState);
             console.error(e);
-            $state.goto('home');
+            $state.go('home');
           }
         },
         parent: 'signed-in'

@@ -175,7 +175,6 @@ export default {
           routerSvc.goto(state.name, state.params, state.query);
           delete localStorage.osReqState;
         }
-
         return;
       } catch (e) {
         console.log('Error processing the req state: ' + localStorage.osReqState);
