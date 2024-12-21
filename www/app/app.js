@@ -161,6 +161,27 @@ osApp.config(function(
         controller: function(VueApp) { VueApp.setVueView('home'); },
         parent: 'signed-in'
       })
+      .state('resolve-req-state', {
+        url: '/resolve-req-state',
+        template: '<div></div>',
+        controller: function($state, $window) {
+          var reqState = $window.localStorage.osReqState;
+          delete $window.localStorage.osReqState;
+          try {
+            if (reqState) {
+              var state = JSON.parse(reqState);
+              $state.go(state.name, state.params);
+            } else {
+              $state.go('home');
+            }
+          } catch(e) {
+            console.log('Error navigating to requested state: ' + reqState);
+            console.error(e);
+            $state.go('home');
+          }
+        },
+        parent: 'signed-in'
+      })
       .state('admin-view', {
         abstract: true,
         template: '<div ui-view></div>',
@@ -435,7 +456,9 @@ osApp.config(function(
           query += '&';
         }
 
-        query += 'token=' + $window.localStorage['osAuthToken'];
+        if ($window.localStorage['osAuthToken']) {
+          query += 'token=' + $window.localStorage['osAuthToken'];
+        }
       }
 
       if (query) {

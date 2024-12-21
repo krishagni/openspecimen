@@ -143,6 +143,7 @@ import { VueDraggableNext } from "vue-draggable-next";
 
 import homePageSvc from '@/common/services/HomePageService.js';
 import i18n from '@/common/services/I18n.js';
+import routerSvc from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
 
 export default {
@@ -165,6 +166,23 @@ export default {
   },
 
   created() {
+    if (localStorage.osReqState) {
+      try {
+        const state = JSON.parse(localStorage.osReqState);
+        if (state.view != 'vue') {
+          routerSvc.ngGoto('resolve-req-state');
+        } else {
+          routerSvc.goto(state.name, state.params, state.query);
+          delete localStorage.osReqState;
+        }
+        return;
+      } catch (e) {
+        console.log('Error processing the req state: ' + localStorage.osReqState);
+        console.error(e);
+        delete localStorage.osReqState;
+      }
+    }
+
     const {widgets} = this.$ui.global.state || {widgets: []};
     this.ctx.widgets = widgets || [];
     this._loadFavorites();
