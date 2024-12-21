@@ -615,6 +615,40 @@ class Util {
     );
   }
 
+  fd(formData, name) {
+    let object = formData;
+    if (!name) {
+      return object;
+    }
+
+    const {objName, objCustomFields} = formData;
+    if (objName && name.indexOf('$extendedObj') == 0) {
+      name = name.replaceAll('$extendedObj', objName);
+    }
+
+    let props = name.split('.');
+    for (let i = 0; i < props.length; ++i) {
+      if (object == null || object == undefined || typeof object != 'object') {
+        break;
+      }
+      object = object[props[i]];
+    }
+
+    if ((object == null || object == undefined) && objCustomFields && props.length == 1) {
+      props = (objCustomFields + '.' + name).split('.');
+      object = formData;
+
+      for (let i = 0; i < props.length; ++i) {
+        if (object == null || object == undefined || typeof object != 'object') {
+          break;
+        }
+        object = object[props[i]];
+      }
+    }
+
+    return object;
+  }
+
   _getEscapeMap(str) {
     let map = {}, insideSgl = false, insideDbl = false;
     let lastIdx = -1;

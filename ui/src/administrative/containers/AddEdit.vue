@@ -162,6 +162,7 @@ export default {
         //
         // new container
         //
+        dataCtx.dimensionLess = false;
         if (defValues && Object.keys(defValues).length > 0) {
           dataCtx.container.extensionDetail = { attrsMap: defValues };
         }

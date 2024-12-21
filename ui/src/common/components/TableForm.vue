@@ -164,6 +164,7 @@ import RadioButton from 'primevue/radiobutton';
 import alertSvc from '@/common/services/Alerts.js';
 import exprUtil from '@/common/services/ExpressionUtil.js';
 import fieldFactory from '@/common/services/FieldFactory.js';
+import util from '@/common/services/Util.js';
 
 export default {
   props: [
@@ -453,38 +454,7 @@ export default {
     },
 
     fd: function(name) {
-      let object = this.data;
-      if (!name) {
-        return object;
-      }
-
-      const {objName, objCustomFields} = this.data;
-      if (objName && name.indexOf('$extendedObj') == 0) {
-        name = name.replaceAll('$extendedObj', objName);
-      }
-
-      let props = name.split('.');
-      for (let i = 0; i < props.length; ++i) {
-        if (!object) {
-          break;
-        }
-        object = object[props[i]];
-      }
-
-      if (!object && objCustomFields && props.length == 1) {
-        props = (objCustomFields + '.' + name).split('.');
-        object = this.data;
-
-        for (let i = 0; i < props.length; ++i) {
-          if (!object) {
-            break;
-          }
-
-          object = object[props[i]];
-        }
-      }
-
-      return object;
+      return util.fd(this.data, name);
     },
 
     removeItem: function(idx) {
