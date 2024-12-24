@@ -93,7 +93,9 @@ class Specimen {
     return http.post('storage-containers/reserve-positions', op).then(
       (positions) => {
         this._assignReservedPositions(op, positions);
-        return positions.length > 0 ? positions[0].reservationId : undefined;
+
+        const position = positions.find(position => position && position.reservationId);
+        return position && position.reservationId;
       }
     );
   }
