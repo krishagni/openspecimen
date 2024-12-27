@@ -7,21 +7,7 @@
 </template>
 
 <script>
-
 import tinymce from 'tinymce/tinymce';
-import 'tinymce/models/dom';
-
-import 'tinymce/themes/silver/theme';
-
-import 'tinymce/plugins/image';
-import 'tinymce/plugins/importcss';
-import 'tinymce/plugins/link';
-import 'tinymce/plugins/lists';
-import 'tinymce/plugins/table';
-import 'tinymce/plugins/fullscreen';
-
-import 'tinymce/skins/ui/oxide/skin.min.css';
-import 'tinymce/icons/default';
 
 export default {
   props: ['modelValue'],
@@ -41,8 +27,8 @@ export default {
   mounted() {
     const opts = {
       selector: '#' + this.id,
-      skin_url   : 'tinymce/skins',
-      content_css: 'tinymce/skins',
+      skin: false,
+      content_css: false,
       init_instance_callback : this._initEditor,
       convert_urls: false,
       height: 250,

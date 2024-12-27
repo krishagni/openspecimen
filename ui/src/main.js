@@ -10,6 +10,22 @@ import 'primevue/resources/primevue.css';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 
+import 'tinymce/tinymce';
+import 'tinymce/models/dom';
+
+import 'tinymce/themes/silver/theme';
+
+import 'tinymce/plugins/image';
+import 'tinymce/plugins/importcss';
+import 'tinymce/plugins/link';
+import 'tinymce/plugins/lists';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/fullscreen';
+
+import 'tinymce/skins/ui/oxide/skin.min.css';
+import 'tinymce/icons/default';
+
+
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
