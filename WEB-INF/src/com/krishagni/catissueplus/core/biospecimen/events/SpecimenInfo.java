@@ -662,6 +662,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		CollectionProtocolEvent cpe = anticipated.getCollectionProtocolEvent();
 		result.setId(null);
 		result.setCpId(cpe != null ? cpe.getCollectionProtocol().getId() : null);
+		result.setCpShortTitle(cpe != null ? cpe.getCollectionProtocol().getShortTitle() : null);
 		result.setEventId(cpe != null ? cpe.getId() : null);
 		result.setEventCode(cpe != null ? cpe.getCode() : null);
 		result.setEventLabel(cpe != null ? cpe.getEventLabel() : null);
