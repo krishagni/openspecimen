@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -220,9 +221,14 @@ public class PermissibleValueController {
 
 		if (pv instanceof Number) {
 			criteria = new EntityQueryCriteria(((Number) pv).longValue());
-		} else if (pv instanceof String) {
-			criteria = new EntityQueryCriteria(pv.toString());
-			props.put("attribute", attribute);
+		} else if (pv instanceof String pvStr) {
+			long pvId = NumberUtils.toLong(pvStr, -999L);
+			if (pvId < 0) {
+				criteria = new EntityQueryCriteria(pv.toString());
+				props.put("attribute", attribute);
+			} else {
+				criteria = new EntityQueryCriteria(pvId);
+			}
 		} else {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT);
 		}
