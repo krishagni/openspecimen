@@ -11,10 +11,11 @@
 </template>
 
 <script>
-import alertsSvc from '@/common/services/Alerts.js';
-import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
-import routerSvc from '@/common/services/Router.js';
-import util      from '@/common/services/Util.js';
+import alertsSvc  from '@/common/services/Alerts.js';
+import cpSvc      from '@/biospecimen/services/CollectionProtocol.js';
+import routerSvc  from '@/common/services/Router.js';
+import settingSvc from '@/common/services/Setting.js'
+import util       from '@/common/services/Util.js';
 
 export default {
   props: ['cp', 'eventId', 'reqId', 'parentReqId', 'lineage'],
@@ -22,6 +23,10 @@ export default {
   data() {
     return {
       ctx: {
+        cp: this.cp,
+
+        barcodingEnabled: false,
+
         sr: {
           cpShortTitle: this.cp.shortTitle,
           eventId: this.eventId,
@@ -34,7 +39,9 @@ export default {
           storageType: this.lineage == 'Aliquot' ? 'Manual' : 'Virtual'
         },
 
-        addEditFs: {rows: []}
+        addEditFs: {rows: []},
+
+        getPrintModes: this._getPrintModes
       }
     }
   },
@@ -61,6 +68,12 @@ export default {
           }
         }
       );
+    }
+
+    this.ctx.barcodingEnabled = this.cp.barcodingEnabled;
+    if (!this.ctx.barcodingEnabled) {
+      settingSvc.getSetting('biospecimen', 'enable_spmn_barcoding')
+        .then(settings => this.ctx.barcodingEnabled = util.isTrue(settings[0].value));
     }
   },
 
@@ -110,6 +123,14 @@ export default {
     cancel: function(req) {
       const query = {eventId: this.eventId, reqId: (req && req.id) || this.reqId};
       routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, query);
+    },
+
+    _getPrintModes: async function() {
+      return [
+        { label: this.$t('cps.print_modes.PRE_PRINT'),     value: 'PRE_PRINT' },
+        { label: this.$t('cps.print_modes.ON_COLLECTION'), value: 'ON_COLLECTION' },
+        { label: this.$t('cps.print_modes.NONE'),          value: 'NONE' }
+      ];
     }
   }
 }

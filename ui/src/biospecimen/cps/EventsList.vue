@@ -101,10 +101,11 @@ import eventsListSchema from '@/biospecimen/schemas/cps/events-list.js';
 import reqsListSchema from '@/biospecimen/schemas/cps/reqs-list.js';
 import reqSchema from '@/biospecimen/schemas/cps/req.js';
 
-import alertsSvc from '@/common/services/Alerts.js';
-import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
-import routerSvc from '@/common/services/Router.js';
-import util      from '@/common/services/Util.js';
+import alertsSvc  from '@/common/services/Alerts.js';
+import cpSvc      from '@/biospecimen/services/CollectionProtocol.js';
+import routerSvc  from '@/common/services/Router.js';
+import settingSvc from '@/common/services/Setting.js';
+import util       from '@/common/services/Util.js';
 
 import cpResources from './Resources.js';
 
@@ -131,6 +132,9 @@ export default {
 
   created() {
     this._loadEvents().then(() => this.autoSelectEvent().then(reqs => this.autoSelectReq(reqs)));
+
+    settingSvc.getSetting('biospecimen', 'enable_spmn_barcoding')
+      .then(settings => this.ctx.barcodingEnabled = util.isTrue(settings[0].value));
   },
 
   watch: {
@@ -174,11 +178,12 @@ export default {
     },
 
     reqCtx: function() {
+      const barcodingEnabled = util.isTrue(this.ctx.barcodingEnabled || this.cp.barcodingEnabled);
       if (this.ctx.expandedReqs.length > 0) {
-        return {cp: this.cp, cpe: this.ctx.expandedEvents[0].cpe, sr: this.ctx.expandedReqs[0].sr};
+        return {cp: this.cp, cpe: this.ctx.expandedEvents[0].cpe, sr: this.ctx.expandedReqs[0].sr, barcodingEnabled};
       }
 
-      return {};
+      return {barcodingEnabled};
     },
 
     hasReqs: function() {

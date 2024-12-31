@@ -161,6 +161,13 @@ export default {
       "labelCode": "cps.label_print_copies"
     },
     {
+      "type": "booleanCheckbox",
+      "name": "sr.preBarcodedTube",
+      "labelCode": "cps.pre_barcoded_tube",
+      "showWhen": "barcodingEnabled == true",
+      "showInOverviewWhen": "barcodingEnabled == true"
+    },
+    {
       "type": "textarea",
       "name": "sr.defaultCustomFieldValuesJson",
       "labelCode": "cps.def_custom_field_values"

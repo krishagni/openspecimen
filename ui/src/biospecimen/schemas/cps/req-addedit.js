@@ -113,6 +113,9 @@ export default {
         fields: [ { name: "sr.labelPrintCopies" } ]
       },
       {
+        fields: [ { name: "sr.preBarcodedTube" } ]
+      },
+      {
         fields: [ { name: "sr.defaultCustomFieldValuesJson" } ]
       }
     ]

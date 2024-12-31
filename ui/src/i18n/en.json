@@ -909,6 +909,7 @@
     "pi_req": "Principal Investigator is mandatory",
     "ppid": "PPID",
     "ppid_full": "Participant Protocol IDs",
+    "pre_barcoded_tube": "Pre-barcoded Tube",
     "primary": "Primary",
     "primary_specimen": "Primary Specimen",
     "print_modes": {
