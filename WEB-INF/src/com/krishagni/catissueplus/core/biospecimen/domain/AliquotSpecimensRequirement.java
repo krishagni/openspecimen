@@ -27,6 +27,8 @@ public class AliquotSpecimensRequirement {
 	private Integer labelPrintCopies;
 
 	private Map<String, Object> defaultCustomFieldValues;
+
+	private boolean isPreBarcodedTube;
 	
 	public String getCpShortTitle() {
 		return cpShortTitle;
@@ -122,5 +124,13 @@ public class AliquotSpecimensRequirement {
 
 	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
 		this.defaultCustomFieldValues = defaultCustomFieldValues;
+	}
+
+	public boolean isPreBarcodedTube() {
+		return isPreBarcodedTube;
+	}
+
+	public void setPreBarcodedTube(boolean preBarcodedTube) {
+		isPreBarcodedTube = preBarcodedTube;
 	}
 }

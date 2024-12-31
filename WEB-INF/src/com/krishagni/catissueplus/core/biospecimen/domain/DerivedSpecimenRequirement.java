@@ -41,6 +41,8 @@ public class DerivedSpecimenRequirement {
 	private Integer sortOrder;
 
 	private Map<String, Object> defaultCustomFieldValues;
+
+	private boolean preBarcodedTube;
 	
 	public String getCpShortTitle() {
 		return cpShortTitle;
@@ -192,5 +194,13 @@ public class DerivedSpecimenRequirement {
 
 	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
 		this.defaultCustomFieldValues = defaultCustomFieldValues;
+	}
+
+	public boolean isPreBarcodedTube() {
+		return preBarcodedTube;
+	}
+
+	public void setPreBarcodedTube(boolean preBarcodedTube) {
+		this.preBarcodedTube = preBarcodedTube;
 	}
 }

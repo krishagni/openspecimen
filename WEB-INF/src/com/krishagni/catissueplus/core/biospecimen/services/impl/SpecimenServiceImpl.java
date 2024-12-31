@@ -1003,10 +1003,11 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 
 		CollectionProtocol cp = specimen.getCollectionProtocol();
-		if (StringUtils.isNotBlank(cp.getSpecimenBarcodeFormatToUse())) {
+		if (!specimen.isPreBarcodedTube() && StringUtils.isNotBlank(cp.getSpecimenBarcodeFormatToUse())) {
 			ose.addError(SpecimenErrorCode.MANUAL_BARCODE_NOT_ALLOWED);
 		}
 
+		// is pre-barcoded or manual barcode
 		if (getSpecimenByBarcode(cp.getShortTitle(), specimen.getBarcode()) != null) {
 			if (areBarcodesUniquePerCp()) {
 				ose.addError(SpecimenErrorCode.DUP_BARCODE_IN_CP, specimen.getBarcode(), cp.getShortTitle());

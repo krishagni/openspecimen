@@ -132,6 +132,8 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 
 	private boolean printLabel;
 
+	private boolean preBarcodedTube;
+
 	public Long getId() {
 		return id;
 	}
@@ -548,6 +550,14 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		this.printLabel = printLabel;
 	}
 
+	public boolean isPreBarcodedTube() {
+		return preBarcodedTube;
+	}
+
+	public void setPreBarcodedTube(boolean preBarcodedTube) {
+		this.preBarcodedTube = preBarcodedTube;
+	}
+
 	public static SpecimenInfo from(Specimen specimen) {
 		return fromTo(specimen, new SpecimenInfo());
 	}
@@ -564,6 +574,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 			result.setReqId(sr.getId());
 			result.setReqLabel(sr.getName());
 			result.setSortOrder(sr.getSortOrder());
+			result.setPreBarcodedTube(specimen.isPreBarcodedTube());
 		}
 
 		CollectionProtocolEvent cpe = specimen.getVisit().getCpEvent();
@@ -668,6 +679,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setEventLabel(cpe != null ? cpe.getEventLabel() : null);
 		result.setReqId(anticipated.getId());
 		result.setReqLabel(anticipated.getName());
+		result.setPreBarcodedTube(anticipated.isPreBarcodedTube());
 		result.setSortOrder(anticipated.getSortOrder());
 		result.setBarcode(null);
 		result.setType(PermissibleValue.getValue(anticipated.getSpecimenType()));

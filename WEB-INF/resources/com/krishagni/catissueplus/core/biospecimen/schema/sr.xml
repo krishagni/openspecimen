@@ -135,6 +135,12 @@
       <caption>#getMessage("sr_label_print_copies")</caption>
       <attribute>labelPrintCopies</attribute>
     </field>
+
+    <field>
+      <type>boolean</type>
+      <caption>#getMessage("sr_pre_barcoded_tube")</caption>
+      <attribute>preBarcodedTube</attribute>
+    </field>
     
     <field>
       <caption>#getMessage("sr_sort_order")</caption>

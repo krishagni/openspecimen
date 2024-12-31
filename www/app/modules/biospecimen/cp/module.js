@@ -370,6 +370,18 @@ angular.module('os.biospecimen.cp',
         templateUrl: 'modules/biospecimen/cp/specimens.html',
         parent: 'cp-detail.events',
         resolve: {
+          barcodingEnabled: function(cp, SettingUtil) {
+            if (cp.barcodingEnabled) {
+              return true;
+            }
+
+            return SettingUtil.getSetting('biospecimen', 'enable_spmn_barcoding').then(
+              function(setting) {
+                return setting.value.toLowerCase() == 'true';
+              }
+            );
+          },
+
           specimenRequirements: function($stateParams, SpecimenRequirement) {
             var eventId = $stateParams.eventId;
             if (!eventId || eventId == -1) {

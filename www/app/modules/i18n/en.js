@@ -1157,6 +1157,7 @@
     "label_fmt": "Label Format",
     "when_to_print": "When to Print",
     "label_print_copies": "Label Print Copies",
+    "pre_barcoded_tube": "Pre-barcoded Tube",
     "available_qty": "Available Quantity",
     "aliquot_cnt": "Count of Aliquots",
     "qty_per_aliquot": "Quantity per Aliquot",

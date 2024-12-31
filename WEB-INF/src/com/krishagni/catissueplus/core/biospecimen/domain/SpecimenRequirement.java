@@ -68,6 +68,8 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 	
 	private Integer sortOrder;
 
+	private Boolean preBarcodedTube;
+
 	private Map<String, Object> defaultCustomFieldValues;
 
 	private String activityStatus;
@@ -268,10 +270,17 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		this.sortOrder = sortOrder;
 	}
 
+	public Boolean isPreBarcodedTube() {
+		return Boolean.TRUE.equals(preBarcodedTube);
+	}
+
+	public void setPreBarcodedTube(Boolean preBarcodedTube) {
+		this.preBarcodedTube = preBarcodedTube;
+	}
+
 	public Map<String, Object> getDefaultCustomFieldValues() {
 		return defaultCustomFieldValues;
 	}
-
 	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
 		this.defaultCustomFieldValues = defaultCustomFieldValues;
 	}
@@ -376,6 +385,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		setLabelAutoPrintMode(sr.getLabelAutoPrintMode());
 		setLabelPrintCopies(sr.getLabelPrintCopies());
 		setDefaultCustomFieldValues(sr.getDefaultCustomFieldValues());
+		setPreBarcodedTube(sr.isPreBarcodedTube());
 
 		if (!isAliquot()) {
 			update(sr.getAnatomicSite(), sr.getLaterality(), sr.getConcentration(),

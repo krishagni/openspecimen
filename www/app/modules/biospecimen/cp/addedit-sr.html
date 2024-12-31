@@ -155,6 +155,19 @@
           <div os-field-error field="srForm.labelPrintCopies"></div>
         </div>
       </div>
+      <div class="form-group" ng-if="cp.barcodingEnabled || barcodingEnabled">
+        <label class="control-label col-xs-4" translate="srs.pre_barcoded_tube">Pre-barcoded Tube</label>
+        <div class="col-xs-8">
+          <label class="radio-inline">
+            <input type="radio" name="storageType" ng-model="sr.preBarcodedTube" ng-value="true">
+            <span translate="common.yes">Yes</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="storageType" ng-model="sr.preBarcodedTube" ng-value="false">
+            <span translate="common.no">No</span>
+          </label>
+        </div>
+      </div>
       <div class="os-divider"></div>
       <div class="form-group">
         <label class="control-label col-xs-4">

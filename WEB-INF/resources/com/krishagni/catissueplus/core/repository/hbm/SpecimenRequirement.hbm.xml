@@ -61,6 +61,8 @@
     <property name="sortOrder" column="SORT_ORDER"/>
 
     <property name="defCustomFieldValuesJson" column="DEFAULT_CUSTOM_FIELD_VALUES" />
+
+    <property name="preBarcodedTube" column="PRE_BARCODED_TUBE" />
       
     <many-to-one
       name="parentSpecimenRequirement"
