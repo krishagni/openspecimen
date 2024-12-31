@@ -1861,7 +1861,8 @@ public class Specimen extends BaseExtensionEntity {
 	public void setBarcodeIfEmpty() {
 		if (StringUtils.isNotBlank(barcode) ||
 			isMissedOrNotCollected() ||
-			!getCollectionProtocol().isBarcodingEnabledToUse()) {
+			!getCollectionProtocol().isBarcodingEnabledToUse() ||
+			isPreBarcodedTube()) {
 			return;
 		}
 
@@ -1869,6 +1870,10 @@ public class Specimen extends BaseExtensionEntity {
 		if (StringUtils.isNotBlank(barcodeTmpl)) {
 			setBarcode(barcodeGenerator.generateLabel(barcodeTmpl, this));
 		}
+	}
+
+	public boolean isPreBarcodedTube() {
+		return getSpecimenRequirement() != null && getSpecimenRequirement().isPreBarcodedTube();
 	}
 
 	public String getLabelTmpl() {

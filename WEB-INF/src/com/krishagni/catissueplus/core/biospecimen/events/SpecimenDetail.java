@@ -579,10 +579,8 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	private static Map<Long, SpecimenDetail> getReqSpecimenMap(List<SpecimenDetail> specimens) {
 		Map<Long, SpecimenDetail> reqSpecimenMap = new HashMap<>();
-						
-		List<SpecimenDetail> remaining = new ArrayList<>();
-		remaining.addAll(specimens);
-		
+
+		List<SpecimenDetail> remaining = new ArrayList<>(specimens);
 		while (!remaining.isEmpty()) {
 			SpecimenDetail specimen = remaining.remove(0);
 			Long srId = (specimen.getReqId() == null) ? -1 : specimen.getReqId();

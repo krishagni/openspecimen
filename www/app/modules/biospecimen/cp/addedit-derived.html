@@ -116,6 +116,15 @@
         </div>
       </div>
 
+      <div class="col-xs-3 os-text-checkbox md-input" ng-if="cp.barcodingEnabled || barcodingEnabled">
+        <div class="checkbox">
+          <os-checkbox ng-model="childReq.preBarcodedTube"></os-checkbox>
+        </div>
+        <div class="message">
+          <span translate="srs.pre_barcoded_tube">Pre-barcoded Tube</span>
+        </div>
+      </div>
+
       <div class="col-xs-3 os-text-checkbox md-input">
         <div class="checkbox">
           <os-checkbox ng-model="childReq.$$storedInRepo"></os-checkbox>

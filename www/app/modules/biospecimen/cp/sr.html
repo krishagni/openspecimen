@@ -35,6 +35,12 @@
         <span>{{childReq.labelPrintCopies | osNoValue}}</span>
       </div>
     </li>
+    <li class="item" ng-if="cp.barcodingEnabled || barcodingEnabled">
+      <strong class="key key-sm" translate="srs.pre_barcoded_tube">Pre-barcode Tube</strong>
+      <div class="value value-md">
+        <span>{{childReq.preBarcodedTube | osBoolValue: 'common.yes': 'common.no'}}</span>
+      </div>
+    </li>
     <li class="item">
       <strong class="key key-sm" translate="srs.specimen_class">Specimen Class</strong>
       <div class="value value-md">

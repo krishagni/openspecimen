@@ -69,6 +69,8 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	private Integer sortOrder;
 
 	private Map<String, Object> defaultCustomFieldValues;
+
+	private boolean preBarcodedTube;
 	
 	private Long eventId;
 
@@ -273,7 +275,6 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 	public void setDefaultCustomFieldValues(Map<String, Object> defaultCustomFieldValues) {
 		this.defaultCustomFieldValues = defaultCustomFieldValues;
 	}
-
 	@JsonIgnore
 	public String getDefCustomFieldValuesJson() {
 		if (defaultCustomFieldValues == null) {
@@ -290,6 +291,14 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		} else {
 			this.defaultCustomFieldValues = Utility.jsonToMap(json);
 		}
+	}
+
+	public boolean isPreBarcodedTube() {
+		return preBarcodedTube;
+	}
+
+	public void setPreBarcodedTube(boolean preBarcodedTube) {
+		this.preBarcodedTube = preBarcodedTube;
 	}
 
 	public Long getEventId() {
@@ -392,6 +401,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		req.setQtyPerAliquot(getInitialQty());
 		req.setStorageType(getStorageType());
 		req.setDefaultCustomFieldValues(getDefaultCustomFieldValues());
+		req.setPreBarcodedTube(isPreBarcodedTube());
 		return req;		
 	}
 	
@@ -410,6 +420,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		req.setCode(getCode());
 		req.setPathology(getPathology());
 		req.setDefaultCustomFieldValues(getDefaultCustomFieldValues());
+		req.setPreBarcodedTube(isPreBarcodedTube());
 		return req;
 	}
 	
@@ -440,6 +451,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setLabelPrintCopies(sr.getLabelPrintCopies());
 		detail.setSortOrder(sr.getSortOrder());
 		detail.setDefaultCustomFieldValues(sr.getDefaultCustomFieldValues());
+		detail.setPreBarcodedTube(sr.isPreBarcodedTube());
 		detail.setEventId(sr.getCollectionProtocolEvent().getId());
 		detail.setCpShortTitle(sr.getCollectionProtocol().getShortTitle());
 		detail.setActivityStatus(sr.getActivityStatus());

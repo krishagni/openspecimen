@@ -2,7 +2,7 @@
 angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
   .controller('CpSpecimensCtrl', function(
     $scope, $state, $stateParams, $timeout, $modal, $injector,
-    cp, events, specimenRequirements, aliquotQtyReq,
+    cp, events, specimenRequirements, aliquotQtyReq, barcodingEnabled,
     Specimen, SpecimenRequirement, PvManager, Alerts, Util) {
 
     if (!$stateParams.eventId && !!events && events.length > 0) {
@@ -16,6 +16,7 @@ angular.module('os.biospecimen.cp.specimens', ['os.biospecimen.models'])
       $scope.eventId = $stateParams.eventId;
       $scope.selectEvent({id: $stateParams.eventId});
       $scope.selectedEvent = events.find(function(evt) { return evt.id == $stateParams.eventId; });
+      $scope.barcodingEnabled = barcodingEnabled;
 
       $scope.specimenRequirements = Specimen.flatten(specimenRequirements);
       $scope.aliquotQtyReq = aliquotQtyReq;

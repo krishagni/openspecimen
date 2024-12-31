@@ -50,4 +50,12 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Pre-barcoded anticipated specimens">
+    <addColumn tableName="CATISSUE_CP_REQ_SPECIMEN">
+      <column name="PRE_BARCODED_TUBE" type="${boolean.type}" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

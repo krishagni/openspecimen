@@ -103,6 +103,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		requirement.setLabelPrintCopies(detail.getLabelPrintCopies());
 		requirement.setSortOrder(detail.getSortOrder());
 		requirement.setDefaultCustomFieldValues(detail.getDefaultCustomFieldValues());
+		requirement.setPreBarcodedTube(detail.isPreBarcodedTube());
 
 		setCpe(detail, requirement, ose);
 		setCode(detail, requirement, ose);
@@ -158,6 +159,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		derived.setLabelPrintCopies(req.getLabelPrintCopies());
 		derived.setSortOrder(req.getSortOrder());
 		derived.setDefaultCustomFieldValues(req.getDefaultCustomFieldValues());
+		derived.setPreBarcodedTube(req.isPreBarcodedTube());
 
 		setSpecimenClass(req.getSpecimenClass(), derived, ose);
 		setSpecimenType(req.getSpecimenClass(), req.getType(), derived, ose);
@@ -186,6 +188,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		sr.setLineage(existingSr.getLineage());
 		sr.setCollectionProtocolEvent(existingSr.getCollectionProtocolEvent());
 		sr.setDefaultCustomFieldValues(req.getDefaultCustomFieldValues());
+		sr.setPreBarcodedTube(req.isPreBarcodedTube());
 		
 		//
 		// Specimen class and type are set here so that properties dependent on these can
@@ -269,6 +272,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 			aliquot.setInitialQuantity(req.getQtyPerAliquot());
 			aliquot.setParentSpecimenRequirement(parent);
 			aliquot.setDefaultCustomFieldValues(req.getDefaultCustomFieldValues());
+			aliquot.setPreBarcodedTube(req.isPreBarcodedTube());
 
 			ose.checkAndThrow();
 			aliquots.add(aliquot);

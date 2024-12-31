@@ -18,4 +18,11 @@
       <column name="requestStatus_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Pre-barcoded anticipated specimens">
+    <addColumn tableName="CATISSUE_CP_REQ_SPECIMEN_AUD">
+      <column name="PRE_BARCODED_TUBE" type="${boolean.type}" />
+      <column name="preBarcodedTube_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>
