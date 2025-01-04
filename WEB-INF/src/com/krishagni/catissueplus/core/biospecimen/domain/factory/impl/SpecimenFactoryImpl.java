@@ -392,6 +392,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			parent.setParentSpecimen(parentOfParent);
 		}
 
+		parent.setKitLabelsIfEmpty();
 		parent.setLabelIfEmpty();
 		daoFactory.getSpecimenDao().saveOrUpdate(parent);
 		parent.addOrUpdateExtension();

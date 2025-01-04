@@ -77,9 +77,9 @@ public interface SpecimenDao extends Dao<Specimen> {
 
 	void savedPooledEvent(SpecimenPooledEvent event);
 
-	List<String> getKitLabels(Visit visit, SpecimenRequirement sr);
+	List<Map<String, String>> getKitLabels(Visit visit, SpecimenRequirement sr);
 
-	Map<Long, String> getKitLabels(Visit visit);
+	Map<Long, Map<String, String>> getKitLabels(Visit visit);
 
 	List<Specimen> getDescendantSpecimens(List<Long> ancestorIds, String labelField, List<String> labels, String lineage, String status);
 }

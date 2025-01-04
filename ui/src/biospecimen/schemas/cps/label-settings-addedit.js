@@ -58,6 +58,9 @@ export default {
         fields: [ { name: "cp.labelSequenceKey" } ]
       },
       {
+        fields: [ { name: "cp.kitLabelsEnabled" } ]
+      },
+      {
         fields: [ { name: "cp.visitCollectionMode" } ]
       },
       {

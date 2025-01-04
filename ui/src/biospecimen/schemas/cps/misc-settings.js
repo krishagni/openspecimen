@@ -63,6 +63,16 @@ export default {
     },
     {
       "type": "radio",
+      "name": "cp.kitLabelsEnabled",
+      "labelCode": "cps.kit_labels",
+      "options": [
+        { "captionCode": "common.enabled",  "value": true },
+        { "captionCode": "common.disabled", "value": false }
+      ],
+      "optionsPerRow": 2
+    },
+    {
+      "type": "radio",
       "name": "cp.visitCollectionMode",
       "labelCode": "cps.on_visit_collection",
       "options": [

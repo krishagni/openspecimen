@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -374,25 +375,38 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@Override
-	public List<String> getKitLabels(Visit visit, SpecimenRequirement sr) {
-		return createQuery(GET_KIT_LABELS_HQL, String.class)
+	public List<Map<String, String>> getKitLabels(Visit visit, SpecimenRequirement sr) {
+		List<Map<String, String>> kitLabels = new ArrayList<>();
+
+		List<Object[]> rows = createQuery(GET_KIT_LABELS_HQL, Object[].class)
 			.setParameter("visitId", visit.getId())
 			.setParameter("cpeId", visit.getCpEvent().getId())
 			.setParameter("srId", sr.getId())
 			.list();
+		for (Object[] row : rows) {
+			Map<String, String> kit = new HashMap<>();
+			kit.put("label", (String) row[0]);
+			kit.put("barcode", (String) row[1]);
+			kitLabels.add(kit);
+		}
+
+		return kitLabels;
 	}
 
 	// sr_id => label
 	@Override
-	public Map<Long, String> getKitLabels(Visit visit) {
+	public Map<Long, Map<String, String>> getKitLabels(Visit visit) {
 		List<Object[]> rows = createQuery(GET_VISIT_KIT_LABELS_HQL, Object[].class)
 			.setParameter("visitId", visit.getId())
 			.setParameter("eventId", visit.getCpEvent().getId())
 			.list();
 
-		Map<Long, String> labels = new HashMap<>();
+		Map<Long, Map<String, String>> labels = new HashMap<>();
 		for (Object[] row : rows) {
-			labels.put((Long) row[0], (String) row[1]);
+			Map<String, String> kit = new HashMap<>();
+			kit.put("label", (String) row[1]);
+			kit.put("barcode", (String) row[2]);
+			labels.put((Long) row[0], kit);
 		}
 
 		return labels;
@@ -824,7 +838,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	private static final String GET_KIT_LABELS_HQL =
 		"select " +
-		"  si.barcode " +
+		"  si.barcode, si.altBarcode " +
 		"from " +
 		"  com.krishagni.openspecimen.supplies.domain.SupplyItem si " +
 		"  join si.rootItem ri " +
@@ -840,7 +854,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	private static final String GET_VISIT_KIT_LABELS_HQL =
 		"select " +
-		"  sr.id as srId, si.barcode as barcode " +
+		"  sr.id as srId, si.barcode as barcode, si.altBarcode " +
 		"from " +
 		"  com.krishagni.openspecimen.supplies.domain.SupplyItem si " +
 		"  join si.rootItem ri " +

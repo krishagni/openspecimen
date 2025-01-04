@@ -122,7 +122,7 @@ public class Visit extends BaseExtensionEntity {
 
 	private transient boolean statusChanged;
 
-	private transient Map<Long, String> kitLabels;
+	private transient Map<Long, Map<String, String>> kitLabels;
 	
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -329,11 +329,11 @@ public class Visit extends BaseExtensionEntity {
 		this.statusChanged = statusChanged;
 	}
 
-	public Map<Long, String> getKitLabels() {
+	public Map<Long, Map<String, String>> getKitLabels() {
 		return kitLabels;
 	}
 
-	public void setKitLabels(Map<Long, String> kitLabels) {
+	public void setKitLabels(Map<Long, Map<String, String>> kitLabels) {
 		this.kitLabels = kitLabels;
 	}
 
@@ -685,6 +685,7 @@ public class Visit extends BaseExtensionEntity {
 		specimen.setVisit(this);
 		specimen.setCollectionStatus(Specimen.PENDING);
 		specimen.updateAvailableStatus();
+		specimen.setKitLabelsIfEmpty();
 		specimen.setLabelIfEmpty();
 		addSpecimen(specimen);
 

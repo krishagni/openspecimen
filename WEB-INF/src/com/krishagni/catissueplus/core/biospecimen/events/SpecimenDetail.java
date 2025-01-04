@@ -67,8 +67,6 @@ public class SpecimenDetail extends SpecimenInfo {
 	
 	private Boolean poolSpecimen;
 	
-	private String reqCode;
-
 	private ExtensionDetail extensionDetail;
 
 	private boolean reserved;
@@ -103,6 +101,8 @@ public class SpecimenDetail extends SpecimenInfo {
 	private StorageLocationSummary checkoutPosition;
 
 	private String kitLabel;
+
+	private String kitBarcode;
 
 	private boolean update;
 
@@ -229,14 +229,6 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	public void setPoolSpecimen(Boolean poolSpecimen) {
 		this.poolSpecimen = poolSpecimen;
-	}
-	
-	public String getReqCode() {
-		return reqCode;
-	}
-
-	public void setReqCode(String reqCode) {
-		this.reqCode = reqCode;
 	}
 
 	@JsonIgnore
@@ -385,6 +377,14 @@ public class SpecimenDetail extends SpecimenInfo {
 
 	public void setKitLabel(String kitLabel) {
 		this.kitLabel = kitLabel;
+	}
+
+	public String getKitBarcode() {
+		return kitBarcode;
+	}
+
+	public void setKitBarcode(String kitBarcode) {
+		this.kitBarcode = kitBarcode;
 	}
 
 	public boolean isUpdate() {
@@ -544,13 +544,11 @@ public class SpecimenDetail extends SpecimenInfo {
 			boolean excludeChildren) {
 
 		if (visit != null && visit.getCpEvent() != null && visit.getCollectionProtocol().isKitLabelsEnabled()) {
-			Map<Long, String> kitLabels = visit.getKitLabels();
-			if (kitLabels == null) {
+			if (visit.getKitLabels() == null) {
 				DaoFactory daoFactory = OpenSpecimenAppCtxProvider.getBean("biospecimenDaoFactory");
 				visit.setKitLabels(daoFactory.getSpecimenDao().getKitLabels(visit));
 			}
 		}
-
 
 		List<SpecimenDetail> result = Utility.stream(specimens)
 			.map(s -> SpecimenDetail.from(s, partial, excludePhi, excludeChildren))
@@ -567,7 +565,9 @@ public class SpecimenDetail extends SpecimenInfo {
 					continue;
 				}
 
-				spmn.setKitLabel(visit.getKitLabels().get(spmn.getReqId()));
+				Map<String, String> kit = visit.getKitLabels().get(spmn.getReqId());
+				spmn.setKitLabel(kit.get("label"));
+				spmn.setKitBarcode(kit.get("barcode"));
 				if (spmn.getChildren() != null) {
 					workingList.addAll(0, spmn.getChildren());
 				}

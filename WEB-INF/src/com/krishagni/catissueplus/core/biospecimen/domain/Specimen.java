@@ -1817,17 +1817,33 @@ public class Specimen extends BaseExtensionEntity {
 
 		receivedEvent.saveOrUpdate();
 	}
+
+	public void setKitLabelsIfEmpty() {
+		boolean skip = !getCollectionProtocol().isKitLabelsEnabled() ||
+			isMissedOrNotCollected() ||
+			(StringUtils.isNotBlank(label) && StringUtils.isNotBlank(barcode)) ||
+			getSpecimenRequirement() == null;
+		if (skip) {
+			return;
+		}
+
+		Map<String, String> kitLabels = getKitLabel(getVisit(), getSpecimenRequirement());
+		if (kitLabels == null || kitLabels.isEmpty()) {
+			return;
+		}
+
+		if (StringUtils.isBlank(label)) {
+			setLabel(kitLabels.get("label"));
+		}
+
+		if (getCollectionProtocol().isBarcodingEnabledToUse() && StringUtils.isBlank(barcode)) {
+			setBarcode(kitLabels.get("barcode"));
+		}
+	}
 	
 	public void setLabelIfEmpty() {
 		if (StringUtils.isNotBlank(label) || isMissedOrNotCollected()) {
 			return;
-		}
-
-		if (getCollectionProtocol().isKitLabelsEnabled() && getSpecimenRequirement() != null) {
-			setLabel(getKitLabel(getVisit(), getSpecimenRequirement()));
-			if (StringUtils.isNotBlank(getLabel())) {
-				return;
-			}
 		}
 
 		String labelTmpl = getLabelTmpl();
@@ -2170,8 +2186,8 @@ public class Specimen extends BaseExtensionEntity {
 		return lineage.equals(NEW) || lineage.equals(DERIVED) || lineage.equals(ALIQUOT);
 	}
 
-	private String getKitLabel(Visit visit, SpecimenRequirement sr) {
-		List<String> labels = daoFactory.getSpecimenDao().getKitLabels(visit, sr);
+	private Map<String, String>  getKitLabel(Visit visit, SpecimenRequirement sr) {
+		List<Map<String, String>> labels = daoFactory.getSpecimenDao().getKitLabels(visit, sr);
 		if (labels.isEmpty()) {
 			String validation = CpWorkflowTxnCache.getInstance().getValue(visit.getCollectionProtocol().getId(), "supplySettings", "barcodeValidation");
 			if (StringUtils.equalsIgnoreCase(validation, "relaxed")) {
@@ -2436,6 +2452,7 @@ public class Specimen extends BaseExtensionEntity {
 			specimen.setVisit(parent.getVisit());
 			specimen.setCollectionStatus(Specimen.PENDING);
 			specimen.updateAvailableStatus();
+			specimen.setKitLabelsIfEmpty();
 			specimen.setLabelIfEmpty();
 
 			parent.addChildSpecimen(specimen);

@@ -77,7 +77,9 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 	private String laterality;
 	
 	private String status;
-	
+
+	private String reqCode;
+
 	private String reqLabel;
 	
 	private String pathology;
@@ -326,6 +328,14 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		this.status = status;
 	}
 
+	public String getReqCode() {
+		return reqCode;
+	}
+
+	public void setReqCode(String reqCode) {
+		this.reqCode = reqCode;
+	}
+
 	public String getReqLabel() {
 		return reqLabel;
 	}
@@ -572,6 +582,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		SpecimenRequirement sr = specimen.getSpecimenRequirement();
 		if (sr != null) {
 			result.setReqId(sr.getId());
+			result.setReqCode(sr.getCode());
 			result.setReqLabel(sr.getName());
 			result.setSortOrder(sr.getSortOrder());
 			result.setPreBarcodedTube(specimen.isPreBarcodedTube());
@@ -678,6 +689,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		result.setEventCode(cpe != null ? cpe.getCode() : null);
 		result.setEventLabel(cpe != null ? cpe.getEventLabel() : null);
 		result.setReqId(anticipated.getId());
+		result.setReqCode(anticipated.getCode());
 		result.setReqLabel(anticipated.getName());
 		result.setPreBarcodedTube(anticipated.isPreBarcodedTube());
 		result.setSortOrder(anticipated.getSortOrder());

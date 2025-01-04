@@ -563,7 +563,7 @@ class Util {
     const detailed = opts.detailed == 'true' || opts.detailed == true;
 
     let result = '';
-    if (specimen.lineage == 'New' || detailed) {
+    if (specimen.lineage == 'New') {
       if (specimen.pathology && specimen.pathology != ns) {
         result += specimen.pathology + ' ';
       }
@@ -581,6 +581,9 @@ class Util {
       result += specimen.lineage + ' ' + specimen.type;
     } else if (specimen.lineage == 'Aliquot') {
       result += specimen.lineage;
+      if (detailed) {
+        result += ' ' + specimen.type;
+      }
     }
 
     if ((specimen.name || specimen.reqLabel) && specimen.lineage != 'Aliquot') {
