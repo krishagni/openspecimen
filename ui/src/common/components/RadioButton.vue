@@ -2,7 +2,7 @@
 <template>
   <div class="os-radio-wrapper">
     <div class="os-radio-buttons">
-      <div class="options-row" v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
+      <div :class="rowClass" v-for="(optionsRow, rowIdx) of optionRows" :key="rowIdx">
         <div class="option" v-for="(option, optionIdx) of optionsRow" :key="optionIdx">
           <span class="p-field-radiobutton">
             <label>
@@ -87,6 +87,10 @@ export default {
       }
 
       return result;
+    },
+
+    rowClass: function() {
+      return this.optionRows.length > 1 ? ['options-row'] : ['options-row', 'compact'];
     }
   },
 
@@ -125,6 +129,10 @@ export default {
   display: table-row;
 }
 
+.os-radio-buttons .options-row.compact {
+  display: block;
+}
+
 .os-radio-buttons .options-row .option {
   display: table-cell;
 }
@@ -138,6 +146,10 @@ export default {
 .os-radio-buttons label span {
   margin-left: 0.25rem;
   margin-right: 0.75rem;
+}
+
+.os-radio-buttons .options-row.compact label span {
+  margin-right: 1rem;
 }
 
 .os-radio-buttons .options-row:not(:last-child) :deep(.p-field-radiobutton) {
