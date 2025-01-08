@@ -83,9 +83,9 @@ export default {
   outline-color: transparent;
 }
 
-.tox .tox-statusbar {
+/*.tox .tox-statusbar {
   display: none!important;
-}
+}*/
 
 .tox .tox-promotion {
   display: none!important;
