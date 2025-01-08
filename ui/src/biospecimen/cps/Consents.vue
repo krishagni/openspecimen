@@ -6,7 +6,11 @@
       </template>
     </os-page-toolbar>
 
-    <div>
+    <os-message type="info" v-if="ctx.hasDocs == null || ctx.tiers == null">
+      <span v-t="'common.loading'">Loading...</span>
+    </os-message>
+
+    <div v-if="cp.consentsSource || noDocsAndTiers">
       <os-card v-if="cp.consentsSource">
         <template #body>
           <div>
@@ -67,9 +71,9 @@
     <os-grid v-if="!ctx.hasEc">
       <os-grid-column :width="12">
         <os-button left-icon="plus" :label="$t('cps.add_consent_tier')" @click="showAddEditConsentTierDialog({})"
-          v-if="!cp.consentsWaived && !cp.consentsSource && (!ctx.tiers || ctx.tiers.length == 0)" />
+          v-if="!cp.consentsWaived && !cp.consentsSource && ctx.tiers && ctx.tiers.length == 0" />
 
-        <os-card v-for="tier of ctx.tiers" :key="tier.id" v-else>
+        <os-card v-for="tier of ctx.tiers || []" :key="tier.id">
           <template #body>
             <div class="os-consent-tier">
               <div class="statement">
@@ -149,7 +153,7 @@ export default {
 
         hasEc: !!this.$osSvc.ecDocSvc,
 
-        hasDocs: false
+        hasDocs: this.$osSvc.ecDocSvc ? null : false
       },
 
       addEditFs: consentSchema.layout,
@@ -168,7 +172,11 @@ export default {
     },
 
     noDocsAndTiers: function() {
-      return !this.ctx.hasDocs && (!this.ctx.tiers || this.ctx.tiers.length == 0);
+      if (this.ctx.hasDocs == false && this.ctx.tiers && this.ctx.tiers.length == 0) {
+        return true;
+      }
+
+      return false; // might be loading
     }
   },
 

@@ -48,6 +48,7 @@ import routerSvc from '@/common/services/Router.js';
 
 // import itemsSvc from '@/common/services/ItemsHolder.js';
 
+import initVars      from '@/common/directives/Init.js';
 import showIfAllowed from '@/common/directives/ShowIfAllowed.js';
 
 import CommonComponents  from '@/common/components';
@@ -81,6 +82,7 @@ const app = createApp(Root)
   .use(ImportComponents);
 
 app.directive('show-if-allowed', showIfAllowed);
+app.directive('os-init', initVars);
 app.directive('os-tooltip', Tooltip);
 app.directive('os-badge', BadgeDirective);
 
