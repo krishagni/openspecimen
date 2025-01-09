@@ -151,7 +151,7 @@ export default {
             }
           },
           {
-            type: 'datePicker',
+            type: 'number',
             name: 'filter.maxNumValue',
             labelCode: 'queries.max_value',
             showWhen: 'valueType == "numericRange"',
