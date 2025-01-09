@@ -27,6 +27,11 @@ class PermissibleValue {
     attribute = this.getAttribute(attribute);
     opts = opts || {};
     const queryParams = {...opts, attribute, searchString: searchTerm};
+    if (searchTerm instanceof Array) {
+      delete queryParams.searchString;
+      queryParams.value = searchTerm;
+    }
+
     return http.get('permissible-values/v', queryParams);
   }
 }

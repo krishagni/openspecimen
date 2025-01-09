@@ -65,7 +65,8 @@ export default {
             listSource: {
               displayProp: 'value',
               selectProp: 'name',
-              loadFn: ({context, query}) => context.formData.getPvs(query)
+              searchProp: 'searchString',
+              loadFn: ({context, query, searchString}) => context.formData.getPvs(query || searchString)
             },
             validations: {
               required: {

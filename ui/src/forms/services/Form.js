@@ -19,12 +19,13 @@ class Form {
   }
 
   async getPvs(formId, fieldName, query) {
-    let params = {controlName: fieldName};
-    if (query) {
-      params.searchString = query;
-    }
-
+    const params = {controlName: fieldName, searchString: query};
     return http.get('forms/' + formId + '/permissible-values', params);
+  }
+
+  async getPvsByName(formName, fieldName, query) {
+    const params = {formName, controlName: fieldName, searchString: query};
+    return http.get('forms/permissible-values', params);
   }
 
   async getRecord(record, opts) {

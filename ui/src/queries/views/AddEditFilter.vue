@@ -20,6 +20,7 @@
 <script>
 import {format, parse} from 'date-fns';
 
+import formSvc from '@/forms/services/Form.js';
 import pvSvc   from '@/common/services/PermissibleValue.js';
 import siteSvc from '@/administrative/services/Site.js';
 import userSvc from '@/administrative/services/User.js';
@@ -39,7 +40,7 @@ export default {
 
         getAllowedOps: async () => this._getAllowedOps(),
 
-        getPvs: async (searchTerm) => this._getPvs(searchTerm)
+        getPvs: async (searchString) => this._getPvs(searchString)
       },
 
       addEditFilterFs: addEditFilter.layout
@@ -149,8 +150,20 @@ export default {
 
       const {fieldObj} = this.ctx.filter || {};
       if (fieldObj.pvs) {
-        searchTerm = searchTerm.toLowerCase();
-        return fieldObj.pvs.filter(pv => pv.toLowerCase().indexOf(searchTerm) >= 0).map(pv => ({name: pv, value: pv}));
+        if (fieldObj.pvs.length < 100) {
+          return fieldObj.pvs.map(pv => ({name: pv, value: pv}));
+        } else {
+          let [formName, ...fieldParts] = fieldObj.id.split('.');
+          let fieldName = fieldParts.join('.');
+          if (fieldParts[0] == 'extensions' || fieldParts[0] == 'customFields') {
+            fieldParts.shift(); // consume 'extensions' or 'customFields'
+            formName = fieldParts.shift();
+            fieldName = fieldParts.join('.');
+          }
+
+          return formSvc.getPvsByName(formName, fieldName, searchTerm)
+            .then(pvs => pvs.map(({value}) => ({name: value, value})));
+        }
       } else {
         const {apiUrl, filters} = fieldObj.lookupProps || {apiUrl: '', filters: {}};
         if (apiUrl.indexOf('permissible-values') >= 0) {
