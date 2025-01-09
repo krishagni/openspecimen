@@ -86,7 +86,7 @@ class Util {
       return filter.desc || i18n.msg('queries.unknown');
     } else if (filter.fieldObj) {
       const {formCaption, caption} = filter.fieldObj;
-      const op = i18n.msg('queries.ops.' + filter.op);
+      const op = i18n.msg('queries.op.' + filter.op);
 
       let desc = formCaption.join(' >> ') + ' >> ' + caption + ' ' + op;
       if (filter.values) {
@@ -396,7 +396,9 @@ class Util {
       } else {
         filterValue = this._stringLiteral(filter.values[0]);
       }
-    }   
+    } else if (filter.op == 'IN' || filter.op == 'NOT_IN' || filter.op == 'BETWEEN') {
+      filterValue = filter.values.length > 0 ? filter.values : '';
+    }
         
     if (filter.op == 'IN' || filter.op == 'NOT_IN' || filter.op == 'BETWEEN') {
       filterValue = '(' + filterValue.join() + ')';
