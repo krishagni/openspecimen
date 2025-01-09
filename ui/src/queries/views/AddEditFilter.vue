@@ -257,4 +257,8 @@ export default {
 .filter-po :deep(form) {
   max-width: 100%;
 }
+
+.filter-po :deep(.p-inputtext) {
+  max-width: 100%;
+}
 </style>
