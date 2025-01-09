@@ -7,6 +7,8 @@ import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class SiteListCriteria extends AbstractListCriteria<SiteListCriteria> {
 
+	private List<String> names;
+
 	private String resource;
 	
 	private String operation;
@@ -22,6 +24,15 @@ public class SiteListCriteria extends AbstractListCriteria<SiteListCriteria> {
 	@Override
 	public SiteListCriteria self() {
 		return this;
+	}
+
+	public List<String> names() {
+		return names;
+	}
+
+	public SiteListCriteria names(List<String> names) {
+		this.names = names;
+		return self();
 	}
 	
 	public String resource() {

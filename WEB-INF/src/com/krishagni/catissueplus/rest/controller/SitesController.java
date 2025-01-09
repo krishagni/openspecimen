@@ -46,7 +46,7 @@ public class SitesController {
 	@ResponseBody
 	public List<SiteSummary> getSites(
 			@RequestParam(value = "name", required= false)
-			String name,
+			List<String> names,
 			
 			@RequestParam(value = "exactMatch", required= false, defaultValue = "false")
 			boolean exactMatch,
@@ -79,7 +79,8 @@ public class SitesController {
 			boolean includeStats) {
 		
 		SiteListCriteria crit = new SiteListCriteria()
-			.query(name)
+			.query(names != null && names.size() == 1 ? names.get(0) : null)
+			.names(names != null && names.size() > 1 ? names : null)
 			.exactMatch(exactMatch)
 			.resource(resource)
 			.operation(operation)
@@ -103,13 +104,14 @@ public class SitesController {
 	@ResponseBody
 	public Map<String, Long> getSitesCount(
 			@RequestParam(value = "name", required= false)
-			String name,
+			List<String> names,
 			
 			@RequestParam(value = "institute", required = false)
 			String institute) {
 		
 		SiteListCriteria crit = new SiteListCriteria()
-			.query(name)
+			.query(names != null && names.size() == 1 ? names.get(0) : null)
+			.names(names != null && names.size() > 1 ? names : null)
 			.institute(institute);
 		
 		RequestEvent<SiteListCriteria> req = new RequestEvent<>(crit);
