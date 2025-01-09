@@ -281,12 +281,20 @@ export default {
               const extnFormPrefix = prefix + '.' + field.name + '.' + extnForm.name;
 
               const children     = this._getFieldsTree0(rootForm, extnForm, extnFormPrefix, extnForm.subFields || []);
-              const extnFormTree = {id: extnFormPrefix, label: extnForm.caption, children: children};
-              subTree.push(extnFormTree);
+              if (children.length > 1) {
+                const extnFormTree = {id: extnFormPrefix, label: extnForm.caption, children: children};
+                subTree.push(extnFormTree);
+              } else if (children.length == 1) {
+                subTree.push(children[0]);
+              }
             }
           } else {
             const children = this._getFieldsTree0(rootForm, form, prefix + '.' + field.name, field.subFields);
-            subTree.push({id: prefix + '.' + field.name, label: field.caption, children});
+            if (children.length > 1) {
+              subTree.push({id: prefix + '.' + field.name, label: field.caption, children});
+            } else if (children.length == 1) {
+              subTree.push(children[0]);
+            }
           }
         } else {
           const formCaption = rootForm.caption + (form ? ': ' + form.caption : '');
