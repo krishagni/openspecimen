@@ -10,12 +10,14 @@
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
+        :auto-filter-focus="true"
         :show-clear="showClear"
         :disabled="disabled"
         :tabindex="tabOrder"
         :reset-filter-on-hide="true"
-        :maxSelectedLabels="0"
-        :selectedItemsLabel="selectedItemsLabel"
+        :display="displayType"
+        :max-selected-labels="maxSelectedItems"
+        :selected-items-label="selectedItemsLabel"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -31,12 +33,14 @@
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
+        :auto-filter-focus="true"
         :show-clear="showClear"
         :disabled="disabled"
         :tabindex="tabOrder"
         :reset-filter-on-hide="true"
-        :maxSelectedLabels="0"
-        :selectedItemsLabel="selectedItemsLabel"
+        :display="displayType"
+        :max-selected-labels="maxSelectedItems"
+        :selected-items-label="selectedItemsLabel"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -296,6 +300,16 @@ export default {
 
     showClear: function() {
       return true;
+    },
+
+    displayType: function() {
+      const selected = this.selected || [];
+      return selected && selected.length > 10 ? 'comma' : 'chip';
+    },
+
+    maxSelectedItems: function() {
+      const selected = this.selected || [];
+      return selected && selected.length > 10 ? 0 : 10;
     }
   },
 
@@ -315,7 +329,7 @@ export default {
 
   mounted() {
     if (this.modelValue) {
-      this.selectedValues().then((values) => this.ctx.options = values);
+      this.selectedValues().then(values => this.ctx.options = values);
     }
   }
 }
@@ -375,5 +389,21 @@ export default {
   .os-dropdown .p-float-label :deep(.p-multiselect-label) {
     white-space: break-spaces;
     padding: 0;
+  }
+
+  .os-dropdown :deep(.p-multiselect-label) {
+    white-space: initial;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .os-dropdown :deep(.p-multiselect-token) {
+    margin-bottom: 0.25rem;
+    border: 1px solid #ced4da;
+    background: none;
+  }
+
+  .os-dropdown :deep(.p-multiselect-token-label) {
+    flex: 1;
   }
 </style>
