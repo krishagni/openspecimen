@@ -327,6 +327,9 @@ export default {
           const column = {field: label, name: columnMetadata[idx].expr, pinned: idx < pinnedColumns && 'left'};
           column.headerName = label.substring(label.lastIndexOf('#') + 1);
           column.url = columnUrls[idx];
+          if (columnTypes[idx] == 'INTEGER' || columnTypes[idx] == 'FLOAT') {
+            column.comparator = (valueA, valueB) => this._compareNum(valueA, valueB);
+          }
 
           if (columnUrls[idx]) {
             column.cellRenderer = 'os-column-url';
@@ -383,6 +386,24 @@ export default {
       } else {
         return this.$filters.date(new Date(params.value));
       }
+    },
+
+    _compareNum: function(valueA, valueB) {
+      const blankValueA = this._isBlank(valueA);
+      const blankValueB = this._isBlank(valueB);
+      if (blankValueA && blankValueB) {
+        return 0;
+      } else if (blankValueA) {
+        return -1;
+      } else if (blankValueB) {
+        return 1;
+      } else {
+        return +valueA - +valueB;
+      }
+    },
+
+    _isBlank: function(value) {
+      return value == null || value == undefined || value == '';
     }
   }
 }
