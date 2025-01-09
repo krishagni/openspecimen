@@ -540,6 +540,8 @@ export default {
 .folders .section {
   flex: 1;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .folders .section .title,
@@ -553,6 +555,7 @@ export default {
   padding: 0;
   margin: 0;
   margin-bottom: 1rem;
+  overflow-y: auto;
 }
 
 .folders .section ul li,
