@@ -64,6 +64,9 @@
 
             <os-add-to-cart :specimens="selectedSpecimens" />
           </span>
+
+          <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
+            url="https://openspecimen.atlassian.net/l/cp/WNtmFmh3" :new-tab="true" />
         </template>
 
         <template #right v-if="selectedSpecimens.length > 0">
