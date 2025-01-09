@@ -73,7 +73,7 @@
         </template>
       </os-page-toolbar>
 
-      <os-grid>
+      <os-grid v-if="query.selectList && query.selectList.length > 0">
         <os-grid-column :width="3" v-show="ctx.hasFacets">
           <Facets :query="query" @facets-loaded="onFacetsLoad" @facets-selected="onFacetsSelection" />
         </os-grid-column>
@@ -98,6 +98,11 @@
             v-if="!ctx.loadingRecords" />
         </os-grid-column>
       </os-grid>
+      <div v-else>
+        <os-message type="info">
+          <span v-t="'queries.select_columns'">Select one or more columns to show the records...</span>
+        </os-message>
+      </div>
 
       <os-column-url />
     </os-page-body>

@@ -1,5 +1,5 @@
 <template>
-  <os-dialog ref="columnsDialog" size="lg">
+  <os-dialog ref="columnsDialog" size="lg" :closable="false">
     <template #header>
       <span v-t="'queries.columns'">Columns</span>
     </template>
@@ -191,7 +191,7 @@ export default {
 
     isFirstStep: function() {
       if (!this.$refs.columnsWizard) {
-        return false;
+        return true;
       }
 
       return this.$refs.columnsWizard.isFirstStep();
