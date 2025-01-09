@@ -11,7 +11,7 @@
       <os-button label="(...)" @click="addParenthesis" />
     </div>
 
-    <draggable :class="classList" v-model="ctx.queryExpression" tag="div" handle=".node">
+    <draggable :class="classList" v-model="nodes" tag="div" handle=".node">
       <div class="node" v-for="(node, idx) of nodes" :key="idx">
         <div class="filter" v-if="node.nodeType == 'FILTER'" v-os-tooltip.bottom="filterDesc(node.value)">
           <span>{{node.value}}</span>
@@ -116,16 +116,16 @@ export default {
     },
 
     addOp: function(op) {
-      this.ctx.queryExpression.push({nodeType: 'OPERATOR', value: op});
+      this.nodes.push({nodeType: 'OPERATOR', value: op});
     },
 
     addParenthesis: function() {
-      this.ctx.queryExpression.unshift({nodeType: 'PARENTHESIS', value: 'LEFT'});
-      this.ctx.queryExpression.push({nodeType: 'PARENTHESIS', value: 'RIGHT'});
+      this.nodes.unshift({nodeType: 'PARENTHESIS', value: 'LEFT'});
+      this.nodes.push({nodeType: 'PARENTHESIS', value: 'RIGHT'});
     },
 
     removeNode: function(nodeIdx) {
-      this.ctx.queryExpression.splice(nodeIdx, 1);
+      this.nodes.splice(nodeIdx, 1);
     },
 
     filterDesc: function(filterId) {
