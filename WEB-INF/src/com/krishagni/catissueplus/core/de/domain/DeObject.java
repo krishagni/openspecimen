@@ -418,7 +418,12 @@ public abstract class DeObject {
 			}
 		};
 
-		extnObj.loadRecord(FormData.getFormData(extnObj.getForm(), valueMap));
+		Container form = extnObj.getForm();
+		if (form == null) {
+			return null;
+		}
+
+		extnObj.loadRecord(FormData.getFormData(form, valueMap));
 		return extnObj;
 	}
 

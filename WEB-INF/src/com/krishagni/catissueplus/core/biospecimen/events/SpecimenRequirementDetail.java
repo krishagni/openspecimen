@@ -453,6 +453,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setDefaultCustomFieldValues(sr.getDefaultCustomFieldValues());
 		detail.setPreBarcodedTube(sr.isPreBarcodedTube());
 		detail.setEventId(sr.getCollectionProtocolEvent().getId());
+		detail.setCpId(sr.getCollectionProtocol().getId());
 		detail.setCpShortTitle(sr.getCollectionProtocol().getShortTitle());
 		detail.setActivityStatus(sr.getActivityStatus());
 		if (sr.getId() != null) {
