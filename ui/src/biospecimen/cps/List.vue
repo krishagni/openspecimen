@@ -281,7 +281,7 @@ export default {
     },
 
     viewCatalog: function({hidden: {cpId, catalogId}}) {
-      routerSvc.ngGoto('s/specimen-catalogs/' + catalogId + '/dashboard?cpId=' + cpId);
+      routerSvc.ngGoto('s/specimen-catalogs/' + catalogId + '/search?cpId=' + cpId);
     },
 
     viewDashboard: function({hidden: {cpId}}) {
