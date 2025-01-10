@@ -39,9 +39,7 @@ export default {
           storageType: this.lineage == 'Aliquot' ? 'Manual' : 'Virtual'
         },
 
-        addEditFs: {rows: []},
-
-        getPrintModes: this._getPrintModes
+        addEditFs: {rows: []}
       }
     }
   },
@@ -123,14 +121,6 @@ export default {
     cancel: function(req) {
       const query = {eventId: this.eventId, reqId: (req && req.id) || this.reqId};
       routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, query);
-    },
-
-    _getPrintModes: async function() {
-      return [
-        { label: this.$t('cps.print_modes.PRE_PRINT'),     value: 'PRE_PRINT' },
-        { label: this.$t('cps.print_modes.ON_COLLECTION'), value: 'ON_COLLECTION' },
-        { label: this.$t('cps.print_modes.NONE'),          value: 'NONE' }
-      ];
     }
   }
 }

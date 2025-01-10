@@ -104,7 +104,7 @@ export default {
         fields: [ { name: "sr.receiver" } ]
       },
       {
-        fields: [ { name: "sr.labelFormat" } ]
+        fields: [ { name: "sr.labelFmt" } ]
       },
       {
         fields: [ { name: "sr.labelAutoPrintMode" } ]

@@ -141,7 +141,7 @@ export default {
     },
     {
       "type": "text",
-      "name": "sr.labelFormat",
+      "name": "sr.labelFmt",
       "labelCode": "cps.label_format"
     },
     {
@@ -149,9 +149,20 @@ export default {
       "name": "sr.labelAutoPrintMode",
       "labelCode": "cps.label_print_mode",
       "listSource": {
-        "loadFn": ({context}) => context.formData.getPrintModes(),
+        "loadFn": async () => {
+           return [
+             { label: window.osSvc.i18nSvc.msg('cps.print_modes.PRE_PRINT'),     value: 'PRE_PRINT' },
+             { label: window.osSvc.i18nSvc.msg('cps.print_modes.ON_COLLECTION'), value: 'ON_COLLECTION' },
+             { label: window.osSvc.i18nSvc.msg('cps.print_modes.NONE'),          value: 'NONE' }
+           ]
+        },
         "displayProp": "label",
         "selectProp": "value"
+      },
+      "displayValues": {
+        "PRE_PRINT":     () => window.osSvc.i18nSvc.msg("cps.print_modes.PRE_PRINT"),
+        "ON_COLLECTION": () => window.osSvc.i18nSvc.msg("cps.print_modes.ON_COLLECTION"),
+        "NONE":          () => window.osSvc.i18nSvc.msg("cps.print_modes.NONE")
       }
     },
     {
