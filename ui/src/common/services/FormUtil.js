@@ -11,8 +11,8 @@ class FormUtil {
       return [];
     }
 
-    let dict = baseSchema.reduce((acc, field) => (acc[field.name] = field) && acc, {});
-    let result = {rows: []};
+    const dict = baseSchema.reduce((acc, field) => (acc[field.name] = field) && acc, {});
+    const result = {rows: [], udnNameMap: {}};
     for (let row of layoutSchema.rows) {
       let fields = [];
       for (let field of row.fields) {
@@ -23,6 +23,10 @@ class FormUtil {
         let ff = util.clone(field);
         ff = Object.assign(util.clone(dict[field.name] || {}), ff);
         fields.push(ff);
+
+        if (ff.udn && ff.name && ff.udn != ff.name) {
+          result.udnNameMap[ff.udn] = ff.name;
+        }
       }
 
       if (fields.length > 0) {
@@ -181,20 +185,27 @@ class FormUtil {
   }
 
   fromDeToStdSchema(formDef, namePrefix) {
-    let schema = { rows: [] };
-    let dvRec = {}; // default values record
+    namePrefix = namePrefix || '';
 
+    const schema = { rows: [], udnNameMap: {} };
+    const dvRec = {}; // default values record
     if (!formDef || !formDef.rows) {
       return { schema, defaultValues: dvRec};
     }
 
+    const { udnNameMap } = schema;
     formDef.rows.forEach(
       (row) => {
-        let rowSchema = {fields: []};
+        const rowSchema = {fields: []};
         row.forEach(
           (field) => {
             field.formId = formDef.id;
-            field.fqn = (namePrefix || '') + field.name;
+
+            const fqn = field.fqn = namePrefix + field.name;
+            const udn = namePrefix + field.udn;
+            if (fqn != udn) {
+              udnNameMap[udn] = fqn;
+            }
 
             let fieldSchema = {source: 'de', ...fieldFactory.getFieldSchema(field, namePrefix)};
             if (fieldSchema.type) {
