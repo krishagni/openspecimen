@@ -76,6 +76,8 @@ public class SpecimenAliquotsSpec {
 
 	private List<Long> reqIds;
 
+	private List<Long> ids;
+
 	public Long getId() {
 		return id;
 	}
@@ -358,5 +360,13 @@ public class SpecimenAliquotsSpec {
 
 	public void setReqIds(List<Long> reqIds) {
 		this.reqIds = reqIds;
+	}
+
+	public List<Long> getIds() {
+		return ids;
+	}
+
+	public void setIds(List<Long> ids) {
+		this.ids = ids;
 	}
 }

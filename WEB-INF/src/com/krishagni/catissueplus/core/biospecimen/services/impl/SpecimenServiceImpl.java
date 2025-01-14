@@ -534,6 +534,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			}
 
 			List<Long> reqIds;
+			List<Long> ids = spec.getIds() != null ? spec.getIds() : Collections.emptyList();
 			if (spec.isLinkToReqs() && parentSpmn.getSpecimenRequirement() != null) {
 				reqIds = parentSpmn.getSpecimenRequirement().getOrderedChildRequirements().stream()
 					.filter(SpecimenRequirement::isAliquot)
@@ -576,6 +577,10 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				aliquot.setComments(spec.getComments());
 				aliquot.setExtensionDetail(spec.getExtensionDetail());
 				aliquot.setStatus(StringUtils.isNotBlank(spec.getStatus()) ? spec.getStatus() : Specimen.COLLECTED);
+
+				if (i < ids.size()) {
+					aliquot.setId(ids.get(i));
+				}
 
 				if (i < reqIds.size()) {
 					aliquot.setReqId(reqIds.get(i));
