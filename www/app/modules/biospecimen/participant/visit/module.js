@@ -12,13 +12,8 @@ angular.module('os.biospecimen.visit', [
     $stateProvider
       .state('visit', {
         url: '/visits/:visitId',
-        controller: function($state, params) {
-          $state.go('visit-detail.overview', params, {location: 'replace'});
-        },
-        resolve: {
-          params: function($stateParams, Visit) {
-            return Visit.getRouteIds($stateParams.visitId);
-          }
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('visit-resolver/' + $stateParams.visitId);
         },
         parent: 'signed-in'
       })

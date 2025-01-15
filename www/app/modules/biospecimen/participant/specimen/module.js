@@ -32,19 +32,8 @@ angular.module('os.biospecimen.specimen',
     $stateProvider
       .state('specimen', {
         url: '/specimens/:specimenId',
-        controller: function(params, VueApp) {
-          VueApp.setVueView(
-            'cp-view/' + params.cpId +
-            '/participants/' + params.cprId +
-            '/visit/' + params.visitId +
-            '/specimen/' + params.specimenId +
-            '/overview'
-          );
-        },
-        resolve: {
-          params: function($stateParams, Specimen) {
-            return Specimen.getRouteIds($stateParams.specimenId);
-          }
+        controller: function($stateParams, VueApp) {
+          VueApp.setVueView('specimen-resolver/' + $stateParams.specimenId);
         },
         parent: 'signed-in'
       })
