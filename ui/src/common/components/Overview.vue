@@ -1,6 +1,6 @@
 
 <template>
-  <ul class="os-key-values" :class="{'os-one-col': columns == 1, 'os-two-cols': columns != 1, 'bg-col': bgCol}">
+  <ul :class="listClass">
     <li class="item" v-for="(field, idx) of fields.simple" :key="idx">
       <strong class="key key-sm">
         <span>{{label(field)}}</span>
@@ -122,13 +122,25 @@ import http from '@/common/services/HttpClient.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['object', 'schema', 'columns', 'bgCol', 'showEmptyFields'],
+  props: ['object', 'schema', 'columns', 'bgCol', 'colType', 'showEmptyFields'],
 
   components: {
     Section
   },
 
   computed: {
+    listClass: function() {
+      const classes = ['os-key-values'];
+      classes.push(this.columns == 1 ? 'os-one-col' : 'os-two-cols');
+      if (util.isTrue(this.bgCol)) {
+        classes.push('bg-col');
+      } else if (this.colType) {
+        classes.push(this.colType + '-col');
+      }
+
+      return classes;
+    },
+
     fields: function() {
       let simpleFields = [], textAreaFields = [], subformFields = [], sectionFields = [];
       for (let field of this.schema) {

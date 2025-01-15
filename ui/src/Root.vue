@@ -177,6 +177,10 @@ a:focus, a:hover {
   width: 300px;
 }
 
+.os-key-values.xl-col .item .key {
+  width: 400px;
+}
+
 .os-key-values.vertical .item {
   flex: 100%;
   flex-direction: column;
