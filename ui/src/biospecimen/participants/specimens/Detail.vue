@@ -1,6 +1,6 @@
 <template>
   <os-page>
-    <os-page-head :noNavButton="noNavButton" :showBreadcrumb="true">
+    <os-page-head :showBreadcrumb="true">
       <template #breadcrumb>
         <os-breadcrumb :items="bcrumb" />
       </template>
@@ -26,40 +26,32 @@
       </span>
     </os-page-head>
     <os-page-body>
-      <div>
-        <os-tab-menu v-if="noNavButton">
-          <ul>
-            <li>
-              <router-link :to="getRoute('Overview')">
-                <span v-t="'common.overview'">Overview</span>
-              </router-link>
-            </li>
+      <os-detail-view>
+        <template #tabs>
+          <os-tab-menu>
+            <ul>
+              <li>
+                <router-link :to="getRoute('Overview')">
+                  <span v-t="'common.overview'">Overview</span>
+                </router-link>
+              </li>
 
-            <li v-if="specimen.id > 0">
-              <router-link :to="getRoute('Forms')">
-                <span v-t="'common.forms'">Forms</span>
-              </router-link>
-            </li>
+              <li v-if="specimen.id > 0">
+                <router-link :to="getRoute('Forms')">
+                  <span v-t="'common.forms'">Forms</span>
+                </router-link>
+              </li>
 
-            <os-plugin-views page="specimen-detail" view="tab-menu" />
-          </ul>
-        </os-tab-menu>
+              <os-plugin-views page="specimen-detail" view="tab-menu" />
+            </ul>
+          </os-tab-menu>
+        </template>
 
-        <os-side-menu v-else>
-          <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
-              <router-link :to="getRoute('Overview')">
-                <os-icon name="eye" />
-              </router-link>
-            </li>
-
-            <os-plugin-views page="specimen-detail" view="side-menu" />
-          </ul>
-        </os-side-menu>
-
-        <router-view :cpr="cpr" :visit="visit" :specimen="specimen"
-          v-if="specimen && (specimen.id > 0 || specimen.reqId > 0)" />
-      </div>
+        <template #content>
+          <router-view :cpr="cpr" :visit="visit" :specimen="specimen"
+            v-if="specimen && (specimen.id > 0 || specimen.reqId > 0)" />
+        </template>
+      </os-detail-view>
     </os-page-body>
   </os-page>
 </template>

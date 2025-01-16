@@ -1,6 +1,6 @@
 
 <template>
-  <router-view :cpr="cpr" :key="cpr.id || -1" />
+  <router-view :cpr="cpr" :key="key" v-if="(!cprId || cprId <= 0) || (cpr && cpr.id > 0)" />
 </template>
 
 <script>
@@ -11,7 +11,7 @@ import formUtil from '@/common/services/FormUtil.js';
 import cprSvc   from '@/biospecimen/services/Cpr.js';
 
 export default {
-  props: ['cprId'],
+  props: ['cprId', 'op'],
 
   inject: ['cpViewCtx'],
 
@@ -26,12 +26,18 @@ export default {
   },
 
   watch: {
-    cprId: async function(newVal, oldVal) {
-      if (newVal == oldVal || newVal == this.cpr.id) {
+    key: async function(newVal, oldVal) {
+      if (newVal == oldVal) {
         return;
       }
 
       this._setupCpr();
+    }
+  },
+
+  computed: {
+    key: function() {
+      return this.cprId + '_' + (this.op || 'view');
     }
   },
 

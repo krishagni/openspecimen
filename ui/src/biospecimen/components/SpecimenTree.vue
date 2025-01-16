@@ -245,10 +245,10 @@ export default {
 
     onScroll: function() {
       const treeEl = this.$refs.specimenTree.$el;
-      if (treeEl.getBoundingClientRect().top <= 100) {
+      if (treeEl.getBoundingClientRect().top <= 167) {
         const width = treeEl.offsetWidth + 'px';
         const height = 'calc(100% - 120px)';
-        Object.assign(treeEl.style, {position: 'fixed', top: '100px', width, height, overflow: 'scroll'});
+        Object.assign(treeEl.style, {position: 'fixed', top: '167px', width, height, overflow: 'scroll'});
         this.panelFixed = true;
       }
     },
@@ -357,7 +357,7 @@ export default {
 .scroll-top {
   position: absolute;
   right: 1rem;
-  bottom: 1rem;
+  bottom: 4rem;
   padding: 0.25rem 0.5rem;
   font-size: 1.5rem!important;
   height: 2.625rem!important;

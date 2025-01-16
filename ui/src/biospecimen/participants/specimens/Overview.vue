@@ -1,36 +1,36 @@
 
 <template>
-  <os-page-toolbar>
-    <template #default>
-      <span v-if="specimen.id > 0">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')"
-          @click="edit" v-if="isAnyUserUpdateAllowed" />
-
-        <os-menu icon="plus" :label="$t('common.buttons.create')"
-          :options="[
-            {icon: 'flask',     caption: $t('specimens.derived'),  onSelect: createDerivatives},
-            {icon: 'share-alt', caption: $t('specimens.aliquots'), onSelect: createAliquots}
-          ]"
-
-          v-if="specimen.availabilityStatus == 'Available' && isCreateChildrenAllowed"
-        />
-
-        <os-button left-icon="print" :label="$t('common.buttons.print')"
-          @click="confirmPrint" v-if="isPrintAllowed" />
-
-        <os-add-to-cart :specimens="[{id: specimen.id}]" />
-
-        <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
-          :lazy-load="true" @menu-toggled="loadEventForms"
-          v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
-
-        <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
-      </span>
-    </template>
-  </os-page-toolbar>
-
   <os-grid>
-    <os-grid-column width="8">
+    <os-grid-column width="8" style="overflow-y: auto;">
+      <os-page-toolbar>
+        <template #default>
+          <span v-if="specimen.id > 0">
+            <os-button left-icon="edit" :label="$t('common.buttons.edit')"
+              @click="edit" v-if="isAnyUserUpdateAllowed" />
+
+            <os-menu icon="plus" :label="$t('common.buttons.create')"
+              :options="[
+                {icon: 'flask',     caption: $t('specimens.derived'),  onSelect: createDerivatives},
+                {icon: 'share-alt', caption: $t('specimens.aliquots'), onSelect: createAliquots}
+              ]"
+
+              v-if="specimen.availabilityStatus == 'Available' && isCreateChildrenAllowed"
+            />
+
+            <os-button left-icon="print" :label="$t('common.buttons.print')"
+              @click="confirmPrint" v-if="isPrintAllowed" />
+
+            <os-add-to-cart :specimens="[{id: specimen.id}]" />
+
+            <os-menu left-icon="plus" :label="$t('specimens.add_event')" :options="ctx.eventForms"
+              :lazy-load="true" @menu-toggled="loadEventForms"
+              v-if="specimen.availabilityStatus == 'Available' && isUpdateAllowed" />
+
+            <os-menu :label="$t('common.buttons.more')" :options="moreOptions" v-if="moreOptions.length > 0"/>
+          </span>
+        </template>
+      </os-page-toolbar>
+
       <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
 
       <SpecimenTree :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimen="ctx.specimen" :specimens="ctx.children"

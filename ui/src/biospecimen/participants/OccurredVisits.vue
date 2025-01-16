@@ -256,10 +256,6 @@ export default {
 </script>
 
 <style scoped>
-.os-occurred-visits-tab :deep(.os-list .results .results-inner) {
-  padding-right: 0rem;
-}
-
 .os-occurred-visits-tab :deep(table.p-datatable-table) {
   border: 0px;
   border-collapse: separate;

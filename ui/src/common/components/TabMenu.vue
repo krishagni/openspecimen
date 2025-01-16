@@ -17,24 +17,21 @@
 
 .os-tab-menu :deep(ul li) {
   display: inline-block;
-  padding: 0rem 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.os-tab-menu :deep(ul li:has(> a.router-link-active)) {
+  border-bottom: 4px solid #428bca;
 }
 
 .os-tab-menu :deep(ul li a) {
   color: initial;
   text-decoration: none;
+  padding: 0.75rem 1rem;
 }
 
 .os-tab-menu :deep(ul li a.router-link-active) {
   color: #428bca;
-}
-
-.os-tab-menu :deep(ul li a.router-link-active:after) {
-  content: ' ';
-  display: block;
-  color: #428bca;
-  border-bottom: 4px solid #428bca;
-  margin: 0rem -1rem;
 }
 
 .os-tab-menu + :deep(div) {

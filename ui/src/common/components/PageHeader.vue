@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-page-header" :class="{'no-border': noNavButton == true}">
+  <div class="os-page-header" :class="{'no-border': noNavButton == true || borderless == true}">
     <sidebar class="os-sidenav" v-model:visible="showNav" :showCloseIcon="false" :dismissable="true">
       <div class="header">
         <div class="nav-button">
@@ -53,7 +53,7 @@ import homePageSvc from '@/common/services/HomePageService.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
-  props: ['noNavButton', 'showBreadcrumb'],
+  props: ['noNavButton', 'showBreadcrumb', 'borderless'],
 
   inject: ['ui'],
 

@@ -60,7 +60,7 @@ export default {
 <style scoped>
 .os-specimen-events .event {
   display: flex;
-  margin-bottom: 1rem;
+  margin: 0rem 1rem 1rem 1rem;
   padding: 0.5rem;
   border: 0px solid #ddd;
   border-radius: 0.5rem;

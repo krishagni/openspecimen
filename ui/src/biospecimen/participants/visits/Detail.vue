@@ -1,6 +1,6 @@
 <template>
   <os-page>
-    <os-page-head :noNavButton="noNavButton" :showBreadcrumb="true">
+    <os-page-head :showBreadcrumb="true">
       <template #breadcrumb>
         <os-breadcrumb :items="bcrumb" />
       </template>
@@ -21,39 +21,43 @@
       </span>
     </os-page-head>
     <os-page-body>
-      <div>
-        <os-tab-menu v-if="noNavButton">
-          <ul>
-            <li>
-              <router-link :to="getRoute('Overview')">
-                <span v-t="'common.overview'">Overview</span>
-              </router-link>
-            </li>
+      <os-detail-view>
+        <template #tabs>
+          <os-tab-menu v-if="noNavButton">
+            <ul>
+              <li>
+                <router-link :to="getRoute('Overview')">
+                  <span v-t="'common.overview'">Overview</span>
+                </router-link>
+              </li>
 
-            <li v-if="!ctx.cp.consentsWaived && ctx.cp.visitLevelConsents && hasEc">
-              <router-link :to="getRoute('Consents')">
-                <span v-t="'participant_consents.list'">Consents</span>
-              </router-link>
-            </li>
+              <li v-if="!ctx.cp.consentsWaived && ctx.cp.visitLevelConsents && hasEc">
+                <router-link :to="getRoute('Consents')">
+                  <span v-t="'participant_consents.list'">Consents</span>
+                </router-link>
+              </li>
 
-            <li v-if="ctx.showSpr && visit.status == 'Complete'">
-              <router-link :to="getRoute('Report')">
-                <span v-t="'visits.path_report'">Path Report</span>
-              </router-link>
-            </li>
+              <li v-if="ctx.showSpr && visit.status == 'Complete'">
+                <router-link :to="getRoute('Report')">
+                  <span v-t="'visits.path_report'">Path Report</span>
+                </router-link>
+              </li>
 
-            <li v-if="visit.id > 0">
-              <router-link :to="getRoute('Forms')">
-                <span v-t="'common.forms'">Forms</span>
-              </router-link>
-            </li>
+              <li v-if="visit.id > 0">
+                <router-link :to="getRoute('Forms')">
+                  <span v-t="'common.forms'">Forms</span>
+                </router-link>
+              </li>
 
-            <os-plugin-views page="visit-detail" view="tab-menu" />
-          </ul>
-        </os-tab-menu>
+              <os-plugin-views page="visit-detail" view="tab-menu" />
+            </ul>
+          </os-tab-menu>
+        </template>
 
-        <router-view :cpr="cpr" :visit="visit" v-if="visit && (visit.id > 0 || visit.eventId > 0)" />
-      </div>
+        <template #content>
+          <router-view :cpr="cpr" :visit="visit" v-if="visit && (visit.id > 0 || visit.eventId > 0)" />
+        </template>
+      </os-detail-view>
     </os-page-body>
   </os-page>
 </template>

@@ -27,6 +27,7 @@ import ContainerSelector from './ContainerSelector.vue';
 import CpsAndGroups from '@/common/components/CpsAndGroups.vue';
 import DatePicker from './DatePicker.vue';
 import DeleteObject from './DeleteObject.vue';
+import DetailView from './DetailView.vue';
 import Dialog from './Dialog.vue';
 import Divider from './Divider.vue';
 import Dropdown from './Dropdown.vue';
@@ -141,6 +142,7 @@ export default {
     app.component('os-cp-n-groups',      CpsAndGroups);
     app.component('os-date-picker',      DatePicker);
     app.component('os-delete-object',    DeleteObject);
+    app.component('os-detail-view',      DetailView);
     app.component('os-dialog',           Dialog);
     app.component('os-divider',          Divider);
     app.component('os-dropdown',         Dropdown);
