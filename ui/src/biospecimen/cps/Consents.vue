@@ -278,6 +278,7 @@ export default {
 <style scoped>
 .os-consents {
   height: 100%;
+  padding: 0.5rem 1rem;
 }
 
 .os-consents :deep(.os-card) {
