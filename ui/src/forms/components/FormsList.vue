@@ -7,6 +7,15 @@
       <os-menu left-icon="plus" :label="$t('forms.survey_mode')" :options="surveys"
         :lazy-load="true" v-if="surveys.length > 0" />
     </template>
+
+    <template #right v-if="filledFormsList.length > 1">
+      <os-menu class="filter-btn" left-icon="search"
+        :label="selectedForm ? selectedForm.formCaption : $t('forms.search_records')"
+        :options="filledFormsList" />
+
+      <os-button left-icon="times" :label="$t('forms.clear_filter')" @click="selectedForm = null"
+        v-if="selectedForm && selectedForm.formId > 0" />
+    </template>
   </os-page-toolbar>
 
   <os-grid>
@@ -17,7 +26,7 @@
 
       <os-list-view v-else
         class="os-list-shadowed-rows records-list"
-        :data="records"
+        :data="recordsList"
         :schema="{columns: recordFields}"
         :expanded="expanded"
         :showRowActions="true"
@@ -79,7 +88,9 @@ export default {
 
       records: [],
 
-      expanded: []
+      expanded: [],
+
+      selectedForm: null
     }
   },
 
@@ -110,6 +121,26 @@ export default {
     formsList: function() {
       return (this.forms || []).filter(form => !form.sysForm && (form.noOfRecords == 0 || form.multiRecord))
         .map(form => ({caption: form.formCaption, onSelect: () => this.addRecord(form)}));
+    },
+
+    filledFormsList: function() {
+      const formsMap = {};
+      for (const record of this.records) {
+        if (!formsMap[record.formId]) {
+          formsMap[record.formId] = {formId: record.formId, formCaption: record.formCaption};
+        }
+      }
+
+      return Object.values(formsMap)
+        .map(form => ({caption: form.formCaption, onSelect: () => this.selectedForm = form}));
+    },
+
+    recordsList: function() {
+      if (this.selectedForm && this.selectedForm.formId > 0) {
+        return this.records.filter(({formId}) => formId == this.selectedForm.formId);
+      }
+
+      return this.records;
     },
 
     recordFields: function() {
@@ -256,5 +287,12 @@ export default {
 
 .records-list .toolbar :deep(.btn) {
   margin-right: 0.5rem;
+}
+
+:deep(.filter-btn) {
+  max-width: 300px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>

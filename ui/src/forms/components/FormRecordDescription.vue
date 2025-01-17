@@ -34,8 +34,8 @@ export default {
 
 .status-ball {
   display: inline-block;
-  height: 0.75rem;
-  width: 0.75rem;
+  min-height: 0.75rem;
+  min-width: 0.75rem;
   border-radius: 50%;
   background: #a0a0a0;
   margin-right: 0.5rem;
