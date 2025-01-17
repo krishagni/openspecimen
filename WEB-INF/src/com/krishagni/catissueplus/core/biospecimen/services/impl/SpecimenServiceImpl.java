@@ -678,6 +678,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			input.setStatus(Specimen.COLLECTED);
 
 			Specimen pooledSpmn = saveOrUpdate(input, null, null, null);
+			getLabelPrinter().print(getSpecimenPrintItems(Collections.singleton(pooledSpmn)));
 			return ResponseEvent.response(SpecimenDetail.from(pooledSpmn, false, true));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
