@@ -116,6 +116,8 @@ export default {
         return result;
       }
     );
+
+    this.schema = {filters: this.filters};
   },
 
   watch: {
