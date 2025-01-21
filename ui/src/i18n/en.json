@@ -335,6 +335,8 @@
     "record": "Record",
     "record_deleted": "{type} '{title}' deleted!",
 
+    "select_field": "Select Field",
+    "set_blank_value": "Erase Field Value",
     "signature": {
       "no_signature": "No signature was detected.",
       "saved": "Signature saved."
@@ -1366,6 +1368,8 @@
     "anticipated": "Anticipated",
     "anticipated_visit_date": "Anticipated Visit Date",
     "birth_date": "Birth Date",
+    "bulk_update": "Bulk Update Participants",
+    "bulk_updated": "{count} participants updated.",
     "collect": "Collect",
     "collect_pending_specimens": "Collect Pending Specimens",
     "collect_specimens": "Collect Specimens",
@@ -1407,6 +1411,7 @@
     "new_visit": "New Visit",
     "no_matching_participant": "No matching participant found.",
     "occurred_visits": "Occurred Visits",
+    "one_updated": "One participant updated.",
     "other_registered_cps": "Other Registered Protocols",
     "pending_visits": "Pending Visits",
     "phone_number": "Phone Number",
@@ -2210,6 +2215,9 @@
     "available_quantity_req": "Available Quantity is mandatory",
     "barcode": "Barcode",
     "biohazards": "Biohazards",
+    "bulk_update": "Bulk Update Specimens",
+    "bulk_update_more_time": "Bulk update of specimens is taking more time than anticipated. You will notified by email on completion of the update process.",
+    "bulk_updated": "{count} specimens updated.",
     "checked_out": "Checked Out",
     "checkin": "Checkin",
     "checkin_specimen": "Checkin Specimen",
@@ -2262,6 +2270,7 @@
     "no_print_current_specimen": "No, only this specimen",
     "not_stored": "Not Stored",
     "one_or_more_labels_req": "Scan or type one or more specimen labels separated by comma or newline or tab",
+    "one_updated": "One specimen updated.",
     "parent_specimen": "Parent Specimen",
     "participant": "Participant",
     "pathology_status": "Pathological Status",

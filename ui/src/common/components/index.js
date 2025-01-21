@@ -11,6 +11,7 @@ import Avatar from './Avatar.vue';
 import Badge from './Badge.vue';
 import BooleanCheckbox from './BooleanCheckbox.vue';
 import Breadcrumb from './Breadcrumb.vue';
+import BulkUpdate from './BulkUpdate.vue';
 import Button from './Button.vue';
 import ButtonGroup from './ButtonGroup.vue';
 import ButtonLink from './ButtonLink.vue';
@@ -126,6 +127,7 @@ export default {
     app.component('os-badge',            Badge);
     app.component('os-boolean-checkbox', BooleanCheckbox);
     app.component('os-breadcrumb',       Breadcrumb);
+    app.component('os-bulk-update',      BulkUpdate);
     app.component('os-button',           Button);
     app.component('os-button-group',     ButtonGroup);
     app.component('os-button-link',      ButtonLink);

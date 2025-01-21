@@ -12,6 +12,16 @@ import savedQuerySvc from '@/queries/services/SavedQuery.js';
 export default {
   props: ['queryId'],
 
+  beforeRouteEnter(to, from, next) {
+    const {osQuery} = window;
+    const {route} = osQuery || {};
+    if (!from || route.name != from.name) {
+      delete window.osQuery;
+    }
+
+    next();
+  },
+
   data() {
     return {
       query: null
@@ -19,7 +29,14 @@ export default {
   },
 
   created() {
-    this._loadQuery();
+    const {osQuery} = window;
+    const {query} = osQuery;
+    if (query) {
+      this.query = JSON.parse(query);
+      delete window.osQuery;
+    } else {
+      this._loadQuery();
+    }
   },
 
   mounted() {

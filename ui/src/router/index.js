@@ -1185,10 +1185,20 @@ const routes = [
                     ]
                   }
                 ]
+              },
+              {
+                path: 'bulk-edit',
+                name: 'ParticipantsBulkEdit',
+                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/BulkEdit.vue')
               }
             ]
           }
         ]
+      },
+      {
+        path: 'bulk-edit-specimens',
+        name: 'SpecimensBulkEdit',
+        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/BulkEdit.vue')
       },
 
       /*****************************

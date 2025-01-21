@@ -60,7 +60,7 @@
 
           <span v-if="ctx.showAddSpecimens && ctx.selectedRows.length > 0">
             <os-specimen-actions label="queries.specimen_actions"
-              :specimens="selectedSpecimens" @reloadSpecimens="rerun" />
+              :specimens="selectedSpecimens" @reloadSpecimens="rerun" @route-change="saveQueryLocally($event)" />
 
             <os-add-to-cart :specimens="selectedSpecimens" />
           </span>
@@ -225,6 +225,10 @@ export default {
   },
 
   methods: {
+    saveQueryLocally: function(route) {
+      window['osQuery'] = {route, query: JSON.stringify(this.query)};
+    },
+
     editQuery: function() {
       if (this.query.id > 0) {
         routerSvc.goto('QueryDetail.AddEdit', {queryId: this.query.id});

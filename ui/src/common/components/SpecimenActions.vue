@@ -390,8 +390,10 @@ export default {
         return;
       }
 
-      itemsSvc.ngSetItems('specimens', specimens);
-      routerSvc.ngGoto('bulk-edit-specimens');
+      itemsSvc.setItems('specimens', specimens);
+
+      this.$emit('route-change', {name: 'SpecimensBulkEdit'});
+      routerSvc.goto('SpecimensBulkEdit');
     },
 
     printLabels: function() {

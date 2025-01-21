@@ -41,6 +41,11 @@ class CollectionProtocolRegistration {
     }
   }
 
+  async bulkUpdate(cprIds, cpr) {
+    const payload = {ids: cprIds, detail: cpr};
+    return http.put('collection-protocol-registrations/bulk-update', payload);
+  }
+
   async deleteCpr(cprId, forceDelete, reason) {
     return http.delete('collection-protocol-registrations/' + cprId, {}, {forceDelete, reason});
   }

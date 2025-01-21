@@ -296,8 +296,8 @@ export default {
     },
 
     editParticipants: function() {
-      itemsSvc.ngSetItems('participants', this.ctx.selectedItems.map(({cprId}) => ({id: cprId})));
-      routerSvc.ngGoto('cp-view/' + this.ctx.cp.id + '/bulk-edit');
+      itemsSvc.setItems('participants', this.ctx.selectedItems.map(({cprId}) => ({id: cprId})));
+      routerSvc.goto('ParticipantsBulkEdit', {cpId: this.ctx.cp.id});
     },
 
     deleteParticipants: function() {

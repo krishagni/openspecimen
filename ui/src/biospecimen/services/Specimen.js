@@ -79,6 +79,12 @@ class Specimen {
     return http.put('specimens', specimens);
   }
 
+  /* Used by bulk edit UI. Should not be used by other components. Use above bulkUpdate() function */
+  async bulkEdit(spmnIds, specimen) {
+    const payload = {ids: spmnIds, detail: specimen};
+    return http.put('specimens/bulk-update', payload);
+  }
+
   async bulkDelete(specimenIds, reason) {
     return http.delete('specimens', {}, {id: specimenIds, reason: reason})
   }
