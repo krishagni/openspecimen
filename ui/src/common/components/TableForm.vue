@@ -75,9 +75,14 @@
                 @change="toggleSelection(itemIdx)" v-else />
             </td>
 
-            <td class="selection" v-else-if="removeItems == true">
-              <os-button size="small" left-icon="times" @click="removeItem(itemIdx)"
-                v-os-tooltip.bottom="$t('workflows.buttons.remove')" />
+            <td class="selection" v-else-if="removeItems == true || copyItems == true">
+              <os-button-group style="min-width: 5rem;">
+                <os-button size="small" left-icon="copy" @click="copyItem(itemIdx)"
+                  v-os-tooltip.bottom="$t('common.buttons.copy')" v-if="copyItems == true" />
+
+                <os-button size="small" left-icon="times" @click="removeItem(itemIdx)"
+                  v-os-tooltip.bottom="$t('workflows.buttons.remove')" v-if="removeItems == true"/>
+              </os-button-group>
             </td>
 
             <td v-if="firstColumn" :class="stickyColumn" @click="rowClicked(itemModel.$context)">
