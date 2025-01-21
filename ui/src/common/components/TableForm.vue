@@ -247,8 +247,15 @@ export default {
     stickyColumn: function() {
       if (this.readOnly && (this.selectionMode == 'radio' || this.selectionMode == 'checkbox')) {
         return ['sticky', 'left-offset'];
-      } else if (this.removeItems == true) {
-        return ['sticky', 'remove-btn-left-offset'];
+      } else if (this.removeItems == true || this.copyItems == true) {
+        const result = ['sticky'];
+        if (this.removeItems == true && this.copyItems == true) {
+          result.push('two-btn-left-offset');
+        } else {
+          result.push('one-btn-left-offset');
+        }
+
+        return result;
       } else {
         return ['sticky']
       }
@@ -801,11 +808,18 @@ table :deep(td.sticky.left-offset) {
   left: 35px;
 }
 
-table th.sticky.remove-btn-left-offset,
-table :deep(th.sticky.remove-btn-left-offset),
-table td.sticky.remove-btn-left-offset,
-table :deep(td.sticky.remove-btn-left-offset) {
+table th.sticky.one-btn-left-offset,
+table :deep(th.sticky.one-btn-left-offset),
+table td.sticky.one-btn-left-offset,
+table :deep(td.sticky.one-btn-left-offset) {
   left: 43px;
+}
+
+table th.sticky.two-btn-left-offset,
+table :deep(th.sticky.two-btn-left-offset),
+table td.sticky.two-btn-left-offset,
+table :deep(td.sticky.two-btn-left-offset) {
+  left: 86px;
 }
 
 table td .field-container {
