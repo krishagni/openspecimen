@@ -15,7 +15,7 @@ export default {
   beforeRouteEnter(to, from, next) {
     const {osQuery} = window;
     const {route} = osQuery || {};
-    if (!from || route.name != from.name) {
+    if (!from || !route || route.name != from.name) {
       delete window.osQuery;
     }
 
