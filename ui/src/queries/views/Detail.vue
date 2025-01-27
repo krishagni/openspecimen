@@ -30,7 +30,7 @@ export default {
 
   created() {
     const {osQuery} = window;
-    const {query} = osQuery;
+    const {query} = osQuery || {};
     if (query) {
       this.query = JSON.parse(query);
       delete window.osQuery;
