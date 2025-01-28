@@ -68,11 +68,10 @@ export default {
 
   async created() {
     const listId = this.listId = {listName: this.name, objectId: this.objectId};
-
-    const cache = {};
     this.config = await http.get('lists/config', listId);
 
-    this.filters = (this.config.filters || []).map(
+    const cache = {};
+    this.schema.filters = this.filters = (this.config.filters || []).map(
       (filter) => {
         const result = { name: filter.expr, caption: filter.caption };
         if (filter.dataType == 'STRING') {
@@ -116,8 +115,6 @@ export default {
         return result;
       }
     );
-
-    this.schema = {filters: this.filters};
   },
 
   watch: {
