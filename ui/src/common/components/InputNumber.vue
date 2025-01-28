@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-input-number" tabindex="-1">
+  <div class="os-input-number" :class="$attrs['md-type'] && 'md-type'" tabindex="-1">
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <InputNumber v-model="inputValue" :mode="'decimal'" :tabindex="tabOrder"
         :input-props="{disabled}" :minFractionDigits="maxFractionDigits"
@@ -12,6 +12,9 @@
         :mode="'decimal'" :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits"
         :input-props="{disabled}" />
     </div>
+    <div class="unit" v-if="unit">
+      <span>{{unit}}</span>
+    </div>
   </div>
 </template>
 
@@ -19,7 +22,7 @@
 import InputNumber from 'primevue/inputnumber';
 
 export default {
-  props: ['modelValue', 'maxFractionDigits', 'tabOrder', 'disabled'],
+  props: ['modelValue', 'maxFractionDigits', 'tabOrder', 'disabled', 'unit'],
 
   components: {
     InputNumber
@@ -86,5 +89,28 @@ export default {
 
 .os-input-number :deep(.p-inputnumber) {
   width: 100%;
+}
+
+.os-input-number:has(.unit) {
+  position: relative;
+}
+
+.os-input-number .unit {
+  position: absolute;
+  top: 0rem;
+  bottom: 0rem;
+  right: 0rem;
+  padding: 0.5rem;
+  background: #ddd;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border: 1px solid #ced4da;
+  border-left: 0;
+}
+
+.os-input-number.md-type .unit {
+  background: transparent;
+  border: 0;
+  padding: 2px;
 }
 </style>

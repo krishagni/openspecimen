@@ -36,7 +36,7 @@ class Form {
     record.appData = record.appData || {};
     let formId = record.appData.formId;
     if (!formId) {
-      alert('Unknown form ID. Maybe a bug in the UI contact. Contact the system administrator');
+      alert('Unknown form ID. Maybe a bug in the UI form setup. Contact the system administrator');
       alert(JSON.stringify(record));
       return;
     }

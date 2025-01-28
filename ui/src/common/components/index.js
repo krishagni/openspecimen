@@ -1,5 +1,6 @@
 import Accordion from './Accordion.vue';
 import AccordionTab from './AccordionTab.vue';
+import ActivityCardsList from './ActivityCardsList.vue';
 import AddItems from './AddItems.vue';
 import AddSpecimens from './AddSpecimens.vue';
 import AddToCart from './AddToCart.vue';
@@ -10,6 +11,7 @@ import AuditTrail from './AuditTrail.vue';
 import Avatar from './Avatar.vue';
 import Badge from './Badge.vue';
 import BooleanCheckbox from './BooleanCheckbox.vue';
+import BoxLayout from './BoxLayout.vue';
 import Breadcrumb from './Breadcrumb.vue';
 import BulkUpdate from './BulkUpdate.vue';
 import Button from './Button.vue';
@@ -115,6 +117,7 @@ export default {
   install(app) {
     app.component('os-accordion',        Accordion);
     app.component('os-accordion-tab',    AccordionTab);
+    app.component('os-activity-cards',   ActivityCardsList);
     app.component('os-add-items',        AddItems);
     app.component('os-add-specimens',    AddSpecimens);
     app.component('os-add-to-cart',      AddToCart);
@@ -126,6 +129,7 @@ export default {
     app.component('os-avatar',           Avatar);
     app.component('os-badge',            Badge);
     app.component('os-boolean-checkbox', BooleanCheckbox);
+    app.component('os-box-layout',       BoxLayout);
     app.component('os-breadcrumb',       Breadcrumb);
     app.component('os-bulk-update',      BulkUpdate);
     app.component('os-button',           Button);
