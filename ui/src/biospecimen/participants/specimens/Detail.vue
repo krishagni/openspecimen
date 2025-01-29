@@ -26,32 +26,30 @@
       </span>
     </os-page-head>
     <os-page-body>
-      <os-detail-view>
-        <template #tabs>
-          <os-tab-menu>
-            <ul>
-              <li>
-                <router-link :to="getRoute('Overview')">
-                  <span v-t="'common.overview'">Overview</span>
-                </router-link>
-              </li>
+      <div>
+        <os-side-menu>
+          <ul>
+            <li>
+              <router-link :to="getRoute('Overview')">
+                <os-icon name="eye" />
+                <span class="label" v-t="'common.overview'">Overview</span>
+              </router-link>
+            </li>
 
-              <li v-if="specimen.id > 0">
-                <router-link :to="getRoute('Forms')">
-                  <span v-t="'common.forms'">Forms</span>
-                </router-link>
-              </li>
+            <li v-if="specimen.id > 0">
+              <router-link :to="getRoute('Forms')">
+                <os-icon name="file-alt" />
+                <span class="label" v-t="'common.forms'">Forms</span>
+              </router-link>
+            </li>
 
-              <os-plugin-views page="specimen-detail" view="tab-menu" />
-            </ul>
-          </os-tab-menu>
-        </template>
+            <os-plugin-views page="specimen-detail" view="tab-menu" />
+          </ul>
+        </os-side-menu>
 
-        <template #content>
-          <router-view :cpr="cpr" :visit="visit" :specimen="specimen"
-            v-if="specimen && (specimen.id > 0 || specimen.reqId > 0)" />
-        </template>
-      </os-detail-view>
+        <router-view :cpr="cpr" :visit="visit" :specimen="specimen"
+          v-if="specimen && (specimen.id > 0 || specimen.reqId > 0)" />
+      </div>
     </os-page-body>
   </os-page>
 </template>

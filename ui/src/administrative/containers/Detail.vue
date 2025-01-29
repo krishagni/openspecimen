@@ -20,31 +20,35 @@
       <div>
         <os-side-menu>
           <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
+            <li>
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
+                <span class="label" v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.locations')" v-if="ctx.container.activityStatus == 'Active'">
+            <li v-if="ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Locations')">
                 <os-icon name="map" />
+                <span class="label" v-t="'containers.locations'">Locations</span>
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.specimens')" v-if="ctx.container.activityStatus == 'Active'">
+            <li v-if="ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
+                <span class="label" v-t="'containers.specimens'">Specimens</span>
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.transfer_events')">
+            <li>
               <router-link :to="getRoute('TransferEvents')">
                 <os-icon name="arrows-alt-h" />
+                <span class="label" v-t="'containers.transfer_events'">Transfer</span>
               </router-link>
             </li>
-            <li v-os-tooltip.right="$t('containers.maintenance')"
-              v-if="!ctx.container.storageLocation || !ctx.container.storageLocation.id &&
-                    ctx.container.activityStatus == 'Active'">
+            <li v-if="!ctx.container.storageLocation || !ctx.container.storageLocation.id &&
+              ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Maintenance')">
                 <os-icon name="calendar" />
+                <span class="label" v-t="'containers.maintenance'">Maintenance</span>
               </router-link>
             </li>
           </ul>

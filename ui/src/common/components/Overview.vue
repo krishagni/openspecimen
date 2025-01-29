@@ -130,7 +130,7 @@ export default {
 
   computed: {
     listClass: function() {
-      const classes = ['os-key-values'];
+      const classes = ['os-key-value-pairs'];
       classes.push(this.columns == 1 ? 'os-one-col' : 'os-two-cols');
       if (util.isTrue(this.bgCol)) {
         classes.push('bg-col');
@@ -387,4 +387,78 @@ export default {
   white-space: break-spaces;
 }
 
+.os-key-value-pairs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style-type: none;
+  padding: 0rem;
+  margin: 1.25rem auto;
+}
+
+.os-key-value-pairs.os-one-col {
+  flex-wrap: initial;
+  flex-direction: column;
+}
+
+.os-key-value-pairs .item {
+  display: flex;
+  flex: 1 1 350px;
+  align-items: center;
+  min-width: 350px;
+}
+
+.os-key-value-pairs.os-one-col .item {
+  flex: auto;
+}
+
+.os-key-value-pairs.bg-col:not(.os-one-col) .item {
+  flex: 1 1 700px;
+  min-width: 700px;
+}
+
+.os-key-value-pairs.os-one-col .item .key {
+  width: 150px;
+}
+
+.os-key-value-pairs:not(.os-one-col) .item .key {
+  flex: 0 0 150px;
+}
+
+.os-key-value-pairs.md-col.os-one-col .item {
+  width: 580px;
+  min-width: 580px;
+}
+
+.os-key-value-pairs.md-col:not(.os-one-col) .item {
+  flex: 1 1 580px;
+  min-width: 580px;
+}
+
+.os-key-value-pairs .item .key {
+  color: #707070;
+  font-weight: normal;
+}
+
+.os-key-value-pairs.bg-col.os-one-col .item .key {
+  width: 300px;
+}
+
+.os-key-value-pairs.bg-col:not(.os-one-col) .item .key {
+  flex: 0 0 300px;
+}
+
+.os-key-value-pairs.md-col.os-one-col .item .key {
+  width: 250px;
+}
+
+.os-key-value-pairs.md-col:not(.os-one-col) .item .key {
+  flex: 0 0 250px;
+}
+
+.os-key-value-paris .item .value {
+  flex: 1;
+  word-wrap: break-word;
+  max-width: 100%;
+}
 </style>

@@ -23,6 +23,13 @@ export default {
   left: 0px;
   width: 54px;
   border-right: 1px solid #ddd;
+  transition: width 0.3s ease;
+  background: #fff;
+  z-index: 1000;
+}
+
+.os-side-menu:hover {
+  width: 225px;
 }
 
 .os-side-menu :deep(ul) {
@@ -51,14 +58,21 @@ export default {
 }
 
 .os-side-menu :deep(ul li a) {
-  display: block;
+  display: flex;
   color: #232323;
-  height: 100%;
+  height: 3rem;
   width: 100%;
   padding: 15px 5px;
-  text-align: center;
   cursor: pointer;
   text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.os-side-menu :deep(ul li a .os-icon-wrapper) {
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .os-side-menu :deep(ul li a:hover) {
@@ -81,5 +95,19 @@ export default {
 
 .os-side-menu :deep(ul li:first-child a.router-link-active:before) {
   top: 2px;
+}
+
+.os-side-menu:hover :deep(ul li a .os-icon-wrapper) {
+  margin-right: 1rem;
+}
+
+.os-side-menu :deep(ul li a .label) {
+  white-space: nowrap;
+  display: none;
+  transition: visibility 0s, opacity 0.3s ease;
+}
+
+.os-side-menu:hover :deep(ul li a .label) {
+  display: inline;
 }
 </style>

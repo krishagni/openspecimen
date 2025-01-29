@@ -27,5 +27,6 @@ export default {
 <style scoped>
 .os-grid-column {
   height: 100%;
+  overflow-y: auto;
 }
 </style>

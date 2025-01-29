@@ -19,43 +19,44 @@
       </span>
     </os-page-head>
     <os-page-body>
-      <os-detail-view>
-        <template #tabs>
-          <os-tab-menu>
-            <ul>
-              <li>
-                <router-link :to="getRoute('Overview')">
-                  <span v-t="'common.overview'">Overview</span>
-                </router-link>
-              </li>
-              <li v-if="!ctx.cp.specimenCentric">
-                <router-link :to="getRoute('Consents')">
-                  <span v-t="'cps.consents'">Consents</span>
-                </router-link>
-              </li>
-              <li>
-                <router-link :to="getRoute('Events')">
-                  <span v-t="ctx.cp.specimenCentric ? 'cps.reqs': 'cps.events'">Consents</span>
-                </router-link>
-              </li>
-              <li>
-                <router-link :to="getRoute('Settings')">
-                  <span v-t="'cps.settings'">Settings</span>
-                </router-link>
-              </li>
-              <li v-if="ctx.versioningEnabled">
-                <router-link :to="getRoute('Revisions')">
-                  <span v-t="'cps.revisions'"></span>
-                </router-link>
-              </li>
-            </ul>
-          </os-tab-menu>
-        </template>
+      <div>
+        <os-side-menu>
+          <ul>
+            <li>
+              <router-link :to="getRoute('Overview')">
+                <os-icon name="eye" />
+                <span class="label" v-t="'common.overview'">Overview</span>
+              </router-link>
+            </li>
+            <li v-if="!ctx.cp.specimenCentric">
+              <router-link :to="getRoute('Consents')">
+                <os-icon name="file-signature" />
+                <span class="label" v-t="'cps.consents'">Consents</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link :to="getRoute('Events')">
+                <os-icon name="calendar" />
+                <span class="label" v-t="'cps.events'">Events</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link :to="getRoute('Settings')">
+                <os-icon name="cogs" />
+                <span class="label" v-t="'cps.settings'">Settings</span>
+              </router-link>
+            </li>
+            <li v-if="ctx.versioningEnabled">
+              <router-link :to="getRoute('Revisions')">
+                <os-icon name="history" />
+                <span class="label" v-t="'cps.revisions'">Revisions</span>
+              </router-link>
+            </li>
+          </ul>
+        </os-side-menu>
 
-        <template #content>
-          <router-view :cp="ctx.cp" v-if="ctx.cp && ctx.cp.id > 0" @cp-saved="loadCp" :key="ctx.cp.id" />
-        </template>
-      </os-detail-view>
+        <router-view :cp="ctx.cp" v-if="ctx.cp && ctx.cp.id > 0" @cp-saved="loadCp" :key="ctx.cp.id" />
+      </div>
     </os-page-body>
   </os-page>
 </template>
