@@ -70,7 +70,7 @@
 
   <os-grid>
     <os-grid-column width="12">
-      <os-overview :schema="userSchema.fields" :object="ctx" />
+      <os-overview :schema="userSchema.fields" :object="ctx" :col-type="'md'"/>
     </os-grid-column>
   </os-grid>
 

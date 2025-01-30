@@ -28,7 +28,7 @@
 
   <os-grid>
     <os-grid-column width="12">
-      <os-overview :schema="ctx.dict" :object="ctx" v-if="ctx.dict.length > 0" />
+      <os-overview :schema="ctx.dict" :columns="1" :object="ctx" v-if="ctx.dict.length > 0" />
     </os-grid-column>
   </os-grid>
 

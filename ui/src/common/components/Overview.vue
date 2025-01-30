@@ -388,75 +388,73 @@ export default {
 }
 
 .os-key-value-pairs {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 0.5rem;
   list-style-type: none;
   padding: 0rem;
   margin: 1.25rem auto;
 }
 
-.os-key-value-pairs.os-one-col {
-  flex-wrap: initial;
-  flex-direction: column;
+/* Width of a medium column is 250px for key and 330px for value = 580px */
+.os-key-value-pairs.md-col {
+  grid-template-columns: repeat(auto-fit, minmax(580px, 1fr));
+}
+
+/* Width of a big column is 300px for key and 400px for value = 700px */
+.os-key-value-pairs.bg-col {
+  grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+}
+
+/* Width of a XL column is 400px for key and 530px for value = 930px */
+.os-key-value-pairs.xl-col {
+  grid-template-columns: repeat(auto-fit, minmax(930px, 1fr));
+}
+
+.os-key-value-pairs.os-one-col,
+.os-key-value-pairs.md-col.os-one-col,
+.os-key-value-pairs.bg-col.os-one-col,
+.os-key-value-pairs.xl-col.os-one-col {
+  grid-template-columns: 1fr;
 }
 
 .os-key-value-pairs .item {
   display: flex;
-  flex: 1 1 350px;
   align-items: center;
   min-width: 350px;
 }
 
-.os-key-value-pairs.os-one-col .item {
-  flex: auto;
+.os-key-value-pairs.md-col .item {
+  min-width: 580px;
 }
 
-.os-key-value-pairs.bg-col:not(.os-one-col) .item {
-  flex: 1 1 700px;
+.os-key-value-pairs.bg-col .item {
   min-width: 700px;
 }
 
-.os-key-value-pairs.os-one-col .item .key {
-  width: 150px;
-}
-
-.os-key-value-pairs:not(.os-one-col) .item .key {
-  flex: 0 0 150px;
-}
-
-.os-key-value-pairs.md-col.os-one-col .item {
-  width: 580px;
-  min-width: 580px;
-}
-
-.os-key-value-pairs.md-col:not(.os-one-col) .item {
-  flex: 1 1 580px;
-  min-width: 580px;
+.os-key-value-pairs.bg-col .item {
+  min-width: 930px;
 }
 
 .os-key-value-pairs .item .key {
   color: #707070;
   font-weight: normal;
+  width: 150px;
 }
 
-.os-key-value-pairs.bg-col.os-one-col .item .key {
-  width: 300px;
-}
-
-.os-key-value-pairs.bg-col:not(.os-one-col) .item .key {
-  flex: 0 0 300px;
-}
-
-.os-key-value-pairs.md-col.os-one-col .item .key {
+.os-key-value-pairs.md-col .item .key {
   width: 250px;
 }
 
-.os-key-value-pairs.md-col:not(.os-one-col) .item .key {
-  flex: 0 0 250px;
+.os-key-value-pairs.bg-col .item .key {
+  width: 300px;
 }
 
-.os-key-value-paris .item .value {
+.os-key-value-pairs.xl-col .item .key {
+  width: 400px;
+}
+
+.os-key-value-pairs .item .value {
   flex: 1;
   word-wrap: break-word;
   max-width: 100%;
