@@ -1,62 +1,92 @@
 <template>
-  <os-page-toolbar>
-    <template #default v-show-if-allowed="cpResources.updateOpts">
-      <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addEvent"
-        v-if="!cp.specimenCentric" />
-
-      <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(ctx.events[0].cpe)" v-else-if="hasReqs" />
-    </template>
-  </os-page-toolbar>
-
-  <div class="os-cp-events-tab">
-    <os-list-view class="os-muted-list-header"
-      :class="cp.specimenCentric ? ['os-cp-hide-events'] : []"
-      :data="ctx.events"
-      :schema="eventsListSchema"
-      :expanded="ctx.expandedEvents"
-      :showRowActions="true"
-      @rowClicked="onEventRowClick"
-      ref="listView">
-
-      <template #rowActions="{rowObject}" v-show-if-allowed="cpResources.updateOpts">
-        <os-button-group>
-          <os-menu icon="ellipsis-v" :lazy-load="true" :options="eventOps(rowObject)" />
-        </os-button-group>
-      </template>
-
-      <template class="event-details" #expansionRow="{rowObject: {cpe}}">
-        <os-table-form class="os-cp-reqs-tab" ref="reqsTable" :tree-layout="true" :read-only="true"
-          :data="{}" :items="cpe.reqs" :expanded="ctx.expandedReqs"
-          :schema="reqsListSchema" :show-row-actions="true"
-          @row-clicked="onReqClick($event.item)" v-if="cpe.reqs && cpe.reqs.length > 0">
-
-          <template #row-actions="{rowItem}" v-show-if-allowed="cpResources.updateOpts">
-            <os-menu icon="ellipsis-v" :lazy-load="true" :options="reqOps(cpe, rowItem.item)" />
-          </template>
-
-          <template #expanded-row>
-            <os-overview :schema="reqSchema.fields" :object="reqCtx" />
-          </template>
-        </os-table-form>
-
-        <div v-else-if="cpe.reqs && cpe.reqs.length == 0">
-          <div v-if="cpe.activityStatus == 'Active'">
-            <os-message type="info">
-              <span v-t="'cps.no_reqs_add_new'">No specimen requirements to show. Create a new specimen requirement by click on the Add Requirement button below</span>
-            </os-message>
-
-            <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(cpe)" />
+  <os-grid v-if="ctx.events && ctx.events.length > 0">
+    <os-grid-column :width="3" v-if="!cp.specimenCentric">
+      <os-list-group :list="ctx.events" :selected="ctx.selectedEvent" @on-item-select="onEventSelect($event.item)">
+        <template #header>
+          <span v-t="'cps.events'">Events</span>
+        </template>
+        <template #actions>
+          <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addEvent"
+            v-if="!cp.specimenCentric" />
+        </template>
+        <template #default="{item: {cpe}}">
+          <div class="event">
+            <span class="description">
+              <os-visit-event-desc :event="cpe" :show-status="true" />
+            </span>
+            <os-button-group class="actions" @click="onEventOpsClick($event)">
+              <os-menu icon="ellipsis-v" :lazy-load="true" :options="eventOps({cpe})" />
+            </os-button-group>
           </div>
+        </template>
+      </os-list-group>
+    </os-grid-column>
 
-          <div v-else>
-            <os-message type="info">
-              <span v-t="'cps.no_reqs'">No specimen requirements to show.</span>
-            </os-message>
+    <os-grid-column :width="cp.specimenCentric ? 12 : 9">
+      <os-panel class="os-full-height-panel">
+        <template #header>
+          <span v-t="'cps.srs'">Specimen Requirements</span>
+        </template>
+
+        <template #actions v-if="ctx.selectedEvent && ctx.selectedEvent.cpe.id > 0 &&
+          ctx.selectedEvent.cpe.activityStatus == 'Active'">
+          <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(ctx.selectedEvent.cpe)" />
+        </template>
+
+        <template #default>
+          <os-table-form class="os-cp-reqs-tab" ref="reqsTable" :tree-layout="true" :read-only="true"
+            :data="{}" :items="ctx.selectedEvent.cpe.reqs" :expanded="ctx.expandedReqs"
+            :schema="reqsListSchema" :show-row-actions="true"
+            @row-clicked="onReqClick($event.item)"
+            @toggle-node="onToggleNode($event.item)"
+            v-if="ctx.selectedEvent && ctx.selectedEvent.cpe.reqs && ctx.selectedEvent.cpe.reqs.length > 0">
+
+            <template #row-actions="{rowItem}" v-show-if-allowed="cpResources.updateOpts">
+              <os-menu icon="ellipsis-v" :lazy-load="true" :options="reqOps(ctx.selectedEvent.cpe, rowItem.item)" />
+            </template>
+
+            <template #expanded-row>
+              <os-overview :schema="reqSchema.fields" :object="reqCtx" />
+            </template>
+          </os-table-form>
+
+          <div v-else-if="ctx.selectedEvent && ctx.selectedEvent.cpe.reqs && ctx.selectedEvent.cpe.reqs.length == 0">
+            <div v-if="ctx.selectedEvent.cpe.activityStatus == 'Active'">
+              <os-message type="info">
+                <span v-t="'cps.no_reqs_add_new'">No specimen requirements to show. Create a new specimen requirement by click on the Add Requirement button below</span>
+              </os-message>
+
+              <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(ctx.selectedEvent.cpe)" />
+            </div>
+
+            <div v-else>
+              <os-message type="info">
+                <span v-t="'cps.no_reqs'">No specimen requirements to show.</span>
+              </os-message>
+            </div>
           </div>
-        </div>
-      </template>
-    </os-list-view>
-  </div>
+        </template>
+      </os-panel>
+    </os-grid-column>
+  </os-grid>
+
+  <os-grid v-else>
+    <os-grid-column :width="12">
+      <div v-if="ctx.events && ctx.events.length == 0">
+        <os-message type="info">
+          <span v-t="'cps.no_cpes'"></span>
+        </os-message>
+
+        <os-button left-icon="plus" :label="$t('cps.add_cpe')" @click="addEvent" />
+      </div>
+
+      <div v-else>
+        <os-message type="info">
+          <span v-t="'common.loading'">Loading...</span>
+        </os-message>
+      </div>
+    </os-grid-column>
+  </os-grid>
 
   <os-confirm ref="confirmDeleteEventDialog">
     <template #title>
@@ -97,7 +127,6 @@
 
 <script>
 
-import eventsListSchema from '@/biospecimen/schemas/cps/events-list.js';
 import reqsListSchema from '@/biospecimen/schemas/cps/reqs-list.js';
 import reqSchema from '@/biospecimen/schemas/cps/req.js';
 
@@ -110,29 +139,26 @@ import util       from '@/common/services/Util.js';
 import cpResources from './Resources.js';
 
 export default {
-  props: ['cp', 'eventId', 'reqId'],
+  props: ['cp', 'event', 'reqId'],
 
   data() {
     return {
       ctx: {
-        events: [],
+        events: null,
 
-        expandedEvents: [],
+        selectedEvent: null,
 
         expandedReqs: []
       },
 
       cpResources,
 
-      eventsListSchema,
-
       reqSchema
     }
   },
 
   created() {
-    this._loadEvents().then(() => this.autoSelectEvent().then(reqs => this.autoSelectReq(reqs)));
-
+    this._loadEvents().then(({reqs}) => this.autoSelectReq(reqs));
     settingSvc.getSetting('biospecimen', 'enable_spmn_barcoding')
       .then(settings => this.ctx.barcodingEnabled = util.isTrue(settings[0].value));
   },
@@ -144,13 +170,9 @@ export default {
         const {eventId: newEventId, reqId: newReqId} = newVal || {};
 
         if (newEventId != oldEventId) {
-          this.autoSelectEvent().then(
-            (reqs) => {
-              this.autoSelectReq(reqs);
-            }
-          );
+          this.autoSelectEvent().then(reqs => this.autoSelectReq(reqs));
         } else if (newReqId != oldReqId) {
-          const [eventItem] = this.ctx.expandedEvents;
+          const eventItem = this.ctx.selectedEvent;
           const {cpe} = eventItem || {cpe: {}};
           this.autoSelectReq(cpe.reqs);
         }
@@ -162,12 +184,12 @@ export default {
 
   computed: {
     eventSr: function() {
-      return {eventId: this.eventId, reqId: this.reqId};
+      return {eventId: this.event.id, reqId: this.reqId};
     },
 
     reqsListSchema: function() {
       const result = util.clone(reqsListSchema);
-      for (let field of result.columns) {
+      for (const field of result.columns) {
         if (field.name == 'sr' && field.type == 'specimen-description') {
           field.showStatus = true;
           field.noLink = true;
@@ -179,8 +201,8 @@ export default {
 
     reqCtx: function() {
       const barcodingEnabled = util.isTrue(this.ctx.barcodingEnabled || this.cp.barcodingEnabled);
-      if (this.ctx.expandedReqs.length > 0) {
-        return {cp: this.cp, cpe: this.ctx.expandedEvents[0].cpe, sr: this.ctx.expandedReqs[0].sr, barcodingEnabled};
+      if (this.ctx.selectedEvent) {
+        return {cp: this.cp, cpe: this.ctx.selectedEvent.cpe, sr: this.ctx.expandedReqs[0].sr, barcodingEnabled};
       }
 
       return {barcodingEnabled};
@@ -197,29 +219,28 @@ export default {
   methods: {
     autoSelectEvent: async function() {
       let event = null;
-      if (this.eventId > 0 ) {
-        event = this.ctx.events.find(({cpe}) => cpe.id == this.eventId);
+      if (this.event.id > 0 ) {
+        event = this.ctx.events.find(({cpe}) => cpe.id == this.event.id);
         if (event == null) {
-          alert('Invalid event ID');
           routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {});
           return;
         }
 
-        this.onEventRowClick(event, true);
-      } else if (this.cp.specimenCentric) {
+        this.onEventSelect(event, true);
+      } else {
         event = this.ctx.events.length > 0 ? this.ctx.events[0] : null;
         if (event && event.cpe && event.cpe.id > 0) {
-          this.onEventRowClick(event, false);
+          this.onEventSelect(event, false);
           return;
         }
       }
 
-      const [prev] = this.ctx.expandedEvents;
-      this.ctx.expandedEvents.length = 0;
+      const prev = this.ctx.selectedEvent;
+      this.ctx.selectedEvent = null;
 
       let reqs = null;
       if (event && (!prev || prev != event)) {
-        this.ctx.expandedEvents = [event];
+        this.ctx.selectedEvent = event;
 
         const {cpe} = event;
         reqs = cpe.reqs;
@@ -237,7 +258,7 @@ export default {
         req = reqs.find(({sr}) => sr.id == this.reqId);
         if (req == null) {
           alert('Invalid SR ID');
-          routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.eventId});
+          routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.event.id});
           return;
         }
 
@@ -266,12 +287,16 @@ export default {
       }
     },
 
-    onEventRowClick: function({cpe: {id: eventId}}, auto) {
+    onEventSelect: function({cpe: {id: eventId}}, auto) {
       if (auto) {
         return;
       }
 
-      routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, eventId == this.eventId ? {} : {eventId});
+      routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, eventId == this.event.id ? {} : {eventId});
+    },
+
+    onEventOpsClick: function(event) {
+      event.stopPropagation();
     },
 
     eventOps: function({cpe}) {
@@ -312,6 +337,7 @@ export default {
         cpSvc.deleteCpe(cpe).then(
           () => {
             alertsSvc.success({code: 'cps.event_deleted', args: cpe});
+            this.ctx.selectedEvent = null;
             this._loadEvents();
           }
         );
@@ -329,6 +355,7 @@ export default {
         cpSvc.saveOrUpdateCpe(toSave).then(
           () => {
             alertsSvc.success({code: 'cps.event_closed', args: cpe});
+            this.ctx.selectedEvent = null;
             this._loadEvents();
           }
         );
@@ -343,6 +370,7 @@ export default {
       cpSvc.saveOrUpdateCpe(toSave).then(
         () => {
           alertsSvc.success({code: 'cps.event_reopened', args: cpe});
+          this.ctx.selectedEvent = null;
           this._loadEvents();
         }
       );
@@ -353,9 +381,18 @@ export default {
       this.ctx.expandedReqs.length = 0;
       if (!prev || prev != item) {
         this.ctx.expandedReqs = [item];
-        routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.eventId, reqId: item.sr.id});
+        setTimeout(() => this.$refs.reqsTable.scrollExpandedIntoView());
+        routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.event.id, reqId: item.sr.id});
       } else {
-        routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.eventId});
+        routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.event.id});
+      }
+    },
+
+    onToggleNode: function(item) {
+      const [prev] = this.ctx.expandedReqs;
+      if (prev == item) {
+        this.ctx.expandedReqs.length = 0;
+        routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, {eventId: this.event.id});
       }
     },
 
@@ -470,7 +507,7 @@ export default {
             events.push({cpe: {reqs: [], activityStatus: 'Active'}});
           }
 
-          return this.ctx.events;
+          return this.autoSelectEvent().then(reqs => ({events, reqs}));
         }
       );
     },
@@ -508,62 +545,17 @@ export default {
 </script>
 
 <style scoped>
-.os-cp-events-tab :deep(.os-list .results .results-inner) {
-  padding-right: 0rem;
+.event {
+  display: flex;
+  align-items: center;
 }
 
-.os-cp-events-tab :deep(table.p-datatable-table) {
-  border: 0px;
-  border-collapse: separate;
-  border-spacing: 2px 15px;
-  margin-top: -0.5rem;
-  margin-bottom: 0rem;
-  table-layout: fixed;
-}
-
-.os-cp-events-tab :deep(table.p-datatable-table > thead > tr > th) {
-  background: transparent!important;
-  border-bottom: 0;
-  padding: 0rem 1rem;
-  text-align: center;
-}
-
-.os-cp-events-tab :deep(table.p-datatable-table > thead > tr > th.row-actions) {
-  width: 90px;
-}
-
-.os-cp-events-tab :deep(table.p-datatable-table > tbody > tr > td) {
-  border-top: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.os-cp-events-tab :deep(table.p-datatable-table > tbody > tr) {
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
-  border-radius: 0.5rem;
-  background: transparent;
-}
-
-.os-cp-events-tab :deep(table.p-datatable-table > tbody > tr:hover) {
-  background: transparent;
-}
-
-.os-cp-events-tab :deep(table.p-datatable-table > tbody > tr > td) {
-  vertical-align: middle;
-  padding: 1rem;
+.event .description {
+  flex: 1;
 }
 
 .os-cp-reqs-tab {
-  max-height: 55vh;
+  height: 100%;
   overflow-y: auto;
-}
-
-.os-cp-hide-events .os-cp-reqs-tab {
-  max-height: calc(100vh - 230px);
-}
-
-.os-cp-hide-events :deep(table.p-datatable-table > thead),
-.os-cp-hide-events :deep(table.p-datatable-table > tbody > tr:not(.p-datatable-row-expansion)) {
-  display: none;
 }
 </style>

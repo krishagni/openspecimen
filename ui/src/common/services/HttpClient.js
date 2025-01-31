@@ -156,6 +156,30 @@ class HttpClient {
     this.listeners.forEach(listener => listener.callFailed({method, response}));
   }
 
+  handleError(resp) {
+    if (typeof resp == 'string') {
+      alertSvc.error(resp);
+    } else if (resp && typeof resp == 'object') {
+      if (resp.status == 401) {
+        localStorage.removeItem('osAuthToken');
+        routerSvc.ngGoto('', {logout: true});
+        return;
+      }
+
+      const errors = resp.data;
+      if (errors instanceof Array) {
+        const msg = errors.map(err => err.message + ' (' + err.code + ')').join(',');
+        alertSvc.error(msg);
+      } else if (errors) {
+        alertSvc.error(errors);
+      } else {
+        alertSvc.error(resp.status + ': ' + resp.statusText);
+      }
+    } else {
+      alert(resp);
+    }
+  }
+
   promise(method, apiCall, errorHandler) {
     this.notifyStart(method);
     return new Promise((resolve, reject) => {
@@ -172,26 +196,7 @@ class HttpClient {
             return;
           }
 
-          if (!e.response) {
-            alertSvc.error(e.message);
-            return;
-          }
-
-          if (e.response.status == 401) {
-            localStorage.removeItem('osAuthToken');
-            routerSvc.ngGoto('', {logout: true});
-            return;
-          }
-
-          let errors = e.response.data;
-          if (errors instanceof Array) {
-            let msg = errors.map(err => err.message + ' (' + err.code + ')').join(',');
-            alertSvc.error(msg);
-          } else if (errors) {
-            alertSvc.error(errors);
-          } else {
-            alertSvc.error(e.response.status + ': ' + e.response.statusText);
-          }
+          this.handleError(e.response || e.message);
         });
     });
   }

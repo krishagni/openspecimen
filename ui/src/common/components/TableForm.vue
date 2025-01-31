@@ -714,12 +714,19 @@ export default {
           }
         }
       }
+
+      this.$emit('toggle-node', {item: itemModel.$context});
     },
 
     scrollExpandedIntoView: function() {
       setTimeout(
-        () => this.$el && this.$el.querySelector('.expanded-row')
-                .scrollIntoView({ behavior: 'smooth', block: 'center'})
+        () => {
+          this.$el && this.$el.querySelector('.expanded-row')
+            .scrollIntoView({ behavior: 'smooth', block: 'center'});
+          this.$el && this.$el.querySelector('.expanded-row-child')
+            .scrollIntoView({ behavior: 'smooth', block: 'center'});
+        },
+        500
       );
     },
 

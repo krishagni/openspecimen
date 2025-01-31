@@ -897,36 +897,37 @@ const routes = [
             path: 'events',
             name: 'CpDetail.Events',
             component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Events.vue'),
+            props: ({query}) => ({eventId: query.eventId}),
             children: [
               {
                 path: 'list',
                 name: 'CpDetail.Events.List',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/EventsList.vue'),
-                props: ({query}) => ({eventId: query.eventId, reqId: query.reqId})
+                props: ({query}) => ({reqId: query.reqId})
               },
               {
                 path: 'addedit',
                 name: 'CpDetail.Events.AddEdit',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEditEvent.vue'),
-                props: ({query}) => ({eventId: query.eventId, copyOf: query.copyOf})
+                props: ({query}) => ({copyOf: query.copyOf})
               },
               {
                 path: 'addedit-sr',
                 name: 'CpDetail.Events.AddEditReq',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEditReq.vue'),
-                props: ({query}) => ({eventId: query.eventId, reqId: query.reqId, copyOf: query.copyOf})
+                props: ({query}) => ({reqId: query.reqId, copyOf: query.copyOf})
               },
               {
                 path: 'add-derived-sr',
                 name: 'CpDetail.Events.CreateDerivedReq',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEditReq.vue'),
-                props: ({query}) => ({eventId: query.eventId, parentReqId: query.parentReqId, lineage: 'Derived'})
+                props: ({query}) => ({parentReqId: query.parentReqId, lineage: 'Derived'})
               },
               {
                 path: 'add-aliquots-sr',
                 name: 'CpDetail.Events.CreateAliquots',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/AddEditReq.vue'),
-                props: ({query}) => ({eventId: query.eventId, parentReqId: query.parentReqId, lineage: 'Aliquot'})
+                props: ({query}) => ({parentReqId: query.parentReqId, lineage: 'Aliquot'})
               }
             ]
           },

@@ -28,6 +28,8 @@ import Panel from '@/common/components/Panel.vue';
 export default {
   props: ['list', 'selected'],
 
+  emits: ['on-item-select'],
+
   components: {
     Panel
   }
@@ -76,5 +78,17 @@ export default {
 .os-list-group .item.active :deep(.os-badge) {
   color: #337ab7;
   background-color: #fff;
+}
+
+.os-list-group .item.active :deep(button) {
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.os-list-group .item.active :deep(button:hover) {
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74
 }
 </style>

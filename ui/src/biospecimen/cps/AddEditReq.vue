@@ -1,13 +1,31 @@
 <template>
-  <os-grid>
-    <os-grid-column :width="12" style="overflow-y: auto;">
+  <os-panel class="os-full-height-panel">
+    <template #header>
+      <span class="title">
+        <os-visit-event-desc :event="event" />
+        <span>&nbsp;&gt;&gt;&nbsp;</span>
+
+        <os-specimen-description :specimen="ctx.sr" :no-link="true" :detailed="true" v-if="reqId > 0" />
+        <os-specimen-description :specimen="ctx.parentSr" :no-link="true" :detailed="true"
+          v-else-if="ctx.parentSr && ctx.parentSr.id > 0" />
+        <span v-t="'cps.add_req'" v-else>Add Requirement</span>
+
+        <span v-if="ctx.parentSr && ctx.parentSr.id > 0">
+          <span>&nbsp;&gt;&gt;&nbsp;</span>
+          <span v-if="lineage == 'Derived'" v-t="'cps.create_derivative'">Create Derived Specimen</span>
+          <span v-else-if="lineage == 'Aliquot'" v-t="'cps.create_aliquots'">Create Aliquots</span>
+        </span>
+      </span>
+    </template>
+
+    <template #default>
       <os-form ref="reqForm" :schema="ctx.addEditFs" :data="ctx">
         <os-button primary :label="$t('common.buttons.add')" @click="saveReq" v-if="!reqId || reqId < 0" />
         <os-button primary :label="$t('common.buttons.update')" @click="saveReq" v-else />
         <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
       </os-form>
-    </os-grid-column>
-  </os-grid>
+    </template>
+  </os-panel>
 </template>
 
 <script>
@@ -18,7 +36,7 @@ import settingSvc from '@/common/services/Setting.js'
 import util       from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'eventId', 'reqId', 'parentReqId', 'lineage'],
+  props: ['cp', 'event', 'reqId', 'parentReqId', 'lineage'],
 
   data() {
     return {
@@ -29,7 +47,7 @@ export default {
 
         sr: {
           cpShortTitle: this.cp.shortTitle,
-          eventId: this.eventId,
+          eventId: this.event.id,
           lineage: this.lineage || 'New',
           anatomicSite: 'Not Specified',
           laterality: 'Not Specified',
@@ -119,9 +137,21 @@ export default {
     },
 
     cancel: function(req) {
-      const query = {eventId: this.eventId, reqId: (req && req.id) || this.reqId};
+      const query = {eventId: this.event.id, reqId: (req && req.id) || this.reqId};
       routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, query);
     }
   }
 }
 </script>
+
+<style scoped>
+.title {
+  display: flex;
+  align-items: center;
+}
+
+.title :deep(a) {
+  color: inherit;
+  text-decoration: none;
+}
+</style>

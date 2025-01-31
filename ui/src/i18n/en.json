@@ -775,6 +775,7 @@
   "cps": {
     "list": "Collection Protocols",
     "add_consent_tier": "Add Consent",
+    "add_cpe": "Add Event",
     "add_req": "Add Requirement",
     "additional_label_fmt": "Additional Label Format",
     "aliquot": "Aliquot",
@@ -895,6 +896,7 @@
     "misc_settings": "Miscellaneous Settings",
     "months": "Months",
     "no_consents_in_source_cp": "No consents in the source collection protocol!",
+    "no_cpes": "No events to show.",
     "no_forms": "No forms to show.",
     "no_reqs": "No specimen requirements to show.",
     "no_reqs_add_new": "No specimen requirements to show. Create a new specimen requirement by click on the Add Requirement button below...",
@@ -932,6 +934,7 @@
     "record_ids": "Record IDs",
     "record_labels": "Record Names/Labels",
     "registration_forms": "Registration Forms",
+    "req_closed": "Specimen requirement {type} closed.",
     "req_copy_created": "Specimen requirement {type} created.",
     "req_deleted": "Specimen requirement {type} deleted.",
     "req_name": "Name",
