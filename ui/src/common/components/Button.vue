@@ -1,6 +1,6 @@
 
 <template>
-  <button type="button" :class="buttonClass" v-os-tooltip.bottom="hint">
+  <button type="button" :class="buttonClass" v-os-tooltip.bottom="hint" :disabled="disabled" @click="handleClick">
     <icon v-if="leftIcon" :name="leftIcon" :class="leftIconClass" :size="iconSize" />
     <span>{{label}}</span>
     <icon v-if="rightIcon" :name="rightIcon" :class="rightIconClass" :size="iconSize" />
@@ -54,7 +54,32 @@ export default {
     rightIconClass: function() {
       return this.label ?  'pad-left' : '';
     }
-  }
+  },
+
+  data() {
+    return {
+      disabled: false
+    }
+  },
+
+  methods: {
+    handleClick: function(event) {
+      if (this.disabled) {
+        event.stopPropagation();
+        return;
+      }
+
+      const self = this;
+      this.disabled = true;
+      this.timer = setTimeout(() => self.disabled = false, 1000);
+    },
+
+    beforeDestroy: function() {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+    }
+  },
 }
 
 </script>
