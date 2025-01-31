@@ -2,7 +2,7 @@
   <os-page>
     <os-page-head>
       <template #breadcrumb>
-        <os-breadcrumb :items="ctx.bcrumb" />
+        <os-breadcrumb :items="bcrumb" />
       </template>
 
       <span>
@@ -157,13 +157,6 @@ export default {
         size: 0
       },
 
-      bcrumb: [ 
-        // TODO: change the breadcrumbs
-        {url: routerSvc.getUrl('CpsList'), label: i18n.msg('participants.collection_protocols')},
-
-        {url: routerSvc.ngUrl('cp-view/' + cp.id + '/list-view', {}), label: cp.shortTitle}
-      ],
-
       moreOptions: [],
 
       access: {
@@ -215,6 +208,14 @@ export default {
   },
 
   computed: {
+    bcrumb: function () {
+      const cp = this.cpViewCtx.getCp();
+      return [
+        {url: routerSvc.getUrl('CpsList'), label: i18n.msg('participants.collection_protocols')},
+        {url: routerSvc.getUrl('DefCpListView', {cpId: cp.id}), label: cp.shortTitle}
+      ];
+    },
+
     itemUrl: function() {
       const baseUrl = "'#/cp-view/' + hidden.cpId + '/participants/' + hidden.cprId";
       if (this.ctx.view == 'participants_list') {

@@ -9,6 +9,7 @@ import {provide, ref} from 'vue';
 
 import formUtil from '@/common/services/FormUtil.js';
 import cprSvc   from '@/biospecimen/services/Cpr.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   props: ['cprId', 'op'],
@@ -45,6 +46,9 @@ export default {
     _setupCpr: async function() {
       if (!this.cprId || this.cprId <= 0) {
         this.cpr = {participant: {pmis: [], source: 'OpenSpecimen'}};
+
+        const cp = this.cpViewCtx.getCp();
+        routerSvc.goto('ParticipantsList', {cpId: cp.id});
         return;
       }
 

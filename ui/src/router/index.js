@@ -1016,6 +1016,11 @@ const routes = [
             props: (route) => ({cpId: route.params && route.params.cpId}),
             children: [
               {
+                path: 'list-view',
+                name: 'DefCpListView',
+                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/DefListView.vue'),
+              },
+              {
                 path: 'participants',
                 name: 'ParticipantsList',
                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/List.vue'),
