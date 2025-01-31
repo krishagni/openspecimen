@@ -50,13 +50,13 @@
         <template #default>
           <os-menu :label="$t('queries.actions')" :options="actionsMenuOpts" />
 
-          <span v-if="ctx.showAddSpecimens">
+          <!-- span v-if="ctx.showAddSpecimens">
             <os-button left-icon="check" :label="$t('queries.select_all')" @click="selectAllRows"
               v-if="!ctx.allRowsSelected" />
 
             <os-button left-icon="times" :label="$t('queries.unselect_all')" @click="unselectAllRows"
               v-if="ctx.allRowsSelected" />
-          </span>
+          </span -->
 
           <span v-if="ctx.showAddSpecimens && ctx.selectedRows.length > 0">
             <os-specimen-actions label="queries.specimen_actions"
@@ -216,7 +216,7 @@ export default {
         return null;
       }
 
-      return {mode: 'multiRow', headerCheckbox: false, enableClickSelection: false, checkboxes: true};
+      return {mode: 'multiRow', headerCheckbox: true, enableClickSelection: false, checkboxes: true};
     },
 
     selectedSpecimens: function() {
