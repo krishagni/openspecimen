@@ -188,6 +188,7 @@ export default {
 
     positionSelected: function({position}) {
       this.position = position;
+      this.previousContainer = position && position.name;
     },
 
     getDisplayValue: function() {
