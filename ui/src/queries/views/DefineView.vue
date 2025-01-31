@@ -85,8 +85,8 @@
     <template #footer>
       <os-button text :label="$t('common.buttons.cancel')" @click="closeColumnsDialog"
         :disabled="!ctx.selectedFields || ctx.selectedFields.length == 0" />
-      <os-button secondary :label="$t('common.buttons.previous')" @click="previous" v-if="!isFirstStep()" />
-      <os-button primary :label="$t('common.buttons.next')" @click="next" v-if="!isLastStep()"
+      <os-button secondary :label="$t('common.buttons.previous')" @click="previous" v-if="!firstStep" />
+      <os-button primary :label="$t('common.buttons.next')" @click="next" v-if="!lastStep"
         :disabled="!ctx.selectedFields || ctx.selectedFields.length == 0" />
       <os-button primary :label="$t('common.buttons.done')" @click="done"
         :disabled="!ctx.selectedFields || ctx.selectedFields.length == 0" />
@@ -120,15 +120,29 @@ export default {
           getColumnSummaryTableFields: (type) => this._getColumnSummaryTableFields(type)
         },
 
-        fieldsTree: []
+        fieldsTree: [],
+
+        stepNo: 0
       },
 
       reportingSchema
     }
   },
 
+  computed: {
+    firstStep: function() {
+      return this.ctx.stepNo == 0 || !this.$refs.columnsWizard || this.$refs.columnsWizard.isFirstStep();
+    },
+
+    lastStep: function() {
+      return this.ctx.stepNo == 3 || (this.$refs.columnsWizard && this.$refs.columnsWizard.isLastStep());
+    }
+  },
+
   methods: {
     open: async function(query) {
+      this.ctx.stepNo = 0;
+
       const self = this;
       query = this.ctx.query = util.clone(query);
       query.wideRowEnabled = query.wideRowMode === 'DEEP';
@@ -189,27 +203,13 @@ export default {
       });
     },
 
-    isFirstStep: function() {
-      if (!this.$refs.columnsWizard) {
-        return true;
-      }
-
-      return this.$refs.columnsWizard.isFirstStep();
-    },
-
-    isLastStep: function() {
-      if (!this.$refs.columnsWizard) {
-        return false;
-      }
-
-      return this.$refs.columnsWizard.isLastStep();
-    },
-
     next: function() {
+      ++this.ctx.stepNo;
       this.$refs.columnsWizard.next();
     },
 
     previous: function() {
+      --this.ctx.stepNo;
       this.$refs.columnsWizard.previous();
     },
 
