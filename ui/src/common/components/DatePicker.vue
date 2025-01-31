@@ -49,6 +49,10 @@ export default {
     if (!this.inputValue && Object.prototype.hasOwnProperty.call(this.$attrs, 'default-current-date')) {
       this.inputValue = new Date();
     }
+
+    if (this.$refs.cal && this.$refs.cal.input) {
+      this.$refs.cal.input.setAttribute('inputmode', 'text');
+    }
   },
 
   computed: {
