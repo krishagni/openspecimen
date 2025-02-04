@@ -9,7 +9,12 @@
     </div>
   </div>
   <div class="os-selected-file" v-else>
-    <span class="filename">{{inputValue.filename || inputValue}}</span>
+    <span class="filename">
+      <a :href="fileUrl" target="_blank" v-if="fileUrl">
+        <span>{{inputValue.filename}}</span>
+      </a>
+      <span v-else>{{inputValue.filename || inputValue}}</span>
+    </span>
     <Button left-icon="times" :disabled="disabled" @click="removeFile"/>
   </div>
 </template>
@@ -20,9 +25,10 @@ import FileUpload from 'primevue/fileupload';
 import Button from '@/common/components/Button.vue';
 
 import alertSvc from '@/common/services/Alerts.js';
+import http from '@/common/services/HttpClient.js';
 
 export default {
-  props: ['url', 'modelValue', 'headers', 'auto', 'tabOrder', 'disabled'],
+  props: ['url', 'href', 'modelValue', 'headers', 'auto', 'tabOrder', 'disabled'],
 
   components: {
     Button,
@@ -52,6 +58,22 @@ export default {
       }
 
       return this.url;
+    },
+
+    fileUrl: function() {
+      if (this.selectedFile) {
+        /* a new file was selected in this session */
+        /* therefore no URL is rendered */
+        return null;
+      }
+
+      if (typeof this.href == 'function') {
+        return this.href(this.inputValue);
+      } else if (this.inputValue && this.inputValue.fileId) {
+        return http.getUrl('form-files/' + this.inputValue.fileId);
+      }
+
+      return null;
     }
   },
 
@@ -128,6 +150,7 @@ export default {
     },
 
     removeFile: function() {
+      this.selectedFile = null;
       this.$emit('update:modelValue', null);
     },
 
