@@ -393,7 +393,7 @@ export default {
   gap: 0.5rem;
   list-style-type: none;
   padding: 0rem;
-  margin: 1.25rem auto;
+  margin: 1.25rem 0rem;
 }
 
 /* Width of a medium column is 250px for key and 330px for value = 580px */
