@@ -12,4 +12,16 @@
       <column name="STATUS" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Index to help clear positions blocked (expired reservations) by auto-allocation">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="OS_CONTAINER_POSITIONS" indexName="OS_POS_BLOCKED_RESV_TIME_IDX" />
+      </not>
+    </preConditions>
+    <createIndex tableName="OS_CONTAINER_POSITIONS" indexName="OS_POS_BLOCKED_RESV_TIME_IDX">
+      <column name="RESERVATION_TIME" />
+      <column name="BLOCKED" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
