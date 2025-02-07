@@ -29,7 +29,7 @@ export default {
       "type": "text",
       "labelCode": "specimens.barcode",
       "name": "specimen.barcode",
-      "showWhen": "!!specimen.barcode || (cp.barcodingEnabled && !cp.specimenBarcodeFmt)"
+      "showWhen": "!!specimen.barcode || (cp.barcodingEnabled && !cp.specimenBarcodeFmt) || specimen.preBarcodedTube"
     },
     {
       "type": "text",
