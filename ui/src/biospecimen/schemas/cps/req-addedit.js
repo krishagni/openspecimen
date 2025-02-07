@@ -37,7 +37,8 @@ export default {
             labelCode: "cps.aliquots_count",
             showWhen: "!sr.id && sr.lineage == 'Aliquot'",
             validations: {
-              required: {
+              requiredIf: {
+                expr: "!(sr.qtyPerAliquot > 0 && parentSr.initialQty > 0)",
                 messageCode: "cps.aliquots_count_req"
               }
             }
@@ -54,7 +55,8 @@ export default {
             specimen: "parentSr",
             showWhen: "parentSr && !sr.id && sr.lineage == 'Aliquot'",
             validations: {
-              required: {
+              requiredIf: {
+                expr: "mandatoryAliquotQty && !(sr.noOfAliquots > 0 && parentSr.initialQty > 0)",
                 messageCode: "cps.aliquot_qty_req"
               }
             }

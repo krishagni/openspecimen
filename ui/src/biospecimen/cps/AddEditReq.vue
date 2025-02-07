@@ -57,7 +57,9 @@ export default {
           storageType: this.lineage == 'Aliquot' ? 'Manual' : 'Virtual'
         },
 
-        addEditFs: {rows: []}
+        addEditFs: {rows: []},
+
+        mandatoryAliquotQty: true
       }
     }
   },
@@ -91,6 +93,12 @@ export default {
       settingSvc.getSetting('biospecimen', 'enable_spmn_barcoding')
         .then(settings => this.ctx.barcodingEnabled = util.isTrue(settings[0].value));
     }
+
+    settingSvc.getSetting('biospecimen', 'mandatory_aliquot_qty').then(
+      settings => {
+        this.ctx.mandatoryAliquotQty = !util.isFalse(settings[0].value);
+      }
+    );
   },
 
   methods: {
@@ -120,6 +128,12 @@ export default {
           }
         );
       } else if (this.lineage == 'Aliquot') {
+        if (!toSave.qtyPerAliquot) {
+          toSave.qtyPerAliquot = this.ctx.parentSr.initialQty / toSave.noOfAliquots;
+        } else if (!toSave.noOfAliquots) {
+          toSave.noOfAliquots = this.ctx.parentSr.initialQty / toSave.qtyPerAliquot;
+        }
+
         cpSvc.createAliquots(this.parentReqId, toSave).then(
           () => {
             alertsSvc.success({code: 'cps.aliquots_created', args: this.ctx.parentSr});

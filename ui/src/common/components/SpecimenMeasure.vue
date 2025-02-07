@@ -1,7 +1,7 @@
 <template>
   <div v-if="showInput">
     <div class="os-spmn-measure" :class="$attrs['md-type'] && 'md-type'">
-      <os-input-text v-model="userInput" :md-type="$attrs['md-type']" :tab-order="tabOrder" />
+      <os-input-text v-model="userInput" :md-type="$attrs['md-type']" :disabled="disabled" :tab-order="tabOrder" />
       <div class="unit">
         <span>{{unit}}</span>
       </div>
@@ -25,7 +25,7 @@ import util from '@/common/services/Util.js';
 const NUMBER_RE = /^[0-9]*(\.[0-9]*)?(([e][+-]?)[0-9]*)?$/;
 
 export default {
-  props: ['modelValue', 'measure', 'entity', 'context', 'readOnly', 'tabOrder'],
+  props: ['modelValue', 'measure', 'entity', 'context', 'readOnly', 'tabOrder', 'disabled'],
 
   data() {
     return { 

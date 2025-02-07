@@ -121,7 +121,12 @@ export default {
       "name": "sr.collectionContainer",
       "labelCode": "cps.collection_container",
       "showWhen": "sr.lineage == 'New'",
-      "showInOverviewWhen": "sr.lineage == 'New'"
+      "showInOverviewWhen": "sr.lineage == 'New'",
+      "validations": {
+        "required": {
+          "messageCode": "cps.collection_container_req"
+        }
+      }
     },
     {
       "type": "pv",
@@ -130,7 +135,12 @@ export default {
       "name": "sr.collectionProcedure",
       "labelCode": "cps.collection_procedure",
       "showWhen": "sr.lineage == 'New'",
-      "showInOverviewWhen": "sr.lineage == 'New'"
+      "showInOverviewWhen": "sr.lineage == 'New'",
+      "validations": {
+        "required": {
+          "messageCode": "cps.collection_procedure_req"
+        }
+      }
     },
     {
       "type": "user",
