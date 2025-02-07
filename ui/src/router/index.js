@@ -879,7 +879,7 @@ const routes = [
         path: 'cps',
         name: 'CpsList',
         component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/List.vue'),
-        props: (route) => ({filters: route.query.filters})
+        props: (route) => ({filters: route.query.filters, showStats: route.query.showStats})
       },
 
       {

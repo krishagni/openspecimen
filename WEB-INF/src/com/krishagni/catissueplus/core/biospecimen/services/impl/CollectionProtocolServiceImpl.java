@@ -2394,9 +2394,22 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		cfg.setFixedColumns(fixedColumns);
 
 		cfg.setFixedColumnsGenerator(
-			(rows) -> {
+			(req, rows) -> {
+				boolean includeStats = false;
+				if (req != null && req.get("allParams") != null) {
+					Map<String, String> allParams = (Map<String, String>) req.get("allParams");
+					includeStats = "true".equals(allParams.get("includeStats"));
+				}
+
+				if (!includeStats) {
+					return Collections.singletonMap("noFixedColumns", true);
+				}
+
+				Map<String, Object> resp = new HashMap<>();
+				resp.put("noFixedColumns", false);
+				resp.put("rows", rows);
 				if (rows == null || rows.isEmpty()) {
-					return rows;
+					return resp;
 				}
 
 				Map<Long, Row> cpRows = new HashMap<>();
@@ -2416,7 +2429,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 					cpRows.get(cpId).setFixedData(new Object[] {dbRow[++idx], dbRow[++idx]});
 				}
 
-				return rows;
+				return resp;
 			}
 		);
 

@@ -44,6 +44,7 @@
             name="cp-list-view"
             :object-id="-1"
             :query="ctx.query"
+            :other-params="listParams"
             :id-filter="'CollectionProtocol.id'"
             :auto-search-open="true"
             :allow-selection="true"
@@ -120,7 +121,7 @@ export default {
 
   inject: ['ui'],
 
-  props: ['filters'],
+  props: ['filters', 'show-stats'],
 
   data() {
     const ui = this.ui;
@@ -170,10 +171,27 @@ export default {
   watch: {
     '$route.query.filters': function(newValue) {
       this.ctx.query = newValue;
+    },
+
+    listParams: function(newVal, oldVal) {
+      const oldShowStats = (oldVal && oldVal.includeStats == true) || false;
+      const newShowStats = (newVal && newVal.includeStats == true) || false;
+      if (newShowStats != oldShowStats) {
+        setTimeout(() => this.reloadList());
+      }
     }
   },
 
   computed: {
+    listParams: function() {
+      const result = {};
+      if (this.showStats == 'true' || this.showStats == true) {
+        result.includeStats = true;
+      }
+
+      return result;
+    },
+
     itemUrl: function() {
       return "'#/cps/' + hidden.cpId + '/detail/overview'";
     },
@@ -253,10 +271,23 @@ export default {
         });
       }
 
-      if (options.length > 0 && this.ctx.pluginMenuOptions.length > 0) {
-        options.push({divider: true});
+      if (this.ctx.pluginMenuOptions.length > 0) {
+        if (options.length > 0) {
+          options.push({divider: true});
+        }
+
         Array.prototype.push.apply(options, this.ctx.pluginMenuOptions);
       }
+
+      if (options.length > 0) {
+        options.push({divider: true});
+      }
+
+      options.push({
+        icon: 'poll',
+        caption: this.$t(this.showStats == 'true' ? 'cps.hide_cp_stats' : 'cps.view_cp_stats'),
+        onSelect: () => this.toggleViewCpStats()
+      });
 
       return options;
     }
@@ -265,6 +296,12 @@ export default {
   methods: {
     reloadList: function() {
       this.$refs.list.reload();
+    },
+
+    toggleViewCpStats: function() {
+      const {name, params, query} = routerSvc.getCurrentRoute();
+      const otherParams = this.showStats == 'true' ? {showStats: false} : {showStats: true};
+      routerSvc.replace(name, params, { ...query, ...otherParams });
     },
 
     onItemSelection: function(items) {
@@ -302,15 +339,19 @@ export default {
     },
 
     onListLoad: function({widget, filters}) {
-      const numFormatter         = Intl.NumberFormat().format;
-      const participantsCountIdx = widget.list.columns.length;
-      const specimensCountIdx    = participantsCountIdx + 1;
+      const numFormatter = Intl.NumberFormat().format;
+      const {schema, list: {columns, fixedColumns}} = widget || {};
+      let participantsCountIdx = -1, specimensCountIdx = -1;
+      if (fixedColumns) {
+        participantsCountIdx = columns.length;
+        specimensCountIdx    = participantsCountIdx + 1;
 
-      // +1 for star
-      widget.schema.columns[participantsCountIdx + 1].href = ({rowObject: {id}}) =>
-        routerSvc.getUrl('ParticipantsList', {cpId: id, cprId: -1});
-      widget.schema.columns[specimensCountIdx + 1].href = ({rowObject: {id}}) =>
-        routerSvc.getUrl('ParticipantsList', {cpId: id, cprId: -1}, {view: 'specimens_list'});
+        // +1 for star
+        schema.columns[participantsCountIdx + 1].href = ({rowObject: {id}}) =>
+          routerSvc.getUrl('ParticipantsList', {cpId: id, cprId: -1});
+        schema.columns[specimensCountIdx + 1].href = ({rowObject: {id}}) =>
+          routerSvc.getUrl('ParticipantsList', {cpId: id, cprId: -1}, {view: 'specimens_list'});
+      }
 
       this.showListSize = true;
       this.ctx.selectedItems.length = 0;
@@ -320,17 +361,20 @@ export default {
           const hidden = row.hidden = row.hidden || {};
           row.id = hidden.cpId;
 
-          const column = row.column;
-          column['a_' + participantsCountIdx] = numFormatter(column['a_' + participantsCountIdx]);
-          column['a_' + specimensCountIdx]    = numFormatter(column['a_' + specimensCountIdx]);
+          if (fixedColumns) {
+            const column = row.column;
+            column['a_' + participantsCountIdx] = numFormatter(column['a_' + participantsCountIdx]);
+            column['a_' + specimensCountIdx]    = numFormatter(column['a_' + specimensCountIdx]);
           
-          if (column['a_' + participantsCountIdx] == -1) {
-            column['a_' + participantsCountIdx] = 'N/A';
+            if (column['a_' + participantsCountIdx] == -1) {
+              column['a_' + participantsCountIdx] = 'N/A';
+            }
           }
         }
       );
 
-      routerSvc.replace('CpsList', {}, { filters });
+      const otherParams = this.showStats == 'true' ? {showStats: true} : {};
+      routerSvc.replace('CpsList', {}, { filters, ...otherParams });
       setTimeout(() => {
         this.ctx.listInfo = {
           list: this.$refs.list.list.rows,

@@ -2,7 +2,8 @@ package com.krishagni.catissueplus.core.query;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -40,7 +41,7 @@ public class ListConfig {
 	private Column primaryColumn;
 
 	@JsonIgnore
-	private Function<List<Row>, List<Row>> fixedColumnsGenerator;
+	private BiFunction<Map<String, Object>, List<Row>, Map<String, Object>> fixedColumnsGenerator;
 
 	public Long getCpId() {
 		return cpId;
@@ -170,11 +171,11 @@ public class ListConfig {
 		this.primaryColumn = primaryColumn;
 	}
 
-	public Function<List<Row>, List<Row>> getFixedColumnsGenerator() {
+	public BiFunction<Map<String, Object>, List<Row>, Map<String, Object>>  getFixedColumnsGenerator() {
 		return fixedColumnsGenerator;
 	}
 
-	public void setFixedColumnsGenerator(Function<List<Row>, List<Row>> fixedColumnsGenerator) {
+	public void setFixedColumnsGenerator(BiFunction<Map<String, Object>, List<Row>, Map<String, Object>>  fixedColumnsGenerator) {
 		this.fixedColumnsGenerator = fixedColumnsGenerator;
 	}
 }

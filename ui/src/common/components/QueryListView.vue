@@ -41,7 +41,8 @@ export default {
     'idFilter',
     'autoSearchOpen',
     'allowStarring',
-    'showRowActions'
+    'showRowActions',
+    'otherParams'
   ],
 
   emits: ['selectedRows', 'rowClicked', 'listLoaded', 'rowStarToggled'],
@@ -118,7 +119,7 @@ export default {
   },
 
   watch: {
-    'objectId': function(newVal, oldVal) {
+    objectId: function(newVal, oldVal) {
       if (newVal != oldVal) {
         this.listId.objectId = newVal;
         this.reload();
@@ -166,6 +167,8 @@ export default {
       this.search         = this.searchReq(filters);
 
       this.loading = true;
+
+      const otherParams = this.otherParams || {};
       this.list = await http.post(
         'lists/data',
         this.search,
@@ -174,7 +177,8 @@ export default {
           includeCount: this.includeCount,
           orderBy: orderBy,
           orderDirection: orderDirection,
-          maxResults: pageSize
+          maxResults: pageSize,
+          ...otherParams
         }
       );
       this.loading = false;

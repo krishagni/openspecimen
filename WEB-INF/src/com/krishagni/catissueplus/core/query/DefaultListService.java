@@ -49,7 +49,12 @@ public class DefaultListService implements ListService {
 			);
 
 			if (cfg.getFixedColumnsGenerator() != null) {
-				list.setRows(cfg.getFixedColumnsGenerator().apply(list.getRows()));
+				Map<String, Object> resp = cfg.getFixedColumnsGenerator().apply(params, list.getRows());
+				if (resp != null && Boolean.TRUE.equals(resp.getOrDefault("noFixedColumns", false))) {
+					list.setFixedColumns(null);
+				} else if (resp != null) {
+					list.setRows((List<Row>) resp.get("rows"));
+				}
 			}
 
 			return ResponseEvent.response(list);

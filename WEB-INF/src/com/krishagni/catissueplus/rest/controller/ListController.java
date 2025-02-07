@@ -97,6 +97,9 @@ public class ListController {
 		@RequestParam(value = "orderDirection", required = false, defaultValue = "asc")
 		String orderDirection,
 
+		@RequestParam
+		Map<String, String> allParams,
+
 		@RequestBody
 		List<Column> filters) {
 
@@ -107,6 +110,7 @@ public class ListController {
 		listReq.put("maxResults", maxResults);
 		listReq.put("includeCount", includeCount);
 		listReq.put("filters", filters);
+		listReq.put("allParams", allParams);
 
 		if (StringUtils.isNotBlank(orderBy)) {
 			Column order = new Column();
