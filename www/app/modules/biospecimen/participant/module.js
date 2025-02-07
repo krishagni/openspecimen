@@ -306,14 +306,14 @@ angular.module('os.biospecimen.participant',
       .state('cp-summary-view', {
         url: '/cp-summary-view/:cpId',
         controller: function($stateParams, VueApp) {
-          VueApp.setVueView('cp-view/' + $stateParams.cpId + '/participants/-1', {view: 'participants_list'});
+          VueApp.setVueView('cp-view/' + $stateParams.cpId + '/participants', {view: 'participants_list'});
         },
         parent: 'signed-in'
       })
       .state('cp-new-ui-list-view', {
         url: '/cp-new-ui-list-view/:cpId',
         controller: function($stateParams, VueApp) {
-          VueApp.setVueView('cp-view/' + $stateParams.cpId + '/participants/-1', {view: 'participants_list'});
+          VueApp.setVueView('cp-view/' + $stateParams.cpId + '/participants', {view: 'participants_list'});
         },
         parent: 'signed-in'
       })
@@ -371,7 +371,7 @@ angular.module('os.biospecimen.participant',
           }
 
           $scope.switchToNewUi = function() {
-            VueApp.setVueView('cp-view/' + cp.id + '/participants/-1');
+            VueApp.setVueView('cp-view/' + cp.id + '/participants');
           }
         },
         resolve: {

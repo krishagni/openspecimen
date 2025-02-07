@@ -9,7 +9,7 @@ angular.module('os.biospecimen.participant.list', ['os.biospecimen.models'])
 
     function init() {
       if (enableBetaFeatures) {
-        VueApp.setVueView('cp-view/' + cp.id + '/participants/-1');
+        VueApp.setVueView('cp-view/' + cp.id + '/participants');
         return;
       }
 
