@@ -61,7 +61,7 @@ export default {
           queries.forEach(
             query => {
               query.displayName = '#' + query.id + ' ' + query.title;
-              query.url = routerSvc.ngUrl('queries/results', {queryId: query.id});
+              query.url = routerSvc.getUrl('QueryDetail.Results', {queryId: query.id});
             }
           );
         }

@@ -17,7 +17,7 @@
         <udn>id</udn>
         <caption>#getMessage("specimen_identifier")</caption>
         <column>IDENTIFIER</column>
-        <recordUrl>#/object-state-params-resolver?stateName=specimen-detail.overview&amp;objectName=specimen&amp;key=id&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$value}}</recordUrl>
       </numberField>
     </row>
 
@@ -41,7 +41,7 @@
         <udn>label</udn>
         <caption>#getMessage("specimen_label")</caption>
         <column>LABEL</column>
-        <recordUrl>#/object-state-params-resolver?stateName=specimen-detail.overview&amp;objectName=specimen&amp;key=id&amp;value={{$specimenId}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$specimenId}}</recordUrl>
       </textField>
     </row>
 
@@ -59,14 +59,14 @@
             <udn>parentId</udn>
             <caption>#getMessage("specimen_parent_specimen_id")</caption>
             <column>IDENTIFIER</column>
-            <recordUrl>#/object-state-params-resolver?stateName=specimen-detail.overview&amp;objectName=specimen&amp;key=id&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$value}}</recordUrl>
           </textField>
           <textField>
             <name>parentLabel</name>
             <udn>parentLabel</udn>
             <caption>#getMessage("specimen_parent_specimen_label")</caption>
             <column>LABEL</column>
-            <recordUrl>#/object-state-params-resolver?stateName=specimen-detail.overview&amp;objectName=specimen&amp;key=id&amp;value={{$parentSpecimenId}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$parentSpecimenId}}</recordUrl>
           </textField>
         </row>
       </subForm>
@@ -87,7 +87,7 @@
         <udn>additionalLabel</udn>
         <caption>#getMessage("specimen_additional_label")</caption>
         <column>ADDITIONAL_LABEL</column>
-        <recordUrl>#/object-state-params-resolver?stateName=specimen-detail.overview&amp;objectName=specimen&amp;key=id&amp;value={{$specimenId}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemSpecimenDetail.Overview&amp;objectName=specimen&amp;key=id&amp;value={{$specimenId}}</recordUrl>
       </textField>
     </row>
 
@@ -303,7 +303,7 @@
             <udn>containerName</udn>
             <caption>#getMessage("specimen_spec_position_container_name")</caption>
             <column>CONTAINER_NAME</column>
-            <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
           </textField>
 
           <textField>
@@ -318,7 +318,7 @@
             <udn>containerBarcode</udn>
             <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
             <column>CONTAINER_BARCODE</column>
-            <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
           </textField>
 
           <siteField>
@@ -326,7 +326,7 @@
             <udn>containerSite</udn>
             <caption>#getMessage("specimen_spec_position_container_site")</caption>
             <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
 
           <textField>
@@ -399,7 +399,7 @@
                 <udn>root_container_name</udn>
                 <caption>#getMessage("specimen_spec_position_container_root_name")</caption>
                 <column>FREEZER</column>
-                <recordUrl>#/object-state-params-resolver?stateName=container-detail.overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+                <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
               </textField>
             </row>
           </subForm>
@@ -640,7 +640,7 @@
                 <udn>primarySite</udn>
                 <caption>#getMessage("specimen_collector_primary_site")</caption>
                 <column>PRIMARY_SITE_ID</column>
-                <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+                <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
               </siteField>
             </row>
             <row>
@@ -718,7 +718,7 @@
             <options>
               <sql>select short_title from catissue_distribution_protocol where activity_status != 'Disabled' order by short_title</sql>
             </options>
-            <recordUrl>#/object-state-params-resolver?stateName=dp-detail.overview&amp;objectName=distribution_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=DpsListItemDetail.Overview&amp;objectName=distribution_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
           </dropDown>
         </row>
 
@@ -749,7 +749,7 @@
             <udn>id</udn>
             <caption>#getMessage("specimen_request_id")</caption>
             <column>REQUEST_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=sc-req-detail.overview&amp;objectName=specimen_request&amp;key=id&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=DistrbutionRequestViewRedirect&amp;objectName=specimen_request&amp;key=id&amp;value={{$value}}</recordUrl>
           </numberField>
         </row>
 
@@ -874,7 +874,7 @@
             <udn>name</udn>
             <caption>#getMessage("specimen_distribution_name")</caption>
             <column>NAME</column>
-            <recordUrl>#/object-state-params-resolver?stateName=order-detail.overview&amp;objectName=distribution_order&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=OrdersListItemDetail.Overview&amp;objectName=distribution_order&amp;key=name&amp;value={{$value}}</recordUrl>
           </textField>  
         </row>
 
@@ -905,7 +905,7 @@
                 <options>
                   <sql>select short_title from catissue_distribution_protocol where activity_status != 'Disabled' order by short_title</sql>
                 </options>
-                <recordUrl>#/object-state-params-resolver?stateName=dp-detail.overview&amp;objectName=distribution_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
+                <recordUrl>#/object-state-params-resolver?stateName=DpsListItemDetail.Overview&amp;objectName=distribution_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
               </dropDown>
 
               <textField>
@@ -946,7 +946,7 @@
                     <udn>primarySite</udn>
                     <caption>#getMessage("specimen_order_dp_pi_primary_site")</caption>
                     <column>PRIMARY_SITE_ID</column>
-                    <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+                    <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
                   </siteField>
                 </row>
 
@@ -972,7 +972,7 @@
             <udn>site</udn>
             <caption>#getMessage("specimen_order_site")</caption>
             <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
         </row>
 
@@ -1104,7 +1104,7 @@
             <udn>name</udn>
             <caption>#getMessage("specimen_shipment_name")</caption>
             <column>SHIPMENT_NAME</column>
-            <recordUrl>#/object-state-params-resolver?stateName=shipment-detail.overview&amp;objectName=shipment&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=ShipmentsListItemDetail.Overview&amp;objectName=shipment&amp;key=name&amp;value={{$value}}</recordUrl>
           </textField>
         </row>
 
@@ -1202,7 +1202,7 @@
             <udn>sendingSite</udn>
             <caption>#getMessage("specimen_shipment_sending_site")</caption>
             <column>SENDING_SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
         </row>
 
@@ -1240,7 +1240,7 @@
             <udn>receivingSite</udn>
             <caption>#getMessage("specimen_shipment_recv_site")</caption>
             <column>RECEIVING_SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
         </row>
 
@@ -1381,7 +1381,7 @@
             <udn>containerName</udn>
             <caption>#getMessage("specimen_spec_position_container_name")</caption>
             <column>CONTAINER_NAME</column>
-            <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
           </textField>
 
           <textField>
@@ -1396,7 +1396,7 @@
             <udn>containerBarcode</udn>
             <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
             <column>CONTAINER_BARCODE</column>
-            <recordUrl>#/object-state-params-resolver?stateName=container-detail.locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
           </textField>
 
           <siteField>
@@ -1404,7 +1404,7 @@
             <udn>containerSite</udn>
             <caption>#getMessage("specimen_spec_position_container_site")</caption>
             <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
 
           <textField>
@@ -1476,7 +1476,7 @@
                 <udn>root_container_name</udn>
                 <caption>#getMessage("specimen_spec_position_container_root_name")</caption>
                 <column>FREEZER</column>
-                <recordUrl>#/object-state-params-resolver?stateName=container-detail.overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+                <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Overview&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
               </textField>
             </row>
           </subForm>

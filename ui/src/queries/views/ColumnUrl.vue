@@ -5,8 +5,6 @@
 </template>
 
 <script>
-import routerSvc from '@/common/services/Router.js';
-
 export default {
   props: ['params'],
 
@@ -42,7 +40,7 @@ export default {
         }
       }
 
-      this.url = routerSvc.ngUrl(result.substring(2));
+      this.url = result;
       this.value = value;
     }
   }

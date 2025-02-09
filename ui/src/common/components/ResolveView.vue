@@ -1,4 +1,3 @@
-
 <template>
   <div>
     <pre>{{params}}</pre>

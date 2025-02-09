@@ -28,8 +28,6 @@
             <os-button left-icon="list" :label="$t('queries.view_audit_logs')" @click="viewAuditLogs"
               v-show-if-allowed="'institute-admin'" />
 
-            <os-button-link label="Old Query UI" :url="oldQueryListUi" :new-tab="true" />
-
             <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
               url="https://openspecimen.atlassian.net/l/cp/2AHMwCtu" :new-tab="true" />
           </span>
@@ -232,9 +230,7 @@ export default {
 
       folderAddEditFs,
 
-      queryResources,
-
-      oldQueryListUi: routerSvc.ngUrl('queries/list')
+      queryResources
     };
   },
 

@@ -387,6 +387,8 @@ export default {
         return null;
       } else if (params.value.indexOf('T') != -1) {
         return this.$filters.dateTime(new Date(params.value));
+      } else if (params.value.indexOf('#####') == 0) {
+        return params.value;
       } else {
         return this.$filters.date(new Date(params.value));
       }

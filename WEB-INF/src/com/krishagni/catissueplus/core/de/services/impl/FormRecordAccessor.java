@@ -64,7 +64,7 @@ public class FormRecordAccessor implements ObjectAccessor {
 				CollectionProtocolRegistration cpr = daoFactory.getCprDao().getById(re.getObjectId());
 				AccessCtrlMgr.getInstance().ensureReadCprRights(cpr);
 
-				result.put("stateName", "participant-detail.extensions.list");
+				result.put("stateName", "ParticipantsListItemDetail.Forms");
 				result.put("cprId", cpr.getId());
 				result.put("cpId", cpr.getCollectionProtocol().getId());
 				break;
@@ -90,7 +90,7 @@ public class FormRecordAccessor implements ObjectAccessor {
 					throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 				}
 
-				result.put("stateName", "participant-detail.extensions.list");
+				result.put("stateName", "ParticipantsListItemDetail.Forms");
 				result.put("cprId", reg.getId());
 				result.put("cpId", reg.getCollectionProtocol().getId());
 				break;
@@ -99,7 +99,7 @@ public class FormRecordAccessor implements ObjectAccessor {
 				Visit visit = daoFactory.getVisitsDao().getById(re.getObjectId());
 				AccessCtrlMgr.getInstance().ensureReadVisitRights(visit);
 
-				result.put("stateName", "visit-detail.extensions.list");
+				result.put("stateName", "ParticipantsListItemVisitDetail.Forms");
 				result.put("visitId", visit.getId());
 				result.put("cprId", visit.getRegistration().getId());
 				result.put("cpId", visit.getRegistration().getCollectionProtocol().getId());
@@ -111,9 +111,9 @@ public class FormRecordAccessor implements ObjectAccessor {
 				AccessCtrlMgr.getInstance().ensureReadSpecimenRights(spmn);
 
 				if (fc.getEntityType().equals("Specimen")) {
-					result.put("stateName", "specimen-detail.extensions.list");
+					result.put("stateName", "ParticipantsListItemSpecimenDetail.Forms");
 				} else {
-					result.put("stateName", "specimen-detail.event-overview");
+					result.put("stateName", "ParticipantsListItemSpecimenDetail.Overview");
 				}
 
 				result.put("specimenId", spmn.getId());

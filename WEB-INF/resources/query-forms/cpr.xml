@@ -203,14 +203,14 @@
             <udn>mrnSiteId</udn>
             <caption>#getMessage("participant_mrn_site_id")</caption>
             <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=id&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=id&amp;value={{$value}}</recordUrl>
           </numberField>
           <siteField>
             <name>mrnSiteName</name>
             <udn>mrnSiteName</udn>
             <caption>#getMessage("participant_mrn_site")</caption>
             <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
           <textField>
             <name>medicalRecordNumber</name>
@@ -236,7 +236,7 @@
         <udn>id</udn>
         <caption>#getMessage("cpr_id")</caption>
         <column>CPR_ID</column>
-        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemDetail.Overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$value}}</recordUrl>
       </numberField>
     </row>
     <row>
@@ -254,7 +254,7 @@
         <udn>ppid</udn>
         <caption>#getMessage("participant_ppid")</caption>
         <column>PPID</column>
-        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$cprId}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemDetail.Overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$cprId}}</recordUrl>
       </textField>
     </row>
     <row>
@@ -263,7 +263,7 @@
         <udn>site</udn>
         <caption>#getMessage("participant_reg_site")</caption>
         <column>SITE_ID</column>
-        <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
       </siteField>
     </row>
     <row>
@@ -272,7 +272,7 @@
         <udn>externalSubjectId</udn>
         <caption>#getMessage("participant_external_id")</caption>
         <column>EXTERNAL_SUBJECT_ID</column>
-        <recordUrl>#/object-state-params-resolver?stateName=participant-detail.overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$cprId}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=ParticipantsListItemDetail.Overview&amp;objectName=collection_protocol_registration&amp;key=id&amp;value={{$cprId}}</recordUrl>
       </textField>
     </row>
     <row>

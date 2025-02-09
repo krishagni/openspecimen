@@ -12,7 +12,7 @@
         <udn>id</udn>
         <caption>#getMessage("cp_identifier")</caption>
         <column>IDENTIFIER</column>
-        <recordUrl>#/cps/{{$value}}/overview</recordUrl>
+        <recordUrl>#/cps/{{$value}}/detail/overview</recordUrl>
       </numberField>
     </row>
     <row>
@@ -21,7 +21,7 @@
         <udn>shortTitle</udn>
         <caption>#getMessage("cp_short_title")</caption>
         <column>SHORT_TITLE</column>
-        <recordUrl>#/object-state-params-resolver?stateName=cp-detail.overview&amp;objectName=collection_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=CpDetail.Overview&amp;objectName=collection_protocol&amp;key=shortTitle&amp;value={{$value}}</recordUrl>
         <options>
           <sql>select SHORT_TITLE from CATISSUE_COLLECTION_PROTOCOL where activity_status != 'Disabled' order by SHORT_TITLE</sql>
         </options>
@@ -33,7 +33,7 @@
         <udn>Title</udn>
         <caption>#getMessage("cp_title")</caption>
         <column>TITLE</column>
-        <recordUrl>#/object-state-params-resolver?stateName=cp-detail.overview&amp;objectName=collection_protocol&amp;key=title&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=CpDetail.Overview&amp;objectName=collection_protocol&amp;key=title&amp;value={{$value}}</recordUrl>
       </textField>
     </row>
     <row>
@@ -42,7 +42,7 @@
         <udn>code</udn>
         <caption>#getMessage("cp_code")</caption>
         <column>CODE</column>
-        <recordUrl>#/object-state-params-resolver?stateName=cp-detail.overview&amp;objectName=collection_protocol&amp;key=title&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=CpDetail.Overview&amp;objectName=collection_protocol&amp;key=title&amp;value={{$value}}</recordUrl>
       </textField>
     </row>
     <row>
@@ -145,7 +145,7 @@
             <udn>primarySite</udn>
             <caption>#getMessage("cp_pi_primary_site")</caption>
             <column>PRIMARY_SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
         </row>
         <row>
@@ -207,7 +207,7 @@
             <udn>primarySite</udn>
             <caption>#getMessage("cp_coordinator_primary_site")</caption>
             <column>PRIMARY_SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
         </row>
         <row>
@@ -237,14 +237,14 @@
             <udn>siteId</udn>
             <caption>#getMessage("cp_sites_id")</caption>
             <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=id&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=id&amp;value={{$value}}</recordUrl>
           </numberField>
           <siteField>
             <name>siteName</name>
             <udn>siteName</udn>
             <caption>#getMessage("cp_sites_name")</caption>
             <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </siteField>
           <textField>
             <name>siteCode</name>

@@ -17,6 +17,13 @@ const routes = [
       },
 
       {
+        path: 'object-state-params-resolver',
+        name: 'ResolveObjectStateParams',
+        component: () => import(/* webpackChunkName: "common" */ '../common/components/ObjectStateParamsResolver.vue'),
+        props: (route) => ({params: route.query})
+      },
+
+      {
         path: 'download-file',
         name: 'DownloadFileView',
         component: () => import(/* webpackChunkName: "common" */ '../common/components/DownloadFileView.vue'),
@@ -1279,6 +1286,14 @@ const routes = [
             ]
           }
         ]
+      },
+
+      /* TODO: This route/view should be discontinued after implementation of catalogs in the new UI */
+      {
+        path: 'distribution-requests',
+        name: 'DistrbutionRequestViewRedirect',
+        component: () => import(/* webpackChunkName: "common" */ '../common/components/DistrbutionRequestRedirect.vue'),
+        props: ({query}) => ({catalogId: query.catalogId, requestId: query.requestId})
       }
     ]
   },

@@ -13,7 +13,6 @@
         <udn>id</udn>
         <caption>#getMessage("kit_identifier")</caption>
         <column>IDENTIFIER</column>
-        <recordUrl>#/object-state-params-resolver?stateName=specimen-kit-detail.overview&amp;objectName=specimen_kit&amp;key=id&amp;value={{$value}}</recordUrl>
       </numberField>
     </row>
 
@@ -54,7 +53,7 @@
             <options>
               <sql>select name from CATISSUE_SITE where activity_status != 'Disabled' order by name</sql>
             </options>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </dropDown>
         </row>
       </subForm>
@@ -78,7 +77,7 @@
             <options>
               <sql>select name from CATISSUE_SITE where activity_status != 'Disabled' order by name</sql>
             </options>
-            <recordUrl>#/object-state-params-resolver?stateName=site-detail.overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
           </dropDown>
         </row>
       </subForm>
