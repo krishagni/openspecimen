@@ -63,8 +63,12 @@ class FieldFactory {
             const required = exprUtil.eval({...form.$context, ...form}, fv.expr);
             return !required || (value == 0 || !!value);
           }*/
+          let expr = fv.expr;
+          if (field.showWhen) {
+            expr = '(' + fv.expr + ') && (' + field.showWhen + ')';
+          }
 
-          validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(fv.expr)));
+          validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(expr)));
         } else if (rule == 'required' && field.showWhen) {
           validations[rule] = requiredIf(new Function('return ' + exprUtil.parse(field.showWhen)));
         } else if (rule == 'pattern') {

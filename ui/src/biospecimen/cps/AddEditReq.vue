@@ -128,10 +128,13 @@ export default {
           }
         );
       } else if (this.lineage == 'Aliquot') {
-        if (!toSave.qtyPerAliquot) {
-          toSave.qtyPerAliquot = this.ctx.parentSr.initialQty / toSave.noOfAliquots;
-        } else if (!toSave.noOfAliquots) {
-          toSave.noOfAliquots = this.ctx.parentSr.initialQty / toSave.qtyPerAliquot;
+        const {initialQty} = this.ctx.parentSr;
+        if (initialQty > 0) {
+          if (!toSave.qtyPerAliquot) {
+            toSave.qtyPerAliquot = initialQty / toSave.noOfAliquots;
+          } else if (!toSave.noOfAliquots) {
+            toSave.noOfAliquots = initialQty / toSave.qtyPerAliquot;
+          }
         }
 
         cpSvc.createAliquots(this.parentReqId, toSave).then(

@@ -23,8 +23,8 @@ export default {
             labelCode: "cps.parent_quantity",
             entity: "parentSr",
             specimen: "parentSr",
-            showWhen: "parentSr && !sr.id && sr.lineage == 'Aliquot'",
-            disableWhen: "parentSr && !sr.id && sr.lineage == 'Aliquot'"
+            showWhen: "parentSr && (sr.id == null || sr.id == undefined) && sr.lineage == 'Aliquot'",
+            disableWhen: "parentSr && (sr.id == null || sr.id == undefined) && sr.lineage == 'Aliquot'"
           }
         ]
       },
@@ -35,10 +35,10 @@ export default {
             type: "number",
             maxFractionDigits: 0,
             labelCode: "cps.aliquots_count",
-            showWhen: "!sr.id && sr.lineage == 'Aliquot'",
+            showWhen: "(sr.id == null || sr.id == undefined) && sr.lineage == 'Aliquot'",
             validations: {
               requiredIf: {
-                expr: "!(sr.qtyPerAliquot > 0 && parentSr.initialQty > 0)",
+                expr: "!(sr.qtyPerAliquot > 0) || !(parentSr.initialQty > 0)",
                 messageCode: "cps.aliquots_count_req"
               }
             }
@@ -56,7 +56,7 @@ export default {
             showWhen: "parentSr && !sr.id && sr.lineage == 'Aliquot'",
             validations: {
               requiredIf: {
-                expr: "mandatoryAliquotQty && !(sr.noOfAliquots > 0 && parentSr.initialQty > 0)",
+                expr: "mandatoryAliquotQty && (!(sr.noOfAliquots > 0) || !(parentSr.initialQty > 0))",
                 messageCode: "cps.aliquot_qty_req"
               }
             }
