@@ -41,6 +41,7 @@ export default class CpViewContext {
     this.accessBasedOnMrn = accessBasedOnMrn;
     this.coordinatorRole = coordinatorRole;
     this._loadAccessRights();
+    this._loadSettings(cp);
   }
 
   getCp() {
@@ -697,5 +698,28 @@ export default class CpViewContext {
     }
 
     return this.wfIds[propName] == -1 ? null : this.wfIds[propName];
+  }
+
+  _loadSettings(cp) {
+    if (!cp.barcodingEnabled) {
+      settingSvc.getSetting('biospecimen', 'enable_spmn_barcoding')
+        .then(settings => cp.barcodingEnabled = util.isTrue(settings[0].value));
+    }
+
+    if (!cp.specimenBarcodeFmt) {
+      settingSvc.getSetting('biospecimen', 'specimen_barcode_format')
+        .then(settings => cp.specimenBarcodeFmt = settings[0].value);
+    }
+
+    if (!cp.additionalLabelFmt) {
+      settingSvc.getSetting('biospecimen', 'specimen_addl_label_format')
+        .then(settings => cp.additionalLabelFmt = settings[0].value);
+    }
+
+    settingSvc.getSetting('biospecimen', 'imaging')
+      .then(settings => cp.imagingEnabled = util.isTrue(settings[0].value));
+
+    settingSvc.getSetting('biospecimen', 'mandatory_aliquot_qty')
+      .then(settings => cp.aliquotQtyReq = util.isTrue(settings[0].value));
   }
 }
