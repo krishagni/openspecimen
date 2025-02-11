@@ -21,6 +21,9 @@
           <os-button left-icon="table" :label="$t('queries.view_records')" @click="viewRecords" />
           <os-button left-icon="calculator" :label="$t('queries.calculated_filter')" @click="showAddCalcFilter" />
         </template>
+        <template #default v-else>
+          <os-button left-icon="calculator" :label="$t('queries.calculated_filter')" @click="showAddCalcFilter" />
+        </template>
       </os-page-toolbar>
 
       <os-grid>
@@ -266,10 +269,15 @@ export default {
     },
 
     viewCounts: async function(event) {
-      this.$refs.countsOverlay.show(event);
+      const {currentTarget} = event;
 
       this.ctx.counts = null;
-      this.ctx.counts = await querySvc.getCount(this.ctx.query);
+      querySvc.getCount(this.ctx.query).then(
+        counts => {
+          this.$refs.countsOverlay.show({currentTarget});
+          this.ctx.counts = counts;
+        }
+      );
     },
 
     closeCountsOverlay: function(event) {
