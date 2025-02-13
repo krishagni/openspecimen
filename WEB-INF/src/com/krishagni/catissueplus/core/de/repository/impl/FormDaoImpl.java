@@ -118,7 +118,8 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	public List<FormSummary> getEntityForms(FormListCriteria crit) {
 		Criteria<Object[]> query = createCriteria(Form.class, Object[].class, "form");
 		query.leftJoin("form.associations", "fc", () -> query.isNull("fc.deletedOn"))
-			.add(query.isNull("form.deletedOn"));
+			.add(query.isNull("form.deletedOn"))
+			.addOrder(query.asc("form.caption"));
 
 		if (CollectionUtils.isNotEmpty(crit.cpIds())) {
 			query.add(

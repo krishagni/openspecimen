@@ -239,6 +239,8 @@
         fc.identifier, fc.container_id, c.name, c.caption, fc.cp_id, fc.entity_type,
         c.create_time, c.last_modify_time, u.identifier, u.first_name, u.last_name,
         fc.is_multirecord, fc.is_sys_form
+      order by
+        c.caption
     </sql-query>
 
     <sql-query name="getParticipantForms">
@@ -278,6 +280,8 @@
         fc.identifier, fc.container_id, c.name, c.caption, fc.cp_id, fc.entity_type,
         c.create_time, c.last_modify_time, u.identifier, u.first_name, u.last_name,
         fc.is_multirecord, fc.is_sys_form
+      order by
+        c.caption
     </sql-query>
 
     <sql-query name="getSpecimenForms">
@@ -319,6 +323,8 @@
         fc.identifier, fc.container_id, c.name, c.caption, fc.cp_id, fc.entity_type,
         c.create_time, c.last_modify_time, u.identifier, u.first_name, u.last_name,
         fc.is_multirecord, fc.is_sys_form
+      order by
+        c.caption
     </sql-query>
         
     <sql-query name="getSpecimenEventForms">

@@ -205,7 +205,7 @@ class Visit {
           wf = {};
         }
 
-        return [ {type: 'SpecimenCollectionGroup', forms: wf['visit'] || []} ];
+        return [ {type: 'SpecimenCollectionGroup', forms: wf['SpecimenCollectionGroup'] || []} ];
       }
     );
   }

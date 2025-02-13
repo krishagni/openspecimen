@@ -260,7 +260,7 @@ class Specimen {
           wf = {};
         }
 
-        return [ {type: 'Specimen', forms: wf['specimen'] || []} ];
+        return [ {type: 'Specimen', forms: wf['Specimen'] || []} ];
       }
     );
   }
