@@ -131,9 +131,9 @@ export default {
         const {initialQty} = this.ctx.parentSr;
         if (initialQty > 0) {
           if (!toSave.qtyPerAliquot) {
-            toSave.qtyPerAliquot = initialQty / toSave.noOfAliquots;
+            toSave.qtyPerAliquot = Math.round(initialQty / toSave.noOfAliquots * 10000) / 10000;
           } else if (!toSave.noOfAliquots) {
-            toSave.noOfAliquots = initialQty / toSave.qtyPerAliquot;
+            toSave.noOfAliquots = Math.floor(initialQty / toSave.qtyPerAliquot);
           }
         }
 
