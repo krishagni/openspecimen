@@ -26,6 +26,9 @@
                 <os-button :label="$t('cpgs.list')" @click="viewCpGroupsList" />
 
                 <os-menu :label="$t('common.buttons.more')" :options="moreMenuOpts" />
+
+                <os-button-link class="btn" left-icon="question-circle" :label="$t('common.buttons.help')"
+                  url="https://openspecimen.atlassian.net/l/cp/Qx15H1AU" :new-tab="true" />
               </span>
               <span v-else>
                 <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCps"
@@ -461,7 +464,7 @@ export default {
     },
 
     _isCpImportAllowed: function() {
-      const resources = ['Collection Protocol'];
+      const resources = ['CollectionProtocol'];
       return this._isAllowed(resources, ['Create']) && this._isAllowed(resources, ['Export Import']);
     },
 

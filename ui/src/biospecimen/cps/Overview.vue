@@ -26,6 +26,9 @@
         v-if="cp.specimenCentric" />
 
       <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
+
+      <os-button-link class="btn" left-icon="question-circle" :label="$t('common.buttons.help')"
+        url="https://openspecimen.atlassian.net/l/cp/m951FBKW" :new-tab="true" />
     </template>
   </os-page-toolbar>
 
