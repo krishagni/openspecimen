@@ -71,7 +71,7 @@ export default {
             name: "cpe.clinicalStatus",
             validations: {
               required: {
-                messageCode: "cps.cps.clinical_status_req"
+                messageCode: "cps.clinical_status_req"
               }
             }
           }
