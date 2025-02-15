@@ -767,7 +767,7 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	}
 
 	private void setAutoFreezerProvider(StorageContainerDetail detail, StorageContainer container, OpenSpecimenException ose) {
-		if (StringUtils.isBlank(detail.getAutoFreezerProvider())) {
+		if (StringUtils.isBlank(detail.getAutoFreezerProvider()) || !container.isAutomated()) {
 			return;
 		}
 
@@ -780,6 +780,10 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 	}
 
 	private void setAutoFreezerProvider(StorageContainerDetail detail, StorageContainer existing, StorageContainer container, OpenSpecimenException ose) {
+		if (!container.isAutomated()) {
+			return;
+		}
+
 		if (detail.isAttrModified("autoFreezerProvider") || existing == null) {
 			setAutoFreezerProvider(detail, container, ose);
 		} else {

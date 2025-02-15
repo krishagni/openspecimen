@@ -301,8 +301,8 @@ export default {
         { captionCode: 'common.no',  value: false }
       ],
       "optionsPerRow": 2,
-      "showWhen": "container.storeSpecimensEnabled && !container.noOfRows && !container.noOfColumns",
-      "showInOverviewWhen": "container.storeSpecimensEnabled && !container.noOfRows && !container.noOfColumns"
+      "showWhen": "container.storeSpecimensEnabled && dimensionLess",
+      "showInOverviewWhen": "container.storeSpecimensEnabled && dimensionLess"
     },
     {
       "type": "dropdown",

@@ -680,6 +680,8 @@ public class StorageContainer extends BaseExtensionEntity {
 		setDisplayName(other.getDisplayName());
 		setType(other.getType());
 		setTemperature(other.getTemperature());
+		setAutomated(other.isAutomated());
+		setAutoFreezerProvider(other.getAutoFreezerProvider());
 		updateCapacity(other);
 		setPositionLabelingMode(other.getPositionLabelingMode());
 		updateLabelingScheme(other);

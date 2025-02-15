@@ -149,6 +149,8 @@ export default {
   setup() {
     const route = useRoute();
     const ctx = reactive({
+      dimensionLess: false,
+
       container: {},
 
       storedSpmns: 0,
@@ -220,6 +222,7 @@ export default {
       const ctx = this.ctx;
       const container = ctx.container = this.container;
       ctx.containerObjs = [{objectName: 'storage_container', objectId: this.container.id}];
+      ctx.dimensionLess = !container.noOfRows && !container.noOfColumns;
 
       ctx.reportOpts = [
         {
