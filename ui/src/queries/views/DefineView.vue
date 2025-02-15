@@ -260,6 +260,19 @@ export default {
 
         const item = {id: form.name, label: form.caption, children: []};
         item.children = this._getFieldsTree0(form, null, form.name, fields);
+
+        const children = [], subForms = [];
+        for (const child of item.children) {
+          if (child.children && child.children.length > 0) {
+            subForms.push(child);
+          } else {
+            children.push(child);
+          }
+        }
+
+        subForms.sort((n1, n2) => n1.label < n2.label ? -1 : (n1.label > n2.label ? 1 : 0));
+        Array.prototype.push.apply(children, subForms);
+        item.children = children;
         tree.push(item);
       }
 
@@ -302,7 +315,6 @@ export default {
         }
       }
 
-      subTree.sort((n1, n2) => n1.label < n2.label ? -1 : (n1.label > n2.label ? 1 : 0));
       return subTree;
     },
 
