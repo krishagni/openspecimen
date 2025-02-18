@@ -2381,7 +2381,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		hiddenColumns.add(starred);
 		cfg.setHiddenColumns(hiddenColumns);
 
-		/*List<Column> fixedColumns = new ArrayList<>();
+		List<Column> fixedColumns = new ArrayList<>();
 		Column participantsCount = new Column();
 		participantsCount.setCaption("Participants");
 		participantsCount.setExpr("count(Participant.id)");
@@ -2431,7 +2431,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 				return resp;
 			}
-		);*/
+		);
 
 		List<Column> orderBy = cfg.getOrderBy();
 		if (orderBy == null) {
