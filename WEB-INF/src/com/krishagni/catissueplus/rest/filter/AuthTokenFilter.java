@@ -261,22 +261,25 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 
 		AuthUtil.setCurrentUser(impersonatedUser != null ? impersonatedUser : user, authToken, httpReq, impersonatedUser != null);
 		Date callStartTime = Calendar.getInstance().getTime();
-		chain.doFilter(req, resp);
-		AuthUtil.clearCurrentUser();
-		teardownReqDataProviders(httpReq, httpResp);
-
-		if (isRecordableApi(httpReq)) {
-			UserApiCallLog userAuditLog = new UserApiCallLog();
-			userAuditLog.setUser(user);
-			userAuditLog.setImpersonatedUser(impersonatedUser);
-			userAuditLog.setUrl(httpReq.getRequestURI());
-			userAuditLog.setMethod(httpReq.getMethod());
-			userAuditLog.setCallStartTime(callStartTime);
-			userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
-			userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
-			userAuditLog.setLoginAuditLog(loginAuditLog);
-			auditService.insertApiCallLog(userAuditLog);
+		try {
+			chain.doFilter(req, resp);
+		} finally {
+			AuthUtil.clearCurrentUser();
+			teardownReqDataProviders(httpReq, httpResp);
+			if (isRecordableApi(httpReq)) {
+				UserApiCallLog userAuditLog = new UserApiCallLog();
+				userAuditLog.setUser(user);
+				userAuditLog.setImpersonatedUser(impersonatedUser);
+				userAuditLog.setUrl(httpReq.getRequestURI());
+				userAuditLog.setMethod(httpReq.getMethod());
+				userAuditLog.setCallStartTime(callStartTime);
+				userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
+				userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
+				userAuditLog.setLoginAuditLog(loginAuditLog);
+				auditService.insertApiCallLog(userAuditLog);
+			}
 		}
+
 	}
 
 	private AuthToken doBasicAuthentication(HttpServletRequest httpReq, HttpServletResponse httpResp) throws UnsupportedEncodingException {
