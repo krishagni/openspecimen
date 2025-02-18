@@ -68,4 +68,10 @@
       <column name="NAME" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen created on date/time. Useful when sorting specimens by their created on dates">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_SPMN_CREATION_TIME_IDX">
+      <column name="CREATED_ON" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
