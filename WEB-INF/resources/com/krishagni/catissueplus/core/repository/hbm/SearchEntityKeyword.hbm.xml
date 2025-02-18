@@ -54,8 +54,7 @@
         k.value like :value and
         k.status = 1
       order by
-        r.sort_order,
-        k.value
+        r.sort_order
     </sql-query>
 
     <sql-query name="getMatchingEntities">
@@ -66,17 +65,17 @@
       from
         os_search_entity_ranks r
       where
-        r.entity in (
+        exists (
           select
-            distinct k.entity
+            k.entity
           from
             os_search_entity_keywords k
-            %s
           where
-            %s
             k.value like :value and
-            k.status = 1
+            k.status = 1 and
+            k.entity = r.entity
         )
+        %s
       order by
         r.sort_order
     </sql-query>

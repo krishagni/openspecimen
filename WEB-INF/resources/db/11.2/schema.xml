@@ -58,4 +58,14 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Covering index on search keywords">
+    <createIndex tableName="OS_SEARCH_ENTITY_KEYWORDS" indexName="OS_SRCH_ENTITY_KW_COV_IDX">
+      <column name="ENTITY" />
+      <column name="ENTITY_ID" />
+      <column name="VALUE" />
+      <column name="STATUS" />
+      <column name="NAME" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

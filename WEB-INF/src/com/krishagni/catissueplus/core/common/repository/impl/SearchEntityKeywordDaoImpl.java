@@ -65,11 +65,7 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 	public List<String> getMatchingEntities(String entity, String searchTerm) {
 		String sql = getCurrentSession().createNamedQuery(GET_MATCHING_ENTITIES).getQueryString();
 		if (entity != null) {
-			sql = String.format(
-				sql,
-				" inner join os_search_entity_ranks r1 on r1.entity = k.entity ",
-				" r1.short_name = :entity and "
-			);
+			sql = String.format(sql, " and r.short_name = :entity");
 		} else {
 			sql = String.format(sql, "", "");
 		}
