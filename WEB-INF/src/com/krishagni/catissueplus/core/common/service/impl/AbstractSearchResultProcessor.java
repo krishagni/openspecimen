@@ -15,6 +15,7 @@ import org.hibernate.type.StandardBasicTypes;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.events.SearchResult;
 import com.krishagni.catissueplus.core.common.service.SearchResultProcessor;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 
 public abstract class AbstractSearchResultProcessor implements SearchResultProcessor {
 	@Override
@@ -23,6 +24,13 @@ public abstract class AbstractSearchResultProcessor implements SearchResultProce
 		String query = getQuery();
 		if (StringUtils.isBlank(query)) {
 			return Collections.emptyList();
+		}
+
+		if (!isPredictiveSearchEnabled()) {
+			int orderIdx = query.lastIndexOf("order by");
+			if (orderIdx >= 0) {
+				query = query.substring(0, orderIdx);
+			}
 		}
 
 		List<Object[]> rows = (List<Object[]>) getSessionFactory().getCurrentSession().createNativeQuery(query)
@@ -83,6 +91,10 @@ public abstract class AbstractSearchResultProcessor implements SearchResultProce
 
 	protected String getEntityPropsQuery() {
 		return null;
+	}
+
+	protected boolean isPredictiveSearchEnabled() {
+		return ConfigUtil.getInstance().getBoolSetting("common", "predictive_search_results", true);
 	}
 
 	private SessionFactory getSessionFactory() {

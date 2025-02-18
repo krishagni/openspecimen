@@ -14,4 +14,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Setting to control the order of search results">
+    <sql>
+      call add_cfg_prop(
+        'common', 'predictive_search_results',
+        'predictive_search_results', 'predictive_search_results_desc',
+        'BOOLEAN', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

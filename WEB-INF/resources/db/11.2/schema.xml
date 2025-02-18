@@ -58,4 +58,26 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Covering index on search keywords">
+    <createIndex tableName="OS_SEARCH_ENTITY_KEYWORDS" indexName="OS_SRCH_ENTITY_KW_COV_IDX">
+      <column name="ENTITY" />
+      <column name="ENTITY_ID" />
+      <column name="VALUE" />
+      <column name="STATUS" />
+      <column name="NAME" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen created on date/time. Useful when sorting specimens by their created on dates">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_SPMN_CREATION_TIME_IDX">
+      <column name="CREATED_ON" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen received timestamp">
+    <createIndex tableName="CATISSUE_RECEIVED_EVENT_PARAM" indexName="OS_SPMN_RECV_TIME_IDX">
+      <column name="EVENT_TIMESTAMP" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
