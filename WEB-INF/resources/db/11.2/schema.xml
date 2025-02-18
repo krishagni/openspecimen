@@ -74,4 +74,10 @@
       <column name="CREATED_ON" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen received timestamp">
+    <createIndex tableName="CATISSUE_RECEIVED_EVENT_PARAM" indexName="OS_SPMN_RECV_TIME_IDX">
+      <column name="EVENT_TIMESTAMP" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
