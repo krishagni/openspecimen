@@ -594,6 +594,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		props.put("allowHtmlMarkup",         getBoolSetting("common", "de_form_html_markup", true));
 		props.put("auditEnabled",            appProps.getProperty("app.audit_enabled"));
 		props.put("localAccountSignups",     getBoolSetting("administrative", "local_account_signups", true));
+		props.put("caseInsensitiveSearch",   !Utility.isMySQL());
 		return props;
 	}
 

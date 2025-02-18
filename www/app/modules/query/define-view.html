@@ -26,7 +26,7 @@
               <span translate="queries.display_field_exprs"> Display Field Expressions </span>
             </label>
           </div>
-          <div class="form-group">
+          <div class="form-group" ng-if="global.appProps.caseInsensitiveSearch">
             <label class="checkbox-inline">
               <input type="checkbox" ng-model="caseSensitive" ng-change="setCaseSensitive(caseSensitive)"
                 style="position: initial;">

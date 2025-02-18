@@ -1200,9 +1200,11 @@ public class QueryServiceImpl implements QueryService {
 		boolean countQuery = "Count".equals(op.getRunType());
 		User user = AuthUtil.getCurrentUser();
 		TimeZone tz = AuthUtil.getUserTimeZone();
+		boolean ic = !Utility.isMySQL() && !op.isCaseSensitive();
+
 		Query query = Query.createQuery()
 			.wideRowMode(WideRowMode.valueOf(op.getWideRowMode()))
-			.ic(!op.isCaseSensitive())
+			.ic(ic)
 			.outputIsoDateTime(op.isOutputIsoDateTime())
 			.outputExpression(op.isOutputColumnExprs())
 			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
@@ -1668,7 +1670,7 @@ public class QueryServiceImpl implements QueryService {
 		TimeZone tz = AuthUtil.getUserTimeZone();
 		String aql = String.format(aqlFmt, aqlFmtArgs.toArray());
 		Query query = Query.createQuery()
-			.ic(true)
+			.ic(!Utility.isMySQL())
 			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt())
 			.timeZone(tz != null ? tz.getID() : null)
