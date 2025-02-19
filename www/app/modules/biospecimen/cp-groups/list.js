@@ -7,6 +7,7 @@ angular.module('os.biospecimen.cpgroups')
     function init() {
       $scope.ctx = ctx = { };
 
+      ctx.updateOpts   = {resource: 'CollectionProtocol', operations: ['Update']};
       ctx.pagerOpts    = new ListPagerOpts({listSizeGetter: getGroupsCount});
       ctx.filterOpts   = Util.filterOpts({includeStats: true, maxResults: ctx.pagerOpts.recordsPerPage + 1});
       ctx.emptyState   = {
