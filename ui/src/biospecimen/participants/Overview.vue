@@ -181,6 +181,10 @@ export default {
       return (this.ctx.visits || []).some(visit => !visit.status || visit.status == 'Pending');
     },
 
+    isCreateAllowed: function() {
+      return this.cpViewCtx.isCreateParticipantAllowed();
+    },
+
     isUpdateAllowed: function() {
       return this.cpViewCtx.isUpdateParticipantAllowed(this.cpr);
     },
@@ -351,9 +355,13 @@ export default {
 
     _loadMoreMenuOptions: async function() {
       const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
-      const moreOptions = [
-        {icon: 'plus', caption: this.$t('participants.add_to_another_cp'), onSelect: this.addToAnother}
-      ];
+
+      const cps = await this._getAddToOtherCps({});
+      const moreOptions = [];
+      if (this.isCreateAllowed && cps && cps.length > 0) {
+        moreOptions.push({icon: 'plus', caption: this.$t('participants.add_to_another_cp'), onSelect: this.addToAnother});
+      }
+
       util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'participant-detail', 'more-menu', ctxt)
         .then(
           pluginOptions => {
