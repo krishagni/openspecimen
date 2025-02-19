@@ -1,5 +1,5 @@
 <template>
-  <os-page-toolbar>
+  <os-page-toolbar v-show-if-allowed="dpResources.updateOpts">
     <template #default>
       <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addRequirement" />
     </template>
@@ -13,7 +13,7 @@
     ref="listView"
   >
     <template #rowActions="slotProps">
-      <os-button-group :style="{'min-width': '3.25rem'}">
+      <os-button-group :style="{'min-width': '3.25rem'}" v-show-if-allowed="dpResources.updateOpts">
         <os-button left-icon="edit"  @click="editRequirement(slotProps.rowObject)"  />
         <os-button left-icon="trash" @click="confirmDeleteReq(slotProps.rowObject)" />
       </os-button-group>
@@ -40,6 +40,8 @@ import alertsSvc from '@/common/services/Alerts.js';
 import routerSvc from '@/common/services/Router.js';
 import dpSvc from '@/administrative/services/DistributionProtocol.js';
 
+import dpResources from './Resources.js';
+
 export default {
   props: ['dp'],
 
@@ -51,7 +53,9 @@ export default {
         loading: false
       },
 
-      listSchema: { columns: [] }
+      listSchema: { columns: [] },
+
+      dpResources
     }
   },
 

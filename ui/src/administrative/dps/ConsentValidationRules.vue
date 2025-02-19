@@ -1,5 +1,5 @@
 <template>
-  <os-page-toolbar>
+  <os-page-toolbar v-show-if-allowed="dpResources.updateOpts">
     <template #default>
       <os-button left-icon="plus" :label="$t('dps.econsents.add_rule')" @click="showAddRule" />
     </template>
@@ -36,7 +36,7 @@
     <div class="os-econsent-rules-expr" v-if="ctx.rules.type == 'ADVANCED'">
       <os-textarea :disabled="!ctx.allowExprEdit" class="text" v-model="ctx.rules.expr" />
 
-      <span class="buttons">
+      <span class="buttons" v-show-if-allowed="dpResources.updateOpts">
         <os-button primary :label="$t('common.buttons.edit')" @click="editRulesExpr" v-if="!ctx.allowExprEdit" />
         <os-button primary :label="$t('common.buttons.save')" @click="saveRules"     v-if="ctx.allowExprEdit"  />
         <os-button :label="$t('common.buttons.cancel')" @click="cancelEditRulesExpr" v-if="ctx.allowExprEdit"  />
@@ -55,7 +55,7 @@
             <span class="response">{{rule.values.join(', ')}}</span>
           </span>
         </div>
-        <div class="actions">
+        <div class="actions" v-show-if-allowed="dpResources.updateOpts">
           <os-button-group>
             <os-button left-icon="edit"  size="small" @click="showEditRule(rule)" />
             <os-button left-icon="trash" size="small" @click="showDeleteRule(rule)" />
@@ -106,6 +106,8 @@
 </template>
 
 <script>
+import dpResources from './Resources.js';
+
 export default {
   props: ['dp'],
 
@@ -119,7 +121,9 @@ export default {
         allowExprEdit: false
       },
 
-      addEditRuleSchema: {rows: []}
+      addEditRuleSchema: {rows: []},
+
+      dpResources
     }
   },
 
@@ -161,6 +165,10 @@ export default {
     },
 
     changeRuleType: function(ruleType) {
+      if (!this.$osSvc.authSvc.isAllowed(dpResources.updateOpts)) {
+        return;
+      }
+
       const rules = this.ctx.rules;
       if (rules.type == ruleType) {
         return;
