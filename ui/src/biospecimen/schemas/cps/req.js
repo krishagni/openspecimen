@@ -29,6 +29,7 @@ export default {
       "type": "pv",
       "attribute": "anatomic_site",
       "selectProp": "value",
+      "leafValue": true,
       "name": "sr.anatomicSite",
       "labelCode": "cps.anatomic_site",
       "showWhen": "sr.lineage != 'Aliquot'",
