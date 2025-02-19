@@ -2,7 +2,7 @@
   <os-page-toolbar>
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editContainer"
-        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.activityStatus == 'Active'" />
+        v-if="ctx.editAllowed && ctx.container.activityStatus == 'Active'" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainer"
         v-show-if-allowed="containerResources.deleteOpts" />
@@ -11,10 +11,12 @@
         v-if="ctx.container.activityStatus == 'Active'" />
 
       <os-menu :label="$t('common.buttons.more')" right-icon="caret-down" :options="ctx.moreOpts"
-        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.moreOpts.length > 0" />
+        v-if="ctx.editAllowed" />
+
+      <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" v-else />
 
       <os-button left-icon="check" :label="$t('common.buttons.unarchive')" @click="showUnarchiveForm"
-        v-show-if-allowed="containerResources.updateOpts" v-if="ctx.container.activityStatus == 'Closed'" />
+        v-if="ctx.editAllowed && ctx.container.activityStatus == 'Closed'" />
 
       <os-menu :label="$t('common.buttons.export')" :options="ctx.reportOpts"
         v-if="ctx.container.activityStatus == 'Active'" />
@@ -134,6 +136,7 @@ import { useRoute } from 'vue-router';
 
 import containerSvc from '@/administrative/services/Container.js';
 import alertsSvc    from '@/common/services/Alerts.js';
+import authSvc      from '@/common/services/Authorization.js';
 import http         from '@/common/services/HttpClient.js';
 import routerSvc    from '@/common/services/Router.js';
 import settingsSvc  from '@/common/services/Setting.js';
@@ -188,7 +191,9 @@ export default {
 
       reportOpts: [],
 
-      moreOpts: []
+      moreOpts: [],
+
+      editAllowed: authSvc.isAllowed(containerResources.updateOpts)
     });
 
     const trCtx = reactive({
