@@ -565,9 +565,14 @@ public class SpecimenDetail extends SpecimenInfo {
 					continue;
 				}
 
-				Map<String, String> kit = visit.getKitLabels().get(spmn.getReqId());
-				spmn.setKitLabel(kit.get("label"));
-				spmn.setKitBarcode(kit.get("barcode"));
+				if (visit.getKitLabels() != null) {
+					Map<String, String> kit = visit.getKitLabels().get(spmn.getReqId());
+					if (kit != null) {
+						spmn.setKitLabel(kit.get("label"));
+						spmn.setKitBarcode(kit.get("barcode"));
+					}
+				}
+
 				if (spmn.getChildren() != null) {
 					workingList.addAll(0, spmn.getChildren());
 				}
