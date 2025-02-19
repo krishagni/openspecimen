@@ -1,6 +1,6 @@
 
 <template>
-  <template v-if="lazyLoad || items.length > 1">
+  <span v-if="lazyLoad || items.length > 1">
     <os-button :size="buttonSize" :left-icon="icon"
       :label="label" :no-outline="noOutline"
       :right-icon="label ? 'caret-down' : ''"
@@ -15,7 +15,7 @@
         </a>
       </template>
     </dropdown-menu>
-  </template>
+  </span>
   <os-button v-else-if="!lazyLoad && items.length == 1 && !items[0].url"
     :left-icon="items[0].icon" :label="items[0].label" @click="items[0].command" />
   <os-button-link v-else-if="!lazyLoad && items.length == 1 && items[0].url"
