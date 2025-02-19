@@ -7,14 +7,15 @@
         </template>
         <template #actions>
           <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="addEvent"
-            v-if="!cp.specimenCentric" />
+            v-if="!cp.specimenCentric" v-show-if-allowed="cpResources.updateOpts" />
         </template>
         <template #default="{item: {cpe}}">
           <div class="event">
             <span class="description">
               <os-visit-event-desc :event="cpe" :show-status="true" />
             </span>
-            <os-button-group class="actions" @click="onEventOpsClick($event)">
+            <os-button-group class="actions" @click="onEventOpsClick($event)"
+              v-show-if-allowed="cpResources.updateOpts">
               <os-menu icon="ellipsis-v" :lazy-load="true" :options="eventOps({cpe})" />
             </os-button-group>
           </div>
@@ -30,7 +31,9 @@
 
         <template #actions v-if="ctx.selectedEvent && ctx.selectedEvent.cpe.id > 0 &&
           ctx.selectedEvent.cpe.activityStatus == 'Active'">
-          <os-button left-icon="plus" :label="$t('cps.add_req')" @click="addReq(ctx.selectedEvent.cpe)" />
+          <os-button left-icon="plus" :label="$t('cps.add_req')"
+            @click="addReq(ctx.selectedEvent.cpe)"
+            v-show-if-allowed="cpResources.updateOpts" />
         </template>
 
         <template #default>
@@ -42,7 +45,9 @@
             v-if="ctx.selectedEvent && ctx.selectedEvent.cpe.reqs && ctx.selectedEvent.cpe.reqs.length > 0">
 
             <template #row-actions="{rowItem}" v-show-if-allowed="cpResources.updateOpts">
-              <os-menu icon="ellipsis-v" :lazy-load="true" :options="reqOps(ctx.selectedEvent.cpe, rowItem.item)" />
+              <os-menu icon="ellipsis-v" :lazy-load="true"
+                :options="reqOps(ctx.selectedEvent.cpe, rowItem.item)"
+                v-show-if-allowed="cpResources.updateOpts" />
             </template>
 
             <template #expanded-row>

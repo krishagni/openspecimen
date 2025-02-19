@@ -1,6 +1,6 @@
 <template>
   <div class="os-consents">
-    <os-page-toolbar v-if="!ctx.hasEc && !cp.consentsSource && ctx.tiers && ctx.tiers.length > 0">
+    <os-page-toolbar v-if="editAllowed && !ctx.hasEc && !cp.consentsSource && ctx.tiers && ctx.tiers.length > 0">
       <template #default>
         <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddEditConsentTierDialog({})" />
       </template>
@@ -19,9 +19,9 @@
               <a :href="consentsSourceUrl" target="_blank">{{cp.consentsSource.shortTitle}}</a>
             </span>
 
-            <os-divider />
+            <os-divider v-if="editAllowed" />
 
-            <div>
+            <div v-if="editAllowed">
               <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="showSelectCpDialog" />
 
               <os-button left-icon="times" :label="$t('common.buttons.remove')" @click="unsetConsentsCp"
@@ -36,22 +36,37 @@
       </os-card>
   
       <os-card v-else-if="noDocsAndTiers">
-        <template #body>
+        <template #body v-if="editAllowed && !cp.consentsWaived">
           <div>
-            <span v-t="'cps.waive_consents_q'" v-if="!cp.consentsWaived">Do you want to waive the consents?</span>
-            <span v-t="'cps.collect_consents_q'" v-else>Consents are waived. Do you want to start collecting consents?</span>
+            <span v-t="'cps.waive_consents_q'">Do you want to waive the consents?</span>
           </div>
 
           <os-divider />
 
           <div>
-            <os-button :label="$t('common.buttons.yes')" @click="waiveConsents" v-if="!cp.consentsWaived" />
-            <os-button :label="$t('common.buttons.yes')" @click="undoWaiveConsents" v-else />
+            <os-button :label="$t('common.buttons.yes')" @click="waiveConsents" />
           </div>
+        </template>
+        <template #body v-else-if="cp.consentsWaived">
+          <div>
+            <span v-t="'cps.consents_waived'" v-if="!editAllowed">Consents are waived</span>
+            <span v-t="'cps.collect_consents_q'" v-else>Consents are waived. Do you want to start collecting consents?</span>
+          </div>
+
+          <os-divider v-if="editAllowed" />
+
+          <div v-if="editAllowed">
+            <os-button :label="$t('common.buttons.yes')" @click="undoWaiveConsents" />
+          </div>
+        </template>
+        <template #body v-else>
+          <os-message type="info">
+            <span v-t="'cps.no_consents'">No consents to show.</span>
+          </os-message>
         </template>
       </os-card>
 
-      <os-card v-if="!cp.consentsWaived && !cp.consentsSource && noDocsAndTiers">
+      <os-card v-if="!cp.consentsWaived && !cp.consentsSource && noDocsAndTiers && editAllowed">
         <template #body>
           <div>
             <span v-t="'cps.source_from_another_cp'">
@@ -71,7 +86,7 @@
     <os-grid v-if="!ctx.hasEc">
       <os-grid-column :width="12">
         <os-button left-icon="plus" :label="$t('cps.add_consent_tier')" @click="showAddEditConsentTierDialog({})"
-          v-if="!cp.consentsWaived && !cp.consentsSource && ctx.tiers && ctx.tiers.length == 0" />
+          v-if="!cp.consentsWaived && !cp.consentsSource && ctx.tiers && ctx.tiers.length == 0 && editAllowed" />
 
         <os-card v-for="tier of ctx.tiers || []" :key="tier.id">
           <template #body>
@@ -79,7 +94,7 @@
               <div class="statement">
                 <span>{{tier.statement}} ({{tier.statementCode}})</span>
               </div>
-              <div class="actions" v-if="!cp.consentsSource">
+              <div class="actions" v-if="!cp.consentsSource && editAllowed">
                 <os-button-group>
                   <os-button size="small" left-icon="edit"  @click="showAddEditConsentTierDialog(tier)" />
                   <os-button size="small" left-icon="trash" @click="deleteTier(tier)" />
@@ -133,14 +148,18 @@ import consentSchema from '@/biospecimen/schemas/cps/consent-addedit.js';
 import consentCpSchema from '@/biospecimen/schemas/cps/consent-cp.js';
 
 import alertsSvc from '@/common/services/Alerts.js';
+import authSvc from '@/common/services/Authorization.js';
 import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
 import routerSvc from '@/common/services/Router.js';
 import util from '@/common/services/Util.js';
+
+import cpResources from './Resources.js';
 
 export default {
   props: ['cp', 'filters'],
 
   data() {
+    const editAllowed = authSvc.isAllowed(cpResources.updateOpts);
     return {
       ctx: {
         tiers: null,
@@ -158,7 +177,11 @@ export default {
 
       addEditFs: consentSchema.layout,
 
-      consentCpFs: consentCpSchema.layout
+      consentCpFs: consentCpSchema.layout,
+
+      cpResources,
+
+      editAllowed
     }
   },
 

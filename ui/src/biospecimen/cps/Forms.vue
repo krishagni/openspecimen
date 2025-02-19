@@ -10,7 +10,8 @@
 
         <template #actions v-if="participantForms.length > 1">
           <os-button left-icon="sort" size="small"
-            @click="showSortFormsDialog('CommonParticipant', participantForms)" />
+            @click="showSortFormsDialog('CommonParticipant', participantForms)"
+            v-show-if-allowed="cpResources.updateOpts" />
         </template>
 
         <template #empty-list>
@@ -32,7 +33,8 @@
 
         <template #actions v-if="registrationForms.length > 1">
           <os-button left-icon="sort" size="small"
-            @click="showSortFormsDialog('Participant', registrationForms)" />
+            @click="showSortFormsDialog('Participant', registrationForms)"
+            v-show-if-allowed="cpResources.updateOpts"  />
         </template>
 
         <template #empty-list>
@@ -54,7 +56,8 @@
 
         <template #actions v-if="visitForms.length > 1">
           <os-button left-icon="sort" size="small"
-            @click="showSortFormsDialog('SpecimenCollectionGroup', visitForms)" />
+            @click="showSortFormsDialog('SpecimenCollectionGroup', visitForms)" 
+            v-show-if-allowed="cpResources.updateOpts" />
         </template>
 
         <template #empty-list>
@@ -76,7 +79,8 @@
 
         <template #actions v-if="specimenForms.length > 1">
           <os-button left-icon="sort" size="small"
-            @click="showSortFormsDialog('Specimen', specimenForms)" />
+            @click="showSortFormsDialog('Specimen', specimenForms)" 
+            v-show-if-allowed="cpResources.updateOpts" />
         </template>
 
         <template #empty-list>
@@ -141,6 +145,8 @@ import formSvc   from '@/forms/services/Form.js';
 import formUtil  from '@/common/services/FormUtil.js';
 import util      from '@/common/services/Util.js';
 
+import cpResources from './Resources.js';
+
 export default {
   props: ['cp'],
 
@@ -166,7 +172,9 @@ export default {
 
       specimenForms: [],
 
-      sortCtx: {}
+      sortCtx: {},
+
+      cpResources
     }
   },
 
