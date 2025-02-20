@@ -135,7 +135,7 @@ export default {
 
   methods: {
     handlePositionInput: function() {
-      if (!this.previousContainer || this.previousContainer != this.position.name) {
+      if (!this.position.reservationId && (!this.previousContainer || this.previousContainer != this.position.name)) {
         let selectedContainer = (this.containers || []).find(container => container.name == this.position.name);
         if (selectedContainer) {
           this.position.mode = selectedContainer.positionLabelingMode;
