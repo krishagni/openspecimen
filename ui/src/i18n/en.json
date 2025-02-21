@@ -504,7 +504,7 @@
     "block": "Block",
     "block_all": "Block All",
     "blocked": "Blocked",
-    "blocked_for_auto_allo": "Blocked for auto allocation",
+    "blocked_for_auto_alloc": "Blocked for auto allocation",
     "box_barcode_not_detected": "Box barcode not detected. Manually input the box barcode.",
     "box_barcode_not_specified": "Box barcode not specified.",
     "box_name_not_detected": "Box name not detected. Manually input the box name.",
