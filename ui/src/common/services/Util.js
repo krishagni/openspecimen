@@ -522,7 +522,12 @@ class Util {
           const result = {header: [], columnTypes: [], rows: []};
 
           for (let sfField of field.fields) {
-            result.header.push(sfField.label);
+            if (sfField.label) {
+              result.header.push(sfField.label);
+            } else {
+              result.header.push(i18n.msg(sfField.labelCode));
+            }
+
             result.columnTypes.push(sfField.displayType || sfField.type);
           }
 

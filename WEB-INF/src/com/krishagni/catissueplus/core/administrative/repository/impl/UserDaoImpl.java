@@ -537,12 +537,12 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	private void addGroupRestrictions(AbstractCriteria<?, ?> query, UserListCriteria listCrit) {
-		if (StringUtils.isBlank(listCrit.group())) {
+		if (CollectionUtils.isEmpty(listCrit.groups())) {
 			return;
 		}
 
 		query.join("u.groups", "group")
-			.add(query.eq("group.name", listCrit.group()));
+			.add(query.in("group.name", listCrit.groups()));
 	}
 
 	private Restriction addSiteRestriction(AbstractCriteria<?, ?> query, String alias, String siteName) {

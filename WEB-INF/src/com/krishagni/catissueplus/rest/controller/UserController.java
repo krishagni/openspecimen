@@ -84,7 +84,7 @@ public class UserController {
 		String institute,
 
 		@RequestParam(value = "group", required = false)
-		String group,
+		List<String> groups,
 
 		@RequestParam(value = "domainName", required = false)
 		String domainName,
@@ -133,7 +133,7 @@ public class UserController {
 			.name(name)
 			.loginName(loginName)
 			.instituteName(institute)
-			.group(group)
+			.groups(groups)
 			.domainName(domainName)
 			.activityStatus(activityStatus)
 			.listAll(listAll)
@@ -173,7 +173,7 @@ public class UserController {
 		String institute,
 
 		@RequestParam(value = "group", required = false)
-		String group,
+		List<String> groups,
 
 		@RequestParam(value = "domainName", required = false)
 		String domainName,
@@ -202,7 +202,7 @@ public class UserController {
 			.name(name)
 			.loginName(loginName)
 			.instituteName(institute)
-			.group(group)
+			.groups(groups)
 			.domainName(domainName)
 			.activityStatus(activityStatus)
 			.type(type)

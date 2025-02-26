@@ -17,10 +17,12 @@ public class VisitSummary extends AttributeModifiedSupport implements Comparable
 	private Long id;
 
 	private Long cpId;
-	
+
 	private Long eventId;
 
 	private Long cprId;
+
+	private String ppid;
 
 	private String name;
 
@@ -90,6 +92,14 @@ public class VisitSummary extends AttributeModifiedSupport implements Comparable
 
 	public void setCprId(Long cprId) {
 		this.cprId = cprId;
+	}
+
+	public String getPpid() {
+		return ppid;
+	}
+
+	public void setPpid(String ppid) {
+		this.ppid = ppid;
 	}
 
 	public String getName() {

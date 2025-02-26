@@ -1,9 +1,13 @@
 package com.krishagni.catissueplus.core.administrative.repository;
 
-import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
-
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class UserListCriteria extends AbstractListCriteria<UserListCriteria> {
 	private static final String ARCHIVED = "Archived";
@@ -16,7 +20,7 @@ public class UserListCriteria extends AbstractListCriteria<UserListCriteria> {
 	
 	private String instituteName;
 
-	private String group;
+	private List<String> groups;
 	
 	private String domainName;
 	
@@ -86,14 +90,22 @@ public class UserListCriteria extends AbstractListCriteria<UserListCriteria> {
 	}
 
 	public UserListCriteria group(String group) {
-		this.group = group;
+		this.groups = StringUtils.isBlank(group) ? Collections.emptyList() : Collections.singletonList(group);
 		return self();
 	}
 
 	public String group() {
-		return group;
+		return CollectionUtils.isEmpty(groups) ? null : groups.iterator().next();
 	}
-	
+
+	public UserListCriteria groups(List<String> groups) {
+		this.groups = groups;
+		return self();
+	}
+
+	public List<String> groups() {
+		return groups;
+	}
 	public UserListCriteria domainName(String domainName) {
 		this.domainName = domainName;
 		return self();

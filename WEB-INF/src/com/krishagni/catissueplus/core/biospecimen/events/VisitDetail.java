@@ -31,8 +31,6 @@ import com.krishagni.catissueplus.core.de.events.ExtensionDetail;
 public class VisitDetail extends VisitSummary {
 	private Long cprId;
 
-	private String ppid;
-	
 	private String cpTitle;
 
 	private String cpShortTitle;
@@ -81,14 +79,6 @@ public class VisitDetail extends VisitSummary {
 
 	public void setCprId(Long cprId) {
 		this.cprId = cprId;
-	}
-
-	public String getPpid() {
-		return ppid;
-	}
-
-	public void setPpid(String ppid) {
-		this.ppid = ppid;
 	}
 
 	public String getCpTitle() {
