@@ -57,7 +57,9 @@ export default {
   methods: {
     _getForms: async function() {
       const cp = this.cpViewCtx.getCp();
-      const ctxt = {cp, cpr: this.cpr};
+      const userRole = this.cpViewCtx.getRole();
+
+      const ctxt = {cp, cpr: this.cpr, userRole};
       return this.cpViewCtx.getParticipantForms(ctxt);
     },
 

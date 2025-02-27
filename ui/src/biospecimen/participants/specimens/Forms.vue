@@ -57,7 +57,9 @@ export default {
   methods: {
     _getForms: async function() {
       const cp = this.cpViewCtx.getCp();
-      const ctxt = {cp, cpr: this.cpr, visit: this.visit, specimen: this.specimen};
+      const userRole = this.cpViewCtx.getRole();
+
+      const ctxt = {cp, cpr: this.cpr, visit: this.visit, specimen: this.specimen, userRole};
       return this.cpViewCtx.getSpecimenForms(ctxt);
     },
 
