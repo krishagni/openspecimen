@@ -96,7 +96,7 @@
 
           <AgGridVue class="results-grid" :theme="theme"
             :row-data="ctx.records" :column-defs="ctx.columns" :suppressFieldDotNotation="true"
-            :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow"
+            :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow" :enableCellTextSelection="true"
             @gridReady="onGridReady" @selectionChanged="onRowSelection"
             v-if="!ctx.loadingRecords" />
         </os-grid-column>
