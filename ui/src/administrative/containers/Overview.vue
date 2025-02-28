@@ -7,6 +7,9 @@
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteContainer"
         v-show-if-allowed="containerResources.deleteOpts" />
 
+      <os-button left-icon="chart-pie" :label="$t('containers.view_utilisation')" @click="viewUtilisation"
+        v-if="ctx.showStatsBtn && (!container.storageLocation || !container.storageLocation.id)" />
+
       <os-button left-icon="print" :label="$t('common.buttons.print')" @click="printLabels"
         v-if="ctx.container.activityStatus == 'Active'" />
 
@@ -156,6 +159,8 @@ export default {
 
       container: {},
 
+      showStatsBtn: true,
+
       storedSpmns: 0,
 
       containerObjs: [],
@@ -287,36 +292,51 @@ export default {
 
       ctx.moreOpts.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
 
+      this.ctx.spmnTypesStorage = {};
+      this.ctx.storedSpmns = 0;
       if (!container.storageLocation || !container.storageLocation.name) {
-        let types = Object.keys(container.specimensByType)
-          .sort((t1, t2) => container.specimensByType[t2] - container.specimensByType[t1]);
-        let storedSpmns = 0, spmnTypes = [], spmnCounts = [];
-        for (let type of types) {
-          storedSpmns += container.specimensByType[type];
-          if (spmnTypes.length < 5) {
-            spmnTypes.push(type);
-            spmnCounts.push(container.specimensByType[type]);
-          }
-        }
-
-        ctx.spmnTypesStorage = {
-          labels: spmnTypes,
-          datasets: [
-            {
-              data: spmnCounts,
-              backgroundColor: ['#FEAE65', '#E6F69D', '#AADEA7', '#64C2A6', '#2D87BB']
-            }
-          ]
-        };
-
-        ctx.storedSpmns = storedSpmns;
+        this.ctx.showStatsBtn = true;
       } else {
-        ctx.storedSpmns = 0;
+        this.ctx.showStatsBtn = false;
       }
     },
 
     editContainer: function() {
       routerSvc.goto('ContainerAddEdit', {containerId: this.container.id});
+    },
+
+    viewUtilisation: function() {
+      containerSvc.getContainer(this.container.id, true).then(
+        (container) => {
+          const types = Object.keys(container.specimensByType)
+            .sort((t1, t2) => container.specimensByType[t2] - container.specimensByType[t1]);
+          let storedSpmns = 0, spmnTypes = [], spmnCounts = [];
+
+          for (let type of types) {
+            storedSpmns += container.specimensByType[type];
+            if (spmnTypes.length < 5) {
+              spmnTypes.push(type);
+              spmnCounts.push(container.specimensByType[type]);
+            }
+          }
+
+          this.ctx.spmnTypesStorage = {
+            labels: spmnTypes,
+            datasets: [
+              {
+                data: spmnCounts,
+                backgroundColor: ['#FEAE65', '#E6F69D', '#AADEA7', '#64C2A6', '#2D87BB']
+              }
+            ]
+          };
+
+          this.ctx.storedSpmns = storedSpmns;
+          this.ctx.showStatsBtn = false;
+          if (storedSpmns <= 0) {
+            alertsSvc.info({code: 'containers.no_specimens'});
+          }
+        }
+      );
     },
 
     showTransferForm: function(action) {

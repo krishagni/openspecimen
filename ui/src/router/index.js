@@ -647,7 +647,7 @@ const routes = [
         path: 'containers',
         name: 'ContainersList',
         component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/List.vue'),
-        props: (route) => ({filters: route.query.filters}),
+        props: (route) => ({filters: route.query.filters, showStats: route.query.showStats}),
       },
       {
         path: 'containers/:containerId/detail',

@@ -602,6 +602,7 @@
     "generating_map": "Generating container map...",
     "generating_transfer_report": "Generating transfer report...",
     "generating_utilisation_report": "Generating utilisation report...",
+    "hide_stats": "Hide Insights",
     "hierarchy_created": "Container hierarchy of type '{typeName}' created.",
     "interval_unit": "Unit",
     "labeling_scheme": "Labeling Scheme",
@@ -630,6 +631,7 @@
     "no_free_positions": "Container does not have enough free positions to store input specimens.",
     "no_layout_detail_to_render": "Container layout detail is not available to render the map view.",
     "no_map_for_dimless": "The map view is not available for dimensionless container.",
+    "no_specimens": "No specimens have been stored in the freezer, so the utilization chart cannot be displayed.",
     "no_tube_barcodes_detected": "No specimen barcodes were detected.",
     "not_checked_out": "No locations blocked by the specimens: {labels}.",
     "not_stored": "Not Stored",
@@ -765,7 +767,9 @@
     "vacate_existing_specimens": "Vacate Existing Specimens",
     "view_color_coding": "View Color Coding",
     "view_map": "View Map",
-    "view_specimens": "View Specimens"
+    "view_specimens": "View Specimens",
+    "view_stats": "View Insights",
+    "view_utilisation": "View Utilisation"
   },
 
   "cpgs": {
