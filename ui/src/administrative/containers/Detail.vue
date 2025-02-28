@@ -151,17 +151,7 @@ export default {
 
   methods: {
     loadContainer: async function() {
-      const container = this.ctx.container = await containerSvc.getContainer(+this.containerId, true);
-      const root = !container.storageLocation || !container.storageLocation.id;
-      if (root) {
-        let storedSpmns = 0;
-        for (let type of Object.keys(container.specimensByType)) {
-          storedSpmns += container.specimensByType[type];
-        }
-
-        container.storedSpecimens = storedSpmns;
-      }
-
+      this.ctx.container = await containerSvc.getContainer(+this.containerId);
       formUtil.createCustomFieldsMap(this.ctx.container, true);
     },
 

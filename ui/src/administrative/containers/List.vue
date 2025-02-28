@@ -38,7 +38,7 @@
                 v-show-if-allowed="containerResources.importOpts" />
 
               <os-menu :label="$t('common.buttons.actions')" :options="actionOpts"
-                v-show-if-allowed="containerResources.updateOpts" />
+                v-if="actionOpts && actionOpts.length > 0" />
 
               <os-menu :label="$t('common.buttons.export')" :options="exportOpts" />
 
@@ -125,48 +125,15 @@ import alertsSvc    from '@/common/services/Alerts.js';
 import authSvc      from '@/common/services/Authorization.js';
 import exportSvc    from '@/common/services/ExportService.js';
 import routerSvc    from '@/common/services/Router.js';
+import util         from '@/common/services/Util.js';
 import wfSvc        from '@/common/services/Workflow.js';
 
 import containerResources from './Resources.js';
 
 export default {
-  props: ['filters'],
+  props: ['filters', 'show-stats'],
 
   data() {
-    const actionOpts = [];
-    if (authSvc.isAllowed(containerResources.updateOpts)) {
-      actionOpts.push({
-        icon: 'archive',
-        caption: this.$t('common.buttons.archive'),
-        onSelect: () => routerSvc.goto('BulkContainerArchive')
-      });
-      actionOpts.push({
-        icon: 'sign-in-alt',
-        caption: this.$t('containers.check_in_button'),
-        onSelect: () => routerSvc.goto('BulkContainerCheckin')
-      });
-      actionOpts.push({
-        icon: 'sign-out-alt',
-        caption: this.$t('containers.check_out_button'),
-        onSelect: () => routerSvc.goto('BulkContainerCheckout')
-      });
-      actionOpts.push({
-        icon: 'arrows-alt-h',
-        caption: this.$t('containers.transfer'),
-        onSelect: () => routerSvc.goto('BulkContainerTransfer')
-      });
-      actionOpts.push({
-        icon: 'box',
-        caption: this.$t('containers.find_places.title'),
-        onSelect: () => routerSvc.goto('ContainerFindPlaces')
-      });
-      actionOpts.push({
-        icon: 'check',
-        caption: this.$t('containers.unblock'),
-        onSelect: () => routerSvc.goto('UnblockLocations')
-      });
-    }
-
     const exportOpts = [];
     exportOpts.push({
       icon: 'arrows-alt-h',
@@ -198,9 +165,8 @@ export default {
         query: this.filters,
         selectedContainers: [],
         trRptFs: containerSvc.getTransferReportFormSchema(),
+        showStats: false
       },
-
-      listSchema,
 
       importOpts: [
         {
@@ -215,8 +181,6 @@ export default {
         }
       ],
 
-      actionOpts,
-
       exportOpts,
 
       trRptCtx: {showDateRange: false, criteria: {}},
@@ -225,27 +189,97 @@ export default {
     };
   },
 
-  created() {
-    if (this.actionOpts.length == 0) {
-      return;
-    }
-
-    wfSvc.getSysWorkflow('box-scanners').then(
-      ({scanners}) => {
-        if (!scanners || scanners.length == 0) {
-          return;
-        }
-
-        this.actionOpts.push({
-          icon: 'qrcode',
-          caption: this.$t('containers.scan_boxes'),
-          onSelect: () => routerSvc.goto('ScanBoxes')
-        });
+  computed: {
+    listSchema: function() {
+      const result = {...listSchema};
+      if (!util.isTrue(this.showStats)) {
+        result.columns = result.columns.filter(({name}) => name != 'container.storedSpecimens' && name != 'container.utilisation');
       }
-    );
+
+      return result;
+    },
+
+    actionOpts: function() {
+      const actionOpts = [];
+      if (authSvc.isAllowed(containerResources.updateOpts)) {
+        actionOpts.push({
+          icon: 'archive',
+          caption: this.$t('common.buttons.archive'),
+          onSelect: () => routerSvc.goto('BulkContainerArchive')
+        });
+        actionOpts.push({
+          icon: 'sign-in-alt',
+          caption: this.$t('containers.check_in_button'),
+          onSelect: () => routerSvc.goto('BulkContainerCheckin')
+        });
+        actionOpts.push({
+          icon: 'sign-out-alt',
+          caption: this.$t('containers.check_out_button'),
+          onSelect: () => routerSvc.goto('BulkContainerCheckout')
+        });
+        actionOpts.push({
+          icon: 'arrows-alt-h',
+          caption: this.$t('containers.transfer'),
+          onSelect: () => routerSvc.goto('BulkContainerTransfer')
+        });
+        actionOpts.push({
+          icon: 'box',
+          caption: this.$t('containers.find_places.title'),
+          onSelect: () => routerSvc.goto('ContainerFindPlaces')
+        });
+        actionOpts.push({
+          icon: 'check',
+          caption: this.$t('containers.unblock'),
+          onSelect: () => routerSvc.goto('UnblockLocations')
+        });
+
+        if (this.ctx.scanners && this.ctx.scanners.length > 0) {
+          actionOpts.push({
+            icon: 'qrcode',
+            caption: this.$t('containers.scan_boxes'),
+            onSelect: () => routerSvc.goto('ScanBoxes')
+          });
+        }
+      }
+
+      if (actionOpts.length > 0) {
+        actionOpts.push({divider: true});
+      }
+
+      const showStats = util.isTrue(this.showStats);
+      actionOpts.push({
+        icon: 'poll',
+        caption: this.$t(showStats ? 'containers.hide_stats' : 'containers.view_stats'),
+        onSelect: () => this.toggleViewStats()
+      });
+
+      return actionOpts;
+    }
+  },
+
+  watch: {
+    showStats: function(newVal, oldVal) {
+      const oldShowStats = util.isTrue(oldVal);
+      const newShowStats = util.isTrue(newVal);
+      if (newShowStats == oldShowStats) {
+        return;
+      }
+
+      this.reloadContainers();
+    }
+  },
+
+  created() {
+    wfSvc.getSysWorkflow('box-scanners').then(scanners => this.ctx.scanners = scanners);
   },
 
   methods: {
+    toggleViewStats: function() {
+      const {name, params, query} = routerSvc.getCurrentRoute();
+      const otherParams = util.isTrue(this.showStats) ? {showStats: false} : {showStats: true};
+      routerSvc.replace(name, params, { ...query, ...otherParams });
+    },
+
     openSearch: function() {
       this.$refs.listView.toggleShowFilters();
     },
@@ -255,12 +289,14 @@ export default {
       this.ctx.pageSize     = pageSize;
 
       await this.reloadContainers();
-      routerSvc.goto('ContainersList', {}, {filters: uriEncoding});
+      routerSvc.goto('ContainersList', {}, {filters: uriEncoding, showStats: this.showStats});
     },
 
     reloadContainers: async function() {
       this.ctx.loading = true;
-      const opts = {orderByStarred: true, includeStats: true, topLevelContainers: true, maxResults: this.ctx.pageSize};
+
+      const includeStats = util.isTrue(this.showStats);
+      const opts = {orderByStarred: true, includeStats, topLevelContainers: true, maxResults: this.ctx.pageSize};
       const containers = await containerSvc.getContainers(Object.assign(opts, this.ctx.filterValues || {}));
       this.ctx.containers = containers.map(container => ({ container }));
       this.ctx.loading = false;
@@ -275,7 +311,7 @@ export default {
     },
 
     onContainerRowClick: function({container}) {
-      routerSvc.goto('ContainerDetail.Overview', {containerId: container.id}, {filters: this.filters});
+      routerSvc.goto('ContainerDetail.Overview', {containerId: container.id}, {filters: this.filters, showStats: this.showStats});
     },
 
     onContainersSelection: function(selection) {
