@@ -21,7 +21,7 @@ export default {
         }
       },
       "showWhen": "!!cpr.ppid || !cp.ppidFmt || cp.manualPpidEnabled",
-      "disableWhen": "cpr.id > 0 && !!cpr.ppid"
+      "disableWhen": "!!cp.ppidFmt && !cp.manualPpidEnabled"
     },
     { 
       "type": "site",

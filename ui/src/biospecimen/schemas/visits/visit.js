@@ -11,7 +11,7 @@ export default {
         }
       },
       "showWhen": "(!!visit.name || !cp.visitNameFmt || cp.manualVisitNameEnabled) && visit.status != 'Missed Collection' && visit.status != 'Not Collected'",
-      "disableWhen": "visit.id > 0 && !!visit.name"
+      "disableWhen": "!!cp.visitNameFmt && !cp.manualVisitNameEnabled"
     },
     { 
       "type": "dropdown",
