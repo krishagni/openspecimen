@@ -1575,25 +1575,24 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	private void virtualize(Date time, String comments) {
-		transferTo(null, time, comments);
-	}
-	
-	private void transferTo(StorageContainerPosition newPosition, Date time, String comments) {
-		transferTo(newPosition, null, time, comments, Boolean.TRUE.equals(checkout));
+		transferTo(null, null, time, comments, Boolean.TRUE.equals(checkout));
 	}
 
 	private void transferTo(StorageContainerPosition newPosition, User user, Date time, String comments, boolean checkout) {
-		setTransferComments(comments);
+		StorageContainerPosition oldPosition = getPosition();
+		setOldPosition(oldPosition);
+
 		if (isStoredInAutoFreezer()) {
-			if (newPosition != null) {
+			if (newPosition != null && !StorageContainerPosition.areSame(oldPosition, newPosition)) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_TRANSFER_NA, getLabel(), getPosition().toString());
-			} else if (checkout) {
+			}
+
+			if (checkout) {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.STORED_IN_AF_CHECK_OUT_NA, getLabel(), getPosition().toString());
 			}
 		}
 
-		StorageContainerPosition oldPosition = getPosition();
-		setOldPosition(oldPosition);
+		setTransferComments(comments);
 		if (StorageContainerPosition.areSame(oldPosition, newPosition)) {
 			// for closed and checked out specimens, both old and new position will be the same
 			if ((isDeleted() || isClosed()) && getCheckoutPosition() != null) {
