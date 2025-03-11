@@ -270,7 +270,12 @@ export default {
   },
 
   created() {
-    wfSvc.getSysWorkflow('box-scanners').then(({scanners}) => this.ctx.scanners = scanners);
+    wfSvc.getSysWorkflow('box-scanners').then(
+      wfData => {
+        const {scanners} = wfData || {};
+        this.ctx.scanners = scanners;
+      }
+    );
   },
 
   methods: {
