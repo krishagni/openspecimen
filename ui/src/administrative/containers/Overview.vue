@@ -156,7 +156,7 @@ export default {
 
       showStatsBtn: true,
 
-      storedSpmns: 0,
+      storedSpmns: null,
 
       containerObjs: [],
 
@@ -285,7 +285,7 @@ export default {
       ctx.moreOpts.push({icon: 'history', caption: this.$t('audit.trail'), onSelect: this.viewAuditTrail});
 
       this.ctx.spmnTypesStorage = {};
-      this.ctx.storedSpmns = 0;
+      this.ctx.storedSpmns = null;
       if (!container.storageLocation || !container.storageLocation.name) {
         this.ctx.showStatsBtn = true;
       } else {

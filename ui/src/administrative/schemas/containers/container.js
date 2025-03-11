@@ -153,16 +153,16 @@ export default {
       "labelCode": "containers.stored_specimens",
       "name": "container.uiStored",
       "showInOverviewWhen": "!container.storageLocation || !container.storageLocation.name",
-      "value": ({container}) => {
+      "value": ({container, storedSpmns}) => {
         if (container.storageLocation && container.storageLocation.name) {
           return null;
-        }
-
-        if (container.capacity > 0) {
-          return new Number(container.storedSpecimens).toLocaleString() +
+        } else if (storedSpmns == null || storedSpmns == undefined) {
+          return null;
+        } else if (container.capacity > 0) {
+          return new Number(storedSpmns).toLocaleString() +
             ' specimens of ' + new Number(container.capacity).toLocaleString();
         } else {
-          return new Number(container.storedSpecimens).toLocaleString() + ' specimens';
+          return new Number(storedSpmns).toLocaleString() + ' specimens';
         }
       }
     },
@@ -172,9 +172,11 @@ export default {
       "labelCode": "containers.utilisation",
       "name": "container.uiUtilisation",
       "showInOverviewWhen": "!container.storageLocation || !container.storageLocation.name",
-      "value": ({container}) => {
-        if (container.capacity > 0 && (!container.storageLocation || !container.storageLocation.name)) {
-          return {utilisation: Math.round(container.storedSpecimens / container.capacity * 100)};
+      "value": ({container, storedSpmns}) => {
+        if (storedSpmns == null || storedSpmns == undefined) {
+          return null;
+        } else if (container.capacity > 0 && (!container.storageLocation || !container.storageLocation.name)) {
+          return {utilisation: Math.round(storedSpmns / container.capacity * 100)};
         }
 
         return null;
