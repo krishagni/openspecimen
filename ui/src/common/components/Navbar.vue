@@ -75,7 +75,7 @@ import NotifsOverlay  from '@/common/components/NotifsOverlay';
 import Search         from '@/common/components/Search';
 
 export default {
-  props: ['noLogin'],
+  props: ['noLogin', 'hideButtons'],
 
   components: {
     'os-about': About,
@@ -106,7 +106,7 @@ export default {
     },
 
     minimalLogin: function() {
-      return this.noLogin || !this.authenticated;
+      return this.noLogin || this.hideButtons || !this.authenticated;
     },
 
     siteAssets: function() {
