@@ -4,7 +4,7 @@
   </div>
 
   <div class="os-root" v-else>
-    <os-navbar />
+    <os-navbar :hide-buttons="navCtrls.hideButtons" />
 
     <div class="os-user-impersonate-warn" v-if="(ui.currentUser && (ui.currentUser.impersonated || (ui.currentUser.daysBeforePasswordExpiry >= 0 && ui.currentUser.daysBeforePasswordExpiry <= 5))) || ui.global.appProps.auditEnabled == 'false' || ui.global.appProps.auditEnabled == false">
       <div class="text" v-if="ui.currentUser && ui.currentUser.impersonated">
@@ -58,8 +58,14 @@ export default {
 
   data() {
     return {
-      loading: true
+      loading: true,
+
+      navCtrls: { }
     }
+  },
+
+  provide() {
+    return {navCtrls: this.navCtrls};
   },
 
   mounted() {
