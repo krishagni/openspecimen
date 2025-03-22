@@ -7,7 +7,7 @@
 
     <template #actions>
       <os-button primary :left-icon="'plus'" :label="$t('participants.collect')" @click="collectSpecimens"
-        v-if="cpr.hasConsented && (!specimen || specimen.status == 'Collected') && selectedPendingSpecimens.length > 0"
+        v-if="cpr.hasConsented && (visit && visit.id > 0) && (!specimen || specimen.status == 'Collected') && selectedPendingSpecimens.length > 0"
       />
 
       <os-add-to-cart :specimens="selectedExistingSpecimens"  v-if="selectedExistingSpecimens.length > 0" />

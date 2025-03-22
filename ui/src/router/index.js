@@ -1065,6 +1065,11 @@ const routes = [
                         path: 'consents',
                         name: 'ParticipantsListItemDetail.Consents',
                         component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/Consents.vue')
+                      },
+                      {
+                        path: 'specimens',
+                        name: 'ParticipantsListItemDetail.Specimens',
+                        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/Specimens.vue')
                       }
                     ]
                   },

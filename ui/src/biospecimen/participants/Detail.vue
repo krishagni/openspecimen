@@ -42,6 +42,13 @@
               </router-link>
             </li>
 
+            <li v-show-if-allowed="{resources: ['PrimarySpecimen', 'Specimen'], operations: ['Read']}">
+              <router-link :to="getRoute('Specimens')">
+                <os-icon name="flask" />
+                <span class="label" v-t="'specimens.list'">Forms</span>
+              </router-link>
+            </li>
+
             <os-plugin-views page="participant-detail" view="tab-menu" />
           </ul>
         </os-side-menu>

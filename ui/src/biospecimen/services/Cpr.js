@@ -227,6 +227,10 @@ class CollectionProtocolRegistration {
   getConsentDocUrl({id: cprId}) {
     return http.getUrl('collection-protocol-registrations/' + cprId + '/consent-form');
   }
+
+  getSpecimens(cpId, cprId) {
+    return http.get('specimens', {cpId, cprId, includeExtensions: true});
+  }
 }
 
 export default new CollectionProtocolRegistration();
