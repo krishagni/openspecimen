@@ -43,7 +43,7 @@ import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['cp', 'cpr', 'visit', 'specimen', 'specimens', 'refDate'],
+  props: ['cp', 'cpr', 'visit', 'specimen', 'specimens', 'refDate', 'page-top'],
 
   emits: ['reload'],
 
@@ -154,6 +154,14 @@ export default {
           labelCode: 'specimens.location',
         }
       ];
+    },
+
+    pageTopLine: function() {
+      return this.pageTop == undefined || this.pageTop == null ? 167 : this.pageTop;
+    },
+
+    pageTopLinePx: function() {
+      return this.pageTopLine + 'px';
     }
   },
 
@@ -245,10 +253,10 @@ export default {
 
     onScroll: function() {
       const treeEl = this.$refs.specimenTree.$el;
-      if (treeEl.getBoundingClientRect().top <= 167) {
+      if (treeEl.getBoundingClientRect().top <= this.pageTopLine) {
         const width = treeEl.offsetWidth + 'px';
         const height = 'calc(100% - 187px)';
-        Object.assign(treeEl.style, {position: 'fixed', top: '167px', width, height, overflow: 'scroll'});
+        Object.assign(treeEl.style, {position: 'fixed', top: this.pageTopLinePx, width, height, overflow: 'scroll'});
         this.panelFixed = true;
       }
     },

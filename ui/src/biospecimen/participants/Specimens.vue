@@ -1,9 +1,7 @@
 <template>
-  <os-page-toolbar />
-
   <os-grid>
     <os-grid-column :width="12">
-      <SpecimenTree :cp="cp" :cpr="cpr" :visit="{}" :specimens="specimens"
+      <SpecimenTree class="tree" :cp="cp" :cpr="cpr" :visit="{}" :specimens="specimens" :page-top="115"
         :ref-date="cpr.registrationDate" @reload="reloadSpecimens" />
     </os-grid-column>
   </os-grid>
@@ -79,3 +77,13 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.tree {
+  height: 100%;
+}
+
+.tree :deep(.p-panel-content) {
+  height: 100%;
+}
+</style>
