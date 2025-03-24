@@ -52,12 +52,15 @@ public class PrintRuleTxnCache {
 		return result;
 	}
 
+	//
+	// TODO: This needs to be refactored to get the rules in pages and stop when a first matching rule is found
+	//
 	@PlusTransactional
 	private List<? extends LabelPrintRule> getRulesFromDb(String objectType) {
 		try {
 			logger.info("Loading print rules from database for: " + objectType);
 			return daoFactory.getPrintRuleConfigDao()
-				.getPrintRules(new PrintRuleConfigsListCriteria().objectType(objectType))
+				.getPrintRules(new PrintRuleConfigsListCriteria().objectType(objectType).maxResults(Integer.MAX_VALUE))
 				.stream().map(PrintRuleConfig::getRule)
 				.collect(Collectors.toList());
 		} catch (Exception e) {
