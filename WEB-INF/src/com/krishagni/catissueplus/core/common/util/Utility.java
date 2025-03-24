@@ -101,6 +101,8 @@ import com.krishagni.catissueplus.core.init.AppProperties;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class Utility {
+	private static final LogUtil logger = LogUtil.getLogger(Utility.class);
+
 	private static SecretKey secretKey = null;
 
 	private static String algorithm = null;
@@ -423,11 +425,14 @@ public class Utility {
 	}
 
 	public static void inflateZip(InputStream in, String destination) {
-		int ALLOWED_ENTRIES = 100;
-		int MAX_INFLATED_SIZE = 1024 * 1024 * 1024;
-		int MAX_COMPRESSION_RATIO = 10;
+		int maxAllowedEntries   = ConfigUtil.getInstance().getIntSetting("common", "max_zip_entries", 100);
+
+		int maxInflatedSize     = ConfigUtil.getInstance().getIntSetting("common", "max_inflated_size", 1024 * 1024 * 1024);
+
+		int maxFileSize         = ConfigUtil.getInstance().getIntSetting("common", "max_file_size", 100 * 1024 * 1024);
 
 		int totalEntries = 0;
+
 		int totalSize = 0;
 
 		ZipInputStream zipIn = null;
@@ -442,9 +447,9 @@ public class Utility {
 					}
 
 					++totalEntries;
-					if (totalEntries > ALLOWED_ENTRIES) {
-						FileUtils.deleteDirectory(destinationDir);
-						throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The count of entries in the input ZIP file exceeds the allowed limit. Bailing out assuming the input is ZIP bomb attack.");
+					if (totalEntries > maxAllowedEntries) {
+						deleteDirectory(destinationDir);
+						throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The count of files in the input ZIP file exceeds the allowed limit (" + maxAllowedEntries + " files). Bailing out assuming the input is ZIP bomb attack.");
 					}
 
 					if (zipEntry.isDirectory()) {
@@ -453,8 +458,8 @@ public class Utility {
 
 					Path entryPath = destinationDir.toPath().resolve(zipEntry.getName());
 					if (!entryPath.normalize().startsWith(destinationDir.toPath())) {
-						FileUtils.deleteDirectory(destinationDir);
-						throw new IOException("Zip entry contains path traversal");
+						deleteDirectory(destinationDir);
+						throw new IOException("ZIP file entry contains path traversal. Bailing out assuming the input is ZIP slip attack.");
 					}
 
 					if (entryPath.getParent() != null) {
@@ -471,15 +476,14 @@ public class Utility {
 							entrySize += nBytes;
 							totalSize += nBytes;
 
-							long compressionRatio = entrySize / zipEntry.getCompressedSize();
-							if (compressionRatio > MAX_COMPRESSION_RATIO) {
-								FileUtils.deleteDirectory(destinationDir);
-								throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Compression ratio of the one or more ZIP file entries exceed the allowed limit. Bailing out assuming the input is ZIP bomb attack.");
+							if (entrySize > maxFileSize) {
+								deleteDirectory(destinationDir);
+								throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "The inflated size of one or more ZIP file entries exceed the allowed limit (" + maxFileSize + " bytes). Bailing out assuming the input is ZIP bomb attack.");
 							}
 
-							if (totalSize > MAX_INFLATED_SIZE) {
-								FileUtils.deleteDirectory(destinationDir);
-								throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Uncompressed file exceeds the max allowed limit. Bailing out assuming the input is ZIP bomb attack.");
+							if (totalSize > maxInflatedSize) {
+								deleteDirectory(destinationDir);
+								throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Uncompressed file exceeds the max allowed limit (" + maxInflatedSize + " bytes). Bailing out assuming the input is ZIP bomb attack.");
 							}
 						}
 					}
@@ -1580,6 +1584,18 @@ public class Utility {
 			return tikaConfig;
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(CommonErrorCode.SERVER_ERROR, "Error initialising the configuration for content detection");
+		}
+	}
+
+	private static void deleteDirectory(File dir) {
+		if (dir == null) {
+			return;
+		}
+
+		try {
+			FileUtils.deleteDirectory(dir);
+		} catch (Exception e) {
+			logger.error("Failed to delete the directory: " + dir.getAbsolutePath() + ". Error: " + e.getMessage(), e);
 		}
 	}
 

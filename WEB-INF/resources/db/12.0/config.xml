@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Maximum number of files allowed in uploaded ZIP file">
+    <sql>
+      call add_cfg_prop(
+        'common', 'max_zip_entries',
+        'max_zip_entries', 'max_zip_entries',
+        'INT', '100'
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Inflated file size limit">
+    <sql>
+      call add_cfg_prop(
+        'common', 'max_inflated_size',
+        'max_inflated_size', 'max_inflated_size_desc',
+        'INT', '1073741824'
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="ZIP file entry limit">
+    <sql>
+      call add_cfg_prop(
+        'common', 'max_file_size',
+        'max_file_size', 'max_file_size',
+        'INT', '104857600'
+      );
+    </sql>
+  </changeSet>
+</databaseChangeLog>
