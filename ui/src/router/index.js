@@ -1307,6 +1307,12 @@ const routes = [
     path: '/',
     name: 'NoLoginApp',
     component: () => import('../NoLoginApp.vue')
+  },
+
+  {
+    path: '/',
+    name: 'AppShell',
+    component: () => import('../AppShell.vue')
   }
 ]
 
