@@ -9,8 +9,6 @@
 import Toast from "primevue/toast";
 
 export default {
-  name: 'NoLoginApp',
-
   components: {
     Toast
   }
