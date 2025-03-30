@@ -321,11 +321,11 @@ export default {
     },
 
     viewCatalog: function({hidden: {cpId, catalogId}}) {
-      routerSvc.ngGoto('s/specimen-catalogs/' + catalogId + '/search?cpId=' + cpId);
+      routerSvc.goto('CatalogSearch', {catalogId}, {cpId});
     },
 
     viewDashboard: function({hidden: {cpId}}) {
-      routerSvc.ngGoto('cp-view/' + cpId + '/dashboard');
+      routerSvc.goto('dbCpDashboard', {cpId});
     },
 
     onItemRowStarToggle: function(event) {
