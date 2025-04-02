@@ -45,7 +45,7 @@
                 <os-divider />
               </li>
               <li>
-                <a :href="$ui.ngServer + '#/?logout=true'">
+                <a @click="logout">
                   <span v-t="'common.logout'">Log Out</span>
                 </a>
               </li>
@@ -65,6 +65,7 @@
 
 import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
+import loginSvc from '@/common/services/Login.js';
 import routerSvc from '@/common/services/Router.js';
 
 import About          from '@/common/components/About';
@@ -152,6 +153,10 @@ export default {
       if (this.$refs && this.$refs.loadingBar) {
         this.$refs.loadingBar.decrement();
       }
+    },
+
+    logout: function() {
+      loginSvc.logout().then(() => routerSvc.goto('UserLogin'));
     }
   }
 }

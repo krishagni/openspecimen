@@ -89,6 +89,10 @@ export default {
         this.registerHomePageCards();
 
         this.loading = false;
+        const {name} = routerSvc.getCurrentRoute();
+        if (name == 'App') {
+          setTimeout(() => routerSvc.goto('HomePage'), 0);
+        }
       }
     );
   },

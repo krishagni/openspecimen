@@ -17,6 +17,19 @@ class Login {
     this.signInState = state;
   }
 
+  getAuthDomains() {
+    return http.get('auth-domains');
+  }
+
+  login(loginDetail) {
+    return http.post('sessions', loginDetail).then(
+      resp => {
+        localStorage.osAuthToken = http.headers['X-OS-API-TOKEN'] = resp.token;
+        return resp;
+      }
+    );
+  }
+
   logout() {
     return http.delete('sessions').then(
       () => {
@@ -26,6 +39,10 @@ class Login {
         return true;
       }
     );
+  }
+
+  gotoIdp() {
+    window.location.replace(http.getServerAppUrl() + 'saml/login?_nonce=' + Date.now());
   }
 }
 

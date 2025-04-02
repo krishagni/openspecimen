@@ -1306,7 +1306,14 @@ const routes = [
   {
     path: '/',
     name: 'NoLoginApp',
-    component: () => import('../NoLoginApp.vue')
+    component: () => import('../NoLoginApp.vue'),
+    children: [
+      {
+        path: 'login',
+        name: 'UserLogin',
+        component: () => import(/* webpackChunkName: "login" */ '../users/views/Login.vue')
+      }
+    ]
   },
 
   {
