@@ -20,7 +20,7 @@ angular.module('openspecimen')
       .state('login', {
         url: '/?logout&directVisit',
         templateUrl: 'modules/user/signin.html',
-        controller: function (VueApp) { VueApp.setVueView('login'); }, // 'LoginCtrl',
+        controller: function (VueApp) { VueApp.setVueView('home'); }, // 'LoginCtrl',
         parent: 'default-nav-buttons',
         data: {
           redirect: false
