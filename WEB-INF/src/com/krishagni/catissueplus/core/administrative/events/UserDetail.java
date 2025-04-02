@@ -68,6 +68,8 @@ public class UserDetail extends AttributeModifiedSupport {
 
 	private String activityStatus;
 
+	private String userId;
+
 	public Long getId() {
 		return id;
 	}
@@ -257,6 +259,14 @@ public class UserDetail extends AttributeModifiedSupport {
 		}
 
 		this.activityStatus = activityStatus;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public static UserDetail from(User user) {

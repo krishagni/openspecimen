@@ -8,7 +8,17 @@
       <img class="logo" :src="osLogo" />
 
       <os-form class="login-form" ref="loginForm" :schema="loginSchema" :data="ctx">
-        <os-button class="sign-in-btn" primary label="Sign In" @click="login" />
+        <div class="actions">
+          <div class="primary">
+            <os-button class="sign-in-btn" primary label="Sign In" @click="login" />
+          </div>
+
+          <div class="secondary">
+            <os-button text label="Forgot Password?" @click="gotoForgotPassword" />
+
+            <os-button text label="Reset OTP Secret Code?" @click="gotoResetOtpSecret" />
+          </div>
+        </div>
       </os-form>
     </div>
   </div>
@@ -30,13 +40,18 @@ export default {
       ctx: {
         loginDetail: {},
 
-        getDomains: async () => this.domains
+        getDomains: async () => this.domains,
+
+        otpAuthEnabled: false
       }
     };
   },
 
   mounted() {
     this._getDomains().then(domains => this.domains = domains);
+    if (this.$osSvc.userOtpSvc) {
+      this.$osSvc.userOtpSvc.isFeatureEnabled().then(status => this.ctx.otpAuthEnabled = status);
+    }
   },
 
   computed: {
@@ -63,6 +78,10 @@ export default {
           routerSvc.goto('HomePage');
         }
       );
+    },
+
+    gotoForgotPassword: function() {
+      routerSvc.goto('UserForgotPassword');
     },
 
     _getDomains: function() {
@@ -102,7 +121,7 @@ export default {
 }
 
 .login-form {
-  width: 100%;
+  max-width: 90%;
 }
 
 .login-form :deep(.row:last-child) {
@@ -179,5 +198,31 @@ export default {
   height: 100px;
   width: 100px;
   border-radius: 50%;
+}
+
+.login-form .actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-form .actions > .primary {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.login-form .actions > .primary .btn {
+  width: 100%;
+}
+
+.login-form .actions > .secondary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-form .actions > .secondary .btn:last-child {
+  margin-right: 0;
 }
 </style>

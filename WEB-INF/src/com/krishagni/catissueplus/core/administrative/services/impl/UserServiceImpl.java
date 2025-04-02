@@ -530,7 +530,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			UserDetail detail = req.getPayload();
 			User user = null;
 			try {
-				user = getUser(detail.getId(), detail.getEmailAddress(), detail.getLoginName(), detail.getDomainName());
+				user = getUser(detail.getId(), detail.getEmailAddress(), detail.getLoginName(), detail.getUserId(), detail.getDomainName());
 			} catch (OpenSpecimenException ose) {
 				if (ose.containsError(UserErrorCode.NOT_FOUND)) {
 					// to prevent users from guessing the user login name / email ID.
@@ -886,10 +886,10 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	}
 
 	private User getUser(Long id, String emailAddress) {
-		return getUser(id, emailAddress, null, null);
+		return getUser(id, emailAddress, null, null, null);
 	}
 
-	private User getUser(Long id, String emailAddress, String loginName, String domain) {
+	private User getUser(Long id, String emailAddress, String loginName, String userId, String domain) {
 		User user = null;
 		Object key = null;
 
@@ -906,6 +906,17 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 			user = daoFactory.getUserDao().getUser(loginName, domain);
 			key = loginName;
+		} else if (StringUtils.isNotBlank(userId)) {
+			if (StringUtils.isBlank(domain)) {
+				domain = DEFAULT_AUTH_DOMAIN;
+			}
+
+			user = daoFactory.getUserDao().getUser(userId, domain);
+			if (user == null) {
+				user = daoFactory.getUserDao().getUserByEmailAddress(userId);
+			}
+
+			key = userId;
 		}
 
 		if (key == null) {

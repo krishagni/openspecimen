@@ -193,7 +193,7 @@ button.icon-btn {
 
 .btn.text {
   background: transparent;
-  border: 0px;
+  border: 1px solid transparent;
   color: #428bca;
 }
 

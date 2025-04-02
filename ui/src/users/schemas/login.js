@@ -54,6 +54,22 @@ export default {
           }
         ]
       },
+      {
+        fields: [
+          {
+            type: 'text',
+            name: 'loginDetail.props.otp',
+            'md-type': true,
+            placeholder: 'OTP',
+            validations: {
+              required: {
+                message: 'OTP is mandatory'
+              }
+            },
+            showWhen: '!!loginDetail.domainName && otpAuthEnabled'
+          }
+        ]
+      },
     ]
   }
 }

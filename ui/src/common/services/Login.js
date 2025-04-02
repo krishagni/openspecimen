@@ -41,6 +41,10 @@ class Login {
     );
   }
 
+  forgotPassword(detail) {
+    return http.post('users/forgot-password', detail);
+  }
+
   gotoIdp() {
     window.location.replace(http.getServerAppUrl() + 'saml/login?_nonce=' + Date.now());
   }
