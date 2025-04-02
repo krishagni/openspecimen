@@ -13,10 +13,10 @@
             <os-button class="sign-in-btn" primary label="Sign In" @click="login" />
           </div>
 
-          <div class="secondary">
-            <os-button text label="Forgot Password?" @click="gotoForgotPassword" />
+          <div class="secondary" v-if="ctx.forgotPasswordEnabled || ctx.otpAuthEnabled">
+            <os-button text label="Forgot Password?" @click="gotoForgotPassword" v-if="ctx.forgotPasswordEnabled" />
 
-            <os-button text label="Reset OTP Secret Code?" @click="gotoResetOtpSecret" />
+            <os-button text label="Reset OTP Secret Code?" @click="gotoResetOtpSecret" v-if="ctx.otpAuthEnabled" />
           </div>
         </div>
       </os-form>
@@ -31,6 +31,8 @@ import osLogo      from '@/assets/images/os_dna_logo.png';
 import routerSvc   from '@/common/services/Router.js';
 
 export default {
+  inject: ['ui'],
+
   data() {
     return {
       osLogo,
@@ -42,7 +44,9 @@ export default {
 
         getDomains: async () => this.domains,
 
-        otpAuthEnabled: false
+        otpAuthEnabled: false,
+
+        forgotPasswordEnabled: this.ui.global.appProps.forgot_password
       }
     };
   },
@@ -121,6 +125,7 @@ export default {
 }
 
 .login-form {
+  width: 90%;
   max-width: 90%;
 }
 
