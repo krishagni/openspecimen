@@ -229,7 +229,7 @@ osApp.config(function(
     }
   })
   .factory('httpRespInterceptor', function(
-    $rootScope, $q, $injector, $location, $window, $templateCache, $timeout,
+    $rootScope, $q, $injector, $location, $window, $templateCache, $timeout, VueApp,
     Alerts, LocationChangeListener) {
 
     var qp = '?_buildVersion=' + ui.os.appProps.build_version + '&_buildDate=' + ui.os.appProps.build_date;
@@ -344,7 +344,8 @@ osApp.config(function(
 
           fourNotOneTimer = setTimeout(
             function() {
-              $injector.get('$state').go('login'); // using injector to get rid of circular dependencies
+              // $injector.get('$state').go('login'); // using injector to get rid of circular dependencies
+              VueApp.setVueView('login');
             }, 1000);
 
           // $timeout(function() { $window.location.reload(); }, 1000);

@@ -20,12 +20,12 @@ angular.module('openspecimen')
       .state('login', {
         url: '/?logout&directVisit',
         templateUrl: 'modules/user/signin.html',
-        controller: 'LoginCtrl',
+        controller: function (VueApp) { VueApp.setVueView('login'); }, // 'LoginCtrl',
         parent: 'default-nav-buttons',
         data: {
           redirect: false
         },
-        resolve: {
+        resolve1: {
           defCatalogId: function($injector) {
             if (!$injector.has('scCatalog')) {
               return null;
