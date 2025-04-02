@@ -53,7 +53,7 @@ export default {
   background: white;
   border-radius: 0.5rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  min-width: 420px;
+  width: 420px;
   display: flex;
   flex-direction: column;
   justify-content: center;

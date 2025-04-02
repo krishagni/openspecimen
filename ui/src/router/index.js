@@ -1317,6 +1317,12 @@ const routes = [
         path: 'forgot-password',
         name: 'UserForgotPassword',
         component: () => import(/* webpackChunkName: "login" */ '../users/views/ForgotPassword.vue')
+      },
+      {
+        path: 'reset-password',
+        name: 'UserResetPassword',
+        component: () => import(/* webpackChunkName: "login" */ '../users/views/ResetPassword.vue'),
+        props: (route) => ({token: route.query.token})
       }
     ]
   },

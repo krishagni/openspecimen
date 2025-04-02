@@ -45,6 +45,14 @@ class Login {
     return http.post('users/forgot-password', detail);
   }
 
+  resetPassword(detail) {
+    return http.post('users/reset-password', detail);
+  }
+
+  getPasswordSettings() {
+    return http.get('config-settings/password');
+  }
+
   gotoIdp() {
     window.location.replace(http.getServerAppUrl() + 'saml/login?_nonce=' + Date.now());
   }
