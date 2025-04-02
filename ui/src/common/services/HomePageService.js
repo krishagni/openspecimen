@@ -19,7 +19,13 @@ class HomePage {
   }
 
   registerCard(card) {
-    this.pageCards.push(card);
+    const idx = this.pageCards.findIndex(existing => existing.title == card.title);
+    if (idx >= 0) {
+      this.pageCards[idx] = card;
+    } else {
+      this.pageCards.push(card);
+    }
+
     this.sorted = false;
   }
 
