@@ -34,25 +34,36 @@ export default {
   inject: ['ui'],
 
   data() {
+    const {global: {appProps}} = this.ui;
     return {
       osLogo,
 
       loginSchema: loginSchema.layout,
 
       ctx: {
-        loginDetail: {},
+        loginDetail: {
+          domainName: appProps.default_domain
+        },
 
         getDomains: async () => this.domains,
 
         otpAuthEnabled: false,
 
-        forgotPasswordEnabled: this.ui.global.appProps.forgot_password
+        forgotPasswordEnabled: appProps.forgot_password,
+
+        samlDomainSelected: false
       }
     };
   },
 
   mounted() {
-    this._getDomains().then(domains => this.domains = domains);
+    this._getDomains().then(
+      domains => {
+        this.domains = domains
+        this._toggleSamlDomainSelected();
+      }
+    );
+
     if (this.$osSvc.userOtpSvc) {
       this.$osSvc.userOtpSvc.isFeatureEnabled().then(status => this.ctx.otpAuthEnabled = status);
     }
@@ -62,9 +73,9 @@ export default {
   },
 
   watch: {
-    'ctx.loginDetail.domainName': function(newVal) {
-      const domain = this.domains.find(d => d.name == newVal);
-      if (domain && domain.type == 'saml') {
+    'ctx.loginDetail.domainName': function() {
+      this._toggleSamlDomainSelected();
+      if (this.ctx.samlDomainSelected) {
         loginSvc.gotoIdp();
       }
     }
@@ -73,6 +84,11 @@ export default {
   methods: {
     login: function() {
       if (!this.$refs.loginForm.validate()) {
+        return;
+      }
+
+      if (this.ctx.samlDomainSelected) {
+        loginSvc.gotoIdp();
         return;
       }
 
@@ -86,6 +102,12 @@ export default {
 
     gotoForgotPassword: function() {
       routerSvc.goto('UserForgotPassword');
+    },
+
+    _toggleSamlDomainSelected: function() {
+      const {loginDetail: {domainName}} = this.ctx;
+      const domain = (this.domains || []).find(d => d.name == domainName);
+      this.ctx.samlDomainSelected = (domain && domain.type == 'saml') || false;
     },
 
     _getDomains: function() {

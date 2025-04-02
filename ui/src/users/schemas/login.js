@@ -10,7 +10,8 @@ export default {
             listSource: {
               selectProp: 'name',
               displayProp: 'name',
-              loadFn: ({context}) => context.formData.getDomains()
+              loadFn: ({context}) => context.formData.getDomains(),
+              initUsingSelectProp: true
             },
             'md-type': true,
             placeholder: 'Domain Name',
@@ -34,7 +35,7 @@ export default {
                 message: 'Login Name is mandatory'
               }
             },
-            showWhen: '!!loginDetail.domainName'
+            showWhen: '!!loginDetail.domainName && !samlDomainSelected'
           }
         ]
       },
@@ -50,7 +51,7 @@ export default {
                 message: 'Password is mandatory'
               }
             },
-            showWhen: '!!loginDetail.domainName'
+            showWhen: '!!loginDetail.domainName && !samlDomainSelected'
           }
         ]
       },
@@ -66,7 +67,7 @@ export default {
                 message: 'OTP is mandatory'
               }
             },
-            showWhen: '!!loginDetail.domainName && otpAuthEnabled'
+            showWhen: '!!loginDetail.domainName && otpAuthEnabled && !samlDomainSelected'
           }
         ]
       },
