@@ -116,7 +116,7 @@ export default {
 
         {
           showIf: 'admin',
-          href: '#/institutes',
+          route: {name: 'InstitutesList', params: {instituteId: -1}},
           icon: 'fa fa-institution',
           title: t('common.home.institutes'),
           description: t('common.home.institutes_desc')
@@ -124,7 +124,7 @@ export default {
 
         {
           showIf: {resource: 'User', operations: ['Create', 'Update']},
-          href: '#/users',
+          route: {name: 'UsersList', params: {userId: -1}},
           icon: 'fa fa-user',
           title: t('common.home.users'),
           description: t('common.home.users_desc')
@@ -140,7 +140,7 @@ export default {
 
         {
           showIf: 'institute-admin',
-          href: '#/sites',
+          route: {name: 'SitesList', params: {siteId: -1}},
           icon: 'fa fa-hospital-o',
           title: t('common.home.sites'),
           description: t('common.home.sites_desc')
@@ -148,7 +148,7 @@ export default {
 
         {
           showIf: {resource: 'StorageContainer', operations: ['Read']},
-          href: '#/containers',
+          route: {name: 'ContainersList'},
           icon: 'fa fa-dropbox',
           title: t('common.home.containers'),
           description: t('common.home.containers_desc')
@@ -164,7 +164,7 @@ export default {
 
         {
           showIf: {resources: ['Specimen', 'PrimarySpecimen'], operations: ['Read']},
-          href: '#/specimen-lists',
+          route: {name: 'SpecimenCartsList', params: {cartId: -1}},
           icon: 'fa fa-shopping-cart',
           title: t('common.home.carts'),
           description: t('common.home.carts_desc')
@@ -180,7 +180,7 @@ export default {
 
         {
           showIf: {resource: 'DistributionProtocol', operations: ['Read']},
-          href: '#/dps',
+          route: {name: 'DpsList', params: {dpId: -1}},
           icon: 'fa fa-truck',
           title: t('common.home.dps'),
           description: t('common.home.dps_desc')
@@ -188,7 +188,7 @@ export default {
 
         {
           showIf: {resource: 'Order', operations: ['Read']},
-          href: '#/orders',
+          route: {name: 'OrdersList', params: {orderId: -1}},
           icon: 'fa fa-share',
           title: t('common.home.orders'),
           description: t('common.home.orders_desc')
@@ -196,7 +196,7 @@ export default {
 
         {
           showIf: {resource: 'ShippingAndTracking', operations: ['Read']},
-          href: '#/shipments',
+          route: {name: 'ShipmentsList', params: {shipmentId: -1}},
           icon: 'fa fa-paper-plane-o',
           title: t('common.home.shipments'),
           description: t('common.home.shipments_desc')
@@ -204,7 +204,7 @@ export default {
 
         {
           showIf: {resource: 'ScheduledJob', operations: ['Read']},
-          href: routerSvc.getFullUrl('JobsList', {}),
+          route: {name: 'JobsList'},
           icon: 'fa fa-gears',
           title: t('common.home.jobs'),
           description: t('common.home.jobs_desc')
@@ -212,7 +212,7 @@ export default {
 
         {
           showIf: 'institute-admin',
-          href: '#/consent-statements',
+          route: {name: 'ConsentStatementsList'},
           icon: 'fa fa-file-text-o',
           title: t('common.home.consents'),
           description: t('common.home.consents_desc')
@@ -231,7 +231,7 @@ export default {
 
         {
           showIf: 'admin',
-          href: routerSvc.getFullUrl('SettingsList', {}),
+          route: {name: 'SettingsList'},
           icon: 'fa fa-wrench',
           title: t('common.home.settings'),
           description: t('common.home.settings_desc'),
