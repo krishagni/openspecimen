@@ -1307,6 +1307,13 @@ const routes = [
     path: '/',
     name: 'NoLoginApp',
     component: () => import('../NoLoginApp.vue'),
+  },
+
+  {
+    path: '/',
+    name: 'LoginApp',
+    component: () => import('../NoLoginApp.vue'),
+    props: () => ({navBarButtons: true}),
     children: [
       {
         path: 'login',
@@ -1323,6 +1330,11 @@ const routes = [
         name: 'UserResetPassword',
         component: () => import(/* webpackChunkName: "login" */ '../users/views/ResetPassword.vue'),
         props: (route) => ({token: route.query.token})
+      },
+      {
+        path: 'sign-up',
+        name: 'UserSignUp',
+        component: () => import(/* webpackChunkName: "login" */ '../users/views/SignUp.vue')
       }
     ]
   },

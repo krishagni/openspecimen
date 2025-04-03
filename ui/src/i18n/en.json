@@ -1358,6 +1358,10 @@
     }
   },
 
+  "login": {
+    "sign_up": "Sign Up"
+  },
+
   "participant_consents": {
     "choose_signed_consent_form": "Choose signed consent form...",
     "comments": "Comments",

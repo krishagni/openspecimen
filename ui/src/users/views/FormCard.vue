@@ -80,12 +80,17 @@ export default {
   max-width: 90%;
 }
 
+.user-form :deep(.row) {
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+}
+
 .user-form :deep(.row:last-child) {
   margin-top: 1rem;
 }
 
 .user-form :deep(.row .field) {
-  padding: 0.5rem 0rem;
+  padding: 0.5rem;
 }
 
 .user-form :deep(.p-float-label label) {
@@ -123,6 +128,7 @@ export default {
   color: #007bff;
 }
 
+.user-form :deep(.os-dropdown .p-float-label .p-dropdown .p-inputtext),
 .user-form :deep(.os-dropdown .p-float-label .p-dropdown.p-inputwrapper-filled .p-inputtext) {
   padding: 0;
 }

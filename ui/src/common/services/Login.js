@@ -49,6 +49,10 @@ class Login {
     return http.post('users/reset-password', detail);
   }
 
+  signUp(detail) {
+    return http.post('users/sign-up', detail);
+  }
+
   getPasswordSettings() {
     return http.get('config-settings/password');
   }
