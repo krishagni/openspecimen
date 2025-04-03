@@ -12,7 +12,7 @@ class HttpClient {
 
   path = '';
 
-  headers = {};
+  headers = {'X-OS-API-CLIENT': 'webui'};
 
   listeners = [];
 
