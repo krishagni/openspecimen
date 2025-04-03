@@ -162,7 +162,7 @@ class HttpClient {
     } else if (resp && typeof resp == 'object') {
       if (resp.status == 401) {
         localStorage.removeItem('osAuthToken');
-        routerSvc.ngGoto('', {logout: true});
+        routerSvc.goto('UserLogin');
         return;
       }
 
