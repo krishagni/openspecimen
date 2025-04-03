@@ -104,6 +104,10 @@ export default {
       routerSvc.goto('UserForgotPassword');
     },
 
+    gotoResetOtpSecret: function() {
+      routerSvc.goto('UserResetOtpSecretCode');
+    },
+
     _toggleSamlDomainSelected: function() {
       const {loginDetail: {domainName}} = this.ctx;
       const domain = (this.domains || []).find(d => d.name == domainName);

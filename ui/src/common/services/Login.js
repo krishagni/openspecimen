@@ -49,6 +49,14 @@ class Login {
     return http.post('users/reset-password', detail);
   }
 
+  generateOtpSecretCodeToken(detail) {
+    return http.post('user-otp-details/reset-token', detail);
+  }
+
+  resetOtpSecretCode(token, errorHandler) {
+    return http.get('user-otp-details/reset-secret', {token}, null, errorHandler);
+  }
+
   signUp(detail) {
     return http.post('users/sign-up', detail);
   }

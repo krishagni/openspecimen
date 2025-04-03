@@ -1335,6 +1335,12 @@ const routes = [
         path: 'sign-up',
         name: 'UserSignUp',
         component: () => import(/* webpackChunkName: "login" */ '../users/views/SignUp.vue')
+      },
+      {
+        path: 'reset-otp-secret-code',
+        name: 'UserResetOtpSecretCode',
+        component: () => import(/* webpackChunkName: "login" */ '../users/views/ResetOtpSecretCode.vue'),
+        props: (route) => ({token: route.query.otpSecretResetToken})
       }
     ]
   },
