@@ -29,7 +29,7 @@
                     #foreach($item in $deletedItems)
                     <tr style="border-bottom: 1px solid #ddd">
                       <td style="width: 160px;text-align: left;padding: 8px;">
-                        <a href="$appUrl/#/specimens/$item.specimen.id">
+                        <a href="$appUrl/ui-app/#/specimen-resolver/$item.specimen.id">
                           <span>$item.specimen.label</span>
                         </a>
                       </td>

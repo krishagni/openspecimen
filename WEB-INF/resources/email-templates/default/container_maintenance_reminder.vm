@@ -1,4 +1,4 @@
-#set ( $containerUrl = "$appUrl/#/containers/$container.id/overview" )
+#set ( $containerUrl = "$appUrl/ui-app/#/containers/$container.id/detail/overview" )
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
   <tbody>
@@ -24,6 +24,6 @@
       <td>
         #parse( $footer )
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>

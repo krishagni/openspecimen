@@ -1,4 +1,4 @@
-#set ( $url = "$appUrl/#/cps/${cp.id}/overview" )
+#set ( $url = "$appUrl/ui-app/#/cps/${cp.id}/detail/overview" )
 #set ( $revisionApiUrl = "$appUrl/rest/ng/collection-protocols/${cp.id}/published-versions/${version.id}" )
 #set ( $revisionDownloadUrl= "$appUrl/#/file-download?downloadUrl=$urlEncoder.encode($revisionApiUrl)" )
 

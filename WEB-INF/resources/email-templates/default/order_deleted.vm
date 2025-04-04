@@ -35,7 +35,7 @@
               <tr>
                 <td> Request </td>
                 <td> :
-                  <a href="$appUrl/#/specimen-requests/$order.request.id/overview?catalogId=$order.request.catalogId">
+                  <a href="$appUrl/ui-app/#/sc-admin/catalogs/$order.request.catalogId/requests/$order.request.id/overview">
                     #$order.request.id
                   </a>
                 </td>

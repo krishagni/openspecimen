@@ -16,7 +16,7 @@
     <tr>
       <td style="font-size: 12px;font-family: arial,sans-serif;color: #777777;border:none; text-align: center;">
        <p style="margin:10px 0 0 0"> 
-         <a href=$appUrl>OpenSpecimen</a> | $adminEmailAddress | $adminPhone 
+         <a href="$appUrl">OpenSpecimen</a> | $adminEmailAddress | $adminPhone
        </p>
       </td>
     </tr>

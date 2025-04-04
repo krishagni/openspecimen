@@ -1,4 +1,4 @@
-#set ($url = "$appUrl/#/?directVisit=true")
+#set ($url = "$appUrl/ui-app/#/login?directVisit=true")
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
   <tbody>

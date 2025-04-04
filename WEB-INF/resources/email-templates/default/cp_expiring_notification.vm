@@ -1,4 +1,4 @@
-#set ( $url = "$appUrl/#/cps/${cp.id}/overview" )
+#set ( $url = "$appUrl/ui-app/#/cps/${cp.id}/detail/overview" )
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
   <tbody>
@@ -52,7 +52,7 @@
                     #else
                       <td> : Not Specified </td>
                     #end
-                  <tr>
+                  </tr>
                 </table>
               </td>
             </tr>

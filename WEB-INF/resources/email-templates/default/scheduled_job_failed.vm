@@ -50,6 +50,6 @@
       <td>
         #parse( $footer )
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>

@@ -1,4 +1,4 @@
-#set ( $url = "$appUrl/#/shipments/${shipment.id}/overview" )
+#set ( $url = "$appUrl/ui-app/#/shipments/${shipment.id}/overview" )
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
   <tbody>

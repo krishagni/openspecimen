@@ -8,15 +8,15 @@
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
                   Hello $fname $lname,
-                  <br><br>
+                  <br></br>
                   Please click on below link to download exported data of job $jobName
-                  <br/>
-                  <br/>
-                  <br>
+                  <br></br>
+                  <br></br>
+                  <br></br>
                   <a href=$appUrl/rest/ng/scheduled-jobs/export?fileId=$filename>$appUrl/rest/ng/scheduled-jobs/export?fileId=$filename</a>
-                  <br/><br/>
+                  <br></br><br></br>
                   The link will be valid for 30 days
-                  <br/><br/>
+                  <br></br><br></br>
                 </p>
               </td>
             </tr>
@@ -31,6 +31,6 @@
       <td>
         #parse( $footer )
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>

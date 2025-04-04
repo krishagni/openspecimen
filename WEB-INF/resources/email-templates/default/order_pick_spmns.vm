@@ -1,5 +1,5 @@
-#set ( $overviewUrl = "$appUrl/#/orders/${order.id}/overview" )
-#set ( $itemsUrl = "$appUrl/#/orders/${order.id}/items" )
+#set ( $overviewUrl = "$appUrl/ui-app/#/orders/${order.id}/overview" )
+#set ( $itemsUrl = "$appUrl/ui-app/#/orders/${order.id}/specimens" )
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
   <tbody>
@@ -30,7 +30,7 @@
                   <tr>
                     <td> Request </td>
                     <td> :
-                      <a href="$appUrl/#/specimen-requests/$order.request.id/overview?catalogId=$order.request.catalogId">
+                      <a href="$appUrl/ui-app/#/sc-admin/catalogs/$order.request.catalogId/requests/$order.request.id/overview">
                         #$order.request.id
                       </a>
                     </td>
