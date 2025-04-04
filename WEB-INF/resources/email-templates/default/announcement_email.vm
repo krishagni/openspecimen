@@ -16,7 +16,7 @@
               <td>
                 $annDetail.message
               </td>
-            <tr>
+            </tr>
           </tbody>
         </table>
       </td>
@@ -28,6 +28,6 @@
       <td>
         #parse( $footer )
       </td>
-    <tr>
+    </tr>
   </tbody>
 </table>

@@ -1329,7 +1329,7 @@ const routes = [
         path: 'reset-password',
         name: 'UserResetPassword',
         component: () => import(/* webpackChunkName: "login" */ '../users/views/ResetPassword.vue'),
-        props: (route) => ({token: route.query.token})
+        props: (route) => ({resetToken: route.query.resetToken})
       },
       {
         path: 'sign-up',
@@ -1340,7 +1340,7 @@ const routes = [
         path: 'reset-otp-secret-code',
         name: 'UserResetOtpSecretCode',
         component: () => import(/* webpackChunkName: "login" */ '../users/views/ResetOtpSecretCode.vue'),
-        props: (route) => ({token: route.query.otpSecretResetToken})
+        props: (route) => ({token: route.query.resetToken})
       }
     ]
   },

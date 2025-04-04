@@ -32,7 +32,7 @@ import resetPasswordSchema from '@/users/schemas/reset-password.js';
 import FormCard from './FormCard.vue';
 
 export default {
-  props: ['token'],
+  props: ['reset-token'],
 
   components: {
     FormCard
@@ -88,7 +88,7 @@ export default {
       }
 
       const {loginName, newPassword} = this.ctx.userDetail;
-      const detail = {loginName, newPassword, resetPasswordToken: this.token};
+      const detail = {loginName, newPassword, resetPasswordToken: this.resetToken};
       loginSvc.resetPassword(detail).then(
         resp => {
           this.ctx.showMessage = resp;

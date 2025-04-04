@@ -1,7 +1,7 @@
 #if( $token )
-  #set ($url = "$appUrl/#/reset-password?token=$token.token")
+  #set ($url = "$appUrl/ui-app/#/reset-password?resetToken=$token.token")
 #else
-  #set ($url = "$appUrl/#/?directVisit=true")
+  #set ($url = "$appUrl/ui-app/#/login?directVisit=true")
 #end
 
 

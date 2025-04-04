@@ -107,8 +107,6 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 	private static final String FORGOT_PASSWD = "forgot_password";
 
-	private static final String DUMMY_EMAIL_ADDR = "localhost@localhost";
-
 	private static final String AUTO_APPROVE_SIGNUPS = "auto_approve_signup";
 
 	private static final String DEF_ROLE_ON_SIGNUP = "def_role_on_signup";
@@ -119,13 +117,13 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 	private static final String PASSWD_RULES = "password_rule";
 
-	private static final Map<String, String> NOTIF_OPS = new HashMap<String, String>() {{
-		put("created",  "CREATE");
-		put("deleted",  "DELETE");
+	private static final Map<String, String> NOTIF_OPS = new HashMap<>() {{
+		put("created", "CREATE");
+		put("deleted", "DELETE");
 		put("rejected", "DELETE");
 		put("unlocked", "UPDATE");
 		put("approved", "UPDATE");
-		put("locked",   "UPDATE");
+		put("locked", "UPDATE");
 	}};
 
 	private DaoFactory daoFactory;
@@ -962,7 +960,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		props.put("user", user);
 		props.put("token", token);
 		props.put("ignoreDnd", true);
-
+		props.put("passwordRules", ConfigUtil.getInstance().getStrSetting("auth", "password_rule"));
 		emailService.sendEmail(FORGOT_PASSWORD_EMAIL_TMPL, new String[]{user.getEmailAddress()}, props);
 	}
 	
