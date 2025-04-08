@@ -4,7 +4,7 @@
       <Dropdown
         ref="selectWidget"
         v-model="selected"
-        :options="options"
+        :options="ddOptions"
         option-label="type"
         option-value="type"
         option-group-label="specimenClass"
@@ -21,7 +21,7 @@
       <Dropdown
         ref="selectWidget"
         v-model="selected"
-        :options="options"
+        :options="ddOptions"
         option-label="type"
         option-value="type"
         option-group-label="specimenClass"
@@ -44,7 +44,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'form', 'disabled', 'context', 'tabOrder', 'entity'],
+  props: ['modelValue', 'form', 'disabled', 'context', 'tabOrder', 'entity', 'options'],
 
   emits: ['update:modelValue'],
 
@@ -54,7 +54,7 @@ export default {
 
   data() {
     return { 
-      options: []
+      ddOptions: []
     };
   },
 
@@ -72,7 +72,7 @@ export default {
 
   created() {
     const map = {};
-    for (let type of util.getSpecimenTypes()) {
+    for (let type of this._getSpecimenTypes()) {
       const types = map[type.specimenClass] = map[type.specimenClass] || {specimenClass: type.specimenClass, types: []};
       types.types.push(type);
     }
@@ -83,7 +83,7 @@ export default {
       sc.types.sort((t1, t2) => t1.type < t2.type ? -1 : (t1.type > t2.type ? 1 : 0));
     }
 
-    this.options = classes;
+    this.ddOptions = classes;
     this._updateValue(this.selected);
   },
 
@@ -118,7 +118,7 @@ export default {
 
     _getSelectedOption(value) {
       let option = {};
-      for (const sc of this.options) {
+      for (const sc of this.ddOptions) {
         for (const type of sc.types) {
           if (type.type == value) {
             option = type;
@@ -128,6 +128,14 @@ export default {
       }
 
       return option;
+    },
+
+    _getSpecimenTypes: function() {
+      if (this.options && this.options.length > 0) {
+        return this.options;
+      }
+
+      return util.getSpecimenTypes();
     }
   }
 }

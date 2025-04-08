@@ -115,6 +115,7 @@
       "clone": "Clone",
       "close": "Close",
       "copy": "Copy",
+      "copy_last": "Copy Last",
       "create": "Create",
       "delete": "Delete",
       "done":   "Done",
@@ -398,6 +399,7 @@
     },
 
     "switch_to_table_view": "Switch to table view",
+    "unknown": "Unknown",
     "update": "Update {name}",
     "update_record": "Update Record",
     "update_time": "Update Time",
