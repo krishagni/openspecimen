@@ -568,19 +568,28 @@ class Util {
     const detailed = opts.detailed == 'true' || opts.detailed == true;
 
     let result = '';
-    if (specimen.lineage == 'New') {
+    if (!specimen.lineage || specimen.lineage == 'New') {
       if (specimen.pathology && specimen.pathology != ns) {
         result += specimen.pathology + ' ';
       }
 
-      result += specimen.type;
+      if (specimen.type) {
+        result += specimen.type;
+      }
 
       if (specimen.specimenClass == 'Tissue' && specimen.anatomicSite && specimen.anatomicSite != ns) {
         result += ' ' + i18n.msg('specimens.extracted_from', {anatomicSite: specimen.anatomicSite});
       }
 
-      if (specimen.specimenClass == 'Fluid' && specimen.collectionContainer && specimen.collectionContainer != ns) {
-        result += ' ' + i18n.msg('specimens.collected_in', {container: specimen.collectionContainer});
+      if (specimen.specimenClass == 'Fluid') {
+        let collectionContainer = specimen.collectionContainer;
+        if (!collectionContainer && specimen.collectionEvent && specimen.collectionEvent.container) {
+          collectionContainer = specimen.collectionEvent.container;
+        }
+
+        if (collectionContainer && collectionContainer != ns) {
+          result += ' ' + i18n.msg('specimens.collected_in', {container: collectionContainer});
+        }
       }
     } else if (specimen.lineage == 'Derived') {
       result += specimen.lineage + ' ' + specimen.type;
@@ -597,7 +606,7 @@ class Util {
       result += ' (' + (specimen.code || specimen.reqCode) + ')';
     }
 
-    return result;
+    return result || i18n.msg('common.unknown');
   }
 
   toSnakeCase(input) {
