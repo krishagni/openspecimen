@@ -223,7 +223,7 @@ public class BiospecimenDaoHelper {
 				String mrnSite =
 					"Participant.medicalRecord.mrnSiteId exists and " +
 					getAqlSiteIdRestriction("Participant.medicalRecord.mrnSiteId", siteCp);
-				siteCond.add(mrnSite);
+				siteCond.add("(" + mrnSite + ")");
 
 				//
 				// When no MRNs exist, site ID should be one of CP site
@@ -231,13 +231,13 @@ public class BiospecimenDaoHelper {
 				String cpSite =
 					"Participant.medicalRecord.mrnSiteId not exists and " +
 					getAqlSiteIdRestriction("CollectionProtocol.cpSites.siteId", siteCp);
-				siteCond.add(cpSite);
+				siteCond.add("(" + cpSite + ")");
 			} else {
 				//
 				// Site ID should be either MRN site or CP site
 				//
-				siteCond.add(getAqlSiteIdRestriction("Participant.medicalRecord.mrnSiteId", siteCp));
-				siteCond.add(getAqlSiteIdRestriction("CollectionProtocol.cpSites.siteId", siteCp));
+				siteCond.add("(" + getAqlSiteIdRestriction("Participant.medicalRecord.mrnSiteId", siteCp) + ")");
+				siteCond.add("(" + getAqlSiteIdRestriction("CollectionProtocol.cpSites.siteId", siteCp) + ")");
 			}
 
 			String cond = "(" + StringUtils.join(siteCond, " or ") + ")";

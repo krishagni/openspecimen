@@ -49,6 +49,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -1279,6 +1280,7 @@ public class QueryServiceImpl implements QueryService {
 	}
 
 	private String getRestriction(User user, Long cpId, Long groupId) {
+		String restriction = null;
 		if (groupId != null && groupId != -1) {
 			Set<Long> cpIds = AccessCtrlMgr.getInstance().getReadAccessGroupCpIds(groupId);
 			if (CollectionUtils.isEmpty(cpIds)) {
@@ -1294,33 +1296,32 @@ public class QueryServiceImpl implements QueryService {
 				}
 			}
 
-			return cpForm + ".id in (" + Utility.join(cpIds, Objects::toString, ",") + ")";
+			restriction = cpForm + ".id in (" + Utility.join(cpIds, Objects::toString, ",") + ")";
 		} else if (cpId != null && cpId != -1) {
 			if (!user.isAdmin()) {
 				AccessCtrlMgr.getInstance().ensureReadCpRights(cpId);
 			}
 
-			return cpForm + ".id = " + cpId;
-		} else if (!user.isAdmin()) {
+			restriction = cpForm + ".id = " + cpId;
+		}
+
+		if (!user.isAdmin()) {
 			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
 			if (CollectionUtils.isEmpty(siteCps)) {
 				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 			}
 
-			List<String> cpSitesConds = new ArrayList<>(); // joined by or
-			for (SiteCpPair siteCp : siteCps) {
-				String cond = getAqlSiteIdRestriction("CollectionProtocol.cpSites.siteId", siteCp);
-				if (siteCp.getCpId() != null) {
-					cond += " and CollectionProtocol.id = " + siteCp.getCpId();
-				}
-
-				cpSitesConds.add("(" + cond + ")");
+			boolean useMrnSites = AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn();
+			String siteCpsAql = BiospecimenDaoHelper.getInstance().getSiteCpsCondAql(siteCps, useMrnSites);
+			String restrictionAql = "Participant.id in (select Participant.id where " + siteCpsAql + ")";
+			if (restriction != null) {
+				restriction = "(" + restriction + " and " + restrictionAql + ")";
+			} else {
+				restriction = restrictionAql;
 			}
-
-			return "(" + StringUtils.join(cpSitesConds, " or ") + ")";
-		} else {
-			return null;
 		}
+
+		return restriction;
 	}
 	
 	private String getAqlWithCpIdInSelect(User user, boolean isCount, String aql) {
