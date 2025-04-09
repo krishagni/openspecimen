@@ -49,7 +49,7 @@ export default {
           if (opts.value || opts.value == 0) {
             try {
               let id = +opts.value;
-              if (!isNaN(id)) {
+              if (!isNaN(id) && this.selectProp == 'id') {
                 let key = 'id: ' + id;
                 if (!cache[key]) {
                   cache[key] = http.get('permissible-values/v/' + id).then(pv => [pv]);
@@ -89,7 +89,7 @@ export default {
   computed: {
     inputValue: {
       get() {
-        if (this.modelValue != null && !isNaN(this.modelValue)) {
+        if (this.modelValue != null && !isNaN(this.modelValue) && this.selectProp == 'id') {
           return +this.modelValue;
         }
 
