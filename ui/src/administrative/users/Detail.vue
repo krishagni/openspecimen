@@ -44,24 +44,28 @@
         </os-tab-menu>
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
+            <li>
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
+                <span class="label" v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
-            <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'" v-os-tooltip.right="$t('users.roles')">
+            <li v-if="ctx.isUpdateAllowed && ctx.user.type == 'NONE'">
               <router-link :to="getRoute('Roles')">
                 <os-icon name="users" />
+                <span class="label" v-t="'users.roles'">Roles</span>
               </router-link>
             </li>
-            <li v-if="ctx.isUpdateAllowed" v-os-tooltip.right="$t('users.forms')">
+            <li v-if="ctx.isUpdateAllowed">
               <router-link :to="getRoute('Forms.List')">
                 <os-icon name="copy" />
+                <span class="label" v-t="'users.forms'">Forms</span>
               </router-link>
             </li>
-            <li v-if="ctx.pfuAllowed" v-os-tooltip.right="$t('users.profile_forms')">
+            <li v-if="ctx.pfuAllowed">
               <router-link :to="getRoute('ProfileForms.List')">
                 <os-icon name="user" />
+                <span class="label" v-t="'users.profile_forms'">Profile Forms</span>
               </router-link>
             </li>
 

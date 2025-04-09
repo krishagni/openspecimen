@@ -29,9 +29,10 @@
 
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
+            <li>
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
+                <span class="label" v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
 
