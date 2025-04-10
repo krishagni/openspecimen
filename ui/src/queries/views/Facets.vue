@@ -62,6 +62,10 @@ export default {
       return this.facets && this.facets.length > 0;
     },
 
+    getSelectedFacets: function() {
+      return Object.values(this.selectedFacets);
+    },
+
     addRangeLimit: function({facet, range}) {
       const {minValue, maxValue, selected} = range || {};
       if (selected) {

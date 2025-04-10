@@ -46,14 +46,14 @@ class Query {
     return http.post('query', payload);
   }
 
-  async exportData(query) {
+  async exportData(query, facets) {
     const payload = {
       savedQueryId: query.id,
       cpId: query.cpId,
       cpGroupId: query.cpGroupId,
       drivingForm: 'Participant',
       runType: 'Export',
-      aql: await util.getDataAql(query, false, false),
+      aql: await util.getDataAql(query, facets, false, false),
       wideRowMode: query.wideRowMode || 'OFF',
       outputIsoDateTime: true, // TODO: (outputIsoFmt || false),
       outputColumnExprs: query.outputColumnExprs || false,

@@ -78,7 +78,7 @@
 
       <os-grid v-if="query.selectList && query.selectList.length > 0">
         <os-grid-column :width="3" v-show="ctx.hasFacets">
-          <Facets :query="query" @facets-loaded="onFacetsLoad" @facets-selected="onFacetsSelection" />
+          <Facets ref="facetsList" :query="query" @facets-loaded="onFacetsLoad" @facets-selected="onFacetsSelection" />
         </os-grid-column>
 
         <os-grid-column class="results-panel" :width="ctx.hasFacets ? 9 : 12">
@@ -263,13 +263,13 @@ export default {
           }
 
           this.$emit('query-saved', {...this.query, ...resp});
-          setTimeout(() => this._loadRecords()); // to allow the query to be updated
+          setTimeout(() => this._loadRecords(this._getSelectedFacets())); // to allow the query to be updated
         }
       );
     },
 
     exportQueryData: function() {
-      querySvc.exportData(this.query);
+      querySvc.exportData(this.query, this._getSelectedFacets());
     },
 
     onGridReady: function({api}) {
@@ -410,6 +410,11 @@ export default {
 
     _isBlank: function(value) {
       return value == null || value == undefined || value == '';
+    },
+
+    _getSelectedFacets: function() {
+      const facets = this.ctx.hasFacets && this.$refs.facetsList ? this.$refs.facetsList.getSelectedFacets() : [];
+      return facets.map(({facet: {id, type}, values}) => ({id, type, values}));
     }
   }
 }
