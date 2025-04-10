@@ -196,7 +196,7 @@ export default {
     },
 
     itemUrl: function() {
-      return "'#/cps/' + hidden.cpId + '/detail/overview'";
+      return "'#/cp-view/' + hidden.cpId + '/participants'";
     },
 
     queryReadAllowed: function() {
