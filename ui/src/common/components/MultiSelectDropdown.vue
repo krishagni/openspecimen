@@ -320,7 +320,9 @@ export default {
     modelValue: async function() {
       let selectedVals = await this.selectedValues();
       if (this.ctx.options) {
-        this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
+        // this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
+        Array.prototype.push.apply(this.ctx.options, selectedVals);
+        this.ctx.options = this.dedup(this.ctx.options);
       } else {
         this.ctx.options = selectedVals;
       }
@@ -357,6 +359,7 @@ export default {
 
   .os-dropdown :deep(.p-multiselect) {
     width: 100%;
+    position: relative;
   }
 
   .os-dropdown .p-float-label :deep(.p-multiselect .p-inputtext) {

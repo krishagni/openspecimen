@@ -50,27 +50,31 @@
 
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
+            <li>
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
+                <span class="label" v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="$t('dps.consents.list')">
+            <li>
               <router-link :to="getRoute('Consents')">
                 <os-icon name="check-square" />
+                <span class="label" v-t="'dps.consents.list'">Consents</span>
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="$t('dps.reserved_specimens')">
+            <li>
               <router-link :to="getRoute('ReservedSpecimens')">
                 <os-icon name="flask" />
+                <span class="label" v-t="'dps.reserved_specimens'">Reserved Specimens</span>
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="$t('dps.requirements')">
+            <li>
               <router-link :to="getRoute('Requirements')">
                 <os-icon name="list-ol" />
+                <span class="label" v-t="'dps.requirements'">Requirements</span>
               </router-link>
             </li>
 

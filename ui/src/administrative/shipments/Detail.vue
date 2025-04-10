@@ -40,21 +40,24 @@
 
         <os-side-menu v-else>
           <ul>
-            <li v-os-tooltip.right="$t('common.overview')">
+            <li>
               <router-link :to="getRoute('Overview')">
                 <os-icon name="eye" />
+                <span class="label" v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
 
-            <li v-if="ctx.shipment.type == 'CONTAINER'" v-os-tooltip.right="$t('shipments.containers')">
+            <li v-if="ctx.shipment.type == 'CONTAINER'">
               <router-link :to="getRoute('Containers')">
                 <os-icon name="box-open" />
+                <span class="label" v-t="'shipments.containers'">Containers</span>
               </router-link>
             </li>
 
-            <li v-os-tooltip.right="$t('shipments.specimens')">
+            <li>
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
+                <span class="label" v-t="'shipments.specimens'">Specimens</span>
               </router-link>
             </li>
 
