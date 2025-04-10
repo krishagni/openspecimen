@@ -45,14 +45,23 @@ public class FormRecordAccessor implements ObjectAccessor {
 			throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Unknown formRecord key: " + key);
 		}
 
-		Long recordId = Long.parseLong(value.toString());
-		FormRecordEntryBean re = deDaoFactory.getFormDao().getRecordEntry(recordId);
+		String[] path = value.toString().split(":");
+
+		FormRecordEntryBean re = null;
+		if (path.length == 2) {
+			String form = path[0];
+			Long recordId = Long.parseLong(path[1]);
+			re = deDaoFactory.getFormDao().getRecordEntry(form, recordId);
+		} else {
+			Long recordId = Long.parseLong(value.toString());
+			re = deDaoFactory.getFormDao().getRecordEntry(recordId);
+		}
+
 		if (re == null) {
-			throw OpenSpecimenException.userError(FormErrorCode.REC_NOT_FOUND, recordId);
+			throw OpenSpecimenException.userError(FormErrorCode.REC_NOT_FOUND, value.toString());
 		}
 
 		FormContextBean fc = re.getFormCtxt();
-
 		Map<String, Object> result = new HashMap<>();
 		result.put("formId", fc.getContainerId());
 		result.put("formCtxtId", fc.getIdentifier());
@@ -114,6 +123,7 @@ public class FormRecordAccessor implements ObjectAccessor {
 					result.put("stateName", "ParticipantsListItemSpecimenDetail.Forms");
 				} else {
 					result.put("stateName", "ParticipantsListItemSpecimenDetail.Overview");
+					result.put("action", "show_event," + fc.getContainerId() + "," + re.getRecordId());
 				}
 
 				result.put("specimenId", spmn.getId());

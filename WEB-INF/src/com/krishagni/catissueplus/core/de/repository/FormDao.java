@@ -93,6 +93,8 @@ public interface FormDao extends Dao<FormContextBean> {
 
 	public FormRecordEntryBean getRecordEntry(Long formId, Long recordId);
 
+	FormRecordEntryBean getRecordEntry(String formName, Long recordId);
+
 	public Long getRecordsCount(Long formCtxtId, Long objectId);
 	
 	public ObjectCpDetail getObjectCpDetail(Map<String, Object> map);
