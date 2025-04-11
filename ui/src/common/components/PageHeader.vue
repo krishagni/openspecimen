@@ -71,6 +71,11 @@ export default {
 
   computed: {
     items: function() {
+      const {currentUser} = this.$ui;
+      if (!currentUser || !currentUser.id) {
+        return [];
+      }
+
       let items = homePageSvc.getCards()
         .filter(card => {
           if (typeof card.showIf == 'function') {

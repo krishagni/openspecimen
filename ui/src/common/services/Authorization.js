@@ -36,6 +36,10 @@ class Authorization {
   }
 
   isAllowed(opts) {
+    if (!ui || !ui.currentUser || !ui.currentUser.id) {
+      return false;
+    }
+
     if (ui.currentUser.admin) {
       return true;
     }

@@ -2,7 +2,11 @@
   <div class="os-root">
     <os-navbar class="no-login-navbar" :no-login="true">
       <template #default="slotProps" v-if="navBarButtons">
-        <os-button primary :label="$t('login.sign_up')" @click="navToSignUp()" v-if="!slotProps.authenticated" />
+        <span v-if="!slotProps.authenticated">
+          <os-plugin-views page="no-login" view="navbar" />
+
+          <os-button primary :label="$t('login.sign_up')" @click="navToSignUp()"/>
+        </span>
       </template>
     </os-navbar>
 
@@ -34,11 +38,13 @@ export default {
 .no-login-navbar :deep(button.btn) {
   border: none;
   color: #fff;
-  padding: 0.25rem;
+  padding: 0.25rem 0.5rem;
   font-weight: bold;
   font-size: 0.8rem;
-  width: 7rem;
+  min-width: 7rem;
   border-radius: 0.25rem;
   cursor: pointer;
+  height: 1.75rem;
+  border-radius: 1rem;
 }
 </style>
