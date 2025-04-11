@@ -3,7 +3,7 @@
     <div class="p-float-label" :class="!$attrs.placeholder && 'no-label'" v-if="$attrs['md-type']">
       <Calendar ref="cal" v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
-        :show-button-bar="true" :hide-on-date-time-select="true"
+        :show-button-bar="true" :hide-on-date-time-select="true" :selectOtherMonths="true"
         :manual-input="true" :disabled="disabled"
         @date-select="onDateSelect" @today-click="onTodaySelect">
         <template #footer>
@@ -16,7 +16,7 @@
       <Calendar ref="cal" v-model="inputValue" :show-time="showTime" :date-format="format" :tabindex="tabOrder"
         :show-icon="true" :month-navigator="true" :year-navigator="true" year-range="1900:2100"
         :show-button-bar="true" :hide-on-date-time-select="true" :placeholder="$attrs.placeholder"
-        :manual-input="true" :disabled="disabled"
+        :manual-input="true" :disabled="disabled" :selectOtherMonths="true"
         @date-select="onDateSelect" @today-click="onTodaySelect">
         <template #footer>
           <os-button text :label="$t('common.buttons.done')" class="os-datepicker-done" @click="hideCalendar" />

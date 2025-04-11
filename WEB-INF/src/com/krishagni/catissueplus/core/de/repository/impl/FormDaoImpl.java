@@ -551,6 +551,19 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 			.uniqueResult();
 	}
 
+	public FormRecordEntryBean getRecordEntry(String formName, Long recordId) {
+		Criteria<FormRecordEntryBean> query = createCriteria(FormRecordEntryBean.class, "re")
+			.join("re.formCtxt", "fc")
+			.join("fc.form", "form");
+
+		return query.add(query.eq("form.name", formName))
+			.add(query.eq("re.recordId", recordId))
+			.add(query.eq("re.activityStatusStr", "ACTIVE"))
+			.add(query.isNull("fc.deletedOn"))
+			.add(query.isNull("form.deletedOn"))
+			.uniqueResult();
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public Map<Long, Pair<Long, Long>> getLatestRecordIds(Long formId, String entityType, List<Long> objectIds) {

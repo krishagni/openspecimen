@@ -150,7 +150,7 @@ public class QueryServiceImpl implements QueryService {
 	
 	private static final int ONLINE_EXPORT_TIMEOUT_SECS = 30;
 
-	private static final String FORM_RECORD_URL = "#/object-state-params-resolver?objectName=formRecord&key=recordId&value={{$value}}";
+	private static final String FORM_RECORD_URL = "#/object-state-params-resolver?objectName=formRecord&key=recordId&value=%s{{$value}}";
 
 	private static final ExecutorService exportThreadPool = Executors.newFixedThreadPool(EXPORT_THREAD_POOL_SIZE);
 
@@ -1270,7 +1270,13 @@ public class QueryServiceImpl implements QueryService {
 		for (ResultColumn rc : queryResult.getResultColumns()) {
 			String columnExpr = rc.getExpression().getAql();
 			if (columnExpr != null && !columnExpr.contains("customFields") && columnExpr.endsWith("_?primary_key?_")) {
-				formattedResult.getColumnUrls()[idx] = FORM_RECORD_URL;
+				String[] path = columnExpr.split("\\.");
+				String form = "";
+				if (path.length >= 4) {
+					form = path[path.length - 2] + ":";
+				}
+
+				formattedResult.getColumnUrls()[idx] = String.format(FORM_RECORD_URL, form);
 			}
 
 			++idx;
