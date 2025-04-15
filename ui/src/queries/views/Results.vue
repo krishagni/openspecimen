@@ -390,6 +390,19 @@ export default {
       } else if (params.value.indexOf('#####') == 0) {
         return params.value;
       } else {
+        if (typeof params.value == 'string') {
+          const parts = params.value.split('-');
+          if (parts.length == 3) {
+            const [year, month, date] = parts;
+            const localDate = new Date();
+            localDate.setFullYear(+year);
+            localDate.setMonth((+month - 1));
+            localDate.setDate(+date);
+            localDate.setHours(0, 0, 0, 0);
+            return this.$filters.date(localDate);
+          }
+        }
+
         return this.$filters.date(new Date(params.value));
       }
     },
