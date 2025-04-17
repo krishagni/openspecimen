@@ -212,7 +212,7 @@ export default {
 <style>
 
 .os-storage-position {
-  display: flex;
+  display: flex!important;
   flex-direction: row;
   align-items: stretch;
 }

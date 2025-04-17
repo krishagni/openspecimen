@@ -762,7 +762,7 @@ class Util {
 
     if (value && typeof value == 'object' && value.id != -1) {
       let position = value;
-      result = !position.displayName ? position.name : position.displayName + ' (' + position.name + ')';
+      result = !position.displayName ? (position.name || position.barcode) : position.displayName + ' (' + position.name + ')';
       if (position.mode == 'TWO_D' && position.positionY && position.positionX) {
         result += ' (' + position.positionY + ', ' + position.positionX + ')';
       } else if (position.mode == 'LINEAR' && position.position > 0) {

@@ -163,6 +163,7 @@ export default {
 
 .os-dropdown :deep(.p-dropdown) {
   width: 100%;
+  position: relative;
 }
 
 .os-dropdown .p-float-label :deep(.p-dropdown .p-inputtext) {
