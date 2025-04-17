@@ -1188,14 +1188,19 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			key = location.getId();
 			container = daoFactory.getStorageContainerDao().getById(location.getId());
 		} else {
-			key = location.getName();
-			container = daoFactory.getStorageContainerDao().getByName(location.getName());
+			if (StringUtils.isNotBlank(location.getName())) {
+				key = location.getName();
+				container = daoFactory.getStorageContainerDao().getByName(location.getName());
+			} else if (StringUtils.isNotBlank(location.getBarcode())) {
+				key = location.getBarcode();
+				container = daoFactory.getStorageContainerDao().getByBarcode(location.getBarcode());
+			}
 
 			if (container == null) {
 				//
 				// Check the possibility of auto creating container
 				//
-				container = createContainer(location.getName(), containerLocation, containerTypeId, containerTypeName, ose);
+				container = createContainer(location.getName(), location.getBarcode(), containerLocation, containerTypeId, containerTypeName, ose);
 				ose.checkAndThrow();
 			}
 		}
@@ -1269,15 +1274,11 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 			return false;
 		}
 
-		if (StringUtils.isNotBlank(location.getName())) {
-			return false;
-		}
-
-		return true;
+		return StringUtils.isBlank(location.getName()) && StringUtils.isBlank(location.getBarcode());
 	}
 
 	private StorageContainer createContainer(
-		String name,
+		String name, String barcode,
 		StorageLocationSummary containerLocation, Long containerTypeId, String containerTypeName,
 		OpenSpecimenException ose) {
 
@@ -1305,6 +1306,7 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		//
 		StorageContainerDetail containerDetail = new StorageContainerDetail();
 		containerDetail.setName(name);
+		containerDetail.setBarcode(barcode);
 		containerDetail.setTypeId(containerTypeId);
 		containerDetail.setTypeName(containerTypeName);
 		containerDetail.setStorageLocation(containerLocation);

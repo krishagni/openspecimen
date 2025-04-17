@@ -130,8 +130,11 @@ export default {
     },
 
     getDisplayValue() {
-      const options = this.getSelectedOptions();
-      return options.map(option => this.displayProp ? option[this.displayProp] : option).join(', ');
+      if (this.selected && this.selected.length > 0) {
+        return this.selected.map(s => s[this.listSource.displayProp]).join(', ');
+      }
+
+      return '';
     }
   },
 
@@ -183,6 +186,7 @@ export default {
 
 .os-dropdown :deep(.p-multiselect) {
   width: 100%;
+  position: relative;
 }
 
 .os-dropdown .p-float-label :deep(.p-multiselect .p-inputtext) {
