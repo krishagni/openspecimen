@@ -115,26 +115,12 @@ public class RestErrorController extends ResponseEntityExceptionHandler {
 
 	private ErrorMessage getMessage(String code, Object[] params) {
 		String message = MessageUtil.getInstance().getMessage(code.toLowerCase(), params);
-		if (!getBoolSetting("common", "de_form_html_markup", false)) {
-			message = HtmlUtils.htmlEscape(message);
-		}
-
-		return new ErrorMessage(code, message);
+		return new ErrorMessage(code, HtmlUtils.htmlEscape(message));
 	}
 	
 	private Object[] getExceptionId(OpenSpecimenException ose) {
 		Long id = ose.getExceptionId();
 		return new Object[] {id != null ? id : ""};
-	}
-
-	private boolean getBoolSetting(String module, String name, boolean defValue) {
-		try {
-			return ConfigUtil.getInstance().getBoolSetting(module, name, defValue);
-		} catch (Throwable t) {
-			logger.error("Error retrieving the configuration setting", t);
-		}
-
-		return defValue;
 	}
 
 	private void dumpRequestBody(WebRequest request, Exception e) {
