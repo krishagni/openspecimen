@@ -29,6 +29,9 @@
             <os-button left-icon="flask" :label="$t('participants.view_specimens')"
               @click="viewSpecimens" v-if="ctx.access.viewSpecimensAllowed" />
 
+            <os-button-link left-icon="procedures" :label="$t('participants.view_sop')"
+              :url="sopUrl" :new-tab="true" v-if="sopUrl" />
+
             <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
           </span>
           <span v-else>
@@ -49,6 +52,9 @@
 
             <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen"
               v-else-if="ctx.cp.activityStatus != 'Closed' && ctx.access.createPrimarySpecimensAllowed" />
+
+            <os-button-link left-icon="procedures" :label="$t('participants.view_sop')"
+              :url="sopUrl" :new-tab="true" v-if="sopUrl" />
 
             <os-menu :label="$t('common.buttons.more')" :options="ctx.moreOptions" />
           </span>
@@ -117,6 +123,7 @@
 import alertsSvc from '@/common/services/Alerts.js';
 import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc    from '@/biospecimen/services/Cpr.js';
+import http      from '@/common/services/HttpClient.js';
 import itemsSvc  from '@/common/services/ItemsHolder.js';
 import i18n      from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
@@ -233,6 +240,17 @@ export default {
 
       return selectedItems;
     },
+
+    sopUrl: function() {
+      const cp = this.cpViewCtx.getCp();
+      if (cp.sopDocumentName) {
+        return http.getUrl('collection-protocols/' + cp.id + '/sop-document');
+      } else if (cp.sopDocumentUrl) {
+        return cp.sopDocumentUrl;
+      }
+
+      return null;
+    }
   },
 
   methods: {
