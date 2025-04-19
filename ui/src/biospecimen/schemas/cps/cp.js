@@ -133,7 +133,7 @@ export default {
       "type": "fileUpload",
       "labelCode": "cps.sop_doc",
       "name": "cp.sopDocumentName",
-      "url": http.getUrl("collection-protocols/sop-documents"),
+      "url": () => http.getUrl("collection-protocols/sop-documents"),
       "headers": http.headers,
       "value": ({cp}) => {
         if (cp.sopDocumentName) {
@@ -143,7 +143,7 @@ export default {
 
         return cp.sopDocumentName;
       },
-      "href": ({cp}) => http.getUrl("collection-protocols/" + cp.id + "/sop-document"),
+      "href": (obj) => obj && obj.cp && http.getUrl("collection-protocols/" + obj.cp.id + "/sop-document"),
       "showWhen": "!cp.sopDocumentUrl",
     },
     {

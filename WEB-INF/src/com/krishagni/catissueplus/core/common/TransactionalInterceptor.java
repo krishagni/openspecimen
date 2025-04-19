@@ -80,8 +80,10 @@ public class TransactionalInterceptor {
 	}
 
 	private Object doWork(ProceedingJoinPoint pjp, boolean rollback) {
+		Map<String, Object> originalError = new HashMap<>();
+
 		try {
-			return doWork0(pjp, rollback);
+			return doWork0(pjp, rollback, originalError);
 		} catch (DataAccessException dae) {
 			throw OpenSpecimenException.serverError(dae.getCause() != null ? dae.getCause() : dae);
 		} catch (CannotCreateTransactionException te) {
@@ -96,6 +98,8 @@ public class TransactionalInterceptor {
 			} else if (t instanceof FormException) {
 				FormException fe = (FormException) t;
 				throw OpenSpecimenException.userError(CommonErrorCode.FORM_ERROR, fe.getError());
+			} else if (!originalError.isEmpty()) {
+				return originalError.get("error");
 			}
 
 			logger.error("Error doing work inside " + pjp.getSignature(), t);
@@ -104,7 +108,7 @@ public class TransactionalInterceptor {
 		}
 	}
 
-	private Object doWork0(ProceedingJoinPoint pjp, boolean rollback) {
+	private Object doWork0(ProceedingJoinPoint pjp, boolean rollback, Map<String, Object> originalError) {
 		return txTmpl.execute(new TransactionCallback<Object>() {
 			@Override
 			public Object doInTransaction(TransactionStatus status) {
@@ -114,8 +118,11 @@ public class TransactionalInterceptor {
 					}
 
 					Object result = pjp.proceed();
-					if (result instanceof ResponseEvent) {
-						ResponseEvent<?> resp = (ResponseEvent<?>)result;
+					if (result instanceof ResponseEvent<?> resp) {
+						if (resp.getError() != null) {
+							originalError.put("error", resp);
+						}
+
 						if (!resp.isSuccessful() && !resp.isForceTxCommitEnabled()) {
 							status.setRollbackOnly();
 							if (resp.isSystemError() || resp.isUnknownError()) {

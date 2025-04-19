@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -506,6 +507,11 @@ public class QueryServiceImpl implements QueryService {
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
+			SQLTimeoutException timeoutException = getSqlTimeoutException(e);
+			if (timeoutException != null) {
+				return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, Utility.getErrorMessage(timeoutException));
+			}
+
 			return ResponseEvent.serverError(e);
 		} finally {
 			if (queryCntIncremented) {
@@ -1972,6 +1978,19 @@ public class QueryServiceImpl implements QueryService {
 
 	private String sql(String sql) {
 		return "sql(\"" + sql + "\")";
+	}
+
+	private SQLTimeoutException getSqlTimeoutException(Exception e) {
+		Throwable t = e;
+		while (t != null) {
+			if (t instanceof SQLTimeoutException timeoutException) {
+				return timeoutException;
+			}
+
+			t = t.getCause();
+		}
+
+		return null;
 	}
 
 	private static final String INSTITUTE_SITE_IDS_SQL =

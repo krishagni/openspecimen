@@ -14,6 +14,8 @@
           <os-button left-icon="file" size="small" v-if="rowObject.visit.sprName"
             v-os-tooltip.bottom="$t('participants.download_path_report')" @click="downloadReport(rowObject)" />
 
+          <os-plugin-views page="participant-detail" view="occurred-visit-actions" :view-props="rowObject" />
+
           <os-menu icon="ellipsis-v" :no-outline="true" :options="options(rowObject.visit)" />
         </os-button-group>
       </template>
@@ -60,7 +62,7 @@ export default {
   computed: {
     occurredVisits: function() {
       return (this.visits || []).filter(visit => visit.status == 'Complete')
-        .map(visit => ({cpr: this.cpr, visit, userRole: this.userRole}));
+        .map(visit => ({cp: this.cp, cpr: this.cpr, visit, userRole: this.userRole}));
     }
   },
 

@@ -266,17 +266,24 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		} finally {
 			AuthUtil.clearCurrentUser();
 			teardownReqDataProviders(httpReq, httpResp);
+
 			if (isRecordableApi(httpReq)) {
-				UserApiCallLog userAuditLog = new UserApiCallLog();
-				userAuditLog.setUser(user);
-				userAuditLog.setImpersonatedUser(impersonatedUser);
-				userAuditLog.setUrl(httpReq.getRequestURI());
-				userAuditLog.setMethod(httpReq.getMethod());
-				userAuditLog.setCallStartTime(callStartTime);
-				userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
-				userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
-				userAuditLog.setLoginAuditLog(loginAuditLog);
-				auditService.insertApiCallLog(userAuditLog);
+				try {
+					UserApiCallLog userAuditLog = new UserApiCallLog();
+					userAuditLog.setUser(user);
+					userAuditLog.setImpersonatedUser(impersonatedUser);
+					userAuditLog.setUrl(httpReq.getRequestURI());
+					userAuditLog.setMethod(httpReq.getMethod());
+					userAuditLog.setCallStartTime(callStartTime);
+					userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
+					userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
+					userAuditLog.setLoginAuditLog(loginAuditLog);
+					auditService.insertApiCallLog(userAuditLog);
+				} catch (Throwable t) {
+					String msg = Utility.getErrorMessage(t);
+					logger.error("Error recording the API call started at " + callStartTime + ". API: " + httpReq.getMethod() + " " + httpReq.getRequestURI() + " Status: " +  httpResp.getStatus() + ". Error: " + msg);
+					logger.debug("Error recording the API call.", t);
+				}
 			}
 		}
 
