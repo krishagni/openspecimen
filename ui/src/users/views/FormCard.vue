@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <div class="title"> 
+    <div class="title" v-if="$slots.title">
       <slot name="title" />
     </div>
   
@@ -8,6 +8,8 @@
       <div class="box-title">
         <slot name="box-title" />
       </div>
+
+      <img class="logo" :src="logo" v-if="logo" />
 
       <os-form class="user-form" ref="form" :schema="schema" :data="data">
         <template #message v-if="message">
@@ -29,7 +31,7 @@
 
 <script>
 export default {
-  props: ['schema', 'data', 'message'],
+  props: ['schema', 'data', 'message', 'logo'],
 
   methods: {
     validate: function() {
@@ -46,6 +48,7 @@ export default {
   align-items: center;
   height: 100vh;
   background: linear-gradient(135deg, #205081, #2d67a3);
+  padding-top: 1.25rem;
 }
 
 .login-box {
@@ -58,10 +61,6 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-.title {
-  margin-top: 1.25rem;
 }
 
 .title :deep(h3) {
