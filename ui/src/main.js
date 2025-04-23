@@ -62,6 +62,8 @@ import DeFormServices    from '@/forms/services';
 import HomeComponents    from '@/home/components';
 import ImportComponents  from '@/importer/components';
 
+import LoginForm         from '@/users/views/LoginForm.vue';
+
 import queryRoutes from '@/queries/routes.js';
 
 import Layout from '@/administrative/containers/Layout.vue';
@@ -88,6 +90,7 @@ app.directive('os-badge', BadgeDirective);
 
 app.component('os-container-layout', Layout);
 app.component('os-no-login-app', NoLoginApp);
+app.component('os-login-form', LoginForm);
 
 app.config.globalProperties.$goto =
   (name, params, query) => routerSvc.goto(name, params, query);
