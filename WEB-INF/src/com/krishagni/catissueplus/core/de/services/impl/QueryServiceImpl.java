@@ -1250,7 +1250,7 @@ public class QueryServiceImpl implements QueryService {
 			aql = getAqlWithCpIdInSelect(user, countQuery, aql);
 		}
 
-		query.compile(rootForm, aql, getRestriction(user, op.getCpId(), op.getCpGroupId()));
+		query.compile(rootForm, aql, getRestriction(user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks()));
 		op.setAql(aql);
 		return query;
 	}
@@ -1291,7 +1291,7 @@ public class QueryServiceImpl implements QueryService {
 		return formattedResult;
 	}
 
-	private String getRestriction(User user, Long cpId, Long groupId) {
+	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks) {
 		String restriction = null;
 		if (groupId != null && groupId != -1) {
 			Set<Long> cpIds = AccessCtrlMgr.getInstance().getReadAccessGroupCpIds(groupId);
@@ -1317,7 +1317,7 @@ public class QueryServiceImpl implements QueryService {
 			restriction = cpForm + ".id = " + cpId;
 		}
 
-		if (!user.isAdmin()) {
+		if (!user.isAdmin() && !disableAccessChecks) {
 			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
 			if (CollectionUtils.isEmpty(siteCps)) {
 				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
@@ -1700,7 +1700,7 @@ public class QueryServiceImpl implements QueryService {
 
 		String restriction = null;
 		if (qs == null) {
-			restriction = getRestriction(AuthUtil.getCurrentUser(), op.getCpId(), op.getCpGroupId());
+			restriction = getRestriction(AuthUtil.getCurrentUser(), op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks());
 		}
 
 		QueryResultData queryResult = null;
