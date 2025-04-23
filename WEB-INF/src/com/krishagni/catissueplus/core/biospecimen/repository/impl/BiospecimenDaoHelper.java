@@ -95,6 +95,11 @@ public class BiospecimenDaoHelper {
 		StringBuilder aql = new StringBuilder();
 		for (SiteCpPair siteCp : siteCps) {
 			String restriction = getAqlSiteIdRestriction("CollectionProtocol.cpSites.siteId", siteCp);
+			if (siteCp.getCpId() != null && siteCp.getCpId() > 0L) {
+				restriction += " and " + "CollectionProtocol.id = " + siteCp.getCpId();
+				restriction = "(" + restriction + ")";
+			}
+
 			if (aql.length() > 0) {
 				aql.append(" or ");
 			}
