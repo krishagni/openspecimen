@@ -513,6 +513,13 @@ class Util {
       case 'pv':
       case 'checkbox':
         if (inputValue instanceof Array) {
+          if (inputValue.length > 0 && inputValue[0] && typeof inputValue[0] == 'object') {
+            const displayProp = (field.listSource || {}).displayProp;
+            if (displayProp) {
+              return inputValue.map(object => object[displayProp]).join(', ');
+            }
+          }
+
           return inputValue.join(', ');
         }
         break;
