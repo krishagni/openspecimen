@@ -428,12 +428,14 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 		Criteria<Specimen> query = createCriteria(Specimen.class, "s");
 		query.add(query.in("s.id", descendantAncestorIdsMap.keySet()));
-		if (StringUtils.isBlank(labelField) || labelField.equals("specimen.label")) {
-			addInCond(query, "s.label", labels);
-		} else if (labelField.equals("specimen.barcode")) {
-			addInCond(query, "s.barcode", labels);
-		} else if (labelField.equals("specimen.additionalLabel")) {
-			addInCond(query, "s.additionalLabel", labels);
+		if (CollectionUtils.isNotEmpty(labels)) {
+			if (StringUtils.isBlank(labelField) || labelField.equals("specimen.label")) {
+				addInCond(query, "s.label", labels);
+			} else if (labelField.equals("specimen.barcode")) {
+				addInCond(query, "s.barcode", labels);
+			} else if (labelField.equals("specimen.additionalLabel")) {
+				addInCond(query, "s.additionalLabel", labels);
+			}
 		}
 
 		if (Specimen.ALIQUOT.equals(lineage)) {
@@ -446,14 +448,23 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			query.add(query.eq("s.collectionStatus", status));
 		}
 
+		boolean sorted = true;
 		List<Specimen> specimens = query.list();
-		if (StringUtils.isBlank(labelField) || labelField.equals("specimen.label")) {
-			specimens = Specimen.sortByLabels(specimens, labels);
-		} else if (labelField.equals("specimen.barcode")) {
-			specimens = Specimen.sortByBarcodes(specimens, labels);
-		} else if (labelField.equals("specimen.additionalLabel")) {
-			specimens = Specimen.sortByAdditionalLabels(specimens, labels);
+		if (CollectionUtils.isNotEmpty(labels)) {
+			if (StringUtils.isBlank(labelField) || labelField.equals("specimen.label")) {
+				specimens = Specimen.sortByLabels(specimens, labels);
+			} else if (labelField.equals("specimen.barcode")) {
+				specimens = Specimen.sortByBarcodes(specimens, labels);
+			} else if (labelField.equals("specimen.additionalLabel")) {
+				specimens = Specimen.sortByAdditionalLabels(specimens, labels);
+			} else {
+				sorted = false;
+			}
 		} else {
+			sorted = false;
+		}
+
+		if (!sorted) {
 			specimens = specimens.stream().sorted(Comparator.comparing(BaseEntity::getId)).collect(Collectors.toList());
 		}
 
