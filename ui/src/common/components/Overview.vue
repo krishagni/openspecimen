@@ -93,6 +93,11 @@
                     <span v-else-if="field.fields[colIdx].type == 'signature'">
                       <img :src="colValue.url">
                     </span>
+                    <span v-else-if="colValue.hrefLink && colValue.value">
+                      <a :href="colValue.hrefLink" target="_blank" rel="noopener">
+                        <span>{{colValue.value}}</span>
+                      </a>
+                    </span>
                     <span v-else-if="field.fields[colIdx].type == 'text' || field.fields[colIdx].type == 'textarea'">
                       <os-html :content="colValue" />
                     </span>
@@ -173,7 +178,12 @@ export default {
                     sfv = util.linkify(sfv);
                   }
 
-                  return sfv;
+                  let hrefLink = null;
+                  if (typeof sfField.href == 'function') {
+                    hrefLink = sfField.href(element);
+                  }
+
+                  return hrefLink ? {hrefLink, value: sfv} : sfv;
                 }
               )
             );
