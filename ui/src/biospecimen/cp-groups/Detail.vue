@@ -17,13 +17,14 @@
           </ul>
         </os-tab-menu>
 
-        <router-view :cpg="ctx.cpg" v-if="ctx.cpg && ctx.cpg.id > 0" :key="ctx.cpg.id" />
+        <router-view :cpg="ctx.cpg" :perm-opts="ctx.permOpts" v-if="ctx.cpg && ctx.cpg.id > 0" :key="ctx.cpg.id" />
       </div>
     </os-page-body>
   </os-page>
 </template>
 
 <script>
+import authSvc from '@/common/services/Authorization.js';
 import cpgSvc from '@/biospecimen/services/CollectionProtocolGroup.js';
 
 export default {
@@ -34,7 +35,9 @@ export default {
   data() {
     return {
       ctx: {
-        cpg: {}
+        cpg: {},
+
+        permOpts: {updateAllowed: true, eximAllowed: true}
       }
     };
   },
@@ -67,7 +70,15 @@ export default {
         return;
       }
 
-      this.ctx.cpg = await cpgSvc.getGroupById(+this.cpgId);
+      const {cps} = this.ctx.cpg = await cpgSvc.getGroupById(+this.cpgId);
+
+      const eopts = {resource: 'CollectionProtocol', operations: ['Export Import']};
+      const eximAllowed = cps.every(cp => authSvc.isAllowed({...eopts, cp: cp.shortTitle}));
+
+      const uopts = {resource: 'CollectionProtocol', operations: ['Update']};
+      const updateAllowed = cps.every(cp => authSvc.isAllowed({...uopts, cp: cp.shortTitle}));
+
+      this.ctx.permOpts = {updateAllowed, eximAllowed};
     },
 
     getRoute: function(routeName, params, query) {

@@ -778,9 +778,12 @@
 
   "cpgs": {
     "collection_protocol": "Collection Protocol",
+    "collection_protocols": "Collection Protocols",
+    "cpes": "Events",
     "cps_count": "Collection Protocols",
     "list": "Collection Protocol Groups",
-    "name": "Name"
+    "name": "Name",
+    "specimen_requirements": "Specimen Requirements"
   },
 
   "cps": {
