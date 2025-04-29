@@ -777,7 +777,10 @@
   },
 
   "cpgs": {
-    "list": "Collection Protocol Groups"
+    "collection_protocol": "Collection Protocol",
+    "cps_count": "Collection Protocols",
+    "list": "Collection Protocol Groups",
+    "name": "Name"
   },
 
   "cps": {
