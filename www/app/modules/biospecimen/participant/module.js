@@ -413,58 +413,16 @@ angular.module('os.biospecimen.participant',
       .state('participant-list', {
         url: '/participants?filters',
         templateUrl: 'modules/biospecimen/participant/list.html',
-        controller: 'ParticipantListCtrl',
-        metaInfo: {
-          button: {
-            icon: 'fa-group',
-            label: 'cp.view_participants'
-          }
+        controller: function(cp, VueApp) {
+          VueApp.setVueView('cp-view/' + cp.id + '/participants');
         },
         parent: 'cp-list-view-root'
       })
       .state('cp-specimens', {
         url: '/specimens?filters',
         templateUrl: 'modules/biospecimen/participant/specimens-list.html',
-        controller: 'SpecimensListViewCtrl',
-        resolve: {
-          accessAllowed: function(cp, cpViewCtx, Alerts) {
-            if (!cpViewCtx.spmnReadAllowed) {
-              Alerts.error('specimens.no_read_access', {cp: cp});
-              throw "Access to specimens of the CP: " + cp.shortTitle + " not allowed!";
-            }
-
-            return null;
-          },
-
-          sdeConfigured: function($injector, cp, CpConfigSvc) {
-            if (!$injector.has('sdeFieldsSvc')) {
-              return false;
-            }
-
-            return CpConfigSvc.getWorkflowData(cp.id, 'sde').then(
-              function(data) {
-                return !!data.singlePatientSamples;
-              }
-            );
-          },
-
-          spmnReqs: function(cp, CpConfigSvc) {
-            if (!cp.specimenCentric) {
-              return [];
-            }
-
-            return CpConfigSvc.getCommonCfg(cp.id, 'addSpecimen', {}).then(
-              function(data) {
-                return (data && data.requirements) || [];
-              }
-            );
-          }
-        },
-        metaInfo: {
-          button: {
-            icon: 'fa-flask',
-            label: 'cp.view_specimens'
-          }
+        controller: function(cp, VueApp) {
+          VueApp.setVueView('cp-view/' + cp.id + '/participants', {view: 'specimens_list'});
         },
         parent: 'cp-list-view-root'
       })
