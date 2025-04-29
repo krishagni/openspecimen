@@ -7,13 +7,25 @@
 
   <os-grid>
     <os-grid-column width="12">
-      <span>{{cpg.name}} details</span>
+      <os-list-view :data="cpsList" :schema="cpsListSchema" :show-row-actions="true" @rowClicked="onCpRowClick">
+        <template #rowActions="{rowObject}">
+          <os-button-group>
+            <os-button left-icon="user-friends" v-os-tooltip.bottom="$t('cps.view_participants')"
+              @click="viewParticipants(rowObject.cp)" v-if="!rowObject.cp.specimenCentric" />
+            <os-button left-icon="flask" v-os-tooltip.bottom="$t('cps.view_specimens')"
+              @click="viewSpecimens(rowObject.cp)" />
+            <os-button left-icon="table" v-os-tooltip.bottom="$t('cps.view_catalog')"
+              @click="viewCatalog(rowObject.cp)" v-if="rowObject.cp.catalogId > 0" />
+          </os-button-group>
+        </template>
+      </os-list-view>
     </os-grid-column>
   </os-grid>
 </template>
 
 <script>
 import exportSvc from '@/common/services/ExportService.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   props: ['cpg', 'permOpts'],
@@ -40,6 +52,42 @@ export default {
         {icon: 'list-alt', caption: this.$t('cpgs.cpes'),                  onSelect: this.exportCpEvents},
         {icon: 'flask',    caption: this.$t('cpgs.specimen_requirements'), onSelect: this.exportCpSrs}
       ];
+    },
+
+    cpsList: function() {
+      return (this.cpg.cps || [])
+        .sort((c1, c2) => c1.shortTitle < c2.shortTitle ? -1 : (c1.shortTitle > c2.shortTitle ? 1 : 0))
+        .map(cp => ({cp}));
+    },
+
+    cpsListSchema: function() {
+      return {
+        columns: [
+          {
+            name: "cp.shortTitle",
+            captionCode: "cps.title",
+            href: (row) => routerSvc.getUrl('CpDetail.Overview', {cpId: row.rowObject.cp.id}),
+            value: ({cp}) => {
+              let result = cp.shortTitle;
+              if (cp.code) {
+                result += ' (' + cp.code + ')';
+              }
+
+              return result;
+            }
+          },
+          {
+            name: "cp.principalInvestigator",
+            captionCode: "cps.pi",
+            type: "user"
+          },
+          {
+            name: "cp.startDate",
+            captionCode: "cps.start_date",
+            type: "date"
+          }
+        ]
+      };
     }
   },
 
@@ -54,6 +102,22 @@ export default {
 
     exportCpSrs: function() {
       this._exportCpRecords('sr');
+    },
+
+    onCpRowClick: function({cp}) {
+      routerSvc.goto('CpDetail.Overview', {cpId: cp.id});
+    },
+
+    viewParticipants: function(cp) {
+      routerSvc.goto('ParticipantsList', {cpId: cp.id});
+    },
+
+    viewSpecimens: function(cp) {
+      routerSvc.goto('ParticipantsList', {cpId: cp.id}, {view: 'specimens_list'});
+    },
+
+    viewCatalog: function(cp) {
+      routerSvc.goto('CatalogSearch', {catalogId: cp.catalogId}, {cpId: cp.id});
     },
 
     _exportCpRecords: function(objectType) {
