@@ -17,6 +17,12 @@ class CollectionProtocolGroup {
   getForms(groupId, level) {
     return http.get('collection-protocol-groups/' + groupId + '/forms', {level})
   }
+
+  removeForms(groupId, level, formIds) {
+    const formIdQp = formIds.map(formId => 'formId=' + formId).join('&');
+    const qp = 'level=' + level + '&' + formIdQp;
+    return http.delete('collection-protocol-groups/' + groupId + '/forms?' + qp);
+  }
 }
 
 export default new CollectionProtocolGroup();

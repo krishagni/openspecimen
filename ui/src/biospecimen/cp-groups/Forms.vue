@@ -1,50 +1,65 @@
 <template>
   <os-grid>
     <os-grid-column width="12">
-    <os-accordion>
-      <os-accordion-tab v-for="level of levels" :key="level.entityType">
-        <template #header>
-          <span class="title">{{level.title}}</span>
-        </template>
-        <template #content>
-          <div>
-            <ul class="os-key-values">
-              <li class="item">
-                <strong class="key" v-t="'cpgs.custom_fields'">Custom Fields</strong>
-                <span class="value" v-if="ctx.forms[level.customFields] && ctx.forms[level.customFields].length == 1">
-                  <router-link :to="{name: 'FormPreview', params: {formId: ctx.forms[level.customFields][0].formId}}"
-                    target="_blank">
-                    <span>{{ctx.forms[level.customFields][0].caption}}</span>
-                  </router-link>
-                  <os-button left-icon="times" size="small" v-if="updateAllowed" />
-                </span>
-                <span class="value" v-else>
-                  <span v-t="'common.none'">-</span>
-                  <os-button left-icon="plus" size="small" v-if="updateAllowed" />
-                </span>
-              </li>
-            </ul>
-            <os-section>
-              <template #title>
-                <span v-t="'cpgs.forms'">Forms</span>
-              </template>
-              <template #content>
-                <div>
-                  <div class="toolbar" v-if="updateAllowed">
-                    <os-button left-icon="plus"  :label="$t('common.buttons.add')" v-if="ctx.selectedForms.length == 0" />
-                    <os-button left-icon="times" :label="$t('common.buttons.remove')" v-else />
-                  </div>
+      <os-accordion>
+        <os-accordion-tab v-for="level of levels" :key="level.entityType">
+          <template #header>
+            <span class="title">{{level.title}}</span>
+          </template>
+          <template #content>
+            <div>
+              <ul class="os-key-values">
+                <li class="item">
+                  <strong class="key" v-t="'cpgs.custom_fields'">Custom Fields</strong>
+                  <span class="value" v-if="ctx.forms[level.customFields] && ctx.forms[level.customFields].length == 1">
+                    <router-link :to="{name: 'FormPreview', params: {formId: ctx.forms[level.customFields][0].formId}}"
+                      target="_blank">
+                      <span>{{ctx.forms[level.customFields][0].caption}}</span>
+                    </router-link>
+                    <os-button left-icon="times" size="small" @click="removeCustomFieldsForm(level.customFields)"
+                      v-if="updateAllowed" />
+                  </span>
+                  <span class="value" v-else>
+                    <span v-t="'common.none'">-</span>
+                    <os-button left-icon="plus" size="small" v-if="updateAllowed" />
+                  </span>
+                </li>
+              </ul>
+              <os-section>
+                <template #title>
+                  <span v-t="'cpgs.forms'">Forms</span>
+                </template>
+                <template #content>
+                  <div>
+                    <div class="toolbar" v-if="updateAllowed">
+                      <os-button left-icon="plus"  :label="$t('common.buttons.add')"
+                        v-if="!ctx.selectedForms[level.entityType] || ctx.selectedForms[level.entityType].length == 0" />
+                      <os-button left-icon="times" :label="$t('common.buttons.remove')" v-else
+                        @click="removeForms(level.entityType)" />
+                    </div>
 
-                  <os-list-view :data="ctx.forms[level.entityType]" :schema="formsListSchema"
-                    :allow-selection="updateAllowed" @selected-rows="onFormsSelection" />
-                </div>
-              </template>
-            </os-section>
-          </div>
-        </template>
-      </os-accordion-tab>
-    </os-accordion>
+                    <os-list-view ref="formsList" :data="ctx.forms[level.entityType]" :schema="formsListSchema"
+                      :allow-selection="updateAllowed"
+                      @selected-rows="onFormsSelection(level.entityType, $event)" />
+                  </div>
+                </template>
+              </os-section>
+            </div>
+          </template>
+        </os-accordion-tab>
+      </os-accordion>
     </os-grid-column>
+
+    <os-confirm ref="rmFormsConfirm">
+      <template #title>
+        <span v-if="ctx.toRemove.formIds.length > 1" v-t="'cpgs.remove_forms'">Remove Forms</span>
+        <span v-else v-t="'cpgs.remove_form'">Remove Form</span>
+      </template>
+      <template #message>
+        <span v-if="ctx.toRemove.formIds.length > 1" v-t="'cpgs.confirm_remove_forms'">Remove Forms</span>
+        <span v-else v-t="'cpgs.confirm_remove_form'">Remove Form</span>
+      </template>
+    </os-confirm>
   </os-grid>
 </template>
 
@@ -62,7 +77,7 @@ export default {
 
         forms: {},
 
-        selectedForms: []
+        selectedForms: {}
       }
     }
   },
@@ -135,8 +150,18 @@ export default {
   },
 
   methods: {
-    onFormsSelection: function(selectedForms) {
-      this.ctx.selectedForms = selectedForms.map(({rowObject}) => rowObject);
+    onFormsSelection: function(entityType, selectedForms) {
+      this.ctx.selectedForms[entityType] = selectedForms.map(({rowObject}) => rowObject);
+    },
+
+    removeCustomFieldsForm: function(level) {
+      this.ctx.toRemove = { level, formIds: [this.ctx.forms[level][0].formId] };
+      this._removeForms(this.ctx.toRemove);
+    },
+
+    removeForms: function(level) {
+      this.ctx.toRemove = { level, formIds: this.ctx.selectedForms[level].map(({formId}) => formId) };
+      this._removeForms(this.ctx.toRemove);
     },
 
     _loadForms: async function() {
@@ -148,7 +173,27 @@ export default {
         },
         {}
       );
-      this.ctx.selectedForms = [];
+      this.ctx.selectedForms = {};
+    },
+
+    _removeForms: function(toRemove) {
+      this.$refs.rmFormsConfirm.open().then(
+        resp => {
+          if (resp == 'proceed') {
+            const {level, formIds} = toRemove;
+            cpgSvc.removeForms(this.cpg.id, level, formIds).then(
+              () => {
+                this.ctx.forms = {};
+                for (const formsList of this.$refs.formsList) {
+                  formsList.reload();
+                }
+
+                setTimeout(() => this._loadForms());
+              }
+            );
+          }
+        }
+      );
     }
   }
 }

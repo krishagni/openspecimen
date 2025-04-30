@@ -779,6 +779,8 @@
   "cpgs": {
     "collection_protocol": "Collection Protocol",
     "collection_protocols": "Collection Protocols",
+    "confirm_remove_form": "You will lose data if you remove the selected form. Do you want to continue?",
+    "confirm_remove_forms": "You will lose data if you remove the selected forms. Do you want to continue?",
     "cpes": "Events",
     "cps_count": "Collection Protocols",
     "custom_fields": "Custom Fields",
@@ -790,6 +792,8 @@
     "name": "Name",
     "notif_rcpts": "Notification Recipients",
     "participant": "Participant",
+    "remove_form": "Remove Form?",
+    "remove_forms": "Remove Forms?",
     "specimen": "Specimen",
     "specimen_requirements": "Specimen Requirements",
     "visit": "Visit"
