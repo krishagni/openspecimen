@@ -28,6 +28,10 @@ class CollectionProtocolGroup {
     const qp = 'level=' + level + '&' + formIdQp;
     return http.delete('collection-protocol-groups/' + groupId + '/forms?' + qp);
   }
+
+  exportWorkflows(cpg) {
+    http.downloadFile(http.getUrl('collection-protocol-groups/' + cpg.id + '/workflows-file'));
+  }
 }
 
 export default new CollectionProtocolGroup();

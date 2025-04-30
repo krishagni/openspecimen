@@ -1,6 +1,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
+      <os-menu icon="tasks" :label="$t('cpgs.workflows')" :options="wfOpts" v-if="eximAllowed" />
+
       <os-menu icon="download" :label="$t('common.buttons.export')" :options="exportOpts" v-if="eximAllowed" />
     </template>
   </os-page-toolbar>
@@ -21,9 +23,30 @@
       </os-list-view>
     </os-grid-column>
   </os-grid>
+
+  <os-dialog ref="importWfDialog">
+    <template #header>
+      <span v-t="'cps.import_workflows'">Import Workflows JSON</span>
+    </template>
+    <template #content>
+      <div>
+        <os-label>
+          <span v-t="'cps.choose_workflows_json_file'">Choose the workflows JSON file</span>
+        </os-label>
+        <os-file-upload ref="wfJsonUploader" :url="workflowsUploadUrl" :auto="false" :headers="reqHeaders" />
+      </div>
+    </template>
+    <template #footer>
+      <os-button text    :label="$t('common.buttons.cancel')" @click="hideImportWfDialog" />
+      <os-button primary :label="$t('common.buttons.import')" @click="importWorkflows" />
+    </template>
+  </os-dialog>
 </template>
 
 <script>
+import alertSvc  from '@/common/services/Alerts.js';
+import cpgSvc    from '@/biospecimen/services/CollectionProtocolGroup.js';
+import http      from '@/common/services/HttpClient.js';
 import exportSvc from '@/common/services/ExportService.js';
 import routerSvc from '@/common/services/Router.js';
 
@@ -44,6 +67,13 @@ export default {
 
     updateAllowed: function() {
       return this.permOpts && this.permOpts.updateAllowed;
+    },
+
+    wfOpts: function() {
+      return [
+        {icon: 'download', caption: this.$t('common.buttons.export'), onSelect: this.exportWorkflows},
+        {icon: 'upload',   caption: this.$t('common.buttons.import'), onSelect: this.showImportWfDialog}
+      ]
     },
 
     exportOpts: function() {
@@ -88,10 +118,39 @@ export default {
           }
         ]
       };
-    }
+    },
+
+    workflowsUploadUrl: function() {
+      return http.getUrl('collection-protocol-groups/' + this.cpg.id + '/workflows-file');
+    },
+
+    reqHeaders: function() {
+      return http.headers;
+    },
   },
 
   methods: {
+    showImportWfDialog: function() {
+      this.$refs.importWfDialog.open();
+    },
+
+    hideImportWfDialog: function() {
+      this.$refs.importWfDialog.close();
+    },
+
+    importWorkflows: function() {
+      this.$refs.wfJsonUploader.upload().then(
+        () => {
+          alertSvc.success({code: 'cpgs.workflows_imported'});
+          this.hideImportWfDialog()
+        }
+      );
+    },
+
+    exportWorkflows: function() {
+      cpgSvc.exportWorkflows(this.cpg);
+    },
+
     exportCps: function() {
       this._exportCpRecords('cp');
     },

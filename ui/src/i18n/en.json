@@ -800,7 +800,9 @@
     "remove_forms": "Remove Forms?",
     "specimen": "Specimen",
     "specimen_requirements": "Specimen Requirements",
-    "visit": "Visit"
+    "visit": "Visit",
+    "workflows": "Workflows",
+    "workflows_imported": "Workflows imported"
   },
 
   "cps": {
