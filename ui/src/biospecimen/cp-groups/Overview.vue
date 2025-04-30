@@ -1,6 +1,8 @@
 <template>
   <os-page-toolbar>
     <template #default>
+      <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="gotoEdit" v-if="updateAllowed" />
+
       <os-menu icon="tasks" :label="$t('cpgs.workflows')" :options="wfOpts" v-if="eximAllowed" />
 
       <os-menu icon="download" :label="$t('common.buttons.export')" :options="exportOpts" v-if="eximAllowed" />
@@ -130,6 +132,10 @@ export default {
   },
 
   methods: {
+    gotoEdit: function() {
+      routerSvc.goto('CpgAddEdit', {cpgId: this.cpg.id});
+    },
+
     showImportWfDialog: function() {
       this.$refs.importWfDialog.open();
     },

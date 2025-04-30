@@ -26,5 +26,12 @@ export default {
         }
       ]
     });
+
+    router.addRoute('App', {
+      path: 'cp-groups/:cpgId/addedit',
+      name: 'CpgAddEdit',
+      component: () => import(/* webpackChunkName: "cp-groups" */ './AddEdit.vue'),
+      props: (route) => ({cpgId: route.params.cpgId})
+    });
   }
 }

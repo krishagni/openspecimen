@@ -14,6 +14,14 @@ class CollectionProtocolGroup {
     return http.get('collection-protocol-groups/' + id);
   }
 
+  saveOrUpdate(cpg) {
+    if (cpg.id > 0) {
+      return http.put('collection-protocol-groups/' + cpg.id, cpg);
+    } else {
+      return http.post('collection-protocol-groups', cpg);
+    }
+  }
+
   getForms(groupId, level) {
     return http.get('collection-protocol-groups/' + groupId + '/forms', {level})
   }

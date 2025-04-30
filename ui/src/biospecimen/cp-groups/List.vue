@@ -26,8 +26,8 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <!-- TODO: Show the button based on user access rights -->
-              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createGroup" />
+              <os-button left-icon="plus" :label="$t('common.buttons.create')"
+                v-show-if-allowed="{resource: 'CollectionProtocol', operations: ['Update']}" @click="createGroup" />
             </template>
 
             <template #right>
@@ -168,8 +168,7 @@ export default {
     },
 
     createGroup: function() {
-      alert('TODO: create group');
-      // routerSvc.goto('SpecimenCartAddEdit', {cartId: -1});
+      routerSvc.goto('CpgAddEdit', {cpgId: -1});
     },
   }
 }
