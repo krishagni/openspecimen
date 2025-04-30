@@ -781,9 +781,18 @@
     "collection_protocols": "Collection Protocols",
     "cpes": "Events",
     "cps_count": "Collection Protocols",
+    "custom_fields": "Custom Fields",
+    "form_data_in_notif": "Include Data in Notifications",
+    "form_notifs_enabled": "Notifications Enabled",
+    "forms": "Forms",
     "list": "Collection Protocol Groups",
+    "multiple_records": "Multiple Records",
     "name": "Name",
-    "specimen_requirements": "Specimen Requirements"
+    "notif_rcpts": "Notification Recipients",
+    "participant": "Participant",
+    "specimen": "Specimen",
+    "specimen_requirements": "Specimen Requirements",
+    "visit": "Visit"
   },
 
   "cps": {

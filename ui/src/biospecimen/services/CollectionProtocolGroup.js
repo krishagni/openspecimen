@@ -13,6 +13,10 @@ class CollectionProtocolGroup {
   getGroupById(id) {
     return http.get('collection-protocol-groups/' + id);
   }
+
+  getForms(groupId, level) {
+    return http.get('collection-protocol-groups/' + groupId + '/forms', {level})
+  }
 }
 
 export default new CollectionProtocolGroup();

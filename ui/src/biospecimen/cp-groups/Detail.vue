@@ -14,6 +14,11 @@
                 <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
+            <li>
+              <router-link :to="getRoute('Forms')">
+                <span v-t="'cpgs.forms'">Forms</span>
+              </router-link>
+            </li>
           </ul>
         </os-tab-menu>
 

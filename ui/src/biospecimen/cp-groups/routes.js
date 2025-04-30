@@ -16,6 +16,11 @@ export default {
               path: 'overview',
               name: 'CpgDetail.Overview',
               component: () => import(/* webpackChunkName: "cp-groups" */ './Overview.vue'),
+            },
+            {
+              path: 'forms',
+              name: 'CpgDetail.Forms',
+              component: () => import(/* webpackChunkName: "cp-groups" */ './Forms.vue'),
             }
           ]
         }

@@ -19,6 +19,8 @@ import formUtil from '@/common/services/FormUtil.js';
 export default {
   props: ['form'],
 
+  emits: ['form-definition'],
+
   data() {
     return {
       ctx: {
@@ -49,6 +51,7 @@ export default {
       const { schema, defaultValues } = formUtil.fromDeToStdSchema(formDef);
       this.ctx.formSchema = schema;
       this.ctx.record = defaultValues;
+      this.$emit('form-definition', formDef);
     }
   }
 }

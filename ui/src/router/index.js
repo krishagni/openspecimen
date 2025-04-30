@@ -1290,7 +1290,14 @@ const routes = [
               }
             ]
           }
-        ]
+        ],
+      },
+
+      {
+        path: 'form-preview/:formId',
+        name: 'FormPreview',
+        component: () => import(/* webpackChunkName: "forms" */ '../administrative/forms/StandalonePreview.vue'),
+        props: ({params}) => ({formId: params.formId})
       },
 
       /* TODO: This route/view should be discontinued after implementation of catalogs in the new UI */
