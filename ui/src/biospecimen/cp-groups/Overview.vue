@@ -1,7 +1,9 @@
 <template>
-  <os-page-toolbar>
+  <os-page-toolbar v-if="updateAllowed || eximAllowed">
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="gotoEdit" v-if="updateAllowed" />
+
+      <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCpg" v-if="updateAllowed" />
 
       <os-menu icon="tasks" :label="$t('cpgs.workflows')" :options="wfOpts" v-if="eximAllowed" />
 
@@ -25,6 +27,15 @@
       </os-list-view>
     </os-grid-column>
   </os-grid>
+
+  <os-confirm ref="confirmDeleteDialog">
+    <template #title>
+      <span v-t="'cpgs.delete_cpg_q'">Delete Collection Protocol Group?</span>
+    </template>
+    <template #message>
+      <span v-t="{path: 'cpgs.delete_cpg', args: cpg}">Delete Collection Protocol Group xyz?</span>
+    </template>
+  </os-confirm>
 
   <os-dialog ref="importWfDialog">
     <template #header>
@@ -134,6 +145,21 @@ export default {
   methods: {
     gotoEdit: function() {
       routerSvc.goto('CpgAddEdit', {cpgId: this.cpg.id});
+    },
+
+    deleteCpg: function() {
+      this.$refs.confirmDeleteDialog.open().then(
+        resp => {
+          if (resp == 'proceed') {
+            cpgSvc.deleteCpg(this.cpg).then(
+              () => {
+                alertSvc.success({code: 'cpgs.deleted', args: this.cpg});
+                routerSvc.goto('CpgsList', {cpgId: -2});
+              }
+            );
+          }
+        }
+      );
     },
 
     showImportWfDialog: function() {

@@ -22,6 +22,10 @@ class CollectionProtocolGroup {
     }
   }
 
+  deleteCpg(cpg) {
+    return http.delete('collection-protocol-groups/' + cpg.id);
+  }
+
   getForms(groupId, level) {
     return http.get('collection-protocol-groups/' + groupId + '/forms', {level})
   }
