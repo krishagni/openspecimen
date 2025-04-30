@@ -18,6 +18,11 @@ class CollectionProtocolGroup {
     return http.get('collection-protocol-groups/' + groupId + '/forms', {level})
   }
 
+  addForms(groupId, level, forms) {
+    const payload = {level, forms};
+    return http.post('collection-protocol-groups/' + groupId + '/forms', payload);
+  }
+
   removeForms(groupId, level, formIds) {
     const formIdQp = formIds.map(formId => 'formId=' + formId).join('&');
     const qp = 'level=' + level + '&' + formIdQp;

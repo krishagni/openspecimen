@@ -21,7 +21,8 @@
                   </span>
                   <span class="value" v-else>
                     <span v-t="'common.none'">-</span>
-                    <os-button left-icon="plus" size="small" v-if="updateAllowed" />
+                    <os-button left-icon="plus" size="small" @click="showAddFormDialog(level.customFields, true)"
+                      v-if="updateAllowed" />
                   </span>
                 </li>
               </ul>
@@ -33,6 +34,7 @@
                   <div>
                     <div class="toolbar" v-if="updateAllowed">
                       <os-button left-icon="plus"  :label="$t('common.buttons.add')"
+                        @click="showAddFormDialog(level.entityType, false)"
                         v-if="!ctx.selectedForms[level.entityType] || ctx.selectedForms[level.entityType].length == 0" />
                       <os-button left-icon="times" :label="$t('common.buttons.remove')" v-else
                         @click="removeForms(level.entityType)" />
@@ -50,6 +52,19 @@
       </os-accordion>
     </os-grid-column>
 
+    <os-dialog ref="addFormDialog">
+      <template #header>
+        <span v-t="'cpgs.add_form'">Add Form</span>
+      </template>
+      <template #content>
+        <os-form ref="addForm" :schema="addFormFs" :data="ctx" />
+      </template>
+      <template #footer>
+        <os-button text :label="$t('common.buttons.cancel')" @click="hideAddFormDialog" />
+        <os-button primary :label="$t('common.buttons.add')" @click="addForm" />
+      </template>
+    </os-dialog>
+
     <os-confirm ref="rmFormsConfirm">
       <template #title>
         <span v-if="ctx.toRemove.formIds.length > 1" v-t="'cpgs.remove_forms'">Remove Forms</span>
@@ -65,7 +80,10 @@
 
 <script>
 import cpgSvc from '@/biospecimen/services/CollectionProtocolGroup.js';
+import formSvc from '@/forms/services/Form.js';
 import routerSvc from '@/common/services/Router.js';
+
+import addFormSchema from '@/biospecimen/schemas/cp-groups/add-form.js';
 
 export default {
   props: ['cpg', 'permOpts'],
@@ -77,8 +95,15 @@ export default {
 
         forms: {},
 
-        selectedForms: {}
-      }
+        selectedForms: {},
+
+        formCtx: {
+        },
+
+        getForms: this._getForms
+      },
+
+      addFormFs: addFormSchema.layout
     }
   },
 
@@ -154,6 +179,31 @@ export default {
       this.ctx.selectedForms[entityType] = selectedForms.map(({rowObject}) => rowObject);
     },
 
+    showAddFormDialog: function(level, customFields) {
+      this.ctx.formCtx = {level, customFields};
+      this.$refs.addFormDialog.open();
+    },
+
+    hideAddFormDialog: function() {
+      this.ctx.formCtx = {};
+      this.$refs.addFormDialog.close();
+    },
+
+    addForm: function() {
+      if (!this.$refs.addForm.validate()) {
+        return;
+      }
+
+      const {level, form, multipleRecords, notifEnabled, dataInNotif, notifUserGroups} = this.ctx.formCtx;
+      const toAdd = {...form, multipleRecords, notifEnabled, dataInNotif, notifUserGroups}
+      cpgSvc.addForms(this.cpg.id, level, [toAdd]).then(
+        () => {
+          this.hideAddFormDialog();
+          this._reloadForms();
+        }
+      );
+    },
+
     removeCustomFieldsForm: function(level) {
       this.ctx.toRemove = { level, formIds: [this.ctx.forms[level][0].formId] };
       this._removeForms(this.ctx.toRemove);
@@ -176,24 +226,36 @@ export default {
       this.ctx.selectedForms = {};
     },
 
+    _getForms: function(query) {
+      return formSvc.getForms({name: query}).then(
+        dbForms => {
+          dbForms.forEach(form => form.id = form.formId)
+
+          const {formCtx, forms} = this.ctx;
+          const entityFormIds = (forms[formCtx.level] || []).map(({formId}) => formId);
+          return dbForms.filter(form => entityFormIds.indexOf(form.id) == -1);
+        }
+      );
+    },
+
     _removeForms: function(toRemove) {
       this.$refs.rmFormsConfirm.open().then(
         resp => {
           if (resp == 'proceed') {
             const {level, formIds} = toRemove;
-            cpgSvc.removeForms(this.cpg.id, level, formIds).then(
-              () => {
-                this.ctx.forms = {};
-                for (const formsList of this.$refs.formsList) {
-                  formsList.reload();
-                }
-
-                setTimeout(() => this._loadForms());
-              }
-            );
+            cpgSvc.removeForms(this.cpg.id, level, formIds).then(() => this._reloadForms());
           }
         }
       );
+    },
+
+    _reloadForms: function() {
+      this.ctx.forms = {};
+      for (const formsList of this.$refs.formsList) {
+        formsList.reload();
+      }
+
+      setTimeout(() => this._loadForms());
     }
   }
 }
