@@ -1249,16 +1249,21 @@
     "jobs_list": "Bulk Import Jobs",
     "object_types": {
       "cpe": "Events",
-      "sr": "Specimen Requirements"
+      "sr": "Specimen Requirements",
+      "user": "Users",
+      "userExtensions": "{formName}",
+      "userRoles": "User Roles"
     },
     "ops": {
       "CREATE": "Create",
       "UPDATE": "Update",
       "UPSERT": "Upsert"
     },
+    "record_type_req": "Record Type is mandatory",
     "update": "Update",
     "upsert": "Upsert",
     "view_past_imports": "View Past Imports",
+    "select_record_type": "Record Type",
     "status": "Status",
     "statuses": {
       "COMPLETED": "Completed",
@@ -1275,7 +1280,8 @@
     "time": "Time",
     "time_format": "Time Format",
     "time_format_required": "Time format is mandatory",
-    "txn_exceeded": "Pre-validate Records Limit Exceeded"
+    "txn_exceeded": "Pre-validate Records Limit Exceeded",
+    "validate_n_import": "Validate and Import"
   },
 
   "institutes": {
@@ -2423,6 +2429,10 @@
     "impersonate": "Impersonate",
     "impersonate_as": "Sign-in as {firstName} {lastName}...",
     "impersonate_tnc": "An email will be sent to '{firstName} {lastName}' to let them know you've signed-in to their account. The email will include details like your name, email address, and device IP address. Do you want to proceed?",
+    "import_extensions": "Import User Forms",
+    "import_jobs_list": "Import Users Jobs List",
+    "import_user": "Import Users",
+    "import_userRoles": "Import User Roles",
     "institute": "Institute",
     "institute_required": "Institute is mandatory",
     "ip_address": "IP Address",

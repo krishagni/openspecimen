@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div class="toolbar">
+      <os-button left-icon="sync" :label="$t('common.buttons.refresh')" @click="loadJobs(0)" />
+    </div>
     <os-list-view
       :data="ctx.jobs" :schema="listSchema"
       :loading="ctx.loading" :showRowActions="true" ref="listView">
@@ -117,3 +120,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.toolbar {
+  margin-bottom: 1.25rem;
+}
+</style>

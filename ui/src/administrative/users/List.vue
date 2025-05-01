@@ -436,22 +436,22 @@ export default {
         {
           icon: 'user',
           caption: this.$t('users.list'),
-          onSelect: () => this.ngGoto('users-import', {objectType: 'user'})
+          onSelect: () => routerSvc.goto('UserImportRecords', {}, {objectType: 'user'})
         },
         {
           icon: 'lock',
           caption: this.$t('users.user_roles'),
-          onSelect: () => this.ngGoto('users-import', {objectType: 'userRoles'})
+          onSelect: () => routerSvc.goto('UserImportRecords', {}, {objectType: 'userRoles'})
         },
         {
           icon: 'copy',
           caption: this.$t('users.user_forms'),
-          onSelect: () => this.ngGoto('users-import', {objectType: 'extensions'})
+          onSelect: () => routerSvc.goto('UserImportRecords', {}, {objectType: 'extensions'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => this.ngGoto('users-import-jobs')
+          onSelect: () => routerSvc.goto('UserImportJobs')
         }
       ]
     },

@@ -6,6 +6,25 @@ export default {
       {
         fields: [
           {
+            type: "dropdown",
+            name: "job.recordType",
+            labelCode: "import.select_record_type",
+            listSource: {
+              displayProp: 'title',
+              loadFn: ({context}) => context.formData.getRecordTypes()
+            },
+            validations: {
+              required: {
+                messageCode: "import.record_type_req"
+              }
+            },
+            showWhen: "recordTypes && recordTypes.length > 0"
+          }
+        ]
+      },
+      {
+        fields: [
+          {
             type: "fileUpload",
             name: "job.inputFileId",
             labelCode: "import.input_records_file",

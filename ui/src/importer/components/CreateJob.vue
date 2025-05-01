@@ -1,10 +1,14 @@
 <template>
   <div>
-    <os-form ref="importForm" :schema="addJobSchema.layout" :data="ctx">
+    <os-form ref="importForm" :schema="addJobSchema.layout" :data="ctx" @input="handleInput">
       <template v-slot:[`job.inputFileId`]>
         <a class="template-url" :href="templateUrl">
           <span v-t="'import.download_template'">Download template</span>
         </a>
+      </template>
+
+      <template #default v-if="$slots.default">
+        <slot></slot>
       </template>
     </os-form>
 
@@ -29,29 +33,35 @@ import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
 
 export default {
-  props: [ 'objectType', 'objectParams', 'showUpsert' ],
+  props: [ 'objectType', 'objectParams', 'showUpsert', 'record-types' ],
   
   data() {
+    const {global: {locale}} = this.$ui;
     return {
       ctx: {
         job: {
           objectType: this.objectType,
 
-          dateFormat: this.$ui.global.locale.shortDateFmt,
+          dateFormat: locale.shortDateFmt,
 
-          timeFormat: this.$ui.global.locale.timeFmt,
+          timeFormat: locale.timeFmt,
 
           atomic: true
         },
 
-        getImportTypes: this._getImportTypes       
+        recordTypes: [],
+
+        getImportTypes: this._getImportTypes,
+
+        getRecordTypes: this._getRecordTypes
       },
 
       addJobSchema
     }
   },
 
-  created() {
+  async created() {
+    this._setupRecordTypes();
   },
 
   computed: {
@@ -66,8 +76,21 @@ export default {
         params.fieldSeparator = fieldSeparator;
       }
 
-      params.schema = this.objectType;
+      const {recordType} = this.ctx.job;
+      if (recordType) {
+        params.schema = recordType.type;
+        Object.assign(params, recordType.params || {});
+      } else {
+        params.schema = this.objectType;
+      }
+
       return http.getUrl('import-jobs/input-file-template', {query: params});
+    }
+  },
+
+  watch: {
+    recordTypes: async function() {
+      this._setupRecordTypes();
     }
   },
 
@@ -80,6 +103,14 @@ export default {
       const payload = util.clone(this.ctx.job);
       payload.inputFileId = payload.inputFileId && payload.inputFileId.fileId;
       payload.objectParams = this.objectParams || {};
+
+      const {recordType} = payload;
+      if (recordType) {
+        payload.objectType   = recordType.type;
+        payload.objectParams = Object.assign(payload.objectParams || {}, recordType.params || {});
+        delete payload.recordType;
+      }
+
       return jobSvc.createJob(payload).then(
         (savedJob) => {
           if (savedJob.status == 'TXN_SIZE_EXCEEDED') {
@@ -90,6 +121,19 @@ export default {
           return savedJob;
         }
       );
+    },
+
+    _setupRecordTypes: async function() {
+      let recordTypes = [];
+      if (typeof this.recordTypes == 'function') {
+        recordTypes = await this.recordTypes();
+      }
+
+      this.ctx.recordTypes = recordTypes || [];
+    },
+
+    _getRecordTypes: async function() {
+      return this.ctx.recordTypes || [];
     },
 
     _getImportTypes: function() {

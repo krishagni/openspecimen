@@ -301,6 +301,65 @@ const routes = [
 
       /*****************************
        *****************************
+       * User Import Jobs          *
+       *****************************
+       *****************************/
+      {
+        path: 'user-import-records',
+        name: 'UserImportRecords',
+        component: () => import(/* webpackChunkName: "users" */ '../importer/views/CreateJob.vue'),
+        props: ({query: {objectType}}) => ({
+          bcrumb: [
+            {
+              url:   window.osSvc.routerSvc.getUrl('UsersList', {userId: -1}),
+              label: window.osSvc.i18nSvc.msg('users.list')
+            }
+          ],
+          title: () => window.osSvc.i18nSvc.msg('users.import_' + objectType),
+          objectType: objectType,
+          objectParams: {},
+          showUpsert: false,
+          recordTypes: async () => {
+            if (objectType != 'extensions') {
+              return [];
+            }
+
+            const {currentUser} = window.osUi;
+            const entityId = currentUser.admin ? -1 : currentUser.instituteId;
+            const {osSvc: {formSvc}} = window;
+            return formSvc.getForms({formType: 'User', entityId}).then(
+              forms => forms.map(
+                form => ({
+                  id: form.formId,
+                  type: 'userExtensions',
+                  title: form.caption,
+                  params: { entityType: 'User', entityId, formName: form.name }
+                })
+              )
+            );
+          },
+          onSubmit: () => window.osSvc.routerSvc.goto('UserImportJobs')
+        })
+      },
+      {
+        path: 'user-import-jobs',
+        name: 'UserImportJobs',
+        component: () => import(/* webpackChunkName: "users" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('UsersList', {userId: -1}),
+              label: window.osSvc.i18nSvc.msg('users.list')
+            }
+          ],
+          title: 'users.import_jobs_list',
+          objectTypes: ['user', 'userRoles', 'userExtensions'],
+          objectParams: {}
+        })
+      },
+
+      /*****************************
+       *****************************
        * Sites module              *
        *****************************
        *****************************/
