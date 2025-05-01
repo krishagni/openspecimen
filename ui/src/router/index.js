@@ -492,6 +492,46 @@ const routes = [
 
       /*****************************
        *****************************
+       * Institute Import Jobs          *
+       *****************************
+       *****************************/
+      {
+        path: 'institute-import-records',
+        name: 'InstituteImportRecords',
+        component: () => import(/* webpackChunkName: "institutes" */ '../importer/views/CreateJob.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url:   window.osSvc.routerSvc.getUrl('InstitutesList', {instituteId: -1}),
+              label: window.osSvc.i18nSvc.msg('institutes.list')
+            }
+          ],
+          title: 'institutes.import_institutes',
+          objectType: 'institute',
+          objectParams: {},
+          showUpsert: false,
+          onSubmit: () => window.osSvc.routerSvc.goto('InstituteImportJobs')
+        })
+      },
+      {
+        path: 'institute-import-jobs',
+        name: 'InstituteImportJobs',
+        component: () => import(/* webpackChunkName: "institutes" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('InstitutesList', {instituteId: -1}),
+              label: window.osSvc.i18nSvc.msg('institutes.list')
+            }
+          ],
+          title: 'institutes.import_jobs_list',
+          objectTypes: ['institute'],
+          objectParams: {}
+        })
+      },
+
+      /*****************************
+       *****************************
        * Shipments module          *
        *****************************
        *****************************/

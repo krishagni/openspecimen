@@ -1249,6 +1249,7 @@
     "jobs_list": "Bulk Import Jobs",
     "object_types": {
       "cpe": "Events",
+      "institute": "Institutes",
       "site": "Sites",
       "sr": "Specimen Requirements",
       "user": "Users",
@@ -1289,6 +1290,8 @@
     "confirm_delete_selected": "Are you sure you want to delete the selected institutes?",
     "create": "Create Institute",
     "deleted": "One institute deleted. | {count} institutes deleted.",
+    "import_institutes": "Import Institutes",
+    "import_jobs_list": "Import Institutes Jobs List",
     "list": "Institutes",
     "name": "Name",
     "name_is_mandatory": "Institute name is mandatory",

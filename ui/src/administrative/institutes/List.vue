@@ -107,12 +107,12 @@ export default {
         {
           icon: 'university',
           caption: this.$t('institutes.list'),
-          onSelect: () => routerSvc.ngGoto('institutes-import')
+          onSelect: () => routerSvc.goto('InstituteImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.ngGoto('institutes-import-jobs')
+          onSelect: () => routerSvc.goto('InstituteImportJobs')
         }
       ]
     };
