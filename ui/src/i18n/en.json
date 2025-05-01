@@ -1249,6 +1249,7 @@
     "jobs_list": "Bulk Import Jobs",
     "object_types": {
       "cpe": "Events",
+      "site": "Sites",
       "sr": "Specimen Requirements",
       "user": "Users",
       "userExtensions": "{formName}",
@@ -2263,6 +2264,8 @@
     "coordinators": "Coordinators",
     "create": "Create Site",
     "deleted": "One site deleted. | {count} sites deleted.",
+    "import_jobs_list": "Import Sites Jobs List",
+    "import_sites": "Import Sites",
     "institute": "Institute",
     "institute_required": "Institute is mandatory",
     "list": "Sites",

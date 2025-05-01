@@ -111,12 +111,12 @@ export default {
         {
           icon: 'hospital',
           caption: this.$t('sites.list'),
-          onSelect: () => routerSvc.ngGoto('sites-import')
+          onSelect: () => routerSvc.goto('SiteImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.ngGoto('sites-import-jobs')
+          onSelect: () => routerSvc.goto('SiteImportJobs')
         }
       ]
     };

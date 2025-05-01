@@ -406,6 +406,46 @@ const routes = [
 
       /*****************************
        *****************************
+       * Site Import Jobs          *
+       *****************************
+       *****************************/
+      {
+        path: 'site-import-records',
+        name: 'SiteImportRecords',
+        component: () => import(/* webpackChunkName: "sites" */ '../importer/views/CreateJob.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url:   window.osSvc.routerSvc.getUrl('SitesList', {siteId: -1}),
+              label: window.osSvc.i18nSvc.msg('sites.list')
+            }
+          ],
+          title: 'sites.import_sites',
+          objectType: 'site',
+          objectParams: {},
+          showUpsert: false,
+          onSubmit: () => window.osSvc.routerSvc.goto('SiteImportJobs')
+        })
+      },
+      {
+        path: 'site-import-jobs',
+        name: 'SiteImportJobs',
+        component: () => import(/* webpackChunkName: "sites" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('SitesList', {siteId: -1}),
+              label: window.osSvc.i18nSvc.msg('sites.list')
+            }
+          ],
+          title: 'sites.import_jobs_list',
+          objectTypes: ['site'],
+          objectParams: {}
+        })
+      },
+
+      /*****************************
+       *****************************
        * Institutes module         *
        *****************************
        *****************************/
