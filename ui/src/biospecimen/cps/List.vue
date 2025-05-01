@@ -396,7 +396,7 @@ export default {
     },
 
     viewCpGroupsList: function() {
-      routerSvc.ngGoto('cp-groups');
+      routerSvc.goto('CpgsList', {cpgId: -1});
     },
 
     deleteCps: function() {

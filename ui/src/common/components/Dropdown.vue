@@ -94,7 +94,7 @@ export default {
         let self = this;
         this.listSource.loadFn({context: this.context, query: query, maxResults: 100}).then(
           function(options) {
-            self.ctx.options = self.dedup(selectedVal.concat(options));
+            self.ctx.options = self.dedup(selectedVal.concat(options|| []));
           }
         );
       } else if (typeof this.listSource.apiUrl == 'string') {
