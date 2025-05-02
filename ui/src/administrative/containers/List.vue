@@ -172,12 +172,12 @@ export default {
         {
           icon: 'box-open',
           caption: this.$t('containers.list'),
-          onSelect: () => routerSvc.ngGoto('containers-import')
+          onSelect: () => routerSvc.goto('ContainerImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.ngGoto('containers-import-jobs')
+          onSelect: () => routerSvc.goto('ContainerImportJobs')
         }
       ],
 

@@ -1026,6 +1026,48 @@ const routes = [
         component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/UnblockLocations.vue')
       },
 
+      /*****************************
+       *****************************
+       * Container Import Jobs     *
+       *****************************
+       *****************************/
+      {
+        path: 'container-import-records',
+        name: 'ContainerImportRecords',
+        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/CreateJob.vue'),
+        props: () => {
+          const {i18nSvc, routerSvc} = window.osSvc;
+          return {
+            bcrumb: [
+              {
+                url:   routerSvc.getUrl('ContainersList'),
+                label: i18nSvc.msg('containers.list')
+              }
+            ],
+            title: 'containers.import_containers',
+            objectType: 'storageContainer',
+            objectParams: {},
+            showUpsert: false,
+            onSubmit: () => window.osSvc.routerSvc.goto('ContainerImportJobs')
+          }
+        }
+      },
+      {
+        path: 'container-import-jobs',
+        name: 'ContainerImportJobs',
+        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('ContainersList'),
+              label: window.osSvc.i18nSvc.msg('containers.list')
+            }
+          ],
+          title: 'containers.import_jobs_list',
+          objectTypes: ['storageContainer'],
+          objectParams: {}
+        })
+      },
 
       /**********************************
        **********************************

@@ -607,6 +607,8 @@
     "generating_utilisation_report": "Generating utilisation report...",
     "hide_stats": "Hide Insights",
     "hierarchy_created": "Container hierarchy of type '{typeName}' created.",
+    "import_containers": "Import Containers",
+    "import_jobs_list": "Import Containers Jobs List",
     "interval_unit": "Unit",
     "labeling_scheme": "Labeling Scheme",
     "less_names_than_count": "Less names ({names}) scanned/specified than the containers count ({count}).",
@@ -1261,6 +1263,7 @@
       "shipment": "Specimen Shipments",
       "site": "Sites",
       "sr": "Specimen Requirements",
+      "storageContainer": "Containers",
       "user": "Users",
       "userExtensions": "{formName}",
       "userRoles": "User Roles"
