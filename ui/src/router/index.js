@@ -616,7 +616,48 @@ const routes = [
 
       /*****************************
        *****************************
-       * Orders module              *
+       * Shipment Import Jobs      *
+       *****************************
+       *****************************/
+      {
+        path: 'shipment-import-records',
+        name: 'ShipmentImportRecords',
+        component: () => import(/* webpackChunkName: "shipments" */ '../importer/views/CreateJob.vue'),
+        props: ({query: {objectType}}) => ({
+          bcrumb: [
+            {
+              url:   window.osSvc.routerSvc.getUrl('ShipmentsList', {shipmentId: -1}),
+              label: window.osSvc.i18nSvc.msg('shipments.list')
+            }
+          ],
+          title: () => window.osSvc.i18nSvc.msg('shipments.import_' + (objectType || 'shipment')),
+          objectType: objectType || 'shipment',
+          objectParams: {},
+          showUpsert: false,
+          csvType: 'MULTIPLE_ROWS_PER_OBJ',
+          onSubmit: () => window.osSvc.routerSvc.goto('ShipmentImportJobs')
+        })
+      },
+      {
+        path: 'shipment-import-jobs',
+        name: 'ShipmentImportJobs',
+        component: () => import(/* webpackChunkName: "shipments" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('ShipmentsList', {shipmentId: -1}),
+              label: window.osSvc.i18nSvc.msg('shipments.list')
+            }
+          ],
+          title: 'shipments.import_jobs_list',
+          objectTypes: ['shipment', 'containerShipment'],
+          objectParams: {}
+        })
+      },
+
+      /*****************************
+       *****************************
+       * Orders module             *
        *****************************
        *****************************/
       {

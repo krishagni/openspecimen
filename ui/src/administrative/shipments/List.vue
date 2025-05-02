@@ -103,17 +103,17 @@ export default {
         {
           icon: 'flask',
           caption: this.$t('shipments.specimen_shipments'),
-          onSelect: () => routerSvc.ngGoto('shipment-import')
+          onSelect: () => routerSvc.goto('ShipmentImportRecords', {}, {objectType: 'shipment'})
         },
         {
           icon: 'box-open',
           caption: this.$t('shipments.container_shipments'),
-          onSelect: () => routerSvc.ngGoto('shipment-import', {type: 'containerShipment'})
+          onSelect: () => routerSvc.goto('ShipmentImportRecords', {}, {objectType: 'containerShipment'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.ngGoto('shipment-import-jobs')
+          onSelect: () => routerSvc.goto('ShipmentImportJobs')
         }
       ],
 

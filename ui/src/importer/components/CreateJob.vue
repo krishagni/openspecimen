@@ -33,7 +33,7 @@ import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
 
 export default {
-  props: [ 'objectType', 'objectParams', 'showUpsert', 'record-types' ],
+  props: [ 'objectType', 'objectParams', 'showUpsert', 'record-types', 'csv-type' ],
   
   data() {
     const {global: {locale}} = this.$ui;
@@ -101,8 +101,9 @@ export default {
       }
 
       const payload = util.clone(this.ctx.job);
-      payload.inputFileId = payload.inputFileId && payload.inputFileId.fileId;
+      payload.inputFileId  = payload.inputFileId && payload.inputFileId.fileId;
       payload.objectParams = this.objectParams || {};
+      payload.csvType      = this.csvType;
 
       const {recordType} = payload;
       if (recordType) {
