@@ -718,6 +718,63 @@ const routes = [
 
       /*****************************
        *****************************
+       * Order Import Jobs      *
+       *****************************
+       *****************************/
+      {
+        path: 'order-import-records',
+        name: 'OrderImportRecords',
+        component: () => import(/* webpackChunkName: "orders" */ '../importer/views/CreateJob.vue'),
+        props: ({query: {objectType}}) => {
+          const {http, i18nSvc, routerSvc} = window.osSvc;
+          let entitiesLabel = null, entities = null;
+          if (objectType != 'returnSpecimen') {
+            entitiesLabel = i18nSvc.msg('orders.dp');
+            entities = (searchTerm) => {
+              return http.get('distribution-protocols', {query: searchTerm}).then(
+                dps => dps.map(dp => ({id: dp.id, entityId: dp.id, title: dp.shortTitle}))
+              );
+            }
+          }
+
+          return {
+            bcrumb: [
+              {
+                url:   routerSvc.getUrl('OrdersList', {orderId: -1}),
+                label: i18nSvc.msg('orders.list')
+              }
+            ],
+            title: () => i18nSvc.msg('orders.import_' + (objectType || 'distributionOrder')),
+            objectType: objectType || 'distributionOrder',
+            objectParams: {},
+            hideOps: objectType == 'returnSpecimen',
+            showUpsert: false,
+            csvType: objectType != 'returnSpecimen' ? 'MULTIPLE_ROWS_PER_OBJ' : null,
+            entitiesLabel,
+            entities,
+            onSubmit: () => window.osSvc.routerSvc.goto('OrderImportJobs')
+          }
+        }
+      },
+      {
+        path: 'order-import-jobs',
+        name: 'OrderImportJobs',
+        component: () => import(/* webpackChunkName: "orders" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('OrdersList', {orderId: -1}),
+              label: window.osSvc.i18nSvc.msg('orders.list')
+            }
+          ],
+          title: 'orders.import_jobs_list',
+          objectTypes: ['distributionOrder', 'returnSpecimen'],
+          objectParams: {}
+        })
+      },
+
+      /*****************************
+       *****************************
        * DPs module                *
        *****************************
        *****************************/

@@ -50,7 +50,8 @@ export default {
               required: {
                 messageCode: "import.import_type_req"
               }
-            }
+            },
+            showWhen: "!hideOps"
           }
         ]
       },

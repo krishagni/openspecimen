@@ -1,6 +1,6 @@
 <template>
   <div>
-    <os-form ref="importForm" :schema="addJobSchema.layout" :data="ctx" @input="handleInput">
+    <os-form ref="importForm" :schema="jobFs" :data="ctx" @input="handleInput">
       <template v-slot:[`job.inputFileId`]>
         <a class="template-url" :href="templateUrl">
           <span v-t="'import.download_template'">Download template</span>
@@ -33,7 +33,7 @@ import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
 
 export default {
-  props: [ 'objectType', 'objectParams', 'showUpsert', 'record-types', 'csv-type' ],
+  props: [ 'object-type', 'object-params', 'hide-ops', 'show-upsert', 'record-types', 'csv-type',  'entities-label', 'entities'],
   
   data() {
     const {global: {locale}} = this.$ui;
@@ -51,12 +51,12 @@ export default {
 
         recordTypes: [],
 
+        hideOps: this.hideOps,
+
         getImportTypes: this._getImportTypes,
 
         getRecordTypes: this._getRecordTypes
-      },
-
-      addJobSchema
+      }
     }
   },
 
@@ -71,9 +71,13 @@ export default {
         Object.assign(params, this.objectParams);
       }
 
-      const {job: {fieldSeparator}} = this.ctx;
+      const {job: {fieldSeparator, entityId}} = this.ctx;
       if (fieldSeparator) {
         params.fieldSeparator = fieldSeparator;
+      }
+
+      if (entityId) {
+        params.entityId = entityId;
       }
 
       const {recordType} = this.ctx.job;
@@ -85,6 +89,31 @@ export default {
       }
 
       return http.getUrl('import-jobs/input-file-template', {query: params});
+    },
+
+    jobFs: function() {
+      let {layout} = addJobSchema;
+      if (this.entitiesLabel && typeof this.entities == 'function') {
+        const row = {
+          fields: [
+            {
+              type: "dropdown",
+              name: "job.entityId",
+              labelCode: this.entitiesLabel,
+              listSource: {
+                selectProp: 'id',
+                displayProp: 'title',
+                loadFn: ({query}) => this.entities(query)
+              }
+            }
+          ]
+        };
+
+        layout = util.clone(layout);
+        layout.rows.unshift(row);
+      }
+
+      return layout;
     }
   },
 
@@ -104,6 +133,11 @@ export default {
       payload.inputFileId  = payload.inputFileId && payload.inputFileId.fileId;
       payload.objectParams = this.objectParams || {};
       payload.csvType      = this.csvType;
+
+      if (+payload.entityId > 0) {
+        payload.objectParams.entityId = payload.entityId;
+        delete payload.entityId;
+      }
 
       const {recordType} = payload;
       if (recordType) {

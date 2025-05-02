@@ -99,17 +99,17 @@ export default {
         {
           icon: 'share',
           caption: this.$t('orders.list'),
-          onSelect: () => routerSvc.ngGoto('orders-import')
+          onSelect: () => routerSvc.goto('OrderImportRecords')
         },
         {
           icon: 'undo',
           caption: this.$t('orders.return_specimens'),
-          onSelect: () => routerSvc.ngGoto('return-specimens-import')
+          onSelect: () => routerSvc.goto('OrderImportRecords', {}, {objectType: 'returnSpecimen'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.ngGoto('orders-import-jobs')
+          onSelect: () => routerSvc.goto('OrderImportJobs')
         }
       ],
     };
