@@ -1134,6 +1134,49 @@ const routes = [
         props: (route) => ({typeId: route.params && route.params.typeId})
       },
 
+      /**********************************
+       **********************************
+       * Container Type Import Jobs     *
+       **********************************
+       **********************************/
+      {
+        path: 'container-type-import-records',
+        name: 'ContainerTypeImportRecords',
+        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/CreateJob.vue'),
+        props: () => {
+          const {i18nSvc, routerSvc} = window.osSvc;
+          return {
+            bcrumb: [
+              {
+                url:   routerSvc.getUrl('ContainerTypesList', {typeId: -1}),
+                label: i18nSvc.msg('container_types.list')
+              }
+            ],
+            title: 'container_types.import_types',
+            objectType: 'storageContainerType',
+            objectParams: {},
+            showUpsert: false,
+            onSubmit: () => window.osSvc.routerSvc.goto('ContainerTypeImportJobs')
+          }
+        }
+      },
+      {
+        path: 'container-type-import-jobs',
+        name: 'ContainerTypeImportJobs',
+        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('ContainerTypesList', {typeId: -1}),
+              label: window.osSvc.i18nSvc.msg('container_types.list')
+            }
+          ],
+          title: 'container_types.import_jobs_list',
+          objectTypes: ['storageContainerType'],
+          objectParams: {}
+        })
+      },
+
       /*****************************
        *****************************
        * Specimen carts module     *

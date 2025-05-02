@@ -120,12 +120,12 @@ export default {
         {
           icon: 'cubes',
           caption: this.$t('container_types.list'),
-          onSelect: () => routerSvc.ngGoto('container-types-import')
+          onSelect: () => routerSvc.goto('ContainerTypeImportRecords')
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.ngGoto('container-types-import-jobs')
+          onSelect: () => routerSvc.goto('ContainerTypeImportJobs')
         }
       ],
 

@@ -444,6 +444,8 @@
     "create": "Create Container Type",
     "create_container": "Create Container",
     "dimension": "Dimension",
+    "import_jobs_list": "Import Container Types Jobs List",
+    "import_types": "Import Container Types",
     "labeling_scheme": "Labeling Scheme",
     "list": "Container Types",
     "name": "Name",
@@ -1264,6 +1266,7 @@
       "site": "Sites",
       "sr": "Specimen Requirements",
       "storageContainer": "Containers",
+      "storageContainerType": "Container Types",
       "user": "Users",
       "userExtensions": "{formName}",
       "userRoles": "User Roles"
