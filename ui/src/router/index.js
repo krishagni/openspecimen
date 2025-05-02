@@ -877,6 +877,49 @@ const routes = [
 
       /*****************************
        *****************************
+       * DP Import Jobs            *
+       *****************************
+       *****************************/
+      {
+        path: 'dp-import-records',
+        name: 'DpImportRecords',
+        component: () => import(/* webpackChunkName: "dps" */ '../importer/views/CreateJob.vue'),
+        props: ({query: {objectType}}) => {
+          const {i18nSvc, routerSvc} = window.osSvc;
+          return {
+            bcrumb: [
+              {
+                url:   routerSvc.getUrl('DpsList', {dpId: -1}),
+                label: i18nSvc.msg('dps.list')
+              }
+            ],
+            title: () => i18nSvc.msg('dps.import_' + (objectType || 'distributionProtocol')),
+            objectType: objectType || 'distributionProtocol',
+            objectParams: {},
+            showUpsert: false,
+            onSubmit: () => window.osSvc.routerSvc.goto('DpImportJobs')
+          }
+        }
+      },
+      {
+        path: 'dp-import-jobs',
+        name: 'DpImportJobs',
+        component: () => import(/* webpackChunkName: "dps" */ '../importer/views/JobsList.vue'),
+        props: () => ({
+          bcrumb: [
+            {
+              url: window.osSvc.routerSvc.getUrl('DpsList', {dpId: -1}),
+              label: window.osSvc.i18nSvc.msg('dps.list')
+            }
+          ],
+          title: 'dps.import_jobs_list',
+          objectTypes: ['distributionProtocol', 'dpRequirement'],
+          objectParams: {}
+        })
+      },
+
+      /*****************************
+       *****************************
        * Containers module         *
        *****************************
        *****************************/

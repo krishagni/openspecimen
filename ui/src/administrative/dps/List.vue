@@ -113,17 +113,17 @@ export default {
         {
           icon: 'truck',
           caption: this.$t('dps.list'),
-          onSelect: () => routerSvc.ngGoto('dp-import')
+          onSelect: () => routerSvc.goto('DpImportRecords')
         },
         {
           icon: 'list-ol',
           caption: this.$t('dps.requirements'),
-          onSelect: () => routerSvc.ngGoto('dp-req-import')
+          onSelect: () => routerSvc.goto('DpImportRecords', {}, {objectType: 'dpRequirement'})
         },
         {
           icon: 'table',
           caption: this.$t('bulk_imports.view_jobs'),
-          onSelect: () => routerSvc.ngGoto('dp-import-jobs')
+          onSelect: () => routerSvc.goto('DpImportJobs')
         }
       ],
 
