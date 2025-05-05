@@ -33,7 +33,9 @@ import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
 
 export default {
-  props: [ 'object-type', 'object-params', 'hide-ops', 'show-upsert', 'record-types', 'csv-type',  'entities-label', 'entities'],
+  props: [ 'object-type', 'object-params', 'hide-ops', 'show-upsert', 'record-types', 'csv-type',  'entities-label', 'entities', 'field-separator'],
+
+  emits: ['record-type-selected'],
   
   data() {
     const {global: {locale}} = this.$ui;
@@ -46,7 +48,9 @@ export default {
 
           timeFormat: locale.timeFmt,
 
-          atomic: true
+          atomic: true,
+
+          fieldSeparator: this.fieldSeparator
         },
 
         recordTypes: [],
@@ -120,10 +124,24 @@ export default {
   watch: {
     recordTypes: async function() {
       this._setupRecordTypes();
+    },
+
+    hideOps: function(newVal) {
+      this.ctx.hideOps = newVal;
+    },
+
+    fieldSeparator: function(newVal) {
+      this.ctx.job.fieldSeparator = newVal;
     }
   },
 
   methods: {
+    handleInput: function({field, value}) {
+      if (field.name == 'job.recordType') {
+        this.$emit('record-type-selected', value);
+      }
+    },
+
     importRecords: async function() {
       if (!this.$refs.importForm.validate()) {
         return null;

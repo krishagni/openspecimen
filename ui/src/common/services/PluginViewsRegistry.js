@@ -5,6 +5,8 @@ class PluginViews {
 
   options = {};
 
+  importTypes = {};
+
   registerView(pageName, viewName, componentDef) {
     let page = this.views[pageName];
     if (!page) {
@@ -43,6 +45,16 @@ class PluginViews {
   getOptions(pageName, optsName) {
     let page = this.options[pageName] || {};
     return page[optsName] || [];
+  }
+
+  getImportTypes(entityType) {
+    const types = this.importTypes[entityType];
+    return types || [];
+  }
+
+  registerImportTypes(entityType, types) {
+    const entityImportTypes = this.importTypes[entityType] = this.importTypes[entityType] || [];
+    Array.prototype.push.apply(entityImportTypes, types);
   }
 }
 

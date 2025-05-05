@@ -253,7 +253,7 @@ export default {
         options.push({
           icon: 'upload',
           caption: this.$t('cps.import_biospecimen_data'),
-          onSelect: () => routerSvc.ngGoto('cps/import-multi-cp-objs')
+          onSelect: () => routerSvc.goto('MultiCpImportRecords')
         });
         options.push({
           icon: 'table',

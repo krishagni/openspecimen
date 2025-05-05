@@ -331,8 +331,17 @@ export default class CpViewContext {
     return this._isAccessBasedOnMrnAllowed(cpr, 'ParticipantPhi', ['Delete']);
   }
 
+  isImportParticipantsAllowed() {
+    const {participantExim} = this.access || {};
+    return !!participantExim;
+  }
+
   isProceedToConsentAllowed() {
     return this._isAllowed('Consent', ['Update']);
+  }
+
+  isImportConsentsAllowed() {
+    return this._isAllowed('Consent', ['Export Import']);
   }
 
   isImportAllowed() {
@@ -383,6 +392,11 @@ export default class CpViewContext {
     }
 
     return this._isAccessBasedOnMrnAllowed(cpr, 'Visit', ['Delete']);
+  }
+
+  isImportVisitsAllowed() {
+    const {visitExim} = this.access || {};
+    return !!visitExim;
   }
 
   isReadSprAllowed(cpr) {
@@ -491,6 +505,16 @@ export default class CpViewContext {
 
   isCreatePrimarySpecimenAllowed() {
     return this.access && this.access.createPrimarySpecimen;
+  }
+
+  isImportSpecimensAllowed() {
+    const {specimenExim} = this.access || {};
+    return !!specimenExim;
+  }
+
+  isImportAllSpecimensAllowed() {
+    const {allSpecimenExim} = this.access || {};
+    return !!allSpecimenExim;
   }
 
   isReadConsentAllowed(cpr) {
@@ -656,11 +680,15 @@ export default class CpViewContext {
 
       specimenExim: this._isAllowed('Specimen', ['Export Import']) || this._isAllowed('PrimarySpecimen', ['Export Import']),
 
+      allSpecimenExim: this._isAllowed('Specimen', ['Export Import']),
+
       readConsent: this._isAllowed('Consent', ['Read']),
 
       updateConsent: this._isAllowed('Consent', ['Update']),
 
       deleteConsent: this._isAllowed('Consent', ['Delete']),
+
+      consentExim: this._isAllowed('Consent', ['Export Import'])
     }
   }
 

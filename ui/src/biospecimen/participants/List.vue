@@ -386,7 +386,7 @@ export default {
         options.push({
           icon: 'upload',
           caption: this.$t('participants.import_biospecimen_data'),
-          url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-objs')
+          url: routerSvc.getUrl('CpImportRecords', {cpId: this.ctx.cp.id})
         });
 
         options.push({

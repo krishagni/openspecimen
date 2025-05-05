@@ -61,9 +61,11 @@ import DeFormComponents  from '@/forms/components';
 import DeFormServices    from '@/forms/services';
 import HomeComponents    from '@/home/components';
 import ImportComponents  from '@/importer/components';
+import ImporterPages     from '@/importer/views';
 
 import LoginForm         from '@/users/views/LoginForm.vue';
 
+import cpgRoutes   from '@/biospecimen/cp-groups/routes.js';
 import queryRoutes from '@/queries/routes.js';
 
 import Layout from '@/administrative/containers/Layout.vue';
@@ -81,7 +83,8 @@ const app = createApp(Root)
   .use(DeFormComponents)
   .use(DeFormServices)
   .use(HomeComponents)
-  .use(ImportComponents);
+  .use(ImportComponents)
+  .use(ImporterPages);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-init', initVars);
@@ -128,7 +131,8 @@ if (!http.headers['X-OS-API-TOKEN']) {
   delete http.headers['X-OS-API-TOKEN'];
 }
 
-// register query routes
+// register routes
+app.use(cpgRoutes,   {router, osSvc: app.config.globalProperties.$osSvc});
 app.use(queryRoutes, {router, osSvc: app.config.globalProperties.$osSvc});
 
 let appPropsQ  = settingSvc.getAppProps();

@@ -1356,6 +1356,13 @@ const routes = [
         props: (route) => ({cpId: route.params && route.params.cpId, copyOf: route.query.copyOf})
       },
 
+      {
+        path: 'cps/import-records',
+        name: 'MultiCpImportRecords',
+        component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/participants/ImportRecords.vue'),
+        props: () => ({cpId: -1})
+      },
+
 
       /** Biospecimen pages **/
       {
@@ -1573,7 +1580,13 @@ const routes = [
                 path: 'bulk-edit',
                 name: 'ParticipantsBulkEdit',
                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/BulkEdit.vue')
-              }
+              },
+              {
+                path: 'import-records',
+                name: 'CpImportRecords',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/participants/ImportRecords.vue'),
+                props: (route) => ({cpId: route.params.cpId})
+              },
             ]
           }
         ]
