@@ -1263,6 +1263,8 @@
       "cpe": "Events",
       "cpr": "Participant Registrations",
       "cprMultiple": "Participant Registrations",
+      "cpWf": "Collection Protocol Workflows",
+      "cpgWf": "CPG Workflows",
       "distributionOrder": "Orders",
       "distributionProtocol": "Distribution Protocols",
       "dpRequirement": "Distribution Protocol Requirements",

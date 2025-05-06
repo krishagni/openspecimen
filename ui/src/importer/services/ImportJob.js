@@ -7,7 +7,6 @@ class ImportJob {
   }
 
   getJobDescription(job) {
-    console.log(job);
     return '#' + job.id + ' ' + i18n.msg('import.ops.' + job.type) + ' ' + i18n.msg('import.object_types.' + job.name, job.params);
   }
 
