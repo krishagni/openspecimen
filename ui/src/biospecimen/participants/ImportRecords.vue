@@ -67,7 +67,6 @@ export default {
 
     hideOps: function() {
       const {hideOps} = this.recordType || {};
-      alert(hideOps);
       return hideOps;
     },
 
@@ -106,7 +105,6 @@ export default {
     },
 
     onRecordTypeSelection: function(recordType) {
-      alert(JSON.stringify(recordType));
       this.recordType = recordType || {};
     },
 
