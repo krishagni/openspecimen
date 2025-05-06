@@ -151,6 +151,7 @@ export default {
       payload.inputFileId  = payload.inputFileId && payload.inputFileId.fileId;
       payload.objectParams = this.objectParams || {};
       payload.csvType      = this.csvType;
+      payload.importType   = payload.importType || payload.objectParams.importType;
 
       if (+payload.entityId > 0) {
         payload.objectParams.entityId = payload.entityId;
