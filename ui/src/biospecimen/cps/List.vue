@@ -258,7 +258,7 @@ export default {
         options.push({
           icon: 'table',
           caption: this.$t('import.view_past_imports'),
-          onSelect: () => routerSvc.ngGoto('cps/import-multi-cp-jobs')
+          onSelect: () => routerSvc.goto('MultiCpImportJobsList')
         });
       }
 

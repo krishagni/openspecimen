@@ -392,7 +392,7 @@ export default {
         options.push({
           icon: 'list',
           caption: this.$t('participants.view_past_imports'),
-          url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/import-cp-jobs')
+          url: routerSvc.getUrl('CpImportJobsList', {cpId: this.ctx.cp.id})
         });
       }
 

@@ -1363,6 +1363,12 @@ const routes = [
         props: () => ({cpId: -1})
       },
 
+      {
+        path: 'cps/import-jobs',
+        name: 'MultiCpImportJobsList',
+        component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/participants/ImportJobsList.vue'),
+        props: () => ({cpId: -1})
+      },
 
       /** Biospecimen pages **/
       {
@@ -1584,9 +1590,15 @@ const routes = [
               {
                 path: 'import-records',
                 name: 'CpImportRecords',
-                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/participants/ImportRecords.vue'),
+                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/ImportRecords.vue'),
                 props: (route) => ({cpId: route.params.cpId})
               },
+              {
+                path: 'import-jobs',
+                name: 'CpImportJobsList',
+                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/ImportJobsList.vue'),
+                props: (route) => ({cpId: route.params.cpId})
+              }
             ]
           }
         ]

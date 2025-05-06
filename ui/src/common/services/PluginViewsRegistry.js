@@ -52,6 +52,11 @@ class PluginViews {
     return types || [];
   }
 
+  getAllImportTypes() {
+    const types = Object.values(this.importTypes || {}); // will give array of arrays
+    return (types || []).flatMap(type => type); // convert it into a single array
+  }
+
   registerImportTypes(entityType, types) {
     const entityImportTypes = this.importTypes[entityType] = this.importTypes[entityType] || [];
     Array.prototype.push.apply(entityImportTypes, types);
