@@ -1,3 +1,4 @@
+import http from '@/common/services/HttpClient.js';
 import i18n from '@/common/services/I18n.js';
 import jobSvc from '@/importer/services/ImportJob.js';
 
@@ -8,6 +9,7 @@ export default {
     {
       name: "job.id",
       captionCode: "import.job_id",
+      href: (row) => http.getUrl('import-jobs/' + row.rowObject.job.id + '/output'),
       value: ({job}) => jobSvc.getJobDescription(job)
     },
     {
