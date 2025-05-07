@@ -94,8 +94,12 @@ export default {
 
       const {loginDetail} = this.ctx;
       loginSvc.login(loginDetail).then(
-        () => {
-          routerSvc.goto('HomePage');
+        (resp) => {
+          if (resp.resetPasswordToken && !resp.token) {
+            routerSvc.goto('UserResetPassword', {}, {resetToken: resp.resetPasswordToken});
+          } else {
+            routerSvc.goto('HomePage');
+          }
         }
       );
     },

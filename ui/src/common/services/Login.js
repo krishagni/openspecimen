@@ -24,7 +24,13 @@ class Login {
   login(loginDetail) {
     return http.post('sessions', loginDetail).then(
       resp => {
-        localStorage.osAuthToken = http.headers['X-OS-API-TOKEN'] = resp.token;
+        if (resp.token) {
+          localStorage.osAuthToken = http.headers['X-OS-API-TOKEN'] = resp.token;
+        } else {
+          localStorage.removeItem('osAuthToken');
+          delete http.headers['X-OS-API-TOKEN'];
+        }
+
         return resp;
       }
     );
