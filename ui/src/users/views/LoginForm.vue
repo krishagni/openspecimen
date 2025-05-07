@@ -1,5 +1,5 @@
 <template>
-  <FormCard ref="loginForm" :schema="loginSchema" :data="ctx" :logo="osLogo">
+  <FormCard ref="loginForm" :schema="loginSchema" :data="ctx" :logo="osLogo" @keydown.enter.prevent="login">
     <template #title v-if="showHeader">
       <h3 class="header">Sign in to continue to OpenSpecimen</h3>
     </template>
