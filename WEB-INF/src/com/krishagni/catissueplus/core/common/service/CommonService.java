@@ -14,8 +14,6 @@ public interface CommonService {
 	ResponseEvent<Long> getUnhandledExceptionsCount(RequestEvent<UnhandledExceptionListCriteria> req);
 	
 	ResponseEvent<String> getUnhandledExceptionLog(RequestEvent<Long> req);
-	
-	Long saveUnhandledException(UnhandledException exception);
 
 	String getLatestReleaseNotes();
 }

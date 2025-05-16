@@ -3,45 +3,23 @@ package com.krishagni.catissueplus.core.biospecimen.services.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
-
 
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
-import com.krishagni.catissueplus.core.common.TransactionAwareInterceptor;
-import com.krishagni.catissueplus.core.common.TransactionEventListener;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 
-public class CollectionProtocolChangeListener implements InitializingBean, ApplicationListener<CollectionProtocolSavedEvent>, TransactionEventListener {
-
-	private ThreadLocal<Map<Long, CollectionProtocolDetail>> modifiedCps = new ThreadLocal<Map<Long, CollectionProtocolDetail>>() {
-		@Override
-		protected Map<Long, CollectionProtocolDetail> initialValue() {
-			return new LinkedHashMap<>();
-		}
-	};
-
-	private TransactionAwareInterceptor transactionAwareInterceptor;
-
-	public void setTransactionAwareInterceptor(TransactionAwareInterceptor transactionAwareInterceptor) {
-		this.transactionAwareInterceptor = transactionAwareInterceptor;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		transactionAwareInterceptor.addListener(this);
-	}
+public class CollectionProtocolChangeListener implements ApplicationListener<CollectionProtocolSavedEvent> {
 
 	@Override
 	public void onApplicationEvent(CollectionProtocolSavedEvent event) {
@@ -56,20 +34,25 @@ public class CollectionProtocolChangeListener implements InitializingBean, Appli
 		}
 
 		cp.setDraftMode(true);
-		if (modifiedCps.get().containsKey(cp.getId())) {
-			return;
+
+		Map<Long, CollectionProtocolDetail> modifiedCps = TransactionCache.getInstance().get("modifiedCps");
+		if (modifiedCps == null) {
+			final Map<Long, CollectionProtocolDetail> modifiedCpsList = modifiedCps = new HashMap<>();
+			TransactionCache.getInstance().put("modifiedCps", modifiedCps,
+				(status) -> {
+					if (status == 0) {
+						modifiedCpsList.values().forEach(this::notifyCpMovedToDraft);
+					}
+				}
+			);
 		}
 
-		CollectionProtocolDetail detail = new CollectionProtocolDetail();
-		CollectionProtocolSummary.copy(cp, detail);
-		detail.setCoordinators(UserSummary.from(cp.getCoordinators()));
-		modifiedCps.get().put(cp.getId(), detail);
-	}
-
-	@Override
-	public void onFinishTransaction() {
-		modifiedCps.get().values().forEach(this::notifyCpMovedToDraft);
-		modifiedCps.remove();
+		if (!modifiedCps.containsKey(cp.getId())) {
+			CollectionProtocolDetail detail = new CollectionProtocolDetail();
+			CollectionProtocolSummary.copy(cp, detail);
+			detail.setCoordinators(UserSummary.from(cp.getCoordinators()));
+			modifiedCps.put(cp.getId(), detail);
+		}
 	}
 
 	private void notifyCpMovedToDraft(CollectionProtocolDetail cp) {

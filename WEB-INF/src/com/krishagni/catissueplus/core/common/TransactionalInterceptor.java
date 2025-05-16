@@ -29,7 +29,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -90,13 +89,12 @@ public class TransactionalInterceptor {
 			String rootCause = NestedExceptionUtils.getMostSpecificCause(te).getMessage();
 			throw OpenSpecimenException.serverError(CommonErrorCode.DB_CONN_ERROR, rootCause);
 		} catch (Throwable t) {
-			if (t instanceof OpenSpecimenException) {
-				OpenSpecimenException ose = (OpenSpecimenException) t;
-				if (ose.getErrorType() == ErrorType.USER_ERROR) {
+			OpenSpecimenException ose = t instanceof OpenSpecimenException ? (OpenSpecimenException) t : null;
+			if (ose != null) {
+				if (ose.getErrorType() == ErrorType.USER_ERROR || ose.getExceptionId() != null) {
 					throw ose;
 				}
-			} else if (t instanceof FormException) {
-				FormException fe = (FormException) t;
+			} else if (t instanceof FormException fe) {
 				throw OpenSpecimenException.userError(CommonErrorCode.FORM_ERROR, fe.getError());
 			} else if (!originalError.isEmpty()) {
 				return originalError.get("error");
@@ -127,7 +125,6 @@ public class TransactionalInterceptor {
 							status.setRollbackOnly();
 							if (resp.isSystemError() || resp.isUnknownError()) {
 								logger.error("Error doing work inside " + pjp.getSignature(), resp.getError().getException());
-
 								OpenSpecimenException ose = resp.getError();
 								Long exceptionId = handleServerError(ose.getException(), pjp.getArgs());
 								ose.setExceptionId(exceptionId);

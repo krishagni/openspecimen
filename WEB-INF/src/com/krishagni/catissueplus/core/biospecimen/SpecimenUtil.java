@@ -16,7 +16,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenTypeUnitsListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenTypeUnitsService;
-import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 
@@ -29,14 +29,6 @@ public class SpecimenUtil {
 
 	@Autowired
 	private SpecimenTypeUnitsService unitSvc;
-
-	private final ThreadLocal<Map<String, SpecimenTypeUnit>> units = new ThreadLocal<>() {
-		@Override
-		protected Map<String, SpecimenTypeUnit> initialValue() {
-			TransactionalThreadLocals.getInstance().register(this);
-			return new HashMap<>();
-		}
-	};
 
 	public static SpecimenUtil getInstance() {
 		if (instance == null || instance.daoFactory == null) {
@@ -81,14 +73,14 @@ public class SpecimenUtil {
 		}
 
 		String key = (cpShortTitle + ":" + specimenClass + ":" + type).toLowerCase();
-		SpecimenTypeUnit result = this.units.get().get(key);
+		SpecimenTypeUnit result = getUnits().get(key);
 		if (result != null) {
 			return result;
 		}
 
 		List<SpecimenTypeUnit> units = daoFactory.getSpecimenTypeUnitDao().getMatchingUnits(cpShortTitle, specimenClass, type);
 		result = setUnits(units, new SpecimenTypeUnit());
-		this.units.get().put(key, result);
+		getUnits().put(key, result);
 		return result;
 	}
 
@@ -130,5 +122,9 @@ public class SpecimenUtil {
 		}
 
 		return result;
+	}
+
+	private Map<String, SpecimenTypeUnit> getUnits() {
+		return TransactionCache.getInstance().get("specimenUnits", new HashMap<>());
 	}
 }

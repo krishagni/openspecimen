@@ -17,8 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.TransactionAwareInterceptor;
-import com.krishagni.catissueplus.core.common.TransactionEventListener;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJob;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJobItem;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintJobSavedEvent;
@@ -33,7 +32,7 @@ import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
-public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, TransactionEventListener {
+public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 	//
 	// format: <entity_type>_<yyyyMMddHHmm>_<unique_os_run_num>_<copy>.txt
 	// E.g. specimen_201604040807_1_1.txt, specimen_201604040807_1_2.txt, visit_201604040807_1_1.txt etc
@@ -50,11 +49,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 	protected LabelTmplTokenRegistrar printLabelTokensRegistrar;
 
-	private TransactionAwareInterceptor transactionAwareInterceptor;
-
 	private LabelPrintFileSpooler labelPrintFilesSpooler;
-
-	private final ThreadLocal<Set<Long>> jobIds = ThreadLocal.withInitial(LinkedHashSet::new);
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -62,13 +57,6 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 	public void setPrintLabelTokensRegistrar(LabelTmplTokenRegistrar printLabelTokensRegistrar) {
 		this.printLabelTokensRegistrar = printLabelTokensRegistrar;
-	}
-
-	public void setTransactionAwareInterceptor(TransactionAwareInterceptor transactionAwareInterceptor) {
-		this.transactionAwareInterceptor = transactionAwareInterceptor;
-		if (transactionAwareInterceptor != null) {
-			transactionAwareInterceptor.addListener(this);
-		}
 	}
 
 	public void setLabelPrintFilesSpooler(LabelPrintFileSpooler labelPrintFilesSpooler) {
@@ -142,19 +130,25 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T>, Transa
 
 			daoFactory.getLabelPrintJobDao().saveOrUpdate(job, true);
 			EventPublisher.getInstance().publish(new LabelPrintJobSavedEvent(job));
-			jobIds.get().add(job.getId());
+
+			Set<Long> jobIds = TransactionCache.getInstance().get("printJobIds");
+			if (jobIds == null) {
+				final Set<Long> jobIdsList = jobIds = new LinkedHashSet<>();
+				TransactionCache.getInstance().put("printJobIds", jobIdsList,
+					(status) -> {
+						if (status == 0) {
+							jobIdsList.forEach(labelPrintFilesSpooler::queueJob);
+						}
+					}
+				);
+			}
+
+			jobIds.add(job.getId());
 			return job;
 		} catch (Exception e) {
 			logger.error("Error printing distribution labels", e);
 			throw OpenSpecimenException.serverError(e);
 		}
-	}
-
-	@Override
-	public void onFinishTransaction() {
-		Set<Long> printJobIds = jobIds.get();
-		jobIds.remove();
-		printJobIds.forEach(labelPrintFilesSpooler::queueJob);
 	}
 
 	protected abstract boolean isApplicableFor(LabelPrintRule rule, T obj, User user, String ipAddr);

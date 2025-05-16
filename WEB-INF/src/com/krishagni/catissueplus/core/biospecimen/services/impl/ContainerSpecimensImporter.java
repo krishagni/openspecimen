@@ -15,7 +15,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -23,19 +23,8 @@ import com.krishagni.catissueplus.core.importer.events.ImportObjectDetail;
 import com.krishagni.catissueplus.core.importer.services.ObjectImporter;
 
 public class ContainerSpecimensImporter implements ObjectImporter<ContainerSpecimenDetail, ContainerSpecimenDetail> {
-	private ThreadLocal<Map<String, StorageContainer>> containersByName = new ThreadLocal<Map<String, StorageContainer>>() {
-		protected Map<String, StorageContainer> initialValue() {
-			TransactionalThreadLocals.getInstance().register(this);
-			return new HashMap<>();
-		}
-	};
 
-	private ThreadLocal<Map<String, String>> barcodeToName = new ThreadLocal<Map<String, String>>() {
-		protected Map<String, String> initialValue() {
-			TransactionalThreadLocals.getInstance().register(this);
-			return new HashMap<>();
-		}
-	};
+
 
 	private DaoFactory daoFactory;
 
@@ -62,10 +51,10 @@ public class ContainerSpecimensImporter implements ObjectImporter<ContainerSpeci
 				return ResponseEvent.userError(SpecimenErrorCode.LOC_NOT_SPECIFIED);
 			} else if (StringUtils.isNotBlank(location.getName())) {
 				String name = location.getName().toLowerCase();
-				container = containersByName.get().get(name);
-				if (container == null && !containersByName.get().containsKey(name)) {
+				container = getContainersByName().get(name);
+				if (container == null && !getContainersByName().containsKey(name)) {
 					container = daoFactory.getStorageContainerDao().getByName(location.getName());
-					containersByName.get().put(name, container);
+					getContainersByName().put(name, container);
 				}
 
 				if (container == null) {
@@ -73,13 +62,15 @@ public class ContainerSpecimensImporter implements ObjectImporter<ContainerSpeci
 				}
 			} else if (StringUtils.isNotBlank(location.getBarcode())) {
 				String barcode = location.getBarcode().toLowerCase();
-				String name = barcodeToName.get().get(barcode);
+				String name = getBarcodeToName().get(barcode);
 				if (name != null) {
-					container = containersByName.get().get(name);
-				} else if (!barcodeToName.get().containsKey(barcode)) {
+					container = getContainersByName().get(name);
+				} else if (!getBarcodeToName().containsKey(barcode)) {
 					container = daoFactory.getStorageContainerDao().getByBarcode(location.getBarcode());
-					barcodeToName.get().put(barcode, container != null ? container.getName().toLowerCase() : null);
-					containersByName.get().put(container.getName().toLowerCase(), container);
+					getBarcodeToName().put(barcode, container != null ? container.getName().toLowerCase() : null);
+					if (container != null) {
+						getContainersByName().put(container.getName().toLowerCase(), container);
+					}
 				}
 
 				if (container == null) {
@@ -126,4 +117,13 @@ public class ContainerSpecimensImporter implements ObjectImporter<ContainerSpeci
 			return ResponseEvent.serverError(e);
 		}
 	}
+
+	private Map<String, StorageContainer> getContainersByName() {
+		return TransactionCache.getInstance().get("containersByName", new HashMap<>());
+	}
+
+	private Map<String, String> getBarcodeToName() {
+		return TransactionCache.getInstance().get("containerBarcodesToName", new HashMap<>());
+	}
+
 }

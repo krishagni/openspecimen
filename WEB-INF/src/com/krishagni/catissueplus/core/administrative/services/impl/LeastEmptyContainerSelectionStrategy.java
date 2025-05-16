@@ -16,7 +16,7 @@ import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.events.ContainerCriteria;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategy;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -28,39 +28,17 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 	@Autowired
 	private DaoFactory daoFactory;
 
-	//
-	// key - hash of the container criteria
-	// value - list of container IDs satisfying the criteria
-	//
-	private ThreadLocal<Map<String, List<Long>>> recentlyUsedContainers =
-		new ThreadLocal<Map<String, List<Long>>>() {
-			@Override
-			protected Map<String, List<Long>> initialValue() {
-				TransactionalThreadLocals.getInstance().register(this);
-				return new HashMap<>();
-			}
-		};
-
-	private ThreadLocal<Map<Long, StorageContainer>> containersCache =
-		new ThreadLocal<Map<Long, StorageContainer>>() {
-			@Override
-			protected Map<Long, StorageContainer> initialValue() {
-				TransactionalThreadLocals.getInstance().register(this);
-				return new HashMap<>();
-			}
-		};
-
 	@Override
 	public StorageContainer getContainer(ContainerCriteria criteria, Boolean aliquotsInSameContainer) {
 		String criteriaKey = getCriteriaKey(criteria);
-		List<Long> containerIds = recentlyUsedContainers.get().get(criteriaKey);
+		List<Long> containerIds = getRecentlyUsedContainers().get(criteriaKey);
 		if (containerIds != null) {
 			int reqPositions = criteria.getRequiredPositions(aliquotsInSameContainer);
 			for (Long containerId : containerIds) {
-				StorageContainer container = containersCache.get().get(containerId);
+				StorageContainer container = getContainersCache().get(containerId);
 				if (container == null) {
 					container = daoFactory.getStorageContainerDao().getById(containerId);
-					containersCache.get().put(containerId, container);
+					getContainersCache().put(containerId, container);
 				}
 
 				if (!container.isArchived() && container.hasFreePositionsForReservation(reqPositions)) {
@@ -75,7 +53,7 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 			return null;
 		}
 
-		List<Long> cachedContainerIds = recentlyUsedContainers.get().computeIfAbsent(criteriaKey, (k) -> new ArrayList<>());
+		List<Long> cachedContainerIds = getRecentlyUsedContainers().computeIfAbsent(criteriaKey, (k) -> new ArrayList<>());
 		for (Long containerId : containerIds) {
 			if (cachedContainerIds.contains(containerId)) {
 				continue;
@@ -85,7 +63,7 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		}
 
 		StorageContainer container = daoFactory.getStorageContainerDao().getById(containerIds.get(0));
-		containersCache.get().put(container.getId(), container);
+		getContainersCache().put(container.getId(), container);
 		return container;
 	}
 	
@@ -136,6 +114,18 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		}
 
 		return StringUtils.join(accessRestrictions, " or ");
+	}
+
+	//
+	// key - hash of the container criteria
+	// value - list of container IDs satisfying the criteria
+	//
+	private Map<String, List<Long>> getRecentlyUsedContainers() {
+		return TransactionCache.getInstance().get("recentlyUsedContainers", new HashMap<>());
+	}
+
+	private Map<Long, StorageContainer> getContainersCache() {
+		return TransactionCache.getInstance().get("containersCache", new HashMap<>());
 	}
 
 	private static final String GET_LEAST_EMPTY_CONTAINER_ID = StorageContainer.class.getName() + ".getLeastEmptyContainerId";

@@ -141,21 +141,6 @@ public class CommonServiceImpl implements CommonService, InitializingBean {
 			return ResponseEvent.serverError(e);
 		}
 	}
-	
-	@Override
-	@PlusTransactional
-	public Long saveUnhandledException(UnhandledException exception) {
-		Long exceptionId = null;
-
-		try {
-			daoFactory.getUnhandledExceptionDao().saveOrUpdate(exception, true);
-			exceptionId = exception.getId();
-		} catch (Exception e) {
-			logger.error("Error saving details of unhandled exception to DB", e);
-		}
-
-		return exceptionId;
-	}
 
 	@Override
 	public String getLatestReleaseNotes() {

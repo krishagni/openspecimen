@@ -57,8 +57,9 @@ public class LabelPrintFileSpooler implements InitializingBean {
     @PlusTransactional
     private void generateLabelFiles(Long jobId) {
         try {
+            logger.info("Generating print label files for the job ID = " + jobId);
             boolean hasItems = true;
-            int startAt = 0, maxItems = 10;
+            int startAt = 0, maxItems = 10, count = 0;
             while (hasItems) {
                 List<LabelPrintJobItem> printItems = daoFactory.getLabelPrintJobDao().getPrintJobItems(jobId, startAt, maxItems);
                 startAt += maxItems;
@@ -66,15 +67,18 @@ public class LabelPrintFileSpooler implements InitializingBean {
                     hasItems = false;
                 }
 
-                generateLabelFiles(printItems);
+                count += generateLabelFiles(printItems);
             }
+
+            logger.info("Generated " + count + " print label files for the job ID = " + jobId);
         } catch (Exception e) {
-            logger.error("Error generating print label files", e);
+            logger.error("Error generating print label files for job ID = " + jobId, e);
         }
     }
 
-    private void generateLabelFiles(List<LabelPrintJobItem> printItems)
+    private int generateLabelFiles(List<LabelPrintJobItem> printItems)
     throws Exception {
+        int count = 0;
         String defaultDir = null;
         for (LabelPrintJobItem item : printItems) {
             if (StringUtils.isBlank(item.getContent()) || (item.getCreateFile() != null && !Boolean.TRUE.equals(item.getCreateFile()))) {
@@ -94,7 +98,10 @@ public class LabelPrintFileSpooler implements InitializingBean {
 
                 File output = new File(dir, label.get("file"));
                 FileUtils.write(output, label.get("content"), Charset.defaultCharset());
+                ++count;
             }
         }
+
+        return count;
     }
 }

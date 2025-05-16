@@ -60,11 +60,8 @@
     </property>
   </bean>
 
-  <bean id="transactionAwareInterceptor" class="com.krishagni.catissueplus.core.common.TransactionAwareInterceptor"/>
-
   <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
     <property name="sessionFactory" ref="sessionFactory" />
-    <property name="entityInterceptor" ref="transactionAwareInterceptor"/>
   </bean>
   
   <bean id="serviceInterceptor" class="com.krishagni.catissueplus.core.common.TransactionalInterceptor" factory-method="aspectOf">
@@ -221,9 +218,7 @@
     <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
-  <bean id="cpChangeListener" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolChangeListener">
-    <property name="transactionAwareInterceptor" ref="transactionAwareInterceptor"/>
-  </bean>
+  <bean id="cpChangeListener" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolChangeListener" />
 
   <bean id="cpGroupFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.CollectionProtocolGroupFactoryImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
@@ -720,7 +715,6 @@
         depends-on="labelPrintRuleFactoryRegistrar">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="printLabelTokensRegistrar" ref="containerPrintLabelTokensRegistrar"/>
-    <property name="transactionAwareInterceptor" ref="transactionAwareInterceptor"/>
     <property name="labelPrintFilesSpooler" ref="labelPrintFilesSpooler"/>
   </bean>
 
@@ -848,7 +842,6 @@
         depends-on="labelPrintRuleFactoryRegistrar">
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="printLabelTokensRegistrar" ref="distributionPrintLabelTokensRegistrar"/>
-    <property name="transactionAwareInterceptor" ref="transactionAwareInterceptor"/>
     <property name="labelPrintFilesSpooler" ref="labelPrintFilesSpooler"/>
   </bean>
 
@@ -1091,7 +1084,6 @@
     <property name="cfgSvc" ref="cfgSvc"/>
     <property name="printLabelTokensRegistrar" ref="specimenPrintLabelTokensRegistrar"/>
     <property name="changeLogSvc" ref="changeLogSvc"/>
-    <property name="transactionAwareInterceptor" ref="transactionAwareInterceptor"/>
     <property name="labelPrintFilesSpooler" ref="labelPrintFilesSpooler"/>
   </bean>
  
@@ -1099,7 +1091,6 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="cfgSvc" ref="cfgSvc"/>
     <property name="printLabelTokensRegistrar" ref="visitPrintLabelTokensRegistrar"/>
-    <property name="transactionAwareInterceptor" ref="transactionAwareInterceptor"/>
     <property name="labelPrintFilesSpooler" ref="labelPrintFilesSpooler"/>
   </bean>
 

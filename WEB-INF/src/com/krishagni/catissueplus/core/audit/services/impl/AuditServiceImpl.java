@@ -67,7 +67,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.domain.Lock;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
@@ -1054,14 +1054,6 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 		implements PreInsertEventListener, PreUpdateEventListener, PreDeleteEventListener,
 		PreCollectionRecreateEventListener, PreCollectionUpdateEventListener, PreCollectionRemoveEventListener {
 
-		private ThreadLocal<IdentityHashMap<BaseEntity, Boolean>> entities =
-			new ThreadLocal<IdentityHashMap<BaseEntity, Boolean>>() {
-				@Override
-				protected IdentityHashMap<BaseEntity, Boolean> initialValue() {
-					TransactionalThreadLocals.getInstance().register(this);
-					return new IdentityHashMap<>();
-				}
-			};
 
 		@Override
 		public boolean onPreInsert(PreInsertEvent event) {
@@ -1076,7 +1068,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				update = true;
 			}
 
-			if (entities.get().containsKey(entity)) {
+			if (getEntities().containsKey(entity)) {
 				return false;
 			}
 
@@ -1096,7 +1088,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			}
 
 			updateState(event.getPersister(), event.getState(), props);
-			entities.get().put(entity, true);
+			getEntities().put(entity, true);
 			return false;
 		}
 
@@ -1111,7 +1103,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				entity = entity.getRoot();
 			}
 
-			if (entities.get().containsKey(entity)) {
+			if (getEntities().containsKey(entity)) {
 				return false;
 			}
 
@@ -1123,7 +1115,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			props.put("updateTime", entity.getUpdateTime());
 			updateState(event.getPersister(), event.getState(), props);
 
-			entities.get().put(entity, true);
+			getEntities().put(entity, true);
 			return false;
 		}
 
@@ -1138,7 +1130,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				entity = entity.getRoot();
 			}
 
-			if (entities.get().containsKey(entity)) {
+			if (getEntities().containsKey(entity)) {
 				return false;
 			}
 
@@ -1150,7 +1142,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			props.put("updateTime", entity.getUpdateTime());
 			updateState(event.getPersister(), event.getDeletedState(), props);
 
-			entities.get().put(entity, true);
+			getEntities().put(entity, true);
 			return false;
 		}
 
@@ -1165,7 +1157,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				entity = entity.getRoot();
 			}
 
-			if (entities.get().containsKey(entity)) {
+			if (getEntities().containsKey(entity)) {
 				return;
 			}
 
@@ -1177,7 +1169,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				entity.setCreationTime(Calendar.getInstance().getTime());
 			}
 
-			entities.get().put(entity, true);
+			getEntities().put(entity, true);
 		}
 
 		@Override
@@ -1191,13 +1183,13 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				entity = entity.getRoot();
 			}
 
-			if (entities.get().containsKey(entity)) {
+			if (getEntities().containsKey(entity)) {
 				return;
 			}
 
 			entity.setUpdater(AuthUtil.getCurrentUser());
 			entity.setUpdateTime(Calendar.getInstance().getTime());
-			entities.get().put(entity, true);
+			getEntities().put(entity, true);
 		}
 
 		@Override
@@ -1211,13 +1203,13 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				entity = entity.getRoot();
 			}
 
-			if (entities.get().containsKey(entity)) {
+			if (getEntities().containsKey(entity)) {
 				return;
 			}
 
 			entity.setUpdater(AuthUtil.getCurrentUser());
 			entity.setUpdateTime(Calendar.getInstance().getTime());
-			entities.get().put(entity, true);
+			getEntities().put(entity, true);
 		}
 
 		private void updateState(EntityPersister persister, Object[] state, Map<String, Object> values) {
@@ -1241,6 +1233,10 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 					break;
 				}
 			}
+		}
+
+		private IdentityHashMap<BaseEntity, Boolean> getEntities() {
+			return TransactionCache.getInstance().get("auditEntities", new IdentityHashMap<>());
 		}
 	}
 }

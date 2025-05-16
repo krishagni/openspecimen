@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,13 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-
 import com.krishagni.catissueplus.core.administrative.repository.ContainerStoreListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 
@@ -26,64 +26,6 @@ public class AutomatedContainerContext {
 	private static final LogUtil logger = LogUtil.getLogger(AutomatedContainerContext.class);
 
 	private static AutomatedContainerContext instance = new AutomatedContainerContext();
-
-	private ThreadLocal<Map<String, ContainerStoreList>> listsCtx = new ThreadLocal<>() {
-		@Override
-		protected Map<String, ContainerStoreList> initialValue() {
-			TransactionalThreadLocals.getInstance().register(this);
-			return new HashMap<>();
-		}
-
-		@Override
-		public void remove() {
-			Map<String, ContainerStoreList> storeLists = get();
-			super.remove();
-
-			if (storeLists == null || storeLists.isEmpty()) {
-				return;
-			}
-
-			taskExecutor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						logger.debug("Executing the queued container store lists");
-
-						setupUserAuthContext();
-						storageContainerSvc.processStoreLists(new Supplier<>() {
-							private boolean supplied = false;
-
-							@Override
-							public List<ContainerStoreList> get() {
-								if (supplied) {
-									return null;
-								}
-
-								supplied = true;
-								return getStoreLists();
-							}
-						});
-					} catch (Throwable t) {
-						logger.error("Error executing the container store lists", t);
-					}
-				}
-
-				@PlusTransactional
-				private void setupUserAuthContext() {
-					AuthUtil.setCurrentUser(daoFactory.getUserDao().getSystemUser());
-				}
-
-				@PlusTransactional
-				private List<ContainerStoreList> getStoreLists() {
-					ContainerStoreListCriteria crit = new ContainerStoreListCriteria()
-						.ids(storeLists.values().stream().map(ContainerStoreList::getId).collect(Collectors.toList()));
-					List<ContainerStoreList> dbStoreLists = daoFactory.getContainerStoreListDao().getStoreLists(crit);
-					dbStoreLists.forEach(list -> list.getContainer().getAutoFreezerProvider().getImplClass());
-					return dbStoreLists;
-				}
-			});
-		}
-	};
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -111,7 +53,7 @@ public class AutomatedContainerContext {
 			return;
 		}
 
-		ContainerStoreList storeList = listsCtx.get().get(listLookupKey(container, op));
+		ContainerStoreList storeList = getStoreLists().get(listLookupKey(container, op));
 		if (storeList == null) {
 			storeList = createNewList(container, op);
 		}
@@ -141,7 +83,68 @@ public class AutomatedContainerContext {
 		list.setUser(AuthUtil.getCurrentUser());
 
 		daoFactory.getContainerStoreListDao().saveOrUpdate(list);
-		listsCtx.get().put(listLookupKey(container, op), list);
+		getStoreLists().put(listLookupKey(container, op), list);
 		return list;
+	}
+
+	private Map<String, ContainerStoreList> getStoreLists() {
+		Map<String, ContainerStoreList> storeLists = TransactionCache.getInstance().get("containerStoreLists");
+		if (storeLists == null) {
+			final Map<String, ContainerStoreList> storeListMap = storeLists = new HashMap<>();
+			TransactionCache.getInstance().put("containerStoreLists", storeLists,
+				(status) -> {
+					if (status != 0) {
+						logger.error("Transaction failed. Store lists will not be processed. Status = " + status);
+						return;
+					}
+
+					if (storeListMap.isEmpty()) {
+						return;
+					}
+
+					taskExecutor.execute(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								logger.debug("Executing the queued container store lists");
+
+								setupUserAuthContext();
+								storageContainerSvc.processStoreLists(new Supplier<>() {
+									private boolean supplied = false;
+
+									@Override
+									public List<ContainerStoreList> get() {
+										if (supplied) {
+											return null;
+										}
+
+										supplied = true;
+										return getStoreLists(storeListMap.values());
+									}
+								});
+							} catch (Throwable t) {
+								logger.error("Error executing the container store lists", t);
+							}
+						}
+					});
+				}
+			);
+		}
+
+		return storeLists;
+	}
+
+	@PlusTransactional
+	private void setupUserAuthContext() {
+		AuthUtil.setCurrentUser(daoFactory.getUserDao().getSystemUser());
+	}
+
+	@PlusTransactional
+	private List<ContainerStoreList> getStoreLists(Collection<ContainerStoreList> storeLists) {
+		ContainerStoreListCriteria crit = new ContainerStoreListCriteria()
+			.ids(storeLists.stream().map(ContainerStoreList::getId).collect(Collectors.toList()));
+		List<ContainerStoreList> dbStoreLists = daoFactory.getContainerStoreListDao().getStoreLists(crit);
+		dbStoreLists.forEach(list -> list.getContainer().getAutoFreezerProvider().getImplClass());
+		return dbStoreLists;
 	}
 }

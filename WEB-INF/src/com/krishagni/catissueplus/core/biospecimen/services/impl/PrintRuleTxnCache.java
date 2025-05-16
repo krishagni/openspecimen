@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
-import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.PrintRuleConfig;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
@@ -23,14 +23,6 @@ public class PrintRuleTxnCache {
 
 	private static final PrintRuleTxnCache instance = new PrintRuleTxnCache();
 
-	private ThreadLocal<Map<String, List<? extends LabelPrintRule>>> rules = new ThreadLocal<>() {
-		@Override
-		protected Map<String, List<? extends LabelPrintRule>> initialValue() {
-			TransactionalThreadLocals.getInstance().register(this);
-			return new HashMap<>();
-		}
-	};
-
 	@Autowired
 	private DaoFactory daoFactory;
 
@@ -39,14 +31,14 @@ public class PrintRuleTxnCache {
 	}
 
 	public List<? extends LabelPrintRule> getRules(String objectType) {
-		List<? extends LabelPrintRule> result = rules.get().get(objectType);
+		List<? extends LabelPrintRule> result = getPrintRules().get(objectType);
 		if (result == null) {
 			result = getRulesFromDb(objectType);
 			if (result == null) {
 				result = new ArrayList<>();
 			}
 
-			rules.get().put(objectType, result);
+			getPrintRules().put(objectType, result);
 		}
 
 		return result;
@@ -67,5 +59,9 @@ public class PrintRuleTxnCache {
 			logger.error("Error loading print rules for: " + objectType, e);
 			throw new RuntimeException("Error loading print rules for: " + objectType, e);
 		}
+	}
+
+	private Map<String, List<? extends LabelPrintRule>> getPrintRules() {
+		return TransactionCache.getInstance().get("printRules", new HashMap<>());
 	}
 }

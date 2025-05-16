@@ -9,10 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
-import com.krishagni.catissueplus.core.common.TransactionalThreadLocals;
+import com.krishagni.catissueplus.core.common.TransactionCache;
 
 @Configurable
 public class PvUtil {
@@ -20,13 +19,6 @@ public class PvUtil {
 
 	@Autowired
 	private DaoFactory daoFactory;
-
-	private ThreadLocal<Map<String, PermissibleValue>> typeUnits = new ThreadLocal<Map<String, PermissibleValue>>() {
-		protected Map<String, PermissibleValue> initialValue() {
-			TransactionalThreadLocals.getInstance().register(this);
-			return new HashMap<>();
-		}
-	};
 
 	public static PvUtil getInstance() {
 		if (instance == null || instance.daoFactory == null) {
@@ -60,13 +52,13 @@ public class PvUtil {
 
 	public String getSpecimenUnit(String measure, String spmnClass, String type) {
 		String key = spmnClass + ":" + type;
-		PermissibleValue pv = typeUnits.get().get(key);
+		PermissibleValue pv = getTypeUnits().get(key);
 		if (pv == null) {
 			List<PermissibleValue> pvs = daoFactory.getPermissibleValueDao()
 				.getPvs("specimen_type", spmnClass, Collections.singleton(type), true);
 			if (!pvs.isEmpty()) {
 				pv = pvs.get(0);
-				typeUnits.get().put(key, pv);
+				getTypeUnits().put(key, pv);
 			}
 		}
 
@@ -109,6 +101,10 @@ public class PvUtil {
 		}
 
 		return result;
+	}
+
+	private Map<String, PermissibleValue> getTypeUnits() {
+		return TransactionCache.getInstance().get("pvTypeUnits", new HashMap<>());
 	}
 
 	private static final String ABBREVIATION = "abbreviation";
