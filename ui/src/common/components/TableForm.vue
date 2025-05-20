@@ -65,7 +65,7 @@
           </td>
         </tr>
 
-        <template v-for="(itemModel, itemIdx) of itemModels" :key="itemIdx">
+        <template v-for="(itemModel, itemIdx) of itemModels" :key="itemModel.key">
           <tr v-if="itemModel.show" :class="expanded && expanded.indexOf(itemModel.$context) >= 0 && 'expanded-row'">
             <td class="selection" v-if="readOnly && (selectionMode == 'radio' || selectionMode == 'checkbox')">
               <RadioButton name="rowSelection" :value="itemIdx" v-model="ctx.selectedIdx"
@@ -338,10 +338,16 @@ export default {
     itemModels: function() {
       let models = [];
 
+      const numItems = this.ctx.items.length;
+      let itemIdx = -1;
       for (let item of this.ctx.items) {
-        let model = {show: true, hideFields: {}};
+        ++itemIdx;
+
+        const key = 'items_' + numItems + '_' + itemIdx;
+        let model = {key, show: true, hideFields: {}};
         if (this.treeLayout) {
           model = {
+            key,
             expanded: item.expanded,
             show: item.show,
             depth: item.depth,
