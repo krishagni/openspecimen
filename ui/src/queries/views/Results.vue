@@ -467,6 +467,13 @@ export default {
   flex: 1;
 }
 
+.results-grid :deep(.ag-dnd-ghost),
+.results-grid :deep(.ag-popup),
+.results-grid :deep(.ag-header),
+.results-grid :deep(.ag-root-wrapper) {
+  font-family: Arial;
+}
+
 .selected-rows-msg {
   margin: 0;
 }
