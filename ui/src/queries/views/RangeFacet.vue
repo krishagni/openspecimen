@@ -144,4 +144,8 @@ export default {
 .range-facet li :deep(.os-boolean-checkbox) {
   margin-right: 1rem;
 }
+
+.range-facet li.input :deep(.os-input-number .p-inputtext) {
+  width: 1%;
+}
 </style>
