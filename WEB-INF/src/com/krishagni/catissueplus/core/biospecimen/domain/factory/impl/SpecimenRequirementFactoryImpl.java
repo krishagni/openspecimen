@@ -570,10 +570,6 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		return pv;
 	}
 
-	private String ensureNotEmptyAndValid(String attr, String value, ErrorCode req, ErrorCode invalid, OpenSpecimenException ose) {
-		return ensureNotEmptyAndValid(attr, value, false, req, invalid, ose);
-	}
-
 	private String ensureNotEmptyAndValid(String attr, String value, boolean leafCheck, ErrorCode req, ErrorCode invalid, OpenSpecimenException ose) {
 		value = ensureNotEmpty(value, req, ose);
 		if (value != null) {
