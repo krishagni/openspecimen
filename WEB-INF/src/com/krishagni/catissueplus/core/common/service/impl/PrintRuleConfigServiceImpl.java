@@ -59,7 +59,7 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@PlusTransactional
 	public ResponseEvent<List<PrintRuleConfigDetail>> getPrintRuleConfigs(RequestEvent<PrintRuleConfigsListCriteria> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureReadPrintRuleRights();
 
 			List<PrintRuleConfig> rules = daoFactory.getPrintRuleConfigDao().getPrintRules(req.getPayload());
 			return ResponseEvent.response(PrintRuleConfigDetail.from(rules));
@@ -74,7 +74,7 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@PlusTransactional
 	public ResponseEvent<PrintRuleConfigDetail> getPrintRuleConfig(RequestEvent<Long> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureReadPrintRuleRights();
 
 			PrintRuleConfig rule = daoFactory.getPrintRuleConfigDao().getById(req.getPayload());
 			if (rule == null) {
@@ -93,7 +93,7 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@PlusTransactional
 	public ResponseEvent<PrintRuleConfigDetail> createPrintRuleConfig(RequestEvent<PrintRuleConfigDetail> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureCreatePrintRuleRights();
 
 			PrintRuleConfig rule = printRuleConfigFactory.createPrintRuleConfig(req.getPayload());
 			daoFactory.getPrintRuleConfigDao().saveOrUpdate(rule, true);
@@ -110,7 +110,7 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@PlusTransactional
 	public ResponseEvent<PrintRuleConfigDetail> updatePrintRuleConfig(RequestEvent<PrintRuleConfigDetail> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureUpdatePrintRuleRights();
 
 			PrintRuleConfigDetail detail = req.getPayload();
 			if (detail.getId() == null) {
@@ -137,7 +137,7 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@PlusTransactional
 	public ResponseEvent<List<PrintRuleConfigDetail>> deletePrintRuleConfigs(RequestEvent<BulkDeleteEntityOp> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureDeletePrintRuleRights();
 
 			Set<Long> ruleIds = req.getPayload().getIds();
 			if (CollectionUtils.isEmpty(ruleIds)) {
@@ -162,6 +162,8 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<FileEntry>> getCommandFiles(RequestEvent<Long> req) {
+		AccessCtrlMgr.getInstance().ensureReadPrintRuleRights();
+
 		List<FileEntry> cmdFiles = new ArrayList<>();
 		try (Stream<Path> files = getFiles(req.getPayload())) {
 			files.forEach(
@@ -201,9 +203,7 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@PlusTransactional
 	public ResponseEvent<File> getCommandFile(RequestEvent<Pair<Long, String>> req) {
 		try {
-			if (!AuthUtil.isAdmin()) {
-				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
-			}
+			AccessCtrlMgr.getInstance().ensureReadPrintRuleRights();
 
 			Long ruleId = req.getPayload().first();
 			if (ruleId == null) {
@@ -242,6 +242,8 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Integer> clearCommandFiles(RequestEvent<Long> req) {
+		AccessCtrlMgr.getInstance().ensureUpdatePrintRuleRights();
+
 		AtomicInteger count = new AtomicInteger(0);
 		try (Stream<Path> files = getFiles(req.getPayload())) {
 			files.forEach(
@@ -261,10 +263,6 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 
 	private Stream<Path> getFiles(Long ruleId)
 	throws IOException  {
-		if (!AuthUtil.isAdmin()) {
-			throw  OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
-		}
-
 		if (ruleId == null) {
 			throw  OpenSpecimenException.userError(PrintRuleConfigErrorCode.ID_REQ);
 		}

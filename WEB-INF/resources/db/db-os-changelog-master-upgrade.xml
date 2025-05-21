@@ -190,6 +190,8 @@
   <include file="db/12.0/schema.xml" />
   <include file="db/12.0/config.xml" />
 
+  <include file="db/12.1/seed-data.xml" />
+
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
 </databaseChangeLog>

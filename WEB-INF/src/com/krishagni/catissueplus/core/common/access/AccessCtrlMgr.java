@@ -1861,6 +1861,45 @@ public class AccessCtrlMgr {
 
 	///////////////////////////////////////////////////////////////////////
 	//                                                                   //
+	// Print rules access check methods                                  //
+	//                                                                   //
+	///////////////////////////////////////////////////////////////////////
+	public void ensureReadPrintRuleRights() {
+		ensurePrintRuleRights(new Operation[] { Operation.READ });
+		ensurePrintRuleEximRights();
+	}
+
+	public void ensureCreatePrintRuleRights() {
+		ensurePrintRuleRights(new Operation[] { Operation.CREATE });
+	}
+
+	public void ensureUpdatePrintRuleRights() {
+		ensurePrintRuleRights(new Operation[] { Operation.CREATE, Operation.UPDATE });
+	}
+
+	public void ensureDeletePrintRuleRights() {
+		ensurePrintRuleRights(new Operation[] { Operation.DELETE });
+	}
+
+	private void ensurePrintRuleEximRights() {
+		if (isExportOp()) {
+			ensurePrintRuleRights(new Operation[] { Operation.EXIM });
+		}
+	}
+
+	private void ensurePrintRuleRights(Operation[] op) {
+		if (AuthUtil.isAdmin()) {
+			return;
+		}
+
+		Set<SiteCpPair> siteCps = getSiteCps(Resource.PRINT_RULE, op);
+		if (CollectionUtils.isEmpty(siteCps)) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////////
+	//                                                                   //
 	//	EXIM access control helper methods                        //
 	//                                                                   //
 	///////////////////////////////////////////////////////////////////////

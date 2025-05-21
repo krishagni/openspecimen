@@ -31,7 +31,9 @@ public enum Resource {
 	
 	SHIPPING_N_TRACKING("ShippingAndTracking"),
 
-	QUERY("Query")
+	QUERY("Query"),
+
+	PRINT_RULE("PrintRule")
 
 	;
 
