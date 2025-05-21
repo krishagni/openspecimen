@@ -1103,6 +1103,7 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="printRuleConfigFactory" ref="printRuleConfigFactory"/>
     <property name="labelPrintRuleFactoryRegistrar" ref="labelPrintRuleFactoryRegistrar"/>
+    <property name="exportSvc" ref="exportSvc" />
   </bean>
 
   <bean id="labelPrintRuleFactoryRegistrar" class="com.krishagni.catissueplus.core.common.domain.LabelPrintRuleFactoryRegistrar" factory-method="getInstance">
@@ -1181,6 +1182,10 @@
         <value>com/krishagni/catissueplus/core/administrative/schema/shipment.xml</value>
         <value>com/krishagni/catissueplus/core/administrative/schema/container-shipment.xml</value>
         <value>com/krishagni/catissueplus/core/administrative/schema/return-specimen.xml</value>
+        <value>com/krishagni/catissueplus/core/administrative/schema/container-print-rule.xml</value>
+        <value>com/krishagni/catissueplus/core/administrative/schema/order-item-print-rule.xml</value>
+        <value>com/krishagni/catissueplus/core/administrative/schema/specimen-print-rule.xml</value>
+        <value>com/krishagni/catissueplus/core/administrative/schema/visit-print-rule.xml</value>
         <value>com/krishagni/catissueplus/core/biospecimen/schema/cpe.xml</value>
         <value>com/krishagni/catissueplus/core/biospecimen/schema/sr.xml</value>
         <value>com/krishagni/catissueplus/core/biospecimen/schema/cpr-multiple.xml</value>

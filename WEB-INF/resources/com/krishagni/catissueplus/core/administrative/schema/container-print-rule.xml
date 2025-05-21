@@ -1,0 +1,40 @@
+#macro(getMessage $code)$messageSource.getMessage($code, null, $locale)#end
+
+<object-schema>
+  <name>containerPrintRule</name>
+  <record>
+    <name>com.krishagni.catissueplus.core.common.events.PrintRuleConfigDetail</name>
+
+    <field>
+      <caption>#getMessage("print_rule_id")</caption>
+      <attribute>id</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("print_rule_object_type")</caption>
+      <attribute>objectType</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("print_rule_description")</caption>
+      <attribute>description</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("print_rule_activity_status")</caption>
+      <attribute>activityStatus</attribute>
+    </field>
+
+    <record>
+      <attribute>rule</attribute>
+      <caption>#getMessage("print_rule_parameters")</caption>
+
+      <field>
+        <caption>#getMessage("print_rule_site")</caption>
+        <attribute>site</attribute>
+      </field>
+
+      #parse( 'com/krishagni/catissueplus/core/administrative/schema/print-rule-parameters.xml' )
+    </record>
+  </record>
+</object-schema>

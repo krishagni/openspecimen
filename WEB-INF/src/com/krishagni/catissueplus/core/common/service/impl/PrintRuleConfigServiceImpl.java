@@ -6,13 +6,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -33,15 +36,17 @@ import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.repository.PrintRuleConfigsListCriteria;
 import com.krishagni.catissueplus.core.common.service.PrintRuleConfigService;
-import com.krishagni.catissueplus.core.common.util.AuthUtil;
-import com.krishagni.rbac.common.errors.RbacErrorCode;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
-public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
+public class PrintRuleConfigServiceImpl implements PrintRuleConfigService, InitializingBean {
 	private DaoFactory daoFactory;
 
 	private PrintRuleConfigFactory printRuleConfigFactory;
 
 	private LabelPrintRuleFactoryRegistrar labelPrintRuleFactoryRegistrar;
+
+	private ExportService exportSvc;
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -53,6 +58,10 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 
 	public void setLabelPrintRuleFactoryRegistrar(LabelPrintRuleFactoryRegistrar labelPrintRuleFactoryRegistrar) {
 		this.labelPrintRuleFactoryRegistrar = labelPrintRuleFactoryRegistrar;
+	}
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
 	}
 
 	@Override
@@ -261,6 +270,14 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 		}
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("containerPrintRule", () -> getPrintRulesGenerator("CONTAINER"));
+		exportSvc.registerObjectsGenerator("orderItemPrintRule", () -> getPrintRulesGenerator("ORDER_ITEM"));
+		exportSvc.registerObjectsGenerator("specimenPrintRule", () -> getPrintRulesGenerator("SPECIMEN"));
+		exportSvc.registerObjectsGenerator("visitPrintRule", () -> getPrintRulesGenerator("VISIT"));
+	}
+
 	private Stream<Path> getFiles(Long ruleId)
 	throws IOException  {
 		if (ruleId == null) {
@@ -300,5 +317,39 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService {
 	private void deleteRule(PrintRuleConfig rule) {
 		rule.delete();
 		EventPublisher.getInstance().publish(PrintRuleEvent.DELETED, rule);
+	}
+
+	private Function<ExportJob, List<? extends Object>> getPrintRulesGenerator(String objectType) {
+		return new Function<>() {
+			private boolean paramsInited;
+
+			private boolean endOfRules;
+
+			private PrintRuleConfigsListCriteria crit;
+
+			@Override
+			public List<PrintRuleConfigDetail> apply(ExportJob job) {
+				initParams();
+
+				if (endOfRules) {
+					return Collections.emptyList();
+				}
+
+				List<PrintRuleConfig> dbRules = daoFactory.getPrintRuleConfigDao().getPrintRules(crit);
+				crit.startAt(crit.startAt() + dbRules.size());
+				endOfRules = dbRules.size() < crit.maxResults();
+				return PrintRuleConfigDetail.from(dbRules);
+			}
+
+			private void initParams() {
+				if (paramsInited) {
+					return;
+				}
+
+				endOfRules = !AccessCtrlMgr.getInstance().hasPrintRuleEximRights();
+				crit = new PrintRuleConfigsListCriteria().objectType(objectType).startAt(0).maxResults(100);
+				paramsInited = true;
+			}
+		};
 	}
 }

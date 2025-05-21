@@ -1,0 +1,63 @@
+<field>
+  <caption>#getMessage("print_rule_ip_address")</caption>
+  <attribute>ipAddressMatcher</attribute>
+</field>
+
+<field>
+  <multiple>true</multiple>
+  <caption>#getMessage("print_rule_users")</caption>
+  <attribute>users</attribute>
+</field>
+
+<field>
+  <multiple>true</multiple>
+  <caption>#getMessage("print_rule_user_groups")</caption>
+  <attribute>userGroups</attribute>
+</field>
+
+<field>
+  <multiple>true</multiple>
+  <caption>#getMessage("print_rule_tokens")</caption>
+  <attribute>dataTokensList</attribute>
+</field>
+
+<field>
+  <caption>#getMessage("print_rule_label_type")</caption>
+  <attribute>labelType</attribute>
+</field>
+
+<field>
+  <caption>#getMessage("print_rule_label_design")</caption>
+  <attribute>labelDesign</attribute>
+</field>
+
+<field>
+  <caption>#getMessage("print_rule_cmd_file_fmt")</caption>
+  <attribute>cmdFileFmt</attribute>
+</field>
+
+<field>
+  <caption>#getMessage("print_rule_line_ending")</caption>
+  <attribute>lineEnding</attribute>
+</field>
+
+<field>
+  <caption>#getMessage("print_rule_file_extn")</caption>
+  <attribute>fileExtn</attribute>
+</field>
+
+<field>
+  <type>boolean</type>
+  <caption>#getMessage("print_rule_create_file")</caption>
+  <attribute>createFile</attribute>
+</field>
+
+<field>
+  <caption>#getMessage("print_rule_cmd_files_dir")</caption>
+  <attribute>cmdFilesDir</attribute>
+</field>
+
+<field>
+  <caption>#getMessage("print_rule_printer")</caption>
+  <attribute>printerName</attribute>
+</field>

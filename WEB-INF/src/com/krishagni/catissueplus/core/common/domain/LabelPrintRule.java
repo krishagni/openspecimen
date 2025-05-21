@@ -297,13 +297,14 @@ public abstract class LabelPrintRule {
 			rule.put("labelType", getLabelType());
 			rule.put("ipAddressMatcher", getIpAddressRange(getIpAddressMatcher()));
 			rule.put("users", getUsersList(ufn));
-			rule.put("userGroups", getUserGroupsList(false));
+			rule.put("userGroups", getUserGroupsList(ufn));
 			rule.put("$$users", getUsersListJson());
 			rule.put("$$userGroups", getUserGroupsListJson());
 			rule.put("printerName", getPrinterName());
 			rule.put("cmdFilesDir", getCmdFilesDir());
 			rule.put("labelDesign", getLabelDesign());
 			rule.put("dataTokens", getTokens());
+			rule.put("dataTokensList", getTokensList());
 			rule.put("cmdFileFmt", getCmdFileFmt().fmt);
 			rule.put("lineEnding", getLineEnding());
 			rule.put("fileExtn", getFileExtn());
@@ -326,22 +327,24 @@ public abstract class LabelPrintRule {
 	}
 
 	private String getTokens() {
-		StringBuilder tokenStr = new StringBuilder();
-		for (Pair<LabelTmplToken, List<String>> tokenArgs : dataTokens) {
-			if (tokenStr.length() > 0) {
-				tokenStr.append(",");
-			}
+		return String.join(",", getTokensList());
+	}
 
+	private List<String> getTokensList() {
+		List<String> result = new ArrayList<>();
+		for (Pair<LabelTmplToken, List<String>> tokenArgs : dataTokens) {
 			LabelTmplToken token = tokenArgs.first();
 			List<String> args = tokenArgs.second();
 
-			tokenStr.append(token.getName());
+			String expr = token.getName();
 			if (args != null && !args.isEmpty()) {
-				tokenStr.append("(").append(String.join(",", args)).append(")");
+				expr += "(" + String.join(",", args) + ")";
 			}
+
+			result.add(expr);
 		}
 
-		return tokenStr.toString();
+		return result;
 	}
 
 	private String getIpAddressRange(IpAddressMatcher ipRange) {
@@ -363,7 +366,7 @@ public abstract class LabelPrintRule {
 	}
 
 	private List<String> getUsersList(boolean ufn) {
-		Function<User, String> mapper = ufn ? (u) -> u.getLoginName() : (u) -> u.getId().toString();
+		Function<User, String> mapper = ufn ? User::getEmailAddress : (u) -> u.getId().toString();
 		return Utility.nullSafeStream(getUsers()).map(mapper).collect(Collectors.toList());
 	}
 
@@ -379,7 +382,7 @@ public abstract class LabelPrintRule {
 	}
 
 	private List<String> getUserGroupsList(boolean ufn) {
-		Function<UserGroup, String> mapper = ufn ? (g) -> g.getName() : (g) -> g.getId().toString();
+		Function<UserGroup, String> mapper = ufn ? UserGroup::getName : (g) -> g.getId().toString();
 		return Utility.nullSafeStream(getUserGroups()).map(mapper).collect(Collectors.toList());
 	}
 

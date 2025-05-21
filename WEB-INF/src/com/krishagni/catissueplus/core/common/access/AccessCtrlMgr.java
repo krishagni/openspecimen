@@ -1881,6 +1881,10 @@ public class AccessCtrlMgr {
 		ensurePrintRuleRights(new Operation[] { Operation.DELETE });
 	}
 
+	public boolean hasPrintRuleEximRights() {
+		return hasEximRights(null, Resource.PRINT_RULE.getName());
+	}
+
 	private void ensurePrintRuleEximRights() {
 		if (isExportOp()) {
 			ensurePrintRuleRights(new Operation[] { Operation.EXIM });
