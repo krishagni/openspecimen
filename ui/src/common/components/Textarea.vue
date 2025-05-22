@@ -73,7 +73,7 @@ export default {
   }
 
   .os-input-text :deep(textarea) {
-    resize: none;
+    resize: vertical;
     width: 100%;
   }
 </style>
