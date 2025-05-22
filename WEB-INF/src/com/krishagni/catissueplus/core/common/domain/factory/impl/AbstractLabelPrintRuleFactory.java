@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.common.domain.factory.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,7 @@ import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
@@ -97,14 +99,14 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 		List<T> objects = getObjs.apply(keys);
 		if (ose != null && objects.size() != keys.size()) {
 			Set<K> foundKeys = objects.stream().map(keyMapper).collect(Collectors.toSet());
-			ose.addError(invalid, keys.stream().filter(k -> !foundKeys.contains(k)).collect(Collectors.toList()));
+			ose.addError(invalid, keys.stream().filter(k -> !foundKeys.contains(k)).map(Object::toString).collect(Collectors.joining(",")));
 		}
 
 		return objects;
 	}
 
 	protected boolean isEmptyString(Object input) {
-		return input == null || !(input instanceof String) || input.toString().trim().isEmpty();
+		return !(input instanceof String) || input.toString().trim().isEmpty();
 	}
 
 	protected List<String> objToList(Object input) {
@@ -142,8 +144,15 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 	private void setDataTokens(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
 		Object tokensStr = input.get("dataTokens");
 		if (isEmptyString(tokensStr)) {
-			ose.addError(PrintRuleConfigErrorCode.LABEL_TOKENS_REQ);
-			return;
+			List<String> dataTokensList = (List<String>) input.get("dataTokensList");
+			if (dataTokensList != null && !dataTokensList.isEmpty()) {
+				tokensStr = String.join(",", dataTokensList);
+			}
+
+			if (isEmptyString(tokensStr)) {
+				ose.addError(PrintRuleConfigErrorCode.LABEL_TOKENS_REQ);
+				return;
+			}
 		}
 
 		List<String> invalidTokenNames = new ArrayList<>();
@@ -270,26 +279,26 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 			return;
 		}
 
-		List<User> result = new ArrayList<>();
+		Set<User> result = new LinkedHashSet<>();
 		Pair<List<Long>, List<String>> idsAndLoginNames = getIdsAndNames(userLogins);
 
 		if (!idsAndLoginNames.first().isEmpty()) {
 			List<User> users = getList(
 				(ids) -> daoFactory.getUserDao().getByIds(ids),
-				idsAndLoginNames.first(), (u) -> u.getId(),
+				idsAndLoginNames.first(), BaseEntity::getId,
 				failOnError ? ose : null, failOnError ? PrintRuleConfigErrorCode.INVALID_USERS : null);
 			result.addAll(users);
 		}
 
 		if (!idsAndLoginNames.second().isEmpty()) {
 			List<User> users = getList(
-				(loginNames) -> daoFactory.getUserDao().getUsers(loginNames, null),
-				idsAndLoginNames.second(), (u) -> u.getLoginName(),
+				(emailAddresses) -> daoFactory.getUserDao().getUsersByEmailAddress(emailAddresses),
+				idsAndLoginNames.second(), User::getEmailAddress,
 				failOnError ? ose : null, failOnError ? PrintRuleConfigErrorCode.INVALID_USERS : null);
 			result.addAll(users);
 		}
 
-		rule.setUsers(result);
+		rule.setUsers(new ArrayList<>(result));
 	}
 
 	private void setUserGroups(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
@@ -298,10 +307,32 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 			return;
 		}
 
-		Set<Long> groupIds = groupIdsList.stream().map(Long::parseLong).collect(Collectors.toSet());
-		List<UserGroup> groups = daoFactory.getUserGroupDao().getByIds(groupIds);
-		groups.forEach(group -> group.getUsers().forEach(user -> user.getFirstName())); // lazy init
-		rule.setUserGroups(groups);
+		Set<UserGroup> result = new LinkedHashSet<>();
+		Pair<List<Long>, List<String>> idsAndNames = getIdsAndNames(groupIdsList);
+		if (!idsAndNames.first().isEmpty()) {
+			List<UserGroup> userGroups = getList(
+				(ids) -> daoFactory.getUserGroupDao().getByIds(ids),
+				idsAndNames.first(),
+				BaseEntity::getId,
+				failOnError ? ose : null,
+				failOnError ? PrintRuleConfigErrorCode.INVALID_USER_GROUPS : null
+			);
+			result.addAll(userGroups);
+		}
+
+		if (!idsAndNames.second().isEmpty()) {
+			List<UserGroup> userGroups = getList(
+				(ids) -> daoFactory.getUserGroupDao().getByNames(ids),
+				idsAndNames.second(),
+				UserGroup::getName,
+				failOnError ? ose : null,
+				failOnError ? PrintRuleConfigErrorCode.INVALID_USER_GROUPS : null
+			);
+			result.addAll(userGroups);
+		}
+
+		result.forEach(group -> group.getUsers().forEach(user -> user.getFirstName())); // lazy init
+		rule.setUserGroups(new ArrayList<>(result));
 	}
 
 	private List<String> parseTokens(String input) {

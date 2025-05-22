@@ -49,26 +49,11 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 			}
 
 			switch (eventName) {
-				case "specimenDisposalEvent":
-					updateDisposeEvent(event);
-					break;
-
-				case "specimenReturnEvent":
-					updateReturnEvent(event);
-					break;
-
-				case "specimenReservedEvent":
-				case "specimenReservationCancelEvent":
-					updateReservedEvent(event);
-					break;
-
-				case "specimenTransferEvent":
-					updateTransferEvent(event);
-					break;
-
-				case "containerTransferEvent":
-					updateContainerTransferEvent(event);
-					break;
+				case "specimenDisposalEvent" -> updateDisposeEvent(event);
+				case "specimenReturnEvent" -> updateReturnEvent(event);
+				case "specimenReservedEvent", "specimenReservationCancelEvent" -> updateReservedEvent(event);
+				case "specimenTransferEvent" -> updateTransferEvent(event);
+				case "containerTransferEvent" -> updateContainerTransferEvent(event);
 			}
 
 			return ResponseEvent.response(event);

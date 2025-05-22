@@ -28,6 +28,7 @@ public class PrintRuleConfigDaoImpl extends AbstractDao<PrintRuleConfig> impleme
 
 	private Criteria<PrintRuleConfig> addSearchConditions(Criteria<PrintRuleConfig> query, PrintRuleConfigsListCriteria crit) {
 		addObjectTypeRestriction(query, crit.objectType());
+		addDescriptionRestriction(query, crit.query());
 		addUserNameRestriction(query, crit.userName());
 		addInstituteRestriction(query, crit.instituteName());
 		return query;
@@ -39,6 +40,14 @@ public class PrintRuleConfigDaoImpl extends AbstractDao<PrintRuleConfig> impleme
 		}
 
 		query.add(query.eq("pr.objectType", objectType));
+	}
+
+	private void addDescriptionRestriction(Criteria<PrintRuleConfig> query, String description) {
+		if (StringUtils.isBlank(description)) {
+			return;
+		}
+
+		query.add(query.like("pr.description", description));
 	}
 
 	private void addUserNameRestriction(Criteria<PrintRuleConfig> query, String name) {

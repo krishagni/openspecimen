@@ -46,6 +46,9 @@ public class PrintRuleConfigsController {
 		@RequestParam(value = "instituteName", required = false)
 		String instituteName,
 
+		@RequestParam(value = "description", required = false)
+		String description,
+
 		@RequestParam(value = "userName", required = false)
 		String userName,
 
@@ -59,6 +62,7 @@ public class PrintRuleConfigsController {
 			.objectType(objectType)
 			.instituteName(instituteName)
 			.userName(userName)
+			.query(description)
 			.startAt(startAt)
 			.maxResults(maxResults);
 		return response(printRuleConfigSvc.getPrintRuleConfigs(request(crit)));

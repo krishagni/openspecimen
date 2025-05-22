@@ -1301,6 +1301,10 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
+  <bean id="printRulesImporter" class="com.krishagni.catissueplus.core.common.service.impl.PrintRuleConfigImporter">
+    <property name="printRuleConfigSvc" ref="printRuleConfigSvc" />
+  </bean>
+
   <bean id="objectImporterFactory" class="com.krishagni.catissueplus.core.importer.services.impl.ObjectImporterFactoryImpl">
     <property name="importersMap">
       <map>
@@ -1495,6 +1499,11 @@
             <property name="specimenResolver" ref="specimenResolver"/>
           </bean>
         </entry>
+
+        <entry key="containerPrintRule" value-ref="printRulesImporter" />
+        <entry key="orderItemPrintRule" value-ref="printRulesImporter" />
+        <entry key="specimenPrintRule"  value-ref="printRulesImporter" />
+        <entry key="visitPrintRule"     value-ref="printRulesImporter" />
       </map>
     </property>
   </bean>
