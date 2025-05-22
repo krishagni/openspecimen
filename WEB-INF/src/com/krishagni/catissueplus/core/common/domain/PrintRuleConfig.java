@@ -35,6 +35,8 @@ public class PrintRuleConfig extends BaseEntity {
 
 	private LabelPrintRule rule;
 
+	private Integer sortOrder;
+
 	public String getObjectType() {
 		return objectType;
 	}
@@ -125,6 +127,14 @@ public class PrintRuleConfig extends BaseEntity {
 		}
 	}
 
+	public Integer getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(Integer sortOrder) {
+		this.sortOrder = sortOrder;
+	}
+
 	public void update(PrintRuleConfig rule) {
 		setObjectType(rule.getObjectType());
 		setInstitute(rule.getInstitute());
@@ -133,6 +143,7 @@ public class PrintRuleConfig extends BaseEntity {
 		setRule(rule.getRule());
 		setActivityStatus(rule.getActivityStatus());
 		setDescription(rule.getDescription());
+		setSortOrder(rule.getSortOrder());
 	}
 
 	public void delete() {
@@ -144,7 +155,7 @@ public class PrintRuleConfig extends BaseEntity {
 		return Arrays.stream(
 			new String[] {
 				"id", "objectType", "description", "institute",
-				"updatedBy", "updatedOn", "ruleDefJson", "activityStatus"
+				"updatedBy", "updatedOn", "ruleDefJson", "activityStatus", "sortOrder"
 			}
 		).collect(Collectors.toSet());
 	}
@@ -161,9 +172,5 @@ public class PrintRuleConfig extends BaseEntity {
 				.withGetterVisibility(Visibility.NONE)
 				.withSetterVisibility(Visibility.NONE)
 				.withCreatorVisibility(Visibility.NONE));
-	}
-
-	private boolean isDisabled() {
-		return Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(getActivityStatus());
 	}
 }

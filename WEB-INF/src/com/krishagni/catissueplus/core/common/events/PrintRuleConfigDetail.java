@@ -30,6 +30,8 @@ public class PrintRuleConfigDetail {
 
 	private Map<String, Object> rule;
 
+	private Integer sortOrder;
+
 	public Long getId() {
 		return id;
 	}
@@ -102,6 +104,13 @@ public class PrintRuleConfigDetail {
 		this.rule = rule;
 	}
 
+	public Integer getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(Integer sortOrder) {
+		this.sortOrder = sortOrder;
+	}
 	public static PrintRuleConfigDetail from(PrintRuleConfig rule) {
 		PrintRuleConfigDetail detail = new PrintRuleConfigDetail();
 
@@ -114,6 +123,7 @@ public class PrintRuleConfigDetail {
 		detail.setActivityStatus(rule.getActivityStatus());
 		detail.setDescription(rule.getDescription());
 		detail.setRule(rule.getRuleDef(true));
+		detail.setSortOrder(rule.getSortOrder());
 		return detail;
 	}
 

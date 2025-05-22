@@ -46,6 +46,7 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 		setInstitute(detail, rule, ose);
 		setActivityStatus(detail, rule, ose);
 		setDescription(detail, rule, ose);
+		setSortOrder(detail, rule, ose);
 		setRule(detail, rule, ose);
 		ose.checkAndThrow();
 		return rule;
@@ -104,6 +105,16 @@ public class PrintRuleConfigFactoryImpl implements PrintRuleConfigFactory {
 		}
 
 		rule.setDescription(detail.getDescription());
+	}
+
+	private void setSortOrder(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {
+		if (detail.getSortOrder() == null) {
+			rule.setSortOrder(null);
+		} else if (detail.getSortOrder() >= 0) {
+			rule.setSortOrder(detail.getSortOrder());
+		} else {
+			ose.addError(PrintRuleConfigErrorCode.INV_SORT_ORDER, detail.getSortOrder());
+		}
 	}
 
 	private void setRule(PrintRuleConfigDetail detail, PrintRuleConfig rule, OpenSpecimenException ose) {

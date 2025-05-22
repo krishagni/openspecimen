@@ -27,6 +27,8 @@
 
     <property name="description" column="DESCRIPTION" not-null="true"/>
 
+    <property name="sortOrder" column="SORT_ORDER" />
+
     <filter name="activeEntity"/>
   </class>
 </hibernate-mapping>

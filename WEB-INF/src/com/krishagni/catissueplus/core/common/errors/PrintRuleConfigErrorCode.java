@@ -27,7 +27,9 @@ public enum PrintRuleConfigErrorCode implements ErrorCode{
 
 	INVALID_USER_GROUPS,
 
-	DESC_REQ;
+	DESC_REQ,
+
+	INV_SORT_ORDER;
 
 	@Override
 	public String code() {

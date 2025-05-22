@@ -25,6 +25,7 @@ import com.krishagni.catissueplus.core.common.domain.LabelPrintRule;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplToken;
 import com.krishagni.catissueplus.core.common.domain.LabelTmplTokenRegistrar;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
+import com.krishagni.catissueplus.core.common.domain.PrintRuleConfig;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
@@ -71,7 +72,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 	@Override
 	public LabelPrintJob print(List<PrintItem<T>> printItems) {
 		try {
-			List<? extends LabelPrintRule> rules = PrintRuleTxnCache.getInstance().getRules(getObjectType());
+			List<PrintRuleConfig> rules = PrintRuleTxnCache.getInstance().getRules(getObjectType());
 			if (rules == null) {
 				return null;
 			}
@@ -92,7 +93,8 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 			for (PrintItem<T> printItem : printItems) {
 				boolean found = false;
 				T obj = printItem.getObject();
-				for (LabelPrintRule rule : rules) {
+				for (PrintRuleConfig cfg : rules) {
+					LabelPrintRule rule = cfg.getRule();
 					if (!isApplicableFor(rule, obj, currentUser, ipAddr)) {
 						continue;
 					}
