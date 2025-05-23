@@ -37,13 +37,17 @@ public class CollectionProtocolEventsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<CollectionProtocolEventDetail> getEvents(
-		@RequestParam(value = "cpId")
+		@RequestParam(value = "cpId", required = false)
 		Long cpId,
+
+		@RequestParam(value = "cpShortTitle", required = false)
+		String cpShortTitle,
 
 		@RequestParam(value = "includeClosedEvents", required = false, defaultValue = "true")
 		boolean includeClosedEvents) {
 
 		EntityQueryCriteria crit = new EntityQueryCriteria(cpId);
+		crit.setName(cpShortTitle);
 		crit.setParams(Collections.singletonMap("includeClosedEvents", includeClosedEvents));
 
 		ResponseEvent<List<CollectionProtocolEventDetail>> resp = cpSvc.getProtocolEvents(getRequest(crit));

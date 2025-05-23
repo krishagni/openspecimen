@@ -828,11 +828,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		EntityQueryCriteria crit = req.getPayload();
 		
 		try {
-			CollectionProtocol cp = daoFactory.getCollectionProtocolDao().getById(crit.getId());
-			if (cp == null) {
-				return ResponseEvent.userError(CpErrorCode.NOT_FOUND);
-			}
-
+			CollectionProtocol cp = getCollectionProtocol(crit.getId(), null, crit.getName());
 			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
 
 			List<CollectionProtocolEvent> events = cp.getOrderedCpeList();

@@ -81,6 +81,11 @@ class CollectionProtocol {
     return http.get('collection-protocol-events', {cpId});
   }
 
+  async getCpesByCpShortTitle(cpShortTitle) {
+    return http.get('collection-protocol-events', {cpShortTitle});
+  }
+
+
   async getCpe(eventId) {
     return http.get('collection-protocol-events/' + eventId);
   }
