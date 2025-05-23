@@ -196,6 +196,21 @@ public class CollectionProtocolEvent extends BaseEntity implements Comparable<Co
 		this.specimenCollectionGroups = specimenCollectionGroups;
 	}
 
+	public String getDescription() {
+		String result = "";
+		if (eventPoint != null) {
+			result += ((eventPoint < 0) ? "-" : "") + "T" + Math.abs(eventPoint);
+			result += eventPointUnit.name().charAt(0) + ": ";
+		}
+
+		result += eventLabel;
+		if (code != null) {
+			result += " (" + code + ")";
+		}
+
+		return result;
+	}
+
 	public int getOffset() {
 		return offset;
 	}
