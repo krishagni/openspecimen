@@ -391,6 +391,10 @@ export default {
       this.emitFiltersUpdated();
     },
 
+    clearSelection: function() {
+      this.selectedRows = [];
+    },
+
     rowClick: function(row) {
       let el = row.originalEvent.target;
       while (el != null && el.tagName.toUpperCase() != 'TR') {
