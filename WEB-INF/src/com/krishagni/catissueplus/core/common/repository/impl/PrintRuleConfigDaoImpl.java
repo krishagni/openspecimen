@@ -47,7 +47,11 @@ public class PrintRuleConfigDaoImpl extends AbstractDao<PrintRuleConfig> impleme
 			return;
 		}
 
-		query.add(query.like("pr.description", description));
+		if (isOracle()) {
+			query.add(query.ilike("pr.description", description));
+		} else {
+			query.add(query.like("pr.description", description));
+		}
 	}
 
 	private void addUserNameRestriction(Criteria<PrintRuleConfig> query, String name) {
