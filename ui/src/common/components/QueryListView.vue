@@ -141,14 +141,24 @@ export default {
           if (filter.endsWith('.$min') || filter.endsWith('.$max')) {
             const key = filter.substr(0, filter.lastIndexOf('.'));
             rangeFilters[key] = rangeFilters[key] || [];
+
+            let value = filters[filter];
+            if (this._isDateFilter(key)) {
+              value = this._toDateString(value);
+            }
+
             if (filter.endsWith('.$min')) {
-              rangeFilters[key][0] = filters[filter];
+              rangeFilters[key][0] = value;
             } else {
-              rangeFilters[key][1] = filters[filter];
+              rangeFilters[key][1] = value;
             }
           } else {
             let values = filters[filter];
             if (!(values instanceof Array)) {
+              if (this._isDateFilter(filter)) {
+                values = this._toDateString(values);
+              }
+
               values = [values];
             }
 
@@ -360,6 +370,19 @@ export default {
       }
 
       return result;
+    },
+
+    _isDateFilter: function(name) {
+      const filter = this.filters.find(f => f.name == name);
+      return filter && filter.type == 'date';
+    },
+
+    _toDateString: function(value) {
+      if (typeof value == 'string') {
+        value = new Date(value);
+      }
+
+      return '"' + util.formatDate(value, ui.global.locale.shortDateFmt) + '"';
     }
   }
 }

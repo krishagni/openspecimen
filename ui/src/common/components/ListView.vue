@@ -108,19 +108,13 @@
               <span v-else-if="filter.type == 'date'">
                 <div class="range" v-if="filter.range">
                   <os-date-picker md-type="true" :placeholder="'Min. ' + caption(filter)"
-                    v-model="filterValues[filter.name + '.$min']" :show-time="filter.showTime"
-                    @update:model-value="handleDateInput(filter, filter.name + '.$min')">
-                  </os-date-picker>
+                    v-model="filterValues[filter.name + '.$min']" :show-time="filter.showTime" />
                   <os-date-picker md-type="true" :placeholder="'Max. ' + caption(filter)"
-                    v-model="filterValues[filter.name + '.$max']" :show-time="filter.showTime"
-                    @update:model-value="handleDateInput(filter, filter.name + '.$max')">
-                  </os-date-picker>
+                    v-model="filterValues[filter.name + '.$max']" :show-time="filter.showTime" />
                 </div>
                 <div v-else>
                   <os-date-picker md-type="true" :placeholder="caption(filter)"
-                    v-model="filterValues[filter.name]" :show-time="filter.showTime"
-                    @update:model-value="handleDateInput(filter)">
-                  </os-date-picker>
+                    v-model="filterValues[filter.name]" :show-time="filter.showTime" />
                 </div>
               </span>
             </cell>
@@ -347,17 +341,6 @@ export default {
       const fb = util.uriEncode(this.filterValues);
       const event = {filters: this.filterValues, uriEncoding: fb, pageSize: this.pageSizeOpts.currentPageSize + 1};
       this.$emit('filtersUpdated', event);
-    },
-
-    handleDateInput: function(filter, name) {
-      const key  = name || filter.name;
-      const date = this.filterValues[key];
-      if (date && filter.format) {
-        this.filterValues[key] = util.formatDate(date, filter.format);
-        if (filter.stringLiteral) {
-          this.filterValues[key] = '"' + this.filterValues[key] + '"';
-        }
-      }
     },
 
     changePageSize: function(input) {
