@@ -101,19 +101,31 @@ public class CsvFileWriter implements CsvWriter {
 			return input;
 		}
 
-		if (UNSAFE_CHARS.indexOf(input.charAt(0)) > -1) {
-			return "'" + input;
+		//
+		// Transform occurrences of \" to \\" in the output CSV
+		//
+		StringBuilder value = new StringBuilder();
+		for (int i = 0; i < input.length(); ++i) {
+			if (input.charAt(i) == '\\') {
+				if ((i + 1) < input.length() && input.charAt(i + 1) == '"') {
+					value.append('\\');
+				}
+			}
+
+			value.append(input.charAt(i));
 		}
 
-		if (NUMERIC_SIGNS.indexOf(input.charAt(0)) > -1) {
+		if (UNSAFE_CHARS.indexOf(value.charAt(0)) > -1) {
+			value.insert(0, "'");
+		} else if (NUMERIC_SIGNS.indexOf(value.charAt(0)) > -1) {
 			try {
-				new BigDecimal(input);
+				new BigDecimal(value.toString());
 			} catch (Exception e) {
-				return "'" + input;
+				value.insert(0, "'");
 			}
 		}
 
-		return input;
+		return value.toString();
 	}
 	
 	private static final String DEFAULT_LINE_ENDING = "\n";
