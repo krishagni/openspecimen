@@ -29,6 +29,9 @@
             <os-button left-icon="flask" :label="$t('participants.view_specimens')"
               @click="viewSpecimens" v-if="ctx.access.viewSpecimensAllowed" />
 
+            <os-button left-icon="calendar-alt" :label="$t('participants.view_cp_details')"
+              @click="$goto('CpDetail.Overview', {cpId: ctx.cp.id})" />
+
             <os-button-link left-icon="procedures" :label="$t('participants.view_sop')"
               :url="sopUrl" :new-tab="true" v-if="sopUrl" />
 
@@ -52,6 +55,9 @@
 
             <os-button left-icon="plus" :label="$t('participants.add_specimen')" @click="addSpecimen"
               v-else-if="ctx.cp.activityStatus != 'Closed' && ctx.access.createPrimarySpecimensAllowed" />
+
+            <os-button left-icon="calendar-alt" :label="$t('participants.view_cp_details')"
+              @click="$goto('CpDetail.Overview', {cpId: ctx.cp.id})" />
 
             <os-button-link left-icon="procedures" :label="$t('participants.view_sop')"
               :url="sopUrl" :new-tab="true" v-if="sopUrl" />
@@ -416,12 +422,6 @@ export default {
         icon: 'file-pdf',
         caption: this.$t('participants.generate_cp_report'),
         onSelect: this.generateCpReport
-      });
-
-      options.push({
-        icon: 'calendar-alt',
-        caption: this.$t('participants.view_cp_details'),
-        url: routerSvc.getUrl('CpDetail.Overview', {cpId: this.ctx.cp.id})
       });
 
       const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
