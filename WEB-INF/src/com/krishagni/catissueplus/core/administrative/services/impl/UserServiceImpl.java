@@ -1232,21 +1232,21 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 	private void emailAnnouncements(AnnouncementDetail detail, List<String> emailAddresses) {
 		String[] adminEmailAddr = {ConfigUtil.getInstance().getAdminEmailId()};
-
 		if (StringUtils.isBlank(adminEmailAddr[0])) {
 			adminEmailAddr[0] = AuthUtil.getCurrentUser().getEmailAddress();
 		}
-
-		String[] rcpts = emailAddresses.toArray(new String[0]);
 
 		Map<String, Object> props = new HashMap<>();
 		props.put("user", AuthUtil.getCurrentUser());
 		props.put("$subject", new String[] { detail.getSubject() });
 		props.put("annDetail", detail);
 		props.put("ignoreDnd", true);
-		emailService.sendEmail(ANNOUNCEMENT_EMAIL_TMPL, adminEmailAddr, rcpts, null, props);
+		for (int i = 0; i < emailAddresses.size(); i += 25) {
+			List<String> rcpts = emailAddresses.subList(i, Math.min(i + 25, emailAddresses.size()));
+			logger.info("Sending email announcement " + detail.getSubject() + " to " + String.join(", ", rcpts));
+			emailService.sendEmail(ANNOUNCEMENT_EMAIL_TMPL, adminEmailAddr, rcpts.toArray(new String[0]), null, props);
+		}
 	}
-
 
 	//
 	// To be invoked only from unauthenticated contexts
