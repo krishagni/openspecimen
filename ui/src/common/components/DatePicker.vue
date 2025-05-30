@@ -53,6 +53,15 @@ export default {
     if (this.$refs.cal && this.$refs.cal.input) {
       this.$refs.cal.input.setAttribute('inputmode', 'text');
     }
+
+    if (this.$refs.cal && this.$refs.cal.input) {
+      let fmt = this.ui.global.locale.shortDateFmt || 'dd-mm-yyyy';
+      if (this.showTime) {
+        fmt += ' HH:mm';
+      }
+
+      this.$refs.cal.input.setAttribute('placeholder', fmt);
+    }
   },
 
   computed: {
