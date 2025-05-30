@@ -13,7 +13,7 @@
     @row-clicked="rowClicked"
     @row-star-toggled="rowStarToggled"
     @sort="sort"
-    ref="listView">
+    ref="listView" v-if="showList">
 
     <template #rowActions="{rowObject}" v-if="showRowActions">
       <slot name="actions" :row-object="rowObject" />
@@ -63,7 +63,9 @@ export default {
 
       selectedSpecimens: [],
 
-      loading: true
+      loading: true,
+
+      showList: false
     };
   },
 
@@ -116,6 +118,8 @@ export default {
         return result;
       }
     );
+
+    this.showList = true;
   },
 
   watch: {
