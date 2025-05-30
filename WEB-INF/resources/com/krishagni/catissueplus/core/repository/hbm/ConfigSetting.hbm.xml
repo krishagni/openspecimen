@@ -13,7 +13,7 @@
       </generator>
     </id>
 
-    <many-to-one name="property" column="PROPERTY_ID" not-null="true"/>
+    <many-to-one name="property" column="PROPERTY_ID" not-null="true" fetch="join"/>
 
     <property name="value" column="VALUE"/>
 
@@ -28,8 +28,10 @@
         cs
       from
         com.krishagni.catissueplus.core.common.domain.ConfigSetting cs
+        join cs.property prop
       where
-        cs.activityStatus = 'Active'
+        cs.activityStatus = 'Active' and
+        prop.activityStatus = 'Active'
     </query>
 
     <query name="getAllByModule">
@@ -40,7 +42,8 @@
         join cs.property prop 
         join prop.module module
       where
-        cs.activityStatus = 'Active' and 
+        cs.activityStatus = 'Active' and
+        prop.activityStatus = 'Active' and
         module.name = :name
     </query>
 
@@ -49,8 +52,10 @@
         cs
       from
         com.krishagni.catissueplus.core.common.domain.ConfigSetting cs
+        join cs.property prop
       where
         cs.activityStatus = 'Active' and
+        prop.activityStatus = 'Active' and
         cs.id > :settingId
     </query>
 
@@ -63,7 +68,8 @@
         join prop.module module
       where
         module.name = :moduleName and
-        prop.name = :propName
+        prop.name = :propName and
+        prop.activityStatus = 'Active'
       order by
         cs.id desc
     </query>

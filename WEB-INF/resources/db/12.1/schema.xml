@@ -10,4 +10,10 @@
       <column name="SORT_ORDER" type="${int.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Field to track the active configuration properties">
+    <addColumn tableName="OS_CFG_PROPS">
+      <column name="ACTIVITY_STATUS" type="${text.type}(32)" defaultValue="Active" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

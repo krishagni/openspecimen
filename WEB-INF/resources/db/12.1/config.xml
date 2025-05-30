@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Delete CP SOP doc setting">
+    <sql>
+      update
+        os_cfg_props
+      set
+        activity_status = 'Disabled'
+      where
+        name = 'cp_sop_doc' and
+        module_id in (
+          select
+            identifier
+          from
+            os_modules
+          where
+            name = 'biospecimen'
+        )
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Delete CP SOP link setting">
+    <sql>
+      update
+        os_cfg_props
+      set
+        activity_status = 'Disabled'
+      where
+        name = 'cp_sop_doc_url' and
+        module_id in (
+          select
+            identifier
+          from
+            os_modules
+          where
+            name = 'biospecimen'
+        )
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Delete Store PHI settings">
+    <sql>
+      update
+        os_cfg_props
+      set
+        activity_status = 'Disabled'
+      where
+        name = 'store_phi' and
+        module_id in (
+          select
+            identifier
+          from
+            os_modules
+          where
+            name = 'biospecimen'
+        )
+    </sql>
+  </changeSet>
+</databaseChangeLog>

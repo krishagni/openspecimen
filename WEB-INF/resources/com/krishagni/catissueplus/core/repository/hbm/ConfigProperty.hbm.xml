@@ -13,10 +13,7 @@
       </generator>
     </id>
 
-    <many-to-one
-      name="module"
-      class="com.krishagni.catissueplus.core.common.domain.Module"
-      column="MODULE_ID"/>
+    <many-to-one name="module" column="MODULE_ID"/>
 
     <property name="name" column="NAME" unique="true"/>
 
@@ -37,5 +34,9 @@
     </set>
     
     <property name="secured" column="IS_SECURE"/>
+
+    <property name="activityStatus" column="ACTIVITY_STATUS" />
+
+    <filter name="activeEntity" />
   </class>
 </hibernate-mapping>

@@ -28,6 +28,8 @@ public class ConfigProperty extends BaseEntity {
 	
 	private boolean secured;
 
+	private String activityStatus;
+
 	public Module getModule() {
 		return module;
 	}
@@ -86,5 +88,13 @@ public class ConfigProperty extends BaseEntity {
 
 	public boolean isFile() {
 		return getDataType() == DataType.FILE;
+	}
+
+	public String getActivityStatus() {
+		return activityStatus;
+	}
+
+	public void setActivityStatus(String activityStatus) {
+		this.activityStatus = activityStatus;
 	}
 }

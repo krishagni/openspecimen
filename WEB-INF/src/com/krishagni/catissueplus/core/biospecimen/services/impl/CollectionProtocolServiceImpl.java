@@ -653,9 +653,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 			String filename = cp.getSopDocumentName();
 			File file = null;
-			if (StringUtils.isBlank(filename)) {
-				file = ConfigUtil.getInstance().getFileSetting(ConfigParams.MODULE, ConfigParams.CP_SOP_DOC, null);
-			} else {
+			if (StringUtils.isNotBlank(filename)) {
 				file = new File(getSopDocDir() + filename);
 				if (!file.exists()) {
 					filename = filename.split("_", 2)[1];
