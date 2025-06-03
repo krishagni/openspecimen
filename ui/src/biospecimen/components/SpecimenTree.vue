@@ -212,11 +212,19 @@ export default {
       const reqOrSpmnIds = {specimens: specimenIds, requirements: reqIds};
       const wfInstanceSvc = this.$osSvc.tmWfInstanceSvc;
       if (wfInstanceSvc) {
+        const opts = {params: this._getBatchParams(this.$t('participants.collect_specimens'), reqOrSpmnIds)};
+
         let wfName;
         if (!this.visit.id || !this.visit.status || this.visit.status == 'Pending') {
           wfName = await this._getCollectVisitsWf();
+          if (this.visit.id > 0) {
+            opts.inputType = 'visit';
+          }
         } else {
           wfName = await this._getCollectPendingSpmnsWf();
+          if (this.specimen) {
+            opts.inputType = 'specimen';
+          }
         }
 
         let inputItem = {
@@ -230,11 +238,6 @@ export default {
 
         if (this.specimen) {
           inputItem.specimen = {id: this.specimen.id};
-        }
-
-        const opts = {params: this._getBatchParams(this.$t('participants.collect_specimens'), reqOrSpmnIds)};
-        if (this.specimen) {
-          opts.inputType = 'specimen';
         }
 
         const instance = await wfInstanceSvc.createInstance({name: wfName}, null, null, null, [inputItem], opts);
