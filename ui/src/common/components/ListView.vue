@@ -108,13 +108,16 @@
               <span v-else-if="filter.type == 'date'">
                 <div class="range" v-if="filter.range">
                   <os-date-picker md-type="true" :placeholder="'Min. ' + caption(filter)"
-                    v-model="filterValues[filter.name + '.$min']" :show-time="filter.showTime" />
+                    v-model="filterValues[filter.name + '.$min']" :show-time="filter.showTime"
+                    :date-only="filter.dateOnly"/>
                   <os-date-picker md-type="true" :placeholder="'Max. ' + caption(filter)"
-                    v-model="filterValues[filter.name + '.$max']" :show-time="filter.showTime" />
+                    v-model="filterValues[filter.name + '.$max']" :show-time="filter.showTime"
+                    :date-only="filter.dateOnly" />
                 </div>
                 <div v-else>
                   <os-date-picker md-type="true" :placeholder="caption(filter)"
-                    v-model="filterValues[filter.name]" :show-time="filter.showTime" />
+                    v-model="filterValues[filter.name]" :show-time="filter.showTime"
+                    :date-only="filter.dateOnly" />
                 </div>
               </span>
             </cell>
