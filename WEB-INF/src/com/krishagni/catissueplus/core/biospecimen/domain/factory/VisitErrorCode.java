@@ -56,7 +56,9 @@ public enum VisitErrorCode implements ErrorCode {
 
 	NAME_FMT_NOT_SPECIFIED,
 
-	CREATE_DISABLED_NA;
+	CREATE_DISABLED_NA,
+
+	SPR_TEXT_NA;
 	
 	public String code() {
 		return "VISIT_" + this.name();

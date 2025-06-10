@@ -360,6 +360,9 @@ public class VisitServiceImpl implements VisitService, ObjectAccessor, Initializ
 			String filename = detail.getFilename();
 			if (detail.isTextContent() || (detail.isPdfContent() && isExtractSprTextEnabled(visit))) {
 				String sprText = getTextFromReq(detail);
+				if (StringUtils.isBlank(sprText)) {
+					return ResponseEvent.userError(VisitErrorCode.SPR_TEXT_NA);
+				}
 
 				File sprFile = new File(getSprDirPath(visit.getId()) + File.separator + "spr.txt");
 				FileUtils.writeStringToFile(sprFile, sprText, (String) null, false);

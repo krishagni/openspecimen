@@ -180,7 +180,13 @@ export default {
     },
 
     uploadReport: function() {
-      this.$refs.pathReportUploader.upload().then(
+      const {pathReportUploader} = this.$refs;
+      if (!pathReportUploader.hasFiles()) {
+        alertsSvc.error({code: 'common.file_not_selected'});
+        return;
+      }
+
+      pathReportUploader.upload().then(
         (sprName) => {
           alertsSvc.success({code: 'visits.path_report_uploaded'});
           Object.assign(this.visit, {sprName});
