@@ -55,7 +55,7 @@ class Query {
       runType: 'Export',
       aql: await util.getDataAql(query, facets, false, false),
       wideRowMode: query.wideRowMode || 'OFF',
-      outputIsoDateTime: true, // TODO: (outputIsoFmt || false),
+      outputIsoDateTime: false, // TODO: (outputIsoFmt || false),
       outputColumnExprs: query.outputColumnExprs || false,
       caseSensitive: (query.caseSensitive == undefined || query.caseSensitive == null || query.caseSensitive)
     };
