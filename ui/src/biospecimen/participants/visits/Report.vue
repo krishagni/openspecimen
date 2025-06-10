@@ -40,7 +40,15 @@
         </div>
         <div v-else>
           <os-message type="info">
-            <span v-t="'visits.non_text_spr'">Path report cannot be displayed, as it is not in text format.</span>
+            <div>
+              <h4 v-t="'visits.spr_text_na'">Path Report Text Not Available</h4>
+              <span v-t="'visits.spr_text_extract_failed'" v-if="extractSprText">
+                The system couldn't extract text from your uploaded file. This usually happens when the file is a PDF, image, or another non-text format. To display the report, please upload a plain text file.
+              </span>
+              <span v-t="'visits.spr_non_text_file'" v-else>
+                The system couldn't find any readable text in your uploaded file. Usually, this happens when your upload images or other non-text files. To view the report, please upload a file that contains text.
+              </span>
+            </div>
           </os-message>
         </div>
       </div>
@@ -83,6 +91,8 @@
 
 import alertsSvc from '@/common/services/Alerts.js';
 import http      from '@/common/services/HttpClient.js';
+import settingsSvc from '@/common/services/Setting.js';
+import util      from '@/common/services/Util.js';
 import visitSvc  from '@/biospecimen/services/Visit.js';
 
 export default {
@@ -101,6 +111,8 @@ export default {
       editMode: false,
 
       formCtx: {},
+
+      extractSprText: false,
 
       reportSchema: {
         rows: [
@@ -124,7 +136,16 @@ export default {
   },
 
   async created() {
-    this._loadSprText(); 
+    this._loadSprText();
+
+    const cp = this.cpViewCtx.getCp();
+    let extractSprText = cp.extractSprText;
+    if (extractSprText == null) {
+      const [setting] = await settingsSvc.getSetting('biospecimen', 'extract_spr_text');
+      extractSprText = util.isTrue(setting.value);
+    }
+
+    this.extractSprText = extractSprText;
   },
 
   computed: {
