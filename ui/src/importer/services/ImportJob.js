@@ -6,6 +6,10 @@ class ImportJob {
     return http.get('import-jobs', crit);
   }
 
+  getJob(jobId) {
+    return http.get('import-jobs/' + jobId);
+  }
+
   getJobDescription(job) {
     return '#' + job.id + ' ' + i18n.msg('import.ops.' + job.type) + ' ' + i18n.msg('import.object_types.' + job.name, job.params);
   }

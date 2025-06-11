@@ -13,7 +13,8 @@
         <os-grid-column :width="12">
           <os-import-records ref="impRecsForm" :object-type="objectType" :object-params="objectParams"
             :hide-ops="hideOps" :show-upsert="showUpsert" :csv-type="csvType" :record-types="getRecordTypes"
-            :field-separator="fieldSeparator" @record-type-selected="onRecordTypeSelection">
+            :field-separator="fieldSeparator" :repeat-job-id="repeatJobId"
+            @record-type-selected="onRecordTypeSelection">
             <os-button primary :label="$t('import.validate_n_import')" @click="submitJob" />
 
             <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
@@ -35,7 +36,7 @@ import util        from '@/common/services/Util.js';
 import CpViewContext from './CpViewContext.js';
 
 export default {
-  props: ['cpId'],
+  props: ['cpId', 'repeatJobId'],
 
   inject: ['cpViewCtx'],
 

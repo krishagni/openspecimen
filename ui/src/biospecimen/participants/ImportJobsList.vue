@@ -11,7 +11,8 @@
     <os-page-body>
       <os-grid>
         <os-grid-column :width="12">
-          <os-import-jobs :object-types="objectTypes" :object-params="objectParams" />
+          <os-import-jobs :object-types="objectTypes" :object-params="objectParams"
+            :create-job="createJobRoute" />
         </os-grid-column>
       </os-grid>
     </os-page-body>
@@ -68,6 +69,11 @@ export default {
 
     objectParams: function() {
       return {cpId: +this.cpId > 0 ? +this.cpId : -1};
+    },
+
+    createJobRoute: function() {
+      const name = +this.cpId > 0 ? 'CpImportRecords' : 'MultiCpImportRecords';
+      return {name, params: {cpId: this.cpId}};
     }
   }
 }

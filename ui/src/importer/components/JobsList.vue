@@ -13,6 +13,9 @@
             v-os-tooltip.bottom="$t('import.download_status')" v-if="job.status != 'QUEUED'" />
           <os-button size="small" left-icon="ban" @click="stopJob(job)" 
             v-os-tooltip.bottom="$t('import.stop_job')" v-if="job.status == 'QUEUED' || job.status == 'IN_PROGRESS'" />
+          <os-button size="small" left-icon="redo" @click="repeatJob(job)"
+            v-os-tooltip.bottom="$t('import.repeat_job')"
+            v-if="createJob && job.status != 'QUEUED' && job.status != 'IN_PROGRESS'" />
         </os-button-group>
       </template>
 
@@ -38,11 +41,12 @@ import listSchema from '@/importer/schemas/jobs-list.js';
 
 import alertsSvc from '@/common/services/Alerts.js';
 import importSvc from '@/importer/services/ImportJob.js';
+import routerSvc from '@/common/services/Router.js';
 
 const MAX_JOBS = 25;
 
 export default {
-  props: ['objectTypes', 'objectParams'],
+  props: ['objectTypes', 'objectParams', 'createJob'],
 
   data() {
     return {
@@ -115,6 +119,13 @@ export default {
         alertsSvc.success({code: 'import.job_completed', args: job});
       } else {
         alertsSvc.info({code: 'import.job_stop_in_progress', args: job});
+      }
+    },
+
+    repeatJob: function(job) {
+      const {name, params, query} = (typeof this.createJob == 'function' ? this.createJob(job) : this.createJob) || {};
+      if (name) {
+        routerSvc.goto(name, params, {...(query || {}), repeatJobId: job.id});
       }
     }
   }

@@ -307,7 +307,7 @@ const routes = [
       {
         path: 'user-import-records',
         name: 'UserImportRecords',
-        component: () => import(/* webpackChunkName: "users" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: ({query: {objectType}}) => ({
           bcrumb: [
             {
@@ -344,7 +344,7 @@ const routes = [
       {
         path: 'user-import-jobs',
         name: 'UserImportJobs',
-        component: () => import(/* webpackChunkName: "users" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -354,7 +354,8 @@ const routes = [
           ],
           title: 'users.import_jobs_list',
           objectTypes: ['user', 'userRoles', 'userExtensions'],
-          objectParams: {}
+          objectParams: {},
+          createJob: (job) => ({name: 'UserImportRecords', query: {objectType: job.name == 'userExtensions' ? 'extensions' : job.name}})
         })
       },
 
@@ -412,7 +413,7 @@ const routes = [
       {
         path: 'site-import-records',
         name: 'SiteImportRecords',
-        component: () => import(/* webpackChunkName: "sites" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -430,7 +431,7 @@ const routes = [
       {
         path: 'site-import-jobs',
         name: 'SiteImportJobs',
-        component: () => import(/* webpackChunkName: "sites" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -440,7 +441,8 @@ const routes = [
           ],
           title: 'sites.import_jobs_list',
           objectTypes: ['site'],
-          objectParams: {}
+          objectParams: {},
+          createJob: ({name: 'SiteImportRecords'})
         })
       },
 
@@ -498,7 +500,7 @@ const routes = [
       {
         path: 'institute-import-records',
         name: 'InstituteImportRecords',
-        component: () => import(/* webpackChunkName: "institutes" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -516,7 +518,7 @@ const routes = [
       {
         path: 'institute-import-jobs',
         name: 'InstituteImportJobs',
-        component: () => import(/* webpackChunkName: "institutes" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -526,7 +528,8 @@ const routes = [
           ],
           title: 'institutes.import_jobs_list',
           objectTypes: ['institute'],
-          objectParams: {}
+          objectParams: {},
+          createJob: {name: 'InstituteImportRecords'}
         })
       },
 
@@ -622,7 +625,7 @@ const routes = [
       {
         path: 'shipment-import-records',
         name: 'ShipmentImportRecords',
-        component: () => import(/* webpackChunkName: "shipments" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: ({query: {objectType}}) => ({
           bcrumb: [
             {
@@ -641,7 +644,7 @@ const routes = [
       {
         path: 'shipment-import-jobs',
         name: 'ShipmentImportJobs',
-        component: () => import(/* webpackChunkName: "shipments" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -651,7 +654,8 @@ const routes = [
           ],
           title: 'shipments.import_jobs_list',
           objectTypes: ['shipment', 'containerShipment'],
-          objectParams: {}
+          objectParams: {},
+          createJob: (job) => ({name: 'ShipmentImportRecords', query: {objectType: job.name}})
         })
       },
 
@@ -724,7 +728,7 @@ const routes = [
       {
         path: 'order-import-records',
         name: 'OrderImportRecords',
-        component: () => import(/* webpackChunkName: "orders" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: ({query: {objectType}}) => {
           const {http, i18nSvc, routerSvc} = window.osSvc;
           let entitiesLabel = null, entities = null;
@@ -759,7 +763,7 @@ const routes = [
       {
         path: 'order-import-jobs',
         name: 'OrderImportJobs',
-        component: () => import(/* webpackChunkName: "orders" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -769,7 +773,8 @@ const routes = [
           ],
           title: 'orders.import_jobs_list',
           objectTypes: ['distributionOrder', 'returnSpecimen'],
-          objectParams: {}
+          objectParams: {},
+          createJob: (job) => ({name: 'OrderImportRecords', query: {objectType: job.name}})
         })
       },
 
@@ -883,7 +888,7 @@ const routes = [
       {
         path: 'dp-import-records',
         name: 'DpImportRecords',
-        component: () => import(/* webpackChunkName: "dps" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: ({query: {objectType}}) => {
           const {i18nSvc, routerSvc} = window.osSvc;
           return {
@@ -904,7 +909,7 @@ const routes = [
       {
         path: 'dp-import-jobs',
         name: 'DpImportJobs',
-        component: () => import(/* webpackChunkName: "dps" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -914,7 +919,8 @@ const routes = [
           ],
           title: 'dps.import_jobs_list',
           objectTypes: ['distributionProtocol', 'dpRequirement'],
-          objectParams: {}
+          objectParams: {},
+          createJob: (job) => ({name: 'DpImportRecords', query: {objectType: job.name}})
         })
       },
 
@@ -1034,7 +1040,7 @@ const routes = [
       {
         path: 'container-import-records',
         name: 'ContainerImportRecords',
-        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: () => {
           const {i18nSvc, routerSvc} = window.osSvc;
           return {
@@ -1055,7 +1061,7 @@ const routes = [
       {
         path: 'container-import-jobs',
         name: 'ContainerImportJobs',
-        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -1065,7 +1071,8 @@ const routes = [
           ],
           title: 'containers.import_jobs_list',
           objectTypes: ['storageContainer'],
-          objectParams: {}
+          objectParams: {},
+          createJob: {name: 'ContainerImportRecords'}
         })
       },
 
@@ -1142,7 +1149,7 @@ const routes = [
       {
         path: 'container-type-import-records',
         name: 'ContainerTypeImportRecords',
-        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/CreateJob.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/CreateJob.vue'),
         props: () => {
           const {i18nSvc, routerSvc} = window.osSvc;
           return {
@@ -1163,7 +1170,7 @@ const routes = [
       {
         path: 'container-type-import-jobs',
         name: 'ContainerTypeImportJobs',
-        component: () => import(/* webpackChunkName: "containers" */ '../importer/views/JobsList.vue'),
+        component: () => import(/* webpackChunkName: "importer" */ '../importer/views/JobsList.vue'),
         props: () => ({
           bcrumb: [
             {
@@ -1173,7 +1180,8 @@ const routes = [
           ],
           title: 'container_types.import_jobs_list',
           objectTypes: ['storageContainerType'],
-          objectParams: {}
+          objectParams: {},
+          createJob: {name: 'ContainerTypeImportRecords'}
         })
       },
 
@@ -1591,7 +1599,7 @@ const routes = [
                 path: 'import-records',
                 name: 'CpImportRecords',
                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/ImportRecords.vue'),
-                props: (route) => ({cpId: route.params.cpId})
+                props: (route) => ({cpId: route.params.cpId, repeatJobId: route.query.repeatJobId})
               },
               {
                 path: 'import-jobs',

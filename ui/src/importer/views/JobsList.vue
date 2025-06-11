@@ -11,7 +11,7 @@
     <os-page-body>
       <os-grid>
         <os-grid-column :width="12">
-          <os-import-jobs :object-types="objectTypes" :object-params="objectParams" />
+          <os-import-jobs :object-types="objectTypes" :object-params="objectParams" :create-job="createJob" />
         </os-grid-column>
       </os-grid>
     </os-page-body>
@@ -20,7 +20,7 @@
 
 <script>
 export default {
-  props: ['bcrumb', 'title', 'object-types', 'object-params']
+  props: ['bcrumb', 'title', 'object-types', 'object-params', 'create-job']
 }
 </script>
       

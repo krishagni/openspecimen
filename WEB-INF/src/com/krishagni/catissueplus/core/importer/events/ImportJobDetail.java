@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.importer.domain.ImportJob;
@@ -30,6 +31,12 @@ public class ImportJobDetail {
 	private Map<String, String> params;
 
 	private String displayName;
+
+	private String dateFormat;
+
+	private String timeFormat;
+
+	private String fieldSeparator;
 
 	public Long getId() {
 		return id;
@@ -119,6 +126,30 @@ public class ImportJobDetail {
 		this.displayName = displayName;
 	}
 
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	public String getTimeFormat() {
+		return timeFormat;
+	}
+
+	public void setTimeFormat(String timeFormat) {
+		this.timeFormat = timeFormat;
+	}
+
+	public String getFieldSeparator() {
+		return fieldSeparator;
+	}
+
+	public void setFieldSeparator(String fieldSeparator) {
+		this.fieldSeparator = fieldSeparator;
+	}
+
 	public static ImportJobDetail from(ImportJob job) {
 		ImportJobDetail detail = new ImportJobDetail();
 		detail.setId(job.getId());
@@ -132,16 +163,14 @@ public class ImportJobDetail {
 		detail.setFailedRecords(job.getFailedRecords());
 		detail.setParams(job.getParams());
 		detail.setDisplayName(job.getDisplayName());
+		detail.setDateFormat(job.getDateFormat());
+		detail.setTimeFormat(job.getTimeFormat());
+		detail.setFieldSeparator(job.getFieldSeparator());
 		return detail;
 	}
 	
 	public static List<ImportJobDetail> from(List<ImportJob> jobs) {
-		List<ImportJobDetail> result = new ArrayList<ImportJobDetail>();
-		for (ImportJob job : jobs) {
-			result.add(ImportJobDetail.from(job));
-		}
-		
-		return result;
+		return jobs.stream().map(ImportJobDetail::from).collect(Collectors.toList());
 	}
 
 	public static ImportJobDetail txnSizeExceeded(int inputRecordsCnt) {

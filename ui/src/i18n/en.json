@@ -1299,6 +1299,7 @@
       "UPSERT": "Upsert"
     },
     "record_type_req": "Record Type is mandatory",
+    "repeat_job": "Repeat Job",
     "update": "Update",
     "upsert": "Upsert",
     "view_past_imports": "View Past Imports",

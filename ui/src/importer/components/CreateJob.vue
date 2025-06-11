@@ -29,6 +29,7 @@ import addJobSchema from '../schemas/create-job.js';
 import alertsSvc   from '@/common/services/Alerts.js';
 import http        from '@/common/services/HttpClient.js';
 import jobSvc      from '@/importer/services/ImportJob.js';
+import routerSvc   from '@/common/services/Router.js';
 import settingsSvc from '@/common/services/Setting.js';
 import util        from '@/common/services/Util.js';
 
@@ -65,7 +66,28 @@ export default {
   },
 
   async created() {
-    this._setupRecordTypes();
+    await this._setupRecordTypes();
+
+    const route = routerSvc.getCurrentRoute();
+    if (route.query && +route.query.repeatJobId > 0) {
+      const dbJob = this.ctx.dbJob = await jobSvc.getJob(route.query.repeatJobId);
+      const {job} = this.ctx;
+      if (dbJob.name != 'extensions' && dbJob.name != 'userExtensions') {
+        job.recordType = this.ctx.recordTypes.find(rt => rt.id == dbJob.name);
+      } else if (dbJob.name == 'extensions') {
+        const {entityType, cpId, formName} = dbJob.params || {};
+        job.recordType = this.ctx.recordTypes.find(rt => rt.type == 'extensions' && rt.params.entityType == entityType && rt.params.cpId == cpId && rt.params.formName == formName);
+      } else if (dbJob.name == 'userExtensions') {
+        const {entityType, entityId, formName} = dbJob.params || {};
+        job.recordType = this.ctx.recordTypes.find(rt => rt.type == 'userExtensions' && rt.params.entityType == entityType && rt.params.entityId == entityId && rt.params.formName == formName);
+      }
+
+      job.importType = dbJob.type;
+      job.dateFormat = dbJob.dateFormat;
+      job.timeFormat = dbJob.timeFormat;
+      job.fieldSeparator = dbJob.fieldSeparator;
+      this.$emit('record-type-selected', job.recordType);
+    }
   },
 
   computed: {
