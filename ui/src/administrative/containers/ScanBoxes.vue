@@ -24,7 +24,7 @@
           </template>
 
           <template #content>
-            <ul class="os-key-values">
+            <ul class="os-key-values os-one-col">
               <li class="item">
                 <strong class="key key-sm">
                   <span v-t="{path: 'containers.' + ctx.scannedField}">Barcode</span>
@@ -50,6 +50,11 @@
                   <os-storage-position v-model="ctx.box.storageLocation"
                     :list-source="{queryParams: {static: {entityType: 'storage_container'}}}" />
                 </span>
+              </li>
+              <li class="item section">
+                <strong class="key key-sm">
+                  <span v-t="'containers.box_restrictions'">Box Restrictions</span>
+                </strong>
               </li>
               <li class="item">
                 <strong class="key key-sm">
@@ -1019,7 +1024,11 @@ export default {
 }
 
 .os-key-values .item {
-  margin-bottom: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.os-key-values .item.section .key {
+  font-weight: bold;
 }
 
 .os-container-occupant h4.title {
