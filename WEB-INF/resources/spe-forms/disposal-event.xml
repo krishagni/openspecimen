@@ -8,13 +8,14 @@
     <primaryKey>IDENTIFIER</primaryKey>
 
     <row>
-      <textArea>
+      <pvField>
         <name>reason</name>
         <udn>reason</udn>
         <caption>#getMessage("disposal_event_reason")</caption>
-	    <column>REASON</column>
-        <height>2</height>
-      </textArea>
+        <column>REASON_ID</column>
+        <mandatory>true</mandatory>
+        <attribute>specimen_dispose_reason</attribute>
+      </pvField>
     </row>
 
     <row>

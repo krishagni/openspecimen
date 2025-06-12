@@ -16,4 +16,13 @@
       <column name="ACTIVITY_STATUS" type="${text.type}(32)" defaultValue="Active" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add reason PV in the specimen disposal event table">
+    <addColumn tableName="CATISSUE_DISPOSAL_EVENT_PARAM">
+      <column name="REASON_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_DISPOSE_REASON_PV" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+           referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

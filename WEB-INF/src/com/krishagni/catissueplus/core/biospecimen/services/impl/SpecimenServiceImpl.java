@@ -393,7 +393,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				ose.checkAndThrow();
 
 				AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen, false);
-				specimen.updateStatus(detail.getStatus(), user, date, detail.getReason(), detail.isForceUpdate());
+				specimen.updateStatus(detail.getStatus(), user, date, detail.getReason(), detail.getComments(), detail.isForceUpdate());
 
 				if (specimen.isDeleted()) {
 					specimen.setOpComments(detail.getReason());
@@ -634,7 +634,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 			ResponseEvent<List<SpecimenDetail>> resp = collectSpecimens(new RequestEvent<>(inputSpmns));
 			if (resp.isSuccessful() && spec.closeParent()) {
-				parentSpmn.close(AuthUtil.getCurrentUser(), new Date(), "");
+				parentSpmn.close(AuthUtil.getCurrentUser(), new Date(), Specimen.PROCESSED, null);
 			}
 
 			return resp;
@@ -658,7 +658,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			ResponseEvent<SpecimenDetail> resp = createSpecimen(new RequestEvent<SpecimenDetail>(spmnDetail));
 			if (resp.isSuccessful() && spmnDetail.closeParent()) {
 				Specimen parent = getSpecimen(spmnDetail.getParentId(), spmnDetail.getCpShortTitle(), spmnDetail.getParentLabel(), null);
-				parent.close(AuthUtil.getCurrentUser(), new Date(), "");
+				parent.close(AuthUtil.getCurrentUser(), new Date(), Specimen.PROCESSED, null);
 			}
 
 			return resp;
@@ -929,6 +929,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			Status.ACTIVITY_STATUS_CLOSED.getStatus(),
 			AuthUtil.getCurrentUser(),
 			Calendar.getInstance().getTime(),
+			Specimen.PROCESSED,
 			reason,
 			false
 		);
@@ -1074,7 +1075,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		}
 
 		if (BooleanUtils.isTrue(detail.getCloseAfterChildrenCreation())) {
-			specimen.close(AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), "");
+			specimen.close(AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), Specimen.PROCESSED, null);
 		}
 
 		return specimen;

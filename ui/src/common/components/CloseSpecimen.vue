@@ -60,15 +60,26 @@ export default {
           {
             fields: [
               {
-                type: "textarea",
+                type: "pv",
+                attribute: "specimen_dispose_reason",
+                selectProp: "value",
                 label: i18n("common.close_specimen.reason"),
                 name: "reason",
-                rows: 5,
                 validations: {
                   required: {
                     message: i18n("common.close_specimen.reason_req"),
                   }
                 }
+              }
+            ]
+          },
+          {
+            fields: [
+              {
+                type: "textarea",
+                label: i18n("common.comments"),
+                name: "comments",
+                rows: 5
               }
             ]
           }

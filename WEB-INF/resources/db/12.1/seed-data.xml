@@ -16,4 +16,72 @@
       insert into rbac_resources(identifier, name) values(rbac_resources_seq.nextval, 'PrintRule');
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen dispose reason">
+    <sql>
+      insert into catissue_cde
+        (public_id, long_name, definition, version, last_updated)
+      values
+        ('specimen_dispose_reason', 'Specimen Dispose Reason', 'Specimen Dispose Reason', '12.1', ${now});
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen dispose reason - PVs" dbms="mysql">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (default, 'specimen_dispose_reason', 'Damaged', 'Active'),
+        (default, 'specimen_dispose_reason', 'Destroyed', 'Active'),
+        (default, 'specimen_dispose_reason', 'Distributed', 'Active'),
+        (default, 'specimen_dispose_reason', 'Not Specified', 'Active'),
+        (default, 'specimen_dispose_reason', 'Processed', 'Active')
+    </sql>
+  </changeSet>
+
+
+  <changeSet author="vpawar" id="Specimen dispose reason - Damaged" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'specimen_dispose_reason', 'Damaged', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen dispose reason - Destroyed" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'specimen_dispose_reason', 'Destroyed', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen dispose reason - Distributed" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'specimen_dispose_reason', 'Distributed', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen dispose reason - Not Specified" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'specimen_dispose_reason', 'Not Specified', 'Active');
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen dispose reason - Processed" dbms="oracle">
+    <sql>
+      insert into catissue_permissible_value
+        (identifier, public_id, value, activity_status)
+      values
+        (catissue_permi_value_seq.nextval, 'specimen_dispose_reason', 'Processed', 'Active');
+    </sql>
+  </changeSet>
 </databaseChangeLog>

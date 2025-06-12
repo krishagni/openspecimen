@@ -7,7 +7,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorC
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenStatusDetail;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
-import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -27,18 +26,11 @@ public class SpecimenDisposalImporter implements ObjectImporter<SpecimenStatusDe
 	public ResponseEvent<SpecimenDetail> importObject(RequestEvent<ImportObjectDetail<SpecimenStatusDetail>> req) {
 		try {
 			ImportObjectDetail<SpecimenStatusDetail> detail = req.getPayload();
+			ensureValidStatus(detail.getObject());
+			detail.getObject().setForceUpdate(true);
 
-			if (!detail.isCreate()) {
-				ensureValidStatus(detail.getObject());
-				detail.getObject().setForceUpdate(true);
-
-				RequestEvent<List<SpecimenStatusDetail>> disposalReq = new RequestEvent<>(Collections.singletonList(detail.getObject()));
-				ResponseEvent<List<SpecimenDetail>> resp = specimenSvc.updateSpecimensStatus(disposalReq);
-				resp.throwErrorIfUnsuccessful();
-				return new ResponseEvent<>(resp.getPayload().get(0));
-			}
-
-			return null;
+			List<SpecimenDetail> specimens = ResponseEvent.unwrap(specimenSvc.updateSpecimensStatus(RequestEvent.wrap(Collections.singletonList(detail.getObject()))));
+			return ResponseEvent.response(specimens != null && !specimens.isEmpty() ? specimens.get(0) : null);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch	(Exception e) {

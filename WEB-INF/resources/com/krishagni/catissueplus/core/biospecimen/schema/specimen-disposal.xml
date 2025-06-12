@@ -37,6 +37,11 @@
       <attribute>reason</attribute>
     </field>
 
+    <field>
+      <caption>#getMessage("specimen_event_comments")</caption>
+      <attribute>comments</attribute>
+    </field>
+
     <record>
       <caption>#getMessage("specimen_event_user")</caption>
       <attribute>user</attribute>

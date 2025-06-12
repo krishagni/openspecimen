@@ -193,6 +193,7 @@
   <include file="db/12.1/seed-data.xml" />
   <include file="db/12.1/audit.xml" />
   <include file="db/12.1/config.xml" />
+  <include file="db/12.1/migration.xml" />
 
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>

@@ -42,4 +42,6 @@ public class PvAttributes {
 	public static final String COHORT = "cohort";
 
 	public static final String SPECIMEN_UNIT = "specimen_unit";
+
+	public static final String SPECIMEN_DISPOSE_REASON = "specimen_dispose_reason";
 }

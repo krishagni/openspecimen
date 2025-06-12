@@ -45,6 +45,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.CpWorkflowTxnCache;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
+import com.krishagni.catissueplus.core.common.PvAttributes;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -92,6 +93,8 @@ public class Specimen extends BaseExtensionEntity {
 	public static final String TO_BE_RECEIVED = "To be Received";
 	
 	public static final String NOT_SPECIFIED = "Not Specified";
+
+	public static final String PROCESSED = "Processed";
 
 	public static final String EXTN = "SpecimenExtension";
 	
@@ -1180,10 +1183,6 @@ public class Specimen extends BaseExtensionEntity {
 		return result;
 	}
 
-	public void close(User user, Date time, String reason) {
-		close(user, time, reason, null);
-	}
-
 	public void close(User user, Date time, String reason, String comments) {
 		if (!getActivityStatus().equals(Status.ACTIVITY_STATUS_ACTIVE.getStatus())) {
 			return;
@@ -1323,8 +1322,8 @@ public class Specimen extends BaseExtensionEntity {
 		setUpdated(true);
 	}
 	
-	public void updateStatus(Specimen otherSpecimen, String reason) {
-		updateStatus(otherSpecimen.getActivityStatus(), AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), reason, isForceDelete());
+	public void updateStatus(Specimen otherSpecimen, String comments) {
+		updateStatus(otherSpecimen.getActivityStatus(), AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), "Not Specified", comments, isForceDelete());
 
 		//
 		// OPSMN-4629
@@ -1343,7 +1342,7 @@ public class Specimen extends BaseExtensionEntity {
 		}
 	}
 
-	public void updateStatus(String activityStatus, User user, Date date, String reason, boolean isForceDelete) {
+	public void updateStatus(String activityStatus, User user, Date date, String reason, String comments, boolean isForceDelete) {
 		if (isReserved()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.RESV_EDIT_NOT_ALLOWED, getLabel());
 		}
@@ -1355,7 +1354,7 @@ public class Specimen extends BaseExtensionEntity {
 		if (Status.ACTIVITY_STATUS_DISABLED.getStatus().equals(activityStatus)) {
 			disable(!isForceDelete);
 		} else if (Status.ACTIVITY_STATUS_CLOSED.getStatus().equals(activityStatus)) {
-			close(user, date, reason);
+			close(user, date, reason, comments);
 		} else if (Status.ACTIVITY_STATUS_ACTIVE.getStatus().equals(activityStatus)) {
 			activate();
 		}
@@ -1450,7 +1449,7 @@ public class Specimen extends BaseExtensionEntity {
 			item.setStatus(DistributionOrderItem.Status.DISTRIBUTED);
 			setAvailabilityStatus(DISTRIBUTED);
 		} else if (item.isDistributedAndClosed()) {
-			close(order.getDistributor(), order.getExecutionDate(), "Distributed to " + dpShortTitle);
+			close(order.getDistributor(), order.getExecutionDate(), "Distributed", "Distributed to " + dpShortTitle);
 			setAvailabilityStatus(DISTRIBUTED);
 		}
 	}
@@ -1559,12 +1558,20 @@ public class Specimen extends BaseExtensionEntity {
 
 	private void addDisposalEvent(User user, Date time, String reason, String comments) {
 		SpecimenDisposalEvent event = new SpecimenDisposalEvent(this);
-		event.setReason(reason);
+		if (StringUtils.isBlank(reason)) {
+			reason = Specimen.NOT_SPECIFIED;
+		}
+
+		PermissibleValue pv = daoFactory.getPermissibleValueDao().getByValue(PvAttributes.SPECIMEN_DISPOSE_REASON, reason);
+		if (pv == null) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.INV_DISPOSE_REASON, reason);
+		}
+
+		event.setReason(pv);
 		event.setUser(user);
 		event.setTime(time);
 		event.setComments(comments);
 		event.saveOrUpdate();
-
 		zeroOutAvailableQty();
 	}
 

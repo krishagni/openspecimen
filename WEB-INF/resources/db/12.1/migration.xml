@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Specimen disposal event - Move existing reasons to the description" dbms="mysql">
+    <sql>
+      update
+        catissue_disposal_event_param
+      set
+        comments = concat(ifnull(reason, ''), '\n', ifnull(comments, ''))
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen disposal event - Move the reason to the description" dbms="oracle">
+    <sql>
+      update
+        catissue_disposal_event_param
+      set
+        comments = concat(reason, concat('\n', comments))
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen disposal event - Set Not Specified as reason for all existing disposal events">
+    <sql>
+      update
+        catissue_disposal_event_param
+      set
+        reason_id = (
+          select
+            identifier
+          from
+            catissue_permissible_value
+          where
+            public_id = 'specimen_dispose_reason' and
+            value = 'Not Specified'
+        )
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add mandatory constraint on disposal event reason">
+    <addNotNullConstraint tableName="CATISSUE_DISPOSAL_EVENT_PARAM" columnName="REASON_ID" columnDataType="${int.type}" />
+  </changeSet>
+</databaseChangeLog>

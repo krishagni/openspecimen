@@ -188,7 +188,9 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	STORED_IN_AF_TRANSFER_NA,
 
-	STORED_IN_AF_CHECK_OUT_NA;
+	STORED_IN_AF_CHECK_OUT_NA,
+
+	INV_DISPOSE_REASON;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

@@ -1350,7 +1350,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			}
 
 			if ("DISPOSED".equals(input.getRemoveSpecimensReason())) {
-				existing.values().forEach(spmn -> spmn.close(AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), input.getRemoveSpecimensComments()));
+				existing.values().forEach(spmn -> spmn.close(AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), Specimen.NOT_SPECIFIED, null));
 			} else {
 				existing.values().forEach(spmn -> spmn.virtualise(input.getRemoveSpecimensComments()));
 			}

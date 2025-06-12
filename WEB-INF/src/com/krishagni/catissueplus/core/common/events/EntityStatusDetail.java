@@ -17,6 +17,8 @@ public class EntityStatusDetail {
 	
 	private String reason;
 
+	private String comments;
+
 	private boolean forceUpdate;
 
 	private List<UserSummary> notifyUsers;
@@ -69,6 +71,14 @@ public class EntityStatusDetail {
 
 	public void setReason(String reason) {
 		this.reason = reason;
+	}
+
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 
 	public boolean isForceUpdate() {
