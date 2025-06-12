@@ -13,6 +13,8 @@ class FieldFactory {
     dropdown: 'os-dropdown',
     multiselect: 'os-multi-select-dropdown',
     groupselect: 'os-multi-select-group-dropdown',
+    'group-multi-select': 'os-multi-select-group-dropdown',
+    'group-single-select': 'os-group-dropdown',
     radio: 'os-radio-button',
     checkbox: 'os-checkbox',
     booleanCheckbox: 'os-boolean-checkbox',

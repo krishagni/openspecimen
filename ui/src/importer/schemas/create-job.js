@@ -6,11 +6,13 @@ export default {
       {
         fields: [
           {
-            type: "dropdown",
+            type: "group-single-select",
             name: "job.recordType",
             labelCode: "import.select_record_type",
             listSource: {
               displayProp: 'title',
+              groupNameProp: 'group',
+              groupItemsProp: 'types',
               loadFn: ({context}) => context.formData.getRecordTypes()
             },
             validations: {

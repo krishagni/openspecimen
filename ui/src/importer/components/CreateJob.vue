@@ -73,13 +73,13 @@ export default {
       const dbJob = this.ctx.dbJob = await jobSvc.getJob(route.query.repeatJobId);
       const {job} = this.ctx;
       if (dbJob.name != 'extensions' && dbJob.name != 'userExtensions') {
-        job.recordType = this.ctx.recordTypes.find(rt => rt.id == dbJob.name);
+        job.recordType = this._getMatchingType((rt) => rt.id == dbJob.name);
       } else if (dbJob.name == 'extensions') {
         const {entityType, cpId, formName} = dbJob.params || {};
-        job.recordType = this.ctx.recordTypes.find(rt => rt.type == 'extensions' && rt.params.entityType == entityType && rt.params.cpId == cpId && rt.params.formName == formName);
+        job.recordType = this._getMatchingType(({type, params}) => type == 'extensions' && params.entityType == entityType && params.cpId == cpId && params.formName == formName);
       } else if (dbJob.name == 'userExtensions') {
         const {entityType, entityId, formName} = dbJob.params || {};
-        job.recordType = this.ctx.recordTypes.find(rt => rt.type == 'userExtensions' && rt.params.entityType == entityType && rt.params.entityId == entityId && rt.params.formName == formName);
+        job.recordType = this._getMatchingType(({type, params}) => type == 'userExtensions' && params.entityType == entityType && params.entityId == entityId && params.formName == formName);
       }
 
       job.importType = dbJob.type;
@@ -233,6 +233,18 @@ export default {
       if (resp == 'proceed') {
         this.ctx.job.atomic = false;
         return this.importRecords();
+      }
+
+      return null;
+    },
+
+    _getMatchingType: function(predicate) {
+      for (const group of this.ctx.recordTypes) {
+        for (const rt of group.types) {
+          if (predicate(rt)) {
+            return rt;
+          }
+        }
       }
 
       return null;

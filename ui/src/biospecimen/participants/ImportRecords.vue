@@ -159,27 +159,41 @@ export default {
 
       const importTypes = [];
       if (!(+this.cpId > 0) && entityTypes.indexOf('CollectionProtocol') >= 0) {
-        Array.prototype.push.apply(importTypes, this._getCpTypes());
+        importTypes.push({group: this.$t('cps.cp'), types: this._getCpTypes()});
       }
 
       const cp = this.cpViewCtx ? this.cpViewCtx.getCp() : {};
       if (!cp.specimenCentric && entityTypes.indexOf('Participant') >= 0) {
-        Array.prototype.push.apply(importTypes, this._getParticipantTypes(entityFormsMap, cp, entityTypes.indexOf('Consent') >= 0));
+        importTypes.push({
+          group: this.$t('participants.participant'),
+          types: this._getParticipantTypes(entityFormsMap, cp, entityTypes.indexOf('Consent') >= 0)
+        });
       } else if (!cp.specimenCentric && entityTypes.indexOf('Consent') >= 0) {
-        Array.prototype.push.apply(importTypes, this._getConsentTypes(cp, true));
+        importTypes.push({
+          group: this.$t('participants.participant'),
+          types: this._getConsentTypes(cp, true)
+        });
       }
 
       if (!cp.specimenCentric && entityTypes.indexOf('SpecimenCollectionGroup') >= 0) {
-        Array.prototype.push.apply(importTypes, this._getVisitTypes(entityFormsMap, cp, entityTypes.indexOf('Consent') >= 0));
+        importTypes.push({
+          group: this.$t('visits.visit'),
+          types: this._getVisitTypes(entityFormsMap, cp, entityTypes.indexOf('Consent') >= 0)
+        });
       }
       
       if (entityTypes.indexOf('Specimen') >= 0) {
-        Array.prototype.push.apply(importTypes, this._getSpecimenTypes(entityFormsMap, cp, entityTypes));
+        importTypes.push({
+          group: this.$t('specimens.specimen'),
+          types: this._getSpecimenTypes(entityFormsMap, cp, entityTypes)
+        });
       }
 
-      for (const importType of importTypes) {
-        const params = importType.params = importType.params || {};
-        params.cpId = cp.id || -1;
+      for (const {types} of importTypes) {
+        for (const type of types) {
+          const params = type.params = type.params || {};
+          params.cpId = cp.id || -1;
+        }
       }
        
       return importTypes;
@@ -195,7 +209,7 @@ export default {
     },
 
     _getParticipantTypes: function(entityFormsMap, cp, addConsent) {
-      const group = this.$t('participants.list');
+      const group = this.$t('participants.participant');
       
       let importTypes = [];
       if (!cp.id || cp.id == -1) {
@@ -223,7 +237,7 @@ export default {
     },
 
     _getVisitTypes: function(entityFormsMap, cp, addConsent) {
-      const group = this.$t('participants.visits');
+      const group = this.$t('visits.visit');
       const importTypes = [{ group, id: 'visit', type: 'visit', title: group, showUpsert: true }];
 
       if (addConsent) {
@@ -260,7 +274,7 @@ export default {
     },
 
     _getSpecimenTypes: function(entityFormsMap, cp, entityTypes) {
-      const group = this.$t('specimens.list');
+      const group = this.$t('specimens.specimen');
 
       const importTypes = [];
       importTypes.push({ group: group, id: 'specimen', type: 'specimen', title: group, showUpsert: true });
