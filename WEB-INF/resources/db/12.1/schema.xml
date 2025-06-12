@@ -25,4 +25,12 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Auth domain property to specify whether logins are allowed from a specified domain">
+    <addColumn tableName="OS_AUTH_DOMAINS">
+      <column name="ALLOW_LOGINS" type="${boolean.type}" defaultValueBoolean="true">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

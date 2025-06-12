@@ -19,7 +19,11 @@ public class OpenSpecimenAuthServiceImpl implements AuthenticationService {
 	
 	@Autowired
 	private AuthenticationManager authManager;
-	
+
+	public OpenSpecimenAuthServiceImpl() {
+
+	}
+
 	public OpenSpecimenAuthServiceImpl(Map<String, String> props) {
 		
 	}

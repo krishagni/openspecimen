@@ -23,7 +23,9 @@ public enum AuthErrorCode implements ErrorCode {
 
 	IMP_TOKEN_EXP,
 
-	OTP_EXPIRED;
+	OTP_EXPIRED,
+
+	DOMAIN_LOGIN_DISABLED;
 
 	@Override
 	public String code() {

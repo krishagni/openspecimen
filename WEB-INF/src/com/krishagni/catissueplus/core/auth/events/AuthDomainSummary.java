@@ -12,6 +12,8 @@ public class AuthDomainSummary {
 
 	private String type;
 
+	private boolean allowLogins = true;
+
 	public Long getId() {
 		return id;
 	}
@@ -36,11 +38,20 @@ public class AuthDomainSummary {
 		this.type = type;
 	}
 
+	public boolean isAllowLogins() {
+		return allowLogins;
+	}
+
+	public void setAllowLogins(boolean allowLogins) {
+		this.allowLogins = allowLogins;
+	}
+
 	public static AuthDomainSummary from(AuthDomain domain) {
 		AuthDomainSummary summary = new AuthDomainSummary();
 		summary.setId(domain.getId());
 		summary.setName(domain.getName());
 		summary.setType(domain.getAuthProvider().getAuthType());
+		summary.setAllowLogins(domain.isAllowLogins());
 		return summary;
 	}
 	

@@ -51,6 +51,7 @@ public class AuthDomainDetail extends AuthDomainSummary {
 		AuthDomainDetail detail = new AuthDomainDetail();
 		detail.setId(authDomain.getId());
 		detail.setName(authDomain.getName());
+		detail.setAllowLogins(authDomain.isAllowLogins());
 		detail.setAuthType(authDomain.getAuthProvider().getAuthType());
 		detail.setImplClass(authDomain.getAuthProvider().getImplClass());
 		detail.setAuthProviderProps(authDomain.getAuthProvider().getProps());

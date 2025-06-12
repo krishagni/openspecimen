@@ -203,7 +203,12 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		int slashIdx = username.indexOf('/');
 		String loginName = slashIdx != -1 ? username.substring(0, slashIdx) : username;
 		String domain    = slashIdx != -1 ? username.substring(slashIdx + 1) : DEFAULT_AUTH_DOMAIN;
-		return daoFactory.getUserDao().getUser(loginName, domain);
+		User user = daoFactory.getUserDao().getUser(loginName, domain);
+		if (user != null && user.getAuthDomain() != null && !user.getAuthDomain().isAllowLogins()) {
+			throw OpenSpecimenException.userError(AuthErrorCode.DOMAIN_LOGIN_DISABLED, user.getAuthDomain().getName());
+		}
+
+		return user;
 	}
 	
 	@Override
@@ -223,6 +228,9 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 		// We should perhaps use SAML local entity ID
 		//
 		AuthDomain domain = daoFactory.getAuthDao().getAuthDomainByType("saml");
+		if (domain != null && !domain.isAllowLogins()) {
+			throw OpenSpecimenException.userError(AuthErrorCode.DOMAIN_LOGIN_DISABLED, domain.getName());
+		}
 
 		Map<String, String> props = domain.getAuthProvider().getProps();
 		String loginNameAttr = props.get("loginNameAttr");

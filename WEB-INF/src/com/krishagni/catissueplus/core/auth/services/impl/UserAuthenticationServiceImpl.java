@@ -95,6 +95,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				throw OpenSpecimenException.userError(AuthErrorCode.INVALID_CREDENTIALS);
 			}
 
+			if (!user.getAuthDomain().isAllowLogins()) {
+				return ResponseEvent.userError(AuthErrorCode.DOMAIN_LOGIN_DISABLED, user.getAuthDomain().getName());
+			}
+
 			if (!user.isAllowedAccessFrom(loginDetail.getIpAddress())) {
 				throw OpenSpecimenException.userError(AuthErrorCode.NA_IP_ADDRESS, loginDetail.getIpAddress());
 			}

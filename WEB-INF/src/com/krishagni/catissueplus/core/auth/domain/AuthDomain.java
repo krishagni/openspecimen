@@ -25,6 +25,9 @@ public class AuthDomain {
 
 	private AuthProvider authProvider;
 
+
+	private boolean allowLogins = true;
+
 	private String activityStatus;
 
 	public Long getId() {
@@ -55,6 +58,13 @@ public class AuthDomain {
 		return getAuthProviderInstance(getAuthProvider());
 	}
 
+	public boolean isAllowLogins() {
+		return allowLogins;
+	}
+
+	public void setAllowLogins(boolean allowLogins) {
+		this.allowLogins = allowLogins;
+	}
 	public String getActivityStatus() {
 		return activityStatus;
 	}
@@ -65,6 +75,7 @@ public class AuthDomain {
 
 	public void update(AuthDomain domain) {
 		setName(domain.getName());
+		setAllowLogins(domain.isAllowLogins());
 
 		Map<String, String> newProps = domain.getAuthProvider().getProps();
 		Map<String, String> oldProps = authProvider.getProps();

@@ -17,6 +17,8 @@
 
     <many-to-one name="authProvider" column="PROVIDER_ID" cascade="all"/>
 
+    <property name="allowLogins" column="ALLOW_LOGINS" not-null="true" />
+
     <query name="getDomainByName">
       select
         d

@@ -59,7 +59,7 @@ export default {
   mounted() {
     this._getDomains().then(
       domains => {
-        this.domains = domains
+        this.domains = domains.filter(domain => domain.allowLogins);
         this._toggleSamlDomainSelected();
       }
     );

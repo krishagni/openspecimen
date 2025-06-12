@@ -13,9 +13,12 @@ import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class DomainRegistrationFactoryImpl implements DomainRegistrationFactory {
+
+	private static final LogUtil logger = LogUtil.getLogger(DomainRegistrationFactoryImpl.class);
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -30,6 +33,7 @@ public class DomainRegistrationFactoryImpl implements DomainRegistrationFactory 
 
 		AuthDomain domain = new AuthDomain();
 		setDomainName(input, domain, ose);
+		setAllowLogins(input, domain, ose);
 		setAuthProvider(input, domain, ose);
 		setActivityStatus(input, domain, ose);
 
@@ -44,6 +48,10 @@ public class DomainRegistrationFactoryImpl implements DomainRegistrationFactory 
 		}
 		
 		domain.setName(domainName);
+	}
+
+	private void setAllowLogins(AuthDomainDetail input, AuthDomain domain, OpenSpecimenException ose) {
+		domain.setAllowLogins(input.isAllowLogins());
 	}
 	
 	private void setAuthProvider(AuthDomainDetail detail, AuthDomain authDomain, OpenSpecimenException ose) {
@@ -79,6 +87,7 @@ public class DomainRegistrationFactoryImpl implements DomainRegistrationFactory 
 			Class.forName(implClass).getDeclaredConstructor().newInstance();
 			return true;
 		} catch (Exception e) {
+			logger.error("Error validating the  authentication provider: " + implClass, e);
 			return false;
 		}
 	}
