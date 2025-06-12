@@ -114,8 +114,10 @@ public class RestErrorController extends ResponseEntityExceptionHandler {
 	}
 
 	private ErrorMessage getMessage(String code, Object[] params) {
-		String message = MessageUtil.getInstance().getMessage(code.toLowerCase(), params);
-		return new ErrorMessage(code, HtmlUtils.htmlEscape(message));
+		String message = HtmlUtils.htmlEscape(MessageUtil.getInstance().getMessage(code.toLowerCase(), params))
+			.replaceAll("&#34;", "\"")
+			.replaceAll("&#39;", "'");
+		return new ErrorMessage(code, message);
 	}
 	
 	private Object[] getExceptionId(OpenSpecimenException ose) {
