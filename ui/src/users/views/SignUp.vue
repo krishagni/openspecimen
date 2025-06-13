@@ -52,7 +52,7 @@ export default {
   },
 
   mounted() {
-    this._getDomains().then(domains => { this.domains = domains });
+    this._getDomains().then(domains => this.domains = domains.filter(domain => domain.allowLogins));
   },
 
   computed: {

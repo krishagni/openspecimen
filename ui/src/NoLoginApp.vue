@@ -5,7 +5,7 @@
         <span v-if="!slotProps.authenticated">
           <os-plugin-views page="no-login" view="navbar" />
 
-          <os-button primary :label="$t('login.sign_up')" @click="navToSignUp()"/>
+          <os-button primary :label="$t('login.sign_up')" @click="navToSignUp()" v-if="allowSignup" />
         </span>
       </template>
     </os-navbar>
@@ -15,17 +15,27 @@
 </template>
 
 <script>
-import routerSvc from '@/common/services/Router.js';
+import routerSvc  from '@/common/services/Router.js';
 
 export default {
   name: 'NoLoginApp',
 
   props: ['navBarButtons'],
 
+  data() {
+    return {
+      allowSignup: false
+    }
+  },
+
   methods: {
     navToSignUp: function() {
       routerSvc.goto('UserSignUp');
     }
+  },
+
+  created() {
+    this.allowSignup = this.$ui.global.appProps.user_sign_up;
   }
 }
 </script>
