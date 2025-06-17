@@ -3,22 +3,22 @@
   <div class="os-storage-position" :class="$attrs['md-type'] && 'md-type'">
     <div class="container">
       <os-dropdown :md-type="$attrs['md-type']" v-model="position.name" :form="context"
-        :tab-order="tabOrder" :list-source="containersLs" @update:model-value="handlePositionInput " />
+        :tab-order="tabOrder" :list-source="containersLs" @update:model-value="handlePositionInput(true)" />
     </div>
 
     <div class="position" v-if="!position.mode || position.mode == 'TWO_D'">
       <os-input-text :md-type="$attrs['md-type']" v-model="position.positionY"
-        :tab-order="tabOrder" @update:model-value="handlePositionInput" />
+        :tab-order="tabOrder" @update:model-value="handlePositionInput(false)" />
     </div>
 
     <div class="position" v-if="!position.mode || position.mode == 'TWO_D'">
       <os-input-text :md-type="$attrs['md-type']" v-model="position.positionX"
-        :tab-order="tabOrder" @update:model-value="handlePositionInput" />
+        :tab-order="tabOrder" @update:model-value="handlePositionInput(false)" />
     </div>
 
     <div class="position" v-if="position.mode == 'LINEAR'">
       <os-input-text :md-type="$attrs['md-type']" v-model="position.position"
-        :tab-order="tabOrder" @update:model-value="handlePositionInput" />
+        :tab-order="tabOrder" @update:model-value="handlePositionInput(false)" />
     </div>
 
     <div class="search">
@@ -129,14 +129,15 @@ export default {
 
   watch: {
     position: function() {
-      this.handlePositionInput();
+      this.handlePositionInput(false);
     }
   },
 
   methods: {
-    handlePositionInput: function() {
-      if (!this.position.reservationId && (!this.previousContainer || this.previousContainer != this.position.name)) {
-        let selectedContainer = (this.containers || []).find(container => container.name == this.position.name);
+    handlePositionInput: function(containerSelected) {
+      const {reservationId, name} = this.position || {};
+      if (containerSelected && !reservationId && (!this.previousContainer || this.previousContainer != name)) {
+        let selectedContainer = (this.containers || []).find(container => container.name == name);
         if (selectedContainer) {
           this.position.mode = selectedContainer.positionLabelingMode;
         }
