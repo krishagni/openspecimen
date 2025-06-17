@@ -41,5 +41,7 @@
     <property name="data" column="DATA" not-null="true"/>
 
     <property name="content" column="CONTENT"  />
+
+    <many-to-one name="rule" column="RULE_ID" />
   </class>
 </hibernate-mapping>

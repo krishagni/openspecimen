@@ -56,4 +56,12 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Track the print rule that generated the print job item">
+    <addColumn tableName="OS_LABEL_PRINT_JOB_ITEMS">
+      <column name="RULE_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_LABEL_PRINT_JOB_ITEM_RULE" referencedTableName="OS_PRINT_RULES" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

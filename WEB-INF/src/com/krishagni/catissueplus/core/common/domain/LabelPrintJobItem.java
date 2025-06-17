@@ -36,6 +36,10 @@ public class LabelPrintJobItem extends BaseEntity {
 
 	private Boolean createFile;
 
+	private String filename;
+
+	private PrintRuleConfig rule;
+
 	private transient Object object;
 
 	private transient Map<String, String> dataItems;
@@ -134,6 +138,22 @@ public class LabelPrintJobItem extends BaseEntity {
 
 	public void setCreateFile(Boolean createFile) {
 		this.createFile = createFile;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+	public PrintRuleConfig getRule() {
+		return rule;
+	}
+
+	public void setRule(PrintRuleConfig rule) {
+		this.rule = rule;
 	}
 
 	public Object getObject() {

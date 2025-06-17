@@ -299,7 +299,7 @@ public class PrintRuleConfigServiceImpl implements PrintRuleConfigService, Initi
 			throw  OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Print labels directory path is not absolute: " + rule.getCmdFilesDir());
 		}
 
-		String prefix = labelPrintRuleFactoryRegistrar.getFactory(printRuleConfig.getObjectType()).getItemType();
+		String prefix = labelPrintRuleFactoryRegistrar.getFactory(printRuleConfig.getObjectType()).getItemType() + "_" + ruleId;
 		return Files.find(
 			path,
 			1,

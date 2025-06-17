@@ -40,7 +40,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 	//
 	private static final LogUtil logger = LogUtil.getLogger(AbstractLabelPrinter.class);
 
-	private static final String LABEL_FILENAME_FMT = "%s_%s_%d_%d.%s";
+	private static final String LABEL_FILENAME_FMT = "%s_%s_%s_%d_%d.%s";
 
 	private static final String TSTAMP_FMT = "yyyyMMddHHmm";
 
@@ -103,6 +103,7 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 
 					LabelPrintJobItem item = new LabelPrintJobItem();
 					item.setJob(job);
+					item.setRule(cfg);
 					item.setPrinterName(userPrinter != null ? userPrinter : rule.getPrinterName());
 					item.setItemLabel(getItemLabel(obj));
 					item.setItemId(getItemId(obj));
@@ -115,7 +116,6 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 					item.setDataItems(labelDataItems);
 					item.setContent(mapper.writeValueAsString(generateCmdFileContent(item, rule, labelDataItems)));
 					item.setCreateFile(rule.getCreateFile());
-
 					job.getItems().add(item);
 					found = true;
 					break;
@@ -208,7 +208,8 @@ public abstract class AbstractLabelPrinter<T> implements LabelPrinter<T> {
 
 		List<Map<String, Object>> result = new ArrayList<>();
 		for (int i = 0; i < item.getCopies(); ++i) {
-			String filename = String.format(LABEL_FILENAME_FMT, item.getJob().getItemType(), tstamp, labelCount, (i + 1), rule.getFileExtn());
+			String ruleId = item.getRule() != null ? item.getRule().getId().toString() : "NA";
+			String filename = String.format(LABEL_FILENAME_FMT, item.getJob().getItemType(), ruleId, tstamp, labelCount, (i + 1), rule.getFileExtn());
 
 			Map<String, Object> label = new HashMap<>();
 			label.put("dir", rule.getCmdFilesDir());
