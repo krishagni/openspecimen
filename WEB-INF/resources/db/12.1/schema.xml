@@ -45,7 +45,7 @@
       columnNames="SITE_ID, MEDICAL_RECORD_NUMBER" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Add unique key constraint on participant / PMI site and MRN" dbms="oracle">
+  <!-- changeSet author="vpawar" id="Add unique key constraint on participant / PMI site and MRN" dbms="oracle">
     <sql>
       create unique index OS_PMI_SITE_MRN_UQ on CATISSUE_PART_MEDICAL_ID(
         case when
@@ -55,7 +55,7 @@
         end
       );
     </sql>
-  </changeSet>
+  </changeSet -->
 
   <changeSet author="vpawar" id="Track the print rule that generated the print job item">
     <addColumn tableName="OS_LABEL_PRINT_JOB_ITEMS">
