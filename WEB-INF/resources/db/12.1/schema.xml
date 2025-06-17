@@ -64,4 +64,23 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Unique key constraint on PV" dbms="mysql">
+    <addUniqueConstraint constraintName="OS_PERMISSIBLE_VALUE_UQ"
+      tableName="CATISSUE_PERMISSIBLE_VALUE" columnNames="PUBLIC_ID, VALUE" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique key constraint on PV" dbms="oracle">
+    <sql>
+      create unique index OS_PERMISSIBLE_VALUE_UQ on CATISSUE_PERMISSIBLE_VALUE(PUBLIC_ID, LOWER(VALUE));
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop existing index on PV, if any">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="CATISSUE_PERMISSIBLE_VALUE" indexName="PV_ATTR_VALUE_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="CATISSUE_PERMISSIBLE_VALUE" indexName="PV_ATTR_VALUE_IDX" />
+  </changeSet>
 </databaseChangeLog>

@@ -42,11 +42,16 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 
 	@Override
 	public PermissibleValue getByValue(String attribute, String value) {
-		List<PermissibleValue> pvs = createNamedQuery(GET_BY_VALUE, PermissibleValue.class)
-			.setParameter("attribute", attribute)
-			.setParameter("value", value)
-			.list();
-		return CollectionUtils.isEmpty(pvs) ? null : pvs.iterator().next();
+		Criteria<PermissibleValue> query = createCriteria(PermissibleValue.class, "pv");
+		query.add(query.eq("pv.attribute", attribute));
+		if (isMySQL()) {
+			query.add(query.eq("pv.value", value));
+		} else {
+			query.add(query.eq(query.lower("pv.value"), value.toLowerCase()));
+		}
+
+		List<PermissibleValue> pvs = query.list();
+		return CollectionUtils.isNotEmpty(pvs) ? pvs.iterator().next() : null;
 	}
 
 	@Override
@@ -248,8 +253,6 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 	}
 
 	private static final String FQN = PermissibleValue.class.getName();
-
-	private static final String GET_BY_VALUE = FQN + ".getByValue";
 
 	private static final String GET_SPECIMEN_CLASSES = FQN + ".getSpecimenClasses";
 
