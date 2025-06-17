@@ -33,4 +33,27 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Convert the blank / empty string MRNs to null">
+    <sql>
+      update CATISSUE_PART_MEDICAL_ID set MEDICAL_RECORD_NUMBER = null where trim(MEDICAL_RECORD_NUMBER) = ''
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add unique key constraint on participant / PMI site and MRN" dbms="mysql">
+    <addUniqueConstraint constraintName="OS_PMI_SITE_MRN_UQ" tableName="CATISSUE_PART_MEDICAL_ID"
+      columnNames="SITE_ID, MEDICAL_RECORD_NUMBER" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Add unique key constraint on participant / PMI site and MRN" dbms="oracle">
+    <sql>
+      create unique index OS_PMI_SITE_MRN_UQ on CATISSUE_PART_MEDICAL_ID(
+        case when
+          SITE_ID is not null and MEDICAL_RECORD_NUMBER is not null
+        then
+          SITE_ID || '-' || lower(MEDICAL_RECORD_NUMBER)
+        end
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

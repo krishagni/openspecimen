@@ -524,7 +524,7 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 					continue;
 				}
 				
-				if (!dupSite && !siteNames.add(pmiDetail.getSiteName())) {
+				if (!dupSite && !siteNames.add(pmiDetail.getSiteName().toLowerCase())) {
 					dupSite = true;
 					oce.addError(ParticipantErrorCode.DUP_MRN_SITE, pmiDetail.getSiteName());
 				}
@@ -538,11 +538,11 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 	}
 
 	private ParticipantMedicalIdentifier getPmi(PmiDetail pmiDetail, OpenSpecimenException oce) {
-		if (StringUtils.isBlank(pmiDetail.getSiteName()) && StringUtils.isBlank(pmiDetail.getMrn())) {
+		if (StringUtils.isBlank(pmiDetail.getSiteName())) {
 			return null;
 		}
 
-		Site site = daoFactory.getSiteDao().getSiteByName(pmiDetail.getSiteName());		
+		Site site = daoFactory.getSiteDao().getSiteByName(pmiDetail.getSiteName());
 		if (site == null) {
 			oce.addError(SiteErrorCode.NOT_FOUND);
 			return null;
@@ -550,7 +550,7 @@ public class ParticipantFactoryImpl implements ParticipantFactory, InitializingB
 		
 		ParticipantMedicalIdentifier pmi = new ParticipantMedicalIdentifier();
 		pmi.setSite(site);
-		pmi.setMedicalRecordNumber(pmiDetail.getMrn());
+		pmi.setMedicalRecordNumber(StringUtils.isNotBlank(pmiDetail.getMrn()) ? pmiDetail.getMrn().trim() : null);
 		return pmi;
 	}
 
