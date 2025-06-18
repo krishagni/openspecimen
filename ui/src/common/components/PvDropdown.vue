@@ -38,7 +38,8 @@ export default {
               attribute: pvAttr,
               parentValue: this.parentValueExpr && exprUtil.eval(this.context, this.parentValueExpr),
               includeOnlyLeafValue: this.leafValue == true,
-              includeOnlyRootValue: this.rootValue == true
+              includeOnlyRootValue: this.rootValue == true,
+              activityStatus: opts && opts._selected ? 'all' : null
             },
             opts || {maxResults: 100}
           );

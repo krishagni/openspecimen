@@ -41,6 +41,7 @@
 import Dropdown from 'primevue/dropdown';
 
 import exprUtil from '@/common/services/ExpressionUtil.js';
+import http     from '@/common/services/HttpClient.js';
 import util     from '@/common/services/Util.js';
 
 export default {
@@ -105,9 +106,32 @@ export default {
       return option.type + ' (' + option.specimenClass + ')';
     },
 
-    _updateValue(value) {
+    async _updateValue(value) {
       const entity = this.entity || 'specimen';
       const option = this.selectedOption = this._getSelectedOption(value);
+      if (value && !option.specimenClass && !option.type)  {
+        //
+        // type is selected but couldn't find the type in the dropdown options
+        // let's get it from the backend using activityStatus = all (assuming it might be archived)
+        //
+        const qp = {attribute: 'specimen_type', includeParentValue: true, activityStatus: 'all', searchString: value};
+        const specimenTypes = await http.get('permissible-values/v', qp);
+        const match = specimenTypes.find(type => type.value.toLowerCase() == value.toLowerCase());
+        if (match) {
+          const specimenType  = {specimenClass: match.parentValue, type: match.value};
+          Object.assign(option, specimenType);
+
+          //
+          // add the option so that it is visible in the dropdown
+          //
+          const ddOption = this.ddOptions.find(opt => opt.specimenClass == option.specimenClass);
+          if (ddOption) {
+            ddOption.types.push(specimenType);
+          } else {
+            this.ddOptions.push({specimenClass: match.parentValue, types: [specimenType]});
+          }
+        }
+      }
 
       const formData  = (this.form && this.form.formData) || this.form || this.context || {};
       const entityObj = exprUtil.getValue(formData, entity) || {};
