@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.common.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ public class ExpressionUtil {
 		try {
 			SimpleEvaluationContext ctxt = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 			addMethods(ctxt);
+			addMathFns(ctxt);
 			ctxt.setVariable("collFns", new CollectionFunctions(variables));
 			if (variables != null) {
 				variables.forEach(ctxt::setVariable);
@@ -59,6 +61,14 @@ public class ExpressionUtil {
 		methods.forEach(ctxt::setVariable);
 	}
 
+	private void addMathFns(SimpleEvaluationContext ctxt) {
+		for (Method method : Math.class.getDeclaredMethods()) {
+			if (Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers())) {
+				ctxt.setVariable("rtMath_" + method.getName(), method);
+			}
+		}
+	}
+
 	private Map<String, Method> getMethods() {
 		try {
 			Map<String, Method> methods = new HashMap<>();
@@ -69,7 +79,7 @@ public class ExpressionUtil {
 			methods.put("cmp", Utility.class.getDeclaredMethod("cmp", Date.class, Date.class));
 			methods.put("formatDate", Utility.class.getDeclaredMethod("format", Date.class, String.class));
 			methods.put("currentTime", Utility.class.getDeclaredMethod("currentTime"));
-			methods.put("strMatch", ExpressionUtil.class.getDeclaredMethod("matches"));
+			methods.put("strMatch", ExpressionUtil.class.getDeclaredMethod("matches", String.class, String.class));
 			return methods;
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
