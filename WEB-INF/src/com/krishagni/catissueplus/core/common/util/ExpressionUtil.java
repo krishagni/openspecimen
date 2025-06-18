@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -31,10 +32,12 @@ public class ExpressionUtil {
 	@SuppressWarnings("unchecked")
 	public <T> T evaluate(String exprStr, Map<String, Object> variables) {
 		try {
-			StandardEvaluationContext ctxt = new StandardEvaluationContext();
+			SimpleEvaluationContext ctxt = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 			addMethods(ctxt);
-			ctxt.setVariables(variables);
 			ctxt.setVariable("collFns", new CollectionFunctions(variables));
+			if (variables != null) {
+				variables.forEach(ctxt::setVariable);
+			}
 
 			SpelExpression expr = parse(exprStr);
 			return (T) expr.getValue(ctxt);
@@ -48,12 +51,12 @@ public class ExpressionUtil {
 		return parser.parseRaw(exprStr);
 	}
 
-	private void addMethods(StandardEvaluationContext ctxt) {
+	private void addMethods(SimpleEvaluationContext ctxt) {
 		if (methods.isEmpty()) {
 			methods = getMethods();
 		}
 
-		methods.forEach(ctxt::registerFunction);
+		methods.forEach(ctxt::setVariable);
 	}
 
 	private Map<String, Method> getMethods() {
@@ -66,10 +69,15 @@ public class ExpressionUtil {
 			methods.put("cmp", Utility.class.getDeclaredMethod("cmp", Date.class, Date.class));
 			methods.put("formatDate", Utility.class.getDeclaredMethod("format", Date.class, String.class));
 			methods.put("currentTime", Utility.class.getDeclaredMethod("currentTime"));
+			methods.put("strMatch", ExpressionUtil.class.getDeclaredMethod("matches"));
 			return methods;
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		}
+	}
+
+	private static boolean matches(String pattern, String testStr) {
+		return Pattern.matches(pattern, testStr);
 	}
 
 	private static class CollectionFunctions {

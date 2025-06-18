@@ -1827,7 +1827,7 @@ public class Specimen extends BaseExtensionEntity {
 	public void setKitLabelsIfEmpty() {
 		boolean skip = !getCollectionProtocol().isKitLabelsEnabled() ||
 			isMissedOrNotCollected() ||
-			(StringUtils.isNotBlank(label) && StringUtils.isNotBlank(barcode)) ||
+			StringUtils.isNotBlank(label) ||
 			getSpecimenRequirement() == null;
 		if (skip) {
 			return;
