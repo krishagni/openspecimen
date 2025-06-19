@@ -94,10 +94,10 @@ export default {
         return null;
       }
 
-      if (typeof this.onSubmit == 'function') {
-        this.onSubmit(job);
+      if (+this.cpId > 0) {
+        routerSvc.goto('CpImportJobsList', {cpId: this.cpId});
       } else {
-        routerSvc.back();
+        routerSvc.goto('MultiCpImportJobsList');
       }
     },
 
