@@ -90,7 +90,7 @@ dependencies {
   implementation group: 'commons-io', name: 'commons-io', version:'2.18.0'
   implementation group: 'org.apache.commons', name: 'commons-collections4', version:'4.4'
   implementation group: 'org.apache.commons', name: 'commons-digester3', version:'3.2'
-  implementation group: 'org.apache.commons', name: 'commons-lang3', version:'3.12.0'
+  implementation group: 'org.apache.commons', name: 'commons-lang3', version:'3.17.0'
   implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.27.1'
   implementation group: 'org.apache.taglibs', name: 'taglibs-standard-impl', version: '1.2.5'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '1.28.4'
@@ -271,23 +271,11 @@ processResources {
   }
 }
 
-task unzip_form_designer(type: Copy) {
-  def zipFile = file('./form-designer.zip')
-  def outputDir = file("${buildDir}/form-designer")
-  
-  from zipTree(zipFile) 
-  into outputDir
-}
-
 task create_war(type: War) {
   from ('./') {
-    include 'ngweb/**'
+    include 'index.html'
   }
-  
-  from ('./www/dist/') {
-    include '**/**'
-  }
-  
+
   from ('./WEB-INF/') {
     include 'resources/**'
     include 'applicationContext.xml'
@@ -320,17 +308,6 @@ task create_war(type: War) {
   }
 }
 
-def grunt_cmd = "grunt"
-
-if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-  grunt_cmd = "grunt.cmd"
-}
-
-task grunt_build(type: Exec) {
-  workingDir './www'
-  commandLine grunt_cmd, 'build'
-}
-
 task vue_backup_src(type: Exec) {
   workingDir './ui'
   commandLine 'mv', 'src', 'src_bk'
@@ -354,7 +331,7 @@ task vue_build(type: Exec) {
 vue_install_dependencies.dependsOn vue_backup_src
 vue_restore_src.dependsOn vue_install_dependencies
 vue_build.dependsOn vue_restore_src
-create_war.dependsOn unzip_form_designer, grunt_build, vue_build
+create_war.dependsOn vue_build
 build.dependsOn create_war
 
 apply from: envScript
