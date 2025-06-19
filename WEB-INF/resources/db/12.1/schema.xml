@@ -83,4 +83,138 @@
 
     <dropIndex tableName="CATISSUE_PERMISSIBLE_VALUE" indexName="PV_ATTR_VALUE_IDX" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Form status table for query">
+    <createTable tableName="OS_FORM_RECORD_STATUSES">
+      <column name="IDENTIFIER" type="${int.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="FORM_ID" type="${int.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="RECORD_ID" type="${int.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="FORM_STATUS" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Covering index on form record status table">
+    <createIndex tableName="OS_FORM_RECORD_STATUSES" indexName="OS_FORM_RECORD_STATUSES_IDX">
+      <column name="RECORD_ID" type="${int.type}" />
+      <column name="FORM_ID" type="${int.type}" />
+      <column name="FORM_STATUS" type="${text.type}(255)" />
+      <column name="IDENTIFIER" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to insert form status in the query table" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_ins_entity_form_status;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_ins_entity_form_status after insert on catissue_form_record_entry
+      for each row
+      begin
+        declare formId bigint;
+
+        select
+          container_id into formId
+        from
+          catissue_form_context
+        where
+          identifier = new.form_ctxt_id;
+
+        insert into os_form_record_statuses
+          (form_id, record_id, form_status, identifier)
+        values
+          (formId, new.record_id, new.form_status, new.identifier);
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to update form status in the query table" dbms="mysql" runOnChange="true">
+    <sql>
+      drop trigger if exists os_update_entity_form_status;
+    </sql>
+
+    <sql endDelimiter="//">
+      create trigger os_update_entity_form_status after update on catissue_form_record_entry
+      for each row
+      begin
+        declare formId bigint;
+
+        select
+          container_id into formId
+        from
+          catissue_form_context
+        where
+          identifier = new.form_ctxt_id;
+
+        update
+          os_form_record_statuses
+        set
+          form_status = new.form_status
+        where
+          form_id = formId and
+          record_id = new.record_id and
+          identifier = new.identifier;
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to insert form status in the query table" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//">
+      create or replace trigger os_ins_entity_form_status after insert on catissue_form_record_entry
+      for each row
+      declare
+        formId number;
+      begin
+        select
+          container_id into formId
+        from
+          catissue_form_context
+        where
+          identifier = :new.form_ctxt_id;
+
+        insert into os_form_record_statuses
+          (form_id, record_id, form_status, identifier)
+        values
+          (formId, :new.record_id, :new.form_status, :new.identifier);
+      end;
+      //
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Trigger to update form status in the query table" dbms="oracle" runOnChange="true">
+    <sql endDelimiter="//">
+      create or replace trigger os_update_entity_form_status after update on catissue_form_record_entry
+      for each row
+      declare
+        formId number;
+      begin
+        select
+          container_id into formId
+        from
+          catissue_form_context
+        where
+          identifier = :new.form_ctxt_id;
+
+        update
+          os_form_record_statuses
+        set
+          form_status = :new.form_status
+        where
+          form_id = formId and
+          record_id = :new.record_id and
+          identifier = :new.identifier;
+      end;
+      //
+    </sql>
+  </changeSet>
 </databaseChangeLog>

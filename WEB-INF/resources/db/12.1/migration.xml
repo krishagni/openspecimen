@@ -43,4 +43,16 @@
   <changeSet author="vpawar" id="Add mandatory constraint on disposal event reason">
     <addNotNullConstraint tableName="CATISSUE_DISPOSAL_EVENT_PARAM" columnName="REASON_ID" columnDataType="${int.type}" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Migrate the existing form statuses to the new query table that tracks record statuses using form_id and record_id">
+    <sql>
+      insert into os_form_record_statuses
+        (form_id, record_id, form_status, identifier)
+      select
+        fc.container_id as form_id, re.record_id, re.form_status, re.identifier
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+    </sql>
+  </changeSet>
 </databaseChangeLog>
