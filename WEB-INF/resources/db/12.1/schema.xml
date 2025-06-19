@@ -70,7 +70,7 @@
       tableName="CATISSUE_PERMISSIBLE_VALUE" columnNames="PUBLIC_ID, VALUE" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Unique key constraint on PV" dbms="oracle">
+  <!-- changeSet author="vpawar" id="Unique key constraint on PV" dbms="oracle">
     <sql>
       create unique index OS_PERMISSIBLE_VALUE_UQ on CATISSUE_PERMISSIBLE_VALUE(PUBLIC_ID, LOWER(VALUE));
     </sql>
@@ -82,5 +82,5 @@
     </preConditions>
 
     <dropIndex tableName="CATISSUE_PERMISSIBLE_VALUE" indexName="PV_ATTR_VALUE_IDX" />
-  </changeSet>
+  </changeSet -->
 </databaseChangeLog>
