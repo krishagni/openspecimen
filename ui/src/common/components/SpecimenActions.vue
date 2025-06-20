@@ -65,7 +65,6 @@ import wfSvc       from '@/biospecimen/services/Workflow.js';
 
 import alertsSvc   from '@/common/services/Alerts.js';
 import authSvc     from '@/common/services/Authorization.js';
-import extnsUtil   from '@/common/services/ExtensionsUtil.js';
 import http        from '@/common/services/HttpClient.js';
 import itemsSvc    from '@/common/services/ItemsHolder.js';
 import pluginReg   from '@/common/services/PluginViewsRegistry.js';
@@ -392,7 +391,7 @@ export default {
 
       itemsSvc.setItems('specimens', specimens);
 
-      this.$emit('route-change', {name: 'SpecimensBulkEdit'});
+      this.emitRouteChange({name: 'SpecimensBulkEdit'});
       routerSvc.goto('SpecimensBulkEdit');
     },
 
@@ -458,6 +457,7 @@ export default {
       }
 
       localStorage.selectedSpecimenIds = JSON.stringify(specimens.map(spmn => spmn.id));
+      this.emitRouteChange({name: 'ShipmentAddEdit'});
       routerSvc.goto('ShipmentAddEdit', {shipmentId: -1, shipmentType: 'SPECIMEN'});
     },
 
@@ -475,10 +475,12 @@ export default {
 
       const payload = {
         workflow: {id: this.ctx.recvSpmnsWfId},
-        inputItems: specimens.map(specimen => ({specimen: {id: specimen.id}}))
+        inputItems: specimens.map(specimen => ({specimen: {id: specimen.id}})),
+        params: {returnOnExit: 'current_view'}
       };
       http.post('workflow-instances', payload).then(
         (instance) => {
+          this.emitRouteChange({name: 'tmWorkflowInstance'});
           routerSvc.goto('tmWorkflowInstance', {wfInstanceId: instance.id});
         }
       );
@@ -511,6 +513,7 @@ export default {
         return;
       }
 
+      this.emitRouteChange({name: 'tmWorkflowInstance'});
       wfSvc.createPooledSpecimens(dbSpmns);
     },
 
@@ -620,6 +623,7 @@ export default {
         comments: userInput.comments
       });
 
+      this.emitRouteChange({name: 'OrderAddEdit'});
       this.$goto('OrderAddEdit', {orderId: -1});
     },
 
@@ -672,22 +676,38 @@ export default {
     },
 
     createAliquots: function() {
-      const navTo = (specimens) => wfSvc.createAliquots(specimens);
+      const navTo = (specimens) => {
+        this.emitRouteChange({name: 'tmWorkflowInstance'});
+        wfSvc.createAliquots(specimens);
+      };
+
       this.navToView('bulk-create-aliquots', navTo, {}, 'common.specimen_actions.select_for_aliquots', false, false, true);
     },
 
     createDerivatives: function() {
-      const navTo = (specimens) => wfSvc.createDerivedSpecimens(specimens);
+      const navTo = (specimens) => {
+        this.emitRouteChange({name: 'tmWorkflowInstance'});
+        wfSvc.createDerivedSpecimens(specimens);
+      };
+
       this.navToView('bulk-create-derivatives', navTo, {}, 'common.specimen_actions.select_for_derived', false, false, true);
     },
 
     addEditEvent: function() {
-      const navTo = (specimens) => wfSvc.bulkAddEditEvents(specimens);
+      const navTo = (specimens) => {
+        this.emitRouteChange({name: 'tmWorkflowInstance'});
+        wfSvc.bulkAddEditEvents(specimens);
+      };
+
       this.navToView('bulk-add-event', navTo, {}, 'common.specimen_actions.select_for_add_edit_event', false, false, false);
     },
 
     transferSpecimens: function() {
-      const navTo = (specimens) => wfSvc.transferSpecimens(specimens);
+      const navTo = (specimens) => {
+        this.emitRouteChange({name: 'tmWorkflowInstance'});
+        wfSvc.transferSpecimens(specimens);
+      };
+
       this.navToView('bulk-transfer-specimens', navTo, {}, 'common.specimen_actions.select_for_transfer', false, false, true);
     },
 
@@ -728,6 +748,10 @@ export default {
       );
     },
 
+    emitRouteChange: function(route) {
+      this.$emit('route-change', route);
+    },
+
     showError: function(error, spmns) {
       alertsSvc.error({code: error, args: {labels: spmns.map(s => !s.label ? s.id : s.label).join(', ')}});
     },
@@ -761,13 +785,6 @@ export default {
         navTo(dbSpmns);
         return;
       }
-
-      for (let spmn of dbSpmns) {
-        extnsUtil.createExtensionFieldMap(spmn, true);
-      }
-
-      itemsSvc.ngSetItems('specimens', dbSpmns);
-      routerSvc.ngGoto(url, params);
     }
   }
 }
