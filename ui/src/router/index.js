@@ -328,13 +328,18 @@ const routes = [
             const entityId = currentUser.admin ? -1 : currentUser.instituteId;
             const {osSvc: {formSvc}} = window;
             return formSvc.getForms({formType: 'User', entityId}).then(
-              forms => forms.map(
-                form => ({
-                  id: form.formId,
-                  type: 'userExtensions',
-                  title: form.caption,
-                  params: { entityType: 'User', entityId, formName: form.name }
-                })
+              forms => (
+                [{
+                  group: window.osSvc.i18nSvc.msg('users.singular'),
+                  types: forms.map(
+                    form => ({
+                      id: form.formId,
+                      type: 'userExtensions',
+                      title: form.caption,
+                      params: { entityType: 'User', entityId, formName: form.name }
+                    })
+                  )
+                }]
               )
             );
           },
