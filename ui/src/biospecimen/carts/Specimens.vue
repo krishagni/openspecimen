@@ -41,7 +41,7 @@
         :object-id="cartId"
         :allow-selection="true"
         :query="query"
-        url="'#/specimens/' + hidden.specimenId"
+        url="'#/specimen-resolver/' + hidden.specimenId"
         @selectedRows="onSpecimenSelection"
         @rowClicked="onSpecimenRowClick"
         @listLoaded="onSpecimensLoaded"
@@ -156,7 +156,7 @@ export default {
     },
 
     onSpecimenRowClick: function(rowObject) {
-      routerSvc.ngGoto('specimens/' + rowObject.hidden.specimenId);
+      routerSvc.goto('SpecimenResolver', {specimenId: rowObject.hidden.specimenId});
     },
 
     onSpecimensLoaded: function({widget, list, filters}) {

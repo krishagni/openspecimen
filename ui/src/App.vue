@@ -99,7 +99,7 @@ export default {
 
   methods: {
     returnToMyAccount: function() {
-      userSvc.unpersonate().then(() => routerSvc.ngGoto(''));
+      userSvc.unpersonate().then(() => routerSvc.goto('HomePage'));
     },
 
     registerHomePageCards: function() {

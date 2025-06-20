@@ -9,13 +9,8 @@ class Router {
   uiUrl = 'ui-app/';
   // uiUrl = 'http://localhost:8081/';
 
-  ngGoto(state, params, newTab) {
-    const url = this.ngUrl(state, params);
-    if (newTab) {
-      window.open(url, '_blank');
-    } else {
-      window.location.href = url;
-    }
+  ngGoto(state) {
+    alert('AngularJS link: "' + state + '" not supported. Report the problem to OpenSpecimen support staff');
   }
 
   ngUrl(state, params) {

@@ -169,12 +169,8 @@ export default {
     if (localStorage.osReqState) {
       try {
         const state = JSON.parse(localStorage.osReqState);
-        if (state.view != 'vue') {
-          routerSvc.ngGoto('resolve-req-state');
-        } else {
-          routerSvc.goto(state.name, state.params, state.query);
-          delete localStorage.osReqState;
-        }
+        routerSvc.goto(state.name, state.params, state.query);
+        delete localStorage.osReqState;
         return;
       } catch (e) {
         console.log('Error processing the req state: ' + localStorage.osReqState);

@@ -9,7 +9,7 @@ export default {
   props: ['catalogId', 'requestId'],
 
   created() {
-    routerSvc.ngGoto('specimen-requests/' + this.requestId + '/overview?catalogId=' + this.catalogId);
+    routerSvc.goto('CatalogRequestDetail.Overview', {catalogId: this.catalogId, requestId: this.requestId}, {});
   }
 }
 </script>

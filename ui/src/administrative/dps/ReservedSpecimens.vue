@@ -29,7 +29,7 @@
     name="reserved-specimens-list-view"
     :object-id="dp.id"
     :allow-selection="allowOrderCreation"
-    url="'#/specimens/' + hidden.specimenId"
+    url="'#/specimen-resolver/' + hidden.specimenId"
     @selectedRows="onSpecimenSelection"
     @rowClicked="onSpecimenRowClick"
     @listLoaded="onListLoad"
@@ -68,7 +68,7 @@ export default {
 
     onSpecimenRowClick: function(event) {
       const spmnId = +event.hidden.specimenId;
-      routerSvc.ngGoto('specimens/' + spmnId);
+      routerSvc.goto('SpecimenResolver', {specimenId: spmnId});
     },
 
     getSpecimensCount: function() {

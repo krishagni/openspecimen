@@ -155,7 +155,7 @@ export default {
     },
 
     viewDefaultCart: function() {
-      routerSvc.ngGoto('specimen-lists/0/specimens');
+      routerSvc.goto('CartSpecimensList', {cartId: 0});
     },
 
     createNewCart: function(event) {
@@ -170,7 +170,7 @@ export default {
     },
 
     viewCarts: function() {
-      routerSvc.ngGoto('specimen-lists');
+      routerSvc.goto('SpecimenCartsList', {cartId: -1});
     }
   }
 }

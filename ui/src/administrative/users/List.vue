@@ -421,8 +421,6 @@ export default {
       routerSvc.ngGoto('users-export-forms');
     },
 
-    ngGoto: (url, params) => routerSvc.ngGoto(url, params),
-
     goto: (name, params) => routerSvc.goto(name, params),
 
     help: function() {

@@ -33,7 +33,6 @@ export default {
     'name',
     'objectId',
     'url',
-    'newUiUrl',
     'newTab',
     'allowSelection',
     'selected',
@@ -217,7 +216,7 @@ export default {
       this.schema.summary = {
         title: {
           text: (ro) => exprUtil.eval(ro, urlColumn.name),
-          url:  (ro) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(ro, this.url)
+          url:  (ro) => '' + exprUtil.eval(ro, this.url)
         },
         descriptions: columns.map(column => column.name).filter((column, index) => index != urlColumnIdx)
       };
@@ -364,7 +363,7 @@ export default {
           result.entity = 'hidden';
         } else if (mi.showLink == 'true') {
           if (this.url) {
-            result.href = (row) => (this.newUiUrl ? '' : ui.ngServer) + exprUtil.eval(row.rowObject, this.url)
+            result.href = (row) => '' + exprUtil.eval(row.rowObject, this.url)
           }
 
           if (this.newTab) {

@@ -82,12 +82,8 @@ export default {
     },
 
     showDetailedList: function() {
-      const {name, params, query, ngState} = this.listUrl || {};
-      if (ngState) {
-        routerSvc.ngGoto(ngState, params);
-      } else {
-        routerSvc.goto(name, params, query);
-      }
+      const {name, params, query} = this.listUrl || {};
+      routerSvc.goto(name, params, query);
     },
       
     toggleStar: function(item) {

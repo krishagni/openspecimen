@@ -25,7 +25,7 @@
     :object-id="container.id"
     :allow-selection="true"
     :include-count="includeCount"
-    url="'#/specimens/' + hidden.specimenId"
+    url="'#/specimen-resolver/' + hidden.specimenId"
     :newTab="true"
     @selectedRows="onSpecimenSelection"
     @rowClicked="onSpecimenRowClick"
@@ -67,8 +67,8 @@ export default {
     },
 
     onSpecimenRowClick: function(event) {
-      const spmnId = +event.hidden.specimenId;
-      routerSvc.ngGoto('specimens/' + spmnId, {}, true);
+      const specimenId = +event.hidden.specimenId;
+      routerSvc.goto('SpecimenResolver', {specimenId});
     },
 
     getSpecimensCount: function() {
