@@ -1175,6 +1175,14 @@
     "visit_clinical_diagnosis": "Clinical Diagnosis"
   },
 
+  "export": {
+    "export_all_q": "Export All?",
+    "export_all_records_q": "Are you sure you want to export all records of {title}?",
+    "export_records": "Export Records",
+    "record_type": "Record Type",
+    "record_type_req": "Record Type is mandatory"
+  },
+
   "forms": {
     "add_association": "Add Association",
     "all_cps": "All Present and Future Collection Protocols",
@@ -1524,6 +1532,7 @@
     "pending_visits": "Pending Visits",
     "phone_number": "Phone Number",
     "ppid": "PPID",
+    "ppids": "Participant Protocol IDs",
     "ppid_req": "PPID is mandatory",
     "preparing_report": "Report for '{shortTitle}' is being prepared and will be emailed shortly to intended recipients.",
     "print_specimen_labels": "Print Specimen Labels",
@@ -1540,6 +1549,7 @@
     "registration_date_req": "Registration Date is mandatory",
     "registration_site": "Registration Site",
     "registrations": "Participant Registrations",
+    "scan_ppids": "Scan one or more PPIDs separated by comma, newline, or tab",
     "select_cp": "Select the Collection Protocol",
     "site": "Site",
     "site_req": "Site is mandatory",
@@ -1554,6 +1564,8 @@
     "view_visit": "View Visit",
     "visit_date": "Visit Date",
     "visits": "Visits",
+    "visits_text_rpts": "Visits (Text Reports)",
+    "visits_pdf_rpts": "Visits (PDF Reports)",
     "vital_status": "Vital Status"
   },
 
@@ -2417,9 +2429,11 @@
     "req_other": "Other",
     "requirement": "Requirement",
     "requirement_req": "Requirement is mandatory",
+    "scan_specimen_labels": "Scan one or more specimen labels separated by comma, newline, or tab",
     "select_participant": "Select participant...",
     "show_pending": "Show Pending",
     "specimen": "Specimen",
+    "specimen_labels": "Specimen Labels",
     "stored": "Stored",
     "system_event": "System Event",
     "time": "Time",
@@ -2581,6 +2595,7 @@
     "pdf_report": "PDF Report",
     "pending_specimens": "Pending Specimens",
     "reason": "Reason",
+    "scan_visit_names": "Scan one or more visit names separated by comma, newline, or tab",
     "site": "Site",
     "spr_non_text_file": "The system couldn't extract text from your uploaded file. Usually, this happens when you upload images, PDFs or other non-text files. To view the report, please upload a plain text file.",
     "spr_text_na": "Path Report Text Not Available",
@@ -2596,6 +2611,7 @@
     "visit_date": "Visit Date",
     "visit_date_req": "Visit Date is mandatory",
     "visit_name": "Visit Name",
+    "visit_names": "Visit Names",
     "visit_site": "Visit Site",
     "visit_site_req": "Visit Site is mandatory"
   }

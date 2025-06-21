@@ -270,7 +270,7 @@ export default {
         options.push({
           icon: 'download',
           caption: this.$t('common.buttons.export'),
-          onSelect: () => routerSvc.ngGoto('cps/export-multi-cp-objs')
+          onSelect: () => routerSvc.goto('MultiCpExportRecords')
         });
       }
 

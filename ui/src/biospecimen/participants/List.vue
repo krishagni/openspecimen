@@ -410,7 +410,7 @@ export default {
         options.push({
           icon: 'download',
           caption: this.$t('common.buttons.export'),
-          url: routerSvc.ngUrl('cp-view/' + this.ctx.cp.id + '/export-cp-objs')
+          url: routerSvc.getUrl('CpExportRecords', {cpId: this.ctx.cp.id})
         });
       }
 
