@@ -113,7 +113,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 				fields.add(getField("specimenLabel", "Specimen Label"));
 				fields.add(getField("barcode", "Barcode"));
 			}
-			case "User" -> fields.add(getField("emailAddress", "Email Address"));
+			case "User", "UserProfile" -> fields.add(getField("emailAddress", "Email Address"));
 		}
 
 		fields.add(getField("fdeStatus", "Status"));

@@ -327,21 +327,29 @@ const routes = [
             const {currentUser} = window.osUi;
             const entityId = currentUser.admin ? -1 : currentUser.instituteId;
             const {osSvc: {formSvc}} = window;
-            return formSvc.getForms({formType: 'User', entityId}).then(
-              forms => (
-                [{
-                  group: window.osSvc.i18nSvc.msg('users.singular'),
-                  types: forms.map(
-                    form => ({
-                      id: form.formId,
-                      type: 'userExtensions',
-                      title: form.caption,
-                      params: { entityType: 'User', entityId, formName: form.name }
-                    })
-                  )
-                }]
-              )
-            );
+
+            const userForms    = await formSvc.getForms({formType: 'User', entityId});
+            const profileForms = await formSvc.getForms({formType: 'UserProfile', entityId});
+            return [
+              {
+                group: window.osSvc.i18nSvc.msg('users.user_forms'),
+                types: userForms.map(form => ({
+                  id: 'userForm_' + form.formId,
+                  type: 'userExtensions',
+                  title: form.caption,
+                  params: { entityType: 'User', entityId, formName: form.name }
+                }))
+              },
+              {
+                group: window.osSvc.i18nSvc.msg('users.profile_forms'),
+                types: profileForms.map(form => ({
+                  id: 'profileForm_' + form.formId,
+                  type: 'userExtensions',
+                  title: form.caption,
+                  params: { entityType: 'UserProfile', entityId, formName: form.name }
+                }))
+              }
+            ];
           },
           onSubmit: () => window.osSvc.routerSvc.goto('UserImportJobs')
         })

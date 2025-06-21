@@ -1299,7 +1299,7 @@
       "storageContainerType": "Container Types",
       "visit": "Visits",
       "user": "Users",
-      "userExtensions": "{formName}",
+      "userExtensions": "{formName} ({entityType})",
       "userRoles": "User Roles"
     },
     "ops": {

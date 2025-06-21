@@ -195,7 +195,7 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 			Specimen specimen = specimenResolver.getSpecimen(null, cpShortTitle, label, barcode);
 			objectId = specimen.getId();
 			cp = specimen.getCollectionProtocol();
-		} else if (entityType.equals("User")) {
+		} else if (entityType.equals("User") || entityType.equals("UserProfile")) {
 			String emailId = (String) extnObj.get("emailAddress");
 			if (StringUtils.isBlank(emailId)) {
 				throw OpenSpecimenException.userError(UserErrorCode.EMAIL_REQUIRED);
@@ -229,10 +229,10 @@ public class ExtensionsImporter implements ObjectImporter<Map<String, Object>, M
 
 	private Long getFormContextId(Container form, String entityType, CollectionProtocol cp, Long entityId) {
 		Long formCtxId = null;
-		if (entityType.equals("User")) {
-			FormContextBean fc  = formDao.getFormContext(false, "User", entityId, form.getId());
+		if (entityType.equals("User") || entityType.equals("UserProfile")) {
+			FormContextBean fc  = formDao.getFormContext(false, entityType, entityId, form.getId());
 			if (fc == null) {
-				fc = formDao.getFormContext(false, "User", -1L, form.getId());
+				fc = formDao.getFormContext(false, entityType, -1L, form.getId());
 				if (fc == null) {
 					throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, "Form is not associated at users level for the institute: " + entityId);
 				}
