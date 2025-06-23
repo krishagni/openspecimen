@@ -2495,6 +2495,7 @@
     "email_address": "Email Address",
     "email_address_invalid": "Email Address is not valid",
     "email_address_required": "Email Address is mandatory",
+    "email_ids": "Email Addresses",
     "export_login_activity": "Export Login Activity",
     "first_name": "First Name",
     "first_name_required": "First Name is mandatory",
@@ -2551,6 +2552,7 @@
     "role_name_required": "Role is mandatory",
     "role_site": "Site",
     "role_site_required": "Site is mandatory",
+    "scan_email_ids": "Scan one or more user email addresses separated by comma, tab, or newline...",
     "singular": "User",
     "status": {
       "archived": "Archived",

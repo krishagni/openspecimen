@@ -413,12 +413,12 @@ export default {
     },
 
     exportForms: function() {
-      const users = this.ctx.selectedUsers.map(item => ({emailAddress: item.rowObject.user.emailAddress}));
-      if (users.length > 0) {
-        localStorage.setItem('os.users', JSON.stringify(users));
+      const users = this.ctx.selectedUsers.map(item => item.rowObject.user);
+      if (users && users.length > 0) {
+        itemsSvc.setItems('users', users);
       }
 
-      routerSvc.ngGoto('users-export-forms');
+      routerSvc.goto('UserExportRecords');
     },
 
     goto: (name, params) => routerSvc.goto(name, params),

@@ -371,6 +371,11 @@ const routes = [
           createJob: (job) => ({name: 'UserImportRecords', query: {objectType: job.name == 'userExtensions' ? 'extensions' : job.name}})
         })
       },
+      {
+        path: 'user-export-records',
+        name: 'UserExportRecords',
+        component: () => import(/* webpackChunkName: "users" */ '../administrative/users/ExportFormRecords.vue')
+      },
 
       /*****************************
        *****************************

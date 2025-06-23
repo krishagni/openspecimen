@@ -2173,7 +2173,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 					recordsFn = this::getVisitFormRecords;
 				} else if (entityType.equals("Specimen") || entityType.equals("SpecimenEvent")) {
 					recordsFn = this::getSpmnFormRecords;
-				} else if (entityType.equals("User")) {
+				} else if (entityType.equals("User") || entityType.equals("UserProfile")) {
 					recordsFn = this::getUserFormRecords;
 				}
 
@@ -2245,7 +2245,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 						siteCps = AccessCtrlMgr.getInstance().getSiteCps(Resource.SPECIMEN, Operation.EXIM);
 						allowed = (siteCps == null || !siteCps.isEmpty());
 					}
-				} else if (entityType.equals("User")) {
+				} else if (entityType.equals("User") || entityType.equals("UserProfile")) {
 					if (entityId != null && entityId != -1L) {
 						if (AuthUtil.isAdmin()) {
 							allowed = true;
@@ -2358,7 +2358,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				return getRecords(
 					job,
 					"emailIds",
-					(emailIds) -> daoFactory.getUserDao().getFormRecords(entityId, form.getId(), emailIds, startAt, 100),
+					(emailIds) -> daoFactory.getUserDao().getFormRecords(entityType, entityId, form.getId(), emailIds, startAt, 100),
 					"userId",
 					(userId) -> daoFactory.getUserDao().getById(userId),
 					(user) -> {

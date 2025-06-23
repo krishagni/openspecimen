@@ -74,4 +74,6 @@ public interface UserDao extends Dao<User> {
 	List<FormCtxtSummary> getForms(String entityType, Long userId);
 
 	List<Map<String, Object>> getFormRecords(Long instituteId, Long formId, List<String> emailIds, int startAt, int maxResults);
+
+	List<Map<String, Object>> getFormRecords(String entityType, Long instituteId, Long formId, List<String> emailIds, int startAt, int maxResults);
 }

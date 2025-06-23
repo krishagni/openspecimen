@@ -281,7 +281,7 @@
       from
         catissue_user usr
         inner join catissue_institution institute on institute.identifier = usr.institute_id
-        inner join catissue_form_context fc on (fc.entity_id = institute.identifier or fc.entity_id = -1) and fc.entity_type = 'User'
+        inner join catissue_form_context fc on (fc.entity_id = institute.identifier or fc.entity_id = -1) and fc.entity_type = :entityType
         inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier and re.object_id = usr.identifier
       where
         usr.activity_status != 'Disabled' and
