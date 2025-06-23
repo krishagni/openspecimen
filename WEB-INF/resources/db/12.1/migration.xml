@@ -44,6 +44,13 @@
     <addNotNullConstraint tableName="CATISSUE_DISPOSAL_EVENT_PARAM" columnName="REASON_ID" columnDataType="${int.type}" />
   </changeSet>
 
+  <!-- Single newline character gets added when there is neither reason or comments -->
+  <changeSet author="vpawar" id="Remove the single newline character from disposal events.">
+    <sql>
+      update catissue_disposal_event_param set comments = null where comments = '\n';
+    </sql>
+  </changeSet>
+
   <changeSet author="vpawar" id="Migrate the existing form statuses to the new query table that tracks record statuses using form_id and record_id">
     <sql>
       insert into os_form_record_statuses
