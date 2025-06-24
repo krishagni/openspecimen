@@ -476,7 +476,7 @@ export default {
         opts.push({
           icon: 'download',
           caption: this.$t('users.export_login_activity'),
-          onSelect: () => this.ngGoto('export-login-audit')
+          onSelect: () => this.goto('extrasLoginActivityReport')
         });
 
         opts.push({
