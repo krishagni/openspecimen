@@ -120,6 +120,13 @@
                     :date-only="filter.dateOnly" />
                 </div>
               </span>
+              <span v-else-if="filter.type == 'radio'">
+                <os-label v-if="caption(filter)">
+                  <span>{{caption(filter)}}</span>
+                </os-label>
+                <os-radio-button :inline-label="caption(filter)" v-model="filterValues[filter.name]"
+                  v-bind="filter" />
+              </span>
             </cell>
           </form-group>
 

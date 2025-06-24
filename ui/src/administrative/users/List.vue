@@ -482,7 +482,7 @@ export default {
         opts.push({
           icon: 'tachometer-alt',
           caption: this.$t('users.active_users'),
-          onSelect: () => this.ngGoto('active-users-report')
+          onSelect: () => this.goto('extrasActiveUsersReport')
         });
       }
 
