@@ -1,39 +1,19 @@
 
-import ui from '@/global.js';
 import router from '@/router/index.js';
 
 class Router {
-  baseUrl = ui.ngServer + '#/';
+  // baseUrl = ui.ngServer + '#/';
   // baseUrl = 'http://localhost:9000/#/';
 
   uiUrl = 'ui-app/';
   // uiUrl = 'http://localhost:8081/';
 
   ngGoto(state) {
-    alert('AngularJS link: "' + state + '" not supported. Report the problem to OpenSpecimen support staff');
+    alert('AngularJS link (ngGoto): "' + state + '" not supported. Report the problem to OpenSpecimen support staff');
   }
 
-  ngUrl(state, params) {
-    let url   = this.baseUrl + state;
-    let query = '';
-    Object.keys(params || {}).forEach(
-      (key) => {
-        let value = params[key];
-        if (value) {
-          if (query) {
-            query += '&';
-          }
-
-          query += key + '=' + value;
-        }
-      }
-    );
-
-    if (query) {
-      url += '?' + query;
-    }
-
-    return url
+  ngUrl(state) {
+    alert('AngularJS link (ngUrl): "' + state + '" not supported. Report the problem to OpenSpecimen support staff');
   }
 
   goto(name, params, query) {

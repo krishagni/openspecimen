@@ -8,7 +8,7 @@ export default {
       "type": "span",
       "href": ({rowObject}) => {
         const specimen = rowObject.specimen || {};
-        return routerSvc.ngUrl('cps/' + specimen.cpId + '/overview');
+        return routerSvc.getUrl('CpDetail.Overview', {cpId: specimen.cpId});
       }
     },
     {
@@ -17,7 +17,7 @@ export default {
       "type": "span",
       "href": ({rowObject}) => {
         const specimen = rowObject.specimen || {};
-        return routerSvc.ngUrl('specimens/' + specimen.id);
+        return routerSvc.getUrl('SpecimenResolver', {specimenId: specimen.id});
       },
       "value": function({specimen}) {
         let label = specimen.label;

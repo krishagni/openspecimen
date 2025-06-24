@@ -8,7 +8,7 @@ export default {
       "name": "specimen.cpShortTitle",
       "href": (data) => {
         const specimen = data.specimen || {};
-        return routerSvc.ngUrl('cps/' + specimen.cpId + '/overview');
+        return routerSvc.getUrl('CpDetail.Overview', {cpId: specimen.cpId});
       }
     },
     {
@@ -17,7 +17,7 @@ export default {
       "name": "specimen.label",
       "href": (data) => {
         const specimen = data.specimen || {};
-        return routerSvc.ngUrl('specimens/' + specimen.id);
+        return routerSvc.getUrl('SpecimenResolver', {specimenId: specimen.id});
       }
     },
     {
@@ -26,7 +26,7 @@ export default {
       "name": "specimen.barcode",
       "href": (data) => {
         const specimen = data.specimen || {};
-        return routerSvc.ngUrl('specimens/' + specimen.id);
+        return routerSvc.getUrl('SpecimenResolver', {specimenId: specimen.id});
       }
     },
     {
@@ -35,7 +35,7 @@ export default {
       "name": "specimen.parentLabel",
       "href": (data) => {
         const specimen = data.specimen || {};
-        return specimen.parentId > 0 ? routerSvc.ngUrl('specimens/' + specimen.parentId) : null;
+        return specimen.parentId > 0 ? routerSvc.getUrl('SpecimenResolver', {specimenId: specimen.parentId}) : null;
       }
     },
     {
@@ -45,7 +45,7 @@ export default {
       "href": (data) => {
         const specimen = data.specimen || {};
         const {cpId, cprId} = specimen;
-        return cprId > 0 ? routerSvc.ngUrl('cp-view/' + cpId + '/participants/' + cprId + '/detail/overview') : null;
+        return cprId > 0 ? routerSvc.getUrl('ParticipantsListItemDetail.Overview', {cpId, cprId}) : null;
       }
     },
     {

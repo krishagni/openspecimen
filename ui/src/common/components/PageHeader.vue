@@ -99,7 +99,7 @@ export default {
                   if (card.newTab) {
                     window.open(link, '_blank');
                   } else {
-                    routerSvc.ngGoto(link);
+                    alert('Unknown link: ' + link);
                   }
                 }
               );

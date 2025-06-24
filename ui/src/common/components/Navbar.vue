@@ -134,7 +134,7 @@ export default {
     },
 
     homeUrl: function() {
-      return routerSvc.ngUrl('home');
+      return routerSvc.getUrl('HomePage');
     }
   },
 

@@ -10,7 +10,8 @@ export default {
       "href": (data) => {
         const request = data.order.request;
         if (request && request.id) {
-          return routerSvc.ngUrl('specimen-requests/' + request.id + '/overview', {catalogId: request.catalogId});
+          const {id: requestId, catalogId} = request;
+          return routerSvc.getUrl('CatalogRequestDetail.Overview', {catalogId, requestId});
         }
 
         return null;
