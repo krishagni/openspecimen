@@ -1,5 +1,5 @@
 
-import ui from '@/global.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   columns: [
@@ -8,7 +8,7 @@ export default {
       "labelCode": "shipments.specimen.label",
       "type": "span",
       "showWhen": "!receive || !allowSpecimenRelabeling",
-      "href": (rowObject) => ui.ngServer + '#/specimens/' + rowObject.specimen.id,
+      "href": (rowObject) => routerSvc.getUrl('SpecimenResolver', {specimenId: rowObject.specimen.id}),
       "value": (rowObject) => {
         let spmn = rowObject.specimen;
         let label = spmn.label;

@@ -172,7 +172,7 @@ export default {
     if (customFields && customFields.length > 0) {
       columns = columns.filter(column => column.name.indexOf('specimen.') != 0);
       columns.splice(0, 0, ...formUtil.fromSde(customFields, true));
-      columns[0].href = (rowObject) => this.$ui.ngServer + '#/specimens/' + rowObject.specimen.id;
+      columns[0].href = (rowObject) => routerSvc.getUrl('SpecimenResolver', {specimenId: rowObject.specimen.id});
       this.ctx.hasCustomSpecimenFields = true;
       this.ctx.specimensCriteria.includeExtensions = true;
     }

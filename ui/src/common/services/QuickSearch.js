@@ -1,5 +1,4 @@
 
-import ui   from '@/global.js';
 import http from '@/common/services/HttpClient.js';
 import routerSvc from '@/common/services/Router.js';
 
@@ -84,34 +83,10 @@ class QuickSearch {
 
     'specimen_list': {
       caption: 'Cart',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=specimen-list&' +
-           'objectName=specimen_list&' +
-           'key=id&' +
-           'value=:entityId',
+      ngView: false,
+      viewName: 'CartSpecimensList',
+      params: {entityId: 'cartId'}
     },
-
-    /* TODO: Need to move to supply plugin */
-    'supply': {
-      caption: 'Supply',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=supplies-detail.overview&' +
-           'objectName=supply&' +
-           'key=id&' +
-           'value=:entityId',
-    },
-
-    'supply_type': {
-      caption: 'Supply Type',
-      ngView: true,
-      url: ui.ngServer + '#/object-state-params-resolver?' +
-           'stateName=supplies-type-detail.overview&' +
-           'objectName=supply_type&' +
-           'key=id&' +
-           'value=:entityId',
-    }
   };
 
   async search(term) {

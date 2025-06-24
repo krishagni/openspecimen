@@ -14,8 +14,6 @@
 
 import i18n from '@/common/services/I18n.js';
 import routerSvc from '@/common/services/Router.js';
-import ui from '@/global.js';
-
 export default {
   props: ['visit', 'event', 'showLink', 'showStatus'],
 
@@ -62,7 +60,7 @@ export default {
           url = routerSvc.getUrl('VisitDetail.Overview', params, {eventId});
         }
       } else if (this.event) {
-        url = ui.ngServer + '#/cps/' + this.event.cpId + '/specimen-requirements?eventId=' + this.event.id;
+        url = routerSvc.getUrl('CpDetail.Events.List', {cpId: this.event.cpId}, {eventId: this.event.id});
       }
 
       return url;

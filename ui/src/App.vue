@@ -40,6 +40,7 @@ import authSvc from '@/common/services/Authorization.js';
 import homePageSvc from '@/common/services/HomePageService.js';
 import routerSvc from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
+import urlResolver from '@/common/services/UrlResolver.js';
 import userSvc   from '@/administrative/services/User.js';
 import util      from '@/common/services/Util.js';
 
@@ -87,6 +88,7 @@ export default {
         }
 
         this.registerHomePageCards();
+        this.registerUrls();
 
         this.loading = false;
         const {name} = routerSvc.getCurrentRoute();
@@ -237,6 +239,18 @@ export default {
           description: t('common.home.settings_desc'),
         }
       ]);
+    },
+
+    registerUrls: function() {
+      urlResolver.registerUrl('cp-overview',    'CpDetail.Overview',    'cpId');
+      urlResolver.registerUrl('dp-overview',    'DpDetail.Overview',    'dpId');
+      urlResolver.registerUrl('folder-queries', 'QueriesList',          null, 'folderId');
+      urlResolver.registerUrl('job-run-log',    'JobRunsList',          'jobId');
+      urlResolver.registerUrl('order-overview', 'OrderDetail.Overview', 'orderId');
+      urlResolver.registerUrl('specimen-list',  'CartSpecimensList',    'cartId');
+      urlResolver.registerUrl('user-overview',  'UserDetail.Overview',  'userId');
+      urlResolver.registerUrl('user-password-change', 'UserDetail.Overview', 'userId');
+      urlResolver.registerUrl('user-roles',     'UserDetail.Roles',     'userId');
     }
   }
 }

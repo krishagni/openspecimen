@@ -2,9 +2,6 @@
 import router from '@/router/index.js';
 
 class Router {
-  // baseUrl = ui.ngServer + '#/';
-  // baseUrl = 'http://localhost:9000/#/';
-
   uiUrl = 'ui-app/';
   // uiUrl = 'http://localhost:8081/';
 

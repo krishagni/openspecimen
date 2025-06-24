@@ -19,6 +19,7 @@ import pluginLoader   from './PluginLoader.js';
 import pluginViews    from './PluginViewsRegistry.js';
 import routerSvc      from './Router.js';
 import settingsSvc    from './Setting.js';
+import urlResolver    from './UrlResolver.js';
 import util           from './Util.js';
 import workflowSvc    from './Workflow.js';
 
@@ -47,6 +48,7 @@ export default {
       pluginViews:  pluginViews,
       routerSvc:    routerSvc,
       settingsSvc:  settingsSvc,
+      urlResolver:  urlResolver,
       util:         util,
       workflowSvc:  workflowSvc
     });

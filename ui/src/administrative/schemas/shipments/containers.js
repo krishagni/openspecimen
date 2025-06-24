@@ -1,11 +1,11 @@
-import ui from '@/global.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   columns: [
     {
       "name": "container.name",
       "captionCode": "shipments.container_name",
-      "href": (row) => ui.ngServer + '#/containers/' + row.rowObject.container.id + '/overview'
+      "href": (row) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: row.rowObject.container.id})
     },
     {
       "name": "containerDimension",

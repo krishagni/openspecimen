@@ -1,11 +1,11 @@
-import ui from '@/global.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   columns: [
     {
       "name": "specimen.label",
       "captionCode": "shipments.specimen.label",
-      "href": (row) => ui.ngServer + '#/specimens/' + row.rowObject.specimen.id,
+      "href": (row) => routerSvc.getUrl('SpecimenResolver', {specimenId: row.rowObject.specimen.id}),
       "value": (rowObject) => {
         let spmn = rowObject.specimen;
         let label = spmn.label;

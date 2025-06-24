@@ -1,13 +1,11 @@
 
-import ui from '@/global.js';
-
 export default {
   columns: [
     {
       "name": "specimen.label",
       "labelCode": "orders.specimen.label",
       "type": "span",
-      "href": (rowObject) => ui.ngServer + '#/specimens/' + rowObject.specimen.id,
+      "href": (rowObject) => window.osSvc.routerSvc.getUrl('SpecimenResolver', {specimenId: rowObject.specimen.id}),
       "uiStyle": {
         "min-width": "140px"
       },

@@ -1,5 +1,5 @@
 
-import ui from '@/global.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   columns: [
@@ -17,17 +17,13 @@ export default {
       "uiStyle": {
         "min-width": "125px"
       },
-      "href": ({container}) => {
-        return (container.id && (ui.ngServer + '#/containers/' + container.id + '/overview')) || '';
-      }
+      "href": ({container}) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: container.id})
     },
     {
       "name": "container.barcode",
       "labelCode": "containers.barcode",
       "type": "span",
-      "href": ({container}) => {
-        return (container.id && (ui.ngServer + '#/containers/' + container.id + '/overview')) || '';
-      }
+      "href": ({container}) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: container.id})
     },
     {
       "name": "container.dimension",

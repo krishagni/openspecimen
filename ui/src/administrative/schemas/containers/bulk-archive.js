@@ -1,5 +1,5 @@
 
-import ui from '@/global.js';
+import routerSvc from '@/common/services/Router.js';
 
 export default {
   columns: [
@@ -17,7 +17,7 @@ export default {
       "uiStyle": {
         "min-width": "125px"
       },
-      "href": (rowObject) => ui.ngServer + '#/containers/' + rowObject.container.id + '/overview'
+      "href": (rowObject) => routerSvc.getUrl('ContainerDetail.Overview', {containerId: rowObject.container.id})
     },
     {
       "name": "container.dimension",

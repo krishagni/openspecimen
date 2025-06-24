@@ -45,6 +45,7 @@
 <script>
 
 import notifSvc from '@/common/services/Notif.js';
+import urlResolver from '@/common/services/UrlResolver.js';
 
 export default {
   data() {
@@ -56,8 +57,6 @@ export default {
   },
 
   created() {
-    let ngServer = this.$ui.ngServer;
-
     this.loading = true;
     this.notifs = [];
     notifSvc.getNotifications(0, 10).then(
@@ -69,7 +68,7 @@ export default {
             notif.href = notif.urlKey;
             notif.newTab = true;
             if (notif.urlKey.indexOf('http://') != 0 && notif.urlKey.indexOf('https://') != 0) {
-              notif.href = ngServer + '#/resolve-url?urlKey=' + notif.urlKey + '&entityId=' + notif.entityId;
+              notif.href = urlResolver.getUrl(notif.urlKey, notif.entityId);
               notif.newTab = false;
             }
           }
