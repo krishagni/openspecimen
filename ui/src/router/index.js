@@ -37,6 +37,13 @@ const routes = [
       },
 
       {
+        path: 'user-notifs',
+        name: 'UserNotificationsList',
+        component: () => import(/* webpackChunkName: "common" */ '../users/views/NotificationsList.vue'),
+        props: (route) => ({pageNo: route.query.pageNo})
+      },
+
+      {
         path: 'users/:userId',
         name: 'UsersList',
         // route level code-splitting
