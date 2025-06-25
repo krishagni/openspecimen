@@ -1,6 +1,6 @@
 #macro(getMessage $code)$messageSource.getMessage($code, null, $locale)#end
 
-#set ( $url = "$appUrl/#/file-download?downloadUrl=$appUrl/rest/ng/mobile-app/upload-jobs/${job.id}/report" )
+#set ( $url = "$appUrl/ui-app/#/download-file?downloadUrl=$appUrl/rest/ng/mobile-app/upload-jobs/${job.id}/report" )
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
   <tbody>

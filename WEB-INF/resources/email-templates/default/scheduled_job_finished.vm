@@ -1,5 +1,5 @@
 #if( $jobRun.logFilePath )
-  #set ($url = "$appUrl/#/file-download?downloadUrl=$appUrl/rest/ng/scheduled-jobs/$job.id/runs/$jobRun.id/result-file")
+  #set ($url = "$appUrl/ui-app/#/download-file?downloadUrl=$appUrl/rest/ng/scheduled-jobs/$job.id/runs/$jobRun.id/result-file")
 #else
   #set ($url = "")
 #end

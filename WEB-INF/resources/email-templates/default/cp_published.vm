@@ -1,6 +1,6 @@
 #set ( $url = "$appUrl/ui-app/#/cps/${cp.id}/detail/overview" )
 #set ( $revisionApiUrl = "$appUrl/rest/ng/collection-protocols/${cp.id}/published-versions/${version.id}" )
-#set ( $revisionDownloadUrl= "$appUrl/#/file-download?downloadUrl=$urlEncoder.encode($revisionApiUrl)" )
+#set ( $revisionDownloadUrl= "$appUrl/ui-app/#/download-file?downloadUrl=$urlEncoder.encode($revisionApiUrl)" )
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
   <tbody>

@@ -1,5 +1,5 @@
 #set ( $apiUrl = "$appUrl/rest/ng/storage-containers/report?fileId=$fileId" )
-#set ( $downloadUrl = "$appUrl/#/file-download?downloadUrl=$urlEncoder.encode($apiUrl)" )
+#set ( $downloadUrl = "$appUrl/ui-app/#/download-file?downloadUrl=$urlEncoder.encode($apiUrl)" )
 #set ( $containerUrl = "$appUrl/ui-app/#/containers/$container.id/detail/overview" )
 
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate">
