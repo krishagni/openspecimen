@@ -1723,13 +1723,13 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	private String getCprRecordUrl(CollectionProtocolRegistration cpr, FormContextBean fc, FormRecordEntryBean fre) {
-		String url = "#/cp-view/%d/participants/%d/detail/extensions/list?formId=%d&formCtxtId=%d&recordId=%d";
-		return getUrl(String.format(url, cpr.getCollectionProtocol().getId(), cpr.getId(), fc.getContainerId(), fc.getIdentifier(), fre.getRecordId()));
+		String url = "ui-app/#/cp-view/%d/participants/%d/forms?formId=%d&recordId=%d";
+		return getUrl(String.format(url, cpr.getCollectionProtocol().getId(), cpr.getId(), fc.getContainerId(), fre.getRecordId()));
 	}
 
 	private String getVisitRecordUrl(Visit visit, FormContextBean fc, FormRecordEntryBean fre) {
-		String url = "#/cp-view/%d/participants/%d/visits/detail/extensions/list?visitId=%d&formId=%d&formCtxtId=%d&recordId=%d";
-		return getUrl(String.format(url, visit.getCollectionProtocol().getId(), visit.getRegistration().getId(), visit.getId(), fc.getContainerId(), fc.getIdentifier(), fre.getRecordId()));
+		String url = "ui-app/#/cp-view/%d/participants/%d/visit/%d/forms?formId=%d&recordId=%d";
+		return getUrl(String.format(url, visit.getCollectionProtocol().getId(), visit.getRegistration().getId(), visit.getId(), fc.getContainerId(), fre.getRecordId()));
 	}
 
 	private String getSpecimenRecordUrl(Specimen specimen, FormContextBean fc, FormRecordEntryBean fre) {
@@ -1737,12 +1737,12 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			return getEventRecordUrl(specimen, fc, fre);
 		}
 
-		String url = "#/cp-view/%d/participants/%d/visits/specimens/detail/extensions/list?visitId=%d&specimenId=%d&formId=%d&formCtxtId=%d&recordId=%d";
-		return getUrl(String.format(url, specimen.getCollectionProtocol().getId(), specimen.getRegistration().getId(), specimen.getVisit().getId(), specimen.getId(), fc.getContainerId(), fc.getIdentifier(), fre.getRecordId()));
+		String url = "ui-app/#/cp-view/%d/participants/%d/visit/%d/specimen/%d/forms?formId=%d&recordId=%d";
+		return getUrl(String.format(url, specimen.getCollectionProtocol().getId(), specimen.getRegistration().getId(), specimen.getVisit().getId(), specimen.getId(), fc.getContainerId(), fre.getRecordId()));
 	}
 
 	private String getEventRecordUrl(Specimen specimen, FormContextBean fc, FormRecordEntryBean fre) {
-		String url = "#/cp-view/%d/participants/%d/visits/specimens/detail/event-overview?visitId=%d&specimenId=%d&formId=%d&recordId=%d";
+		String url = "ui-app/#/cp-view/%d/participants/%d/visit/%d/specimen/%d/overview?action=show_event,%d,%d";
 		return getUrl(String.format(url, specimen.getCollectionProtocol().getId(), specimen.getRegistration().getId(), specimen.getVisit().getId(), specimen.getId(), fc.getContainerId(), fre.getRecordId()));
 	}
 
