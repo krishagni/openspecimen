@@ -46,7 +46,7 @@ export default {
     {
       name: "order.executionDate",
       captionCode: "orders.date",
-      type: "date",
+      type: "date"
     },
     {
       name: "order.status",
@@ -111,7 +111,7 @@ export default {
       name: "executionDate",
       type: "date",
       captionCode: "orders.execution_date",
-      format: "yyyy-MM-dd"
+      dateOnly: true
     },
     {
       name: "status",

@@ -36,14 +36,14 @@ export default {
       type: 'date',
       captionCode: 'jobs.run_start_time',
       showTime: true,
-      format: 'yyyy-MM-dd HH:mm'
+      isoString: true
     },
     {
       name: 'toDate',
       type: 'date',
       captionCode: 'jobs.run_end_time',
       showTime: true,
-      format: 'yyyy-MM-dd HH:mm'
+      isoString: true
     },
     {
       name: 'status',

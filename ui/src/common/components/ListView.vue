@@ -109,15 +109,15 @@
                 <div class="range" v-if="filter.range">
                   <os-date-picker md-type="true" :placeholder="'Min. ' + caption(filter)"
                     v-model="filterValues[filter.name + '.$min']" :show-time="filter.showTime"
-                    :date-only="filter.dateOnly"/>
+                    :date-only="filter.dateOnly" :iso-string="filter.isoString" />
                   <os-date-picker md-type="true" :placeholder="'Max. ' + caption(filter)"
                     v-model="filterValues[filter.name + '.$max']" :show-time="filter.showTime"
-                    :date-only="filter.dateOnly" />
+                    :date-only="filter.dateOnly" :iso-string="filter.isoString" />
                 </div>
                 <div v-else>
                   <os-date-picker md-type="true" :placeholder="caption(filter)"
                     v-model="filterValues[filter.name]" :show-time="filter.showTime"
-                    :date-only="filter.dateOnly" />
+                    :date-only="filter.dateOnly" :iso-string="filter.isoString" />
                 </div>
               </span>
               <span v-else-if="filter.type == 'radio'">

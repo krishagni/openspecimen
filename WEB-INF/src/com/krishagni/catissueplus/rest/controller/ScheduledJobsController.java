@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.rest.controller;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -125,12 +126,12 @@ public class ScheduledJobsController {
 		Long jobId,
 
 		@RequestParam(value = "fromDate", required = false)
-		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-		Date fromDate,
+		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm", fallbackPatterns = {"yyyy-MM-dd'T'HH:mm:ss.SSSX"})
+		Instant fromDate,
 
 		@RequestParam(value = "toDate", required = false)
-		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-		Date toDate,
+		@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm", fallbackPatterns = {"yyyy-MM-dd'T'HH:mm:ss.SSSX"})
+		Instant toDate,
 
 		@RequestParam(value = "status", required = false)
 		ScheduledJobRun.Status status,
@@ -140,8 +141,8 @@ public class ScheduledJobsController {
 
 		JobRunsListCriteria criteria = new JobRunsListCriteria()
 			.jobId(jobId)
-			.fromDate(fromDate)
-			.toDate(toDate)
+			.fromDate(fromDate != null ? Date.from(fromDate) : null)
+			.toDate(toDate != null ? Date.from(toDate) : null)
 			.status(status)
 			.startAt(0)
 			.maxResults(maxResults);

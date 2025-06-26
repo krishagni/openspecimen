@@ -32,7 +32,7 @@ import Calendar from 'primevue/calendar';
 import utilSvc from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'showTime', 'tabOrder', 'disabled', 'dateOnly'],
+  props: ['modelValue', 'showTime', 'tabOrder', 'disabled', 'dateOnly', 'isoString'],
 
   inject: ['ui'],
 
@@ -103,6 +103,9 @@ export default {
           const month = (dt.getMonth() < 9 ? "0" : "") + (dt.getMonth() + 1);
           const date  = (dt.getDate() < 10 ? "0" : "") + dt.getDate();
           value = year + "-" + month + "-" + date;
+        } else if (value && this.isoString) {
+          const dt = new Date(value);
+          value = dt.toISOString();
         }
 
         this.$emit('update:modelValue', value);
