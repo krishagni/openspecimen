@@ -1112,7 +1112,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	private List<FormFieldSummary> getCpGroupFields(Long groupId, Container form) {
-		if (groupId == null || groupId <= 0) {
+		if (form.getName().equals("CollectionProtocol")) {
+			return getCpFields(-1L, form);
+		} else if (groupId == null || groupId <= 0) {
 			return Collections.emptyList();
 		}
 
