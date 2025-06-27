@@ -51,6 +51,12 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Remove the trailing \n from the disposed event comments">
+    <sql>
+      update catissue_disposal_event_param set comments = regexp_replace(comments, '\\n$', '') where comments like '%\n';
+    </sql>
+  </changeSet>
+
   <changeSet author="vpawar" id="Migrate the existing form statuses to the new query table that tracks record statuses using form_id and record_id">
     <sql>
       insert into os_form_record_statuses
