@@ -54,7 +54,7 @@
               </span>
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="https://help.openspecimen.org/specimen-list" new-tab="true" />
+                url="https://openspecimen.atlassian.net/wiki/x/DgAwAw" new-tab="true" />
             </template>
 
             <template #right>
