@@ -178,6 +178,7 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 		return orderBy;
 	}
 
+	@JsonProperty("orderBy")
 	public T orderBy(String orderBy) {
 		this.orderBy = orderBy;
 		return self();
@@ -187,6 +188,7 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 		return asc;
 	}
 
+	@JsonProperty("asc")
 	public T asc(boolean asc) {
 		this.asc = asc;
 		return self();
@@ -196,6 +198,7 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 		return orderByStarred;
 	}
 
+	@JsonProperty("orderByStarred")
 	public T orderByStarred(boolean orderByStarred) {
 		this.orderByStarred = orderByStarred;
 		return self();
