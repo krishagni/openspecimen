@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="CP specimen service">
+    <createTable tableName="OS_CP_SERVICES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="CODE" type="${text.type}(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="DESCRIPTION" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="CP_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CP_SERVICES_CP"
+          referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP specimen service ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_CP_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on the CP service code">
+    <addUniqueConstraint constraintName="OS_CP_SERVICE_CODE_UQ" tableName="OS_CP_SERVICES" columnNames="CP_ID, CODE" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP specimen service rate">
+    <createTable tableName="OS_CP_SERVICE_RATES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="SERVICE_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_CP_SVC_RATE_SERVICE_ID"
+          referencedTableName="OS_CP_SERVICES" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="START_DATE" type="${nullable.ts.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="END_DATE" type="${nullable.ts.type}" />
+      <column name="RATE" type="${decimal.type}(10, 2)">
+        <constraints nullable="false" />
+      </column>
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP specimen service rate ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_CP_SERVICE_RATES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Anticipated specimen services">
+    <createTable tableName="OS_CP_SR_SERVICES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="SR_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SR_SVCS_SR_ID"
+          referencedTableName="CATISSUE_CP_REQ_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SERVICE_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SR_SVCS_SVC_ID"
+          referencedTableName="OS_CP_SERVICES" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UNITS" type="${int.type}" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Anticipated specimen service ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_CP_SR_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen services">
+    <createTable tableName="OS_SPECIMEN_SERVICES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SPMN_SVCS_SPECIMEN_ID"
+          referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SERVICE_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SPMN_SVCS_SERVICE_ID"
+          referencedTableName="OS_CP_SERVICES" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UNITS" type="${int.type}" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="SERVICE_DATE" type="${nullable.ts.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="SERVICED_BY" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SPMN_SVCS_USER_ID"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COMMENTS" type="${text.type}(255)"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen service ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_SPECIMEN_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+</databaseChangeLog>

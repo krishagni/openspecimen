@@ -78,6 +78,8 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 	
 	private Set<SpecimenRequirement> childSpecimenRequirements = new LinkedHashSet<>();
 
+	private Set<SpecimenRequirementService> services = new LinkedHashSet<>();
+
 	private Set<Specimen> specimens = new HashSet<>();
 
 	public String getName() {
@@ -329,6 +331,14 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 
 	public void setChildSpecimenRequirements(Set<SpecimenRequirement> childSpecimenRequirements) {
 		this.childSpecimenRequirements = childSpecimenRequirements;
+	}
+
+	public Set<SpecimenRequirementService> getServices() {
+		return services;
+	}
+
+	public void setServices(Set<SpecimenRequirementService> services) {
+		this.services = services;
 	}
 
 	public List<SpecimenRequirement> getOrderedChildRequirements() {
