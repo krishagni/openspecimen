@@ -1741,7 +1741,7 @@ public class Specimen extends BaseExtensionEntity {
 		pooledEvent.addPoolItem(spmn);
 		spmn.setPoolItem(true);
 		if (close) {
-			spmn.close(pooledEvent.getUser(), pooledEvent.getTime(), "Pooling", comments);
+			spmn.close(pooledEvent.getUser(), pooledEvent.getTime(), "Pooled", comments);
 		}
 	}
 
