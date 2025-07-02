@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService" table="OS_CP_SR_SERVICES"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_CP_SR_SERVICES_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="requirement" column="SR_ID" not-null="true" />
+
+    <many-to-one name="service" column="SERVICE_ID" not-null="true" />
+
+    <property name="units" column="UNITS" not-null="true" />
+  </class>
+</hibernate-mapping>

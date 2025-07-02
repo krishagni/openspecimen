@@ -48,9 +48,11 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -901,6 +903,61 @@ public class CollectionProtocolsController {
 	@ResponseBody
 	public Map<String, Boolean> removeLabel(@PathVariable("id") Long cpId) {
 		return Collections.singletonMap("status", cpSvc.toggleStarredCp(cpId, false));
+	}
+
+	//
+	// CP services
+	//
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/services")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<ServiceDetail> getServices(
+		@PathVariable("id")
+		Long cpId,
+
+		@RequestParam(value = "code", required = false)
+		String code,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+
+		ServiceListCriteria crit = new ServiceListCriteria()
+			.cpId(cpId)
+			.query(code)
+			.startAt(startAt)
+			.maxResults(maxResults);
+		return response(cpSvc.getServices(request(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/{id}/services")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ServiceDetail createService(@PathVariable("id") Long cpId, @RequestBody ServiceDetail input) {
+		input.setCpId(cpId);
+		input.setCpShortTitle(null);
+		return response(cpSvc.createService(request(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/services/{serviceId}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ServiceDetail updateService(@PathVariable("id") Long cpId, @PathVariable("serviceId") Long serviceId, @RequestBody ServiceDetail input) {
+		input.setId(serviceId);
+		input.setCpId(cpId);
+		input.setCpShortTitle(null);
+		return response(cpSvc.updateService(request(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/services/{serviceId}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ServiceDetail deleteService(@PathVariable("id") Long cpId, @PathVariable("serviceId") Long serviceId) {
+		EntityQueryCriteria crit = new EntityQueryCriteria(serviceId);
+		crit.setParams(Collections.singletonMap("cpId", cpId));
+		return response(cpSvc.deleteService(request(crit)));
 	}
 
 	private ConsentTierDetail performConsentTierOp(OP op, Long cpId, ConsentTierDetail consentTier) {

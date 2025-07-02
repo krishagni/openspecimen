@@ -65,6 +65,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workflow;
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
+import com.krishagni.catissueplus.core.biospecimen.domain.Service;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
@@ -75,8 +76,10 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpReportSettingsFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenRequirementFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.ServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolPublishDetail;
@@ -92,6 +95,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
@@ -101,6 +105,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -109,6 +114,7 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr.ParticipantReadAccess;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.domain.Notification;
+import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -155,6 +161,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	
 	private SpecimenRequirementFactory srFactory;
 
+	private ServiceFactory serviceFactory;
+
 	private DaoFactory daoFactory;
 	
 	private RbacService rbacSvc;
@@ -183,6 +191,10 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	
 	public void setSrFactory(SpecimenRequirementFactory srFactory) {
 		this.srFactory = srFactory;
+	}
+
+	public void setServiceFactory(ServiceFactory serviceFactory) {
+		this.serviceFactory = serviceFactory;
 	}
 
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -1619,6 +1631,92 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<ServiceDetail>> getServices(RequestEvent<ServiceListCriteria> req) {
+		try {
+			ServiceListCriteria crit = req.getPayload();
+			if (crit.cpId() == null || crit.cpId() <= 0L) {
+				return ResponseEvent.userError(CpErrorCode.ID_REQ);
+			}
+
+			CollectionProtocol cp = getCollectionProtocol(crit.cpId(), null, null);
+			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
+
+			List<Service> services = daoFactory.getServiceDao().getServices(crit);
+			return ResponseEvent.response(ServiceDetail.from(services));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ServiceDetail> createService(RequestEvent<ServiceDetail> req) {
+		try {
+			Service service = serviceFactory.createService(req.getPayload());
+			service.setId(null);
+			if (!Status.isActiveStatus(service.getActivityStatus())) {
+				return ResponseEvent.userError(ActivityStatusErrorCode.INVALID, service.getActivityStatus());
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(service.getCp());
+
+			ensureUniqueServiceCode(null, service);
+			daoFactory.getServiceDao().saveOrUpdate(service);
+			return ResponseEvent.response(ServiceDetail.from(service));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ServiceDetail> updateService(RequestEvent<ServiceDetail> req) {
+		try {
+			Service service = serviceFactory.createService(req.getPayload());
+			Service existing = getService(service.getId(), service.getCp().getId(), service.getCp().getShortTitle(), service.getCode());
+			if (!service.getCp().equals(existing.getCp())) {
+				return ResponseEvent.userError(ServiceErrorCode.CP_CHG_NA);
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(existing.getCp());
+
+			ensureUniqueServiceCode(existing, service);
+			if (Status.isDisabledStatus(service.getActivityStatus())) {
+				ensureServiceIsNotInUse(service);
+			}
+
+			existing.update(service);
+			return ResponseEvent.response(ServiceDetail.from(existing));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			Service service = getService(crit.getId(), crit.paramLong("cpId"), crit.paramString("cpShortTitle"), crit.getName());
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(service.getCp());
+			ensureServiceIsNotInUse(service);
+			service.delete();
+			return ResponseEvent.response(ServiceDetail.from(service));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	private CpListCriteria addCpListCriteria(CpListCriteria crit) {
 		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
 		return siteCps != null && siteCps.isEmpty() ? null : crit.siteCps(siteCps);
@@ -2645,6 +2743,54 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 
 		return reviewers;
+	}
+
+	private Service getService(Long serviceId, Long cpId, String cpShortTitle, String serviceCode) {
+		Service service = null;
+		Object key = null;
+
+		if (serviceId != null) {
+			key = serviceId;
+			service = daoFactory.getServiceDao().getById(serviceId);
+		} else if (StringUtils.isNotBlank(serviceCode)) {
+			if (cpId != null) {
+				key = cpId + " / " + serviceCode;
+				service = daoFactory.getServiceDao().getService(cpId, serviceCode);
+			} else if (StringUtils.isNotBlank(cpShortTitle)) {
+				key = cpShortTitle + " / " + serviceCode;
+				service = daoFactory.getServiceDao().getService(cpShortTitle, serviceCode);
+			}
+
+			if (key == null) {
+				throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
+			}
+		}
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(ServiceErrorCode.CODE_REQ);
+		} else if (service == null) {
+			throw OpenSpecimenException.userError(ServiceErrorCode.NOT_FOUND, key);
+		}
+
+		return service;
+	}
+
+	private void ensureUniqueServiceCode(Service existing, Service service) {
+		if (existing != null && existing.getCode().equalsIgnoreCase(service.getCode())) {
+			return;
+		}
+
+		Service dbService = daoFactory.getServiceDao().getService(service.getCp().getShortTitle(), service.getCode());
+		if (dbService != null) {
+			throw OpenSpecimenException.userError(ServiceErrorCode.DUP_CODE, service.getCp().getShortTitle(), service.getCode());
+		}
+	}
+
+	private void ensureServiceIsNotInUse(Service service) {
+		long count = daoFactory.getServiceDao().getServiceUsageCount(service.getId());
+		if (count > 0) {
+			throw OpenSpecimenException.userError(ServiceErrorCode.IN_USE, service.getCode(), count);
+		}
 	}
 
 	private Function<ExportJob, List<? extends Object>> getCpsGenerator() {

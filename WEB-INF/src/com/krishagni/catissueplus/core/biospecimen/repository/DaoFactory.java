@@ -140,4 +140,6 @@ public interface DaoFactory {
 	LockDao getLockDao();
 
 	UserFavoriteDao getUserFavoriteDao();
+
+	ServiceDao getServiceDao();
 } 

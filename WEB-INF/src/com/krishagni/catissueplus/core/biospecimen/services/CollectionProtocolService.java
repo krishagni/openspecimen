@@ -25,10 +25,12 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpReportSettingsDetail
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteria;
 import com.krishagni.catissueplus.core.common.Tuple;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
@@ -156,6 +158,17 @@ public interface CollectionProtocolService {
 	public ResponseEvent<CollectionProtocolPublishDetail> publish(RequestEvent<CollectionProtocolPublishDetail> req);
 
 	public ResponseEvent<String> getPublishedVersion(RequestEvent<EntityQueryCriteria> req);
+
+	//
+	// CP services
+	//
+	ResponseEvent<List<ServiceDetail>> getServices(RequestEvent<ServiceListCriteria> req);
+
+	ResponseEvent<ServiceDetail> createService(RequestEvent<ServiceDetail> req);
+
+	ResponseEvent<ServiceDetail> updateService(RequestEvent<ServiceDetail> req);
+
+	ResponseEvent<ServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req);
 
 	//
 	// For UI work

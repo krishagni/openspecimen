@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenService" table="OS_SPECIMEN_SERVICES"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenService">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_SPECIMEN_SERVICES_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="specimen" column="SPECIMEN_ID" not-null="true" />
+
+    <many-to-one name="service" column="SERVICE_ID" not-null="true" />
+
+    <property name="units" column="UNITS" not-null="true" />
+
+    <property name="serviceDate" column="SERVICE_DATE" not-null="true" />
+
+    <many-to-one name="servicedBy" column="SERVICED_BY" not-null="true" />
+
+    <property name="comments" column="COMMENTS" />
+  </class>
+</hibernate-mapping>

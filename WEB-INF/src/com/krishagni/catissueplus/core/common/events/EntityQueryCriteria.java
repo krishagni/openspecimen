@@ -47,6 +47,11 @@ public class EntityQueryCriteria {
 		return value instanceof Number ? (Number) value : null;
 	}
 
+	public Long paramLong(String name) {
+		Number number = paramNumber(name);
+		return number != null ? number.longValue() : null;
+	}
+
 	public String paramString(String name) {
 		Object value = getParamValue(name);
 		return value instanceof String ? (String) value : null;
