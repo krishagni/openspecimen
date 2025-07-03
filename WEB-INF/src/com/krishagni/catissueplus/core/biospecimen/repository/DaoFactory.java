@@ -142,4 +142,6 @@ public interface DaoFactory {
 	UserFavoriteDao getUserFavoriteDao();
 
 	ServiceDao getServiceDao();
+
+	ServiceRateDao getServiceRateDao();
 } 

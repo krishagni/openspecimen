@@ -66,6 +66,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workf
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Service;
+import com.krishagni.catissueplus.core.biospecimen.domain.ServiceRate;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
@@ -76,10 +77,12 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpReportSettingsFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceRateErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceRateFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenRequirementFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.ServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolPublishDetail;
@@ -96,6 +99,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceRateDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
@@ -163,6 +167,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	private ServiceFactory serviceFactory;
 
+	private ServiceRateFactory serviceRateFactory;
+
 	private DaoFactory daoFactory;
 	
 	private RbacService rbacSvc;
@@ -195,6 +201,10 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	public void setServiceFactory(ServiceFactory serviceFactory) {
 		this.serviceFactory = serviceFactory;
+	}
+
+	public void setServiceRateFactory(ServiceRateFactory serviceRateFactory) {
+		this.serviceRateFactory = serviceRateFactory;
 	}
 
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -1717,6 +1727,88 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<ServiceRateDetail>> addServiceRates(RequestEvent<List<ServiceRateDetail>> req) {
+		try {
+			List<ServiceRateDetail> result = new ArrayList<>();
+
+			Set<CollectionProtocol> allowedAccess = new HashSet<>();
+			for (ServiceRateDetail input : req.getPayload()) {
+				ServiceRate rate = serviceRateFactory.createServiceRate(input);
+				if (!allowedAccess.contains(rate.getService().getCp())) {
+					AccessCtrlMgr.getInstance().ensureUpdateCpRights(rate.getService().getCp());
+					allowedAccess.add(rate.getService().getCp());
+				}
+
+				ensureNoRateIntervalOverlap(rate);
+				daoFactory.getServiceRateDao().saveOrUpdate(rate);
+				result.add(ServiceRateDetail.from(rate));
+			}
+
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ServiceRateDetail> updateServiceRate(RequestEvent<ServiceRateDetail> req) {
+		try {
+			ServiceRateDetail input = req.getPayload();
+			if (input.getId() == null) {
+				return ResponseEvent.userError(ServiceRateErrorCode.ID_REQ);
+			}
+
+			ServiceRate existing = daoFactory.getServiceRateDao().getById(input.getId());
+			if (existing == null) {
+				return ResponseEvent.userError(ServiceRateErrorCode.NOT_FOUND, input.getId());
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(existing.getService().getCp());
+
+			ServiceRate rate = serviceRateFactory.createServiceRate(input);
+			if (rate.getService().equals(existing.getService())) {
+				return ResponseEvent.userError(ServiceRateErrorCode.SERVICE_CHG_NA);
+			}
+
+			ensureNoRateIntervalOverlap(rate);
+			existing.update(rate);
+			return ResponseEvent.response(ServiceRateDetail.from(rate));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<ServiceRateDetail> deleteServiceRate(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			if (crit.getId() != null) {
+				return ResponseEvent.userError(ServiceRateErrorCode.ID_REQ);
+			}
+
+			ServiceRate rate = daoFactory.getServiceRateDao().getById(crit.getId());
+			if (rate == null) {
+				return ResponseEvent.userError(ServiceRateErrorCode.NOT_FOUND, crit.getId());
+			}
+
+			AccessCtrlMgr.getInstance().ensureUpdateCpRights(rate.getService().getCp());
+			rate.delete();
+			return ResponseEvent.response(ServiceRateDetail.from(rate));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	private CpListCriteria addCpListCriteria(CpListCriteria crit) {
 		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
 		return siteCps != null && siteCps.isEmpty() ? null : crit.siteCps(siteCps);
@@ -2792,6 +2884,15 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			throw OpenSpecimenException.userError(ServiceErrorCode.IN_USE, service.getCode(), count);
 		}
 	}
+
+	private void ensureNoRateIntervalOverlap(ServiceRate rate) {
+		List<ServiceRate> rates = daoFactory.getServiceRateDao().getOverlappingRates(rate);
+		if (!rates.isEmpty()) {
+			String existingInterval = rates.iterator().next().intervalString();
+			throw OpenSpecimenException.userError(ServiceRateErrorCode.INT_OVERLAP, rate.intervalString(), existingInterval);
+		}
+	}
+
 
 	private Function<ExportJob, List<? extends Object>> getCpsGenerator() {
 		return new Function<>() {

@@ -26,6 +26,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceRateDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
@@ -169,6 +170,12 @@ public interface CollectionProtocolService {
 	ResponseEvent<ServiceDetail> updateService(RequestEvent<ServiceDetail> req);
 
 	ResponseEvent<ServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<List<ServiceRateDetail>> addServiceRates(RequestEvent<List<ServiceRateDetail>> req);
+
+	ResponseEvent<ServiceRateDetail> updateServiceRate(RequestEvent<ServiceRateDetail> req);
+
+	ResponseEvent<ServiceRateDetail> deleteServiceRate(RequestEvent<EntityQueryCriteria> req);
 
 	//
 	// For UI work

@@ -1,4 +1,4 @@
-package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
+package com.krishagni.catissueplus.core.biospecimen.domain.factory;
 
 import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 

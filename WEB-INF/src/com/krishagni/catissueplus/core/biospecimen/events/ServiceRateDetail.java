@@ -12,6 +12,10 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 public class ServiceRateDetail {
 	private Long id;
 
+	private Long serviceId;
+
+	private Long cpId;
+
 	private String cpShortTitle;
 
 	private String serviceCode;
@@ -30,6 +34,22 @@ public class ServiceRateDetail {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getServiceId() {
+		return serviceId;
+	}
+
+	public void setServiceId(Long serviceId) {
+		this.serviceId = serviceId;
+	}
+
+	public Long getCpId() {
+		return cpId;
+	}
+
+	public void setCpId(Long cpId) {
+		this.cpId = cpId;
 	}
 
 	public String getCpShortTitle() {
