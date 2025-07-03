@@ -35,6 +35,8 @@
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService" />
     </set>
 
+    <property name="activityStatus" column="ACTIVITY_STATUS" not-null="true" />
+
     <filter name="activeEntity" />
   </class>
 </hibernate-mapping>

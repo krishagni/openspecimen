@@ -30,8 +30,14 @@
     <createSequence sequenceName="OS_CP_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Unique constraint on the CP service code">
+  <changeSet author="vpawar" id="Unique constraint on the CP service code" dbms="mysql">
     <addUniqueConstraint constraintName="OS_CP_SERVICE_CODE_UQ" tableName="OS_CP_SERVICES" columnNames="CP_ID, CODE" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on the CP service code" dbms="oracle">
+    <sql>
+      create unique index OS_CP_SERVICE_CODE_UQ on OS_CP_SERVICES(CP_ID, lower(CODE));
+    </sql>
   </changeSet>
 
   <changeSet author="vpawar" id="CP specimen service rate">

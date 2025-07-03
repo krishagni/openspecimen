@@ -13,7 +13,7 @@ public class SpecimenService extends BaseEntity {
 
 	private Date serviceDate;
 
-	private User serviceBy;
+	private User servicedBy;
 
 	private String comments;
 
@@ -49,12 +49,12 @@ public class SpecimenService extends BaseEntity {
 		this.serviceDate = serviceDate;
 	}
 
-	public User getServiceBy() {
-		return serviceBy;
+	public User getServicedBy() {
+		return servicedBy;
 	}
 
-	public void setServiceBy(User serviceBy) {
-		this.serviceBy = serviceBy;
+	public void setServicedBy(User servicedBy) {
+		this.servicedBy = servicedBy;
 	}
 
 	public String getComments() {

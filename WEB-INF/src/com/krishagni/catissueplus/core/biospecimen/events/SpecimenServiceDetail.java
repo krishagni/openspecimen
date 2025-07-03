@@ -131,7 +131,7 @@ public class SpecimenServiceDetail {
 		result.setServiceId(spmnSvc.getService().getId());
 		result.setUnits(spmnSvc.getUnits());
 		result.setServiceDate(spmnSvc.getServiceDate());
-		result.setServicedBy(UserSummary.from(spmnSvc.getServiceBy()));
+		result.setServicedBy(UserSummary.from(spmnSvc.getServicedBy()));
 		result.setComments(spmnSvc.getComments());
 		return result;
 	}

@@ -726,6 +726,7 @@ public class Specimen extends BaseExtensionEntity {
 		this.deleteEvents = deleteEvents;
 	}
 
+	@NotAudited
 	public Set<SpecimenService> getServices() {
 		return services;
 	}

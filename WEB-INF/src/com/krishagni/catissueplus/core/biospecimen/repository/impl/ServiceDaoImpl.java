@@ -69,7 +69,8 @@ public class ServiceDaoImpl extends AbstractDao<Service> implements ServiceDao {
 	@Override
 	public long getServiceUsageCount(Long serviceId) {
 		Criteria<Long> query = createCriteria(Service.class, Long.class, "svc")
-			.join("svc.specimens", "spmn");
+			.join("svc.specimens", "spmnSvc")
+			.join("spmnSvc.specimen", "spmn");
 
 		return query.add(query.eq("svc.id", serviceId))
 			.add(query.ne("spmn.activityStatus", "Disabled"))

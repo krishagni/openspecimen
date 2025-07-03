@@ -76,8 +76,8 @@ public class ServiceFactoryImpl implements ServiceFactory {
 			service.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		} else if (!Status.isValidActivityStatus(input.getActivityStatus())) {
 			ose.addError(ActivityStatusErrorCode.INVALID, input.getActivityStatus());
+		} else {
+			service.setActivityStatus(input.getActivityStatus());
 		}
-
-		service.setActivityStatus(input.getActivityStatus());
 	}
 }

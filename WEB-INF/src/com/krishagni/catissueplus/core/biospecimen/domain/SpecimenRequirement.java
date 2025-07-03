@@ -333,6 +333,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		this.childSpecimenRequirements = childSpecimenRequirements;
 	}
 
+	@NotAudited
 	public Set<SpecimenRequirementService> getServices() {
 		return services;
 	}
