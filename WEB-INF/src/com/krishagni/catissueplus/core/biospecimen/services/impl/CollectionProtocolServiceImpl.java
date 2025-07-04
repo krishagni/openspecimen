@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +111,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventList
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -1654,6 +1656,23 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
 
 			List<Service> services = daoFactory.getServiceDao().getServices(crit);
+			if (crit.rateEffectiveOn() != null) {
+				Map<Long, ServiceDetail> result = new LinkedHashMap<>();
+				for (Service svc : services) {
+					result.put(svc.getId(), ServiceDetail.from(svc));
+				}
+
+				ServiceRateListCriteria rlCrit = new ServiceRateListCriteria()
+					.serviceIds(result.keySet())
+					.effectiveDate(crit.rateEffectiveOn());
+				List<ServiceRate> rates = daoFactory.getServiceRateDao().getRates(rlCrit);
+				for (ServiceRate rate : rates) {
+					result.get(rate.getService().getId()).setRate(rate.getRate());
+				}
+
+				return ResponseEvent.response(new ArrayList<>(result.values()));
+			}
+
 			return ResponseEvent.response(ServiceDetail.from(services));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1729,6 +1748,32 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<ServiceRateDetail>> getServiceRates(RequestEvent<ServiceRateListCriteria> req) {
+		try {
+			ServiceRateListCriteria crit = req.getPayload();
+
+			CollectionProtocol cp = null;
+			if (crit.serviceId() != null) {
+				Service service = getService(crit.serviceId(), null, null, null);
+				cp = service.getCp();
+			} else if (crit.cpId() != null) {
+				cp = getCollectionProtocol(crit.cpId(), null, null);
+			} else {
+				return ResponseEvent.userError(ServiceRateErrorCode.CP_OR_SVC_ID_REQ);
+			}
+
+			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
+			List<ServiceRate> rates = daoFactory.getServiceRateDao().getRates(crit);
+			return ResponseEvent.response(ServiceRateDetail.from(rates));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<List<ServiceRateDetail>> addServiceRates(RequestEvent<List<ServiceRateDetail>> req) {
 		try {
 			List<ServiceRateDetail> result = new ArrayList<>();
@@ -1771,7 +1816,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(existing.getService().getCp());
 
 			ServiceRate rate = serviceRateFactory.createServiceRate(input);
-			if (rate.getService().equals(existing.getService())) {
+			if (!rate.getService().equals(existing.getService())) {
 				return ResponseEvent.userError(ServiceRateErrorCode.SERVICE_CHG_NA);
 			}
 
@@ -1790,7 +1835,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	public ResponseEvent<ServiceRateDetail> deleteServiceRate(RequestEvent<EntityQueryCriteria> req) {
 		try {
 			EntityQueryCriteria crit = req.getPayload();
-			if (crit.getId() != null) {
+			if (crit.getId() == null) {
 				return ResponseEvent.userError(ServiceRateErrorCode.ID_REQ);
 			}
 

@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -591,6 +592,10 @@ public class Utility {
 
 	public static String getDateString(Date date) {
 		return getDateString(date, false);
+	}
+
+	public static String getDateString(LocalDate date) {
+		return DateTimeFormatter.ofPattern(ConfigUtil.getInstance().getDateFmt()).format(date);
 	}
 
 	public static String getDateString(Date date, boolean dateOnly) {

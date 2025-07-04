@@ -51,7 +51,7 @@ public class ServiceRateFactoryImpl implements ServiceRateFactory {
 	}
 
 	private void setEndDate(ServiceRateDetail input, ServiceRate rate, OpenSpecimenException ose) {
-		if (input.getStartDate() != null && input.getEndDate() != null && input.getEndDate().before(input.getStartDate())) {
+		if (input.getStartDate() != null && input.getEndDate() != null && input.getEndDate().isBefore(input.getStartDate())) {
 			ose.addError(ServiceRateErrorCode.END_DT_LT_START_DT, Utility.getDateString(input.getStartDate()), Utility.getDateString(input.getEndDate()));
 		}
 

@@ -32,6 +32,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpPublishEventListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.CprListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateListCriteria;
 import com.krishagni.catissueplus.core.common.Tuple;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
@@ -170,6 +171,8 @@ public interface CollectionProtocolService {
 	ResponseEvent<ServiceDetail> updateService(RequestEvent<ServiceDetail> req);
 
 	ResponseEvent<ServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<List<ServiceRateDetail>> getServiceRates(RequestEvent<ServiceRateListCriteria> req);
 
 	ResponseEvent<List<ServiceRateDetail>> addServiceRates(RequestEvent<List<ServiceRateDetail>> req);
 

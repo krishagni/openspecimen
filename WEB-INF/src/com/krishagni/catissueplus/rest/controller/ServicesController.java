@@ -1,9 +1,11 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceRateDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -38,6 +41,10 @@ public class ServicesController {
 		@RequestParam(value = "code", required = false)
 		String code,
 
+		@RequestParam(value = "rateEffectiveOn", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate rateEffectiveOn,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -47,6 +54,7 @@ public class ServicesController {
 		ServiceListCriteria crit = new ServiceListCriteria()
 			.cpId(cpId)
 			.query(code)
+			.rateEffectiveOn(rateEffectiveOn)
 			.startAt(startAt)
 			.maxResults(maxResults);
 		return response(cpSvc.getServices(request(crit)));
@@ -75,6 +83,63 @@ public class ServicesController {
 		return response(cpSvc.deleteService(request(crit)));
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/rates")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<ServiceRateDetail> getServiceRates(
+		@RequestParam(value = "serviceId")
+		List<Long> serviceIds,
+
+		@RequestParam(value = "startDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate startDate,
+
+		@RequestParam(value = "endDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate endDate,
+
+		@RequestParam(value = "effectiveDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate effectiveDate) {
+
+		ServiceRateListCriteria crit = new ServiceRateListCriteria()
+			.serviceIds(serviceIds)
+			.startDate(startDate)
+			.endDate(endDate)
+			.effectiveDate(effectiveDate);
+
+		return response(cpSvc.getServiceRates(request(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/rates")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<ServiceRateDetail> getServiceRates(
+		@PathVariable("id")
+		Long serviceId,
+
+		@RequestParam(value = "startDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate startDate,
+
+		@RequestParam(value = "endDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate endDate,
+
+		@RequestParam(value = "effectiveDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate effectiveDate) {
+
+		ServiceRateListCriteria crit = new ServiceRateListCriteria()
+			.serviceId(serviceId)
+			.startDate(startDate)
+			.endDate(endDate)
+			.effectiveDate(effectiveDate);
+
+		return response(cpSvc.getServiceRates(request(crit)));
+	}
+
+
 	@RequestMapping(method = RequestMethod.POST, value = "/{id}/rates")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
@@ -84,7 +149,7 @@ public class ServicesController {
 		return result.isEmpty() ? null : result.iterator().next();
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/{id}/rates/{rateId}")
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/rates/{rateId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ServiceRateDetail updateServiceRate(

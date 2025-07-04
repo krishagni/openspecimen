@@ -19,8 +19,17 @@ public class ServiceRateDaoImpl extends AbstractDao<ServiceRate> implements Serv
 		Criteria<ServiceRate> query = createCriteria(ServiceRate.class, "svcRate")
 			.join("svcRate.service", "svc");
 
+		if (crit.cpId() != null) {
+			query.join("svc.cp", "cp")
+				.add(query.eq("cp.id", crit.cpId()));
+		}
+
 		if (crit.serviceId() != null) {
 			query.add(query.eq("svc.id", crit.serviceId()));
+		}
+
+		if (crit.serviceIds() != null && !crit.serviceIds().isEmpty()) {
+			query.add(query.in("svc.id", crit.serviceIds()));
 		}
 
 		if (crit.startDate() != null) {
@@ -31,7 +40,22 @@ public class ServiceRateDaoImpl extends AbstractDao<ServiceRate> implements Serv
 			query.add(query.le("svcRate.endDate", crit.endDate()));
 		}
 
-		return query.addOrder(query.desc("svcRate.startDate")).list(crit.startAt(), crit.maxResults());
+		if (crit.effectiveDate() != null) {
+			query.add(query.le("svcRate.startDate", crit.effectiveDate()))
+				.add(
+					query.or(
+						query.isNull("svcRate.endDate"),
+						query.ge("svcRate.endDate", crit.effectiveDate())
+					)
+				);
+		}
+
+		query.addOrder(query.desc("svcRate.startDate"));
+		if (crit.limitItems()) {
+			return query.list(crit.startAt(), crit.maxResults());
+		} else {
+			return query.list();
+		}
 	}
 
 	public List<ServiceRate> getOverlappingRates(ServiceRate rate) {

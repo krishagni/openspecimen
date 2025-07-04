@@ -1,7 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -9,9 +9,9 @@ import com.krishagni.catissueplus.core.common.util.Utility;
 public class ServiceRate extends BaseEntity {
 	private Service service;
 
-	private Date startDate;
+	private LocalDate startDate;
 
-	private Date endDate;
+	private LocalDate endDate;
 
 	private BigDecimal rate;
 
@@ -25,19 +25,19 @@ public class ServiceRate extends BaseEntity {
 		this.service = service;
 	}
 
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 
@@ -59,6 +59,10 @@ public class ServiceRate extends BaseEntity {
 
 	public String intervalString() {
 		return Utility.getDateString(startDate) + " - " + (endDate != null ? Utility.getDateString(endDate) : "EOL");
+	}
+
+	public CollectionProtocol getCp() {
+		return getService().getCp();
 	}
 
 	public void update(ServiceRate other) {

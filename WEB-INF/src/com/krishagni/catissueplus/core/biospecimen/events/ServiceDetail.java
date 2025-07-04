@@ -1,12 +1,16 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.Service;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ServiceDetail {
 	private Long id;
 
@@ -17,6 +21,8 @@ public class ServiceDetail {
 	private String code;
 
 	private String description;
+
+	private BigDecimal rate;
 
 	private String activityStatus;
 
@@ -58,6 +64,14 @@ public class ServiceDetail {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public BigDecimal getRate() {
+		return rate;
+	}
+
+	public void setRate(BigDecimal rate) {
+		this.rate = rate;
 	}
 
 	public String getActivityStatus() {

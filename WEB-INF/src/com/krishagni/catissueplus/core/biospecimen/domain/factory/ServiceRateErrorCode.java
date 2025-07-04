@@ -15,7 +15,9 @@ public enum ServiceRateErrorCode implements ErrorCode {
 
 	INT_OVERLAP,
 
-	SERVICE_CHG_NA;
+	SERVICE_CHG_NA,
+
+	CP_OR_SVC_ID_REQ;
 
 	@Override
 	public String code() {
