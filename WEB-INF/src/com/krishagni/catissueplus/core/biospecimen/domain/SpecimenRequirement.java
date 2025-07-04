@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
@@ -342,6 +343,18 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		this.services = services;
 	}
 
+	public void addService(SpecimenRequirementService service) {
+		addService(service.getService(), service.getUnits());
+	}
+
+	public void addService(Service service, int units) {
+		SpecimenRequirementService srSvc = new SpecimenRequirementService();
+		srSvc.setRequirement(this);
+		srSvc.setService(service);
+		srSvc.setUnits(units);
+		getServices().add(srSvc);
+	}
+
 	public List<SpecimenRequirement> getOrderedChildRequirements() {
 		List<SpecimenRequirement> childReqs = new ArrayList<>(getChildSpecimenRequirements());
 		Collections.sort(childReqs);
@@ -398,6 +411,20 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		setDefaultCustomFieldValues(sr.getDefaultCustomFieldValues());
 		setPreBarcodedTube(sr.isPreBarcodedTube());
 
+		Map<Service, SpecimenRequirementService> existingSvcs = getServices().stream()
+			.collect(Collectors.toMap(SpecimenRequirementService::getService, svc -> svc));
+
+		for (SpecimenRequirementService svc : sr.getServices()) {
+			SpecimenRequirementService existing = existingSvcs.remove(svc.getService());
+			if (existing != null) {
+				existing.update(svc);
+			} else {
+				addService(svc);
+			}
+		}
+
+		existingSvcs.values().forEach(svc -> getServices().remove(svc));
+
 		if (!isAliquot()) {
 			update(sr.getAnatomicSite(), sr.getLaterality(), sr.getConcentration(),
 				sr.getSpecimenClass(), sr.getSpecimenType(), sr.getPathologyStatus());
@@ -420,7 +447,8 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 				
 	public SpecimenRequirement copy() {
 		SpecimenRequirement copy = new SpecimenRequirement();
-		BeanUtils.copyProperties(this, copy, EXCLUDE_COPY_PROPS); 
+		BeanUtils.copyProperties(this, copy, EXCLUDE_COPY_PROPS);
+		getServices().forEach(copy::addService);
 		return copy;
 	}
 
@@ -647,6 +675,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		"parentSpecimenRequirement",
 		"childSpecimenRequirements",
 		"specimenPoolReqs",
-		"specimens"		
+		"specimens",
+		"services"
 	};
 }

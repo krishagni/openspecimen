@@ -30,4 +30,8 @@ public class SpecimenRequirementService extends BaseEntity {
 	public void setUnits(int units) {
 		this.units = units;
 	}
+
+	public void update(SpecimenRequirementService other) {
+		setUnits(other.getUnits());
+	}
 }

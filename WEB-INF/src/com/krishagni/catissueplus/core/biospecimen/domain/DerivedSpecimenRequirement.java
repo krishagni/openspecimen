@@ -1,7 +1,10 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
+
+import com.krishagni.catissueplus.core.biospecimen.events.SrServiceDetail;
 
 public class DerivedSpecimenRequirement {
 	private String cpShortTitle;
@@ -43,6 +46,8 @@ public class DerivedSpecimenRequirement {
 	private Map<String, Object> defaultCustomFieldValues;
 
 	private boolean preBarcodedTube;
+
+	private List<SrServiceDetail> services;
 	
 	public String getCpShortTitle() {
 		return cpShortTitle;
@@ -202,5 +207,13 @@ public class DerivedSpecimenRequirement {
 
 	public void setPreBarcodedTube(boolean preBarcodedTube) {
 		this.preBarcodedTube = preBarcodedTube;
+	}
+
+	public List<SrServiceDetail> getServices() {
+		return services;
+	}
+
+	public void setServices(List<SrServiceDetail> services) {
+		this.services = services;
 	}
 }

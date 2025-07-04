@@ -27,9 +27,9 @@ public class ServiceDaoImpl extends AbstractDao<Service> implements ServiceDao {
 
 		if (StringUtils.isNotBlank(crit.query())) {
 			if (isMySQL()) {
-				query.add(query.like("s.code", crit.query()));
+				query.add(query.or(query.like("s.code", crit.query()), query.like("s.description", crit.query())));
 			} else {
-				query.add(query.ilike("s.code", crit.query()));
+				query.add(query.or(query.ilike("s.code", crit.query()), query.ilike("s.description", crit.query())));
 			}
 		}
 

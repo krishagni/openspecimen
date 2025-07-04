@@ -2,8 +2,12 @@ package com.krishagni.catissueplus.core.biospecimen.domain.factory.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -14,16 +18,20 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelAutoPrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
+import com.krishagni.catissueplus.core.biospecimen.domain.Service;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenRequirementFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.SrServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorCode;
@@ -121,6 +129,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setCollectionProcedure(detail, requirement, ose);
 		setCollectionContainer(detail, requirement, ose);
 		setReceiver(detail, requirement, ose);
+		setServices(detail, requirement, ose);
 		setActivityStatus(detail, requirement, ose);
 
 		ose.checkAndThrow();
@@ -172,6 +181,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setLabelFormat(req.getLabelFmt(), derived, ose);
 		setLabelAutoPrintMode(req.getLabelAutoPrintMode(), derived, ose);
 		setCode(req.getCode(), derived, ose);
+		setServices(req.getServices(), derived, ose);
 		setActivityStatus(StringUtils.EMPTY, derived, ose);
 
 		ose.checkAndThrow();
@@ -203,6 +213,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		setLabelAutoPrintMode(req, sr, ose);
 		setCode(req, sr, ose);
 		setConcentration(req, sr, ose);
+		setServices(req, sr, ose);
 		setActivityStatus(req, sr, ose);
 
 		if (existingSr.isPrimary() || existingSr.isDerivative()) {
@@ -261,6 +272,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		ose.checkAndThrow();
 
 		List<SpecimenRequirement> aliquots = new ArrayList<>();
+		Set<SpecimenRequirementService> srServices = getServices(parent.getCollectionProtocol(), req.getServices(), ose);
 		for (int i = 0; i < req.getNoOfAliquots(); ++i) {
 			SpecimenRequirement aliquot = parent.copy();
 			aliquot.setLabelFormat(null);
@@ -268,6 +280,10 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 			setStorageType(req.getStorageType(), aliquot, ose);
 			setLabelFormat(req.getLabelFmt(), aliquot, ose);
 			setLabelAutoPrintMode(req.getLabelAutoPrintMode(), aliquot, ose);
+
+			aliquot.getServices().clear(); // clear the services copied from parent
+			srServices.forEach(aliquot::addService);
+
 			aliquot.setLabelPrintCopies(req.getLabelPrintCopies());
 			aliquot.setInitialQuantity(req.getQtyPerAliquot());
 			aliquot.setParentSpecimenRequirement(parent);
@@ -540,6 +556,43 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		} else {
 			ose.addError(ActivityStatusErrorCode.INVALID, activityStatus);
 		}
+	}
+
+	private void setServices(SpecimenRequirementDetail detail, SpecimenRequirement sr, OpenSpecimenException ose) {
+		setServices(detail.getServices(), sr, ose);
+	}
+
+	private void setServices(List<SrServiceDetail> services, SpecimenRequirement sr, OpenSpecimenException ose) {
+		Set<SpecimenRequirementService> srServices = getServices(sr.getCollectionProtocol(), services, ose);
+		srServices.forEach(srSvc -> srSvc.setRequirement(sr));
+		sr.setServices(srServices);
+	}
+
+	private Set<SpecimenRequirementService> getServices(CollectionProtocol cp, List<SrServiceDetail> services, OpenSpecimenException ose) {
+		Set<SpecimenRequirementService> result = new HashSet<>();
+		if (CollectionUtils.isEmpty(services)) {
+			return result;
+		}
+
+		Set<Service> seen = new HashSet<>();
+		for (SrServiceDetail input : services) {
+			if (StringUtils.isBlank(input.getServiceCode())) {
+				continue;
+			}
+
+			Service service = daoFactory.getServiceDao().getService(cp.getId(), input.getServiceCode());
+			if (service == null) {
+				ose.addError(ServiceErrorCode.NOT_FOUND, input.getServiceCode());
+			} else if (seen.add(service)) {
+				SpecimenRequirementService srSvc = new SpecimenRequirementService();
+				srSvc.setId(input.getId());
+				srSvc.setService(service);
+				srSvc.setUnits(input.getUnits() != 0 ? input.getUnits() : 1);
+				result.add(srSvc);
+			}
+		}
+
+		return result;
 	}
 
 	private PermissibleValue getPv(String attr, String value, boolean leafNode, ErrorCode req, ErrorCode invalid, OpenSpecimenException ose) {

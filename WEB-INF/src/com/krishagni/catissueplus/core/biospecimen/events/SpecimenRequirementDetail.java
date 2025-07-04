@@ -88,6 +88,8 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 
 	private ExtensionDetail extensionDetail;
 
+	private List<SrServiceDetail> services;
+
 	private String uid;
 
 	private String parentUid;
@@ -365,6 +367,14 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		this.extensionDetail = extensionDetail;
 	}
 
+	public List<SrServiceDetail> getServices() {
+		return services;
+	}
+
+	public void setServices(List<SrServiceDetail> services) {
+		this.services = services;
+	}
+
 	public String getUid() {
 		return uid;
 	}
@@ -455,6 +465,7 @@ public class SpecimenRequirementDetail implements Comparable<SpecimenRequirement
 		detail.setEventId(sr.getCollectionProtocolEvent().getId());
 		detail.setCpId(sr.getCollectionProtocol().getId());
 		detail.setCpShortTitle(sr.getCollectionProtocol().getShortTitle());
+		detail.setServices(SrServiceDetail.from(sr.getServices()));
 		detail.setActivityStatus(sr.getActivityStatus());
 		if (sr.getId() != null) {
 			detail.setUid("sr_" + sr.getId());

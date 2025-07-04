@@ -119,6 +119,25 @@ export default {
       },
       {
         fields: [ { name: "sr.defaultCustomFieldValuesJson" } ]
+      },
+      {
+        fields: [
+          {
+            name: "sr.services",
+            labelCode: "cps.services",
+            type: "multiselect",
+            listSource: {
+              apiUrl: "cp-services",
+              displayProp: (option) => option.description + ' (' + option.code + ')',
+              selectProp: "code",
+              queryParams: {
+                dynamic: {
+                  cpId: "sr.cpId"
+                }
+              }
+            }
+          }
+        ]
       }
     ]
   }

@@ -45,6 +45,9 @@ public class ServicesController {
 		@DateTimeFormat(pattern = "yyyy-MM-dd")
 		LocalDate rateEffectiveOn,
 
+		@RequestParam(value = "query", required = false)
+		String query,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -55,6 +58,7 @@ public class ServicesController {
 			.cpId(cpId)
 			.query(code)
 			.rateEffectiveOn(rateEffectiveOn)
+			.query(query)
 			.startAt(startAt)
 			.maxResults(maxResults);
 		return response(cpSvc.getServices(request(crit)));
