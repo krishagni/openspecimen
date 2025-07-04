@@ -83,34 +83,6 @@ public class ServicesController {
 		return response(cpSvc.deleteService(request(crit)));
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/rates")
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public List<ServiceRateDetail> getServiceRates(
-		@RequestParam(value = "serviceId")
-		List<Long> serviceIds,
-
-		@RequestParam(value = "startDate", required = false)
-		@DateTimeFormat(pattern = "yyyy-MM-dd")
-		LocalDate startDate,
-
-		@RequestParam(value = "endDate", required = false)
-		@DateTimeFormat(pattern = "yyyy-MM-dd")
-		LocalDate endDate,
-
-		@RequestParam(value = "effectiveDate", required = false)
-		@DateTimeFormat(pattern = "yyyy-MM-dd")
-		LocalDate effectiveDate) {
-
-		ServiceRateListCriteria crit = new ServiceRateListCriteria()
-			.serviceIds(serviceIds)
-			.startDate(startDate)
-			.endDate(endDate)
-			.effectiveDate(effectiveDate);
-
-		return response(cpSvc.getServiceRates(request(crit)));
-	}
-
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/rates")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
