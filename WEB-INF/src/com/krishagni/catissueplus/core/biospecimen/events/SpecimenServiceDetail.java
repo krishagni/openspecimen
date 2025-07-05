@@ -5,7 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenService;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -120,13 +121,17 @@ public class SpecimenServiceDetail {
 		this.comments = comments;
 	}
 
-	public static SpecimenServiceDetail from(SpecimenService spmnSvc) {
+	public static SpecimenServiceDetail from(LabSpecimenService spmnSvc) {
+		return SpecimenServiceDetail.from(spmnSvc.getSpecimen(), spmnSvc);
+	}
+
+	public static SpecimenServiceDetail from(Specimen specimen, LabSpecimenService spmnSvc) {
 		SpecimenServiceDetail result = new SpecimenServiceDetail();
 		result.setId(spmnSvc.getId());
-		result.setCpShortTitle(spmnSvc.getSpecimen().getCpShortTitle());
-		result.setLabel(spmnSvc.getSpecimen().getLabel());
-		result.setBarcode(spmnSvc.getSpecimen().getBarcode());
-		result.setSpecimenId(spmnSvc.getSpecimen().getId());
+		result.setCpShortTitle(specimen.getCpShortTitle());
+		result.setLabel(specimen.getLabel());
+		result.setBarcode(specimen.getBarcode());
+		result.setSpecimenId(specimen.getId());
 		result.setServiceCode(spmnSvc.getService().getCode());
 		result.setServiceId(spmnSvc.getService().getId());
 		result.setUnits(spmnSvc.getUnits());
@@ -136,7 +141,11 @@ public class SpecimenServiceDetail {
 		return result;
 	}
 
-	public static List<SpecimenServiceDetail> from(Collection<SpecimenService> services) {
+	public static List<SpecimenServiceDetail> from(Collection<LabSpecimenService> services) {
 		return Utility.nullSafeStream(services).map(SpecimenServiceDetail::from).collect(Collectors.toList());
+	}
+
+	public static List<SpecimenServiceDetail> from(Specimen specimen, Collection<LabSpecimenService> services) {
+		return Utility.nullSafeStream(services).map(svc -> from(specimen, svc)).collect(Collectors.toList());
 	}
 }

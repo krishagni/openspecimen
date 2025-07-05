@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -82,4 +83,12 @@ public interface SpecimenDao extends Dao<Specimen> {
 	Map<Long, Map<String, String>> getKitLabels(Visit visit);
 
 	List<Specimen> getDescendantSpecimens(List<Long> ancestorIds, String labelField, List<String> labels, String lineage, String status);
+
+	LabSpecimenService getLabSpecimenService(Long id);
+
+	List<LabSpecimenService> getLabSpecimenServices(Long specimenId);
+
+	void saveOrUpdate(LabSpecimenService svc);
+
+	void delete(LabSpecimenService svc);
 }

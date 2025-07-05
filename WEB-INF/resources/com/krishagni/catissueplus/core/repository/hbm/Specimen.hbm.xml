@@ -133,7 +133,7 @@
 
     <set name="services" table="OS_SPECIMEN_SERVICES" inverse="true">
       <key column="SPECIMEN_ID" />
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenService" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" />
     </set>
 
     <filter name="activeEntity"/>

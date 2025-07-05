@@ -19,6 +19,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -473,6 +474,31 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		}
 
 		return specimens;
+	}
+
+	@Override
+	public LabSpecimenService getLabSpecimenService(Long id) {
+		Criteria<LabSpecimenService> query = createCriteria(LabSpecimenService.class, "ls");
+		return query.add(query.eq("ls.id", id)).uniqueResult();
+	}
+
+	@Override
+	public List<LabSpecimenService> getLabSpecimenServices(Long specimenId) {
+		Criteria<LabSpecimenService> query = createCriteria(LabSpecimenService.class, "ls")
+			.join("ls.specimen", "spmn");
+		return query.add(query.eq("spmn.id", specimenId))
+			.addOrder(query.desc("ls.serviceDate"))
+			.list();
+	}
+
+	@Override
+	public void saveOrUpdate(LabSpecimenService labSpecimenService) {
+		sessionFactory.getCurrentSession().saveOrUpdate(labSpecimenService);
+	}
+
+	@Override
+	public void delete(LabSpecimenService svc) {
+		sessionFactory.getCurrentSession().delete(svc);
 	}
 
 	private void addIdsCond(AbstractCriteria<?, ?> query, List<Long> ids) {

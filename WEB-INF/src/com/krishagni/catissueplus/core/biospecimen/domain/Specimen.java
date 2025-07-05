@@ -197,7 +197,7 @@ public class Specimen extends BaseExtensionEntity {
 
 	private Set<SpecimenDeleteEvent> deleteEvents = new HashSet<>();
 
-	private Set<SpecimenService> services = new HashSet<>();
+	private Set<LabSpecimenService> services = new HashSet<>();
 
 	@Autowired
 	@Qualifier("specimenLabelGenerator")
@@ -727,11 +727,11 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	@NotAudited
-	public Set<SpecimenService> getServices() {
+	public Set<LabSpecimenService> getServices() {
 		return services;
 	}
 
-	public void setServices(Set<SpecimenService> services) {
+	public void setServices(Set<LabSpecimenService> services) {
 		this.services = services;
 	}
 

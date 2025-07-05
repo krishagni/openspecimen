@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
 
-public class SpecimenService extends BaseEntity {
+public class LabSpecimenService extends BaseEntity {
 	private Specimen specimen;
 
 	private Service service;
@@ -63,5 +63,12 @@ public class SpecimenService extends BaseEntity {
 
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public void update(LabSpecimenService other) {
+		setUnits(other.getUnits());
+		setServiceDate(other.getServiceDate());
+		setServicedBy(other.getServicedBy());
+		setComments(other.getComments());
 	}
 }

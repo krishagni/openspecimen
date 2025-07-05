@@ -27,7 +27,7 @@
 
     <set name="specimens" table="OS_SPECIMEN_SERVICES" inverse="true">
       <key column="SERVICE_ID" />
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenService" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" />
     </set>
 
     <set name="requirements" table="OS_CP_SR_SERVICES" inverse="true">
