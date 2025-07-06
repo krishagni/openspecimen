@@ -91,4 +91,6 @@ public interface SpecimenDao extends Dao<Specimen> {
 	void saveOrUpdate(LabSpecimenService svc);
 
 	void delete(LabSpecimenService svc);
+
+	void deleteServices(Long specimenId);
 }

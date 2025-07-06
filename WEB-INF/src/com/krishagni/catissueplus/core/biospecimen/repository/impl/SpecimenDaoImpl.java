@@ -501,6 +501,13 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		sessionFactory.getCurrentSession().delete(svc);
 	}
 
+	@Override
+	public void deleteServices(Long specimenId) {
+		createNamedQuery(DELETE_SERVICES)
+			.setParameter("specimenId", specimenId)
+			.executeUpdate();
+	}
+
 	private void addIdsCond(AbstractCriteria<?, ?> query, List<Long> ids) {
 		addInCond(query, "specimen.id", ids);
 	}
@@ -869,6 +876,8 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String ACTIVATE_SPMN = FQN + ".activateSpecimen";
 
 	private static final String ACTIVATE_HIERARCHY = FQN + ".activateHierarchy";
+
+	private static final String DELETE_SERVICES = LabSpecimenService.class.getName() + ".deleteServices";
 
 	private static final String GET_DESCENDENTS_SQL =
 		"select descendent_id from catissue_specimen_hierarchy where ancestor_id = %d and ancestor_id != descendent_id";

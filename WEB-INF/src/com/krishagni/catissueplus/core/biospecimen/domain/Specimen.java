@@ -1414,6 +1414,7 @@ public class Specimen extends BaseExtensionEntity {
 				setCollectionStatus(collectionStatus);
 				decAliquotedQtyFromParent();
 				addOrUpdateCollRecvEvents();
+				addServices();
 			}
 		}
 
@@ -2060,6 +2061,26 @@ public class Specimen extends BaseExtensionEntity {
 		}
 	}
 
+	public void addServices() {
+		if (!isCollected() || getSpecimenRequirement() == null || CollectionUtils.isEmpty(getSpecimenRequirement().getServices())) {
+			return;
+		}
+
+		for (SpecimenRequirementService svc : getSpecimenRequirement().getServices()) {
+			LabSpecimenService labSvc = new LabSpecimenService();
+			labSvc.setSpecimen(this);
+			labSvc.setService(svc.getService());
+			labSvc.setUnits(svc.getUnits());
+			labSvc.setServiceDate(getCreatedOn());
+			labSvc.setServicedBy(AuthUtil.getCurrentUser());
+			daoFactory.getSpecimenDao().saveOrUpdate(labSvc);
+		}
+	}
+
+	public void deleteServices() {
+		daoFactory.getSpecimenDao().deleteServices(getId());
+	}
+
 	//
 	// HSEARCH-1350: https://hibernate.atlassian.net/browse/HSEARCH-1350
 	//
@@ -2319,6 +2340,7 @@ public class Specimen extends BaseExtensionEntity {
 			}
 				
 			deleteEvents();
+			deleteServices();
 		}
 
 		getChildCollection().forEach(child -> child.updateHierarchyStatus0(status));

@@ -1314,6 +1314,9 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			// update specimen events and custom fields only if it is not deleted
 			specimen.addOrUpdateCollRecvEvents();
 			specimen.addOrUpdateExtension();
+			if (existing == null) {
+				specimen.addServices();
+			}
 		}
 
 		if (pooling) {

@@ -24,5 +24,12 @@
     <many-to-one name="servicedBy" column="SERVICED_BY" not-null="true" />
 
     <property name="comments" column="COMMENTS" />
+
+    <query name="deleteServices">
+      delete from
+        com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService ls
+      where
+        ls.specimen.id = :specimenId
+    </query>
   </class>
 </hibernate-mapping>
