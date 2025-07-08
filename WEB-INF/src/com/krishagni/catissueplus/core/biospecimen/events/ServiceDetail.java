@@ -1,10 +1,12 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Service;
@@ -21,6 +23,12 @@ public class ServiceDetail {
 	private String code;
 
 	private String description;
+
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate rateStartDate;
+
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate rateEndDate;
 
 	private BigDecimal rate;
 
@@ -64,6 +72,22 @@ public class ServiceDetail {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public LocalDate getRateStartDate() {
+		return rateStartDate;
+	}
+
+	public void setRateStartDate(LocalDate rateStartDate) {
+		this.rateStartDate = rateStartDate;
+	}
+
+	public LocalDate getRateEndDate() {
+		return rateEndDate;
+	}
+
+	public void setRateEndDate(LocalDate rateEndDate) {
+		this.rateEndDate = rateEndDate;
 	}
 
 	public BigDecimal getRate() {

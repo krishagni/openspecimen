@@ -6,6 +6,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.ServiceRate;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
+import com.krishagni.catissueplus.core.common.repository.Conjunction;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 
@@ -88,6 +89,14 @@ public class ServiceRateDaoImpl extends AbstractDao<ServiceRate> implements Serv
 		} else {
 			orCond.add(query.isNull("svcRate.endDate"));
 		}
+
+		Conjunction encompassCond = query.conjunction();
+		encompassCond.add(query.ge("svcRate.startDate", rate.getStartDate()));
+		if (rate.getEndDate() != null) {
+			encompassCond.add(query.le("svcRate.endDate", rate.getEndDate()));
+		}
+
+		orCond.add(encompassCond);
 
 		query.add(orCond);
 		if (rate.getId() != null) {

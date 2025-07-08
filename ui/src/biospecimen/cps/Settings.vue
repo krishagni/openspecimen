@@ -28,6 +28,13 @@
         </template>
       </os-card>
     </router-link>
+    <router-link :to="{name: 'CpDetail.Settings.Services', params: {cpId: cp.id}}">
+      <os-card>
+        <template #body>
+          <span v-t="'cps.services'">Services</span>
+        </template>
+      </os-card>
+    </router-link>
 
     <os-plugin-views page="cp-detail" view="settings" :viewProps="{cp}" />
   </div>

@@ -1376,6 +1376,12 @@ const routes = [
                 path: 'forms',
                 name: 'CpDetail.Settings.Forms',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Forms.vue')
+              },
+              {
+                path: 'services',
+                name: 'CpDetail.Settings.Services',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Services.vue'),
+                props: (route) => ({serviceId: route.query.serviceId})
               }
             ]
           }

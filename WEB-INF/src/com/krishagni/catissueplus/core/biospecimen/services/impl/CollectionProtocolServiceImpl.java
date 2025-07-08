@@ -1685,7 +1685,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	@PlusTransactional
 	public ResponseEvent<ServiceDetail> createService(RequestEvent<ServiceDetail> req) {
 		try {
-			Service service = serviceFactory.createService(req.getPayload());
+			ServiceDetail input = req.getPayload();
+			Service service = serviceFactory.createService(input);
 			service.setId(null);
 			if (!Status.isActiveStatus(service.getActivityStatus())) {
 				return ResponseEvent.userError(ActivityStatusErrorCode.INVALID, service.getActivityStatus());
@@ -1694,7 +1695,16 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(service.getCp());
 
 			ensureUniqueServiceCode(null, service);
-			daoFactory.getServiceDao().saveOrUpdate(service);
+			daoFactory.getServiceDao().saveOrUpdate(service, true);
+			if (input.getRateStartDate() != null && input.getRate() != null) {
+				ServiceRateDetail rate = new ServiceRateDetail();
+				rate.setServiceId(service.getId());
+				rate.setStartDate(input.getRateStartDate());
+				rate.setEndDate(input.getRateEndDate());
+				rate.setRate(input.getRate());
+				ResponseEvent.unwrap(addServiceRates(RequestEvent.wrap(Collections.singletonList(rate))));
+			}
+
 			return ResponseEvent.response(ServiceDetail.from(service));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
