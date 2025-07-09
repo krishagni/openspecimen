@@ -1,6 +1,7 @@
 <template>
   <os-page-toolbar>
-    <os-button left-icon="plus" :label="$t('cps.add_service')" @click="showAddEditServiceDialog({})" />
+    <os-button left-icon="plus" :label="$t('cps.add_service')" @click="showAddEditServiceDialog({})"
+      v-if="isUpdateAllowed" />
   </os-page-toolbar>
 
   <os-grid>
@@ -12,7 +13,7 @@
 
         <template #rowActions="slotProps">
           <div style="width: 5rem;">
-            <os-button-group>
+            <os-button-group v-if="isUpdateAllowed">
               <os-button size="small" left-icon="edit" @click="showAddEditServiceDialog(slotProps.rowObject)" />
               <os-button size="small" left-icon="trash" @click="deleteService(slotProps.rowObject)" />
             </os-button-group>
@@ -55,6 +56,8 @@ import addEditServiceSchema from '@/biospecimen/schemas/specimens/addedit-servic
 import servicesListSchema   from '@/biospecimen/schemas/specimens/services-list.js';
 
 export default {
+  props: ['cpr'],
+
   inject: ['cpViewCtx', 'specimen'],
 
   data() {
@@ -79,6 +82,22 @@ export default {
 
   mounted() {
     this._loadServices();
+  },
+
+  computed: {
+    notCoordinatOrStoreAllowed: function() {
+      return this.cpViewCtx.notCoordinatOrStoreAllowed(this.specimen || {});
+    },
+
+    isAnyUserUpdateAllowed: function() {
+      const vc = this.cpViewCtx;
+      const {lineage} = this.specimen;
+      return lineage == 'New' ? vc.isUpdateSpecimenAllowed(this.cpr) : vc.isUpdateAllSpecimenAllowed(this.cpr);
+    },
+
+    isUpdateAllowed: function() {
+      return this.isAnyUserUpdateAllowed && this.notCoordinatOrStoreAllowed;
+    }
   },
 
   methods: {

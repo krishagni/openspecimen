@@ -6,7 +6,8 @@
 
     <template #primary-actions>
       <os-button left-icon="plus" :label="$t('common.buttons.add')"
-        v-os-tooltip.bottom="$t('cps.add_service')" @click="showAddEditSvcDialog({})"/>
+        v-os-tooltip.bottom="$t('cps.add_service')" @click="showAddEditSvcDialog({})"
+        v-show-if-allowed="cpResources.updateOpts" />
     </template>
 
     <div>
@@ -22,11 +23,11 @@
         <template #rowActions="slotProps">
           <os-button-group>
             <os-button size="small" left-icon="edit" v-os-tooltip.bottom="$t('cps.edit_service')"
-              @click="showAddEditSvcDialog(slotProps.rowObject)" />
+              @click="showAddEditSvcDialog(slotProps.rowObject)" v-show-if-allowed="cpResources.updateOpts" />
             <os-button size="small" left-icon="trash" v-os-tooltip.bottom="$t('cps.delete_service')"
-              @click="deleteService(slotProps.rowObject)" />
+              @click="deleteService(slotProps.rowObject)" v-show-if-allowed="cpResources.updateOpts" />
             <os-button size="small" left-icon="plus" v-os-tooltip.bottom="$t('cps.add_service_rate')"
-              @click="showAddEditRateDialog(slotProps.rowObject, {})" />
+              @click="showAddEditRateDialog(slotProps.rowObject, {})" v-show-if-allowed="cpResources.updateOpts" />
           </os-button-group>
         </template>
 
@@ -45,9 +46,10 @@
             <template #rowActions="slotProps">
               <os-button-group>
                 <os-button size="small" left-icon="edit" v-os-tooltip.bottom="$t('cps.edit_service_rate')"
-                  @click="showAddEditRateDialog(rowObject, slotProps.rowObject)" />
+                  @click="showAddEditRateDialog(rowObject, slotProps.rowObject)"
+                  v-show-if-allowed="cpResources.updateOpts" />
                 <os-button size="small" left-icon="trash" v-os-tooltip.bottom="$t('cps.delete_service_rate')"
-                  @click="deleteRate(rowObject, slotProps.rowObject)" />
+                  @click="deleteRate(rowObject, slotProps.rowObject)" v-show-if-allowed="cpResources.updateOpts" />
               </os-button-group>
             </template>
           </os-list-view>
@@ -114,6 +116,8 @@ import addEditRateSchema  from '@/biospecimen/schemas/cps/addedit-rate.js';
 import ratesListSchema    from '@/biospecimen/schemas/cps/rates-list.js';
 import servicesListSchema from '@/biospecimen/schemas/cps/services-list.js';
 
+import cpResources from './Resources.js';
+
 export default {
   props: ['cp', 'serviceId'],
 
@@ -139,7 +143,9 @@ export default {
 
       ratesListSchema,
 
-      servicesListSchema
+      servicesListSchema,
+
+      cpResources
     }
   },
 
