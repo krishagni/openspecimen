@@ -740,7 +740,18 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 			AccessCtrlMgr.getInstance().ensureReadSpecimenRights(specimen);
 			List<LabSpecimenService> services = daoFactory.getSpecimenDao().getLabSpecimenServices(specimen.getId());
-			return ResponseEvent.response(SpecimenServiceDetail.from(specimen, services));
+			List<SpecimenServiceDetail> result = SpecimenServiceDetail.from(specimen, services);
+			if (Boolean.TRUE.equals(crit.paramBoolean("includeRates")) && !services.isEmpty()) {
+				Map<Long, BigDecimal> rates = daoFactory.getSpecimenDao().getLabSpecimenServicesRate(specimen.getId());
+				for (SpecimenServiceDetail svc : result) {
+					BigDecimal rate = rates.get(svc.getId());
+					if (rate != null) {
+						svc.setServiceRate(rate.multiply(new BigDecimal(svc.getUnits())));
+					}
+				}
+			}
+
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

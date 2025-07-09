@@ -31,5 +31,24 @@
       where
         ls.specimen.id = :specimenId
     </query>
+
+    <sql-query name="getLabServiceRates">
+      <return-scalar column="labSvcId" type="long" />
+      <return-scalar column="serviceRate" type="big_decimal" />
+
+      <![CDATA[
+
+      select
+        ss.identifier as labSvcId, sr.rate as serviceRate
+      from
+        os_specimen_services ss
+        inner join os_cp_service_rates sr on sr.service_id = ss.service_id
+      where
+        ss.specimen_id = :specimenId and
+        ss.service_date >= sr.start_date and (sr.end_date is null or ss.service_date < sr.end_date) and
+        sr.activity_status != 'Disabled'
+
+      ]]>
+    </sql-query>
   </class>
 </hibernate-mapping>

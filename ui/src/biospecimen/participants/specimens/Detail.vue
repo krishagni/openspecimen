@@ -43,6 +43,13 @@
               </router-link>
             </li>
 
+            <li v-if="specimen.id > 0">
+              <router-link :to="getRoute('Services')">
+                <os-icon name="tasks" />
+                <span class="label" v-t="'cps.services'">Services</span>
+              </router-link>
+            </li>
+
             <os-plugin-views page="specimen-detail" view="tab-menu" />
           </ul>
         </os-side-menu>

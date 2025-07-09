@@ -32,10 +32,10 @@
 
         <template #expansionRow="{rowObject}">
           <os-message type="info" v-if="rowObject.loadingRates">
-            <span v-t="'cp.loading_rates'">Loading rates...</span>
+            <span v-t="'cps.loading_rates'">Loading rates...</span>
           </os-message>
           <os-message type="info" v-else-if="!rowObject.rates || rowObject.rates.length == 0">
-            <span v-t="'cp.no_service_rates'">No rates specified for this service...</span>
+            <span v-t="'cps.no_service_rates'">No rates specified for this service...</span>
           </os-message>
           <os-list-view
             class="service-rates"

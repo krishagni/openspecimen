@@ -1,15 +1,19 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SpecimenServiceDetail {
 	private Long id;
 
@@ -25,11 +29,15 @@ public class SpecimenServiceDetail {
 
 	private Long serviceId;
 
+	private String serviceDescription;
+
 	private int units;
 
 	private Date serviceDate;
 
 	private UserSummary servicedBy;
+
+	private BigDecimal serviceRate;
 
 	private String comments;
 
@@ -89,6 +97,14 @@ public class SpecimenServiceDetail {
 		this.serviceId = serviceId;
 	}
 
+	public String getServiceDescription() {
+		return serviceDescription;
+	}
+
+	public void setServiceDescription(String serviceDescription) {
+		this.serviceDescription = serviceDescription;
+	}
+
 	public int getUnits() {
 		return units;
 	}
@@ -113,6 +129,14 @@ public class SpecimenServiceDetail {
 		this.servicedBy = servicedBy;
 	}
 
+	public BigDecimal getServiceRate() {
+		return serviceRate;
+	}
+
+	public void setServiceRate(BigDecimal serviceRate) {
+		this.serviceRate = serviceRate;
+	}
+
 	public String getComments() {
 		return comments;
 	}
@@ -134,6 +158,7 @@ public class SpecimenServiceDetail {
 		result.setSpecimenId(specimen.getId());
 		result.setServiceCode(spmnSvc.getService().getCode());
 		result.setServiceId(spmnSvc.getService().getId());
+		result.setServiceDescription(spmnSvc.getService().getDescription());
 		result.setUnits(spmnSvc.getUnits());
 		result.setServiceDate(spmnSvc.getServiceDate());
 		result.setServicedBy(UserSummary.from(spmnSvc.getServicedBy()));

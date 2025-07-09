@@ -72,7 +72,7 @@ public class ServiceRateDaoImpl extends AbstractDao<ServiceRate> implements Serv
 					query.le("svcRate.startDate", rate.getStartDate()),
 					query.or(
 						query.isNull("svcRate.endDate"),
-						query.ge("svcRate.endDate", rate.getStartDate()))
+						query.gt("svcRate.endDate", rate.getStartDate()))
 				)
 			);
 		}
@@ -93,7 +93,7 @@ public class ServiceRateDaoImpl extends AbstractDao<ServiceRate> implements Serv
 		Conjunction encompassCond = query.conjunction();
 		encompassCond.add(query.ge("svcRate.startDate", rate.getStartDate()));
 		if (rate.getEndDate() != null) {
-			encompassCond.add(query.le("svcRate.endDate", rate.getEndDate()));
+			encompassCond.add(query.lt("svcRate.endDate", rate.getEndDate()));
 		}
 
 		orCond.add(encompassCond);

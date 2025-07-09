@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,14 @@ public class LabSpecimenServicesController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<SpecimenServiceDetail> getServices(@RequestParam(value = "specimenId") Long specimenId) {
+	public List<SpecimenServiceDetail> getServices(
+		@RequestParam(value = "specimenId")
+		Long specimenId,
+
+		@RequestParam(value = "includeRates", required = false, defaultValue = "false")
+		boolean includeRates) {
 		SpecimenQueryCriteria criteria = new SpecimenQueryCriteria(specimenId);
+		criteria.setParams(Collections.singletonMap("includeRates", includeRates));
 		return ResponseEvent.unwrap(spmnSvc.getServices(RequestEvent.wrap(criteria)));
 	}
 

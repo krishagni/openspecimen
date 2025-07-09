@@ -492,6 +492,20 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@Override
+	public Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SERVICE_RATES)
+			.setParameter("specimenId", specimenId)
+			.list();
+
+		Map<Long, BigDecimal> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (BigDecimal) row[1]);
+		}
+
+		return result;
+	}
+
+	@Override
 	public void saveOrUpdate(LabSpecimenService labSpecimenService) {
 		sessionFactory.getCurrentSession().saveOrUpdate(labSpecimenService);
 	}
@@ -878,6 +892,8 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String ACTIVATE_HIERARCHY = FQN + ".activateHierarchy";
 
 	private static final String DELETE_SERVICES = LabSpecimenService.class.getName() + ".deleteServices";
+
+	private static final String GET_SERVICE_RATES = LabSpecimenService.class.getName() + ".getLabServiceRates";
 
 	private static final String GET_DESCENDENTS_SQL =
 		"select descendent_id from catissue_specimen_hierarchy where ancestor_id = %d and ancestor_id != descendent_id";

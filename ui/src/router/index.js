@@ -1555,6 +1555,11 @@ const routes = [
                                 name: 'ParticipantsListItemSpecimenDetail.Forms',
                                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Forms.vue'),
                                 props: ({query}) => ({formId: query.formId, recordId: query.recordId})
+                              },
+                              {
+                                path: 'services',
+                                name: 'ParticipantsListItemSpecimenDetail.Services',
+                                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Services.vue')
                               }
                             ]
                           }

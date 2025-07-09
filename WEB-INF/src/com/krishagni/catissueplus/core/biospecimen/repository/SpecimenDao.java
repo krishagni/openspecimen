@@ -1,6 +1,7 @@
 
 package com.krishagni.catissueplus.core.biospecimen.repository;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,8 @@ public interface SpecimenDao extends Dao<Specimen> {
 	LabSpecimenService getLabSpecimenService(Long id);
 
 	List<LabSpecimenService> getLabSpecimenServices(Long specimenId);
+
+	Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId);
 
 	void saveOrUpdate(LabSpecimenService svc);
 
