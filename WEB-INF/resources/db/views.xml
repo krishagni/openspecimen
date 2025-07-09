@@ -384,4 +384,21 @@
         re.cancelled_event_id is null
     </createView>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen service rates view" runOnChange="true">
+    <createView viewName="OS_SPECIMEN_SERVICE_RATES_VIEW" replaceIfExists="true">
+      <![CDATA[
+      select
+        ss.identifier as service_id, ss.specimen_id as specimen_id, s.code as code, s.description as description,
+        ss.service_date as service_date, ss.serviced_by as serviced_by, ss.comments as comments,
+        ss.units * sr.rate as rate
+      from
+        os_specimen_services ss
+        inner join os_cp_services s on s.identifier = ss.service_id
+        left join os_cp_service_rates sr on sr.service_id = ss.service_id and ss.service_date >= sr.start_date and (sr.end_date is null or ss.service_date < sr.end_date) and sr.activity_status != 'Disabled'
+      where
+        s.activity_status != 'Disabled';
+      ]]>
+    </createView>
+  </changeSet>
 </databaseChangeLog>
