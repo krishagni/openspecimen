@@ -66,6 +66,14 @@
     <createSequence sequenceName="OS_CP_SERVICE_RATES_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
 
+  <changeSet author="vpawar" id="Create CP services rate index">
+    <createIndex tableName="OS_CP_SERVICE_RATES" indexName="OS_CP_SVC_RATES_IDX">
+      <column name="SERVICE_ID" type="${int.type}" />
+      <column name="START_DATE" type="${date.type}" />
+      <column name="END_DATE"   type="${date.type}" />
+    </createIndex>
+  </changeSet>
+
   <changeSet author="vpawar" id="Anticipated specimen services">
     <createTable tableName="OS_CP_SR_SERVICES">
       <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
@@ -118,5 +126,13 @@
 
   <changeSet author="vpawar" id="Specimen service ID generator" dbms="oracle">
     <createSequence sequenceName="OS_SPECIMEN_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen services index">
+    <createIndex tableName="OS_SPECIMEN_SERVICES" indexName="OS_SPMN_SVCS_IDX">
+      <column name="SERVICE_ID" type="${int.type}" />
+      <column name="SERVICE_DATE" type="${nullable.ts.type}" />
+      <column name="SPECIMEN_ID" type="${int.type}" />
+    </createIndex>
   </changeSet>
 </databaseChangeLog>
