@@ -89,7 +89,12 @@
       </template>
 
       <template #content>
-        <os-form ref="addEditRateForm" :schema="addEditRateSchema" :data="addEditRateCtx" />
+        <os-form ref="addEditRateForm" :schema="addEditRateSchema" :data="addEditRateCtx">
+          <span v-if="rateInterval">
+            <span v-if="rateInterval.to" v-t="{path: 'cps.service_rate_interval', args: rateInterval}"></span>
+            <span v-else v-t="{path: 'cps.service_rate_interval_eol', args: rateInterval}"></span>
+          </span>
+        </os-form>
       </template>
 
       <template #footer>
@@ -111,7 +116,12 @@
       </template>
 
       <template #content>
-        <os-form ref="serviceReportForm" :schema="servicesReportSchema" :data="svcRptCtx" />
+        <os-form ref="serviceReportForm" :schema="servicesReportSchema" :data="svcRptCtx">
+          <span v-if="rptInterval">
+            <span v-if="rptInterval.to" v-t="{path: 'cps.service_rpt_interval', args: rptInterval}"></span>
+            <span v-else v-t="{path: 'cps.service_rpt_interval_eol', args: rptInterval}"></span>
+          </span>
+        </os-form>
       </template>
 
       <template #footer>
@@ -155,6 +165,8 @@ export default {
 
       deleteRateCtx: {},
 
+      svcRptCtx: {},
+
       addEditSvcSchema: addEditSvcSchema.layout,
 
       addEditRateSchema: addEditRateSchema.layout,
@@ -176,6 +188,18 @@ export default {
   watch: {
     serviceId: function() {
       this._expandServiceCard();
+    }
+  },
+
+  computed: {
+    rateInterval: function() {
+      const {startDate, endDate} = this.addEditRateCtx.rate || {};
+      return this._getInterval(startDate, endDate);
+    },
+
+    rptInterval: function() {
+      const {startDate, endDate} = this.svcRptCtx.rptCriteria || {};
+      return this._getInterval(startDate, endDate);
     }
   },
 
@@ -353,6 +377,21 @@ export default {
           rowObject.loadingRates = false;
         }
       );
+    },
+
+    _getInterval: function(startDate, endDate) {
+      if (startDate) {
+        const from = this._getDateStr(startDate);
+        const to = endDate ? this._getDateStr(endDate) : null;
+        return {from, to};
+      } else {
+        return null;
+      }
+    },
+
+    _getDateStr: function(date) {
+      const [year, month, day] = date.split('-');
+      return util.formatDate(new Date(+year, +month - 1, +day), this.$ui.global.locale.dateTimeFmt);
     },
 
     _getCurrentDate: function() {
