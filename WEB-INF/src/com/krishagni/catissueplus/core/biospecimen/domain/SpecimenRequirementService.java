@@ -1,5 +1,8 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
+import org.hibernate.envers.Audited;
+
+@Audited
 public class SpecimenRequirementService extends BaseEntity {
 	private SpecimenRequirement requirement;
 

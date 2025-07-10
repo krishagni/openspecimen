@@ -3,9 +3,12 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.hibernate.envers.Audited;
+
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@Audited
 public class ServiceRate extends BaseEntity {
 	private Service service;
 

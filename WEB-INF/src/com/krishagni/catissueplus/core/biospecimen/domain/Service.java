@@ -3,9 +3,13 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@Audited
 public class Service extends BaseEntity {
 	private String code;
 
@@ -45,6 +49,7 @@ public class Service extends BaseEntity {
 		this.cp = cp;
 	}
 
+	@NotAudited
 	public Set<ServiceRate> getServiceRatesList() {
 		return serviceRatesList;
 	}
@@ -53,6 +58,7 @@ public class Service extends BaseEntity {
 		this.serviceRatesList = serviceRatesList;
 	}
 
+	@NotAudited
 	public Set<Specimen> getSpecimens() {
 		return specimens;
 	}
@@ -61,6 +67,7 @@ public class Service extends BaseEntity {
 		this.specimens = specimens;
 	}
 
+	@NotAudited
 	public Set<SpecimenRequirement> getRequirements() {
 		return requirements;
 	}

@@ -49,10 +49,10 @@
         <constraints nullable="false" foreignKeyName="FK_CP_SVC_RATE_SERVICE_ID"
           referencedTableName="OS_CP_SERVICES" referencedColumnNames="IDENTIFIER" />
       </column>
-      <column name="START_DATE" type="${nullable.ts.type}">
+      <column name="START_DATE" type="${date.type}">
         <constraints nullable="false" />
       </column>
-      <column name="END_DATE" type="${nullable.ts.type}" />
+      <column name="END_DATE" type="${date.type}" />
       <column name="RATE" type="${decimal.type}(10, 2)">
         <constraints nullable="false" />
       </column>

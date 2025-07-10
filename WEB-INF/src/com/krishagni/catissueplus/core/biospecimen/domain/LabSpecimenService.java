@@ -2,8 +2,11 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.util.Date;
 
+import org.hibernate.envers.Audited;
+
 import com.krishagni.catissueplus.core.administrative.domain.User;
 
+@Audited
 public class LabSpecimenService extends BaseEntity {
 	private Specimen specimen;
 
