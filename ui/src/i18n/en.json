@@ -933,6 +933,8 @@
     "form_preview": "Form Preview: {caption}",
     "forms": "Forms",
     "forms_sort_order_saved": "Forms sort order saved...",
+    "generate_report": "Generate Report",
+    "generate_service_rpt": "Generate Service Report",
     "hide_cp_stats": "Hide CP Insights",
     "hide_site_code_info": "Hide Site Code Information",
     "import_biospecimen_data": "Import Biospecimen Data (CSV)",

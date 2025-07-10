@@ -13,7 +13,13 @@ public enum ServiceErrorCode implements ErrorCode {
 
 	DUP_CODE,
 
-	IN_USE;
+	IN_USE,
+
+	RPT_ST_DT_REQ,
+
+	RPT_INT_EXCEEDS_3M,
+
+	RPT_ED_LT_ST_DT;
 
 	@Override
 	public String code() {

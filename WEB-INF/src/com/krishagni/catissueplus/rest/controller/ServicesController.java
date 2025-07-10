@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -16,14 +18,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceRateDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Controller
 @RequestMapping("/cp-services")
@@ -156,6 +161,32 @@ public class ServicesController {
 		EntityQueryCriteria crit = new EntityQueryCriteria(rateId);
 		crit.setParams(Collections.singletonMap("serviceId", serviceId));
 		return response(cpSvc.deleteServiceRate(request(new EntityQueryCriteria(rateId))));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/report")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public void getServiceReport(
+		@PathVariable("id")
+		Long cpId,
+
+		@RequestParam(value = "startDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate startDate,
+
+		@RequestParam(value = "endDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		LocalDate endDate,
+
+		HttpServletResponse httpResp) {
+
+		ServiceReportCriteria criteria = new ServiceReportCriteria();
+		criteria.setCpId(cpId);
+		criteria.setStartDate(startDate);
+		criteria.setEndDate(endDate);
+
+		FileDetail file = response(cpSvc.generateServiceReport(request(criteria)));
+		Utility.sendToClient(httpResp, file.getFilename(), file.getFileOut(), true);
 	}
 
 	private <T> RequestEvent<T> request(T payload) {

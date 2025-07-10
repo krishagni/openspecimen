@@ -50,5 +50,30 @@
 
       ]]>
     </sql-query>
+
+    <sql-query name="getLabServicesReport">
+      <return-scalar column="code" type="string" />
+      <return-scalar column="description" type="string" />
+      <return-scalar column="specimens" type="long" />
+      <return-scalar column="total_rate" type="big_decimal" />
+
+      <![CDATA[
+
+      select
+        s.code, s.description, count(ssr.specimen_id) as specimens, sum(ssr.rate) as total_rate
+      from
+        os_specimen_service_rates_view ssr
+        inner join os_cp_services s on s.identifier = ssr.service_id
+      where
+        ssr.service_date >= :startDate and ssr.service_date < :endDate and
+        s.cp_id = :cpId and
+        s.activity_status != 'Disabled'
+      group by
+        s.code, s.description
+      order by
+        s.code
+
+      ]]>
+    </sql-query>
   </class>
 </hibernate-mapping>

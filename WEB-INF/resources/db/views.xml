@@ -389,7 +389,8 @@
     <createView viewName="OS_SPECIMEN_SERVICE_RATES_VIEW" replaceIfExists="true">
       <![CDATA[
       select
-        ss.identifier as service_id, ss.specimen_id as specimen_id, s.code as code, s.description as description,
+        ss.identifier as specimen_service_id, ss.specimen_id as specimen_id,
+        s.identifier as service_id, s.code as code, s.description as description,
         ss.service_date as service_date, ss.serviced_by as serviced_by, ss.comments as comments,
         ss.units * sr.rate as rate
       from

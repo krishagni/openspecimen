@@ -12,6 +12,8 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportCriteria;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportDetail;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.Dao;
@@ -90,6 +92,8 @@ public interface SpecimenDao extends Dao<Specimen> {
 	List<LabSpecimenService> getLabSpecimenServices(Long specimenId);
 
 	Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId);
+
+	List<ServiceReportDetail> getLabSpecimensServiceReport(ServiceReportCriteria crit);
 
 	void saveOrUpdate(LabSpecimenService svc);
 

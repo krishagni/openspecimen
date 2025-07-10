@@ -1366,7 +1366,7 @@
         <table>OS_SPECIMEN_SERVICE_RATES_VIEW</table>
         <foreignKey>SPECIMEN_ID</foreignKey>
         <parentKey>IDENTIFIER</parentKey>
-        <primaryKey>SERVICE_ID</primaryKey>
+        <primaryKey>SPECIMEN_SERVICE_ID</primaryKey>
         <row>
           <textField>
             <name>code</name>

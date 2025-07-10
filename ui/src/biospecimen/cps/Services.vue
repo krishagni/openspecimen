@@ -8,6 +8,8 @@
       <os-button left-icon="plus" :label="$t('common.buttons.add')"
         v-os-tooltip.bottom="$t('cps.add_service')" @click="showAddEditSvcDialog({})"
         v-show-if-allowed="cpResources.updateOpts" />
+
+      <os-button left-icon="file-invoice-dollar" :label="$t('cps.generate_report')" @click="showServiceReportDialog" />
     </template>
 
     <div>
@@ -102,6 +104,21 @@
         <span v-t="{path: 'cps.confirm_delete_service_rate', args: deleteRateCtx}">Are you sure you want to delete the service {0} rate for the interval {1}</span>
       </template>
     </os-confirm-delete>
+
+    <os-dialog ref="serviceRptDialog">
+      <template #header>
+        <span v-t="'cps.generate_service_rpt'">Generate Service Report</span>
+      </template>
+
+      <template #content>
+        <os-form ref="serviceReportForm" :schema="servicesReportSchema" :data="svcRptCtx" />
+      </template>
+
+      <template #footer>
+        <os-button text :label="$t('common.buttons.cancel')" @click="hideServiceReportDialog" />
+        <os-button primary :label="$t('common.buttons.generate')" @click="generateServiceReport" />
+      </template>
+    </os-dialog>
   </os-panel>
 </template>
 
@@ -115,6 +132,7 @@ import addEditSvcSchema   from '@/biospecimen/schemas/cps/addedit-service.js';
 import addEditRateSchema  from '@/biospecimen/schemas/cps/addedit-rate.js';
 import ratesListSchema    from '@/biospecimen/schemas/cps/rates-list.js';
 import servicesListSchema from '@/biospecimen/schemas/cps/services-list.js';
+import servicesReportSchema from '@/biospecimen/schemas/cps/services-report.js';
 
 import cpResources from './Resources.js';
 
@@ -144,6 +162,8 @@ export default {
       ratesListSchema,
 
       servicesListSchema,
+
+      servicesReportSchema: servicesReportSchema.layout,
 
       cpResources
     }
@@ -262,6 +282,24 @@ export default {
           cpSvc.deleteServiceRate(service.id, rate.id).then(() => this._refreshService(service.id));
         }
       );
+    },
+
+    showServiceReportDialog: function() {
+      this.svcRptCtx = {rptCriteria: {cpId: this.cp.id}};
+      this.$refs.serviceRptDialog.open();
+    },
+
+    hideServiceReportDialog: function() {
+      this.$refs.serviceRptDialog.close();
+    },
+
+    generateServiceReport: function() {
+      if (!this.$refs.serviceReportForm.validate()) {
+        return;
+      }
+
+      cpSvc.downloadServiceReport(this.svcRptCtx.rptCriteria);
+      this.hideServiceReportDialog();
     },
 
     _expandServiceCard: function() {

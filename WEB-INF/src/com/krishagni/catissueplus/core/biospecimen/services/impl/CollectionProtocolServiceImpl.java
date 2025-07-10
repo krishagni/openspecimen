@@ -4,6 +4,9 @@ package com.krishagni.catissueplus.core.biospecimen.services.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -101,6 +104,8 @@ import com.krishagni.catissueplus.core.biospecimen.events.FileDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.MergeCpDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ServiceRateDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportCriteria;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenRequirementDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
@@ -114,6 +119,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.ServiceListCriteri
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
+import com.krishagni.catissueplus.core.common.PdfUtil;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.Tuple;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
@@ -1864,6 +1870,66 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		}
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<FileDetail> generateServiceReport(RequestEvent<ServiceReportCriteria> req) {
+		try {
+			ServiceReportCriteria rptCriteria = req.getPayload();
+			CollectionProtocol cp = getCollectionProtocol(rptCriteria.getCpId(), null, rptCriteria.getCpShortTitle());
+			AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
+
+			LocalDate startDate = rptCriteria.getStartDate();
+			if (startDate == null) {
+				return ResponseEvent.userError(ServiceErrorCode.RPT_ST_DT_REQ);
+			}
+
+			LocalDate endDate = rptCriteria.getEndDate();
+			if (endDate == null) {
+				endDate = startDate.plus(Period.ofMonths(3));
+			}
+
+			LocalDate limitDate = startDate.plus(Period.ofMonths(3));
+			if (endDate.isAfter(limitDate)) {
+				return ResponseEvent.userError(ServiceErrorCode.RPT_INT_EXCEEDS_3M, Utility.getDateString(startDate), Utility.getDateString(endDate));
+			} else if (endDate.isBefore(startDate)) {
+				return ResponseEvent.userError(ServiceErrorCode.RPT_ED_LT_ST_DT, Utility.getDateString(startDate), Utility.getDateString(endDate));
+			}
+
+			rptCriteria.setStartDate(startDate);
+			rptCriteria.setEndDate(endDate);
+
+			List<ServiceReportDetail> serviceItems = daoFactory.getSpecimenDao().getLabSpecimensServiceReport(rptCriteria);
+			Map<String, Object> props = new HashMap<>();
+			props.put("cp", cp);
+			props.put("startDate", Utility.getDateString(startDate));
+			props.put("endDate", Utility.getDateString(endDate));
+			props.put("user", AuthUtil.getCurrentUser());
+			props.put("currentDateTime", Utility.getDateTimeString(Calendar.getInstance().getTime()));
+			props.put("serviceItems", serviceItems);
+
+			BigDecimal totalRate = BigDecimal.ZERO;
+			for (ServiceReportDetail item : serviceItems) {
+				totalRate = totalRate.add(item.getRate() != null ? item.getRate() : BigDecimal.ZERO);
+			}
+			props.put("totalRate", totalRate);
+
+			File output = new File(ConfigUtil.getInstance().getTempDir(), UUID.randomUUID().toString());
+			PdfUtil.getInstance().toPdf(SERVICES_REPORT_TMPL, props, output);
+
+			FileDetail result = new FileDetail();
+			result.setFileOut(output);
+
+			String startDateStr = startDate.toString().replaceAll("-", "_");
+			String endDateStr   = endDate.toString().replaceAll("-", "_");
+			result.setFilename("service_report_" + startDateStr + "_" + endDateStr + ".pdf");
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	private CpListCriteria addCpListCriteria(CpListCriteria crit) {
 		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
 		return siteCps != null && siteCps.isEmpty() ? null : crit.siteCps(siteCps);
@@ -3216,4 +3282,6 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	private static final String AND_COND = "(%s) and (%s)";
 
 	private static final String CP_PUBLISHED_EMAIL_TMPL = "cp_published";
+
+	private static final String SERVICES_REPORT_TMPL = "com/krishagni/catissueplus/core/biospecimen/service_report.html";
 }
