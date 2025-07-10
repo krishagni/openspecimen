@@ -8,8 +8,6 @@
       <os-button left-icon="plus" :label="$t('common.buttons.add')"
         v-os-tooltip.bottom="$t('cps.add_service')" @click="showAddEditSvcDialog({})"
         v-show-if-allowed="cpResources.updateOpts" />
-
-      <os-button left-icon="file-invoice-dollar" :label="$t('cps.generate_report')" @click="showServiceReportDialog" />
     </template>
 
     <div>

@@ -13,7 +13,7 @@ export default {
     },
     { 
       type: 'text',
-      labelCode: 'cps.service_rate',
+      labelCode: 'cps.present_service_rate',
       name: 'service.rate'
     }   
   ]

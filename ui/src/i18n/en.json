@@ -983,6 +983,7 @@
     "ppid": "PPID",
     "ppid_full": "Participant Protocol IDs",
     "pre_barcoded_tube": "Pre-barcoded Tube",
+    "present_service_rate": "Present Rate",
     "primary": "Primary",
     "primary_specimen": "Primary Specimen",
     "print_modes": {

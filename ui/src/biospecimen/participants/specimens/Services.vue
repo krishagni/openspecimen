@@ -158,6 +158,7 @@ export default {
         services => {
           this.services = services.map(service => ({service}));
           this.totalRate = services.reduce((acc, svc) => svc.serviceRate >= 0 ? acc + svc.serviceRate : acc, 0);
+          this.totalRate = this.totalRate.toFixed(2);
         }
       );
     }

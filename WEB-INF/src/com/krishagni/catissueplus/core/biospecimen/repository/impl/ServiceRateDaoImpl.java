@@ -80,7 +80,7 @@ public class ServiceRateDaoImpl extends AbstractDao<ServiceRate> implements Serv
 		if (rate.getEndDate() != null) {
 			orCond.add(
 				query.and(
-					query.le("svcRate.startDate", rate.getEndDate()),
+					query.lt("svcRate.startDate", rate.getEndDate()),
 					query.or(
 						query.isNull("svcRate.endDate"),
 						query.ge("svcRate.endDate", rate.getEndDate()))
