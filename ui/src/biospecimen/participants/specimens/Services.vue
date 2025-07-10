@@ -14,8 +14,10 @@
         <template #rowActions="slotProps">
           <div style="width: 5rem;">
             <os-button-group v-if="isUpdateAllowed">
-              <os-button size="small" left-icon="edit" @click="showAddEditServiceDialog(slotProps.rowObject)" />
-              <os-button size="small" left-icon="trash" @click="deleteService(slotProps.rowObject)" />
+              <os-button size="small" left-icon="edit" @click="showAddEditServiceDialog(slotProps.rowObject)"
+                v-os-tooltip.bottom="$t('cps.edit_service')" />
+              <os-button size="small" left-icon="trash" @click="deleteService(slotProps.rowObject)"
+                v-os-tooltip.bottom="$t('cps.delete_service')" />
             </os-button-group>
           </div>
         </template>
