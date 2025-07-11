@@ -135,4 +135,10 @@
       <column name="SPECIMEN_ID" type="${int.type}" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP service rate currency">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="SERVICE_RATE_CURRENCY" type="${text.type}(16)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

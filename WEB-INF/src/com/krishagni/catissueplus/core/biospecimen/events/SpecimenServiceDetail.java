@@ -41,6 +41,11 @@ public class SpecimenServiceDetail {
 
 	private String comments;
 
+	// Needed for workflow
+	private SpecimenDetail specimen;
+
+	private Boolean includeSpmnDetailsInResp;
+
 	public Long getId() {
 		return id;
 	}
@@ -145,10 +150,35 @@ public class SpecimenServiceDetail {
 		this.comments = comments;
 	}
 
+	public SpecimenDetail getSpecimen() {
+		return specimen;
+	}
+
+	public void setSpecimen(SpecimenDetail specimen) {
+		this.specimen = specimen;
+	}
+
+	public Boolean getIncludeSpmnDetailsInResp() {
+		return includeSpmnDetailsInResp;
+	}
+
+	public void setIncludeSpmnDetailsInResp(Boolean includeSpmnDetailsInResp) {
+		this.includeSpmnDetailsInResp = includeSpmnDetailsInResp;
+	}
+
 	public static SpecimenServiceDetail from(LabSpecimenService spmnSvc) {
 		return SpecimenServiceDetail.from(spmnSvc.getSpecimen(), spmnSvc);
 	}
 
+	// Used by workflows module - add/edit service task
+	public static SpecimenServiceDetail from(LabSpecimenService spmnSvc, boolean includeSpmnDetail) {
+		SpecimenServiceDetail output = from(spmnSvc);
+		if (includeSpmnDetail) {
+			output.setSpecimen(SpecimenDetail.from(spmnSvc.getSpecimen(), false, false, true));
+		}
+
+		return output;
+	}
 	public static SpecimenServiceDetail from(Specimen specimen, LabSpecimenService spmnSvc) {
 		SpecimenServiceDetail result = new SpecimenServiceDetail();
 		result.setId(spmnSvc.getId());

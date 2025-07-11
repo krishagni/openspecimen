@@ -72,4 +72,11 @@
       <column name="comments_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP service rate currency">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="SERVICE_RATE_CURRENCY" type="${text.type}(16)" />
+      <column name="serviceRateCurrency_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

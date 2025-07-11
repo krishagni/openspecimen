@@ -8,6 +8,10 @@
       <os-button left-icon="plus" :label="$t('common.buttons.add')"
         v-os-tooltip.bottom="$t('cps.add_service')" @click="showAddEditSvcDialog({})"
         v-show-if-allowed="cpResources.updateOpts" />
+
+      <os-button left-icon="money-bill-alt" :label="$t('cps.set_currency')"
+        v-os-tooltip.bottom="$t('cps.set_service_rate_currency')" @click="showSvcRateCurrencyDialog()"
+        v-show-if-allowed="cpResources.updateOpts" />
     </template>
 
     <div>
@@ -71,6 +75,19 @@
         <os-button text :label="$t('common.buttons.cancel')" @click="hideAddEditSvcDialog" />
         <os-button primary :label="$t(addEditSvcCtx.service.id > 0 ? 'common.buttons.update' : 'common.buttons.add')"
           @click="addEditService" />
+      </template>
+    </os-dialog>
+
+    <os-dialog ref="svcRateCurrencyDialog">
+      <template #header>
+        <span v-t="'cps.set_service_rate_currency'">Set Service Rate Currency</span>
+      </template>
+      <template #content>
+        <os-form ref="svcRateCurrencyForm" :schema="svcRateCurrencySchema" :data="svcRateCurrencyCtx" />
+      </template>
+      <template #footer>
+        <os-button text :label="$t('common.buttons.cancel')" @click="hideSvcRateCurrencyDialog" />
+        <os-button primary :label="$t('cps.set_currency')" @click="setSvcRateCurrency" />
       </template>
     </os-dialog>
 
@@ -186,6 +203,12 @@ export default {
   watch: {
     serviceId: function() {
       this._expandServiceCard();
+    },
+
+    currency: function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this._setCurrency();
+      }
     }
   },
 
@@ -198,6 +221,26 @@ export default {
     rptInterval: function() {
       const {startDate, endDate} = this.svcRptCtx.rptCriteria || {};
       return this._getInterval(startDate, endDate);
+    },
+
+    currency: function() {
+      return this.cp.serviceRateCurrency || '';
+    },
+
+    svcRateCurrencySchema: function() {
+      return {
+        rows: [
+          {
+            fields: [
+              {
+                type: 'text',
+                labelCode: 'cps.service_rate_currency',
+                name: 'cp.serviceRateCurrency'
+              }
+            ]
+          }
+        ]
+      }
     }
   },
 
@@ -258,6 +301,24 @@ export default {
               routerSvc.goto('CpDetail.Settings.Services', {cpId: this.cp.id});
             }
           );
+        }
+      );
+    },
+
+    showSvcRateCurrencyDialog: function() {
+      this.svcRateCurrencyCtx = {cp: util.clone(this.cp)};
+      this.$refs.svcRateCurrencyDialog.open();
+    },
+
+    hideSvcRateCurrencyDialog: function() {
+      this.$refs.svcRateCurrencyDialog.close();
+    },
+
+    setSvcRateCurrency: function() {
+      cpSvc.saveOrUpdate(this.svcRateCurrencyCtx.cp).then(
+        savedCp => {
+          this.$emit('cp-saved', savedCp);
+          this.hideSvcRateCurrencyDialog();
         }
       );
     },
@@ -343,7 +404,7 @@ export default {
       const rateEffectiveOn = this._getCurrentDate();
       return cpSvc.getServices(this.cp.id, {rateEffectiveOn}).then(
         services => {
-          this.services = services.map(service => ({service}));
+          this.services = services.map(service => ({currency: this.currency, service}));
           return this.services;
         }
       );
@@ -371,7 +432,7 @@ export default {
       rowObject.loadingRates = true;
       cpSvc.getServiceRates(rowObject.service.id).then(
         rates => {
-          rowObject.rates = rates.map(rate => ({rate}));
+          rowObject.rates = rates.map(rate => ({currency: this.currency, rate}));
           rowObject.loadingRates = false;
         }
       );
@@ -398,6 +459,15 @@ export default {
       const month = (dt.getMonth() + 1).toString().padStart(2, '0');
       const date = dt.getDate().toString().padStart(2, '0');
       return year + '-' + month + '-' + date;
+    },
+
+    _setCurrency: function() {
+      for (const service of this.services || []) {
+        service.currency = this.currency;
+        for (const rate of service.rates || []) {
+          rate.currency = this.currency;
+        }
+      }
     }
   }
 }

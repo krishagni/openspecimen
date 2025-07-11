@@ -22,7 +22,7 @@
           </div>
         </template>
         <template #footerRow>
-          <span v-t="{path: 'specimens.total_service_rate', args: {totalRate}}">Total Rate: {{totalRate}}</span>
+          <span v-t="{path: 'specimens.total_service_rate', args: {currency, totalRate}}">Total Rate: {{totalRate}}</span>
         </template>
       </os-list-view>
     </os-grid-column>
@@ -99,6 +99,11 @@ export default {
 
     isUpdateAllowed: function() {
       return this.isAnyUserUpdateAllowed && this.notCoordinatOrStoreAllowed;
+    },
+
+    currency: function() {
+      const cp = this.cpViewCtx.getCp();
+      return cp.serviceRateCurrency;
     }
   },
 
@@ -156,7 +161,7 @@ export default {
     _loadServices: function() {
       specimenSvc.getLabServices(this.specimen.id, {includeRates: true}).then(
         services => {
-          this.services = services.map(service => ({service}));
+          this.services = services.map(service => ({currency: this.currency, service}));
           this.totalRate = services.reduce((acc, svc) => svc.serviceRate >= 0 ? acc + svc.serviceRate : acc, 0);
           this.totalRate = this.totalRate.toFixed(2);
         }

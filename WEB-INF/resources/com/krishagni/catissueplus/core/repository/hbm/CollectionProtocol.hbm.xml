@@ -117,6 +117,8 @@
 
     <property name="draftMode" column="DRAFT_MODE" />
 
+    <property name="serviceRateCurrency" column="SERVICE_RATE_CURRENCY" />
+
     <many-to-one name="consentsSource" column="CONSENTS_SOURCE_CP_ID" />
 
     <set name="consentTier" table="CATISSUE_CONSENT_TIER" inverse="true" cascade="all-delete-orphan" order-by="id">

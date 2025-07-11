@@ -828,7 +828,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 				daoFactory.getSpecimenDao().saveOrUpdate(spmnSvc);
 			}
 
-			return ResponseEvent.response(SpecimenServiceDetail.from(spmnSvc));
+			return ResponseEvent.response(SpecimenServiceDetail.from(spmnSvc, Boolean.TRUE.equals(input.getIncludeSpmnDetailsInResp())));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

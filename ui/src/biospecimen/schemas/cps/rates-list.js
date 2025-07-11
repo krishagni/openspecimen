@@ -16,7 +16,14 @@ export default {
     {   
       type: 'number',
       labelCode: 'cps.service_rate',
-      name: 'rate.rate'
+      name: 'rate.rate',
+      value: ({currency, rate}) => {
+        if (rate.rate == undefined || rate.rate == null) {
+          return rate.rate;
+        }
+
+        return currency ? (currency + ' ' + rate.rate) : rate.rate;
+      }
     }      
   ]
 }

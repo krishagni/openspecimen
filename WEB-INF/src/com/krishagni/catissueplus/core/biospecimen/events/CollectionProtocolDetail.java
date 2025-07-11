@@ -95,6 +95,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	private List<DistributionProtocolSummary> distributionProtocols;
 
+	private String serviceRateCurrency;
+
 	private Long catalogId;
 
 	private String activityStatus;
@@ -412,6 +414,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		this.distributionProtocols = distributionProtocols;
 	}
 
+	public String getServiceRateCurrency() {
+		return serviceRateCurrency;
+	}
+
+	public void setServiceRateCurrency(String serviceRateCurrency) {
+		this.serviceRateCurrency = serviceRateCurrency;
+	}
+
 	public Long getCatalogId() {
 		return catalogId;
 	}
@@ -532,6 +542,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setSpmnLabelPrintSettings(CpSpecimenLabelPrintSettingDetail.from(cp.getSpmnLabelPrintSettings()));
 		result.setDistributionProtocols(DistributionProtocolSummary.from(cp.getDistributionProtocols()));
 		result.setCatalogId(cp.getCatalogId());
+		result.setServiceRateCurrency(cp.getServiceRateCurrency());
 		result.setActivityStatus(cp.getActivityStatus());
 		result.setCpSites(CollectionProtocolSiteDetail.from(cp.getSites()));
 		result.setExtensionDetail(ExtensionDetail.from(cp.getExtension()));
