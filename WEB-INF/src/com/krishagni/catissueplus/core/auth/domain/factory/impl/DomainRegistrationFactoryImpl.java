@@ -1,6 +1,9 @@
 
 package com.krishagni.catissueplus.core.auth.domain.factory.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -78,7 +81,16 @@ public class DomainRegistrationFactoryImpl implements DomainRegistrationFactory 
 		AuthProvider authProvider = new AuthProvider();
 		authProvider.setAuthType(detail.getAuthType());
 		authProvider.setImplClass(implClass);
-		authProvider.setProps(detail.getAuthProviderProps());
+
+		Map<String, String> props = null;
+		if (detail.getAuthProviderProps() != null) {
+			props = new HashMap<>(detail.getAuthProviderProps());
+		} else {
+			props = new HashMap<>();
+		}
+
+		props.entrySet().removeIf(prop -> StringUtils.isBlank(prop.getValue()));
+		authProvider.setProps(props);
 		return authProvider;
 	}
 
