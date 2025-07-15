@@ -398,7 +398,7 @@
         inner join os_cp_services s on s.identifier = ss.service_id
         left join os_cp_service_rates sr on sr.service_id = ss.service_id and ss.service_date >= sr.start_date and (sr.end_date is null or ss.service_date < sr.end_date) and sr.activity_status != 'Disabled'
       where
-        s.activity_status != 'Disabled';
+        s.activity_status != 'Disabled'
       ]]>
     </createView>
   </changeSet>
