@@ -1376,6 +1376,12 @@ const routes = [
                 path: 'forms',
                 name: 'CpDetail.Settings.Forms',
                 component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Forms.vue')
+              },
+              {
+                path: 'services',
+                name: 'CpDetail.Settings.Services',
+                component: () => import(/* webpackChunkName: "cps" */ '../biospecimen/cps/Services.vue'),
+                props: (route) => ({serviceId: route.query.serviceId})
               }
             ]
           }
@@ -1549,6 +1555,11 @@ const routes = [
                                 name: 'ParticipantsListItemSpecimenDetail.Forms',
                                 component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Forms.vue'),
                                 props: ({query}) => ({formId: query.formId, recordId: query.recordId})
+                              },
+                              {
+                                path: 'services',
+                                name: 'ParticipantsListItemSpecimenDetail.Services',
+                                component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/participants/specimens/Services.vue')
                               }
                             ]
                           }

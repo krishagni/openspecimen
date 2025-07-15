@@ -9,6 +9,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 
 
@@ -16,7 +17,7 @@ public class JsonDateDeserializer extends UntypedObjectDeserializer {
 	private static final LogUtil logger = LogUtil.getLogger(JsonDateDeserializer.class);
 
 	public JsonDateDeserializer() {
-		super(null, null);
+		super((JavaType) null, null);
 	}
 
 	@Override

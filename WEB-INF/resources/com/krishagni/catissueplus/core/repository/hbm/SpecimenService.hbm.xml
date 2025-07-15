@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" table="OS_SPECIMEN_SERVICES"
+         entity-name="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_SPECIMEN_SERVICES_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="specimen" column="SPECIMEN_ID" not-null="true" />
+
+    <many-to-one name="service" column="SERVICE_ID" not-null="true" />
+
+    <property name="units" column="UNITS" not-null="true" />
+
+    <property name="serviceDate" column="SERVICE_DATE" not-null="true" />
+
+    <many-to-one name="servicedBy" column="SERVICED_BY" not-null="true" />
+
+    <property name="comments" column="COMMENTS" />
+
+    <query name="deleteServices">
+      delete from
+        com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService ls
+      where
+        ls.specimen.id = :specimenId
+    </query>
+
+    <sql-query name="getLabServiceRates">
+      <return-scalar column="labSvcId" type="long" />
+      <return-scalar column="serviceRate" type="big_decimal" />
+
+      <![CDATA[
+
+      select
+        ss.identifier as labSvcId, sr.rate as serviceRate
+      from
+        os_specimen_services ss
+        inner join os_cp_service_rates sr on sr.service_id = ss.service_id
+      where
+        ss.specimen_id = :specimenId and
+        ss.service_date >= sr.start_date and (sr.end_date is null or ss.service_date < sr.end_date) and
+        sr.activity_status != 'Disabled'
+
+      ]]>
+    </sql-query>
+
+    <sql-query name="getLabServicesReport">
+      <return-scalar column="code" type="string" />
+      <return-scalar column="description" type="string" />
+      <return-scalar column="specimens" type="long" />
+      <return-scalar column="total_rate" type="big_decimal" />
+
+      <![CDATA[
+
+      select
+        s.code, s.description, count(ssr.specimen_id) as specimens, sum(ssr.rate) as total_rate
+      from
+        os_specimen_service_rates_view ssr
+        inner join os_cp_services s on s.identifier = ssr.service_id
+      where
+        ssr.service_date >= :startDate and ssr.service_date < :endDate and
+        s.cp_id = :cpId and
+        s.activity_status != 'Disabled'
+      group by
+        s.code, s.description
+      order by
+        s.code
+
+      ]]>
+    </sql-query>
+  </class>
+</hibernate-mapping>

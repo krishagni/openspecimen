@@ -196,6 +196,9 @@
   <include file="db/12.1/config.xml" />
   <include file="db/12.1/migration.xml" />
 
+  <include file="db/12.2/schema.xml" />
+  <include file="db/12.2/audit.xml" />
+
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>
 </databaseChangeLog>

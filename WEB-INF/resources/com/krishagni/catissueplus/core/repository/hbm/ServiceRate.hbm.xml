@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.ServiceRate" table="OS_CP_SERVICE_RATES"
+     entity-name="com.krishagni.catissueplus.core.biospecimen.domain.ServiceRate">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_CP_SERVICE_RATES_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="service" column="SERVICE_ID" not-null="true" />
+
+    <property name="startDate" column="START_DATE" not-null="true" />
+
+    <property name="endDate" column="END_DATE" />
+
+    <property name="rate" column="RATE" />
+
+    <property name="activityStatus" column="ACTIVITY_STATUS" />
+
+    <filter name="activeEntity" />
+  </class>
+</hibernate-mapping>

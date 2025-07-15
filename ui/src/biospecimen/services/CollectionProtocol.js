@@ -499,6 +499,52 @@ class CollectionProtocol {
   getReqAddEditFormSchema() {
     return formUtil.getFormSchema(reqSchema.fields, reqAddEditLayout.layout);
   }
+
+  /**
+   * Services
+   */
+  getServices(cpId, opts) {
+    const filters = {cpId, ...(opts || {})};
+    return http.get('cp-services', filters);
+  }
+
+  addEditService(service) {
+    if (service.id > 0) {
+      return http.put('cp-services/' + service.id, service);
+    } else {
+      return http.post('cp-services', service);
+    }
+  }
+
+  deleteService(serviceId) {
+    return http.delete('cp-services/' + serviceId);
+  }
+
+  downloadServiceReport({cpId, startDate, endDate}) {
+    const query = {startDate};
+    if (endDate) {
+      query.endDate = endDate;
+    }
+
+    return http.downloadFile(http.getUrl('cp-services/' + cpId + '/report', {query}));
+  }
+
+  getServiceRates(serviceId, opts) {
+    const filters = opts || {};
+    return http.get('cp-services/' + serviceId + '/rates', filters);
+  }
+
+  addEditServiceRate(serviceId, rate) {
+    if (rate.id > 0) {
+      return http.put('cp-services/' + serviceId + '/rates/' + rate.id, rate);
+    } else {
+      return http.post('cp-services/' + serviceId + '/rates', rate);
+    }
+  }
+
+  deleteServiceRate(serviceId, rateId) {
+    return http.delete('cp-services/' + serviceId + '/rates/' + rateId);
+  }
 }
 
 export default new CollectionProtocol();

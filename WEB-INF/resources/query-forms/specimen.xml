@@ -1360,6 +1360,58 @@
 
     <row>
       <subForm>
+        <name>services</name>
+        <udn>services</udn>
+        <caption>#getMessage("specimen_services")</caption>
+        <table>OS_SPECIMEN_SERVICE_RATES_VIEW</table>
+        <foreignKey>SPECIMEN_ID</foreignKey>
+        <parentKey>IDENTIFIER</parentKey>
+        <primaryKey>SPECIMEN_SERVICE_ID</primaryKey>
+        <row>
+          <textField>
+            <name>code</name>
+            <udn>code</udn>
+            <caption>#getMessage("specimen_service_code")</caption>
+            <column>CODE</column>
+          </textField>
+          <textField>
+            <name>description</name>
+            <udn>description</udn>
+            <caption>#getMessage("specimen_service_description")</caption>
+            <column>DESCRIPTION</column>
+          </textField>
+          <datePicker>
+            <name>serviceDate</name>
+            <udn>serviceDate</udn>
+            <caption>#getMessage("specimen_service_date")</caption>
+            <column>SERVICE_DATE</column>
+            <format>MM-dd-yyyy HH:mm</format>
+          </datePicker>
+          <userField>
+            <name>servicedBy</name>
+            <udn>servicedBy</udn>
+            <caption>#getMessage("specimen_serviced_by")</caption>
+            <column>SERVICED_BY</column>
+          </userField>
+          <textField>
+            <name>comments</name>
+            <udn>comments</udn>
+            <caption>#getMessage("specimen_service_comments")</caption>
+            <column>COMMENTS</column>
+          </textField>
+          <numberField>
+            <name>rate</name>
+            <udn>rate</udn>
+            <caption>#getMessage("specimen_service_rate")</caption>
+            <column>RATE</column>
+            <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
+          </numberField>
+        </row>
+      </subForm>
+    </row>
+
+    <row>
+      <subForm>
         <name>checkoutPosition</name>
         <udn>checkoutPosition</udn>
         <caption>#getMessage("specimen_checkout_details")</caption>

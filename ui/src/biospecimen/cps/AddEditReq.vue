@@ -46,6 +46,7 @@ export default {
         barcodingEnabled: false,
 
         sr: {
+          cpId: this.cp.id,
           cpShortTitle: this.cp.shortTitle,
           eventId: this.event.id,
           lineage: this.lineage || 'New',
@@ -73,6 +74,8 @@ export default {
           if (sr.defaultCustomFieldValues) {
             sr.defaultCustomFieldValuesJson = JSON.stringify(sr.defaultCustomFieldValues, null, 2);
           }
+
+          this._setupServices(sr);
         }
       );
     } else if (+this.parentReqId > 0) {
@@ -119,6 +122,10 @@ export default {
         }
       }
 
+      if (toSave.services) {
+        toSave.services = toSave.services.map(service => ({serviceCode: service, units: 1}));
+      }
+
       if (this.lineage == 'Derived') {
         toSave.quantity = toSave.initialQty;
         cpSvc.createDerivedRequirement(this.parentReqId, toSave).then(
@@ -156,6 +163,10 @@ export default {
     cancel: function(req) {
       const query = {eventId: this.event.id, reqId: (req && req.id) || this.reqId};
       routerSvc.goto('CpDetail.Events.List', {cpId: this.cp.id}, query);
+    },
+
+    _setupServices: function(req) {
+      req.services = (req.services || []).map(service => service.serviceCode);
     }
   }
 }

@@ -193,6 +193,12 @@ export default {
       "type": "textarea",
       "name": "sr.defaultCustomFieldValuesJson",
       "labelCode": "cps.def_custom_field_values"
+    },
+    {
+      "type": "text",
+      "name": "services",
+      "labelCode": "cps.services",
+      "value": ({sr}) => (sr.services || []).map(s => s.serviceDescription + ' (' + s.serviceCode + ')').join(', ')
     }
   ]
 }

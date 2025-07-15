@@ -19,10 +19,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportCriteria;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -475,6 +478,72 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		return specimens;
 	}
 
+	@Override
+	public LabSpecimenService getLabSpecimenService(Long id) {
+		Criteria<LabSpecimenService> query = createCriteria(LabSpecimenService.class, "ls");
+		return query.add(query.eq("ls.id", id)).uniqueResult();
+	}
+
+	@Override
+	public List<LabSpecimenService> getLabSpecimenServices(Long specimenId) {
+		Criteria<LabSpecimenService> query = createCriteria(LabSpecimenService.class, "ls")
+			.join("ls.specimen", "spmn");
+		return query.add(query.eq("spmn.id", specimenId))
+			.addOrder(query.desc("ls.serviceDate"))
+			.list();
+	}
+
+	@Override
+	public Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SERVICE_RATES)
+			.setParameter("specimenId", specimenId)
+			.list();
+
+		Map<Long, BigDecimal> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (BigDecimal) row[1]);
+		}
+
+		return result;
+	}
+
+	@Override
+	public List<ServiceReportDetail> getLabSpecimensServiceReport(ServiceReportCriteria crit) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SERVICES_REPORT)
+			.setParameter("cpId", crit.getCpId())
+			.setParameter("startDate", crit.getStartDate())
+			.setParameter("endDate", crit.getEndDate())
+			.list();
+
+		return rows.stream().map(
+			row -> {
+				ServiceReportDetail detail = new ServiceReportDetail();
+				detail.setCode((String) row[0]);
+				detail.setDescription((String) row[1]);
+				detail.setSpecimens((Long) row[2]);
+				detail.setRate((BigDecimal) row[3]);
+				return detail;
+			}
+		).collect(Collectors.toList());
+	}
+
+	@Override
+	public void saveOrUpdate(LabSpecimenService labSpecimenService) {
+		sessionFactory.getCurrentSession().saveOrUpdate(labSpecimenService);
+	}
+
+	@Override
+	public void delete(LabSpecimenService svc) {
+		sessionFactory.getCurrentSession().delete(svc);
+	}
+
+	@Override
+	public void deleteServices(Long specimenId) {
+		createNamedQuery(DELETE_SERVICES)
+			.setParameter("specimenId", specimenId)
+			.executeUpdate();
+	}
+
 	private void addIdsCond(AbstractCriteria<?, ?> query, List<Long> ids) {
 		addInCond(query, "specimen.id", ids);
 	}
@@ -843,6 +912,12 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String ACTIVATE_SPMN = FQN + ".activateSpecimen";
 
 	private static final String ACTIVATE_HIERARCHY = FQN + ".activateHierarchy";
+
+	private static final String DELETE_SERVICES = LabSpecimenService.class.getName() + ".deleteServices";
+
+	private static final String GET_SERVICE_RATES = LabSpecimenService.class.getName() + ".getLabServiceRates";
+
+	private static final String GET_SERVICES_REPORT = LabSpecimenService.class.getName() + ".getLabServicesReport";
 
 	private static final String GET_DESCENDENTS_SQL =
 		"select descendent_id from catissue_specimen_hierarchy where ancestor_id = %d and ancestor_id != descendent_id";

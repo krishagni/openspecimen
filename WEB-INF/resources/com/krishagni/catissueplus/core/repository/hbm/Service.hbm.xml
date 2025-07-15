@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.Service" table="OS_CP_SERVICES"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.Service">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_CP_SERVICES_SEQ</param>
+      </generator>
+    </id>
+
+    <property name="code" column="CODE" not-null="true" />
+
+    <property name="description" column="DESCRIPTION" not-null="true" />
+
+    <many-to-one name="cp" column="CP_ID" not-null="true" />
+
+    <set name="serviceRatesList" table="OS_CP_SERVICE_RATES" inverse="true">
+      <key column="SERVICE_ID" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.ServiceRate" />
+      <filter name="activeEntity" />
+    </set>
+
+    <set name="specimens" table="OS_SPECIMEN_SERVICES" inverse="true">
+      <key column="SERVICE_ID" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" />
+    </set>
+
+    <set name="requirements" table="OS_CP_SR_SERVICES" inverse="true">
+      <key column="SERVICE_ID" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService" />
+    </set>
+
+    <property name="activityStatus" column="ACTIVITY_STATUS" not-null="true" />
+
+    <filter name="activeEntity" />
+  </class>
+</hibernate-mapping>

@@ -1,15 +1,19 @@
 
 package com.krishagni.catissueplus.core.biospecimen.repository;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportCriteria;
+import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportDetail;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.Dao;
@@ -82,4 +86,18 @@ public interface SpecimenDao extends Dao<Specimen> {
 	Map<Long, Map<String, String>> getKitLabels(Visit visit);
 
 	List<Specimen> getDescendantSpecimens(List<Long> ancestorIds, String labelField, List<String> labels, String lineage, String status);
+
+	LabSpecimenService getLabSpecimenService(Long id);
+
+	List<LabSpecimenService> getLabSpecimenServices(Long specimenId);
+
+	Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId);
+
+	List<ServiceReportDetail> getLabSpecimensServiceReport(ServiceReportCriteria crit);
+
+	void saveOrUpdate(LabSpecimenService svc);
+
+	void delete(LabSpecimenService svc);
+
+	void deleteServices(Long specimenId);
 }

@@ -287,6 +287,23 @@ class Specimen {
     );
   }
 
+  getLabServices(specimenId, opts) {
+    opts = opts || {}
+    return http.get('lab-specimen-services', {specimenId, ...opts});
+  }
+
+  addOrUpdateLabService(serviceDetail) {
+    if (serviceDetail.id > 0) {
+      return http.put('lab-specimen-services/' + serviceDetail.id, serviceDetail);
+    } else {
+      return http.post('lab-specimen-services', serviceDetail);
+    }
+  }
+
+  deleteLabService({id}) {
+    return http.delete('lab-specimen-services/' + id);
+  }
+
   async _getAllocRule(ctxt, specimen) {
     ctxt.allocRules = ctxt.allocRules || {};
 

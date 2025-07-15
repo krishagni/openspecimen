@@ -36,6 +36,8 @@ import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
+import com.krishagni.catissueplus.core.biospecimen.domain.Service;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPreSaveEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -44,6 +46,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
@@ -56,6 +59,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenAliquotsSpec;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenQueryCriteria;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenStatusDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
@@ -72,6 +76,7 @@ import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
+import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.LabelPrintJobSummary;
 import com.krishagni.catissueplus.core.common.events.LabelTokenDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -723,6 +728,134 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		return ResponseEvent.response(LabelTokenDetail.from("print_", getLabelPrinter().getTokens()));
 	}
 
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<SpecimenServiceDetail>> getServices(RequestEvent<SpecimenQueryCriteria> req) {
+		try {
+			SpecimenQueryCriteria crit = req.getPayload();
+
+			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+			Specimen specimen = getSpecimen(crit.getId(), crit.getCpShortTitle(), crit.getName(), crit.getBarcode(), ose);
+			ose.checkAndThrow();
+
+			AccessCtrlMgr.getInstance().ensureReadSpecimenRights(specimen);
+			List<LabSpecimenService> services = daoFactory.getSpecimenDao().getLabSpecimenServices(specimen.getId());
+			List<SpecimenServiceDetail> result = SpecimenServiceDetail.from(specimen, services);
+			if (Boolean.TRUE.equals(crit.paramBoolean("includeRates")) && !services.isEmpty()) {
+				Map<Long, BigDecimal> rates = daoFactory.getSpecimenDao().getLabSpecimenServicesRate(specimen.getId());
+				for (SpecimenServiceDetail svc : result) {
+					BigDecimal rate = rates.get(svc.getId());
+					if (rate != null) {
+						svc.setServiceRate(rate.multiply(new BigDecimal(svc.getUnits())));
+					}
+				}
+			}
+
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimenServiceDetail> getService(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			LabSpecimenService service = daoFactory.getSpecimenDao().getLabSpecimenService(crit.getId());
+			if (service == null) {
+				return ResponseEvent.userError(SpecimenErrorCode.LAB_SVC_NOT_FOUND, crit.getId());
+			}
+
+			AccessCtrlMgr.getInstance().ensureReadSpecimenRights(service.getSpecimen());
+			return ResponseEvent.response(SpecimenServiceDetail.from(service));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimenServiceDetail> addOrUpdateService(RequestEvent<SpecimenServiceDetail> req) {
+		try {
+			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+
+			SpecimenServiceDetail input = req.getPayload();
+			Specimen specimen = getSpecimen(input.getSpecimenId(), input.getCpShortTitle(), input.getLabel(), input.getBarcode(), ose);
+			ose.checkAndThrow();
+
+			AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen);
+
+			if (!specimen.isCollected()) {
+				return ResponseEvent.userError(SpecimenErrorCode.NOT_COLLECTED, specimen.getLabel());
+			}
+
+			LabSpecimenService existing = null;
+			if (input.getId() != null) {
+				existing = daoFactory.getSpecimenDao().getLabSpecimenService(input.getId());
+				if (existing == null) {
+					ose.addError(SpecimenErrorCode.LAB_SVC_NOT_FOUND, input.getId());
+				}
+			}
+
+			Date serviceDate = specimen.getCreatedOn();
+			if (input.getServiceDate() != null) {
+				if (input.getServiceDate().before(specimen.getCreatedOn())) {
+					ose.addError(SpecimenErrorCode.LAB_SVC_DT_LT_CREATED_ON, Utility.getDateTimeString(input.getServiceDate()), Utility.getDateTimeString(specimen.getCreatedOn()));
+				}
+
+				serviceDate = input.getServiceDate();
+			}
+
+			LabSpecimenService spmnSvc = new LabSpecimenService();
+			spmnSvc.setSpecimen(specimen);
+			spmnSvc.setService(getService(input, specimen, ose));
+			spmnSvc.setUnits(input.getUnits() > 0 ? input.getUnits() : 1);
+			spmnSvc.setServicedBy(getUser(input.getServicedBy(), ose));
+			spmnSvc.setServiceDate(serviceDate);
+			spmnSvc.setComments(input.getComments());
+
+			ose.checkAndThrow();
+
+			if (existing != null) {
+				existing.update(spmnSvc);
+				spmnSvc = existing;
+			} else {
+				daoFactory.getSpecimenDao().saveOrUpdate(spmnSvc);
+			}
+
+			return ResponseEvent.response(SpecimenServiceDetail.from(spmnSvc, Boolean.TRUE.equals(input.getIncludeSpmnDetailsInResp())));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimenServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			LabSpecimenService service = daoFactory.getSpecimenDao().getLabSpecimenService(crit.getId());
+			if (service == null) {
+				return ResponseEvent.userError(SpecimenErrorCode.LAB_SVC_NOT_FOUND, crit.getId());
+			}
+
+			AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(service.getSpecimen());
+			daoFactory.getSpecimenDao().delete(service);
+			return ResponseEvent.response(SpecimenServiceDetail.from(service));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public LabelPrinter<Specimen> getLabelPrinter() {
@@ -1192,6 +1325,9 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			// update specimen events and custom fields only if it is not deleted
 			specimen.addOrUpdateCollRecvEvents();
 			specimen.addOrUpdateExtension();
+			if (existing == null) {
+				specimen.addServices();
+			}
 		}
 
 		if (pooling) {
@@ -1552,6 +1688,25 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		info.setAvailableQty(spmn.getAvailableQuantity());
 		info.setActivityStatus(spmn.getActivityStatus());
 		return info;
+	}
+
+	private Service getService(SpecimenServiceDetail input, Specimen specimen, OpenSpecimenException ose) {
+		Service service = null;
+		Object key = null;
+		if (input.getServiceId() != null) {
+			service = daoFactory.getServiceDao().getById(input.getServiceId());
+			key = input.getServiceId();
+		} else if (StringUtils.isNotBlank(input.getServiceCode())) {
+			service = daoFactory.getServiceDao().getService(specimen.getCpId(), input.getServiceCode());
+			key = specimen.getCpShortTitle() + " / " + input.getServiceCode();
+		}
+
+		if (key == null) {
+			ose.addError(ServiceErrorCode.CODE_REQ);
+		} else if (service == null) {
+			ose.addError(ServiceErrorCode.NOT_FOUND, key);
+		}
+		return service;
 	}
 
 	private Function<ExportJob, List<? extends Object>> getSpecimensGenerator() {

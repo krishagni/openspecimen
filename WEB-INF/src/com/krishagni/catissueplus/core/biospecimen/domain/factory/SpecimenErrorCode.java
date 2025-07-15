@@ -190,7 +190,11 @@ public enum SpecimenErrorCode implements ErrorCode {
 
 	STORED_IN_AF_CHECK_OUT_NA,
 
-	INV_DISPOSE_REASON;
+	INV_DISPOSE_REASON,
+
+	LAB_SVC_NOT_FOUND,
+
+	LAB_SVC_DT_LT_CREATED_ON;
 
 	public String code() {
 		return "SPECIMEN_" + this.name();

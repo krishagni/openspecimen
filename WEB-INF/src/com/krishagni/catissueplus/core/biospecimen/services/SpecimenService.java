@@ -11,10 +11,12 @@ import com.krishagni.catissueplus.core.biospecimen.events.SpecimenAliquotsSpec;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenQueryCriteria;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenStatusDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.events.BulkEntityDetail;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
+import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.LabelPrintJobSummary;
 import com.krishagni.catissueplus.core.common.events.LabelTokenDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -59,6 +61,15 @@ public interface SpecimenService {
 	public ResponseEvent<LabelPrintJobSummary> printSpecimenLabels(RequestEvent<PrintSpecimenLabelDetail> req);
 
 	public ResponseEvent<List<LabelTokenDetail>> getPrintLabelTokens();
+
+	ResponseEvent<List<SpecimenServiceDetail>> getServices(RequestEvent<SpecimenQueryCriteria> req);
+
+	ResponseEvent<SpecimenServiceDetail> getService(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<SpecimenServiceDetail> addOrUpdateService(RequestEvent<SpecimenServiceDetail> req);
+
+	ResponseEvent<SpecimenServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req);
+
 	
 	/** Used mostly by plugins **/
 	public LabelPrinter<Specimen> getLabelPrinter();
