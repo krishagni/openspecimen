@@ -199,7 +199,7 @@ export default {
       this.$refs.confirmImpersonate.open().then(
         (resp) => {
           if (resp == 'proceed') {
-            userSvc.impersonate(this.ctx.user).then(() => routerSvc.goto('HomePage'));
+            userSvc.impersonate(this.ctx.user).then(() => routerSvc.reloadView('HomePage'));
           }
         }
       );

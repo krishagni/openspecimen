@@ -29,13 +29,18 @@ class Router {
     router.go(router.currentRoute);
   }
 
+  reloadView(name, params, query) {
+    window.location.href = this.getUrl(name, params, query);
+    window.location.reload();
+  }
+
   getCurrentRoute() {
     const route = router.currentRoute;
     return (route && route.value) || {};
   }
 
   getUrl(name, params, query) {
-    let route = router.resolve({name: name, params: params, query: query});
+    let route = router.resolve({name, params, query});
     return route && route.href;
   }
 

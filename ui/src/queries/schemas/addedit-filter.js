@@ -141,6 +141,7 @@ export default {
         fields: [
           {
             type: 'number',
+            maxFractionDigits: 6,
             name: 'filter.minNumValue',
             labelCode: 'queries.min_value',
             showWhen: 'valueType == "numericRange"',
@@ -152,6 +153,7 @@ export default {
           },
           {
             type: 'number',
+            maxFractionDigits: 6,
             name: 'filter.maxNumValue',
             labelCode: 'queries.max_value',
             showWhen: 'valueType == "numericRange"',

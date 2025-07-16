@@ -101,7 +101,7 @@ export default {
 
   methods: {
     returnToMyAccount: function() {
-      userSvc.unpersonate().then(() => routerSvc.goto('HomePage'));
+      userSvc.unpersonate().then(() => routerSvc.reloadView('HomePage'));
     },
 
     registerHomePageCards: function() {
