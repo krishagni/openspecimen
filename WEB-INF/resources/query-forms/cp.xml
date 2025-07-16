@@ -42,7 +42,7 @@
         <udn>code</udn>
         <caption>#getMessage("cp_code")</caption>
         <column>CODE</column>
-        <recordUrl>#/object-state-params-resolver?stateName=CpDetail.Overview&amp;objectName=collection_protocol&amp;key=title&amp;value={{$value}}</recordUrl>
+        <recordUrl>#/object-state-params-resolver?stateName=CpDetail.Overview&amp;objectName=collection_protocol&amp;key=code&amp;value={{$value}}</recordUrl>
       </textField>
     </row>
     <row>
