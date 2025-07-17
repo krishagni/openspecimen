@@ -33,7 +33,10 @@ public class ExpressionUtil {
 	@SuppressWarnings("unchecked")
 	public <T> T evaluate(String exprStr, Map<String, Object> variables) {
 		try {
-			SimpleEvaluationContext ctxt = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+			SimpleEvaluationContext ctxt = SimpleEvaluationContext
+				.forReadOnlyDataBinding()
+				.withInstanceMethods()
+				.build();
 			addMethods(ctxt);
 			addMathFns(ctxt);
 			ctxt.setVariable("collFns", new CollectionFunctions(variables));
