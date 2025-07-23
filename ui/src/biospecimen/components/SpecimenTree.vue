@@ -74,6 +74,7 @@ export default {
         for (let field of this.treeCfg.fields) {
           if (field.type == 'specimen-description') {
             field.showStatus = true;
+            field.detailed = (this.treeCfg.hideDerivatives == true);
           }
 
           if (field.name.indexOf('calc') == 0 && field.displayExpr) {
@@ -281,7 +282,7 @@ export default {
     _flattenSpecimens: function(specimens, depth, parentUid) {
       let idx = 0;
       let result = [];
-      for (let specimen of specimens) {
+      for (const specimen of specimens) {
         formUtil.createCustomFieldsMap(specimen, true);
         if (this.oldTree && (!specimen.status || specimen.status == 'Pending')) {
           this.haveOldSpecimens = true;
@@ -290,14 +291,22 @@ export default {
           }
         }
 
+        const {hideDerivatives} = this.treeCfg || {};
         const uid = parentUid !== undefined && parentUid !== null ? parentUid + '_' + idx : idx;
-        const item = {cpr: this.cpr, visit: this.visit, specimen, depth, expanded: true, show: true, uid, parentUid};
-        result.push(item);
-        ++idx;
+        if (hideDerivatives && specimen.lineage == 'Derived' &&
+             (!specimen.children || specimen.children.every(aliquot => aliquot.lineage == 'Aliquot'))) {
+          const aliquots = this._flattenSpecimens(specimen.children || [], depth, uid);
+          Array.prototype.push.apply(result, aliquots);
+        } else {
+          const item = {cpr: this.cpr, visit: this.visit, specimen, depth, expanded: true, show: true, uid, parentUid};
+          result.push(item);
       
-        const children = this._flattenSpecimens(specimen.children || [], depth + 1, uid);
-        Array.prototype.push.apply(result, children);
-        item.hasChildren = (children || []).length > 0;
+          const children = this._flattenSpecimens(specimen.children || [], depth + 1, uid);
+          Array.prototype.push.apply(result, children);
+          item.hasChildren = (children || []).length > 0;
+        }
+
+        ++idx;
       }
 
       return result;
