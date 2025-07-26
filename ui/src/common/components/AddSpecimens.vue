@@ -144,7 +144,7 @@ export default {
     addSpecimens: async function() {
       const {specimens, useBarcode, error} = await this.getSpecimens();
       if (error) {
-        return;
+        return {error, specimens: []};
       }
 
       if (specimens && specimens.length > 0) {
@@ -154,6 +154,12 @@ export default {
         const opts = this.errorOpts || {};
         alerts.error(opts.no_match || {code: 'common.add_specimens.no_matching_specimens'});
       }
+
+      return {error, specimens};
+    },
+
+    setInput: function(text) {
+      this.inputValue = text;
     },
 
     clearInput: function() {
