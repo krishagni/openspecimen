@@ -296,6 +296,7 @@ export default {
 
     Object.assign(this.filterValues, values);
     Object.assign(this.filtersContext, this.filterValues);
+    this.filtersContext.listViewCtx = this.context || {};
 
     if (Object.keys(values).length > 0) {
       this.showFilters = true;

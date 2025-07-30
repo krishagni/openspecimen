@@ -34,6 +34,11 @@ export default {
   color: #fff;
 }
 
+.os-tag :deep(.p-tag.p-tag-secondary) {
+  background-color: #020617;
+  color: #fff;
+}
+
 .os-tag.os-missed-tag :deep(.p-tag) {
   background-color: #888;
   color: #fff;

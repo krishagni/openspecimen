@@ -365,10 +365,14 @@ class Util {
 
   formatDate(date, pattern) {
     if (!(date instanceof Date)) {
-      return date;
+      if (!(typeof date == 'number')) {
+        return date;
+      }
+
+      date = new Date(+date);
     }
 
-    return format(date, pattern);
+    return format(date, pattern || ui.global.locale.dateFmt);
   }
 
   i18n(msg, args) {
@@ -575,7 +579,7 @@ class Util {
     const detailed = opts.detailed == 'true' || opts.detailed == true;
 
     let result = '';
-    if (!specimen.lineage || specimen.lineage == 'New') {
+    if (!specimen.lineage || specimen.lineage == 'New' || detailed) {
       if (specimen.pathology && specimen.pathology != ns) {
         result += specimen.pathology + ' ';
       }
@@ -602,7 +606,7 @@ class Util {
       result += specimen.lineage + ' ' + specimen.type;
     } else if (specimen.lineage == 'Aliquot') {
       result += specimen.lineage;
-      if (detailed) {
+      if (opts.showAliquotType == 'true' || opts.showAliquotType == true) {
         result += ' ' + specimen.type;
       }
     }

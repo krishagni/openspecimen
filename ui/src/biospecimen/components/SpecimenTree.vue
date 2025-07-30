@@ -74,7 +74,7 @@ export default {
         for (let field of this.treeCfg.fields) {
           if (field.type == 'specimen-description') {
             field.showStatus = true;
-            field.detailed = (this.treeCfg.hideDerivatives == true);
+            field.showAliquotType = (this.treeCfg.hideDerivatives == true);
           }
 
           if (field.name.indexOf('calc') == 0 && field.displayExpr) {
