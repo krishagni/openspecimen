@@ -161,7 +161,7 @@ export default {
             fieldName = fieldParts.join('.');
           }
 
-          return formSvc.getPvsByName(formName, fieldName, searchTerm)
+          return formSvc.getPvsByName(formName, fieldName, searchTerm, true)
             .then(pvs => pvs.map(({value}) => ({name: value, value})));
         }
       } else {

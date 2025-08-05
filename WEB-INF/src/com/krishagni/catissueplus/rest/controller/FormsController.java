@@ -574,7 +574,7 @@ public class FormsController {
 		@RequestParam(value = "formName", required = false)
 		String formName,
 
-		@RequestParam(value = "controlName", required = true)
+		@RequestParam(value = "controlName")
 		String controlName,
 
 		@RequestParam(value = "useUdn", required = false, defaultValue = "false")
