@@ -23,8 +23,8 @@ class Form {
     return http.get('forms/' + formId + '/permissible-values', params);
   }
 
-  async getPvsByName(formName, fieldName, query) {
-    const params = {formName, controlName: fieldName, searchString: query};
+  async getPvsByName(formName, fieldName, query, useUdn) {
+    const params = {formName, controlName: fieldName, searchString: query, useUdn};
     return http.get('forms/permissible-values', params);
   }
 
