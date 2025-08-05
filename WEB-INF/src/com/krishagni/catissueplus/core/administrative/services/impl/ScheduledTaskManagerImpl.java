@@ -134,7 +134,10 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 				return null;
 			}
 
-			logger.info("Acquired the lock on the job " + job.getName());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Acquired the lock on the job " + job.getName());
+			}
+
 			job = getScheduledJob(job.getId());
 			if (job == null) {
 				return null;
@@ -162,7 +165,10 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 		notifyJobCompleted(dbRun);
 		scheduledJobs.remove(dbRun.getScheduledJob().getId());
 		releaseLock(dbRun.getScheduledJob());
-		logger.info("Released the lock on the job " + dbRun.getScheduledJob().getName());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Released the lock on the job " + dbRun.getScheduledJob().getName());
+		}
+
 		schedule(dbRun.getScheduledJob().getId());
 	}
 
@@ -193,10 +199,10 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 				String thisNode = appProps.getProperty("node.name", "thisNode");
 
 				String node = daoFactory.getScheduledJobDao().getRunByNodeForUpdate(job.getId());
-				logger.info("Lock on the job " + job.getName() + " is held by " + (node != null ? node : "none"));
 
 				if (StringUtils.isNotBlank(node) &&
 					((clear && !node.equals(thisNode)) || (!clear && !node.equals("none")))) {
+					logger.info("Lock on the job '" + job.getName() + "' is held by " + node);
 					return false;
 				}
 
@@ -231,7 +237,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 			}
 		}
 
-		logger.info("Scheduling the job " + job.getName() + " to run " + minutesLater + " minutes later");
+		logger.info("Scheduling the job '" + job.getName() + "' to run " + minutesLater + " minutes later");
 		ScheduledTaskWrapper taskWrapper = new ScheduledTaskWrapper(job, args, user, this);
 		ScheduledFuture<?> future = executorService.schedule(taskWrapper, minutesLater, TimeUnit.MINUTES);
 		scheduledJobs.put(job.getId(), future);		
