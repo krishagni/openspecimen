@@ -274,7 +274,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	@Override
 	public ResponseEvent<File> getExportedRevisionsFile(RequestEvent<String> req) {
 		String filename = req.getPayload() + "_" + AuthUtil.getCurrentUser().getId();
-		return ResponseEvent.response(new File(getAuditDir(), filename));
+		return ResponseEvent.response(Utility.getFile(getAuditDir(), filename));
 	}
 
 	@Override
@@ -476,11 +476,11 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 	}
 
 	private File getAuditDir() {
-		return new File(ConfigUtil.getInstance().getDataDir(), "audit");
+		return Utility.getFile(ConfigUtil.getInstance().getDataDir(), "audit");
 	}
 
 	private File getAuditDir(String dir) {
-		File result = new File(getAuditDir(), dir);
+		File result = Utility.getFile(getAuditDir(), dir);
 		if (!result.exists()) {
 			result.mkdirs();
 		}

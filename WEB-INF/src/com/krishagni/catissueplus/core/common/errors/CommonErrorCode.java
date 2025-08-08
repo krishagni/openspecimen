@@ -37,7 +37,9 @@ public enum CommonErrorCode implements ErrorCode {
 
 	FILE_TYPE_DETECT_FAILED,
 
-	INVALID_EMAIL_ID;
+	INVALID_EMAIL_ID,
+
+	INV_FILE_PATH;
 
 	@Override
 	public String code() {

@@ -108,17 +108,16 @@ public class AuditController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public void downloadRevisionsFile(@RequestParam(value = "fileId") String fileId, HttpServletResponse httpResp) {
-		ResponseEvent<File> resp = auditService.getExportedRevisionsFile(new RequestEvent<>(fileId));
-		resp.throwErrorIfUnsuccessful();
+		File file = ResponseEvent.unwrap(auditService.getExportedRevisionsFile(RequestEvent.wrap(fileId)));
 
-		String[] parts = resp.getPayload().getName().split("_"); // <UUID>_<date>_<time>_<userid>
+		String[] parts = file.getName().split("_"); // <UUID>_<date>_<time>_<userid>
 		String filename = "os_audit_revisions_" + parts[1] + "_" + parts[2]+ ".zip";
 		httpResp.setContentType("application/zip");
 		httpResp.setHeader("Content-Disposition", "attachment;filename=" + filename);
 
 		InputStream in = null;
 		try {
-			in = new FileInputStream(resp.getPayload());
+			in = new FileInputStream(file);
 			IOUtils.copy(in, httpResp.getOutputStream());
 		} catch (IOException e) {
 			throw new RuntimeException("Error sending file", e);

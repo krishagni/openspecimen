@@ -1257,6 +1257,26 @@ public class Utility {
 		return phoneNumber;
 	}
 
+	public static File getFile(File basedir, String filename) {
+		try {
+			String baseDirPath = basedir.getCanonicalPath() + File.separator;
+
+			File file = new File(basedir, filename);
+			String filePath = file.getCanonicalPath();
+			if (!filePath.startsWith(baseDirPath)) {
+				throw OpenSpecimenException.userError(CommonErrorCode.INV_FILE_PATH, basedir, filename);
+			}
+
+			return file;
+		} catch (IOException e) {
+			throw OpenSpecimenException.serverError(e);
+		}
+	}
+
+	public static File getFile(String basedir, String filename) {
+		return getFile(new File(basedir), filename);
+	}
+
 	private static boolean equals(Object obj1, Object obj2, String fieldName) {
 		try {
 			Object val1 = PropertyUtils.getProperty(obj1, fieldName);
