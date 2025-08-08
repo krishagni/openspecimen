@@ -1109,7 +1109,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		}
 
 		String filename = String.join("_", parts[0], parts[1], parts[2], parts[3]) + "." + parts[0];
-		File rptFile = new File(ConfigUtil.getInstance().getReportsDir(), filename);
+		File rptFile = Utility.getFile(ConfigUtil.getInstance().getReportsDir(), filename);
 		if (!rptFile.exists()) {
 			return ResponseEvent.userError(CommonErrorCode.FILE_NOT_FOUND, fileId);
 		}

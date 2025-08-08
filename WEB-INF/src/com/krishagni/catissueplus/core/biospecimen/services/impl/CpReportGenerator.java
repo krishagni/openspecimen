@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.events.QueryExecResult;
@@ -91,7 +92,7 @@ public class CpReportGenerator {
 	}
 
 	public File getDataFile(Long cpId, String fileId) {
-		return new File(getReportsDir(), cpId + "-" + fileId);
+		return Utility.getFile(getReportsDir(), cpId + "-" + fileId);
 	}
 
 	private Map<String, Object> getMetrics(CollectionProtocol cp, CpReportSettings sysSettings, CpReportSettings rptSettings)
