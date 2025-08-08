@@ -1058,7 +1058,7 @@ public class QueryServiceImpl implements QueryService {
 
 	@Override
 	public ResponseEvent<File> getExportedAuditLogsFile(RequestEvent<String> req) {
-		String auditDir = new File(ConfigUtil.getInstance().getDataDir(), "audit");
+		File auditDir = new File(ConfigUtil.getInstance().getDataDir(), "audit");
 		String filename = req.getPayload() + "_" + AuthUtil.getCurrentUser().getId();
 		return ResponseEvent.response(Utility.getFile(auditDir, filename));
 	}
