@@ -588,8 +588,8 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 		return getDataDir() + File.separator + "bulk-import";
 	}
 	
-	private String getFilePath(String fileId) { 
-		 return getImportDir() + File.separator + fileId;
+	private String getFilePath(String fileId) {
+		return Utility.getFile(getImportDir(), fileId).getAbsolutePath();
 	}
 	
 	private String getJobsDir() {

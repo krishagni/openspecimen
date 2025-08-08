@@ -1257,6 +1257,19 @@ public class Utility {
 		return phoneNumber;
 	}
 
+	public static File getFile(String path) {
+		try {
+			String canonicalPath = new File(path).getCanonicalPath();
+			if (!path.startsWith(canonicalPath)) {
+				throw OpenSpecimenException.userError(CommonErrorCode.INV_FILE_PATH, canonicalPath, path);
+			}
+
+			return new File(path);
+		} catch (IOException ioe) {
+			throw OpenSpecimenException.serverError(ioe);
+		}
+	}
+
 	public static File getFile(File basedir, String filename) {
 		try {
 			String baseDirPath = basedir.getCanonicalPath() + File.separator;
@@ -1264,7 +1277,7 @@ public class Utility {
 			File file = new File(basedir, filename);
 			String filePath = file.getCanonicalPath();
 			if (!filePath.startsWith(baseDirPath)) {
-				throw OpenSpecimenException.userError(CommonErrorCode.INV_FILE_PATH, basedir, filename);
+				throw OpenSpecimenException.userError(CommonErrorCode.INV_FILE_PATH, baseDirPath, filename);
 			}
 
 			return file;

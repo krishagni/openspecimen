@@ -107,10 +107,7 @@ public class BulkObjectImportController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<Map<String, Object>> processFileRecords(@RequestBody FileRecordsDetail detail) {
-		ResponseEvent<List<Map<String, Object>>> resp = importSvc.processFileRecords(new RequestEvent<>(detail));
-		resp.throwErrorIfUnsuccessful();
-
-		return resp.getPayload();
+		return ResponseEvent.unwrap(importSvc.processFileRecords(RequestEvent.wrap(detail)));
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/record-fields-csv")
@@ -194,21 +191,14 @@ public class BulkObjectImportController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
 	public ImportJobDetail createImportJob(@RequestBody ImportDetail detail) {
-		RequestEvent<ImportDetail> req = new RequestEvent<ImportDetail>(detail);
-		ResponseEvent<ImportJobDetail> resp = importSvc.importObjects(req);
-		resp.throwErrorIfUnsuccessful();
-		
-		return resp.getPayload();
+		return ResponseEvent.unwrap(importSvc.importObjects(RequestEvent.wrap(detail)));
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "{id}/stop")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ImportJobDetail stopImportJob(@PathVariable("id") Long jobId) {
-		ResponseEvent<ImportJobDetail> resp = importSvc.stopJob(new RequestEvent<>(jobId));
-		resp.throwErrorIfUnsuccessful();
-
-		return resp.getPayload();
+		return ResponseEvent.unwrap(importSvc.stopJob(RequestEvent.wrap(jobId)));
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "schedule")

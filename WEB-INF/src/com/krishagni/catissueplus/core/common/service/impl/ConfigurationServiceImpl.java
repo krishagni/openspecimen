@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -602,10 +603,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 	public String getDataDir() {		
 		String dataDir = appProps.getProperty("app.data_dir");
 		if (StringUtils.isBlank(dataDir)) {
-			dataDir = ".";
+			dataDir = Paths.get("").toAbsolutePath().toString(); // current working directory
 		}
 		
-		return getStrSetting("common", "data_dir", dataDir);
+		dataDir = getStrSetting("common", "data_dir", dataDir);
+		return Utility.getFile(dataDir).getAbsolutePath();
 	}
 	
 	@Override
