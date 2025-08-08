@@ -538,7 +538,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 		try {
 			in = new FileInputStream(zipFile);
 
-			File zipDirFile = new File(getImportDir() + File.separator + "inflated-" + fileId);
+			File zipDirFile = Utility.getFile(getImportDir(), "inflated-" + fileId);
 			Utility.inflateZip(in, zipDirFile.getAbsolutePath());
 			inputFile = Arrays.stream(Objects.requireNonNull(zipDirFile.listFiles()))
 				.filter(f -> !f.isDirectory() && f.getName().endsWith(".csv"))
