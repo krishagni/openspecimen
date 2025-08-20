@@ -21,7 +21,15 @@ public enum SpecimenListErrorCode implements ErrorCode {
 
 	INVALID_GROUPS_LIST,
 
-	EXCEEDS_REL_SORT_SIZE;
+	EXCEEDS_REL_SORT_SIZE,
+
+	INV_CART_SPECIMENS,
+
+	PICK_LIST_ID_REQ,
+
+	PICK_LIST_NAME_REQ,
+
+	PICK_LIST_NOT_FOUND;
 
 	@Override
 	public String code() {

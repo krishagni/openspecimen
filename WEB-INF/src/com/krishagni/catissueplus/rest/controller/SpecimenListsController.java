@@ -18,11 +18,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimenDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateListSpecimensOp;
+import com.krishagni.catissueplus.core.biospecimen.repository.PickListSpecimensCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.PickListsCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenListService;
@@ -319,6 +324,130 @@ public class SpecimenListsController {
 	@ResponseBody
 	public Map<String, Boolean> removeLabel(@PathVariable("id") Long listId) {
 		return Collections.singletonMap("status", specimenListSvc.toggleStarredSpecimenList(listId, false));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/pick-lists")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<SpecimensPickListDetail> getPickLists(
+		@PathVariable("id")
+		Long cartId,
+
+		@RequestParam(value = "name", required = false)
+		String name,
+
+		@RequestParam(value = "includeStats", required = false, defaultValue = "false")
+		boolean includeStats,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+
+		PickListsCriteria crit = new PickListsCriteria()
+			.cartId(cartId)
+			.query(name)
+			.includeStat(includeStats)
+			.startAt(startAt)
+			.maxResults(maxResults);
+		return ResponseEvent.unwrap(specimenListSvc.getPickLists(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/pick-lists/{listId}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public SpecimensPickListDetail getPickList(@PathVariable("id") Long cartId, @PathVariable("listId") Long listId) {
+		EntityQueryCriteria crit = new EntityQueryCriteria(listId);
+		crit.setParams(Collections.singletonMap("cartId", cartId));
+		return ResponseEvent.unwrap(specimenListSvc.getPickList(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/{id}/pick-lists")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public SpecimensPickListDetail createPickList(@PathVariable("id") Long cartId, @RequestBody SpecimensPickListDetail input) {
+		input.setCart(new SpecimenListSummary());
+		input.getCart().setId(cartId);
+		return ResponseEvent.unwrap(specimenListSvc.createPickList(RequestEvent.wrap(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/pick-lists/{listId}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public SpecimensPickListDetail updatePickList(
+		@PathVariable("id")
+		Long cartId,
+
+		@PathVariable("listId")
+		Long listId,
+
+		@RequestBody
+		SpecimensPickListDetail input) {
+
+		input.setId(listId);
+		input.setCart(new SpecimenListSummary());
+		input.getCart().setId(cartId);
+		return ResponseEvent.unwrap(specimenListSvc.updatePickList(RequestEvent.wrap(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/pick-lists/{listId}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public SpecimensPickListDetail deletePickList(@PathVariable("id") Long cartId, @PathVariable("listId") Long listId) {
+		EntityQueryCriteria crit = new EntityQueryCriteria(listId);
+		crit.setParams(Collections.singletonMap("cartId", cartId));
+		return ResponseEvent.unwrap(specimenListSvc.deletePickList(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/pick-lists/{listId}/specimens")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<PickListSpecimenDetail> getPickListSpecimens(
+		@PathVariable("id")
+		Long cartId,
+
+		@PathVariable("listId")
+		Long listId,
+
+		@RequestParam(value = "picked", required = false, defaultValue = "false")
+		Boolean picked,
+
+		@RequestParam(value = "container", required = false)
+		String container,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+
+		PickListSpecimensCriteria criteria = new PickListSpecimensCriteria()
+			.cartId(cartId)
+			.pickListId(listId)
+			.picked(picked)
+			.container(container)
+			.startAt(startAt)
+			.maxResults(maxResults);
+		return ResponseEvent.unwrap(specimenListSvc.getPickListSpecimens(RequestEvent.wrap(criteria)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value="/{id}/pick-lists/{pickListId}/specimens")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, List<Long>> updatePickListSpecimens(
+		@PathVariable("id")
+		Long listId,
+
+		@PathVariable("pickListId")
+		Long pickListId,
+
+		@RequestBody
+		PickListSpecimensOp input) {
+
+		input.setCartId(listId);
+		input.setPickListId(pickListId);
+		return response(specimenListSvc.updatePickListSpecimens(request(input)));
 	}
 
 	private <T> RequestEvent<T> request(T payload) {

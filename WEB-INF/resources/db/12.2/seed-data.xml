@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Delete inactive pick lists" dbms="mysql">
+    <sql>
+      select identifier into @userId from catissue_user where login_name = '$system';
+
+      insert into os_scheduled_jobs
+        (identifier, name, created_by, start_date, end_date, scheduled_hour, scheduled_minute, activity_status,
+         repeat_schedule, type, task_impl_fqn, rt_args_provided, rt_args_help_text)
+      values
+        (default, 'Delete inactive pick lists', @userId, now(), null, 2, 15, 'Active',
+         'DAILY', 'INTERNAL', 'com.krishagni.catissueplus.core.biospecimen.services.impl.CleanupInactivePickListsTask',
+         0, null);
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="On demand task to delete forms" dbms="oracle">
+    <sql endDelimiter="//">
+      declare
+        userId number;
+      begin
+        select identifier into userId from catissue_user where login_name like '$system';
+
+        insert into os_scheduled_jobs
+          (identifier, name, created_by, start_date, end_date, scheduled_hour, scheduled_minute, activity_status,
+           repeat_schedule, type, command, task_impl_fqn, rt_args_provided, rt_args_help_text)
+        values
+          (os_scheduled_jobs_seq.nextval, 'Delete inactive pick lists', userId, sysdate, null, 2, 15, 'Active',
+           'DAILY', 'INTERNAL', null, 'com.krishagni.catissueplus.core.biospecimen.services.impl.CleanupInactivePickListsTask',
+           0, null);
+      end;
+      //
+    </sql>
+  </changeSet>
+</databaseChangeLog>

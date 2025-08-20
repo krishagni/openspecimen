@@ -44,6 +44,10 @@ public class StorageLocationSummary implements Serializable {
 
 	private String siteName;
 
+	private String formattedPosition;
+
+	private String hierarchy;
+
 	public Long getId() {
 		return id;
 	}
@@ -154,6 +158,22 @@ public class StorageLocationSummary implements Serializable {
 
 	public void setSiteName(String siteName) {
 		this.siteName = siteName;
+	}
+
+	public String getFormattedPosition() {
+		return formattedPosition;
+	}
+
+	public void setFormattedPosition(String formattedPosition) {
+		this.formattedPosition = formattedPosition;
+	}
+
+	public String getHierarchy() {
+		return hierarchy;
+	}
+
+	public void setHierarchy(String hierarchy) {
+		this.hierarchy = hierarchy;
 	}
 
 	public static StorageLocationSummary from(StorageContainerPosition position) {

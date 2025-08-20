@@ -22,6 +22,23 @@
             :view-props="{cart: ctx.cart, selectedSpecimens}" />
 
           <os-menu :label="$t('common.buttons.more')" :options="moreOpts" />
+
+          <os-dynamic-menu ref="pickListsMenu" icon="dolly" :label="$t('carts.pick_lists')" :options="ctx.pickLists"
+            :no-options-label="$t('carts.no_pick_lists')" :search-hint="$t('carts.search_pick_lists')"
+            @option-selected="viewPickList($event)" @search-options="loadPickLists($event)" :key="cartId">
+            <template #fixed-options>
+              <li>
+                <a @click="showCreatePickListDialog">
+                  <span v-t="'carts.new_pick_list'">Create New</span>
+                </a>
+              </li>
+              <li>
+                <a @click="viewPickLists">
+                  <span v-t="'carts.manage_pick_lists'">Manage Pick Lists</span>
+                </a>
+              </li>
+            </template>
+          </os-dynamic-menu>
         </template>
 
         <template #right>
@@ -62,6 +79,8 @@
     <os-overlay ref="cartInfoOverlay">
       <os-overview :schema="ctx.dict" :object="ctx" :columns="1" v-if="ctx.dict.length > 0" />
     </os-overlay>
+
+    <AddEditPickListDialog ref="addEditPickListDialog" />
   </os-page>
 </template>
 
@@ -72,8 +91,14 @@ import cartSvc    from '@/biospecimen/services/SpecimenCart.js';
 import routerSvc  from '@/common/services/Router.js';
 import util       from '@/common/services/Util.js';
 
+import AddEditPickListDialog from './AddEditPickListDialog.vue';
+
 export default {
   props: ['cartId', 'query', 'listItemDetailView'],
+
+  components: {
+    AddEditPickListDialog
+  },
 
   data() {
     return {
@@ -209,6 +234,28 @@ export default {
         ({count}) => {
           alertSvc.success({code: 'carts.specimens_removed', args: {count: count, name: this.displayName}});
           this.reloadList();
+        }
+      );
+    },
+
+    showCreatePickListDialog: function(event) {
+      this.$refs.pickListsMenu.toggleMenu(event);
+      this.$refs.addEditPickListDialog.open(this.ctx.cart, {});
+    },
+
+    viewPickLists: function() {
+      routerSvc.goto('PickLists', {cartId: this.cartId});
+    },
+
+    viewPickList: function(pickList) {
+      routerSvc.goto('PickList', {cartId: this.cartId, listId: pickList.id});
+    },
+
+    loadPickLists: function(name) {
+      cartSvc.getPickLists(+this.cartId, {name}).then(
+        lists => {
+          this.ctx.pickLists = lists = lists || [];
+          lists.forEach(list => list.displayName = list.name);
         }
       );
     }

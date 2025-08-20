@@ -65,6 +65,51 @@ class SpecimenCart {
     return http.delete('specimen-lists/' + cart.id + '/labels');
   }
 
+  getPickLists(cartId, filters) {
+    return http.get('specimen-lists/' + cartId + '/pick-lists', filters || {}).then(
+      pickLists => {
+        pickLists.forEach(pickList => pickList.cartId = cartId);
+        return pickLists;
+      }
+    );
+  }
+
+  getPickList(cartId, listId) {
+    return http.get('specimen-lists/' + cartId + '/pick-lists/' + listId);
+  }
+
+  saveOrUpdatePickList(list) {
+    if (list.id > 0) {
+      return http.put('specimen-lists/' + list.cart.id + '/pick-lists/' + list.id, list);
+    } else {
+      return http.post('specimen-lists/' + list.cart.id + '/pick-lists', list);
+    }
+  }
+
+  deletePickList(list) {
+    return http.delete('specimen-lists/' + list.cart.id + '/pick-lists/' + list.id);
+  }
+
+  getPickedSpecimens(cartId, listId, filterOpts) {
+    filterOpts = filterOpts || {};
+    return http.get('specimen-lists/' + cartId + '/pick-lists/' + listId + '/specimens', {...filterOpts, picked: true});
+  }
+
+  pickSpecimens(cartId, pickListId, specimens) {
+    const payload = {op: 'PICK', cartId, pickListId, specimens};
+    return http.put('specimen-lists/' + cartId + '/pick-lists/' + pickListId + '/specimens', payload);
+  }
+
+  getUnpickedSpecimens(cartId, listId, filterOpts) {
+    filterOpts = filterOpts || {};
+    return http.get('specimen-lists/' + cartId + '/pick-lists/' + listId + '/specimens', {...filterOpts, picked: false});
+  }
+
+  unpickSpecimens(cartId, pickListId, specimens) {
+    const payload = {op: 'UNPICK', cartId, pickListId, specimens};
+    return http.put('specimen-lists/' + cartId + '/pick-lists/' + pickListId + '/specimens', payload);
+  }
+
   isDefaultCart(cart) {
     return cart.name && cart.name.indexOf('$$$$user_') == 0;
   }

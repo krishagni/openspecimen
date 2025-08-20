@@ -1,6 +1,9 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -14,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -24,30 +26,39 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
+import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListsFolder;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimensPickList;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListsFolderFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.SpecimenListsFolderErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimenDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateFolderCartsOp;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.biospecimen.repository.PickListSpecimensCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.PickListsCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsFoldersCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenListService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
+import com.krishagni.catissueplus.core.common.Tuple;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.domain.Notification;
@@ -61,12 +72,14 @@ import com.krishagni.catissueplus.core.common.service.StarredItemService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.SavedQuery;
 import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
+import com.krishagni.catissueplus.core.de.events.QueryExecResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
 import com.krishagni.catissueplus.core.query.Column;
@@ -75,11 +88,12 @@ import com.krishagni.catissueplus.core.query.ListService;
 import com.krishagni.catissueplus.core.query.ListUtil;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
-import edu.common.dynamicextensions.query.QueryResultData;
 import edu.common.dynamicextensions.query.WideRowMode;
 
 
 public class SpecimenListServiceImpl implements SpecimenListService, InitializingBean, ObjectAccessor {
+
+	private static final LogUtil logger = LogUtil.getLogger(SpecimenListServiceImpl.class);
 
 	private static final Pattern DEF_LIST_NAME_PATTERN = Pattern.compile("\\$\\$\\$\\$user_\\d+");
 
@@ -547,6 +561,388 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 	}
 
 	@Override
+	@PlusTransactional
+	public ResponseEvent<List<SpecimensPickListDetail>> getPickLists(RequestEvent<PickListsCriteria> req) {
+		try {
+			PickListsCriteria crit = req.getPayload();
+			SpecimenList cart = getSpecimenList(crit.cartId(), crit.cartName());
+			crit.cartId(cart.getId());
+
+			List<SpecimensPickList> pickLists = daoFactory.getSpecimenListDao().getPickLists(crit);
+			if (!crit.includeStat() || pickLists.isEmpty()) {
+				return ResponseEvent.response(SpecimensPickListDetail.from(pickLists));
+			}
+
+			Map<Long, SpecimensPickListDetail> pickListsMap = new LinkedHashMap<>();
+			for (SpecimensPickList pickList : pickLists) {
+				pickListsMap.put(pickList.getId(), SpecimensPickListDetail.from(pickList, false));
+			}
+
+			Map<Long, Map<String, Long>> counts = daoFactory.getSpecimenListDao().getPickListSpecimensCount(pickListsMap.keySet());
+			for (SpecimensPickListDetail detail : pickListsMap.values()) {
+				Map<String, Long> count = counts.get(detail.getId());
+				detail.setTotalSpecimens(count.get("total"));
+				detail.setPickedSpecimens(count.get("picked"));
+			}
+
+			return ResponseEvent.response(new ArrayList<>(pickListsMap.values()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimensPickListDetail> getPickList(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			if (crit.getId() == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_ID_REQ);
+			}
+
+			SpecimenList cart = getSpecimenList(crit.paramLong("cartId"), crit.paramString("cartName"));
+			SpecimensPickList pickList = daoFactory.getSpecimenListDao().getPickList(cart.getId(), crit.getId());
+			if (pickList == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_NOT_FOUND, cart.getDisplayName(), crit.getId());
+			}
+
+			SpecimensPickListDetail result = SpecimensPickListDetail.from(pickList);
+			Map<String, Long> counts = daoFactory.getSpecimenListDao().getPickListSpecimensCount(pickList.getId());
+			result.setPickedSpecimens(counts.getOrDefault("picked", 0L));
+			result.setTotalSpecimens(counts.getOrDefault("total", 0L));
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimensPickListDetail> createPickList(RequestEvent<SpecimensPickListDetail> req) {
+		try {
+			SpecimensPickListDetail input = req.getPayload();
+			SpecimenListSummary inputCart = input.getCart();
+
+			if (inputCart == null || (inputCart.getId() == null && StringUtils.isBlank(inputCart.getName()))) {
+				return ResponseEvent.userError(SpecimenListErrorCode.NAME_REQUIRED);
+			}
+
+			if (StringUtils.isBlank(input.getName())) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_NAME_REQ);
+			}
+
+			SpecimenList cart = getSpecimenList(inputCart.getId(), inputCart.getName());
+			SpecimensPickList pickList = new SpecimensPickList();
+			pickList.setName(input.getName());
+			pickList.setCart(cart);
+			pickList.setCreator(AuthUtil.getCurrentUser());
+			pickList.setCreationTime(Calendar.getInstance().getTime());
+			daoFactory.getSpecimenListDao().saveOrUpdate(pickList);
+			return ResponseEvent.response(SpecimensPickListDetail.from(pickList));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimensPickListDetail> updatePickList(RequestEvent<SpecimensPickListDetail> req) {
+		try {
+			SpecimensPickListDetail input = req.getPayload();
+			SpecimenListSummary inputCart = input.getCart();
+			if (inputCart == null || (inputCart.getId() == null && StringUtils.isBlank(inputCart.getName()))) {
+				return ResponseEvent.userError(SpecimenListErrorCode.NAME_REQUIRED);
+			}
+
+			if (input.getId() == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_ID_REQ);
+			}
+
+			if (StringUtils.isBlank(input.getName())) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_NAME_REQ);
+			}
+
+			SpecimenList cart = getSpecimenList(inputCart.getId(), inputCart.getName());
+			SpecimensPickList pickList = daoFactory.getSpecimenListDao().getPickList(cart.getId(), input.getId());
+			if (pickList == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_NOT_FOUND, cart.getDisplayName(), input.getId());
+			}
+
+			pickList.setName(input.getName());
+			pickList.setUpdater(AuthUtil.getCurrentUser());
+			pickList.setUpdateTime(Calendar.getInstance().getTime());
+			daoFactory.getSpecimenListDao().saveOrUpdate(pickList);
+			return ResponseEvent.response(SpecimensPickListDetail.from(pickList));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<SpecimensPickListDetail> deletePickList(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			if (crit.getId() == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_ID_REQ);
+			}
+
+			SpecimenList cart = getSpecimenList(crit.paramLong("cartId"), crit.paramString("cartName"));
+			SpecimensPickList pickList = daoFactory.getSpecimenListDao().getPickList(cart.getId(), crit.getId());
+			if (pickList == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_NOT_FOUND, cart.getDisplayName(), crit.getId());
+			}
+
+			daoFactory.getSpecimenListDao().deletePickList(cart.getId(), pickList.getId());
+			return ResponseEvent.response(SpecimensPickListDetail.from(pickList));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<PickListSpecimenDetail>> getPickListSpecimens(RequestEvent<PickListSpecimensCriteria> req) {
+		try {
+			PickListSpecimensCriteria crit = req.getPayload();
+			if (crit.pickListId() == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_ID_REQ);
+			}
+
+			SpecimenList cart = getSpecimenList(crit.cartId(), crit.cartName());
+			SpecimensPickList list = daoFactory.getSpecimenListDao().getPickList(cart.getId(), crit.pickListId());
+			if (list == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_NOT_FOUND, cart.getDisplayName(), crit.pickListId());
+			}
+
+			String filters = StringUtils.EMPTY;
+			if (StringUtils.isNotBlank(crit.container())) {
+				filters = " and " + String.format(DESCENDENT_CONTAINER_IDS_SQL, crit.container());
+			}
+
+			ExecuteQueryEventOp queryOp = new ExecuteQueryEventOp();
+			queryOp.setDrivingForm("Participant");
+			queryOp.setOutputColumnExprs(true);
+			queryOp.setOutputIsoDateTime(true);
+			queryOp.setDisableAuditing(true);
+			queryOp.setTimeout(-1);
+			if (Boolean.TRUE.equals(crit.picked())) {
+				queryOp.setAql(String.format(PICKED_SPECIMENS_AQL, list.getId(), filters, crit.startAt(), crit.maxResults()));
+			} else {
+				queryOp.setAql(String.format(UNPICKED_SPECIMENS_AQL, "\"" + cart.getName() + "\"", list.getId(), filters, crit.startAt(), crit.maxResults()));
+			}
+
+			QueryExecResult result = ResponseEvent.unwrap(querySvc.executeQuery(RequestEvent.wrap(queryOp)));
+			if (result.getRows() == null || result.getRows().isEmpty()) {
+				return ResponseEvent.response(Collections.emptyList());
+			}
+
+			ZoneId zoneId = ZoneId.systemDefault();
+			if (AuthUtil.getUserTimeZone() != null) {
+				zoneId = AuthUtil.getUserTimeZone().toZoneId();
+			}
+
+			List<PickListSpecimenDetail> pickListItems = new ArrayList<>();
+			for (String[] row : result.getRows()) {
+				PickListSpecimenDetail item = new PickListSpecimenDetail();
+				SpecimenInfo specimen = new SpecimenInfo();
+				item.setSpecimen(specimen);
+
+				StorageLocationSummary location = new StorageLocationSummary();
+				UserSummary pickedBy = new UserSummary();
+
+				int idx = -1;
+				for (String columnLabel : result.getColumnLabels()) {
+					++idx;
+					switch (columnLabel) {
+						case "CollectionProtocol.id" -> specimen.setCpId(Long.parseLong(row[idx]));
+						case "CollectionProtocol.shortTitle" -> specimen.setCpShortTitle(row[idx]);
+						case "Specimen.id" -> specimen.setId(Long.parseLong(row[idx]));
+						case "Specimen.label" -> specimen.setLabel(row[idx]);
+						case "Specimen.barcode" -> specimen.setBarcode(row[idx]);
+						case "Specimen.class" -> specimen.setSpecimenClass(row[idx]);
+						case "Specimen.type" -> specimen.setType(row[idx]);
+						case "Specimen.availableQty" -> specimen.setAvailableQty(StringUtils.isNotBlank(row[idx]) ? new BigDecimal(row[idx]) : null);
+						case "Specimen.specimenPosition.containerHierarchy.hierarchy" -> location.setHierarchy(row[idx]);
+						case "Specimen.specimenPosition.containerDisplayName" -> location.setDisplayName(row[idx]);
+						case "Specimen.specimenPosition.containerName" -> location.setName(row[idx]);
+						case "Specimen.specimenPosition.formattedPos" -> location.setFormattedPosition(row[idx]);
+						case "Specimen.pickedSpecimens.pickedBy.userId" -> pickedBy.setId(Long.parseLong(row[idx]));
+						case "Specimen.pickedSpecimens.pickedBy.firstName" -> pickedBy.setFirstName(row[idx]);
+						case "Specimen.pickedSpecimens.pickedBy.lastName" -> pickedBy.setLastName(row[idx]);
+						case "Specimen.pickedSpecimens.pickedBy.emailAddress" -> pickedBy.setEmailAddress(row[idx]);
+						case "Specimen.pickedSpecimens.pickupTime" -> item.setPickupTime(Date.from(LocalDateTime.parse(row[idx]).atZone(zoneId).toInstant()));
+					}
+				}
+
+				if (StringUtils.isNotBlank(location.getName())) {
+					specimen.setStorageLocation(location);
+				}
+
+				if (pickedBy.getId() != null) {
+					item.setPickedBy(pickedBy);
+				}
+
+				pickListItems.add(item);
+			}
+
+			return ResponseEvent.response(pickListItems);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, List<Long>>> updatePickListSpecimens(RequestEvent<PickListSpecimensOp> req) {
+		try {
+			List<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			PickListSpecimensOp input = req.getPayload();
+			if (input.getPickListId() == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_ID_REQ);
+			}
+
+			SpecimenList cart = getSpecimenList(input.getCartId(), input.getCartName());
+			SpecimensPickList pickList = daoFactory.getSpecimenListDao().getPickList(cart.getId(), input.getPickListId());
+			if (pickList == null) {
+				return ResponseEvent.userError(SpecimenListErrorCode.PICK_LIST_NOT_FOUND, cart.getDisplayName(), input.getPickListId());
+			}
+
+			if (input.getOp() == null) {
+				input.setOp(PickListSpecimensOp.Op.PICK);
+			}
+
+			if (CollectionUtils.isEmpty(input.getSpecimens())) {
+				return ResponseEvent.response(Collections.singletonMap(input.getOp().name().toLowerCase() + "ed", Collections.emptyList()));
+			}
+
+
+			List<Long> ids        = new ArrayList<>();
+			List<String> labels   = new ArrayList<>();
+			List<String> barcodes = new ArrayList<>();
+			for (SpecimenInfo inputSpmn : input.getSpecimens()) {
+				if (inputSpmn.getId() != null) {
+					ids.add(inputSpmn.getId());
+				} else if (StringUtils.isNotBlank(inputSpmn.getLabel())) {
+					labels.add(inputSpmn.getLabel());
+				} else if (StringUtils.isNotBlank(inputSpmn.getBarcode())) {
+					barcodes.add(inputSpmn.getBarcode());
+				}
+			}
+
+			if (ids.isEmpty() && labels.isEmpty() && barcodes.isEmpty()) {
+				return ResponseEvent.response(Collections.singletonMap(input.getOp().name().toLowerCase() + "ed", Collections.emptyList()));
+			}
+
+			SpecimenListCriteria crit = new SpecimenListCriteria()
+				.ids(ids).labels(labels).barcodes(barcodes)
+				.specimenListId(cart.getId())
+				.siteCps(siteCps)
+				.exactMatch(true);
+
+			List<Specimen> specimens = daoFactory.getSpecimenDao().getSpecimens(crit);
+			List<String> notFound = new ArrayList<>();
+			if (!ids.isEmpty()) {
+				ids.removeIf(id -> specimens.stream().anyMatch(specimen -> specimen.getId().equals(id)));
+				notFound.addAll(ids.stream().map(Object::toString).toList());
+			}
+
+			if (!labels.isEmpty()) {
+				labels.removeIf(label -> specimens.stream().anyMatch(specimen -> specimen.getLabel().equalsIgnoreCase(label)));
+				notFound.addAll(labels);
+			}
+
+			if (!barcodes.isEmpty()) {
+				barcodes.removeIf(barcode -> specimens.stream().anyMatch(specimen -> specimen.getBarcode().equalsIgnoreCase(barcode)));
+				notFound.addAll(barcodes);
+			}
+
+			if (!notFound.isEmpty()) {
+				return ResponseEvent.userError(SpecimenListErrorCode.INV_CART_SPECIMENS, cart.getDisplayName(), StringUtils.join(notFound, ", "));
+			}
+
+			List<Long> spmnIds = specimens.stream().map(BaseEntity::getId).collect(Collectors.toList());
+			if (spmnIds.isEmpty()) {
+				return ResponseEvent.response(Collections.singletonMap(input.getOp().name().toLowerCase() + "ed", Collections.emptyList()));
+			}
+
+			User user = AuthUtil.getCurrentUser();
+			Date time = Calendar.getInstance().getTime();
+			switch (input.getOp()) {
+				case PICK -> {
+					List<Long> alreadyAdded = daoFactory.getSpecimenListDao().getSpecimenIdsInPickList(pickList.getId(), spmnIds);
+					spmnIds.removeAll(alreadyAdded);
+					daoFactory.getSpecimenListDao().savePickListItems(pickList, user, time, spmnIds);
+				}
+
+				case UNPICK -> daoFactory.getSpecimenListDao().deleteSpecimensFromPickList(pickList.getId(), spmnIds);
+			}
+
+			pickList.setUpdater(user);
+			pickList.setUpdateTime(time);
+			return ResponseEvent.response(Collections.singletonMap(input.getOp().name().toLowerCase() + "ed", spmnIds));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	public void deleteInactivePickLists() {
+		try {
+			if (!AuthUtil.isAdmin()) {
+				logger.error("Only admin users can cleanup pick lists");
+				return;
+			}
+
+			int days = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.INACTIVE_PICK_LIST_LIMIT, 90);
+			if (days <= 0) {
+				logger.info("Deletion of inactive pick lists is disabled");
+				return;
+			}
+
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.DAY_OF_MONTH, -days);
+			cal.set(Calendar.HOUR_OF_DAY, 23);
+			cal.set(Calendar.MINUTE, 59);
+			cal.set(Calendar.SECOND, 59);
+			Date inactiveLimit = cal.getTime();
+
+			cal.add(Calendar.DAY_OF_MONTH, 5);
+			Date warningLimit = cal.getTime();
+
+			List<Tuple> inactivePickLists = getInactivePickLists(warningLimit);
+			for (Tuple pickList : inactivePickLists) { // {cartId, pickListId, lastAccessTime
+				Date lastAccessed = pickList.element(2);
+				if (lastAccessed.before(inactiveLimit) || lastAccessed.equals(inactiveLimit)) {
+					deletePickList(pickList.element(0), pickList.element(1));
+				} else {
+					warnPickListDelete(pickList.element(0), pickList.element(1));
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error deleting inactive pick lists", e);
+		}
+	}
+
+	@Override
 	public void afterPropertiesSet()
 	throws Exception {
 		listSvc.registerListConfigurator("cart-specimens-list-view", this::getListSpecimensConfig);
@@ -695,7 +1091,9 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			key = listName;
 		}
 
-		if (list == null) {
+		if (key == null) {
+			throw OpenSpecimenException.userError(SpecimenListErrorCode.NAME_REQUIRED);
+		} else if (list == null) {
 			throw OpenSpecimenException.userError(SpecimenListErrorCode.NOT_FOUND, key);
 		}
 
@@ -1004,16 +1402,62 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 		List<SpecimenList> carts = daoFactory.getSpecimenListDao().getByIds(accessibleCartIds);
 		switch (operation) {
-			case ADD:
-				folder.getLists().addAll(carts);
-				break;
-
-			case REMOVE:
-				folder.getLists().removeAll(carts);
-				break;
+			case ADD -> folder.getLists().addAll(carts);
+			case REMOVE -> carts.forEach(folder.getLists()::remove);
 		}
 
 		return carts.size();
+	}
+
+	@PlusTransactional
+	private List<Tuple> getInactivePickLists(Date cutOffDate) {
+		return daoFactory.getSpecimenListDao().getInactivePickLists(cutOffDate);
+	}
+
+	@PlusTransactional
+	private void deletePickList(Long cartId, Long pickListId) {
+		try {
+			logger.error("Deleting the pick list: " + pickListId);
+			daoFactory.getSpecimenListDao().deletePickList(cartId, pickListId);
+		} catch (Exception e) {
+			logger.error("Error deleting the pick list: " + pickListId, e);
+		}
+
+	}
+
+	@PlusTransactional
+	private void warnPickListDelete(Long cartId, Long pickListId) {
+		SpecimensPickList pickList = daoFactory.getSpecimenListDao().getPickList(cartId, pickListId);
+		Date lastAccessed = pickList.getUpdateTime();
+		if (lastAccessed == null) {
+			lastAccessed = pickList.getCreationTime();
+		}
+
+		int inactiveDaysLimit = ConfigUtil.getInstance().getIntSetting(ConfigParams.MODULE, ConfigParams.INACTIVE_PICK_LIST_LIMIT, 90);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(lastAccessed);
+		cal.add(Calendar.DAY_OF_MONTH, inactiveDaysLimit);
+		cal.set(Calendar.HOUR_OF_DAY, 23);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+
+		Map<String, Object> emailProps = new LinkedHashMap<>();
+		emailProps.put("lastAccessTime", Utility.getDateTimeString(lastAccessed));
+		emailProps.put("deleteDate", Utility.getDateTimeString(cal.getTime()));
+		emailProps.put("pickList", pickList);
+		emailProps.put("cart", pickList.getCart());
+		emailProps.put("cartName", pickList.getCart().getDisplayName());
+		emailProps.put("$subject", new String[] { pickList.getCart().getDisplayName(), pickList.getName() });
+
+		Set<User> rcpts = pickList.getCart().getAllSharedUsers();
+		rcpts.add(pickList.getCart().getOwner());
+
+		String[] to = rcpts.stream()
+			.filter(rcpt -> StringUtils.isNotBlank(rcpt.getEmailAddress()) && !rcpt.isContact() && !rcpt.isDndEnabled())
+			.map(User::getEmailAddress)
+			.toList()
+			.toArray(new String[0]);
+		EmailUtil.getInstance().sendEmail("warn_inactive_pick_list", to, null, emailProps);
 	}
 
 	private String msg(String code, Object ... params) {
@@ -1025,4 +1469,39 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 	private static final String LIST_DESC      = "specimen_list_description";
 
 	private static final String SPECIMEN_LIST_SHARED_TMPL = "specimen_list_shared";
+
+	private static final String UNPICKED_SPECIMENS_AQL =
+		"select " +
+		"  CollectionProtocol.id, CollectionProtocol.shortTitle, Specimen.id, Specimen.label, Specimen.barcode, Specimen.class, Specimen.type, " +
+		"  Specimen.availableQty, Specimen.specimenPosition.ancestors.root_container_name, " +
+		"  Specimen.specimenPosition.containerHierarchy.hierarchy, Specimen.specimenPosition.containerDisplayName, " +
+		"  Specimen.specimenPosition.containerName, Specimen.specimenPosition.formattedPos, " +
+		"  Specimen.specimenPosition.rowOrdinal, Specimen.specimenPosition.columnOrdinal " +
+		"where " +
+		"  Specimen.specimenCarts.name = %s and " +
+		"  Specimen.id not in (select Specimen.id where Specimen.pickedSpecimens.pickListId = %d) " +
+		"  %s " + // filters
+		"order by " +
+		"  Specimen.specimenPosition.containerName, Specimen.specimenPosition.rowOrdinal, Specimen.specimenPosition.columnOrdinal " +
+		"limit %d, %d";
+
+	private static final String PICKED_SPECIMENS_AQL =
+		"select " +
+		"  CollectionProtocol.id, CollectionProtocol.shortTitle, Specimen.id, Specimen.label, Specimen.barcode, Specimen.class, Specimen.type, " +
+		"  Specimen.availableQty, Specimen.specimenPosition.ancestors.root_container_name, " +
+		"  Specimen.specimenPosition.containerHierarchy.hierarchy, Specimen.specimenPosition.containerDisplayName, " +
+		"  Specimen.specimenPosition.containerName, Specimen.specimenPosition.formattedPos, " +
+		"  Specimen.specimenPosition.rowOrdinal, Specimen.specimenPosition.columnOrdinal, " +
+		"  Specimen.pickedSpecimens.pickedBy.userId, Specimen.pickedSpecimens.pickedBy.firstName, " +
+		"  Specimen.pickedSpecimens.pickedBy.lastName, Specimen.pickedSpecimens.pickedBy.emailAddress, " +
+		"  Specimen.pickedSpecimens.pickupTime " +
+		"where " +
+		"  Specimen.pickedSpecimens.pickListId = %d " +
+		"  %s " + // filters
+		"order by " +
+		"  Specimen.pickedSpecimens.pickupTime desc " +
+		"limit %d, %d";
+
+	private static final String DESCENDENT_CONTAINER_IDS_SQL =
+		"Specimen.specimenPosition.containerId in sql(\"select h.descendent_id from os_containers_hierarchy h inner join os_storage_containers c on c.identifier = h.ancestor_id where c.name = '%s'\")";
 }

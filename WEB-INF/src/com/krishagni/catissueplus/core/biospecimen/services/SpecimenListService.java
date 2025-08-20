@@ -1,15 +1,21 @@
 package com.krishagni.catissueplus.core.biospecimen.services;
 
 import java.util.List;
+import java.util.Map;
 
+import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimenDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenInfo;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListsFolderSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateFolderCartsOp;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateListSpecimensOp;
+import com.krishagni.catissueplus.core.biospecimen.repository.PickListSpecimensCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.PickListsCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsFoldersCriteria;
@@ -65,6 +71,25 @@ public interface SpecimenListService {
 	ResponseEvent<SpecimenListsFolderDetail> deleteFolder(RequestEvent<EntityQueryCriteria> req);
 
 	ResponseEvent<Integer> updateFolderCarts(RequestEvent<UpdateFolderCartsOp> req);
+
+	//
+	// Pick lists
+	//
+	ResponseEvent<List<SpecimensPickListDetail>> getPickLists(RequestEvent<PickListsCriteria> req);
+
+	ResponseEvent<SpecimensPickListDetail> getPickList(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<SpecimensPickListDetail> createPickList(RequestEvent<SpecimensPickListDetail> req);
+
+	ResponseEvent<SpecimensPickListDetail> updatePickList(RequestEvent<SpecimensPickListDetail> req);
+
+	ResponseEvent<SpecimensPickListDetail> deletePickList(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<List<PickListSpecimenDetail>> getPickListSpecimens(RequestEvent<PickListSpecimensCriteria> req);
+
+	ResponseEvent<Map<String, List<Long>>> updatePickListSpecimens(RequestEvent<PickListSpecimensOp> req);
+
+	void deleteInactivePickLists();
 
 	//
 	// Used for internal consumption purpose.

@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.PickedSpecimen" table="OS_PICKED_SPECIMENS" batch-size="100"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.PickedSpecimen">
+
+    <id name="id" column="IDENTIFIER" type="long">
+      <generator class="native">
+        <param name="sequence">OS_PICKED_SPECIMENS_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="pickList" column="PICK_LIST_ID" not-null="true" fetch="join" />
+
+    <many-to-one name="specimen" column="SPECIMEN_ID" not-null="true" fetch="join" />
+
+    <many-to-one name="updater" column="UPDATED_BY" not-null="true" fetch="join" />
+
+    <property name="updateTime" column="UPDATE_TIME" not-null="true" />
+
+    <sql-query name="deletePickedItems">
+      delete from os_picked_specimens where pick_list_id = :pickListId and specimen_id in (:specimenIds)
+    </sql-query>
+
+    <sql-query name="deleteAllPickedItems">
+      delete from os_picked_specimens where pick_list_id = :pickListId
+    </sql-query>
+
+    <sql-query name="getPickListItemsCount">
+      <return-scalar column="pickListId" type="long" />
+      <return-scalar column="cartItemsCount" type="long" />
+      <return-scalar column="pickedItemsCount" type="long" />
+
+      select
+        pl.identifier as pickListId, count(cart_item.obj_id) as cartItemsCount, count(ps.identifier) as pickedItemsCount
+      from
+        os_specimen_pick_lists pl
+        inner join catissue_specimenlist_tags cart on cart.identifier = pl.cart_id
+        inner join catissue_spec_tag_items cart_item on cart_item.tag_id = pl.cart_id
+        inner join catissue_specimen s on s.identifier = cart_item.obj_id
+        left join os_picked_specimens ps on ps.specimen_id = cart_item.obj_id and ps.pick_list_id = pl.identifier
+      where
+        pl.identifier in (:pickListIds) and
+        s.activity_status != 'Disabled'
+      group by
+        pl.identifier;
+    </sql-query>
+  </class>
+</hibernate-mapping>

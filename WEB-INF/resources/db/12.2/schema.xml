@@ -141,4 +141,62 @@
       <column name="SERVICE_RATE_CURRENCY" type="${text.type}(16)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen pick lists">
+    <createTable tableName="OS_SPECIMEN_PICK_LISTS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="NAME" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="CART_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PICK_LIST_CART"
+          referencedTableName="CATISSUE_SPECIMENLIST_TAGS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CREATOR_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PICK_LIST_CREATOR"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CREATION_TIME" type="${nullable.ts.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="UPDATER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_PICK_LIST_UPDATER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UPDATE_TIME" type="${nullable.ts.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimens pick list ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_SPECIMEN_PICK_LISTS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Picked specimens">
+    <createTable tableName="OS_PICKED_SPECIMENS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="PICK_LIST_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PICKED_SPMN_PICK_LIST_ID"
+          referencedTableName="OS_SPECIMEN_PICK_LISTS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_PICKED_SPECIMEN_ID"
+          referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UPDATED_BY" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SPECIMEN_PICKED_BY"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UPDATE_TIME" type="${nullable.ts.type}">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Picked specimens ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_PICKED_SPECIMENS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
 </databaseChangeLog>

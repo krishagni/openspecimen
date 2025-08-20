@@ -1,26 +1,34 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.PickedSpecimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimensPickList;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDigestItem;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
+import com.krishagni.catissueplus.core.biospecimen.repository.PickListsCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListsCriteria;
+import com.krishagni.catissueplus.core.common.Tuple;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements SpecimenListDao {
 
@@ -179,6 +187,147 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 
 	@Override
+	public void saveOrUpdate(SpecimensPickList session) {
+		getCurrentSession().saveOrUpdate(session);
+	}
+
+	@Override
+	public List<SpecimensPickList> getPickLists(PickListsCriteria crit) {
+		Criteria<SpecimensPickList> query = createCriteria(SpecimensPickList.class, "list")
+			.join("list.cart", "cart")
+			.join("list.creator", "creator");
+
+		if (crit.cartId() != null) {
+			query.add(query.eq("cart.id", crit.cartId()));
+		}
+
+		if (StringUtils.isNotBlank(crit.cartName())) {
+			query.add(query.eq("cart.name", crit.cartName()));
+		}
+
+		if (StringUtils.isNotBlank(crit.query())) {
+			if (isMySQL()) {
+				query.add(query.like("list.name", crit.query()));
+			} else {
+				query.add(query.ilike("list.name", crit.query().toLowerCase()));
+			}
+		}
+
+		return query.list(crit.startAt(), crit.maxResults());
+	}
+
+	@Override
+	public SpecimensPickList getPickList(Long cartId, Long pickListId) {
+		Criteria<SpecimensPickList> query = createCriteria(SpecimensPickList.class, "pickList")
+			.join("pickList.cart", "cart")
+			.join("pickList.creator", "creator");
+		return query.add(query.eq("pickList.id", pickListId))
+			.add(query.eq("cart.id", cartId))
+			.uniqueResult();
+	}
+
+	@Override
+	public void deletePickList(Long cartId, Long pickListId) {
+		getCurrentSession().getNamedQuery(DELETE_ALL_PICKED_ITEMS)
+			.setParameter("pickListId", pickListId)
+			.executeUpdate();
+
+		getCurrentSession().getNamedQuery(DELETE_PICK_LIST)
+			.setParameter("cartId", cartId)
+			.setParameter("listId", pickListId)
+			.executeUpdate();
+	}
+
+	@Override
+	public List<Long> getSpecimenIdsInPickList(Long pickListId, List<Long> specimenIds) {
+		Criteria<Long> query = createCriteria(PickedSpecimen.class, Long.class, "pickedSpmn");
+		return query.join("pickedSpmn.specimen", "specimen")
+			.join("pickedSpmn.pickList", "pickList")
+			.add(query.eq("pickList.id", pickListId))
+			.add(query.in("specimen.id", specimenIds))
+			.select("specimen.id")
+			.list();
+	}
+
+	@Override
+	public Map<String, Long> getPickListSpecimensCount(Long pickListId) {
+		return getPickListSpecimensCount(Collections.singletonList(pickListId)).get(pickListId);
+	}
+
+	@Override
+	public Map<Long, Map<String, Long>> getPickListSpecimensCount(Collection<Long> pickListIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_PICK_LIST_ITEMS_COUNT)
+			.setParameterList("pickListIds", pickListIds)
+			.list();
+		if (rows.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		// {pickListId -> {total: <count>, picked: <count>}
+		Map<Long, Map<String, Long>> result = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			Map<String, Long> counts = new LinkedHashMap<>();
+			counts.put("total", (Long) row[1]);
+			counts.put("picked", (Long) row[2]);
+
+			result.put((Long) row[0], counts);
+		}
+
+		return result;
+	}
+
+	@Override
+	public int savePickListItems(SpecimensPickList pickList, User pickedBy, Date pickTime, List<Long> specimenIds) {
+		int count = 0;
+		for (Long specimenId : specimenIds) {
+			Specimen specimen = new Specimen();
+			specimen.setId(specimenId);
+
+			PickedSpecimen pickedSpecimen = new PickedSpecimen();
+			pickedSpecimen.setPickList(pickList);
+			pickedSpecimen.setSpecimen(specimen);
+			pickedSpecimen.setUpdater(pickedBy);
+			pickedSpecimen.setUpdateTime(pickTime);
+			getCurrentSession().saveOrUpdate(pickedSpecimen);
+
+			++count;
+			if (count % 25 == 0) {
+				getCurrentSession().flush();
+				getCurrentSession().clear();
+			}
+		}
+
+		return count;
+	}
+
+	@Override
+	public int deleteSpecimensFromPickList(Long pickListId, List<Long> specimenIds) {
+		return getCurrentSession().getNamedQuery(DELETE_PICKED_ITEMS)
+			.setParameter("pickListId", pickListId)
+			.setParameterList("specimenIds", specimenIds)
+			.executeUpdate();
+	}
+
+	@Override
+	public List<Tuple> getInactivePickLists(Date activeBefore) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_INACTIVE_PICK_LISTS)
+			.setParameter("cutOffDate", activeBefore)
+			.list();
+
+		if (rows.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<Tuple> pickLists = new ArrayList<>();
+		for (Object[] row : rows) {
+			// {cartId, pickListId, lastAccessTime}
+			pickLists.add(new Tuple((Long) row[0], (Long) row[1], (Date) row[2]));
+		}
+
+		return pickLists;
+	}
+
+	@Override
 	@Deprecated
 	public Map<Long, List<Specimen>> getListCpSpecimens(Long listId) {
 		List<Object[]> rows = createNamedQuery(GET_LIST_CP_SPECIMENS, Object[].class)
@@ -326,4 +475,18 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	private static final String GET_DIGEST_ENABLED_LIST_IDS = FQN + ".getDigestEnabledListIds";
 
 	private static final String GET_LIST_DIGEST = FQN + ".getListDigest";
+
+	private static final String PICK_LIST_FQN = SpecimensPickList.class.getName();
+
+	private static final String DELETE_PICK_LIST = PICK_LIST_FQN + ".deletePickList";
+
+	private static final String GET_INACTIVE_PICK_LISTS = PICK_LIST_FQN + ".getInactivePickLists";
+
+	private static final String PICKED_ITEMS_FQN = PickedSpecimen.class.getName();
+
+	private static final String DELETE_PICKED_ITEMS = PICKED_ITEMS_FQN + ".deletePickedItems";
+
+	private static final String DELETE_ALL_PICKED_ITEMS = PICKED_ITEMS_FQN + ".deleteAllPickedItems";
+
+	private static final String GET_PICK_LIST_ITEMS_COUNT = PICKED_ITEMS_FQN + ".getPickListItemsCount";
 }

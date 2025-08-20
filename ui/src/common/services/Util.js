@@ -429,6 +429,26 @@ class Util {
     return result;
   }
 
+  dedup(stringCsv, sort) {
+    const items = this.splitStr(stringCsv || '', /,|\t|\n/, false);
+    const seen = {};
+    const result = [];
+    for (const item of items) {
+      if (seen[item]) {
+        continue;
+      }
+
+      seen[item] = true;
+      result.push(item);
+    }
+
+    if (sort) {
+      result.sort();
+    }
+
+    return result.join(', ');
+  }
+
   promise(result) {
     if (typeof result == 'function') {
       return new Promise((resolve) => resolve(result()));

@@ -298,6 +298,14 @@
             <hidden>true</hidden>
           </numberField>
 
+          <numberField>
+            <name>containerId</name>
+            <udn>containerId</udn>
+            <caption>Container ID</caption>
+            <column>CONTAINER_IDENTIFIER</column>
+            <hidden>true</hidden>
+          </numberField>
+
           <textField>
             <name>containerName</name>
             <udn>containerName</udn>
@@ -1575,7 +1583,74 @@
         </row>
       </subForm>
     </row>
-
+    <row>
+      <subForm>
+        <name>pickedSpecimens</name>
+        <udn>pickedSpecimens</udn>
+        <caption>#getMessage("pick_list_specimens")</caption>
+        <table>OS_PICKED_SPECIMENS</table>
+        <foreignKey>SPECIMEN_ID</foreignKey>
+        <parentKey>IDENTIFIER</parentKey>
+        <primaryKey>IDENTIFIER</primaryKey>
+        <hidden>true</hidden>
+        <row>
+          <numberField>
+            <name>pickListItemId</name>
+            <udn>pickListItemId</udn>
+            <caption>#getMessage("pick_list_specimen_id")</caption>
+            <column>IDENTIFIER</column>
+          </numberField>
+          <numberField>
+            <name>pickListId</name>
+            <udn>pickListId</udn>
+            <caption>#getMessage("pick_list_id")</caption>
+            <column>PICK_LIST_ID</column>
+          </numberField>
+          <subForm>
+            <name>pickedBy</name>
+            <udn>pickedBy</udn>
+            <caption>#getMessage("pick_list_specimen_picked_by")</caption>
+            <table>CATISSUE_USER</table>
+            <foreignKey>IDENTIFIER</foreignKey>
+            <parentKey>UPDATED_BY</parentKey>
+            <primaryKey>IDENTIFIER</primaryKey>
+            <row>
+              <numberField>
+                <name>userId</name>
+                <udn>userId</udn>
+                <caption>#getMessage("user_identifier")</caption>
+                <column>IDENTIFIER</column>
+              </numberField>
+              <textField>
+                <name>firstName</name>
+                <udn>firstName</udn>
+                <caption>#getMessage("user_first_name")</caption>
+                <column>FIRST_NAME</column>
+              </textField>
+              <textField>
+                <name>lastName</name>
+                <udn>lastName</udn>
+                <caption>#getMessage("user_last_name")</caption>
+                <column>LAST_NAME</column>
+              </textField>
+              <textField>
+                <name>emailAddress</name>
+                <udn>emailAddress</udn>
+                <caption>#getMessage("user_email")</caption>
+                <column>EMAIL_ADDRESS</column>
+              </textField>
+            </row>
+          </subForm>
+          <datePicker>
+            <name>pickupTime</name>
+            <udn>pickupTime</udn>
+            <caption>#getMessage("pick_list_specimen_pickup_time")</caption>
+            <column>UPDATE_TIME</column>
+            <format>MM-dd-yyyy HH:mm</format>
+          </datePicker>
+        </row>
+      </subForm>
+    </row>
     <row>
       <subForm>
         <name>extensions</name>

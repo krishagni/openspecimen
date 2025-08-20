@@ -594,27 +594,35 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		SubQuery<Long> query = mainQuery.createSubQuery(Specimen.class, "specimen")
 			.distinct().select("specimen.id");
 
+		Disjunction idsOrLabelsOrBarcodes = query.disjunction();
+		boolean idsOrLabelsOrBarcodesCond = false;
 		if (CollectionUtils.isNotEmpty(crit.ids())) {
-			addIdsCond(query, crit.ids());
-		} else {
-			Disjunction labelOrBarcode = query.disjunction();
-			if (CollectionUtils.isNotEmpty(crit.labels())) {
-				if (crit.labels().size() == 1) {
-					addLabelCond(query, labelOrBarcode, crit.labels().iterator().next(), crit.exactMatch());
-				} else {
-					addLabelsCond(query, labelOrBarcode, crit.labels());
-				}
+			addInCond(query, idsOrLabelsOrBarcodes, "specimen.id", crit.ids());
+			idsOrLabelsOrBarcodesCond = true;
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.labels())) {
+			if (crit.labels().size() == 1) {
+				addLabelCond(query, idsOrLabelsOrBarcodes, crit.labels().iterator().next(), crit.exactMatch());
+			} else {
+				addLabelsCond(query, idsOrLabelsOrBarcodes, crit.labels());
 			}
 
-			if (CollectionUtils.isNotEmpty(crit.barcodes())) {
-				if (crit.barcodes().size() == 1) {
-					addBarcodeCond(query, labelOrBarcode, crit.barcodes().iterator().next(), crit.exactMatch());
-				} else {
-					addBarcodesCond(query, labelOrBarcode, crit.barcodes());
-				}
+			idsOrLabelsOrBarcodesCond = true;
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.barcodes())) {
+			if (crit.barcodes().size() == 1) {
+				addBarcodeCond(query, idsOrLabelsOrBarcodes, crit.barcodes().iterator().next(), crit.exactMatch());
+			} else {
+				addBarcodesCond(query, idsOrLabelsOrBarcodes, crit.barcodes());
 			}
 
-			query.add(labelOrBarcode);
+			idsOrLabelsOrBarcodesCond = true;
+		}
+
+		if (idsOrLabelsOrBarcodesCond) {
+			query.add(idsOrLabelsOrBarcodes);
 		}
 
 		addLastIdCond(query, crit);

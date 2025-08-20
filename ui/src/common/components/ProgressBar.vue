@@ -1,8 +1,10 @@
 <template>
-  <div class="os-progress-bar">
-    <ProgressBar :value="completed">
-      <slot></slot>
+  <div class="os-progress-bar" v-os-tooltip.bottom="tooltip">
+    <ProgressBar :value="completed" :show-value="false">
     </ProgressBar>
+    <div class="value">
+      <slot>{{value}} / {{total}}</slot>
+    </div>
   </div>
 </template>
 
@@ -11,7 +13,7 @@
 import ProgressBar from 'primevue/progressbar';
 
 export default {
-  props: ['value', 'total'],
+  props: ['value', 'total', 'tooltip'],
 
   components: {
     ProgressBar
@@ -27,9 +29,27 @@ export default {
 </script>
 
 <style scoped>
+.os-progress-bar {
+  position: relative;
+}
+
+.os-progress-bar .value {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}
+
+.os-progress-bar :deep(.p-progressbar) {
+  background: #f0ad4e;
+}
 
 .os-progress-bar :deep(.p-progressbar .p-progressbar-value) {
   background: #5cb85c;
 }
-
 </style>

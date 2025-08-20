@@ -1240,6 +1240,32 @@ const routes = [
         ]
       },
       {
+        path: 'carts/:cartId/pick-lists',
+        name: 'PickLists',
+        component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/PickLists.vue'),
+        props: (route) => {
+          const props = {filters: route.query.filters};
+          if (route.params) {
+            props.cartId = route.params.cartId;
+          }
+
+          return props;
+        }
+      },
+      {
+        path: 'carts/:cartId/pick-lists/:listId',
+        name: 'PickList',
+        component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/PickList.vue'),
+        props: (route) => {
+          const props = {upf: route.query.upf, ppf: route.query.ppf};
+          if (route.params) {
+            Object.assign(props, route.params); // cartId && listId
+          }
+
+          return props;
+        }
+      },
+      {
         path: 'cart-addedit/:cartId',
         name: 'SpecimenCartAddEdit',
         component: () => import(/* webpackChunkName: "carts" */ '../biospecimen/carts/AddEdit.vue'),

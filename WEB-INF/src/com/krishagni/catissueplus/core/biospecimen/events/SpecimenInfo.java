@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -26,6 +27,7 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 
 @ListenAttributeChanges
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SpecimenInfo extends AttributeModifiedSupport implements Comparable<SpecimenInfo>, Serializable {
 	
 	private static final long serialVersionUID = -2766658206691562011L;

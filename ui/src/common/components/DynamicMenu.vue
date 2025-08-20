@@ -19,6 +19,9 @@
         <a class="no-click" v-t="'common.loading'"></a>
       </li>
     </ul>
+    <ul class="fixed-options" v-if="$slots['fixed-options']">
+      <slot name="fixed-options"></slot>
+    </ul>
   </os-overlay>
 </template>
 
@@ -80,7 +83,7 @@ export default {
 }
 
 .os-dynamic-menu ul.options {
-  max-height: 190px;
+  max-height: 262px;
   overflow: scroll;
 }
 
@@ -89,7 +92,8 @@ export default {
   border-bottom: 0px;
 }
 
-.os-dynamic-menu ul li a {
+.os-dynamic-menu ul.options li a,
+.os-dynamic-menu ul.fixed-options :deep(li a) {
   padding: 0.5rem 1rem;
   text-decoration: none;
   display: inline-block;
@@ -97,11 +101,13 @@ export default {
   color: #212529;
 }
 
-.os-dynamic-menu ul li a:hover:not(.no-click) {
+.os-dynamic-menu ul.options li a:hover:not(.no-click),
+.os-dynamic-menu ul.fixed-options :deep(li a:hover:not(.no-click)) {
   background: #e9ecef;
 }
 
-.os-dynamic-menu ul li a.no-click {
+.os-dynamic-menu ul.options li a.no-click,
+.os-dynamic-menu ul.fixed-options :deep(li a.no-click) {
   cursor: initial;
 }
 </style>
