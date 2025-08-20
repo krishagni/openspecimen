@@ -48,5 +48,13 @@
       group by
         pl.identifier;
     </sql-query>
+
+    <sql-query name="delPickListItemsByCartAndSpecimens">
+      delete from
+        os_picked_specimens
+      where
+        pick_list_id in (select identifier from os_specimen_pick_lists where cart_id = :cartId) and
+        specimen_id in (:specimenIds)
+    </sql-query>
   </class>
 </hibernate-mapping>

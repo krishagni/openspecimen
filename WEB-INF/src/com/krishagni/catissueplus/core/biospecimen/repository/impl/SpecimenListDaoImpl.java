@@ -28,7 +28,6 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
-import com.krishagni.catissueplus.core.common.util.AuthUtil;
 
 public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements SpecimenListDao {
 
@@ -154,10 +153,12 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public int deleteListItems(Long listId, List<Long> specimenIds) {
-		return createNamedQuery(CLEAR_LIST_ITEMS)
+		int deleted = createNamedQuery(CLEAR_LIST_ITEMS)
 			.setParameter("listId", listId)
 			.setParameterList("specimenIds", specimenIds)
 			.executeUpdate();
+		deletePickListItems(listId, specimenIds);
+		return deleted;
 	}
 
 	@Override
@@ -328,6 +329,14 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 
 	@Override
+	public void deletePickListItems(Long cartId, Collection<Long> specimenIds) {
+		getCurrentSession().getNamedQuery(DEL_PICK_LIST_ITEMS_BY_CART_N_SPMNS)
+			.setParameter("cartId", cartId)
+			.setParameterList("specimenIds", specimenIds)
+			.executeUpdate();
+	}
+
+	@Override
 	@Deprecated
 	public Map<Long, List<Specimen>> getListCpSpecimens(Long listId) {
 		List<Object[]> rows = createNamedQuery(GET_LIST_CP_SPECIMENS, Object[].class)
@@ -489,4 +498,6 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	private static final String DELETE_ALL_PICKED_ITEMS = PICKED_ITEMS_FQN + ".deleteAllPickedItems";
 
 	private static final String GET_PICK_LIST_ITEMS_COUNT = PICKED_ITEMS_FQN + ".getPickListItemsCount";
+
+	private static final String DEL_PICK_LIST_ITEMS_BY_CART_N_SPMNS = PICKED_ITEMS_FQN + ".delPickListItemsByCartAndSpecimens";
 }

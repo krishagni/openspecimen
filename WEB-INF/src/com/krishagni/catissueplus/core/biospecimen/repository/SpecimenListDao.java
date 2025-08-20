@@ -73,6 +73,8 @@ public interface SpecimenListDao extends Dao<SpecimenList> {
 
 	List<Tuple> getInactivePickLists(Date activeBefore);
 
+	void deletePickListItems(Long cartId, Collection<Long> specimenIds);
+
 	//
 	// Deprecated, used mostly by specimen request plugin
 	//
