@@ -726,8 +726,16 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			}
 
 			String filters = StringUtils.EMPTY;
+			if (StringUtils.isNotBlank(crit.cp())) {
+				filters += " and CollectionProtocol.shortTitle = \"" + crit.cp() + "\"";
+			}
+
+			if (StringUtils.isNotBlank(crit.type())) {
+				filters += " and Specimen.type = \"" + crit.type() + "\"";
+			}
+
 			if (StringUtils.isNotBlank(crit.container())) {
-				filters = " and " + String.format(DESCENDENT_CONTAINER_IDS_SQL, crit.container());
+				filters += " and " + String.format(DESCENDENT_CONTAINER_IDS_SQL, crit.container());
 			}
 
 			ExecuteQueryEventOp queryOp = new ExecuteQueryEventOp();

@@ -59,6 +59,7 @@
     "picklist_progress": "Picked {pickedSpecimens} of {totalSpecimens} specimens",
     "pick_lists": "Pick Lists",
     "pickup_time": "Pickup Time",
+    "progress": "Progress",
     "remove_from_cart": "Remove from cart",
     "remove_from_folder": "Remove from folder",
     "remove_specimens_q": "Remove specimens from the cart?",

@@ -413,6 +413,12 @@ public class SpecimenListsController {
 		@RequestParam(value = "picked", required = false, defaultValue = "false")
 		Boolean picked,
 
+		@RequestParam(value = "cp", required = false)
+		String cp,
+
+		@RequestParam(value = "type", required = false)
+		String type,
+
 		@RequestParam(value = "container", required = false)
 		String container,
 
@@ -426,6 +432,8 @@ public class SpecimenListsController {
 			.cartId(cartId)
 			.pickListId(listId)
 			.picked(picked)
+			.cp(cp)
+			.type(type)
 			.container(container)
 			.startAt(startAt)
 			.maxResults(maxResults);

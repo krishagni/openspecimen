@@ -17,6 +17,10 @@ public class PickListSpecimensCriteria extends AbstractListCriteria<PickListSpec
 
 	private Boolean picked;
 
+	private String cp;
+
+	private String type;
+
 	private String container;
 
 	@Override
@@ -67,6 +71,24 @@ public class PickListSpecimensCriteria extends AbstractListCriteria<PickListSpec
 
 	public Boolean picked() {
 		return this.picked;
+	}
+
+	public PickListSpecimensCriteria cp(String cp) {
+		this.cp = cp;
+		return self();
+	}
+
+	public String cp() {
+		return this.cp;
+	}
+
+	public PickListSpecimensCriteria type(String type) {
+		this.type = type;
+		return self();
+	}
+
+	public String type() {
+		return this.type;
 	}
 
 	public PickListSpecimensCriteria container(String container) {

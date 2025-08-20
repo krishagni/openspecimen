@@ -102,6 +102,9 @@
                     <os-button left-icon="times" :label="$t('common.buttons.remove')"
                       v-os-tooltip.bottom="$t('carts.rm_spmns_from_picked_list')" @click="removeFromPickedList" 
                       v-if="pickedCtx.selected && pickedCtx.selected.length > 0" />
+
+                    <os-specimen-actions :specimens="pickedCtx.selected" @reloadSpecimens="reloadPickedList"
+                      v-if="pickedCtx.selected && pickedCtx.selected.length > 0" />
                   </span>
                   <span class="right">
                     <os-button left-icon="search" :label="$t('common.buttons.search')" @click="togglePickedSearch" />
@@ -330,7 +333,7 @@ export default {
     },
 
     selectPickedSpecimens: function(selected) {
-      this.pickedCtx.selected = selected.map(({rowObject: {specimen}}) => ({id: specimen.id}));
+      this.pickedCtx.selected = selected.map(({rowObject: {specimen}}) => ({id: specimen.id, cpId: specimen.cpId}));
     },
 
     useBoxScanner: function() {
@@ -435,6 +438,10 @@ export default {
 
     togglePickedSearch: function() {
       this.$refs.pickedListView.toggleShowFilters();
+    },
+
+    reloadPickedList: function() {
+      this.$refs.pickedListView.reload();
     },
 
     removeFromPickedList: function() {

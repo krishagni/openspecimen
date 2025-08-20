@@ -16,6 +16,10 @@ export default {
       hrefTarget: "_blank"
     },
     {
+      name: "specimen.type",
+      captionCode: "specimens.type",
+    },
+    {
       name: "specimen.storageLocation.hierarchy",
       captionCode: "containers.container_hierarchy",
       uiStyle: {
@@ -24,7 +28,7 @@ export default {
     },
     {
       name: "specimen.availableQty",
-      captionCode: "specimens.available_quantity",
+      captionCode: "specimens.quantity",
       type: "specimen-measure",
       entity: "specimen"
     },
@@ -45,6 +49,34 @@ export default {
   ],
 
   filters: [
+    {
+      name: "cp",
+      captionCode: "specimens.cp",
+      type: "dropdown",
+      listSource: {
+        apiUrl: "collection-protocols",
+        displayProp: "shortTitle",
+        selectProp: "shortTitle",
+        searchProp: "query"
+      }
+    },
+    {
+      name: "type",
+      captionCode: "specimens.type",
+      type: "dropdown",
+      listSource: {
+        apiUrl: "permissible-values/v",
+        displayProp: "value",
+        selectProp: "value",
+        searchProp: "searchString",
+        queryParams: {
+          static: {
+            attribute: "specimen_type",
+            includeOnlyLeafValue: true
+          }
+        }
+      }
+    },
     {
       name: "container",
       captionCode: "specimens.container",
