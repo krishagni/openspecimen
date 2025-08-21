@@ -338,6 +338,7 @@ export default {
     },
 
     _addForms: function(importTypes, group, entityType, forms) {
+      forms = forms || [];
       for (const form of forms) {
         if (form.sysForm) { 
           continue;
