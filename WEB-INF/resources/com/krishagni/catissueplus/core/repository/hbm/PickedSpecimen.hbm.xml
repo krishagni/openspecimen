@@ -46,7 +46,7 @@
         pl.identifier in (:pickListIds) and
         s.activity_status != 'Disabled'
       group by
-        pl.identifier;
+        pl.identifier
     </sql-query>
 
     <sql-query name="delPickListItemsByCartAndSpecimens">
