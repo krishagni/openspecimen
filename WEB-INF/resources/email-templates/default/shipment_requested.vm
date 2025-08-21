@@ -35,12 +35,12 @@
                       <td> : $dateFmt.format( $shipment.requestDate ) </td>
                     </tr>
                     <tr>
-                      <td> Requester Comments </td>
-                      <td> :
+                      <td style="vertical-align: top;"> Requester Comments </td>
+                      <td>
                         #if ($shipment.requesterComments)
-                          $shipment.requesterComments
+                          <pre style="background: transparent; border: none; font: inherit; font-size: inherit; padding: 0px; margin: 0px;">: $shipment.requesterComments</pre>
                         #else
-                          Not Specified
+                          : Not Specified
                         #end
                       </td>
                     </tr>

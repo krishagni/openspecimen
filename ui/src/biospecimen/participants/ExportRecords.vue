@@ -326,6 +326,7 @@ export default {
     },
 
     _addForms: function(exportTypes, group, entityType, forms) {
+      forms = forms || [];
       for (const form of forms) {
         exportTypes.push({
           id: entityType + '_' + form.formId,
