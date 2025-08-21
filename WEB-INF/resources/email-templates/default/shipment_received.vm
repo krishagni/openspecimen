@@ -35,19 +35,19 @@
                     <td> : $dateFmt.format( $$shipment.requestDate ) </td>
                   </tr>
                   <tr>
-                    <td> Requester Comments </td>
-                    <td> :
+                    <td style="vertical-align: top;"> Requester Comments </td>
+                    <td>
                       #if ($shipment.requesterComments)
-                      $shipment.requesterComments
+                        <pre style="background: transparent; border: none; font: inherit; font-size: inherit; padding: 0px; margin: 0px;">: $shipment.requesterComments</pre>
                       #else
-                      Not Specified
+                        : Not Specified
                       #end
                     </td>
                   </tr>
                   #end
                   <tr>
                     <td> Courier Name </td>
-                    <td> : 
+                    <td> :
                       #if ( $shipment.courierName )
                         $shipment.courierName
                       #else
@@ -88,6 +88,16 @@
                     <td> : $dateFmt.format( $shipment.shippedDate ) </td>
                   </tr>
                   <tr>
+                    <td style="vertical-align: top;"> Sender Comments </td>
+                    <td>
+                      #if ($shipment.senderComments)
+                        <pre style="background: transparent; border: none; font: inherit; font-size: inherit; padding: 0px; margin: 0px;">: $shipment.senderComments</pre>
+                      #else
+                        : Not Specified
+                      #end
+                    </td>
+                  </tr>
+                  <tr>
                     <td> Receiving Site </td>
                     <td> : $shipment.receivingSite.name </td>
                   </tr>
@@ -98,6 +108,16 @@
                   <tr>
                     <td> Received On </td>
                     <td> : $dateFmt.format( $shipment.receivedDate ) </td>
+                  </tr>
+                  <tr>
+                    <td style="vertical-align: top;"> Receiver Comments </td>
+                    <td>
+                      #if ($shipment.receiverComments)
+                        <pre style="background: transparent; border: none; font: inherit; font-size: inherit; padding: 0px; margin: 0px;">: $shipment.receiverComments</pre>
+                      #else
+                        : Not Specified
+                      #end
+                    </td>
                   </tr>
                 </table>
               </td>
