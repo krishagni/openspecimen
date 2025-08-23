@@ -14,7 +14,7 @@
     "@fortawesome/vue-fontawesome": "^3.1.0",
     "@vuelidate/core": "^2.0.0-alpha.35",
     "@vuelidate/validators": "^2.0.0-alpha.27",
-    "ag-grid-vue3": "^32.3.0",
+    "ag-grid-vue3": "^32.3.2",
     "bootstrap": "^5.0.1",
     "chart.js": "^3.7.1",
     "core-js": "^3.21.1",
