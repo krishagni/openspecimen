@@ -62,6 +62,7 @@ import DeFormServices    from '@/forms/services';
 import HomeComponents    from '@/home/components';
 import ImportComponents  from '@/importer/components';
 import ImporterPages     from '@/importer/views';
+import QueryServices     from '@/queries/services';
 
 import LoginForm         from '@/users/views/LoginForm.vue';
 
@@ -84,7 +85,8 @@ const app = createApp(Root)
   .use(DeFormServices)
   .use(HomeComponents)
   .use(ImportComponents)
-  .use(ImporterPages);
+  .use(ImporterPages)
+  .use(QueryServices);
 
 app.directive('show-if-allowed', showIfAllowed);
 app.directive('os-init', initVars);

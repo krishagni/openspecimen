@@ -50,20 +50,14 @@
         <template #default>
           <os-menu :label="$t('queries.actions')" :options="actionsMenuOpts" />
 
-          <!-- span v-if="ctx.showAddSpecimens">
-            <os-button left-icon="check" :label="$t('queries.select_all')" @click="selectAllRows"
-              v-if="!ctx.allRowsSelected" />
-
-            <os-button left-icon="times" :label="$t('queries.unselect_all')" @click="unselectAllRows"
-              v-if="ctx.allRowsSelected" />
-          </span -->
-
           <span v-if="ctx.showAddSpecimens && ctx.selectedRows.length > 0">
             <os-specimen-actions label="queries.specimen_actions"
               :specimens="selectedSpecimens" @reloadSpecimens="rerun" @route-change="saveQueryLocally($event)" />
 
             <os-add-to-cart :specimens="selectedSpecimens" />
           </span>
+
+          <os-plugin-views page="query-results" view="toolbar" :view-props="{query}" />
 
           <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
             url="https://openspecimen.atlassian.net/l/cp/WNtmFmh3" :new-tab="true" />
