@@ -33,6 +33,15 @@
     ref="specimensList"
   />
 
+  <os-confirm ref="confirmPrintAllDialog">
+    <template #title>
+      <span v-t="'orders.print_all'">Print All Order Items?</span>
+    </template>
+    <template #message>
+      <span v-t="'orders.confirm_print_all'">Are you sure you want to print labels of all specimens of the order?</span>
+    </template>
+  </os-confirm>
+
   <os-dialog ref="retrieveSpmnComments">
     <template #header>
       <span v-t="'orders.retrieve_specimens'"> Retrieve Specimens </span>
@@ -119,11 +128,18 @@ export default {
 
     printLabels: async function() {
       if (this.selectedSpecimens.length == 0) {
-        alertSvc.error({code: 'orders.no_specimen_selected'});
-        return;
+        const resp = await this.$refs.confirmPrintAllDialog.open();
+        if (resp != 'proceed') {
+          return;
+        }
       }
 
       const printJob = await orderSvc.printLabels(this.order.id, this.selectedSpecimens);
+      if (!printJob) {
+        alertSvc.success({code: 'orders.print_job_submitted'});
+        return;
+      }
+
       let downloadEnabled = this.$ui.currentUser.downloadLabelsPrintFile;
       if (!downloadEnabled) {
         const setting = await settingSvc.getSetting('administrative', 'download_labels_print_file');

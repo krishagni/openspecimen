@@ -540,16 +540,45 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 			DistributionOrder order = getOrder(input.getOrderId(), input.getOrderName());
 			AccessCtrlMgr.getInstance().ensureReadDistributionOrderRights(order);
 
-			List<DistributionOrderItem> orderItems = daoFactory.getDistributionOrderDao()
-				.getOrderItems(new DistributionOrderItemListCriteria().orderId(order.getId()).ids(input.getItemIds()));
+			List<LabelPrintJob> printJobs = new ArrayList<>();
+			boolean endOfItems = false;
+			List<Long> itemIds = input.getItemIds();
+			int startAt = 0;
+			while (!endOfItems) {
+				DistributionOrderItemListCriteria crit = new DistributionOrderItemListCriteria().orderId(order.getId());
+				if (CollectionUtils.isNotEmpty(itemIds)) {
+					if (itemIds.size() > crit.maxResults()) {
+						crit.ids(itemIds.subList(0, crit.maxResults()));
+						itemIds = itemIds.subList(crit.maxResults(), itemIds.size());
+					} else {
+						crit.ids(itemIds);
+						itemIds = null;
+					}
+				} else {
+					crit.startAt(startAt);
+				}
 
-			LabelPrintJob job = printDistributionLabels(orderItems, input.getCopies());
-			if (job == null) {
+				List<DistributionOrderItem> orderItems = daoFactory.getDistributionOrderDao().getOrderItems(crit);
+				LabelPrintJob job = printDistributionLabels(orderItems, input.getCopies());
+				if (job != null) {
+					printJobs.add(job);
+				}
+
+				startAt += orderItems.size();
+				endOfItems = CollectionUtils.isEmpty(itemIds) && orderItems.size() < crit.maxResults();
+			}
+
+			if (printJobs.isEmpty()) {
 				return ResponseEvent.userError(DistributionOrderErrorCode.NO_ITEMS_PRINTED);
 			}
 
-			job.generateLabelsDataFile();
-			return ResponseEvent.response(LabelPrintJobSummary.from(job));
+			if (printJobs.size() == 1) {
+				LabelPrintJob job = printJobs.iterator().next();
+				job.generateLabelsDataFile();
+				return ResponseEvent.response(LabelPrintJobSummary.from(job));
+			}
+
+			return ResponseEvent.response(null);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
