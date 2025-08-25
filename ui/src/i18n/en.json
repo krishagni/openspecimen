@@ -1677,6 +1677,7 @@
   "orders": {
     "checkout_specimens": "Checkout Specimens",
     "confirm_delete_msg": "Order '{name}' and any dependent data will be deleted. Are you sure you want to proceed?",
+    "confirm_print_all": "You are about to print distribution labels for all specimens in this order. Are you sure you want to proceed?",
     "confirm_rm_specimens": "Are you sure you want to remove the selected specimens from the order?",
     "comments": "Comments",
     "cost": "Cost",
@@ -1714,7 +1715,9 @@
     "no_spmns_in_order": "No specimens in the order. Add at least one specimen.",
     "no_spmns_to_return": "No specimens to return. Add at least one specimen to return.",
     "passed": "Passed",
-    "print_job_created": "Distribution labels print job {id} created.",
+    "print_all": "Print Distribution Labels for All Specimens?",
+    "print_job_created": "Distribution labels print job #{id} created.",
+    "print_job_submitted": "Distribution labels print jobs submitted...",
     "print_labels": "Print Labels",
     "receiving_institute": "Receiving Institute",
     "receiving_institute_req": "Receiving Institute is mandatory",
