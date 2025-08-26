@@ -136,6 +136,9 @@ class FormUtil {
           result.headers = http.headers;
         } else if (result.type == 'dropdown' && result.multiple) {
           result.type = 'multiselect';
+        } else if (result.type == 'user' && result.name && result.name.indexOf('extensionDetail.attrsMap.') >= 0) {
+          result.defaultValue = 'current_user';
+          result.selectProp = 'id';
         }
 
         const ls = result.listSource;

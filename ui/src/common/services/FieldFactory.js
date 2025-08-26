@@ -190,6 +190,7 @@ class FieldFactory {
     } else if (field.type == 'userField') {
       fs.type = 'user';
       fs.selectProp = 'id';
+      fs.defaultValue = 'current_user';
     } else if (field.type == 'pvField') {
       fs.type = 'pv';
       fs.selectProp = 'value';
