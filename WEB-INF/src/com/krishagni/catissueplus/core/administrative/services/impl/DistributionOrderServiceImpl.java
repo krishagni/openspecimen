@@ -565,7 +565,7 @@ public class DistributionOrderServiceImpl implements DistributionOrderService, O
 				}
 
 				startAt += orderItems.size();
-				endOfItems = CollectionUtils.isEmpty(itemIds) && orderItems.size() < crit.maxResults();
+				endOfItems = CollectionUtils.isNotEmpty(crit.ids()) ? CollectionUtils.isEmpty(itemIds) : orderItems.size() < crit.maxResults();
 			}
 
 			if (printJobs.isEmpty()) {
