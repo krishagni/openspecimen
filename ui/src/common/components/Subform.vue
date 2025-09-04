@@ -24,7 +24,7 @@
                 <os-inline-message>{{errorMessages[sfRdIdx][field.name]}}</os-inline-message>
               </div>
             </td>
-            <td class="actioncol" v-if="readOnlyCollection != true">
+            <td class="actioncol" v-if="disabled != true && readOnlyCollection != true">
               <os-button left-icon="times" @click="removeSfRow(sfRdIdx)" />
             </td>
           </tr>
@@ -37,7 +37,7 @@
 
     <os-button class="inline-button" left-icon="plus"
       :label="inputValue && inputValue.length > 0 ? $t('common.buttons.add_another') : $t('common.buttons.add')"
-      @click="addSfRow" v-if="readOnlyCollection != true" />
+      @click="addSfRow" v-if="disabled != true && readOnlyCollection != true" />
   </div>
 </template>
 
