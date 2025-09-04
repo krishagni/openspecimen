@@ -818,6 +818,52 @@ export default {
   border: 1px solid #ddd;
 }
 
+.os-list.os-list-card-items :deep(table.p-datatable-table) {
+  border: 0px;
+  border-collapse: separate;
+  border-spacing: 2px 15px;
+  margin-top: -0.5rem;
+  margin-bottom: 0rem;
+  table-layout: fixed;
+}
+
+.os-list.os-list-card-items :deep(.os-key-values .item) {
+  border-collapse: collapse;
+  border-spacing: 0px;
+}
+
+.os-list.os-list-card-items :deep(table.p-datatable-table > thead > tr > th) {
+  background: transparent!important;
+  border-bottom: 0;
+  padding: 0rem 1rem;
+  text-align: center;
+}
+
+.os-list.os-list-card-items :deep(table.p-datatable-table > thead > tr > th.row-actions) {
+  width: 90px;
+}
+
+.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr > td) {
+  border-top: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr) {
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
+  border-radius: 0.5rem;
+  background: transparent;
+}
+
+.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr:hover) {
+  background: transparent;
+}
+
+.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr > td) {
+  vertical-align: middle;
+  padding: 1rem;
+}
+
 .filters .body .input-group {
   display: flex;
   align-items: flex-end;
