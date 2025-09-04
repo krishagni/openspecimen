@@ -26,6 +26,10 @@ class CollectionProtocol {
     return http.get('collection-protocols/' + cpId);
   }
 
+  async getSites(cpId) {
+    return http.get('collection-protocols/' + cpId + '/sites');
+  }
+
   async getCps(filterOpts) {
     return http.get('collection-protocols', filterOpts || {});
   }
