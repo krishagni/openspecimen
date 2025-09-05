@@ -150,6 +150,7 @@
       "export": "Export",
       "find": "Find",
       "generate": "Generate",
+      "get_barcodes": "Get Barcodes",
       "go": "Go",
       "help":   "Help",
       "history": "History",

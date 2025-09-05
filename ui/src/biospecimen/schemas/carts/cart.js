@@ -49,7 +49,7 @@ export default {
       "type": "add-specimens",
       "labelCode": "carts.specimens",
       "name": "cart.specimenLabels",
-      "hideButtons": true,
+      "hideAddButton": true,
       "placeholder": "Add specimens to the cart by scanning labels or barcodes separated by comma, tab, or newline",
       "showWhen": "noInputSpecimens",
       "dataEntry": true

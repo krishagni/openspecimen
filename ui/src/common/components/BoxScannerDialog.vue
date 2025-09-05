@@ -40,8 +40,11 @@
       <os-button secondary :label="$t('common.buttons.rescan')" @click="rescan"
         :disabled="!scanCtx.results" />
 
+      <os-button primary :label="$t('common.buttons.get_barcodes')" @click="emitBarcodes"
+        :disabled="!scanCtx.specimens || scanCtx.specimens.length == 0" v-if="fetchBarcodes" />
+
       <os-button primary :label="doneLabel || $t('common.buttons.done')" @click="done"
-        :disabled="!scanCtx.specimens || scanCtx.specimens.length == 0" />
+        :disabled="!scanCtx.specimens || scanCtx.specimens.length == 0" v-if="!hideDone" />
     </template>
   </os-dialog>
 </template>
@@ -54,7 +57,7 @@ import BoxSpecimenCell from '@/administrative/containers/BoxSpecimenCell.vue';
 import Layout          from '@/administrative/containers/Layout.vue';
 
 export default {
-  props: ['fetch-specimens', 'doneLabel'],
+  props: ['fetch-specimens', 'fetch-barcodes', 'hide-done', 'doneLabel'],
 
   emits: ['done'],
 
@@ -121,6 +124,12 @@ export default {
         notFound,
         specimens: (tubes || []).filter(tube => tube.specimen && tube.specimen.id > 0).map(tube => tube.specimen)
       };
+    },
+
+    emitBarcodes: function() {
+      const {specimens} = this.scanCtx;
+      const barcodes = (specimens || []).map(specimen => specimen.barcode).join(', ');
+      this.$emit('barcodes', barcodes);
     },
 
     done: function() {

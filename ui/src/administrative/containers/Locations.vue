@@ -32,7 +32,8 @@
   <os-grid>
     <os-grid-column class="os-container-locations" :width="ctx.showTree ? 12 : 8">
       <div class="labels-scan-area" v-if="isSpecimenContainer && !anySelected && ctx.showLabelsScanArea">
-        <os-add-specimens ref="specimensScanner" @labels-scanned="updateMap" :optionsAtBottom="true">
+        <os-add-specimens ref="specimensScanner" @labels-scanned="updateMap"
+          :hide-add-button="true" :options-at-bottom="true">
           <os-button primary :label="$t('containers.store')" @click="assignPositions" />
 
           <os-button :label="$t('common.buttons.cancel')" @click="hideLabelsScanArea" />
@@ -689,10 +690,6 @@ export default {
 .os-container-locations {
   display: flex;
   flex-direction: column;
-}
-
-.os-container-locations .labels-scan-area :deep(.os-add-specimens .buttons .btn:first-child) {
-  display: none;
 }
 
 .os-container-locations .map {

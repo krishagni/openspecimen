@@ -16,7 +16,8 @@
         @update:modelValue="$emit('labels-scanned', $event)" />
 
       <span class="buttons" v-if="!hideButtons">
-        <os-button primary :label="$t('common.buttons.add')" @click="addSpecimens" />
+        <os-button primary :label="$t('common.buttons.add')" @click="addSpecimens" v-if="!hideAddButton" />
+        <os-button primary :label="$t('common.buttons.scan')" @click="scanSpecimens" v-if="!hideScanButton" />
         <slot></slot>
       </span>
     </div>
@@ -80,6 +81,10 @@
         </div>
       </template>
     </os-confirm>
+
+    <os-box-scanner-dialog ref="boxScannerDialog" :fetch-barcodes="true"
+      :hide-done="hideAddButton" :done-label="$t('common.buttons.add')"
+      @barcodes="addBarcodes" @done="addBoxSpecimens" />
   </div>
 </template>
 
@@ -98,6 +103,8 @@ export default {
     'label',
     'optionsAtBottom',
     'hideButtons',
+    'hideAddButton',
+    'hideScanButton',
     'modelValue',
     'allowVisitNames',
     'scanProp'
@@ -156,6 +163,22 @@ export default {
       }
 
       return {error, specimens};
+    },
+
+    scanSpecimens: function() {
+      this.$refs.boxScannerDialog.open();
+    },
+
+    addBarcodes: function(barcodes) {
+      this.inputValue = barcodes;
+      this.useBarcode = true;
+      this.$emit('labels-scanned', barcodes);
+      this.$refs.boxScannerDialog.close();
+    },
+
+    addBoxSpecimens: function({specimens}) {
+      this.$emit('on-add', {specimens, useBarcode: true});
+      this.$refs.boxScannerDialog.close();
     },
 
     setInput: function(text) {
