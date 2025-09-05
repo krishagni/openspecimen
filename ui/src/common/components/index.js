@@ -14,6 +14,7 @@ import BooleanCheckbox from './BooleanCheckbox.vue';
 import BoxLayout from './BoxLayout.vue';
 import BoxScanResults from './BoxScanResults.vue';
 import Breadcrumb from './Breadcrumb.vue';
+import BoxScannerDialog from './BoxScannerDialog.vue';
 import BulkUpdate from './BulkUpdate.vue';
 import Button from './Button.vue';
 import ButtonGroup from './ButtonGroup.vue';
@@ -136,6 +137,7 @@ export default {
     app.component('os-box-layout',       BoxLayout);
     app.component('os-box-scan-results', BoxScanResults);
     app.component('os-box-scanner',      ScanBox);
+    app.component('os-box-scanner-dialog', BoxScannerDialog);
     app.component('os-breadcrumb',       Breadcrumb);
     app.component('os-bulk-update',      BulkUpdate);
     app.component('os-button',           Button);

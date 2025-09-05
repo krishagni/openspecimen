@@ -28,8 +28,7 @@
               <div class="tab-panel">
                 <div class="toolbar">
                   <span class="left">
-                    <os-button :label="$t('carts.use_box_scanner')" @click="useBoxScanner"
-                      v-if="ctx.scannerOpts.options && ctx.scannerOpts.options.length > 0" />
+                    <os-button :label="$t('carts.use_box_scanner')" @click="useBoxScanner" />
 
                     <os-button :label="$t('carts.use_device_camera')" @click="useDeviceCamera" v-if="!ctx.useCamera" />
 
@@ -130,41 +129,8 @@
       </os-grid>
     </os-page-body>
 
-    <os-dialog ref="boxScannerDialog" :size="'lg'">
-      <template #header>
-        <span v-t="'common.scan_box'">Scan box</span>
-      </template>
-      <template #content>
-        <div>
-          <div class="row">
-            <os-box-scanner ref="scanner" :scanners="ctx.scanners" :fetch-box-details="true"
-              :fetch-specimen-details="searchSpecimens"
-              @scan-started="onBoxScanningStart" @scan-results="handleBoxScanResults" />
-          </div>
-
-          <div class="results" v-if="boxScanCtx.results">
-            <os-box-scan-results :scan-results="boxScanCtx" />
-          </div>
-
-          <div class="row" v-if="boxScanCtx.container">
-            <box-layout class="map" :container="boxScanCtx.container" :occupants="boxScanCtx.tubes">
-              <template #occupant_specimen="slotProps">
-                <specimen-cell :specimen="slotProps.occupant" />
-              </template>
-            </box-layout>
-          </div>
-        </div>
-      </template>
-      <template #footer>
-        <os-button text :label="$t('common.buttons.close')" @click="hideBoxScannerDialog" />
-
-        <os-button secondary :label="$t('common.buttons.rescan')" @click="rescanBox"
-          :disabled="!boxScanCtx.results" />
-
-        <os-button primary :label="$t('carts.pick')" @click="pickBoxSpecimens"
-          :disabled="!boxScanCtx.specimens || boxScanCtx.specimens.length == 0" />
-      </template>
-    </os-dialog>
+    <os-box-scanner-dialog ref="boxScannerDialog" :fetch-specimens="searchSpecimens"
+      :done-label="$t('carts.pick')" @done="pickBoxSpecimens" />
   </os-page>
 </template>
 
@@ -175,24 +141,17 @@ import cartSvc     from '@/biospecimen/services/SpecimenCart.js';
 import routerSvc   from '@/common/services/Router.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util        from '@/common/services/Util.js';
-import wfSvc       from '@/common/services/Workflow.js';
 
 import pickedSpecimensListSchema   from "@/biospecimen/schemas/carts/picked-specimens.js";
 import unpickedSpecimensListSchema from "@/biospecimen/schemas/carts/unpicked-specimens.js";
 
-import BoxSpecimenCell from '@/administrative/containers/BoxSpecimenCell.vue';
-import Layout          from '@/administrative/containers/Layout.vue';
 import {QrcodeStream}  from 'vue-qrcode-reader';
 
 export default {
   props: ['cartId', 'listId', 'upf', 'ppf'],
 
   components: {
-    'qrcode-stream': QrcodeStream,
-
-    'box-layout': Layout,
-
-    'specimen-cell': BoxSpecimenCell
+    'qrcode-stream': QrcodeStream
   },
 
   data() {
@@ -203,9 +162,6 @@ export default {
         activeTab: 0,
 
         scannerOpts: {options: [], displayProp: 'name'},
-      },
-
-      boxScanCtx: {
       },
 
       pickedCtx: {
@@ -238,19 +194,6 @@ export default {
   mounted() {
     this._loadList();
     this.$refs.barcodesTextField.focus();
-
-    wfSvc.getSysWorkflow('box-scanners').then(
-      ({scannedBoxField, scanners}) => {
-        this.ctx.scanners = scanners;
-
-        const options = this.ctx.scannerOpts.options = scanners.map((s, idx) => ({id: idx, ...s}));
-        if (options.length == 1) {
-          this.ctx.scanner = options[0];
-        }
-
-        this.ctx.scannedBoxField = scannedBoxField || 'barcode';
-      }
-    );
   },
 
   computed: {
@@ -340,40 +283,9 @@ export default {
       this.$refs.boxScannerDialog.open();
     },
 
-    rescanBox: function() {
-      this.boxScanCtx = {};
-      this.$refs.scanner.scan();
-    },
-
-    pickBoxSpecimens: function() {
-      const specimens = this.boxScanCtx.specimens.map(specimen => ({id: specimen.id}));
-      this._pickSpecimens(specimens).then(() => this.hideBoxScannerDialog());
-    },
-
-    hideBoxScannerDialog: function() {
-      this.boxScanCtx = {};
-      this.$refs.boxScannerDialog.close();
-    },
-
-    onBoxScanningStart: function() {
-      this.boxScanCtx = {scanning: true};
-    },
-
-    handleBoxScanResults: async function({scanner, box, tubes, container, readErrorsCount, noTubesCount, barcodes, notFound}) {
-
-      this.boxScanCtx = {
-        scanning: false,
-        results: true,
-        scanner,
-        noBoxBarcode: !box || !box.barcode,
-        readErrorsCount,
-        noTubesCount,
-        container,
-        tubes,
-        scannedBarcodesCount: barcodes.length,
-        notFound,
-        specimens: (tubes || []).filter(tube => tube.specimen && tube.specimen.id > 0).map(tube => tube.specimen)
-      };
+    pickBoxSpecimens: function(scanResults) {
+      const specimens = (scanResults.specimens || []).map(specimen => ({id: specimen.id}));
+      this._pickSpecimens(specimens).then(() => this.$refs.boxScannerDialog.close());
     },
 
     searchSpecimens: async function(filters) {

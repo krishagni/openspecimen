@@ -326,6 +326,7 @@
     },
 
     "loading": "Loading...",
+    "loading_box_scanners": "Loading box scanner configurations...",
     "loading_form": "Loading the form. Please wait for a moment...",
     "logout": "Log Out",
     "more_item_labels_scanned": "More labels scanned than the items present in the table...",
@@ -341,6 +342,7 @@
     },
 
     "no": "No",
+    "no_box_scanners_configured": "Box scanners are not configured.",
     "no_form_records": "No form records to display. Create a new record by clicking on the Add button...",
     "no_form_records_no_add": "No form records to display.",
     "none": "None",
