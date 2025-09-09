@@ -26,7 +26,7 @@
               </template>
 
               <div class="tab-panel">
-                <div class="toolbar">
+                <div class="toolbar" v-if="!unpickedCtx.selected || unpickedCtx.selected.length == 0">
                   <span class="left">
                     <os-button :label="$t('carts.use_box_scanner')" @click="useBoxScanner" />
 
@@ -40,50 +40,59 @@
                   </span>
                 </div>
 
+                <div class="toolbar" v-else>
+                  <span class="left">
+                    <os-button :label="$t('carts.pick')" @click="pickSelectedSpecimens" />
+                  </span>
+                </div>
+
                 <div class="content">
-                  <div v-if="!ctx.useCamera">
-                    <os-input-text ref="barcodesTextField" :debounce="500" v-model="ctx.inputBarcodes"
-                      @change="handleInputBarcodes" :placeholder="$t('carts.scan_or_copy_paste_barcodes')"
-                      style="margin-bottom: 1.25rem;" v-if="!ctx.batchMode" />
-                  </div>
-
-                  <div v-else>
-                    <div class="camera-display">
-                      <qrcode-stream :formats="allFormats" @camera-on="onCameraReady" @detect="onBarcodeDetect">
-                        <os-message type="info" v-if="!ctx.initCamera">
-                          <span v-t="'carts.initialising_camera'">Initialising camera...</span>
-                        </os-message>
-                      </qrcode-stream>
+                  <span v-if="!unpickedCtx.selected || unpickedCtx.selected.length == 0">
+                    <div v-if="!ctx.useCamera">
+                      <os-input-text ref="barcodesTextField" :debounce="500" v-model="ctx.inputBarcodes"
+                        @change="handleInputBarcodes" :placeholder="$t('carts.scan_or_copy_paste_barcodes')"
+                        style="margin-bottom: 1.25rem;" v-if="!ctx.batchMode" />
                     </div>
-                  </div>
 
-                  <div class="input-group" v-if="ctx.batchMode">
-                    <os-textarea v-model="ctx.inputBarcodes"
-                      :placeholder="$t('carts.scan_or_copy_paste_barcodes')" />
+                    <div v-else>
+                      <div class="camera-display">
+                        <qrcode-stream :formats="allFormats" @camera-on="onCameraReady" @detect="onBarcodeDetect">
+                          <os-message type="info" v-if="!ctx.initCamera">
+                            <span v-t="'carts.initialising_camera'">Initialising camera...</span>
+                          </os-message>
+                        </qrcode-stream>
+                      </div>
+                    </div>
 
-                    <os-button primary :label="$t('carts.pick')" @click="handleInputBarcodes" />
-                  </div>
+                    <div class="input-group" v-if="ctx.batchMode">
+                      <os-textarea v-model="ctx.inputBarcodes"
+                        :placeholder="$t('carts.scan_or_copy_paste_barcodes')" />
 
-                  <div class="scan-options">
-                    <os-boolean-checkbox :inline-label-code="$t('carts.use_barcode')" v-model="ctx.useBarcode" />
+                      <os-button primary :label="$t('carts.pick')" @click="handleInputBarcodes" />
+                    </div>
 
-                    <os-boolean-checkbox :inline-label-code="$t('carts.turn_off_real_time')" v-model="ctx.batchMode"
-                      @update:model-value="toggleRealTimePick" />
-                  </div>
+                    <div class="scan-options">
+                      <os-boolean-checkbox :inline-label-code="$t('carts.use_barcode')" v-model="ctx.useBarcode" />
 
-                  <div v-if="ctx.batchMode">
-                    <span v-t="{path: 'carts.scanned_barcodes_count', args: {count: scannedBarcodesCount}}">
-                      <span>Scanned Barcodes: {{scannedBarcodesCount}}</span>
-                    </span>
-                  </div>
+                      <os-boolean-checkbox :inline-label-code="$t('carts.turn_off_real_time')" v-model="ctx.batchMode"
+                        @update:model-value="toggleRealTimePick" />
+                    </div>
+
+                    <div v-if="ctx.batchMode">
+                      <span v-t="{path: 'carts.scanned_barcodes_count', args: {count: scannedBarcodesCount}}">
+                        <span>Scanned Barcodes: {{scannedBarcodesCount}}</span>
+                      </span>
+                    </div>
+                  </span>
 
                   <os-list-view
                     :data="unpickedCtx.list || []"
                     :schema="unpickedSpecimensListSchema"
                     :query="unpickedCtx.query"
-                    :allowSelection="false"
+                    :allowSelection="true"
                     :loading="unpickedCtx.loading"
                     @filtersUpdated="loadUnpickedSpecimens"
+                    @selectedRows="selectUnpickedSpecimens"
                     ref="unpickedListView"
                   />
                 </div>
@@ -253,13 +262,21 @@ export default {
       this.unpickedCtx.filters = filters;
       this.unpickedCtx.uriEncodedFilters = uriEncoding;
       this.unpickedCtx.pageSize = pageSize;
-      this.unpickedCtx.list = null;
+      this.unpickedCtx.list = this.unpickedCtx.selected = null;
       this._loadUnpickedSpecimens();
       routerSvc.goto(
         'PickList',
         {cartId: this.cartId, listId: this.listId},
         {upf: uriEncoding, ppf: this.pickedCtx.uriEncodedFilters}
       );
+    },
+
+    selectUnpickedSpecimens: function(unselected) {
+      this.unpickedCtx.selected = unselected.map(({rowObject: {specimen}}) => ({id: specimen.id, cpId: specimen.cpId}));
+    },
+
+    pickSelectedSpecimens: function() {
+      this._pickSpecimens(this.unpickedCtx.selected).then(() => this.$refs.unpickedListView.clearSelection());
     },
 
     loadPickedSpecimens: function({filters, uriEncoding, pageSize}) {
@@ -423,6 +440,7 @@ export default {
           alertsSvc.success({code: 'carts.specimens_picked', args: {count: picked.length}});
           this.pickedCtx.list = this.pickedCtx.selected = null;
           this.unpickedCtx.picked += picked.length;
+          this.unpickedCtx.selected = null;
 
           if (this.unpickedCtx.list) {
             this.unpickedCtx.list = this.unpickedCtx.list.filter(item => picked.indexOf(item.specimen.id) == -1);
