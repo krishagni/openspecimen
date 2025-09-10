@@ -32,6 +32,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListsFolder;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimensPickList;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenListErrorCode;
@@ -69,6 +70,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.StarredItemService;
+import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
@@ -229,6 +231,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			Collection<User> allSharedUsers = specimenList.getAllSharedUsers();
 			saveListItems(specimenList, listDetails.getSpecimenIds(), true);
 			notifyUsersOnCreate(specimenList, allSharedUsers);
+			EventPublisher.getInstance().publish(new SpecimenListSavedEvent(specimenList, 0));
 			return ResponseEvent.response(SpecimenListDetail.from(specimenList));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -263,8 +266,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 			existing.delete();
 			daoFactory.getSpecimenListDao().saveOrUpdate(existing);
-
 			notifyUsersOnDelete(deletedSpecimenList);
+			EventPublisher.getInstance().publish(new SpecimenListSavedEvent(deletedSpecimenList, 2));
 			return ResponseEvent.response(SpecimenListDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1075,6 +1078,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			saveListItems(existing, listDetails.getSpecimenIds(), false);
 
 			notifyUsersOnUpdate(existing, addedUsers, removedUsers);
+			EventPublisher.getInstance().publish(new SpecimenListSavedEvent(existing, 1));
 			return ResponseEvent.response(SpecimenListDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);

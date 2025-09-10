@@ -332,6 +332,7 @@
     "logout": "Log Out",
     "more_item_labels_scanned": "More labels scanned than the items present in the table...",
     "name": "Name",
+    "name_req": "Name is mandatory",
     "navigate_to": "Navigate To",
 
     "new_stuff": {

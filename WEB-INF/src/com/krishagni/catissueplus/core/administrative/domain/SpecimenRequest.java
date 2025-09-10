@@ -15,6 +15,7 @@ import org.hibernate.envers.NotAudited;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -67,6 +68,8 @@ public class SpecimenRequest extends BaseExtensionEntity {
 	private String comments;
 
 	private Set<DistributionOrder> orders = new HashSet<>();
+
+	private SpecimenList cart;
 
 	public Long getCatalogId() {
 		return catalogId;
@@ -219,6 +222,15 @@ public class SpecimenRequest extends BaseExtensionEntity {
 
 	public void setOrders(Set<DistributionOrder> orders) {
 		this.orders = orders;
+	}
+
+	@NotAudited
+	public SpecimenList getCart() {
+		return cart;
+	}
+
+	public void setCart(SpecimenList cart) {
+		this.cart = cart;
 	}
 
 	@Override

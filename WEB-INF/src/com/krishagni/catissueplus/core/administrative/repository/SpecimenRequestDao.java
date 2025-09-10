@@ -11,4 +11,6 @@ public interface SpecimenRequestDao extends Dao<SpecimenRequest> {
 	List<SpecimenRequestSummary> getSpecimenRequests(SpecimenRequestListCriteria crit);
 
 	Map<String, Object> getRequestIds(String key, Object value);
+
+	void removeRequestCart(Long cartId);
 }

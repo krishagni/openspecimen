@@ -58,6 +58,13 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		return ids;
 	}
 
+	@Override
+	public void removeRequestCart(Long cartId) {
+		getCurrentSession().getNamedQuery(REMOVE_REQ_CART)
+			.setParameter("cartId", cartId)
+			.executeUpdate();
+	}
+
 	private Criteria<Object[]> getListQuery(SpecimenRequestListCriteria crit) {
 		Criteria<Object[]> query = createCriteria(SpecimenRequest.class, Object[].class, "req")
 			.leftJoin("req.dp", "dp")
@@ -215,4 +222,6 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		req.setActivityStatus((String)row[idx++]);
 		return req;
 	}
+
+	private static final String REMOVE_REQ_CART = SpecimenRequest.class.getName() + ".removeRequestCart";
 }

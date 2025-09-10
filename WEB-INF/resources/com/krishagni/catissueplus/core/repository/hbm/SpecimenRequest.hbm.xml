@@ -62,6 +62,12 @@
       <one-to-many class="com.krishagni.catissueplus.core.administrative.domain.DistributionOrder"/>
     </set>
 
+    <many-to-one name="cart" column="CART_ID" />
+
     <filter name="activeEntity"/>
+
+    <sql-query name="removeRequestCart">
+      update os_specimen_requests set cart_id = null where cart_id = :cartId
+    </sql-query>
   </class>
 </hibernate-mapping>

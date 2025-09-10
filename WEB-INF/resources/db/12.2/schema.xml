@@ -199,4 +199,12 @@
   <changeSet author="vpawar" id="Picked specimens ID generator" dbms="oracle">
     <createSequence sequenceName="OS_PICKED_SPECIMENS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen request backing cart">
+    <addColumn tableName="OS_SPECIMEN_REQUESTS">
+      <column name="CART_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_REQUEST_CART" referencedTableName="CATISSUE_SPECIMENLIST_TAGS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>
