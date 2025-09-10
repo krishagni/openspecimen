@@ -32,6 +32,10 @@ public class SpecimenListSummary extends AttributeModifiedSupport {
 
 	private Boolean sendDigestNotifs;
 
+	private String sourceEntityType;
+
+	private Long sourceEntityId;
+
 	public Long getId() {
 		return id;
 	}
@@ -112,6 +116,22 @@ public class SpecimenListSummary extends AttributeModifiedSupport {
 		this.sendDigestNotifs = sendDigestNotifs;
 	}
 
+	public String getSourceEntityType() {
+		return sourceEntityType;
+	}
+
+	public void setSourceEntityType(String sourceEntityType) {
+		this.sourceEntityType = sourceEntityType;
+	}
+
+	public Long getSourceEntityId() {
+		return sourceEntityId;
+	}
+
+	public void setSourceEntityId(Long sourceEntityId) {
+		this.sourceEntityId = sourceEntityId;
+	}
+
 	public static SpecimenListSummary fromSpecimenList(SpecimenList list){
 		SpecimenListSummary listSummary = new SpecimenListSummary();
 		listSummary.setId(list.getId());
@@ -122,6 +142,8 @@ public class SpecimenListSummary extends AttributeModifiedSupport {
 		listSummary.setOwner(UserSummary.from(list.getOwner()));
 		listSummary.setDefaultList(list.isDefaultList());
 		listSummary.setSendDigestNotifs(list.getSendDigestNotifs());
+		listSummary.setSourceEntityType(list.getSourceEntityType());
+		listSummary.setSourceEntityId(list.getSourceEntityId());
 		return listSummary;
 	}
 }

@@ -49,6 +49,10 @@ public class SpecimenList extends BaseEntity {
 
 	private Boolean sendDigestNotifs;
 
+	private String sourceEntityType;
+
+	private Long sourceEntityId;
+
 	@Autowired
 	private DaoFactory daoFactory;
 
@@ -149,6 +153,22 @@ public class SpecimenList extends BaseEntity {
 
 	public void setSendDigestNotifs(Boolean sendDigestNotifs) {
 		this.sendDigestNotifs = sendDigestNotifs;
+	}
+
+	public String getSourceEntityType() {
+		return sourceEntityType;
+	}
+
+	public void setSourceEntityType(String sourceEntityType) {
+		this.sourceEntityType = sourceEntityType;
+	}
+
+	public Long getSourceEntityId() {
+		return sourceEntityId;
+	}
+
+	public void setSourceEntityId(Long sourceEntityId) {
+		this.sourceEntityId = sourceEntityId;
 	}
 
 	public void addSharedUsers(List<User> users) {

@@ -29,7 +29,9 @@ public enum SpecimenListErrorCode implements ErrorCode {
 
 	PICK_LIST_NAME_REQ,
 
-	PICK_LIST_NOT_FOUND;
+	PICK_LIST_NOT_FOUND,
+
+	ADD_RM_SPMNS_NA;
 
 	@Override
 	public String code() {

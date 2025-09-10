@@ -81,6 +81,8 @@ public class SpecimenListFactoryImpl implements SpecimenListFactory {
 		setSharedUsers(details, specimenList, partial, ose);
 		setSharedGroups(details, specimenList, partial, ose);
 
+		specimenList.setSourceEntityType(details.getSourceEntityType());
+		specimenList.setSourceEntityId(details.getSourceEntityId());
 		specimenList.setCreatedOn(Calendar.getInstance().getTime());
 		specimenList.setLastUpdatedOn(specimenList.getCreatedOn());
 	}

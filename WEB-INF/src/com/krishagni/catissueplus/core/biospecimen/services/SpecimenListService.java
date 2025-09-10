@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.core.biospecimen.services;
 import java.util.List;
 import java.util.Map;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.PickListSpecimensOp;
 import com.krishagni.catissueplus.core.biospecimen.events.ShareSpecimenListOp;
@@ -36,6 +37,8 @@ public interface SpecimenListService {
 	ResponseEvent<SpecimenListDetail> createSpecimenList(RequestEvent<SpecimenListDetail> req);
 	
 	ResponseEvent<SpecimenListDetail> updateSpecimenList(RequestEvent<SpecimenListDetail> req);
+
+	int updateListSpecimens(SpecimenList specimenList, UpdateListSpecimensOp opDetail);
 
 	ResponseEvent<SpecimenListDetail> patchSpecimenList(RequestEvent<SpecimenListDetail> req);
 

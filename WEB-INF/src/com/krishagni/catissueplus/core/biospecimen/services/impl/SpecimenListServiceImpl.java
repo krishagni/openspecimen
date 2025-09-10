@@ -334,30 +334,36 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			}
 
 			SpecimenList specimenList = getSpecimenList(opDetail.getListId(), null);
-			ensureValidSpecimens(opDetail.getSpecimens(), null);
-
-			switch (opDetail.getOp()) {
-				case ADD:
-					if (specimenList.getId() == null) {
-						daoFactory.getSpecimenListDao().saveOrUpdate(specimenList);
-					}
-
-					saveListItems(specimenList, opDetail.getSpecimens(), false);
-					break;
-				
-				case REMOVE:
-					if (specimenList.getId() != null) {
-						deleteListItems(specimenList, opDetail.getSpecimens());
-					}
-					break;				
+			if (StringUtils.isNotBlank(specimenList.getSourceEntityType())) {
+				return ResponseEvent.userError(SpecimenListErrorCode.ADD_RM_SPMNS_NA, specimenList.getDisplayName(), specimenList.getSourceEntityType(), specimenList.getSourceEntityId());
 			}
 
-			return ResponseEvent.response(opDetail.getSpecimens().size());
+			ensureValidSpecimens(opDetail.getSpecimens(), null);
+			return ResponseEvent.response(updateListSpecimens(specimenList, opDetail));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+	@Override
+	public int updateListSpecimens(SpecimenList specimenList, UpdateListSpecimensOp opDetail) {
+		switch (opDetail.getOp()) {
+			case ADD:
+				if (specimenList.getId() == null) {
+					daoFactory.getSpecimenListDao().saveOrUpdate(specimenList);
+				}
+
+				return saveListItems(specimenList, opDetail.getSpecimens(), false);
+
+			case REMOVE:
+				if (specimenList.getId() != null) {
+					return deleteListItems(specimenList, opDetail.getSpecimens());
+				}
+		}
+
+		return 0;
 	}
 
 	@Override
@@ -1013,6 +1019,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		return crit;
 	}
 
+
 	private int saveListItems(SpecimenList list, List<Long> specimenIds, boolean newList) {
 		if (CollectionUtils.isEmpty(specimenIds)) {
 			return 0;
@@ -1075,7 +1082,9 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 			existing.update(specimenList);
 			daoFactory.getSpecimenListDao().saveOrUpdate(existing);
-			saveListItems(existing, listDetails.getSpecimenIds(), false);
+			if (StringUtils.isBlank(existing.getSourceEntityType())) {
+				saveListItems(existing, listDetails.getSpecimenIds(), false);
+			}
 
 			notifyUsersOnUpdate(existing, addedUsers, removedUsers);
 			EventPublisher.getInstance().publish(new SpecimenListSavedEvent(existing, 1));

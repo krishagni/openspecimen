@@ -79,4 +79,12 @@
       <column name="serviceRateCurrency_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
-</databaseChangeLog>
+
+  <changeSet author="vpawar" id="Specimen cart source and record ID">
+    <addColumn tableName="CATISSUE_SPECIMENLIST_TAGS_AUD">
+      <column name="SOURCE_ENTITY_TYPE" type="${text.type}(64)" />
+      <column name="sourceEntityType_MOD" type="${boolean.type}" />
+      <column name="SOURCE_ENTITY_ID" type="${int.type}" />
+      <column name="sourceEntityId_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet></databaseChangeLog>

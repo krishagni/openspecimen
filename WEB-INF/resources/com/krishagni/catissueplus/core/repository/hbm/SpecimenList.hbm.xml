@@ -24,6 +24,10 @@
     <many-to-one name="owner" column="USER_ID"/>
 
     <property name="sendDigestNotifs" column="SEND_DIGEST_NOTIFS" />
+
+    <property name="sourceEntityType" column="SOURCE_ENTITY_TYPE" />
+
+    <property name="sourceEntityId" column="SOURCE_ENTITY_ID" />
      
     <set name="sharedWith" table="SHARED_SPECIMENLIST_TAGS">
       <key column="TAG_ID"/>
