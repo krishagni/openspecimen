@@ -1019,7 +1019,6 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		return crit;
 	}
 
-
 	private int saveListItems(SpecimenList list, List<Long> specimenIds, boolean newList) {
 		if (CollectionUtils.isEmpty(specimenIds)) {
 			return 0;

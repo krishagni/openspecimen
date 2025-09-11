@@ -172,6 +172,29 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 			.executeUpdate();
 	}
 
+	@Override
+	public int addSpecimensToCart(Long shipmentId, Long cartId) {
+		String insertDml = String.format(isMySQL() ? ADD_SHIPMENT_ITEMS_TO_CART_MYSQL : ADD_SHIPMENT_ITEMS_TO_CART_ORASQL, cartId, AuthUtil.getCurrentUser().getId(), cartId);
+		return createNativeQuery(insertDml)
+			.setParameter("shipmentId", shipmentId)
+			.executeUpdate();
+	}
+
+	@Override
+	public int removeSpecimensFromCart(Long shipmentId, Long cartId) {
+		return createNativeQuery(RM_SPMNS_FROM_CART_SQL)
+			.setParameter("shipmentId", shipmentId)
+			.setParameter("cartId", cartId)
+			.executeUpdate();
+	}
+
+	@Override
+	public void removeShipmentCart(Long cartId) {
+		getCurrentSession().getNamedQuery(REMOVE_SHIPMENT_CART)
+			.setParameter("cartId", cartId)
+			.executeUpdate();
+	}
+
 	private Criteria<Shipment> getShipmentsQuery(ShipmentListCriteria crit) {
 		Criteria<Shipment> query = createCriteria(Shipment.class, "shipment")
 			.join("shipment.sendingSite", "sendSite")
@@ -345,6 +368,8 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 
 	private static final String DELETE_SPECIMEN_SHIPMENT_EVENTS = FQN + ".deleteSpecimenShipmentEvents";
 
+	private static final String REMOVE_SHIPMENT_CART = FQN + ".removeShipmentCart";
+
 	private static final String GET_SPMN_IDS_ORD_BY_EXT_ID_MYSQL =
 		"select " +
 		"  s.identifier, group_concat(e.value order by e.value %s) " +
@@ -386,4 +411,35 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		"order by " +
 		"  listagg(e.value, ',') within group (order by e.value %s) %s," +
 		"  s.identifier %s";
+
+	private static final String ADD_SHIPMENT_ITEMS_TO_CART_MYSQL =
+		"insert into " +
+		"  catissue_spec_tag_items (tag_id, obj_id, added_by, added_on) " +
+		"select " +
+		"  %d, ss.specimen_id, %d, current_timestamp " +
+		"from " +
+		"  os_shipment_specimens ss " +
+		"  left join catissue_spec_tag_items cart_spmns on cart_spmns.obj_id = ss.specimen_id and cart_spmns.tag_id = %d " +
+		"where " +
+		"  ss.shipment_id = :shipmentId and " +
+		"  cart_spmns.identifier is null";
+
+	private static final String ADD_SHIPMENT_ITEMS_TO_CART_ORASQL =
+		"insert into " +
+		"  catissue_spec_tag_items (identifier, tag_id, obj_id, added_by, added_on) " +
+		"select " +
+		"  OS_SPMN_CART_ITEMS_SEQ.nextval, %d, ss.specimen_id, %d, current_timestamp " +
+		"from " +
+		"  os_shipment_specimens ss " +
+		"  left join catissue_spec_tag_items cart_spmns on cart_spmns.obj_id = ss.specimen_id and cart_spmns.tag_id = %d " +
+		"where " +
+		"  ss.shipment_id = :shipmentId and " +
+		"  cart_spmns.identifier is null";
+
+	private static final String RM_SPMNS_FROM_CART_SQL =
+		"delete from " +
+		"  catissue_spec_tag_items " +
+		"where " +
+		"  tag_id = :cartId and " +
+		"  obj_id not in (select specimen_id from os_shipment_specimens where shipment_id = :shipmentId)";
 }

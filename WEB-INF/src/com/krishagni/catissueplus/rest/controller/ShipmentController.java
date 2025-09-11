@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentCartDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentContainerDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
@@ -225,6 +226,14 @@ public class ShipmentController {
 	@ResponseBody
 	public QueryDataExportResult exportReport(@PathVariable("id") Long id) {
 		return response(shipmentSvc.exportReport(request(id)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/cart")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ShipmentDetail createCartIfAbsent(@PathVariable("id") Long id, @RequestBody ShipmentCartDetail input) {
+		input.setShipmentId(id);
+		return response(shipmentSvc.createCartIfAbsent(request(input)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/containers")

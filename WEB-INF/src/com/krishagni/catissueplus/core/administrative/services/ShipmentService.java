@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.administrative.services;
 
 import java.util.List;
 
+import com.krishagni.catissueplus.core.administrative.events.ShipmentCartDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentContainerDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
@@ -34,4 +35,6 @@ public interface ShipmentService {
 	ResponseEvent<QueryDataExportResult> exportReport(RequestEvent<Long> req);
 
 	List<StorageContainerSummary> getContainers(List<String> names, boolean request, String sendingSiteName, String receivingSiteName);
+
+	ResponseEvent<ShipmentDetail> createCartIfAbsent(RequestEvent<ShipmentCartDetail> req);
 }

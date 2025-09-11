@@ -81,7 +81,9 @@ public enum ShipmentErrorCode implements ErrorCode {
 
 	INV_REQ_STATUS,
 
-	NOT_REQUEST
+	NOT_REQUEST,
+
+	SPECIMENS_REQ_FOR_CART
 	
 	;
 	

@@ -73,6 +73,10 @@ class Shipment {
     return http.get('shipments/' + shipmentId + '/report');
   }
 
+  async createCartIfAbsent(shipmentId, cart) {
+    return http.put('shipments/' + shipmentId + '/cart', cart);
+  }
+
   async getListViewSchema() {
     return listSchema;
   }

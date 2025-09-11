@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListSummary;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serializable {
@@ -70,6 +71,8 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 	private List<UserSummary> notifyUsers = new ArrayList<>();
 
 	private Integer specimensCount;
+
+	private SpecimenListSummary cart;
 	
 	//
 	// For BO template
@@ -288,6 +291,14 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		this.specimensCount = specimensCount;
 	}
 
+	public SpecimenListSummary getCart() {
+		return cart;
+	}
+
+	public void setCart(SpecimenListSummary cart) {
+		this.cart = cart;
+	}
+
 	public ShipmentSpecimenDetail getShipmentSpecimen() {
 		return shipmentSpecimen;
 	}
@@ -337,6 +348,10 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		detail.setRequestStatus(PermissibleValue.getValue(shipment.getRequestStatus()));
 		detail.setActivityStatus(shipment.getActivityStatus());
 		detail.setNotifyUsers(UserSummary.from(shipment.getNotifyUsers()));
+		if (shipment.getCart() != null) {
+			detail.setCart(SpecimenListSummary.fromSpecimenList(shipment.getCart()));
+		}
+
 		return detail;
 	}
 	

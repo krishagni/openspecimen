@@ -12,10 +12,12 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.CollectionUpdater;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
@@ -113,6 +115,8 @@ public class Shipment extends BaseEntity {
 	private Set<ShipmentContainer> shipmentContainers = new HashSet<>();
 
 	private Set<User> notifyUsers = new HashSet<>();
+
+	private SpecimenList cart;
 
 	public static String getEntityName() {
 		return ENTITY_NAME;
@@ -300,6 +304,15 @@ public class Shipment extends BaseEntity {
 
 	public void setNotifyUsers(Set<User> notifyUsers) {
 		this.notifyUsers = notifyUsers;
+	}
+
+	@NotAudited
+	public SpecimenList getCart() {
+		return cart;
+	}
+
+	public void setCart(SpecimenList cart) {
+		this.cart = cart;
 	}
 
 	public boolean isSpecimenShipment() {

@@ -214,4 +214,12 @@
       <column name="SOURCE_ENTITY_ID" type="${int.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Shipment backed cart">
+    <addColumn tableName="OS_SHIPMENTS">
+      <column name="CART_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SHIPMENT_CART" referencedTableName="CATISSUE_SPECIMENLIST_TAGS" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationListener;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
@@ -27,6 +28,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.ShipmentFactory;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SiteErrorCode;
+import com.krishagni.catissueplus.core.administrative.events.ShipmentCartDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentContainerDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentDetail;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCriteria;
@@ -39,9 +41,13 @@ import com.krishagni.catissueplus.core.administrative.services.ShipmentService;
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.services.SpecimenListService;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -51,6 +57,7 @@ import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
@@ -69,7 +76,7 @@ import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
 
-public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
+public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, ApplicationListener<SpecimenListSavedEvent> {
 	private static final String SHIPMENT_REQUESTED_EMAIL_TMPL = "shipment_requested";
 
 	private static final String SHIPMENT_SHIPPED_EMAIL_TMPL = "shipment_shipped";
@@ -93,6 +100,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	private StorageContainerService containerSvc;
 	
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
+
+	private SpecimenListService spmnListSvc;
 	
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -117,7 +126,11 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	public void setDeDaoFactory(com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory) {
 		this.deDaoFactory = deDaoFactory;
 	}
-	
+
+	public void setSpmnListSvc(SpecimenListService spmnListSvc) {
+		this.spmnListSvc = spmnListSvc;
+	}
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<ShipmentDetail>> getShipments(RequestEvent<ShipmentListCriteria> req) {
@@ -283,6 +296,11 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 
 			existing.update(newShipment);
 			getShipmentDao().saveOrUpdate(existing, true);
+			if (existing.getCart() != null) {
+				getShipmentDao().addSpecimensToCart(existing.getId(), existing.getCart().getId());
+				getShipmentDao().removeSpecimensFromCart(existing.getId(), existing.getCart().getId());
+			}
+
 			sendEmailNotifications(existing, oldStatus, oldReqStatus, detail.isSendMail());
 			EventPublisher.getInstance().publish(new ShipmentSavedEvent(existing));
 			return ResponseEvent.response(ShipmentDetail.from(existing));
@@ -300,6 +318,10 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 			Shipment shipment = getShipment(req.getPayload(), null);
 			AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(shipment);
 			shipment.delete();
+			if (shipment.getCart() != null) {
+				shipment.getCart().delete();
+			}
+
 			return ResponseEvent.response(ShipmentDetail.from(shipment));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -441,6 +463,50 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	}
 
 	@Override
+	@PlusTransactional
+	public ResponseEvent<ShipmentDetail> createCartIfAbsent(RequestEvent<ShipmentCartDetail> req) {
+		try {
+			ShipmentCartDetail input = req.getPayload();
+			Shipment shipment = getShipment(input.getShipmentId(), null);
+			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(shipment);
+			if (!shipment.isSpecimenShipment()) {
+				return ResponseEvent.userError(ShipmentErrorCode.SPECIMENS_REQ_FOR_CART);
+			}
+
+			if (shipment.getCart() != null) {
+				return ResponseEvent.response(ShipmentDetail.from(shipment));
+			}
+
+			SpecimenListDetail cartDetail = new SpecimenListDetail();
+			cartDetail.setName(input.getName());
+			cartDetail.setDescription(input.getDescription());
+			cartDetail.setSourceEntityType(Shipment.getEntityName());
+			cartDetail.setSourceEntityId(shipment.getId());
+
+			List<UserSummary> sharedWith = new ArrayList<>();
+			if (shipment.getSender() != null) {
+				sharedWith.add(UserSummary.from(shipment.getSender()));
+			}
+
+			if (shipment.getReceiver() != null) {
+				sharedWith.add(UserSummary.from(shipment.getReceiver()));
+			}
+
+			cartDetail.setSharedWith(sharedWith);
+			cartDetail = ResponseEvent.unwrap(spmnListSvc.createSpecimenList(RequestEvent.wrap(cartDetail)));
+			SpecimenList cart = daoFactory.getSpecimenListDao().getSpecimenList(cartDetail.getId());
+			shipment.setCart(cart);
+			daoFactory.getShipmentDao().saveOrUpdate(shipment);
+			getShipmentDao().addSpecimensToCart(shipment.getId(), cart.getId());
+			return ResponseEvent.response(ShipmentDetail.from(shipment));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
 	public String getObjectName() {
 		return Shipment.getEntityName();
 	}
@@ -464,6 +530,17 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor {
 	public void ensureReadAllowed(Long id) {
 		Shipment shipment = getShipment(id, null);
 		AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
+	}
+
+	@Override
+	public void onApplicationEvent(SpecimenListSavedEvent event) {
+		int op = event.getOp();
+		if (op != 2) {
+			return;
+		}
+
+		SpecimenList cart = event.getEventData();
+		getShipmentDao().removeShipmentCart(cart.getId());
 	}
 
 	private ShipmentListCriteria addShipmentListCriteria(ShipmentListCriteria crit) {
