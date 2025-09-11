@@ -2,7 +2,7 @@
   <div>
     <os-page-toolbar v-show-if-allowed="shipmentResources.updateOpts"
       v-if="(!shipment.request || shipment.status != 'Pending') && shipment.type == 'SPECIMEN'">
-      <os-button left-icon="dolly" :label="$t('carts.pick_lists')" @click="viewPickLists" />
+      <os-pick-lists-dropdown :cart="ctx.cart" @new-cart="createPickList" />
     </os-page-toolbar>
 
     <os-grid>
@@ -44,8 +44,11 @@ export default {
     return {
       ctx: {
         specimens: [],
+
         loading: true,
+
         startAt: 0,
+
         haveMoreSpmns: false
       },
 
@@ -57,6 +60,14 @@ export default {
 
   created() {
     this.loadSpecimens(0);
+    this.ctx.cart = this.shipment.cart || {name: 'Shipment #' + this.shipment.id + ' Cart'};
+  },
+
+  watch: {
+    shipment: function() {
+      this.loadSpecimens(0);
+      this.ctx.cart = this.shipment.cart || {name: 'Shipment #' + this.shipment.id + ' Cart'};
+    }
   },
 
   methods: {
@@ -85,15 +96,19 @@ export default {
       this.loadSpecimens(this.ctx.startAt + MAX_SPMNS);
     },
 
-    viewPickLists: function() {
-      if (this.shipment.cart && this.shipment.cart.id > 0) {
-        routerSvc.goto('PickLists', {cartId: this.shipment.cart.id});
-        return;
-      }
+    createPickList: function({dialog, cart, pickList}) {
+      const payload = {
+        shipmentId: this.shipment.id,
+        name: cart.name,
+        sharedWith: cart.sharedWith,
+        pickListName: pickList.name
+      };
 
-      const cart = {name: 'Shipment #' + this.shipment.id + ' Cart'};
-      shipmentSvc.createCartIfAbsent(this.shipment.id, cart).then(
-        savedShipment => routerSvc.goto('PickLists', {cartId: savedShipment.cart.id})
+      shipmentSvc.createPickList(this.shipment.id, payload).then(
+        ({cart, id}) => {
+          routerSvc.goto('PickList', {cartId: cart.id, listId: id});
+          dialog.close();
+        }
       );
     }
   }

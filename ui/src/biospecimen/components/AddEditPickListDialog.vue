@@ -22,6 +22,7 @@ import routerSvc from '@/common/services/Router.js';
 import util      from '@/common/services/Util.js';
 
 export default {
+  emits: ['new-cart'],
 
   data() {
     return {
@@ -38,6 +39,21 @@ export default {
           {
             fields: [
               {
+                name: "cart.name",
+                type: "text",
+                labelCode: "carts.cart",
+                validations: {
+                  required: {
+                    messageCode: "carts.cart_required"
+                  }
+                },
+                showWhen: "!cart || !cart.id"
+              }
+            ]
+          },
+          {
+            fields: [
+              {
                 name: "pickList.name",
                 type: "text",
                 labelCode: "carts.name",
@@ -48,6 +64,26 @@ export default {
                 }
               }
             ]
+          },
+          {
+            fields: [
+              {
+                name: "cart.sharedWithGroups",
+                type: "multiselect",
+                labelCode: "carts.share_with_user_groups",
+                listSource: {
+                  apiUrl: "user-groups",
+                  displayProp: "name",
+                  searchProp: "query",
+                  queryParams: {
+                    static: {
+                      listAll: true
+                    }
+                  }
+                },
+                showWhen: "!cart || !cart.id"
+              }
+            ]
           }
         ]
       };
@@ -56,7 +92,7 @@ export default {
 
   methods: {
     open: function(cart, pickList) {
-      this.ctx.cart = cart;
+      this.ctx.cart = util.clone(cart || {});
       this.ctx.pickList = util.clone(pickList || {});
       this.$refs.addEditFormDialog.open();
     },
@@ -68,6 +104,11 @@ export default {
 
     saveOrUpdate: function() {
       if (!this.$refs.addEditForm.validate()) {
+        return;
+      }
+
+      if (!this.ctx.cart.id) {
+        this.$emit('new-cart', {dialog: this.$refs.addEditFormDialog, cart: this.ctx.cart, pickList: this.ctx.pickList});
         return;
       }
 

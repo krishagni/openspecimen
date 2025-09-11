@@ -20,6 +20,8 @@
 
   "carts": {
     "assign_folder": "Assign",
+    "cart": "Cart",
+    "cart_required": "Cart Name is mandatory",
     "child_specimens_added": "Child specimens added to the cart.",
     "confirm_delete": "Cart '{name}' and any dependent data will be deleted. Are you sure you want to proceed?",
     "confirm_delete_picklist": "Pick List '{name}' will be deleted. Are you sure you want to proceed?",

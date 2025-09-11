@@ -45,6 +45,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenListDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenListService;
@@ -57,7 +58,6 @@ import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
-import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.EmailService;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
@@ -464,7 +464,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, App
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<ShipmentDetail> createCartIfAbsent(RequestEvent<ShipmentCartDetail> req) {
+	public ResponseEvent<SpecimensPickListDetail> createPickList(RequestEvent<ShipmentCartDetail> req) {
 		try {
 			ShipmentCartDetail input = req.getPayload();
 			Shipment shipment = getShipment(input.getShipmentId(), null);
@@ -473,32 +473,28 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, App
 				return ResponseEvent.userError(ShipmentErrorCode.SPECIMENS_REQ_FOR_CART);
 			}
 
-			if (shipment.getCart() != null) {
-				return ResponseEvent.response(ShipmentDetail.from(shipment));
-			}
-
 			SpecimenListDetail cartDetail = new SpecimenListDetail();
-			cartDetail.setName(input.getName());
-			cartDetail.setDescription(input.getDescription());
-			cartDetail.setSourceEntityType(Shipment.getEntityName());
-			cartDetail.setSourceEntityId(shipment.getId());
+			if (shipment.getCart() == null) {
+				cartDetail.setName(input.getName());
+				cartDetail.setDescription(input.getDescription());
+				cartDetail.setSharedWithGroups(input.getSharedWith());
+				cartDetail.setSourceEntityType(Shipment.getEntityName());
+				cartDetail.setSourceEntityId(shipment.getId());
 
-			List<UserSummary> sharedWith = new ArrayList<>();
-			if (shipment.getSender() != null) {
-				sharedWith.add(UserSummary.from(shipment.getSender()));
+				cartDetail = ResponseEvent.unwrap(spmnListSvc.createSpecimenList(RequestEvent.wrap(cartDetail)));
+				SpecimenList cart = daoFactory.getSpecimenListDao().getSpecimenList(cartDetail.getId());
+				shipment.setCart(cart);
+
+				getShipmentDao().addSpecimensToCart(shipment.getId(), cart.getId());
+			} else {
+				cartDetail.setId(shipment.getCart().getId());
+				cartDetail.setName(shipment.getCart().getName());
 			}
 
-			if (shipment.getReceiver() != null) {
-				sharedWith.add(UserSummary.from(shipment.getReceiver()));
-			}
-
-			cartDetail.setSharedWith(sharedWith);
-			cartDetail = ResponseEvent.unwrap(spmnListSvc.createSpecimenList(RequestEvent.wrap(cartDetail)));
-			SpecimenList cart = daoFactory.getSpecimenListDao().getSpecimenList(cartDetail.getId());
-			shipment.setCart(cart);
-			daoFactory.getShipmentDao().saveOrUpdate(shipment);
-			getShipmentDao().addSpecimensToCart(shipment.getId(), cart.getId());
-			return ResponseEvent.response(ShipmentDetail.from(shipment));
+			SpecimensPickListDetail pickListDetail = new SpecimensPickListDetail();
+			pickListDetail.setCart(cartDetail);
+			pickListDetail.setName(input.getPickListName());
+			return spmnListSvc.createPickList(RequestEvent.wrap(pickListDetail));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

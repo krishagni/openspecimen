@@ -1,6 +1,6 @@
 <template>
   <span>
-    <os-button :left-icon="dolly" :label="$t('carts.pick_lists')" @click="showCreatePickListDialog"
+    <os-button left-icon="dolly" :label="$t('carts.pick_lists')" @click="showCreatePickListDialog"
       v-if="!cart || !cart.id" />
 
     <os-dynamic-menu ref="pickListsMenu" icon="dolly" :label="$t('carts.pick_lists')" :options="ctx.pickLists"
@@ -20,7 +20,7 @@
       </template>
     </os-dynamic-menu>
 
-    <os-addedit-pick-list-dialog ref="addEditPickListDialog" />
+    <os-addedit-pick-list-dialog ref="addEditPickListDialog" @new-cart="$emit('new-cart', $event)"/>
   </span>
 </template>
 

@@ -25,6 +25,7 @@ import com.krishagni.catissueplus.core.administrative.events.ShipmentListCriteri
 import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimenDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.administrative.services.ShipmentService;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -228,12 +229,12 @@ public class ShipmentController {
 		return response(shipmentSvc.exportReport(request(id)));
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/cart")
+	@RequestMapping(method = RequestMethod.POST, value = "/{id}/pick-lists")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public ShipmentDetail createCartIfAbsent(@PathVariable("id") Long id, @RequestBody ShipmentCartDetail input) {
+	public SpecimensPickListDetail createPickList(@PathVariable("id") Long id, @RequestBody ShipmentCartDetail input) {
 		input.setShipmentId(id);
-		return response(shipmentSvc.createCartIfAbsent(request(input)));
+		return response(shipmentSvc.createPickList(request(input)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/containers")

@@ -9,6 +9,7 @@ import com.krishagni.catissueplus.core.administrative.events.ShipmentItemsListCr
 import com.krishagni.catissueplus.core.administrative.events.ShipmentListCriteria;
 import com.krishagni.catissueplus.core.administrative.events.ShipmentSpecimenDetail;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.SpecimensPickListDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
@@ -36,5 +37,5 @@ public interface ShipmentService {
 
 	List<StorageContainerSummary> getContainers(List<String> names, boolean request, String sendingSiteName, String receivingSiteName);
 
-	ResponseEvent<ShipmentDetail> createCartIfAbsent(RequestEvent<ShipmentCartDetail> req);
+	ResponseEvent<SpecimensPickListDetail> createPickList(RequestEvent<ShipmentCartDetail> req);
 }
