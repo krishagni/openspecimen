@@ -1,6 +1,8 @@
+import AddEditPickListDialog   from './AddEditPickListDialog.vue';
 import CpList                  from './CpList.vue';
 import CpeList                 from './CpeList.vue';
 import EventDescription        from './EventDescription.vue';
+import PickListsDropdown       from './PickListsDropdown.vue';
 import PpidList                from './PpidList.vue';
 import SpecimenRequirementList from './SpecimenRequirementList.vue';
 import VisitList               from './VisitList.vue';
@@ -11,6 +13,7 @@ import fieldFactory from '@/common/services/FieldFactory.js';
 
 export default {
   install(app) {
+    app.component('os-addedit-pick-list-dialog', AddEditPickListDialog);
     app.component('os-cp-list',    CpList);
     app.component('os-cpe-list',   CpeList);
     app.component('os-ppid-list',  PpidList);
@@ -20,6 +23,8 @@ export default {
     app.component('os-visit-event-desc', EventDescription);
     app.component('os-visit-specimen-collection-stats', VisitSpecimenCollectionStats);
     app.component('os-visit-specimen-utilisation-stats', VisitSpecimenUtilisationStats);
+
+    app.component('os-pick-lists-dropdown', PickListsDropdown);
 
     fieldFactory.registerComponent('cp-list',    'os-cp-list');
     fieldFactory.registerComponent('cpe-list',   'os-cpe-list');

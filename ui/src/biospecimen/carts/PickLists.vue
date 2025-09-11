@@ -37,7 +37,7 @@
       </os-list-view>
     </os-page-body>
 
-    <AddEditPickListDialog ref="addEditPickListDialog" />
+    <os-addedit-pick-list-dialog ref="addEditPickListDialog" />
 
     <os-confirm-delete ref="confirmDeletePickList" :captcha="false">
       <template #message>
@@ -54,14 +54,8 @@ import listSchema from  '@/biospecimen/schemas/carts/pick-lists.js';
 import cartSvc     from '@/biospecimen/services/SpecimenCart.js';
 import routerSvc   from '@/common/services/Router.js';
 
-import AddEditPickListDialog from './AddEditPickListDialog.vue';
-
 export default {
   props: ['cartId', 'filters'],
-
-  components: {
-    AddEditPickListDialog
-  },
 
   data() {
     return {
