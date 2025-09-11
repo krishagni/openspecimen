@@ -483,8 +483,9 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, App
 
 				cartDetail = ResponseEvent.unwrap(spmnListSvc.createSpecimenList(RequestEvent.wrap(cartDetail)));
 				SpecimenList cart = daoFactory.getSpecimenListDao().getSpecimenList(cartDetail.getId());
-				shipment.setCart(cart);
 
+				shipment.setCart(cart);
+				daoFactory.getShipmentDao().saveOrUpdate(shipment, true);
 				getShipmentDao().addSpecimensToCart(shipment.getId(), cart.getId());
 			} else {
 				cartDetail.setId(shipment.getCart().getId());

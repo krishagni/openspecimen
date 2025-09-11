@@ -252,7 +252,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public Map<String, Long> getPickListSpecimensCount(Long pickListId) {
-		return getPickListSpecimensCount(Collections.singletonList(pickListId)).get(pickListId);
+		return getPickListSpecimensCount(Collections.singletonList(pickListId)).getOrDefault(pickListId, Collections.emptyMap());
 	}
 
 	@Override
