@@ -47,8 +47,8 @@
                   </tr>
                   <tr>
                     <td> IRB ID </td>
-                    #if ( $dp.irbIdentifier && !$dp.irbIdentifier.trim().isEmpty() )
-                      <td> : $dp.irbIdentifier </td>
+                    #if ( $dp.irbId && !$dp.irbId.trim().isEmpty() )
+                      <td> : $dp.irbId </td>
                     #else
                       <td> : Not Specified </td>
                     #end
