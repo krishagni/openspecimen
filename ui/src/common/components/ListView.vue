@@ -330,6 +330,10 @@ export default {
       Object.keys(this.filterValues).forEach(key => delete this.filterValues[key]);
     },
 
+    setFilters: function(input) {
+      this.filterValues = input || {};
+    },
+
     emitFiltersUpdated: function() {
       //
       // first remove the filters that are hidden or not displayed
