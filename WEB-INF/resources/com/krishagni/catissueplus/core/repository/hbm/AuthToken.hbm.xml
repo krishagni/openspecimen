@@ -21,8 +21,7 @@
     
     <sql-query name="deleteInactiveAuthTokens">
       <![CDATA[
-        delete
-        from
+        delete from
           os_auth_tokens
         where
           login_audit_log_id in (

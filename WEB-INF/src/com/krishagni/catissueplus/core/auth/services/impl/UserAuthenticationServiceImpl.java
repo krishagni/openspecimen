@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
@@ -46,6 +47,7 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConcurrentLruCache;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
@@ -71,6 +73,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
 	
 	private AuditService auditService;
+
+	private ConcurrentLruCache<String, Date> tokenAccessTimes = new ConcurrentLruCache<>(100);
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -184,6 +188,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				throw OpenSpecimenException.userError(AuthErrorCode.NA_IP_ADDRESS, tokenDetail.getIpAddress());
 			}
 
+			if (!user.isAdmin() && isSystemLockedDown()) {
+				throw OpenSpecimenException.userError(AuthErrorCode.SYSTEM_LOCKDOWN);
+			}
+
 			LoginAuditLog loginAuditLog = authToken.getLoginAuditLog();
 			if (loginAuditLog.getImpersonatedBy() != null) {
 				long endTime = loginAuditLog.getLoginTime().getTime() + 60 * 60 * 1000;
@@ -192,14 +200,17 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				}
 			}
 
-			long timeSinceLastApiCall = auditService.getTimeSinceLastApiCall(user.getId(), token);
-			int tokenInactiveInterval = AuthConfig.getInstance().getTokenInactiveIntervalInMinutes();
-			if (!user.isAdmin() && isSystemLockedDown()) {
-				throw OpenSpecimenException.userError(AuthErrorCode.SYSTEM_LOCKDOWN);
+			Date lastAccess = tokenAccessTimes.get(token);
+			if (lastAccess == null) {
+				lastAccess = daoFactory.getAuditDao().getLatestApiCallTime(user.getId(), token);
+				tokenAccessTimes.put(token, lastAccess);
 			}
 
+			long timeSinceLastApiCall = TimeUnit.MILLISECONDS.toMinutes(Calendar.getInstance().getTime().getTime() - lastAccess.getTime());
+			int tokenInactiveInterval = AuthConfig.getInstance().getTokenInactiveIntervalInMinutes();
 			if (timeSinceLastApiCall > tokenInactiveInterval) {
 				daoFactory.getAuthDao().deleteAuthToken(authToken);
+				tokenAccessTimes.remove(token);
 				throw OpenSpecimenException.userError(AuthErrorCode.TOKEN_EXPIRED);
 			}
 
@@ -246,6 +257,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			
 			daoFactory.getAuthDao().deleteAuthToken(token);
 			daoFactory.getAuthDao().deleteCredentials(token.getToken());
+			tokenAccessTimes.remove(userToken);
 			return ResponseEvent.response("Success");
 		} catch (Exception e) {	
 			return ResponseEvent.serverError(e);
@@ -414,7 +426,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		}
 	}
 
-	@Scheduled(cron="0 0 12 ? * *")
+	@Scheduled(cron="0 0 1 ? * *")
 	@PlusTransactional
 	public void deleteInactiveAuthTokens() {
 		Calendar cal = Calendar.getInstance();
@@ -422,6 +434,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		daoFactory.getAuthDao().deleteInactiveAuthTokens(cal.getTime());
 		daoFactory.getAuthDao().deleteDanglingCredentials();
 		daoFactory.getAuthDao().deleteExpiredLoginOtps(); // deletes all login OTPs that are older than 5 minutes
+
+		Date cutOffTime = cal.getTime();
+		tokenAccessTimes.removeIf(d -> d.before(cutOffTime));
 	}
 	
 	public String generateToken(User user, LoginDetail loginDetail) {
@@ -498,6 +513,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			EmailUtil.getInstance().sendEmail(KILLED_SESSIONS_TMPL, new String[] { user.getEmailAddress() }, null, props);
 		}
 
+		toDelete.forEach(token -> tokenAccessTimes.remove(token));
 		return deleted;
 	}
 
