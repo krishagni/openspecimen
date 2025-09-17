@@ -217,4 +217,12 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Add covering index on the key sequence generator table to avoid DB lookups">
+    <createIndex tableName="KEY_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX">
+      <column name="KEY_TYPE" type="${text.type}(255)" />
+      <column name="KEY_VALUE" type="${text.type}(255)" />
+      <column name="KEY_SEQUENCE_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
