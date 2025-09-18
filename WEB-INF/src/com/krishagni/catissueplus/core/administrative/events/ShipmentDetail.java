@@ -323,6 +323,35 @@ public class ShipmentDetail implements Mergeable<String, ShipmentDetail>, Serial
 		this.sendMail = sendMail;
 	}
 
+	public ShipmentDetail clone() {
+		ShipmentDetail detail = new ShipmentDetail();
+		detail.setId(this.getId());
+		detail.setRequest(this.isRequest());
+		detail.setRequester(this.getRequester());
+		detail.setRequestDate(this.getRequestDate());
+		detail.setRequesterComments(this.getRequesterComments());
+		detail.setName(this.getName());
+		detail.setType(this.getType());
+		detail.setCourierName(this.getCourierName());
+		detail.setTrackingNumber(this.getTrackingNumber());
+		detail.setTrackingUrl(this.getTrackingUrl());
+		detail.setSendingSite(this.getSendingSite());
+		detail.setReceivingInstitute(this.getReceivingInstitute());
+		detail.setReceivingSite(this.getReceivingSite());
+		detail.setShippedDate(this.getShippedDate());
+		detail.setSender(this.getSender());
+		detail.setSenderComments(this.getSenderComments());
+		detail.setReceivedDate(this.getReceivedDate());
+		detail.setReceiver(this.getReceiver());
+		detail.setReceiverComments(this.getReceiverComments());
+		detail.setStatus(this.getStatus());
+		detail.setRequestStatus(this.getRequestStatus());
+		detail.setActivityStatus(this.getActivityStatus());
+		detail.setNotifyUsers(this.getNotifyUsers());
+		detail.setCart(this.getCart());
+		return detail;
+	}
+
 	public static ShipmentDetail from(Shipment shipment) {
 		ShipmentDetail detail = new ShipmentDetail();
 		detail.setId(shipment.getId());

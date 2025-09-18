@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
@@ -22,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.domain.Shipment;
 import com.krishagni.catissueplus.core.administrative.domain.Shipment.Status;
 import com.krishagni.catissueplus.core.administrative.domain.ShipmentContainer;
 import com.krishagni.catissueplus.core.administrative.domain.ShipmentSavedEvent;
+import com.krishagni.catissueplus.core.administrative.domain.ShipmentSpecimen;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -72,11 +75,13 @@ import com.krishagni.catissueplus.core.de.events.ExecuteQueryEventOp;
 import com.krishagni.catissueplus.core.de.events.QueryDataExportResult;
 import com.krishagni.catissueplus.core.de.services.QueryService;
 import com.krishagni.catissueplus.core.de.services.SavedQueryErrorCode;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
 
-public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, ApplicationListener<SpecimenListSavedEvent> {
+public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, InitializingBean, ApplicationListener<SpecimenListSavedEvent> {
 	private static final String SHIPMENT_REQUESTED_EMAIL_TMPL = "shipment_requested";
 
 	private static final String SHIPMENT_SHIPPED_EMAIL_TMPL = "shipment_shipped";
@@ -102,6 +107,8 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, App
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
 
 	private SpecimenListService spmnListSvc;
+
+	private ExportService exportSvc;
 	
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -129,6 +136,10 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, App
 
 	public void setSpmnListSvc(SpecimenListService spmnListSvc) {
 		this.spmnListSvc = spmnListSvc;
+	}
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
 	}
 
 	@Override
@@ -527,6 +538,11 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, App
 	public void ensureReadAllowed(Long id) {
 		Shipment shipment = getShipment(id, null);
 		AccessCtrlMgr.getInstance().ensureReadShipmentRights(shipment);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("shipment", this::getShipmentsGenerator);
 	}
 
 	@Override
@@ -1005,6 +1021,95 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, App
 				Utility.writeKeyValuesToCsv(out, headers);
 			}
 		});
+	}
+
+	private Function<ExportJob, List<? extends Object>> getShipmentsGenerator() {
+		return new Function<>() {
+			private boolean paramsInited = false;
+
+			private boolean endOfShipments = false;
+
+			private ShipmentListCriteria crit;
+
+			private Long lastId;
+
+			private List<ShipmentDetail> shipments;
+
+			private ShipmentDetail currentShipment;
+
+			private int itemStartAt;
+
+			@Override
+			public List<? extends Object> apply(ExportJob job) {
+				initParams(job);
+
+				while (!endOfShipments) {
+					if (currentShipment == null) {
+						if (CollectionUtils.isEmpty(shipments)) {
+							shipments = ShipmentDetail.from(daoFactory.getShipmentDao().getShipments(crit.lastId(lastId)));
+							if (shipments.isEmpty()) {
+								return Collections.emptyList();
+							}
+						}
+
+						currentShipment = shipments.remove(0);
+						lastId = currentShipment.getId();
+						itemStartAt = 0;
+					}
+
+					ShipmentItemsListCriteria itemsCriteria = new ShipmentItemsListCriteria()
+						.shipmentId(currentShipment.getId())
+						.startAt(itemStartAt)
+						.maxResults(100);
+
+					List<ShipmentSpecimen> items = daoFactory.getShipmentDao().getShipmentSpecimens(itemsCriteria);
+					List<ShipmentDetail> records = new ArrayList<>();
+					for (ShipmentSpecimen item : items) {
+						ShipmentDetail record = currentShipment.clone();
+						record.setShipmentSpecimen(ShipmentSpecimenDetail.from(item));
+						records.add(record);
+					}
+
+					itemStartAt += items.size();
+					if (items.size() < itemsCriteria.maxResults()) {
+						currentShipment = null;
+					}
+
+					if (CollectionUtils.isNotEmpty(records)) {
+						return records;
+					}
+				}
+
+				return null;
+			}
+
+
+			private void initParams(ExportJob job) {
+				if (paramsInited) {
+					return;
+				}
+
+				Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessShipmentSites();
+				if (siteCps != null && siteCps.isEmpty()) {
+					endOfShipments = true;
+				} else if (!AccessCtrlMgr.getInstance().hasShipmentEximRights()) {
+					endOfShipments = true;
+				} else {
+					crit = new ShipmentListCriteria()
+						.type(Shipment.Type.SPECIMEN)
+						.sites(siteCps)
+						.orderBy("id")
+						.asc(false);
+
+					if (CollectionUtils.isNotEmpty(job.getRecordIds())) {
+						crit.ids(job.getRecordIds());
+						crit.maxResults(crit.ids().size() + 1);
+					}
+				}
+
+				paramsInited = true;
+			}
+		};
 	}
 	
 	private String getMessage(String code) {

@@ -1765,6 +1765,10 @@ public class AccessCtrlMgr {
 		ensureShipmentRights(shipment, Operation.DELETE);
 	}
 
+	public boolean hasShipmentEximRights() {
+		return hasEximRights(null, Resource.SHIPPING_N_TRACKING.getName());
+	}
+
 	private void ensureShipmentRights(Shipment shipment, Operation op) {
 		if (AuthUtil.isAdmin()) {
 			return;

@@ -1558,6 +1558,7 @@
     <property name="containerSvc" ref="storageContainerSvc"/>
     <property name="deDaoFactory" ref="deDaoFactory"/>
     <property name="spmnListSvc" ref="specimenListSvc" />
+    <property name="exportSvc" ref="exportSvc"/>
   </bean>
 
   <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">  

@@ -39,6 +39,15 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 	@Override
 	public List<Shipment> getShipments(ShipmentListCriteria crit) {
 		Criteria<Shipment> query = getShipmentsQuery(crit);
+		if ("id".equals(crit.orderBy())) {
+			if (crit.lastId() != null) {
+				query.add(crit.asc() ? query.gt("shipment.id", crit.lastId()) : query.lt("shipment.id", crit.lastId()));
+			}
+
+			return query.orderBy(crit.asc() ? query.asc("shipment.id") : query.desc("shipment.id"))
+				.list(crit.startAt(), crit.maxResults());
+		}
+
 		return query.orderBy(
 			query.desc(
 				query.isNotNull("shipment.shippedDate"),
@@ -205,6 +214,7 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		addSendSiteRestrictions(query, crit);
 		addRecvSiteRestrictions(query, crit);
 		addStatusRestrictions(query, crit);
+		addTypeRestrictions(query, crit);
 		addRequestStatusRestrictions(query, crit);
 		addLabelOrBarcodeRestrictions(query, crit);
 		addSiteRestrictions(query, crit);
@@ -244,6 +254,14 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 		}
 
 		query.add(query.eq("shipment.status", crit.status()));
+	}
+
+	private void addTypeRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {
+		if (crit.type() == null) {
+			return;
+		}
+
+		query.add(query.eq("shipment.type", crit.type()));
 	}
 
 	private void addRequestStatusRestrictions(Criteria<Shipment> query, ShipmentListCriteria crit) {

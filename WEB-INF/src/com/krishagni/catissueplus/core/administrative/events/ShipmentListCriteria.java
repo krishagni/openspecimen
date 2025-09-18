@@ -19,6 +19,8 @@ public class ShipmentListCriteria extends AbstractListCriteria<ShipmentListCrite
 
 	private Shipment.Status status;
 
+	private Shipment.Type type;
+
 	private String requestStatus;
 	
 	private Set<SiteCpPair> sites;
@@ -79,6 +81,15 @@ public class ShipmentListCriteria extends AbstractListCriteria<ShipmentListCrite
 
 	public ShipmentListCriteria status(Shipment.Status status) {
 		this.status = status;
+		return self();
+	}
+
+	public Shipment.Type type() {
+		return type;
+	}
+
+	public ShipmentListCriteria type(Shipment.Type type) {
+		this.type = type;
 		return self();
 	}
 
