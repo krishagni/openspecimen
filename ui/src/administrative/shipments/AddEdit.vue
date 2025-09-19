@@ -35,7 +35,7 @@
           <os-step :title="$t('shipments.specimens')" :validate="validateSpecimenDetails"
             v-if="dataCtx.shipment.type == 'SPECIMEN'">
 
-            <span v-if="dataCtx.shipment.status == 'Pending'">
+            <span v-if="dataCtx.shipment.status == 'Pending' && dataCtx.specimenItems.length < ctx.maxSpmnsLimit">
               <os-add-specimens ref="addSpmns" :criteria="ctx.criteria" :error-opts="ctx.errorOpts"
                 :label="$t('shipments.scan_specimen_labels')" @on-add="addSpecimens">
                 <os-button :label="$t('shipments.validate')" @click="validateSpecimenLabels" />
@@ -46,6 +46,15 @@
               <os-message type="error" v-if="!dataCtx.specimenItems || dataCtx.specimenItems.length == 0">
                 <span v-t="'shipments.no_specimens_add_one'">No specimens in the shipment. Add at least one specimen.</span>
               </os-message>
+
+              <div v-else-if="dataCtx.specimenItems.length > ctx.maxSpmnsLimit">
+                <os-message type="warn">
+                  <span v-t="{path: 'shipments.max_spmns_limit_exceeded', args: ctx}">More specimens in the shipment than allowed to edit on the UI. Use Bulk Import</span>
+                </os-message>
+
+                <os-button v-if="dataCtx.shipment.id > 0" left-icon="download" :label="$t('shipments.export_shipment')"
+                  @click="exportShipment" />
+              </div>
 
               <os-table-form ref="specimenDetails" v-else
                 :data="dataCtx" :items="dataCtx.specimenItems" :schema="ctx.specimensSchema"
@@ -150,6 +159,7 @@
 import { reactive, inject } from 'vue';
 
 import alertSvc    from '@/common/services/Alerts.js';
+import exportSvc   from '@/common/services/ExportService.js';
 import i18n        from '@/common/services/I18n.js';
 import routerSvc   from '@/common/services/Router.js';
 import util        from '@/common/services/Util.js';
@@ -244,18 +254,22 @@ export default {
   },
 
   methods: {
-    loadShipment: function() {
+    loadShipment: async function() {
       const ctx     = this.ctx;
       const dataCtx = this.dataCtx;
 
       ctx.loading = true;
+      if (ctx.maxSpmnsLimit == null || ctx.maxSpmnsLimit == undefined) {
+        const setting = await settingsSvc.getSetting('administrative', 'max_order_spmns_ui_limit');
+        ctx.maxSpmnsLimit = +setting[0].value || 100;
+      }
 
       let promises = [ shipmentSvc.getAddEditFormSchema() ];
       if (this.shipmentId && +this.shipmentId > 0) {
         promises.push(shipmentSvc.getShipment(+this.shipmentId));
 
         if (this.shipmentType == 'SPECIMEN') {
-          promises.push(shipmentSvc.getSpecimens(+this.shipmentId, {startAt: 0, maxResults: 10000}));
+          promises.push(shipmentSvc.getSpecimens(+this.shipmentId, {startAt: 0, maxResults: ctx.maxSpmnsLimit + 1}));
         } else {
           promises.push(shipmentSvc.getContainers(+this.shipmentId, {startAt: 0, maxResults: 10000}));
         }
@@ -308,10 +322,12 @@ export default {
             dataCtx.shipment.receivedDate = new Date();
 
             if (dataCtx.shipment.type == 'SPECIMEN') {
+              const defRecvQty = (dataCtx.specimenItems.length > ctx.maxSpmnsLimit) ? 'Acceptable' : null;
               dataCtx.specimenItems.forEach(
                 item => {
                   item.specimen.storageLocation = null;
                   item.specimen.printLabel = (item.specimen.labelAutoPrintMode == 'ON_RECEIVE');
+                  item.receivedQuality = item.receivedQuality || defRecvQty;
                 }
               );
             } else {
@@ -352,7 +368,7 @@ export default {
     },
 
     validateSpecimenDetails: function() {
-      if (!this.dataCtx.specimenItems  || this.dataCtx.specimenItems.length == 0) {
+      if (!this.dataCtx.specimenItems  || this.dataCtx.specimenItems.length == 0 || !this.$refs.specimenDetails) {
         return true;
       }
 
@@ -463,7 +479,7 @@ export default {
           return;
         }
 
-        if (!this.$refs.specimenDetails.validate()) {
+        if (this.$refs.specimenDetails && !this.$refs.specimenDetails.validate()) {
           return;
         }
       } else {
@@ -515,6 +531,10 @@ export default {
 
     cancel: function() {
       routerSvc.back();
+    },
+
+    exportShipment: function() {
+      exportSvc.exportRecords({objectType: 'shipment', recordIds: [+this.shipmentId]});
     },
 
 
