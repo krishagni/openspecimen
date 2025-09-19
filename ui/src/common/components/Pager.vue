@@ -40,7 +40,6 @@ export default {
 
 .os-pager {
   display: block;
-  margin-bottom: 1.25rem;
 }
 
 .os-pager:after {

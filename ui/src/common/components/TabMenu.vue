@@ -35,6 +35,6 @@
 }
 
 .os-tab-menu + :deep(div) {
-  height: calc(100% - 45px);
+  height: calc(100% - 51px);
 }
 </style>

@@ -8,6 +8,8 @@
 <style scoped>
 .os-page {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .os-page:not(:last-child) {
@@ -15,7 +17,7 @@
 }
 
 .os-page :deep(.os-page-body) {
-  height: calc(100% - 68px);
+  flex: 1;
   overflow-y: auto;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
