@@ -13,9 +13,12 @@ public class ImportJob extends BaseEntity {
 		COMPLETED,
 		FAILED,
 		QUEUED,
+		OFFLINE_QUEUED,
 		IN_PROGRESS,
 		STOPPED,
-		TXN_SIZE_EXCEEDED
+		TXN_SIZE_EXCEEDED,
+		TOO_LARGE,
+		LARGE_TXN_N_JOB
 	}
 	
 	public enum Type {
@@ -223,6 +226,10 @@ public class ImportJob extends BaseEntity {
 
 	public boolean isQueued() {
 		return getStatus() == Status.QUEUED;
+	}
+
+	public boolean isOfflineQueued() {
+		return getStatus() == Status.OFFLINE_QUEUED;
 	}
 
 	public boolean isInProgress() {

@@ -101,7 +101,11 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 	private static final int MAX_RECS_PER_TXN = 5000;
 
+	private static final int ONLINE_IMPORT_LIMIT = 1000;
+
 	private static final String CFG_MAX_TXN_SIZE = "import_max_records_per_txn";
+
+	private static final String CFG_ONLINE_IMPORT_LIMIT = "online_import_job_size_limit";
 
 	private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
@@ -251,8 +255,17 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			// Ensure transaction size is well within configured limits
 			//
 			int inputRecordsCnt = CsvFileReader.getRowsCount(inputFile, true);
+			Status status = null;
+			if (!detail.isOfflineQueue() && inputRecordsCnt > getOnlineImportJobLimit()) {
+				status = Status.TOO_LARGE;
+			}
+
 			if (detail.isAtomic() && inputRecordsCnt > getMaxRecsPerTxn()) {
-				return ResponseEvent.response(ImportJobDetail.txnSizeExceeded(inputRecordsCnt));
+				status = (status == null) ? Status.TXN_SIZE_EXCEEDED : Status.LARGE_TXN_N_JOB;
+			}
+
+			if (status != null) {
+				return ResponseEvent.response(ImportJobDetail.status(status, inputRecordsCnt));
 			}
 
 			job = createImportJob(detail);
@@ -263,7 +276,10 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			createJobDir(job.getId());
 			moveToJobDir(inputFile, job.getId());
 
-			queuedJobs.offer(job);
+			if (!job.isOfflineQueued()) {
+				queuedJobs.offer(job);
+			}
+
 			return ResponseEvent.response(ImportJobDetail.from(job));
 		} catch (CsvException csve) {
 			return ResponseEvent.userError(ImportJobErrorCode.RECORD_PARSE_ERROR, csve.getLocalizedMessage());
@@ -486,6 +502,11 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 	}
 
 	@Override
+	public void queueJob(ImportJob job) {
+		queuedJobs.offer(job);
+	}
+
+	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		boolean startScheduler = (lastRefreshTime == 0L);
 		lastRefreshTime = System.currentTimeMillis();
@@ -560,6 +581,10 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 	private int getMaxRecsPerTxn() {
 		return ConfigUtil.getInstance().getIntSetting("common", CFG_MAX_TXN_SIZE, MAX_RECS_PER_TXN);
+	}
+
+	private int getOnlineImportJobLimit() {
+		return ConfigUtil.getInstance().getIntSetting("common", CFG_ONLINE_IMPORT_LIMIT, ONLINE_IMPORT_LIMIT);
 	}
 
 	private ImportJob getImportJob(Long jobId) {
@@ -643,7 +668,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 		job.setCreatedBy(AuthUtil.getCurrentUser());
 		job.setCreationTime(Calendar.getInstance().getTime());
 		job.setName(detail.getObjectType());
-		job.setStatus(Status.QUEUED);
+		job.setStatus(detail.isOfflineQueue() ? Status.OFFLINE_QUEUED : Status.QUEUED);
 		job.setAtomic(detail.isAtomic());
 		job.setParams(detail.getObjectParams());
 		job.setFieldSeparator(detail.getFieldSeparator());

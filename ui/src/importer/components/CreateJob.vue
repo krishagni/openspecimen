@@ -14,10 +14,14 @@
 
     <os-confirm ref="confirmTxnPerRecordDialog">
       <template #title>
-        <span v-t="'import.txn_exceeded'">Pre-validate Records Limit Exceeded</span>
+        <span v-t="'import.txn_exceeded'" v-if="ctx.status == 'TXN_SIZE_EXCEEDED'">Pre-validate Records Limit Exceeded</span>
+        <span v-t="'import.too_large_job'" v-else-if="ctx.status == 'TOO_LARGE'">Online Import Records Limit Exceeded</span>
+        <span v-t="'import.large_txn_n_job'" v-else-if="ctx.status == 'LARGE_TXN_N_JOB'">Records Limit Exceeded</span>
       </template>
       <template #message>
-        <span v-t="{path: 'import.confirm_txn_per_record', args: ctx}"></span>
+        <span v-t="{path: 'import.confirm_txn_per_record', args: ctx}" v-if="ctx.status == 'TXN_SIZE_EXCEEDED'"></span>
+        <span v-t="{path: 'import.confirm_offline_execution', args: ctx}" v-else-if="ctx.status == 'TOO_LARGE'"></span>
+        <span v-t="{path: 'import.confirm_offline_txn_per_record_job', args: ctx}" v-else-if="ctx.status == 'LARGE_TXN_N_JOB'"></span>
       </template>
     </os-confirm>
   </div>
@@ -189,8 +193,9 @@ export default {
 
       return jobSvc.createJob(payload).then(
         (savedJob) => {
-          if (savedJob.status == 'TXN_SIZE_EXCEEDED') {
-            return this._handleTxnSizeExceeded(savedJob);
+          const {status} = savedJob;
+          if (status == 'TXN_SIZE_EXCEEDED' || status == 'TOO_LARGE' || status == 'LARGE_TXN_N_JOB') {
+            return this._handleSizeExceeded(savedJob);
           }
 
           alertsSvc.success({code: 'import.job_created', args: savedJob});
@@ -225,13 +230,24 @@ export default {
       return types;
     },
 
-    _handleTxnSizeExceeded: async function(job) {
-      const [setting] = await settingsSvc.getSetting('common', 'import_max_records_per_txn');
-      Object.assign(this.ctx, {totalRecords: job.totalRecords, maxTxnSize: setting.value});
+    _handleSizeExceeded: async function(job) {
+      const {status, totalRecords} = job;
+
+      Object.assign(this.ctx, {status, totalRecords});
+      if (status == 'TXN_SIZE_EXCEEDED' || status == 'LARGE_TXN_N_JOB') {
+        const [maxTxnSize] = await settingsSvc.getSetting('common', 'import_max_records_per_txn');
+        this.ctx.maxTxnSize = maxTxnSize.value;
+      }
+
+      if (status == 'TOO_LARGE' || status == 'LARGE_TXN_N_JOB') {
+        const [onlineJobSizeLimit] = await settingsSvc.getSetting('common', 'online_import_job_size_limit');
+        this.ctx.onlineJobSizeLimit = onlineJobSizeLimit.value;
+      }
 
       const resp = await this.$refs.confirmTxnPerRecordDialog.open();
       if (resp == 'proceed') {
-        this.ctx.job.atomic = false;
+        this.ctx.job.atomic       = (status != 'TXN_SIZE_EXCEEDED' && status != 'LARGE_TXN_N_JOB');
+        this.ctx.job.offlineQueue = (status == 'TOO_LARGE' || status == 'LARGE_TXN_N_JOB');
         return this.importRecords();
       }
 

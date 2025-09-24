@@ -14,4 +14,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Maximum allowed job size for online import">
+    <sql>
+      call add_cfg_prop(
+        'common', 'online_import_job_size_limit',
+        'online_import_job_size_limit', 'online_import_job_size_limit',
+        'INT', '1000'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

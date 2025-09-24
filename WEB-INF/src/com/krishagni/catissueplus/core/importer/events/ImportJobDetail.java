@@ -173,9 +173,9 @@ public class ImportJobDetail {
 		return jobs.stream().map(ImportJobDetail::from).collect(Collectors.toList());
 	}
 
-	public static ImportJobDetail txnSizeExceeded(int inputRecordsCnt) {
+	public static ImportJobDetail status(ImportJob.Status status, int inputRecordsCnt) {
 		ImportJobDetail detail = new ImportJobDetail();
-		detail.setStatus(ImportJob.Status.TXN_SIZE_EXCEEDED.name());
+		detail.setStatus(status.name());
 		detail.setTotalRecords((long) inputRecordsCnt);
 		return detail;
 	}

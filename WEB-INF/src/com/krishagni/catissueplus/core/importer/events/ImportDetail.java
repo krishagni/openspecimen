@@ -24,6 +24,8 @@ public class ImportDetail {
 
 	private boolean atomic;
 
+	private boolean offlineQueue;
+
 	public String getObjectType() {
 		return objectType;
 	}
@@ -102,5 +104,13 @@ public class ImportDetail {
 
 	public void setAtomic(boolean atomic) {
 		this.atomic = atomic;
+	}
+
+	public boolean isOfflineQueue() {
+		return offlineQueue;
+	}
+
+	public void setOfflineQueue(boolean offlineQueue) {
+		this.offlineQueue = offlineQueue;
 	}
 }

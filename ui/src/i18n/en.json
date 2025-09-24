@@ -1307,7 +1307,9 @@
 
   "import": {
     "confirm_stop_job": "Are you sure you want to stop the job #{id}?",
-    "confirm_txn_per_record": "Only {maxTxnSize} records can be pre-validated before importing into database. However, input file contains {totalRecords} records. Do you want to proceed with option of importing only valid records into database; whilst rejecting invalid records?",
+    "confirm_offline_execution": "Your file of {totalRecords} records exceeds the online import limit of {onlineJobSizeLimit} records. To proceed, your file will be imported during off-peak hours. Do you want to continue?",
+    "confirm_offline_txn_per_record_job": "Your file of {totalRecords} records exceeds both the pre-validation limit {maxTxnSize} records and online import limit {onlineJobSizeLimit} records. To proceed, only the valid records will be imported during off-peak hours. Do you want to continue?",
+    "confirm_txn_per_record": "Your file of {totalRecords} records exceeds the pre-validation limit {maxTxnSize} records. To proceed, only the valid records will be imported. Do you want to continue?",
     "create": "Create",
     "date": "Date",
     "date_format": "Date Format",
@@ -1329,6 +1331,7 @@
     "job_stop_in_progress": "It is taking more time than anticipated to stop import job #{id}. Please refresh this list after some time to view latest status.",
     "job_stopped": "Import job #{id} stopped.",
     "jobs_list": "Bulk Import Jobs",
+    "large_txn_n_job": "Multiple Limits Breached",
     "object_types": {
       "consent": "Consents",
       "containerShipment": "Container Shipments",
@@ -1384,6 +1387,7 @@
       "COMPLETED": "Completed",
       "FAILED": "Failed",
       "IN_PROGRESS": "In Progress",
+      "OFFLINE_QUEUED": "Offline, Queued",
       "QUEUED": "Queued",
       "STOPPED": "Stopped"
     },
@@ -1392,6 +1396,7 @@
     "submit_time": "Submit Time",
     "submitted_by": "Submitted By",
     "success": "Success",
+    "too_large_job": "Online Import Records Limit Exceeded",
     "time": "Time",
     "time_format": "Time Format",
     "time_format_required": "Time format is mandatory",
@@ -2164,6 +2169,8 @@
       "hosting_institute_desc": "Name of the institute hosting OpenSpecimen and the biobank services",
       "import_max_records_per_txn": "Pre-validate Records Limit",
       "import_max_records_per_txn_desc": "Maximum number of records that can be pre-validated before importing to database. WARNING: Keep the limit below 15,000. With a higher limit, the system might become inaccessible to users.",
+      "online_import_job_size_limit": "Online Import Limit",
+      "online_import_job_size_limit_desc": "Maximum records allowed in online import jobs. Jobs that exceed this limit are queued for execution during the off-peak hours.",
       "locale": "Locale",
       "locale_desc": "Locale in which the server has to be deployed. By default, it assumes the server's locale.",
       "log_files_retain_period": "Log Files Retain Period",

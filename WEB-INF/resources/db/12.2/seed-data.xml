@@ -37,4 +37,37 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Nightly job to queue the off-peak hour bulk import jobs" dbms="mysql">
+    <sql>
+      select identifier into @userId from catissue_user where login_name = '$system';
+
+      insert into os_scheduled_jobs
+        (identifier, name, created_by, start_date, end_date, scheduled_hour, scheduled_minute, activity_status,
+         repeat_schedule, type, task_impl_fqn, rt_args_provided, rt_args_help_text)
+      values
+        (default, 'Off-Peak Bulk Import Jobs Scheduler', @userId, now(), null, 2, 0, 'Active',
+         'DAILY', 'INTERNAL', 'com.krishagni.catissueplus.core.importer.services.impl.LoadOfflineJobsTask',
+         0, null);
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Nightly job to queue the off-peak hour bulk import jobs" dbms="oracle">
+    <sql endDelimiter="//">
+      declare
+        userId number;
+      begin
+        select identifier into userId from catissue_user where login_name like '$system';
+
+        insert into os_scheduled_jobs
+          (identifier, name, created_by, start_date, end_date, scheduled_hour, scheduled_minute, activity_status,
+           repeat_schedule, type, command, task_impl_fqn, rt_args_provided, rt_args_help_text)
+        values
+          (os_scheduled_jobs_seq.nextval, 'Off-Peak Bulk Import Jobs Scheduler', userId, sysdate, null, 2, 0, 'Active',
+           'DAILY', 'INTERNAL', null, 'com.krishagni.catissueplus.core.importer.services.impl.LoadOfflineJobsTask',
+           0, null);
+      end;
+      //
+    </sql>
+  </changeSet>
 </databaseChangeLog>

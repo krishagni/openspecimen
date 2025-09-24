@@ -376,9 +376,18 @@ export default {
 
 <style scoped>
 
-form {
-  width: 80%;
-  margin: auto;
+@media (min-width: 576px) {
+  form {
+    width: 90%;
+    margin: auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  form {
+    width: 80%;
+    margin: auto;
+  }
 }
 
 .p-dialog form {

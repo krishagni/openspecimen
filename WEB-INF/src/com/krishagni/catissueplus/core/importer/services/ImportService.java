@@ -35,4 +35,6 @@ public interface ImportService {
 	public ResponseEvent<Integer> scheduleImportJobs(RequestEvent<FileDetail> req);
 
 	public ImportJob saveJob(String entity, String op, Date startTime, Map<String, String> params);
+
+	void queueJob(ImportJob job);
 }
