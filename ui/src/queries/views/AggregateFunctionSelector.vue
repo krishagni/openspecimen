@@ -30,7 +30,7 @@
     </div>
 
     <div style="display: flex; flex-direction: row; margin-bottom: 1.25rem;"
-      v-if="field.type == 'INTEGER' || field.type == 'FLOAT'">
+      v-if="field.type == 'INTEGER' || field.type == 'FLOAT' || field.type == 'DATE'">
       <os-boolean-checkbox v-model="ctx.aggFns.min" :inline-label="$t('queries.min')"
         @update:modelValue="handleInput('min')" style="flex-basis: 40%;" />
       <os-input-text v-model="ctx.aggFns.min_desc" @update:modelValue="handleInput('min')"
@@ -38,7 +38,7 @@
     </div>
 
     <div style="display: flex; flex-direction: row; margin-bottom: 1.25rem;"
-      v-if="field.type == 'INTEGER' || field.type == 'FLOAT'">
+      v-if="field.type == 'INTEGER' || field.type == 'FLOAT' || field.type == 'DATE'">
       <os-boolean-checkbox v-model="ctx.aggFns.max" :inline-label="$t('queries.max')"
         @update:modelValue="handleInput('max')" style="flex-basis: 40%;" />
       <os-input-text v-model="ctx.aggFns.max_desc" @update:modelValue="handleInput('max')"
