@@ -377,7 +377,7 @@ export default {
 <style scoped>
 
 form {
-  max-width: 80%;
+  width: 80%;
   margin: auto;
 }
 
