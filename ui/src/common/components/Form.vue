@@ -391,7 +391,7 @@ export default {
 }
 
 .p-dialog form {
-  max-width: 100%;
+  width: 100%;
 }
 
 .row, :slotted(.row) {
