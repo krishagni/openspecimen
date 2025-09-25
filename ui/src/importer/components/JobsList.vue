@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="toolbar">
+    <div class="toolbar" v-if="!hideRefreshButton">
       <os-button left-icon="sync" :label="$t('common.buttons.refresh')" @click="loadJobs(0)" />
     </div>
     <os-list-view
@@ -46,7 +46,7 @@ import routerSvc from '@/common/services/Router.js';
 const MAX_JOBS = 25;
 
 export default {
-  props: ['objectTypes', 'objectParams', 'createJob'],
+  props: ['objectTypes', 'objectParams', 'createJob', 'hideRefreshButton'],
 
   data() {
     return {
