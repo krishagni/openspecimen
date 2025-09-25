@@ -868,7 +868,7 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 			return;
 		}
 
-		String entityName = job.getEntityName();
+		String entityName = MessageUtil.getInstance().getMessage(job.getEntityName(), job.getEntityName(), new Object[0]);
 		String [] subjParams = {job.getId().toString(), entityName};
 
 		Map<String, Object> props = new HashMap<>();

@@ -1464,7 +1464,7 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 		private void sendJobStatusNotification() {
 			try {
-				String entityName = job.getEntityName();
+				String entityName = MessageUtil.getInstance().getMessage(job.getEntityName(), job.getEntityName(), null);
 				String op = msg("bulk_import_ops_" + job.getType());
 				String [] subjParams = new String[] {
 					job.getId().toString(),

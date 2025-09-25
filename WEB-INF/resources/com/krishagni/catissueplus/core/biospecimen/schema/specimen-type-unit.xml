@@ -1,0 +1,44 @@
+#macro(getMessage $code)$messageSource.getMessage($code, null, $locale)#end
+
+<object-schema>
+  <name>specimenTypeUnit</name>
+
+  <record>
+    <name>com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail</name>
+
+    <field>
+      <caption>#getMessage("specimen_identifier")</caption>
+      <attribute>id</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_cp_short")</caption>
+      <attribute>cpShortTitle</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_class")</caption>
+      <attribute>specimenClass</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_type")</caption>
+      <attribute>type</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_quantity_unit")</caption>
+      <attribute>quantityUnit</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_concentration_unit")</caption>
+      <attribute>concentrationUnit</attribute>
+    </field>
+
+    <field>
+      <caption>#getMessage("specimen_activity_status")</caption>
+      <attribute>activityStatus</attribute>
+    </field>
+  </record>
+</object-schema>

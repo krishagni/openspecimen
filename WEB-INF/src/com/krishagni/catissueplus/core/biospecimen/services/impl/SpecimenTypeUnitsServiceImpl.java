@@ -1,9 +1,13 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
@@ -22,12 +26,26 @@ import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
+import com.krishagni.catissueplus.core.exporter.services.ExportService;
+import com.krishagni.rbac.common.errors.RbacErrorCode;
 
-public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService {
+public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService, InitializingBean {
+	private static final LogUtil logger = LogUtil.getLogger(SpecimenTypeUnitsServiceImpl.class);
+
 	private DaoFactory daoFactory;
+
+	private ExportService exportSvc;
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
+	}
+
+	public void setExportSvc(ExportService exportSvc) {
+		this.exportSvc = exportSvc;
 	}
 
 	@Override
@@ -115,6 +133,11 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService {
 		}
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exportSvc.registerObjectsGenerator("specimenTypeUnit", this::getUnitsGenerator);
+	}
+
 	private SpecimenTypeUnit createUnit(SpecimenTypeUnitDetail input) {
 		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 
@@ -135,7 +158,14 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService {
 	private void setCp(SpecimenTypeUnitDetail input, SpecimenTypeUnit unit, OpenSpecimenException ose) {
 		String shortTitle = input.getCpShortTitle();
 		CollectionProtocol cp = null;
-		if (StringUtils.isNotBlank(shortTitle)) {
+		if (input.getCpId() != null) {
+			if (input.getCpId() > 0L) {
+				cp = daoFactory.getCollectionProtocolDao().getById(input.getCpId());
+				if (cp == null) {
+					ose.addError(CpErrorCode.NOT_FOUND, input.getCpId());
+				}
+			}
+		} else if (StringUtils.isNotBlank(shortTitle)) {
 			cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(shortTitle);
 			if (cp == null) {
 				ose.addError(CpErrorCode.NOT_FOUND, shortTitle);
@@ -223,5 +253,84 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService {
 		} else {
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(unit.getCp());
 		}
+	}
+
+	private Function<ExportJob, List<? extends Object>> getUnitsGenerator() {
+		return new Function<>() {
+			private boolean paramsInited = false;
+
+			private boolean endOfUnits = false;
+
+			private SpecimenTypeUnitsListCriteria crit;
+
+			private Long lastId;
+
+			private int startAt;
+
+			@Override
+			public List<? extends Object> apply(ExportJob job) {
+				initParams(job);
+				if (endOfUnits) {
+					return Collections.emptyList();
+				}
+
+				List<SpecimenTypeUnit> units = daoFactory.getSpecimenTypeUnitDao().getUnits(crit.startAt(startAt).lastId(lastId));
+				List<SpecimenTypeUnitDetail> result = SpecimenTypeUnitDetail.from(units);
+				result.forEach(unit -> unit.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus()));
+
+				startAt += result.size();
+				endOfUnits = result.size() < crit.maxResults();
+				if (!result.isEmpty()) {
+					lastId = result.get(result.size() - 1).getId();
+				}
+
+				return result;
+			}
+
+			private void initParams(ExportJob job) {
+				if (paramsInited) {
+					return;
+				}
+
+				Map<String, String> params = job.getParams();
+				if (params == null) {
+					params = Collections.emptyMap();
+				}
+
+				Long cpId = null;
+				String cpIdStr = params.get("cpId");
+				if (StringUtils.isNotBlank(cpIdStr)) {
+					try {
+						cpId = Long.parseLong(cpIdStr);
+						if (cpId == -1L) {
+							cpId = null;
+						}
+					} catch (Exception e) {
+						logger.error("Invalid CP ID: " + cpIdStr, e);
+					}
+				}
+
+				if (cpId != null) {
+					try {
+						AccessCtrlMgr.getInstance().ensureReadCpRights(cpId);
+					} catch (OpenSpecimenException ose) {
+						if (ose.containsError(RbacErrorCode.ACCESS_DENIED)) {
+							endOfUnits = true;
+						} else {
+							throw ose;
+						}
+					}
+				} else if (!AuthUtil.isAdmin()) {
+					endOfUnits = true;
+				}
+
+				crit = new SpecimenTypeUnitsListCriteria()
+					.cpId(cpId)
+					.startAt(0)
+					.maxResults(100)
+					.asc(true);
+				paramsInited = true;
+			}
+		};
 	}
 }

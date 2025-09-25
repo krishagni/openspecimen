@@ -397,6 +397,7 @@
 
   <bean id="spmnTypeUnitsSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenTypeUnitsServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory" />
+    <property name="exportSvc" ref="exportSvc" />
   </bean>
 
   <bean id="specimenTokenRegistrar" class="com.krishagni.catissueplus.core.common.domain.DefaultLabelTmplTokenRegistrar">
@@ -1208,6 +1209,7 @@
         <value>com/krishagni/catissueplus/core/biospecimen/schema/reserved-event.xml</value>
         <value>com/krishagni/catissueplus/core/biospecimen/schema/return-event.xml</value>
         <value>com/krishagni/catissueplus/core/biospecimen/schema/transfer-event.xml</value>
+        <value>com/krishagni/catissueplus/core/biospecimen/schema/specimen-type-unit.xml</value>
       </list>
     </property>
 
@@ -1514,6 +1516,13 @@
         <entry key="orderItemPrintRule" value-ref="printRulesImporter" />
         <entry key="specimenPrintRule"  value-ref="printRulesImporter" />
         <entry key="visitPrintRule"     value-ref="printRulesImporter" />
+
+        <entry key="specimenTypeUnit">
+          <bean class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenTypeUnitImporter">
+            <property name="unitsSvc" ref="spmnTypeUnitsSvc" />
+            <property name="daoFactory" ref="biospecimenDaoFactory" />
+          </bean>
+        </entry>
       </map>
     </property>
   </bean>

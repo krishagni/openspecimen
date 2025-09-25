@@ -43,6 +43,33 @@ public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> imple
 	}
 
 	@Override
+	public SpecimenTypeUnit getUnit(Long cpId, String cpShortTitle, String specimenClass, String type) {
+		Criteria<SpecimenTypeUnit> query = createCriteria(SpecimenTypeUnit.class, "unit")
+			.leftJoin("unit.cp", "cp")
+			.leftJoin("unit.specimenClass", "specimenClass")
+			.leftJoin("unit.type", "type");
+
+		if ((cpId == null || cpId == -1L) && StringUtils.isBlank(cpShortTitle)) {
+			query.add(query.isNull("cp.id"));
+		} else if (cpId != null && cpId > 0L) {
+			query.add(query.eq("cp.id", cpId));
+		} else if (StringUtils.isNotBlank(cpShortTitle)) {
+			query.add(query.eq("cp.shortTitle", cpShortTitle));
+		}
+
+		query.add(query.eq("specimenClass.value", specimenClass));
+
+		if (StringUtils.isBlank(type)) {
+			query.add(query.isNull("type.id"));
+		} else {
+			query.add(query.eq("type.value", type));
+		}
+
+		List<SpecimenTypeUnit> units = query.list();
+		return units.isEmpty() ? null : units.get(0);
+	}
+
+	@Override
 	public List<SpecimenTypeUnit> getMatchingUnits(Long cpId, Long specimenClassId, Long typeId) {
 		Criteria<SpecimenTypeUnit> query = createCriteria(SpecimenTypeUnit.class, "unit")
 			.leftJoin("unit.cp", "cp")
@@ -79,8 +106,10 @@ public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> imple
 			.leftJoin("unit.specimenClass", "specimenClass")
 			.leftJoin("unit.type", "type");
 
-		if (StringUtils.isNotBlank(crit.cpShortTitle())) {
-			if (crit.cpShortTitle().equals("allCps")) {
+		if (crit.cpId() != null || StringUtils.isNotBlank(crit.cpShortTitle())) {
+			if (crit.cpId() != null) {
+				query.add(query.eq("cp.id", crit.cpId()));
+			} else if (crit.cpShortTitle().equals("allCps")) {
 				query.add(query.isNull("cp.id"));
 			} else {
 				query.add(query.eq("cp.shortTitle", crit.cpShortTitle()));
@@ -100,6 +129,14 @@ public class SpecimenTypeUnitDaoImpl extends AbstractDao<SpecimenTypeUnit> imple
 
 		if (StringUtils.isNotBlank(crit.type())) {
 			query.add(query.eq("type.value", crit.type()));
+		}
+
+		if (crit.lastId() != null) {
+			if (crit.asc()) {
+				query.add(query.gt("unit.id", crit.lastId()));
+			} else {
+				query.add(query.lt("unit.id", crit.lastId()));
+			}
 		}
 
 		return query;

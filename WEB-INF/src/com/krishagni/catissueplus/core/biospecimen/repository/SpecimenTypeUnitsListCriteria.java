@@ -3,11 +3,22 @@ package com.krishagni.catissueplus.core.biospecimen.repository;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class SpecimenTypeUnitsListCriteria extends AbstractListCriteria<SpecimenTypeUnitsListCriteria> {
+	private Long cpId;
+
 	private String cpShortTitle;
 
 	private String specimenClass;
 
 	private String type;
+
+	public Long cpId() {
+		return cpId;
+	}
+
+	public SpecimenTypeUnitsListCriteria cpId(Long cpId) {
+		this.cpId = cpId;
+		return self();
+	}
 
 	public String cpShortTitle() {
 		return cpShortTitle;
