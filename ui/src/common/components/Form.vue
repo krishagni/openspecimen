@@ -379,14 +379,14 @@ export default {
 @media (min-width: 576px) {
   form {
     width: 90%;
-    margin: auto;
+    margin: 0rem auto;
   }
 }
 
 @media (min-width: 1200px) {
   form {
     width: 80%;
-    margin: auto;
+    margin: 0rem auto;
   }
 }
 
