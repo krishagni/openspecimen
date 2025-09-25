@@ -802,6 +802,7 @@ export default {
 
 .os-list :deep(.actions) {
   text-align: right;
+  white-space: nowrap;
 }
 
 .os-list :deep(.actions .os-icon-wrapper) {
