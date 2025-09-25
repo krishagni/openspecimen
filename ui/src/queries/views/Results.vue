@@ -75,7 +75,7 @@
           <Facets ref="facetsList" :query="query" @facets-loaded="onFacetsLoad" @facets-selected="onFacetsSelection" />
         </os-grid-column>
 
-        <os-grid-column class="results-panel" :width="ctx.hasFacets ? 9 : 12">
+        <os-grid-column class="results-panel" :width="ctx.hasFacets ? 9 : 12" :style="{'--ag-spacing': '6px'}">
           <os-message type="info" v-if="ctx.loadingRecords">
             <span v-t="'queries.loading_records'">Loading records...</span>
           </os-message>
@@ -91,6 +91,7 @@
           <AgGridVue class="results-grid" :theme="theme"
             :row-data="ctx.records" :column-defs="ctx.columns" :suppressFieldDotNotation="true"
             :rowSelection="rowSelection" :pinnedBottomRowData="ctx.footerRow" :enableCellTextSelection="true"
+            :tooltipShowMode="'whenTruncated'" :tooltipShowDelay="500"
             @gridReady="onGridReady" @selectionChanged="onRowSelection"
             v-if="!ctx.loadingRecords" />
         </os-grid-column>
@@ -322,9 +323,18 @@ export default {
       this.ctx.dbHasMoreRecords = dbRowsCount >= 1000;
       this.ctx.columns = columnLabels
         .map((label, idx) => {
-          const column = {field: label, name: columnMetadata[idx].expr, pinned: idx < pinnedColumns && 'left'};
-          column.headerName = label.substring(label.lastIndexOf('#') + 1);
-          column.url = columnUrls[idx];
+          const column = {
+            field: label,
+            name: columnMetadata[idx].expr,
+            pinned: idx < pinnedColumns && 'left',
+            // tooltipField: label,
+            wrapHeaderText: true,
+            autoHeaderHeight: true,
+            headerName: label.substring(label.lastIndexOf('#') + 1),
+            wrapText: true,
+            autoHeight: true,
+            url: columnUrls[idx]
+          };
           if (columnTypes[idx] == 'INTEGER' || columnTypes[idx] == 'FLOAT') {
             column.comparator = (valueA, valueB) => this._compareNum(valueA, valueB);
           }
