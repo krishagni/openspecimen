@@ -287,11 +287,18 @@ class CollectionProtocol {
 
         const result = {rows: []};
         for (let section of layout) {
+          let firstRow = true;
           for (let row of section.rows) {
             const outputRow = row.filter(field => field.indexOf(objAlias) == 0)
               .map(field => ({name: field}));
             if (outputRow.length > 0) {
-              result.rows.push({fields: outputRow});
+              let sectionLabel = undefined;
+              if (firstRow) {
+                sectionLabel = section.label || section.title;
+              }
+
+              result.rows.push({sectionLabel, fields: outputRow});
+              firstRow = false;
             }
           }
         }

@@ -302,7 +302,7 @@ export default {
            formRow.push(field);
          }
 
-         if (formRow.length > 0) {
+         if (formRow.length > 0 || row.label || row.labelCode || row.sectionLabel || row.sectionLabelCode) {
            result.push({...row, fields: formRow});
          }
        }
