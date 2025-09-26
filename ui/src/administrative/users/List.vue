@@ -47,7 +47,8 @@
 
                 <os-menu :label="$t('common.buttons.more')" :options="moreOpts" v-show-if-allowed="institute" />
 
-                <os-button left-icon="question-circle" :label="$t('common.buttons.help')" @click="help" />
+                <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
+                  url="https://openspecimen.atlassian.net/wiki/x/DgCPi" new-tab="true" />
               </span>
 
               <span v-if="ctx.selectedUsers.length > 0">
@@ -421,11 +422,7 @@ export default {
       routerSvc.goto('UserExportRecords');
     },
 
-    goto: (name, params) => routerSvc.goto(name, params),
-
-    help: function() {
-      window.open('http://help.openspecimen.org/user', '_blank').focus();
-    }
+    goto: (name, params) => routerSvc.goto(name, params)
   },
 
   computed: {

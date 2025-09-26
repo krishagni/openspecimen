@@ -30,7 +30,7 @@
               </span>
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="http://help.openspecimen.org/roles" new-tab="true" />
+                url="https://openspecimen.atlassian.net/wiki/x/boB1" new-tab="true" />
             </template>
 
             <template #right>

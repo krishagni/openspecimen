@@ -43,7 +43,7 @@
               <os-menu :label="$t('common.buttons.export')" :options="exportOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="https://help.openspecimen.org/containers" new-tab="true" />
+                url="https://openspecimen.atlassian.net/wiki/x/a4CB" new-tab="true" />
             </span>
           </span>
         </template>

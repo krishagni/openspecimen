@@ -7,7 +7,7 @@
     <os-overlay ref="helpMenu" @click="toggleHelpMenu">
       <ul class="help-options">
         <li>
-          <a href="https://help.openspecimen.org" target="_blank" rel="noopener">
+          <a href="https://openspecimen.atlassian.net/wiki/x/fYB1" target="_blank" rel="noopener">
             <span v-t="'common.about.online_help'">Online Help</span>
           </a>
         </li>

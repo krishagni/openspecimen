@@ -33,7 +33,7 @@
                 v-show-if-allowed="shipmentResources.importOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="https://help.openspecimen.org/shipment" new-tab="true" />
+                url="https://openspecimen.atlassian.net/wiki/x/hoDKBg" new-tab="true" />
             </template>
 
             <template #right>

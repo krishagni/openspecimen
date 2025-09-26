@@ -24,7 +24,7 @@
                 @click="$goto('JobAddEdit', {jobId: -1}, {})" v-show-if-allowed="jobResources.createOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="https://help.openspecimen.org/jobs" new-tab="true" />
+                url="https://openspecimen.atlassian.net/wiki/x/CgBeAw" new-tab="true" />
             </template>
 
             <template #right>

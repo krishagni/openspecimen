@@ -39,7 +39,7 @@
                 @click="viewDps" v-show-if-allowed="orderResources.dpOpts" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="https://help.openspecimen.org/orders" new-tab="true" />
+                url="https://openspecimen.atlassian.net/wiki/x/FQD1W" new-tab="true" />
             </template>
 
             <template #right>

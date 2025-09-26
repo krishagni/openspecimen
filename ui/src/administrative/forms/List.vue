@@ -37,7 +37,7 @@
                   @click="showImportFormDialog" />
 
                 <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                  url="https://help.openspecimen.org/forms" new-tab="true" />
+                  url="https://openspecimen.atlassian.net/wiki/x/DYAHaQ" new-tab="true" />
               </span>
             </template>
 

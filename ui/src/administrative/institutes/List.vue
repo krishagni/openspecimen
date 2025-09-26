@@ -41,7 +41,7 @@
               <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportInstitutes" />
 
               <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                url="https://help.openspecimen.org/institute" new-tab="true" />
+                url="https://openspecimen.atlassian.net/wiki/x/SADPB" new-tab="true" />
             </template>
 
             <template #right>

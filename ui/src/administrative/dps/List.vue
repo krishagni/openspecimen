@@ -40,7 +40,7 @@
                   v-show-if-allowed="dpResources.orderOpts" />
 
                 <os-button-link left-icon="question-circle" :label="$t('common.buttons.help')"
-                  url="https://help.openspecimen.org/distribution" new-tab="true" />
+                  url="https://openspecimen.atlassian.net/wiki/x/CoHfBg" new-tab="true" />
               </span>
 
               <span v-else>
