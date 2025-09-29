@@ -159,7 +159,7 @@ export default {
         // get /records?value=v1&value=v2...
         //
         Object.assign(searchOpts, this.queryParams(ls));
-        selected = await http.get(ls.apiUrl, searchOpts);
+        selected = await this.getFromBackend(searchOpts);
       }
 
       if (selected instanceof Array) {
@@ -203,12 +203,11 @@ export default {
       cache = cache['ms-dropdown'] = cache['ms-dropdown'] || {};
 
       const qs = util.queryString(Object.assign({url: this.listSource.apiUrl}, params || {}));
-      let options = cache[qs];
-      if (!options) {
-        options = cache[qs] = await http.get(this.listSource.apiUrl, params);
+      if (!cache[qs]) {
+        cache[qs] = http.get(this.listSource.apiUrl, params);
       }
 
-      return options;
+      return await cache[qs];
     },
 
     dedup(options) {
