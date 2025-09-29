@@ -761,6 +761,27 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<SpecimenServiceDetail>> getMultiSpecimenServices(RequestEvent<SpecimenListCriteria> req) {
+		try {
+			SpecimenListCriteria specimensCriteria = req.getPayload();
+			List<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps(specimensCriteria.cpId());
+			if (siteCps != null && siteCps.isEmpty()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			List<Specimen> specimens = daoFactory.getSpecimenDao().getSpecimens(specimensCriteria);
+			List<Long> specimenIds = specimens.stream().map(Specimen::getId).toList();
+			List<LabSpecimenService> services = daoFactory.getSpecimenDao().getLabSpecimenServices(specimenIds);
+			return ResponseEvent.response(SpecimenServiceDetail.from(services));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<SpecimenServiceDetail> getService(RequestEvent<EntityQueryCriteria> req) {
 		try {
 			EntityQueryCriteria crit = req.getPayload();

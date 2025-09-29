@@ -44,7 +44,7 @@ public class ServicesController {
 		Long cpId,
 
 		@RequestParam(value = "code", required = false)
-		String code,
+		List<String> codes,
 
 		@RequestParam(value = "rateEffectiveOn", required = false)
 		@DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -61,7 +61,7 @@ public class ServicesController {
 
 		ServiceListCriteria crit = new ServiceListCriteria()
 			.cpId(cpId)
-			.query(code)
+			.codes(codes)
 			.rateEffectiveOn(rateEffectiveOn)
 			.query(query)
 			.startAt(startAt)

@@ -486,17 +486,27 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public List<LabSpecimenService> getLabSpecimenServices(Long specimenId) {
+		return getLabSpecimenServices(Collections.singletonList(specimenId));
+	}
+
+	@Override
+	public List<LabSpecimenService> getLabSpecimenServices(Collection<Long> specimenIds) {
 		Criteria<LabSpecimenService> query = createCriteria(LabSpecimenService.class, "ls")
 			.join("ls.specimen", "spmn");
-		return query.add(query.eq("spmn.id", specimenId))
+		return query.add(query.in("spmn.id", specimenIds))
 			.addOrder(query.desc("ls.serviceDate"))
 			.list();
 	}
 
 	@Override
 	public Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId) {
+		return getLabSpecimenServicesRate(Collections.singletonList(specimenId));
+	}
+
+	@Override
+	public Map<Long, BigDecimal> getLabSpecimenServicesRate(List<Long> specimenIds) {
 		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SERVICE_RATES)
-			.setParameter("specimenId", specimenId)
+			.setParameterList("specimenIds", specimenIds)
 			.list();
 
 		Map<Long, BigDecimal> result = new HashMap<>();

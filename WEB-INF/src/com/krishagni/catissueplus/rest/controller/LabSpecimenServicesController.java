@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenQueryCriteria;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenServiceDetail;
+import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -37,10 +38,28 @@ public class LabSpecimenServicesController {
 
 		@RequestParam(value = "includeRates", required = false, defaultValue = "false")
 		boolean includeRates) {
+
 		SpecimenQueryCriteria criteria = new SpecimenQueryCriteria(specimenId);
 		criteria.setParams(Collections.singletonMap("includeRates", includeRates));
 		return ResponseEvent.unwrap(spmnSvc.getServices(RequestEvent.wrap(criteria)));
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/multi-specimens")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<SpecimenServiceDetail> getServices(
+		@RequestParam(value = "cpId", required = false)
+		Long cpId,
+
+		@RequestParam(value = "specimenId")
+		List<Long> specimenIds) {
+
+		SpecimenListCriteria criteria = new SpecimenListCriteria()
+			.cpId(cpId)
+			.ids(specimenIds);
+		return ResponseEvent.unwrap(spmnSvc.getMultiSpecimenServices(RequestEvent.wrap(criteria)));
+	}
+
 
 	@RequestMapping(method = RequestMethod.GET, value="/{id}")
 	@ResponseStatus(HttpStatus.OK)

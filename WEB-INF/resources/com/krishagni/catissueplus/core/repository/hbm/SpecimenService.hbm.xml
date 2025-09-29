@@ -44,7 +44,7 @@
         os_specimen_services ss
         inner join os_cp_service_rates sr on sr.service_id = ss.service_id
       where
-        ss.specimen_id = :specimenId and
+        ss.specimen_id in (:specimenIds) and
         ss.service_date >= sr.start_date and (sr.end_date is null or ss.service_date < sr.end_date) and
         sr.activity_status != 'Disabled'
 

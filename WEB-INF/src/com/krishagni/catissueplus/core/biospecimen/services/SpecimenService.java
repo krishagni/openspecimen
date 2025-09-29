@@ -64,6 +64,8 @@ public interface SpecimenService {
 
 	ResponseEvent<List<SpecimenServiceDetail>> getServices(RequestEvent<SpecimenQueryCriteria> req);
 
+	ResponseEvent<List<SpecimenServiceDetail>> getMultiSpecimenServices(RequestEvent<SpecimenListCriteria> req);
+
 	ResponseEvent<SpecimenServiceDetail> getService(RequestEvent<EntityQueryCriteria> req);
 
 	ResponseEvent<SpecimenServiceDetail> addOrUpdateService(RequestEvent<SpecimenServiceDetail> req);

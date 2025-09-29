@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Service;
@@ -23,6 +24,10 @@ public class ServiceDaoImpl extends AbstractDao<Service> implements ServiceDao {
 
 		if (crit.cpId() > 0L) {
 			query.add(query.eq("cp.id", crit.cpId()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.codes())) {
+			query.add(query.in("s.code", crit.codes()));
 		}
 
 		if (StringUtils.isNotBlank(crit.query())) {
