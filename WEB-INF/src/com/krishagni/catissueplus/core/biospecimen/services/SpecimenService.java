@@ -96,4 +96,6 @@ public interface SpecimenService {
 	Specimen updateSpecimen(Specimen existing, Specimen newSpmn);
 
 	List<SpecimenInfo> bulkUpdateSpecimens(BulkEntityDetail<SpecimenDetail> req);
+
+	SpecimenServiceDetail addOrUpdateService(Specimen specimen, SpecimenServiceDetail input);
 }

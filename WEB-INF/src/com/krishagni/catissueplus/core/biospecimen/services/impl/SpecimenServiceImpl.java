@@ -804,52 +804,16 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 	public ResponseEvent<SpecimenServiceDetail> addOrUpdateService(RequestEvent<SpecimenServiceDetail> req) {
 		try {
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
-
 			SpecimenServiceDetail input = req.getPayload();
 			Specimen specimen = getSpecimen(input.getSpecimenId(), input.getCpShortTitle(), input.getLabel(), input.getBarcode(), ose);
 			ose.checkAndThrow();
 
 			AccessCtrlMgr.getInstance().ensureCreateOrUpdateSpecimenRights(specimen);
-
 			if (!specimen.isCollected()) {
 				return ResponseEvent.userError(SpecimenErrorCode.NOT_COLLECTED, specimen.getLabel());
 			}
 
-			LabSpecimenService existing = null;
-			if (input.getId() != null) {
-				existing = daoFactory.getSpecimenDao().getLabSpecimenService(input.getId());
-				if (existing == null) {
-					ose.addError(SpecimenErrorCode.LAB_SVC_NOT_FOUND, input.getId());
-				}
-			}
-
-			Date serviceDate = specimen.getCreatedOn();
-			if (input.getServiceDate() != null) {
-				if (input.getServiceDate().before(specimen.getCreatedOn())) {
-					ose.addError(SpecimenErrorCode.LAB_SVC_DT_LT_CREATED_ON, Utility.getDateTimeString(input.getServiceDate()), Utility.getDateTimeString(specimen.getCreatedOn()));
-				}
-
-				serviceDate = input.getServiceDate();
-			}
-
-			LabSpecimenService spmnSvc = new LabSpecimenService();
-			spmnSvc.setSpecimen(specimen);
-			spmnSvc.setService(getService(input, specimen, ose));
-			spmnSvc.setUnits(input.getUnits() > 0 ? input.getUnits() : 1);
-			spmnSvc.setServicedBy(getUser(input.getServicedBy(), ose));
-			spmnSvc.setServiceDate(serviceDate);
-			spmnSvc.setComments(input.getComments());
-
-			ose.checkAndThrow();
-
-			if (existing != null) {
-				existing.update(spmnSvc);
-				spmnSvc = existing;
-			} else {
-				daoFactory.getSpecimenDao().saveOrUpdate(spmnSvc);
-			}
-
-			return ResponseEvent.response(SpecimenServiceDetail.from(spmnSvc, Boolean.TRUE.equals(input.getIncludeSpmnDetailsInResp())));
+			return ResponseEvent.response(addOrUpdateService(specimen, input));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -993,6 +957,48 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 		ose.checkAndThrow();
 		return SpecimenDetail.from(savedSpmns);
+	}
+
+	@Override
+	@PlusTransactional
+	public SpecimenServiceDetail addOrUpdateService(Specimen specimen, SpecimenServiceDetail input) {
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+
+		LabSpecimenService existing = null;
+		if (input.getId() != null) {
+			existing = daoFactory.getSpecimenDao().getLabSpecimenService(input.getId());
+			if (existing == null) {
+				ose.addError(SpecimenErrorCode.LAB_SVC_NOT_FOUND, input.getId());
+			}
+		}
+
+		Date serviceDate = specimen.getCreatedOn();
+		if (input.getServiceDate() != null) {
+			if (input.getServiceDate().before(specimen.getCreatedOn())) {
+				ose.addError(SpecimenErrorCode.LAB_SVC_DT_LT_CREATED_ON, Utility.getDateTimeString(input.getServiceDate()), Utility.getDateTimeString(specimen.getCreatedOn()));
+			}
+
+			serviceDate = input.getServiceDate();
+		}
+
+		LabSpecimenService spmnSvc = new LabSpecimenService();
+		spmnSvc.setSpecimen(specimen);
+		spmnSvc.setService(getService(input, specimen, ose));
+		spmnSvc.setUnits(input.getUnits() > 0 ? input.getUnits() : 1);
+		spmnSvc.setServicedBy(getUser(input.getServicedBy(), ose));
+		spmnSvc.setServiceDate(serviceDate);
+		spmnSvc.setComments(input.getComments());
+
+		ose.checkAndThrow();
+
+		if (existing != null) {
+			existing.update(spmnSvc);
+			spmnSvc = existing;
+		} else {
+			daoFactory.getSpecimenDao().saveOrUpdate(spmnSvc);
+		}
+
+		return SpecimenServiceDetail.from(spmnSvc, Boolean.TRUE.equals(input.getIncludeSpmnDetailsInResp()));
 	}
 
 	@Override
