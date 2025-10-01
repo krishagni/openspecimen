@@ -4,6 +4,12 @@
 
 <script>
 export default {
-  props: ['type']
+  props: ['type'],
+
+  methods: {
+    getDisplayValue: function() {
+      return "Unknown Component"
+    }
+  }
 }
 </script>
