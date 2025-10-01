@@ -66,14 +66,14 @@ export default {
       }
 
       if (self.notifsOpen) {
-        self.timeout = setTimeout(getUnreadNotifCount, 10000);
+        self.timeout = setTimeout(getUnreadNotifCount, 30000);
         return;
       }
 
       notifSvc.getUnreadCount().then(
         (result) => {
           self.unreadNotifCount = result.count;
-          self.timeout = setTimeout(getUnreadNotifCount, 10000);
+          self.timeout = setTimeout(getUnreadNotifCount, 30000);
           if (result.count > 0) {
             self.notifs = null;
           }
