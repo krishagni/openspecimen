@@ -7,7 +7,9 @@ public enum LabServiceErrorCode implements ErrorCode {
 
 	DESC_REQ,
 
-	DUP_CODE;
+	DUP_CODE,
+
+	NOT_FOUND;
 
 	@Override
 	public String code() {

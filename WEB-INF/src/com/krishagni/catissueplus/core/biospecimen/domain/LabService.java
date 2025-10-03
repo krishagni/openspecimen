@@ -7,6 +7,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
 public class LabService extends BaseEntity {
@@ -60,6 +61,20 @@ public class LabService extends BaseEntity {
 
 	public void setSpecimens(Set<Specimen> specimens) {
 		this.specimens = specimens;
+	}
+
+	public void update(LabService other) {
+		setCode(other.getCode());
+		setDescription(other.getDescription());
+		setActivityStatus(other.getActivityStatus());
+		if (Status.isDisabledStatus(getActivityStatus())) {
+			delete();
+		}
+	}
+
+	public void delete() {
+		setCode(Utility.getDisabledValue(getCode(), 32));
+		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 
 	public boolean isActive() {

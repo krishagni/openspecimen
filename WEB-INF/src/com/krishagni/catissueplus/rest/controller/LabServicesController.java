@@ -3,6 +3,7 @@ package com.krishagni.catissueplus.rest.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,5 +27,13 @@ public class LabServicesController {
 	@ResponseBody
 	public LabServiceDetail createService(@RequestBody LabServiceDetail input) {
 		return ResponseEvent.unwrap(rateListSvc.createService(RequestEvent.wrap(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public LabServiceDetail updateService(@PathVariable("id") Long svcId, @RequestBody LabServiceDetail input) {
+		input.setId(svcId);
+		return ResponseEvent.unwrap(rateListSvc.updateService(RequestEvent.wrap(input)));
 	}
 }

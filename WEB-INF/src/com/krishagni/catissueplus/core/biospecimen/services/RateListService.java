@@ -7,4 +7,6 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 public interface RateListService {
 
 	ResponseEvent<LabServiceDetail> createService(RequestEvent<LabServiceDetail> req);
+
+	ResponseEvent<LabServiceDetail> updateService(RequestEvent<LabServiceDetail> req);
 }
