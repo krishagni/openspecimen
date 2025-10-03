@@ -1,5 +1,9 @@
 package com.krishagni.catissueplus.rest.controller;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -7,10 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.biospecimen.events.LabServiceDetail;
+import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.RateListService;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -22,6 +28,52 @@ public class LabServicesController {
 
 	@Autowired
 	private RateListService rateListSvc;
+
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<LabServiceDetail> getServices(
+		@RequestParam(value = "code", required = false)
+		List<String> codes,
+
+		@RequestParam(value = "query", required = false)
+		String query,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+
+		LabServiceListCriteria crit = new LabServiceListCriteria()
+			.codes(codes)
+			.query(query)
+			.startAt(startAt)
+			.maxResults(maxResults);
+		return ResponseEvent.unwrap(rateListSvc.getServices(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/count")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Long> getServicesCount(
+		@RequestParam(value = "code", required = false)
+		List<String> codes,
+
+		@RequestParam(value = "query", required = false)
+		String query) {
+
+		LabServiceListCriteria crit = new LabServiceListCriteria().codes(codes).query(query);
+		return Collections.singletonMap("count", ResponseEvent.unwrap(rateListSvc.getServicesCount(RequestEvent.wrap(crit))));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public LabServiceDetail getService(@PathVariable("id") Long svcId) {
+		return ResponseEvent.unwrap(rateListSvc.getService(RequestEvent.wrap(new EntityQueryCriteria(svcId))));
+	}
+
 
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
