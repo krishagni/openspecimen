@@ -12,6 +12,7 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -65,6 +66,26 @@ public class RateListServiceImpl implements RateListService {
 			}
 
 			existing.update(service);
+			return ResponseEvent.response(LabServiceDetail.from(existing));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<LabServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			EntityQueryCriteria input = req.getPayload();
+			LabService existing = getService(input.getId(), input.getName());
+			// TODO:
+			// ensureServiceIsNotInUse(service);
+			//
+
+			existing.delete();
 			return ResponseEvent.response(LabServiceDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.biospecimen.events.LabServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.services.RateListService;
+import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 
@@ -35,5 +36,12 @@ public class LabServicesController {
 	public LabServiceDetail updateService(@PathVariable("id") Long svcId, @RequestBody LabServiceDetail input) {
 		input.setId(svcId);
 		return ResponseEvent.unwrap(rateListSvc.updateService(RequestEvent.wrap(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public LabServiceDetail deleteService(@PathVariable("id") Long svcId) {
+		return ResponseEvent.unwrap(rateListSvc.deleteService(RequestEvent.wrap(new EntityQueryCriteria(svcId))));
 	}
 }
