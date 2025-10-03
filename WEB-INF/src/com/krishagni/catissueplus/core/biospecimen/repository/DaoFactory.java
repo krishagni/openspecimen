@@ -145,5 +145,7 @@ public interface DaoFactory {
 
 	LabServiceDao getLabServiceDao();
 
+	LabServicesRateListDao getLabServiceRateListDao();
+
 	ServiceRateDao getServiceRateDao();
 } 

@@ -510,6 +510,19 @@ public class AccessCtrlMgr {
 		return hasUpdateCpRights(cp);
 	}
 
+	public boolean hasUpdateCpRights() {
+		if (AuthUtil.isAdmin()) {
+			return true;
+		}
+
+		Long     userId   = AuthUtil.getCurrentUser().getId();
+		String   resource = Resource.CP.getName();
+		String[] ops      = { Operation.UPDATE.getName() };
+
+		List<SubjectAccess> accessList = daoFactory.getSubjectDao().getAccessList(userId, resource, ops);
+		return !accessList.isEmpty();
+	}
+
 	public void ensureUpdateCpRights(CollectionProtocol cp) {
 		ensureCpObjectRights(cp, Operation.UPDATE);
 	}

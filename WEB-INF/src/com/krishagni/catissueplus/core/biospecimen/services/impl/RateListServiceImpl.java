@@ -5,9 +5,12 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.LabService;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServiceFactory;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServicesRateListFactory;
 import com.krishagni.catissueplus.core.biospecimen.events.LabServiceDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.LabServicesRateListDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.RateListService;
@@ -19,14 +22,21 @@ import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class RateListServiceImpl implements RateListService {
 	private LabServiceFactory serviceFactory;
+
+	private LabServicesRateListFactory rateListFactory;
 
 	private DaoFactory daoFactory;
 
 	public void setServiceFactory(LabServiceFactory serviceFactory) {
 		this.serviceFactory = serviceFactory;
+	}
+
+	public void setRateListFactory(LabServicesRateListFactory rateListFactory) {
+		this.rateListFactory = rateListFactory;
 	}
 
 	public void setDaoFactory(DaoFactory daoFactory) {
@@ -130,6 +140,25 @@ public class RateListServiceImpl implements RateListService {
 
 			existing.delete();
 			return ResponseEvent.response(LabServiceDetail.from(existing));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<LabServicesRateListDetail> createRateList(RequestEvent<LabServicesRateListDetail> req) {
+		try {
+			if (!AccessCtrlMgr.getInstance().hasUpdateCpRights()) {
+				return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			LabServicesRateListDetail input = req.getPayload();
+			LabServicesRateList rateList = rateListFactory.createRateList(input);
+			daoFactory.getLabServiceRateListDao().saveOrUpdate(rateList);
+			return ResponseEvent.response(LabServicesRateListDetail.from(rateList));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

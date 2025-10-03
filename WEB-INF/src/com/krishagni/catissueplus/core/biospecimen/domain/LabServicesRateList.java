@@ -8,6 +8,8 @@ import org.hibernate.envers.Audited;
 
 @Audited
 public class LabServicesRateList extends BaseEntity {
+	private String name;
+
 	private String description;
 
 	private LocalDate startDate;
@@ -19,6 +21,14 @@ public class LabServicesRateList extends BaseEntity {
 	private Set<LabServiceRate> serviceRates = new HashSet<>();
 
 	private String activityStatus;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getDescription() {
 		return description;

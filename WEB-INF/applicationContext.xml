@@ -214,8 +214,11 @@
 
   <bean id="labServiceFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.LabServiceFactoryImpl" />
 
+  <bean id="labServicesRateListFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.LabServicesRateListFactoryImpl" />
+
   <bean id="rateListSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.RateListServiceImpl">
     <property name="serviceFactory" ref="labServiceFactory" />
+    <property name="rateListFactory" ref="labServicesRateListFactory" />
     <property name="daoFactory" ref="biospecimenDaoFactory" />
   </bean>
 

@@ -102,4 +102,30 @@
       <column name="activityStatus_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Lab services rate lists">
+    <createTable tableName="OS_LAB_SERVICES_RATE_LISTS_AUD">
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${smallint.type}" />
+      <column name="NAME" type="${text.type}(32)" />
+      <column name="name_MOD" type="${boolean.type}" />
+      <column name="DESCRIPTION" type="${text.type}(255)" />
+      <column name="description_MOD" type="${boolean.type}" />
+      <column name="START_DATE" type="${date.type}" />
+      <column name="startDate_MOD" type="${boolean.type}" />
+      <column name="END_DATE" type="${date.type}" />
+      <column name="endDate_MOD" type="${boolean.type}" />
+      <column name="CREATOR_ID" type="${int.type}" />
+      <column name="creator_MOD" type="${boolean.type}" />
+      <column name="CREATION_TIME" type="${timestamp.type}" />
+      <column name="creationTime_MOD" type="${boolean.type}" />
+      <column name="UPDATER_ID" type="${int.type}" />
+      <column name="updater_MOD" type="${boolean.type}" />
+      <column name="UPDATE_TIME" type="${nullable.ts.type}" />
+      <column name="updateTime_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

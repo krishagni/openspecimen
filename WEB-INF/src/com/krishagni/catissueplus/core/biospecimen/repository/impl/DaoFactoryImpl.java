@@ -54,6 +54,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.ConsentStatementDa
 import com.krishagni.catissueplus.core.biospecimen.repository.CpReportSettingsDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceDao;
+import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabelPrintJobDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.ParticipantDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.ServiceDao;
@@ -485,6 +486,13 @@ public class DaoFactoryImpl implements DaoFactory {
 	@Override
 	public LabServiceDao getLabServiceDao() {
 		LabServiceDaoImpl dao = new LabServiceDaoImpl();
+		setSessionFactory(dao);
+		return dao;
+	}
+
+	@Override
+	public LabServicesRateListDao getLabServiceRateListDao() {
+		LabServicesRateListDaoImpl dao = new LabServicesRateListDaoImpl();
 		setSessionFactory(dao);
 		return dao;
 	}

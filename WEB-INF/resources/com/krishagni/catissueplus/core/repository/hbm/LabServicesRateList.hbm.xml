@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList" table="OS_LAB_SERVICES_RATE_LISTS"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList">
+
+    <id name="id" column="IDENTIFIER">
+      <generator class="native">
+        <param name="sequence">OS_LAB_SVCS_RATE_LISTS_SEQ</param>
+      </generator>
+    </id>
+
+    <property name="name" column="NAME" not-null="true" />
+
+    <property name="description" column="DESCRIPTION" />
+
+    <property name="startDate" column="START_DATE" not-null="true" />
+
+    <property name="endDate" column="END_DATE" />
+
+    <many-to-one name="creator" column="CREATOR_ID" not-null="true" />
+
+    <property name="creationTime" column="CREATION_TIME" not-null="true" />
+
+    <many-to-one name="updater" column="UPDATER_ID" />
+
+    <property name="updateTime" column="UPDATE_TIME" />
+
+    <property name="activityStatus" column="ACTIVITY_STATUS" not-null="true" />
+
+    <filter name="activeEntity" />
+  </class>
+</hibernate-mapping>

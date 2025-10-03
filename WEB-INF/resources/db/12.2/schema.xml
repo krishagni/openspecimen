@@ -253,4 +253,39 @@
       create unique index OS_LAB_SERVICE_CODE_UQ on OS_LAB_SERVICES(lower(CODE));
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Lab services rate lists">
+    <createTable tableName="OS_LAB_SERVICES_RATE_LISTS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="NAME" type="${text.type}(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="DESCRIPTION" type="${text.type}(255)" />
+      <column name="START_DATE" type="${date.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="END_DATE" type="${date.type}" />
+      <column name="CREATOR_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_LAB_SVC_RATE_LIST_CREATOR"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CREATION_TIME" type="${timestamp.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="UPDATER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_LAB_SVC_RATE_LIST_UPDATER"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UPDATE_TIME" type="${nullable.ts.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Lab services rate list ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_LAB_SVCS_RATE_LISTS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
 </databaseChangeLog>
