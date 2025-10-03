@@ -212,6 +212,13 @@
     <property name="daoFactory" ref="biospecimenDaoFactory" />
   </bean>
 
+  <bean id="labServiceFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.LabServiceFactoryImpl" />
+
+  <bean id="rateListSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.RateListServiceImpl">
+    <property name="serviceFactory" ref="labServiceFactory" />
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+  </bean>
+
   <bean id="cpSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolServiceImpl">
     <property name="taskExecutor" ref="taskExecutor"/>
     <property name="cpFactory" ref="cpFactory"/>

@@ -87,4 +87,19 @@
       <column name="SOURCE_ENTITY_ID" type="${int.type}" />
       <column name="sourceEntityId_MOD" type="${boolean.type}" />
     </addColumn>
-  </changeSet></databaseChangeLog>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Lab services">
+    <createTable tableName="OS_LAB_SERVICES_AUD">
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${smallint.type}" />
+      <column name="CODE" type="${text.type}(32)" />
+      <column name="code_MOD" type="${boolean.type}" />
+      <column name="DESCRIPTION" type="${text.type}(255)" />
+      <column name="description_MOD" type="${boolean.type}" />
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" />
+      <column name="activityStatus_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

@@ -222,4 +222,35 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Lab services">
+    <createTable tableName="OS_LAB_SERVICES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="CODE" type="${text.type}(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="DESCRIPTION" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Lab service ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_LAB_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on the lab service code" dbms="mysql">
+    <addUniqueConstraint constraintName="OS_LAB_SERVICE_CODE_UQ" tableName="OS_LAB_SERVICES" columnNames="CODE" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on the lab service code" dbms="oracle">
+    <sql>
+      create unique index OS_LAB_SERVICE_CODE_UQ on OS_LAB_SERVICES(lower(CODE));
+    </sql>
+  </changeSet>
 </databaseChangeLog>
