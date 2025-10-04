@@ -7,7 +7,19 @@ public enum LabServicesRateListErrorCode implements ErrorCode {
 
 	START_DT_REQ,
 
-	END_DT_LT_START_DT;
+	END_DT_LT_START_DT,
+
+	NOT_FOUND,
+
+	SVC_RATE_REQ,
+
+	INV_SVC_RATE,
+
+	SVC_RATE_NF,
+
+	SVC_CODE_REQ,
+
+	ITEM_ERROR;
 
 	@Override
 	public String code() {

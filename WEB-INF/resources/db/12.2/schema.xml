@@ -288,4 +288,35 @@
   <changeSet author="vpawar" id="Lab services rate list ID generator" dbms="oracle">
     <createSequence sequenceName="OS_LAB_SVCS_RATE_LISTS_SEQ" startValue="1" incrementBy="1" ordered="true" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Lab service rates">
+    <createTable tableName="OS_LAB_SERVICE_RATES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="RATE_LIST_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SERVICE_RATE_LIST_ID"
+          referencedTableName="OS_LAB_SERVICES_RATE_LISTS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SERVICE_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SERVICE_RATE_SERVICE_ID"
+          referencedTableName="OS_LAB_SERVICES" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="RATE" type="${decimal.type}(10, 2)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Lab service rate ID generator">
+    <createSequence sequenceName="OS_LAB_SERVICE_RATE_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Covering index on service rates">
+    <createIndex tableName="OS_LAB_SERVICE_RATES" indexName="OS_LAB_SERVICE_RATES_IDX">
+      <column name="RATE_LIST_ID" type="${int.type}" />
+      <column name="SERVICE_ID" type="${int.type}" />
+      <column name="RATE" type="${decimal.type}(10, 2)" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

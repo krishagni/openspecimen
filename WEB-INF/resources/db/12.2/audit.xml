@@ -128,4 +128,24 @@
       <column name="activityStatus_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Lab service rates collection">
+    <addColumn tableName="OS_LAB_SERVICES_RATE_LISTS_AUD">
+      <column name="serviceRates_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Lab service rate">
+    <createTable tableName="OS_LAB_SERVICE_RATES_AUD">
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${smallint.type}" />
+      <column name="RATE_LIST_ID" type="${int.type}" />
+      <column name="rateList_MOD" type="${boolean.type}" />
+      <column name="SERVICE_ID" type="${int.type}" />
+      <column name="service_MOD" type="${boolean.type}" />
+      <column name="RATE" type="${decimal.type}(10, 2)" />
+      <column name="rate_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

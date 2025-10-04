@@ -1,10 +1,14 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.envers.Audited;
+
+import com.krishagni.catissueplus.core.common.Tuple;
 
 @Audited
 public class LabServicesRateList extends BaseEntity {
@@ -76,5 +80,18 @@ public class LabServicesRateList extends BaseEntity {
 
 	public void setActivityStatus(String activityStatus) {
 		this.activityStatus = activityStatus;
+	}
+
+	public Tuple getServiceRateLookupMaps() {
+		Map<Long, LabServiceRate> serviceRatesByIdMap = new HashMap<>();
+		Map<String, LabServiceRate> serviceRatesBySvcCodeMap = new HashMap<>();
+		Map<Long, LabServiceRate> serviceRatesBySvcIdMap = new HashMap<>();
+		for (LabServiceRate rate : getServiceRates()) {
+			serviceRatesByIdMap.put(rate.getId(), rate);
+			serviceRatesBySvcIdMap.put(rate.getService().getId(), rate);
+			serviceRatesBySvcCodeMap.put(rate.getService().getCode(), rate);
+		}
+
+		return Tuple.make(serviceRatesByIdMap, serviceRatesBySvcIdMap, serviceRatesBySvcCodeMap);
 	}
 }
