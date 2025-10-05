@@ -20,7 +20,7 @@ public class LabServicesRateList extends BaseEntity {
 
 	private LocalDate endDate;
 
-	private Set<CollectionProtocol> cps = new HashSet<>();
+	private Set<LabServiceRateListCp> cps = new HashSet<>();
 
 	private Set<LabServiceRate> serviceRates = new HashSet<>();
 
@@ -58,11 +58,11 @@ public class LabServicesRateList extends BaseEntity {
 		this.endDate = endDate;
 	}
 
-	public Set<CollectionProtocol> getCps() {
+	public Set<LabServiceRateListCp> getCps() {
 		return cps;
 	}
 
-	public void setCps(Set<CollectionProtocol> cps) {
+	public void setCps(Set<LabServiceRateListCp> cps) {
 		this.cps = cps;
 	}
 

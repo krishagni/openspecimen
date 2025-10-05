@@ -19,7 +19,9 @@ public enum LabServicesRateListErrorCode implements ErrorCode {
 
 	SVC_CODE_REQ,
 
-	ITEM_ERROR;
+	ITEM_ERROR,
+
+	SVCS_OVERLAP;
 
 	@Override
 	public String code() {

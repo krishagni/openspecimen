@@ -1,23 +1,33 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabService;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRate;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRateListCp;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServiceFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServicesRateListErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServicesRateListFactory;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.LabServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.LabServiceRateDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.LabServicesRateListDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.UpdateLabServicesRateListOp;
+import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListCollectionProtocolsOp;
+import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListServicesOp;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.RateListService;
@@ -180,9 +190,9 @@ public class RateListServiceImpl implements RateListService {
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<Integer> updateRateListServices(RequestEvent<UpdateLabServicesRateListOp> req) {
+	public ResponseEvent<Integer> updateRateListServices(RequestEvent<UpdateRateListServicesOp> req) {
 		try {
-			UpdateLabServicesRateListOp op = req.getPayload();
+			UpdateRateListServicesOp op = req.getPayload();
 			LabServicesRateList rateList = getRateList(op.getRateListId());
 
 			//
@@ -196,10 +206,66 @@ public class RateListServiceImpl implements RateListService {
 			}
 
 			int count = 0;
-			if (op.getOp() == null || op.getOp() == UpdateLabServicesRateListOp.Op.UPSERT) {
+			if (op.getOp() == null || op.getOp() == UpdateRateListServicesOp.Op.UPSERT) {
 				count = upsertServiceRates(rateList, serviceRates);
-			} else if (op.getOp() == UpdateLabServicesRateListOp.Op.DELETE) {
+				raiseErrorIfOverlappingServices(rateList);
+			} else if (op.getOp() == UpdateRateListServicesOp.Op.DELETE) {
 				count = deleteServiceRates(rateList, serviceRates);
+			}
+
+			return ResponseEvent.response(count);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Integer> updateRateListCps(RequestEvent<UpdateRateListCollectionProtocolsOp> req) {
+		try {
+			UpdateRateListCollectionProtocolsOp op = req.getPayload();
+			LabServicesRateList rateList = getRateList(op.getRateListId());
+
+			List<CollectionProtocolSummary> cps = op.getCps();
+			if (CollectionUtils.isEmpty(cps)) {
+				return ResponseEvent.response(0);
+			}
+
+			int idx = 0;
+			Set<Long> validatedCpIds = new LinkedHashSet<>();
+			Map<Long, CollectionProtocol> cpsMap = new HashMap<>();
+			OpenSpecimenException userErrors = new OpenSpecimenException(ErrorType.USER_ERROR);
+			for (CollectionProtocolSummary inputCp : cps) {
+				++idx;
+				List<ParameterizedError> errors = new ArrayList<>();
+				try {
+					CollectionProtocol cp = getCollectionProtocol(inputCp);
+					cpsMap.put(cp.getId(), cp);
+
+					if (AccessCtrlMgr.getInstance().hasUpdateCpRights(cp)) {
+						validatedCpIds.add(cp.getId());
+					} else {
+						errors.add(new ParameterizedError(RbacErrorCode.ACCESS_DENIED, null));
+					}
+				} catch (OpenSpecimenException e) {
+					errors.addAll(e.getErrors());
+				}
+
+				addItemErrorsIfPresent(idx, errors, userErrors);
+			}
+
+			userErrors.checkAndThrow();
+
+			int count = 0;
+			if (op.getOp() == null || op.getOp() == UpdateRateListCollectionProtocolsOp.Op.ADD) {
+				List<Long> preAssociatedCpIds = getRateListAssociatedCps(rateList, validatedCpIds);
+				preAssociatedCpIds.forEach(validatedCpIds::remove);
+				count = associateRateListCps(cpsMap, rateList, validatedCpIds);
+				raiseErrorIfOverlappingServices(rateList);
+			} else if (op.getOp() == UpdateRateListCollectionProtocolsOp.Op.RM) {
+				count = removeRateListCpAssociations(rateList, validatedCpIds);
 			}
 
 			return ResponseEvent.response(count);
@@ -353,6 +419,72 @@ public class RateListServiceImpl implements RateListService {
 
 		userErrors.checkAndThrow();
 		return idx;
+	}
+
+	private void raiseErrorIfOverlappingServices(LabServicesRateList rateList) {
+		daoFactory.getLabServiceRateListDao().flush();
+
+		List<Object[]> overlappingServiceRates = daoFactory.getLabServiceRateListDao().getOverlappingServiceRates(rateList);
+		if (overlappingServiceRates.isEmpty()) {
+			return;
+		}
+
+		Map<String, List<String>> services = new LinkedHashMap<>();
+		for (Object[] serviceRate : overlappingServiceRates) {
+			String rateListCp = "#" + serviceRate[0] + " " + serviceRate[1] + ", " + serviceRate[2];
+			services.computeIfAbsent(rateListCp, (k) -> new ArrayList<>()).add((String) serviceRate[3]);
+		}
+
+		List<String> args = new ArrayList<>();
+		for (Map.Entry<String, List<String>> service : services.entrySet()) {
+			args.add(service.getKey() + ": " + String.join(" / ", service.getValue()));
+		}
+
+		throw OpenSpecimenException.userError(LabServicesRateListErrorCode.SVCS_OVERLAP, String.join("; ", args));
+	}
+
+	private CollectionProtocol getCollectionProtocol(CollectionProtocolSummary input) {
+		CollectionProtocol cp = null;
+		Object key = null;
+		if (input.getId() != null) {
+			cp = daoFactory.getCollectionProtocolDao().getById(input.getId());
+			key = input.getId();
+		} else if (StringUtils.isNotBlank(input.getShortTitle())) {
+			cp = daoFactory.getCollectionProtocolDao().getCpByShortTitle(input.getShortTitle());
+			key = input.getShortTitle();
+		}
+
+		if (key == null) {
+			throw OpenSpecimenException.userError(CpErrorCode.SHORT_TITLE_REQUIRED);
+		} else if (cp == null) {
+			throw OpenSpecimenException.userError(CpErrorCode.NOT_FOUND, key);
+		}
+
+		return cp;
+	}
+
+	private List<Long> getRateListAssociatedCps(LabServicesRateList rateList, Collection<Long> cpIds) {
+		return daoFactory.getLabServiceRateListDao().getAssociatedCpIds(rateList.getId(), cpIds);
+	}
+
+	private int associateRateListCps(Map<Long, CollectionProtocol> cpsMap, LabServicesRateList rateList, Collection<Long> cpIds) {
+		for (Long cpId : cpIds) {
+			LabServiceRateListCp rateListCp = new LabServiceRateListCp();
+			rateListCp.setRateList(rateList);
+			rateListCp.setCp(cpsMap.get(cpId));
+			daoFactory.getLabServiceRateListDao().saveRateListCp(rateListCp);
+		}
+
+		return cpIds.size();
+	}
+
+	private int removeRateListCpAssociations(LabServicesRateList rateList, Collection<Long> cpIds) {
+		List<LabServiceRateListCp> rateListCps = daoFactory.getLabServiceRateListDao().getRateListCps(rateList.getId(), cpIds);
+		for (LabServiceRateListCp rateListCp : rateListCps) {
+			daoFactory.getLabServiceRateListDao().deleteRateListCp(rateListCp);
+		}
+
+		return rateListCps.size();
 	}
 
 	private void addItemErrorsIfPresent(int idx, List<ParameterizedError> errors, OpenSpecimenException userErrors) {

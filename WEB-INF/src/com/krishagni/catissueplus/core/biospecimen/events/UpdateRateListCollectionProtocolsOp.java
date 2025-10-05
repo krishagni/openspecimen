@@ -1,19 +1,20 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class UpdateLabServicesRateListOp {
+public class UpdateRateListCollectionProtocolsOp {
 	public enum Op {
-		UPSERT,
+		ADD,
 
-		DELETE
-	}
+		RM
+	};
 
 	private Long rateListId;
 
 	private Op op;
 
-	private List<LabServiceRateDetail> serviceRates;
+	private List<CollectionProtocolSummary> cps = new ArrayList<>();
 
 	public Long getRateListId() {
 		return rateListId;
@@ -31,11 +32,11 @@ public class UpdateLabServicesRateListOp {
 		this.op = op;
 	}
 
-	public List<LabServiceRateDetail> getServiceRates() {
-		return serviceRates;
+	public List<CollectionProtocolSummary> getCps() {
+		return cps;
 	}
 
-	public void setServiceRates(List<LabServiceRateDetail> serviceRates) {
-		this.serviceRates = serviceRates;
+	public void setCps(List<CollectionProtocolSummary> cps) {
+		this.cps = cps;
 	}
 }

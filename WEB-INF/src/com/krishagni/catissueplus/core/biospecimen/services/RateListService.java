@@ -4,7 +4,8 @@ import java.util.List;
 
 import com.krishagni.catissueplus.core.biospecimen.events.LabServiceDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.LabServicesRateListDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.UpdateLabServicesRateListOp;
+import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListCollectionProtocolsOp;
+import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListServicesOp;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -26,5 +27,7 @@ public interface RateListService {
 
 	ResponseEvent<LabServicesRateListDetail> createRateList(RequestEvent<LabServicesRateListDetail> req);
 
-	ResponseEvent<Integer> updateRateListServices(RequestEvent<UpdateLabServicesRateListOp> req);
+	ResponseEvent<Integer> updateRateListServices(RequestEvent<UpdateRateListServicesOp> req);
+
+	ResponseEvent<Integer> updateRateListCps(RequestEvent<UpdateRateListCollectionProtocolsOp> req);
 }

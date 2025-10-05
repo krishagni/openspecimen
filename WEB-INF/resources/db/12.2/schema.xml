@@ -319,4 +319,31 @@
       <column name="RATE" type="${decimal.type}(10, 2)" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Rate list CPs">
+    <createTable tableName="OS_LAB_SVCS_RATE_LIST_CPS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="RATE_LIST_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_LAB_SVC_RL_CP_RATE_LIST_ID"
+          referencedTableName="OS_LAB_SERVICES_RATE_LISTS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CP_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_LAB_SVC_RL_CP_ID"
+          referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Rate list CP ID generator">
+    <createSequence sequenceName="OS_LAB_SVCS_RATE_LIST_CPS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Covering index on rate list CPs">
+    <createIndex tableName="OS_LAB_SVCS_RATE_LIST_CPS" indexName="OS_LAB_SVCS_RATE_LIST_CPS_IDX" unique="true">
+      <column name="RATE_LIST_ID" type="${int.type}" />
+      <column name="CP_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

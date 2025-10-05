@@ -31,11 +31,44 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS" not-null="true" />
 
+    <set name="cps" table="OS_LAB_SVCS_RATE_LIST_CPS" inverse="true" cascade="all-delete-orphan" batch-size="100">
+      <key column="RATE_LIST_ID" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRateListCp" />
+    </set>
+
     <set name="serviceRates" table="OS_LAB_SERVICE_RATES" inverse="true" cascade="all-delete-orphan" batch-size="100">
       <key column="RATE_LIST_ID" />
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRate" />
     </set>
 
     <filter name="activeEntity" />
+
+    <sql-query name="getOverlappingServiceRates">
+      <return-scalar column="rate_list_id" type="long" />
+      <return-scalar column="rate_list_name" type="string" />
+      <return-scalar column="cp_short_title" type="string" />
+      <return-scalar column="service_code" type="string" />
+
+      <![CDATA[
+      select
+        rl.identifier as rate_list_id, rl.name as rate_list_name, cp.short_title as cp_short_title, svc.code as service_code
+      from
+        os_lab_services_rate_lists rl
+        inner join os_lab_svcs_rate_list_cps rl_cp on rl_cp.rate_list_id = rl.identifier
+        inner join os_lab_service_rates svc_rate on svc_rate.rate_list_id = rl.identifier
+        inner join os_lab_services svc on svc.identifier = svc_rate.service_id
+        inner join catissue_collection_protocol cp on cp.identifier = rl_cp.cp_id
+      where
+        rl.identifier != :rateListId and
+        rl.start_date <= :endDate and
+        (rl.end_date is null or rl.end_date >= :startDate) and
+        cp.identifier in (select cp_id from os_lab_svcs_rate_list_cps where rate_list_id = :rateListId) and
+        svc.identifier in (select service_id from os_lab_service_rates where rate_list_id = :rateListId) and
+        cp.activity_status != 'Disabled' and
+        svc.activity_status != 'Disabled'
+      order by
+        rl.identifier, rl.name, cp.short_title, svc.code
+      ]]>
+    </sql-query>
   </class>
 </hibernate-mapping>
