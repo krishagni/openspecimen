@@ -399,6 +399,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		}
 
 		applyIdsFilter(query, "cp.id", crit.ids());
+		addInClauses(query, "cp.shortTitle", crit.shortTitles());
 		addSiteCpsCond(query, crit.siteCps());
 		if (CollectionUtils.isNotEmpty(crit.notInIds())) {
 			query.add(query.not(query.in("cp.id", crit.notInIds())));

@@ -34,6 +34,14 @@ public class LabServicesRateListsController {
 		return ResponseEvent.unwrap(rateListSvc.createRateList(RequestEvent.wrap(input)));
 	}
 
+	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public LabServicesRateListDetail createRateList(@PathVariable("id") Long rateListId, @RequestBody LabServicesRateListDetail input) {
+		input.setId(rateListId);
+		return ResponseEvent.unwrap(rateListSvc.updateRateList(RequestEvent.wrap(input)));
+	}
+
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/service-rates")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

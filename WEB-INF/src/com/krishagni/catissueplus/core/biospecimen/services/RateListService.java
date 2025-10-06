@@ -27,6 +27,8 @@ public interface RateListService {
 
 	ResponseEvent<LabServicesRateListDetail> createRateList(RequestEvent<LabServicesRateListDetail> req);
 
+	ResponseEvent<LabServicesRateListDetail> updateRateList(RequestEvent<LabServicesRateListDetail> req);
+
 	ResponseEvent<Integer> updateRateListServices(RequestEvent<UpdateRateListServicesOp> req);
 
 	ResponseEvent<Integer> updateRateListCps(RequestEvent<UpdateRateListCollectionProtocolsOp> req);

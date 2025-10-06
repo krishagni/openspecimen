@@ -4,12 +4,16 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRateListCp;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListDao;
+import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList> implements LabServicesRateListDao {
 	@Override
@@ -58,6 +62,19 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 			.setParameter("endDate", rateList.getEndDate() != null ? rateList.getEndDate() : DISTANT_FUTURE)
 			.setMaxResults(10)
 			.list();
+	}
+
+	@Override
+	public List<CollectionProtocol> notAllowedCps(Long rateListId, Collection<SiteCpPair> siteCps, int maxCps) {
+		Criteria<LabServiceRateListCp> query = createCriteria(LabServiceRateListCp.class, "rateListCp")
+			.join("rateListCp.rateList", "rateList")
+			.join("rateListCp.cp", "cp");
+
+		SubQuery<Long> allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, siteCps);
+		List<LabServiceRateListCp> rateListCps = query.add(query.eq("rateList.id", rateListId))
+			.add(query.notIn("cp.id", allowedCps))
+			.list(0, maxCps);
+		return rateListCps.stream().map(LabServiceRateListCp::getCp).collect(Collectors.toList());
 	}
 
 	private static Date getFarInFutureDate() {

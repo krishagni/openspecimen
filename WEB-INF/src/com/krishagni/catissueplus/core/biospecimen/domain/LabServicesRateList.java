@@ -82,6 +82,14 @@ public class LabServicesRateList extends BaseEntity {
 		this.activityStatus = activityStatus;
 	}
 
+	public void update(LabServicesRateList other) {
+		setName(other.getName());
+		setDescription(other.getDescription());
+		setStartDate(other.getStartDate());
+		setEndDate(other.getEndDate());
+		setActivityStatus(other.getActivityStatus());
+	}
+
 	public Tuple getServiceRateLookupMaps() {
 		Map<Long, LabServiceRate> serviceRatesByIdMap = new HashMap<>();
 		Map<String, LabServiceRate> serviceRatesBySvcCodeMap = new HashMap<>();

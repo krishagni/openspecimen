@@ -82,18 +82,22 @@ public class AbstractDao<T> implements Dao<T> {
 		sessionFactory.getCurrentSession().flush();
 	}
 
-	protected void applyIdsFilter(AbstractCriteria<?, ?> criteria, String attrName, List<Long> ids) {
+	protected void addInClauses(AbstractCriteria<?, ?> criteria, String attrName, List<?> ids) {
 		if (CollectionUtils.isEmpty(ids)) {
 			return;
 		}
 
 		Junction or = criteria.disjunction();
 		for (int i = 0; i < ids.size(); i += 500) {
-			List<Long> params = ids.subList(i, Math.min(i + 500, ids.size()));
+			List<?> params = ids.subList(i, Math.min(i + 500, ids.size()));
 			or.add(criteria.in(attrName, params));
 		}
 
 		criteria.add(or);
+	}
+
+	protected void applyIdsFilter(AbstractCriteria<?, ?> criteria, String attrName, List<Long> ids) {
+		addInClauses(criteria, attrName, ids);
 	}
 
 	protected Session getCurrentSession() {

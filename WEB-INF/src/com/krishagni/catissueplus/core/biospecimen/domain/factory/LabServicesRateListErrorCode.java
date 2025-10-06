@@ -3,6 +3,8 @@ package com.krishagni.catissueplus.core.biospecimen.domain.factory;
 import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 
 public enum LabServicesRateListErrorCode implements ErrorCode {
+	ID_REQ,
+
 	NAME_REQ,
 
 	START_DT_REQ,
@@ -21,7 +23,11 @@ public enum LabServicesRateListErrorCode implements ErrorCode {
 
 	ITEM_ERROR,
 
-	SVCS_OVERLAP;
+	SVCS_OVERLAP,
+
+	UPDATE_NOT_ALLOWED,
+
+	CP_NF_OR_UPDATE_NA;
 
 	@Override
 	public String code() {

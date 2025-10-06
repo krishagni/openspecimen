@@ -1,12 +1,15 @@
 
 package com.krishagni.catissueplus.core.biospecimen.repository;
 
+import java.util.List;
 import java.util.Set;
 
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 
 public class CpListCriteria extends AbstractListCriteria<CpListCriteria> {
+
+	private List<String> shortTitles;
 	
 	private String title;
 
@@ -27,6 +30,15 @@ public class CpListCriteria extends AbstractListCriteria<CpListCriteria> {
 	@Override
 	public CpListCriteria self() {
 		return this;
+	}
+
+	public List<String> shortTitles() {
+		return shortTitles;
+	}
+
+	public CpListCriteria shortTitles(List<String> shortTitles) {
+		this.shortTitles = shortTitles;
+		return self();
 	}
 	
 	public String title() {

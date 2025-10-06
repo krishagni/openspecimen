@@ -3,8 +3,10 @@ package com.krishagni.catissueplus.core.biospecimen.repository;
 import java.util.Collection;
 import java.util.List;
 
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRateListCp;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
+import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface LabServicesRateListDao extends Dao<LabServicesRateList> {
@@ -17,4 +19,6 @@ public interface LabServicesRateListDao extends Dao<LabServicesRateList> {
 	void deleteRateListCp(LabServiceRateListCp rateListCp);
 
 	List<Object[]> getOverlappingServiceRates(LabServicesRateList rateList);
+
+	List<CollectionProtocol> notAllowedCps(Long rateListId, Collection<SiteCpPair> siteCps, int maxCps);
 }
