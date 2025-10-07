@@ -23,9 +23,13 @@ public interface LabServicesRateListDao extends Dao<LabServicesRateList> {
 
 	Long getRateListCpsCount(Long rateListId, CpListCriteria cpListCrit);
 
+	int cloneRateListCps(Long srcRateListId, Long tgtRateListId);
+
 	void saveRateListCp(LabServiceRateListCp rateListCp);
 
 	void deleteRateListCp(LabServiceRateListCp rateListCp);
+
+	int cloneRateListServices(Long srcRateListId, Long tgtRateListId);
 
 	List<Object[]> getOverlappingServiceRates(LabServicesRateList rateList);
 

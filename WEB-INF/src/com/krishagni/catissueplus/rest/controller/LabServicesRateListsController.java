@@ -133,6 +133,7 @@ public class LabServicesRateListsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public LabServicesRateListDetail createRateList(@RequestBody LabServicesRateListDetail input) {
+		input.setId(null);
 		return ResponseEvent.unwrap(rateListSvc.createRateList(RequestEvent.wrap(input)));
 	}
 
@@ -142,6 +143,15 @@ public class LabServicesRateListsController {
 	public LabServicesRateListDetail updateRateList(@PathVariable("id") Long rateListId, @RequestBody LabServicesRateListDetail input) {
 		input.setId(rateListId);
 		return ResponseEvent.unwrap(rateListSvc.updateRateList(RequestEvent.wrap(input)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/{id}/clone")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public LabServicesRateListDetail cloneRateList(@PathVariable("id") Long rateListId, @RequestBody LabServicesRateListDetail input) {
+		input.setId(null);
+		input.setCloneOf(rateListId);
+		return ResponseEvent.unwrap(rateListSvc.cloneRateList(RequestEvent.wrap(input)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/service-rates")

@@ -38,6 +38,8 @@ public interface RateListService {
 
 	ResponseEvent<LabServicesRateListDetail> updateRateList(RequestEvent<LabServicesRateListDetail> req);
 
+	ResponseEvent<LabServicesRateListDetail> cloneRateList(RequestEvent<LabServicesRateListDetail> req);
+
 	ResponseEvent<List<LabServiceRateDetail>> getRateListServices(RequestEvent<EntityQueryCriteria> req);
 
 	ResponseEvent<Integer> updateRateListServices(RequestEvent<UpdateRateListServicesOp> req);

@@ -260,6 +260,27 @@ public class RateListServiceImpl implements RateListService {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<LabServicesRateListDetail> cloneRateList(RequestEvent<LabServicesRateListDetail> req) {
+		try {
+			LabServicesRateListDetail input = req.getPayload();
+			LabServicesRateList existing = getRateList(input.getCloneOf());
+			raiseErrorIfUpdateNotAllowed(existing);
+
+			LabServicesRateList newRateList = rateListFactory.createRateList(input);
+			daoFactory.getLabServiceRateListDao().saveOrUpdate(newRateList, true);
+			daoFactory.getLabServiceRateListDao().cloneRateListServices(existing.getId(), newRateList.getId());
+			daoFactory.getLabServiceRateListDao().cloneRateListCps(existing.getId(), newRateList.getId());
+			raiseErrorIfOverlappingServices(newRateList);
+			return ResponseEvent.response(LabServicesRateListDetail.from(newRateList));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<List<LabServiceRateDetail>> getRateListServices(RequestEvent<EntityQueryCriteria> req) {
 		try {
 			EntityQueryCriteria crit = req.getPayload();
@@ -407,6 +428,10 @@ public class RateListServiceImpl implements RateListService {
 	}
 
 	private LabServicesRateList getRateList(Long rateListId) {
+		if (rateListId == null) {
+			throw OpenSpecimenException.userError(LabServicesRateListErrorCode.ID_REQ);
+		}
+
 		LabServicesRateList rateList = daoFactory.getLabServiceRateListDao().getById(rateListId);
 		if (rateList == null) {
 			throw OpenSpecimenException.userError(LabServicesRateListErrorCode.NOT_FOUND, rateListId);

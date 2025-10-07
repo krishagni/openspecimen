@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LabServicesRateListDetail {
 	private Long id;
 
@@ -34,6 +36,8 @@ public class LabServicesRateListDetail {
 	private Date updateTime;
 
 	private String activityStatus;
+
+	private Long cloneOf;
 
 	public Long getId() {
 		return id;
@@ -113,6 +117,14 @@ public class LabServicesRateListDetail {
 
 	public void setActivityStatus(String activityStatus) {
 		this.activityStatus = activityStatus;
+	}
+
+	public Long getCloneOf() {
+		return cloneOf;
+	}
+
+	public void setCloneOf(Long cloneOf) {
+		this.cloneOf = cloneOf;
 	}
 
 	public static LabServicesRateListDetail from(LabServicesRateList rateList) {
