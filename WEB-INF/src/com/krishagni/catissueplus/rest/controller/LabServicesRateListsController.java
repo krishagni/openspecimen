@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.LabServiceRateDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.LabServicesRateListDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListCollectionProtocolsOp;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListServicesOp;
+import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.RateListService;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
@@ -141,6 +144,13 @@ public class LabServicesRateListsController {
 		return ResponseEvent.unwrap(rateListSvc.updateRateList(RequestEvent.wrap(input)));
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/service-rates")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<LabServiceRateDetail> getRateListServices(@PathVariable("id") Long rateListId) {
+		return ResponseEvent.unwrap(rateListSvc.getRateListServices(RequestEvent.wrap(new EntityQueryCriteria(rateListId))));
+	}
+
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/service-rates")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
@@ -148,6 +158,67 @@ public class LabServicesRateListsController {
 		op.setRateListId(rateListId);
 		return Collections.singletonMap("count", ResponseEvent.unwrap(rateListSvc.updateRateListServices(RequestEvent.wrap(op))));
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/collection-protocols")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<CollectionProtocolSummary> getRateListCps(
+		@PathVariable("id")
+		Long rateListId,
+
+		@RequestParam(value = "query", required = false)
+		String query,
+
+		@RequestParam(value = "piId", required = false)
+		Long piId,
+
+		@RequestParam(value = "site", required = false)
+		String site,
+
+		@RequestParam(value = "startAt", required = false, defaultValue = "0")
+		int startAt,
+
+		@RequestParam(value = "maxResults", required = false, defaultValue = "100")
+		int maxResults) {
+
+		CpListCriteria cpListCriteria = new CpListCriteria()
+			.query(query)
+			.piId(piId)
+			.repositoryName(site)
+			.startAt(startAt)
+			.maxResults(maxResults);
+
+		EntityQueryCriteria crit = new EntityQueryCriteria(rateListId);
+		crit.setParams(Collections.singletonMap("cpListCriteria", cpListCriteria));
+		return ResponseEvent.unwrap(rateListSvc.getRateListCps(RequestEvent.wrap(crit)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/collection-protocols/count")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Long> getRateListCpsCount(
+		@PathVariable("id")
+		Long rateListId,
+
+		@RequestParam(value = "query", required = false)
+		String query,
+
+		@RequestParam(value = "piId", required = false)
+		Long piId,
+
+		@RequestParam(value = "site", required = false)
+		String site) {
+
+		CpListCriteria cpListCriteria = new CpListCriteria()
+			.query(query)
+			.piId(piId)
+			.repositoryName(site);
+
+		EntityQueryCriteria crit = new EntityQueryCriteria(rateListId);
+		crit.setParams(Collections.singletonMap("cpListCriteria", cpListCriteria));
+		return Collections.singletonMap("count", ResponseEvent.unwrap(rateListSvc.getRateListCpsCount(RequestEvent.wrap(crit))));
+	}
+
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/collection-protocols")
 	@ResponseStatus(HttpStatus.OK)

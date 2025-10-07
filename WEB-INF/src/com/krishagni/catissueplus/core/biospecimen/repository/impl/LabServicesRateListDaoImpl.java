@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRateListCp;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
+import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListDao;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -62,6 +63,19 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		return query.add(query.eq("rateList.id", rateListId))
 			.add(query.in("cp.id", cpIds))
 			.list();
+	}
+
+	@Override
+	public List<LabServiceRateListCp> getRateListCps(Long rateListId, CpListCriteria cpListCrit) {
+		Criteria<LabServiceRateListCp> query = getRateListCpsQuery(rateListId, cpListCrit);
+		return query.addOrder(query.asc("cp.shortTitle"))
+			.list(cpListCrit.startAt(), cpListCrit.maxResults());
+	}
+
+	@Override
+	public Long getRateListCpsCount(Long rateListId, CpListCriteria cpListCrit) {
+		Criteria<LabServiceRateListCp> query = getRateListCpsQuery(rateListId, cpListCrit);
+		return query.getCount("cp.id");
 	}
 
 	@Override
@@ -157,6 +171,38 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		}
 
 		applyIdsFilter(query, "rateList.id", crit.ids());
+		return query;
+	}
+
+	private Criteria<LabServiceRateListCp> getRateListCpsQuery(Long rateListId, CpListCriteria cpListCrit) {
+		Criteria<LabServiceRateListCp> query = createCriteria(LabServiceRateListCp.class, "rateListCp")
+			.join("rateListCp.rateList", "rateList")
+			.join("rateListCp.cp", "cp")
+			.join("cp.principalInvestigator", "pi");
+
+		query.add(query.eq("rateList.id", rateListId));
+		if (StringUtils.isNotBlank(cpListCrit.query())) {
+			query.add(
+				query.or(
+					query.like("cp.shortTitle", cpListCrit.query()),
+					query.like("cp.title", cpListCrit.query()),
+					query.like("cp.code", cpListCrit.query())
+				)
+			);
+		}
+
+		if (cpListCrit.piId() != null) {
+			query.add(query.eq("pi.id", cpListCrit.piId()));
+		}
+
+		if (StringUtils.isNotBlank(cpListCrit.repositoryName())) {
+			SubQuery<Long> cpSitesQuery = query.createSubQuery(CollectionProtocol.class, "icp")
+				.join("icp.sites", "cpSite")
+				.join("cpSite.site", "site");
+			cpSitesQuery.add(cpSitesQuery.eq("site.name", cpListCrit.repositoryName()));
+			query.add(query.in("cp.id", cpSitesQuery));
+		}
+
 		return query;
 	}
 

@@ -208,19 +208,8 @@ public class RateListServiceImpl implements RateListService {
 	@PlusTransactional
 	public ResponseEvent<LabServicesRateListDetail> getRateList(RequestEvent<EntityQueryCriteria> req) {
 		try {
-			EntityQueryCriteria input = req.getPayload();
-			if (input.getId() == null) {
-				return ResponseEvent.userError(LabServicesRateListErrorCode.ID_REQ);
-			}
-
-			LabServicesRateListCriteria crit = new LabServicesRateListCriteria().ids(Collections.singletonList(input.getId()));
-			addReadConstraints(crit);
-			List<LabServicesRateList> rateLists = daoFactory.getLabServiceRateListDao().getRateLists(crit);
-			if (rateLists.isEmpty()) {
-				return ResponseEvent.userError(LabServicesRateListErrorCode.NOT_FOUND, input.getId());
-			}
-
-			return ResponseEvent.response(LabServicesRateListDetail.from(rateLists.get(0)));
+			LabServicesRateList rateList = getReadAllowedRateList(req.getPayload().getId());
+			return ResponseEvent.response(LabServicesRateListDetail.from(rateList));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -271,6 +260,20 @@ public class RateListServiceImpl implements RateListService {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<LabServiceRateDetail>> getRateListServices(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			LabServicesRateList rateList = getReadAllowedRateList(crit.getId());
+			return ResponseEvent.response(LabServiceRateDetail.from(rateList.getServiceRates()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<Integer> updateRateListServices(RequestEvent<UpdateRateListServicesOp> req) {
 		try {
 			UpdateRateListServicesOp op = req.getPayload();
@@ -290,6 +293,46 @@ public class RateListServiceImpl implements RateListService {
 				count = deleteServiceRates(rateList, serviceRates);
 			}
 
+			return ResponseEvent.response(count);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<CollectionProtocolSummary>> getRateListCps(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			LabServicesRateList rateList = getReadAllowedRateList(crit.getId());
+			CpListCriteria cpListCrit = new CpListCriteria();
+			if (crit.getParams() != null && crit.getParams().get("cpListCriteria") != null) {
+				cpListCrit = (CpListCriteria) crit.getParams().get("cpListCriteria");
+			}
+
+			List<LabServiceRateListCp> rateListCps = daoFactory.getLabServiceRateListDao().getRateListCps(rateList.getId(), cpListCrit);
+			return ResponseEvent.response(rateListCps.stream().map(rateListCp -> CollectionProtocolSummary.from(rateListCp.getCp())).collect(Collectors.toList()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Long> getRateListCpsCount(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			LabServicesRateList rateList = getReadAllowedRateList(crit.getId());
+			CpListCriteria cpListCrit = new CpListCriteria();
+			if (crit.getParams() != null && crit.getParams().get("cpListCriteria") != null) {
+				cpListCrit = (CpListCriteria) crit.getParams().get("cpListCriteria");
+			}
+
+			Long count = daoFactory.getLabServiceRateListDao().getRateListCpsCount(rateList.getId(), cpListCrit);
 			return ResponseEvent.response(count);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -370,6 +413,21 @@ public class RateListServiceImpl implements RateListService {
 		}
 
 		return rateList;
+	}
+
+	private LabServicesRateList getReadAllowedRateList(Long rateListId) {
+		if (rateListId == null) {
+			throw OpenSpecimenException.userError(LabServicesRateListErrorCode.ID_REQ);
+		}
+
+		LabServicesRateListCriteria crit = new LabServicesRateListCriteria().ids(Collections.singletonList(rateListId));
+		addReadConstraints(crit);
+		List<LabServicesRateList> rateLists = daoFactory.getLabServiceRateListDao().getRateLists(crit);
+		if (rateLists.isEmpty()) {
+			throw OpenSpecimenException.userError(LabServicesRateListErrorCode.NOT_FOUND, rateListId);
+		}
+
+		return rateLists.get(0);
 	}
 
 	private int upsertServiceRates(LabServicesRateList rateList, List<LabServiceRateDetail> serviceRates) {

@@ -19,6 +19,10 @@ public interface LabServicesRateListDao extends Dao<LabServicesRateList> {
 
 	List<LabServiceRateListCp> getRateListCps(Long rateListId, Collection<Long> cpIds);
 
+	List<LabServiceRateListCp> getRateListCps(Long rateListId, CpListCriteria cpListCrit);
+
+	Long getRateListCpsCount(Long rateListId, CpListCriteria cpListCrit);
+
 	void saveRateListCp(LabServiceRateListCp rateListCp);
 
 	void deleteRateListCp(LabServiceRateListCp rateListCp);
