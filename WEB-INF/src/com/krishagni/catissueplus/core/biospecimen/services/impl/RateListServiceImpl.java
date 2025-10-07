@@ -32,6 +32,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListServices
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.RateListService;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
@@ -47,6 +48,7 @@ import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -168,6 +170,57 @@ public class RateListServiceImpl implements RateListService {
 
 			existing.delete();
 			return ResponseEvent.response(LabServiceDetail.from(existing));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<List<LabServicesRateListDetail>> getRateLists(RequestEvent<LabServicesRateListCriteria> req) {
+		try {
+			LabServicesRateListCriteria crit = addReadConstraints(req.getPayload());
+			List<LabServicesRateList> rateLists = daoFactory.getLabServiceRateListDao().getRateLists(crit);
+			return ResponseEvent.response(LabServicesRateListDetail.from(rateLists));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Long> getRateListsCount(RequestEvent<LabServicesRateListCriteria> req) {
+		try {
+			LabServicesRateListCriteria crit = addReadConstraints(req.getPayload());
+			return ResponseEvent.response(daoFactory.getLabServiceRateListDao().getRateListsCount(crit));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<LabServicesRateListDetail> getRateList(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria input = req.getPayload();
+			if (input.getId() == null) {
+				return ResponseEvent.userError(LabServicesRateListErrorCode.ID_REQ);
+			}
+
+			LabServicesRateListCriteria crit = new LabServicesRateListCriteria().ids(Collections.singletonList(input.getId()));
+			addReadConstraints(crit);
+			List<LabServicesRateList> rateLists = daoFactory.getLabServiceRateListDao().getRateLists(crit);
+			if (rateLists.isEmpty()) {
+				return ResponseEvent.userError(LabServicesRateListErrorCode.NOT_FOUND, input.getId());
+			}
+
+			return ResponseEvent.response(LabServicesRateListDetail.from(rateLists.get(0)));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -461,6 +514,21 @@ public class RateListServiceImpl implements RateListService {
 		}
 
 		throw OpenSpecimenException.userError(LabServicesRateListErrorCode.SVCS_OVERLAP, rateList.getId(), rateList.getName(), String.join("; ", args));
+	}
+
+	private LabServicesRateListCriteria addReadConstraints(LabServicesRateListCriteria crit) {
+		if (crit.cpId() != null) {
+			AccessCtrlMgr.getInstance().ensureReadCpRights(crit.cpId());
+		} else {
+			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getSiteCps(Resource.CP, Operation.READ, false);
+			if (siteCps != null && siteCps.isEmpty()) {
+				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			crit.siteCps(siteCps);
+		}
+
+		return crit.creatorId(AuthUtil.getCurrentUser().getId());
 	}
 
 

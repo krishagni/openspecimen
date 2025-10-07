@@ -7,6 +7,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.LabServicesRateListDet
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListCollectionProtocolsOp;
 import com.krishagni.catissueplus.core.biospecimen.events.UpdateRateListServicesOp;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListCriteria;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -24,6 +25,12 @@ public interface RateListService {
 	ResponseEvent<LabServiceDetail> updateService(RequestEvent<LabServiceDetail> req);
 
 	ResponseEvent<LabServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req);
+
+	ResponseEvent<List<LabServicesRateListDetail>> getRateLists(RequestEvent<LabServicesRateListCriteria> req);
+
+	ResponseEvent<Long> getRateListsCount(RequestEvent<LabServicesRateListCriteria> req);
+
+	ResponseEvent<LabServicesRateListDetail> getRateList(RequestEvent<EntityQueryCriteria> req);
 
 	ResponseEvent<LabServicesRateListDetail> createRateList(RequestEvent<LabServicesRateListDetail> req);
 

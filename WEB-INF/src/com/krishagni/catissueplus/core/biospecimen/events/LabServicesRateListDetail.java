@@ -1,12 +1,16 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class LabServicesRateListDetail {
 	private Long id;
@@ -127,5 +131,9 @@ public class LabServicesRateListDetail {
 		result.setActivityStatus(rateList.getActivityStatus());
 
 		return result;
+	}
+
+	public static List<LabServicesRateListDetail> from(Collection<LabServicesRateList> rateLists) {
+		return Utility.nullSafeStream(rateLists).map(LabServicesRateListDetail::from).collect(Collectors.toList());
 	}
 }

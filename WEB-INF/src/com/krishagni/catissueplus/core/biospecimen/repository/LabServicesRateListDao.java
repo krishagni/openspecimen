@@ -10,6 +10,11 @@ import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface LabServicesRateListDao extends Dao<LabServicesRateList> {
+
+	List<LabServicesRateList> getRateLists(LabServicesRateListCriteria crit);
+
+	Long getRateListsCount(LabServicesRateListCriteria crit);
+
 	List<Long> getAssociatedCpIds(Long rateListId, Collection<Long> cpIds);
 
 	List<LabServiceRateListCp> getRateListCps(Long rateListId, Collection<Long> cpIds);

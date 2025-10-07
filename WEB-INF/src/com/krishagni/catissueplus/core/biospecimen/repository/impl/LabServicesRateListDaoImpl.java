@@ -6,11 +6,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRateListCp;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
+import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListDao;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
@@ -19,6 +24,21 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 	@Override
 	public Class<LabServicesRateList> getType() {
 		return LabServicesRateList.class;
+	}
+
+	@Override
+	public List<LabServicesRateList> getRateLists(LabServicesRateListCriteria crit) {
+		Criteria<LabServicesRateList> query = createCriteria(LabServicesRateList.class, "rateList");
+		return query.add(query.in("rateList.id", getRateListsQuery(crit, query)))
+			.addOrder(query.desc("rateList.startDate"))
+			.list(crit.startAt(), crit.maxResults());
+	}
+
+	@Override
+	public Long getRateListsCount(LabServicesRateListCriteria crit) {
+		Criteria<LabServicesRateList> query = createCriteria(LabServicesRateList.class, "rateList");
+		return query.add(query.in("rateList.id", getRateListsQuery(crit, query)))
+			.getCount("rateList.id");
 	}
 
 	@Override
@@ -81,6 +101,63 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		Calendar cal = Calendar.getInstance();
 		cal.set(9999, 11, 31, 23, 59, 59); // 9999-12-31 23:59:59
 		return cal.getTime();
+	}
+
+	private SubQuery<Long> getRateListsQuery(LabServicesRateListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
+		SubQuery<Long> query = mainQuery.createSubQuery(LabServicesRateList.class, "rateList")
+			.join("rateList.creator", "creator")
+			.leftJoin("rateList.cps", "rateListCp")
+			.leftJoin("rateListCp.cp", "cp");
+
+		if (StringUtils.isNotBlank(crit.query())) {
+			if (isMySQL()) {
+				query.add(query.like("rateList.name", crit.query()));
+			} else {
+				query.add(query.ilike("rateList.name", crit.query()));
+			}
+		}
+
+		if (crit.startDate() != null) {
+			query.add(query.ge("rateList.startDate", crit.startDate()));
+		}
+
+		if (crit.endDate() != null) {
+			query.add(query.le("rateList.endDate", crit.endDate()));
+		}
+
+		if (crit.effectiveDate() != null) {
+			query.add(query.le("rateList.startDate", crit.effectiveDate()))
+				.add(
+					query.or(
+						query.isNull("rateList.endDate"),
+						query.ge("rateList.endDate", crit.effectiveDate())
+					)
+				);
+		}
+
+		if (crit.cpId() != null) {
+			query.add(query.eq("cp.id", crit.cpId()));
+		} else if (StringUtils.isNotBlank(crit.cpShortTitle())) {
+			query.add(query.eq("cp.shortTitle", crit.cpShortTitle()));
+		}
+
+		if (StringUtils.isNotBlank(crit.serviceCode())) {
+			query.join("rateList.serviceRates", "serviceRate")
+				.join("serviceRate.service", "service")
+				.add(query.eq("service.code", crit.serviceCode()));
+		}
+
+		if (CollectionUtils.isNotEmpty(crit.siteCps())) {
+			query.add(
+				query.or(
+					query.and(query.isNull("cp.id"), query.eq("creator.id", crit.creatorId())),
+					query.in("cp.id", BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, crit.siteCps()))
+				)
+			);
+		}
+
+		applyIdsFilter(query, "rateList.id", crit.ids());
+		return query;
 	}
 
 	private static final Date DISTANT_FUTURE = getFarInFutureDate();
