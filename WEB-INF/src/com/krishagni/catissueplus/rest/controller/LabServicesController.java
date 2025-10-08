@@ -39,6 +39,9 @@ public class LabServicesController {
 		@RequestParam(value = "query", required = false)
 		String query,
 
+		@RequestParam(value = "includeStats", required = false, defaultValue = "false")
+		boolean includeStats,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -48,6 +51,7 @@ public class LabServicesController {
 		LabServiceListCriteria crit = new LabServiceListCriteria()
 			.codes(codes)
 			.query(query)
+			.includeStat(includeStats)
 			.startAt(startAt)
 			.maxResults(maxResults);
 		return ResponseEvent.unwrap(rateListSvc.getServices(RequestEvent.wrap(crit)));

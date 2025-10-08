@@ -158,7 +158,7 @@ export default {
 
     _reloadServices: function() {
       this.ctx.loading = true;
-      const opts = Object.assign({maxResults: this.ctx.pageSize}, this.ctx.filterValues || {});
+      const opts = Object.assign({includeStats: true, maxResults: this.ctx.pageSize}, this.ctx.filterValues || {});
       return labSvc.getServices(opts || {}).then(
         resp => {
           this.ctx.loading = false;

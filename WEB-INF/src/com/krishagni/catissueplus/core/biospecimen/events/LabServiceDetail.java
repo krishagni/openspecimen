@@ -4,9 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.LabService;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LabServiceDetail {
 	private Long id;
 
@@ -15,6 +18,8 @@ public class LabServiceDetail {
 	private String description;
 
 	private String activityStatus;
+
+	private Long rateLists;
 
 	public Long getId() {
 		return id;
@@ -46,6 +51,14 @@ public class LabServiceDetail {
 
 	public void setActivityStatus(String activityStatus) {
 		this.activityStatus = activityStatus;
+	}
+
+	public Long getRateLists() {
+		return rateLists;
+	}
+
+	public void setRateLists(Long rateLists) {
+		this.rateLists = rateLists;
 	}
 
 	public static LabServiceDetail from(LabService service) {

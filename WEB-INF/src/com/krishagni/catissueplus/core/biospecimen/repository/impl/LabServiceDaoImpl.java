@@ -1,6 +1,9 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +45,20 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 		return query.uniqueResult();
 	}
 
+	@Override
+	public Map<Long, Long> getRateListsCount(Collection<Long> serviceIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_RATE_LISTS_COUNT)
+			.setParameterList("serviceIds", serviceIds)
+			.list();
+
+		Map<Long, Long> result = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (Long) row[1]);
+		}
+
+		return result;
+	}
+
 	private Criteria<LabService> getLabServicesQuery(LabServiceListCriteria criteria) {
 		Criteria<LabService> query = createCriteria(LabService.class, "labSvc");
 		if (CollectionUtils.isNotEmpty(criteria.codes())) {
@@ -57,4 +74,8 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 		}
 		return query;
 	}
+
+	private static final String FQN = LabService.class.getName();
+
+	private static final String GET_RATE_LISTS_COUNT = FQN + ".getRateListsCount";
 }

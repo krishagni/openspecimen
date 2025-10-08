@@ -20,5 +20,21 @@
     <property name="activityStatus" column="ACTIVITY_STATUS" not-null="true" />
 
     <filter name="activeEntity" />
+
+    <sql-query name="getRateListsCount">
+      <return-scalar column="service_id" type="long" />
+      <return-scalar column="rate_lists_count" type="long" />
+
+      select
+        sr.service_id as service_id, count(sr.rate_list_id) as rate_lists_count
+      from
+        os_lab_service_rates sr
+        inner join os_lab_services_rate_lists rl on rl.identifier = sr.rate_list_id
+      where
+        rl.activity_status != 'Disabled' and
+        sr.service_id in (:serviceIds)
+      group by
+        sr.service_id
+    </sql-query>
   </class>
 </hibernate-mapping>
