@@ -158,6 +158,11 @@ export default {
     },
 
     onServiceRowClick: function(rowObject) {
+      if (this.ctx.expandedServices.indexOf(rowObject) >= 0) {
+        this.ctx.expandedServices = [];
+        return;
+      }
+
       this.ctx.expandedServices = [rowObject];
       if (!rowObject.rateLists) {
         rowObject.loadingRateLists = true;
