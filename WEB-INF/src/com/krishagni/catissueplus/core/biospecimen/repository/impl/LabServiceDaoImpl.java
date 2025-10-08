@@ -79,6 +79,20 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 		return result;
 	}
 
+	@Override
+	public Map<String, Long> getSpecimensCountServicedBy(Collection<Long> serviceIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPECIMENS_COUNT_BY_SERVICE)
+			.setParameterList("serviceIds", serviceIds)
+			.list();
+
+		Map<String, Long> result = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			result.put((String) row[1], (Long) row[2]);
+		}
+
+		return result;
+	}
+
 	private Criteria<LabService> getLabServicesQuery(LabServiceListCriteria criteria) {
 		Criteria<LabService> query = createCriteria(LabService.class, "labSvc");
 		if (CollectionUtils.isNotEmpty(criteria.codes())) {
@@ -100,4 +114,6 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 	private static final String GET_RATE_LISTS = FQN + ".getServiceRates";
 
 	private static final String GET_RATE_LISTS_COUNT = FQN + ".getRateListsCount";
+
+	private static final String GET_SPECIMENS_COUNT_BY_SERVICE = FQN + ".getSpecimensCountServicedBy";
 }

@@ -72,6 +72,12 @@
           @click="addEditService" />
       </template>
     </os-dialog>
+
+    <os-confirm-delete ref="confirmDeleteSvcDialog" :captcha="false" :collect-reason="false">
+      <template #message>
+        <span v-t="{path: 'lab_services.confirm_delete_service', args: deleteSvcCtx}">Are you sure you want to delete the service {0}?</span>
+      </template>
+    </os-confirm-delete>
   </os-page>
 </template>
 
@@ -153,6 +159,19 @@ export default {
         saved => {
           this._refreshService(saved);
           this.hideAddEditSvcDialog();
+        }
+      );
+    },
+
+    deleteService: function({service}) {
+      this.deleteSvcCtx = { service: service.code };
+      this.$refs.confirmDeleteSvcDialog.open().then(
+        resp => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          labSvc.deleteService(service.id).then(() => this._reloadServices());
         }
       );
     },

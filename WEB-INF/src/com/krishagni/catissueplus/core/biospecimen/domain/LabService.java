@@ -19,7 +19,7 @@ public class LabService extends BaseEntity {
 
 	private Set<SpecimenRequirement> requirements = new HashSet<>();
 
-	private Set<Specimen> specimens = new HashSet<>();
+	private Set<LabSpecimenService> specimenServices = new HashSet<>();
 
 
 	private Set<LabServiceRate> serviceRates = new HashSet<>();
@@ -58,12 +58,12 @@ public class LabService extends BaseEntity {
 	}
 
 	@NotAudited
-	public Set<Specimen> getSpecimens() {
-		return specimens;
+	public Set<LabSpecimenService> getSpecimenServices() {
+		return specimenServices;
 	}
 
-	public void setSpecimens(Set<Specimen> specimens) {
-		this.specimens = specimens;
+	public void setSpecimenServices(Set<LabSpecimenService> specimenServices) {
+		this.specimenServices = specimenServices;
 	}
 
 	@NotAudited

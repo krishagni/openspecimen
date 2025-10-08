@@ -19,4 +19,6 @@ public interface LabServiceDao extends Dao<LabService> {
 	List<LabServicesRateListDetail> getRateLists(Long serviceId);
 
 	Map<Long, Long> getRateListsCount(Collection<Long> serviceIds);
+
+	Map<String, Long> getSpecimensCountServicedBy(Collection<Long> serviceIds);
 }

@@ -22,6 +22,10 @@ class LabService {
     }
   }
 
+  deleteService(serviceId) {
+    return http.delete('lab-services/' + serviceId);
+  }
+
   getRateLists(serviceId) {
     return http.get('lab-services/' + serviceId + '/rate-lists');
   }

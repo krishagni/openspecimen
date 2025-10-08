@@ -1526,6 +1526,7 @@
     "code": "Code",
     "code_or_desc": "Service Code or Description",
     "code_req": "Service Code is mandatory",
+    "confirm_delete_service": "Are you sure you want to delete the service {service}?",
     "delete_service": "Delete Service",
     "description": "Description",
     "description_req": "Description is mandatory",

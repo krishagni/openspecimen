@@ -24,6 +24,11 @@
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRate" />
     </set>
 
+    <set name="specimenServices" table="OS_SPECIMEN_LAB_SERVICES" inverse="true" batch-size="100">
+      <key column="SERVICE_ID" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" />
+    </set>
+
     <filter name="activeEntity" />
 
     <query name="getServiceRates">
@@ -38,6 +43,24 @@
       order by
         rl.startDate desc
     </query>
+
+    <sql-query name="getSpecimensCountServicedBy">
+      <return-scalar column="serviceId" type="long" />
+      <return-scalar column="serviceCode" type="string" />
+      <return-scalar column="specimens" type="long" />
+
+      select
+        s.identifier as serviceId, s.code as serviceCode, count(spmn.identifier) as specimens
+      from
+        os_lab_services s
+        inner join os_specimen_lab_services ss on ss.service_id = s.identifier
+        inner join catissue_specimen spmn on spmn.identifier = ss.specimen_id
+      where
+        spmn.activity_status != 'Disabled' and
+        s.identifier in (:serviceIds)
+      group by
+        s.identifier
+    </sql-query>
 
     <sql-query name="getRateListsCount">
       <return-scalar column="service_id" type="long" />

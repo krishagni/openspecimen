@@ -31,12 +31,14 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS" not-null="true" />
 
-    <set name="cps" table="OS_LAB_SVCS_RATE_LIST_CPS" inverse="true" cascade="all-delete-orphan" batch-size="100">
+    <set name="cps" table="OS_LAB_SVCS_RATE_LIST_CPS" inverse="true" cascade="all-delete-orphan" batch-size="100"
+      where="exists (select 1 from catissue_collection_protocol cp where cp.identifier = cp_id and cp.activity_status != 'Disabled')">
       <key column="RATE_LIST_ID" />
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRateListCp" />
     </set>
 
-    <set name="serviceRates" table="OS_LAB_SERVICE_RATES" inverse="true" cascade="all-delete-orphan" batch-size="100">
+    <set name="serviceRates" table="OS_LAB_SERVICE_RATES" inverse="true" cascade="all-delete-orphan" batch-size="100"
+      where="exists (select 1 from os_lab_services s where s.identifier = service_id and s.activity_status != 'Disabled')">
       <key column="RATE_LIST_ID" />
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRate" />
     </set>

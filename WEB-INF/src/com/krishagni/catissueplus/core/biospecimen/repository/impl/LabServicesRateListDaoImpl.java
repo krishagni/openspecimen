@@ -137,7 +137,8 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		SubQuery<Long> query = mainQuery.createSubQuery(LabServicesRateList.class, "rateList")
 			.join("rateList.creator", "creator")
 			.leftJoin("rateList.cps", "rateListCp")
-			.leftJoin("rateListCp.cp", "cp");
+			.leftJoin("rateListCp.cp", "cp")
+			.select("rateList.id");
 
 		if (StringUtils.isNotBlank(crit.query())) {
 			if (isMySQL()) {

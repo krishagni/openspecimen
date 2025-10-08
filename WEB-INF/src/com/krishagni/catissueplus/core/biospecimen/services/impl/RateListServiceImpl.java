@@ -178,9 +178,12 @@ public class RateListServiceImpl implements RateListService {
 			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
 			EntityQueryCriteria input = req.getPayload();
 			LabService existing = getService(input.getId(), input.getName());
-			// TODO:
-			// ensureServiceIsNotInUse(service);
-			//
+
+			Map<String, Long> specimensCount = daoFactory.getLabServiceDao()
+				.getSpecimensCountServicedBy(Collections.singletonList(existing.getId()));
+			if (!specimensCount.isEmpty()) {
+				return ResponseEvent.userError(LabServiceErrorCode.IN_USE, existing.getCode(), specimensCount.get(existing.getCode()));
+			}
 
 			existing.delete();
 			return ResponseEvent.response(LabServiceDetail.from(existing));
