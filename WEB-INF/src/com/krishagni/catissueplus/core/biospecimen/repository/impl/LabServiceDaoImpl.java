@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,6 +11,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.LabService;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
+import com.krishagni.catissueplus.core.biospecimen.events.LabServicesRateListDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
@@ -46,6 +50,22 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 	}
 
 	@Override
+	public List<LabServicesRateListDetail> getRateLists(Long serviceId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_RATE_LISTS)
+			.setParameter("serviceId", serviceId)
+			.list();
+
+		List<LabServicesRateListDetail> rateLists = new ArrayList<>();
+		for (Object[] row : rows) {
+			LabServicesRateListDetail rateList = LabServicesRateListDetail.from((LabServicesRateList) row[0]);
+			rateList.setServiceRate((BigDecimal) row[1]);
+			rateLists.add(rateList);
+		}
+
+		return rateLists;
+	}
+
+	@Override
 	public Map<Long, Long> getRateListsCount(Collection<Long> serviceIds) {
 		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_RATE_LISTS_COUNT)
 			.setParameterList("serviceIds", serviceIds)
@@ -76,6 +96,8 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 	}
 
 	private static final String FQN = LabService.class.getName();
+
+	private static final String GET_RATE_LISTS = FQN + ".getServiceRates";
 
 	private static final String GET_RATE_LISTS_COUNT = FQN + ".getRateListsCount";
 }

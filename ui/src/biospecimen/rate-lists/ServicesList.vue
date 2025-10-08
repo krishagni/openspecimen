@@ -49,10 +49,9 @@
             <span v-t="'lab_services.loading_rate_lists'">Loading rate lists...</span>
           </os-message>
           <os-message type="info" v-else-if="!rowObject.rateLists || rowObject.rateLists.length == 0">
-            <span v-t="'lab_services.no_rate_lists'">No rates specified for this service...</span>
+            <span v-t="'lab_services.service_not_used_in_rl'">No rates specified for this service...</span>
           </os-message>
-
-          <pre>{{rowObject.rateLists}}</pre>
+          <os-list-view :data="rowObject.rateLists" :schema="serviceRatesListSchema" v-else />
         </template>
       </os-list-view>
     </os-page-body>
@@ -103,7 +102,9 @@ export default {
 
       addEditSvcSchema: labSvc.getAddEditSchema(),
  
-      listSchema: labSvc.getListSchema()
+      listSchema: labSvc.getListSchema(),
+
+      serviceRatesListSchema: labSvc.getServiceRatesListSchema()
     };
   },
 
@@ -154,6 +155,19 @@ export default {
           this.hideAddEditSvcDialog();
         }
       );
+    },
+
+    onServiceRowClick: function(rowObject) {
+      this.ctx.expandedServices = [rowObject];
+      if (!rowObject.rateLists) {
+        rowObject.loadingRateLists = true;
+        labSvc.getRateLists(rowObject.service.id).then(
+          rateLists => {
+            rowObject.rateLists = rateLists.map(rateList => ({rateList}));
+            rowObject.loadingRateLists = false;
+          }
+        );
+      }
     },
 
     _reloadServices: function() {

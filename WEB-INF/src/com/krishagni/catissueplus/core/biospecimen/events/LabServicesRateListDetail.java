@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
@@ -38,6 +39,8 @@ public class LabServicesRateListDetail {
 	private String activityStatus;
 
 	private Long cloneOf;
+
+	private BigDecimal serviceRate;
 
 	public Long getId() {
 		return id;
@@ -125,6 +128,14 @@ public class LabServicesRateListDetail {
 
 	public void setCloneOf(Long cloneOf) {
 		this.cloneOf = cloneOf;
+	}
+
+	public BigDecimal getServiceRate() {
+		return serviceRate;
+	}
+
+	public void setServiceRate(BigDecimal serviceRate) {
+		this.serviceRate = serviceRate;
 	}
 
 	public static LabServicesRateListDetail from(LabServicesRateList rateList) {

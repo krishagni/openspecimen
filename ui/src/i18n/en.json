@@ -1531,7 +1531,13 @@
     "description_req": "Description is mandatory",
     "edit_service": "Edit Service",
     "list": "Services",
-    "rate_lists": "Rate Lists"
+    "loading_rate_lists": "Loading rate lists...",
+    "rate": "Rate",
+    "rate_list": "Rate List",
+    "rate_lists": "Rate Lists",
+    "service_not_used_in_rl": "Service is not associated with any rate lists",
+    "start_date": "Start Date",
+    "end_date": "End Date"
   },
 
   "login": {

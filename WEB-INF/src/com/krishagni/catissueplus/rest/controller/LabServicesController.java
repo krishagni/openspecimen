@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.krishagni.catissueplus.core.biospecimen.events.LabServiceDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.LabServicesRateListDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.RateListService;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
@@ -99,5 +100,12 @@ public class LabServicesController {
 	@ResponseBody
 	public LabServiceDetail deleteService(@PathVariable("id") Long svcId) {
 		return ResponseEvent.unwrap(rateListSvc.deleteService(RequestEvent.wrap(new EntityQueryCriteria(svcId))));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}/rate-lists")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<LabServicesRateListDetail> getRateLists(@PathVariable("id") Long svcId) {
+		return ResponseEvent.unwrap(rateListSvc.getServiceRates(RequestEvent.wrap(new EntityQueryCriteria(svcId))));
 	}
 }

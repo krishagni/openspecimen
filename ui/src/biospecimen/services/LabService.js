@@ -3,6 +3,7 @@ import http from '@/common/services/HttpClient.js';
 
 import addEditSchema from '../schemas/rate-lists/services-addedit.js';
 import listSchema    from '../schemas/rate-lists/services-list.js';
+import serviceRatesSchema from '../schemas/rate-lists/service-rates.js';
 
 class LabService {
   getServices(filters) {
@@ -21,12 +22,20 @@ class LabService {
     }
   }
 
+  getRateLists(serviceId) {
+    return http.get('lab-services/' + serviceId + '/rate-lists');
+  }
+
   getListSchema() {
     return listSchema;
   }
 
   getAddEditSchema() {
     return addEditSchema.layout;
+  }
+
+  getServiceRatesListSchema() {
+    return serviceRatesSchema;
   }
 }
 

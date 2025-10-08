@@ -19,7 +19,25 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS" not-null="true" />
 
+    <set name="serviceRates" table="OS_LAB_SERVICE_RATES" inverse="true" batch-size="100">
+      <key column="SERVICE_ID" />
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabServiceRate" />
+    </set>
+
     <filter name="activeEntity" />
+
+    <query name="getServiceRates">
+      select
+        rl, sr.rate
+      from
+        com.krishagni.catissueplus.core.biospecimen.domain.LabService s
+        join s.serviceRates sr
+        join sr.rateList rl
+      where
+        s.id = :serviceId
+      order by
+        rl.startDate desc
+    </query>
 
     <sql-query name="getRateListsCount">
       <return-scalar column="service_id" type="long" />

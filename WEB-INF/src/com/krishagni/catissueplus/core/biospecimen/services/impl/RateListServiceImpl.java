@@ -193,6 +193,19 @@ public class RateListServiceImpl implements RateListService {
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<LabServicesRateListDetail>> getServiceRates(RequestEvent<EntityQueryCriteria> req) {
+		try {
+			EntityQueryCriteria input = req.getPayload();
+			return ResponseEvent.response(daoFactory.getLabServiceDao().getRateLists(input.getId()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<List<LabServicesRateListDetail>> getRateLists(RequestEvent<LabServicesRateListCriteria> req) {
 		try {
 			LabServicesRateListCriteria crit = addReadConstraints(req.getPayload());

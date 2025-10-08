@@ -18,7 +18,7 @@
         <div v-if="selectedRows.length > 0" class="p-inline-message p-inline-message-info">
           <span v-t="{path: 'common.lists.records_selected', args: {count: selectedRows.length}}"></span>
         </div>
-        <data-table scrollable scroll-height="flex" :value="list"
+        <data-table :table-class="tableStyle" scrollable scroll-height="flex" :value="list"
           v-model:expandedRows="expandedRows" v-model:selection="selectedRows"
           :row-class="getRowClass" @row-click="rowClick($event)" @sort="sort($event)">
           <column class="os-selection-cb" v-if="allowSelection" selectionMode="multiple"></column>
@@ -599,6 +599,10 @@ export default {
           return true;
         }
       );
+    },
+
+    tableStyle: function() {
+      return this.$attrs.class && this.$attrs.class.indexOf('os-list-card-items') >= 0 ? 'cards-table' : null;
     }
   },
 
@@ -823,7 +827,7 @@ export default {
   border: 1px solid #ddd;
 }
 
-.os-list.os-list-card-items :deep(table.p-datatable-table) {
+.os-list.os-list-card-items :deep(table.p-datatable-table.cards-table) {
   border: 0px;
   border-collapse: separate;
   border-spacing: 2px 15px;
@@ -837,34 +841,34 @@ export default {
   border-spacing: 0px;
 }
 
-.os-list.os-list-card-items :deep(table.p-datatable-table > thead > tr > th) {
+.os-list.os-list-card-items :deep(table.p-datatable-table.cards-table > thead > tr > th) {
   background: transparent!important;
   border-bottom: 0;
   padding: 0rem 1rem;
   text-align: center;
 }
 
-.os-list.os-list-card-items :deep(table.p-datatable-table > thead > tr > th.row-actions) {
+.os-list.os-list-card-items :deep(table.p-datatable-table.cards-table > thead > tr > th.row-actions) {
   width: 90px;
 }
 
-.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr > td) {
+.os-list.os-list-card-items :deep(table.p-datatable-table.cards-table > tbody > tr > td) {
   border-top: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
 
-.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr) {
+.os-list.os-list-card-items :deep(table.p-datatable-table.cards-table > tbody > tr) {
   box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
   border-radius: 0.5rem;
   background: transparent;
 }
 
-.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr:hover) {
+.os-list.os-list-card-items :deep(table.p-datatable-table.cards-table > tbody > tr:hover) {
   background: transparent;
 }
 
-.os-list.os-list-card-items :deep(table.p-datatable-table > tbody > tr > td) {
+.os-list.os-list-card-items :deep(table.p-datatable-table.cards-table > tbody > tr > td) {
   vertical-align: middle;
   padding: 1rem;
 }

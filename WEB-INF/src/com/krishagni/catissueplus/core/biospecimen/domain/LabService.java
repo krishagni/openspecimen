@@ -21,6 +21,9 @@ public class LabService extends BaseEntity {
 
 	private Set<Specimen> specimens = new HashSet<>();
 
+
+	private Set<LabServiceRate> serviceRates = new HashSet<>();
+
 	public String getCode() {
 		return code;
 	}
@@ -61,6 +64,15 @@ public class LabService extends BaseEntity {
 
 	public void setSpecimens(Set<Specimen> specimens) {
 		this.specimens = specimens;
+	}
+
+	@NotAudited
+	public Set<LabServiceRate> getServiceRates() {
+		return serviceRates;
+	}
+
+	public void setServiceRates(Set<LabServiceRate> serviceRates) {
+		this.serviceRates = serviceRates;
 	}
 
 	public void update(LabService other) {

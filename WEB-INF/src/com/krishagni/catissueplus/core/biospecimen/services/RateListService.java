@@ -28,6 +28,8 @@ public interface RateListService {
 
 	ResponseEvent<LabServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req);
 
+	ResponseEvent<List<LabServicesRateListDetail>> getServiceRates(RequestEvent<EntityQueryCriteria> req);
+
 	ResponseEvent<List<LabServicesRateListDetail>> getRateLists(RequestEvent<LabServicesRateListCriteria> req);
 
 	ResponseEvent<Long> getRateListsCount(RequestEvent<LabServicesRateListCriteria> req);
