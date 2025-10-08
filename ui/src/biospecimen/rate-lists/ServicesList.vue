@@ -56,11 +56,29 @@
         </template>
       </os-list-view>
     </os-page-body>
+
+    <os-dialog ref="addEditSvcDialog">
+      <template #header>
+        <span v-if="addEditSvcCtx.service.id > 0" v-t="'lab_services.edit_service'">Edit Service</span>
+        <span v-else v-t="'lab_services.add_service'">Add Service</span>
+      </template>
+
+      <template #content>
+        <os-form ref="addEditSvcForm" :schema="addEditSvcSchema" :data="addEditSvcCtx" />
+      </template>
+
+      <template #footer>
+        <os-button text :label="$t('common.buttons.cancel')" @click="hideAddEditSvcDialog" />
+        <os-button primary :label="$t(addEditSvcCtx.service.id > 0 ? 'common.buttons.update' : 'common.buttons.add')"
+          @click="addEditService" />
+      </template>
+    </os-dialog>
   </os-page>
 </template>
 
 <script>
 import routerSvc from '@/common/services/Router.js';
+import util      from '@/common/services/Util.js';
 
 import labSvc from '../services/LabService.js';
 
@@ -80,6 +98,10 @@ export default {
 
         expandedServices: []
       },
+
+      addEditSvcCtx: {},
+
+      addEditSvcSchema: labSvc.getAddEditSchema(),
  
       listSchema: labSvc.getListSchema()
     };
@@ -111,6 +133,29 @@ export default {
       labSvc.getServicesCount(opts).then(({count}) => this.ctx.servicesCount = count);
     },
 
+    showAddEditSvcDialog: function({service}) {
+      this.addEditSvcCtx = {service: util.clone(service || {})};
+      this.$refs.addEditSvcDialog.open();
+    },
+
+    hideAddEditSvcDialog: function() {
+      this.$refs.addEditSvcDialog.close();
+    },
+
+    addEditService: function() {
+      if (!this.$refs.addEditSvcForm.validate()) {
+        return;
+      }
+
+      const {service} = this.addEditSvcCtx;
+      labSvc.saveOrUpdate(service).then(
+        saved => {
+          this._refreshService(saved);
+          this.hideAddEditSvcDialog();
+        }
+      );
+    },
+
     _reloadServices: function() {
       this.ctx.loading = true;
       const opts = Object.assign({maxResults: this.ctx.pageSize}, this.ctx.filterValues || {});
@@ -121,6 +166,15 @@ export default {
           return this.ctx.services;
         }
       );
+    },
+
+    _refreshService: function(saved) {
+      const rowObject = this.ctx.services.find(({service}) => service.id == saved.id);
+      if (rowObject) {
+        Object.assign(rowObject.service, saved);
+      } else {
+        this.ctx.services.unshift({service: saved});
+      }
     }
   }
 }

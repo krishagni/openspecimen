@@ -1522,13 +1522,16 @@
   },
 
   "lab_services": {
+    "add_service": "Add Service",
+    "code": "Code",
     "code_or_desc": "Service Code or Description",
+    "code_req": "Service Code is mandatory",
     "delete_service": "Delete Service",
     "description": "Description",
+    "description_req": "Description is mandatory",
     "edit_service": "Edit Service",
     "list": "Services",
-    "rate_lists": "Rate Lists",
-    "service_code": "Service Code"
+    "rate_lists": "Rate Lists"
   },
 
   "login": {

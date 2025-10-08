@@ -3,7 +3,7 @@ export default {
   columns: [
     {   
       type: 'text',
-      labelCode: 'lab_services.service_code',
+      labelCode: 'lab_services.code',
       name: 'service.code'
     },  
     {     
