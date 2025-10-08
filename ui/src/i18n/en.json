@@ -1521,6 +1521,16 @@
     }
   },
 
+  "lab_services": {
+    "code_or_desc": "Service Code or Description",
+    "delete_service": "Delete Service",
+    "description": "Description",
+    "edit_service": "Edit Service",
+    "list": "Services",
+    "rate_lists": "Rate Lists",
+    "service_code": "Service Code"
+  },
+
   "login": {
     "sign_up": "Sign Up"
   },

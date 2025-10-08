@@ -1442,6 +1442,15 @@ const routes = [
         props: () => ({cpId: null})
       },
 
+
+      /** Rate Lists Module **/
+      {
+        path: 'lab-services',
+        name: 'LabServicesList',
+        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/rate-lists/ServicesList.vue'),
+        props: (route) => ({serviceId: route.query.serviceId, filters: route.query.filters})
+      },
+
       /** Biospecimen pages **/
       {
         path: 'cpr-resolver/:cprId',

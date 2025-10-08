@@ -287,6 +287,12 @@ export default {
       }
 
       options.push({
+        icon: 'cogs',
+        caption: this.$t('lab_services.list'),
+        onSelect: () => this.viewLabServices()
+      });
+
+      options.push({
         icon: 'poll',
         caption: this.$t(this.showStats == 'true' ? 'cps.hide_cp_stats' : 'cps.view_cp_stats'),
         onSelect: () => this.toggleViewCpStats()
@@ -456,6 +462,10 @@ export default {
         Array.prototype.push.apply(dict, await cpSvc.getDict());
         return dict;
       }
+    },
+
+    viewLabServices: function() {
+      routerSvc.goto('LabServicesList', {}, {});
     },
 
     _exportRecords: function(objectType) {
