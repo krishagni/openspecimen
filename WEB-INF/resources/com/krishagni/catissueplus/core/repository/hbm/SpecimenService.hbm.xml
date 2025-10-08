@@ -4,12 +4,12 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" table="OS_SPECIMEN_SERVICES"
-         entity-name="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService">
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" table="OS_SPECIMEN_LAB_SERVICES"
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService">
 
     <id name="id" column="IDENTIFIER">
       <generator class="native">
-        <param name="sequence">OS_SPECIMEN_SERVICES_SEQ</param>
+        <param name="sequence">OS_SPECIMEN_LAB_SERVICES_SEQ</param>
       </generator>
     </id>
 
@@ -37,17 +37,20 @@
       <return-scalar column="serviceRate" type="big_decimal" />
 
       <![CDATA[
-
       select
         ss.identifier as labSvcId, sr.rate as serviceRate
       from
-        os_specimen_services ss
-        inner join os_cp_service_rates sr on sr.service_id = ss.service_id
+        os_specimen_lab_services ss
+        inner join catissue_specimen spmn on spmn.identifier = ss.specimen_id
+        inner join os_lab_svcs_rate_list_cps rl_cp on rl_cp.cp_id = spmn.collection_protocol_id
+        inner join os_lab_services_rate_lists rl on rl.identifier = rl_cp.rate_list_id
+        inner join os_lab_service_rates sr on sr.rate_list_id = rl.identifier
+        inner join os_lab_services s on s.identifier = sr.service_id
       where
-        ss.specimen_id in (:specimenIds) and
-        ss.service_date >= sr.start_date and (sr.end_date is null or ss.service_date < sr.end_date) and
-        sr.activity_status != 'Disabled'
-
+        spmn.identifier in (:specimenIds) and
+        ss.service_date >= rl.start_date and (rl.end_date is null or ss.service_date < rl.end_date) and
+        rl.activity_status != 'Disabled' and
+        s.activity_status != 'Disabled'
       ]]>
     </sql-query>
 
@@ -62,11 +65,11 @@
       select
         s.code, s.description, count(ssr.specimen_id) as specimens, sum(ssr.rate) as total_rate
       from
-        os_specimen_service_rates_view ssr
-        inner join os_cp_services s on s.identifier = ssr.service_id
+        os_specimen_lab_svc_rates_view ssr
+        inner join os_lab_services s on s.identifier = ssr.service_id
       where
         ssr.service_date >= :startDate and ssr.service_date < :endDate and
-        s.cp_id = :cpId and
+        ssr.cp_id = :cpId and
         s.activity_status != 'Disabled'
       group by
         s.code, s.description

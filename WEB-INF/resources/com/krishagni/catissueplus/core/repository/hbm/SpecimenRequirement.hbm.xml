@@ -83,7 +83,7 @@
       <filter name="activeEntity"/>
     </set>
 
-    <set name="services" table="OS_CP_SR_SERVICES" inverse="true" cascade="all-delete-orphan">
+    <set name="services" table="OS_CP_SR_LAB_SERVICES" inverse="true" cascade="all-delete-orphan">
       <key column="SR_ID" />
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService" />
     </set>

@@ -166,4 +166,38 @@
       <column name="cp_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Anticipated specimen lab services">
+    <createTable tableName="OS_CP_SR_LAB_SERVICES_AUD">
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${smallint.type}" />
+      <column name="SR_ID" type="${int.type}" />
+      <column name="requirement_MOD" type="${boolean.type}" />
+      <column name="SERVICE_ID" type="${int.type}" />
+      <column name="service_MOD" type="${boolean.type}" />
+      <column name="UNITS" type="${int.type}" />
+      <column name="units_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen lab services">
+    <createTable tableName="OS_SPECIMEN_LAB_SERVICES_AUD">
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${smallint.type}" />
+      <column name="SPECIMEN_ID" type="${int.type}" />
+      <column name="specimen_MOD" type="${boolean.type}" />
+      <column name="SERVICE_ID" type="${int.type}" />
+      <column name="service_MOD" type="${boolean.type}" />
+      <column name="UNITS" type="${int.type}" />
+      <column name="units_MOD" type="${boolean.type}" />
+      <column name="SERVICE_DATE" type="${nullable.ts.type}" />
+      <column name="serviceDate_MOD" type="${boolean.type}" />
+      <column name="SERVICED_BY" type="${int.type}" />
+      <column name="servicedBy_MOD" type="${boolean.type}" />
+      <column name="COMMENTS" type="${text.type}(255)" />
+      <column name="comments_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

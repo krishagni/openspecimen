@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +17,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelAutoPrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.DerivedSpecimenRequirement;
-import com.krishagni.catissueplus.core.biospecimen.domain.Service;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService;
@@ -26,7 +25,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpeFactory;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenRequirementFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolEventDetail;
@@ -272,7 +271,7 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 		ose.checkAndThrow();
 
 		List<SpecimenRequirement> aliquots = new ArrayList<>();
-		Set<SpecimenRequirementService> srServices = getServices(parent.getCollectionProtocol(), req.getServices(), ose);
+		Set<SpecimenRequirementService> srServices = getServices(req.getServices(), ose);
 		for (int i = 0; i < req.getNoOfAliquots(); ++i) {
 			SpecimenRequirement aliquot = parent.copy();
 			aliquot.setLabelFormat(null);
@@ -563,26 +562,26 @@ public class SpecimenRequirementFactoryImpl implements SpecimenRequirementFactor
 	}
 
 	private void setServices(List<SrServiceDetail> services, SpecimenRequirement sr, OpenSpecimenException ose) {
-		Set<SpecimenRequirementService> srServices = getServices(sr.getCollectionProtocol(), services, ose);
+		Set<SpecimenRequirementService> srServices = getServices(services, ose);
 		srServices.forEach(srSvc -> srSvc.setRequirement(sr));
 		sr.setServices(srServices);
 	}
 
-	private Set<SpecimenRequirementService> getServices(CollectionProtocol cp, List<SrServiceDetail> services, OpenSpecimenException ose) {
+	private Set<SpecimenRequirementService> getServices(List<SrServiceDetail> services, OpenSpecimenException ose) {
 		Set<SpecimenRequirementService> result = new HashSet<>();
 		if (CollectionUtils.isEmpty(services)) {
 			return result;
 		}
 
-		Set<Service> seen = new HashSet<>();
+		Set<LabService> seen = new HashSet<>();
 		for (SrServiceDetail input : services) {
 			if (StringUtils.isBlank(input.getServiceCode())) {
 				continue;
 			}
 
-			Service service = daoFactory.getServiceDao().getService(cp.getId(), input.getServiceCode());
+			LabService service = daoFactory.getLabServiceDao().getByCode(input.getServiceCode());
 			if (service == null) {
-				ose.addError(ServiceErrorCode.NOT_FOUND, input.getServiceCode());
+				ose.addError(LabServiceErrorCode.NOT_FOUND, input.getServiceCode());
 			} else if (seen.add(service)) {
 				SpecimenRequirementService srSvc = new SpecimenRequirementService();
 				srSvc.setId(input.getId());

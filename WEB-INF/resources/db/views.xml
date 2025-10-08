@@ -402,4 +402,25 @@
       ]]>
     </createView>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen lab services rates view" runOnChange="true">
+    <createView viewName="OS_SPECIMEN_LAB_SVC_RATES_VIEW" replaceIfExists="true">
+      <![CDATA[
+      select
+        ss.identifier as specimen_service_id, ss.specimen_id as specimen_id,
+        s.identifier as service_id, s.code as code, s.description as description,
+        ss.service_date as service_date, ss.serviced_by as serviced_by, ss.comments as comments,
+        ss.units * sr.rate as rate
+      from
+        os_lab_specimen_services ss
+        inner join catissue_specimen s on s.identifier = ss.specimen_id
+        left join os_lab_svcs_rate_list_cps rl_cp on rl_cp.cp_id = s.collection_protocol_id
+        left join os_lab_services_rate_lists rl on rl.identifier = rl_cp.rate_list_id and ss.service_date >= rl.start_date and (rl.end_date is null or ss.service_date < rl.end_date) and rl.activity_status != 'Disabled'
+        left join os_lab_service_rates sr on sr.rate_list_id = rl.identifier and sr.service_id = ss.service_id
+        left join os_lab_services s on s.identifier = sr.service_id
+      where
+        s.activity_status != 'Disabled'
+      ]]>
+    </createView>
+  </changeSet>
 </databaseChangeLog>

@@ -36,8 +36,8 @@ import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
+import com.krishagni.catissueplus.core.biospecimen.domain.LabService;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
-import com.krishagni.catissueplus.core.biospecimen.domain.Service;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPreSaveEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -46,7 +46,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.ServiceErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.LabServiceErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
@@ -983,7 +983,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 		LabSpecimenService spmnSvc = new LabSpecimenService();
 		spmnSvc.setSpecimen(specimen);
-		spmnSvc.setService(getService(input, specimen, ose));
+		spmnSvc.setService(getService(input, ose));
 		spmnSvc.setUnits(input.getUnits() > 0 ? input.getUnits() : 1);
 		spmnSvc.setServicedBy(getUser(input.getServicedBy(), ose));
 		spmnSvc.setServiceDate(serviceDate);
@@ -1717,22 +1717,23 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		return info;
 	}
 
-	private Service getService(SpecimenServiceDetail input, Specimen specimen, OpenSpecimenException ose) {
-		Service service = null;
+	private LabService getService(SpecimenServiceDetail input, OpenSpecimenException ose) {
+		LabService service = null;
 		Object key = null;
 		if (input.getServiceId() != null) {
-			service = daoFactory.getServiceDao().getById(input.getServiceId());
+			service = daoFactory.getLabServiceDao().getById(input.getServiceId());
 			key = input.getServiceId();
 		} else if (StringUtils.isNotBlank(input.getServiceCode())) {
-			service = daoFactory.getServiceDao().getService(specimen.getCpId(), input.getServiceCode());
-			key = specimen.getCpShortTitle() + " / " + input.getServiceCode();
+			service = daoFactory.getLabServiceDao().getByCode(input.getServiceCode());
+			key = input.getServiceCode();
 		}
 
 		if (key == null) {
-			ose.addError(ServiceErrorCode.CODE_REQ);
+			ose.addError(LabServiceErrorCode.CODE_REQ);
 		} else if (service == null) {
-			ose.addError(ServiceErrorCode.NOT_FOUND, key);
+			ose.addError(LabServiceErrorCode.NOT_FOUND, key);
 		}
+
 		return service;
 	}
 

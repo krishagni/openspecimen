@@ -10,7 +10,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 public class LabSpecimenService extends BaseEntity {
 	private Specimen specimen;
 
-	private Service service;
+	private LabService service;
 
 	private int units;
 
@@ -28,11 +28,11 @@ public class LabSpecimenService extends BaseEntity {
 		this.specimen = specimen;
 	}
 
-	public Service getService() {
+	public LabService getService() {
 		return service;
 	}
 
-	public void setService(Service service) {
+	public void setService(LabService service) {
 		this.service = service;
 	}
 

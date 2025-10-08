@@ -346,4 +346,66 @@
       <column name="CP_ID" type="${int.type}" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Anticipated specimen lab services">
+    <createTable tableName="OS_CP_SR_LAB_SERVICES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="SR_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SR_LAB_SVCS_SR_ID"
+          referencedTableName="CATISSUE_CP_REQ_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SERVICE_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SR_LAB_SVCS_SVC_ID"
+          referencedTableName="OS_LAB_SERVICES" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UNITS" type="${int.type}" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Anticipated specimen lab service ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_CP_SR_LAB_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen lab services">
+    <createTable tableName="OS_SPECIMEN_LAB_SERVICES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SPMN_LAB_SVCS_SPECIMEN_ID"
+          referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="SERVICE_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SPMN_LAB_SVCS_SERVICE_ID"
+          referencedTableName="OS_LAB_SERVICES" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UNITS" type="${int.type}" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="SERVICE_DATE" type="${nullable.ts.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="SERVICED_BY" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_SPMN_LAB_SVCS_USER_ID"
+          referencedTableName="CATISSUE_USER" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COMMENTS" type="${text.type}(255)" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen lab service ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_SPECIMEN_LAB_SERVICES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen lab services index">
+    <createIndex tableName="OS_SPECIMEN_LAB_SERVICES" indexName="OS_SPMN_LAB_SVCS_IDX">
+      <column name="SERVICE_ID" type="${int.type}" />
+      <column name="SERVICE_DATE" type="${nullable.ts.type}" />
+      <column name="SPECIMEN_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

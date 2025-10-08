@@ -4,12 +4,12 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false">
-  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService" table="OS_CP_SR_SERVICES"
+  <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService" table="OS_CP_SR_LAB_SERVICES"
     entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirementService">
 
     <id name="id" column="IDENTIFIER">
       <generator class="native">
-        <param name="sequence">OS_CP_SR_SERVICES_SEQ</param>
+        <param name="sequence">OS_CP_SR_LAB_SERVICES_SEQ</param>
       </generator>
     </id>
 

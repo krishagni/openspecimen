@@ -1371,7 +1371,7 @@
         <name>services</name>
         <udn>services</udn>
         <caption>#getMessage("specimen_services")</caption>
-        <table>OS_SPECIMEN_SERVICE_RATES_VIEW</table>
+        <table>OS_SPECIMEN_LAB_SVC_RATES_VIEW</table>
         <foreignKey>SPECIMEN_ID</foreignKey>
         <parentKey>IDENTIFIER</parentKey>
         <primaryKey>SPECIMEN_SERVICE_ID</primaryKey>

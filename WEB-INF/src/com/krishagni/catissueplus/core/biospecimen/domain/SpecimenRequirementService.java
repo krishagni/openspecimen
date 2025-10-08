@@ -6,7 +6,7 @@ import org.hibernate.envers.Audited;
 public class SpecimenRequirementService extends BaseEntity {
 	private SpecimenRequirement requirement;
 
-	private Service service;
+	private LabService service;
 
 	private int units;
 
@@ -18,11 +18,11 @@ public class SpecimenRequirementService extends BaseEntity {
 		this.requirement = requirement;
 	}
 
-	public Service getService() {
+	public LabService getService() {
 		return service;
 	}
 
-	public void setService(Service service) {
+	public void setService(LabService service) {
 		this.service = service;
 	}
 

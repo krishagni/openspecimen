@@ -347,7 +347,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		addService(service.getService(), service.getUnits());
 	}
 
-	public void addService(Service service, int units) {
+	public void addService(LabService service, int units) {
 		SpecimenRequirementService srSvc = new SpecimenRequirementService();
 		srSvc.setRequirement(this);
 		srSvc.setService(service);
@@ -411,7 +411,7 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		setDefaultCustomFieldValues(sr.getDefaultCustomFieldValues());
 		setPreBarcodedTube(sr.isPreBarcodedTube());
 
-		Map<Service, SpecimenRequirementService> existingSvcs = getServices().stream()
+		Map<LabService, SpecimenRequirementService> existingSvcs = getServices().stream()
 			.collect(Collectors.toMap(SpecimenRequirementService::getService, svc -> svc));
 
 		for (SpecimenRequirementService svc : sr.getServices()) {
