@@ -21,12 +21,21 @@
 
   <os-audit-trail ref="auditTrailDialog" :objects="ctx.rateListObjs" />
 
-  <AddEditRateList ref="editRateListDialog" />
+  <AddEditRateList ref="editDialog" />
+
+  <os-confirm-delete ref="confirmDeleteDialog" :captcha="false" :collect-reason="false">
+    <template #message>
+      <span v-t="{path: 'lab_services.confirm_delete_rate_list', args: ctx.rateList}">
+        Are you sure you want to delete the service {0}?
+      </span>
+    </template>
+  </os-confirm-delete>
 </template>
 
 <script>
+import alertsSvc   from '@/common/services/Alerts.js';
 import rateListSvc from '@/biospecimen/services/RateList.js';
-// import routerSvc from '@/common/services/Router.js';
+import routerSvc   from '@/common/services/Router.js';
 
 import AddEditRateList from '@/biospecimen/rate-lists/AddEditRateList.vue';
 
@@ -72,32 +81,39 @@ export default {
 
   methods: {
     editRateList: function() {
-      this.$refs.editRateListDialog.open(this.ctx.rateList).then(
+      this.$refs.editDialog.open(this.ctx.rateList).then(
         savedRateList => {
           this.$emit('rate-list-saved', savedRateList);
         }
       );
     },
 
-    _setupRateList: function() {
-      const ctx = this.ctx;
-      ctx.rateList = this.rateList;
-      ctx.deleteOpts = { };
-      ctx.rateListObjs = [{objectName: 'rate_list', objectId: this.rateList.id}];
-    },
-
     deleteRateList: function() {
-      /*this.$refs.deleteObj.execute().then(
-        (resp) => {
-          if (resp == 'deleted') {
-            routerSvc.goto('SitesList', {siteId: -2}, this.ctx.routeQuery);
+      const {rateList} = this.ctx;
+      this.$refs.confirmDeleteDialog.open().then(
+        resp => {
+          if (resp != 'proceed') {
+            return;
           }
+
+          rateListSvc.deleteRateList(rateList).then(
+            () => {
+              alertsSvc.success({code: 'lab_services.rate_list_deleted', args: rateList});
+              routerSvc.goto('RateLists', {rateListId: -2})
+            }
+          );
         }
-      ); */
+      );
     },
 
     viewAuditTrail: function() {
       this.$refs.auditTrailDialog.open();
+    },
+
+    _setupRateList: function() {
+      const ctx = this.ctx;
+      ctx.rateList = this.rateList;
+      ctx.rateListObjs = [{objectName: 'rate_list', objectId: this.rateList.id}];
     }
   }
 }

@@ -1,6 +1,7 @@
 
 import formUtil from '@/common/services/FormUtil.js';
 import http from '@/common/services/HttpClient.js';
+import util from '@/common/services/Util.js';
 
 
 import addEditSchema from '../schemas/rate-lists/rate-list-addedit.js';
@@ -28,8 +29,10 @@ class RateList {
     }
   }
 
-  deleteRateList(rateListId) {
-    return http.delete('lab-services-rate-lists/' + rateListId);
+  deleteRateList(rateList) {
+    const toSave = util.clone(rateList);
+    toSave.activityStatus = 'Disabled';
+    return http.put('lab-services-rate-lists/' + toSave.id, toSave);
   }
 
   getListSchema() {
