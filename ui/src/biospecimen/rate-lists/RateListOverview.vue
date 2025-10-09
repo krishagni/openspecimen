@@ -38,7 +38,7 @@ export default {
 
         rateListObjs: [],
 
-        dict: [],
+        dict: rateListSvc.getDict(),
 
         routeQuery: this.$route.query
       },

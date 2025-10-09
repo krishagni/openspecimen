@@ -1,6 +1,7 @@
 import http from '@/common/services/HttpClient.js';
 
-import listSchema   from '../schemas/rate-lists/rate-lists.js';
+import dict        from '../schemas/rate-lists/rate-list.js';
+import listSchema  from '../schemas/rate-lists/rate-lists.js';
 
 class RateList {
   getRateLists(filters) {
@@ -32,7 +33,7 @@ class RateList {
   }
 
   getDict() {
-    return [];
+    return dict.fields;
   }
 }
 

@@ -289,6 +289,10 @@ export default {
           }
         } else if (field.type == 'date' || (field.type == 'datePicker' && field.showTime != true)) {
           if (field.dateOnly) {
+            if (typeof value == 'string' && value.length == 10 && value[4] == '-') {
+              value = new Date(value);
+            }
+
             value = util.getLocalDate(value);
           }
 
