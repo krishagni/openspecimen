@@ -213,7 +213,24 @@ public class RateListServiceImpl implements RateListService {
 		try {
 			LabServicesRateListCriteria crit = addReadConstraints(req.getPayload());
 			List<LabServicesRateList> rateLists = daoFactory.getLabServiceRateListDao().getRateLists(crit);
-			return ResponseEvent.response(LabServicesRateListDetail.from(rateLists));
+			List<LabServicesRateListDetail> results = LabServicesRateListDetail.from(rateLists);
+
+			if (!rateLists.isEmpty() && crit.includeStat()) {
+				Map<Long, LabServicesRateListDetail> rlMap = new LinkedHashMap<>();
+				for (LabServicesRateListDetail rateList : results) {
+					rlMap.put(rateList.getId(), rateList);
+				}
+
+				Map<Long, Pair<Long, Long>> stats = daoFactory.getLabServiceRateListDao().getRateListsStats(rlMap.keySet());
+				for (Map.Entry<Long, Pair<Long, Long>> statEntry : stats.entrySet()) {
+					Pair<Long, Long> stat = statEntry.getValue();
+					LabServicesRateListDetail rateList = rlMap.get(statEntry.getKey());
+					rateList.setServicesCount(stat.first());
+					rateList.setCpsCount(stat.second());
+				}
+			}
+
+			return ResponseEvent.response(results);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

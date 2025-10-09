@@ -64,6 +64,9 @@ public class LabServicesRateListsController {
 		@RequestParam(value = "query", required = false)
 		String query,
 
+		@RequestParam(value = "includeStats", required = false, defaultValue = "false")
+		boolean includeStat,
+
 		@RequestParam(value = "startAt", required = false, defaultValue = "0")
 		int startAt,
 
@@ -78,6 +81,7 @@ public class LabServicesRateListsController {
 			.endDate(endDate)
 			.effectiveDate(rateEffectiveOn)
 			.query(query)
+			.includeStat(includeStat)
 			.startAt(startAt)
 			.maxResults(maxResults);
 		return ResponseEvent.unwrap(rateListSvc.getRateLists(RequestEvent.wrap(crit)));
@@ -122,7 +126,7 @@ public class LabServicesRateListsController {
 		return Collections.singletonMap("count", ResponseEvent.unwrap(rateListSvc.getRateListsCount(RequestEvent.wrap(crit))));
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/id")
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public LabServicesRateListDetail getRateList(@PathVariable("id") Long rateListId) {

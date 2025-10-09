@@ -42,6 +42,10 @@ public class LabServicesRateListDetail {
 
 	private BigDecimal serviceRate;
 
+	private Long servicesCount;
+
+	private Long cpsCount;
+
 	public Long getId() {
 		return id;
 	}
@@ -136,6 +140,22 @@ public class LabServicesRateListDetail {
 
 	public void setServiceRate(BigDecimal serviceRate) {
 		this.serviceRate = serviceRate;
+	}
+
+	public Long getServicesCount() {
+		return servicesCount;
+	}
+
+	public void setServicesCount(Long servicesCount) {
+		this.servicesCount = servicesCount;
+	}
+
+	public Long getCpsCount() {
+		return cpsCount;
+	}
+
+	public void setCpsCount(Long cpsCount) {
+		this.cpsCount = cpsCount;
 	}
 
 	public static LabServicesRateListDetail from(LabServicesRateList rateList) {

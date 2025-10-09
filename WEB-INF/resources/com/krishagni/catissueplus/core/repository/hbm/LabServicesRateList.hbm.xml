@@ -45,6 +45,25 @@
 
     <filter name="activeEntity" />
 
+    <sql-query name="getRateListStats">
+      <return-scalar column="rateListId" type="long" />
+      <return-scalar column="services" type="long" />
+      <return-scalar column="cps" type="long" />
+
+      select
+        rl.identifier as rateListId, count(svc.identifier) as services, count(cp.identifier) as cps
+      from
+        os_lab_services_rate_lists rl
+        left join os_lab_svcs_rate_list_cps rl_cp on rl_cp.rate_list_id = rl.identifier
+        left join catissue_collection_protocol cp on cp.identifier = rl_cp.cp_id and cp.activity_status != 'Disabled'
+        left join os_lab_service_rates rl_svc on rl_svc.rate_list_id = rl.identifier
+        left join os_lab_services svc on svc.identifier = rl_svc.service_id and svc.activity_status != 'Disabled'
+      where
+        rl.identifier in (:rateListIds)
+      group by
+        rl.identifier
+    </sql-query>
+
     <sql-query name="getOverlappingServiceRates">
       <return-scalar column="rate_list_id" type="long" />
       <return-scalar column="rate_list_name" type="string" />

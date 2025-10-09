@@ -1,0 +1,39 @@
+import http from '@/common/services/HttpClient.js';
+
+import listSchema   from '../schemas/rate-lists/rate-lists.js';
+
+class RateList {
+  getRateLists(filters) {
+    return http.get('lab-services-rate-lists', filters || {});
+  }
+
+  getRateListsCount(filters) {
+    return http.get('lab-services-rate-lists/count', filters || {});
+  }
+
+  getRateList(rateListId) {
+    return http.get('lab-services-rate-lists/' + rateListId);
+  }
+
+  saveOrUpdate(rateList) {
+    if (rateList.id > 0) {
+      return http.put('lab-services-rate-lists/' + rateList.id, rateList);
+    } else {
+      return http.post('lab-services-rate-lists', rateList);
+    }
+  }
+
+  deleteRateList(rateListId) {
+    return http.delete('lab-services-rate-lists/' + rateListId);
+  }
+
+  getListSchema() {
+    return listSchema;
+  }
+
+  getDict() {
+    return [];
+  }
+}
+
+export default new RateList();

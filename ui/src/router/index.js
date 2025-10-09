@@ -1447,8 +1447,30 @@ const routes = [
       {
         path: 'lab-services',
         name: 'LabServicesList',
-        component: () => import(/* webpackChunkName: "cp-view" */ '../biospecimen/rate-lists/ServicesList.vue'),
+        component: () => import(/* webpackChunkName: "rate-lists" */ '../biospecimen/rate-lists/ServicesList.vue'),
         props: (route) => ({serviceId: route.query.serviceId, filters: route.query.filters})
+      },
+
+      {
+        path: 'rate-lists/:rateListId',
+        name: 'RateLists',
+        component: () => import(/* webpackChunkName: "rate-lists" */ '../biospecimen/rate-lists/RateLists.vue'),
+        props: (route) => ({rateListId: route.params && route.params.rateListId, filters: route.query.filters}),
+        children: [
+          {
+            path: '',
+            name: 'RateListsItemDetail',
+            component: () => import(/* webpackChunkName: "rate-lists" */ '../biospecimen/rate-lists/RateListDetail.vue'),
+            props: (route) => ({rateListId: route.params && route.params.rateListId}),
+            children: [
+              {
+                path: 'overview',
+                name: 'RateListsItemDetail.Overview',
+                component: () => import(/* webpackChunkName: "rate-lists" */ '../biospecimen/rate-lists/RateListOverview.vue')
+              }
+            ]
+          }
+        ]
       },
 
       /** Biospecimen pages **/

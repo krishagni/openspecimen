@@ -3,7 +3,10 @@ package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,10 +18,12 @@ import com.krishagni.catissueplus.core.biospecimen.domain.LabServicesRateList;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListDao;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.Restriction;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList> implements LabServicesRateListDao {
@@ -40,6 +45,20 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		Criteria<LabServicesRateList> query = createCriteria(LabServicesRateList.class, "rateList");
 		return query.add(query.in("rateList.id", getRateListsQuery(crit, query)))
 			.getCount("rateList.id");
+	}
+
+	@Override
+	public Map<Long, Pair<Long, Long>> getRateListsStats(Collection<Long> rateListIds) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_RATE_LISTS_STATS)
+			.setParameterList("rateListIds", rateListIds)
+			.list();
+
+		Map<Long, Pair<Long, Long>> result = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], Pair.make((Long) row[1], (Long) row[2]));
+		}
+
+		return result;
 	}
 
 	@Override
@@ -141,10 +160,16 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 			.select("rateList.id");
 
 		if (StringUtils.isNotBlank(crit.query())) {
-			if (isMySQL()) {
-				query.add(query.like("rateList.name", crit.query()));
+			if (StringUtils.isNumeric(crit.query())) {
+				query.add(query.eq("rateList.id", Long.parseLong(crit.query())));
 			} else {
-				query.add(query.ilike("rateList.name", crit.query()));
+				BiFunction<String, String, Restriction> likeFn = isMySQL() ? query::like : query::ilike;
+				query.add(
+					query.or(
+						likeFn.apply("rateList.name", crit.query()),
+						likeFn.apply("rateList.description", crit.query())
+					)
+				);
 			}
 		}
 
@@ -250,6 +275,8 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		"where " +
 		"  s.activity_status != 'Disabled' and " +
 		"  r.rate_list_id = :rateListId";
+
+	private static final String GET_RATE_LISTS_STATS = FQN + ".getRateListStats";
 
 	private static final String GET_OVERLAPPING_SERVICE_RATES = FQN + ".getOverlappingServiceRates";
 
