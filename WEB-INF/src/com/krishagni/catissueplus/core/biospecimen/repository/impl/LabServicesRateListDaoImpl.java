@@ -240,7 +240,8 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		if (StringUtils.isNotBlank(cpListCrit.repositoryName())) {
 			SubQuery<Long> cpSitesQuery = query.createSubQuery(CollectionProtocol.class, "icp")
 				.join("icp.sites", "cpSite")
-				.join("cpSite.site", "site");
+				.join("cpSite.site", "site")
+				.select("icp.id");
 			cpSitesQuery.add(cpSitesQuery.eq("site.name", cpListCrit.repositoryName()));
 			query.add(query.in("cp.id", cpSitesQuery));
 		}

@@ -15,6 +15,11 @@
                 <span v-t="'common.overview'">Overview</span>
               </router-link>
             </li>
+            <li>
+              <router-link :to="getRoute('CollectionProtocols')">
+                <span v-t="'lab_services.cps'">Collection Protocols</span>
+              </router-link>
+            </li>
           </ul>
         </os-tab-menu>
 

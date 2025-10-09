@@ -51,7 +51,7 @@
       <return-scalar column="cps" type="long" />
 
       select
-        rl.identifier as rateListId, count(svc.identifier) as services, count(cp.identifier) as cps
+        rl.identifier as rateListId, count(distinct svc.identifier) as services, count(distinct cp.identifier) as cps
       from
         os_lab_services_rate_lists rl
         left join os_lab_svcs_rate_list_cps rl_cp on rl_cp.rate_list_id = rl.identifier

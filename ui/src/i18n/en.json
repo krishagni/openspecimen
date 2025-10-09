@@ -1528,6 +1528,8 @@
     "code_req": "Service Code is mandatory",
     "confirm_delete_rate_list": "Are you sure you want to delete the rate list #{id}: {name}?",
     "confirm_delete_service": "Are you sure you want to delete the service {service}?",
+    "cp": "Collection Protocol",
+    "cp_pi": "Principal Investigator",
     "cps": "Collection Protocols",
     "create_rate_list": "Create Rate List",
     "delete_service": "Delete Service",
@@ -1546,6 +1548,7 @@
     "rate_lists": "Rate Lists",
     "service_not_used_in_rl": "Service is not associated with any rate lists",
     "services": "Services",
+    "site": "Site",
     "start_date": "Start Date",
     "start_date_req": "Start Date is mandatory",
     "end_date": "End Date"
