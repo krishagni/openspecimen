@@ -19,8 +19,8 @@ export default {
 
         return result;
       },
-      ({rateList: {cpsCount, servicesCount}}) => i18n.msg('lab_services.services') + ': ' + servicesCount + ' | ' +
-        i18n.msg('lab_services.cps') + ': ' + cpsCount
+      ({rateList: {cpsCount, servicesCount}}) => i18n.msg('lab_services.services') + ': ' + (servicesCount || 0) + ' | ' +
+        i18n.msg('lab_services.cps') + ': ' + (cpsCount || 0)
     ]
   },
 

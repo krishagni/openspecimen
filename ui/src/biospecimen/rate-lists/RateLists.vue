@@ -24,7 +24,7 @@
         <os-page-body>
           <os-page-toolbar v-if="!ctx.detailView">
             <template #default>
-              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="showCreateRateListDialog" />
+              <os-button left-icon="plus" :label="$t('common.buttons.create')" @click="createRateList" />
             </template>
 
             <template #right>
@@ -49,8 +49,11 @@
     </os-screen-panel>
 
     <os-screen-panel :width="9" v-if="$route.params && $route.params.rateListId > 0 && ctx.selectedRateList">
-      <router-view :rateListId="$route.params.rateListId" :key="$route.params.rateListId" />
+      <router-view :rate-list-id="$route.params.rateListId" :key="$route.params.rateListId"
+        @rate-list-saved="updateRateList($event)" />
     </os-screen-panel>
+
+    <AddEditRateList ref="addRateListDialog" />
   </os-screen>
 </template>
 
@@ -59,8 +62,14 @@
 import rateListSvc from '@/biospecimen/services/RateList.js';
 import routerSvc  from '@/common/services/Router.js';
 
+import AddEditRateList from './AddEditRateList.vue';
+
 export default {
   props: ['rateListId', 'filters'],
+
+  components: {
+    AddEditRateList
+  },
 
   data() {
     return {
@@ -152,6 +161,23 @@ export default {
       routerSvc.goto('RateLists', {rateListId: -1}, {filters: this.filters});
       if (reload) {
         this.$refs.listView.reload();
+      }
+    },
+
+    createRateList: function() {
+      this.$refs.addRateListDialog.open({rateList: {}}).then(
+        savedRateList => {
+          const newRow = {rateList: savedRateList};
+          this.ctx.rateLists.unshift(newRow);
+          this.onRateListRowClick(newRow);
+        }
+      );
+    },
+
+    updateRateList: function(savedRateList) {
+      const row = this.ctx.rateLists.find(({rateList}) => rateList.id == savedRateList.id);
+      if (row) {
+        Object.assign(row.rateList, savedRateList);
       }
     },
 

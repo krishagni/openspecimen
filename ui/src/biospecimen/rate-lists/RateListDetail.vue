@@ -18,7 +18,8 @@
           </ul>
         </os-tab-menu>
 
-        <router-view :rate-list="ctx.rateList" v-if="ctx.rateList.id" />
+        <router-view :rate-list="ctx.rateList" v-if="ctx.rateList.id > 0"
+          @rate-list-saved="onRateListSave($event)" />
       </div>
     </os-page-body>
   </os-page>
@@ -58,6 +59,11 @@ export default {
   },
 
   methods: {
+    onRateListSave: function(rateList) {
+      this.ctx.rateList = rateList;
+      this.$emit('rate-list-saved', rateList);
+    },
+
     getRoute: function(routeName, params, query) {
       return {
         name: this.detailRouteName + '.' + routeName,

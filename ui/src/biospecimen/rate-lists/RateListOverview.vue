@@ -2,7 +2,7 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="cpUpdateOpts">
-        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="showEditDialog" />
+        <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editRateList" />
 
         <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteRateList" />
 
@@ -20,14 +20,24 @@
   <os-delete-object ref="deleteObj" :input="ctx.deleteOpts" />
 
   <os-audit-trail ref="auditTrailDialog" :objects="ctx.rateListObjs" />
+
+  <AddEditRateList ref="editRateListDialog" />
 </template>
 
 <script>
 import rateListSvc from '@/biospecimen/services/RateList.js';
 // import routerSvc from '@/common/services/Router.js';
 
+import AddEditRateList from '@/biospecimen/rate-lists/AddEditRateList.vue';
+
 export default {
-  props: ['rateList'],
+  props: ['rate-list'],
+
+  emits: ['rate-list-saved'],
+
+  components: {
+    AddEditRateList
+  },
 
   data() {
     return {
@@ -61,6 +71,14 @@ export default {
   },
 
   methods: {
+    editRateList: function() {
+      this.$refs.editRateListDialog.open(this.ctx.rateList).then(
+        savedRateList => {
+          this.$emit('rate-list-saved', savedRateList);
+        }
+      );
+    },
+
     _setupRateList: function() {
       const ctx = this.ctx;
       ctx.rateList = this.rateList;

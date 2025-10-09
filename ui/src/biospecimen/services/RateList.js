@@ -1,5 +1,9 @@
+
+import formUtil from '@/common/services/FormUtil.js';
 import http from '@/common/services/HttpClient.js';
 
+
+import addEditSchema from '../schemas/rate-lists/rate-list-addedit.js';
 import dict        from '../schemas/rate-lists/rate-list.js';
 import listSchema  from '../schemas/rate-lists/rate-lists.js';
 
@@ -34,6 +38,10 @@ class RateList {
 
   getDict() {
     return dict.fields;
+  }
+
+  getAddEditSchema() {
+    return formUtil.getFormSchema(dict.fields, addEditSchema.layout);
   }
 }
 
