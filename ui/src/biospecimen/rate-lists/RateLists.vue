@@ -50,7 +50,7 @@
 
     <os-screen-panel :width="9" v-if="$route.params && $route.params.rateListId > 0 && ctx.selectedRateList">
       <router-view :rate-list-id="$route.params.rateListId" :key="$route.params.rateListId"
-        @rate-list-saved="updateRateList($event)" />
+        @rate-list-saved="updateRateList($event)" @rate-list-cps-added="addCpsCount($event)" />
     </os-screen-panel>
 
     <AddEditRateList ref="addRateListDialog" />
@@ -178,6 +178,14 @@ export default {
       const row = this.ctx.rateLists.find(({rateList}) => rateList.id == savedRateList.id);
       if (row) {
         Object.assign(row.rateList, savedRateList);
+      }
+    },
+
+    addCpsCount: function({rateList, count}) {
+      const row = this.ctx.rateLists.find(rowObject => rowObject.rateList.id == rateList.id);
+      if (row) {
+        row.rateList.cpsCount = row.rateList.cpsCount || 0;
+        row.rateList.cpsCount += count;
       }
     },
 

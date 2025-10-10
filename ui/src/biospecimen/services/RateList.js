@@ -5,6 +5,7 @@ import util from '@/common/services/Util.js';
 
 
 import addEditSchema from '../schemas/rate-lists/rate-list-addedit.js';
+import addRateListCpsSchema from '../schemas/rate-lists/add-rate-list-cps.js';
 import cpsListSchema from '../schemas/rate-lists/rl-cp-list.js';
 import dict        from '../schemas/rate-lists/rate-list.js';
 import listSchema  from '../schemas/rate-lists/rate-lists.js';
@@ -45,6 +46,11 @@ class RateList {
     return http.get('lab-services-rate-lists/' + rateListId + '/collection-protocols/count', filters);
   }
 
+  addCollectionProtocols(rateListId, cps) {
+    const payload = {op: 'ADD', rateListId, cps};
+    return http.put('lab-services-rate-lists/' + rateListId + '/collection-protocols', payload);
+  }
+
   getServices(rateListId) {
     return http.get('lab-services-rate-lists/' + rateListId + '/service-rates');
   }
@@ -63,6 +69,10 @@ class RateList {
 
   getCpsListSchema() {
     return cpsListSchema;
+  }
+
+  getAddCpsSchema() {
+    return addRateListCpsSchema.layout;
   }
 
   getServicesListSchema() {

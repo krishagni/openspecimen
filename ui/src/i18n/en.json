@@ -1522,6 +1522,7 @@
   },
 
   "lab_services": {
+    "add_cps": "Add Collection Protocols",
     "add_service": "Add Service",
     "code": "Code",
     "code_or_desc": "Service Code or Description",
@@ -1531,6 +1532,7 @@
     "cp": "Collection Protocol",
     "cp_pi": "Principal Investigator",
     "cps": "Collection Protocols",
+    "cps_added": "One new collection protocol associated with the rate list. | {count} new collection protocols associated with the rate list.",
     "create_rate_list": "Create Rate List",
     "delete_service": "Delete Service",
     "description": "Description",
@@ -1546,6 +1548,8 @@
     "rate_list": "Rate List",
     "rate_list_deleted": "Rate List #{id}: {name} deleted.",
     "rate_lists": "Rate Lists",
+    "select_atleast_one_cp": "Select at least one collection protocol to associate with the rate list",
+    "select_cps_for_rate_list": "Select one or more collection protocols to associate with the rate list",
     "service_not_used_in_rl": "Service is not associated with any rate lists",
     "services": "Services",
     "site": "Site",
