@@ -2,7 +2,9 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="cpUpdateOpts">
-        <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddCpsDialog" />
+        <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddCpsDialog"
+          v-if="!ctx.selectedCps || ctx.selectedCps.length == 0" />
+        <os-button left-icon="times" :label="$t('common.buttons.remove')" @click="removeCps" v-else />
       </span>
     </template>
     <template #right>
@@ -22,8 +24,10 @@
         :data="ctx.cps"
         :schema="listSchema"
         :loading="ctx.loading"
+        :allowSelection="true"
         @filtersUpdated="loadCps"
         @rowClicked="onCpRowClick"
+        @selectedRows="onCpsSelection"
         ref="listView"
       />
     </os-grid-column>
@@ -41,6 +45,15 @@
         <os-button primary :label="$t('common.buttons.add')" @click="addCps" />
       </template>
     </os-dialog>
+
+    <os-confirm ref="removeCpsConfirmDialog">
+      <template #title>
+        <span v-t="'lab_services.remove_cps'">Remove Collection Protocols</span>
+      </template>
+      <template #message>
+        <span v-t="'lab_services.remove_cps_confirm'">Are you sure you want to remove association of the selected collection protocols with the rate list?</span>
+      </template>
+    </os-confirm>
   </os-grid>
 </template>
 
@@ -52,7 +65,7 @@ import routerSvc   from '@/common/services/Router.js';
 export default {
   props: ['rate-list'],
 
-  emits: ['rate-list-cps-added'],
+  emits: ['rate-list-cps-added', 'rate-list-cps-removed'],
 
   data() {
     return {
@@ -61,7 +74,9 @@ export default {
 
         loading: false,
 
-        cpsToAdd: []
+        cpsToAdd: [],
+
+        selectedCps: []
       },
 
       cpUpdateOpts: {resource: 'CollectionProtocol', operations: ['Create', 'Update']},
@@ -92,6 +107,10 @@ export default {
       routerSvc.goto('CpDetail.Overview', {cpId: cp.id});
     },
 
+    onCpsSelection: function(selection) {
+      this.ctx.selectedCps = (selection || []).map(({rowObject: {cp}}) => cp);
+    },
+
     showAddCpsDialog: function() {
       this.ctx.cpsToAdd = [];
       this.$refs.addCpsDialog.open();
@@ -115,6 +134,22 @@ export default {
           this.$refs.listView.reload();
           this.$emit('rate-list-cps-added', {count});
           this.hideAddCpsDialog();
+        }
+      );
+    },
+
+    removeCps: async function() {
+      const resp = await this.$refs.removeCpsConfirmDialog.open();
+      if (resp != 'proceed') {
+        return;
+      }
+
+      const {selectedCps} = this.ctx;
+      rateListSvc.removeCollectionProtocols(this.rateList.id, selectedCps).then(
+        ({count}) => {
+          alertsSvc.success({code: 'lab_services.cps_removed', args: {count}});
+          this.$refs.listView.reload();
+          this.$emit('rate-list-cps-removed', {count});
         }
       );
     },

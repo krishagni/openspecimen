@@ -50,7 +50,8 @@
 
     <os-screen-panel :width="9" v-if="$route.params && $route.params.rateListId > 0 && ctx.selectedRateList">
       <router-view :rate-list-id="$route.params.rateListId" :key="$route.params.rateListId"
-        @rate-list-saved="updateRateList($event)" @rate-list-cps-added="addCpsCount($event)" />
+        @rate-list-saved="updateRateList($event)" @rate-list-cps-added="addCpsCount($event)"
+        @rate-list-cps-removed="deductCpsCount($event)" />
     </os-screen-panel>
 
     <AddEditRateList ref="addRateListDialog" />
@@ -182,11 +183,11 @@ export default {
     },
 
     addCpsCount: function({rateList, count}) {
-      const row = this.ctx.rateLists.find(rowObject => rowObject.rateList.id == rateList.id);
-      if (row) {
-        row.rateList.cpsCount = row.rateList.cpsCount || 0;
-        row.rateList.cpsCount += count;
-      }
+      this._updateCpsCount(rateList, count);
+    },
+
+    deductCpsCount: function({rateList, count}) {
+      this._updateCpsCount(rateList, -count);
     },
 
     _reloadRateLists: function() {
@@ -199,6 +200,14 @@ export default {
           return this.ctx.rateLists;
         }
       );
+    },
+
+    _updateCpsCount: function(rateList, count) {
+      const row = this.ctx.rateLists.find(rowObject => rowObject.rateList.id == rateList.id);
+      if (row) {
+        row.rateList.cpsCount = row.rateList.cpsCount || 0;
+        row.rateList.cpsCount += count;
+      }
     }
   }
 }

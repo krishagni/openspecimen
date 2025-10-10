@@ -51,6 +51,11 @@ class RateList {
     return http.put('lab-services-rate-lists/' + rateListId + '/collection-protocols', payload);
   }
 
+  removeCollectionProtocols(rateListId, cps) {
+    const payload = {op: 'RM', rateListId, cps};
+    return http.put('lab-services-rate-lists/' + rateListId + '/collection-protocols', payload);
+  }
+
   getServices(rateListId) {
     return http.get('lab-services-rate-lists/' + rateListId + '/service-rates');
   }
