@@ -4,7 +4,10 @@
       <span v-show-if-allowed="cpUpdateOpts">
         <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddEditServicesDialog"
           v-if="!ctx.selectedServices || ctx.selectedServices.length == 0" />
-        <os-button left-icon="times" :label="$t('common.buttons.remove')" @click="removeServices" v-else />
+        <span v-else>
+          <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editServices" />
+          <os-button left-icon="times" :label="$t('common.buttons.remove')" @click="removeServices" />
+        </span>
       </span>
     </template>
     <template #right>
@@ -27,12 +30,13 @@
 
     <os-dialog ref="addEditServicesDialog" size="lg">
       <template #header>
-        <span v-t="'lab_services.add_services'">Add Services</span>
+        <span v-t="'lab_services.edit_services'" v-if="ctx.editServices">Edit Services</span>
+        <span v-t="'lab_services.add_services'" v-else>Add Services</span>
       </template>
       <template #content>
         <os-table-form ref="svcsForm" :schema="addEditSvcsSchema" :data="ctx" :items="ctx.serviceRates"
-          :remove-items="true" @remove-item="removeServiceRateItem($event)">
-          <template #default>
+          :remove-items="!ctx.editServices" @remove-item="removeServiceRateItem($event)">
+          <template #default v-if="!ctx.editServices">
             <os-button :label="$t('common.buttons.add_another')" @click="addServiceRateItem" />
           </template>
         </os-table-form>
@@ -40,7 +44,8 @@
       <template #footer>
         <os-button text :label="$t('common.buttons.cancel')" @click="hideAddEditServicesDialog" />
 
-        <os-button primary :label="$t('common.buttons.add')" @click="addServices" />
+        <os-button primary :label="$t(ctx.editServices ? 'common.buttons.update' : 'common.buttons.add')"
+          @click="saveOrUpdateServices" />
       </template>
     </os-dialog>
 
@@ -59,6 +64,7 @@
 import alertsSvc   from '@/common/services/Alerts.js';
 import rateListSvc from '@/biospecimen/services/RateList.js';
 import routerSvc   from '@/common/services/Router.js';
+import util        from '@/common/services/Util.js';
 
 export default {
   props: ['rate-list'],
@@ -102,7 +108,14 @@ export default {
             },
             uiStyle: {
               'width': '550px'
-            }
+            },
+            showWhen: '!editServices'
+          },
+          {
+            type: 'span',
+            labelCode: 'lab_services.service',
+            name: 'serviceRate.service.description',
+            showWhen: 'editServices'
           },
           {
             type: 'number',
@@ -141,8 +154,20 @@ export default {
       this.ctx.selectedServices = (selection || []).map(({rowObject: {service}}) => service);
     },
 
+    editServices: function() {
+      this.ctx.serviceRates = util.clone(this.ctx.selectedServices);
+      for (const rate of this.ctx.serviceRates) {
+        rate.service = {code: rate.serviceCode, description: rate.serviceDescription + ' (' + rate.serviceCode + ')'};
+      }
+
+      this.ctx.serviceRates = this.ctx.serviceRates.map(serviceRate => ({serviceRate}));
+      this.ctx.editServices = true;
+      this.$refs.addEditServicesDialog.open();
+    },
+
     showAddEditServicesDialog: function() {
       this.ctx.serviceRates = [{}],
+      this.ctx.editServices = false;
       this.$refs.addEditServicesDialog.open();
     },
 
@@ -161,19 +186,22 @@ export default {
       }
     },
 
-    addServices: function() {
+    saveOrUpdateServices: function() {
       if (!this.$refs.svcsForm.validate()) {
         return;
       }
 
-      const servicesToAdd = this.ctx.serviceRates.map(
-        ({serviceRate}) => ({serviceCode: serviceRate.service.code, rate: serviceRate.rate})
-      );
-      return rateListSvc.upsertServices(this.rateList.id, servicesToAdd).then(
+      const toSave = this.ctx.serviceRates.map(({serviceRate: {service, rate}}) => ({serviceCode: service.code, rate}));
+      return rateListSvc.upsertServices(this.rateList.id, toSave).then(
         ({count}) => {
-          alertsSvc.success({code: 'lab_services.services_added', args: {count}});
+          if (this.ctx.editServices) {
+            alertsSvc.success({code: 'lab_services.services_updated', args: {count}});
+          } else {
+            alertsSvc.success({code: 'lab_services.services_added', args: {count}});
+            this.$emit('rate-list-services-added', {count});
+          }
+
           this.$refs.listView.reload();
-          this.$emit('rate-list-services-added', {count});
           this.hideAddEditServicesDialog();
         }
       );
