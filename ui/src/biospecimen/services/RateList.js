@@ -6,6 +6,7 @@ import util from '@/common/services/Util.js';
 
 import addEditSchema from '../schemas/rate-lists/rate-list-addedit.js';
 import addRateListCpsSchema from '../schemas/rate-lists/add-rate-list-cps.js';
+import addEditRateListServicesSchema from '../schemas/rate-lists/rl-services-addedit.js';
 import cpsListSchema from '../schemas/rate-lists/rl-cp-list.js';
 import dict        from '../schemas/rate-lists/rate-list.js';
 import listSchema  from '../schemas/rate-lists/rate-lists.js';
@@ -92,6 +93,10 @@ class RateList {
 
   getServicesListSchema() {
     return servicesListSchema;
+  }
+
+  getAddEditServicesSchema() {
+    return addEditRateListServicesSchema;
   }
 }
 
