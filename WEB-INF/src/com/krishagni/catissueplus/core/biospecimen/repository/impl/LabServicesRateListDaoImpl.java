@@ -99,7 +99,14 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 
 	@Override
 	public int cloneRateListCps(Long srcRateListId, Long tgtRateListId) {
-		String cloneSql = String.format(CLONE_CPS, isMySQL() ? "default" : "os_lab_svcs_rate_list_cps_seq.nextval", tgtRateListId);
+		String idColumnName = "";
+		String idColumnValue = "";
+		if (isOracle()) {
+			idColumnName = "identifier, ";
+			idColumnValue = "os_lab_svcs_rate_list_cps_seq.nextval, ";
+		}
+
+		String cloneSql = String.format(CLONE_CPS, idColumnName, idColumnValue, tgtRateListId);
 		return getCurrentSession().createNativeQuery(cloneSql)
 			.setParameter("rateListId", srcRateListId)
 			.executeUpdate();
@@ -117,7 +124,14 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 
 	@Override
 	public int cloneRateListServices(Long srcRateListId, Long tgtRateListId) {
-		String cloneSql = String.format(CLONE_SERVICE_RATES, isMySQL() ? "default" : "os_lab_service_rate_seq.nextval", tgtRateListId);
+		String idColumnName = "";
+		String idColumnValue = "";
+		if (isOracle()) {
+			idColumnName = "identifier, ";
+			idColumnValue = "os_lab_service_rate_seq.nextval, ";
+		}
+
+		String cloneSql = String.format(CLONE_SERVICE_RATES, idColumnName, idColumnValue, tgtRateListId);
 		return getCurrentSession().createNativeQuery(cloneSql)
 			.setParameter("rateListId", srcRateListId)
 			.executeUpdate();
@@ -255,9 +269,9 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 
 	private static final String CLONE_CPS =
 		"insert into" +
-		"  os_lab_svcs_rate_list_cps (identifier, rate_list_id, cp_id) " +
+		"  os_lab_svcs_rate_list_cps (%s rate_list_id, cp_id) " +
 		"select " +
-		"  %s, %d, cp.identifier " +
+		"  %s %d, cp.identifier " +
 		"from " +
 		"  os_lab_svcs_rate_list_cps rl_cp " +
 		"  inner join catissue_collection_protocol cp on cp.identifier = rl_cp.cp_id " +
@@ -267,9 +281,9 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 
 	private static final String CLONE_SERVICE_RATES =
 		"insert into" +
-		"  os_lab_service_rates (identifier, rate_list_id, service_id, rate) " +
+		"  os_lab_service_rates (%s rate_list_id, service_id, rate) " +
 		"select " +
-		"  %s, %d, r.service_id, r.rate " +
+		"  %s %d, r.service_id, r.rate " +
 		"from " +
 		"  os_lab_service_rates r " +
 		"  inner join os_lab_services s on s.identifier = r.service_id " +

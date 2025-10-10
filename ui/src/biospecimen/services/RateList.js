@@ -28,6 +28,8 @@ class RateList {
   saveOrUpdate(rateList) {
     if (rateList.id > 0) {
       return http.put('lab-services-rate-lists/' + rateList.id, rateList);
+    } else if (rateList.cloneOf > 0) {
+      return http.post('lab-services-rate-lists/' + rateList.cloneOf + '/clone', rateList);
     } else {
       return http.post('lab-services-rate-lists', rateList);
     }

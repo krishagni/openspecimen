@@ -6,7 +6,7 @@
 
         <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteRateList" />
 
-        <os-button left-icon="history" :label="$t('audit.trail')" @click="viewAuditTrail" />
+        <os-button left-icon="copy" :label="$t('common.buttons.clone')" @click="cloneRateList" />
       </span>
     </template>
   </os-page-toolbar>
@@ -36,6 +36,7 @@
 import alertsSvc   from '@/common/services/Alerts.js';
 import rateListSvc from '@/biospecimen/services/RateList.js';
 import routerSvc   from '@/common/services/Router.js';
+import util        from '@/common/services/Util.js';
 
 import AddEditRateList from '@/biospecimen/rate-lists/AddEditRateList.vue';
 
@@ -84,6 +85,17 @@ export default {
       this.$refs.editDialog.open(this.ctx.rateList).then(
         savedRateList => {
           this.$emit('rate-list-saved', savedRateList);
+        }
+      );
+    },
+
+    cloneRateList: function() {
+      const toClone = util.clone(this.ctx.rateList);
+      toClone.cloneOf = toClone.id;
+      toClone.id = toClone.startDate = toClone.endDate = null;
+      this.$refs.editDialog.open(toClone).then(
+        savedRateList => {
+          routerSvc.goto('RateListsItemDetail.Overview', {rateListId: savedRateList.id});
         }
       );
     },
