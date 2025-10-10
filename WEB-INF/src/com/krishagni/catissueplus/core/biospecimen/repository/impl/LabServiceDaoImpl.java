@@ -17,6 +17,7 @@ import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceListCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 
 public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabServiceDao {
 
@@ -106,6 +107,16 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 				query.add(query.or(query.ilike("labSvc.code", criteria.query()), query.ilike("labSvc.description", criteria.query())));
 			}
 		}
+
+		if (criteria.notInRateListId() != null && criteria.notInRateListId() > 0L) {
+			SubQuery<Long> notInRateListSvcs = query.createSubQuery(LabService.class, "iLabSvc")
+				.join("iLabSvc.serviceRates", "serviceRate")
+				.join("serviceRate.rateList", "rateList")
+				.select("iLabSvc.id");
+			notInRateListSvcs.add(notInRateListSvcs.eq("rateList.id", criteria.notInRateListId()));
+			query.add(query.notIn("labSvc.id", notInRateListSvcs));
+		}
+
 		return query;
 	}
 

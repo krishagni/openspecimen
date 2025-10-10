@@ -30,6 +30,7 @@
 
         <router-view :rate-list="ctx.rateList" v-if="ctx.rateList.id > 0"
           @rate-list-saved="onRateListSave($event)"
+          @rate-list-services-added="onRateListServicesAdd($event)"
           @rate-list-cps-added="onRateListCpsAdd($event)"
           @rate-list-cps-removed="onRateListCpsRemove($event)" />
       </div>
@@ -43,7 +44,7 @@ import rateListSvc from '@/biospecimen/services/RateList.js';
 export default {
   props: ['rateListId'],
 
-  emits: ['rate-list-saved', 'rate-list-cps-added', 'rate-list-cps-removed'],
+  emits: ['rate-list-saved', 'rate-list-services-added', 'rate-list-cps-added', 'rate-list-cps-removed'],
 
   data() {
     return {
@@ -76,6 +77,11 @@ export default {
     onRateListSave: function(rateList) {
       this.ctx.rateList = rateList;
       this.$emit('rate-list-saved', rateList);
+    },
+
+    onRateListServicesAdd: function({count}) {
+      const {rateList} = this.ctx;
+      this.$emit('rate-list-services-added', {rateList, count});
     },
 
     onRateListCpsAdd: function({count}) {

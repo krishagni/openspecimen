@@ -60,6 +60,11 @@ class RateList {
     return http.get('lab-services-rate-lists/' + rateListId + '/service-rates');
   }
 
+  upsertServices(rateListId, serviceRates) {
+    const payload = {op: 'UPSERT', rateListId, serviceRates};
+    return http.put('lab-services-rate-lists/' + rateListId + '/service-rates', payload);
+  }
+
   getListSchema() {
     return listSchema;
   }

@@ -40,6 +40,9 @@ public class LabServicesController {
 		@RequestParam(value = "query", required = false)
 		String query,
 
+		@RequestParam(value = "notInRateListId", required = false)
+		Long notInRateListId,
+
 		@RequestParam(value = "includeStats", required = false, defaultValue = "false")
 		boolean includeStats,
 
@@ -52,6 +55,7 @@ public class LabServicesController {
 		LabServiceListCriteria crit = new LabServiceListCriteria()
 			.codes(codes)
 			.query(query)
+			.notInRateListId(notInRateListId)
 			.includeStat(includeStats)
 			.startAt(startAt)
 			.maxResults(maxResults);
@@ -66,9 +70,12 @@ public class LabServicesController {
 		List<String> codes,
 
 		@RequestParam(value = "query", required = false)
-		String query) {
+		String query,
 
-		LabServiceListCriteria crit = new LabServiceListCriteria().codes(codes).query(query);
+		@RequestParam(value = "notInRateListId", required = false)
+		Long notInRateListId) {
+
+		LabServiceListCriteria crit = new LabServiceListCriteria().codes(codes).query(query).notInRateListId(notInRateListId);
 		return Collections.singletonMap("count", ResponseEvent.unwrap(rateListSvc.getServicesCount(RequestEvent.wrap(crit))));
 	}
 

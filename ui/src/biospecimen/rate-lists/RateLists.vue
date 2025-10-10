@@ -50,7 +50,9 @@
 
     <os-screen-panel :width="9" v-if="$route.params && $route.params.rateListId > 0 && ctx.selectedRateList">
       <router-view :rate-list-id="$route.params.rateListId" :key="$route.params.rateListId"
-        @rate-list-saved="updateRateList($event)" @rate-list-cps-added="addCpsCount($event)"
+        @rate-list-saved="updateRateList($event)"
+        @rate-list-services-added="addServicesCount($event)"
+        @rate-list-cps-added="addCpsCount($event)"
         @rate-list-cps-removed="deductCpsCount($event)" />
     </os-screen-panel>
 
@@ -182,6 +184,10 @@ export default {
       }
     },
 
+    addServicesCount: function({rateList, count}) {
+      this._updateServicesCount(rateList, count);
+    },
+
     addCpsCount: function({rateList, count}) {
       this._updateCpsCount(rateList, count);
     },
@@ -202,11 +208,19 @@ export default {
       );
     },
 
+    _updateServicesCount: function(rateList, count) {
+      this._updateCount(rateList, 'servicesCount', count);
+    },
+
     _updateCpsCount: function(rateList, count) {
+      this._updateCount(rateList, 'cpsCount', count);
+    },
+
+    _updateCount: function(rateList, stat, count) {
       const row = this.ctx.rateLists.find(rowObject => rowObject.rateList.id == rateList.id);
       if (row) {
-        row.rateList.cpsCount = row.rateList.cpsCount || 0;
-        row.rateList.cpsCount += count;
+        row.rateList[stat] = row.rateList[stat] || 0;
+        row.rateList[stat] += count;
       }
     }
   }
