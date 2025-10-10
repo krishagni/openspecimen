@@ -1469,6 +1469,11 @@ const routes = [
                 component: () => import(/* webpackChunkName: "rate-lists" */ '../biospecimen/rate-lists/RateListOverview.vue')
               },
               {
+                path: 'services',
+                name: 'RateListsItemDetail.Services',
+                component: () => import(/* webpackChunkName: "rate-lists" */ '../biospecimen/rate-lists/RateListServices.vue')
+              },
+              {
                 path: 'cps',
                 name: 'RateListsItemDetail.CollectionProtocols',
                 component: () => import(/* webpackChunkName: "rate-lists" */ '../biospecimen/rate-lists/RateListCps.vue')

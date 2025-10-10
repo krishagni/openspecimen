@@ -16,6 +16,11 @@
               </router-link>
             </li>
             <li>
+              <router-link :to="getRoute('Services')">
+                <span v-t="'lab_services.services'">Services</span>
+              </router-link>
+            </li>
+            <li>
               <router-link :to="getRoute('CollectionProtocols')">
                 <span v-t="'lab_services.cps'">Collection Protocols</span>
               </router-link>

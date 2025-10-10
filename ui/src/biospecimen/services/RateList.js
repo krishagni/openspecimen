@@ -5,9 +5,10 @@ import util from '@/common/services/Util.js';
 
 
 import addEditSchema from '../schemas/rate-lists/rate-list-addedit.js';
-import cpListSchema from '../schemas/rate-lists/rl-cp-list.js';
+import cpsListSchema from '../schemas/rate-lists/rl-cp-list.js';
 import dict        from '../schemas/rate-lists/rate-list.js';
 import listSchema  from '../schemas/rate-lists/rate-lists.js';
+import servicesListSchema  from '../schemas/rate-lists/rl-services-list.js';
 
 class RateList {
   getRateLists(filters) {
@@ -44,6 +45,10 @@ class RateList {
     return http.get('lab-services-rate-lists/' + rateListId + '/collection-protocols/count', filters);
   }
 
+  getServices(rateListId) {
+    return http.get('lab-services-rate-lists/' + rateListId + '/service-rates');
+  }
+
   getListSchema() {
     return listSchema;
   }
@@ -56,8 +61,12 @@ class RateList {
     return formUtil.getFormSchema(dict.fields, addEditSchema.layout);
   }
 
-  getCpListSchema() {
-    return cpListSchema;
+  getCpsListSchema() {
+    return cpsListSchema;
+  }
+
+  getServicesListSchema() {
+    return servicesListSchema;
   }
 }
 

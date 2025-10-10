@@ -47,7 +47,7 @@ export default {
 
       cpUpdateOpts: {resource: 'CollectionProtocol', operations: ['Create', 'Update']},
 
-      listSchema: rateListSvc.getCpListSchema()
+      listSchema: rateListSvc.getCpsListSchema()
     }
   },
 
