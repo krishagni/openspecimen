@@ -52,6 +52,7 @@
       <router-view :rate-list-id="$route.params.rateListId" :key="$route.params.rateListId"
         @rate-list-saved="updateRateList($event)"
         @rate-list-services-added="addServicesCount($event)"
+        @rate-list-services-removed="deductServicesCount($event)"
         @rate-list-cps-added="addCpsCount($event)"
         @rate-list-cps-removed="deductCpsCount($event)" />
     </os-screen-panel>
@@ -186,6 +187,10 @@ export default {
 
     addServicesCount: function({rateList, count}) {
       this._updateServicesCount(rateList, count);
+    },
+
+    deductServicesCount: function({rateList, count}) {
+      this._updateServicesCount(rateList, -count);
     },
 
     addCpsCount: function({rateList, count}) {

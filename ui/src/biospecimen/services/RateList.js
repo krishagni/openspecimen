@@ -65,6 +65,11 @@ class RateList {
     return http.put('lab-services-rate-lists/' + rateListId + '/service-rates', payload);
   }
 
+  removeServices(rateListId, serviceRates) {
+    const payload = {op: 'DELETE', rateListId, serviceRates};
+    return http.put('lab-services-rate-lists/' + rateListId + '/service-rates', payload);
+  }
+
   getListSchema() {
     return listSchema;
   }

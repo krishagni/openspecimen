@@ -2,7 +2,9 @@
   <os-page-toolbar>
     <template #default>
       <span v-show-if-allowed="cpUpdateOpts">
-        <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddEditServicesDialog" />
+        <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddEditServicesDialog"
+          v-if="!ctx.selectedServices || ctx.selectedServices.length == 0" />
+        <os-button left-icon="times" :label="$t('common.buttons.remove')" @click="removeServices" v-else />
       </span>
     </template>
     <template #right>
@@ -15,13 +17,15 @@
         :data="ctx.services"
         :schema="listSchema"
         :loading="ctx.loading"
+        :allowSelection="true"
         @filtersUpdated="loadServices"
         @rowClicked="onServiceRowClick"
+        @selectedRows="onServicesSelection"
         ref="listView"
       />
     </os-grid-column>
 
-    <os-dialog ref="addEditServicesDialog">
+    <os-dialog ref="addEditServicesDialog" size="lg">
       <template #header>
         <span v-t="'lab_services.add_services'">Add Services</span>
       </template>
@@ -40,6 +44,14 @@
       </template>
     </os-dialog>
 
+    <os-confirm ref="removeSvcsConfirmDialog">
+      <template #title>
+        <span v-t="'lab_services.remove_services'">Remove Services</span>
+      </template>
+      <template #message>
+        <span v-t="'lab_services.remove_services_confirm'">Are you sure you want to remove selected services from the rate list?</span>
+      </template>
+    </os-confirm>
   </os-grid>
 </template>
 
@@ -57,6 +69,8 @@ export default {
         services: [],
 
         loading: false,
+
+        selectedServices: [],
 
         serviceRates: []
       },
@@ -87,7 +101,7 @@ export default {
               }
             },
             uiStyle: {
-              'width': '450px'
+              'width': '550px'
             }
           },
           {
@@ -121,6 +135,10 @@ export default {
 
     onServiceRowClick: function({service}) {
       routerSvc.goto('LabServicesList', {}, {serviceId: service.serviceId});
+    },
+
+    onServicesSelection: function(selection) {
+      this.ctx.selectedServices = (selection || []).map(({rowObject: {service}}) => service);
     },
 
     showAddEditServicesDialog: function() {
@@ -157,6 +175,22 @@ export default {
           this.$refs.listView.reload();
           this.$emit('rate-list-services-added', {count});
           this.hideAddEditServicesDialog();
+        }
+      );
+    },
+
+    removeServices: async function() {
+      const resp = await this.$refs.removeSvcsConfirmDialog.open();
+      if (resp != 'proceed') {
+        return;
+      }
+
+      const {selectedServices} = this.ctx;
+      rateListSvc.removeServices(this.rateList.id, selectedServices).then(
+        ({count}) => {
+          alertsSvc.success({code: 'lab_services.services_removed', args: {count}});
+          this.$refs.listView.reload();
+          this.$emit('rate-list-services-removed', {count});
         }
       );
     }
