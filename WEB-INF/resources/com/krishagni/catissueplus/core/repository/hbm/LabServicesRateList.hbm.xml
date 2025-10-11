@@ -83,9 +83,10 @@
         rl.identifier != :rateListId and
         rl.start_date <= :endDate and
         (rl.end_date is null or rl.end_date >= :startDate) and
+        rl.activity_status != 'Disabled' and
         cp.identifier in (select cp_id from os_lab_svcs_rate_list_cps where rate_list_id = :rateListId) and
-        svc.identifier in (select service_id from os_lab_service_rates where rate_list_id = :rateListId) and
         cp.activity_status != 'Disabled' and
+        svc.identifier in (select service_id from os_lab_service_rates where rate_list_id = :rateListId) and
         svc.activity_status != 'Disabled'
       order by
         rl.identifier, rl.name, cp.short_title, svc.code

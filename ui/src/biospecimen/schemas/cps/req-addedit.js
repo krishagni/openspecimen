@@ -127,7 +127,7 @@ export default {
             labelCode: "cps.services",
             type: "multiselect",
             listSource: {
-              apiUrl: "cp-services",
+              apiUrl: "lab-services",
               displayProp: (option) => option.description + ' (' + option.code + ')',
               selectProp: "code",
               queryParams: {

@@ -293,6 +293,12 @@ export default {
       });
 
       options.push({
+        icon: 'money-bill-alt',
+        caption: this.$t('lab_services.rate_lists'),
+        onSelect: () => this.viewRateLists()
+      });
+
+      options.push({
         icon: 'poll',
         caption: this.$t(this.showStats == 'true' ? 'cps.hide_cp_stats' : 'cps.view_cp_stats'),
         onSelect: () => this.toggleViewCpStats()
@@ -466,6 +472,10 @@ export default {
 
     viewLabServices: function() {
       routerSvc.goto('LabServicesList', {}, {});
+    },
+
+    viewRateLists: function() {
+      routerSvc.goto('RateLists', {rateListId: -1}, {});
     },
 
     _exportRecords: function(objectType) {

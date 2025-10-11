@@ -40,12 +40,12 @@
       select
         ss.identifier as labSvcId, sr.rate as serviceRate
       from
-        os_specimen_lab_services ss
-        inner join catissue_specimen spmn on spmn.identifier = ss.specimen_id
-        inner join os_lab_svcs_rate_list_cps rl_cp on rl_cp.cp_id = spmn.collection_protocol_id
+        catissue_specimen spmn
+        inner join os_specimen_lab_services ss on ss.specimen_id = spmn.identifier
+        inner join os_lab_services s on s.identifier = ss.service_id
+        inner join os_lab_service_rates sr on sr.service_id = s.identifier
+        inner join os_lab_svcs_rate_list_cps rl_cp on rl_cp.cp_id = spmn.collection_protocol_id and rl_cp.rate_list_id = sr.rate_list_id
         inner join os_lab_services_rate_lists rl on rl.identifier = rl_cp.rate_list_id
-        inner join os_lab_service_rates sr on sr.rate_list_id = rl.identifier
-        inner join os_lab_services s on s.identifier = sr.service_id
       where
         spmn.identifier in (:specimenIds) and
         ss.service_date >= rl.start_date and (rl.end_date is null or ss.service_date < rl.end_date) and
@@ -66,11 +66,12 @@
         s.code, s.description, count(ssr.specimen_id) as specimens, sum(ssr.rate) as total_rate
       from
         os_specimen_lab_svc_rates_view ssr
+        inner join catissue_specimen spmn on spmn.identifier = ssr.specimen_id
         inner join os_lab_services s on s.identifier = ssr.service_id
       where
         ssr.service_date >= :startDate and ssr.service_date < :endDate and
-        ssr.cp_id = :cpId and
-        s.activity_status != 'Disabled'
+        s.activity_status != 'Disabled' and
+        spmn.collection_protocol_id = :cpId
       group by
         s.code, s.description
       order by

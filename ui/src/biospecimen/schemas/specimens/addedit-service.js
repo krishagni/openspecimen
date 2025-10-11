@@ -8,7 +8,7 @@ export default {
             labelCode: 'specimens.service',
             name: 'serviceDetail.serviceCode',
             listSource: {
-              apiUrl: 'cp-services',
+              apiUrl: 'lab-services',
               queryParams: {
                 dynamic: {
                   cpId: 'serviceDetail.cpId'
