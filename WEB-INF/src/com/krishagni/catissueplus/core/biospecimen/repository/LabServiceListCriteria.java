@@ -7,6 +7,8 @@ import com.krishagni.catissueplus.core.common.events.AbstractListCriteria;
 public class LabServiceListCriteria extends AbstractListCriteria<LabServiceListCriteria> {
 	private List<String> codes;
 
+	private Long cpId;
+
 	private Long notInRateListId;
 
 	@Override
@@ -20,6 +22,15 @@ public class LabServiceListCriteria extends AbstractListCriteria<LabServiceListC
 
 	public LabServiceListCriteria codes(List<String> codes) {
 		this.codes = codes;
+		return self();
+	}
+
+	public Long cpId() {
+		return cpId;
+	}
+
+	public LabServiceListCriteria cpId(Long cpId) {
+		this.cpId = cpId;
 		return self();
 	}
 

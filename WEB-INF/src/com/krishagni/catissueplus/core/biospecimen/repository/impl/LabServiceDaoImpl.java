@@ -117,6 +117,18 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 			query.add(query.notIn("labSvc.id", notInRateListSvcs));
 		}
 
+		if (criteria.cpId() != null && criteria.cpId() > 0L) {
+			SubQuery<Long> cpLabSvcs = query.createSubQuery(LabService.class, "cpLabSvc")
+				.join("cpLabSvc.serviceRates", "serviceRate")
+				.join("serviceRate.rateList", "rateList")
+				.join("rateList.cps", "rateListCp")
+				.join("rateListCp.cp", "cp")
+				.select("cpLabSvc.id");
+			cpLabSvcs.add(cpLabSvcs.eq("cp.id", criteria.cpId()))
+				.add(cpLabSvcs.ne("rateList.activityStatus", "Disabled"));
+			query.add(query.in("labSvc.id", cpLabSvcs));
+		}
+
 		return query;
 	}
 
