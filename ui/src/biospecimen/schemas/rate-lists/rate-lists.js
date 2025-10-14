@@ -64,6 +64,34 @@ export default {
       type: 'text',
       labelCode: 'lab_services.id_name_desc',
       name: 'query'
+    },
+    {
+      type: 'dropdown',
+      labelCode: 'lab_services.cp',
+      name: 'cpShortTitle',
+      listSource: {
+        apiUrl: 'collection-protocols',
+        displayProp: 'shortTitle',
+        selectProp: 'shortTitle',
+        searchProp: 'query'
+      }
+    },
+    {
+      type: 'date',
+      dateOnly: true,
+      labelCode: 'lab_services.effective_on',
+      name: 'rateEffectiveOn'
+    },
+    {
+      type: 'dropdown',
+      labelCode: 'lab_services.service',
+      name: 'serviceCode',
+      listSource: {
+        apiUrl: 'lab-services',
+        displayProp: ({code, description}) => code + ' (' + description + ')',
+        selectProp: 'code',
+        searchProp: 'query'
+      }
     }
   ]
 }
