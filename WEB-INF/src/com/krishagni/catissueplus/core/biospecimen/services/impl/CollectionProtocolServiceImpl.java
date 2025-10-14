@@ -1054,7 +1054,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			}
 
 
-			List<SpecimenRequirementDetail> result = result = cpes.stream()
+			List<SpecimenRequirementDetail> result = cpes.stream()
 				.flatMap(e -> SpecimenRequirementDetail.from(e.getTopLevelAnticipatedSpecimens(), includeChildren).stream())
 				.collect(Collectors.toList());
 			return ResponseEvent.response(result);

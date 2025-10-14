@@ -9,6 +9,8 @@ public class LabServiceListCriteria extends AbstractListCriteria<LabServiceListC
 
 	private Long cpId;
 
+	private String cpShortTitle;
+
 	private Long notInRateListId;
 
 	@Override
@@ -31,6 +33,15 @@ public class LabServiceListCriteria extends AbstractListCriteria<LabServiceListC
 
 	public LabServiceListCriteria cpId(Long cpId) {
 		this.cpId = cpId;
+		return self();
+	}
+
+	public String cpShortTitle() {
+		return cpShortTitle;
+	}
+
+	public LabServiceListCriteria cpShortTitle(String cpShortTitle) {
+		this.cpShortTitle = cpShortTitle;
 		return self();
 	}
 

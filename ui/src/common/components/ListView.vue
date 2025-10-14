@@ -673,7 +673,7 @@ export default {
   width: 100%;
 }
 
-.os-list.show-filters .results {
+.os-list.show-filters > .results {
   width: calc(100% - 300px);
 }
 
@@ -706,7 +706,7 @@ export default {
   flex-direction: column;
 }
 
-.os-list.show-filters .filters {
+.os-list.show-filters > .filters {
   display: flex;
   border-left: 1px solid #ddd;
 }
