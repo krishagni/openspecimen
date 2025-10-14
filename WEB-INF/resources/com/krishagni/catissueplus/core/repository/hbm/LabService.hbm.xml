@@ -39,7 +39,8 @@
         join s.serviceRates sr
         join sr.rateList rl
       where
-        s.id = :serviceId
+        s.id = :serviceId and
+        rl.activityStatus != 'Disabled'
       order by
         rl.startDate desc
     </query>

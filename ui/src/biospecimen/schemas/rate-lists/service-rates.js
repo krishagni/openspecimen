@@ -1,10 +1,13 @@
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   columns: [
     {   
       type: 'text',
       labelCode: 'lab_services.rate_list',
       name: 'rateList',
-      value: ({rateList}) => '#' + rateList.id + ' ' + rateList.name
+      value: ({rateList}) => '#' + rateList.id + ' ' + rateList.name,
+      href: ({rowObject: {rateList}}) => routerSvc.getUrl('RateListsItemDetail.Overview', {rateListId: rateList.id})
     },  
     {
       type: 'text',
