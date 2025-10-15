@@ -16,7 +16,8 @@
     <os-page-body>
       <os-page-toolbar>
         <template #default>
-          <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddEditSvcDialog({})" />
+          <os-button left-icon="plus" :label="$t('common.buttons.add')" @click="showAddEditSvcDialog({})"
+            v-show-if-allowed="'institute-admin'"/>
         </template>
 
         <template #right>
@@ -35,12 +36,12 @@
         @rowClicked="onServiceRowClick"
         ref="listView">
 
-        <template #rowActions="slotProps">
+        <template #rowActions="slotProps" v-show-if-allowed="'institute-admin'">
           <os-button-group>
             <os-button size="small" left-icon="edit" v-os-tooltip.bottom="$t('lab_services.edit_service')"
-              @click="showAddEditSvcDialog(slotProps.rowObject)" v-show-if-allowed="'admin'" />
+              @click="showAddEditSvcDialog(slotProps.rowObject)" />
             <os-button size="small" left-icon="trash" v-os-tooltip.bottom="$t('lab_services.delete_service')"
-              @click="deleteService(slotProps.rowObject)" v-show-if-allowed="'admin'" />
+              @click="deleteService(slotProps.rowObject)" />
           </os-button-group>
         </template>
 
