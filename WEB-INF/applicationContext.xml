@@ -204,14 +204,6 @@
     <property name="cpeFactory" ref="cpeFactory"/>
   </bean>
 
-  <bean id="cpServiceFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.ServiceFactoryImpl">
-    <property name="daoFactory" ref="biospecimenDaoFactory" />
-  </bean>
-
-  <bean id="cpServiceRateFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.ServiceRateFactoryImpl">
-    <property name="daoFactory" ref="biospecimenDaoFactory" />
-  </bean>
-
   <bean id="labServiceFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.LabServiceFactoryImpl" />
 
   <bean id="labServicesRateListFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.LabServicesRateListFactoryImpl" />
@@ -227,8 +219,6 @@
     <property name="cpFactory" ref="cpFactory"/>
     <property name="cpeFactory" ref="cpeFactory"/>
     <property name="srFactory" ref="srFactory"/>
-    <property name="serviceFactory" ref="cpServiceFactory" />
-    <property name="serviceRateFactory" ref="cpServiceRateFactory" />
     <property name="rbacSvc" ref="rbacSvc"/>
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="listSvc" ref="listSvc"/>

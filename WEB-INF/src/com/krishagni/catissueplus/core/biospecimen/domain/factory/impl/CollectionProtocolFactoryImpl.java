@@ -135,7 +135,6 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setSpecimenLabelPrePrintMode(input, cp, ose);
 		setSpecimenLabelPrintSettings(input, cp, ose);
 		setDistributionProtocolSettings(input, cp, ose);
-		setServiceRateCurrency(input, cp, ose);
 		setActivityStatus(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
 		setConsentsSource(input, cp, ose);
@@ -548,10 +547,6 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		}
 
 		return dp;
-	}
-
-	private void setServiceRateCurrency(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
-		result.setServiceRateCurrency(input.getServiceRateCurrency());
 	}
 
 	private void setCollectionProtocolExtension(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {

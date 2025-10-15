@@ -24,8 +24,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
-import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportCriteria;
-import com.krishagni.catissueplus.core.biospecimen.events.ServiceReportDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListCriteria;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -518,26 +516,6 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@Override
-	public List<ServiceReportDetail> getLabSpecimensServiceReport(ServiceReportCriteria crit) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SERVICES_REPORT)
-			.setParameter("cpId", crit.getCpId())
-			.setParameter("startDate", crit.getStartDate())
-			.setParameter("endDate", crit.getEndDate())
-			.list();
-
-		return rows.stream().map(
-			row -> {
-				ServiceReportDetail detail = new ServiceReportDetail();
-				detail.setCode((String) row[0]);
-				detail.setDescription((String) row[1]);
-				detail.setSpecimens((Long) row[2]);
-				detail.setRate((BigDecimal) row[3]);
-				return detail;
-			}
-		).collect(Collectors.toList());
-	}
-
-	@Override
 	public void saveOrUpdate(LabSpecimenService labSpecimenService) {
 		sessionFactory.getCurrentSession().saveOrUpdate(labSpecimenService);
 	}
@@ -934,8 +912,6 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	private static final String DELETE_SERVICES = LabSpecimenService.class.getName() + ".deleteServices";
 
 	private static final String GET_SERVICE_RATES = LabSpecimenService.class.getName() + ".getLabServiceRates";
-
-	private static final String GET_SERVICES_REPORT = LabSpecimenService.class.getName() + ".getLabServicesReport";
 
 	private static final String GET_DESCENDENTS_SQL =
 		"select descendent_id from catissue_specimen_hierarchy where ancestor_id = %d and ancestor_id != descendent_id";

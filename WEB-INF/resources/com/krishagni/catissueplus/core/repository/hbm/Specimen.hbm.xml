@@ -131,7 +131,7 @@
       <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent" column="POOLED_EVENT_ID" />
     </set>
 
-    <set name="services" table="OS_SPECIMEN_SERVICES" inverse="true">
+    <set name="services" table="OS_SPECIMEN_LAB_SERVICES" inverse="true">
       <key column="SPECIMEN_ID" />
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService" />
     </set>

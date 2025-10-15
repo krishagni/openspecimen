@@ -57,8 +57,6 @@ import com.krishagni.catissueplus.core.biospecimen.repository.LabServiceDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabServicesRateListDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.LabelPrintJobDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.ParticipantDao;
-import com.krishagni.catissueplus.core.biospecimen.repository.ServiceDao;
-import com.krishagni.catissueplus.core.biospecimen.repository.ServiceRateDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenKitDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenListDao;
@@ -477,13 +475,6 @@ public class DaoFactoryImpl implements DaoFactory {
 	}
 
 	@Override
-	public ServiceDao getServiceDao() {
-		ServiceDaoImpl dao = new ServiceDaoImpl();
-		setSessionFactory(dao);
-		return dao;
-	}
-
-	@Override
 	public LabServiceDao getLabServiceDao() {
 		LabServiceDaoImpl dao = new LabServiceDaoImpl();
 		setSessionFactory(dao);
@@ -493,13 +484,6 @@ public class DaoFactoryImpl implements DaoFactory {
 	@Override
 	public LabServicesRateListDao getLabServiceRateListDao() {
 		LabServicesRateListDaoImpl dao = new LabServicesRateListDaoImpl();
-		setSessionFactory(dao);
-		return dao;
-	}
-
-	@Override
-	public ServiceRateDao getServiceRateDao() {
-		ServiceRateDaoImpl dao = new ServiceRateDaoImpl();
 		setSessionFactory(dao);
 		return dao;
 	}

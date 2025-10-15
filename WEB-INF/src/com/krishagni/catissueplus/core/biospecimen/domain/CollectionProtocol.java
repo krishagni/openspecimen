@@ -175,8 +175,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private CollectionProtocol consentsSource;
 
-	private String serviceRateCurrency;
-
 	private Set<CpConsentTier> consentTier = new LinkedHashSet<>();
 	
 	private Set<User> coordinators = new HashSet<>();
@@ -638,14 +636,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.consentsSource = consentsSource;
 	}
 
-	public String getServiceRateCurrency() {
-		return serviceRateCurrency;
-	}
-
-	public void setServiceRateCurrency(String serviceRateCurrency) {
-		this.serviceRateCurrency = serviceRateCurrency;
-	}
-
 	public Set<CpConsentTier> getConsentTier() {
 		return consentTier;
 	}
@@ -787,7 +777,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setVisitNamePrintMode(cp.getVisitNamePrintMode());
 		setVisitNamePrintCopies(cp.getVisitNamePrintCopies());
 		setUnsignedConsentDocumentURL(cp.getUnsignedConsentDocumentURL());
-		setServiceRateCurrency(cp.getServiceRateCurrency());
 		setExtension(cp.getExtension());
 //		setCatalogId(cp.getCatalogId());
 		
@@ -855,7 +844,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setContainerSelectionStrategy(getContainerSelectionStrategy());
 		cp.setAliquotsInSameContainer(getAliquotsInSameContainer());
 		cp.setStorageSiteBasedAccess(getStorageSiteBasedAccess());
-		cp.setServiceRateCurrency(getServiceRateCurrency());
 		cp.setDraftDataEntry(draftDataEntryEnabled());
 		cp.setActivityStatus(getActivityStatus());
 	}
