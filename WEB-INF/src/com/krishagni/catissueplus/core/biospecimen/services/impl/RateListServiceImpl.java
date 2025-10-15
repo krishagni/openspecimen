@@ -131,7 +131,7 @@ public class RateListServiceImpl implements RateListService {
 	@PlusTransactional
 	public ResponseEvent<LabServiceDetail> createService(RequestEvent<LabServiceDetail> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureUserIsAdminOrInstituteAdmin();
 			LabService service = serviceFactory.createService(req.getPayload());
 			if (!service.isActive()) {
 				return ResponseEvent.userError(ActivityStatusErrorCode.INVALID, service.getActivityStatus());
@@ -151,15 +151,17 @@ public class RateListServiceImpl implements RateListService {
 	@PlusTransactional
 	public ResponseEvent<LabServiceDetail> updateService(RequestEvent<LabServiceDetail> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureUserIsAdminOrInstituteAdmin();
 			LabServiceDetail input = req.getPayload();
 			LabService existing = getService(input.getId(), input.getCode());
 			LabService service = serviceFactory.createService(input);
 			ensureUniqueServiceCode(existing, service);
 			if (Status.isDisabledStatus(service.getActivityStatus())) {
-				// TODO:
-				// ensureServiceIsNotInUse(service);
-				//
+				Map<String, Long> specimensCount = daoFactory.getLabServiceDao()
+					.getSpecimensCountServicedBy(Collections.singletonList(existing.getId()));
+				if (!specimensCount.isEmpty()) {
+					return ResponseEvent.userError(LabServiceErrorCode.IN_USE, existing.getCode(), specimensCount.get(existing.getCode()));
+				}
 			}
 
 			existing.update(service);
@@ -175,7 +177,7 @@ public class RateListServiceImpl implements RateListService {
 	@PlusTransactional
 	public ResponseEvent<LabServiceDetail> deleteService(RequestEvent<EntityQueryCriteria> req) {
 		try {
-			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+			AccessCtrlMgr.getInstance().ensureUserIsAdminOrInstituteAdmin();
 			EntityQueryCriteria input = req.getPayload();
 			LabService existing = getService(input.getId(), input.getName());
 
