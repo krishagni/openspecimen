@@ -408,4 +408,12 @@
       <column name="SPECIMEN_ID" type="${int.type}" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Rate list currency">
+    <addColumn tableName="OS_LAB_SERVICES_RATE_LISTS">
+      <column name="CURRENCY" type="${text.type}(16)" defaultValue="UNK">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -17,7 +17,8 @@ export default {
     {
       type: 'number',
       labelCode: 'lab_services.rate',
-      name: 'service.rate'
+      name: 'service.rate',
+      value: ({rateList, service}) => rateList.currency + ' ' + service.rate
     }
   ]
 }

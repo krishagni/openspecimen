@@ -93,9 +93,9 @@ public interface SpecimenDao extends Dao<Specimen> {
 
 	List<LabSpecimenService> getLabSpecimenServices(Collection<Long> specimenIds);
 
-	Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId);
+	Map<Long, Pair<String, BigDecimal>> getLabSpecimenServicesRate(Long specimenId);
 
-	Map<Long, BigDecimal> getLabSpecimenServicesRate(List<Long> specimenIds);
+	Map<Long, Pair<String, BigDecimal>> getLabSpecimenServicesRate(List<Long> specimenIds);
 
 	List<ServiceReportDetail> getLabSpecimensServiceReport(ServiceReportCriteria crit);
 

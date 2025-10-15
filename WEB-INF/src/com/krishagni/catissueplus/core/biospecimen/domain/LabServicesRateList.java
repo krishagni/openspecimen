@@ -20,6 +20,8 @@ public class LabServicesRateList extends BaseEntity {
 
 	private LocalDate endDate;
 
+	private String currency;
+
 	private Set<LabServiceRateListCp> cps = new HashSet<>();
 
 	private Set<LabServiceRate> serviceRates = new HashSet<>();
@@ -58,6 +60,14 @@ public class LabServicesRateList extends BaseEntity {
 		this.endDate = endDate;
 	}
 
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
 	public Set<LabServiceRateListCp> getCps() {
 		return cps;
 	}
@@ -87,6 +97,7 @@ public class LabServicesRateList extends BaseEntity {
 		setDescription(other.getDescription());
 		setStartDate(other.getStartDate());
 		setEndDate(other.getEndDate());
+		setCurrency(other.getCurrency());
 		setActivityStatus(other.getActivityStatus());
 	}
 

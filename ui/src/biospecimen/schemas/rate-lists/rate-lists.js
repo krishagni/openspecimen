@@ -48,6 +48,11 @@ export default {
       name: 'rateList.endDate'
     },
     {
+      type: 'text',
+      labelCode: 'lab_services.currency',
+      name: 'rateList.currency'
+    },
+    {
       type: 'number',
       labelCode: 'lab_services.services',
       name: 'rateList.servicesCount'

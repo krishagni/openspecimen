@@ -32,12 +32,12 @@ export default {
       type: 'text',
       labelCode: 'specimens.service_rate',
       name: 'service.serviceRate',
-      value: ({currency, service}) => {
+      value: ({service}) => {
         if (service.serviceRate == null || service.serviceRate == undefined) {
           return service.serviceRate;
         }
 
-        return currency ? (currency + ' ' + service.serviceRate) : service.serviceRate;
+        return service.currency + ' ' + service.serviceRate;
       }
     }
   ]

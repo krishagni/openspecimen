@@ -499,19 +499,19 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@Override
-	public Map<Long, BigDecimal> getLabSpecimenServicesRate(Long specimenId) {
+	public Map<Long, Pair<String, BigDecimal>> getLabSpecimenServicesRate(Long specimenId) {
 		return getLabSpecimenServicesRate(Collections.singletonList(specimenId));
 	}
 
 	@Override
-	public Map<Long, BigDecimal> getLabSpecimenServicesRate(List<Long> specimenIds) {
+	public Map<Long, Pair<String, BigDecimal>> getLabSpecimenServicesRate(List<Long> specimenIds) {
 		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SERVICE_RATES)
 			.setParameterList("specimenIds", specimenIds)
 			.list();
 
-		Map<Long, BigDecimal> result = new HashMap<>();
+		Map<Long, Pair<String, BigDecimal>> result = new HashMap<>();
 		for (Object[] row : rows) {
-			result.put((Long) row[0], (BigDecimal) row[1]);
+			result.put((Long) row[0], Pair.make((String) row[1], (BigDecimal) row[2]));
 		}
 
 		return result;

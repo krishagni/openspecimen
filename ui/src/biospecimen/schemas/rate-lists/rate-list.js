@@ -36,6 +36,16 @@ export default {
       dateOnly: true,
       labelCode: 'lab_services.end_date',
       name: 'rateList.endDate'
+    },
+    {
+      type: 'text',
+      labelCode: 'lab_services.currency',
+      name: 'rateList.currency',
+      validations: {
+        required: {
+          messageCode: 'lab_services.currency_req'
+        }
+      }
     }
   ]
 }

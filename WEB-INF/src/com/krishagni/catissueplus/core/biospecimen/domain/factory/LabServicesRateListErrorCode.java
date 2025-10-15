@@ -11,6 +11,10 @@ public enum LabServicesRateListErrorCode implements ErrorCode {
 
 	END_DT_LT_START_DT,
 
+	CURRENCY_REQ,
+
+	CURRENCY_MAX_LEN,
+
 	NOT_FOUND,
 
 	SVC_RATE_REQ,

@@ -37,6 +37,8 @@ public class SpecimenServiceDetail {
 
 	private UserSummary servicedBy;
 
+	private String currency;
+
 	private BigDecimal serviceRate;
 
 	private String comments;
@@ -132,6 +134,14 @@ public class SpecimenServiceDetail {
 
 	public void setServicedBy(UserSummary servicedBy) {
 		this.servicedBy = servicedBy;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 
 	public BigDecimal getServiceRate() {

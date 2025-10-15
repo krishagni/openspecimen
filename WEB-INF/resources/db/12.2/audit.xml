@@ -200,4 +200,11 @@
       <column name="comments_MOD" type="${boolean.type}" />
     </createTable>
   </changeSet>
+
+  <changeSet author="vpawar" id="Lab service rate lists currency">
+    <addColumn tableName="OS_LAB_SERVICES_RATE_LISTS_AUD">
+      <column name="CURRENCY" type="${text.type}(16)" />
+      <column name="currency_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

@@ -28,6 +28,8 @@ public class LabServicesRateListDetail {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate endDate;
 
+	private String currency;
+
 	private UserSummary creator;
 
 	private Date creationTime;
@@ -84,6 +86,14 @@ public class LabServicesRateListDetail {
 
 	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 
 	public UserSummary getCreator() {
@@ -165,6 +175,7 @@ public class LabServicesRateListDetail {
 		result.setDescription(rateList.getDescription());
 		result.setStartDate(rateList.getStartDate());
 		result.setEndDate(rateList.getEndDate());
+		result.setCurrency(rateList.getCurrency());
 		result.setCreator(UserSummary.from(rateList.getCreator()));
 		result.setCreationTime(rateList.getCreationTime());
 		if (rateList.getUpdater() != null) {

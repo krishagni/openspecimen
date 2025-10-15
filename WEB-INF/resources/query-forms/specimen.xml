@@ -1407,6 +1407,12 @@
             <caption>#getMessage("specimen_service_comments")</caption>
             <column>COMMENTS</column>
           </textField>
+          <textField>
+            <name>currency</name>
+            <udn>currency</udn>
+            <caption>#getMessage("specimen_service_rate_currency")</caption>
+            <column>CURRENCY</column>
+          </textField>
           <numberField>
             <name>rate</name>
             <udn>rate</udn>

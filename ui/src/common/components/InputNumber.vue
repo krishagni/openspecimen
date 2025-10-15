@@ -12,8 +12,8 @@
         :mode="'decimal'" :minFractionDigits="maxFractionDigits" :maxFractionDigits="maxFractionDigits"
         :input-props="{disabled}" />
     </div>
-    <div class="unit" v-if="unit">
-      <span>{{unit}}</span>
+    <div class="unit" v-if="unitText">
+      <span>{{unitText}}</span>
     </div>
   </div>
 </template>
@@ -22,7 +22,7 @@
 import InputNumber from 'primevue/inputnumber';
 
 export default {
-  props: ['modelValue', 'maxFractionDigits', 'tabOrder', 'disabled', 'unit'],
+  props: ['modelValue', 'maxFractionDigits', 'tabOrder', 'disabled', 'unit', 'form'],
 
   components: {
     InputNumber
@@ -42,6 +42,14 @@ export default {
       set(value) {
         this.$emit('update:modelValue', value);
       }
+    },
+
+    unitText: function() {
+      if (typeof this.unit == 'function') {
+        return this.unit(this.form);
+      }
+
+      return this.unit;
     }
   },
 

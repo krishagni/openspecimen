@@ -1535,6 +1535,8 @@
     "cps": "Collection Protocols",
     "cps_added": "Associated one new collection protocol with the rate list. | Associated {count} new collection protocols with the rate list.",
     "cps_removed": "Removed association with one collection protocol from the rate list | Removed association with {count} collection protocols from the rate list.",
+    "currency": "Currency",
+    "currency_req": "Currency is mandatory",
     "create_rate_list": "Create Rate List",
     "delete_service": "Delete Service",
     "description": "Description",
@@ -1543,6 +1545,7 @@
     "edit_service": "Edit Service",
     "edit_services": "Edit Services",
     "effective_on": "Effective On",
+    "end_date": "End Date",
     "id_name_desc": "ID or Name or Description",
     "list": "Services",
     "loading_rate_lists": "Loading rate lists...",
@@ -1568,8 +1571,7 @@
     "services_updated": "Service updated.| {count} services updated.",
     "site": "Site",
     "start_date": "Start Date",
-    "start_date_req": "Start Date is mandatory",
-    "end_date": "End Date"
+    "start_date_req": "Start Date is mandatory"
   },
 
   "login": {

@@ -66,6 +66,8 @@ export default {
     return {
       services: [],
 
+      currency: null,
+
       totalRate: 0,
 
       addEditCtx: {
@@ -99,11 +101,6 @@ export default {
 
     isUpdateAllowed: function() {
       return this.isAnyUserUpdateAllowed && this.notCoordinatOrStoreAllowed;
-    },
-
-    currency: function() {
-      const cp = this.cpViewCtx.getCp();
-      return cp.serviceRateCurrency;
     }
   },
 
@@ -161,8 +158,21 @@ export default {
     _loadServices: function() {
       specimenSvc.getLabServices(this.specimen.id, {includeRates: true}).then(
         services => {
-          this.services = services.map(service => ({currency: this.currency, service}));
-          this.totalRate = services.reduce((acc, svc) => svc.serviceRate >= 0 ? acc + svc.serviceRate : acc, 0);
+          this.services = [];
+          this.totalRate = 0;
+          this.currency = null;
+          for (const service of services) {
+            this.services.push({service});
+            if (service.currency && service.serviceRate >= 0) {
+              this.totalRate += service.serviceRate;
+              if (!this.currency) {
+                this.currency = service.currency;
+              } else if (this.currency != service.currency) {
+                this.currency = 'MULTI CURRENCY';
+              }
+            }
+          }
+
           this.totalRate = this.totalRate.toFixed(2);
         }
       );

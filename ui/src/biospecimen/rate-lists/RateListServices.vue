@@ -96,7 +96,7 @@ export default {
       return rateListSvc.getServices(this.rateList.id).then(
         resp => {
           this.ctx.loading = false;
-          this.ctx.services = resp.map(service => ({service}));
+          this.ctx.services = resp.map(service => ({rateList: this.ctx.rateList, service}));
           return this.ctx.services; 
         }
       );

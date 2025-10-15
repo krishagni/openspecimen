@@ -29,6 +29,7 @@ public class LabServicesRateListFactoryImpl implements LabServicesRateListFactor
 		setDescription(input, rateList, ose);
 		setStartDate(input, rateList, ose);
 		setEndDate(input, rateList, ose);
+		setCurrency(input, rateList, ose);
 		setActivityStatus(input, rateList, ose);
 		ose.checkAndThrow();
 
@@ -59,6 +60,15 @@ public class LabServicesRateListFactoryImpl implements LabServicesRateListFactor
 		rateList.setEndDate(input.getEndDate());
 		if (rateList.getStartDate() != null && rateList.getEndDate() != null && rateList.getEndDate().isBefore(rateList.getStartDate())) {
 			ose.addError(LabServicesRateListErrorCode.END_DT_LT_START_DT, Utility.getDateString(rateList.getStartDate()), Utility.getDateString(rateList.getEndDate()));
+		}
+	}
+
+	private void setCurrency(LabServicesRateListDetail input, LabServicesRateList rateList, OpenSpecimenException ose) {
+		rateList.setCurrency(input.getCurrency());
+		if (StringUtils.isBlank(rateList.getCurrency())) {
+			ose.addError(LabServicesRateListErrorCode.CURRENCY_REQ);
+		} else if (rateList.getCurrency().length() > 8) {
+			ose.addError(LabServicesRateListErrorCode.CURRENCY_MAX_LEN, rateList.getCurrency());
 		}
 	}
 

@@ -35,6 +35,7 @@ export default {
       maxFractionDigits: 2,
       labelCode: 'lab_services.rate',
       name: 'serviceRate.rate',
+      unit: ({rateList}) => rateList.currency,
       validations: {
         required: {
           messageCode: 'lab_services.rate_req'

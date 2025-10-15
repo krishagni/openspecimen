@@ -742,11 +742,12 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			List<LabSpecimenService> services = daoFactory.getSpecimenDao().getLabSpecimenServices(specimen.getId());
 			List<SpecimenServiceDetail> result = SpecimenServiceDetail.from(specimen, services);
 			if (Boolean.TRUE.equals(crit.paramBoolean("includeRates")) && !services.isEmpty()) {
-				Map<Long, BigDecimal> rates = daoFactory.getSpecimenDao().getLabSpecimenServicesRate(specimen.getId());
+				Map<Long, Pair<String, BigDecimal>> rates = daoFactory.getSpecimenDao().getLabSpecimenServicesRate(specimen.getId());
 				for (SpecimenServiceDetail svc : result) {
-					BigDecimal rate = rates.get(svc.getId());
+					Pair<String, BigDecimal> rate = rates.get(svc.getId());
 					if (rate != null) {
-						svc.setServiceRate(rate.multiply(new BigDecimal(svc.getUnits())));
+						svc.setCurrency(rate.first());
+						svc.setServiceRate(rate.second().multiply(new BigDecimal(svc.getUnits())));
 					}
 				}
 			}

@@ -162,7 +162,7 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 
 	private static Date getFarInFutureDate() {
 		Calendar cal = Calendar.getInstance();
-		cal.set(9999, 11, 31, 23, 59, 59); // 9999-12-31 23:59:59
+		cal.set(9999, Calendar.DECEMBER, 29, 23, 59, 59); // 9999-12-29 23:59:59
 		return cal.getTime();
 	}
 

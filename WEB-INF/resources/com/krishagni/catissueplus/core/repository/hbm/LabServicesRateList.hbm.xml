@@ -21,6 +21,8 @@
 
     <property name="endDate" column="END_DATE" />
 
+    <property name="currency" column="CURRENCY" not-null="true" />
+
     <many-to-one name="creator" column="CREATOR_ID" not-null="true" />
 
     <property name="creationTime" column="CREATION_TIME" not-null="true" />
@@ -81,8 +83,8 @@
         inner join catissue_collection_protocol cp on cp.identifier = rl_cp.cp_id
       where
         rl.identifier != :rateListId and
-        rl.start_date <= :endDate and
-        (rl.end_date is null or rl.end_date >= :startDate) and
+        rl.start_date < :endDate and
+        (rl.end_date is null or rl.end_date > :startDate) and
         rl.activity_status != 'Disabled' and
         cp.identifier in (select cp_id from os_lab_svcs_rate_list_cps where rate_list_id = :rateListId) and
         cp.activity_status != 'Disabled' and

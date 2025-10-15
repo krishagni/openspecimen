@@ -297,6 +297,7 @@ public class RateListServiceImpl implements RateListService {
 
 			LabServicesRateList rateList = rateListFactory.createRateList(input);
 			existing.update(rateList);
+			raiseErrorIfOverlappingServices(rateList);
 			return ResponseEvent.response(LabServicesRateListDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);

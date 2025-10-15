@@ -34,11 +34,12 @@
 
     <sql-query name="getLabServiceRates">
       <return-scalar column="labSvcId" type="long" />
+      <return-scalar column="currency" type="string" />
       <return-scalar column="serviceRate" type="big_decimal" />
 
       <![CDATA[
       select
-        ss.identifier as labSvcId, sr.rate as serviceRate
+        ss.identifier as labSvcId, rl.currency as currency, sr.rate as serviceRate
       from
         catissue_specimen spmn
         inner join os_specimen_lab_services ss on ss.specimen_id = spmn.identifier
