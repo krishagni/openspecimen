@@ -8,6 +8,8 @@ public class SpecimensPickList extends BaseEntity {
 
 	private SpecimenList cart;
 
+	private Boolean transferToBox;
+
 	private Set<PickedSpecimen> pickedSpecimens = new HashSet<>();
 
 	public String getName() {
@@ -26,11 +28,23 @@ public class SpecimensPickList extends BaseEntity {
 		this.cart = cart;
 	}
 
+	public Boolean getTransferToBox() {
+		return transferToBox;
+	}
+
+	public void setTransferToBox(Boolean transferToBox) {
+		this.transferToBox = transferToBox;
+	}
+
 	public Set<PickedSpecimen>  getPickedSpecimens() {
 		return pickedSpecimens;
 	}
 
 	public void setPickedSpecimens(Set<PickedSpecimen> pickedSpecimens) {
 		this.pickedSpecimens = pickedSpecimens;
+	}
+
+	public String getDescription() {
+		return "#" + getId() + " " + getName();
 	}
 }

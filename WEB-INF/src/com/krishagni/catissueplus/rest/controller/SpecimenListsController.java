@@ -443,7 +443,7 @@ public class SpecimenListsController {
 	@RequestMapping(method = RequestMethod.PUT, value="/{id}/pick-lists/{pickListId}/specimens")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, List<Long>> updatePickListSpecimens(
+	public Map<String, Object> updatePickListSpecimens(
 		@PathVariable("id")
 		Long listId,
 

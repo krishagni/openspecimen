@@ -23,6 +23,8 @@ public class SpecimensPickListDetail {
 
 	private Date creationTime;
 
+	private Boolean transferToBox;
+
 	private Long totalSpecimens;
 
 	private Long pickedSpecimens;
@@ -67,6 +69,14 @@ public class SpecimensPickListDetail {
 		this.creationTime = creationTime;
 	}
 
+	public Boolean getTransferToBox() {
+		return transferToBox;
+	}
+
+	public void setTransferToBox(Boolean transferToBox) {
+		this.transferToBox = transferToBox;
+	}
+
 	public Long getTotalSpecimens() {
 		return totalSpecimens;
 	}
@@ -93,6 +103,7 @@ public class SpecimensPickListDetail {
 		result.setName(list.getName());
 		result.setCreator(UserSummary.from(list.getCreator()));
 		result.setCreationTime(list.getCreationTime());
+		result.setTransferToBox(list.getTransferToBox());
 		if (includeCartDetail) {
 			result.setCart(SpecimenListSummary.fromSpecimenList(list.getCart()));
 		}

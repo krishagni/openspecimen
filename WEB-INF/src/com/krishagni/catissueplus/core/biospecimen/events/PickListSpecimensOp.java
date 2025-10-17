@@ -18,6 +18,8 @@ public class PickListSpecimensOp {
 
 	private List<SpecimenInfo> specimens;
 
+	private String boxName;
+
 	public Long getCartId() {
 		return cartId;
 	}
@@ -56,5 +58,13 @@ public class PickListSpecimensOp {
 
 	public void setSpecimens(List<SpecimenInfo> specimens) {
 		this.specimens = specimens;
+	}
+
+	public String getBoxName() {
+		return boxName;
+	}
+
+	public void setBoxName(String boxName) {
+		this.boxName = boxName;
 	}
 }

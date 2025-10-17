@@ -7,6 +7,10 @@
 
       <span class="os-title">
         <h3>{{ctx.list.name}}</h3>
+
+        <div class="accessories" v-if="ctx.list.transferToBox">
+          <os-tag :value="$t('carts.box_transfer_enabled')" :rounded="true" type="info" />
+        </div>
       </span>
 
       <template #right v-if="ctx.list.totalSpecimens > 0">
@@ -140,6 +144,19 @@
 
     <os-box-scanner-dialog ref="boxScannerDialog" :fetch-specimens="searchSpecimens"
       :done-label="$t('carts.pick')" @done="pickBoxSpecimens" />
+
+    <os-dialog ref="selectBoxDialog">
+      <template #header>
+        <span v-t="'carts.select_box'">Select Box</span>
+      </template>
+      <template #content>
+        <os-form ref="selectBoxForm" :schema="selectBoxFs" :data="ctx" />
+      </template>
+      <template #footer>
+        <os-button :label="$t('common.buttons.cancel')" @click="hideSelectBoxDialog" />
+        <os-button primary :label="$t('common.buttons.done')" @click="selectBox" />
+      </template>
+    </os-dialog>
   </os-page>
 </template>
 
@@ -239,6 +256,39 @@ export default {
 
       const barcodes = util.splitStr(this.ctx.inputBarcodes || '', /,|\t|\n/, false);
       return barcodes.length;
+    },
+
+    selectBoxFs: function() {
+      return {
+        rows: [
+          {
+            fields: [
+              {
+                name: 'boxName',
+                type: 'dropdown',
+                labelCode: 'carts.select_box_to_transfer_specimens',
+                listSource: {
+                  apiUrl: 'storage-containers',
+                  displayProp: ({displayName, name}) => (displayName ? (displayName + ' ') : '') + name,
+                  selectProp: 'name',
+                  searchProp: 'name',
+                  queryParams: {
+                    static: {
+                      onlyFreeContainers: true,
+                      storeSpecimensEnabled: true,
+                    }
+                  }
+                },
+                validations: {
+                  required: {
+                    messageCode: 'carts.select_box'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
     }
   },
 
@@ -275,8 +325,49 @@ export default {
       this.unpickedCtx.selected = unselected.map(({rowObject: {specimen}}) => ({id: specimen.id, cpId: specimen.cpId}));
     },
 
-    pickSelectedSpecimens: function() {
-      this._pickSpecimens(this.unpickedCtx.selected).then(() => this.$refs.unpickedListView.clearSelection());
+
+    hideSelectBoxDialog: function() {
+      this.ctx.selectBoxQ = null;
+      this.$refs.selectBoxDialog.close();
+    },
+
+    showSelectBoxDialog: function() {
+      this.ctx.boxName = null;
+      this.$refs.selectBoxDialog.open();
+      return new Promise(
+        (resolve) => {
+          this.ctx.selectBoxQ = resolve;
+        }
+      );
+    },
+
+    selectBox: function() {
+      if (!this.$refs.selectBoxForm.validate()) {
+        return;
+      }
+
+      this.ctx.selectedBox = this.ctx.boxName;
+      this.ctx.selectBoxQ(this.ctx.boxName);
+      this.hideSelectBoxDialog();
+    },
+
+    pickSelectedSpecimens: async function() {
+      if (this.ctx.list.transferToBox) {
+        if (!this.ctx.selectedBox) {
+          await this.showSelectBoxDialog();
+        }
+      }
+
+      this._pickSpecimens(this.unpickedCtx.selected, this.ctx.selectedBox).then(
+        (resp) => {
+          if (resp == 'SPECIMEN_LIST_NO_SPACE_IN_BOX') {
+            this.ctx.selectedBox = null;
+            this.pickSelectedSpecimens();
+          } else if (resp != 'SPECIMEN_LIST_LTD_SPACE_IN_BOX') {
+            this.$refs.unpickedListView.clearSelection()
+          }
+        }
+      );
     },
 
     loadPickedSpecimens: function({filters, uriEncoding, pageSize}) {
@@ -342,15 +433,29 @@ export default {
       }
     },
     
-    handleInputBarcodes: function() {
+    handleInputBarcodes: async function() {
       const barcodes = util.splitStr(this.ctx.inputBarcodes || '', /,|\t|\n/, false);
-      this.ctx.inputBarcodes = null;
       if (barcodes.length == 0) {
         return;
       }
 
+      if (this.ctx.list.transferToBox) {
+        if (!this.ctx.selectedBox) {
+          await this.showSelectBoxDialog();
+        }
+      }
+
       const specimens = this.ctx.useBarcode ? barcodes.map(barcode => ({barcode})) : barcodes.map(label => ({label}));
-      this._pickSpecimens(specimens);
+      this._pickSpecimens(specimens, this.ctx.selectedBox).then(
+        (resp) => {
+          if (resp == 'SPECIMEN_LIST_NO_SPACE_IN_BOX') {
+            this.ctx.selectedBox = null;
+            this.handleInputBarcodes();
+          } else if (resp != 'SPECIMEN_LIST_LTD_SPACE_IN_BOX') {
+            this.ctx.inputBarcodes = null;
+          }
+        }
+      );
     },
 
     toggleRealTimePick: function() {
@@ -434,9 +539,14 @@ export default {
       );
     },
 
-    _pickSpecimens: function(specimens) {
-      return cartSvc.pickSpecimens(+this.cartId, +this.listId, specimens).then(
-        ({picked}) => {
+    _pickSpecimens: function(specimens, boxName) {
+      return cartSvc.pickSpecimens(+this.cartId, +this.listId, specimens, boxName).then(
+        ({error, picked}) => {
+          if (error) {
+            alertsSvc.error(error.message);
+            return error.code;
+          }
+
           alertsSvc.success({code: 'carts.specimens_picked', args: {count: picked.length}});
           this.pickedCtx.list = this.pickedCtx.selected = null;
           this.unpickedCtx.picked += picked.length;

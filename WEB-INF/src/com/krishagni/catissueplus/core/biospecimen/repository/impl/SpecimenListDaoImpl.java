@@ -278,6 +278,11 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 
 	@Override
+	public void savePickListItem(PickedSpecimen pickedSpecimen) {
+		getCurrentSession().saveOrUpdate(pickedSpecimen);
+	}
+
+	@Override
 	public int savePickListItems(SpecimensPickList pickList, User pickedBy, Date pickTime, List<Long> specimenIds) {
 		int count = 0;
 		for (Long specimenId : specimenIds) {

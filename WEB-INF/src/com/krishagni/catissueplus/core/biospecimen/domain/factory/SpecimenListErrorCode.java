@@ -31,7 +31,11 @@ public enum SpecimenListErrorCode implements ErrorCode {
 
 	PICK_LIST_NOT_FOUND,
 
-	ADD_RM_SPMNS_NA;
+	ADD_RM_SPMNS_NA,
+
+	NO_SPACE_IN_BOX,
+
+	LTD_SPACE_IN_BOX;
 
 	@Override
 	public String code() {

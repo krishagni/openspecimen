@@ -84,6 +84,15 @@ export default {
                 showWhen: "!cart || !cart.id"
               }
             ]
+          },
+          {
+            fields: [
+              {
+                name: "pickList.transferToBox",
+                type: "booleanCheckbox",
+                inlineLabelCode: "carts.transfer_specimens_to_box_during_pick"
+              }
+            ]
           }
         ]
       };

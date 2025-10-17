@@ -279,4 +279,10 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen pick lists - enable transfer to box when picking">
+    <addColumn tableName="OS_SPECIMEN_PICK_LISTS">
+      <column name="TRANSFER_TO_BOX" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

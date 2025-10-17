@@ -90,7 +90,7 @@ public interface SpecimenListService {
 
 	ResponseEvent<List<PickListSpecimenDetail>> getPickListSpecimens(RequestEvent<PickListSpecimensCriteria> req);
 
-	ResponseEvent<Map<String, List<Long>>> updatePickListSpecimens(RequestEvent<PickListSpecimensOp> req);
+	ResponseEvent<Map<String, Object>> updatePickListSpecimens(RequestEvent<PickListSpecimensOp> req);
 
 	void deleteInactivePickLists();
 

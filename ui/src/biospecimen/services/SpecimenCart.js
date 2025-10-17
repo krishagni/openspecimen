@@ -95,8 +95,8 @@ class SpecimenCart {
     return http.get('specimen-lists/' + cartId + '/pick-lists/' + listId + '/specimens', {...filterOpts, picked: true});
   }
 
-  pickSpecimens(cartId, pickListId, specimens) {
-    const payload = {op: 'PICK', cartId, pickListId, specimens};
+  pickSpecimens(cartId, pickListId, specimens, boxName) {
+    const payload = {op: 'PICK', cartId, pickListId, boxName, specimens};
     return http.put('specimen-lists/' + cartId + '/pick-lists/' + pickListId + '/specimens', payload);
   }
 

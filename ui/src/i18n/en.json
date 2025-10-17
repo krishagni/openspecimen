@@ -20,6 +20,7 @@
 
   "carts": {
     "assign_folder": "Assign",
+    "box_transfer_enabled": "Transfer to Box Enabled",
     "cart": "Cart",
     "cart_required": "Cart Name is mandatory",
     "child_specimens_added": "Child specimens added to the cart.",
@@ -72,12 +73,15 @@
     "search_pick_lists": "Search Pick Lists By Name",
     "send_digest_notifications": "Send digest of specimens added to the cart.",
     "select_one_spmn_to_rm": "Select at least one specimen to remove from the cart.",
+    "select_box": "Select Box",
+    "select_box_to_transfer_specimens": "Select Box to Store Picked Specimens",
     "share_with_users": "Share with users",
     "share_with_user_groups": "Share with user groups",
     "specimens": "Specimens",
     "specimens_picked": "One specimen picked | {count} specimens picked",
     "specimens_removed": "One specimen removed from the cart '{name}'. | {count} specimens removed from the cart '{name}'.",
     "specimens_unpicked": "One specimen moved back to the unpicked specimens list | {count} specimens moved back to the unpicked specimens list",
+    "transfer_specimens_to_box_during_pick": "Transfer specimens to box when picking the specimens",
     "turn_off_camera": "Turn off camera",
     "turn_off_real_time": "Turn off real-time pick",
     "unpicked_specimens": "Unpicked Specimens",

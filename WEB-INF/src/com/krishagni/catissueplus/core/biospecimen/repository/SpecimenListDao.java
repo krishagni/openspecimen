@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.PickedSpecimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
@@ -66,6 +67,8 @@ public interface SpecimenListDao extends Dao<SpecimenList> {
 	Map<Long, Map<String, Long>> getPickListSpecimensCount(Collection<Long> pickListIds);
 
 	List<Long> getSpecimenIdsInPickList(Long pickListId, List<Long> specimenIds);
+
+	void savePickListItem(PickedSpecimen specimen);
 
 	int savePickListItems(SpecimensPickList pickList, User pickedBy, Date pickTime, List<Long> specimenIds);
 

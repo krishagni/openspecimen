@@ -25,10 +25,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.StorageLocationSummary;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.biospecimen.domain.PickedSpecimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenList;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem;
@@ -63,6 +67,7 @@ import com.krishagni.catissueplus.core.common.Tuple;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.domain.Notification;
+import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
@@ -88,6 +93,7 @@ import com.krishagni.catissueplus.core.query.Column;
 import com.krishagni.catissueplus.core.query.ListConfig;
 import com.krishagni.catissueplus.core.query.ListService;
 import com.krishagni.catissueplus.core.query.ListUtil;
+import com.krishagni.catissueplus.rest.ErrorMessage;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 import edu.common.dynamicextensions.query.WideRowMode;
@@ -650,6 +656,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			pickList.setCart(cart);
 			pickList.setCreator(AuthUtil.getCurrentUser());
 			pickList.setCreationTime(Calendar.getInstance().getTime());
+			pickList.setTransferToBox(input.getTransferToBox());
 			daoFactory.getSpecimenListDao().saveOrUpdate(pickList);
 			return ResponseEvent.response(SpecimensPickListDetail.from(pickList));
 		} catch (OpenSpecimenException ose) {
@@ -686,6 +693,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			pickList.setName(input.getName());
 			pickList.setUpdater(AuthUtil.getCurrentUser());
 			pickList.setUpdateTime(Calendar.getInstance().getTime());
+			pickList.setTransferToBox(input.getTransferToBox());
 			daoFactory.getSpecimenListDao().saveOrUpdate(pickList);
 			return ResponseEvent.response(SpecimensPickListDetail.from(pickList));
 		} catch (OpenSpecimenException ose) {
@@ -823,7 +831,7 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<Map<String, List<Long>>> updatePickListSpecimens(RequestEvent<PickListSpecimensOp> req) {
+	public ResponseEvent<Map<String, Object>> updatePickListSpecimens(RequestEvent<PickListSpecimensOp> req) {
 		try {
 			List<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadAccessSpecimenSiteCps();
 			if (siteCps != null && siteCps.isEmpty()) {
@@ -849,22 +857,40 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 				return ResponseEvent.response(Collections.singletonMap(input.getOp().name().toLowerCase() + "ed", Collections.emptyList()));
 			}
 
-
 			List<Long> ids        = new ArrayList<>();
 			List<String> labels   = new ArrayList<>();
 			List<String> barcodes = new ArrayList<>();
+			Map<String, Integer> idxMap = new HashMap<>();
+			int idx = -1;
 			for (SpecimenInfo inputSpmn : input.getSpecimens()) {
+				++idx;
 				if (inputSpmn.getId() != null) {
 					ids.add(inputSpmn.getId());
+					idxMap.put("id:" + inputSpmn.getId(), idx);
 				} else if (StringUtils.isNotBlank(inputSpmn.getLabel())) {
 					labels.add(inputSpmn.getLabel());
+					idxMap.put("label:" + inputSpmn.getLabel().toLowerCase(), idx);
 				} else if (StringUtils.isNotBlank(inputSpmn.getBarcode())) {
 					barcodes.add(inputSpmn.getBarcode());
+					idxMap.put("barcode:" + inputSpmn.getBarcode().toLowerCase(), idx);
 				}
 			}
 
-			if (ids.isEmpty() && labels.isEmpty() && barcodes.isEmpty()) {
+			if (idxMap.isEmpty()) {
 				return ResponseEvent.response(Collections.singletonMap(input.getOp().name().toLowerCase() + "ed", Collections.emptyList()));
+			}
+
+			StorageContainer box = null;
+			if (input.getOp() == PickListSpecimensOp.Op.PICK && Boolean.TRUE.equals(pickList.getTransferToBox())) {
+				if (StringUtils.isBlank(input.getBoxName())) {
+					// TODO: check whether the error makes sense
+					return ResponseEvent.userError(StorageContainerErrorCode.NAME_REQUIRED);
+				}
+
+				box = daoFactory.getStorageContainerDao().getByName(input.getBoxName());
+				if (box == null) {
+					return ResponseEvent.userError(StorageContainerErrorCode.NOT_FOUND, input.getBoxName());
+				}
 			}
 
 			SpecimenListCriteria crit = new SpecimenListCriteria()
@@ -894,21 +920,56 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 				return ResponseEvent.userError(SpecimenListErrorCode.INV_CART_SPECIMENS, cart.getDisplayName(), StringUtils.join(notFound, ", "));
 			}
 
-			List<Long> spmnIds = specimens.stream().map(BaseEntity::getId).collect(Collectors.toList());
-			if (spmnIds.isEmpty()) {
+			if (specimens.isEmpty()) {
 				return ResponseEvent.response(Collections.singletonMap(input.getOp().name().toLowerCase() + "ed", Collections.emptyList()));
 			}
 
+			specimens.sort((s1, s2) -> getSpecimenPositionIndex(idxMap, s1).compareTo(getSpecimenPositionIndex(idxMap, s2)));
+			List<Long> spmnIds = specimens.stream().map(BaseEntity::getId).collect(Collectors.toList());
 			User user = AuthUtil.getCurrentUser();
 			Date time = Calendar.getInstance().getTime();
 			switch (input.getOp()) {
 				case PICK -> {
 					List<Long> alreadyAdded = daoFactory.getSpecimenListDao().getSpecimenIdsInPickList(pickList.getId(), spmnIds);
-					spmnIds.removeAll(alreadyAdded);
-					daoFactory.getSpecimenListDao().savePickListItems(pickList, user, time, spmnIds);
+					idx = -1;
+					for (Specimen specimen : specimens) {
+						++idx;
+
+						if (Boolean.TRUE.equals(pickList.getTransferToBox()) && box != null) {
+							if (!box.canContain(specimen)) {
+								return ResponseEvent.userError(StorageContainerErrorCode.CANNOT_HOLD_SPECIMEN, box.getName(), specimen.getLabelOrDesc());
+							}
+
+							StorageContainerPosition position = box.nextAvailablePosition();
+							if (position == null) {
+								ErrorCode errorCode = idx == 0 ? SpecimenListErrorCode.NO_SPACE_IN_BOX : SpecimenListErrorCode.LTD_SPACE_IN_BOX;
+								String message = MessageUtil.getInstance().getMessage(errorCode.code().toLowerCase(), new Object[] { box.getName(), idx });
+								ResponseEvent<Map<String, Object>> resp = ResponseEvent.response(Collections.singletonMap("error", new ErrorMessage(errorCode.code(), message)));
+								resp.setRollback(true);
+								return resp;
+							}
+
+							specimen.updatePosition(position, user, time, "Picked. " + pickList.getDescription());
+						}
+
+						if (!alreadyAdded.contains(specimen.getId())) {
+							PickedSpecimen pickedSpecimen = new PickedSpecimen();
+							pickedSpecimen.setSpecimen(specimen);
+							pickedSpecimen.setPickList(pickList);
+							pickedSpecimen.setUpdater(user);
+							pickedSpecimen.setUpdateTime(time);
+							daoFactory.getSpecimenListDao().savePickListItem(pickedSpecimen);
+						}
+					}
 				}
 
-				case UNPICK -> daoFactory.getSpecimenListDao().deleteSpecimensFromPickList(pickList.getId(), spmnIds);
+				case UNPICK -> {
+					if (Boolean.TRUE.equals(pickList.getTransferToBox())) {
+						specimens.forEach(specimen -> specimen.virtualise("Unpicked. " + pickList.getDescription()));
+					}
+
+					daoFactory.getSpecimenListDao().deleteSpecimensFromPickList(pickList.getId(), spmnIds);
+				}
 			}
 
 			pickList.setUpdater(user);
@@ -1478,6 +1539,17 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 			.toList()
 			.toArray(new String[0]);
 		EmailUtil.getInstance().sendEmail("warn_inactive_pick_list", to, null, emailProps);
+	}
+
+	private Integer getSpecimenPositionIndex(Map<String, Integer> idxMap, Specimen s1) {
+		Integer idx = idxMap.get("id:" + s1.getId());
+		if (idx == null) {
+			idx = idxMap.get("label:" + s1.getLabel().toLowerCase());
+			if (idx == null) {
+				idx = idxMap.get("barcode:" + s1.getBarcode().toLowerCase());
+			}
+		}
+		return idx != null ? idx : -1;
 	}
 
 	private String msg(String code, Object ... params) {

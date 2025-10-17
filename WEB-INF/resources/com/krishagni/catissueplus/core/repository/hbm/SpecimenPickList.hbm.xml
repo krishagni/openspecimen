@@ -5,7 +5,7 @@
 
 <hibernate-mapping auto-import="false">
   <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimensPickList" table="OS_SPECIMEN_PICK_LISTS" batch-size="100"
-         entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimensPickList">
+    entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimensPickList">
 
     <id name="id" column="IDENTIFIER" type="long">
       <generator class="native">
@@ -16,6 +16,8 @@
     <property name="name" column="NAME" not-null="true" />
 
     <many-to-one name="cart" column="CART_ID" not-null="true" fetch="join" />
+
+    <property name="transferToBox" column="TRANSFER_TO_BOX" />
 
     <many-to-one name="creator" column="CREATOR_ID" not-null="true" fetch="join" />
 
