@@ -564,6 +564,8 @@
     <property name="querySvc" ref="querySvc"/>
     <property name="starredItemSvc" ref="starredItemSvc"/>
     <property name="folderFactory" ref="specimenListsFolderFactory" />
+    <property name="storageContainerSvc" ref="storageContainerSvc" />
+
   </bean>
 
   <bean id="specimenKitFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.SpecimenKitFactoryImpl">

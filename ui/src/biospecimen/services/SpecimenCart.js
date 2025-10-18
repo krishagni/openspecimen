@@ -100,6 +100,11 @@ class SpecimenCart {
     return http.put('specimen-lists/' + cartId + '/pick-lists/' + pickListId + '/specimens', payload);
   }
 
+  pickBoxSpecimens(cartId, pickListId, boxDetail) {
+    const payload = {op: 'PICK', cartId, pickListId, boxDetail};
+    return http.put('specimen-lists/' + cartId + '/pick-lists/' + pickListId + '/specimens', payload);
+  }
+
   getUnpickedSpecimens(cartId, listId, filterOpts) {
     filterOpts = filterOpts || {};
     return http.get('specimen-lists/' + cartId + '/pick-lists/' + listId + '/specimens', {...filterOpts, picked: false});

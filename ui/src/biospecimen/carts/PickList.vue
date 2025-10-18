@@ -143,6 +143,7 @@
     </os-page-body>
 
     <os-box-scanner-dialog ref="boxScannerDialog" :fetch-specimens="searchSpecimens"
+      :show-box-details="ctx.list.transferToBox"
       :done-label="$t('carts.pick')" @done="pickBoxSpecimens" />
 
     <os-dialog ref="selectBoxDialog">
@@ -360,10 +361,10 @@ export default {
 
       this._pickSpecimens(this.unpickedCtx.selected, this.ctx.selectedBox).then(
         (resp) => {
-          if (resp == 'SPECIMEN_LIST_NO_SPACE_IN_BOX') {
+          if (resp == 'NO_SPACE_IN_BOX') {
             this.ctx.selectedBox = null;
             this.pickSelectedSpecimens();
-          } else if (resp != 'SPECIMEN_LIST_LTD_SPACE_IN_BOX') {
+          } else if (resp != 'LTD_SPACE_IN_BOX') {
             this.$refs.unpickedListView.clearSelection()
           }
         }
@@ -392,8 +393,51 @@ export default {
     },
 
     pickBoxSpecimens: function(scanResults) {
-      const specimens = (scanResults.specimens || []).map(specimen => ({id: specimen.id}));
-      this._pickSpecimens(specimens).then(() => this.$refs.boxScannerDialog.close());
+      const {container, specimens} = scanResults;
+      if (!this.ctx.list.transferToBox) {
+         this._pickSpecimens(specimens.filter(spmn => spmn && spmn.id > 0).map(spmn => ({id: spmn.id})))
+           .then(() => this.$refs.boxScannerDialog.close());
+         return;
+      }
+
+      if (!container.storageLocation || !container.storageLocation.name) {
+        alertsSvc.error({code: 'containers.parent_container_not_selected'});
+        return;
+      }
+
+      const spmnClasses = [];
+      const spmnTypes   = [];
+      for (let type of container.allowedTypes) {
+        if (type.all) {
+          spmnClasses.push(type.specimenClass);
+        } else {
+          spmnTypes.push(type.type);
+        }
+      }
+
+      const payload = {
+        id: container.id,
+        name: container.name,
+        barcode: container.barcode,
+        type: container.typeName,
+        storageLocation: container.storageLocation,
+        allowedCollectionProtocols: container.allowedCollectionProtocols,
+        allowedSpecimenClasses: spmnClasses,
+        allowedSpecimenTypes: spmnTypes,
+        positions: specimens.filter(
+          spmn => spmn.id > 0
+        ).map(
+          spmn => ({
+            posOne: spmn.storageLocation.posOne,
+            posTwo: spmn.storageLocation.posTwo,
+            position: spmn.storageLocation.position,
+            occuypingEntity: 'specimen',
+            occupyingEntityId: spmn.id
+          })
+        )
+      };
+
+      this._pickBoxSpecimens(payload).then(() => this.$refs.boxScannerDialog.close());
     },
 
     searchSpecimens: async function(filters) {
@@ -448,10 +492,10 @@ export default {
       const specimens = this.ctx.useBarcode ? barcodes.map(barcode => ({barcode})) : barcodes.map(label => ({label}));
       this._pickSpecimens(specimens, this.ctx.selectedBox).then(
         (resp) => {
-          if (resp == 'SPECIMEN_LIST_NO_SPACE_IN_BOX') {
+          if (resp == 'NO_SPACE_IN_BOX') {
             this.ctx.selectedBox = null;
             this.handleInputBarcodes();
-          } else if (resp != 'SPECIMEN_LIST_LTD_SPACE_IN_BOX') {
+          } else if (resp != 'LTD_SPACE_IN_BOX') {
             this.ctx.inputBarcodes = null;
           }
         }
@@ -540,32 +584,36 @@ export default {
     },
 
     _pickSpecimens: function(specimens, boxName) {
-      return cartSvc.pickSpecimens(+this.cartId, +this.listId, specimens, boxName).then(
-        ({error, picked}) => {
-          if (error) {
-            alertsSvc.error(error.message);
-            return error.code;
-          }
+      return cartSvc.pickSpecimens(+this.cartId, +this.listId, specimens, boxName).then(resp => this._handlePickSpecimensResp(resp));
+    },
 
-          alertsSvc.success({code: 'carts.specimens_picked', args: {count: picked.length}});
-          this.pickedCtx.list = this.pickedCtx.selected = null;
-          this.unpickedCtx.picked += picked.length;
-          this.unpickedCtx.selected = null;
+    _pickBoxSpecimens: function(boxDetail) {
+      return cartSvc.pickBoxSpecimens(+this.cartId, +this.listId, boxDetail).then(resp => this._handlePickSpecimensResp(resp));
+    },
 
-          if (this.unpickedCtx.list) {
-            this.unpickedCtx.list = this.unpickedCtx.list.filter(item => picked.indexOf(item.specimen.id) == -1);
-          }
+    _handlePickSpecimensResp: function({error, picked}) {
+      if (error) {
+        alertsSvc.error(error.message);
+        return error.code;
+      }
 
-          if (this.unpickedCtx.picked >= 50) {
-            this.unpickedCtx.list = null;
-            this._loadUnpickedSpecimens();
-          }
+      alertsSvc.success({code: 'carts.specimens_picked', args: {count: picked.length}});
+      this.pickedCtx.list = this.pickedCtx.selected = null;
+      this.unpickedCtx.picked += picked.length;
+      this.unpickedCtx.selected = null;
+
+      if (this.unpickedCtx.list) {
+        this.unpickedCtx.list = this.unpickedCtx.list.filter(item => picked.indexOf(item.specimen.id) == -1);
+      }
+
+      if (this.unpickedCtx.picked >= 50) {
+        this.unpickedCtx.list = null;
+        this._loadUnpickedSpecimens();
+      }
     
-          this.ctx.inputBarcodes = null;
-          this.ctx.list.pickedSpecimens += picked.length;
-          return picked;
-        }
-      );
+      this.ctx.inputBarcodes = null;
+      this.ctx.list.pickedSpecimens += picked.length;
+      return picked;
     }
   }
 }

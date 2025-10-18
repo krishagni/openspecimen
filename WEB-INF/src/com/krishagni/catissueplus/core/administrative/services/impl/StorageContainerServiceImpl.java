@@ -1293,6 +1293,9 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			box.assignPositions(positions, false);
 			daoFactory.getStorageContainerDao().saveOrUpdate(box, true);
+			if (input.getOnSpecimenStore() != null) {
+				positions.forEach(position -> input.getOnSpecimenStore().accept(position));
+			}
 
 			Map<String, Object> result = new HashMap<>();
 			result.put("id", box.getId());
@@ -1312,7 +1315,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	public ResponseEvent<Map<String, Object>> updateBoxSpecimens(RequestEvent<BoxDetail> req) {
 		try {
 			BoxDetail input = req.getPayload();
-			StorageContainer box = getContainer(input.getId(), input.getName(), input.getBarcode());
+			StorageContainer box = input.getBox();
+			if (box == null) {
+				box = getContainer(input.getId(), input.getName(), input.getBarcode());
+			}
 
 			StorageContainerDetail boxDetail = new StorageContainerDetail();
 			boxDetail.setId(box.getId());
@@ -1356,6 +1362,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			}
 
 			daoFactory.getStorageContainerDao().saveOrUpdate(box, true);
+			if (input.getOnSpecimenStore() != null) {
+				positions.forEach(position -> input.getOnSpecimenStore().accept(position));
+			}
+
 
 			Map<String, Object> result = new HashMap<>();
 			result.put("id", box.getId());

@@ -2,6 +2,8 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 
 import java.util.List;
 
+import com.krishagni.catissueplus.core.administrative.events.BoxDetail;
+
 public class PickListSpecimensOp {
 	public enum Op {
 		PICK,
@@ -19,6 +21,8 @@ public class PickListSpecimensOp {
 	private List<SpecimenInfo> specimens;
 
 	private String boxName;
+
+	private BoxDetail boxDetail;
 
 	public Long getCartId() {
 		return cartId;
@@ -66,5 +70,13 @@ public class PickListSpecimensOp {
 
 	public void setBoxName(String boxName) {
 		this.boxName = boxName;
+	}
+
+	public BoxDetail getBoxDetail() {
+		return boxDetail;
+	}
+
+	public void setBoxDetail(BoxDetail boxDetail) {
+		this.boxDetail = boxDetail;
 	}
 }

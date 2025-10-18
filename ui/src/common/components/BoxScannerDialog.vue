@@ -6,8 +6,9 @@
     <template #content>
       <div v-if="ctx.scanners && ctx.scanners.length > 0">
         <div class="row">
-          <os-box-scanner ref="scanner" :scanners="ctx.scanners" :fetch-box-details="true"
-            :fetch-specimen-details="searchSpecimens"
+          <os-box-scanner ref="scanner" :scanners="ctx.scanners"
+            :show-box-details="showBoxDetails" :fetch-box-details="true"
+            :fetch-specimen-details="searchSpecimens" :scanned-box-id="ctx.scannedBoxField"
             @scan-started="onScanningStart" @scan-results="handleScanResults" />
         </div>
 
@@ -57,7 +58,7 @@ import BoxSpecimenCell from '@/administrative/containers/BoxSpecimenCell.vue';
 import Layout          from '@/administrative/containers/Layout.vue';
 
 export default {
-  props: ['fetch-specimens', 'fetch-barcodes', 'hide-done', 'doneLabel'],
+  props: ['fetch-specimens', 'fetch-barcodes', 'show-box-details', 'hide-done', 'done-label'],
 
   emits: ['done'],
 
@@ -122,7 +123,9 @@ export default {
         tubes,
         scannedBarcodesCount: barcodes.length,
         notFound,
-        specimens: (tubes || []).filter(tube => tube.specimen && tube.specimen.id > 0).map(tube => tube.specimen)
+        specimens: (tubes || [])
+          .filter(tube => tube.specimen && tube.specimen.id > 0)
+          .map(tube => ({...tube.specimen, storageLocation: {posOne: tube.posOne, posTwo: tube.posTwo}}))
       };
     },
 

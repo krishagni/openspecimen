@@ -3,7 +3,10 @@ package com.krishagni.catissueplus.core.administrative.events;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
+import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 
@@ -32,6 +35,13 @@ public class BoxDetail extends AttributeModifiedSupport {
 
 	// COMMENTs
 	private String removeSpecimensComments;
+
+	//
+	// internal APIs
+	//
+	private StorageContainer box;
+
+	private Consumer<StorageContainerPosition> onSpecimenStore;
 
 	public Long getId() {
 		return id;
@@ -119,5 +129,21 @@ public class BoxDetail extends AttributeModifiedSupport {
 
 	public void setAllowedCollectionProtocols(Set<String> allowedCollectionProtocols) {
 		this.allowedCollectionProtocols = allowedCollectionProtocols;
+	}
+
+	public StorageContainer getBox() {
+		return box;
+	}
+
+	public void setBox(StorageContainer box) {
+		this.box = box;
+	}
+
+	public Consumer<StorageContainerPosition> getOnSpecimenStore() {
+		return onSpecimenStore;
+	}
+
+	public void setOnSpecimenStore(Consumer<StorageContainerPosition> onSpecimenStore) {
+		this.onSpecimenStore = onSpecimenStore;
 	}
 }

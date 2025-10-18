@@ -14,6 +14,7 @@ import BooleanCheckbox from './BooleanCheckbox.vue';
 import BoxLayout from './BoxLayout.vue';
 import BoxScanResults from './BoxScanResults.vue';
 import Breadcrumb from './Breadcrumb.vue';
+import BoxDetails from './BoxDetails.vue';
 import BoxScannerDialog from './BoxScannerDialog.vue';
 import BulkUpdate from './BulkUpdate.vue';
 import Button from './Button.vue';
@@ -134,6 +135,7 @@ export default {
     app.component('os-avatar',           Avatar);
     app.component('os-badge',            Badge);
     app.component('os-boolean-checkbox', BooleanCheckbox);
+    app.component('os-box-details',      BoxDetails);
     app.component('os-box-layout',       BoxLayout);
     app.component('os-box-scan-results', BoxScanResults);
     app.component('os-box-scanner',      ScanBox);

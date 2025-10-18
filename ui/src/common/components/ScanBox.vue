@@ -1,10 +1,15 @@
 <template>
-  <div class="scanner">
-    <os-label v-t="'common.select_scanner'">Select Scanner</os-label>
-    <div class="input-group">
-      <os-dropdown :list-source="scannerOpts" v-model="scanner" />
-      <os-button primary :label="$t('common.buttons.scan')" :disabled="!scanner" @click="scan" />
+  <div>
+    <div class="scanner">
+      <os-label v-t="'common.select_scanner'">Select Scanner</os-label>
+      <div class="input-group">
+        <os-dropdown :list-source="scannerOpts" v-model="scanner" />
+        <os-button primary :label="$t('common.buttons.scan')" :disabled="!scanner" @click="scan" />
+      </div>
     </div>
+
+    <os-box-details v-model="box" :scanned-box-id="scannedBoxId" :box-id="boxBarcode"
+      @search-box="searchBox($event)" v-if="fetchBoxDetails && scanner && box && showBoxDetails == true" />
   </div>
 </template>
 
@@ -20,13 +25,19 @@ export default {
   //
   // scanned-box-id either name or barcode
   //
-  props: ['scanned-box-id', 'scanners', 'fetch-box-details', 'fetch-specimen-details'],
+  props: ['scanned-box-id', 'scanners', 'show-box-details', 'fetch-box-details', 'fetch-specimen-details'],
 
   emits: ['scan-started', 'scan-results', 'scan-error'],
 
   data() {
     return {
-      scanner: null
+      scanner: null,
+
+      box: null,
+
+      boxBarcode: null,
+
+      tubes: []
     }
   },
 
@@ -44,35 +55,55 @@ export default {
       }
     
       this.$emit('scan-started', {scanner: this.scanner});
-      const {box, tubes} = await scanner.scan(this.scanner) || {};
+      let {box, tubes} = await scanner.scan(this.scanner) || {};
+      this.tubes = tubes;
+      this.boxBarcode = box.barcode;
 
       let noTubesCount = 0, readErrorsCount = 0, barcodes = [];
-      if (tubes) {
-        for (const tube of tubes) {
-          if (!tube.barcode) {
-            noTubesCount++;
-          } else if (tube.barcode == 'READ_ERROR') {
-            readErrorsCount++;
-          } else {
-            barcodes.push(tube.barcode);
-          }
+      for (const {barcode} of tubes || []) {
+        if (!barcode) {
+          noTubesCount++;
+        } else if (barcode == 'READ_ERROR') {
+          readErrorsCount++;
+        } else {
+          barcodes.push(barcode);
         }
+      }
+
+      if (typeof this.fetchSpecimenDetails == 'function') {
+        await this._loadSpecimenDetails(this.tubes, barcodes)
       }
 
       let container = null;
       if (this.fetchBoxDetails) {
-        container = await this._getBoxDetails(this.scanner, box, this.scannedBoxId);
-        this._assignPositions(container, tubes);
+        this.box = container = await this._getBoxDetails(this.scanner, box, this.scannedBoxId);
+        tubes = this._assignPositions(container, util.clone(tubes));
+      } else {
+        this.box = box;
       }
 
       let notFound = null;
       if (typeof this.fetchSpecimenDetails == 'function') {
-        await this._fetchSpecimenDetails(tubes, barcodes)
         notFound = tubes.filter(tube => tube.barcode && tube.barcode != 'READ_ERROR' && !tube.specimen);
       }
 
-      const scanResults = {scanner: this.scanner, box, tubes, barcodes, container, noTubesCount, readErrorsCount, notFound};
-      this.$emit('scan-results', scanResults);
+      this.scanResults = {scanner: this.scanner, box, tubes, barcodes, container, noTubesCount, readErrorsCount, notFound};
+      this.$emit('scan-results', this.scanResults);
+    },
+
+    searchBox: async function(input) {
+      this.box = await this._getBoxDetails(this.scanner, input, this.scannedBoxId);
+
+      const tubes = this._assignPositions(this.box, util.clone(this.tubes));
+      let notFound = null;
+      if (typeof this.fetchSpecimenDetails == 'function') {
+        notFound = tubes.filter(tube => tube.barcode && tube.barcode != 'READ_ERROR' && !tube.specimen);
+      }
+
+      this.scanResults.box = this.scanResults.container = this.box
+      this.scanResults.tubes = tubes;
+      this.scanResults.notFound = notFound;
+      this.$emit('scan-results', this.scanResults);
     },
 
     _getBoxDetails: async function(scanner, box, boxIdFieldName) {
@@ -92,15 +123,28 @@ export default {
       if (!container.id) {
         const containerType = await containerTypeSvc.getTypeByName(scanner.containerType);
         Object.assign(container, containerType);
+        container.typeName = container.name;
         delete container.id;
+        delete container.name;
+
+        container[boxIdFieldName] = box.barcode;
       }
- 
+
+      const allowedTypes = container.allowedTypes = [];
+      for (const specimenClass of (container.allowedSpecimenClasses || [])) {
+        allowedTypes.push({specimenClass, type: 'All ' + specimenClass, all: true});
+      }
+
+      for (const type of (container.allowedSpecimenTypes || [])) {
+        allowedTypes.push({type});
+      }
+
       return container;
     },
 
     _assignPositions: function(container, tubes) {
       if (!tubes) {
-        return;
+        return [];
       }
 
       const {
@@ -132,7 +176,7 @@ export default {
       return tubes;
     },
 
-    _fetchSpecimenDetails: async function(tubes, barcodes) {
+    _loadSpecimenDetails: async function(tubes, barcodes) {
       if (!tubes || !barcodes) {
         return;
       }
@@ -170,6 +214,10 @@ export default {
 </script>
 
 <style scoped>
+.scanner {
+  margin-bottom: 1.25rem;
+}
+
 .scanner .input-group {
   display: flex;
   flex-direction: row;
