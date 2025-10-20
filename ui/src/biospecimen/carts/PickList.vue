@@ -37,6 +37,8 @@
                     <os-button :label="$t('carts.use_device_camera')" @click="useDeviceCamera" v-if="!ctx.useCamera" />
 
                     <os-button :label="$t('carts.turn_off_camera')" @click="turnOffCamera" v-else/>
+
+                    <os-button :label="$t('carts.change_selected_box')" @click="changeSelectedBox" v-if="ctx.selectedBox" />
                   </span>
 
                   <span class="right">
@@ -52,10 +54,13 @@
 
                 <div class="content">
                   <span v-if="!unpickedCtx.selected || unpickedCtx.selected.length == 0">
-                    <div v-if="!ctx.useCamera">
+                    <div class="input-group" v-if="!ctx.useCamera">
                       <os-input-text ref="barcodesTextField" :debounce="500" v-model="ctx.inputBarcodes"
                         @change="handleInputBarcodes" :placeholder="$t('carts.scan_or_copy_paste_barcodes')"
-                        style="margin-bottom: 1.25rem;" v-if="!ctx.batchMode" />
+                        v-if="!ctx.batchMode" />
+
+                      <os-button primary :label="$t('carts.pick')" @click="handleInputBarcodes"
+                        v-if="!ctx.batchMode && ctx.inputBarcodes && ctx.inputBarcodes.trim().length > 0" />
                     </div>
 
                     <div v-else>
@@ -350,6 +355,10 @@ export default {
       this.ctx.selectedBox = this.ctx.boxName;
       this.ctx.selectBoxQ(this.ctx.boxName);
       this.hideSelectBoxDialog();
+    },
+
+    changeSelectedBox: function() {
+      this.showSelectBoxDialog();
     },
 
     pickSelectedSpecimens: async function() {
