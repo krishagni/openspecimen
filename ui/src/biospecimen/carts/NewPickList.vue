@@ -40,75 +40,33 @@
                 <span v-t="'carts.picked_specimens'">Picked Specimens</span>
               </template>
 
-              <div class="tab-panel">
-                <div class="toolbar">
-                  <span class="left">
-                    <os-button left-icon="times" :label="$t('common.buttons.remove')"
-                      v-os-tooltip.bottom="$t('carts.rm_spmns_from_picked_list')" @click="removeFromPickedList" 
-                      v-if="pickedCtx.selected && pickedCtx.selected.length > 0" />
-
-                    <os-specimen-actions :specimens="pickedCtx.selected" @reloadSpecimens="reloadPickedList"
-                      v-if="pickedCtx.selected && pickedCtx.selected.length > 0" />
-                  </span>
-                  <span class="right">
-                    <os-button left-icon="search" :label="$t('common.buttons.search')" @click="togglePickedSearch" />
-                  </span>
-                </div>
-
-                <div class="content">
-                  <os-list-view
-                    :data="pickedCtx.list || []"
-                    :schema="pickedSpecimensListSchema"
-                    :query="pickedCtx.query"
-                    :allowSelection="true"
-                    :loading="pickedCtx.loading"
-                    @filtersUpdated="loadPickedSpecimens"
-                    @selectedRows="selectPickedSpecimens"
-                    ref="pickedListView"
-                  />
-                </div>
-              </div>
+              <PickedSpecimensTab ref="pickedListView" :cart="ctx.list.cart" :pick-list="ctx.list"
+                :filters="ppf" :active-tab="ctx.activeTab == 1"
+                @specimens-loaded="reloadRoute({ppf: $event.uriEncoding})"
+                @unpicked-specimens="onSpecimensUnpick($event)" />
             </os-tab>
           </os-tabs>
         </os-grid-column>
       </os-grid>
     </os-page-body>
-
-    <os-box-scanner-dialog ref="boxScannerDialog" :fetch-specimens="searchSpecimens"
-      :show-box-details="ctx.list.transferToBox"
-      :done-label="$t('carts.pick')" @done="pickBoxSpecimens" />
-
-    <os-dialog ref="selectBoxDialog">
-      <template #header>
-        <span v-t="'carts.select_box'">Select Box</span>
-      </template>
-      <template #content>
-        <os-form ref="selectBoxForm" :schema="selectBoxFs" :data="ctx" />
-      </template>
-      <template #footer>
-        <os-button :label="$t('common.buttons.cancel')" @click="hideSelectBoxDialog" />
-        <os-button primary :label="$t('common.buttons.done')" @click="selectBox" />
-      </template>
-    </os-dialog>
   </os-page>
 </template>
 
 <script>
 
-import alertsSvc   from '@/common/services/Alerts.js';
 import cartSvc     from '@/biospecimen/services/SpecimenCart.js';
 import routerSvc   from '@/common/services/Router.js';
 import util        from '@/common/services/Util.js';
 
-import pickedSpecimensListSchema   from "@/biospecimen/schemas/carts/picked-specimens.js";
-import unpickedSpecimensListSchema from "@/biospecimen/schemas/carts/unpicked-specimens.js";
-
+import PickedSpecimensTab   from './PickedSpecimensTab.vue';
 import UnpickedSpecimensTab from './UnpickedSpecimensTab.vue';
 
 export default {
   props: ['cartId', 'listId', 'upf', 'ppf'],
 
   components: {
+    PickedSpecimensTab,
+
     UnpickedSpecimensTab
   },
 
@@ -117,32 +75,8 @@ export default {
       ctx: {
         list: {cart: { }},
 
-        activeTab: 0,
-
-        scannerOpts: {options: [], displayProp: 'name'},
-      },
-
-      pickedCtx: {
-        list: null,
-
-        query: this.ppf,
-
-        selected: null,
-
-        unpicked: 0
-      },
-
-      pickedSpecimensListSchema,
-
-      unpickedCtx: {
-        list: null,
-
-        query: this.upf,
-
-        picked: 0
-      },
-
-      unpickedSpecimensListSchema
+        activeTab: 0
+      }
     };
   },
 
@@ -230,15 +164,18 @@ export default {
   },
 
   methods: {
-    onSpecimensPick: function() {
-      this.pickedCtx.list = this.pickedCtx.selected = null;
+    onSpecimensPick: function(picked) {
+      this.ctx.list.pickedSpecimens += picked.length;
+      this.$refs.pickedListView.nullifyList();
+    },
+
+    onSpecimensUnpick: function(unpicked) {
+      this.ctx.list.pickedSpecimens -= unpicked.length;
+      this.$refs.unpickedListView.nullifyList();
     },
 
     onTabChange: function({index}) {
       this.ctx.activeTab = index;
-      if (index == 1) {
-        this._loadPickedSpecimens();
-      }
     },
 
     reloadRoute: function(queryParams) {
@@ -246,79 +183,10 @@ export default {
       routerSvc.goto(name, params, {...query, ...queryParams});
     },
 
-    loadPickedSpecimens: function({filters, uriEncoding, pageSize}) {
-      this.pickedCtx.filters = filters;
-      this.pickedCtx.uriEncodedFilters = uriEncoding;
-      this.pickedCtx.pageSize = pageSize;
-      this.pickedCtx.list = this.pickedCtx.selected = null;
-      this._loadPickedSpecimens();
-      routerSvc.goto(
-        'PickList',
-        {cartId: this.cartId, listId: this.listId},
-        {upf: this.unpickedCtx.uriEncodedFilters, ppf: uriEncoding}
-      );
-    },
-
-    selectPickedSpecimens: function(selected) {
-      this.pickedCtx.selected = selected.map(({rowObject: {specimen}}) => ({id: specimen.id, cpId: specimen.cpId}));
-    },
-
-    togglePickedSearch: function() {
-      this.$refs.pickedListView.toggleShowFilters();
-    },
-
-    reloadPickedList: function() {
-      this.$refs.pickedListView.reload();
-    },
-
-    removeFromPickedList: function() {
-      cartSvc.unpickSpecimens(+this.cartId, +this.listId, this.pickedCtx.selected).then(
-        ({unpicked}) => {
-          alertsSvc.success({code: 'carts.specimens_unpicked', args: {count: unpicked.length}});
-
-          this.$refs.pickedListView.clearSelection();
-          this.unpickedCtx.list = null;
-          this.pickedCtx.selected = null;
-          this.pickedCtx.unpicked += unpicked.length;
-            
-          if (this.pickedCtx.list) {
-            this.pickedCtx.list = this.pickedCtx.list.filter(item => unpicked.indexOf(item.specimen.id) == -1);
-          }
-            
-          if (this.pickedCtx.unpicked >= 50) {
-              this.pickedCtx.list = null;
-              this._loadPickedSpecimens();
-          }
-
-          this.ctx.list.pickedSpecimens -= unpicked.length;
-
-          this.$refs.unpickedListView.nullifyList();
-        }
-      );
-    },
-
     _loadList: async function() {
       this.ctx.list = {};
-      this.pickedCtx   = {list: null, query: this.ppf};
-      this.unpickedCtx = {list: null, query: this.upf};
       cartSvc.getPickList(+this.cartId, +this.listId).then(list => this.ctx.list = list);
-    },
-
-    _loadPickedSpecimens: function() {
-      if (this.pickedCtx.list || this.ctx.activeTab != 1) {
-        return;
-      }
-
-      this.pickedCtx.loading = true;
-      cartSvc.getPickedSpecimens(+this.cartId, +this.listId, this.pickedCtx.filters || {}).then(
-        items => {
-          this.pickedCtx.loading = false;
-          this.pickedCtx.list = items;
-          this.pickedCtx.unpicked = 0;
-        }
-      );
-    },
-
+    }
   }
 }
 </script>
@@ -340,34 +208,7 @@ export default {
   margin-right: 1rem;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 1.25rem;
-}
-
-.input-group:deep(.os-input-text) {
-  flex: 1;
-}
-
-.input-group:deep(button) {
-  height: auto;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
 .list-progress {
   width: 25vw;
-}
-
-.camera-display {
-  height: 150px;
-  width: 300px;
-  margin-bottom: 1.25rem;
-}
-
-.scan-options {
-  display: flex;
-  flex-direction: row;
 }
 </style>
