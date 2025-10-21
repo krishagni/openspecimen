@@ -29,7 +29,8 @@
                 <span v-t="'carts.unpicked_specimens'">Unpicked Specimens</span>
               </template>
 
-              <UnpickedSpecimensTab ref="unpickedListView" :cart="ctx.list.cart" :pick-list="ctx.list"
+              <UnpickedSpecimensTab ref="unpickedListView" class="tab-panel"
+                :cart="ctx.list.cart" :pick-list="ctx.list"
                 :filters="upf" :active-tab="ctx.activeTab == 0"
                 @specimens-loaded="reloadRoute({upf: $event.uriEncoding})"
                 @picked-specimens="onSpecimensPick($event)" />
@@ -40,7 +41,8 @@
                 <span v-t="'carts.picked_specimens'">Picked Specimens</span>
               </template>
 
-              <PickedSpecimensTab ref="pickedListView" :cart="ctx.list.cart" :pick-list="ctx.list"
+              <PickedSpecimensTab ref="pickedListView" class="tab-panel"
+                :cart="ctx.list.cart" :pick-list="ctx.list"
                 :filters="ppf" :active-tab="ctx.activeTab == 1"
                 @specimens-loaded="reloadRoute({ppf: $event.uriEncoding})"
                 @unpicked-specimens="onSpecimensUnpick($event)" />
@@ -53,10 +55,8 @@
 </template>
 
 <script>
-
 import cartSvc     from '@/biospecimen/services/SpecimenCart.js';
 import routerSvc   from '@/common/services/Router.js';
-import util        from '@/common/services/Util.js';
 
 import PickedSpecimensTab   from './PickedSpecimensTab.vue';
 import UnpickedSpecimensTab from './UnpickedSpecimensTab.vue';
@@ -104,57 +104,6 @@ export default {
     viewKey: function() {
       return this.cartId + '_' + this.listId;
     },
-
-    allFormats: function() {
-      return [
-        'codabar', 'code_39', 'code_93', 'code_128', 'databar', 'databar_expanded',
-        'dx_film_edge', 'ean_8', 'ean_8', 'itf', 'upc_a', 'upc_e',
-        'aztec', 'data_matrix', 'maxi_code', 'pdf417', 'qr_code', 'micro_qr_code', 'rm_qr_code',
-        'linear_codes', 'matrix_codes'
-      ];
-    },
-
-    scannedBarcodesCount: function() {
-      if (!this.ctx.batchMode) {
-        return -1;
-      }
-
-      const barcodes = util.splitStr(this.ctx.inputBarcodes || '', /,|\t|\n/, false);
-      return barcodes.length;
-    },
-
-    selectBoxFs: function() {
-      return {
-        rows: [
-          {
-            fields: [
-              {
-                name: 'boxName',
-                type: 'dropdown',
-                labelCode: 'carts.select_box_to_transfer_specimens',
-                listSource: {
-                  apiUrl: 'storage-containers',
-                  displayProp: ({displayName, name}) => (displayName ? (displayName + ' ') : '') + name,
-                  selectProp: 'name',
-                  searchProp: 'name',
-                  queryParams: {
-                    static: {
-                      onlyFreeContainers: true,
-                      storeSpecimensEnabled: true,
-                    }
-                  }
-                },
-                validations: {
-                  required: {
-                    messageCode: 'carts.select_box'
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      };
-    }
   },
 
   watch: {
@@ -192,19 +141,19 @@ export default {
 </script>
 
 <style scoped>
-.tab-panel {
+:deep(.tab-panel) {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.tab-panel .toolbar {
+:deep(.tab-panel .toolbar) {
   margin-bottom: 1.25rem;
   display: flex;
   justify-content: space-between;
 }
 
-.tab-panel .toolbar :deep(button:not(:last-child)) {
+:deep(.tab-panel .toolbar button:not(:last-child)) {
   margin-right: 1rem;
 }
 

@@ -432,22 +432,6 @@ export default {
 </script>
 
 <style scoped>
-.tab-panel {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.tab-panel .toolbar {
-  margin-bottom: 1.25rem;
-  display: flex;
-  justify-content: space-between;
-}
-
-.tab-panel .toolbar :deep(button:not(:last-child)) {
-  margin-right: 1rem;
-}
-
 .input-group {
   display: flex;
   flex-direction: row;
@@ -462,10 +446,6 @@ export default {
   height: auto;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-}
-
-.list-progress {
-  width: 25vw;
 }
 
 .camera-display {

@@ -1,5 +1,5 @@
 <template>
-  <div class="tab-panel">
+  <div>
     <div class="toolbar">
       <span class="left" v-if="ctx.selected && ctx.selected.length > 0">
         <os-button left-icon="times" :label="$t('common.buttons.remove')"
@@ -134,21 +134,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.tab-panel {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.tab-panel .toolbar {
-  margin-bottom: 1.25rem;
-  display: flex;
-  justify-content: space-between;
-}
-
-.tab-panel .toolbar :deep(button:not(:last-child)) {
-  margin-right: 1rem;
-}
-</style>
