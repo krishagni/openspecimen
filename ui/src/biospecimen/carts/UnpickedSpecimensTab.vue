@@ -1,83 +1,84 @@
 <template>
-    <div class="tab-panel">
-      <div class="toolbar" v-if="!ctx.selected || ctx.selected.length == 0">
-        <span class="left">
-          <os-button :label="$t('carts.use_box_scanner')" @click="useBoxScanner" />
+  <div class="tab-panel">
+    <div class="toolbar" v-if="!ctx.selected || ctx.selected.length == 0">
+      <span class="left">
+        <os-button :label="$t('carts.use_box_scanner')" @click="useBoxScanner" />
 
-          <os-button :label="$t('carts.use_device_camera')" @click="useDeviceCamera" v-if="!ctx.useCamera" />
+        <os-button :label="$t('carts.use_device_camera')" @click="useDeviceCamera" v-if="!ctx.useCamera" />
 
-          <os-button :label="$t('carts.turn_off_camera')" @click="turnOffCamera" v-else/>
+        <os-button :label="$t('carts.turn_off_camera')" @click="turnOffCamera" v-else/>
 
-          <os-button :label="$t('carts.change_selected_box')" @click="changeSelectedBox" v-if="ctx.selectedBox" />
-        </span>
+        <os-button :label="$t('carts.change_selected_box')" @click="changeSelectedBox" v-if="ctx.selectedBox" />
+      </span>
 
-        <span class="right">
-          <os-button left-icon="search" :label="$t('common.buttons.search')" @click="toggleSearch" />
-        </span>
-      </div>
-
-      <div class="toolbar" v-else>
-        <span class="left">
-          <os-button :label="$t('carts.pick')" @click="pickSelectedSpecimens" />
-        </span>
-      </div>
-
-      <div class="content">
-        <span v-if="!ctx.selected || ctx.selected.length == 0">
-          <div class="input-group" v-if="!ctx.useCamera">
-            <os-input-text ref="barcodesTextField" :debounce="500" v-model="ctx.inputBarcodes"
-              @change="handleInputBarcodes" :placeholder="$t('carts.scan_or_copy_paste_barcodes')"
-              v-if="!ctx.batchMode" />
-
-            <os-button primary :label="$t('carts.pick')" @click="handleInputBarcodes"
-              v-if="!ctx.batchMode && ctx.inputBarcodes && ctx.inputBarcodes.trim().length > 0" />
-          </div>
-
-          <div v-else>
-            <div class="camera-display">
-              <qrcode-stream :formats="allFormats" @camera-on="onCameraReady" @detect="onBarcodeDetect">
-                <os-message type="info" v-if="!ctx.initCamera">
-                  <span v-t="'carts.initialising_camera'">Initialising camera...</span>
-                </os-message>
-              </qrcode-stream>
-            </div>
-          </div>
-
-          <div class="input-group" v-if="ctx.batchMode">
-            <os-textarea v-model="ctx.inputBarcodes" :placeholder="$t('carts.scan_or_copy_paste_barcodes')" />
-
-            <os-button primary :label="$t('carts.pick')" @click="handleInputBarcodes" />
-          </div>
-
-          <div class="scan-options">
-            <os-boolean-checkbox :inline-label-code="$t('carts.use_barcode')" v-model="ctx.useBarcode" />
-
-            <os-boolean-checkbox :inline-label-code="$t('carts.turn_off_real_time')" v-model="ctx.batchMode"
-              @update:model-value="toggleRealTimePick" />
-          </div>
-
-          <div v-if="ctx.batchMode">
-            <span v-t="{path: 'carts.scanned_barcodes_count', args: {count: scannedBarcodesCount}}">
-              <span>Scanned Barcodes: {{scannedBarcodesCount}}</span>
-            </span>
-          </div>
-        </span>
-
-        <os-list-view
-          :data="ctx.list || []"
-          :schema="listSchema"
-          :query="ctx.query"
-          :allowSelection="true"
-          :loading="ctx.loading"
-          @filtersUpdated="loadSpecimens"
-          @selectedRows="selectSpecimens"
-          ref="listView"
-        />
-      </div>
+      <span class="right">
+        <os-button left-icon="search" :label="$t('common.buttons.search')" @click="toggleSearch" />
+      </span>
     </div>
 
-  <os-box-scanner-dialog ref="boxScannerDialog" :fetch-specimens="searchSpecimens"
-    :show-box-details="pickList.transferToBox"
+    <div class="toolbar" v-else>
+      <span class="left">
+        <os-button :label="$t('carts.pick')" @click="pickSelectedSpecimens" />
+
+        <os-button :label="$t('carts.change_selected_box')" @click="changeSelectedBox" v-if="ctx.selectedBox" />
+      </span>
+    </div>
+
+    <div class="content">
+      <span v-if="!ctx.selected || ctx.selected.length == 0">
+        <div class="input-group" v-if="!ctx.useCamera && !ctx.batchMode">
+          <os-input-text ref="barcodesTextField" :debounce="500" v-model="ctx.inputBarcodes"
+            @change="handleInputBarcodes" :placeholder="$t('carts.scan_or_copy_paste_barcodes')" />
+
+          <os-button primary :label="$t('carts.pick')" @click="handleInputBarcodes"
+            v-if="ctx.inputBarcodes && ctx.inputBarcodes.trim().length > 0" />
+        </div>
+
+        <div v-else-if="ctx.useCamera">
+          <div class="camera-display">
+            <qrcode-stream :formats="barcodeFormats" @camera-on="onCameraReady" @detect="onBarcodeDetect">
+              <os-message type="info" v-if="!ctx.initCamera">
+                <span v-t="'carts.initialising_camera'">Initialising camera...</span>
+              </os-message>
+            </qrcode-stream>
+          </div>
+        </div>
+
+        <div class="input-group" v-else-if="ctx.batchMode">
+          <os-textarea v-model="ctx.inputBarcodes" :placeholder="$t('carts.scan_or_copy_paste_barcodes')" />
+
+          <os-button primary :label="$t('carts.pick')" @click="handleInputBarcodes" />
+        </div>
+
+        <div class="scan-options">
+          <os-boolean-checkbox :inline-label-code="$t('carts.use_barcode')" v-model="ctx.useBarcode" />
+
+          <os-boolean-checkbox :inline-label-code="$t('carts.turn_off_real_time')" v-model="ctx.batchMode"
+            @update:model-value="toggleRealTimePick" />
+        </div>
+
+        <div v-if="ctx.batchMode">
+          <span v-t="{path: 'carts.scanned_barcodes_count', args: {count: scannedBarcodesCount}}">
+            <span>Scanned Barcodes: {{scannedBarcodesCount}}</span>
+          </span>
+        </div>
+      </span>
+
+      <os-list-view
+        :data="ctx.list || []"
+        :schema="listSchema"
+        :query="ctx.query"
+        :allowSelection="true"
+        :loading="ctx.loading"
+        @filtersUpdated="loadSpecimens"
+        @selectedRows="selectSpecimens"
+        ref="listView"
+      />
+    </div>
+  </div>
+
+  <os-box-scanner-dialog ref="boxScannerDialog"
+    :fetch-specimens="searchSpecimens" :show-box-details="pickList.transferToBox"
     :done-label="$t('carts.pick')" @done="pickBoxSpecimens" />
 
   <os-dialog ref="selectBoxDialog">
@@ -101,7 +102,7 @@ import cartSvc     from '@/biospecimen/services/SpecimenCart.js';
 import specimenSvc from '@/biospecimen/services/Specimen.js';
 import util        from '@/common/services/Util.js';
 
-import listSchema from "@/biospecimen/schemas/carts/unpicked-specimens.js";
+import listSchema  from "@/biospecimen/schemas/carts/unpicked-specimens.js";
 
 import {QrcodeStream}  from 'vue-qrcode-reader';
 
@@ -119,10 +120,14 @@ export default {
 
         query: this.filters,
 
+        selected: null,
+
         picked: 0
       },
 
-      listSchema
+      listSchema,
+
+      selectBoxFs: this._getSelectBoxFs()
     };
   },
 
@@ -131,13 +136,11 @@ export default {
 
   mounted() {
     this.$nextTick(() => this.$refs.barcodesTextField?.focus?.());
-    if (this.activeTab) {
-      this._loadSpecimens();
-    }
+    this._loadSpecimens();
   },
 
   computed: {
-    allFormats: function() {
+    barcodeFormats: function() {
       return [
         'codabar', 'code_39', 'code_93', 'code_128', 'databar', 'databar_expanded',
         'dx_film_edge', 'ean_8', 'ean_8', 'itf', 'upc_a', 'upc_e',
@@ -153,60 +156,27 @@ export default {
 
       const barcodes = util.splitStr(this.ctx.inputBarcodes || '', /,|\t|\n/, false);
       return barcodes.length;
-    },
-
-    selectBoxFs: function() {
-      return {
-        rows: [
-          {
-            fields: [
-              {
-                name: 'boxName',
-                type: 'dropdown',
-                labelCode: 'carts.select_box_to_transfer_specimens',
-                listSource: {
-                  apiUrl: 'storage-containers',
-                  displayProp: ({displayName, name}) => (displayName ? (displayName + ' ') : '') + name,
-                  selectProp: 'name',
-                  searchProp: 'name',
-                  queryParams: {
-                    static: {
-                      onlyFreeContainers: true,
-                      storeSpecimensEnabled: true,
-                    }
-                  }
-                },
-                validations: {
-                  required: {
-                    messageCode: 'carts.select_box'
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      };
     }
   },
 
   watch: {
     activeTab: function() {
-      if (this.activeTab) {
-        this._loadSpecimens();
-      }
+      this._loadSpecimens();
     }
   },
 
   methods: {
     nullifyList: function() {
       this.ctx.list = this.ctx.selected = null;
+      this.ctx.picked = 0;
     },
       
     loadSpecimens: function({filters, uriEncoding, pageSize}) {
       this.ctx.filters = filters;
-      this.ctx.uriEncodedFilters = uriEncoding;
       this.ctx.pageSize = pageSize;
-      this.ctx.list = this.ctx.selected = null;
+
+      this.nullifyList();
+
       this._loadSpecimens();
       this.$emit('specimens-loaded', {uriEncoding});
     },
@@ -215,20 +185,19 @@ export default {
       this.ctx.selected = selected.map(({rowObject: {specimen}}) => ({id: specimen.id, cpId: specimen.cpId}));
     },
 
+    toggleSearch: function() {
+      this.$refs.listView.toggleShowFilters();
+    },
 
     hideSelectBoxDialog: function() {
-      this.ctx.selectBoxQ = null;
+      this.selectBoxQ = null;
       this.$refs.selectBoxDialog.close();
     },
 
     showSelectBoxDialog: function() {
       this.ctx.boxName = null;
       this.$refs.selectBoxDialog.open();
-      return new Promise(
-        (resolve) => {
-          this.ctx.selectBoxQ = resolve;
-        }
-      );
+      return new Promise((resolve) => this.selectBoxQ = resolve);
     },
 
     selectBox: function() {
@@ -237,7 +206,7 @@ export default {
       }
 
       this.ctx.selectedBox = this.ctx.boxName;
-      this.ctx.selectBoxQ(this.ctx.boxName);
+      this.selectBoxQ(this.ctx.boxName);
       this.hideSelectBoxDialog();
     },
 
@@ -246,22 +215,7 @@ export default {
     },
 
     pickSelectedSpecimens: async function() {
-      if (this.pickList.transferToBox) {
-        if (!this.ctx.selectedBox) {
-          await this.showSelectBoxDialog();
-        }
-      }
-
-      this._pickSpecimens(this.ctx.selected, this.ctx.selectedBox).then(
-        (resp) => {
-          if (resp == 'NO_SPACE_IN_BOX') {
-            this.ctx.selectedBox = null;
-            this.pickSelectedSpecimens();
-          } else if (resp != 'LTD_SPACE_IN_BOX') {
-            this.$refs.listView.clearSelection()
-          }
-        }
-      );
+      this._getBox().then(selectedBox => this._pickSpecimens(this.ctx.selected, selectedBox));
     },
 
     useBoxScanner: function() {
@@ -283,7 +237,7 @@ export default {
 
       const spmnClasses = [];
       const spmnTypes   = [];
-      for (let type of container.allowedTypes) {
+      for (const type of container.allowedTypes) {
         if (type.all) {
           spmnClasses.push(type.specimenClass);
         } else {
@@ -292,9 +246,7 @@ export default {
       }
 
       const payload = {
-        id: container.id,
-        name: container.name,
-        barcode: container.barcode,
+        id: container.id, name: container.name, barcode: container.barcode,
         type: container.typeName,
         storageLocation: container.storageLocation,
         allowedCollectionProtocols: container.allowedCollectionProtocols,
@@ -359,23 +311,8 @@ export default {
         return;
       }
 
-      if (this.pickList.transferToBox) {
-        if (!this.ctx.selectedBox) {
-          await this.showSelectBoxDialog();
-        }
-      }
-
       const specimens = this.ctx.useBarcode ? barcodes.map(barcode => ({barcode})) : barcodes.map(label => ({label}));
-      this._pickSpecimens(specimens, this.ctx.selectedBox).then(
-        (resp) => {
-          if (resp == 'NO_SPACE_IN_BOX') {
-            this.ctx.selectedBox = null;
-            this.handleInputBarcodes();
-          } else if (resp != 'LTD_SPACE_IN_BOX') {
-            this.ctx.inputBarcodes = null;
-          }
-        }
-      );
+      this._getBox().then(selectedBox => this._pickSpecimens(specimens, selectedBox));
     },
 
     toggleRealTimePick: function() {
@@ -384,10 +321,6 @@ export default {
       }
 
       this.handleInputBarcodes();
-    },
-
-    toggleSearch: function() {
-      this.$refs.listView.toggleShowFilters();
     },
 
     _loadSpecimens: function() {
@@ -405,10 +338,30 @@ export default {
       );
     },
 
+    _getBox: async function() {
+      if (!this.pickList.transferToBox) {
+        return null;
+      } else if (this.ctx.selectedBox) {
+        return this.ctx.selectedBox;
+      } else {
+        return this.showSelectBoxDialog();
+      }
+    },
 
     _pickSpecimens: function(specimens, boxName) {
-      return cartSvc.pickSpecimens(this.cart.id, this.pickList.id, specimens, boxName)
-        .then(resp => this._handlePickSpecimensResp(resp));
+      return cartSvc.pickSpecimens(this.cart.id, this.pickList.id, specimens, boxName).then(
+        resp =>
+          this._handlePickSpecimensResp(resp).then(
+            result => {
+              if (result == 'NO_SPACE_IN_BOX') {
+                this.ctx.selectedBox = null;
+                this._getBox().then(selectedBox => this._pickSpecimens(specimens, selectedBox))
+              }
+
+              return result;
+            }
+          )
+      );
     },
 
     _pickBoxSpecimens: function(boxDetail) {
@@ -416,7 +369,7 @@ export default {
         .then(resp => this._handlePickSpecimensResp(resp));
     },
 
-    _handlePickSpecimensResp: function({error, picked}) {
+    _handlePickSpecimensResp: async function({error, picked}) {
       if (error) {
         alertsSvc.error(error.message);
         return error.code;
@@ -430,14 +383,49 @@ export default {
         this.ctx.list = this.ctx.list.filter(item => picked.indexOf(item.specimen.id) == -1);
       }
 
+      this.ctx.inputBarcodes = null;
+      this.$refs.listView.clearSelection();
+
       if (this.ctx.picked >= 50) {
         this.ctx.list = null;
         this._loadSpecimens();
       }
     
-      this.ctx.inputBarcodes = null;
       this.$emit('picked-specimens', picked);
       return picked;
+    },
+
+    _getSelectBoxFs: function() {
+      return {
+        rows: [
+          {
+            fields: [
+              {
+                name: 'boxName',
+                type: 'dropdown',
+                labelCode: 'carts.select_box_to_transfer_specimens',
+                listSource: {
+                  apiUrl: 'storage-containers',
+                  displayProp: ({displayName, name}) => (displayName ? (displayName + ' ') : '') + name,
+                  selectProp: 'name',
+                  searchProp: 'name',
+                  queryParams: {
+                    static: {
+                      onlyFreeContainers: true,
+                      storeSpecimensEnabled: true,
+                    }
+                  }
+                },
+                validations: {
+                  required: {
+                    messageCode: 'carts.select_box'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
     }
   }
 }
