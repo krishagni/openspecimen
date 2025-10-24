@@ -65,6 +65,7 @@
       </span>
 
       <os-list-view
+        :context="listViewCtx"
         :data="ctx.list || []"
         :schema="listSchema"
         :query="ctx.query"
@@ -140,6 +141,10 @@ export default {
   },
 
   computed: {
+    listViewCtx: function() {
+      return {cart: this.cart, pickList: this.pickList}
+    },
+
     barcodeFormats: function() {
       return [
         'codabar', 'code_39', 'code_93', 'code_128', 'databar', 'databar_expanded',

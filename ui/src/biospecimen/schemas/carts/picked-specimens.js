@@ -64,10 +64,20 @@ export default {
       captionCode: "specimens.cp",
       type: "dropdown",
       listSource: {
-        apiUrl: "collection-protocols",
-        displayProp: "shortTitle",
-        selectProp: "shortTitle",
-        searchProp: "query"
+        apiUrl: "lists/expression-values",
+        queryParams: {
+          static: {
+            listName: "cart-specimens-list-view",
+            expr: "CollectionProtocol.shortTitle"
+          },
+          dynamic: {
+            objectId: "listViewCtx.cart.id"
+          }
+        },
+        optionsFn: options => options.map(value => ({value})),
+        searchProp: "searchTerm",
+        displayProp: "value",
+        selectProp: "value"
       }
     },
     {
@@ -75,27 +85,41 @@ export default {
       captionCode: "specimens.type",
       type: "dropdown",
       listSource: {
-        apiUrl: "permissible-values/v",
-        displayProp: "value",
-        selectProp: "value",
-        searchProp: "searchString",
+        apiUrl: "lists/expression-values",
         queryParams: {
           static: {
-            attribute: "specimen_type",
-            includeOnlyLeafValue: true
+            listName: "cart-specimens-list-view",
+            expr: "Specimen.type"
+          },
+          dynamic: {
+            objectId: "listViewCtx.cart.id"
           }
-        }
+        },
+        optionsFn: options => options.map(value => ({value})),
+        searchProp: "searchTerm",
+        displayProp: "value",
+        selectProp: "value"
       }
     },
     {
       name: "container",
-      captionCode: "specimens.container",
+      captionCode: "specimens.freezer",
       type: "dropdown",
       listSource: {
-        apiUrl: "storage-containers",
-        displayProp: ({displayName, name}) => displayName ? displayName + " (" + name + ")" : name,
-        selectProp: "name",
-        searchProp: "name"
+        apiUrl: "lists/expression-values",
+        queryParams: {
+          static: {
+            listName: "cart-specimens-list-view",
+            expr: "Specimen.specimenPosition.ancestors.root_container_name"
+          },
+          dynamic: {
+            objectId: "listViewCtx.cart.id"
+          }
+        },
+        optionsFn: options => options.map(value => ({value})),
+        searchProp: "searchTerm",
+        displayProp: "value",
+        selectProp: "value"
       }
     }
   ]

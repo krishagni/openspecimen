@@ -1,11 +1,13 @@
 <template>
   <div>
     <div class="toolbar">
-      <span class="left" v-if="ctx.selected && ctx.selected.length > 0">
-        <os-button left-icon="times" :label="$t('common.buttons.remove')"
-          v-os-tooltip.bottom="$t('carts.rm_spmns_from_picked_list')" @click="removeSpecimens" />
+      <span class="left">
+        <span v-if="ctx.selected && ctx.selected.length > 0">
+          <os-button left-icon="times" :label="$t('common.buttons.remove')"
+            v-os-tooltip.bottom="$t('carts.rm_spmns_from_picked_list')" @click="removeSpecimens" />
 
-        <os-specimen-actions :specimens="ctx.selected" @reloadSpecimens="reloadSpecimens" />
+          <os-specimen-actions :specimens="ctx.selected" @reloadSpecimens="reloadSpecimens" />
+        </span>
       </span>
       <span class="right">
         <os-button left-icon="search" :label="$t('common.buttons.search')" @click="toggleSearch" />
@@ -14,6 +16,7 @@
 
     <div class="content">
       <os-list-view
+        :context="listViewCtx"
         :data="ctx.list || []"
         :schema="listSchema"
         :query="ctx.query"
@@ -58,6 +61,12 @@ export default {
 
   mounted() {
     this._loadSpecimens();
+  },
+
+  computed: {
+    listViewCtx: function() {
+      return {cart: this.cart, pickList: this.pickList}
+    }
   },
 
   watch: {

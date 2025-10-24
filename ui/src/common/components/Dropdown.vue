@@ -165,7 +165,7 @@ export default {
         }
 
         if (ls.queryParams.dynamic) {
-          let form = this.form;
+          let form = this.form || this.context || {};
           Object.keys(ls.queryParams.dynamic).forEach(
             function(name) {
               let expr = ls.queryParams.dynamic[name];
@@ -190,7 +190,19 @@ export default {
       }
 
       const optionsAttr = this.listSource.listAttr;
-      return promise.then(options => (optionsAttr && options[optionsAttr]) || options);
+      return promise.then(
+        options => {
+          if (optionsAttr) {
+            options = options[optionsAttr];
+          }
+
+          if (typeof this.listSource.optionsFn == 'function') {
+            options = this.listSource.optionsFn(options);
+          }
+
+          return options;
+        }
+      );
     },
 
     extrapolateUrl(url) {
@@ -207,7 +219,7 @@ export default {
       }
 
       result += "'" + url.substring(lastMatchIdx + skip) + "'";
-      return exprUtil.eval(this.form || {}, result);
+      return exprUtil.eval(this.form || this.context || {}, result);
     },
 
     dedup(options) {

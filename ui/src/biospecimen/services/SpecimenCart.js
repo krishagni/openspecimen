@@ -87,7 +87,7 @@ class SpecimenCart {
   }
 
   deletePickList(list) {
-    return http.delete('specimen-lists/' + list.cart.id + '/pick-lists/' + list.id);
+    return http.delete('specimen-lists/' + list.cartId + '/pick-lists/' + list.id);
   }
 
   getPickedSpecimens(cartId, listId, filterOpts) {

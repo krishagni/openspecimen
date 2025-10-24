@@ -2506,6 +2506,7 @@
     "event_saved": "{eventName} saved.",
     "extracted_from": "from {anatomicSite}",
     "freeze_thaw_cycles": "Freeze/Thaw Cycles",
+    "freezer": "Freezer",
     "hide_pending": "Hide Pending",
     "image_id_url": "Image ID/URL",
     "initial_quantity": "Initial Quantity",
