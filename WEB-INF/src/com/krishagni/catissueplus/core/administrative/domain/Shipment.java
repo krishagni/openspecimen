@@ -364,10 +364,15 @@ public class Shipment extends BaseEntity {
 	}
 
 	public void delete() {
+		if (isShipped()) {
+			moveItemsToSendingSite();
+		}
+
 		DaoFactory daoFactory = OpenSpecimenAppCtxProvider.getBean("biospecimenDaoFactory");
 		setName(Utility.getDisabledValue(getName(), 255));
 		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
 		daoFactory.getShipmentDao().deleteSpecimenShipmentEvents(getId());
+
 	}
 
 	public void ship() {
@@ -575,6 +580,14 @@ public class Shipment extends BaseEntity {
 			receive(other);
 		} else if (getStatus() != other.getStatus()) {
 			throw OpenSpecimenException.userError(ShipmentErrorCode.STATUS_CHANGE_NOT_ALLOWED, getStatus().getName(), other.getStatus().getName());
+		}
+	}
+
+	private void moveItemsToSendingSite() {
+		if (isSpecimenShipment()) {
+			getShipmentSpecimens().forEach(ShipmentSpecimen::unship);
+		} else {
+			getShipmentContainers().forEach(ShipmentContainer::unship);
 		}
 	}
 }

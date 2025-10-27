@@ -56,6 +56,14 @@ public class ShipmentContainer extends BaseEntity {
 		shipSpecimens();
 	}
 
+	public void unship() {
+		if (!getShipment().isShipped()) {
+			return;
+		}
+
+		getContainer().moveTo(getShipment().getSendingSite().getContainer());
+	}
+
 	public void receive(ShipmentContainer other) {
 		receiveSpecimens(other.getReceivedQuality());
 		setReceivedQuality(other.getReceivedQuality());

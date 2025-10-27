@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
@@ -70,11 +72,7 @@ public class ShipmentSpecimen extends BaseEntity {
 
 		Shipment shipment = getShipment();
 		if (shipment.isSpecimenShipment()) {
-			StorageContainerPosition position = new StorageContainerPosition();
-			position.setContainer(shipment.getReceivingSite().getContainer());
-			position.setOccupyingSpecimen(getSpecimen());
-			position.setSupressAccessChecks(true);
-			getSpecimen().updatePosition(position, null, shipment.getShippedDate(), "Shipment: " + shipment.getName());
+			moveToSite(shipment.getReceivingSite(), shipment.getShippedDate(), "Shipment: " + shipment.getName());
 		}
 
 		if (getSpecimen().isStoredInAutoFreezer()) {
@@ -92,7 +90,15 @@ public class ShipmentSpecimen extends BaseEntity {
 			}
 		);
 	}
-	
+
+	public void unship() {
+		if (!getShipment().isShipped() || !getShipment().isSpecimenShipment()) {
+			return;
+		}
+
+		moveToSite(getShipment().getSendingSite(), Calendar.getInstance().getTime(), "Shipment: " + shipment.getName() + " deleted.");
+	}
+
 	public void receive(ShipmentSpecimen other) {
 		setReceivedQuality(other.getReceivedQuality());
 		if (!shipment.isReceived()) {
@@ -129,5 +135,13 @@ public class ShipmentSpecimen extends BaseEntity {
 		}
 
 		spmnSvc.updateSpecimen(getSpecimen(), other.getSpecimen());
+	}
+
+	private void moveToSite(Site site, Date time, String comments) {
+		StorageContainerPosition position = new StorageContainerPosition();
+		position.setContainer(site.getContainer());
+		position.setOccupyingSpecimen(getSpecimen());
+		position.setSupressAccessChecks(true);
+		getSpecimen().updatePosition(position, null, time, comments);
 	}
 }

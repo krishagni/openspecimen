@@ -287,9 +287,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 			}
 
 			if (newShipment.isDeleted()) {
-				AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(existing);
-				existing.delete();
-				return ResponseEvent.response(ShipmentDetail.from(existing));
+				return ResponseEvent.response(ShipmentDetail.from(deleteShipment(existing)));
 			}
 
 			AccessCtrlMgr.getInstance().ensureUpdateShipmentRights(newShipment);
@@ -327,13 +325,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 	public ResponseEvent<ShipmentDetail> deleteShipment(RequestEvent<Long> req) {
 		try {
 			Shipment shipment = getShipment(req.getPayload(), null);
-			AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(shipment);
-			shipment.delete();
-			if (shipment.getCart() != null) {
-				shipment.getCart().delete();
-			}
-
-			return ResponseEvent.response(ShipmentDetail.from(shipment));
+			return ResponseEvent.response(ShipmentDetail.from(deleteShipment(shipment)));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -839,6 +831,29 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 		}
 		
 		return shipment;
+	}
+
+	private Shipment deleteShipment(Shipment shipment) {
+		AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(shipment);
+		if (shipment.isShipped()) {
+			createSendSiteContainer(shipment);
+		}
+
+		shipment.delete();
+		if (shipment.getCart() != null) {
+			shipment.getCart().delete();
+		}
+
+		return shipment;
+	}
+
+	private void createSendSiteContainer(Shipment shipment) {
+		Site sendingSite = shipment.getSendingSite();
+		if (sendingSite.getContainer() != null) {
+			return;
+		}
+
+		sendingSite.setContainer(containerSvc.createSiteContainer(sendingSite.getId(), sendingSite.getName()));
 	}
 
 	private void createRecvSiteContainer(Shipment shipment) {
