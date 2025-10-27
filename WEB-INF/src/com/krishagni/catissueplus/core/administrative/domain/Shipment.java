@@ -372,7 +372,6 @@ public class Shipment extends BaseEntity {
 		setName(Utility.getDisabledValue(getName(), 255));
 		setActivityStatus(com.krishagni.catissueplus.core.common.util.Status.ACTIVITY_STATUS_DISABLED.getStatus());
 		daoFactory.getShipmentDao().deleteSpecimenShipmentEvents(getId());
-
 	}
 
 	public void ship() {

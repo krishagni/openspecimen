@@ -836,7 +836,7 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 	private Shipment deleteShipment(Shipment shipment) {
 		AccessCtrlMgr.getInstance().ensureDeleteShipmentRights(shipment);
 		if (shipment.isShipped()) {
-			createSendSiteContainer(shipment);
+			createSiteContainerIfRequired(shipment.getSendingSite());
 		}
 
 		shipment.delete();
@@ -847,23 +847,16 @@ public class ShipmentServiceImpl implements ShipmentService, ObjectAccessor, Ini
 		return shipment;
 	}
 
-	private void createSendSiteContainer(Shipment shipment) {
-		Site sendingSite = shipment.getSendingSite();
-		if (sendingSite.getContainer() != null) {
+	private void createSiteContainerIfRequired(Site site) {
+		if (site.getContainer() != null) {
 			return;
 		}
 
-		sendingSite.setContainer(containerSvc.createSiteContainer(sendingSite.getId(), sendingSite.getName()));
+		site.setContainer(containerSvc.createSiteContainer(site.getId(), site.getName()));
 	}
 
 	private void createRecvSiteContainer(Shipment shipment) {
-		if (shipment.getReceivingSite().getContainer() != null) {
-			return;
-		}
-
-		Site recvSite = shipment.getReceivingSite();
-		StorageContainer recvSiteContainer = containerSvc.createSiteContainer(recvSite.getId(), recvSite.getName());
-		recvSite.setContainer(recvSiteContainer);
+		createSiteContainerIfRequired(shipment.getReceivingSite());
 	}
 
 	private Site getSite(String siteName) {
