@@ -185,6 +185,8 @@ public class StorageContainer extends BaseExtensionEntity {
 	// query capabilities
 	//
 	private StorageContainerStats stats;
+
+	private Integer utilisation;
 	
 	private Set<PermissibleValue> compAllowedSpecimenClasses = new HashSet<>();
 	
@@ -598,6 +600,15 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void setStats(StorageContainerStats stats) {
 		this.stats = stats;
+	}
+
+	@NotAudited
+	public Integer getUtilisation() {
+		return utilisation;
+	}
+
+	public void setUtilisation(Integer utilisation) {
+		this.utilisation = utilisation;
 	}
 
 	@NotAudited

@@ -43,7 +43,6 @@ import com.krishagni.catissueplus.core.common.repository.Conjunction;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.repository.Junction;
-import com.krishagni.catissueplus.core.common.repository.Order;
 import com.krishagni.catissueplus.core.common.repository.Query;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
@@ -1146,9 +1145,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		private void addNameRestriction() {
 			if (StringUtils.isNotBlank(crit.query())) {
 				addAnd();
-				where.append("(upper(c.name) like :name or upper(c.displayName) like :displayName)");
-				params.put("name", "%" + crit.query().toUpperCase() + "%");
-				params.put("displayName", "%" + crit.query().toUpperCase() + "%");
+				if (isMySQL()) {
+					where.append("(c.name like :name or c.displayName like :displayName)");
+					params.put("name", "%" + crit.query() + "%");
+					params.put("displayName", "%" + crit.query() + "%");
+
+				} else {
+					where.append("(upper(c.name) like :name or upper(c.displayName) like :displayName)");
+					params.put("name", "%" + crit.query().toUpperCase() + "%");
+					params.put("displayName", "%" + crit.query().toUpperCase() + "%");
+				}
 			}
 
 			if (CollectionUtils.isNotEmpty(crit.names())) {
@@ -1173,11 +1179,11 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			if (crit.hierarchical()) {
 				where.append("((dc.noOfRows is null and dc.noOfColumns is null)")
 					.append("or")
-					.append("(size(dc.occupiedPositions) - dc.noOfRows * dc.noOfColumns < 0))");
+					.append("(dc.utilisation - dc.noOfRows * dc.noOfColumns < 0))");
 			} else {
 				where.append("((c.noOfRows is null and c.noOfColumns is null)")
 					.append("or")
-					.append("(size(c.occupiedPositions) - c.noOfRows * c.noOfColumns < 0))");
+					.append("(c.utilisation - c.noOfRows * c.noOfColumns < 0))");
 			}
 		}
 
@@ -1380,22 +1386,15 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			List<String> disjunctions = new ArrayList<>();
 			for (StorageContainerListCriteria.Status status : crit.statuses()) {
 				switch (status) {
-					case AVAILABLE:
+					case AVAILABLE ->
 						disjunctions.add("(" + alias + ".status is null and " + alias + ".activityStatus = 'Active')");
-						break;
-
-					case CHECKED_OUT:
-						disjunctions.add("(" + alias + ".status = 'CHECKED_OUT')");
-						break;
-
-					case ARCHIVED:
-						disjunctions.add("(" + alias + ".status = 'Closed')");
-						break;
+					case CHECKED_OUT -> disjunctions.add("(" + alias + ".status = 'CHECKED_OUT')");
+					case ARCHIVED -> disjunctions.add("(" + alias + ".status = 'Closed')");
 				}
 			}
 
 			addAnd();
-			where.append("(" + StringUtils.join(disjunctions, " or ") + ")");
+			where.append("(").append(StringUtils.join(disjunctions, " or ")).append(")");
 		}
 
 		private void addTypes() {
@@ -1405,7 +1404,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 			addAnd();
 			String alias = crit.hierarchical() ? "dc" : "c";
-			from.append(" left join " + alias + ".type type");
+			from.append(" left join ").append(alias).append(".type type");
 			where.append("type.name in (:types)");
 			params.put("types", crit.types());
 		}

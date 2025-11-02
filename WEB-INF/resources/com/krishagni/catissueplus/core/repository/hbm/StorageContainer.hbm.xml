@@ -176,6 +176,8 @@
       class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerStats"
       update="false" insert="false"/>
 
+    <property name="utilisation" column="UTILISATION" insert="false" update="false" not-null="true" />
+
     <filter name="activeEntity"/>
 
     <query name="getSpecimensCount">
@@ -429,15 +431,12 @@
       <return-scalar column="occupied" type="integer"/>
 
       select
-        b.identifier, b.name, b.no_of_rows, b.no_of_cols, count(p.identifier) as occupied
+        b.identifier, b.name, b.no_of_rows, b.no_of_cols, b.utilisation as occupied
       from
         os_storage_containers b
-        left join os_container_positions p on p.storage_container_id = b.identifier
       where
         b.identifier in (:containerIds) and
         b.activity_status != 'Disabled'
-      group by
-        b.identifier, b.name, b.no_of_rows, b.no_of_cols
     </sql-query>
 
     <sql-query name="getContainerReportDetails">
