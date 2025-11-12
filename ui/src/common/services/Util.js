@@ -587,8 +587,17 @@ class Util {
     return inputValue || '-';
   }
 
-  getLocalDate(timeInMillisSinceEpoch) {
-    return this._getLocalDate(timeInMillisSinceEpoch);
+  getLocalDate(input) {
+    if (typeof input == 'string' && isNaN(input)) {
+      if (input.length == 10) {
+        const [year, month, date] = input.split('-');
+        return new Date(year, +month - 1, date);
+      } else {
+        return input;
+      }
+    }
+
+    return this._getLocalDate(input);
   }
 
   getSpecimenDescription(specimen, opts) {

@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.de.domain;
 
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -861,8 +862,12 @@ public abstract class DeObject {
 			//
 			if (StringUtils.isNotBlank(displayValue) && ctrlValue.getControl() instanceof DatePicker) {
 				DatePicker dateCtrl = (DatePicker)ctrlValue.getControl();
-				Date date = dateCtrl.fromString(displayValue);
-				displayValue = dateCtrl.isDateTimeFmt() ? Utility.getDateTimeString(date) : Utility.getDateString(date);
+				Object date = dateCtrl.fromString(displayValue);
+				if (date instanceof Date dt) {
+					displayValue = dateCtrl.isDateTimeFmt() ? Utility.getDateTimeString(dt) : Utility.getDateString(dt);
+				} else if (date instanceof LocalDate ldt) {
+					displayValue = Utility.getDateString(ldt);
+				}
 			} else if (ctrlValue.getControl() instanceof CheckBox) {
 				Boolean truth = StringUtils.equals(displayValue, "1") || StringUtils.equalsIgnoreCase(displayValue, "true");
 				displayValue = StringUtils.capitalize(MessageUtil.getInstance().getBooleanMsg(truth));

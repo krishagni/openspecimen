@@ -334,6 +334,9 @@ class FormUtil {
           value = Date.now();
         } else if (!isNaN(attr.value) && !isNaN(parseInt(attr.value))) {
           value = new Date(parseInt(attr.value));
+        } else if (attr.value && attr.value.length == 10 && attr.value[4] == '-' && attr.value[7] == '-') {
+          const [year, month, date] = attr.value.split('-');
+          value = new Date(year, +month - 1, date);
         } else if (!!attr.value || attr.value === 0) {
           value = new Date(attr.value);
         }

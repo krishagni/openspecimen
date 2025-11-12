@@ -44,8 +44,13 @@ export default {
       if (this.field.type == 'datePicker') {
         if (this.field.format.indexOf('HH:mm') >= 0) {
           return this.$filters.dateTime(+this.field.value);
-        } else {
+        } else if (typeof this.field.value == 'string' && this.field.value.length == 10) {
+          const [year, month, date] = this.field.value.split('-');
+          return this.$filters.date(new Date(+year, +month - 1, +date));
+        } else if (!isNaN(this.field.value)) {
           return this.$filters.date(+this.field.value);
+        } else {
+          return this.field.value;
         }
       } else if (this.field.type == 'booleanCheckbox') {
         return this.$filters.boolValue(this.field.value);
