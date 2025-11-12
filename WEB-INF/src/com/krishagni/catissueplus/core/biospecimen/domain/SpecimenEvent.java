@@ -100,10 +100,12 @@ public abstract class SpecimenEvent extends DeObject {
 		
 		String timeStr = (String)values.get("time");
 		if (StringUtils.isNotBlank(timeStr)) {
-			this.time = (Date) new DatePicker().fromString(timeStr);
+			Attr timeAttr = getAttrs().stream().filter(attr -> attr.getUdn().equals("time")).findFirst().orElse(null);
+			DatePicker datePicker = (DatePicker) timeAttr.getCtrlValue().getControl();
+			this.time = (Date) datePicker.fromString(timeStr);
 		}
 				
-		this.comments = (String)values.get("comments");		
+		this.comments = (String)values.get("comments");
 		setEventAttrs(values);
 	}
 
