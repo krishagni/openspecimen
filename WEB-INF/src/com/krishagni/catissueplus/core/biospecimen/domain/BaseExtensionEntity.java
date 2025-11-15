@@ -1,7 +1,10 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -103,6 +106,14 @@ public abstract class BaseExtensionEntity extends BaseEntity {
 				DataEntryStatus status = BaseExtensionEntity.this.getDataEntryStatus();
 				return status != null ? status : DataEntryStatus.COMPLETE;
 			}
+
+			@Override
+			public void saveOrUpdateRecordEntry(boolean insert) {
+				boolean ret = BaseExtensionEntity.this.saveOrUpdateRecordEntry(insert, getFormId(), getFormContextId(), getId());
+				if (!ret) {
+					super.saveOrUpdateRecordEntry(insert);
+				}
+			}
 		};
 		
 		if (StringUtils.isBlank(extnObj.getFormName())) {
@@ -113,12 +124,29 @@ public abstract class BaseExtensionEntity extends BaseEntity {
 			return extnObj;
 		}
 		
-		Long recId = getRecordId(extnObj);
+		Long recId = this.getRecordId(extnObj.getFormId(), extnObj.getFormContextId());
+		if (recId != null && recId == -1L) {
+			recId = getRecordId(extnObj);
+		}
+
 		extnObj.setId(recId);
 		return extnObj;
 	}
 	
 	public abstract String getEntityType();
+
+	public Long getRecordId(Long formId, Long formCtxtId) {
+		return -1L;
+	}
+
+	public Map<Long, Long> getRecordIds(Collection<Long> objectIds, Long formId, Long formCtxtId) {
+		Map<Long, List<Long>> recordIds = getExtension().getRecordIds(objectIds, formId, formCtxtId);
+		return recordIds.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, kv -> kv.getValue().iterator().next()));
+	}
+
+	public boolean saveOrUpdateRecordEntry(boolean insert, Long formId, Long formCtxtId, Long recordId) {
+		return false;
+	}
 
 	public Long getCpId() {
 		return -1L;

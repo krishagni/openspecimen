@@ -414,5 +414,46 @@
         s.activity_status != 'Disabled' and
         p.identifier != s.identifier
     </sql-query>
+
+    <sql-query name="getCustomFieldRecordId">
+      <return-scalar column="recordId" type="long" />
+
+      select
+        record_id as recordId
+      from
+        os_spmn_cust_fields
+      where
+        specimen_id = :specimenId and
+        form_id = :formId and
+        form_ctxt_id = :formCtxtId
+    </sql-query>
+
+    <sql-query name="getCustomFieldRecordIds">
+      <return-scalar column="specimenId" type="long" />
+      <return-scalar column="recordId" type="long" />
+
+      select
+        specimen_id as specimenId, record_id as recordId
+      from
+        os_spmn_cust_fields
+      where
+        specimen_id in (:specimenIds) and
+        form_id = :formId and
+        form_ctxt_id = :formCtxtId
+    </sql-query>
+
+    <sql-query name="insertCustomFieldRecord">
+      insert into
+        os_spmn_cust_fields(specimen_id, form_id, form_ctxt_id, record_id)
+      values
+        (:specimenId, :formId, :formCtxtId, :recordId)
+    </sql-query>
+
+    <sql-query name="insertCustomFieldRecordStatus">
+      insert into
+        os_form_record_statuses (identifier, form_id, record_id, form_status)
+      values
+        (:specimenId, :formId, :recordId, 'COMPLETE')
+    </sql-query>
   </class>
 </hibernate-mapping>

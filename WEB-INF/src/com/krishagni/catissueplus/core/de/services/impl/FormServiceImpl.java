@@ -685,15 +685,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			return ResponseEvent.userError(FormErrorCode.FILE_NOT_FOUND);
 		}
 
-		FormRecordEntryBean re = deDaoFactory.getFormDao().getRecordEntry(fcv.getFormId(), fcv.getRecordId());
-		if (re == null) {
-			return ResponseEvent.userError(FormErrorCode.REC_NOT_FOUND);
-		}
-
-		FormContextBean fc = re.getFormCtxt();
-		String accessType = getCuratedEntityType(fc.getEntityType());
+		String accessType = getCuratedEntityType(fcv.getObjectType());
 		FormAccessChecker checker = formAccessCheckers.get(accessType);
-		if (checker == null || !checker.isDataReadAllowed(fc.getEntityType(), re.getObjectId())) {
+		if (checker == null || !checker.isDataReadAllowed(fcv.getObjectType(), fcv.getObjectId())) {
 			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 
@@ -1458,9 +1452,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		formData.setRecordId(recordId);
 		formData.getAppData().put("object", object);
+		formData.getAppData().put("objectType", entityType);
 		
 		FormRecordEntryBean recordEntry = null;
-		
 		if (isInsert) {
 			if (!formContext.isMultiRecord()) {
 				Long noOfRecords = formDao.getRecordsCount(formContext.getIdentifier(), objectId);
@@ -2036,6 +2030,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	private String getCuratedEntityType(String entityType) {
+		if (StringUtils.isBlank(entityType)) {
+			return entityType;
+		}
+
 		String accessType = entityType;
 		int hyphenIdx = entityType.indexOf("-");
 		if (hyphenIdx >= 0) {

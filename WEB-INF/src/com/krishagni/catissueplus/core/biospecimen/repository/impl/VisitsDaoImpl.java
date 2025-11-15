@@ -179,6 +179,49 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 		return query.list();
 	}
 
+	@Override
+	public Long getCustomFieldRecordId(Long visitId, Long formId, Long formCtxtId) {
+		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+			.setParameter("visitId", visitId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.uniqueResult();
+	}
+
+	@Override
+	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> visitIds, Long formId, Long formCtxtId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+			.setParameterList("visitIds", visitIds)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.list();
+
+		Map<Long, Long> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (Long) row[1]);
+		}
+
+		return result;
+	}
+
+	@Override
+	public int insertCustomFieldRecordId(Long visitId, Long formId, Long formCtxtId, Long recordId) {
+		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+			.setParameter("visitId", visitId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+
+		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+			.setParameter("visitId", visitId)
+			.setParameter("formId", formId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+
+		return rows;
+	}
+
 	private SubQuery<Long> getVisitIdsListQuery(VisitsListCriteria crit, AbstractCriteria<?, ?> mainQuery) {
 		SubQuery<Long> query = mainQuery.createSubQuery(Visit.class, "visit").select("visit.id");
 		if (crit.lastId() != null && crit.lastId() >= 0L) {
@@ -221,5 +264,13 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 	private static final String GET_LATEST_VISIT_BY_CPR_ID = FQN + ".getLatestVisitByCprId";
 
 	private static final String GET_BY_EMPI_OR_MRN = FQN + ".getVisitsByEmpiOrMrn";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_ID = FQN + ".getCustomFieldRecordId";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_IDS = FQN + ".getCustomFieldRecordIds";
+
+	private static final String INSERT_CUSTOM_FIELD_RECORD = FQN + ".insertCustomFieldRecord";
+
+	private static final String INSERT_CUSTOM_FIELD_REC_STATUS = FQN + ".insertCustomFieldRecordStatus";
 }
 

@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1013,7 +1014,26 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	public String getEntityType() {
 		return EXTN;
 	}
-	
+
+	@Override
+	public Long getRecordId(Long formId, Long formCtxtId) {
+		return daoFactory.getCollectionProtocolDao().getCustomFieldRecordId(getId(), formId, formCtxtId);
+	}
+
+	@Override
+	public boolean saveOrUpdateRecordEntry(boolean insert, Long formId, Long formCtxtId, Long recordId) {
+		if (insert) {
+			daoFactory.getCollectionProtocolDao().insertCustomFieldRecordId(getId(), formId, formCtxtId, recordId);
+		}
+
+		return true;
+	}
+
+	@Override
+	public Map<Long, Long> getRecordIds(Collection<Long> cpIds, Long formId, Long formCtxtId) {
+		return daoFactory.getCollectionProtocolDao().getCustomFieldRecordIds(cpIds, formId, formCtxtId);
+	}
+
 	public CollectionProtocolEvent firstEvent() {
 		if (!getCollectionProtocolEvents().isEmpty()) {
 			return getOrderedCpeList().get(0);

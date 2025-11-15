@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionOrderErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.SpecimenRequestErrorCode;
@@ -24,6 +27,7 @@ import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @Audited
+@Configurable
 public class DistributionOrder extends BaseExtensionEntity {
 	public enum Status { 
 		PENDING,
@@ -76,12 +80,15 @@ public class DistributionOrder extends BaseExtensionEntity {
 
 	private Boolean checkoutSpecimens;
 
+	@Autowired
+	private DaoFactory daoFactory;
+
 	public static String getEntityName() {
 		return ENTITY_NAME;
 	}
 
 	public static String getExtnEntityType() { return EXTN; }
-	
+
 	public String getName() {
 		return name;
 	}
@@ -383,6 +390,25 @@ public class DistributionOrder extends BaseExtensionEntity {
 	@Override
 	public Long getEntityId() {
 		return getDistributionProtocol().getId();
+	}
+
+	@Override
+	public Long getRecordId(Long formId, Long formCtxtId) {
+		return daoFactory.getDistributionOrderDao().getCustomFieldRecordId(getId(), formId, formCtxtId);
+	}
+
+	@Override
+	public boolean saveOrUpdateRecordEntry(boolean insert, Long formId, Long formCtxtId, Long recordId) {
+		if (insert) {
+			daoFactory.getDistributionOrderDao().insertCustomFieldRecordId(getId(), formId, formCtxtId, recordId);
+		}
+
+		return true;
+	}
+
+	@Override
+	public Map<Long, Long> getRecordIds(Collection<Long> orderIds, Long formId, Long formCtxtId) {
+		return daoFactory.getDistributionOrderDao().getCustomFieldRecordIds(orderIds, formId, formCtxtId);
 	}
 
 	private void updateRequest(DistributionOrder other) {

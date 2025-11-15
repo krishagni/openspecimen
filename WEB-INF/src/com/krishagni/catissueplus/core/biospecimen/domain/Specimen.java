@@ -59,6 +59,7 @@ import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
+import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 
 @Configurable
@@ -755,6 +756,25 @@ public class Specimen extends BaseExtensionEntity {
 	@Override
 	public String getEntityType() {
 		return EXTN;
+	}
+
+	@Override
+	public Long getRecordId(Long formId, Long formCtxtId) {
+		return daoFactory.getSpecimenDao().getCustomFieldRecordId(getId(), formId, formCtxtId);
+	}
+
+	@Override
+	public boolean saveOrUpdateRecordEntry(boolean insert, Long formId, Long formCtxtId, Long recordId) {
+		if (insert && recordId != null) {
+			daoFactory.getSpecimenDao().insertCustomFieldRecordId(getId(), formId, formCtxtId, recordId);
+		}
+
+		return true;
+	}
+
+	@Override
+	public Map<Long, Long> getRecordIds(Collection<Long> specimenIds, Long formId, Long formCtxtId) {
+		return daoFactory.getSpecimenDao().getCustomFieldRecordIds(specimenIds, formId, formCtxtId);
 	}
 
 	@Override

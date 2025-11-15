@@ -164,5 +164,57 @@
         cp.shortTitle = :cpShortTitle and
         cpr.ppid in (:ppids)
     </query>
+
+    <sql-query name="getCustomFieldRecordId">
+      <return-scalar column="recordId" type="long" />
+
+      select
+        record_id as recordId
+      from
+        os_cpr_cust_fields
+      where
+        cpr_id = :cprId and
+        form_id = :formId and
+        form_ctxt_id = :formCtxtId
+    </sql-query>
+
+    <sql-query name="getCustomFieldRecordIds">
+      <return-scalar column="cprId" type="long" />
+      <return-scalar column="recordId" type="long" />
+
+      select
+        cpr_id as cprId, record_id as recordId
+      from
+        os_cpr_cust_fields
+      where
+        cpr_id in (:cprIds) and
+        form_id = :formId and
+        form_ctxt_id = :formCtxtId
+    </sql-query>
+
+    <sql-query name="insertCustomFieldRecord">
+      insert into
+        os_cpr_cust_fields(cpr_id, form_id, form_ctxt_id, record_id)
+      values
+        (:cprId, :formId, :formCtxtId, :recordId)
+    </sql-query>
+
+    <sql-query name="insertCustomFieldRecordStatus">
+      insert into
+        os_form_record_statuses (identifier, form_id, record_id, form_status)
+      values
+        (:cprId, :formId, :recordId, :formStatus)
+    </sql-query>
+
+    <sql-query name="updateCustomFieldRecordStatus">
+      update
+        os_form_record_statuses
+      set
+        form_status = :formStatus
+      where
+        identifier = :cprId and
+        form_id = :formId and
+        record_id = :recordId
+    </sql-query>
   </class>
 </hibernate-mapping>

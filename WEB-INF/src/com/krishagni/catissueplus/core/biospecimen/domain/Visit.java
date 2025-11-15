@@ -600,6 +600,25 @@ public class Visit extends BaseExtensionEntity {
 	}
 
 	@Override
+	public Long getRecordId(Long formId, Long formCtxtId) {
+		return daoFactory.getVisitsDao().getCustomFieldRecordId(getId(), formId, formCtxtId);
+	}
+
+	@Override
+	public boolean saveOrUpdateRecordEntry(boolean insert, Long formId, Long formCtxtId, Long recordId) {
+		if (insert && recordId != null) {
+			daoFactory.getVisitsDao().insertCustomFieldRecordId(getId(), formId, formCtxtId, recordId);
+		}
+
+		return true;
+	}
+
+	@Override
+	public Map<Long, Long> getRecordIds(Collection<Long> visitIds, Long formId, Long formCtxtId) {
+		return daoFactory.getVisitsDao().getCustomFieldRecordIds(visitIds, formId, formCtxtId);
+	}
+
+	@Override
 	public Long getCpId() {
 		return getCollectionProtocol().getId();
 	}

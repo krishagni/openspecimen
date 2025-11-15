@@ -137,19 +137,7 @@ public abstract class DeObject {
 			int revision = formData.getRevision();
 			boolean isInsert = (this.id == null);
 			this.id = formDataMgr.saveOrUpdateFormData(userCtx, formData);
-
-			Long fcId = getFormContext();
-			FormRecordEntryBean re = null;
-			if (isInsert && this.id != null) {
-				re = prepareRecordEntry(getUserCtx(), fcId, getId());
-				daoFactory.getFormDao().saveOrUpdateRecordEntry(re);
-			} else if (this.id != null) {
-				re = daoFactory.getFormDao().getRecordEntry(fcId, getObjectId(), getId());
-				if (re != null) {
-					re.setFormStatus(getDataEntryStatus());
-				}
-			}
-
+			saveOrUpdateRecordEntry(isInsert);
 			attrs.clear();
 			attrs.addAll(getAttrs(formData));
 			return revision != formData.getRevision();
@@ -166,7 +154,23 @@ public abstract class DeObject {
 		FormRecordEntryBean re = prepareRecordEntry(getUserCtx(), getFormContext(), getId());
 		daoFactory.getFormDao().saveOrUpdateRecordEntry(re);
 	}
-	
+
+	public void saveOrUpdateRecordEntry(boolean insert) {
+		if (this.id == null) {
+			return;
+		}
+
+		Long fcId = getFormContext();
+		FormRecordEntryBean re = null;
+		if (insert) {
+			saveRecordEntry();
+		} else {
+			re = daoFactory.getFormDao().getRecordEntry(fcId, getObjectId(), getId());
+			if (re != null) {
+				re.setFormStatus(getDataEntryStatus());
+			}
+		}
+	}
 	public void delete() {
 		if (getId() == null) {
 			return;
@@ -180,21 +184,14 @@ public abstract class DeObject {
 		re.delete();
 		daoFactory.getFormDao().saveOrUpdateRecordEntry(re);
 	}
+
+	public Map<Long, List<Long>> getRecordIds(Collection<Long> objectIds, Long formId, Long formCtxtId) {
+		return daoFactory.getFormDao().getRecordIds(formCtxtId, objectIds);
+	}
 	
 	/** Hackish method */
 	public List<Long> getRecordIds() {
-		Long formCtx = getFormContext();
-		if (formCtx == null) {
-			return null;
-		}
-		
-		List<FormRecordSummary> records = daoFactory.getFormDao().getFormRecords(formCtx, getObjectId());
-		List<Long> recIds = new ArrayList<Long>();
-		for (FormRecordSummary rec : records) {
-			recIds.add(rec.getRecordId());
-		}
-		
-		return recIds;
+		return getRecordIds(getFormContext());
 	}
 	
 	public boolean hasPhiFields() {
@@ -218,6 +215,15 @@ public abstract class DeObject {
 		for (Attr attr : getAttrs()) {
 			other.getAttrs().add(attr.copy());
 		}
+	}
+
+	protected List<Long> getRecordIds(Long formCtxtId) {
+		if (formCtxtId == null) {
+			return null;
+		}
+
+		List<FormRecordSummary> records = daoFactory.getFormDao().getFormRecords(formCtxtId, getObjectId());
+		return records.stream().map(FormRecordSummary::getRecordId).collect(Collectors.toList());
 	}
 
 	protected void loadRecordIfNotLoaded() {
@@ -553,21 +559,22 @@ public abstract class DeObject {
 
 		List<DeObject> result = new ArrayList<>();
 		String formName = null;
+		Container form = null;
 
 		Map<String, Object> formInfo = DeObject.getFormInfo(cpBased, entityType, entityId);
 		if (formInfo != null) {
 			Long formCtxtId = (Long) formInfo.get("formCtxtId");
 			formName = (String) formInfo.get("formName");
+			form = getForm(formName);
 
-			Map<Long, List<Long>> objRecordIds = fakeDeObj.daoFactory.getFormDao().getRecordIds(formCtxtId, objectsMap.keySet());
-			Map<Long, Long> recObjIdMap = objRecordIds.entrySet().stream()
-				.collect(Collectors.toMap(re -> re.getValue().get(0), Map.Entry::getKey));
+			Map<Long, Long> objRecordIds = objects.iterator().next().getRecordIds(objectsMap.keySet(), form.getId(), formCtxtId);
+			Map<Long, Long> recObjIdMap = objRecordIds.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
 			List<FormData> formDataList = null;
 			if (recObjIdMap.isEmpty()) {
 				formDataList = Collections.emptyList();
 			} else {
-				formDataList = fakeDeObj.formDataMgr.getFormData(getForm(formName), new ArrayList<>(recObjIdMap.keySet()));
+				formDataList = fakeDeObj.formDataMgr.getFormData(form, new ArrayList<>(recObjIdMap.keySet()));
 			}
 
 			for (FormData formData : formDataList) {
@@ -693,6 +700,7 @@ public abstract class DeObject {
 		Map<String, Object> appData = formData.getAppData();
 		if (appData == null) {
 			appData = new HashMap<>();
+			formData.setAppData(appData);
 		}
 
 		BaseEntity.DataEntryStatus formStatus = getDataEntryStatus();
@@ -705,6 +713,8 @@ public abstract class DeObject {
 			formData.validate();
 		}
 
+		appData.put("objectType", getEntityType());
+		appData.put("objectId", getObjectId());
 		return formData;
 	}
 
@@ -718,7 +728,7 @@ public abstract class DeObject {
 		re.setActivityStatus(Status.ACTIVE);
 		re.setFormStatus(getDataEntryStatus());
 		return re;
-	}	
+	}
 		
 	private Container getForm() {
 		return formInfoCache.getForm(getFormName());

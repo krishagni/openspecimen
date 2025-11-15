@@ -40,4 +40,12 @@ public interface CollectionProtocolRegistrationDao extends Dao<CollectionProtoco
 	Map<String, Object> getCprIds(String key, Object value);
 
 	Map<String, Integer> getParticipantsBySite(Long cpId, Collection<Long> siteIds);
+
+	Long getCustomFieldRecordId(Long cprId, Long formId, Long formCtxtId);
+
+	Map<Long, Long> getCustomFieldRecordIds(Collection<Long> cprIds, Long formId, Long formCtxtId);
+
+	int insertCustomFieldRecordId(Long cprId, Long formId, Long formCtxtId, Long recordId, String formStatus);
+
+	int updateCustomFieldRecStatus(Long cprId, Long formId, Long recordId, String formStatus);
 }

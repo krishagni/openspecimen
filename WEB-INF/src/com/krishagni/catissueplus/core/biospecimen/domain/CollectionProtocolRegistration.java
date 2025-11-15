@@ -22,13 +22,13 @@ import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CprErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.ParticipantErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
-import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
@@ -72,6 +72,9 @@ public class CollectionProtocolRegistration extends BaseExtensionEntity {
 	@Autowired
 	@Qualifier("ppidGenerator")
 	private LabelGenerator labelGenerator;
+
+	@Autowired
+	private DaoFactory daoFactory;
 
 	private transient boolean forceDelete;
 
@@ -151,6 +154,28 @@ public class CollectionProtocolRegistration extends BaseExtensionEntity {
 	@Override
 	public String getEntityType() {
 		return EXTN;
+	}
+
+	@Override
+	public Long getRecordId(Long formId, Long formCtxtId) {
+		return daoFactory.getCprDao().getCustomFieldRecordId(getId(), formId, formCtxtId);
+	}
+
+    @Override
+    public Map<Long, Long> getRecordIds(Collection<Long> cprIds, Long formId, Long formCtxtId) {
+		return daoFactory.getCprDao().getCustomFieldRecordIds(cprIds, formId, formCtxtId);
+	}
+
+	@Override
+	public boolean saveOrUpdateRecordEntry(boolean insert, Long formId, Long formCtxtId, Long recordId) {
+		String status = getDataEntryStatus() != null ? getDataEntryStatus().name() : "COMPLETE";
+		if (insert) {
+			daoFactory.getCprDao().insertCustomFieldRecordId(getId(), formId, formCtxtId, recordId, status);
+		} else {
+			daoFactory.getCprDao().updateCustomFieldRecStatus(getId(), formId, recordId, status);
+		}
+
+		return true;
 	}
 
 	@Override

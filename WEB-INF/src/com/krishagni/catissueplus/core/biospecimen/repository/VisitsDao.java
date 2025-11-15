@@ -35,4 +35,10 @@ public interface VisitsDao extends Dao<Visit> {
 	List<Visit> getBySpr(Long cpId, String sprNumber);
 
 	List<Visit> getByEvent(Long cprId, String eventLabel);
+
+	Long getCustomFieldRecordId(Long visitId, Long formId, Long formCtxtId);
+
+	Map<Long, Long> getCustomFieldRecordIds(Collection<Long> visitIds, Long formId, Long formCtxtId);
+
+	int insertCustomFieldRecordId(Long visitId, Long formId, Long formCtxtId, Long recordId);
 }

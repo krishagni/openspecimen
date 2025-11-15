@@ -87,4 +87,10 @@ public interface CollectionProtocolDao extends Dao<CollectionProtocol> {
 	public boolean anyBarcodingEnabledCpExists();
 
 	public List<String> getDependentContainers(Long cpId, Collection<Long> siteIds);
+
+	Long getCustomFieldRecordId(Long cpId, Long formId, Long formCtxtId);
+
+	Map<Long, Long> getCustomFieldRecordIds(Collection<Long> cpIds, Long formId, Long formCtxtId);
+
+	int insertCustomFieldRecordId(Long cpId, Long formId, Long formCtxtId, Long recordId);
 }

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Clear the specimen custom fields record IDs">
+    <sql>delete from os_spmn_cust_fields</sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen custom fields rec IDs">
+    <sql>
+      insert into
+        os_spmn_cust_fields (specimen_id, form_id, record_id, form_ctxt_id)
+      select
+        re.object_id as specimen_id, fc.container_id as form_id, re.record_id as record_id, fc.identifier as form_ctxt_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+      where
+        fc.entity_type = 'SpecimenExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Clear the visit custom fields record IDs">
+    <sql>delete from os_visit_cust_fields</sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Visit custom fields rec IDs">
+    <sql>
+      insert into
+        os_visit_cust_fields (visit_id, form_id, record_id, form_ctxt_id)
+      select
+        re.object_id as visit_id, fc.container_id as form_id, re.record_id as record_id, fc.identifier as form_ctxt_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+      where
+        fc.entity_type = 'VisitExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Clear the participant registration custom fields record IDs">
+    <sql>delete from os_cpr_cust_fields</sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Participant registration custom fields rec IDs">
+    <sql>
+      insert into
+        os_cpr_cust_fields (cpr_id, form_id, record_id, form_ctxt_id)
+      select
+        re.object_id as cpr_id, fc.container_id as form_id, re.record_id as record_id, fc.identifier as form_ctxt_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+      where
+        fc.entity_type = 'ParticipantExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Clear the CP custom fields record IDs">
+    <sql>delete from os_cp_cust_fields</sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP custom fields rec IDs">
+    <sql>
+      insert into
+        os_cp_cust_fields (cp_id, form_id, record_id, form_ctxt_id)
+      select
+        re.object_id as cp_id, fc.container_id as form_id, re.record_id as record_id, fc.identifier as form_ctxt_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+      where
+        fc.entity_type = 'CollectionProtocolExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Clear the Order custom fields record IDs">
+    <sql>delete from os_order_cust_fields</sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Order custom fields rec IDs">
+    <sql>
+      insert into
+        os_order_cust_fields (order_id, form_id, record_id, form_ctxt_id)
+      select
+        re.object_id as order_id, fc.container_id as form_id, re.record_id as record_id, fc.identifier as form_ctxt_id
+      from
+        catissue_form_record_entry re
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id
+      where
+        fc.entity_type = 'OrderExtension' and
+        fc.deleted_on is null and
+        re.activity_status = 'ACTIVE'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Associate object type and ID for every uploaded file of custom forms" dbms="mysql">
+    <sql>
+      update
+        dyextn_form_files file
+        inner join catissue_form_record_entry re on re.record_id = file.record_id
+        inner join catissue_form_context fc on fc.identifier = re.form_ctxt_id and fc.container_id = file.form_id
+      set
+        file.object_type = fc.entity_type,
+        file.object_id = re.object_id
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Associate object type and ID for every uploaded file of custom forms" dbms="oracle">
+    <sql>
+      merge into
+        dyextn_form_files file
+      using (
+        select
+          fc.container_id as form_id, re.record_id as record_id, fc.entity_type as object_type, re.object_id as object_id
+        from
+          catissue_form_context fc
+          inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier
+      ) t on (t.form_id = file.form_id and t.record_id = file.record_id)
+      when matched then
+        update set
+          file.object_type = t.object_type,
+          file.object_id = t.object_id
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Record entry table backup">
+    <sql>
+      create table catissue_fre_20251114 as select * from catissue_form_record_entry
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Delete specimen custom field records from the centralised records entry table">
+    <sql>
+      delete from
+        catissue_form_record_entry
+      where
+        form_ctxt_id in (
+          select
+            identifier
+          from
+            catissue_form_context
+          where
+            entity_type in (
+              'CollectionProtocolExtension',
+              'ParticipantExtension',
+              'VisitExtension',
+              'SpecimenExtension',
+              'OrderExtension'
+            )
+        )
+    </sql>
+  </changeSet>
+</databaseChangeLog>

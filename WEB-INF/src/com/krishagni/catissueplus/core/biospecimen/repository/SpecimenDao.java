@@ -100,4 +100,10 @@ public interface SpecimenDao extends Dao<Specimen> {
 	void delete(LabSpecimenService svc);
 
 	void deleteServices(Long specimenId);
+
+	Long getCustomFieldRecordId(Long specimenId, Long formId, Long formCtxtId);
+
+	Map<Long, Long> getCustomFieldRecordIds(Collection<Long> specimenIds, Long formId, Long formCtxtId);
+
+	int insertCustomFieldRecordId(Long specimenId, Long formId, Long formCtxtId, Long recordId);
 }

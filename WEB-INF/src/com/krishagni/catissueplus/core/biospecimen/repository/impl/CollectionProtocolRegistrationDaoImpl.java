@@ -243,6 +243,60 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 			.list();
 	}
 
+	@Override
+	public Long getCustomFieldRecordId(Long cprId, Long formId, Long formCtxtId) {
+		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+			.setParameter("cprId", cprId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.uniqueResult();
+	}
+
+	@Override
+	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> cprIds, Long formId, Long formCtxtId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+			.setParameterList("cprIds", cprIds)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.list();
+
+		Map<Long, Long> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (Long) row[1]);
+		}
+
+		return result;
+	}
+
+	@Override
+	public int insertCustomFieldRecordId(Long cprId, Long formId, Long formCtxtId, Long recordId, String formStatus) {
+		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+			.setParameter("cprId", cprId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+
+		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+			.setParameter("cprId", cprId)
+			.setParameter("formId", formId)
+			.setParameter("recordId", recordId)
+			.setParameter("formStatus", formStatus)
+			.executeUpdate();
+
+		return rows;
+	}
+
+	@Override
+	public int updateCustomFieldRecStatus(Long cprId, Long formId, Long recordId, String formStatus) {
+		return getCurrentSession().getNamedQuery(UPDATE_CUSTOM_FIELD_REC_STATUS)
+			.setParameter("formStatus", formStatus)
+			.setParameter("cprId", cprId)
+			.setParameter("formId", formId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+	}
+
 	private Criteria<Object[]> getCprListQuery(CprListCriteria cprCrit) {
 		Criteria<Object[]> query = createCriteria(CollectionProtocolRegistration.class, Object[].class, "cpr");
 		query.join("collectionProtocol", "cp")
@@ -612,4 +666,14 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 	private static final String GET_COUNTS_BY_SITE = FQN + ".getParticipantsCountBySite";
 
 	private static final String GET_BY_PPIDS = FQN + ".getByPpids";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_ID = FQN + ".getCustomFieldRecordId";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_IDS = FQN + "..getCustomFieldRecordIds";
+
+	private static final String INSERT_CUSTOM_FIELD_RECORD = FQN + ".insertCustomFieldRecord";
+
+	private static final String INSERT_CUSTOM_FIELD_REC_STATUS = FQN + ".insertCustomFieldRecordStatus";
+
+	private static final String UPDATE_CUSTOM_FIELD_REC_STATUS = FQN + ".updateCustomFieldRecordStatus";
 }

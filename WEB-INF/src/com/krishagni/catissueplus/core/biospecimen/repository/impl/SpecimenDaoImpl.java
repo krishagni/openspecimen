@@ -532,6 +532,49 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			.executeUpdate();
 	}
 
+	@Override
+	public Long getCustomFieldRecordId(Long specimenId, Long formId, Long formCtxtId) {
+		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+			.setParameter("specimenId", specimenId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.uniqueResult();
+	}
+
+	@Override
+	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> specimenIds, Long formId, Long formCtxtId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+			.setParameterList("specimenIds", specimenIds)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.list();
+
+		Map<Long, Long> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (Long) row[1]);
+		}
+
+		return result;
+	}
+
+	@Override
+	public int insertCustomFieldRecordId(Long specimenId, Long formId, Long formCtxtId, Long recordId) {
+		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+			.setParameter("specimenId", specimenId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+
+		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+			.setParameter("specimenId", specimenId)
+			.setParameter("formId", formId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+
+		return rows;
+	}
+
 	private void addIdsCond(AbstractCriteria<?, ?> query, List<Long> ids) {
 		addInCond(query, "specimen.id", ids);
 	}
@@ -947,4 +990,12 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 		"  cpe.id = :eventId";
 
 	private static final String GET_DESCENDANT_SPMN_IDS = FQN + ".getDescendantSpecimenIds";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_ID = FQN + ".getCustomFieldRecordId";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_IDS = FQN + ".getCustomFieldRecordIds";
+
+	private static final String INSERT_CUSTOM_FIELD_RECORD = FQN + ".insertCustomFieldRecord";
+
+	private static final String INSERT_CUSTOM_FIELD_REC_STATUS = FQN + ".insertCustomFieldRecordStatus";
 }

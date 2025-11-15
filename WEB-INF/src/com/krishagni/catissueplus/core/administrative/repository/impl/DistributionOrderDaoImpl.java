@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.administrative.repository.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -147,6 +148,49 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	@Override
 	public void deleteOrderItem(DistributionOrderItem item) {
 		getCurrentSession().delete(item);
+	}
+
+	@Override
+	public Long getCustomFieldRecordId(Long orderId, Long formId, Long formCtxtId) {
+		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+			.setParameter("orderId", orderId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.uniqueResult();
+	}
+
+	@Override
+	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> orderIds, Long formId, Long formCtxtId) {
+		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+			.setParameterList("orderIds", orderIds)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.list();
+
+		Map<Long, Long> result = new HashMap<>();
+		for (Object[] row : rows) {
+			result.put((Long) row[0], (Long) row[1]);
+		}
+
+		return result;
+	}
+
+	@Override
+	public int insertCustomFieldRecordId(Long orderId, Long formId, Long formCtxtId, Long recordId) {
+		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+			.setParameter("orderId", orderId)
+			.setParameter("formId", formId)
+			.setParameter("formCtxtId", formCtxtId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+
+		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+			.setParameter("orderId", orderId)
+			.setParameter("formId", formId)
+			.setParameter("recordId", recordId)
+			.executeUpdate();
+
+		return rows;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -376,4 +420,12 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	private static final String GET_ORDER_ITEMS_COUNT = FQN + ".getOrderItemsCount";
 
 	private static final String GET_ORDER_LIST_ITEMS_COUNT = FQN + ".getListItemsCount";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_ID = FQN + ".getCustomFieldRecordId";
+
+	private static final String GET_CUSTOM_FIELD_RECORD_IDS = FQN + "..getCustomFieldRecordIds";
+
+	private static final String INSERT_CUSTOM_FIELD_RECORD = FQN + ".insertCustomFieldRecord";
+
+	private static final String INSERT_CUSTOM_FIELD_REC_STATUS = FQN + ".insertCustomFieldRecordStatus";
 }

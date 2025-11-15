@@ -363,5 +363,46 @@
         ccps.cp_id = :cpId and
         c.activity_status != 'Disabled'
     </sql-query>
+
+    <sql-query name="getCustomFieldRecordId">
+      <return-scalar column="recordId" type="long" />
+
+      select
+        record_id as recordId
+      from
+        os_cp_cust_fields
+      where
+        cp_id = :cpId and
+        form_id = :formId and
+        form_ctxt_id = :formCtxtId
+    </sql-query>
+
+    <sql-query name="getCustomFieldRecordIds">
+      <return-scalar column="cpId" type="long" />
+      <return-scalar column="recordId" type="long" />
+
+      select
+        cp_id as cpId, record_id as recordId
+      from
+        os_cp_cust_fields
+      where
+        cp_id in (:cpIds) and
+        form_id = :formId and
+        form_ctxt_id = :formCtxtId
+    </sql-query>
+
+    <sql-query name="insertCustomFieldRecord">
+      insert into
+        os_cp_cust_fields(cp_id, form_id, form_ctxt_id, record_id)
+      values
+        (:cpId, :formId, :formCtxtId, :recordId)
+    </sql-query>
+
+    <sql-query name="insertCustomFieldRecordStatus">
+      insert into
+        os_form_record_statuses (identifier, form_id, record_id, form_status)
+      values
+        (:cpId, :formId, :recordId, 'COMPLETE')
+    </sql-query>
   </class>
 </hibernate-mapping>
