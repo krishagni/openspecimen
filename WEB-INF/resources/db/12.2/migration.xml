@@ -135,11 +135,11 @@
     </sql>
   </changeSet>
 
-  <changeSet author="vpawar" id="Record entry table backup">
+  <!-- changeSet author="vpawar" id="Record entry table backup">
     <sql>
       create table catissue_fre_20251114 as select * from catissue_form_record_entry
     </sql>
-  </changeSet>
+  </changeSet -->
 
   <changeSet author="vpawar" id="Delete specimen custom field records from the centralised records entry table">
     <sql>
