@@ -120,18 +120,18 @@
   <changeSet author="vpawar" id="Associate object type and ID for every uploaded file of custom forms" dbms="oracle">
     <sql>
       merge into
-        dyextn_form_files file
+        dyextn_form_files fl
       using (
         select
           fc.container_id as form_id, re.record_id as record_id, fc.entity_type as object_type, re.object_id as object_id
         from
           catissue_form_context fc
           inner join catissue_form_record_entry re on re.form_ctxt_id = fc.identifier
-      ) t on (t.form_id = file.form_id and t.record_id = file.record_id)
+      ) t on (t.form_id = fl.form_id and t.record_id = fl.record_id)
       when matched then
         update set
-          file.object_type = t.object_type,
-          file.object_id = t.object_id
+          fl.object_type = t.object_type,
+          fl.object_id = t.object_id
     </sql>
   </changeSet>
 
