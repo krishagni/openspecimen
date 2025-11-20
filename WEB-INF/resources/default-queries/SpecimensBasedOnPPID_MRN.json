@@ -102,7 +102,7 @@
     "SpecimenCollectionGroup.clinicalDiagnoses.value",
     "SpecimenCollectionGroup.site",
     "Specimen.label",
-    "Specimen.extensions.SpecimenCollectionEvent.time",
+    "Specimen.spmnCollRecvDetails.collTime",
     "Specimen.class",
     "Specimen.type",
     "Specimen.specimenPosition.containerName",

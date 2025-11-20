@@ -1,7 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
@@ -26,20 +26,23 @@ public class CollectionEventDetail extends SpecimenEventDetail {
 		this.container = container;
 	}
 
-	public static CollectionEventDetail from(SpecimenCollectionEvent ce) {
-		if (ce == null) {
+	public static CollectionEventDetail from(Specimen specimen) {
+		if (specimen == null) {
 			return null;
+		} else if (specimen.isAliquot() || specimen.isDerivative()) {
+			return from(specimen.getCollRecvDetails());
 		}
 
 		CollectionEventDetail detail = new CollectionEventDetail();
-		fromTo(ce, detail);
-
-		detail.setContainer(PermissibleValue.getValue(ce.getContainer()));
-		detail.setProcedure(PermissibleValue.getValue(ce.getProcedure()));
+		detail.setContainer(PermissibleValue.getValue(specimen.getCollectionContainer()));
+		detail.setProcedure(PermissibleValue.getValue(specimen.getCollectionProcedure()));
+		detail.setUser(UserSummary.from(specimen.getCollectionUser()));
+		detail.setTime(specimen.getCollectionTime());
+		detail.setComments(specimen.getCollectionComments());
 		return detail;
 	}
 
-	public static CollectionEventDetail from(SpecimenCollectionReceiveDetail cre) {
+	private static CollectionEventDetail from(SpecimenCollectionReceiveDetail cre) {
 		if (cre == null) {
 			return null;
 		}

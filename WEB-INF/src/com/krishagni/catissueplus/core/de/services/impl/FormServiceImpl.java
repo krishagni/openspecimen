@@ -39,8 +39,6 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGrou
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolRegistration;
 import com.krishagni.catissueplus.core.biospecimen.domain.Participant;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenSavedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
@@ -55,7 +53,6 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.domain.PdeAuditLog;
-import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
@@ -164,7 +161,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		customFieldEntities.put(SCG_FORM, Visit.EXTN);
 		customFieldEntities.put(SPECIMEN_FORM, Specimen.EXTN);
 
-		editableEvents = new HashMap<String, List<String>>() {
+		editableEvents = new HashMap<>() {
 			{
 				put("SpecimenDisposalEvent", Arrays.asList("reason", "user", "time", "comments"));
 				put("SpecimenTransferEvent", Arrays.asList("user", "time", "comments"));
@@ -1347,7 +1344,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				}
 
 				formData = allowed;
-			} else if (!isCollectionOrReceivedEvent(form)) {
+			} else {
 				throw OpenSpecimenException.userError(FormErrorCode.SYS_REC_EDIT_NOT_ALLOWED);
 			}
 		}
@@ -1410,24 +1407,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				Specimen specimen = getSpecimen(objectId);
 				object = specimen;
 				cp = specimen.getCollectionProtocol();
-				if (isCollectionOrReceivedEvent(form)) {
-					if (isReceivedEvent(form.getName())) {
-						String newLabel = (String) formData.getAppData().get("newSpecimenlabel");
-						if (StringUtils.isNotBlank(newLabel)) {
-							specimen.setLabel(newLabel.trim());
-						}
-
-						prevStatus = specimen.getCollectionStatus();
-						if (specimen.getReceivedEvent() != null && specimen.getReceivedEvent().getQuality() != null) {
-							prevRecv = specimen.getReceivedEvent().getQuality().getValue();
-						}
-
-						setReceivedEventUserTime(formData);
-					}
-
-					specimen.setUpdated(true);
-					collOrRecvEvent = new SpecimenSavedEvent(specimen);
-				}
 			}
 			case "User", "UserProfile" -> {
 				User user = daoFactory.getUserDao().getById(objectId);
@@ -1485,24 +1464,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		formDao.saveOrUpdateRecordEntry(recordEntry);
 		formData.setRecordId(recordId);
 
-		if (collOrRecvEvent != null) {
-			Specimen specimen = (Specimen) collOrRecvEvent.getEventData();
-			if (isReceivedEvent(form.getName())) {
-				// This is to flush out the old received event values
-				specimen.getReceivedEvent().setAttrValues(formData.getFieldNameValueMap(true));
-			}
-
-			EventPublisher.getInstance().publish(collOrRecvEvent);
-			if (isReceivedEvent(form.getName())) {
-				Object printLabel = formData.getAppData().get("printLabel");
-				if (printLabel != null && printLabel.toString().toLowerCase().equals("true")) {
-					PrintItem<Specimen> printItem = PrintItem.make(specimen, specimen.getCopiesToPrint());
-					Specimen.getLabelPrinter().print(Collections.singletonList(printItem));
-				}
-
-				specimen.prePrintChildrenLabels(prevStatus, prevRecv);
-			}
-		} else if (object != null) {
+		if (object != null) {
 			EventPublisher.getInstance().publish(new FormDataSavedEvent(entityType, object, formData));
 		}
 
@@ -1512,40 +1474,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		notifyFormSave(object, formContext, recordEntry, formData, isInsert);
 		return formData;
-	}
-
-	private void setReceivedEventUserTime(FormData formData) {
-		ControlValue qualityCv = formData.getFieldValue("quality");
-		String quality = null;
-		if (qualityCv != null && qualityCv.getValue() != null && StringUtils.isNotBlank(qualityCv.getValue().toString())) {
-			quality = qualityCv.getControl().toDisplayValue(qualityCv.getValue());
-		}
-
-		ControlValue userCv = formData.getFieldValue("user");
-		ControlValue timeCv = formData.getFieldValue("time");
-		if (StringUtils.isBlank(quality) || quality.equals(SpecimenReceivedEvent.TO_BE_RECEIVED)) {
-			if (userCv != null) {
-				userCv.setValue(null);
-			}
-
-			if (timeCv != null) {
-				timeCv.setValue(null);
-			}
-		} else {
-			if (userCv != null) {
-				Object user = userCv.getValue();
-				if (user == null || StringUtils.isBlank(user.toString())) {
-					userCv.setValue(AuthUtil.getCurrentUser().getId().toString());
-				}
-			}
-
-			if (timeCv != null) {
-				Object time = timeCv.getValue();
-				if (time == null || StringUtils.isBlank(time.toString())) {
-					timeCv.setValue(String.valueOf(Calendar.getInstance().getTimeInMillis()));
-				}
-			}
-		}
 	}
 
 	private void notifyFormSave(Object object, FormContextBean ctxt, FormRecordEntryBean fre, FormData formData, boolean added) {
@@ -1764,22 +1692,6 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		} else {
 			return false;
 		}
-	}
-
-	private boolean isCollectionOrReceivedEvent(Container form) {
-		return isCollectionOrReceivedEvent(form.getName());
-	}
-
-	private boolean isCollectionOrReceivedEvent(String name) {
-		return isCollectionEvent(name) || isReceivedEvent(name);
-	}
-
-	private boolean isCollectionEvent(String name) {
-		return name.equals("SpecimenCollectionEvent");
-	}
-
-	private boolean isReceivedEvent(String name) {
-		return name.equals("SpecimenReceivedEvent");
 	}
 
 	private boolean isEditableEvent(Container form) {

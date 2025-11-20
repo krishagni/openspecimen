@@ -3,6 +3,7 @@ import alertsSvc   from '@/common/services/Alerts.js';
 import cpSvc       from './CollectionProtocol.js';
 import exprUtil    from '@/common/services/ExpressionUtil.js';
 import http        from '@/common/services/HttpClient.js';
+import formUtil    from '@/common/services/FormUtil.js';
 import formSvc     from '@/forms/services/Form.js';
 import routerSvc   from '@/common/services/Router.js';
 import settingsSvc from '@/common/services/Setting.js';
@@ -11,6 +12,8 @@ import util        from '@/common/services/Util.js';
 
 import specimenSchema from '@/biospecimen/schemas/specimens/specimen.js';
 import addEditLayout from '@/biospecimen/schemas/specimens/addedit.js';
+import collEventLayout from '@/biospecimen/schemas/specimens/collection-event.js';
+import recvEventLayout from '@/biospecimen/schemas/specimens/received-event.js';
 
 class Specimen {
   search(criteria) {
@@ -239,6 +242,22 @@ class Specimen {
         return formSvc.getDefinition(resp.formId);
       }
     );
+  }
+
+  getCollectionEventDict() {
+    return specimenSchema.fields.filter(field => field.name.indexOf('specimen.collectionEvent.') == 0);
+  }
+
+  getCollectionEventAddEditFs() {
+    return formUtil.getFormSchema(specimenSchema.fields, collEventLayout.layout);
+  }
+
+  getReceivedEventDict() {
+    return specimenSchema.fields.filter(field => field.name.indexOf('specimen.receivedEvent.') == 0);
+  }
+
+  getReceivedEventAddEditFs() {
+    return formUtil.getFormSchema(specimenSchema.fields, recvEventLayout.layout);
   }
 
   async getEventForms(spmnId) {

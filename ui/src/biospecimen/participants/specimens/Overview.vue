@@ -74,10 +74,15 @@
 
   <os-dialog ref="eventOverviewDialog">
     <template #header>
-      <span>{{ctx.event.name}}: #{{ctx.event.id}}</span>
+      <span>
+        <span>{{ctx.event.name}}</span>
+        <span v-if="+ctx.event.id > 0">: #{{ctx.event.id}}</span>
+      </span>
     </template>
     <template #content>
-      <os-form-record-overview :record="ctx.eventRecord" />
+      <os-overview :schema="eventDict" :object="ctx.eventRecord" :columns="1"
+        v-if="ctx.event.id == 'SpecimenCollectionEvent' || ctx.event.id == 'SpecimenReceivedEvent'" />
+      <os-form-record-overview :record="ctx.eventRecord" v-else />
     </template>
     <template #footer>
       <os-button text   :label="$t('common.buttons.close')" @click="closeEventOverview()" />
@@ -169,7 +174,9 @@ export default {
 
         userRole: this.cpViewCtx.getRole(),
 
-        pluginOptions: []
+        pluginOptions: [],
+
+        event: {}
       },
 
       pluginViewProps: { },
@@ -274,6 +281,16 @@ export default {
 
     notCoordinatOrStoreAllowed: function() {
       return this.cpViewCtx.notCoordinatOrStoreAllowed(this.specimen || {});
+    },
+
+    eventDict: function() {
+      if (this.ctx.event.id == 'SpecimenCollectionEvent') {
+        return specimenSvc.getCollectionEventDict();
+      } else if (this.ctx.event.id == 'SpecimenReceivedEvent') {
+        return specimenSvc.getReceivedEventDict();
+      } else {
+        return [];
+      }
     }
   },
 
@@ -343,13 +360,28 @@ export default {
 
     showEvent: function(event) {
       const {formId, id: recordId} = event;
-      formSvc.getRecord({formId, recordId}, {includeMetadata: true}).then(
-        (record) => {
-          this.ctx.event = {name: record.caption, id: record.id};
-          this.ctx.eventRecord = this.pluginViewProps.record = record;
-          this.$refs.eventOverviewDialog.open();
-        }
-      );
+      if (recordId == 'SpecimenCollectionEvent' || recordId == 'SpecimenReceivedEvent') {
+        const msgCode = 'specimens.' + (recordId == 'SpecimenCollectionEvent' ? 'collection_event' : 'received_event');
+        this.ctx.event = {name: this.$t(msgCode), id: recordId, sysForm: true, isEditable: this.isUpdateAllowed};
+        this.ctx.eventRecord = {specimen: this.ctx.specimen};
+        this.$refs.eventOverviewDialog.open();
+      } else {
+        formSvc.getRecord({formId, recordId}, {includeMetadata: true}).then(
+          record => {
+            const sysForm = record.appData && record.appData.sysForm;
+            this.ctx.event = {
+              name: record.caption,
+              id: record.id,
+              formId: record.containerId,
+              formCtxtId: record.appData && record.appData.formCtxtId,
+              sysForm,
+              isEditable: !sysForm && this.isUpdateAllowed
+            };
+            this.ctx.eventRecord = this.pluginViewProps.record = record;
+            this.$refs.eventOverviewDialog.open();
+          }
+        );
+      }
     },
 
     deleteEvent: function(event) {
@@ -515,8 +547,37 @@ export default {
     },
 
     _loadEvents: function(specimen) {
-      if (specimen.availabilityStatus && specimen.availabilityStatus != 'Pending') {
-        specimenSvc.getEvents(this.specimen).then(events => this.ctx.events = events);
+      const {availabilityStatus, lineage} = specimen;
+      if (availabilityStatus && ['Pending', 'Missed Collection', 'Not Collected'].indexOf(availabilityStatus) < 0) {
+        specimenSvc.getEvents(this.specimen).then(
+          events => {
+            if (lineage == 'New') {
+              const {time: receivedTime, user: receivedUser} = specimen.receivedEvent || {};
+              const recvEvent = {id: 'SpecimenReceivedEvent', name: 'Received Event', sysForm: true, isEditable: true};
+              events.push(recvEvent);
+              if (receivedTime) {
+                recvEvent.time = new Date(receivedTime);
+              }
+
+              if (receivedUser) {
+                recvEvent.user = this.$filters.username(receivedUser);
+              }
+
+              const {time: collectionTime, user: collectionUser} = specimen.collectionEvent || {};
+              const collEvent = {id: 'SpecimenCollectionEvent', name: 'Collection Event', sysForm: true, isEditable: true};
+              events.push(collEvent);
+              if (collectionTime) {
+                collEvent.time = new Date(collectionTime);
+              }
+
+              if (collectionUser) {
+                collEvent.user = this.$filters.username(collectionUser);
+              }
+            }
+
+            this.ctx.events = events
+          }
+        );
       }
     },
 

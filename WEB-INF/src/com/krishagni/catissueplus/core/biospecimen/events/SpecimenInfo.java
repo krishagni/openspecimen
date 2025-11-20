@@ -665,7 +665,7 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 			result.setCollectionContainer(PermissibleValue.getValue(specimen.getSpecimenRequirement().getCollectionContainer()));
 		}
 
-		if (specimen.getCollRecvDetails() != null && !specimen.getCollRecvDetails().getRecvQuality().equals(Specimen.TO_BE_RECEIVED)) {
+		if (specimen.getCollRecvDetails() != null && !Specimen.TO_BE_RECEIVED.equals(specimen.getCollRecvDetails().getRecvQuality())) {
 			result.setReceiver(UserSummary.from(specimen.getCollRecvDetails().getReceiver()));
 		} else if (specimen.isPrimary() && specimen.getSpecimenRequirement() != null) {
 			result.setReceiver(UserSummary.from(specimen.getSpecimenRequirement().getReceiver()));

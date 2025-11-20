@@ -38,10 +38,13 @@ import com.krishagni.catissueplus.core.administrative.domain.SpecimenReservedEve
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenReturnEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionEventDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.ReceivedEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.CpWorkflowTxnCache;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
@@ -50,6 +53,7 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.domain.PrintItem;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
+import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
 import com.krishagni.catissueplus.core.common.service.LabelPrinter;
 import com.krishagni.catissueplus.core.common.service.impl.EventPublisher;
@@ -59,8 +63,11 @@ import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
-import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.services.impl.FormUtil;
+
+import static com.krishagni.catissueplus.core.common.PvAttributes.COLL_PROC;
+import static com.krishagni.catissueplus.core.common.PvAttributes.CONTAINER;
+import static com.krishagni.catissueplus.core.common.PvAttributes.RECV_QUALITY;
 
 @Configurable
 @Audited
@@ -176,9 +183,23 @@ public class Specimen extends BaseExtensionEntity {
 	//
 	// collectionEvent and receivedEvent are valid only for primary specimens
 	//
-	private SpecimenCollectionEvent collectionEvent;
+	private PermissibleValue collectionProcedure;
+
+	private PermissibleValue collectionContainer;
+
+	private User collectionUser;
+
+	private Date collectionTime;
+
+	private String collectionComments;
 	
-	private SpecimenReceivedEvent receivedEvent;
+	private PermissibleValue receivedQuality;
+
+	private User receivedUser;
+
+	private Date receivedTime;
+
+	private String receivedComments;
 
 	//
 	// record the DP for which this specimen is currently reserved
@@ -215,6 +236,8 @@ public class Specimen extends BaseExtensionEntity {
 
 	@Autowired
 	private DaoFactory daoFactory;
+
+	private transient String newLabel;
 
 	private transient boolean forceDelete;
 	
@@ -626,46 +649,76 @@ public class Specimen extends BaseExtensionEntity {
 		this.parentEvent = parentEvent;
 	}
 
-	@NotAudited
-	public SpecimenCollectionEvent getCollectionEvent() {
-		if (isAliquot() || isDerivative()) {
-			return null;
-		}
-				
-		if (this.collectionEvent == null) {
-			this.collectionEvent = SpecimenCollectionEvent.getFor(this); 
-		}
-		
-		if (this.collectionEvent == null) {
-			this.collectionEvent = SpecimenCollectionEvent.createFromSr(this);
-		}
-		
-		return this.collectionEvent;
+	public PermissibleValue getCollectionProcedure() {
+		return collectionProcedure;
 	}
 
-	public void setCollectionEvent(SpecimenCollectionEvent collectionEvent) {
-		this.collectionEvent = collectionEvent;
+	public void setCollectionProcedure(PermissibleValue collectionProcedure) {
+		this.collectionProcedure = collectionProcedure;
 	}
 
-	@NotAudited
-	public SpecimenReceivedEvent getReceivedEvent() {
-		if (isAliquot() || isDerivative()) {
-			return null;
-		}
-		
-		if (this.receivedEvent == null) {
-			this.receivedEvent = SpecimenReceivedEvent.getFor(this); 			 
-		}
-		
-		if (this.receivedEvent == null) {
-			this.receivedEvent = SpecimenReceivedEvent.createFromSr(this);
-		}
-		
-		return this.receivedEvent; 
+	public PermissibleValue getCollectionContainer() {
+		return collectionContainer;
 	}
 
-	public void setReceivedEvent(SpecimenReceivedEvent receivedEvent) {
-		this.receivedEvent = receivedEvent;
+	public void setCollectionContainer(PermissibleValue collectionContainer) {
+		this.collectionContainer = collectionContainer;
+	}
+
+	public User getCollectionUser() {
+		return collectionUser;
+	}
+
+	public void setCollectionUser(User collectionUser) {
+		this.collectionUser = collectionUser;
+	}
+
+	public Date getCollectionTime() {
+		return collectionTime;
+	}
+
+	public void setCollectionTime(Date collectionTime) {
+		this.collectionTime = collectionTime;
+	}
+
+	public String getCollectionComments() {
+		return collectionComments;
+	}
+
+	public void setCollectionComments(String collectionComments) {
+		this.collectionComments = collectionComments;
+	}
+
+	public PermissibleValue getReceivedQuality() {
+		return receivedQuality;
+	}
+
+	public void setReceivedQuality(PermissibleValue receivedQuality) {
+		this.receivedQuality = receivedQuality;
+	}
+
+	public User getReceivedUser() {
+		return receivedUser;
+	}
+
+	public void setReceivedUser(User receivedUser) {
+		this.receivedUser = receivedUser;
+	}
+
+	public Date getReceivedTime() {
+		return receivedTime;
+	}
+
+	public void setReceivedTime(Date receivedTime) {
+		this.receivedTime = receivedTime;
+	}
+
+	public String getReceivedComments() {
+		return receivedComments;
+	}
+
+	public void setReceivedComments(String receivedComments) {
+		this.receivedComments = receivedComments;
 	}
 
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
@@ -784,6 +837,14 @@ public class Specimen extends BaseExtensionEntity {
 
 	public String getCpShortTitle() {
 		return getCollectionProtocol().getShortTitle();
+	}
+
+	public String getNewLabel() {
+		return newLabel;
+	}
+
+	public void setNewLabel(String newLabel) {
+		this.newLabel = newLabel;
 	}
 
 	public boolean isForceDelete() {
@@ -983,7 +1044,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public boolean isReceived() {
-		return isPrimary() && isCollected() && getReceivedEvent() != null && getReceivedEvent().isReceived();
+		return isPrimary() && isCollected() && getReceivedQuality() != null && !getReceivedQuality().getValue().equals(TO_BE_RECEIVED);
 	}
 
 	public boolean isStorageSiteBasedAccessRightsEnabled() {
@@ -1265,6 +1326,7 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		boolean wasCollected = isCollected();
+		boolean wasReceived  = isReceived();
 
 		setForceDelete(specimen.isForceDelete());
 		setAutoCollectParents(specimen.isAutoCollectParents());
@@ -1305,8 +1367,12 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		updateExternalIds(specimen.getExternalIds());
-		updateEvent(getCollectionEvent(), specimen.getCollectionEvent());
-		updateEvent(getReceivedEvent(), specimen.getReceivedEvent());
+		updateCollectionDetails(specimen);
+		updateReceivedDetails(specimen);
+		if (StringUtils.isNotBlank(specimen.getNewLabel()) && !wasReceived && isReceived()) {
+			// relabeling of specimens during receive process
+			setLabel(specimen.getNewLabel());
+		}
 
 		setCreatedOn(specimen.getCreatedOn()); // required for auto-collection of parent specimens
 		updateCollectionStatus(specimen.getCollectionStatus());
@@ -1318,7 +1384,7 @@ public class Specimen extends BaseExtensionEntity {
 		if (isCollected()) {
 			Date createdOn = specimen.getCreatedOn();
 			if (isPrimary()) {
-				updateCreatedOn(createdOn != null ? createdOn : getReceivedEvent().getTime());
+				updateCreatedOn(createdOn != null ? createdOn : getReceivedTime());
 			} else {
 				updateCreatedOn(createdOn != null ? createdOn : Calendar.getInstance().getTime());
 
@@ -1433,14 +1499,180 @@ public class Specimen extends BaseExtensionEntity {
 
 				setCollectionStatus(collectionStatus);
 				decAliquotedQtyFromParent();
-				addOrUpdateCollRecvEvents();
 				addServices();
 			}
 		}
 
 		setStatusChanged(true);
 	}
-		
+
+	public void setCollectionDetails(CollectionEventDetail input) {
+		if (isAliquot() || isDerivative()) {
+			return;
+		}
+
+		if (input == null) {
+			input = new CollectionEventDetail();
+		}
+
+		SpecimenRequirement sr = getSpecimenRequirement();
+		if (StringUtils.isNotBlank(input.getContainer())) {
+			PermissibleValue contPv = getPv(CONTAINER, input.getContainer(), false);
+			if (contPv != null) {
+				setCollectionContainer(contPv);
+			} else {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_COLL_CONTAINER, input.getContainer());
+			}
+		} else if (sr != null) {
+			setCollectionContainer(sr.getCollectionContainer());
+		} else {
+			setCollectionContainer(getPv(CONTAINER, Specimen.NOT_SPECIFIED, true));
+		}
+
+		if (StringUtils.isNotBlank(input.getProcedure())) {
+			PermissibleValue procPv = getPv(COLL_PROC, input.getProcedure(), false);
+			if (procPv != null) {
+				setCollectionProcedure(procPv);
+			} else {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_COLL_PROC, input.getProcedure());
+			}
+		} else if (sr != null) {
+			setCollectionProcedure(sr.getCollectionProcedure());
+		} else {
+			setCollectionProcedure(getPv(COLL_PROC, Specimen.NOT_SPECIFIED, true));
+		}
+
+		if (StringUtils.isNotBlank(input.getComments())) {
+			setCollectionComments(input.getComments());
+		}
+
+		User user = getUser(input.getUser());
+		if (user != null) {
+			setCollectionUser(user);
+		} else {
+			setCollectionUser(AuthUtil.getCurrentUser());
+		}
+
+		if (input.getTime() != null) {
+			setCollectionTime(input.getTime());
+		} else {
+			String defCollectionDate = null;
+			if (getCollectionProtocol() != null) {
+				defCollectionDate = CpWorkflowTxnCache.getInstance()
+					.getValue(getCollectionProtocol().getId(), "specimenCollection", "defCollectionDate");
+			}
+
+			Date collectionTime = null;
+			if (StringUtils.equals(defCollectionDate, "current_date")) {
+				collectionTime = Calendar.getInstance().getTime();
+			} else if (!getCollectionProtocol().isSpecimenCentric() && getVisit() != null) {
+				collectionTime = getVisit().getVisitDate();
+			}
+
+			if (collectionTime == null) {
+				collectionTime = Calendar.getInstance().getTime();
+			}
+
+			setCollectionTime(collectionTime);
+		}
+	}
+
+	public void updateCollectionDetails(Specimen other) {
+		if (isAliquot() || isDerivative()) {
+			return;
+		}
+
+		setCollectionProcedure(other.getCollectionProcedure());
+		setCollectionContainer(other.getCollectionContainer());
+		setCollectionUser(other.getCollectionUser());
+		setCollectionTime(other.getCollectionTime());
+		setCollectionComments(other.getCollectionComments());
+	}
+
+	public void setReceivedDetails(ReceivedEventDetail input) {
+		if (isAliquot() || isDerivative()) {
+			return;
+		}
+
+		if (input == null) {
+			input = new ReceivedEventDetail();
+		}
+
+		String recvQuality = null;
+		if (StringUtils.isNotBlank(input.getReceivedQuality())) {
+			recvQuality = input.getReceivedQuality();
+		} else {
+			if (getCollectionProtocol() != null) {
+				recvQuality = CpWorkflowTxnCache.getInstance()
+					.getValue(getCollectionProtocol().getId(), "specimenCollection", "defReceiveQuality");
+			}
+
+			if (StringUtils.isBlank(recvQuality)) {
+				recvQuality = Specimen.ACCEPTABLE;
+			}
+		}
+
+		PermissibleValue recvQualityPv = getPv(RECV_QUALITY, recvQuality, true);
+		if (recvQualityPv == null) {
+			throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_RECV_QUALITY, recvQuality);
+		}
+
+		setReceivedQuality(recvQualityPv);
+		if (TO_BE_RECEIVED.equals(recvQualityPv.getValue())) {
+			return;
+		}
+
+		User user = getUser(input.getUser());
+		if (user == null) {
+			user = getSpecimenRequirement() != null && getSpecimenRequirement().getReceiver() != null
+				? getSpecimenRequirement().getReceiver()
+				: AuthUtil.getCurrentUser();
+		}
+		setReceivedUser(user);
+
+		Date receivedTime = null;
+		if (input.getTime() != null) {
+			receivedTime = input.getTime();
+		} else if (!getCollectionProtocol().isSpecimenCentric() && getVisit() != null && getVisit().getVisitDate() != null) {
+			receivedTime = getVisit().getVisitDate();
+		} else {
+			receivedTime = Calendar.getInstance().getTime();
+		}
+		setReceivedTime(receivedTime);
+
+		if (StringUtils.isNotBlank(input.getComments())) {
+			setReceivedComments(input.getComments());
+		}
+
+		if (StringUtils.isNotBlank(input.getNewLabel())) {
+			setNewLabel(input.getNewLabel());
+		}
+	}
+
+	public void updateReceivedDetails(Specimen other) {
+		if (isAliquot() || isDerivative()) {
+			return;
+		}
+
+		setReceivedQuality(other.getReceivedQuality());
+		setReceivedUser(other.getReceivedUser());
+		setReceivedTime(other.getReceivedTime());
+		setReceivedComments(other.getReceivedComments());
+
+		if (getReceivedQuality() != null && !getReceivedQuality().getValue().equals(TO_BE_RECEIVED)) {
+			if (getReceivedUser() == null) {
+				setReceivedUser(AuthUtil.getCurrentUser());
+			}
+
+			if (getReceivedTime() == null) {
+				setReceivedTime(Calendar.getInstance().getTime());
+			}
+		} else {
+			setReceivedUser(null);
+			setReceivedTime(null);
+		}
+	}
+
 	public void distribute(DistributionOrderItem item) {
 		if (!isCollected() || isClosed()) {
 			throw OpenSpecimenException.userError(SpecimenErrorCode.NOT_AVAILABLE_FOR_DIST, getLabel());
@@ -1832,30 +2064,6 @@ public class Specimen extends BaseExtensionEntity {
 		position.occupy();
 	}
 	
-	public void addOrUpdateCollRecvEvents() {
-		if (!isCollected() || isAliquot() || isDerivative()) {
-			return;
-		}
-
-		getCollectionEvent().saveOrUpdate();
-
-		SpecimenReceivedEvent receivedEvent = getReceivedEvent();
-		if (receivedEvent.isReceived()) {
-			if (receivedEvent.getUser() == null) {
-				receivedEvent.setUser(AuthUtil.getCurrentUser());
-			}
-
-			if (receivedEvent.getTime() == null) {
-				receivedEvent.setTime(Calendar.getInstance().getTime());
-			}
-		} else {
-			receivedEvent.setUser(null);
-			receivedEvent.setTime(null);
-		}
-
-		receivedEvent.saveOrUpdate();
-	}
-
 	public void setKitLabelsIfEmpty() {
 		boolean skip = !getCollectionProtocol().isKitLabelsEnabled() ||
 			isMissedOrNotCollected() ||
@@ -2311,13 +2519,11 @@ public class Specimen extends BaseExtensionEntity {
 			
 	private void deleteEvents() {
 		if (!isAliquot() && !isDerivative()) {
-			getCollectionEvent().delete();
-			getReceivedEvent().delete();
+			clearCollectionDetails();
+			clearReceivedDetails();
 		}
-		
-		for (SpecimenTransferEvent te : getTransferEvents()) {
-			te.delete();
-		}
+
+		getTransferEvents().forEach(SpecimenTransferEvent::delete);
 	}
 
 	private void adjustParentSpecimenQty(BigDecimal qty) {
@@ -2333,15 +2539,34 @@ public class Specimen extends BaseExtensionEntity {
 
 		parentSpecimen.setAvailableQuantity(parentQty);
 	}
-	
-	private void updateEvent(SpecimenEvent thisEvent, SpecimenEvent otherEvent) {
-		if (isAliquot() || isDerivative()) {
-			return;
-		}
-		
-		thisEvent.update(otherEvent);
+
+	private void addCollectionDetails() {
+		setCollectionDetails(null);
 	}
-	
+
+	private void clearCollectionDetails() {
+		setCollectionProcedure(null);
+		setCollectionContainer(null);
+		setCollectionUser(null);
+		setCollectionTime(null);
+		setCollectionComments(null);
+	}
+
+	private void addReceivedDetails() {
+		setReceivedDetails(null);
+	}
+
+	private void clearReceivedDetails() {
+		setReceivedQuality(null);
+		setReceivedUser(null);
+		setReceivedTime(null);
+		setReceivedComments(null);
+	}
+
+	private PermissibleValue getNotSpecifiedPv(String attribute) {
+		return daoFactory.getPermissibleValueDao().getByValue(attribute, NOT_SPECIFIED);
+	}
+
 	private void updateHierarchyStatus0(String status) {
 		setCollectionStatus(status);
 		setStatusChanged(true);
@@ -2414,14 +2639,15 @@ public class Specimen extends BaseExtensionEntity {
 
 			Date createdOn = childSpmn.getCreatedOn();
 			if (parentSpmn.isPrimary()) {
-				if (!parentSpmn.getReceivedEvent().isReceived()) {
-					parentSpmn.getReceivedEvent().setQuality(getAcceptableReceiveQuality());
+				if (parentSpmn.getReceivedQuality() == null || parentSpmn.getReceivedQuality().getValue().equals(TO_BE_RECEIVED)) {
+					parentSpmn.setReceivedQuality(getAcceptableReceiveQuality());
 				}
 
-				parentSpmn.addOrUpdateCollRecvEvents();
+				parentSpmn.addCollectionDetails();
+				parentSpmn.addReceivedDetails();
 
 				if (createdOn == null) {
-					createdOn = parentSpmn.getReceivedEvent().getTime();
+					createdOn = parentSpmn.getReceivedTime();
 				}
 
 				if (createdOn == null) {
@@ -2544,6 +2770,29 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	private PermissibleValue getAcceptableReceiveQuality() {
-		return daoFactory.getPermissibleValueDao().getPv("receive_quality", "Acceptable", true);
+		return getPv(RECV_QUALITY, Specimen.ACCEPTABLE, true);
+	}
+
+	private PermissibleValue getPv(String attribute, String value, boolean leafNode) {
+		return daoFactory.getPermissibleValueDao().getPv(attribute, value, leafNode);
+	}
+
+	private User getUser(UserSummary input) {
+		if (input == null) {
+			return null;
+		}
+
+		User user = null;
+		if (input.getId() != null) {
+			user = daoFactory.getUserDao().getById(input.getId());
+		} else if (StringUtils.isNotBlank(input.getEmailAddress())) {
+			user = daoFactory.getUserDao().getUserByEmailAddress(input.getEmailAddress());
+		}
+
+		if (user == null) {
+			throw OpenSpecimenException.userError(UserErrorCode.NOT_FOUND);
+		}
+
+		return user;
 	}
 }

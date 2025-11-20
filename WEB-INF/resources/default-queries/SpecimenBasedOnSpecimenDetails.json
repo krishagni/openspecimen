@@ -93,7 +93,7 @@
     },
     {
       "id": 8,
-      "field": "Specimen.extensions.SpecimenCollectionEvent.time",
+      "field": "Specimen.spmnCollRecvDetails.collTime",
       "op": "GT",
       "values": [
         "01-01-2005"
@@ -173,11 +173,11 @@
     "Participant.medicalRecord.mrnSiteName",
     "Participant.race",
     "SpecimenCollectionGroup.clinicalDiagnoses.value",
-    "Specimen.extensions.SpecimenCollectionEvent.time",
-    "Specimen.extensions.SpecimenCollectionEvent.procedure",
-    "Specimen.extensions.SpecimenCollectionEvent.container",
-    "Specimen.extensions.SpecimenCollectionEvent.user",
-    "Specimen.extensions.SpecimenCollectionEvent.comments",
+    "Specimen.spmnCollRecvDetails.collTime",
+    "Specimen.spmnCollRecvDetails.collProcedure",
+    "Specimen.spmnCollRecvDetails.collContainer",
+    "Specimen.spmnCollRecvDetails.collector",
+    "Specimen.spmnCollRecvDetails.collComments",
     "Specimen.type",
     "Specimen.specimenPosition.containerName",
     "Specimen.specimenPosition.positionDimensionOneString",

@@ -108,6 +108,24 @@
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem"/>
     </set>
 
+    <many-to-one name="collectionProcedure" column="COLLECTION_PROCEDURE_ID" />
+
+    <many-to-one name="collectionContainer" column="COLLECTION_CONTAINER_ID" />
+
+    <many-to-one name="collectionUser" column="COLLECTION_USER_ID" />
+
+    <property name="collectionTime" column="COLLECTION_TIME" />
+
+    <property name="collectionComments" column="COLLECTION_COMMENTS" />
+
+    <many-to-one name="receivedQuality" column="RECEIVED_QUALITY_ID" />
+
+    <many-to-one name="receivedUser" column="RECEIVED_USER_ID" />
+
+    <property name="receivedTime" column="RECEIVED_TIME" />
+
+    <property name="receivedComments" column="RECEIVED_COMMENTS" />
+
     <many-to-one name="parentEvent" column="PARENT_EVENT_ID" fetch="join"/>
 
     <set name="childrenEvents" table="OS_CHILD_SPMN_EVENTS" inverse="true" cascade="all-delete-orphan" order-by="id">

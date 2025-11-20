@@ -207,18 +207,25 @@ export default {
       "showInOverviewWhen": "!!specimen.collectionEvent.container"
     },
     {
+      "type": "textarea",
+      "labelCode": "specimens.collection_comments",
+      "name": "specimen.collectionEvent.comments",
+      "showWhen": "specimen.lineage == 'New'",
+      "showInOverviewWhen": "!!specimen.collectionEvent.comments"
+    },
+    {
       "type": "datePicker",
       "labelCode": "specimens.receive_date",
       "name": "specimen.receivedEvent.time",
       "showTime": true,
-      "showWhen": "specimen.lineage == 'New'",
+      "showWhen": "specimen.lineage == 'New' && specimen.receivedEvent.receivedQuality && specimen.receivedEvent.receivedQuality != 'To be Received'",
       "showInOverviewWhen": "!!specimen.receivedEvent.time"
     },
     {
       "type": "user",
       "labelCode": "specimens.receiver",
       "name": "specimen.receivedEvent.user",
-      "showWhen": "specimen.lineage == 'New'",
+      "showWhen": "specimen.lineage == 'New' && specimen.receivedEvent.receivedQuality && specimen.receivedEvent.receivedQuality != 'To be Received'",
       "showInOverviewWhen": "!!specimen.receivedEvent.user"
     },
     {
@@ -229,6 +236,13 @@ export default {
       "selectProp": "value",
       "showWhen": "specimen.lineage == 'New'",
       "showInOverviewWhen": "!!specimen.receivedEvent.receivedQuality"
-    }
+    },
+    {
+      "type": "textarea",
+      "labelCode": "specimens.receive_comments",
+      "name": "specimen.receivedEvent.comments",
+      "showWhen": "specimen.lineage == 'New' && specimen.receivedEvent.receivedQuality && specimen.receivedEvent.receivedQuality != 'To be Received'",
+      "showInOverviewWhen": "!!specimen.receivedEvent.comments"
+    },
   ]
 }

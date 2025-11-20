@@ -34,7 +34,7 @@
       "field": null,
       "op": null,
       "values": null,
-      "expr": "minutes_between( Specimen.extensions.SpecimenFrozenEvent.time, Specimen.extensions.SpecimenReceivedEvent.time) < 15",
+      "expr": "minutes_between( Specimen.extensions.SpecimenFrozenEvent.time, Specimen.spmnCollRecvDetails.recvTime) < 15",
       "desc": "Frozen time difference",
       "parameterized": false
     }
@@ -77,7 +77,7 @@
     "Specimen.specimenPosition.containerName",
     "Specimen.specimenPosition.positionDimensionTwoString",
     "Specimen.specimenPosition.positionDimensionOneString",
-    "Specimen.extensions.SpecimenReceivedEvent.time",
+    "Specimen.spmnCollRecvDetails.recvTime",
     "Specimen.extensions.SpecimenFrozenEvent.time",
     "$temporal.3"
   ],

@@ -5,7 +5,6 @@ import java.util.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.domain.AbstractUniqueIdToken;
 
@@ -26,9 +25,8 @@ public class PpidYocUniqueIdLabelToken extends AbstractUniqueIdToken<Specimen> {
 		}
 
 		Calendar cal = Calendar.getInstance();
-		SpecimenCollectionEvent collEvent = specimen.getCollectionEvent();
-		if (collEvent != null) {
-			cal.setTime(collEvent.getTime());
+		if (specimen.getCollectionTime() != null) {
+			cal.setTime(specimen.getCollectionTime());
 		} else if (specimen.getCreatedOn() != null) {
 			cal.setTime(specimen.getCreatedOn());
 		}

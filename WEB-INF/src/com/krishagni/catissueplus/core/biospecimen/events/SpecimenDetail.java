@@ -478,13 +478,8 @@ public class SpecimenDetail extends SpecimenInfo {
 
 		if (!partial) {
 			result.setExtensionDetail(ExtensionDetail.from(specimen.getExtension(), excludePhi));
-			if (specimen.isPrimary()) {
-				result.setCollectionEvent(CollectionEventDetail.from(specimen.getCollectionEvent()));
-				result.setReceivedEvent(ReceivedEventDetail.from(specimen.getReceivedEvent()));
-			} else {
-				result.setCollectionEvent(CollectionEventDetail.from(specimen.getCollRecvDetails()));
-				result.setReceivedEvent(ReceivedEventDetail.from(specimen.getCollRecvDetails()));
-			}
+			result.setCollectionEvent(CollectionEventDetail.from(specimen));
+			result.setReceivedEvent(ReceivedEventDetail.from(specimen));
 		}
 
 		result.setUid(specimen.getUid());

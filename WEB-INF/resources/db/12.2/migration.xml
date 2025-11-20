@@ -162,4 +162,135 @@
         )
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Move specimen collection details from a separate table to the owning entity table" dbms="mysql">
+    <sql>
+      update
+        catissue_specimen s
+        inner join catissue_coll_event_param ce on ce.specimen_id = s.identifier
+      set
+        s.collection_container_id = ce.collection_container_id,
+        s.collection_procedure_id = ce.collection_procedure_id,
+        s.collection_user_id = ce.user_id,
+        s.collection_time = ce.event_timestamp,
+        s.collection_comments = ce.comments
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Move specimen collection details from a separate table to the owning entity table" dbms="oracle">
+    <sql>
+      merge into
+        catissue_specimen s
+      using (
+        select
+          specimen_id, collection_container_id, collection_procedure_id, user_id, event_timestamp, comments
+        from
+          catissue_coll_event_param
+      ) ce on (ce.specimen_id = s.identifier)
+      when matched then
+        update set
+          s.collection_container_id = ce.collection_container_id,
+          s.collection_procedure_id = ce.collection_procedure_id,
+          s.collection_user_id = ce.user_id,
+          s.collection_time = ce.event_timestamp,
+          s.collection_comments = ce.comments
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Move specimen received details from a separate table to the owning entity table" dbms="mysql">
+    <sql>
+      update
+        catissue_specimen s
+        inner join catissue_received_event_param re on re.specimen_id = s.identifier
+      set
+        s.received_quality_id = re.received_quality_id,
+        s.received_user_id = re.user_id,
+        s.received_time = re.event_timestamp,
+        s.received_comments = re.comments
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Move specimen received details from a separate table to the owning entity table" dbms="oracle">
+    <sql>
+      merge into
+        catissue_specimen s
+      using (
+        select
+          specimen_id, received_quality_id, user_id, event_timestamp, comments
+        from
+          catissue_received_event_param
+      ) re on (re.specimen_id = s.identifier)
+      when matched then
+        update set
+          s.received_quality_id = re.received_quality_id,
+          s.received_user_id = re.user_id,
+          s.received_time = re.event_timestamp,
+          s.received_comments = re.comments
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Replace the specimen collection and received form field columns with the main entity columns in the saved queries">
+    <sql>
+      update
+        catissue_saved_queries
+      set
+        query_def =
+          replace(
+            replace(
+              replace(
+                replace(
+                  replace(
+                    replace(
+                      replace(
+                        replace(
+                          replace(
+                            replace(
+                              replace(
+                                replace(
+                                  replace(
+                                    query_def,
+                                    'Specimen.extensions.SpecimenCollectionEvent._?primary_key?_',
+                                    'Specimen.id'
+                                  ),
+                                  'Specimen.extensions.SpecimenCollectionEvent.procedure',
+                                  'Specimen.spmnCollRecvDetails.collProcedure'
+                                ),
+                                'Specimen.extensions.SpecimenCollectionEvent.container',
+                                'Specimen.spmnCollRecvDetails.collContainer'
+                              ),
+                              'Specimen.extensions.SpecimenCollectionEvent.user',
+                              'Specimen.spmnCollRecvDetails.collector'
+                            ),
+                            'Specimen.extensions.SpecimenCollectionEvent.time',
+                            'Specimen.spmnCollRecvDetails.collTime'
+                          ),
+                          'Specimen.extensions.SpecimenCollectionEvent.comments',
+                          'Specimen.spmnCollRecvDetails.collComments'
+                        ),
+                        'Specimen.extensions.SpecimenCollectionEvent._rec_details_.status',
+                        'Specimen.collectionStatus'
+                      ),
+                      'Specimen.extensions.SpecimenReceivedEvent._?primary_key?_',
+                      'Specimen.id'
+                    ),
+                    'Specimen.extensions.SpecimenReceivedEvent.quality',
+                    'Specimen.spmnCollRecvDetails.recvQuality'
+                  ),
+                  'Specimen.extensions.SpecimenReceivedEvent.user',
+                  'Specimen.spmnCollRecvDetails.receiver'
+                ),
+                'Specimen.extensions.SpecimenReceivedEvent.time',
+                'Specimen.spmnCollRecvDetails.recvTime'
+              ),
+              'Specimen.extensions.SpecimenReceivedEvent.comments',
+              'Specimen.spmnCollRecvDetails.recvComments'
+            ),
+            'Specimen.extensions.SpecimenReceivedEvent._rec_details_.status',
+            'Specimen.collectionStatus'
+          )
+      where
+        query_def like '%Specimen.extensions.SpecimenCollectionEvent%' or
+        query_def like '%Specimen.extensions.SpecimenReceivedEvent%'
+    </sql>
+  </changeSet>
 </databaseChangeLog>

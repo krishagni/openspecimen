@@ -78,17 +78,20 @@
     <createView viewName="OS_SPMN_COLL_RECV_DETAILS_VIEW" replaceIfExists="true">
       select
         h.descendent_id as specimen_id,
-        col.identifier as coll_event_id, ccont.value as coll_container, cproc.value as coll_procedure,
-        col.user_id as collector_id, col.event_timestamp as coll_time, col.comments as coll_comments,
-        rcv.identifier as recv_event_id, rqual.value as recv_quality,
-        rcv.user_id as receiver_id, rcv.event_timestamp as recv_time, rcv.comments as recv_comments
+        h.ancestor_id as coll_event_id, ccont.value as coll_container, cproc.value as coll_procedure,
+        s.collection_user_id as collector_id, s.collection_time as coll_time, s.collection_comments as coll_comments,
+        h.ancestor_id as recv_event_id, rqual.value as recv_quality,
+        s.received_user_id as receiver_id, s.received_time as recv_time, s.received_comments as recv_comments
       from
-        catissue_specimen_hierarchy h
-        inner join catissue_coll_event_param col on col.specimen_id = h.ancestor_id
-        inner join catissue_received_event_param rcv on rcv.specimen_id = h.ancestor_id
-        left join catissue_permissible_value ccont on ccont.identifier = col.collection_container_id
-        left join catissue_permissible_value cproc on cproc.identifier = col.collection_procedure_id
-        left join catissue_permissible_value rqual on rqual.identifier = rcv.received_quality_id
+        catissue_specimen s
+        inner join catissue_specimen_hierarchy h on h.ancestor_id = s.identifier
+        left join catissue_permissible_value ccont on ccont.identifier = s.collection_container_id
+        left join catissue_permissible_value cproc on cproc.identifier = s.collection_procedure_id
+        left join catissue_permissible_value rqual on rqual.identifier = s.received_quality_id
+      where
+        s.collection_status = 'Collected' and
+        s.activity_status != 'Disabled' and
+        s.lineage = 'New'
     </createView>
   </changeSet>
 

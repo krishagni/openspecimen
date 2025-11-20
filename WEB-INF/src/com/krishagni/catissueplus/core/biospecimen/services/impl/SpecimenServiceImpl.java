@@ -1280,8 +1280,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 		String prevRecv   = null;
 		if (existing != null) {
 			prevStatus = existing.getCollectionStatus();
-			if (existing.getReceivedEvent() != null && existing.getReceivedEvent().getQuality() != null) {
-				prevRecv = existing.getReceivedEvent().getQuality().getValue();
+			if (existing.getReceivedQuality() != null) {
+				prevRecv = existing.getReceivedQuality().getValue();
 			}
 		}
 
@@ -1351,7 +1351,6 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 
 		if (!specimen.isDeleted()) {
 			// update specimen events and custom fields only if it is not deleted
-			specimen.addOrUpdateCollRecvEvents();
 			specimen.addOrUpdateExtension();
 			if (existing == null) {
 				specimen.addServices();
@@ -1766,8 +1765,8 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 							AccessCtrlMgr.SpecimenAccessRights rights = AccessCtrlMgr.getInstance().ensureReadSpecimenRights(specimen, true);
 							SpecimenDetail detail = SpecimenDetail.from(specimen, false, !rights.phiAccess, true);
 							if (specimen.isPrimary()) {
-								detail.setCollectionEvent(CollectionEventDetail.from(specimen.getCollectionEvent()));
-								detail.setReceivedEvent(ReceivedEventDetail.from(specimen.getReceivedEvent()));
+								detail.setCollectionEvent(CollectionEventDetail.from(specimen));
+								detail.setReceivedEvent(ReceivedEventDetail.from(specimen));
 							}
 
 							SpecimenTypeUnit unit = getUnit(specimen);

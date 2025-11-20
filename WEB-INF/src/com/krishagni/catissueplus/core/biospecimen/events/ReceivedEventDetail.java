@@ -1,12 +1,14 @@
 package com.krishagni.catissueplus.core.biospecimen.events;
 
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
+import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 public class ReceivedEventDetail extends SpecimenEventDetail {
 	private String receivedQuality;
+
+	private String newLabel;
 
 	public String getReceivedQuality() {
 		return receivedQuality;
@@ -16,19 +18,30 @@ public class ReceivedEventDetail extends SpecimenEventDetail {
 		this.receivedQuality = receivedQuality;
 	}
 
-	public static ReceivedEventDetail from(SpecimenReceivedEvent sre) {
-		if (sre == null) {
+	public String getNewLabel() {
+		return newLabel;
+	}
+
+	public void setNewLabel(String newLabel) {
+		this.newLabel = newLabel;
+	}
+
+	public static ReceivedEventDetail from(Specimen specimen) {
+		if (specimen == null) {
 			return null;
+		} else if (specimen.isDerivative() || specimen.isAliquot()) {
+			return from(specimen.getCollRecvDetails());
 		}
 
 		ReceivedEventDetail detail = new ReceivedEventDetail();
-		fromTo(sre, detail);
-
-		detail.setReceivedQuality(PermissibleValue.getValue(sre.getQuality()));
+		detail.setReceivedQuality(PermissibleValue.getValue(specimen.getReceivedQuality()));
+		detail.setUser(UserSummary.from(specimen.getReceivedUser()));
+		detail.setTime(specimen.getReceivedTime());
+		detail.setComments(specimen.getReceivedComments());
 		return detail;
 	}
 
-	public static ReceivedEventDetail from(SpecimenCollectionReceiveDetail cre) {
+	private static ReceivedEventDetail from(SpecimenCollectionReceiveDetail cre) {
 		if (cre == null) {
 			return null;
 		}

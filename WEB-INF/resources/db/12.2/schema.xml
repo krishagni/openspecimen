@@ -619,4 +619,82 @@
       //
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Move collection details to the owning table or entity - specimen">
+    <addColumn tableName="CATISSUE_SPECIMEN">
+      <column name="COLLECTION_CONTAINER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPECIMEN_CONTAINER_ID" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COLLECTION_PROCEDURE_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPECIMEN_PROCEDURE_ID" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COLLECTION_USER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPECIMEN_COLLECTOR_ID" referencedTableName="CATISSUE_USER"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COLLECTION_TIME" type="${nullable.ts.type}" defaultValue="null" />
+      <column name="COLLECTION_COMMENTS" type="${text.type}(512)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Move received details to the owning table or entity - specimen">
+    <addColumn tableName="CATISSUE_SPECIMEN">
+      <column name="RECEIVED_QUALITY_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPECIMEN_RECV_QUALITY_ID" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="RECEIVED_USER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPECIMEN_RECEIVER_ID" referencedTableName="CATISSUE_USER"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="RECEIVED_TIME" type="${nullable.ts.type}" defaultValue="null" />
+      <column name="RECEIVED_COMMENTS" type="${text.type}(512)" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Remove all the collection and received event form record entries">
+    <sql>
+      delete from
+        catissue_form_record_entry
+      where
+        form_ctxt_id in (
+          select
+            fc.identifier
+          from
+            catissue_form_context fc
+            inner join dyextn_containers f on f.identifier = fc.container_id
+          where
+            f.name in ('SpecimenCollectionEvent', 'SpecimenReceivedEvent') and
+            fc.entity_type = 'SpecimenEvent'
+        )
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Disable the collection and received event form associations">
+    <sql>
+      delete from
+        catissue_form_context
+      where
+        entity_type = 'SpecimenEvent' and
+        container_id in (
+          select
+            identifier
+          from
+            dyextn_containers
+          where
+            name in ('SpecimenCollectionEvent', 'SpecimenReceivedEvent')
+        )
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Delete the collection and received event forms">
+    <sql>
+      delete from
+        dyextn_containers
+      where
+        name in ('SpecimenCollectionEvent', 'SpecimenReceivedEvent')
+    </sql>
+  </changeSet>
 </databaseChangeLog>

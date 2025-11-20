@@ -591,6 +591,12 @@
             <column>COLL_TIME</column>
             <format>MM-dd-yyyy HH:mm</format>
           </datePicker>
+          <textField>
+            <name>collComments</name>
+            <udn>collComments</udn>
+            <caption>#getMessage("specimen_collection_comments")</caption>
+            <column>COLL_COMMENTS</column>
+          </textField>
           <dropDown>
             <name>recvQuality</name>
             <udn>recvQuality</udn>
@@ -613,6 +619,12 @@
             <column>RECV_TIME</column>
             <format>MM-dd-yyyy HH:mm</format>
           </datePicker>
+          <textField>
+            <name>recvComments</name>
+            <udn>recvComments</udn>
+            <caption>#getMessage("specimen_received_comments")</caption>
+            <column>RECV_COMMENTS</column>
+          </textField>
         </row>
       </subForm>
     </row>

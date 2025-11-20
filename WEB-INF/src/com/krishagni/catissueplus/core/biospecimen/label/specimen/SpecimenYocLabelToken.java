@@ -2,7 +2,6 @@ package com.krishagni.catissueplus.core.biospecimen.label.specimen;
 
 import java.util.Calendar;
 
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 
 public class SpecimenYocLabelToken extends AbstractSpecimenLabelToken {
@@ -17,9 +16,8 @@ public class SpecimenYocLabelToken extends AbstractSpecimenLabelToken {
 		}
 
 		Calendar cal = Calendar.getInstance();
-		SpecimenCollectionEvent collEvent = specimen.getCollectionEvent();
-		if (collEvent != null) {
-			cal.setTime(collEvent.getTime());
+		if (specimen.getCollectionTime() != null) {
+			cal.setTime(specimen.getCollectionTime());
 		} else if (specimen.getCreatedOn() != null) {
 			cal.setTime(specimen.getCreatedOn());
 		}

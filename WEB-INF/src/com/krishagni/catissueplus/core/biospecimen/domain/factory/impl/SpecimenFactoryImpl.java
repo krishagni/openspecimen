@@ -25,10 +25,7 @@ import com.krishagni.catissueplus.core.administrative.services.StorageContainerS
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionEvent;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenExternalIdentifier;
-import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenReceivedEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolRegistrationFactory;
@@ -38,10 +35,8 @@ import com.krishagni.catissueplus.core.biospecimen.domain.factory.SpecimenFactor
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.SrErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.VisitFactory;
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.ReceivedEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.SpecimenEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenResolver;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -58,10 +53,7 @@ import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.importer.services.impl.ImporterContextHolder;
 
 import static com.krishagni.catissueplus.core.common.PvAttributes.BIOHAZARD;
-import static com.krishagni.catissueplus.core.common.PvAttributes.COLL_PROC;
-import static com.krishagni.catissueplus.core.common.PvAttributes.CONTAINER;
 import static com.krishagni.catissueplus.core.common.PvAttributes.PATH_STATUS;
-import static com.krishagni.catissueplus.core.common.PvAttributes.RECV_QUALITY;
 import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_ANATOMIC_SITE;
 import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_CLASS;
 import static com.krishagni.catissueplus.core.common.PvAttributes.SPECIMEN_LATERALITY;
@@ -987,103 +979,37 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 	}
 	
 	private void setCollectionDetail(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
-		if (specimen.isAliquot() || specimen.isDerivative()) {
-			return;
+		try {
+			specimen.setCollectionDetails(detail.getCollectionEvent());
+		} catch (OpenSpecimenException ce) {
+			ose.addErrors(ce.getErrors());
 		}
-				
-		CollectionEventDetail collDetail = detail.getCollectionEvent();
-		if (collDetail == null) {
-			return;
-		}
-		
-		SpecimenCollectionEvent event = SpecimenCollectionEvent.getFor(specimen);
-		setEventAttrs(collDetail, false, event, ose);
-
-		String collCont = collDetail.getContainer();
-		if (StringUtils.isNotBlank(collCont)) {
-			PermissibleValue contPv = getPv(CONTAINER, collCont, false);
-			if (contPv != null) {
-				event.setContainer(contPv);
-			} else {
-				ose.addError(SpecimenErrorCode.INVALID_COLL_CONTAINER, collCont);
-			}
-
-		}
-			
-		String proc = collDetail.getProcedure();
-		if (StringUtils.isNotBlank(proc)) {
-			PermissibleValue procPv = getPv(COLL_PROC, proc, false);
-			if (procPv != null) {
-				event.setProcedure(procPv);
-			} else {
-				ose.addError(SpecimenErrorCode.INVALID_COLL_PROC, proc);
-			}
-		}
-		
-		specimen.setCollectionEvent(event);
 	}
 	
 	private void setCollectionDetail(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
 		if (existing == null || detail.isAttrModified("collectionEvent")) {
 			setCollectionDetail(detail, specimen, ose);
 		} else {
-			specimen.setCollectionEvent(existing.getCollectionEvent());
+			specimen.updateCollectionDetails(existing);
 		}
 	}
 	
 	private void setReceiveDetail(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
-		if (specimen.isAliquot() || specimen.isDerivative()) {
-			return;			
+		try {
+			specimen.setReceivedDetails(detail.getReceivedEvent());
+		} catch (OpenSpecimenException re) {
+			ose.addErrors(re.getErrors());
 		}
-		
-		ReceivedEventDetail recvDetail = detail.getReceivedEvent();
-		if (recvDetail == null) {
-			return;
-		}
-		
-		SpecimenReceivedEvent event = SpecimenReceivedEvent.getFor(specimen);
-		String recvQuality = recvDetail.getReceivedQuality();
-		if (StringUtils.isNotBlank(recvQuality)) {
-			PermissibleValue recvPv = getPv(RECV_QUALITY, recvQuality, false);
-			if (recvPv != null) {
-				event.setQuality(recvPv);
-			} else {
-				ose.addError(SpecimenErrorCode.INVALID_RECV_QUALITY, recvQuality);
-			}
-		}
-
-		setEventAttrs(recvDetail, !event.isReceived(), event, ose);
-		specimen.setReceivedEvent(event);
 	}
 	
 	private void setReceiveDetail(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
 		if (existing == null || detail.isAttrModified("receivedEvent")) {
 			setReceiveDetail(detail, specimen, ose);
 		} else {
-			specimen.setReceivedEvent(existing.getReceivedEvent());
+			specimen.updateReceivedDetails(existing);
 		}
 	}
-	
-	private void setEventAttrs(SpecimenEventDetail detail, boolean skipUserTime, SpecimenEvent event, OpenSpecimenException ose) {
-		if (StringUtils.isNotBlank(detail.getComments())) {
-			event.setComments(detail.getComments());
-		}
 
-		if (skipUserTime) {
-			event.setUser(null);
-			event.setTime(null);
-		} else {
-			User user = getUser(detail, ose);
-			if (user != null) {
-				event.setUser(user);
-			}
-
-			if (detail.getTime() != null) {
-				event.setTime(detail.getTime());
-			}
-		}
-	}
-	
 	private void setExtension(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
 		if (specimen.getCollectionProtocol() == null) {
 			return;
@@ -1115,10 +1041,6 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		if (existing == null || detail.isAttrModified("createdBy")) {
 			specimen.setCreatedBy(getUser(detail.getCreatedBy(), ose));
 		}
-	}
-	
-	private User getUser(SpecimenEventDetail detail, OpenSpecimenException ose) {
-		return getUser(detail.getUser(), ose);
 	}
 
 	private User getUser(UserSummary input, OpenSpecimenException ose) {

@@ -132,4 +132,32 @@
       <column name="currency_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Move collection details to the owning table or entity - specimen">
+    <addColumn tableName="CATISSUE_SPECIMEN_AUD">
+      <column name="COLLECTION_CONTAINER_ID" type="${int.type}" />
+      <column name="collectionContainer_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_PROCEDURE_ID" type="${int.type}" />
+      <column name="collectionProcedure_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_USER_ID" type="${int.type}" />
+      <column name="collectionUser_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_TIME" type="${nullable.ts.type}"  />
+      <column name="collectionTime_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_COMMENTS" type="${text.type}(512)" />
+      <column name="collectionComments_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Move received details to the owning table or entity - specimen">
+    <addColumn tableName="CATISSUE_SPECIMEN_AUD">
+      <column name="RECEIVED_QUALITY_ID" type="${int.type}" />
+      <column name="receivedQuality_MOD" type="${boolean.type}" />
+      <column name="RECEIVED_USER_ID" type="${int.type}" />
+      <column name="receivedUser_MOD" type="${boolean.type}" />
+      <column name="RECEIVED_TIME" type="${nullable.ts.type}" defaultValue="null" />
+      <column name="receivedTime_MOD" type="${boolean.type}" />
+      <column name="RECEIVED_COMMENTS" type="${text.type}(512)" />
+      <column name="receivedComments_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

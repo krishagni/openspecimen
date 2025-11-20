@@ -109,6 +109,10 @@ public abstract class BaseExtensionEntity extends BaseEntity {
 
 			@Override
 			public void saveOrUpdateRecordEntry(boolean insert) {
+				if (getId() == null) {
+					return;
+				}
+
 				boolean ret = BaseExtensionEntity.this.saveOrUpdateRecordEntry(insert, getFormId(), getFormContextId(), getId());
 				if (!ret) {
 					super.saveOrUpdateRecordEntry(insert);
