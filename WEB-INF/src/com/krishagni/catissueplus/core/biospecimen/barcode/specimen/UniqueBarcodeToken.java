@@ -13,6 +13,7 @@ public class UniqueBarcodeToken extends AbstractUniqueIdToken<Specimen> {
 
 	public UniqueBarcodeToken() {
 		this.name = "SYS_UID";
+		this.useSysGenFastSetting = true;
 	}
 
 	@Override

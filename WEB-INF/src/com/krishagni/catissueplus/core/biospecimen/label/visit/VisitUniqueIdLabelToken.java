@@ -13,6 +13,7 @@ public class VisitUniqueIdLabelToken extends AbstractUniqueIdToken<Visit> {
 			
 	public VisitUniqueIdLabelToken() {
 		this.name = "SYS_UID";
+		this.useSysGenFastSetting = true;
 	}
 
 	@Override

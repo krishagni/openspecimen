@@ -1986,6 +1986,8 @@
       "field_separator_desc": "A single character that specifies how records in delimited text file should be split into fields. For example: CSV files use comma (,) as the field separator",
       "hosting_institute": "Hosting Institute",
       "hosting_institute_desc": "Name of the institute hosting OpenSpecimen and the biobank services",
+      "gen_fast_unique_ids": "Fast Unique IDs",
+      "gen_fast_unique_ids_desc": "Enable for faster generation of system unique IDs (SYS_UID) by reducing bottlenecks for concurrent requests.",
       "import_max_records_per_txn": "Pre-validate Records Limit",
       "import_max_records_per_txn_desc": "Maximum number of records that can be pre-validated before importing to database. WARNING: Keep the limit below 15,000. With a higher limit, the system might become inaccessible to users.",
       "locale": "Locale",

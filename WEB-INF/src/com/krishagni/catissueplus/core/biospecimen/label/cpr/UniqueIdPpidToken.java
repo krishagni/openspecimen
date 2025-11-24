@@ -13,6 +13,7 @@ public class UniqueIdPpidToken extends AbstractUniqueIdToken<CollectionProtocolR
 	
 	public UniqueIdPpidToken() {
 		this.name = "SYS_UID";
+		this.useSysGenFastSetting = true;
 	}
 
 	public Number getUniqueId(CollectionProtocolRegistration cpr, String ... args) {

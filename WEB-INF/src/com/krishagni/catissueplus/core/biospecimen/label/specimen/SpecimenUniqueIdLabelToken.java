@@ -13,6 +13,7 @@ public class SpecimenUniqueIdLabelToken extends AbstractUniqueIdToken<Specimen> 
 			
 	public SpecimenUniqueIdLabelToken() {
 		this.name = "SYS_UID";
+		this.useSysGenFastSetting = true;
 	}
 
 	@Override
