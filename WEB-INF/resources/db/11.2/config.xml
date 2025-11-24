@@ -24,4 +24,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Setting to enable faster generation of system unique IDs">
+    <sql>
+      call add_cfg_prop(
+        'common', 'gen_fast_unique_ids',
+        'gen_fast_unique_ids', 'gen_fast_unique_ids_desc',
+        'BOOLEAN', ''
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
