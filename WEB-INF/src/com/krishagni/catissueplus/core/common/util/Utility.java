@@ -705,6 +705,10 @@ public class Utility {
 		return collection != null ? collection.stream() : Stream.empty();
 	}
 
+	public static <T> Stream<T> nullSafeStream(T... args) {
+		return args != null && args.length > 0 ? Arrays.stream(args) : Stream.empty();
+	}
+
 	public static <T, K, V> Map<K, V> toLinkedMap(Collection<T> collection, Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
 		Map<K, V> map = new LinkedHashMap<>();
 		if (CollectionUtils.isEmpty(collection)) {
