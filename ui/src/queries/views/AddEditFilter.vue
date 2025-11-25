@@ -20,6 +20,7 @@
 <script>
 import {format, parse} from 'date-fns';
 
+import containerSvc from '@/administrative/services/Container.js';
 import formSvc from '@/forms/services/Form.js';
 import pvSvc   from '@/common/services/PermissibleValue.js';
 import siteSvc from '@/administrative/services/Site.js';
@@ -178,6 +179,15 @@ export default {
           return siteSvc.getSites({...filters, name: searchTerm}).then(
             sites => sites.map(site => ({name: site.name, value: site.name}))
           );
+        } else if (apiUrl.indexOf('storage-containers') >= 0) {
+          const opts = {...filters, includeChildren: true};
+          if (searchTerm instanceof Array) {
+            opts.naam = searchTerm;
+          } else {
+            opts.name = searchTerm;
+          }
+
+          return containerSvc.getContainers(opts).then(containers => containers.map(({name}) => ({name, value: name})));
         }
 
         return [];
