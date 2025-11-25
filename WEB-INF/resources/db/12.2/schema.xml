@@ -697,4 +697,16 @@
         name in ('SpecimenCollectionEvent', 'SpecimenReceivedEvent')
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Auth tokens: Increase the size of IP address to accommodate the IPv6 addresses">
+    <modifyDataType tableName="OS_AUTH_TOKENS" columnName="IP_ADDRESS" newDataType="${text.type}(64)" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Login audits: Increase the size of IP address to accommodate the IPv6 addresses">
+    <modifyDataType tableName="OS_LOGIN_AUDIT_LOGS" columnName="IP_ADDRESS" newDataType="${text.type}(64)" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Login OTPs: Increase the size of IP address to accommodate the IPv6 addresses">
+    <modifyDataType tableName="OS_USER_LOGIN_OTPS" columnName="IP_ADDRESS" newDataType="${text.type}(64)" />
+  </changeSet>
 </databaseChangeLog>
