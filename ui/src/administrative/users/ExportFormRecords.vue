@@ -110,7 +110,7 @@ export default {
 
     _getRecordTypes: async function() {
       const {currentUser} = this.$ui;
-      const entityId = currentUser.admin ? -1 : currentUser.instituteId;
+      const entityId = (!currentUser.admin && currentUser.instituteId) || null;
 
       const userForms    = await formSvc.getForms({formType: 'User', entityId});
       const profileForms = await formSvc.getForms({formType: 'UserProfile', entityId});
