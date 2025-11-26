@@ -227,7 +227,7 @@ export default {
     },
 
     _getForms: function(query) {
-      return formSvc.getForms({name: query}).then(
+      return formSvc.getForms({name: query, excludeSysForms: true}).then(
         dbForms => {
           dbForms.forEach(form => form.id = form.formId)
 
