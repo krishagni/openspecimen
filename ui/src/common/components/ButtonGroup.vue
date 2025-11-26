@@ -12,6 +12,10 @@ export default {
 
 <style scoped>
 
+.os-btn-group {
+  display: inline-flex;
+}
+
 .os-btn-group :deep(> *:not(:last-child)),
 .os-btn-group :deep(> *:not(:last-child) button) {
   border-top-right-radius: 0px;

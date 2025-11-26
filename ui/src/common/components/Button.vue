@@ -118,6 +118,9 @@ button.icon-btn {
   background: transparent;
   height: 1.75rem;
   width: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn.btn-xs {
