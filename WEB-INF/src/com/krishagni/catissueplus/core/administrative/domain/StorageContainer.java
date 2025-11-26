@@ -38,6 +38,7 @@ import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.SchemeOrdinalConverterUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -1299,6 +1300,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		copy.setCompAllowedCps(computeAllowedCps());
 		copy.setCompAllowedDps(computeAllowedDps());
 		copyExtensionTo(copy);
+		ensureWithinCapacityLimits();
 		return copy;
 	}
 	
@@ -1355,6 +1357,19 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public boolean isSiteContainer() {
 		return isSiteContainer(getSite());
+	}
+
+	public void ensureWithinCapacityLimits() {
+		int maxAllowedSize = ConfigUtil.getInstance().getIntSetting("administrative", "max_container_capacity", 225);
+		if (isDimensionless() || getNoOfRows() == null || getNoOfColumns() == null) {
+			return;
+		}
+
+		int currentCapacity = getNoOfRows() * getNoOfColumns();
+		if (currentCapacity > maxAllowedSize) {
+			String name = StringUtils.isNotBlank(getName()) ? getName() : "Unknown";
+			throw OpenSpecimenException.userError(StorageContainerErrorCode.EXCEED_CAPACITY_LMT, name, currentCapacity, maxAllowedSize);
+		}
 	}
 
 	public static String getDefaultSiteContainerName(Site site) {
@@ -1558,6 +1573,7 @@ public class StorageContainer extends BaseExtensionEntity {
 
 			setNoOfColumns(other.getNoOfColumns());
 			setNoOfRows(other.getNoOfRows());
+			ensureWithinCapacityLimits();
 		}
 
 		if (other.getCapacity() != null && other.getCapacity() > 0) {

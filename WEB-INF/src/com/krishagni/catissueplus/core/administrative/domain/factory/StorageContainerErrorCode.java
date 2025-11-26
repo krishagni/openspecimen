@@ -100,7 +100,9 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	PARENT_ARCHIVED,
 
-	ARCHIVED;
+	ARCHIVED,
+
+	EXCEED_CAPACITY_LMT;
 
 	@Override
 	public String code() {

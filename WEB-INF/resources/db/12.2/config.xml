@@ -24,4 +24,14 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Max container size">
+    <sql>
+      call add_cfg_prop(
+        'administrative', 'max_container_capacity',
+        'max_container_capacity', 'max_container_capacity',
+        'INT', '225'
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

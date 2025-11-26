@@ -117,6 +117,12 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 		if ((!rowDimLess || !colDimLess) && (rowDimLess || colDimLess)) {
 			ose.addError(ContainerTypeErrorCode.INVALID_CAPACITY);
 		}
+
+		try {
+			containerType.ensureCapacityWithinLimits();
+		} catch (OpenSpecimenException e) {
+			ose.addErrors(e.getErrors());
+		}
 	}
 	
 	private void setNoOfColumns(ContainerTypeDetail detail, ContainerType containerType, OpenSpecimenException ose) {

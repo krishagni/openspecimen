@@ -313,6 +313,12 @@ public class StorageContainerFactoryImpl implements StorageContainerFactory {
 			container.setNoOfRows(existing.getNoOfRows());
 		}
 
+		try {
+			container.ensureWithinCapacityLimits();
+		} catch (OpenSpecimenException ce) {
+			ose.addErrors(ce.getErrors());
+		}
+
 		boolean rowDimLess = (container.getNoOfRows() == null);
 		boolean colDimLess = (container.getNoOfColumns() == null);
 		if ((!rowDimLess || !colDimLess) && (rowDimLess || colDimLess)) {

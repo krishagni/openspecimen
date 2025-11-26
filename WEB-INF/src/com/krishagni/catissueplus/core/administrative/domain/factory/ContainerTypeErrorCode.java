@@ -28,7 +28,9 @@ public enum ContainerTypeErrorCode implements ErrorCode {
 
 	CANNOT_HOLD_CONTAINER,
 
-	INVALID_NAME_FORMAT;
+	INVALID_NAME_FORMAT,
+
+	EXCEED_CAPACITY_LMT;
 
 	@Override
 	public String code() {

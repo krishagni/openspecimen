@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
+import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
@@ -188,8 +189,9 @@ public class ContainerType extends BaseEntity {
 		setTemperature(containerType.getTemperature());
 		setStoreSpecimenEnabled(containerType.isStoreSpecimenEnabled());
 		setActivityStatus(containerType.getActivityStatus());
-		
 		updateCanHold(containerType.getCanHold());
+
+		ensureCapacityWithinLimits();
 	}
 	
 	public List<DependentEntityDetail> getDependentEntities() {
@@ -204,6 +206,18 @@ public class ContainerType extends BaseEntity {
 
 		setName(Utility.getDisabledValue(getName(), 64));
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
+	}
+
+	public void ensureCapacityWithinLimits() {
+		int maxAllowedSize = ConfigUtil.getInstance().getIntSetting("administrative", "max_container_capacity", 225);
+		if (isDimensionless() || getNoOfRows() == null || getNoOfColumns() == null) {
+			return;
+		}
+
+		int currentCapacity = getNoOfRows() * getNoOfColumns();
+		if (currentCapacity > maxAllowedSize) {
+			throw OpenSpecimenException.userError(ContainerTypeErrorCode.EXCEED_CAPACITY_LMT, currentCapacity, maxAllowedSize);
+		}
 	}
 
 	private void updateCanHold(ContainerType canHold) {

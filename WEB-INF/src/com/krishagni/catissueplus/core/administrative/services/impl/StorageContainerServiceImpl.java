@@ -1962,7 +1962,6 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		storageLocation.setPositionY(dest.getPosTwo());
 		storageLocation.setPosition(dest.getPosition());
 		detail.setStorageLocation(storageLocation);
-
 		return createStorageContainer(getContainerCopy(srcContainer), detail);
 	}
 
@@ -2153,25 +2152,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 	}
 
 	private StorageContainer getContainerCopy(StorageContainer source) {
-		StorageContainer copy = new StorageContainer();
-		copy.setUsedFor(source.getUsedFor());
-		copy.setTemperature(source.getTemperature());
-		copy.setNoOfColumns(source.getNoOfColumns());
-		copy.setNoOfRows(source.getNoOfRows());
-		copy.setColumnLabelingScheme(source.getColumnLabelingScheme());
-		copy.setRowLabelingScheme(source.getRowLabelingScheme());
-		copy.setPositionLabelingMode(source.getPositionLabelingMode());
-		copy.setPositionAssignment(source.getPositionAssignment());
-		copy.setComments(source.getComments());
-		copy.setAllowedSpecimenClasses(new HashSet<>(source.getAllowedSpecimenClasses()));
-		copy.setAllowedSpecimenTypes(new HashSet<>(source.getAllowedSpecimenTypes()));
-		copy.setAllowedCps(new HashSet<>(source.getAllowedCps()));
-		copy.setAllowedDps(new HashSet<>(source.getAllowedDps()));
-		copy.setCompAllowedSpecimenClasses(copy.computeAllowedSpecimenClasses());
-		copy.setCompAllowedSpecimenTypes(copy.computeAllowedSpecimenTypes());
-		copy.setCompAllowedCps(copy.computeAllowedCps());
-		copy.setCompAllowedDps(copy.computeAllowedDps());
-		copy.setStoreSpecimenEnabled(source.isStoreSpecimenEnabled());
+		StorageContainer copy = source.copy();
+		copy.setSite(null);
+		copy.setParentContainer(null);
+		copy.setPosition(null);
 		copy.setCreatedBy(AuthUtil.getCurrentUser());
 		return copy;
 	}
