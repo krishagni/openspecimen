@@ -66,7 +66,8 @@
         </tr>
 
         <template v-for="(itemModel, itemIdx) of itemModels" :key="itemModel.key">
-          <tr v-if="itemModel.show" :class="expanded && expanded.indexOf(itemModel.$context) >= 0 && 'expanded-row'">
+          <tr v-if="itemModel.show"
+            :class="[expanded && expanded.indexOf(itemModel.$context) >= 0 ? 'expanded-row' : 'regular-row']">
             <td class="selection" v-if="readOnly && (selectionMode == 'radio' || selectionMode == 'checkbox')">
               <RadioButton name="rowSelection" :value="itemIdx" v-model="ctx.selectedIdx"
                 @click="toggleSelection(itemIdx)" v-if="selectionMode == 'radio'" />
@@ -893,4 +894,11 @@ tr.expanded-row-child:hover {
   background: #fff!important;
 }
 
+tr:nth-child(odd):not(.expanded-row) td,
+tr:nth-child(odd):not(.expanded-row) td :deep(input),
+tr:nth-child(odd):not(.expanded-row) td :deep(textarea),
+tr:nth-child(odd):not(.expanded-row) td :deep(.p-dropdown),
+tr:nth-child(odd):not(.expanded-row) td :deep(.p-multiselect) {
+  background: #fafafa;
+}
 </style>
