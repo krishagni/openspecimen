@@ -1997,6 +1997,8 @@
       "dp_expiry_rem_rept_inter_desc": "Number of days after which email notification should be repeated for distribution protocol expiry.",
       "local_account_signups": "Local Account Signups",
       "local_account_signups_desc": "Enable signup requests for the 'openspecimen' domain.",
+      "max_container_capacity": "Max. Container Capacity",
+      "max_container_capacity_desc": "Maximum allowed size of the container. When nothing is specified, default is 225 slots or positions.",
       "max_order_spmns_ui_limit": "Specimens UI Limit",
       "max_order_spmns_ui_limit_desc": "Maximum number of specimens displayed in UI during distribution or shipment.",
       "order_attachment_type": "Order Attachment",
