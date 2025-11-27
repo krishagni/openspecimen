@@ -40,6 +40,8 @@ public class ScheduledTaskWrapper implements Runnable {
 		} catch (Exception e) {
 			logger.error("Error running scheduled job: " + (job != null ? job.getName() : "Unknown"), e);
 			callback.failed(jobRun, e);
-		} 
+		} finally {
+			callback.cleanup(jobRun);
+		}
 	}
 }

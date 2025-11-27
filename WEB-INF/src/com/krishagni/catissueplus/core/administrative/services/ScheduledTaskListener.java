@@ -10,4 +10,6 @@ public interface ScheduledTaskListener {
 	void completed(ScheduledJobRun jobRun);
 	
 	void failed(ScheduledJobRun jobRun, Exception e);
+
+	void cleanup(ScheduledJobRun jobRun);
 }

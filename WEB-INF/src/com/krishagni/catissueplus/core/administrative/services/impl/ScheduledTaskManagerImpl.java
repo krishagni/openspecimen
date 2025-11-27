@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -41,7 +42,9 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 	private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(5);
 	
 	private static Map<Long, ScheduledFuture<?>> scheduledJobs = new HashMap<>();
-	
+
+	private static Map<Long, ScheduledJobRun> runningJobs = new ConcurrentHashMap<>();
+
 	private static final String JOB_FINISHED_TEMPLATE = "scheduled_job_finished";
 	
 	private static final String JOB_FAILED_TEMPLATE = "scheduled_job_failed";
@@ -149,39 +152,57 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 			jobRun.setRtArgs(args);
 			daoFactory.getScheduledJobDao().saveOrUpdateJobRun(jobRun);
 			initializeLazilyLoadedEntites(job);
+			runningJobs.put(jobRun.getScheduledJob().getId(), jobRun);
 			return jobRun;
 		} catch (Exception e) {
 			logger.error("Error creating job run. Job name: " + job.getName(), e);
 			throw new RuntimeException(e);
 		}
-		
 	}
 
 	@Override
 	@PlusTransactional
 	public void completed(ScheduledJobRun jobRun) {
-		ScheduledJobRun dbRun = daoFactory.getScheduledJobDao().getJobRun(jobRun.getId());
-		dbRun.completed(jobRun.getLogFilePath());
-		notifyJobCompleted(dbRun);
-		scheduledJobs.remove(dbRun.getScheduledJob().getId());
-		releaseLock(dbRun.getScheduledJob());
-		if (logger.isDebugEnabled()) {
-			logger.debug("Released the lock on the job " + dbRun.getScheduledJob().getName());
-		}
+		try {
+			ScheduledJobRun dbRun = daoFactory.getScheduledJobDao().getJobRun(jobRun.getId());
+			dbRun.completed(jobRun.getLogFilePath());
+			notifyJobCompleted(dbRun);
+			scheduledJobs.remove(dbRun.getScheduledJob().getId());
+			releaseLock(dbRun.getScheduledJob());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Released the lock on the job " + dbRun.getScheduledJob().getName());
+			}
 
-		schedule(dbRun.getScheduledJob().getId());
+			schedule(dbRun.getScheduledJob().getId());
+		} catch (Exception e) {
+			logger.error("Error running the completion callback of the scheduled job. Job Name: " + jobRun.getScheduledJob().getName(), e);
+		} finally {
+			runningJobs.remove(jobRun.getScheduledJob().getId());
+		}
 	}
 
 	@Override
 	@PlusTransactional
 	public void failed(ScheduledJobRun jobRun, Exception e) {
-		ScheduledJobRun dbRun = daoFactory.getScheduledJobDao().getJobRun(jobRun.getId());
-		dbRun.failed(e);
-		notifyJobFailed(dbRun);
-		scheduledJobs.remove(dbRun.getScheduledJob().getId());
-		releaseLock(dbRun.getScheduledJob());
-		logger.info("Released the lock on the job " + dbRun.getScheduledJob().getName());
-		schedule(dbRun.getScheduledJob().getId());
+		try {
+			ScheduledJobRun dbRun = daoFactory.getScheduledJobDao().getJobRun(jobRun.getId());
+			dbRun.failed(e);
+			notifyJobFailed(dbRun);
+			scheduledJobs.remove(dbRun.getScheduledJob().getId());
+			releaseLock(dbRun.getScheduledJob());
+			logger.info("Released the lock on the job " + dbRun.getScheduledJob().getName());
+			schedule(dbRun.getScheduledJob().getId());
+		} catch (Exception fe) {
+			logger.error("Error running the error callback of the scheduled job. Job Name: " + jobRun.getScheduledJob().getName(), fe);
+		} finally {
+			runningJobs.remove(jobRun.getScheduledJob().getId());
+		}
+	}
+
+	// This method should not depend on database including PlusTransactional
+	@Override
+	public void cleanup(ScheduledJobRun jobRun) {
+		runningJobs.remove(jobRun.getScheduledJob().getId());
 	}
 
 	private boolean acquireLock(ScheduledJob job) {
@@ -197,12 +218,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 			status -> {
 				Properties appProps = AppProperties.getInstance().getProperties();
 				String thisNode = appProps.getProperty("node.name", "thisNode");
-
-				String node = daoFactory.getScheduledJobDao().getRunByNodeForUpdate(job.getId());
-
-				if (StringUtils.isNotBlank(node) &&
-					((clear && !node.equals(thisNode)) || (!clear && !node.equals("none")))) {
-					logger.info("Lock on the job '" + job.getName() + "' is held by " + node);
+				if (!canModifyLock(job, clear, thisNode)) {
 					return false;
 				}
 
@@ -211,7 +227,40 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 			}
 		));
 	}
-		
+
+	private boolean canModifyLock(ScheduledJob job, boolean clear, String thisNode) {
+		String node = daoFactory.getScheduledJobDao().getRunByNodeForUpdate(job.getId());
+		if (StringUtils.isBlank(node)) {
+			return true;
+		}
+
+		boolean heldByOther = !node.equals(thisNode);
+		if (clear) {
+			if (heldByOther) {
+				logger.info("Lock on the job '" + job.getName() + "' is held by " + node);
+				return false;
+			}
+
+			return true;
+		}
+
+		if (node.equals("none")) {
+			return true;
+		}
+
+		if (heldByOther) {
+			logger.info("Lock on the job '" + job.getName() + "' is held by " + node);
+			return false;
+		}
+
+		if (runningJobs.containsKey(job.getId())) {
+			logger.info("Lock on the job '" + job.getName() + "' is held by " + node + " and the job is still running");
+			return false;
+		}
+
+		return true;
+	}
+
 	private void runJob(User user, ScheduledJob job, String args, Long minutesLater) {
 		if (isJobQueued(job)) {
 			cancel(job);
@@ -240,7 +289,7 @@ public class ScheduledTaskManagerImpl implements ScheduledTaskManager, Scheduled
 		logger.info("Scheduling the job '" + job.getName() + "' to run " + minutesLater + " minutes later");
 		ScheduledTaskWrapper taskWrapper = new ScheduledTaskWrapper(job, args, user, this);
 		ScheduledFuture<?> future = executorService.schedule(taskWrapper, minutesLater, TimeUnit.MINUTES);
-		scheduledJobs.put(job.getId(), future);		
+		scheduledJobs.put(job.getId(), future);
 	}
 	
 	private void initializeLazilyLoadedEntites(ScheduledJob job) {
