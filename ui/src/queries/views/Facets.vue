@@ -176,7 +176,9 @@ export default {
             break;
 
           default:
-            continue;
+            if (type != 'BOOLEAN') {
+              continue;
+            }
         }
 
         facets.push(this._getFacet(prefix, filter, expr, type, op, values));

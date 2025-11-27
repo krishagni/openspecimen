@@ -428,6 +428,8 @@ class Util {
         const relOp = facet.op == 'LT' ? ' < ' : ' <= ';
         expr = '(' + lhs + relOp + literal(maxValue) + ')';
       }
+    } else if (facet.type == 'BOOLEAN') {
+      expr = lhs + ' in (' + facet.values.map(v => v == 'Yes' ? 1 : (v == 'No' ? 0 : v)).join(', ') + ')';
     } else {
       expr = lhs + ' in ("' + facet.values.join('", "') + '")';
     }
