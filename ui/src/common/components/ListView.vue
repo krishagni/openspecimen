@@ -127,6 +127,7 @@
                 <os-radio-button :inline-label="caption(filter)" v-model="filterValues[filter.name]"
                   v-bind="filter" />
               </span>
+              <span v-else>{{filter}}</span>
             </cell>
           </form-group>
 

@@ -109,7 +109,7 @@ export default {
     },
 
     async selectedValue() {
-      if (!this.modelValue) {
+      if (!this.modelValue && this.modelValue !== 0) {
         return [];
       }
 

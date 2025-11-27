@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -237,6 +238,18 @@ public class DefaultListGenerator implements ListGenerator {
 			case DATE:
 			case DATE_INTERVAL:
 				return getRangeAql(criterion.getExpr(), criterion.getValues());
+
+			case BOOLEAN:
+				String inVals = criterion.getValues().stream()
+					.filter(Objects::nonNull)
+					.map(Object::toString)
+					.collect(Collectors.joining(", "));
+
+				if (StringUtils.isBlank(inVals)) {
+					return null;
+				}
+
+				return criterion.getExpr() + " in (" + inVals + ")";
 
 			default:
 				String searchType = criterionCfg.getSearchType();

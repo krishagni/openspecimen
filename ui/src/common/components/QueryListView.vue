@@ -112,6 +112,16 @@ export default {
           result.range = true;
           result.format = ui.global.locale.shortDateFmt;
           result.stringLiteral = true;
+        } else if (filter.dataType == 'BOOLEAN') {
+          result.type = 'dropdown';
+          result.listSource = {
+            options: [
+              {value: 1, caption: 'Yes'},
+              {value: 0, caption: 'No'}
+            ],
+            selectProp: 'value',
+            displayProp: 'caption'
+          };
         }
 
         return result;
@@ -137,7 +147,7 @@ export default {
       const result = [];
       Object.keys(filters || {}).forEach(
         (filter) => {
-          if (!filters[filter]) {
+          if (!filters[filter] && filters[filter] !== 0) {
             return;
           }
 
