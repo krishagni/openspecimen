@@ -4,7 +4,7 @@
   </div>
 
   <div class="os-root" v-else>
-    <os-navbar :hide-buttons="navCtrls.hideButtons" />
+    <os-navbar :hide-buttons="navCtrls.hideButtons" @single-logout="logout" />
 
     <div class="os-user-impersonate-warn" v-if="(ui.currentUser && (ui.currentUser.impersonated || (ui.currentUser.daysBeforePasswordExpiry >= 0 && ui.currentUser.daysBeforePasswordExpiry <= 5))) || ui.global.appProps.auditEnabled == 'false' || ui.global.appProps.auditEnabled == false">
       <div class="text" v-if="ui.currentUser && ui.currentUser.impersonated">
@@ -25,6 +25,8 @@
     </div>
 
     <os-app-body />
+
+    <iframe :src="logoutUrl" style="height: 0; width: 0; display:none;" v-if="logoutUrl"></iframe>
   </div>
 
   <teleport to="body">
@@ -61,7 +63,9 @@ export default {
     return {
       loading: true,
 
-      navCtrls: { }
+      navCtrls: { },
+
+      logoutUrl: null
     }
   },
 
@@ -71,6 +75,18 @@ export default {
 
   mounted() {
     util.setMask(this.$refs.mask);
+  },
+
+  unmounted() {
+    //
+    // Look for _setLogoutUrl method
+    // we remove the timers when the view is unmounted / destroyed
+    // for example when users move from App to NoLoginApp
+    //
+    if (this.timers && this.timers.length > 0) {
+      this.timers.forEach(timer => clearTimeout(timer));
+      this.timers = [];
+    }
   },
 
   created() {
@@ -97,6 +113,10 @@ export default {
         }
       }
     );
+
+    if (window.logoutUrl) {
+      this._setLogoutUrl(window.logoutUrl);
+    }
   },
 
   methods: {
@@ -251,6 +271,28 @@ export default {
       urlResolver.registerUrl('user-overview',  'UserDetail.Overview',  'userId');
       urlResolver.registerUrl('user-password-change', 'UserDetail.Overview', 'userId');
       urlResolver.registerUrl('user-roles',     'UserDetail.Roles',     'userId');
+    },
+
+    logout: function(logoutUrl) {
+      this._setLogoutUrl(logoutUrl);
+    },
+
+    _setLogoutUrl: function(logoutUrl) {
+      window.osLogoutUrl = logoutUrl;
+
+      const timers = this.timers = [];
+      timers.push(setTimeout(
+        () => {
+          this.logoutUrl = logoutUrl;
+          timers.push(this._clearLogoutUrl());
+        },
+        500 /* This timer allows the UI to transition from App or NoLoginApp view, if any */
+      ));
+    },
+
+    _clearLogoutUrl: function() {
+      /* This allows to remove the iframe from the view, if any */
+      return setTimeout(() => window.osLogoutUrl = this.logoutUrl = null, 10000);
     }
   }
 }

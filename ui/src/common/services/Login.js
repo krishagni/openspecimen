@@ -74,6 +74,10 @@ class Login {
   gotoIdp() {
     window.location.replace(http.getServerAppUrl() + 'saml/login?_nonce=' + Date.now());
   }
+
+  getIdpLogoutUrl() {
+    return http.getServerAppUrl() + 'saml/logout?_nonce=' + Date.now();
+  }
 }
 
 export default new Login();

@@ -1,4 +1,3 @@
-
 <template>
   <div class="os-navbar">
     <div class="items">
@@ -67,6 +66,7 @@ import osLogo from '@/assets/images/os_logo.png';
 import http from '@/common/services/HttpClient.js';
 import loginSvc from '@/common/services/Login.js';
 import routerSvc from '@/common/services/Router.js';
+import settingSvc from '@/common/services/Setting.js';
 
 import About          from '@/common/components/About';
 import AddToFavorites from '@/common/components/AddToFavorites.vue';
@@ -77,6 +77,8 @@ import Search         from '@/common/components/Search';
 
 export default {
   props: ['noLogin', 'hideButtons'],
+
+  emits: ['single-logout'],
 
   components: {
     'os-about': About,
@@ -155,7 +157,13 @@ export default {
       }
     },
 
-    logout: function() {
+    logout: async function() {
+      const [{value: samlEnabled}] = await settingSvc.getSetting('auth', 'saml_enable');
+      const [{value: sloEnabled}]  = await settingSvc.getSetting('auth', 'single_logout');
+      if (samlEnabled && sloEnabled) {
+        this.$emit('single-logout', loginSvc.getIdpLogoutUrl());
+      }
+
       loginSvc.logout().then(() => routerSvc.goto('UserLogin'));
     }
   }
