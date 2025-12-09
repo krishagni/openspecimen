@@ -165,7 +165,7 @@ class HttpClient {
         delete this.headers['X-OS-API-TOKEN'];
 
         const {name, params, query} = routerSvc.getCurrentRoute();
-        if (name && name != 'UserLogin') {
+        if (name && name != 'App' && name != 'UserLogin') {
           localStorage.osReqState = JSON.stringify({name, params, query});
         }
 
