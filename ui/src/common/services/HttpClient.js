@@ -163,6 +163,12 @@ class HttpClient {
       if (resp.status == 401) {
         localStorage.removeItem('osAuthToken');
         delete this.headers['X-OS-API-TOKEN'];
+
+        const {name, params, query} = routerSvc.getCurrentRoute();
+        if (name && name != 'UserLogin') {
+          localStorage.osReqState = JSON.stringify({name, params, query});
+        }
+
         routerSvc.goto('UserLogin');
         return;
       }

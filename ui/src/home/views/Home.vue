@@ -168,10 +168,13 @@ export default {
   created() {
     if (localStorage.osReqState) {
       try {
-        const state = JSON.parse(localStorage.osReqState);
-        routerSvc.goto(state.name, state.params, state.query);
+        const {name, params, query} = JSON.parse(localStorage.osReqState);
         delete localStorage.osReqState;
-        return;
+
+        if (name) {
+          routerSvc.goto(name, params, query);
+          return;
+        }
       } catch (e) {
         console.log('Error processing the req state: ' + localStorage.osReqState);
         console.error(e);
