@@ -51,6 +51,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCo
 import com.krishagni.catissueplus.core.auth.domain.AuthCredential;
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
+import com.krishagni.catissueplus.core.auth.domain.AuthProvider;
 import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -127,6 +128,12 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 	throws Exception {
 		User user = AuthUtil.getCurrentUser();
 		if (user == null || user.getAuthDomain() == null) {
+			return Collections.emptyMap();
+		}
+
+		AuthDomain domain = user.getAuthDomain();
+		AuthProvider provider = daoFactory.getAuthDao().getAuthProvider(domain.getAuthProvider().getId());
+		if (!"saml".equals(provider.getAuthType())) {
 			return Collections.emptyMap();
 		}
 
