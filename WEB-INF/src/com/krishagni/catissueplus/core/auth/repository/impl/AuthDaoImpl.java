@@ -52,6 +52,15 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	}
 
 	@Override
+	public AuthDomain getLegacySamlAuthDomain() {
+		Criteria<AuthDomain> query = createCriteria(AuthDomain.class, "d")
+			.join("d.authProvider", "ap");
+		return query.add(query.eq("ap.authType", "saml"))
+			.add(query.eq("d.legacySaml", Boolean.TRUE))
+			.uniqueResult();
+	}
+
+	@Override
 	public Boolean isUniqueAuthDomainName(String domainName) {
 		List<AuthDomain> result = createNamedQuery(GET_DOMAIN_BY_NAME, AuthDomain.class)
 			.setParameter("domainName", domainName)

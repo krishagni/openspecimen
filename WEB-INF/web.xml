@@ -31,13 +31,40 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
   </filter-mapping>
 
   <filter>
-    <filter-name>samlFilter</filter-name>
+    <filter-name>saml2Filter</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    <init-param>
+        <param-name>targetBeanName</param-name>
+        <param-value>springSecurityFilterChain</param-value>
+    </init-param>
   </filter>
 
   <filter-mapping>
-    <filter-name>samlFilter</filter-name>
+    <filter-name>saml2Filter</filter-name>
+    <url-pattern>/saml2/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>saml2Filter</filter-name>
+    <url-pattern>/login/saml2/sso/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>saml2Filter</filter-name>
+    <url-pattern>/logout/saml2/slo/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>saml2Filter</filter-name>
     <url-pattern>/saml/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
 
   <filter>
@@ -73,16 +100,6 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
   </servlet>
 
   <servlet>
-    <servlet-name>pluginUiResources</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value>/WEB-INF/pluginUiContext.xml</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-
-  <servlet>
     <servlet-name>pluginVueUiResources</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
     <init-param>
@@ -92,30 +109,11 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
     <load-on-startup>1</load-on-startup>
   </servlet>
 
-  <servlet>
-    <servlet-name>CSD</servlet-name>
-    <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-    <init-param>
-      <param-name>javax.ws.rs.Application</param-name>
-      <param-value>edu.wustl.dynamicextensions.formdesigner.resource.Resources</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>CSD</servlet-name>
-    <url-pattern>/csdApi/*</url-pattern>
-  </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>restApi</servlet-name>
     <url-pattern>/rest/ng/*</url-pattern>
   </servlet-mapping>
  
-  <servlet-mapping>
-    <servlet-name>pluginUiResources</servlet-name>
-    <url-pattern>/plugin-ui-resources/*</url-pattern>
-  </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>pluginVueUiResources</servlet-name>
     <url-pattern>/ui-app/plugins/*</url-pattern>

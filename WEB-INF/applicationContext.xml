@@ -963,9 +963,18 @@
     </security:authentication-provider>
   </security:authentication-manager>
   
-  <bean id="samlFilter" class="com.krishagni.catissueplus.rest.filter.SamlFilter">
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
-    <property name="authService" ref="userAuthService"/>
+  <bean id="samlIdpRegistry" class="com.krishagni.catissueplus.core.auth.services.impl.SamlIdpRegistrationRepository">
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+  </bean>
+
+  <bean id="samlAuthHandler" class="com.krishagni.catissueplus.core.auth.services.impl.SamlAuthenticationHandler">
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+    <property name="userAuthSvc" ref="userAuthService" />
+    <property name="relyingPartyRepository" ref="samlIdpRegistry" />
+  </bean>
+
+  <bean id="legacySamlEndpointHandler" class="com.krishagni.catissueplus.rest.filter.LegacySamlEndpointHandler">
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
   </bean>
   
   <bean id="authTokenFilter" class="com.krishagni.catissueplus.rest.filter.AuthTokenFilter">
@@ -1668,6 +1677,7 @@
   <context:spring-configured/>
 
   <context:component-scan base-package="com.krishagni.catissueplus.core"/>
+  <context:component-scan base-package="com.krishagni.catissueplus.rest.filter"/>
   
   <import resource="migrationContext.xml"/>
   <import resource="classpath:com/krishagni/openspecimen/**/context.xml"/>

@@ -18,8 +18,13 @@ public interface AuthDao extends Dao<AuthDomain> {
 	List<AuthDomain> getAuthDomains(int maxResults);
 	
 	AuthDomain getAuthDomainByName(String domainName);
-	
+
+	//
+	// Gets the first "configured/created" auth domain of the request type.
+	//
 	AuthDomain getAuthDomainByType(String authType);
+
+	AuthDomain getLegacySamlAuthDomain();
 
 	Boolean isUniqueAuthDomainName(String domainName);
 

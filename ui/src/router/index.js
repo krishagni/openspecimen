@@ -1836,6 +1836,12 @@ const routes = [
         component: () => import(/* webpackChunkName: "login" */ '../users/views/Login.vue')
       },
       {
+        path: 'login-error',
+        name: 'UserLoginError',
+        component: () => import(/* webpackChunkName: "login" */ '../users/views/LoginError.vue'),
+        props: (route) => ({message: route.query.message})
+      },
+      {
         path: 'forgot-password',
         name: 'UserForgotPassword',
         component: () => import(/* webpackChunkName: "login" */ '../users/views/ForgotPassword.vue')
