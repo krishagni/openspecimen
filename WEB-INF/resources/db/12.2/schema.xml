@@ -709,4 +709,10 @@
   <changeSet author="vpawar" id="Login OTPs: Increase the size of IP address to accommodate the IPv6 addresses">
     <modifyDataType tableName="OS_USER_LOGIN_OTPS" columnName="IP_ADDRESS" newDataType="${text.type}(64)" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Flag to mark the legacy SAML based domains">
+    <addColumn tableName="OS_AUTH_DOMAINS">
+      <column name="LEGACY_SAML" type="${boolean.type}" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

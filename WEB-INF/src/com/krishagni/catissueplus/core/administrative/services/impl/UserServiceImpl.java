@@ -15,13 +15,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.opensaml.saml2.core.Attribute;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 
 import com.krishagni.catissueplus.core.administrative.domain.ForgotPasswordToken;
 import com.krishagni.catissueplus.core.administrative.domain.Institute;
@@ -37,7 +34,6 @@ import com.krishagni.catissueplus.core.administrative.events.UserDetail;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserListCriteria;
 import com.krishagni.catissueplus.core.administrative.services.UserService;
-import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
 import com.krishagni.catissueplus.core.auth.domain.AuthErrorCode;
 import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -78,7 +74,7 @@ import com.krishagni.rbac.events.SubjectRoleOpNotif;
 import com.krishagni.rbac.events.SubjectRolesList;
 import com.krishagni.rbac.service.RbacService;
 
-public class UserServiceImpl implements UserService, ObjectAccessor, InitializingBean, UserDetailsService, SAMLUserDetailsService {
+public class UserServiceImpl implements UserService, ObjectAccessor, InitializingBean, UserDetailsService {
 	private static final LogUtil logger = LogUtil.getLogger(UserServiceImpl.class);
 
 	private static final String DEFAULT_AUTH_DOMAIN = "openspecimen";
@@ -208,52 +204,6 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			throw OpenSpecimenException.userError(AuthErrorCode.DOMAIN_LOGIN_DISABLED, user.getAuthDomain().getName());
 		}
 
-		return user;
-	}
-	
-	@Override
-	@PlusTransactional
-	public Object loadUserBySAML(SAMLCredential credential)
-	throws UsernameNotFoundException {
-		if (logger.isDebugEnabled()) {
-			for (Attribute attr : credential.getAttributes()) {
-				logger.debug(String.format(
-					"Credential attr: %s (%s) = %s",
-					attr.getName(), attr.getFriendlyName(), credential.getAttributeAsString(attr.getName())));
-			}
-		}
-
-		//
-		// The assumption is - there can be only one SAML auth provider
-		// We should perhaps use SAML local entity ID
-		//
-		AuthDomain domain = daoFactory.getAuthDao().getAuthDomainByType("saml");
-		if (domain != null && !domain.isAllowLogins()) {
-			throw OpenSpecimenException.userError(AuthErrorCode.DOMAIN_LOGIN_DISABLED, domain.getName());
-		}
-
-		Map<String, String> props = domain.getAuthProvider().getProps();
-		String loginNameAttr = props.get("loginNameAttr");
-		String emailAttr     = props.get("emailAddressAttr");
-
-		String key = null;
-		User user = null;
-		if (StringUtils.isNotBlank(loginNameAttr)) {
-			String loginName = key = getCredentialAttrValue(credential, loginNameAttr);
-			user = daoFactory.getUserDao().getUser(loginName, domain.getName());
-		} else if (StringUtils.isNotBlank(emailAttr)) {
-			String email = key = getCredentialAttrValue(credential, emailAttr);
-			user = daoFactory.getUserDao().getUserByEmailAddress(email);
-		}
-		
-		if (user == null) {
-			throw new UsernameNotFoundException(MessageUtil.getInstance().getMessage("user_not_found"));
-		} else if (user.isLocked()) {
-			throw OpenSpecimenException.userError(AuthErrorCode.USER_LOCKED, key);
-		} else if (!user.isActive()) {
-			throw OpenSpecimenException.userError(UserErrorCode.INACTIVE, key);
-		}
-		
 		return user;
 	}
 
@@ -1198,18 +1148,6 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 			daoFactory.getUserDao().saveFpToken(token);
 		}
 		return token;
-	}
-
-	private String getCredentialAttrValue(SAMLCredential credential, String attrName) {
-		Attribute attr = credential.getAttributes().stream()
-			.filter(a -> attrName.equals(a.getName()) || attrName.equals(a.getFriendlyName()))
-			.findFirst().orElse(null);
-
-		if (attr == null) {
-			return null;
-		}
-
-		return credential.getAttributeAsString(attr.getName());
 	}
 
 	private void ensureValidAnnouncement(AnnouncementDetail detail, OpenSpecimenException ose) {

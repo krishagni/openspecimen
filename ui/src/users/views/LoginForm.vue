@@ -73,10 +73,10 @@ export default {
   },
 
   watch: {
-    'ctx.loginDetail.domainName': function() {
+    'ctx.loginDetail.domainName': function(domainName) {
       this._toggleSamlDomainSelected();
       if (this.ctx.samlDomainSelected) {
-        loginSvc.gotoIdp();
+        loginSvc.gotoIdp(domainName);
       }
     }
   },
@@ -88,7 +88,8 @@ export default {
       }
 
       if (this.ctx.samlDomainSelected) {
-        loginSvc.gotoIdp();
+        const {loginDetail: {domainName}} = this.ctx;
+        loginSvc.gotoIdp(domainName);
         return;
       }
 

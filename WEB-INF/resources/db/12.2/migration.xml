@@ -293,4 +293,28 @@
         query_def like '%Specimen.extensions.SpecimenReceivedEvent%'
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Set the legacy flag to ON (True) for older SAML implementations">
+    <sql>
+      update
+        os_auth_domains
+      set
+        legacy_saml = 1
+      where
+        identifier in (
+          select
+            t.legacy_saml_id
+          from (
+            select
+              min(d.identifier) as legacy_saml_id
+            from
+              os_auth_domains d
+              inner join os_auth_providers p on d.provider_id = p.identifier
+            where
+              d.activity_status != 'Disabled' and
+              p.auth_type = 'saml'
+          ) t
+        )
+    </sql>
+  </changeSet>
 </databaseChangeLog>

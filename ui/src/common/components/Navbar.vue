@@ -158,13 +158,17 @@ export default {
     },
 
     logout: async function() {
-      const [{value: samlEnabled}] = await settingSvc.getSetting('auth', 'saml_enable');
       const [{value: sloEnabled}]  = await settingSvc.getSetting('auth', 'single_logout');
-      if (samlEnabled && sloEnabled) {
-        this.$emit('single-logout', loginSvc.getIdpLogoutUrl());
+      if (sloEnabled) {
+        loginSvc.getIdpLogoutUrl(this.$ui.currentUser.domain).then(
+          url => {
+            this.$emit('single-logout', url);
+            loginSvc.logout().then(() => routerSvc.goto('UserLogin'));
+          }
+        );
+      } else {
+        loginSvc.logout().then(() => routerSvc.goto('UserLogin'));
       }
-
-      loginSvc.logout().then(() => routerSvc.goto('UserLogin'));
     }
   }
 }

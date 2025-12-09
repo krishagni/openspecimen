@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
+import com.krishagni.catissueplus.core.auth.domain.AuthDomainSavedEvent;
 import com.krishagni.catissueplus.core.auth.domain.factory.AuthProviderErrorCode;
 import com.krishagni.catissueplus.core.auth.domain.factory.DomainRegistrationFactory;
 import com.krishagni.catissueplus.core.auth.events.AuthDomainDetail;
@@ -13,6 +14,7 @@ import com.krishagni.catissueplus.core.auth.events.AuthDomainSummary;
 import com.krishagni.catissueplus.core.auth.events.ListAuthDomainCriteria;
 import com.krishagni.catissueplus.core.auth.services.DomainRegistrationService;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -64,6 +66,8 @@ public class DomainRegistrationServiceImpl implements DomainRegistrationService 
 			AuthDomain authDomain = domainRegFactory.createDomain(req.getPayload());
 			ensureUniqueDomainName(null, authDomain);
 			daoFactory.getAuthDao().saveOrUpdate(authDomain);
+
+			OpenSpecimenAppCtxProvider.getAppCtx().publishEvent(new AuthDomainSavedEvent(authDomain));
 			return ResponseEvent.response(AuthDomainDetail.from(authDomain));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -84,7 +88,8 @@ public class DomainRegistrationServiceImpl implements DomainRegistrationService 
 			AuthDomain authDomain = domainRegFactory.createDomain(detail);
 			ensureUniqueDomainName(existing, authDomain);
 			existing.update(authDomain);
-			
+
+			OpenSpecimenAppCtxProvider.getAppCtx().publishEvent(new AuthDomainSavedEvent(existing));
 			return  ResponseEvent.response(AuthDomainDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -103,6 +108,7 @@ public class DomainRegistrationServiceImpl implements DomainRegistrationService 
 			AuthDomain existing = getDomain(input.getId(), input.getName());
 			existing.delete();
 
+			OpenSpecimenAppCtxProvider.getAppCtx().publishEvent(new AuthDomainSavedEvent(existing));
 			return ResponseEvent.response(AuthDomainDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);

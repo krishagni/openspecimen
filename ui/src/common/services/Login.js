@@ -71,12 +71,12 @@ class Login {
     return http.get('config-settings/password');
   }
 
-  gotoIdp() {
-    window.location.replace(http.getServerAppUrl() + 'saml/login?_nonce=' + Date.now());
+  gotoIdp(domainName) {
+    window.location.replace(http.getServerAppUrl() + 'saml2/authenticate/' + domainName + '?_nonce=' + Date.now());
   }
 
   getIdpLogoutUrl() {
-    return http.getServerAppUrl() + 'saml/logout?_nonce=' + Date.now();
+    return http.get('sessions/saml2-logout?_nonce=' + Date.now()).then(resp => resp.url);
   }
 }
 

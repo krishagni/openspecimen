@@ -28,4 +28,6 @@ public interface UserAuthenticationService {
 	ResponseEvent<Boolean> generateOtp(RequestEvent<LoginDetail> req);
 
 	ResponseEvent<Map<String, Object>> verifyOtp(RequestEvent<LoginDetail> req);
+
+	String generateToken(User user, LoginDetail loginDetail);
 }

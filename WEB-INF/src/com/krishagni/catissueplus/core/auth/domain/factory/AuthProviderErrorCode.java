@@ -20,7 +20,11 @@ public enum AuthProviderErrorCode implements ErrorCode {
 	
 	IMPL_NOT_SPECIFIED,
 	
-	INVALID_AUTH_IMPL;
+	INVALID_AUTH_IMPL,
+
+	NOT_SAML,
+
+	IDP_METADATA_NOT_SPECIFIED;
 	
 	@Override
 	public String code() {

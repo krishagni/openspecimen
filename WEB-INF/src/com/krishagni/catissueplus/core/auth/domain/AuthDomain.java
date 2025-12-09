@@ -28,6 +28,8 @@ public class AuthDomain {
 
 	private boolean allowLogins = true;
 
+	private boolean legacySaml = false;
+
 	private String activityStatus;
 
 	public Long getId() {
@@ -65,6 +67,15 @@ public class AuthDomain {
 	public void setAllowLogins(boolean allowLogins) {
 		this.allowLogins = allowLogins;
 	}
+
+	public boolean isLegacySaml() {
+		return legacySaml;
+	}
+
+	public void setLegacySaml(boolean legacySaml) {
+		this.legacySaml = legacySaml;
+	}
+
 	public String getActivityStatus() {
 		return activityStatus;
 	}

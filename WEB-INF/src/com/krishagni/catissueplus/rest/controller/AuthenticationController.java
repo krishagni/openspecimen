@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.auth.domain.AuthToken;
 import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
+import com.krishagni.catissueplus.core.auth.services.impl.SamlAuthenticationHandler;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -44,6 +45,9 @@ public class AuthenticationController {
 
 	@Autowired
 	private HttpServletRequest httpReq;
+
+	@Autowired
+	private SamlAuthenticationHandler samlAuthHandler;
 
 	@RequestMapping(method=RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
@@ -176,5 +180,13 @@ public class AuthenticationController {
 		}
 
 		return detail;
+	}
+
+	@RequestMapping(method=RequestMethod.GET, value="/saml2-logout")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> getSamlLogoutUrl(Authentication auth)
+	throws Exception {
+		return samlAuthHandler.getSamlLogoutUrl();
 	}
 }

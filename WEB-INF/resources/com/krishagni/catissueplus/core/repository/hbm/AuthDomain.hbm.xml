@@ -19,6 +19,8 @@
 
     <property name="allowLogins" column="ALLOW_LOGINS" not-null="true" />
 
+    <property name="legacySaml" column="LEGACY_SAML" not-null="true" />
+
     <query name="getDomainByName">
       select
         d
@@ -36,6 +38,8 @@
         join d.authProvider provider
       where 
         provider.authType = :authType
+      order by
+        d.id
     </query>
 	
     <query name="getAuthDomains">
