@@ -18,6 +18,8 @@ public class DistributionOrderItemDetail implements Serializable {
 	private String orderName;
 	
 	private SpecimenInfo specimen;
+
+	private String specimenLocation;
 	
 	private BigDecimal quantity;
 
@@ -61,6 +63,14 @@ public class DistributionOrderItemDetail implements Serializable {
 
 	public void setSpecimen(SpecimenInfo specimen) {
 		this.specimen = specimen;
+	}
+
+	public String getSpecimenLocation() {
+		return specimenLocation;
+	}
+
+	public void setSpecimenLocation(String specimenLocation) {
+		this.specimenLocation = specimenLocation;
 	}
 
 	public BigDecimal getQuantity() {
@@ -124,6 +134,7 @@ public class DistributionOrderItemDetail implements Serializable {
 		detail.setCost(orderItem.getCost());
 		detail.setLabel(orderItem.getLabel());
 		detail.setStatus(orderItem.getStatus().name());
+		detail.setSpecimenLocation(orderItem.getSpecimenLocation());
 		if (incSpmn) {
 			detail.setSpecimen(SpecimenDetail.from(orderItem.getSpecimen(), true, true, true));
 		}

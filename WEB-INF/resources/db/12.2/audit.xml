@@ -160,4 +160,11 @@
       <column name="receivedComments_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Record specimen location at time of distribution">
+    <addColumn tableName="OS_ORDER_ITEMS_AUD">
+      <column name="SPECIMEN_LOCATION" type="${text.type}(255)" />
+      <column name="specimenLocation_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

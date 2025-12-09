@@ -715,4 +715,10 @@
       <column name="LEGACY_SAML" type="${boolean.type}" defaultValueBoolean="false" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Record specimen location at time of distribution">
+    <addColumn tableName="OS_ORDER_ITEMS">
+      <column name="SPECIMEN_LOCATION" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

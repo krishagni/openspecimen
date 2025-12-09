@@ -415,4 +415,31 @@
       ]]>
     </createView>
   </changeSet>
+
+  <changeSet author="vpawar" id="Specimen distribution view" runOnChange="true">
+    <createView viewName="os_specimen_distribution_view" replaceIfExists="true">
+      select
+        oi.identifier as identifier,
+        o.identifier as order_id,
+        o.name as name,
+        o.distribution_protocol_id as dp_id,
+        o.site_id as site_id,
+        o.tracking_url as tracking_url,
+        o.comments as comments,
+        o.requester_id as requester_id,
+        o.execution_date as execution_date,
+        o.status as order_status,
+        oi.quantity as quantity,
+        oi.cost as cost,
+        oi.status as status,
+        oi.specimen_id as specimen_id,
+        oi.label as label,
+        oi.specimen_location as specimen_location
+      from
+        os_orders o
+        inner join os_order_items oi on oi.order_id = o.identifier
+      where
+        o.activity_status != 'Disabled'
+    </createView>
+  </changeSet>
 </databaseChangeLog>

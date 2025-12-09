@@ -18,6 +18,8 @@
     <property name="quantity" column="QUANTITY"/>
       
     <many-to-one name="specimen" column="SPECIMEN_ID"/>
+
+    <property name="specimenLocation" column="SPECIMEN_LOCATION" />
     
     <property name="status" column="STATUS" not-null="true">
       <type name="org.hibernate.type.EnumType">

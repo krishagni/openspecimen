@@ -1080,6 +1080,15 @@
           </numberField>
         </row>
 
+        <row>
+          <textField>
+            <name>specimenLocation</name>
+            <udn>specimenLocation</udn>
+            <caption>#getMessage("specimen_distribution_location")</caption>
+            <column>SPECIMEN_LOCATION</column>
+          </textField>
+        </row>
+
         $querySvc.insertCustomQueryForms('order')
 
         <row>

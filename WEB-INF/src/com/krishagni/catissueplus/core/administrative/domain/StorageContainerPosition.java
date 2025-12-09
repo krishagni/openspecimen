@@ -256,13 +256,8 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 		}
 
 		switch (getContainer().getPositionLabelingMode()) {
-			case LINEAR:
-				result.append(" (").append(getPosition()).append(")");
-				break;
-
-			case TWO_D:
-				result.append(" (").append(getPosTwo()).append(" x ").append(getPosOne()).append(")");
-				break;
+			case LINEAR -> result.append(" (").append(getPosition()).append(")");
+			case TWO_D -> result.append(" (").append(getPosTwo()).append(" x ").append(getPosOne()).append(")");
 		}
 
 		return result.toString();
