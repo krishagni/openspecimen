@@ -317,4 +317,58 @@
         )
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Update specimen label formats to use the correct field names for collection container/procedure and received quality">
+    <sql>
+      update
+        catissue_collection_protocol
+      set
+        label_format = replace(label_format, 'specimen.collectionEvent.container', 'specimen.collectionContainer')
+      where
+        label_format like '%specimen.collectionEvent.container%'
+    </sql>
+    <sql>
+      update
+        catissue_collection_protocol
+      set
+        label_format = replace(label_format, 'specimen.collectionEvent.procedure', 'specimen.collectionProcedure')
+      where
+        label_format like '%specimen.collectionEvent.procedure%'
+    </sql>
+    <sql>
+      update
+        catissue_collection_protocol
+      set
+        label_format = replace(label_format, 'specimen.receivedEvent.quality', 'specimen.receivedQuality')
+      where
+        label_format like '%specimen.receivedEvent.quality%'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update specimen print rules to use the correct field names for collection container/procedure and received quality">
+    <sql>
+      update
+        os_print_rules
+      set
+        rule_def = replace(rule_def, 'specimen.collectionEvent.container', 'specimen.collectionContainer')
+      where
+        rule_def like '%specimen.collectionEvent.container%'
+    </sql>
+    <sql>
+      update
+        os_print_rules
+      set
+        rule_def = replace(rule_def, 'specimen.collectionEvent.procedure', 'specimen.collectionProcedure')
+      where
+        rule_def like '%specimen.collectionEvent.procedure%'
+    </sql>
+    <sql>
+      update
+        os_print_rules
+      set
+        rule_def = replace(rule_def, 'specimen.receivedEvent.quality', 'specimen.receivedQuality')
+      where
+        rule_def like '%specimen.receivedEvent.quality%'
+    </sql>
+  </changeSet>
 </databaseChangeLog>
