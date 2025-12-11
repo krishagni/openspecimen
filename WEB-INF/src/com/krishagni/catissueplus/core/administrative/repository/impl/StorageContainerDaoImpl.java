@@ -73,17 +73,26 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	
 	@Override
 	public StorageContainer getByName(String name) {
-		Criteria<StorageContainer> query = createCriteria(StorageContainer.class, "s");
-		return query.add(query.eq("s.name", name))
+		Criteria<Long> query = createCriteria(StorageContainer.class, Long.class, "s");
+		Long containerId = query.add(query.eq("s.name", name))
 			.add(query.eq("s.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
+			.select("s.id")
 			.uniqueResult();
+		return containerId != null ? getById(containerId) : null;
 	}
 
+	@Override
 	public StorageContainer getByBarcode(String barcode) {
-		Criteria<StorageContainer> query = createCriteria(StorageContainer.class, "s");
-		return query.add(query.eq(query.lower("s.barcode"), barcode.toLowerCase()))
-			.add(query.eq("s.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
+		Criteria<Long> query = createCriteria(StorageContainer.class, Long.class, "s");
+		if (isMySQL()) {
+			query.add(query.eq("s.barcode", barcode));
+		} else {
+			query.add(query.eq(query.lower("s.barcode"), barcode.toLowerCase()));
+		}
+
+		Long containerId = query.add(query.eq("s.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
 			.uniqueResult();
+		return containerId != null ? getById(containerId) : null;
 	}
 
 	@Override

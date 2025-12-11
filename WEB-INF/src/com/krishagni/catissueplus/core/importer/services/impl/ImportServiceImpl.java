@@ -1351,9 +1351,9 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 
 				if (atomic) {
 					//
-					// Let's give a clean session for every object to be imported
+					// Flush the session including any DB errors encountered by the last row
 					//
-					clearSession();
+					flushSession();
 				}
 
 				if (resp.isSuccessful()) {
@@ -1488,8 +1488,8 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			}
 		}
 
-		private void clearSession() {
-			SessionUtil.getInstance().clearSession();
+		private void flushSession() {
+			SessionUtil.getInstance().flush();
 		}
 
 		private boolean isCopyNotifToAdminEnabled() {

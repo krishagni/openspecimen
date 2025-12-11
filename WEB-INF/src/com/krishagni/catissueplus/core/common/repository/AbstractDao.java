@@ -14,10 +14,13 @@ import org.hibernate.SessionFactory;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.init.AppProperties;
 
 public class AbstractDao<T> implements Dao<T> {
+	private static LogUtil logger = LogUtil.getLogger(AbstractDao.class);
+
 	private static final String LIMIT_SQL = "select * from (select tab.*, rownum rnum from (%s) tab where rownum <= %d) where rnum >= %d";
 
 	protected SessionFactory sessionFactory;
@@ -65,8 +68,13 @@ public class AbstractDao<T> implements Dao<T> {
 
 	@Override
 	public T getById(Long id) {
-		Criteria<?> query = createCriteria(getType(), "t");
-		return (T) query.add(query.eq("t.id", id)).uniqueResult();
+		try {
+			return (T) getCurrentSession().find(getType(), id);
+		} catch (Exception e) {
+			logger.error("Error obtaining the object of type " + getType().getName() + " and ID = " + id, e);
+		}
+
+		return null;
 	}
 
 	public List<T> getByIds(Collection<Long> ids) {
