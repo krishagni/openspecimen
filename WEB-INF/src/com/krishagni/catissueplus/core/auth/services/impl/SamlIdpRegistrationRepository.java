@@ -87,6 +87,8 @@ public class SamlIdpRegistrationRepository implements RelyingPartyRegistrationRe
 
 			if (domain.isLegacySaml()) {
 				builder.assertionConsumerServiceLocation(url("saml/SSO"));
+			} else {
+				builder.assertionConsumerServiceLocation(url("login/saml2/sso/" + domain.getName()));
 			}
 
 			RelyingPartyRegistration registration = builder.build();
