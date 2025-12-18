@@ -32,6 +32,19 @@ public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> i
 	}
 
 	@Override
+	public List<ContainerStoreListItem> getStoreListItems(Long storeListId, Long lastId, int maxResults) {
+		Criteria<ContainerStoreListItem> query = createCriteria(ContainerStoreListItem.class, "item")
+			.join("item.storeList", "storeList");
+		query.add(query.eq("storeList.id", storeListId));
+
+		if (lastId != null) {
+			query.add(query.gt("item.id", lastId));
+		}
+
+		return query.addOrder(query.asc("item.id")).list(0, maxResults);
+	}
+
+	@Override
 	public Map<Op, Integer> getStoreListItemsCount(Date from, Date to) {
 		List<Object[]> rows = createNamedQuery(GET_ITEMS_COUNT_BY_OP, Object[].class)
 			.setParameter("fromDate", from)

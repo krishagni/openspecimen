@@ -53,9 +53,10 @@ public class AutomatedContainerContext {
 			return;
 		}
 
-		ContainerStoreList storeList = getStoreLists().get(listLookupKey(container, op));
+		String lookupKey = listLookupKey(container, op, specimen);
+		ContainerStoreList storeList = getStoreLists().get(lookupKey);
 		if (storeList == null) {
-			storeList = createNewList(container, op);
+			storeList = createNewList(container, op, lookupKey);
 		}
 
 		ContainerStoreListItem item = new ContainerStoreListItem();
@@ -71,11 +72,11 @@ public class AutomatedContainerContext {
 		}
 	}
 
-	private String listLookupKey(StorageContainer container, ContainerStoreList.Op op) {
-		return container.getId() + "-" + op.name();
+	private String listLookupKey(StorageContainer container, ContainerStoreList.Op op, Specimen specimen) {
+		return container.getAutoFreezerProvider().getInstance().listName(container, op, specimen);
 	}
 
-	private ContainerStoreList createNewList(StorageContainer container, ContainerStoreList.Op op) {
+	private ContainerStoreList createNewList(StorageContainer container, ContainerStoreList.Op op, String lookupKey) {
 		ContainerStoreList list = new ContainerStoreList();
 		list.setContainer(container);
 		list.setCreationTime(Calendar.getInstance().getTime());
@@ -83,7 +84,7 @@ public class AutomatedContainerContext {
 		list.setUser(AuthUtil.getCurrentUser());
 
 		daoFactory.getContainerStoreListDao().saveOrUpdate(list);
-		getStoreLists().put(listLookupKey(container, op), list);
+		getStoreLists().put(lookupKey, list);
 		return list;
 	}
 
