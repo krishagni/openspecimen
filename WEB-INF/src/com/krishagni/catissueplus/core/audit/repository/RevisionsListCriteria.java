@@ -19,6 +19,8 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 
 	private Date endDate;
 
+	private boolean useProvidedInstant;
+
 	private List<Long> userIds;
 
 	private boolean includeModifiedProps;
@@ -55,6 +57,16 @@ public class RevisionsListCriteria extends AbstractListCriteria<RevisionsListCri
 	@JsonProperty("endDate")
 	public RevisionsListCriteria endDate(Date endDate) {
 		this.endDate = endDate;
+		return self();
+	}
+
+	public boolean useProvidedInstant() {
+		return useProvidedInstant;
+	}
+
+	@JsonProperty("useProvidedInstant")
+	public RevisionsListCriteria useProvidedInstant(boolean useProvidedInstant) {
+		this.useProvidedInstant = useProvidedInstant;
 		return self();
 	}
 

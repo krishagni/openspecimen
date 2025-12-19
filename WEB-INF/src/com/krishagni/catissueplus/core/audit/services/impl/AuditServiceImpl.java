@@ -193,8 +193,8 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 			}
 		}
 
-		Date startDate = Utility.chopSeconds(criteria.startDate());
-		Date endDate   = Utility.getEndOfDay(criteria.endDate());
+		Date startDate = criteria.useProvidedInstant() ? criteria.startDate(): Utility.chopSeconds(criteria.startDate());
+		Date endDate   = criteria.useProvidedInstant() ? criteria.endDate()  : Utility.getEndOfDay(criteria.endDate());
 		Date endOfDay  = Utility.getEndOfDay(Calendar.getInstance().getTime());
 		if (startDate != null && startDate.after(endOfDay)) {
 			return ResponseEvent.userError(AuditErrorCode.DATE_GT_TODAY, Utility.getDateTimeString(startDate));
