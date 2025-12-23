@@ -2,6 +2,8 @@
 <template>
   <div class="os-page">
     <slot></slot>
+
+    <os-ask-os class="os-floating-ask-os" />
   </div>
 </template>
 
@@ -21,5 +23,11 @@
   overflow-y: auto;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.os-floating-ask-os {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 3rem;
 }
 </style>

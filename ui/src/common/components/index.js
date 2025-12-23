@@ -5,6 +5,7 @@ import AddItems from './AddItems.vue';
 import AddSpecimens from './AddSpecimens.vue';
 import AddToCart from './AddToCart.vue';
 import AppBody from './AppBody.vue';
+import AskOS   from './AskOS.vue';
 import AuditOverview from './AuditOverview.vue';
 import AuditRevisions from './AuditRevisions.vue';
 import AuditTrail from './AuditTrail.vue';
@@ -128,7 +129,7 @@ export default {
     app.component('os-add-specimens',    AddSpecimens);
     app.component('os-add-to-cart',      AddToCart);
     app.component('os-app-body',         AppBody);
-
+    app.component('os-ask-os',           AskOS);
     app.component('os-audit-overview',   AuditOverview);
     app.component('os-audit-revisions',  AuditRevisions);
     app.component('os-audit-trail',      AuditTrail);

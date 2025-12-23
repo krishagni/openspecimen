@@ -28,6 +28,8 @@
 
         <os-notifs-overlay v-if="!minimalLogin" />
 
+        <os-ask-os />
+
         <div class="user-profile" v-os-tooltip.bottom="$t('common.user_profile')" v-if="authenticated">
           <button @click="toggleProfileMenu">
             <os-username-avatar :name="username" />
@@ -274,5 +276,4 @@ export default {
   padding: 0.25rem 0rem;
   margin: -1rem 0rem;
 }
-
 </style>
