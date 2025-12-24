@@ -4,8 +4,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -388,7 +390,7 @@ public class ObjectReader implements Closeable {
 		return value instanceof String && ((String)value).trim().equals(SET_TO_BLANK);
 	}
 	
-	private Long parseDateTime(String value)
+	private Object parseDateTime(String value)
 	throws ParseException, DateTimeParseException {
 		String format = dateFmt + " " + timeFmt;
 		try {
@@ -407,7 +409,7 @@ public class ObjectReader implements Closeable {
 		}
 	}
 
-	private Long parseDate(String value, boolean dateOnly) {
+	private Object parseDate(String value, boolean dateOnly) {
 		try {
 			return parseDate(value, dateFmt, dateOnly);
 		} catch (ParseException | DateTimeParseException e) {
@@ -415,17 +417,17 @@ public class ObjectReader implements Closeable {
 		}
 	}
 
-	private Long parseDate(String value, String fmt)
+	private Object parseDate(String value, String fmt)
 	throws ParseException, DateTimeParseException {
 		return parseDate(value, fmt, false);
 	}
 
-	private Long parseDate(String value, String fmt, boolean dateOnly)
+	private Object parseDate(String value, String fmt, boolean dateOnly)
 	throws ParseException, DateTimeParseException {
 		return parseDate(value, fmt, timeZone, dateOnly);
 	}
 
-	private Long parseDate(String value, String fmt, TimeZone tz, boolean dateOnly)
+	private Object parseDate(String value, String fmt, TimeZone tz, boolean dateOnly)
 	throws ParseException, DateTimeParseException {
 		DateTimeFormatter formatter = dateTimeFormatterMap.get(fmt);
 		if (formatter == null) {
@@ -434,11 +436,14 @@ public class ObjectReader implements Closeable {
 		}
 
 		// validate
-		formatter.parse(value);
+		TemporalAccessor temporalAccessor = formatter.parse(value);
+		if (dateOnly) {
+			return LocalDate.from(temporalAccessor).toString();
+		}
 
 		SimpleDateFormat sdf = new SimpleDateFormat(fmt);
 		sdf.setLenient(false);
-		if (!dateOnly && tz != null) {
+		if (tz != null) {
 			sdf.setTimeZone(tz);
 		}
 

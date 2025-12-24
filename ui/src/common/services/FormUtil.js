@@ -327,19 +327,20 @@ class FormUtil {
       let value = attr.value;
       if (attr.type == 'subForm') {
         value = (attr.value || []).map(sfAttrs => this._createCustomFieldsMap(sfAttrs, useDisplayValue));
-      } else if (attr.type != 'fileUpload' && useDisplayValue && attr.displayValue) {
-        value = attr.displayValue;
       } else if (attr.type == 'datePicker') {
         if (attr.value == 'current_date' || attr.value == 'current_time') {
           value = Date.now();
         } else if (!isNaN(attr.value) && !isNaN(parseInt(attr.value))) {
           value = new Date(parseInt(attr.value));
         } else if (attr.value && attr.value.length == 10 && attr.value[4] == '-' && attr.value[7] == '-') {
-          const [year, month, date] = attr.value.split('-');
-          value = new Date(year, +month - 1, date);
+          // const [year, month, date] = attr.value.split('-');
+          // value = new Date(year, +month - 1, date);
+          value = attr.value;
         } else if (!!attr.value || attr.value === 0) {
           value = new Date(attr.value);
         }
+      } else if (attr.type != 'fileUpload' && useDisplayValue && attr.displayValue) {
+        value = attr.displayValue;
       }
 
       valueMap[attr.name] = value;

@@ -171,7 +171,7 @@ public class ExtensionSchemaBuilder implements ObjectSchemaBuilder {
 			if (((DatePicker)ctrl).getFormat().contains("HH:mm")) {
 				field.setType("datetime");
 			} else {
-				field.setType("date");
+				field.setType("dateOnly");
 			}
 		} else if (ctrl instanceof FileUploadControl) {
 			field.setType("defile");

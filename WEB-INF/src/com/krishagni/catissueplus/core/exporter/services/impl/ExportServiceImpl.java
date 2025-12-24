@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -786,11 +788,21 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 
 		private String getFormattedDateTimeString(SimpleDateFormat formatter, Object input) {
 			Date dateObj = null;
-			if (input instanceof String) {
-				try {
-					dateObj = new Date(Long.parseLong((String) input));
-				} catch (Exception e) {
-					return (String) input;
+			if (input instanceof String inputStr) {
+				if (StringUtils.isNumeric(inputStr)) {
+					try {
+						dateObj = new Date(Long.parseLong(inputStr));
+					} catch (Exception e) {
+						logger.error("Error converting the input string (numeric) " + inputStr + " to date object!", e);
+						return inputStr;
+					}
+				} else {
+					try {
+						dateObj = Date.from(LocalDate.parse(inputStr).atStartOfDay(ZoneId.systemDefault()).toInstant());
+					} catch (Exception e) {
+						logger.error("Error converting the input string " + inputStr + " to date object!", e);
+						return inputStr;
+					}
 				}
 			} else if (input instanceof Number) {
 				dateObj = new Date(((Number) input).longValue());
