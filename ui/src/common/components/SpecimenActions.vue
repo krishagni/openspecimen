@@ -18,7 +18,8 @@
     </template>
     <template #footer>
       <os-button text    :label="$t('common.buttons.cancel')"     @click="closeDistributionDialog" />
-      <os-button primary :label="$t('common.specimen_actions.reserve')"    @click="reserveSpecimens" />
+      <os-button primary :label="$t('common.specimen_actions.reserve')"    @click="reserveSpecimens"
+        v-if="!ctx.distDetails.specimenListId" />
       <os-button primary :label="$t('common.specimen_actions.distribute')" @click="showDistributeOptions" right-icon="caret-down" />
     </template>
   </os-dialog>
