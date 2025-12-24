@@ -21,6 +21,16 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
   </context-param>
 
   <filter>
+    <filter-name>httpMetricsFilter</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>httpMetricsFilter</filter-name>
+    <url-pattern>/rest/ng/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
     <filter-name>authTokenFilter</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
   </filter>

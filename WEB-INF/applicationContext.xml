@@ -1677,6 +1677,7 @@
   <context:spring-configured/>
 
   <context:component-scan base-package="com.krishagni.catissueplus.core"/>
+  <context:component-scan base-package="com.krishagni.catissueplus.core.config"/>
   <context:component-scan base-package="com.krishagni.catissueplus.rest.filter"/>
   
   <import resource="migrationContext.xml"/>
