@@ -649,6 +649,11 @@ public class Specimen extends BaseExtensionEntity {
 		this.parentEvent = parentEvent;
 	}
 
+	@NotAudited
+	public SpecimenCollectionEvent getCollectionEvent() {
+		return new SpecimenCollectionEvent(this);
+	}
+
 	public PermissibleValue getCollectionProcedure() {
 		return collectionProcedure;
 	}
@@ -687,6 +692,11 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void setCollectionComments(String collectionComments) {
 		this.collectionComments = collectionComments;
+	}
+
+	@NotAudited
+	public Object getReceivedEvent() {
+		return new SpecimenReceivedEvent(this);
 	}
 
 	public PermissibleValue getReceivedQuality() {
