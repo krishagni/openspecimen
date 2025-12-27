@@ -448,7 +448,7 @@ public class Visit extends BaseExtensionEntity {
 	public void addSpecimen(Specimen specimen) {
 		specimen.setVisit(this);
 		getSpecimens().add(specimen);
-		daoFactory.getSpecimenDao().saveOrUpdate(specimen);
+		daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
 		specimen.addOrUpdateExtension();
 		EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 	}
