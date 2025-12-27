@@ -468,21 +468,11 @@ public class VisitFactoryImpl implements VisitFactory {
 	}
 
 	private String getDefaultNameTmpl() {
-		String defVisitFmt = ConfigUtil.getInstance().getStrSetting(ConfigParams.MODULE, ConfigParams.VISIT_NAME_FMT);
-		if (StringUtils.isBlank(defVisitFmt)) {
-			throw new OpenSpecimenException(ErrorType.USER_ERROR, VisitErrorCode.NAME_FMT_NOT_SPECIFIED);
-		}
-
-		return defVisitFmt;
+		return ConfigUtil.getInstance().getStrSetting(ConfigParams.MODULE, ConfigParams.VISIT_NAME_FMT);
 	}
 
 	private String getUnplannedNameTmpl() {
-		String defVisitFmt = ConfigUtil.getInstance().getStrSetting(ConfigParams.MODULE, ConfigParams.UNPLANNED_VISIT_NAME_FMT);
-		if (StringUtils.isBlank(defVisitFmt)) {
-			throw new OpenSpecimenException(ErrorType.USER_ERROR, VisitErrorCode.NAME_FMT_NOT_SPECIFIED);
-		}
-
-		return defVisitFmt;
+		return ConfigUtil.getInstance().getStrSetting(ConfigParams.MODULE, ConfigParams.UNPLANNED_VISIT_NAME_FMT);
 	}
 
 	private void setVisitExtension(VisitDetail visitDetail, Visit visit, OpenSpecimenException ose) {

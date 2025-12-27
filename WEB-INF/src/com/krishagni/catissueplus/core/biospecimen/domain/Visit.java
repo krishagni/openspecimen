@@ -466,7 +466,11 @@ public class Visit extends BaseExtensionEntity {
 		if (StringUtils.isBlank(visitNameFmt)) {
 			visitNameFmt = defNameTmpl;
 		}
-		
+
+		if (StringUtils.isBlank(visitNameFmt)) {
+			throw OpenSpecimenException.userError(VisitErrorCode.NAME_FMT_NOT_SPECIFIED);
+		}
+
 		setName(labelGenerator.generateLabel(visitNameFmt, this));
 	}
 	
