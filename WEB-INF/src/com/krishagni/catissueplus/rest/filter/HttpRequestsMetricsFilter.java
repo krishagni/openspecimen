@@ -9,10 +9,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.servlet.HandlerMapping;
 
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
@@ -28,8 +30,8 @@ public class HttpRequestsMetricsFilter {
 	public GenericFilterBean filterBean() {
 		return new GenericFilterBean() {
 			@Override
-			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
 				// Start a sample to measure duration
 				Timer.Sample sample = Timer.start(registry);
 
@@ -38,20 +40,17 @@ public class HttpRequestsMetricsFilter {
 				} finally {
 					HttpServletRequest httpReq = (HttpServletRequest) request;
 					HttpServletResponse httpResp   = (HttpServletResponse) response;
-					String uri = httpReq.getRequestURI();
-					int idx = uri.indexOf(API_PATH);
-					if (idx >= 0) {
-						String module = uri.substring(idx + API_PATH.length() + 1).split("/", 2)[0];
+					String apiPath = (String) httpReq.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+					if (StringUtils.isNotBlank(apiPath)) {
 						sample.stop(
 							registry.timer(
 								"http.server.requests",
-								"uri", module,
+								"uri", apiPath,
 								"method", httpReq.getMethod(),
 								"status", String.valueOf(httpResp.getStatus())
 							)
 						);
 					}
-
 				}
 			}
 		};
