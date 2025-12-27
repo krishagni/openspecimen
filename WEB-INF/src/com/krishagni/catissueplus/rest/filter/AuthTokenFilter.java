@@ -260,33 +260,17 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		}
 
 		AuthUtil.setCurrentUser(impersonatedUser != null ? impersonatedUser : user, authToken, httpReq, impersonatedUser != null);
-		Date callStartTime = Calendar.getInstance().getTime();
+		UserApiCallLog callLog = null;
 		try {
+			callLog = recordApiCall(httpReq, httpResp, null, loginAuditLog, user, impersonatedUser);
 			chain.doFilter(req, resp);
 		} finally {
 			AuthUtil.clearCurrentUser();
 			teardownReqDataProviders(httpReq, httpResp);
-
-			if (isRecordableApi(httpReq)) {
-				try {
-					UserApiCallLog userAuditLog = new UserApiCallLog();
-					userAuditLog.setUser(user);
-					userAuditLog.setImpersonatedUser(impersonatedUser);
-					userAuditLog.setUrl(httpReq.getRequestURI());
-					userAuditLog.setMethod(httpReq.getMethod());
-					userAuditLog.setCallStartTime(callStartTime);
-					userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
-					userAuditLog.setResponseCode(Integer.toString(httpResp.getStatus()));
-					userAuditLog.setLoginAuditLog(loginAuditLog);
-					auditService.insertApiCallLog(userAuditLog);
-				} catch (Throwable t) {
-					String msg = Utility.getErrorMessage(t);
-					logger.error("Error recording the API call started at " + callStartTime + ". API: " + httpReq.getMethod() + " " + httpReq.getRequestURI() + " Status: " +  httpResp.getStatus() + ". Error: " + msg);
-					logger.debug("Error recording the API call.", t);
-				}
+			if (callLog != null) {
+				recordApiCall(httpReq, httpResp, callLog, loginAuditLog, user, impersonatedUser);
 			}
 		}
-
 	}
 
 	private AuthToken doBasicAuthentication(HttpServletRequest httpReq, HttpServletResponse httpResp) throws UnsupportedEncodingException {
@@ -368,9 +352,43 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		return result;
 	}
 
+	private UserApiCallLog recordApiCall(HttpServletRequest httpReq, HttpServletResponse httpResp, UserApiCallLog apiCall, LoginAuditLog loginAuditLog, User currentUser, User impersonatedUser) {
+		if (apiCall == null && !isRecordableApi(httpReq)) {
+			return null;
+		}
+
+		try {
+			if (apiCall == null) {
+				apiCall = new UserApiCallLog();
+				apiCall.setUser(currentUser);
+				apiCall.setImpersonatedUser(impersonatedUser);
+				apiCall.setUrl(httpReq.getRequestURI());
+				apiCall.setMethod(httpReq.getMethod());
+				apiCall.setCallStartTime(Calendar.getInstance().getTime());
+				apiCall.setLoginAuditLog(loginAuditLog);
+				apiCall.setResponseCode("000");
+			} else {
+				apiCall.setCallEndTime(Calendar.getInstance().getTime());
+				if (httpResp != null) {
+					apiCall.setResponseCode(Integer.toString(httpResp.getStatus()));
+				}
+			}
+
+			auditService.saveOrUpdateApiLog(apiCall);
+		} catch (Throwable t) {
+			String msg = Utility.getErrorMessage(t);
+			Date startTime = apiCall != null ? apiCall.getCallStartTime() : Calendar.getInstance().getTime();
+			String status = apiCall != null ? apiCall.getResponseCode() : "000";
+			logger.error("Error recording the API call started at " + startTime + ". API: " + httpReq.getMethod() + " " + httpReq.getRequestURI() + " Status: " +  status + ". Error: " + msg, t);
+		}
+
+		return apiCall;
+	}
+
 	private boolean isRecordableApi(HttpServletRequest httpReq) {
 		return !matches(httpReq, "/user-notifications/unread-count/**") &&
-			!matches(httpReq, "/label-print-jobs/items/**");
+			!matches(httpReq, "/label-print-jobs/items/**") &&
+			!matches(httpReq, "/metrics");
 	}
 
 	private boolean matches(HttpServletRequest httpReq, String url) {
