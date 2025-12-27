@@ -91,6 +91,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		}
 
 		Long containerId = query.add(query.eq("s.activityStatus", Status.ACTIVITY_STATUS_ACTIVE.getStatus()))
+			.select("s.id")
 			.uniqueResult();
 		return containerId != null ? getById(containerId) : null;
 	}
