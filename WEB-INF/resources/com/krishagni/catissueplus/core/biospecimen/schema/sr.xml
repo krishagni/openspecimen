@@ -166,5 +166,21 @@
       <caption>#getMessage("sr_uid")</caption>
       <attribute>uid</attribute>
     </field>
+
+    <record>
+      <attribute>services</attribute>
+      <caption>#getMessage("sr_services")</caption>
+      <multiple>true</multiple>
+
+      <field>
+        <caption>#getMessage("sr_service_code")</caption>
+        <attribute>serviceCode</attribute>
+      </field>
+
+      <field>
+        <caption>#getMessage("sr_service_units")</caption>
+        <attribute>units</attribute>
+      </field>
+    </record>
   </record>
 </object-schema>

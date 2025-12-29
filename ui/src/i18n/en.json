@@ -1047,6 +1047,7 @@
     "select_consent_cp": "Select the collection protocol to source the consents from...",
     "select_consent_cp_req": "Collection Protocol is mandatory",
     "select_form_on_left": "Select a form on the left side to preview...",
+    "services": "Services",
     "settings": "Settings",
     "short_title": "Short Title",
     "short_title_req": "Short Title is mandatory",
