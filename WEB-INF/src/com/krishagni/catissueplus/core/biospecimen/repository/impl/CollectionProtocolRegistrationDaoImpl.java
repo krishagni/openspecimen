@@ -669,7 +669,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	private static final String GET_CUSTOM_FIELD_RECORD_ID = FQN + ".getCustomFieldRecordId";
 
-	private static final String GET_CUSTOM_FIELD_RECORD_IDS = FQN + "..getCustomFieldRecordIds";
+	private static final String GET_CUSTOM_FIELD_RECORD_IDS = FQN + ".getCustomFieldRecordIds";
 
 	private static final String INSERT_CUSTOM_FIELD_RECORD = FQN + ".insertCustomFieldRecord";
 
