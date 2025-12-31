@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.query.internal.QueryImpl;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
 
@@ -124,6 +125,15 @@ public class Query<R> {
 
 	public int executeUpdate() {
 		return query.executeUpdate();
+	}
+
+	public String getQueryString() {
+		return query.getQueryString();
+	}
+
+	public String getSqlString() {
+		String[] sqlPlans = ((QueryImpl<Object>) query).getQueryPlan().getSqlStrings();
+		return sqlPlans[0];
 	}
 
 	//
