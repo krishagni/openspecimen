@@ -1194,10 +1194,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			}
 
 			addAnd(this.restrictionQuery);
-			this.restrictionQuery.where
-				.append("((c.noOfRows is null and c.noOfColumns is null)")
-				.append("or")
-				.append("(c.utilisation - c.noOfRows * c.noOfColumns < 0))");
+			this.restrictionQuery.where.append("(c.freeSpaces is null or c.freeSpaces > 0)");
 		}
 
 		private void addSiteAlias() {
