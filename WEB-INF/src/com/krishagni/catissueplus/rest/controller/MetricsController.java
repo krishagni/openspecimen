@@ -44,7 +44,7 @@ public class MetricsController {
 		Utility.sendToClient(response, heapDumpFile.getName(), heapDumpFile, true);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/thread-dump")
+	@RequestMapping(method = RequestMethod.GET, value = "/threads-dump")
 	@ResponseStatus(HttpStatus.OK)
 	public void downloadThreadDump(HttpServletResponse response) {
 		if (!AuthUtil.isAdmin()) {
