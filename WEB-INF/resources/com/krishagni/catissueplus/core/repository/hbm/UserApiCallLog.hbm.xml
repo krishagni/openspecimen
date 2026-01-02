@@ -39,6 +39,14 @@
       where 
         a.user.id = :userId and t.token = :authToken
     </query>
-   
-  </class>  
-</hibernate-mapping>    
+
+    <query name="deleteOlderLogs">
+      <![CDATA[
+        delete
+          com.krishagni.catissueplus.core.audit.domain.UserApiCallLog l
+        where
+          l.callStartTime < :olderThan
+      ]]>
+    </query>
+  </class>
+</hibernate-mapping>
