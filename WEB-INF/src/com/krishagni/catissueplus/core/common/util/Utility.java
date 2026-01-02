@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
@@ -44,6 +46,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -60,6 +63,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.management.MBeanServer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -86,6 +90,7 @@ import org.springframework.web.util.JavaScriptUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.management.HotSpotDiagnosticMXBean;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseExtensionEntity;
@@ -103,6 +108,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class Utility {
 	private static final LogUtil logger = LogUtil.getLogger(Utility.class);
+
+	private static final AtomicLong count = new AtomicLong(0L);
 
 	private static SecretKey secretKey = null;
 
@@ -1292,6 +1299,71 @@ public class Utility {
 
 	public static File getFile(String basedir, String filename) {
 		return getFile(new File(basedir), filename);
+	}
+
+	public static synchronized File dumpLiveHeap() {
+		File heapFile = null;
+
+		try {
+			String time = Utility.format(Calendar.getInstance().getTime(), "yyyy_MM_dd_HH_mm_ss");
+			String filename = "heap_" + time + "_" + count.incrementAndGet() + ".hprof";
+
+			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+			HotSpotDiagnosticMXBean mxBean =
+				ManagementFactory.newPlatformMXBeanProxy(
+					mbs,
+					"com.sun.management:type=HotSpotDiagnostic",
+					HotSpotDiagnosticMXBean.class
+				);
+
+			heapFile = new File(ConfigUtil.getInstance().getTempDir(), filename);
+			logger.info("Starting heap dump to: " + filename);
+			mxBean.dumpHeap(heapFile.getAbsolutePath(), true);
+			logger.info("Heap dump complete.");
+
+			logger.info("Compressing heap dump file...");
+			File gzipHeapFile = gzip(heapFile, new File(ConfigUtil.getInstance().getTempDir(), filename + ".gz"));
+			logger.info("Heap dump compression completed!");
+
+			return gzipHeapFile;
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			if (heapFile != null) {
+				heapFile.delete();
+			}
+		}
+	}
+
+	public static synchronized File dumpLiveThreadStacks() {
+		String time = Utility.format(Calendar.getInstance().getTime(), "yyyy_MM_dd_HH_mm_ss");
+		String filename = "threads_" + time + "_" + count.incrementAndGet() + ".txt";
+		File threadDumpFile = new File(ConfigUtil.getInstance().getTempDir(), filename);
+
+		logger.info("Starting threads dump to: " + threadDumpFile.getAbsolutePath());
+		try (FileOutputStream tout = new FileOutputStream(threadDumpFile)) {
+			ThreadInfo[] threads = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+			for (ThreadInfo thread : threads) {
+				IOUtils.write(thread.toString(), tout, Charset.defaultCharset());
+			}
+
+			logger.info("Threads dump completed!");
+		} catch (Exception e) {
+			threadDumpFile.delete();
+			throw OpenSpecimenException.serverError(e);
+		}
+
+		try {
+			logger.info("Compressing thread dump file...");
+			File gzipThreadDumpFile = gzip(threadDumpFile, new File(ConfigUtil.getInstance().getTempDir(), filename + ".gz"));
+			logger.info("Thread dump file compression completed!");
+
+			return gzipThreadDumpFile;
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		} finally {
+			threadDumpFile.delete();
+		}
 	}
 
 	private static boolean equals(Object obj1, Object obj2, String fieldName) {
