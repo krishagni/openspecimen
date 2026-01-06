@@ -494,8 +494,11 @@ export default {
 
           let colIdx = row.indexOf(field);
           row.splice(colIdx, 1);
+
+          let rowDeleted = false;
           if (row.length == 0) {
             form.rows.splice(rowIdx, 1);
+            rowDeleted = true;
           }
 
           ctx.saving = true;
@@ -503,7 +506,12 @@ export default {
             onSave: function (result) {
               ctx.saving = false;
               if (result.status != true) {
-                alert("Failed to save. Reload the form");
+                if (rowDeleted) {
+                  row = [];
+                  form.rows.splice(rowIdx, 0, row);
+                }
+
+                row.splice(colIdx, 0, field);
               }
             },
           });
