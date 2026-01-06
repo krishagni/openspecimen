@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -295,18 +296,18 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			//       |____ pvs
 			//
 			File inputDir = new File(req.getPayload());
-			String formXml = Arrays.stream(inputDir.list((dir, name) -> name.endsWith(".xml")))
-				.sorted(Comparator.naturalOrder())
-				.findFirst().orElse(null);
+			String formXml = Arrays.stream(Objects.requireNonNull(inputDir.list((dir, name) -> name.endsWith(".xml"))))
+				.min(Comparator.naturalOrder())
+				.orElse(null);
 			if (StringUtils.isBlank(formXml)) {
 				return ResponseEvent.response(null);
 			}
 
 			String formXmlPath = new File(inputDir, formXml).getAbsolutePath();
-			String pvsDirPath = new File(inputDir, "pvs").getAbsolutePath();
+			String pvsDirPath  = new File(inputDir, "pvs").getAbsolutePath();
 
 			Container parsedForm = new ContainerParser(formXmlPath, pvsDirPath).parse();
-			Long formId = Container.createContainer(getUserContext(false), parsedForm, true);
+			Long formId = saveForm(parsedForm, true);
 
 			FormSummary result = new FormSummary();
 			result.setFormId(formId);
@@ -331,50 +332,24 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	@PlusTransactional
 	public ResponseEvent<Long> saveForm(RequestEvent<Map<String, Object>> req) {
 		AccessCtrlMgr.getInstance().ensureFormUpdateRights();
-		Container input = new ContainerPropsParser(req.getPayload()).parse();
-
-		Form form = null;
-		if (input.getId() != null) {
-			form = formDao.getFormById(input.getId());
-			if (form == null) {
-				return ResponseEvent.userError(FormErrorCode.NOT_FOUND, input.getId());
-			}
-		}
-
-		if (StringUtils.isBlank(input.getName())) {
-			return ResponseEvent.userError(FormErrorCode.NAME_REQUIRED);
-		}
-
-		if (form == null || !form.getName().equals(input.getName())) {
-			//
-			// Either a new form is being created or the form name has been modified, in which case,
-			// we need to ensure the form name doesn't conflict with the existing forms
-			// i.e. there should be no form in the DB with the same name
-			//
-			Form dbForm = formDao.getFormByName(input.getName());
-			if (dbForm != null) {
-				return ResponseEvent.userError(FormErrorCode.DUP_NAME, input.getName());
-			}
-		}
-
-		if (form != null) {
-			for (FormContextBean formCtxt : form.getAssociations()) {
-				ensureUpdateAllowed(formCtxt);
-			}
-		}
 
 		try {
-			return ResponseEvent.response(Container.createContainer(getUserContext(false), input, true));
-		} catch (FormException e) {
-			String rootCauseMsg = ExceptionUtils.getRootCauseMessage(e);
+			Container input = new ContainerPropsParser(req.getPayload()).parse();
+			return ResponseEvent.response(saveForm(input, false));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (FormException fe) {
+			String rootCauseMsg = ExceptionUtils.getRootCauseMessage(fe);
 			if (StringUtils.contains(rootCauseMsg, "Row size too large")) {
 				return ResponseEvent.userError(FormErrorCode.TOO_MANY_FIELDS);
 			}
 
-			throw e;
+			return ResponseEvent.serverError(fe);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
 		}
 	}
-    
+
 	@Override
 	@PlusTransactional
 	public ResponseEvent<Boolean> deleteForms(RequestEvent<BulkDeleteEntityOp> req) {
@@ -1307,6 +1282,49 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		fc.getNotifUserGroups().retainAll(userGroups);
 		fc.getNotifUserGroups().addAll(userGroups);
+	}
+
+	private Long saveForm(Container input, boolean importedForm) {
+		Form form = null;
+		if (input.getId() != null) {
+			form = formDao.getFormById(input.getId());
+			if (form == null) {
+				throw OpenSpecimenException.userError(FormErrorCode.NOT_FOUND, input.getId());
+			}
+		}
+
+		if (StringUtils.isBlank(input.getName())) {
+			throw OpenSpecimenException.userError(FormErrorCode.NAME_REQUIRED);
+		}
+
+		if (form == null || !form.getName().equals(input.getName())) {
+			//
+			// Either a new form is being created or the form name has been modified, in which case,
+			// we need to ensure the form name doesn't conflict with the existing forms
+			// i.e. there should be no form in the DB with the same name
+			//
+			Form dbForm = formDao.getFormByName(input.getName());
+			if (importedForm) {
+				form = dbForm;
+			} else if (dbForm != null) {
+				throw OpenSpecimenException.userError(FormErrorCode.DUP_NAME, input.getName());
+			}
+		}
+
+		if (form != null) {
+			form.getAssociations().forEach(this::ensureUpdateAllowed);
+		}
+
+		try {
+			return Container.createContainer(getUserContext(false), input, true);
+		} catch (FormException e) {
+			String rootCauseMsg = ExceptionUtils.getRootCauseMessage(e);
+			if (StringUtils.contains(rootCauseMsg, "Row size too large")) {
+				throw OpenSpecimenException.userError(FormErrorCode.TOO_MANY_FIELDS);
+			}
+
+			throw e;
+		}
 	}
 
 	private FormData saveOrUpdateFormData(Long recordId, FormData formData, boolean isPartial) {
