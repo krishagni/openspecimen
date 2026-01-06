@@ -178,7 +178,15 @@ class FieldFactory {
       fs.showTime = field.format && field.format.indexOf('HH:mm') > 0;
       fs.dateOnly = !fs.showTime;
       if (field.defaultType == 'CURRENT_DATE' || field.defaultValue == 'current_date') {
-        fs.defaultValue = '' + new Date().getTime();
+        const date = new Date();
+        if (fs.showTime) {
+          fs.defaultValue = '' + date.getTime();
+        } else {
+          const year = date.getFullYear();
+          const month = new String(date.getMonth() + 1).padStart(2, 0);
+          const day = new String(date.getDate()).padStart(2, 0);
+          fs.defaultValue = `${year}-${month}-${day}`;
+        }
       }
     } else if (field.type == 'fileUpload') {
       fs.type = 'fileUpload';
