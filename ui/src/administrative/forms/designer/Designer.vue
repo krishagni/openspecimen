@@ -1,6 +1,5 @@
 <template>
   <BlockUI :blocked="saving">
-    <Toast />
     <ConfirmDialog />
     <div class="spinner" v-if="loading">
       <ProgressSpinner />
@@ -15,11 +14,11 @@
 <script>
 
 import { reactive, ref } from "vue";
-import BlockUI from "primevue/blockui";
+import BlockUI         from "primevue/blockui";
 import ProgressSpinner from "primevue/progressspinner";
-import Toast from "primevue/toast";
-import ConfirmDialog from 'primevue/confirmdialog';
-import { useToast } from "primevue/usetoast";
+import ConfirmDialog   from 'primevue/confirmdialog';
+
+
 import FormCanvas from "./components/FormCanvas.vue";
 
 import http from "@/common/services/HttpClient.js";
@@ -31,7 +30,6 @@ export default {
   components: {
     BlockUI,
     ProgressSpinner,
-    Toast,
     ConfirmDialog,
     "form-canvas": FormCanvas,
   },
@@ -75,10 +73,9 @@ export default {
           data.onSave({ status: true, id: form.id });
           emit('form-saved', {form: formObj});
         })
-        .catch((error) => {
+        .catch(() => {
           saving.value = false;
           data.onSave({ status: false });
-          showError(error.response);
         });
     };
 
@@ -87,24 +84,6 @@ export default {
         window.parent.postMessage('done');
       }
     }
-
-    let showError = function (error) {
-      if (error.data) {
-        if (error.data instanceof Array) {
-          error.data.forEach((err) => addError(err.message));
-        } else if (typeof error.data == "object") {
-          addError(JSON.stringify(error.data));
-        } else {
-          addError(error.data);
-        }
-      } else {
-        addError(error.statusText);
-      }
-    };
-
-    const toast = useToast();
-    let addError = (msg) =>
-      toast.add({ severity: "error", detail: msg, life: 5000 });
 
     return {
       loading,
