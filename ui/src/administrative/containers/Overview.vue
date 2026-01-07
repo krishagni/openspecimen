@@ -378,10 +378,11 @@ export default {
       const trCont = this.trCtx.container;
       const newLocation = trCont.storageLocation || {};
 
+      const hasCoordChanged = (oldLoc, newLoc) => oldLoc == null || oldLoc == undefined || oldLoc != newLoc;
       const locationChanged = (olCont.siteName != trCont.siteName) ||
         (olLocation.name != newLocation.name) ||
-        (olLocation.positionY != newLocation.positionY) ||
-        (olLocation.positionX != newLocation.positionX);
+        (hasCoordChanged(olLocation.positionY, newLocation.positionY)) ||
+        (hasCoordChanged(olLocation.positionX, newLocation.positionX));
       if (!locationChanged) {
         alertsSvc.info({code: 'containers.no_change_not_transferred'});
         this.closeTransferForm();
