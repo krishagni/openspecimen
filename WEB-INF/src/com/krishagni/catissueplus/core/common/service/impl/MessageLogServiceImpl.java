@@ -133,11 +133,11 @@ public class MessageLogServiceImpl implements MessageLogService {
 	private void updateStatus(MessageLog msgLog, String recordIds, String error) {
 		if (StringUtils.isNotBlank(recordIds) && StringUtils.isBlank(error)) {
 			msgLog.setRecordId(recordIds);
+			msgLog.setStatus(MessageLog.Status.SUCCESS);
 			msgLog.setProcessStatus(MessageLog.ProcessStatus.PROCESSED);
-		} else if (StringUtils.isNotBlank(error)) {
-			msgLog.setError(error);
 		}
 
+		msgLog.setError(error);
 		msgLog.incrNoOfRetries();
 		msgLog.setProcessTime(Calendar.getInstance().getTime());
 		daoFactory.getMessageLogDao().saveOrUpdate(msgLog);
