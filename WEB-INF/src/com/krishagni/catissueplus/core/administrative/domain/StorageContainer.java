@@ -188,6 +188,8 @@ public class StorageContainer extends BaseExtensionEntity {
 	private StorageContainerStats stats;
 
 	private Integer utilisation;
+
+	private Integer freeSpaces;
 	
 	private Set<PermissibleValue> compAllowedSpecimenClasses = new HashSet<>();
 	
@@ -610,6 +612,15 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void setUtilisation(Integer utilisation) {
 		this.utilisation = utilisation;
+	}
+
+	@NotAudited
+	public Integer getFreeSpaces() {
+		return freeSpaces;
+	}
+
+	public void setFreeSpaces(Integer freeSpaces) {
+		this.freeSpaces = freeSpaces;
 	}
 
 	@NotAudited

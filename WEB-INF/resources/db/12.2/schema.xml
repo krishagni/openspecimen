@@ -721,4 +721,35 @@
       <column name="SPECIMEN_LOCATION" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Free spaces in the container" dbms="mysql">
+    <sql>
+      alter table
+        OS_STORAGE_CONTAINERS
+      add
+        FREE_SPACES int
+      as
+        ((NO_OF_ROWS * NO_OF_COLS) - UTILISATION)
+      virtual
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Free spaces in the container" dbms="oracle">
+    <sql>
+      alter table
+        OS_STORAGE_CONTAINERS
+      add
+        (FREE_SPACES as ((NO_OF_ROWS * NO_OF_COLS) - UTILISATION))
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on free containers that can store specimens">
+    <createIndex tableName="OS_STORAGE_CONTAINERS" indexName="OS_FREE_CONTAINERS_IDX">
+      <column name="ACTIVITY_STATUS" type="${text.type}(16)" />
+      <column name="STORE_SPECIMENS" type="${boolean.type}" />
+      <column name="USED_FOR" type="${text.type}(32)" />
+      <column name="STATUS" type="${text.type}(32)" />
+      <column name="FREE_SPACES" type="${int.type}" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

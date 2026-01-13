@@ -178,6 +178,8 @@
 
     <property name="utilisation" column="UTILISATION" insert="false" update="false" not-null="true" />
 
+    <property name="freeSpaces" column="FREE_SPACES" insert="false" update="false" />
+
     <filter name="activeEntity"/>
 
     <query name="getSpecimensCount">
