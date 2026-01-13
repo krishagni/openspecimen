@@ -96,6 +96,7 @@ dependencies {
   implementation group: 'org.apache.commons', name: 'commons-digester3', version:'3.2'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version:'3.17.0'
   implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.27.1'
+  implementation group: 'org.apache.commons', name: 'commons-text', version: '1.15.0'
   implementation group: 'org.apache.taglibs', name: 'taglibs-standard-impl', version: '1.2.5'
   implementation group: 'org.apache.tika', name: 'tika-core', version: '3.2.3'
   implementation group: 'org.apache.tika', name: 'tika-parsers-standard-package', version: '3.2.3'

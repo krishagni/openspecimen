@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -112,6 +114,7 @@ import com.krishagni.catissueplus.core.common.util.CsvWriter;
 import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
+import com.krishagni.catissueplus.core.common.util.SessionUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.DeObject;
 import com.krishagni.catissueplus.core.de.domain.Filter;
@@ -2365,93 +2368,73 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			private StorageContainerListCriteria topLevelCrit;
 
-			private StorageContainerListCriteria descendantsCrit;
-
 			private List<StorageContainerDetail> topLevelContainers = new ArrayList<>();
 
 			private Set<String> types = null;
 
+			private Deque<StorageContainerDetail> workList = new ArrayDeque<>();
+
+			private Set<Long> visited = new HashSet<>();
+
+			private Map<Long, Long> pageTracker = new HashMap<>();
+
 			@Override
 			public List<StorageContainerDetail> apply(ExportJob job) {
-				while (true) {
-					initParams();
+				List<StorageContainerDetail> result = new ArrayList<>();
 
-					if (endOfContainers) {
-						return Collections.emptyList();
+				while (!endOfContainers) {
+					initParams();
+					if (workList.isEmpty()) {
+						setupTopLevelContainers(job);
 					}
 
-					if (topLevelContainers.isEmpty()) {
-						if (topLevelCrit == null) {
-							topLevelCrit = new StorageContainerListCriteria().topLevelContainers(true).ids(job.getRecordIds());
-							Map<String, String> params = job.getParams();
-							if (params != null && !params.isEmpty()) {
-								if (StringUtils.isNotBlank(params.get("names"))) {
-									topLevelCrit.names(Arrays.asList(params.get("names").split("\\^")));
-								}
+					StorageContainerListCriteria childrenCrit = new StorageContainerListCriteria()
+						.cpShortTitles(topLevelCrit.cpShortTitles())
+						.siteCps(topLevelCrit.siteCps())
+						.orderBy("id")
+						.maxResults(500);
 
-								if (StringUtils.isNotBlank(params.get("cps"))) {
-									topLevelCrit.cpShortTitles(params.get("cps").split("\\^"));
-								}
+					while (!workList.isEmpty() && result.size() < 100) {
+						StorageContainerDetail container = workList.removeFirst();
+						if (visited.add(container.getId())) {
+							if (types == null || types.isEmpty() || types.contains(container.getTypeName())) {
+								result.add(container);
+							}
+						}
 
-								if (StringUtils.isNotBlank(params.get("types"))) {
-									types = Arrays.stream(params.get("types").split("\\^")).collect(Collectors.toSet());
+						Long lastId = pageTracker.get(container.getId());
+						childrenCrit.parentContainerId(container.getId()).lastId(lastId);
+						List<StorageContainerDetail> children = getContainers(childrenCrit);
+						if (children.size() >= childrenCrit.maxResults()) {
+							Long prevLastId = lastId;
+							for (StorageContainerDetail child : children) {
+								if (lastId == null || child.getId() > lastId) {
+									lastId = child.getId();
 								}
 							}
 
-							addContainerListCriteria(topLevelCrit);
+							if (prevLastId == null || prevLastId < lastId) {
+								pageTracker.put(container.getId(), lastId);
+								workList.addFirst(container);
+							}
+						} else {
+							pageTracker.remove(container.getId());
 						}
 
-						if (loadTopLevelContainers) {
-							topLevelContainers = getContainers(topLevelCrit.startAt(startAt).maxResults(1));
-							startAt += topLevelContainers.size();
-							loadTopLevelContainers = CollectionUtils.isEmpty(job.getRecordIds());
-						}
-					}
-
-					if (topLevelContainers.isEmpty()) {
-						endOfContainers = true;
-						return Collections.emptyList();
-					}
-
-					if (descendantsCrit == null) {
-						descendantsCrit = new StorageContainerListCriteria()
-							.cpShortTitles(topLevelCrit.cpShortTitles())
-							.siteCps(topLevelCrit.siteCps()).maxResults(100000);
-					}
-
-					StorageContainerDetail topLevelContainer = topLevelContainers.remove(0);
-					descendantsCrit.parentContainerId(topLevelContainer.getId());
-					List<StorageContainer> descendants = daoFactory.getStorageContainerDao().getDescendantContainers(descendantsCrit);
-
-					Map<Long, List<StorageContainer>> childContainersMap = new HashMap<>();
-					for (StorageContainer container : descendants) {
-						Long parentId = container.getParentContainer() == null ? null : container.getParentContainer().getId();
-						List<StorageContainer> childContainers = childContainersMap.computeIfAbsent(parentId, (k) -> new ArrayList<>());
-						childContainers.add(container);
-					}
-
-					List<StorageContainerDetail> workList = new ArrayList<>();
-					workList.addAll(toDetailList(childContainersMap.get(null)));
-
-					List<StorageContainerDetail> result = new ArrayList<>();
-					while (!workList.isEmpty()) {
-						StorageContainerDetail containerDetail = workList.remove(0);
-						if (types == null || types.isEmpty() || types.contains(containerDetail.getTypeName())) {
-							result.add(containerDetail);
-						}
-
-						List<StorageContainer> childContainers = childContainersMap.get(containerDetail.getId());
-						if (childContainers != null) {
-							workList.addAll(0, toDetailList(childContainers));
+						for (int i = children.size() - 1; i >= 0; --i) {
+							workList.addFirst(children.get(i));
 						}
 					}
 
+					SessionUtil.getInstance().clearSession();
 					if (!result.isEmpty()) {
-						return result;
+						break;
 					}
 
 					// continue until all the containers are exhausted
 				}
+
+				return result;
 			}
 
 			private void initParams() {
@@ -2463,8 +2446,49 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				paramsInited = true;
 			}
 
+			private void setupTopLevelContainers(ExportJob job) {
+				if (topLevelContainers.isEmpty()) {
+					if (topLevelCrit == null) {
+						topLevelCrit = new StorageContainerListCriteria().topLevelContainers(true).ids(job.getRecordIds());
+						Map<String, String> params = job.getParams();
+						if (params != null && !params.isEmpty()) {
+							if (StringUtils.isNotBlank(params.get("names"))) {
+								topLevelCrit.names(Arrays.asList(params.get("names").split("\\^")));
+							}
+
+							if (StringUtils.isNotBlank(params.get("cps"))) {
+								topLevelCrit.cpShortTitles(params.get("cps").split("\\^"));
+							}
+
+							if (StringUtils.isNotBlank(params.get("types"))) {
+								types = Arrays.stream(params.get("types").split("\\^")).collect(Collectors.toSet());
+							}
+						}
+
+						addContainerListCriteria(topLevelCrit);
+					}
+
+					if (loadTopLevelContainers) {
+						topLevelContainers = getContainers(topLevelCrit.startAt(startAt).maxResults(1));
+						startAt += topLevelContainers.size();
+						loadTopLevelContainers = CollectionUtils.isEmpty(job.getRecordIds());
+					}
+				}
+
+				if (topLevelContainers.isEmpty()) {
+					endOfContainers = true;
+					return;
+				}
+
+				workList.addFirst(topLevelContainers.remove(0));
+				pageTracker.clear();
+				visited.clear();
+			}
+
 			private List<StorageContainerDetail> getContainers(StorageContainerListCriteria crit) {
-				return toDetailList(daoFactory.getStorageContainerDao().getStorageContainers(crit));
+				List<StorageContainerDetail> containers = toDetailList(daoFactory.getStorageContainerDao().getStorageContainers(crit));
+				SessionUtil.getInstance().clearSession();
+				return containers;
 			}
 
 			private List<StorageContainerDetail> toDetailList(List<StorageContainer> containers) {

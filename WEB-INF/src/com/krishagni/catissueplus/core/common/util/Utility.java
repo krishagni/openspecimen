@@ -1302,6 +1302,10 @@ public class Utility {
 	}
 
 	public static synchronized File dumpLiveHeap() {
+		return dumpLiveHeap(true);
+	}
+
+	public static synchronized File dumpLiveHeap(boolean gzip) {
 		File heapFile = null;
 
 		try {
@@ -1316,20 +1320,23 @@ public class Utility {
 					HotSpotDiagnosticMXBean.class
 				);
 
-			heapFile = new File(ConfigUtil.getInstance().getTempDir(), filename);
+			File result = heapFile = new File(ConfigUtil.getInstance().getTempDir(), filename);
 			logger.info("Starting heap dump to: " + filename);
 			mxBean.dumpHeap(heapFile.getAbsolutePath(), true);
 			logger.info("Heap dump complete.");
 
-			logger.info("Compressing heap dump file...");
-			File gzipHeapFile = gzip(heapFile, new File(ConfigUtil.getInstance().getTempDir(), filename + ".gz"));
-			logger.info("Heap dump compression completed!");
+			if (gzip) {
+				logger.info("Compressing heap dump file...");
+				File gzipHeapFile = gzip(heapFile, new File(ConfigUtil.getInstance().getTempDir(), filename + ".gz"));
+				logger.info("Heap dump compression completed!");
+				result = gzipHeapFile;
+			}
 
-			return gzipHeapFile;
+			return result;
 		} catch (Exception e) {
 			throw OpenSpecimenException.serverError(e);
 		} finally {
-			if (heapFile != null) {
+			if (heapFile != null && gzip) {
 				heapFile.delete();
 			}
 		}

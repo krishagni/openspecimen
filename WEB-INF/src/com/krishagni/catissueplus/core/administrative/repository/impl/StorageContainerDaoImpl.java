@@ -1069,6 +1069,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		}
 
 		public <T> Query<T> query(Class<T> returnType) {
+			addLastIdRestriction();
 			addIdsRestriction();
 			addNotInIdsRestriction();
 			addNameRestriction();		
@@ -1090,7 +1091,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			addSiteCpRestriction();
 
 			String orderBy = "wc.id asc";
-			if (crit.parentContainerId() != null) {
+			if (!"id".equals(crit.orderBy()) && crit.parentContainerId() != null) {
 				orderBy = "pos.posTwoOrdinal, pos.posOneOrdinal";
 			}
 
@@ -1138,6 +1139,16 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			if (query.where.length() != 0) {
 				query.where.append(" and ");
 			}
+		}
+
+		private void addLastIdRestriction() {
+			if (crit.lastId() == null) {
+				return;
+			}
+
+			addAnd(this.restrictionQuery);
+			this.restrictionQuery.where.append("c.id > :lastId");
+			params.put("lastId", crit.lastId());
 		}
 
 		private void addIdsRestriction() {
