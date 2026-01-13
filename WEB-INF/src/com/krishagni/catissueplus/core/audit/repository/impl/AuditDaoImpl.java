@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.audit.repository.impl;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -223,6 +225,14 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		}
 
 		return query.list(crit.startAt(), crit.maxResults());
+	}
+
+	@Override
+	public int deleteApiCallLogs(int olderThanDays) {
+		LocalDate olderThan = LocalDate.now().minus(olderThanDays, ChronoUnit.DAYS);
+		return getCurrentSession().getNamedQuery(DELETE_OLDER_API_CALL_LOGS)
+			.setParameter("olderThan", java.sql.Date.valueOf(olderThan))
+			.executeUpdate();
 	}
 
 	private Object[] getLatestRevisionInfo(String auditTable, Long objectId, int revType) {
@@ -665,6 +675,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	private static final String GET_FORM_IDS_SQL = "select f.identifier from dyextn_containers f where f.name in :formNames";
 
 	private static final String GET_LATEST_API_CALL_TIME = FQN + ".getLatestApiCallTime";
+
+	private static final String DELETE_OLDER_API_CALL_LOGS = FQN + ".deleteOlderLogs";
 
 	private static final String GET_ENTITY_NAMES = "com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord.getEntityNames";
 }

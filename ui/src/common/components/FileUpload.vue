@@ -81,7 +81,7 @@ export default {
     upload: function() {
       if (!this.$refs.uploader.hasFiles) {
         alertSvc.error({code: 'common.file_not_selected'});
-        return;
+        return new Promise(() => null);
       }
 
       return new Promise((resolve, reject) => {

@@ -7,16 +7,23 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJobRun;
 import com.krishagni.catissueplus.core.administrative.services.ScheduledTask;
+import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 
+@Configurable
 public class FilesBacklogCleaner implements ScheduledTask {
 	private static final LogUtil logger = LogUtil.getLogger(FilesBacklogCleaner.class);
 
@@ -26,22 +33,42 @@ public class FilesBacklogCleaner implements ScheduledTask {
 
 	private static final String AUDIT_FILES_DIR = "audit";
 
-	private static final int period = 30; //30 days
+	private static final int FILE_RETENTION_DAYS = 30; //30 days
+
+	private static final int API_LOG_RETENTION_DAYS = 90;
+
+	@Autowired
+	private DaoFactory daoFactory;
 	
 	@Override
 	public void doJob(ScheduledJobRun jobRun) 
 	throws Exception {
-		Integer inputPeriod = null;
+
+		Map<String, String> argsMap = new HashMap<>();
 		if (StringUtils.isNotBlank(jobRun.getScheduledJob().getFixedArgs())) {
-			try {
-				String[] args = jobRun.getScheduledJob().getFixedArgs().split(",");
-				inputPeriod = Integer.parseInt(args[0].trim());
-			} catch (Exception e) {
-				logger.error("Error parsing the retention period from the job configuration. Defaulting to 30 days", e);
+			String[] args = jobRun.getScheduledJob().getFixedArgs().split(",");
+			for (String arg : args) {
+				String[] parts = arg.trim().split("=");
+				if (parts.length == 1) {
+					argsMap.put("filesRetentionDays", parts[0]);
+				} else {
+					argsMap.put(parts[0].trim(), parts[1].trim());
+				}
 			}
 		}
 
-		int effectivePeriod = inputPeriod != null ? inputPeriod : period;
+		Integer inputPeriod = null;
+		try {
+			String input = argsMap.get("filesRetentionDays");
+			if (StringUtils.isNotBlank(input)) {
+				inputPeriod = Integer.parseInt(input);
+			}
+		} catch (Exception e) {
+			logger.error("Error parsing the retention period from the job configuration. Defaulting to " + FILE_RETENTION_DAYS + " days", e);
+		}
+
+
+		int effectivePeriod = inputPeriod != null ? inputPeriod : FILE_RETENTION_DAYS;
 		cleanupOlderFiles(getQueryExportDataDir(), effectivePeriod, null, true);
 		cleanupOlderFiles(getLogFilesDir(), getLogFilesRetainPeriod(), null, true);
 		cleanupOlderFiles(getAuditFilesDir(), effectivePeriod, null, true);
@@ -51,6 +78,24 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		cleanupOlderFiles(getDirPath("oc", "import-logs"), effectivePeriod, null, true);
 		cleanupOlderFiles(getDirPath("oc", "auto-importer"), effectivePeriod, null, true);
 		cleanupOlderFiles(getDataDir(), effectivePeriod, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"), false);
+
+		Integer apiLogsRetentionDays = null;
+		try {
+			String input = argsMap.get("apiLogsRetentionDays");
+			if (StringUtils.isNotBlank(input)) {
+				apiLogsRetentionDays = Integer.parseInt(input);
+			}
+		} catch (Exception e) {
+			logger.error("Error parsing the retention period from the job configuration. Defaulting to " + API_LOG_RETENTION_DAYS + " days", e);
+		}
+
+		apiLogsRetentionDays = apiLogsRetentionDays != null ? apiLogsRetentionDays : API_LOG_RETENTION_DAYS;
+		if (apiLogsRetentionDays > 0) {
+			int deleted = cleanupApiCallsLog(apiLogsRetentionDays);
+			if (deleted > 0) {
+				logger.info("Deleted " + deleted + " API calls log entries that are older than " + apiLogsRetentionDays + " days");
+			}
+		}
 	}
 
 	private String getDataDir() {
@@ -86,10 +131,10 @@ public class FilesBacklogCleaner implements ScheduledTask {
 	}
 
 	private int getLogFilesRetainPeriod() {
-		return ConfigUtil.getInstance().getIntSetting("common", "log_files_retain_period", period);
+		return ConfigUtil.getInstance().getIntSetting("common", "log_files_retain_period", FILE_RETENTION_DAYS);
 	}
 
-	private static void cleanupOlderFiles(String dataDir, int period, FilenameFilter filter, boolean rmDirs) {
+	private void cleanupOlderFiles(String dataDir, int period, FilenameFilter filter, boolean rmDirs) {
 		if (period <= 0) {
 			return;
 		}
@@ -102,7 +147,7 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		cleanupDir(dataDir, timeInMilliseconds, filter, rmDirs);
 	}
 
-	private static void cleanupDir(String directory, Long timeBefore, FilenameFilter filter, boolean rmDirs) {
+	private void cleanupDir(String directory, Long timeBefore, FilenameFilter filter, boolean rmDirs) {
 		try {
 			File dir = new File(directory);
 			if (!dir.exists() || !dir.isDirectory()) {
@@ -128,5 +173,10 @@ public class FilesBacklogCleaner implements ScheduledTask {
 				logger.error("Error deleting files from directory: " + directory, e);
 			}
 		}
+	}
+
+	@PlusTransactional
+	private int cleanupApiCallsLog(int apiLogsRetentionDays) {
+		return daoFactory.getAuditDao().deleteApiCallLogs(apiLogsRetentionDays);
 	}
 }

@@ -50,7 +50,8 @@ class Container {
   }
 
   async unarchive(container) {
-    const payload = {id: container.id, activityStatus: 'Active'};
+    const {id, storageLocation} = container;
+    const payload = {id, storageLocation, activityStatus: 'Active'};
     return http.patch('storage-containers/' + container.id, payload);
   }
 
