@@ -223,6 +223,14 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 	
 	public void vacate() {
 		container.removePosition(this);
+		if (getBlockedForContainer() != null) {
+			setBlockedForContainer(null);
+		}
+
+		if (getCheckoutSpecimen() != null) {
+			getCheckoutSpecimen().setCheckoutPosition(null);
+			setCheckoutSpecimen(null);
+		}
 	}
 
 	public boolean equals(String row, String column, String reservationId) {
