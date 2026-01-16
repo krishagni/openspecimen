@@ -976,11 +976,16 @@
   <bean id="legacySamlEndpointHandler" class="com.krishagni.catissueplus.rest.filter.LegacySamlEndpointHandler">
     <property name="daoFactory" ref="biospecimenDaoFactory" />
   </bean>
+
+  <bean id="jwtSvc" class="com.krishagni.catissueplus.core.auth.services.impl.JwtServiceImpl">
+    <property name="daoFactory" ref="biospecimenDaoFactory" />
+  </bean>
   
   <bean id="authTokenFilter" class="com.krishagni.catissueplus.rest.filter.AuthTokenFilter">
-    <property name="authService" ref="userAuthService"/>
-    <property name="auditService" ref="auditService"/>
-    <property name="cfgSvc" ref="cfgSvc"/>
+    <property name="authService" ref="userAuthService" />
+    <property name="auditService" ref="auditService" />
+    <property name="cfgSvc" ref="cfgSvc" />
+    <property name="jwtSvc" ref="jwtSvc" />
     <property name="excludeUrls">
       <map>
         <entry key="POST">

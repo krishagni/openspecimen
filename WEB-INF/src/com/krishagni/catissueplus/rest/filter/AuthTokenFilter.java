@@ -39,6 +39,7 @@ import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
 import com.krishagni.catissueplus.core.auth.domain.UserRequestData;
 import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.events.TokenDetail;
+import com.krishagni.catissueplus.core.auth.services.JwtService;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
 import com.krishagni.catissueplus.core.auth.services.UserRequestDataProvider;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -55,7 +56,9 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	private static final String OS_CLIENT_HDR = "X-OS-API-CLIENT";
 
 	private static final String BASIC_AUTH = "Basic ";
-	
+
+	private static final String BEARER_TOKEN = "Bearer ";
+
 	private Set<String> allowedOrigins;
 	
 	private UserAuthenticationService authService;
@@ -66,6 +69,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 
 	private ConfigurationService cfgSvc;
 
+	private JwtService jwtSvc;
+
 	private List<UserRequestDataProvider> userRequestDataProviders = new ArrayList<>();
 
 	public void setAuthService(UserAuthenticationService authService) {
@@ -74,6 +79,10 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 
 	public void setCfgSvc(ConfigurationService cfgSvc) {
 		this.cfgSvc = cfgSvc;
+	}
+
+	public void setJwtSvc(JwtService jwtSvc) {
+		this.jwtSvc = jwtSvc;
 	}
 
 	public void setExcludeUrls(Map<String, List<String>> excludeUrls) {
@@ -179,15 +188,24 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 				setUnauthorizedResp(httpReq, httpResp, chain, true);
 				return;
 			}
-		} else if (httpReq.getHeader(HttpHeaders.AUTHORIZATION) != null) {
-			logger.info("No auth token in the request. Probing the authorization header for username/password details. URL = " + httpReq.getRequestURI());
-			AuthToken token = doBasicAuthentication(httpReq, httpResp);
-			if (token != null) {
-				user = token.getUser();
-				loginAuditLog = token.getLoginAuditLog();
-			} else {
-				logger.info("The credentials received in authorization header are invalid. URL = " + httpReq.getRequestURI());
-				setUnauthorizedResp(httpReq, httpResp, chain, true);
+		} else {
+			String authorization = httpReq.getHeader(HttpHeaders.AUTHORIZATION);
+			if (StringUtils.isNotBlank(authorization)) {
+				logger.info("No auth token in the request. Probing the authorization header for username/password details or JWT token. URL = " + httpReq.getRequestURI());
+				if (authorization.startsWith(BEARER_TOKEN)) {
+					user = jwtSvc.resolveUser(authorization.substring(BEARER_TOKEN.length()).trim());
+				} else if (authorization.startsWith(BASIC_AUTH)) {
+					AuthToken token = doBasicAuthentication(httpReq, httpResp);
+					if (token != null) {
+						user = token.getUser();
+						loginAuditLog = token.getLoginAuditLog();
+					}
+				}
+
+				if (user == null) {
+					logger.info("Credentials / JWT received in authorization header is invalid. URL = " + httpReq.getRequestURI());
+					setUnauthorizedResp(httpReq, httpResp, chain, true);
+				}
 			}
 		}
 

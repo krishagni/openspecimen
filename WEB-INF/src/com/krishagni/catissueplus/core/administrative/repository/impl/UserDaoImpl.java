@@ -76,6 +76,15 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 		return users.isEmpty() ? null : users.get(0);
 	}
 
+	@Override
+	public User getUser(String loginName, Long domainId) {
+		Criteria<User> query = createCriteria(User.class, "u")
+			.join("u.authDomain", "domain");
+		return query.add(query.eq("domain.id", domainId))
+			.add(query.eq("u.loginName", loginName))
+			.uniqueResult();
+	}
+
 	public List<User> getUsers(Collection<String> loginNames, String domainName) {
 		Criteria<User> query = createCriteria(User.class, "u");
 		query.add(query.in("u.loginName", loginNames));

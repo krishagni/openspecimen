@@ -6,16 +6,11 @@ import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.services.AuthenticationService;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 
-public class SamlAuthenticationServiceImpl implements AuthenticationService {
+public class SamlAuthenticationServiceImpl extends NoAuthenticationServiceImpl {
 	public SamlAuthenticationServiceImpl() {
 		
 	}
 	
 	public SamlAuthenticationServiceImpl(Map<String, String> props) {
-	}
-	
-	@Override
-	public void authenticate(LoginDetail loginDetail) {
-		throw OpenSpecimenException.serverError(new UnsupportedOperationException("Not supported for this implementation"));
 	}
 }
