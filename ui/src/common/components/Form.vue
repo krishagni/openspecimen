@@ -25,8 +25,8 @@
             <span class="required-indicator" v-show="field.required" v-os-tooltip.bottom="field.requiredTooltip">
               <span>*</span>
             </span>
-            <span class="help" v-if="field.tooltip">
-              <os-icon name="question-circle" v-os-tooltip.bottom="field.tooltip"/>
+            <span class="help" v-if="field.tooltip || field.tooltipCode">
+              <os-icon name="question-circle" v-os-tooltip.bottom="field.tooltip || $t(field.tooltipCode)"/>
             </span>
           </os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
