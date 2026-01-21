@@ -45,10 +45,15 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public AuthDomain getAuthDomainByType(String authType) {
-		List<AuthDomain> result = createNamedQuery(GET_DOMAIN_BY_TYPE, AuthDomain.class)
+		List<AuthDomain> result = getAuthDomainsByType(authType);
+		return result.isEmpty() ? null : result.get(0);
+	}
+
+	@Override
+	public List<AuthDomain> getAuthDomainsByType(String authType) {
+		return createNamedQuery(GET_DOMAIN_BY_TYPE, AuthDomain.class)
 			.setParameter("authType", authType)
 			.list();
-		return result.isEmpty() ? null : result.get(0);
 	}
 
 	@Override

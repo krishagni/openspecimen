@@ -157,6 +157,10 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-core',   version: '5.7.13'
   implementation group: 'org.springframework.security', name: 'spring-security-ldap',   version: '5.7.13'
   implementation group: 'org.springframework.security', name: 'spring-security-web',    version: '5.7.13'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core', version: '5.7.13'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: '5.7.13'
+
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.31'
 
   implementation group: 'com.thoughtworks.xstream', name: 'xstream', version:'1.4.19'
   implementation group: 'com.itextpdf', name: 'itextpdf', version:'5.5.13.2'

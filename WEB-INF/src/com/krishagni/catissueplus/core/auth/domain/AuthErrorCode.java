@@ -25,7 +25,19 @@ public enum AuthErrorCode implements ErrorCode {
 
 	OTP_EXPIRED,
 
-	DOMAIN_LOGIN_DISABLED;
+	DOMAIN_LOGIN_DISABLED,
+
+	JWT_PARSE_ERROR,
+
+	JWT_UNKNOWN_ISSUER,
+
+	JWT_EXPIRED,
+
+	JWT_INV_AUD,
+
+	JWT_INV_AUD_BY_ISSUER,
+
+	INV_STATE;
 
 	@Override
 	public String code() {

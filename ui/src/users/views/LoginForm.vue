@@ -51,7 +51,7 @@ export default {
 
         forgotPasswordEnabled: appProps.forgot_password,
 
-        samlDomainSelected: false
+        externalAuth: false
       }
     };
   },
@@ -60,7 +60,7 @@ export default {
     this._getDomains().then(
       domains => {
         this.domains = domains.filter(domain => domain.allowLogins);
-        this._toggleSamlDomainSelected();
+        this._toggleExternalAuthSelected();
       }
     );
 
@@ -73,10 +73,10 @@ export default {
   },
 
   watch: {
-    'ctx.loginDetail.domainName': function(domainName) {
-      this._toggleSamlDomainSelected();
-      if (this.ctx.samlDomainSelected) {
-        loginSvc.gotoIdp(domainName);
+    'ctx.loginDetail.domainName': function() {
+      this._toggleExternalAuthSelected();
+      if (this.ctx.externalAuth) {
+        loginSvc.gotoIdp(this.ctx.selectedDomain);
       }
     }
   },
@@ -87,9 +87,8 @@ export default {
         return;
       }
 
-      if (this.ctx.samlDomainSelected) {
-        const {loginDetail: {domainName}} = this.ctx;
-        loginSvc.gotoIdp(domainName);
+      if (this.ctx.externalAuth) {
+        loginSvc.gotoIdp(this.ctx.selectedDomain);
         return;
       }
 
@@ -113,10 +112,10 @@ export default {
       routerSvc.goto('UserResetOtpSecretCode');
     },
 
-    _toggleSamlDomainSelected: function() {
+    _toggleExternalAuthSelected: function() {
       const {loginDetail: {domainName}} = this.ctx;
-      const domain = (this.domains || []).find(d => d.name == domainName);
-      this.ctx.samlDomainSelected = (domain && domain.type == 'saml') || false;
+      const domain = this.ctx.selectedDomain = (this.domains || []).find(d => d.name == domainName);
+      this.ctx.externalAuth = (domain && (domain.type == 'saml' || domain.type == 'oauth')) || false;
     },
 
     _getDomains: function() {

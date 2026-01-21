@@ -22,6 +22,7 @@ import com.krishagni.catissueplus.core.administrative.repository.UserDao;
 import com.krishagni.catissueplus.core.administrative.repository.UserGroupDao;
 import com.krishagni.catissueplus.core.audit.repository.AuditDao;
 import com.krishagni.catissueplus.core.auth.repository.AuthDao;
+import com.krishagni.catissueplus.core.auth.repository.OAuthStateDao;
 import com.krishagni.catissueplus.core.common.repository.ConfigSettingDao;
 import com.krishagni.catissueplus.core.common.repository.ExternalAppIdDao;
 import com.krishagni.catissueplus.core.common.repository.LockDao;
@@ -66,6 +67,8 @@ public interface DaoFactory {
 	UserGroupDao getUserGroupDao();
 	
 	AuthDao getAuthDao();
+
+	OAuthStateDao getOAuthStateDao();
 
 	UniqueIdGenerator getUniqueIdGenerator();
 
