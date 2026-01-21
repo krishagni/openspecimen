@@ -977,15 +977,17 @@
     <property name="daoFactory" ref="biospecimenDaoFactory" />
   </bean>
 
-  <bean id="jwtSvc" class="com.krishagni.catissueplus.core.auth.services.impl.JwtServiceImpl">
+  <bean id="oAuthSvc" class="com.krishagni.catissueplus.core.auth.services.impl.OAuthServiceImpl">
     <property name="daoFactory" ref="biospecimenDaoFactory" />
+    <property name="userAuthSvc" ref="userAuthService" />
+    <property name="taskManager" ref="scheduledTaskMgr" />
   </bean>
   
   <bean id="authTokenFilter" class="com.krishagni.catissueplus.rest.filter.AuthTokenFilter">
     <property name="authService" ref="userAuthService" />
     <property name="auditService" ref="auditService" />
     <property name="cfgSvc" ref="cfgSvc" />
-    <property name="jwtSvc" ref="jwtSvc" />
+    <property name="oAuthSvc" ref="oAuthSvc" />
     <property name="excludeUrls">
       <map>
         <entry key="POST">
@@ -1011,6 +1013,8 @@
             <value>/config-settings/deployment-site-logo</value>
             <value>/config-settings/i18n-messages</value>
             <value>/auth-domains/</value>
+            <value>/oauth/login/**</value>
+            <value>/oauth/callback</value>
             <value>/forms/data-entry-tokens/**</value>
           </list>
         </entry>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="OAuth states">
+    <createTable tableName="OS_OAUTH_STATES">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="STATE" type="${text.type}(255)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="OS_OAUTH_STATES_UQ"/>
+      </column>
+      <column name="DOMAIN_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_OAUTH_STATE_DOMAIN"
+          referencedTableName="OS_AUTH_DOMAINS" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="VERIFIER" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="CHALLENGE" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="AUTH_TIME" type="${nullable.ts.type}">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="OAuth state ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_OAUTH_STATES_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on OAuth state time to facilitate faster clean up of old states">
+    <createIndex tableName="OS_OAUTH_STATES" indexName="OS_OAUTH_STATE_TIME_IDX">
+      <column name="AUTH_TIME" />
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

@@ -1,6 +1,6 @@
 
 import http from '@/common/services/HttpClient.js';
-import ui from '@/global.js';
+import ui   from '@/global.js';
 
 class Login {
   signInState = {};
@@ -71,8 +71,12 @@ class Login {
     return http.get('config-settings/password');
   }
 
-  gotoIdp(domainName) {
-    window.location.replace(http.getServerAppUrl() + 'saml2/authenticate/' + domainName + '?_nonce=' + Date.now());
+  gotoIdp(domain) {
+    if (domain.type == 'saml') {
+      window.location.replace(http.getServerAppUrl() + 'saml2/authenticate/' + domain.name + '?_nonce=' + Date.now());
+    } else if (domain.type == 'oauth') {
+      window.location.replace(http.getUrl('oauth/login/' + domain.id));
+    }
   }
 
   getIdpLogoutUrl() {

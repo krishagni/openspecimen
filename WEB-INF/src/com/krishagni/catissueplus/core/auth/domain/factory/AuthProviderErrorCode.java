@@ -24,7 +24,17 @@ public enum AuthProviderErrorCode implements ErrorCode {
 
 	NOT_SAML,
 
-	IDP_METADATA_NOT_SPECIFIED;
+	IDP_METADATA_NOT_SPECIFIED,
+
+	NOT_OAUTH,
+
+	ISSUER_URL_REQ,
+
+	AUTHORIZE_URL_REQ,
+
+	TOKEN_URL_REQ,
+
+	CLIENT_ID_REQ;
 	
 	@Override
 	public String code() {

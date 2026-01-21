@@ -33,7 +33,11 @@ public enum AuthErrorCode implements ErrorCode {
 
 	JWT_EXPIRED,
 
-	JWT_INV_AUD;
+	JWT_INV_AUD,
+
+	JWT_INV_AUD_BY_ISSUER,
+
+	INV_STATE;
 
 	@Override
 	public String code() {

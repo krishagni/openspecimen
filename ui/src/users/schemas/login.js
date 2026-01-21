@@ -35,7 +35,7 @@ export default {
                 message: 'Login Name is mandatory'
               }
             },
-            showWhen: '!!loginDetail.domainName && !samlDomainSelected'
+            showWhen: '!!loginDetail.domainName && !externalAuth'
           }
         ]
       },
@@ -51,7 +51,7 @@ export default {
                 message: 'Password is mandatory'
               }
             },
-            showWhen: '!!loginDetail.domainName && !samlDomainSelected'
+            showWhen: '!!loginDetail.domainName && !externalAuth'
           }
         ]
       },
@@ -67,7 +67,7 @@ export default {
                 message: 'OTP is mandatory'
               }
             },
-            showWhen: '!!loginDetail.domainName && otpAuthEnabled && !samlDomainSelected'
+            showWhen: '!!loginDetail.domainName && otpAuthEnabled && !externalAuth'
           }
         ]
       },

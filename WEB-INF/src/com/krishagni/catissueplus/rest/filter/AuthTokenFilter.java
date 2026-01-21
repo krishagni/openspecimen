@@ -39,7 +39,7 @@ import com.krishagni.catissueplus.core.auth.domain.LoginAuditLog;
 import com.krishagni.catissueplus.core.auth.domain.UserRequestData;
 import com.krishagni.catissueplus.core.auth.events.LoginDetail;
 import com.krishagni.catissueplus.core.auth.events.TokenDetail;
-import com.krishagni.catissueplus.core.auth.services.JwtService;
+import com.krishagni.catissueplus.core.auth.services.OAuthService;
 import com.krishagni.catissueplus.core.auth.services.UserAuthenticationService;
 import com.krishagni.catissueplus.core.auth.services.UserRequestDataProvider;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -69,7 +69,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 
 	private ConfigurationService cfgSvc;
 
-	private JwtService jwtSvc;
+	private OAuthService oAuthSvc;
 
 	private List<UserRequestDataProvider> userRequestDataProviders = new ArrayList<>();
 
@@ -81,8 +81,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		this.cfgSvc = cfgSvc;
 	}
 
-	public void setJwtSvc(JwtService jwtSvc) {
-		this.jwtSvc = jwtSvc;
+	public void setoAuthSvc(OAuthService oAuthSvc) {
+		this.oAuthSvc = oAuthSvc;
 	}
 
 	public void setExcludeUrls(Map<String, List<String>> excludeUrls) {
@@ -151,7 +151,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 
 		httpResp.setHeader("Access-Control-Allow-Credentials", "true");
 		httpResp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, PATCH, OPTIONS");
-		httpResp.setHeader("Access-Control-Allow-Headers", "Origin, Accept, Content-Type, X-OS-API-TOKEN, X-OS-API-CLIENT, X-OS-IMPERSONATE-USER, X-OS-CLIENT-TZ, X-OS-SURVEY-TOKEN");
+		httpResp.setHeader("Access-Control-Allow-Headers", "Origin, Accept, Content-Type, X-OS-API-TOKEN, X-OS-API-CLIENT, X-OS-IMPERSONATE-USER, X-OS-CLIENT-TZ, X-OS-SURVEY-TOKEN, Authorization");
 		httpResp.setHeader("Access-Control-Expose-Headers", "Content-Disposition, Content-Length, Content-Type");
 
 		httpResp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -193,7 +193,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 			if (StringUtils.isNotBlank(authorization)) {
 				logger.info("No auth token in the request. Probing the authorization header for username/password details or JWT token. URL = " + httpReq.getRequestURI());
 				if (authorization.startsWith(BEARER_TOKEN)) {
-					user = jwtSvc.resolveUser(authorization.substring(BEARER_TOKEN.length()).trim());
+					user = oAuthSvc.resolveUser(authorization.substring(BEARER_TOKEN.length()).trim());
 				} else if (authorization.startsWith(BASIC_AUTH)) {
 					AuthToken token = doBasicAuthentication(httpReq, httpResp);
 					if (token != null) {
