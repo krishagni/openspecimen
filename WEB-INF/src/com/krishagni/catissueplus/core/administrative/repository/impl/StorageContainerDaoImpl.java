@@ -1101,8 +1101,6 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 			}
 
 			String hql = String.format(wrapperQuery.select + " " + wrapperQuery.from + " " + wrapperQuery.where + " order by " + orderBy, restrictionHql);
-			System.err.println(hql);
-
 			Query<T> query = createQuery(hql, returnType);
 			for (Map.Entry<String, Object> param : params.entrySet()) {
 				if (param.getValue() instanceof Collection<?>) {
@@ -1110,11 +1108,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 				} else {
 					query.setParameter(param.getKey(), param.getValue());
 				}
-
-				System.err.println(param.getKey() + " => " + param.getValue());
 			}
 
-			System.err.println(query.getSqlString());
 			return query;
 		}
 		
