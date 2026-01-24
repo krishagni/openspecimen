@@ -7,8 +7,11 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.TimeZone;
 
+import javax.servlet.ServletContext;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +31,8 @@ public class AuthUtil {
 	private static final String OS_AUTH_TOKEN_HDR = "X-OS-API-TOKEN";
 
 	private static final String OS_IMP_USER_HDR = "X-OS-IMPERSONATE-USER";
+
+	private static final String DEF_SESSION_COOKIE_NAME = "JSESSIONID";
 
 	public static Authentication getAuth() {
 		return SecurityContextHolder.getContext().getAuthentication();
@@ -159,6 +164,7 @@ public class AuthUtil {
 	public static void clearTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp) {
 		setTokenCookie(httpReq, httpResp, null);
 		setImpersonateTokenCookie(httpReq, httpResp, null);
+		invalidateSession(httpReq, httpResp);
 	}
 
 	public static void setImpersonateTokenCookie(HttpServletRequest httpReq, HttpServletResponse httpResp, String impToken) {
@@ -251,6 +257,24 @@ public class AuthUtil {
 		}
 
 		return value;
+	}
+
+	private static void invalidateSession(HttpServletRequest httpReq, HttpServletResponse httpResp) {
+		HttpSession session = httpReq.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+
+		String sessionCookieName = DEF_SESSION_COOKIE_NAME;
+		ServletContext ctxt = httpReq.getServletContext();
+		if (ctxt != null) {
+			SessionCookieConfig cookieCfg = ctxt.getSessionCookieConfig();
+			if (cookieCfg != null && StringUtils.isNotBlank(cookieCfg.getName())) {
+				sessionCookieName = cookieCfg.getName();
+			}
+		}
+
+		setCookie(httpReq, httpResp, sessionCookieName, null, 0);
 	}
 
 	private static TimeZone toTimeZone(String timeZone) {
