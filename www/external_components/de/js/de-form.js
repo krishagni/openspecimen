@@ -160,7 +160,10 @@ edu.common.de.SkipLogic = function(form, fieldObj, fieldAttrs) {
       return;
     }
 
-    var tokens = logic.trim().split(logicalOpRe);
+    var tokens = logic.replaceAll('||', ' or ')
+      .replaceAll('&&', ' and ')
+      .trim()
+      .split(logicalOpRe);
     if ((tokens.length - 1) % 2 != 0) {
       alert("Invalid skip logic: " + logic);
       return;
@@ -196,12 +199,17 @@ edu.common.de.SkipLogic = function(form, fieldObj, fieldAttrs) {
   function constructExpr(expr) {
     var tokens = expr.split(relOpRe);
     if (tokens.length != 3) {
-      alert("Invalid expression: " + expr);
-      return undefined;
+      expr = expr.replaceAll('==', '=');
+      tokens = expr.split(relOpRe);
+      if (tokens.length != 3) {
+        alert("Invalid expression: " + expr);
+        return undefined;
+      }
     }
 
     var value = tokens[2].trim();
-    if (value.charAt(0) == '"' && value.charAt(value.length - 1) == '"') {
+    if ((value.charAt(0) == '"' && value.charAt(value.length - 1) == '"') ||
+        (value.charAt(0) == "'" && value.charAt(value.length - 1) == "'")) {
       value = value.substring(1, value.length - 1);
     }
 
