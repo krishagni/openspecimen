@@ -10,12 +10,14 @@
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
+        :auto-filter-focus="true"
         :show-clear="showClear"
         :disabled="disabled"
         :tabindex="tabOrder"
         :reset-filter-on-hide="true"
-        :maxSelectedLabels="0"
-        :selectedItemsLabel="selectedItemsLabel"
+        :display="displayType"
+        :max-selected-labels="maxSelectedItems"
+        :selected-items-label="selectedItemsLabel"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -31,12 +33,14 @@
         :option-label="displayProp"
         :option-value="selectProp"
         :filter="true"
+        :auto-filter-focus="true"
         :show-clear="showClear"
         :disabled="disabled"
         :tabindex="tabOrder"
         :reset-filter-on-hide="true"
-        :maxSelectedLabels="0"
-        :selectedItemsLabel="selectedItemsLabel"
+        :display="displayType"
+        :max-selected-labels="maxSelectedItems"
+        :selected-items-label="selectedItemsLabel"
         @change="onChange"
         @show="loadOptions"
         @filter="filterOptions($event)"
@@ -48,8 +52,9 @@
 <script>
 import MultiSelect from 'primevue/multiselect';
 
-import http from '@/common/services/HttpClient.js';
-import util from '@/common/services/Util.js';
+import exprUtil from '@/common/services/ExpressionUtil.js';
+import http     from '@/common/services/HttpClient.js';
+import util     from '@/common/services/Util.js';
 
 export default {
   props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey'],
@@ -154,7 +159,7 @@ export default {
         // get /records?value=v1&value=v2...
         //
         Object.assign(searchOpts, this.queryParams(ls));
-        selected = await http.get(ls.apiUrl, searchOpts);
+        selected = await this.getFromBackend(searchOpts);
       }
 
       if (selected instanceof Array) {
@@ -184,7 +189,7 @@ export default {
           Object.keys(ls.queryParams.dynamic).forEach(
             function(name) {
               let expr = ls.queryParams.dynamic[name];
-              params[name] = new Function('return ' + expr).call(form);
+              params[name] = exprUtil.eval(form, expr);
             }
           );
         }
@@ -198,12 +203,11 @@ export default {
       cache = cache['ms-dropdown'] = cache['ms-dropdown'] || {};
 
       const qs = util.queryString(Object.assign({url: this.listSource.apiUrl}, params || {}));
-      let options = cache[qs];
-      if (!options) {
-        options = cache[qs] = await http.get(this.listSource.apiUrl, params);
+      if (!cache[qs]) {
+        cache[qs] = http.get(this.listSource.apiUrl, params);
       }
 
-      return options;
+      return await cache[qs];
     },
 
     dedup(options) {
@@ -295,6 +299,16 @@ export default {
 
     showClear: function() {
       return true;
+    },
+
+    displayType: function() {
+      const selected = this.selected || [];
+      return selected && selected.length > 10 ? 'comma' : 'chip';
+    },
+
+    maxSelectedItems: function() {
+      const selected = this.selected || [];
+      return selected && selected.length > 10 ? 0 : 10;
     }
   },
 
@@ -305,7 +319,9 @@ export default {
     modelValue: async function() {
       let selectedVals = await this.selectedValues();
       if (this.ctx.options) {
-        this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
+        // this.ctx.options = this.dedup(selectedVals.concat(this.ctx.options));
+        Array.prototype.push.apply(this.ctx.options, selectedVals);
+        this.ctx.options = this.dedup(this.ctx.options);
       } else {
         this.ctx.options = selectedVals;
       }
@@ -314,7 +330,7 @@ export default {
 
   mounted() {
     if (this.modelValue) {
-      this.selectedValues().then((values) => this.ctx.options = values);
+      this.selectedValues().then(values => this.ctx.options = values);
     }
   }
 }
@@ -342,6 +358,7 @@ export default {
 
   .os-dropdown :deep(.p-multiselect) {
     width: 100%;
+    position: relative;
   }
 
   .os-dropdown .p-float-label :deep(.p-multiselect .p-inputtext) {
@@ -374,5 +391,21 @@ export default {
   .os-dropdown .p-float-label :deep(.p-multiselect-label) {
     white-space: break-spaces;
     padding: 0;
+  }
+
+  .os-dropdown :deep(.p-multiselect-label) {
+    white-space: initial;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .os-dropdown :deep(.p-multiselect-token) {
+    margin-bottom: 0.25rem;
+    border: 1px solid #ced4da;
+    background: none;
+  }
+
+  .os-dropdown :deep(.p-multiselect-token-label) {
+    flex: 1;
   }
 </style>
