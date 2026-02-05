@@ -69,7 +69,7 @@ export default {
      let ctx = reactive({
        formData: props.data || {},
        fd: function(name) {
-         return util.fd(ctx.formData, name);
+         return util.fd(ctx.formData, name, props.schema);
        }
      });
 
@@ -144,7 +144,7 @@ export default {
      },
 
      fd: function(name) {
-       return util.fd(this.ctx.formData, name);
+       return util.fd(this.ctx.formData, name, this.schema);
      },
 
      uploadFile: async function(fieldName) {

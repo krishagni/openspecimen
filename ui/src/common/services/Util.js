@@ -615,7 +615,7 @@ class Util {
     );
   }
 
-  fd(formData, name) {
+  fd(formData, name, schema) {
     let object = formData;
     if (!name) {
       return object;
@@ -626,27 +626,38 @@ class Util {
       name = name.replaceAll('$extendedObj', objName);
     }
 
-    let props = name.split('.');
+    let value = this.getValue(formData, name);
+    if (this.isNullOrUndefined(value) && objCustomFields && name.indexOf('.') == -1) {
+      value = this.getValue(formData, objCustomFields + '.' + name);
+    }
+
+    const {udnNameMap} = schema || {};
+    if (this.isNullOrUndefined(value) && udnNameMap) {
+      if (udnNameMap[name]) {
+        value = this.fd(formData, udnNameMap[name], null);
+      } else if (objCustomFields && udnNameMap[objCustomFields + '.' + name]) {
+        value = this.fd(formData, udnNameMap[objCustomFields + '.' + name], null);
+      }
+    }
+
+    return value;
+  }
+
+  getValue(object, fqn) {
+    const props = fqn.split('.');
     for (let i = 0; i < props.length; ++i) {
-      if (object == null || object == undefined || typeof object != 'object') {
+      if (this.isNullOrUndefined(object) || typeof object != 'object') {
         break;
       }
+
       object = object[props[i]];
     }
 
-    if ((object == null || object == undefined) && objCustomFields && props.length == 1) {
-      props = (objCustomFields + '.' + name).split('.');
-      object = formData;
-
-      for (let i = 0; i < props.length; ++i) {
-        if (object == null || object == undefined || typeof object != 'object') {
-          break;
-        }
-        object = object[props[i]];
-      }
-    }
-
     return object;
+  }
+
+  isNullOrUndefined(value) {
+    return value === null || value === undefined;
   }
 
   _getEscapeMap(str) {
