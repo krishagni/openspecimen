@@ -752,4 +752,10 @@
       <column name="FREE_SPACES" type="${int.type}" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Index on reservation ID to facilitate cleaning up of reservations">
+    <createIndex tableName="OS_CONTAINER_POSITIONS" indexName="OS_POS_RESV_IDX">
+      <column name="RESERVATION_ID" type="${text.type}(40)" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
