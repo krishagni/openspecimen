@@ -228,9 +228,13 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 			query.add(query.gt("visit.id", crit.lastId()));
 		}
 
+		query.join("visit.registration", "cpr");
+		if (crit.cprId() != null) {
+			query.add(query.eq("cpr.id", crit.cprId()));
+		}
+
 		if (crit.cpId() != null) {
-			query.join("visit.registration", "cpr")
-				.join("cpr.collectionProtocol", "cp")
+			query.join("cpr.collectionProtocol", "cp")
 				.add(query.eq("cp.id", crit.cpId()));
 		}
 

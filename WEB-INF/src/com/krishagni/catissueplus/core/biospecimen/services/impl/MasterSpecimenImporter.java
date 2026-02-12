@@ -27,6 +27,7 @@ import com.krishagni.catissueplus.core.biospecimen.events.ReceivedEventDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.VisitDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
+import com.krishagni.catissueplus.core.biospecimen.repository.VisitsListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolRegistrationService;
 import com.krishagni.catissueplus.core.biospecimen.services.SpecimenService;
 import com.krishagni.catissueplus.core.biospecimen.services.VisitService;
@@ -139,13 +140,14 @@ public class MasterSpecimenImporter implements ObjectImporter<MasterSpecimenDeta
 		detail.setPpid(resp.getPayload().getPpid());
 
 		if (cpr != null) {
+			List<Visit> visits = daoFactory.getVisitsDao().getVisitsList(new VisitsListCriteria().cprId(cpr.getId()));
 			if (StringUtils.isBlank(detail.getVisitName())) {
-				cpr.getVisits().stream()
+				visits.stream()
 					.filter(visit -> isVisitOfSameEvent(visit, detail.getEventLabel()))
 					.filter(visit -> detail.getVisitDate() != null && DateUtils.isSameDay(visit.getVisitDate(), detail.getVisitDate()))
 					.findAny().ifPresent(matchedVisit -> detail.setVisitId(matchedVisit.getId()));
 			} else {
-				cpr.getVisits().stream()
+				visits.stream()
 					.filter(visit -> detail.getVisitName().equals(visit.getName()))
 					.findAny().ifPresent(matchedVisit -> detail.setVisitId(matchedVisit.getId()));
 			}
