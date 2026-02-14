@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.auth.services;
 
+import java.util.Date;
 import java.util.Map;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -14,7 +15,9 @@ public interface UserAuthenticationService {
 	ResponseEvent<Map<String, Object>> authenticateUser(RequestEvent<LoginDetail> req);
 	
 	ResponseEvent<AuthToken> validateToken(RequestEvent<TokenDetail> req);
-	
+
+	Date touchToken(String token, Date lastAccessTime);
+
 	ResponseEvent<UserSummary> getCurrentLoggedInUser();
 	
 	ResponseEvent<String> removeToken(RequestEvent<String> req);

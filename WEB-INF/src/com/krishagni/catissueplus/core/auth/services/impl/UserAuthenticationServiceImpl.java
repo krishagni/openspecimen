@@ -68,6 +68,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
 	private static final String USER_OTP_TMPL = "user_login_otp";
 
+	private static final long ONE_HOUR_IN_MS = 60 * 60 * 1000;
+
 	private DaoFactory daoFactory;
 
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
@@ -192,26 +194,40 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 				throw OpenSpecimenException.userError(AuthErrorCode.SYSTEM_LOCKDOWN);
 			}
 
+			long now = System.currentTimeMillis();
 			LoginAuditLog loginAuditLog = authToken.getLoginAuditLog();
 			if (loginAuditLog.getImpersonatedBy() != null) {
-				long endTime = loginAuditLog.getLoginTime().getTime() + 60 * 60 * 1000;
-				if (endTime < Calendar.getInstance().getTimeInMillis()) {
+				long endTime = loginAuditLog.getLoginTime().getTime() + ONE_HOUR_IN_MS;
+				if (endTime < now) {
 					throw OpenSpecimenException.userError(AuthErrorCode.IMP_TOKEN_EXP);
 				}
 			}
 
+			boolean accessTimeFromDb = false;
 			Date lastAccess = tokenAccessTimes.get(token);
 			if (lastAccess == null) {
 				lastAccess = daoFactory.getAuditDao().getLatestApiCallTime(user.getId(), token);
 				tokenAccessTimes.put(token, lastAccess);
+				accessTimeFromDb = true;
 			}
 
-			long timeSinceLastApiCall = TimeUnit.MILLISECONDS.toMinutes(Calendar.getInstance().getTime().getTime() - lastAccess.getTime());
+			long timeSinceLastApiCall = TimeUnit.MILLISECONDS.toMinutes(now - lastAccess.getTime());
 			int tokenInactiveInterval = AuthConfig.getInstance().getTokenInactiveIntervalInMinutes();
 			if (timeSinceLastApiCall > tokenInactiveInterval) {
-				daoFactory.getAuthDao().deleteAuthToken(authToken);
-				tokenAccessTimes.remove(token);
-				throw OpenSpecimenException.userError(AuthErrorCode.TOKEN_EXPIRED);
+				boolean expired = true;
+				if (!accessTimeFromDb) {
+					lastAccess = daoFactory.getAuditDao().getLatestApiCallTime(user.getId(), token);
+					tokenAccessTimes.put(token, lastAccess);
+
+					timeSinceLastApiCall = TimeUnit.MILLISECONDS.toMinutes(now - lastAccess.getTime());
+					expired = timeSinceLastApiCall > tokenInactiveInterval;
+				}
+
+				if (expired) {
+					daoFactory.getAuthDao().deleteAuthToken(authToken);
+					tokenAccessTimes.remove(token);
+					throw OpenSpecimenException.userError(AuthErrorCode.TOKEN_EXPIRED);
+				}
 			}
 
 			if (AuthConfig.getInstance().isTokenIpVerified()) {
@@ -230,6 +246,11 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+	@Override
+	public Date touchToken(String token, Date lastAccess) {
+		return tokenAccessTimes.touch(AuthUtil.decodeToken(token), lastAccess);
 	}
 
 	@PlusTransactional

@@ -246,8 +246,9 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		}
 
 		User impersonatedUser = null;
+		String impUserToken = null;
 		if (user.isAdmin() && !user.isSysUser()) {
-			String impUserToken = AuthUtil.getImpersonateUser(httpReq);
+			impUserToken = AuthUtil.getImpersonateUser(httpReq);
 			if (StringUtils.isNotBlank(impUserToken)) {
 				logger.info("Validating the credentials of the impersonate request by: " + user.formattedName() + ", URL = " + httpReq.getRequestURI());
 				TokenDetail tokenDetail = new TokenDetail();
@@ -258,7 +259,6 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 					ResponseEvent<AuthToken> atResp = authService.validateToken(new RequestEvent<>(tokenDetail));
 					atResp.throwErrorIfUnsuccessful();
 
-					authToken = impUserToken;
 					impersonatedUser = atResp.getPayload().getUser();
 					loginAuditLog = atResp.getPayload().getLoginAuditLog();
 				} catch (OpenSpecimenException ose) {
@@ -277,10 +277,25 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 			}
 		}
 
-		AuthUtil.setCurrentUser(impersonatedUser != null ? impersonatedUser : user, authToken, httpReq, impersonatedUser != null);
+		AuthUtil.setCurrentUser(
+			impersonatedUser != null ? impersonatedUser : user,
+			impUserToken != null ? impUserToken : authToken,
+			httpReq,
+			impersonatedUser != null);
+
 		UserApiCallLog callLog = null;
 		try {
-			callLog = recordApiCall(httpReq, httpResp, null, loginAuditLog, user, impersonatedUser);
+			boolean recordableApi = isRecordableApi(httpReq);
+			if (recordableApi) {
+				callLog = recordApiCall(httpReq, httpResp, null, loginAuditLog, user, impersonatedUser);
+
+				Date accessTime = Calendar.getInstance().getTime();
+				authService.touchToken(authToken, accessTime);
+				if (impUserToken != null) {
+					authService.touchToken(impUserToken, accessTime);
+				}
+			}
+
 			chain.doFilter(req, resp);
 		} finally {
 			AuthUtil.clearCurrentUser();
@@ -371,10 +386,6 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	}
 
 	private UserApiCallLog recordApiCall(HttpServletRequest httpReq, HttpServletResponse httpResp, UserApiCallLog apiCall, LoginAuditLog loginAuditLog, User currentUser, User impersonatedUser) {
-		if (apiCall == null && !isRecordableApi(httpReq)) {
-			return null;
-		}
-
 		try {
 			if (apiCall == null) {
 				apiCall = new UserApiCallLog();
