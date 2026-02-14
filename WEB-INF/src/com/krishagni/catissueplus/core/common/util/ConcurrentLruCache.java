@@ -46,6 +46,24 @@ public class ConcurrentLruCache<K, V> {
 		}
 	}
 
+	public V touch(K key, V value) {
+		lock.lock();
+		try {
+			V existing = elements.get(key);
+			if (existing != null) {
+				elements.put(key, value);
+				existing = value;
+
+				accessOrder.remove(key);
+				accessOrder.addLast(key);
+			}
+
+			return existing;
+		} finally {
+			lock.unlock();
+		}
+	}
+
 	public V get(K key) {
 		lock.lock();
 		try {
