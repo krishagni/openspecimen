@@ -6,8 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -498,10 +498,8 @@ public class OAuthServiceImpl implements OAuthService, InitializingBean, Applica
 
 			@PlusTransactional
 			private void run0() {
-				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.MINUTE, -OLD_STATE_MINS);
-
-				int count = daoFactory.getOAuthStateDao().deleteStatesOlderThan(cal.getTime());
+				Instant olderThan = Instant.now().minus(OLD_STATE_MINS, ChronoUnit.MINUTES);
+				int count = daoFactory.getOAuthStateDao().deleteStatesOlderThan(olderThan);
 				if (count > 0) {
 					logger.info(String.format("Cleaned up %d stale OAuth states", count));
 				}
