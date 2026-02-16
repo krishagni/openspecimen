@@ -169,11 +169,17 @@ export default {
           "type": "dropdown",
           "labelCode": "dps.institute",
           "name": "institute",
+          "unique": "dp.distributingSites.institute",
           "listSource": {
             "apiUrl": "institutes",
             "selectProp": "name",
             "displayProp": "name",
             "searchProp": "name"
+          },
+          "validations": {
+            "required": {
+              "messageCode": "dps.institute_req"
+            }
           }
         },
         {

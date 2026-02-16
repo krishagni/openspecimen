@@ -6,7 +6,8 @@
   </span>
   <span v-else>
     <Dropdown ref="ssDd" v-model="inputValue" :list-source="ddListSource" :disabled="disabled"
-      :tabOrder="tabOrder" :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']" />
+      :tabOrder="tabOrder" :md-type="$attrs['md-type']" :placeholder="$attrs['placeholder']"
+      :context="context" :unique="unique" />
   </span>
 </template>
 
@@ -19,7 +20,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util     from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'selectProp', 'listSource', 'context', 'multiple', 'disabled', 'tabOrder'],
+  props: ['modelValue', 'selectProp', 'listSource', 'context', 'multiple', 'disabled', 'tabOrder', 'unique'],
 
   components: {
     Dropdown,

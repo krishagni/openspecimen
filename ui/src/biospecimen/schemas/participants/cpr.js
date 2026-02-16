@@ -151,6 +151,7 @@ export default {
           "type": "site",
           "labelCode": "participants.site",
           "name": "siteName",
+          "unique": "cpr.participant.pmis.siteName",
           "selectProp": "name",
           "listSource": {
             "selectProp": "name",

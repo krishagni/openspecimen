@@ -50,7 +50,7 @@ import exprUtil from '@/common/services/ExpressionUtil.js';
 import util from '@/common/services/Util.js';
 
 export default {
-  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey', 'optional'],
+  props: ['modelValue', 'listSource', 'form', 'disabled', 'context', 'tabOrder', 'dataKey', 'optional', 'unique'],
 
   emits: ['update:modelValue'],
 
@@ -89,12 +89,12 @@ export default {
 
       let selectedVal = await this.selectedValue() || [];
       if (this.listSource.options) {
-        this.ctx.options = this.dedup(selectedVal.concat(this.listSource.options));
+        this.ctx.options = this.dedup(selectedVal, this.listSource.options);
       } else if (typeof this.listSource.loadFn == 'function') {
         let self = this;
         this.listSource.loadFn({context: this.context, query: query, maxResults: 100}).then(
           function(options) {
-            self.ctx.options = self.dedup(selectedVal.concat(options|| []));
+            self.ctx.options = self.dedup(selectedVal, options || []);
           }
         );
       } else if (typeof this.listSource.apiUrl == 'string') {
@@ -104,7 +104,7 @@ export default {
         params[ls.searchProp || 'query'] = query;
         Object.assign(params, this.queryParams(ls));
         const options = await this.getFromBackend(params);
-        this.ctx.options = this.dedup(selectedVal.concat(options));
+        this.ctx.options = this.dedup(selectedVal, options);
       }
     },
 
@@ -222,11 +222,13 @@ export default {
       return exprUtil.eval(this.form || this.context || {}, result);
     },
 
-    dedup(options) {
-      let ls = this.listSource;
-      let selectProp = ls.selectProp || ls.idProp || 'id';
-      let seen = [], result = [];
-      for (let option of options) {
+    dedup(selectedVal, options) {
+      const ls = this.listSource;
+      const selectProp = ls.selectProp || ls.idProp || 'id';
+      const seen = this._selectedOptions(selectedVal, selectProp);
+      const result = [];
+
+      for (const option of selectedVal.concat(options)) {
         if (seen.indexOf(option[selectProp]) == -1) {
           result.push(option);
           seen.push(option[selectProp]);
@@ -282,6 +284,29 @@ export default {
       }
 
       return option;
+    },
+
+    _selectedOptions(selectedVal, selectProp) {
+      if (!this.unique) {
+        return [];
+      }
+
+      const idx = this.unique.lastIndexOf('.');
+      if (idx == -1) {
+        return [];
+      }
+
+      const form   = this.form || this.context || {};
+      const array  = exprUtil.eval(form, this.unique.substring(0, idx));
+      const prop   = this.unique.substring(idx + 1);
+      const result = [];
+      for (const element of array || []) {
+        if (element[prop] && !selectedVal.some(val => val[selectProp] == element[prop])) {
+          result.push(element[prop]);
+        }
+      }
+
+      return result;
     }
   },
 
@@ -323,7 +348,7 @@ export default {
     modelValue: async function() {
       let selectedVal = await this.selectedValue();
       if (this.ctx.options) {
-        this.ctx.options = this.dedup(selectedVal.concat(this.ctx.options));
+        this.ctx.options = this.dedup(selectedVal, this.ctx.options);
       } else {
         this.ctx.options = selectedVal;
       }
