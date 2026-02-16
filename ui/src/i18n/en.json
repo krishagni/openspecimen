@@ -1184,6 +1184,7 @@
     "import_dpRequirement": "Import Requirements",
     "import_jobs_list": "Import Jobs List",
     "institute": "Institute",
+    "institute_req": "Institute is mandatory",
     "label_format": "Label Format",
     "list": "Distribution Protocols",
     "none": "None",

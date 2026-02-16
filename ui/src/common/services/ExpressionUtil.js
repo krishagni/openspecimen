@@ -56,7 +56,15 @@ class ExpressionUtil {
       return;
     }
 
-    return new Function('return ' + this.parse(expr)).call(context);
+    let result = new Function('return ' + this.parse(expr)).call(context);
+    if (result == undefined && context._subForm === true) {
+      //
+      // needed for dynamic query params of sub-form fields
+      //
+      result = this.getValue(context, expr);
+    }
+
+    return result;
   }
 
   evalJavaScript(src, context) {
