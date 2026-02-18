@@ -250,6 +250,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
 	@Override
 	public Date touchToken(String token, Date lastAccess) {
+		if (StringUtils.isBlank(token)) {
+			return null;
+		}
+
 		return tokenAccessTimes.touch(AuthUtil.decodeToken(token), lastAccess);
 	}
 

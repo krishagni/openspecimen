@@ -273,9 +273,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 
 				Date accessTime = Calendar.getInstance().getTime();
 				authService.touchToken(authToken, accessTime);
-				if (impUserToken != null) {
-					authService.touchToken(impUserToken, accessTime);
-				}
+				authService.touchToken(impUserToken, accessTime);
 			}
 
 			chain.doFilter(req, resp);
