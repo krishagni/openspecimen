@@ -1,7 +1,8 @@
 <template>
   <a class="description" :href="link" :target="hrefTarget || '_self'" rel="noopener">
     <os-specimen-status-icon :specimen="object" :status="status" v-if="showStatus" />
-    <span>{{description}}</span>
+    <os-dynamic-template v-if="tmpl" :template="tmpl" :specimen="object" v-bind="$attrs" />
+    <span v-else>{{description}}</span>
     <os-tag class="pooled-specimen" :value="$t('specimens.pooled')" :rounded="true"
       v-if="showStatus && object.specimensPool && object.specimensPool.length > 0" />
   </a>
@@ -9,11 +10,18 @@
 
 <script>
 
+import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import routerSvc from '@/common/services/Router.js';
 import util      from '@/common/services/Util.js';
 
 export default {
   props: ['model-value', 'specimen', 'show-status', 'status', 'href-target', 'no-link'],
+
+  data() {
+    return {
+      tmpl: null
+    }
+  },
 
   computed: {
     inputValue: {
@@ -73,6 +81,10 @@ export default {
     }
   },
 
+  created() {
+    cpSvc.getWorkflowProperty(this.object.cpId, 'common', 'spmnDescTmpl').then(tmpl => this.tmpl = tmpl);
+  },
+
   methods: {
     _getDescription: function(value, attrs) {
       return util.getSpecimenDescription(value, attrs);
@@ -105,5 +117,9 @@ export default {
 .description .pooled-specimen :deep(.p-tag) {
   background: #ff69b4;
 }
-</style>
 
+a.description:not([href]) {
+  text-decoration: none;
+  color: inherit;
+}
+</style>

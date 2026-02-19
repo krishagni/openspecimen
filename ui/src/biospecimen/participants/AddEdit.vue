@@ -5,12 +5,23 @@
         <os-breadcrumb :items="ctx.bcrumb" />
       </template>
 
-      <span>
+      <span class="os-title">
         <h3>
           <span v-if="!dataCtx.cpr.id" v-t="'participants.register_participant'">Register Participant</span>
-          <span v-else v-t="{path: 'common.update', args: {name}}"></span>
+          <span v-else-if="!ctx.header.leftTitle" v-t="{path: 'common.update', args: {name}}"></span>
+          <span class="custom-title" v-else>
+            <span v-t="{path: 'common.buttons.update'}">Update</span>
+            <os-dynamic-template v-if="ctx.header.leftTitle" :template="ctx.header.leftTitle"
+              :cp="dataCtx.cp" :cpr="cpr" :hasPhiAccess="true" />
+          </span>
         </h3>
       </span>
+
+      <template #right v-if="ctx.header.rightTitle">
+        <h3>
+          <os-dynamic-template :template="ctx.header.rightTitle" :cp="dataCtx.cp" :cpr="cpr" :hasPhiAccess="true" />
+        </h3>
+      </template>
     </os-page-head>
 
     <os-page-body>
@@ -168,7 +179,9 @@ export default {
 
         bcrumb: [{url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}],
 
-        showProceedToConsent: false
+        showProceedToConsent: false,
+
+        header: {}
       }
     };
   },
@@ -251,6 +264,13 @@ export default {
       }
     );
 
+    cpSvc.getWorkflowProperty(this.dataCtx.cp.id, 'common', 'participantHeader').then(
+      header => {
+        if (header) {
+          this.ctx.header = header;
+        }
+      }
+    );
   },
 
   computed: {

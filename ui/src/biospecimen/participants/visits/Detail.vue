@@ -7,10 +7,15 @@
 
       <span class="os-title" v-if="visit">
         <h3>
-          <os-visit-event-desc :visit="visit" />
+          <os-dynamic-template v-if="ctx.header.leftTitle" :template="ctx.header.leftTitle"
+            :cp="ctx.cp" :cpr="cpr" :visit="visit" :hasPhiAccess="hasPhiAccess" />
+
+          <os-visit-event-desc v-else :visit="visit" />
         </h3>
+
         <div class="accessories">
           <os-tag :value="status" :rounded="true" :type="statusType" />
+
           <os-copy-link size="small"
             :route="{
               name: 'ParticipantsListItemVisitDetail.Overview',
@@ -19,6 +24,13 @@
             }" />
         </div>
       </span>
+
+      <template #right v-if="ctx.header.rightTitle">
+        <h3>
+          <os-dynamic-template :template="ctx.header.rightTitle" :cp="ctx.cp" :cpr="cpr" :visit="visit"
+            :hasPhiAccess="hasPhiAccess" />
+        </h3>
+      </template>
     </os-page-head>
     <os-page-body>
       <div>
@@ -64,6 +76,8 @@
 
 <script>
 
+import authSvc    from '@/common/services/Authorization.js';
+import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
@@ -77,7 +91,9 @@ export default {
       ctx: {
         cp,
 
-        showSpr: true
+        showSpr: true,
+
+        header: {}
       }
     };
   },
@@ -93,6 +109,14 @@ export default {
     this.cpViewCtx.isSaveSprEnabled().then(
       showSpr => {
         this.ctx.showSpr = showSpr && this.cpViewCtx.isReadSprAllowed(this.cpr);
+      }
+    );
+
+    cpSvc.getWorkflowProperty(this.ctx.cp.id, 'common', 'visitHeader').then(
+      header => {
+        if (header) {
+          this.ctx.header = header;
+        }
       }
     );
   },
@@ -135,7 +159,11 @@ export default {
 
     hasEc: function() {
       return this.$osSvc.ecDocSvc != null;
-    }
+    },
+
+    hasPhiAccess: function() {
+      return authSvc.isAllowed({resources: ['ParticipantPhi'], cp: this.ctx.cp.shortTitle, operations: ['Read']});
+    },
   },
 
   methods: {

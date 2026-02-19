@@ -7,7 +7,10 @@
 
       <span class="os-title" v-if="cpr && cpr.id > 0">
         <h3>
-          <span>{{participantName}}</span>
+          <os-dynamic-template v-if="ctx.header.leftTitle" :template="ctx.header.leftTitle"
+            :cp="ctx.cp" :cpr="cpr" :hasPhiAccess="hasPhiAccess" />
+
+          <span v-else>{{participantName}}</span>
         </h3>
         <div class="accessories">
           <os-tag :value="$t('common.draft')" :rounded="true" :type="'warning'" v-if="cpr.dataEntryStatus == 'DRAFT'" />
@@ -16,6 +19,12 @@
             :route="{name: 'ParticipantsListItemDetail.Overview', params: {cpId: ctx.cp.id, cprId: cpr.id}}" />
         </div>
       </span>
+
+      <template #right v-if="ctx.header.rightTitle">
+        <h3>
+          <os-dynamic-template :template="ctx.header.rightTitle" :cp="ctx.cp" :cpr="cpr" :hasPhiAccess="hasPhiAccess" />
+        </h3>
+      </template>
     </os-page-head>
     <os-page-body>
       <div>
@@ -65,6 +74,7 @@ import authSvc    from '@/common/services/Authorization.js';
 import i18n       from '@/common/services/I18n.js';
 import routerSvc  from '@/common/services/Router.js';
 
+import cpSvc  from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc from '@/biospecimen/services/Cpr.js';
 
 export default {
@@ -81,18 +91,28 @@ export default {
         bcrumb: [
           {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: cp.shortTitle}, // TODO: CP conf list view
           {url: routerSvc.getUrl('ParticipantsList', {cprId: -1}), label: i18n.msg('participants.list')}
-        ]
+        ],
+
+        header: {}
       }
     }
   },
 
-  created() {
+  async created() {
     const route = this.$route.matched[this.$route.matched.length - 1];
     this.detailRouteName = route.name.split('.')[0];
     this.query = {};
     if (this.$route.query) {
       Object.assign(this.query, {filters: this.$route.query.filters});
     }
+
+    cpSvc.getWorkflowProperty(this.ctx.cp.id, 'common', 'participantHeader').then(
+      header => {
+        if (header) {
+          this.ctx.header = header;
+        }
+      }
+    );
   },
 
   computed: {

@@ -194,6 +194,12 @@ export default {
     margin-left: 0.5rem;
   }
 
+  .os-page-header .content-wrapper .content .left :deep(.os-title .custom-title) {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
   .os-page-header .content-wrapper .content .right {
   }
 

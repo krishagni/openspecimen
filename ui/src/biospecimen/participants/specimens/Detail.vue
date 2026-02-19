@@ -7,7 +7,10 @@
 
       <span class="os-title">
         <h3>
-          <span>{{specimen.label || specimen.type}}</span>
+          <os-dynamic-template v-if="ctx.header.leftTitle" :template="ctx.header.leftTitle"
+            :cp="ctx.cp" :cpr="cpr" :visit="visit" :specimen="specimen" :hasPhiAccess="hasPhiAccess" />
+
+          <span v-else>{{specimen.label || specimen.type}}</span>
         </h3>
 
         <div class="accessories">
@@ -24,6 +27,13 @@
             query: {eventId: visit.eventId, srId: specimen.reqId}}" />
         </div>
       </span>
+
+      <template #right v-if="ctx.header.rightTitle">
+        <h3>
+          <os-dynamic-template :template="ctx.header.rightTitle" :cp="ctx.cp" :cpr="cpr" :visit="visit"
+            :specimen="specimen" :hasPhiAccess="hasPhiAccess" />
+        </h3>
+      </template>
     </os-page-head>
     <os-page-body>
       <div>
@@ -63,7 +73,8 @@
 
 <script>
 
-import cpSvc from '@/biospecimen/services/CollectionProtocol.js';
+import authSvc   from '@/common/services/Authorization.js';
+import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import routerSvc from '@/common/services/Router.js';
 
 export default {
@@ -73,7 +84,7 @@ export default {
 
   data() {
     const cp = this.cpViewCtx.getCp();
-    return { ctx: { cp } };
+    return { ctx: { cp, header: { } } };
   },
 
   created() {
@@ -84,6 +95,14 @@ export default {
       const {filters, view} = this.$route.query;
       Object.assign(this.query, {filters, view});
     }
+
+    cpSvc.getWorkflowProperty(this.ctx.cp.id, 'common', 'specimenHeader').then(
+      header => {
+        if (header) {
+          this.ctx.header = header;
+        }
+      }
+    );
   },
 
   computed: {
@@ -152,6 +171,10 @@ export default {
         default:
           return 'warning';
       }
+    },
+
+    hasPhiAccess: function() {
+      return authSvc.isAllowed({resources: ['ParticipantPhi'], cp: this.ctx.cp.shortTitle, operations: ['Read']});
     }
   },
 
