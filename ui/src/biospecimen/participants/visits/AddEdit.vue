@@ -5,12 +5,24 @@
         <os-breadcrumb :items="bcrumb" />
       </template>
 
-      <span>
+      <span class="os-title">
         <h3>
           <span v-if="!dataCtx.visit.id" v-t="'visits.add_visit'">Add Visit</span>
-          <span v-else v-t="{path: 'common.update', args: {name: description}}"></span>
+          <span v-else-if="!ctx.header.leftTitle" v-t="{path: 'common.update', args: {name: description}}"></span>
+          <span class="custom-title" v-else>
+            <span v-t="{path: 'common.buttons.update'}">Update</span>
+            <os-dynamic-template v-if="ctx.header.leftTitle" :template="ctx.header.leftTitle"
+              :cp="dataCtx.cp" :cpr="cpr" :visit="visit" :hasPhiAccess="hasPhiAccess" />
+          </span>
         </h3>
       </span>
+
+      <template #right v-if="ctx.header.rightTitle">
+        <h3>
+          <os-dynamic-template :template="ctx.header.rightTitle" :cp="dataCtx.cp" :cpr="cpr"
+            :visit="visit" :hasPhiAccess="hasPhiAccess" />
+        </h3>
+      </template>
     </os-page-head>
 
     <os-page-body>
@@ -27,10 +39,10 @@
 </template>
 
 <script>
-
 import cpSvc      from '@/biospecimen/services/CollectionProtocol.js';
 import visitSvc   from '@/biospecimen/services/Visit.js';
 
+import authSvc    from '@/common/services/Authorization.js';
 import formUtil   from '@/common/services/FormUtil.js';
 import routerSvc  from '@/common/services/Router.js';
 import util       from '@/common/services/Util.js';
@@ -71,7 +83,9 @@ export default {
       },
 
       ctx: {
-        addEditFs: {rows: []}
+        addEditFs: {rows: []},
+
+        header: {}
       }
     };
   },
@@ -84,6 +98,14 @@ export default {
         const formSchema = this.ctx.addEditFs = formUtil.getFormSchema(fields, layout)
         if (!this.visit.id || this.visit.id <= 0) {
           formUtil.setDefaultValues(formSchema, this.dataCtx);
+        }
+      }
+    );
+
+    cpSvc.getWorkflowProperty(this.dataCtx.cp.id, 'common', 'visitHeader').then(
+      header => {
+        if (header) {
+          this.ctx.header = header;
         }
       }
     );
@@ -110,6 +132,10 @@ export default {
           label: this.cpr.ppid
         }
       ];
+    },
+
+    hasPhiAccess: function() {
+      return authSvc.isAllowed({resources: ['ParticipantPhi'], cp: this.dataCtx.cp.shortTitle, operations: ['Read']});
     }
   },
 
