@@ -3,6 +3,7 @@ import alertsSvc   from '@/common/services/Alerts.js';
 import cpSvc       from './CollectionProtocol.js';
 import exprUtil    from '@/common/services/ExpressionUtil.js';
 import http        from '@/common/services/HttpClient.js';
+import i18nSvc     from '@/common/services/I18n.js';
 import formUtil    from '@/common/services/FormUtil.js';
 import formSvc     from '@/forms/services/Form.js';
 import routerSvc   from '@/common/services/Router.js';
@@ -321,6 +322,33 @@ class Specimen {
 
   deleteLabService({id}) {
     return http.delete('lab-specimen-services/' + id);
+  }
+
+  //
+  // input = items = [{specimen}]
+  // result = 'Total rows: n | Type 1: x | Type 2: y | Type 3: z'
+  // where n = x + y + z
+  //
+  getItemsCountDesc(items) {
+    const typesCount = {};
+    for (const {specimen} of items || []) {
+      const type = specimen.type || 'Not Specified';
+      typesCount[type] = typesCount[type] || 0;
+      ++typesCount[type];
+    }
+
+    let result = '';
+    let total = 0;
+    for (const type of Object.keys(typesCount).sort()) {
+      if (result) {
+        result += ' | ';
+      }
+
+      result += type + ': ' + typesCount[type];
+      total += typesCount[type];
+    }
+
+    return i18nSvc.msg('common.total_rows') + ': ' + total + ' | ' + result;
   }
 
   async _getAllocRule(ctxt, specimen) {

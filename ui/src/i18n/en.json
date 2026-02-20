@@ -443,6 +443,7 @@
     },
 
     "switch_to_table_view": "Switch to table view",
+    "total_rows": "Total Rows",
     "unknown": "Unknown",
     "update": "Update {name}",
     "update_record": "Update Record",

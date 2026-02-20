@@ -135,7 +135,7 @@ class Workflow {
     }
 
     let cpId = specimens && specimens[0].cpId;
-    for (let specimen of specimens) {
+    for (const specimen of specimens) {
       if (cpId != specimen.cpId) {
         cpId = -1;
         break;
@@ -154,8 +154,9 @@ class Workflow {
     };
 
     if (cpId >= 1) {
+      const cprId = this._getCprId(specimens);
       Object.assign(params, {
-        cpId: cpId,
+        cpId, cprId,
         'breadcrumb-1': JSON.stringify({
           label: specimens[0].cpShortTitle,
           route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
@@ -194,8 +195,9 @@ class Workflow {
     };
 
     if (cpId >= 1) {
+      const cprId = this._getCprId(specimens);
       Object.assign(params, {
-        cpId: cpId,
+        cpId, cprId,
         'breadcrumb-1': JSON.stringify({
           label: specimens[0].cpShortTitle,
           route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
@@ -234,8 +236,9 @@ class Workflow {
     };
 
     if (cpId >= 1) {
+      const cprId = this._getCprId(specimens);
       Object.assign(params, {
-        cpId: cpId,
+        cpId, cprId,
         'breadcrumb-1': JSON.stringify({
           label: specimens[0].cpShortTitle,
           route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
@@ -324,7 +327,8 @@ class Workflow {
   _getVisitBreadcrumb({cpId, cpShortTitle, cprId, ppid}, title) {
     return {
       returnOnExit: 'current_view',
-      cpId: cpId,
+      cpId,
+      cprId,
       'breadcrumb-1': JSON.stringify({
         label: cpShortTitle,
         route: {name: 'ParticipantsList', params: {cpId, cprId: -1}}
@@ -368,6 +372,18 @@ class Workflow {
 
   _wfInstanceSvc() {
     return window.osSvc.tmWfInstanceSvc;
+  }
+
+  _getCprId(specimens) {
+    let cprId = specimens && specimens[0].cprId;
+    for (const specimen of specimens || []) {
+      if (cprId != specimen.cprId) {
+        cprId = undefined;
+        break;
+      }
+    }
+
+    return cprId;
   }
 }
 
