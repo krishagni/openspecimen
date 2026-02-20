@@ -603,6 +603,7 @@ export default {
               params: {cpId: cpr.cpId, cprId: cpr.id}
             }),
             cpId: cpr.cpId,
+            cprId: cpr.id,
             'breadcrumb-1': JSON.stringify({
               label: cpr.cpShortTitle,
               route: {name: 'ParticipantsList', params: {cpId: cpr.cpId, cprId: -1}}

@@ -131,6 +131,7 @@ export default {
       return {
         returnOnExit: 'current_view',
         cpId: visit.cpId,
+        cprId: visit.cprId,
         'breadcrumb-1': JSON.stringify({
           label: visit.cpShortTitle,
           route: {name: 'ParticipantsList', params: {cpId: visit.cpId, cprId: -1}}

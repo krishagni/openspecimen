@@ -348,8 +348,10 @@ export default {
         });
       }
 
+      let cprId = undefined;
       let breadCrumb2 = null;
       if (!this.cp.specimenCentric) {
+        cprId = this.cpr.id;
         breadCrumb2 = JSON.stringify({
           label: this.cpr.ppid,
           route: {name: 'ParticipantsListItemDetail.Overview', params: {cpId: this.cp.id, cprId: this.cpr.id}}
@@ -359,6 +361,7 @@ export default {
       return {
         returnOnExit,
         cpId: this.cp.id,
+        cprId,
         'breadcrumb-1': JSON.stringify({
           label: this.cp.shortTitle,
           route: {name: 'ParticipantsList', params: {cpId: this.cp.id, cprId: -1}}
