@@ -136,6 +136,10 @@
 
     "all_current_n_future": "All Current and Future",
 
+    "auto_save_failed": "Auto save failed. Error: {message}",
+    "auto_saved_draft": "Auto saved",
+    "auto_saving_draft": "Auto saving...",
+
     "buttons": {
       "actions": "Actions",
       "add"   : "Add",

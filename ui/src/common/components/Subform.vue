@@ -198,10 +198,12 @@ export default {
           {}
         )
       );
+      this.$emit('input', {data: this.inputValue});
     },
 
     removeSfRow: function(idx) {
       this.inputValue.splice(idx, 1);
+      this.$emit('input', {data: this.inputValue});
     },
 
     getDisplayValue: function() {

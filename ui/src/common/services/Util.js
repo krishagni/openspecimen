@@ -5,12 +5,15 @@ import useClipboard from 'vue-clipboard3';
 import { compile } from '@vue/compiler-dom';
 
 import dateFormatter from '@/common/filters/DateFormatter.js';
-import alertSvc from '@/common/services/Alerts.js';
-import http from '@/common/services/HttpClient.js';
-import exprUtil from '@/common/services/ExpressionUtil.js';
-import i18n from '@/common/services/I18n.js';
-import pluginReg from '@/common/services/PluginViewsRegistry.js';
+
+import alertSvc    from '@/common/services/Alerts.js';
+import exprUtil    from '@/common/services/ExpressionUtil.js';
+import http        from '@/common/services/HttpClient.js';
+import i18n        from '@/common/services/I18n.js';
+import pluginReg   from '@/common/services/PluginViewsRegistry.js';
 import ui from '@/global.js';
+
+import {AutoSaveManager} from '@/common/services/AutoSaveManager.js';
 
 class Util {
   httpsRe = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
@@ -735,6 +738,10 @@ class Util {
 
   isNullOrUndefined(value) {
     return value === null || value === undefined;
+  }
+
+  getAutoSaveManager(saveFn) {
+    return new AutoSaveManager(saveFn);
   }
 
   _getEscapeMap(str) {

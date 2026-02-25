@@ -1,5 +1,10 @@
 package com.krishagni.catissueplus.core.de.events;
 
+import java.io.File;
+
+import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
+import com.krishagni.catissueplus.core.common.util.Utility;
+
 import edu.common.dynamicextensions.napi.FileControlValue;
 
 public class FileDetail {
@@ -61,5 +66,18 @@ public class FileDetail {
 		fileDetail.setPath(fcv.getPath());
 		
 		return fileDetail;
+	}
+
+	public static FileDetail from(File file) {
+		try {
+			FileDetail fileDetail = new FileDetail();
+			fileDetail.setContentType(Utility.getContentType(file));
+			fileDetail.setFileId(file.getName());
+			fileDetail.setFilename(file.getName());
+			fileDetail.setPath(file.getCanonicalPath());
+			return fileDetail;
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		}
 	}
 }
