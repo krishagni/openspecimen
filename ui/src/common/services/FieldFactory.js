@@ -195,7 +195,14 @@ class FieldFactory {
     } else if (field.type == 'signature') {
       fs.type = 'signature';
       fs.uploader = (data) => http.post('form-files/images', {dataUrl: data}).then((r) => r.fileId);
-      fs.imageUrl = (fileId) => http.getUrl('form-files/' + fileId);
+      fs.imageUrl = (fileId) => {
+        const query = {};
+        if (http.headers && http.headers['X-OS-SURVEY-TOKEN']) {
+          query['X-OS-SURVEY-TOKEN'] = http.headers['X-OS-SURVEY-TOKEN'];
+        }
+
+        return http.getUrl('form-files/' + fileId, {query});
+      }
     } else if (field.type == 'userField') {
       fs.type = 'user';
       fs.selectProp = 'id';

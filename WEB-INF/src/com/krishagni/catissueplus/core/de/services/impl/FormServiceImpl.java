@@ -124,6 +124,7 @@ import edu.common.dynamicextensions.napi.FormEventsNotifier;
 import edu.common.dynamicextensions.napi.FormException;
 import edu.common.dynamicextensions.nutility.ContainerParser;
 import edu.common.dynamicextensions.nutility.ContainerPropsParser;
+import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.nutility.FileUploadMgr;
 import krishagni.catissueplus.beans.FormContextBean;
 import krishagni.catissueplus.beans.FormRecordEntryBean;
@@ -654,6 +655,11 @@ public class FormServiceImpl implements FormService, InitializingBean {
 		GetFileDetailOp op = req.getPayload();
 		FileControlValue fcv = formDataMgr.getFileMetadata(op.getFileId());
 		if (fcv == null) {
+			File file = new File(DeConfiguration.getInstance().fileUploadDir(), op.getFileId());
+			if (file.exists()) {
+				return ResponseEvent.response(FileDetail.from(file));
+			}
+
 			return ResponseEvent.userError(FormErrorCode.FILE_NOT_FOUND);
 		}
 

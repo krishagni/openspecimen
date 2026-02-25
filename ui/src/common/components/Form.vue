@@ -30,7 +30,8 @@
             </span>
           </os-label>
           <component :ref="'osField-' + field.name" :is="field.component" v-bind="field"
-            v-model="formModel[field.name]" :form="ctx" :context="ctx" @update:model-value="handleInput(field)">
+            v-model="formModel[field.name]" :form="ctx" :context="ctx"
+            @update:model-value="handleInput(field)" @input="handleInput(field)">
           </component>
           <div v-if="v$.formModel[field.name] && v$.formModel[field.name].$error">
             <os-inline-message>{{errorMessages[field.name]}}</os-inline-message>
