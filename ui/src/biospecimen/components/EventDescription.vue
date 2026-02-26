@@ -29,7 +29,7 @@ export default {
       if (input.eventLabel) {
         if (input.eventPoint != null && input.eventPoint != undefined) {
           result += ((input.eventPoint < 0) ? '-' : '') + 'T' + Math.abs(input.eventPoint);
-          result += input.eventPointUnit.charAt(0) + ': ';
+          result += (input.eventPointUnit ? input.eventPointUnit.charAt(0) : 'UNK') + ': ';
         }
 
         result += input.eventLabel;

@@ -1091,6 +1091,7 @@
     "type": "Type",
     "type_req": "Type is mandatory",
     "unit": "Unit",
+    "unit_req": "Unit is mandatory",
     "update_event": "Update Event",
     "use_system_setting": "Use System Setting",
     "user_inputs_allowed": "User Inputs Allowed",
