@@ -134,11 +134,21 @@ export default {
         return;
       }
 
-      const toSave = util.clone(this.eventCtx.specimen);
+      const {id, collectionEvent, receivedEvent} = util.clone(this.eventCtx.specimen);
+
+      let msgKey = '';
+      let toSave = null;
+      if (this.recordId == 'SpecimenCollectionEvent') {
+        msgKey = 'specimens.coll_event_saved';
+        toSave = {id, collectionEvent};
+      } else {
+        msgKey = 'specimens.recv_event_saved';
+        toSave = {id, receivedEvent};
+      }
+
       spmnSvc.saveOrUpdate(toSave).then(
         saved => {
-          const msg = 'specimens.' + (this.recordId == 'SpecimenCollectionEvent' ? 'coll_event_saved' : 'recv_event_saved');
-          alertsSvc.success({code: msg});
+          alertsSvc.success({code: msgKey});
           this._navToOverview(saved);
         }
       );
