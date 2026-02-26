@@ -84,6 +84,7 @@ import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
@@ -1488,34 +1489,20 @@ public class Utility {
 	}
 
 	public static Integer getNoOfDays(Integer interval, IntervalUnit intervalUnit) {
-		if (interval == null) {
+		if (interval == null || intervalUnit == null) {
 			return null;
 		}
 
-		Integer noOfDays = null;
-		switch (intervalUnit) {
-			case DAYS:
-				noOfDays = interval;
-				break;
-
-			case WEEKS:
-				noOfDays = interval * 7;
-				break;
-
-			case MONTHS:
-				noOfDays = interval * 30;
-				break;
-
-			case YEARS:
-				noOfDays = interval * 365;
-				break;
-		}
-
-		return noOfDays;
+		return switch (intervalUnit) {
+			case DAYS -> interval;
+			case WEEKS -> interval * 7;
+			case MONTHS -> interval * 30;
+			case YEARS -> interval * 365;
+		};
 	}
 
-	public static <T> Stream<T> stream(Collection<T> coll) {
-		return Optional.ofNullable(coll).map(Collection::stream).orElse(Stream.empty());
+	public static <T> Stream<T> stream(@Nullable Collection<T> coll) {
+		return coll == null ? Stream.empty() : coll.stream();
 	}
 
 	public static <T> String join(Collection<T> coll, Function<T, String> mapper, String delimiter) {
