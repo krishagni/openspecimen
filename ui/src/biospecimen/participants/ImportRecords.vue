@@ -63,7 +63,8 @@ export default {
     },
 
     objectParams: function() {
-      return {cpId: this.cpId};
+      const {importType} = this.recordType || {};
+      return {cpId: this.cpId, importType};
     },
 
     hideOps: function() {
@@ -314,7 +315,7 @@ export default {
     },
 
     _addEventTypes: function(cp, importTypes, group) {
-      if (cp.id != -1) {
+      if (cp.id && cp.id != -1) {
         return importTypes;
       }
 
@@ -328,8 +329,9 @@ export default {
           group,
           id: event,
           type: event,
-          title: this.$t('imports.object_types.' + event),
+          title: this.$t('import.object_types.' + event),
           hideOps: true,
+          importType: 'UPDATE',
           params: {}
         });
       }
