@@ -255,7 +255,7 @@ public class VisitSummary extends AttributeModifiedSupport implements Comparable
 	}
 
 	public void setAnticipatedVisitDate(Date baseline, Integer interval, IntervalUnit unit) {
-		if (eventPoint == null) {
+		if (eventPoint == null || eventPointUnit == null) {
 			return;
 		}
 

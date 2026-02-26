@@ -77,6 +77,12 @@ public class CpeFactoryImpl implements CpeFactory {
 		} else {
 			cpe.setEventPointUnit(existing.getEventPointUnit());
 		}
+
+		if (cpe.getEventPoint() != null && cpe.getEventPointUnit() == null) {
+			// scenario: the source has no event point and unit
+			// this check ensures the copy has both event point and unit
+			ose.addError(CpeErrorCode.POINT_UNIT_REQUIRED);
+		}
 		
 		cpe.setCollectionProtocol(existing.getCollectionProtocol());
 		

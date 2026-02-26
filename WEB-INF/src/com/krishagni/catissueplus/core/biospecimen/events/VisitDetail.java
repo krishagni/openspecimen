@@ -354,7 +354,7 @@ public class VisitDetail extends VisitSummary {
 			}
 
 			Integer interval = Utility.getNoOfDays(visit.getEventPoint(), visit.getEventPointUnit());
-			if (interval < minEventPointInDays) {
+			if (interval != null && interval < minEventPointInDays) {
 				minEventPoint = visit.getEventPoint();
 				minEventPointInDays = interval;
 				minEventPointUnit = visit.getEventPointUnit();

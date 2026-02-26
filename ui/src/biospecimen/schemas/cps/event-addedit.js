@@ -27,6 +27,12 @@ export default {
               selectProp: "value",
               displayProp: "label",
               loadFn: ({context}) => context.formData.getIntervalUnits()
+            },
+            validations: {
+              requiredIf: {
+                expr: "!!cpe.eventPoint || cpe.eventPoint == 0",
+                messageCode: "cps.unit_req"
+              }
             }
           }
         ]
