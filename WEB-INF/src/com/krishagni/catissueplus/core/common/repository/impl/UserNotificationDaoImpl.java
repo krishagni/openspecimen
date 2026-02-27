@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.common.repository.impl;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +48,21 @@ public class UserNotificationDaoImpl extends AbstractDao<UserNotification> imple
 		getCurrentSession().saveOrUpdate(notification);
 	}
 
+	public int deleteNotificationsOlderThan(int olderThanDays, int maxNotifs) {
+		LocalDate olderThan = LocalDate.now().minus(olderThanDays, ChronoUnit.DAYS);
+
+		Criteria<Long> query = createCriteria(Notification.class, Long.class, "notif");
+		List<Long> notifIds = query.select("notif.id")
+			.add(query.lt("notif.creationTime", java.sql.Date.valueOf(olderThan)))
+			.list(0, maxNotifs);
+		if (notifIds.isEmpty()) {
+			return 0;
+		}
+
+		getCurrentSession().getNamedQuery(DELETE_NOTIF_USERS).setParameterList("notifIds", notifIds).executeUpdate();
+		return getCurrentSession().getNamedQuery(DELETE_NOTIFS).setParameterList("notifIds", notifIds).executeUpdate();
+	}
+
 	private Criteria<UserNotification> getUserNotificationsListCriteria(UserNotifsListCriteria crit) {
 		Criteria<UserNotification> query = createCriteria(UserNotification.class, "un");
 		addIdsCondition(query, crit);
@@ -72,4 +89,8 @@ public class UserNotificationDaoImpl extends AbstractDao<UserNotification> imple
 	private static final String FQN = UserNotification.class.getName();
 
 	private static final String MARK_AS_READ = FQN + ".markNotifsAsRead";
+
+	private static final String DELETE_NOTIF_USERS = Notification.class.getName() + ".deleteNotifiedUsers";
+
+	private static final String DELETE_NOTIFS = Notification.class.getName() + ".deleteNotifications";
 }

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,8 @@ public class FilesBacklogCleaner implements ScheduledTask {
 
 	private static final int API_LOG_RETENTION_DAYS = 90;
 
+	private static final int NOTIF_RETENTION_DAYS = 90;
+
 	@Autowired
 	private DaoFactory daoFactory;
 	
@@ -57,17 +60,7 @@ public class FilesBacklogCleaner implements ScheduledTask {
 			}
 		}
 
-		Integer inputPeriod = null;
-		try {
-			String input = argsMap.get("filesRetentionDays");
-			if (StringUtils.isNotBlank(input)) {
-				inputPeriod = Integer.parseInt(input);
-			}
-		} catch (Exception e) {
-			logger.error("Error parsing the retention period from the job configuration. Defaulting to " + FILE_RETENTION_DAYS + " days", e);
-		}
-
-
+		Integer inputPeriod = getRetentionDays(argsMap, "filesRetentionDays", FILE_RETENTION_DAYS);
 		int effectivePeriod = inputPeriod != null ? inputPeriod : FILE_RETENTION_DAYS;
 		cleanupOlderFiles(getQueryExportDataDir(), effectivePeriod, null, true);
 		cleanupOlderFiles(getLogFilesDir(), getLogFilesRetainPeriod(), null, true);
@@ -79,23 +72,21 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		cleanupOlderFiles(getDirPath("oc", "auto-importer"), effectivePeriod, null, true);
 		cleanupOlderFiles(getDataDir(), effectivePeriod, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"), false);
 
-		Integer apiLogsRetentionDays = null;
+		cleanupApiCallsLog(argsMap);
+		cleanupNotifs(argsMap);
+	}
+
+	private Integer getRetentionDays(Map<String, String> config, String key, int defRetentionDays) {
+		Integer retentionDays = null;
+
 		try {
-			String input = argsMap.get("apiLogsRetentionDays");
-			if (StringUtils.isNotBlank(input)) {
-				apiLogsRetentionDays = Integer.parseInt(input);
-			}
+			String value = config.get(key);
+			retentionDays = StringUtils.isNotBlank(value) ? Integer.parseInt(value) : defRetentionDays;
 		} catch (Exception e) {
-			logger.error("Error parsing the retention period from the job configuration. Defaulting to " + API_LOG_RETENTION_DAYS + " days", e);
+			logger.error("Error parsing the retention period " + key + " from the job configuration. Defaulting to " + defRetentionDays + " days", e);
 		}
 
-		apiLogsRetentionDays = apiLogsRetentionDays != null ? apiLogsRetentionDays : API_LOG_RETENTION_DAYS;
-		if (apiLogsRetentionDays > 0) {
-			int deleted = cleanupApiCallsLog(apiLogsRetentionDays);
-			if (deleted > 0) {
-				logger.info("Deleted " + deleted + " API calls log entries that are older than " + apiLogsRetentionDays + " days");
-			}
-		}
+		return retentionDays == null ? defRetentionDays : retentionDays;
 	}
 
 	private String getDataDir() {
@@ -175,8 +166,46 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		}
 	}
 
+
+	private int cleanupOldDbEntries(String type, Function<Integer, Integer> cleanupFn, Map<String, String> config, String key, int defRetentionDays) {
+		Integer retentionDays = getRetentionDays(config, key, defRetentionDays);
+		if (retentionDays <= 0) {
+			return 0;
+		}
+
+		int total = 0;
+		try {
+			while (true) {
+				int count = cleanupFn.apply(retentionDays);
+				total += count;
+				logger.info("Deleted " + count + " of " + total + " " + type + " that are older than " + retentionDays + " days");
+				if (count == 0) {
+					break;
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error deleting " + type + ". Error: " + e.getMessage(), e);
+		}
+
+		logger.info("Deleted " + total + " " + type + " that are older than " + retentionDays + " days");
+		return total;
+	}
+
+	private int cleanupApiCallsLog(Map<String, String> argsMap) {
+		return cleanupOldDbEntries("API calls log entries", this::cleanupApiCallsLog0, argsMap, "apiLogsRetentionDays", API_LOG_RETENTION_DAYS);
+	}
+
 	@PlusTransactional
-	private int cleanupApiCallsLog(int apiLogsRetentionDays) {
-		return daoFactory.getAuditDao().deleteApiCallLogs(apiLogsRetentionDays);
+	private int cleanupApiCallsLog0(int apiLogsRetentionDays) {
+		return daoFactory.getAuditDao().deleteApiCallLogs(apiLogsRetentionDays, 10000);
+	}
+
+	private int cleanupNotifs(Map<String, String> argsMap) {
+		return cleanupOldDbEntries("Notifications", this::cleanupNotifs0, argsMap, "notifRetentionDays", NOTIF_RETENTION_DAYS);
+	}
+
+	@PlusTransactional
+	private int cleanupNotifs0(int notifRetentionDays) {
+		return daoFactory.getUserNotificationDao().deleteNotificationsOlderThan(notifRetentionDays, 10000);
 	}
 }

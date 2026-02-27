@@ -228,9 +228,10 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	@Override
-	public int deleteApiCallLogs(int olderThanDays) {
+	public int deleteApiCallLogs(int olderThanDays, int maxRows) {
 		LocalDate olderThan = LocalDate.now().minus(olderThanDays, ChronoUnit.DAYS);
-		return getCurrentSession().getNamedQuery(DELETE_OLDER_API_CALL_LOGS)
+		String sql = String.format(DELETE_OLDER_API_CALL_LOGS_SQL, isMySQL() ? " limit " : " and rownum < ")  + maxRows;
+		return getCurrentSession().createNativeQuery(sql)
 			.setParameter("olderThan", java.sql.Date.valueOf(olderThan))
 			.executeUpdate();
 	}
@@ -679,4 +680,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	private static final String DELETE_OLDER_API_CALL_LOGS = FQN + ".deleteOlderLogs";
 
 	private static final String GET_ENTITY_NAMES = "com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord.getEntityNames";
+
+	private static final String DELETE_OLDER_API_CALL_LOGS_SQL =
+		"delete from os_user_api_calls_log where call_start_time < :olderThan %s";
 }
