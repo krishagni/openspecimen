@@ -401,7 +401,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	private SubQuery<Long> getSpecimenListsQuery(SpecimenListsCriteria crit, Criteria<?> mainQuery) {
 		SubQuery<Long> query = mainQuery.createSubQuery(SpecimenList.class, "l")
-			.distinct().select("l.id");
+			.select("l.id");
 
 		query.add(query.isNull("l.deletedOn"));
 		if (crit.userId() != null || StringUtils.isNotBlank(crit.query())) {

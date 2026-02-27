@@ -29,5 +29,13 @@
       <key column="NOTIFICATION_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.common.domain.UserNotification"/>
     </set>
+
+    <sql-query name="deleteNotifiedUsers">
+      delete from os_user_notifications where notification_id in (:notifIds)
+    </sql-query>
+
+    <sql-query name="deleteNotifications">
+      delete from os_notifications where identifier in (:notifIds)
+    </sql-query>
   </class>
 </hibernate-mapping>
