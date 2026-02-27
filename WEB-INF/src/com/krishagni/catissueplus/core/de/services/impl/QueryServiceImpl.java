@@ -1414,7 +1414,7 @@ public class QueryServiceImpl implements QueryService {
 		auditLog.setTimeToFinish(resp.getExecutionTime());
 		auditLog.setRunType(opDetail.getRunType());
 		auditLog.setAql(opDetail.getAql());
-		auditLog.setRecordCount(Long.valueOf(resp.getResultData().getDbRowsCount()));
+		auditLog.setRecordCount((long) resp.getResultData().getDbRowsCount());
 		auditLog.setSql(resp.getSql());
 		daoFactory.getQueryAuditLogDao().saveOrUpdate(auditLog);
 	}

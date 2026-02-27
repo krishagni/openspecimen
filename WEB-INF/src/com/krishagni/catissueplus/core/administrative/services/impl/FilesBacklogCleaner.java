@@ -53,7 +53,7 @@ public class FilesBacklogCleaner implements ScheduledTask {
 			for (String arg : args) {
 				String[] parts = arg.trim().split("=");
 				if (parts.length == 1) {
-					argsMap.put("filesRetentionDays", parts[0]);
+					argsMap.put("filesRetentionDays", parts[0].trim());
 				} else {
 					argsMap.put(parts[0].trim(), parts[1].trim());
 				}
