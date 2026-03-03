@@ -242,7 +242,7 @@ public class VisitDetail extends VisitSummary {
 		} else {
 			if (getEventPoint() != null) {
 				result += (getEventPoint() < 0 ? "-" : "") + "T" + Math.abs(getEventPoint());
-				result += getEventPointUnit().name().charAt(0) + ": ";
+				result += (getEventPointUnit() != null ? getEventPointUnit().name().charAt(0) : "UNK") + ": ";
 			}
 
 			result += getEventLabel();
