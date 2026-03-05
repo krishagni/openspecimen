@@ -440,31 +440,14 @@ export default {
         value = column.value(data.rowObject);
       } else {
         value = exprUtil.eval(data.rowObject, column.name);
-        if (value || value == 0) {
-          let extra = {metadata: column, context: data.rowObject};
-          if (column.type == 'user') {
-            if (value instanceof Array) {
-              value = value.map(u => this.$filters.username(u, extra)).join(', ');
-            } else {
-              value = this.$filters.username(value, extra);
-            }
-          } else if (column.type == 'date' || (column.type == 'datePicker' && column.showTime != true)) {
-            value = this.$filters.date(value, extra);
-          } else if (column.type == 'date-time' || column.type == 'dateTime' ||
-                      (column.type == 'datePicker' && column.showTime == true)) {
-            value = this.$filters.dateTime(value, extra);
-          } else if (column.type == 'storage-position') {
-            value = this.$filters.storagePosition(value, extra);
-          } else if (column.type == 'specimen-measure') {
-            value = this.$filters.specimenMeasure(value, extra);
-          } else if (value instanceof Array) {
-            value = value.join(', ');
-          } else if (column.type == 'booleanCheckbox') {
-            value = this.$filters.boolValue(value);
-          }
-        }
       }
 
+      let effDisplayType = column.displayType;
+      if (!effDisplayType && column.displayTypeExpr) {
+        effDisplayType = exprUtil.eval(data.rowObject, column.displayTypeExpr);
+      }
+
+      value = util.getFieldDisplayValue(data.rowObject, column, value, effDisplayType || column.type);
       if ((value == undefined || value == null) && typeof column.empty == 'function') {
         return column.empty(data.rowObject);
       }

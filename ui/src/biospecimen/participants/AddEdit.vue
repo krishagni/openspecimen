@@ -37,26 +37,52 @@
         </div>
       </os-form>
 
-      <div v-else-if="ctx.step == 'choose_match'">
+      <div class="participant-matches" v-else-if="ctx.step == 'choose_match'">
         <os-message type="info">
           <span v-t="'participants.following_matches_found'">Following matching participant/s were found: </span>
         </os-message>
 
-        <os-table-form ref="selectMatchForm" :schema="ctx.selectMatchTs" :data="dataCtx" :items="ctx.matches"
-          :read-only="true" :selection-mode="'radio'" @item-selected="selectMatch"
-          v-if="ctx.selectMatchTs.columns.length > 0">
+        <os-list-view class="os-list-shadowed-rows"
+          :data="ctx.matches"
+          :schema="ctx.selectMatchTs"
+          :showRowActions="true"
+          :expanded="ctx.expandedMatches"
+          @rowClicked="viewMatchingParticipantDetails"
+          ref="listView">
 
-          <os-button primary v-if="ctx.selectedMatch" @click="useSelectedMatch"
-            :label="$t(!dataCtx.cpr.id || ctx.selectedMatch.participant.id == -1 ?
-              'participants.use_selected_match' : 'participants.merge_with_selected_part')" />
+          <template #expansionRow="{rowObject}">
+            <div>
+              <os-overview :schema="ctx.cprDict" :object="ctx" :columns="2" v-if="ctx.cprDict && ctx.cprDict.length > 0" />
 
-          <os-button primary v-else-if="ctx.allowIgnoreMatches"
-            :label="$t('participants.ignore_matches_proceed')" @click="ignoreMatches" />
+              <template v-if="ctx.cpr && ctx.cpr.id > 0">
+                <template v-for="(widget, idx) of matchingPartWidgets" :key="idx">
+                  <component :is="widget.name" :context="ctx" v-bind="widget.params" />
+                </template>
+              </template>
 
-          <os-button secondary :label="$t('common.buttons.back')" @click="back" v-if="ctx.history.length > 0" />
+              <div>
+                <os-button primary  @click="useSelectedMatch(rowObject)"
+                  :label="$t(!dataCtx.cpr.id || !(ctx.cpr.id > 0) ?
+                  'participants.use_selected_match' : 'participants.merge_with_selected_part')" />
+              </div>
+            </div>
+          </template>
 
-          <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
-        </os-table-form>
+          <template #footer>
+            <div>
+              <os-divider />
+
+              <div class="buttons">
+                <os-button primary v-if="ctx.allowIgnoreMatches" :label="$t('participants.ignore_matches_proceed')"
+                  @click="ignoreMatches" />
+
+                <os-button secondary :label="$t('common.buttons.back')" @click="back" v-if="ctx.history.length > 0" />
+
+                <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
+              </div>
+            </div>
+          </template>
+        </os-list-view>
       </div>
 
       <os-form ref="cprForm" :schema="ctx.addEditFs" :disabled-fields="ctx.lockedFields"
@@ -96,7 +122,7 @@
           <span v-t="'participants.merging_participant'">Merging Participant</span>
         </template>
         <template #message>
-          <span v-t="{path: 'participants.merge_participant_warning', args: dataCtx.cpr.participant}">
+          <span v-t="{path: 'participants.merge_participant_warning', args: {name: pname}}">
             <span>Participant will be deleted after merge. Do you want to continue?</span>
           </span>
         </template>
@@ -113,6 +139,7 @@ import cpSvc      from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc     from '@/biospecimen/services/Cpr.js';
 
 import alertsSvc  from '@/common/services/Alerts.js';
+import exprUtil   from '@/common/services/ExpressionUtil.js';
 import formUtil   from '@/common/services/FormUtil.js';
 import pvSvc      from '@/common/services/PermissibleValue.js';
 import routerSvc  from '@/common/services/Router.js';
@@ -174,6 +201,8 @@ export default {
         history: [],
 
         matches: [],
+
+        expandedMatches: [],
 
         lockedFields: [],
 
@@ -278,6 +307,24 @@ export default {
       return cprSvc.getFormattedTitle(this.dataCtx.cpr);
     },
 
+    pname: function() {
+      const {participant: {firstName, lastName}} = this.dataCtx.cpr;
+      let result = '';
+      if (firstName) {
+        result += firstName;
+      }
+
+      if (lastName) {
+        if (result) {
+          result += ' ';
+        }
+
+        result += lastName;
+      }
+
+      return result;
+    },
+
     showLookupForm: function() {
       return !this.dataCtx.cpr.id && (this.ctx.lookupFields.length > 0 || this.ctx.twoStep);
     },
@@ -301,6 +348,23 @@ export default {
     cpEventOptions: function() {
       return (this.cpEvents || [])
         .map(event => ({caption: cpSvc.getEventDescription(event), onSelect: () => this.saveOrUpdate(event)}));
+    },
+
+    matchingPartWidgets: function() {
+      const widgets = this._getMatchingParticipantWidgets();
+      const result = [];
+      for (const widget of widgets) {
+        const {name, params} = widget;
+        const item = {name};
+        if (item.name.indexOf('os-') == -1) {
+          item.name = 'os-' + name;
+        }
+
+        item.params = this._getInstantiatedParams(params);
+        result.push(item);
+      }
+
+      return result;
     }
   },
 
@@ -342,13 +406,39 @@ export default {
       this.ctx.selectedMatch = this.ctx.matches[index];
     },
 
-    useSelectedMatch: function() {
+    useSelectedMatch: function(match) {
       this.ctx.history.unshift({
         step: 'choose_match',
         data: {cpr: util.clone(this.dataCtx.cpr), matches: util.clone(this.ctx.matches)}
       });
 
-      this._useSelectedMatch(this.ctx.selectedMatch);
+      this._useSelectedMatch(match);
+    },
+
+    viewMatchingParticipantDetails: function(match) {
+      const {expandedMatches} = this.ctx;
+      if (expandedMatches && expandedMatches.length == 1 && expandedMatches[0] == match) {
+        // close the expanded panel
+        expandedMatches.length = 0;
+        return;
+      }
+
+      if (!this.ctx.participantWidgets) {
+        const {cp: {id: cpId}} = this.dataCtx;
+        cpSvc.getWorkflowProperty(cpId, 'matching-participants', 'detail-widgets')
+          .then(widgets => this.ctx.participantWidgets = widgets || []);
+      }
+
+      this.ctx.cprDict = [];
+      this.ctx.cpr = this.ctx.consents = {};
+      this._loadCprDetails(match).then(
+        ([cprDict, cpr, consents]) => {
+          this.ctx.cprDict = cprDict;
+          this.ctx.cpr = cpr;
+          this.ctx.consents = consents;
+          this.ctx.expandedMatches = [match];
+        }
+      );
     },
 
     saveOrUpdate: function(cpEvent, saveAsDraft, gotoConsents) {
@@ -421,8 +511,7 @@ export default {
     _handleParticipantMatches(matches, action) {
       const ctx = this.ctx;
 
-      ctx.matches = matches;
-      ctx.autoSelectedMatch = null;
+      ctx.matches = matches = this._flattenMatches(matches);
       ctx.allowIgnoreMatches = matches.every(({matchedAttrs}) => matchedAttrs.length == 1 && matchedAttrs[0] == 'lnameAndDob');
 
       matches.forEach(
@@ -452,31 +541,73 @@ export default {
             this.ctx.history.unshift(action);
           }
         }
-      } else if (this._isAutoSelect(matches)) {
-        // match is auto selected
-        const {cpr} = this.dataCtx;
-        const participant = ctx.autoSelectedMatch = matches[0].participant;
-        if (ctx.twoStep) {
-          // 2 step registration
-          const cpId = cpr.cpId;
-          for (let regCp of (participant.registeredCps || [])) {
-            if (regCp.cpId == cpId) {
-              // auto selected match is of the same CP as the current one
-              // navigate to the participant overview page
-              routerSvc.goto('ParticipantsListItemDetail.Overview', {cpId, cprId: regCp.cprId});
-              return;
-            }
-          }
-        }
-
-        this._useSelectedMatch(matches[0]);
-        this.ctx.history.unshift(action);
       } else {
-        // multiple matches or a single match that cannot be auto selected
+        // one or more matches
         this.ctx.step = 'choose_match';
         this._loadSelectMatchTabSchema();
+        if (matches.length == 1) {
+          this.viewMatchingParticipantDetails(matches[0]);
+        }
+
         this.ctx.history.unshift(action);
       }
+    },
+
+    _flattenMatches: function(matches) {
+      return matches.flatMap(
+        match =>
+          match.participant.registeredCps.map(({cpId, cpShortTitle, cprId: id}) => ({...match, cpId, cpShortTitle, id}))
+      );
+    },
+
+    _loadCprDetails: async function(match) {
+      const {id: cprId, participant} = match;
+      const cprsQ = this.cprsQ = this.cprsQ || {};
+      let cprQ = cprsQ[cprId];
+      if (!cprQ) {
+        if (cprId > 0) {
+          cprQ = cprsQ[cprId] = this._getCpr(cprId);
+        } else {
+          cprQ = new Promise((resolve) => resolve({participant}));
+        }
+      }
+
+      const cprDictQ = this._getCprDict();
+      return Promise.all([cprDictQ, cprQ]).then(
+        ([cprDict, cpr]) => {
+          const hasConsentFields = cprDict.some(field => field.name.indexOf('consents.') == 0);
+          if (hasConsentFields && cpr.id > 0) {
+            return cprSvc.getConsents(cpr)
+              .then(consents => [cprDict, cpr, consents])
+              .error(err => [cprDict, cpr, {}]);
+          }
+
+          return [cprDict, cpr, {}];
+        }
+      );
+    },
+
+    _getCprDict: function() {
+      const cpCtx = this.cpViewCtx;
+      const cprDictQ = cpCtx.getCprDict();
+      const consentsDictQ = cpCtx.getConsentsDict();
+      return Promise.all([cprDictQ, consentsDictQ]).then(
+        ([cprFields, consentFields]) => {
+          const dict = [];
+          Array.prototype.push.apply(dict, cprFields || []);
+          Array.prototype.push.apply(dict, consentFields || []);
+          return dict;
+        }
+      );
+    },
+
+    _getCpr: function(cprId) {
+      return cprSvc.getCpr(cprId).then(
+        cpr => {
+          formUtil.createCustomFieldsMap(cpr.participant, true);
+          return cpr;
+        }
+      );
     },
 
     _useSelectedMatch: async function({participant}) {
@@ -523,18 +654,6 @@ export default {
       this._saveOrUpdate(this.dataCtx.cpr);
     },
 
-    _isAutoSelect: function(matches) {
-      if (this.dataCtx.cpr.id > 0 || matches.length > 1) {
-        return false;
-      }
-
-      if (matches.length == 1 && matches[0].matchedAttrs.length == 1 && matches[0].matchedAttrs[0] == 'lnameAndDob') {
-        return false;
-      }
-
-      return true;
-    },
-
     _copyParticipantDetails(cpr, participant) {
       const customFields = cpr.participant.extensionDetail || {};
       Object.assign(cpr, {participant});
@@ -542,11 +661,69 @@ export default {
     },
 
     _loadSelectMatchTabSchema: function() {
-      if (this.ctx.selectMatchTs.columns.length > 0) {
+      const {selectMatchTs: {columns}} = this.ctx;
+      if (columns.length > 0) {
         return;
       }
 
       this.cpViewCtx.getSelectMatchTabSchema().then(schema => this.ctx.selectMatchTs = schema);
+    },
+
+    _getMatchingParticipantWidgets() {
+      const {participantWidgets} = this.ctx;
+      if (participantWidgets && participantWidgets.length > 0) {
+        return participantWidgets;
+      }
+
+      return [this._getPrimarySpecimensTable(), this._getAliquotCountsTable()];
+    },
+
+    _getPrimarySpecimensTable() {
+      return {
+        name: 'aql-table',
+        params: {
+          static: {
+            title: this.$t('participants.primary_specimens'),
+            aql: `select
+                    Specimen.type, Specimen.tissueSite, Specimen.spmnCollRecvDetails.collContainer, Specimen.availableQty
+                  where
+                    Specimen.lineage = "New" and
+                    Specimen.collectionStatus = "Collected" and
+                    Participant.id = :cprId`,
+            params: {
+              dynamic: {
+                cprId: 'cpr.id'
+              }
+            }
+          }
+        }
+      }
+    },
+
+    _getAliquotCountsTable() {
+      return {
+        name: 'aql-table',
+        params: {
+          static: {
+            title: this.$t('participants.aliquots'),
+            aql: `select
+                    Specimen.type, count(distinct Specimen.id) as "Aliquots"
+                  where
+                    Specimen.lineage = "Aliquot" and
+                    Specimen.availabilityStatus = "Available" and
+                    Participant.id = :cprId`,
+            params: {
+              dynamic: {
+                cprId: 'cpr.id'
+              }
+            }
+          }
+        }
+      }
+    },
+
+    _getInstantiatedParams(params) {
+      return util.getInstantiatedParams(this.ctx, params);
     },
 
     _navToNextView: function(savedCpr) {
@@ -627,3 +804,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.participant-matches {
+  display: flex;
+  flex-direction: column;
+}
+
+.buttons :deep(button) {
+  margin-right: 0.5rem;
+}
+</style>

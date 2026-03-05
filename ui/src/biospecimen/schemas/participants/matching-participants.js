@@ -1,6 +1,11 @@
 export default {
   columns: [
     {
+      "name": "cpShortTitle",
+      "labelCode": "participants.cp",
+      "type": "span"
+    },
+    {
       "name": "participant.firstName",
       "labelCode": "participants.first_name",
       "type": "span"
@@ -33,15 +38,6 @@ export default {
       "value": ({participant}) => {
         const {pmis} = participant;
         return (pmis || []).map(({siteName, mrn}) => siteName + (mrn ? ' (' + mrn + ') ' : '')).join(', ');
-      }
-    },
-    {
-      "name": "participant.registeredCps",
-      "labelCode": "participants.registered_cps",
-      "type": "span",
-      "value": ({participant}) => {
-        const {registeredCps} = participant;
-        return (registeredCps || []).map(({cpShortTitle}) => cpShortTitle).join(', ');
       }
     }
   ]

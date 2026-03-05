@@ -744,6 +744,22 @@ class Util {
     return new AutoSaveManager(saveFn);
   }
 
+  getInstantiatedParams(context, params) {
+    context = context || {};
+    params  = params  || {};
+
+    const result = {};
+    for (const name of Object.keys(params.static || {})) {
+      result[name] = params.static[name];
+    }
+
+    for (const name of Object.keys(params.dynamic || {})) {
+      result[name] = exprUtil.eval(context, params.dynamic[name]);
+    }
+
+    return result;
+  }
+
   _getEscapeMap(str) {
     let map = {}, insideSgl = false, insideDbl = false;
     let lastIdx = -1;
