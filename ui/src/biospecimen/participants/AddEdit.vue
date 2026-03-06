@@ -139,7 +139,6 @@ import cpSvc      from '@/biospecimen/services/CollectionProtocol.js';
 import cprSvc     from '@/biospecimen/services/Cpr.js';
 
 import alertsSvc  from '@/common/services/Alerts.js';
-import exprUtil   from '@/common/services/ExpressionUtil.js';
 import formUtil   from '@/common/services/FormUtil.js';
 import pvSvc      from '@/common/services/PermissibleValue.js';
 import routerSvc  from '@/common/services/Router.js';
@@ -579,7 +578,7 @@ export default {
           if (hasConsentFields && cpr.id > 0) {
             return cprSvc.getConsents(cpr)
               .then(consents => [cprDict, cpr, consents])
-              .error(err => [cprDict, cpr, {}]);
+              .error(() => [cprDict, cpr, {}]);
           }
 
           return [cprDict, cpr, {}];
