@@ -253,7 +253,6 @@
   
   <bean id="formSvc" class="com.krishagni.catissueplus.core.de.services.impl.FormServiceImpl">
     <property name="formDao" ref="formDao"/>
-    <property name="queryContextVectorSvc" ref="queryContextVectorSvc"/>
   </bean>
   
   <bean id="specimenEventsSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.SpecimenEventsServiceImpl">
@@ -284,11 +283,6 @@
     <property name="userDao" ref="userDao"/>
     <property name="queryFolderFactory" ref="queryFolderFactory"/>
     <property name="emailService" ref="emailService"/>
-  </bean>
-
-  <bean id="queryContextVectorSvc" class="com.krishagni.catissueplus.core.de.services.impl.QueryContextVectorServiceImpl">
-    <property name="formSvc" ref="formSvc"/>
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
   <bean id="extAppNotificationService" class="com.krishagni.catissueplus.core.notification.services.impl.ExternalAppNotificationServiceImpl">

@@ -593,7 +593,6 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="deDaoFactory" ref="deDaoFactory"/>
     <property name="exportSvc" ref="exportSvc"/>
-    <property name="queryContextVectorSvc" ref="queryContextVectorSvc"/>
     <property name="ctxtProcs">
       <map>
         <entry key="ParticipantExtension">
@@ -651,11 +650,6 @@
     <property name="templateService" ref="templateService"/>
     <property name="cfgService" ref="cfgSvc"/>
     <property name="starredItemSvc" ref="starredItemSvc"/>
-  </bean>
-
-  <bean id="queryContextVectorSvc" class="com.krishagni.catissueplus.core.de.services.impl.QueryContextVectorServiceImpl">
-    <property name="formSvc" ref="formSvc"/>
-    <property name="daoFactory" ref="biospecimenDaoFactory"/>
   </bean>
 
   <bean id="reportSettingsFact" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.CpReportSettingsFactoryImpl">
