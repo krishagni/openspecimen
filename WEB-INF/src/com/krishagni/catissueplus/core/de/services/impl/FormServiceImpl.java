@@ -99,6 +99,7 @@ import com.krishagni.catissueplus.core.de.repository.FormDao;
 import com.krishagni.catissueplus.core.de.services.FormAccessChecker;
 import com.krishagni.catissueplus.core.de.services.FormContextProcessor;
 import com.krishagni.catissueplus.core.de.services.FormService;
+import com.krishagni.catissueplus.core.de.services.QueryContextVectorService;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 import com.krishagni.catissueplus.core.exporter.services.impl.ExporterContextHolder;
@@ -181,6 +182,8 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
 
 	private ExportService exportSvc;
+
+	private QueryContextVectorService queryContextVectorSvc;
 	
 	private Map<String, List<FormContextProcessor>> ctxtProcs = new HashMap<>();
 
@@ -202,6 +205,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 	public void setExportSvc(ExportService exportSvc) {
 		this.exportSvc = exportSvc;
+	}
+
+	public void setQueryContextVectorSvc(QueryContextVectorService queryContextVectorSvc) {
+		this.queryContextVectorSvc = queryContextVectorSvc;
 	}
 
 	public void setCtxtProcs(Map<String, List<FormContextProcessor>> ctxtProcs) {
@@ -314,6 +321,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			result.setFormId(formId);
 			result.setName(parsedForm.getName());
 			result.setCaption(parsedForm.getCaption());
+			notifyQueryContextMetadataChanged();
 			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -336,7 +344,9 @@ public class FormServiceImpl implements FormService, InitializingBean {
 
 		try {
 			Container input = new ContainerPropsParser(req.getPayload()).parse();
-			return ResponseEvent.response(saveForm(input, false));
+			Long formId = saveForm(input, false);
+			notifyQueryContextMetadataChanged();
+			return ResponseEvent.response(formId);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (FormException fe) {
@@ -376,11 +386,22 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			// TODO: The interested listeners, like CP group listener, would then take appropriate actions
 			//
 			daoFactory.getCpGroupDao().deleteForms(formIds);
+			notifyQueryContextMetadataChanged();
 			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
+		}
+	}
+
+	private void notifyQueryContextMetadataChanged() {
+		try {
+			if (queryContextVectorSvc != null) {
+				queryContextVectorSvc.onMetadataChanged();
+			}
+		} catch (Exception e) {
+			logger.error("Error notifying query context vector service about metadata updates", e);
 		}
 	}
     
