@@ -1,6 +1,6 @@
 
 <template>
-  <div class="os-file-upload" v-if="!inputValue">
+  <div class="os-file-upload" v-show="!inputValue">
     <FileUpload ref="uploader" mode="basic" name="file" :auto="auto != false" :url="uploadUrl" :tabindex="tabOrder"
       :disabled="disabled" @before-send="addHeaders" @upload="onUpload" @error="onError" @select="onFileSelect" />
 
@@ -8,7 +8,7 @@
       <os-button class="clear" :left-icon="'times'" :label="'Clear Selection'" @click="clear" />
     </div>
   </div>
-  <div class="os-selected-file" v-else>
+  <div class="os-selected-file" v-if="inputValue">
     <span class="filename">
       <a :href="fileUrl" target="_blank" v-if="fileUrl">
         <span>{{inputValue.filename}}</span>
