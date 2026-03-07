@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,9 +62,6 @@ public class StorageContainersController {
 	@Autowired
 	private StorageContainerService storageContainerSvc;
 	
-	@Autowired
-	private HttpServletRequest httpReq;
-
 	@Autowired
 	private ContainerSelectionStrategyFactory containerSelectionStrategyFactory;
 
@@ -117,12 +114,6 @@ public class StorageContainersController {
 		@RequestParam(value = "cpId", required = false)
 		Long[] cpIds,
 			
-		@RequestParam(value = "cpShortTitle", required = false)
-		String[] cpShortTitles,
-
-		@RequestParam(value = "dpShortTitle", required = false)
-		String[] dpShortTitles,
-
 		@RequestParam(value = "storeSpecimensEnabled", required = false)
 		Boolean storeSpecimensEnabled,
 
@@ -139,7 +130,10 @@ public class StorageContainersController {
 		boolean includeStats,
 
 		@RequestParam(value = "orderByStarred", required = false, defaultValue = "false")
-		Boolean orderByStarred) {
+		Boolean orderByStarred,
+
+		@RequestParam
+		MultiValueMap<String, String> queryParams) {
 		
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
 			.query(name)
@@ -156,8 +150,8 @@ public class StorageContainersController {
 			.specimenClass(specimenClass)
 			.specimenType(specimenType)
 			.cpIds(cpIds)
-			.cpShortTitles(cpShortTitles)
-			.dpShortTitles(dpShortTitles)
+			.cpShortTitles(getRequestParams(queryParams, "cpShortTitle"))
+			.dpShortTitles(getRequestParams(queryParams, "dpShortTitle"))
 			.storeSpecimensEnabled(storeSpecimensEnabled)
 			.usageMode(usageMode)
 			.statuses(statuses)
@@ -211,12 +205,6 @@ public class StorageContainersController {
 		@RequestParam(value = "cpId", required = false)
 		Long[] cpIds,
 			
-		@RequestParam(value = "cpShortTitle", required = false)
-		String[] cpShortTitles,
-
-		@RequestParam(value = "dpShortTitle", required = false)
-		String[] dpShortTitles,
-
 		@RequestParam(value = "storeSpecimensEnabled", required = false)
 		Boolean storeSpecimensEnabled,
 
@@ -227,7 +215,10 @@ public class StorageContainersController {
 		List<String> statuses,
 
 		@RequestParam(value = "hierarchical", required = false, defaultValue = "false")
-		boolean hierarchical) {
+		boolean hierarchical,
+
+		@RequestParam
+		MultiValueMap<String, String> queryParams) {
 		
 		StorageContainerListCriteria crit = new StorageContainerListCriteria()
 			.query(name)
@@ -242,8 +233,8 @@ public class StorageContainersController {
 			.specimenClass(specimenClass)
 			.specimenType(specimenType)
 			.cpIds(cpIds)
-			.cpShortTitles(cpShortTitles)
-			.dpShortTitles(dpShortTitles)
+			.cpShortTitles(getRequestParams(queryParams, "cpShortTitle"))
+			.dpShortTitles(getRequestParams(queryParams, "dpShortTitle"))
 			.storeSpecimensEnabled(storeSpecimensEnabled)
 			.usageMode(usageMode)
 			.statuses(statuses)
@@ -911,5 +902,10 @@ public class StorageContainersController {
 		resp.throwErrorIfUnsuccessful();
 		
 		return resp.getPayload();		
-	}	
+	}
+
+	private String[] getRequestParams(MultiValueMap<String, String> queryParams, String name) {
+		List<String> values = queryParams.get(name);
+		return values != null && !values.isEmpty() ? values.toArray(new String[0]) : null;
+	}
 }
