@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Collection;
@@ -18,20 +21,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.core.xml.XMLObject;
-import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.util.XMLObjectSupport;
 import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.Issuer;
 import org.opensaml.saml.saml2.core.LogoutRequest;
 import org.opensaml.saml.saml2.core.NameID;
-import org.opensaml.saml.saml2.core.NameIDType;
 import org.opensaml.saml.saml2.core.SessionIndex;
-import org.opensaml.security.x509.BasicX509Credential;
-import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
-import org.opensaml.xmlsec.signature.support.SignatureException;
-import org.opensaml.xmlsec.signature.support.Signer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -158,9 +154,14 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 			return Collections.emptyMap();
 		}
 
+		Saml2X509Credential signingCred = getSigningCredential(rp);
 		String encodedReq = samlEncode(buildLogoutRequest(rp, principal));
+		String signAlg    = urlEncode(getSigningAlgUri(signingCred));
+
+		String queryToSign = "SAMLRequest=" + encodedReq + "&SigAlg=" + signAlg;
+		String signedQuery = queryToSign + "&Signature=" + urlEncode(signQuery(queryToSign, signingCred));
 		String redirectUrl = UriComponentsBuilder.fromUriString(idpSloUrl)
-			.queryParam("SAMLRequest", encodedReq)
+			.replaceQuery(signedQuery)
 			.build(true)
 			.toUriString();
 		return Collections.singletonMap("url", redirectUrl);
@@ -246,8 +247,7 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		return encodedToken;
 	}
 
-	private LogoutRequest buildLogoutRequest(RelyingPartyRegistration rp, Saml2AuthenticatedPrincipal principal)
-	throws MarshallingException, SignatureException {
+	private LogoutRequest buildLogoutRequest(RelyingPartyRegistration rp, Saml2AuthenticatedPrincipal principal) {
 		String nameIdValue = principal.getName();
 		String sessionIdxValue = null;
 		if (principal.getSessionIndexes() != null && !principal.getSessionIndexes().isEmpty()) {
@@ -269,7 +269,6 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		// NameID
 		NameID nameId = (NameID) XMLObjectSupport.buildXMLObject(NameID.DEFAULT_ELEMENT_NAME);
 		nameId.setValue(nameIdValue);
-		nameId.setFormat(NameIDType.PERSISTENT);
 		logoutReq.setNameID(nameId);
 
 		// SessionIndex
@@ -278,30 +277,35 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 			si.setValue(sessionIdxValue);
 			logoutReq.getSessionIndexes().add(si);
 		}
-
-		// Add signature to the request
-		Signature signature = getSignature(rp);
-		logoutReq.setSignature(signature);
-
-		XMLObjectProviderRegistrySupport.getMarshallerFactory()
-			.getMarshaller(logoutReq)
-			.marshall(logoutReq);
-
-		Signer.signObject(signature);
 		return logoutReq;
 	}
 
-	private Signature getSignature(RelyingPartyRegistration rp) {
-		Saml2X509Credential signing = rp.getSigningX509Credentials().stream()
+	private Saml2X509Credential getSigningCredential(RelyingPartyRegistration rp) {
+		return Utility.nullSafeStream(rp.getSigningX509Credentials())
 			.findFirst()
 			.orElseThrow(() -> new IllegalStateException("No signing credential"));
+	}
 
-		BasicX509Credential credential = new BasicX509Credential(signing.getCertificate(), signing.getPrivateKey());
-		Signature signature = (Signature) XMLObjectSupport.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
-		signature.setSigningCredential(credential);
-		signature.setSignatureAlgorithm(SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256);
-		signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
-		return signature;
+	private String getSigningAlgUri(Saml2X509Credential signingCred) {
+		return switch (signingCred.getPrivateKey().getAlgorithm()) {
+			case "EC" -> "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
+			case "DSA" -> "http://www.w3.org/2009/xmldsig11#dsa-sha256";
+			default -> SignatureConstants.ALGO_ID_SIGNATURE_RSA_SHA256;
+		};
+	}
+
+	private String signQuery(String queryToSign, Saml2X509Credential signingCred)
+	throws NoSuchAlgorithmException, InvalidKeyException, java.security.SignatureException {
+		String jcaAlgo = switch (signingCred.getPrivateKey().getAlgorithm()) {
+			case "EC" -> "SHA256withECDSA";
+			case "DSA" -> "SHA256withDSA";
+			default -> "SHA256withRSA";
+		};
+
+		Signature signer = Signature.getInstance(jcaAlgo);
+		signer.initSign(signingCred.getPrivateKey());
+		signer.update(queryToSign.getBytes(StandardCharsets.UTF_8));
+		return Base64.getEncoder().encodeToString(signer.sign());
 	}
 
 	private String samlEncode(XMLObject object) throws Exception {
@@ -309,7 +313,11 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		String xml = SerializeSupport.nodeToString(node);
 		byte[] deflated = deflate(xml);
 		String base64Encoded = Base64.getEncoder().encodeToString(deflated);
-		return URLEncoder.encode(base64Encoded, StandardCharsets.UTF_8);
+		return urlEncode(base64Encoded);
+	}
+
+	private String urlEncode(String input) {
+		return URLEncoder.encode(input, StandardCharsets.UTF_8).replace("+", "%20");
 	}
 
 	private byte[] deflate(String inputString) throws IOException {
