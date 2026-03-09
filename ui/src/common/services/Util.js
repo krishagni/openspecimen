@@ -534,6 +534,7 @@ class Util {
         return this._getDate(inputValue);
 
       case 'datetime':
+      case 'date-time':
         return this._getDate(inputValue, true);
 
       case 'multiselect':
