@@ -38,4 +38,13 @@
       <column name="AUTH_TIME" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP Request managers">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="REQ_MANAGERS_USER_GROUP_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_CP_REQ_MANAGERS_UG_IDX" referencedTableName="OS_USER_GROUPS"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

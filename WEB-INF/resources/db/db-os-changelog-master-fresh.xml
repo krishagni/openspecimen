@@ -202,6 +202,7 @@
   <include file="db/12.2/migration.xml" />
 
   <include file="db/13.0/schema.xml" />
+  <include file="db/13.0/audit.xml" />
 
   <!-- Views are created always at the last -->
   <include file="db/views.xml"/>

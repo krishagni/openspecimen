@@ -14,9 +14,12 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.administrative.domain.factory.DistributionProtocolErrorCode;
 import com.krishagni.catissueplus.core.administrative.domain.factory.StorageContainerErrorCode;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
+import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.administrative.services.ContainerSelectionStrategyFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelAutoPrintMode;
@@ -138,6 +141,8 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setActivityStatus(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
 		setConsentsSource(input, cp, ose);
+		setCatalogId(input, cp, ose);
+		setReqManagers(input, cp, ose);
 
 		ose.checkAndThrow();
 		return cp;
@@ -601,6 +606,33 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		}
 
 		result.setConsentsSource(consentsSource);
+	}
+
+	private void setCatalogId(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		result.setCatalogId(input.getCatalogId() != null && input.getCatalogId() > 0L ? input.getCatalogId() :  null);
+	}
+
+	private void setReqManagers(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		UserGroupSummary inputUg = input.getReqManagers();
+		if (inputUg == null) {
+			return;
+		}
+
+		Object key = null;
+		UserGroup reqManagers = null;
+		if (inputUg.getId() != null) {
+			reqManagers = daoFactory.getUserGroupDao().getById(inputUg.getId());
+			key = inputUg.getId();
+		} else if (StringUtils.isNotBlank(inputUg.getName())) {
+			reqManagers = daoFactory.getUserGroupDao().getByName(inputUg.getName());
+			key = inputUg.getName();
+		}
+
+		if (key != null && reqManagers == null) {
+			ose.addError(UserGroupErrorCode.NOT_FOUND, key);
+		}
+
+		result.setReqManagers(reqManagers);
 	}
 	
 	private User getUser(UserSummary userDetail) {

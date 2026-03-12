@@ -266,6 +266,21 @@
     </field>
 
     <field>
+      <caption>#getMessage("cp_catalog_id")</caption>
+      <attribute>catalogId</attribute>
+    </field>
+
+    <record>
+      <caption>#getMessage("cp_req_managers")</caption>
+      <attribute>reqManagers</attribute>
+
+      <field>
+        <caption>#getMessage("cp_req_managers_group_name")</caption>
+        <attribute>name</attribute>
+      </field>
+    </record>
+
+    <field>
       <caption>#getMessage("cp_activity_status")</caption>
       <attribute>activityStatus</attribute>
     </field>

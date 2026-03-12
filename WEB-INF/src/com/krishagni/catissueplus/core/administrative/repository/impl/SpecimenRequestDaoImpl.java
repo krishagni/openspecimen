@@ -17,6 +17,7 @@ import com.krishagni.catissueplus.core.administrative.domain.SpecimenRequest;
 import com.krishagni.catissueplus.core.administrative.events.SpecimenRequestSummary;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestDao;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestListCriteria;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -67,9 +68,11 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 
 	private Criteria<Object[]> getListQuery(SpecimenRequestListCriteria crit) {
 		Criteria<Object[]> query = createCriteria(SpecimenRequest.class, Object[].class, "req")
+			.leftJoin("req.cp", "cp")
 			.leftJoin("req.dp", "dp")
 			.leftJoin("req.requestor", "requestor");
 		addCatalogCond(query, crit);
+		addCpCond(query, crit);
 		addDateConds(query, crit);
 		addStatusConds(query, crit);
 		return addUserRestrictions(query, crit);
@@ -81,6 +84,14 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		}
 
 		return query.add(query.eq("req.catalogId", crit.catalogId()));
+	}
+
+	private Criteria<Object[]> addCpCond(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
+		if (crit.cpId() == null) {
+			return query;
+		}
+
+		return query.add(query.eq("cp.id", crit.cpId()));
 	}
 
 
@@ -181,6 +192,15 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 
 		if (crit.requestorId() != null) {
 			orCond.add(query.eq("requestor.id", crit.requestorId()));
+		}
+
+		if (crit.userId() != null) {
+			SubQuery<Long> rmCpsQuery = query.createSubQuery(CollectionProtocol.class, "cp")
+				.join("cp.reqManagers", "mug")
+				.join("mug.users", "user");
+			rmCpsQuery.add(rmCpsQuery.eq("user.id", crit.userId()))
+					.select("cp.id");
+			orCond.add(query.in("cp.id", rmCpsQuery));
 		}
 
 		return query.add(orCond);

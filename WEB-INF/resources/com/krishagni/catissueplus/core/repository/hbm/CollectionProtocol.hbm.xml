@@ -111,6 +111,8 @@
 
     <property name="catalogId" column="CATALOG_ID"/>
 
+    <many-to-one name="reqManagers" column="REQ_MANAGERS_USER_GROUP_ID" />
+
     <property name="consentsWaived" column="CONSENTS_WAIVED"/>
 
     <property name="visitLevelConsents" column="VISIT_CONSENTS"/>

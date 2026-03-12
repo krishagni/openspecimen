@@ -7,11 +7,7 @@ import com.krishagni.catissueplus.core.common.service.impl.AbstractObjectCopier;
 public class CollectionProtocolCopier extends AbstractObjectCopier<CollectionProtocol>{
 
 	public CollectionProtocolCopier() {
-		addAttrCopier(new AttributesCopier<CollectionProtocol>() {
-			public void copy(CollectionProtocol src, CollectionProtocol tgt) {
-				src.copyTo(tgt);
-			}
-		});
+		addAttrCopier(CollectionProtocol::copyTo);
 	}
 	
 	public CollectionProtocol copy(CollectionProtocol src) {

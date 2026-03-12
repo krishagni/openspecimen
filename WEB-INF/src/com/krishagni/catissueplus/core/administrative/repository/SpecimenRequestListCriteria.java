@@ -10,6 +10,8 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	private Long catalogId;
 
+	private Long cpId;
+
 	private Date fromReqDate;
 
 	private Date toReqDate;
@@ -23,6 +25,8 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	private Long requestorId;
 
+	private Long userId;
+
 
 	@Override
 	public SpecimenRequestListCriteria self() {
@@ -35,6 +39,15 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	public SpecimenRequestListCriteria catalogId(Long catalogId) {
 		this.catalogId = catalogId;
+		return this;
+	}
+
+	public Long cpId() {
+		return cpId;
+	}
+
+	public SpecimenRequestListCriteria cpId(Long cpId) {
+		this.cpId = cpId;
 		return this;
 	}
 
@@ -80,6 +93,15 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	public SpecimenRequestListCriteria requestorId(Long requestorId) {
 		this.requestorId = requestorId;
+		return self();
+	}
+
+	public Long userId() {
+		return userId;
+	}
+
+	public SpecimenRequestListCriteria userId(Long userId) {
+		this.userId = userId;
 		return self();
 	}
 }
