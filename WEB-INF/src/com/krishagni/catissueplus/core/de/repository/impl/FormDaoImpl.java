@@ -1261,12 +1261,12 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		}
 
 		Query<Object[]> query = createNativeQuery(sql, Object[].class)
-			.setParameter("formId", formId)
-			.setFirstResult(startAt)
-			.setMaxResults(maxResults);
+			.setParameter("formId", formId);
 
 		if (CollectionUtils.isNotEmpty(names)) {
 			query.setParameterList(namesVar, names);
+		} else {
+			query.setFirstResult(startAt).setMaxResults(maxResults);
 		}
 
 		if (params != null) {

@@ -2060,7 +2060,7 @@ public class FormServiceImpl implements FormService, InitializingBean {
 	}
 
 	private Function<ExportJob, List<? extends Object>> getFormRecordsGenerator() {
-		return new Function<ExportJob, List<? extends Object>>() {
+		return new Function<>() {
 			private boolean endOfRecords = false;
 
 			private boolean paramsInited = false;
@@ -2088,6 +2088,10 @@ public class FormServiceImpl implements FormService, InitializingBean {
 			private boolean lastObjReadAllowed;
 
 			private boolean lastObjPhiAllowed;
+
+			private List<String> names;
+
+			private int namesIdx;
 
 			@Override
 			public List<? extends Object> apply(ExportJob job) {
@@ -2330,21 +2334,39 @@ public class FormServiceImpl implements FormService, InitializingBean {
 				Function<Pair<Object, Map<String, Object>>, Map<String, Object>> toFormRec) {
 
 				String namesCsv = job.getParams().get(namesCsvVar);
-				List<String> names = null;
-				if (StringUtils.isNotBlank(namesCsv)) {
-					names = Utility.csvToStringList(namesCsv);
-					endOfRecords = true;
+				List<String> namesBatch = null;
+				boolean useNames = StringUtils.isNotBlank(namesCsv);
+				if (useNames) {
+					if (names == null) {
+						names = Utility.csvToStringList(namesCsv);
+						namesIdx = 0;
+					}
+
+					if (CollectionUtils.isEmpty(names) || namesIdx >= names.size()) {
+						endOfRecords = true;
+						return Collections.emptyList();
+					}
+
+					int toIdx = Math.min(namesIdx + 100, names.size());
+					namesBatch = names.subList(namesIdx, toIdx);
+					namesIdx = toIdx;
 				}
 
-				List<Map<String, Object>> records = getFormRecs.apply(names);
-				startAt += records.size();
-				if (records.size() < 100) {
-					endOfRecords = true;
+				List<Map<String, Object>> records = getFormRecs.apply(namesBatch);
+				if (useNames) {
+					if (namesIdx >= names.size()) {
+						endOfRecords = true;
+					}
+				} else {
+					startAt += records.size();
+					if (records.size() < 100) {
+						endOfRecords = true;
+					}
 				}
 
 				List<Map<String, Object>> result = new ArrayList<>();
 				for (Map<String, Object> record : records) {
-					Long objId = (Long)record.get(objIdVar);
+					Long objId = (Long) record.get(objIdVar);
 					if (objId.equals(lastObjId) && !lastObjReadAllowed) {
 						continue;
 					}
