@@ -149,7 +149,7 @@
         );
 
         if v_last_id is not null then
-          insert into tmp_os_cpr_spmn_stats
+          execute immediate 'insert into tmp_os_cpr_spmn_stats
             (identifier, specimens_collected, specimens_missed, specimens_not_collected, specimens_pending)
           select
             cpr.identifier as identifier,
@@ -178,10 +178,10 @@
               on (spmn.req_specimen_id is null or spmn.req_specimen_id = sr.identifier)
                  and spmn.specimen_collection_group_id = visit.identifier and spmn.activity_status != ''Disabled''
           where
-            cpr.identifier > in_last_id and
-            cpr.identifier <= v_last_id
+            cpr.identifier > ' || in_last_id || ' and
+            cpr.identifier <= ' || v_last_id || '
           group by
-            cpr.identifier;
+            cpr.identifier';
         end if;
 
         out_last_id := nvl(v_last_id, in_last_id);
