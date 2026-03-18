@@ -19,11 +19,10 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
-    <set name="cps" table="OS_CP_GROUP_CPS">
-      <key column="GROUP_ID"/>
-      <many-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol" column="CP_ID">
-        <filter name="activeEntity" condition="activity_status != 'Disabled'"/>
-      </many-to-many>
+    <set name="cps" table="CATISSUE_COLLECTION_PROTOCOL" inverse="true">
+      <key column="CP_GROUP_ID"/>
+      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol"/>
+      <filter name="activeEntity" condition="activity_status != 'Disabled'"/>
     </set>
 
     <set name="forms" table="OS_CP_GROUP_FORMS" inverse="true" cascade="all-delete-orphan">
@@ -47,15 +46,14 @@
       <return-scalar column="cp_count" type="integer"/>
 
       select
-        gcp.group_id as group_id, count(gcp.cp_id) as cp_count
+        cp.cp_group_id as group_id, count(cp.identifier) as cp_count
       from
-        os_cp_group_cps gcp
-        inner join catissue_collection_protocol cp on cp.identifier = gcp.cp_id
+        catissue_collection_protocol cp
       where
-        gcp.group_id in :groupIds and
+        cp.cp_group_id in :groupIds and
         cp.activity_status != 'Disabled'
       group by
-        gcp.group_id
+        cp.cp_group_id
     </sql-query>
 
     <sql-query name="getEntityFormsByCp">

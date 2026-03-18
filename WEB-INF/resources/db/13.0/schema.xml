@@ -47,4 +47,48 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP group ID in CP table">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="CP_GROUP_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_CP_CP_GROUP_ID" referencedTableName="OS_CP_GROUPS"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on CP group ID of CP table" dbms="oracle">
+    <createIndex tableName="CATISSUE_COLLECTION_PROTOCOL" indexName="CP_CP_GROUP_ID_IDX">
+      <column name="CP_GROUP_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Migrate CP groups to CP table">
+    <preConditions onFail="HALT">
+      <sqlCheck expectedResult="0">
+        <![CDATA[
+          select count(*) from (select cp_id from os_cp_group_cps group by cp_id having count(*) > 1)
+        ]]>
+      </sqlCheck>
+    </preConditions>
+    <sql>
+      update
+        catissue_collection_protocol cp
+      set
+        cp_group_id = (
+          select
+            g.group_id
+          from
+            os_cp_group_cps g
+          where
+            g.cp_id = cp.identifier
+        )
+      where
+        exists (select 1 from os_cp_group_cps g where g.cp_id = cp.identifier)
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop CP group join table">
+    <dropTable tableName="OS_CP_GROUP_CPS" cascadeConstraints="true" />
+  </changeSet>
 </databaseChangeLog>

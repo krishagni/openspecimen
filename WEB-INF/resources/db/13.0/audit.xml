@@ -11,4 +11,11 @@
       <column name="reqManagers_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP group ID in CP audit">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="CP_GROUP_ID" type="${int.type}" />
+      <column name="cpGroup_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

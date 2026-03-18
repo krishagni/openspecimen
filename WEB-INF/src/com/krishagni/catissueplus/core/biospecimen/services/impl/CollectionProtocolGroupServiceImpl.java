@@ -537,7 +537,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 	}
 
 	private void ensureCpsNotInOtherGroups(Long groupId, Collection<Long> cpIds) {
-		List<String> cpsInOtherGroups = daoFactory.getCpGroupDao().getCpsUsedInOtherGroups(groupId, cpIds);
+		List<String> cpsInOtherGroups = daoFactory.getCpGroupDao().getCpsAssignedToOtherGroup(groupId, cpIds);
 		if (CollectionUtils.isNotEmpty(cpsInOtherGroups)) {
 			throw OpenSpecimenException.userError(
 				CpGroupErrorCode.CP_IN_OTH_GRPS,

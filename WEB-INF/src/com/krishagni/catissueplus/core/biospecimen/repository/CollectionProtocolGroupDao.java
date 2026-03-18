@@ -17,17 +17,15 @@ public interface CollectionProtocolGroupDao extends Dao<CollectionProtocolGroup>
 
 	Map<Long, Integer> getCpsCount(Collection<Long> groupIds);
 
-	List<String> getCpsUsedInOtherGroups(CollectionProtocolGroup group);
-
 	//
 	// Filters the input list of CP IDs by removing those that are not present in the CPG identified by group ID.
 	//
 	List<Long> getGroupCpIds(Long groupId, Collection<Long> cpIds);
 
 	//
-	// Returns the list of input CPs that are part of any CPG other than input group ID.
+	// Returns the list of input CPs that are part CPG different from input group ID.
 	//
-	List<String> getCpsUsedInOtherGroups(Long groupId, Collection<Long> cpIds);
+	List<String> getCpsAssignedToOtherGroup(Long groupId, Collection<Long> cpIds);
 
 	//
 	// Returns count of CPs that are part of the group and matches one of the CP sites.

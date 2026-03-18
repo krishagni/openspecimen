@@ -102,6 +102,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private String activityStatus;
 
 	private User principalInvestigator;
+
+	private CollectionProtocolGroup cpGroup;
 	
 	private String irbIdentifier;
 	
@@ -270,6 +272,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	public void setPrincipalInvestigator(User principalInvestigator) {
 		this.principalInvestigator = principalInvestigator;
+	}
+
+	public CollectionProtocolGroup getCpGroup() {
+		return cpGroup;
+	}
+
+	public void setCpGroup(CollectionProtocolGroup cpGroup) {
+		this.cpGroup = cpGroup;
 	}
 
 	public String getIrbIdentifier() {

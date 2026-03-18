@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -452,12 +451,9 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		}
 
 		if (crit.groupId() != null) {
-			SubQuery<Long> cpgQuery = query.createSubQuery(CollectionProtocolGroup.class, "cpg");
-			cpgQuery.join("cpg.cps", "cp")
-				.add(cpgQuery.eq("cpg.id", crit.groupId()))
-				.add(cpgQuery.ne("cpg.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()))
-				.select("cp.id");
-			query.in("cp.id", cpgQuery);
+			query.join("cp.cpGroup", "cpg")
+				.add(query.eq("cpg.id", crit.groupId()))
+				.add(query.ne("cpg.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
 		}
 
 		applyIdsFilter(query, "cp.id", crit.ids());

@@ -1,6 +1,5 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
-import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtocolGroup> implements CollectionProtocolGroupDao  {
 
@@ -82,54 +82,38 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 	}
 
 	@Override
-	public List<String> getCpsUsedInOtherGroups(CollectionProtocolGroup group) {
-		Criteria<String> query = createCriteria(CollectionProtocolGroup.class, String.class, "g")
-			.join("g.cps", "cp")
-			.select("cp.shortTitle");
-
-		if (group.getId() != null) {
-			query.add(query.ne("g.id", group.getId()));
-		}
-
-		List<Long> cpIds = group.getCps().stream().map(CollectionProtocol::getId).collect(Collectors.toList());
-		return query.add(query.in("cp.id", cpIds)).list();
-	}
-
-	@Override
 	public List<Long> getGroupCpIds(Long groupId, Collection<Long> cpIds) {
 		if (CollectionUtils.isEmpty(cpIds)) {
 			return Collections.emptyList();
 		}
 
-		Criteria<Long> query = createCriteria(CollectionProtocolGroup.class, Long.class, "g")
-			.join("g.cps", "cp");
-		return query.add(query.eq("g.id", groupId))
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp");
+		return query.add(query.eq("cp.cpGroup.id", groupId))
 			.add(query.in("cp.id", cpIds))
 			.select("cp.id")
 			.list();
 	}
 
 	@Override
-	public List<String> getCpsUsedInOtherGroups(Long groupId, Collection<Long> cpIds) {
+	public List<String> getCpsAssignedToOtherGroup(Long groupId, Collection<Long> cpIds) {
 		if (CollectionUtils.isEmpty(cpIds)) {
 			return Collections.emptyList();
 		}
 
-		Criteria<String> query = createCriteria(CollectionProtocolGroup.class, String.class, "g")
-			.join("g.cps", "cp")
+		Criteria<String> query = createCriteria(CollectionProtocol.class, String.class, "cp")
 			.select("cp.shortTitle");
 
-		return query.add(query.ne("g.id", groupId != null ? groupId : -1L))
+		return query.add(query.ne("cp.cpGroup.id", groupId != null ? groupId : -1L))
+			.add(query.isNotNull("cp.cpGroup"))
 			.add(query.in("cp.id", cpIds))
 			.list();
 	}
 
 	@Override
 	public int getCpsCount(Long groupId, Set<SiteCpPair> siteCps) {
-		Criteria<Long> query = createCriteria(CollectionProtocolGroup.class, Long.class, "group")
-			.join("group.cps", "cp");
-
-		query.add(query.eq("group.id", groupId));
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp");
+		query.add(query.eq("cp.cpGroup.id", groupId))
+			.add(query.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
 		if (CollectionUtils.isNotEmpty(siteCps)) {
 			SubQuery<Long> allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, siteCps);
 			query.add(query.in("cp.id", allowedCps));
@@ -144,19 +128,10 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 			return;
 		}
 
-		getCurrentSession().doWork(
-			connection -> {
-				try (PreparedStatement ps = connection.prepareStatement(INSERT_GROUP_CP)) {
-					for (Long cpId : cpIds) {
-						ps.setLong(1, groupId);
-						ps.setLong(2, cpId);
-						ps.addBatch();
-					}
-
-					ps.executeBatch();
-				}
-			}
-		);
+		createNativeQuery(SET_CP_GROUP_ID_SQL)
+			.setParameter("groupId", groupId)
+			.setParameterList("cpIds", cpIds)
+			.executeUpdate();
 	}
 
 	@Override
@@ -165,15 +140,17 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 			return 0;
 		}
 
-		return createNativeQuery(DELETE_GROUP_CPS)
+		return createNativeQuery(UNSET_CP_GROUP_ID_SQL)
 			.setParameter("groupId", groupId)
-			.setParameter("cpIds", cpIds)
+			.setParameterList("cpIds", cpIds)
 			.executeUpdate();
 	}
 
 	@Override
 	public int removeCpsFromGroup(Long groupId) {
-		return createNativeQuery(DELETE_ALL_GROUP_CPS).setParameter("groupId", groupId).executeUpdate();
+		return createNativeQuery(UNSET_GROUP_ID_SQL)
+			.setParameter("groupId", groupId)
+			.executeUpdate();
 	}
 
 	@Override
@@ -232,9 +209,9 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 
 	private static final String DELETE_ALL_FORMS = FQN + ".deleteAllForms";
 
-	private static final String INSERT_GROUP_CP = "insert into os_cp_group_cps (group_id, cp_id) values (?, ?)";
+	private static final String SET_CP_GROUP_ID_SQL = "update catissue_collection_protocol set cp_group_id = :groupId where identifier in (:cpIds)";
 
-	private static final String DELETE_GROUP_CPS = "delete from os_cp_group_cps where group_id = :groupId and cp_id in (:cpIds)";
+	private static final String UNSET_CP_GROUP_ID_SQL = "update catissue_collection_protocol set cp_group_id = null where cp_group_id = :groupId and identifier in (:cpIds)";
 
-	private static final String DELETE_ALL_GROUP_CPS = "delete from os_cp_group_cps where group_id = :groupId";
+	private static final String UNSET_GROUP_ID_SQL = "update catissue_collection_protocol set cp_group_id = null where cp_group_id = :groupId";
 }
