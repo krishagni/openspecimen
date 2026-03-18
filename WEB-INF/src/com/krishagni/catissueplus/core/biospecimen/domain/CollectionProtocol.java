@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -274,6 +275,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.principalInvestigator = principalInvestigator;
 	}
 
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public CollectionProtocolGroup getCpGroup() {
 		return cpGroup;
 	}

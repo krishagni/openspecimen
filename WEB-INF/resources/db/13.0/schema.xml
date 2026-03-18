@@ -67,7 +67,7 @@
     <preConditions onFail="HALT">
       <sqlCheck expectedResult="0">
         <![CDATA[
-          select count(*) from (select cp_id from os_cp_group_cps group by cp_id having count(*) > 1)
+          select count(*) from (select cp_id from os_cp_group_cps group by cp_id having count(*) > 1) t
         ]]>
       </sqlCheck>
     </preConditions>
