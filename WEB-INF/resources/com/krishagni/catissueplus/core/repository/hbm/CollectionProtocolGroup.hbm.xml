@@ -74,8 +74,12 @@
         fc.entity_type = :entityType
     </sql-query>
 
-    <sql-query name="deleteGroupForms">
+    <sql-query name="deleteFormsById">
       delete from os_cp_group_forms where form_id in (:formIds)
+    </sql-query>
+
+    <sql-query name="deleteAllForms">
+      delete from os_cp_group_forms where group_id = :groupId
     </sql-query>
   </class>
 </hibernate-mapping>

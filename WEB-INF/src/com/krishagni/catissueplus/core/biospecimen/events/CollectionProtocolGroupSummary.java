@@ -13,6 +13,8 @@ public class CollectionProtocolGroupSummary {
 
 	private Integer cpsCount;
 
+	private List<CollectionProtocolSummary> cps;
+
 	public Long getId() {
 		return id;
 	}
@@ -35,6 +37,14 @@ public class CollectionProtocolGroupSummary {
 
 	public void setCpsCount(Integer cpsCount) {
 		this.cpsCount = cpsCount;
+	}
+
+	public List<CollectionProtocolSummary> getCps() {
+		return cps;
+	}
+
+	public void setCps(List<CollectionProtocolSummary> cps) {
+		this.cps = cps;
 	}
 
 	public static CollectionProtocolGroupSummary from(CollectionProtocolGroup group) {

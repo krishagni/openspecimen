@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpConsentTier;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -24,13 +25,16 @@ import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocol
 import com.krishagni.catissueplus.core.biospecimen.repository.CpListCriteria;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
 import com.krishagni.catissueplus.core.common.repository.Junction;
 import com.krishagni.catissueplus.core.common.repository.Property;
 import com.krishagni.catissueplus.core.common.repository.PropertyBuilder;
+import com.krishagni.catissueplus.core.common.repository.SubQuery;
 import com.krishagni.catissueplus.core.common.util.Status;
+import com.krishagni.catissueplus.core.common.util.Utility;
 
 public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> implements CollectionProtocolDao {
 	@Override
@@ -381,55 +385,61 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	private List<Object[]> getCpList(CpListCriteria crit) {
 		Criteria<Object[]> query = getCpQuery(crit, Object[].class);
+		if (crit.includePi()) {
+			query.join("cp.principalInvestigator", "pi");
+		}
+
 		return addProjections(query, crit)
 			.addOrder(query.asc("shortTitle"))
 			.list(crit.startAt(), crit.maxResults());
 	}
 	
 	private <T> Criteria<T> getCpQuery(CpListCriteria crit, Class<T> klass) {
-		Criteria<T> query = createCriteria(CollectionProtocol.class, klass, "cp")
-			.join("cp.principalInvestigator", "pi");
-		query.add(query.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
-		return addSearchConditions(query, crit);
+		Criteria<T> query = createCriteria(CollectionProtocol.class, klass, "cp");
+		SubQuery<Long> cpIds = getCpIdsQuery(query, crit);
+		query.add(query.in("cp.id", cpIds));
+		return query;
 	}
 
-	private <T> Criteria<T> addSearchConditions(Criteria<T> query, CpListCriteria crit) {
-		String searchString = crit.query();
-		if (StringUtils.isBlank(searchString)) {
-			searchString = crit.title();
-		} 
-		
-		if (StringUtils.isNotBlank(searchString)) {
+	private SubQuery<Long> getCpIdsQuery(AbstractCriteria<?, ?> query, CpListCriteria crit) {
+		SubQuery<Long> cpIdsQuery = query.createSubQuery(CollectionProtocol.class, "cp").select("cp.id");
+		cpIdsQuery.add(cpIdsQuery.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
+		addSearchConditions(cpIdsQuery, crit);
+		return cpIdsQuery;
+	}
+
+	private void addSearchConditions(AbstractCriteria<?, ?> query, CpListCriteria crit) {
+		boolean hasQuery = StringUtils.isNotBlank(crit.query());
+		String searchTerm = hasQuery ? crit.query() : crit.title();
+		if (StringUtils.isNotBlank(searchTerm)) {
 			Junction searchCond = query.disjunction()
-				.add(query.ilike("cp.title", searchString))
-				.add(query.ilike("cp.shortTitle", searchString));
+				.add(query.ilike("cp.title", searchTerm))
+				.add(query.ilike("cp.shortTitle", searchTerm));
 			
-			if (StringUtils.isNotBlank(crit.query())) {
-				searchCond.add(query.ilike("cp.irbIdentifier", searchString));
+			if (hasQuery) {
+				searchCond.add(query.ilike("cp.irbIdentifier", searchTerm));
 			}	
 			
 			query.add(searchCond);
 		}
 
-		if (StringUtils.isBlank(crit.query()) && StringUtils.isNotBlank(crit.irbId())) {
-			query.add(query.ilike("irbIdentifier", crit.irbId()));
+		if (!hasQuery && StringUtils.isNotBlank(crit.irbId())) {
+			query.add(query.ilike("cp.irbIdentifier", crit.irbId()));
 		}
 
 		if (crit.piId() != null) {
-			query.add(query.eq("pi.id", crit.piId()));
+			query.join("cp.principalInvestigator", "pi")
+				.add(query.eq("pi.id", crit.piId()));
 		}
 		
 		String repositoryName = crit.repositoryName();
+		Set<SiteCpPair> siteCps = crit.siteCps();
 		if (StringUtils.isNotBlank(repositoryName)) {
 			query.join("cp.sites", "cpSite")
 				.join("cpSite.site", "site")
 				.add(query.eq("site.name", repositoryName));
 		} else if (crit.instituteId() != null) {
-			boolean addInst = CollectionUtils.isEmpty(crit.siteCps());
-			if (!addInst) {
-				addInst = crit.siteCps().stream().noneMatch(scp -> scp.getInstituteId().equals(crit.instituteId()));
-			}
-
+			boolean addInst = Utility.nullSafeStream(siteCps).noneMatch(scp -> scp.getInstituteId().equals(crit.instituteId()));
 			if (addInst) {
 				SiteCpPair siteCp = new SiteCpPair();
 				siteCp.setInstituteId(crit.instituteId());
@@ -441,14 +451,21 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 			query.add(query.or(query.eq("cp.visitLevelConsents", false)));
 		}
 
+		if (crit.groupId() != null) {
+			SubQuery<Long> cpgQuery = query.createSubQuery(CollectionProtocolGroup.class, "cpg");
+			cpgQuery.join("cpg.cps", "cp")
+				.add(cpgQuery.eq("cpg.id", crit.groupId()))
+				.add(cpgQuery.ne("cpg.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()))
+				.select("cp.id");
+			query.in("cp.id", cpgQuery);
+		}
+
 		applyIdsFilter(query, "cp.id", crit.ids());
 		addInClauses(query, "cp.shortTitle", crit.shortTitles());
 		addSiteCpsCond(query, crit.siteCps());
 		if (CollectionUtils.isNotEmpty(crit.notInIds())) {
 			query.add(query.not(query.in("cp.id", crit.notInIds())));
 		}
-
-		return query;
 	}
 	
 	private Criteria<Object[]> addProjections(Criteria<Object[]> query, CpListCriteria crit) {
@@ -499,12 +516,12 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 		return cp;
 	}
 
-	private <T> void addSiteCpsCond(Criteria<T> query, Collection<SiteCpPair> siteCps) {
+	private void addSiteCpsCond(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps) {
 		if (CollectionUtils.isEmpty(siteCps)) {
 			return;
 		}
 
-		query.add(query.in("cp.id", BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, siteCps)));
+		query.add(BiospecimenDaoHelper.getInstance().getSiteCpsCondForCps(query, siteCps));
 	}
 
 	private static final String FQN = CollectionProtocol.class.getName();

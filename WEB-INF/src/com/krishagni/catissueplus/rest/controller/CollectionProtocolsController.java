@@ -118,6 +118,9 @@ public class CollectionProtocolsController {
 
 			@RequestParam(value = "instituteId", required = false)
 			Long instituteId,
+
+			@RequestParam(value = "groupId", required = false)
+			Long groupId,
 			
 			@RequestParam(value = "startAt", required = false, defaultValue = "0") 
 			int startAt,
@@ -145,6 +148,7 @@ public class CollectionProtocolsController {
 			.includeStat(detailedList)
 			.orderByStarred(orderByStarred)
 			.onlyParticipantConsentCps(onlyParticipantConsentCps)
+			.groupId(groupId)
 			.startAt(startAt)
 			.maxResults(maxResults);
 
@@ -175,6 +179,9 @@ public class CollectionProtocolsController {
 			@RequestParam(value = "instituteId", required = false)
 			Long instituteId,
 
+			@RequestParam(value = "groupId", required = false)
+			Long groupId,
+
 			@RequestParam(value = "onlyParticipantConsentCps", required = false, defaultValue = "false")
 			boolean onlyParticipantConsentCps) {
 		
@@ -185,6 +192,7 @@ public class CollectionProtocolsController {
 			.piId(piId)
 			.repositoryName(repositoryName)
 			.instituteId(instituteId)
+			.groupId(groupId)
 			.onlyParticipantConsentCps(onlyParticipantConsentCps);
 		
 		ResponseEvent<Long> resp = cpSvc.getProtocolsCount(request(crit));

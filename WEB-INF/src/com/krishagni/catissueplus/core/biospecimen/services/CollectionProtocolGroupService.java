@@ -2,7 +2,6 @@ package com.krishagni.catissueplus.core.biospecimen.services;
 
 import java.util.List;
 
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupFormsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupWorkflowCfgDetail;
@@ -16,11 +15,15 @@ import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 public interface CollectionProtocolGroupService {
 	ResponseEvent<List<CollectionProtocolGroupSummary>> getGroups(RequestEvent<CpGroupListCriteria> req);
 
-	ResponseEvent<CollectionProtocolGroupDetail> getGroup(RequestEvent<EntityQueryCriteria> req);
+	ResponseEvent<CollectionProtocolGroupSummary> getGroup(RequestEvent<EntityQueryCriteria> req);
 
-	ResponseEvent<CollectionProtocolGroupDetail> createGroup(RequestEvent<CollectionProtocolGroupDetail> req);
+	ResponseEvent<CollectionProtocolGroupSummary> createGroup(RequestEvent<CollectionProtocolGroupSummary> req);
 
-	ResponseEvent<CollectionProtocolGroupDetail> updateGroup(RequestEvent<CollectionProtocolGroupDetail> req);
+	ResponseEvent<CollectionProtocolGroupSummary> updateGroup(RequestEvent<CollectionProtocolGroupSummary> req);
+
+	ResponseEvent<Integer> addGroupCps(RequestEvent<CollectionProtocolGroupSummary> req);
+
+	ResponseEvent<Integer> removeGroupCps(RequestEvent<CollectionProtocolGroupSummary> req);
 
 	ResponseEvent<BulkDeleteEntityResp<CollectionProtocolGroupSummary>> deleteGroups(RequestEvent<BulkDeleteEntityOp> req);
 
