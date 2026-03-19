@@ -13,7 +13,8 @@
 
   <os-grid>
     <os-grid-column width="12">
-      <os-list-view :data="cpsList" :schema="cpsListSchema" :show-row-actions="true" @rowClicked="onCpRowClick">
+      <os-list-view :data="cpsList" :schema="cpsListSchema" :show-row-actions="true"
+        :loading="ctx.loading" @rowClicked="onCpRowClick">
         <template #rowActions="{rowObject}">
           <os-button-group>
             <os-button left-icon="user-friends" v-os-tooltip.bottom="$t('cps.view_participants')"
@@ -23,6 +24,11 @@
             <os-button left-icon="table" v-os-tooltip.bottom="$t('cps.view_catalog')"
               @click="viewCatalog(rowObject.cp)" v-if="rowObject.cp.catalogId > 0" />
           </os-button-group>
+        </template>
+
+        <template #footer>
+          <os-pager :start-at="ctx.startAt" :have-more="ctx.haveMoreCps"
+            @previous="previousPage" @next="nextPage" />
         </template>
       </os-list-view>
     </os-grid-column>
@@ -58,6 +64,7 @@
 
 <script>
 import alertSvc  from '@/common/services/Alerts.js';
+import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import cpgSvc    from '@/biospecimen/services/CollectionProtocolGroup.js';
 import http      from '@/common/services/HttpClient.js';
 import exportSvc from '@/common/services/ExportService.js';
@@ -69,7 +76,32 @@ export default {
   data() {
     return {
       ctx: {
+        cps: [],
+
+        startAt: 0,
+
+        haveMoreCps: false,
+
+        loading: false,
+
+        pageSize: 1
       }
+    }
+  },
+
+  created() {
+    if (this.cpg && this.cpg.id > 0) {
+      this._loadCps(0);
+    }
+  },
+
+  watch: {
+    cpg: function(newVal, oldVal) {
+      if (!newVal || (oldVal && newVal.id == oldVal.id)) {
+        return;
+      }
+
+      this._loadCps(0);
     }
   },
 
@@ -98,9 +130,7 @@ export default {
     },
 
     cpsList: function() {
-      return (this.cpg.cps || [])
-        .sort((c1, c2) => c1.shortTitle < c2.shortTitle ? -1 : (c1.shortTitle > c2.shortTitle ? 1 : 0))
-        .map(cp => ({cp}));
+      return (this.ctx.cps || []).map(cp => ({cp}));
     },
 
     cpsListSchema: function() {
@@ -143,6 +173,14 @@ export default {
   },
 
   methods: {
+    previousPage: function() {
+      this._loadCps(this.ctx.startAt - this.ctx.pageSize);
+    },
+
+    nextPage: function() {
+      this._loadCps(this.ctx.startAt + this.ctx.pageSize);
+    },
+
     gotoEdit: function() {
       routerSvc.goto('CpgAddEdit', {cpgId: this.cpg.id});
     },
@@ -211,8 +249,58 @@ export default {
       routerSvc.goto('CatalogSearch', {catalogId: cp.catalogId}, {cpId: cp.id});
     },
 
-    _exportCpRecords: function(objectType) {
-      exportSvc.exportRecords({objectType, recordIds: this.cpg.cps.map(cp => cp.id)});
+    _loadCps: async function(startAt) {
+      if (!this.cpg || !this.cpg.id) {
+        return;
+      }
+
+      const ctx = this.ctx;
+      const pageSize = ctx.pageSize;
+      ctx.loading = true;
+
+      const cps = await cpSvc.getCps({groupId: this.cpg.id, startAt, maxResults: pageSize + 1});
+      if (cps.length > pageSize) {
+        ctx.haveMoreCps = true;
+        cps.splice(cps.length - 1, 1);
+      } else {
+        ctx.haveMoreCps = false;
+      }
+
+      ctx.cps = cps;
+      ctx.startAt = startAt;
+      ctx.loading = false;
+    },
+
+    // TODO: export CP records should be changed to make the backend import
+    // records of all CPs of the CPG
+    //
+    _exportCpRecords: async function(objectType) {
+      const recordIds = await this._getAllCpIds();
+      exportSvc.exportRecords({objectType, recordIds});
+    },
+
+    _getAllCpIds: async function() {
+      if (!this.cpg || !this.cpg.id) {
+        return [];
+      }
+
+      const cpIds = [];
+      const pageSize = 200;
+      let startAt = 0;
+      let done = false;
+
+      while (!done) {
+        const cps = await cpSvc.getCps({groupId: this.cpg.id, startAt, maxResults: pageSize});
+        cpIds.push(...cps.map(cp => cp.id));
+        if (cps.length < pageSize) {
+          done = true;
+          break;
+        }
+
+        startAt += pageSize;
+      }
+
+      return cpIds;
     }
   }
 }

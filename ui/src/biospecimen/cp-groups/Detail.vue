@@ -75,13 +75,14 @@ export default {
         return;
       }
 
-      const {cps} = this.ctx.cpg = await cpgSvc.getGroupById(+this.cpgId);
+      this.ctx.cpg = await cpgSvc.getGroupById(+this.cpgId);
 
+      // TODO: Add BFF to get the permission settings given CP ID is input
       const eopts = {resource: 'CollectionProtocol', operations: ['Export Import']};
-      const eximAllowed = cps.every(cp => authSvc.isAllowed({...eopts, cp: cp.shortTitle}));
+      const eximAllowed = authSvc.isAllowed(eopts);
 
       const uopts = {resource: 'CollectionProtocol', operations: ['Update']};
-      const updateAllowed = cps.every(cp => authSvc.isAllowed({...uopts, cp: cp.shortTitle}));
+      const updateAllowed = authSvc.isAllowed(uopts);
 
       this.ctx.permOpts = {updateAllowed, eximAllowed};
     },
