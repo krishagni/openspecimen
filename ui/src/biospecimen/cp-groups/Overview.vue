@@ -1,5 +1,5 @@
 <template>
-  <os-page-toolbar v-if="updateAllowed || importAllowed || exportAllowed">
+  <os-page-toolbar v-if="ctx.selectedCps.length == 0 && (updateAllowed || importAllowed || exportAllowed)">
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="gotoEdit" v-if="updateAllowed" />
 
@@ -11,10 +11,17 @@
     </template>
   </os-page-toolbar>
 
+  <os-page-toolbar v-else-if="ctx.selectedCps.length > 0">
+    <template #default>
+      <os-button left-icon="times" :label="$t('common.buttons.remove')" @click="removeSelectedCps" />
+    </template>
+  </os-page-toolbar>
+
   <os-grid>
     <os-grid-column width="12">
       <os-list-view :data="cpsList" :schema="cpsListSchema" :show-row-actions="true"
-        :loading="ctx.loading" @rowClicked="onCpRowClick">
+        :loading="ctx.loading" :allowSelection="allowSelection"
+        @rowClicked="onCpRowClick" @selectedRows="onCpsSelection">
         <template #rowActions="{rowObject}">
           <os-button-group>
             <os-button left-icon="user-friends" v-os-tooltip.bottom="$t('cps.view_participants')"
@@ -23,6 +30,8 @@
               @click="viewSpecimens(rowObject.cp)" />
             <os-button left-icon="table" v-os-tooltip.bottom="$t('cps.view_catalog')"
               @click="viewCatalog(rowObject.cp)" v-if="rowObject.cp.catalogId > 0" />
+            <os-button left-icon="times" v-os-tooltip.bottom="$t('common.buttons.remove')"
+              @click="removeCp(rowObject.cp)" v-if="rowObject.updateAllowed" />
           </os-button-group>
         </template>
 
@@ -40,6 +49,17 @@
     </template>
     <template #message>
       <span v-t="{path: 'cpgs.delete_cpg', args: cpg}">Delete Collection Protocol Group xyz?</span>
+    </template>
+  </os-confirm>
+
+  <os-confirm ref="removeCpsConfirmDialog">
+    <template #title>
+      <span v-if="ctx.toRemoveCps.length > 1" v-t="'cpgs.remove_cps'">Remove Collection Protocols?</span>
+      <span v-else v-t="'cpgs.remove_cp'">Remove Collection Protocol?</span>
+    </template>
+    <template #message>
+      <span v-if="ctx.toRemoveCps.length > 1" v-t="'cpgs.confirm_remove_cps'">Are you sure you want to remove the selected collection protocols from the group?</span>
+      <span v-else v-t="{path: 'cpgs.confirm_remove_cp', args: {cp: ctx.toRemoveCps[0].shortTitle}}">Are you sure you want to remove the collection protocol from the group?</span>
     </template>
   </os-confirm>
 
@@ -64,6 +84,7 @@
 
 <script>
 import alertSvc  from '@/common/services/Alerts.js';
+import authSvc   from '@/common/services/Authorization.js';
 import cpSvc     from '@/biospecimen/services/CollectionProtocol.js';
 import cpgSvc    from '@/biospecimen/services/CollectionProtocolGroup.js';
 import http      from '@/common/services/HttpClient.js';
@@ -84,7 +105,11 @@ export default {
 
         loading: false,
 
-        pageSize: 1
+        pageSize: 25,
+
+        selectedCps: [],
+
+        toRemoveCps: []
       }
     }
   },
@@ -140,7 +165,7 @@ export default {
     },
 
     cpsList: function() {
-      return (this.ctx.cps || []).map(cp => ({cp}));
+      return (this.ctx.cps || []).map(cp => ({cp, updateAllowed: this._isUpdateAllowed(cp)}));
     },
 
     cpsListSchema: function() {
@@ -180,6 +205,10 @@ export default {
     reqHeaders: function() {
       return http.headers;
     },
+
+    allowSelection: function() {
+      return this.cpsList.some(({updateAllowed}) => updateAllowed);
+    }
   },
 
   methods: {
@@ -247,6 +276,10 @@ export default {
       routerSvc.goto('CpDetail.Overview', {cpId: cp.id});
     },
 
+    onCpsSelection: function(selection) {
+      this.ctx.selectedCps = (selection || []).map(({rowObject: {cp}}) => cp);
+    },
+
     viewParticipants: function(cp) {
       routerSvc.goto('ParticipantsList', {cpId: cp.id});
     },
@@ -257,6 +290,38 @@ export default {
 
     viewCatalog: function(cp) {
       routerSvc.goto('CatalogSearch', {catalogId: cp.catalogId}, {cpId: cp.id});
+    },
+
+    removeSelectedCps: function() {
+      this._confirmRemoveCps(this.ctx.selectedCps);
+    },
+
+    removeCp: function(cp) {
+      this._confirmRemoveCps([cp]);
+    },
+
+    _confirmRemoveCps: function(cps) {
+      if (!cps || cps.length == 0) {
+        return;
+      }
+
+      this.ctx.toRemoveCps = cps;
+      this.$refs.removeCpsConfirmDialog.open().then(
+        resp => {
+          if (resp != 'proceed') {
+            return;
+          }
+
+          const cpIds = cps.map(cp => cp.id);
+          cpgSvc.removeCps(this.cpg.id, cpIds).then(
+            ({count}) => {
+              alertSvc.success({code: 'cpgs.cps_removed', args: {cp: cps[0].shortTitle, count: count || cpIds.length}});
+              this.ctx.selectedCps = [];
+              this._loadCps(this.ctx.startAt);
+            }
+          );
+        }
+      );
     },
 
     _loadCps: async function(startAt) {
@@ -284,6 +349,10 @@ export default {
     _exportCpRecords: async function(objectType) {
       const {id: groupId} = this.cpg;
       exportSvc.exportRecords({objectType, params: {groupId}});
+    },
+
+    _isUpdateAllowed: function({shortTitle}) {
+      return authSvc.isAllowed({resource: 'CollectionProtocol', cp: shortTitle, operations: ['Update']});
     }
   }
 }
