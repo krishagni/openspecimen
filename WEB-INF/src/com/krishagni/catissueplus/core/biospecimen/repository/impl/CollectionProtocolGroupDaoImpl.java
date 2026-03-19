@@ -87,8 +87,9 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 			return Collections.emptyList();
 		}
 
-		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp");
-		return query.add(query.eq("cp.cpGroup.id", groupId))
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp")
+			.join("cp.cpGroup", "cpg");
+		return query.add(query.eq("cpg.id", groupId))
 			.add(query.in("cp.id", cpIds))
 			.select("cp.id")
 			.list();
@@ -101,18 +102,20 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 		}
 
 		Criteria<String> query = createCriteria(CollectionProtocol.class, String.class, "cp")
+			.join("cp.cpGroup", "cpg")
 			.select("cp.shortTitle");
 
-		return query.add(query.ne("cp.cpGroup.id", groupId != null ? groupId : -1L))
-			.add(query.isNotNull("cp.cpGroup"))
+		return query.add(query.ne("cpg.id", groupId != null ? groupId : -1L))
+			.add(query.isNotNull("cpg.id"))
 			.add(query.in("cp.id", cpIds))
 			.list();
 	}
 
 	@Override
 	public int getCpsCount(Long groupId, Set<SiteCpPair> siteCps) {
-		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp");
-		query.add(query.eq("cp.cpGroup.id", groupId))
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp")
+			.join("cp.cpGroup", "cpg");
+		query.add(query.eq("cpg.id", groupId))
 			.add(query.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
 		if (CollectionUtils.isNotEmpty(siteCps)) {
 			SubQuery<Long> allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, siteCps);
