@@ -1,9 +1,11 @@
 <template>
-  <os-page-toolbar v-if="ctx.selectedCps.length == 0 && (updateAllowed || importAllowed || exportAllowed)">
+  <os-page-toolbar v-if="ctx.selectedCps.length == 0 && (updateAllowed || importAllowed || exportAllowed || canAddCps)">
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="gotoEdit" v-if="updateAllowed" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCpg" v-if="updateAllowed" />
+
+      <os-button left-icon="plus" :label="$t('cpgs.add_cps')" @click="showAddCpsDialog" v-if="canAddCps" />
 
       <os-menu icon="tasks" :label="$t('cpgs.workflows')" :options="wfOpts" v-if="wfOpts.length > 0" />
 
@@ -63,6 +65,19 @@
     </template>
   </os-confirm>
 
+  <os-dialog ref="addCpsDialog">
+    <template #header>
+      <span v-t="'cpgs.add_cps'">Add Collection Protocols</span>
+    </template>
+    <template #content>
+      <os-form ref="addCpsForm" :schema="addCpsFs" :data="ctx" />
+    </template>
+    <template #footer>
+      <os-button text :label="$t('common.buttons.cancel')" @click="hideAddCpsDialog" />
+      <os-button primary :label="$t('common.buttons.add')" @click="addCps" />
+    </template>
+  </os-dialog>
+
   <os-dialog ref="importWfDialog">
     <template #header>
       <span v-t="'cps.import_workflows'">Import Workflows JSON</span>
@@ -91,6 +106,8 @@ import http      from '@/common/services/HttpClient.js';
 import exportSvc from '@/common/services/ExportService.js';
 import routerSvc from '@/common/services/Router.js';
 
+import addCpsSchema from '@/biospecimen/schemas/cp-groups/add-cps.js';
+
 export default {
   props: ['cpg', 'permOpts'],
 
@@ -109,8 +126,14 @@ export default {
 
         selectedCps: [],
 
-        toRemoveCps: []
-      }
+        toRemoveCps: [],
+
+        cpsToAdd: [],
+
+        getAvailableCps: this._getAvailableCps
+      },
+
+      addCpsFs: addCpsSchema.layout
     }
   },
 
@@ -141,6 +164,10 @@ export default {
 
     updateAllowed: function() {
       return this.permOpts && this.permOpts.updateAllowed;
+    },
+
+    canAddCps: function() {
+      return authSvc.isAllowed({resource: 'CollectionProtocol', operations: ['Update']});
     },
 
     wfOpts: function() {
@@ -292,6 +319,32 @@ export default {
       routerSvc.goto('CatalogSearch', {catalogId: cp.catalogId}, {cpId: cp.id});
     },
 
+    showAddCpsDialog: function() {
+      this.ctx.cpsToAdd = [];
+      this.$refs.addCpsDialog.open();
+    },
+
+    hideAddCpsDialog: function() {
+      this.ctx.cpsToAdd = [];
+      this.$refs.addCpsDialog.close();
+    },
+
+    addCps: function() {
+      const {cpsToAdd} = this.ctx;
+      if (!cpsToAdd || cpsToAdd.length == 0) {
+        alertSvc.error({code: 'cpgs.select_atleast_one_cp'});
+        return;
+      }
+
+      cpgSvc.addCps(this.cpg.id, cpsToAdd).then(
+        ({count}) => {
+          alertSvc.success({code: 'cpgs.cps_added', args: {count: count || cpsToAdd.length}});
+          this._loadCps(this.ctx.startAt);
+          this.hideAddCpsDialog();
+        }
+      );
+    },
+
     removeSelectedCps: function() {
       this._confirmRemoveCps(this.ctx.selectedCps);
     },
@@ -344,6 +397,19 @@ export default {
       ctx.cps = cps;
       ctx.startAt = startAt;
       ctx.loading = false;
+    },
+
+    _getAvailableCps: async function({query, maxResults}) {
+      const existingIds = new Set((this.ctx.cps || []).map(cp => cp.id));
+      const cps = await cpSvc.getCps({query, maxResults});
+      return (cps || [])
+        .filter(cp => !existingIds.has(cp.id))
+        .map(
+          (cp) => {
+            cp.displayLabel = cp.code ? cp.shortTitle + ' (' + cp.code + ')' : cp.shortTitle;
+            return cp;
+          }
+        );
     },
 
     _exportCpRecords: async function(objectType) {
