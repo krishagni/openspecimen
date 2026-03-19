@@ -17,6 +17,10 @@
   max-height: 55px;
 }
 
+.os-page-body :deep(.os-tab-menu) {
+  max-height: 50px;
+}
+
 .os-page-body :deep(> div:not(.os-page-toolbar)) {
   height: 100%;
   flex: 1;
@@ -28,6 +32,14 @@
 
 .os-page-body :deep(.os-page-toolbar + div) {
   height: calc(100% - 55px);
+}
+
+.os-page-body :deep(.os-tab-menu + div) {
+  height: calc(100% - 50px);
+}
+
+.os-page-body :deep(.os-tab-menu + .os-page-toolbar + div) {
+  height: calc(100% - 105px);
 }
 
 
