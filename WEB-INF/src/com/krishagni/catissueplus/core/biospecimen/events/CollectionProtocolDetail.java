@@ -32,6 +32,8 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	private CollectionProtocolSummary consentsSource;
 
+	private CollectionProtocolGroupSummary cpg;
+
 	private String irbId;
 
 	private Long anticipatedParticipantsCount;
@@ -157,6 +159,14 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 
 	public void setConsentsSource(CollectionProtocolSummary consentsSource) {
 		this.consentsSource = consentsSource;
+	}
+
+	public CollectionProtocolGroupSummary getCpg() {
+		return cpg;
+	}
+
+	public void setCpg(CollectionProtocolGroupSummary cpg) {
+		this.cpg = cpg;
 	}
 
 	public String getIrbId() {
@@ -507,6 +517,7 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setConsentsWaived(cp.isConsentsWaived());
 		result.setVisitLevelConsents(cp.getVisitLevelConsents());
 		result.setConsentsSource(cp.getConsentsSource() != null ? CollectionProtocolSummary.from(cp.getConsentsSource()) : null);
+		result.setCpg(cp.getCpGroup() != null ? CollectionProtocolGroupSummary.from(cp.getCpGroup()) : null);
 		result.setIrbId(cp.getIrbIdentifier());
 		result.setAnticipatedParticipantsCount(cp.getEnrollment());
 		result.setSopDocumentUrl(cp.getSopDocumentUrl());

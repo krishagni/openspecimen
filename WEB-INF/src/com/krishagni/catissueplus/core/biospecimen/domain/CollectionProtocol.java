@@ -804,6 +804,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setExtension(cp.getExtension());
 		setCatalogId(cp.getCatalogId());
 		setReqManagers(cp.getReqManagers());
+		setCpGroup(cp.getCpGroup());
 		
 		updateSites(cp.getSites());
 		updateSpecimenLabelPrintSettings(cp.getSpmnLabelPrintSettings());
