@@ -42,7 +42,7 @@ export default {
       ctx: {
         cpg: {},
 
-        permOpts: {updateAllowed: true, eximAllowed: true}
+        permOpts: {}
       }
     };
   },
@@ -75,16 +75,16 @@ export default {
         return;
       }
 
-      this.ctx.cpg = await cpgSvc.getGroupById(+this.cpgId);
+      this.ctx.cpg = {};
+      cpgSvc.getGroupById(+this.cpgId).then(group => this.ctx.cpg = group);
 
-      // TODO: Add BFF to get the permission settings given CP ID is input
-      const eopts = {resource: 'CollectionProtocol', operations: ['Export Import']};
-      const eximAllowed = authSvc.isAllowed(eopts);
-
-      const uopts = {resource: 'CollectionProtocol', operations: ['Update']};
-      const updateAllowed = authSvc.isAllowed(uopts);
-
-      this.ctx.permOpts = {updateAllowed, eximAllowed};
+      cpgSvc.getPermissions(+this.cpgId).then(
+        ({updateAllowed}) => {
+          const eximAllowed = authSvc.isAllowed({resource: 'CollectionProtocol', operations: ['Export Import']});
+          const importAllowed = updateAllowed && eximAllowed;
+          this.ctx.permOpts = {updateAllowed, importAllowed, exportAllowed: eximAllowed};
+        }
+      );
     },
 
     getRoute: function(routeName, params, query) {

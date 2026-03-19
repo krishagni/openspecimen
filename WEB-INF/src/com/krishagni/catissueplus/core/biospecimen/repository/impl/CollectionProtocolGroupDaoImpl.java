@@ -113,10 +113,16 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 
 	@Override
 	public int getCpsCount(Long groupId, Set<SiteCpPair> siteCps) {
+		if (siteCps != null && siteCps.isEmpty()) {
+			return 0;
+		}
+
 		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp")
 			.join("cp.cpGroup", "cpg");
+
 		query.add(query.eq("cpg.id", groupId))
 			.add(query.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
+
 		if (CollectionUtils.isNotEmpty(siteCps)) {
 			SubQuery<Long> allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, siteCps);
 			query.add(query.in("cp.id", allowedCps));

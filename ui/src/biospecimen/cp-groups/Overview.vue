@@ -1,13 +1,13 @@
 <template>
-  <os-page-toolbar v-if="updateAllowed || eximAllowed">
+  <os-page-toolbar v-if="updateAllowed || importAllowed || exportAllowed">
     <template #default>
       <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="gotoEdit" v-if="updateAllowed" />
 
       <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteCpg" v-if="updateAllowed" />
 
-      <os-menu icon="tasks" :label="$t('cpgs.workflows')" :options="wfOpts" v-if="eximAllowed" />
+      <os-menu icon="tasks" :label="$t('cpgs.workflows')" :options="wfOpts" v-if="wfOpts.length > 0" />
 
-      <os-menu icon="download" :label="$t('common.buttons.export')" :options="exportOpts" v-if="eximAllowed" />
+      <os-menu icon="download" :label="$t('common.buttons.export')" :options="exportOpts" v-if="exportAllowed" />
     </template>
   </os-page-toolbar>
 
@@ -106,8 +106,12 @@ export default {
   },
 
   computed: {
-    eximAllowed: function() {
-      return this.permOpts && this.permOpts.eximAllowed;
+    importAllowed: function() {
+      return this.permOpts && this.permOpts.importAllowed;
+    },
+
+    exportAllowed: function() {
+      return this.permOpts && this.permOpts.exportAllowed;
     },
 
     updateAllowed: function() {
@@ -115,10 +119,16 @@ export default {
     },
 
     wfOpts: function() {
-      return [
-        {icon: 'download', caption: this.$t('common.buttons.export'), onSelect: this.exportWorkflows},
-        {icon: 'upload',   caption: this.$t('common.buttons.import'), onSelect: this.showImportWfDialog}
-      ]
+      const opts = [];
+      if (this.exportAllowed) {
+        opts.push({icon: 'download', caption: this.$t('common.buttons.export'), onSelect: this.exportWorkflows});
+      }
+
+      if (this.importAllowed) {
+        opts.push({icon: 'upload',   caption: this.$t('common.buttons.import'), onSelect: this.showImportWfDialog});
+      }
+
+      return opts;
     },
 
     exportOpts: function() {

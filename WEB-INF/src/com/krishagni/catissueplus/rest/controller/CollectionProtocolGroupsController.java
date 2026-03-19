@@ -135,6 +135,13 @@ public class CollectionProtocolGroupsController {
 		return Collections.singletonMap("removed", ResponseEvent.unwrap(groupSvc.removeGroupCps(RequestEvent.wrap(input))));
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "{id}/permissions")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Boolean> getPermissions(@PathVariable("id") Long groupId) {
+		return ResponseEvent.unwrap(groupSvc.getPermissions(RequestEvent.wrap(new EntityQueryCriteria(groupId))));
+	}
+
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

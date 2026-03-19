@@ -229,6 +229,24 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<Map<String, Boolean>> getPermissions(RequestEvent<EntityQueryCriteria> req) {
+		Map<String, Boolean> result = new HashMap<>();
+		result.put("updateAllowed", false);
+
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			ensureUpdateAccess(crit.getId());
+			result.put("updateAllowed", true);
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.response(result);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<BulkDeleteEntityResp<CollectionProtocolGroupSummary>> deleteGroups(RequestEvent<BulkDeleteEntityOp> req) {
 		Set<Long> groupIds = req.getPayload().getIds();
 
@@ -422,6 +440,10 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 	}
 
 	private void ensureUpdateAccess(CollectionProtocolGroup group) {
+		ensureUpdateAccess(group.getId());
+	}
+
+	private void ensureUpdateAccess(Long groupId) {
 		if (AuthUtil.isAdmin()) {
 			//
 			// admins can update any CPG
@@ -429,7 +451,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			return;
 		}
 
-		if (group.getId() == null) {
+		if (groupId == null) {
 			//
 			// new group being created
 			// user needs to have CP update rights to create a new group
@@ -446,7 +468,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 
-		int total = getCpsCount(group.getId());
+		int total = getCpsCount(groupId);
 		if (total == 0) {
 			//
 			// existing group without any CPs is accessible only to admins
@@ -454,7 +476,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 
-		int accessible = daoFactory.getCpGroupDao().getCpsCount(group.getId(), siteCps);
+		int accessible = daoFactory.getCpGroupDao().getCpsCount(groupId, siteCps);
 		if (accessible < total) {
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
