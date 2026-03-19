@@ -271,36 +271,9 @@ export default {
       ctx.loading = false;
     },
 
-    // TODO: export CP records should be changed to make the backend import
-    // records of all CPs of the CPG
-    //
     _exportCpRecords: async function(objectType) {
-      const recordIds = await this._getAllCpIds();
-      exportSvc.exportRecords({objectType, recordIds});
-    },
-
-    _getAllCpIds: async function() {
-      if (!this.cpg || !this.cpg.id) {
-        return [];
-      }
-
-      const cpIds = [];
-      const pageSize = 200;
-      let startAt = 0;
-      let done = false;
-
-      while (!done) {
-        const cps = await cpSvc.getCps({groupId: this.cpg.id, startAt, maxResults: pageSize});
-        cpIds.push(...cps.map(cp => cp.id));
-        if (cps.length < pageSize) {
-          done = true;
-          break;
-        }
-
-        startAt += pageSize;
-      }
-
-      return cpIds;
+      const {id: groupId} = this.cpg;
+      exportSvc.exportRecords({objectType, params: {groupId}});
     }
   }
 }
