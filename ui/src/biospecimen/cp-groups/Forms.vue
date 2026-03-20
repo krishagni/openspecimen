@@ -112,10 +112,6 @@ export default {
   },
 
   computed: {
-    eximAllowed: function() {
-      return this.permOpts && this.permOpts.eximAllowed;
-    },
-
     updateAllowed: function() {
       return this.permOpts && this.permOpts.updateAllowed;
     },

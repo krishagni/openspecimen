@@ -11,6 +11,9 @@
 
       <os-menu icon="download" :label="$t('common.buttons.export')" :options="exportOpts" v-if="exportAllowed" />
     </template>
+    <template #right>
+      <os-button left-icon="search" :label="$t('common.buttons.search')" @click="openSearch" />
+    </template>
   </os-page-toolbar>
 
   <os-page-toolbar v-else-if="ctx.selectedCps.length > 0">
@@ -21,9 +24,9 @@
 
   <os-grid>
     <os-grid-column width="12">
-      <os-list-view :data="cpsList" :schema="cpsListSchema" :show-row-actions="true"
+      <os-list-view ref="cpsListView" :data="cpsList" :schema="cpsListSchema" :show-row-actions="true"
         :loading="ctx.loading" :allowSelection="allowSelection"
-        @rowClicked="onCpRowClick" @selectedRows="onCpsSelection">
+        @rowClicked="onCpRowClick" @selectedRows="onCpsSelection" @filtersUpdated="loadCps">
         <template #rowActions="{rowObject}">
           <os-button-group>
             <os-button left-icon="user-friends" v-os-tooltip.bottom="$t('cps.view_participants')"
@@ -107,6 +110,7 @@ import exportSvc from '@/common/services/ExportService.js';
 import routerSvc from '@/common/services/Router.js';
 
 import addCpsSchema from '@/biospecimen/schemas/cp-groups/add-cps.js';
+import cpsListSchema from '@/biospecimen/schemas/cp-groups/cps-list.js';
 
 export default {
   props: ['cpg', 'permOpts'],
@@ -124,6 +128,8 @@ export default {
 
         pageSize: 25,
 
+        filterValues: {},
+
         selectedCps: [],
 
         toRemoveCps: [],
@@ -133,14 +139,13 @@ export default {
         getAvailableCps: this._getAvailableCps
       },
 
-      addCpsFs: addCpsSchema.layout
+      addCpsFs: addCpsSchema.layout,
+
+      cpsListSchema
     }
   },
 
   created() {
-    if (this.cpg && this.cpg.id > 0) {
-      this._loadCps(0);
-    }
   },
 
   watch: {
@@ -195,36 +200,6 @@ export default {
       return (this.ctx.cps || []).map(cp => ({cp, updateAllowed: this._isUpdateAllowed(cp)}));
     },
 
-    cpsListSchema: function() {
-      return {
-        columns: [
-          {
-            name: "cp.shortTitle",
-            captionCode: "cps.title",
-            href: (row) => routerSvc.getUrl('CpDetail.Overview', {cpId: row.rowObject.cp.id}),
-            value: ({cp}) => {
-              let result = cp.shortTitle;
-              if (cp.code) {
-                result += ' (' + cp.code + ')';
-              }
-
-              return result;
-            }
-          },
-          {
-            name: "cp.principalInvestigator",
-            captionCode: "cps.pi",
-            type: "user"
-          },
-          {
-            name: "cp.startDate",
-            captionCode: "cps.start_date",
-            type: "date"
-          }
-        ]
-      };
-    },
-
     workflowsUploadUrl: function() {
       return http.getUrl('collection-protocol-groups/' + this.cpg.id + '/workflows-file');
     },
@@ -239,12 +214,22 @@ export default {
   },
 
   methods: {
+    openSearch: function() {
+      this.$refs.cpsListView.toggleShowFilters();
+    },
+
+    loadCps: function({filters, pageSize}) {
+      this.ctx.filterValues = filters || {};
+      this.ctx.pageSize = pageSize;
+      this._loadCps(0);
+    },
+
     previousPage: function() {
-      this._loadCps(this.ctx.startAt - this.ctx.pageSize);
+      this._loadCps(this.ctx.startAt - this.ctx.pageSize + 1);
     },
 
     nextPage: function() {
-      this._loadCps(this.ctx.startAt + this.ctx.pageSize);
+      this._loadCps(this.ctx.startAt + this.ctx.pageSize - 1);
     },
 
     gotoEdit: function() {
@@ -386,8 +371,9 @@ export default {
       const pageSize = ctx.pageSize;
       ctx.loading = true;
 
-      const cps = await cpSvc.getCps({groupId: this.cpg.id, startAt, maxResults: pageSize + 1});
-      if (cps.length > pageSize) {
+      const filters = ctx.filterValues || {};
+      const cps = await cpSvc.getCps({groupId: this.cpg.id, includePi: true, startAt, maxResults: pageSize, ...filters});
+      if (cps.length == pageSize) {
         ctx.haveMoreCps = true;
         cps.splice(cps.length - 1, 1);
       } else {
