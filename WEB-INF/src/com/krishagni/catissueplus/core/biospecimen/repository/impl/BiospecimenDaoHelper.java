@@ -144,33 +144,36 @@ public class BiospecimenDaoHelper {
 	public SubQuery<Long> getCpIdsFilter(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps) {
 		SubQuery<Long> subQuery = query.createSubQuery(CollectionProtocol.class, "cp")
 			.distinct().select("cp.id");
+		return subQuery.add(getSiteCpsCondForCps(subQuery, siteCps));
+	}
 
+	public Junction getSiteCpsCondForCps(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps) {
 		boolean siteAdded = false, instAdded = false;
-		Disjunction orCond = subQuery.disjunction();
+		Disjunction orCond = query.disjunction();
 		for (SiteCpPair siteCp : siteCps) {
 			if (siteCp.getCpId() != null) {
-				orCond.add(subQuery.eq("cp.id", siteCp.getCpId()));
+				orCond.add(query.eq("cp.id", siteCp.getCpId()));
 			} else {
 				if (!siteAdded) {
-					subQuery.join("cp.sites", "cpSite")
+					query.join("cp.sites", "cpSite")
 						.join("cpSite.site", "site");
 					siteAdded = true;
 				}
 
 				if (siteCp.getSiteId() != null) {
-					orCond.add(subQuery.eq("site.id", siteCp.getSiteId()));
+					orCond.add(query.eq("site.id", siteCp.getSiteId()));
 				} else {
 					if (!instAdded) {
-						subQuery.join("site.institute", "institute");
+						query.join("site.institute", "institute");
 						instAdded = true;
 					}
 
-					orCond.add(subQuery.eq("institute.id", siteCp.getInstituteId()));
+					orCond.add(query.eq("institute.id", siteCp.getInstituteId()));
 				}
 			}
 		}
 
-		return subQuery.add(orCond);
+		return orCond;
 	}
 
 	private Junction getSiteCpsCond(AbstractCriteria<?, ?> query, Collection<SiteCpPair> siteCps, boolean useMrnSites) {

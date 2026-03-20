@@ -30,7 +30,8 @@ export default {
               required: {
                 messageCode: "cpgs.cps_req"
               }
-            }
+            },
+            showWhen: "!cpg.id"
           }
         ]
       }

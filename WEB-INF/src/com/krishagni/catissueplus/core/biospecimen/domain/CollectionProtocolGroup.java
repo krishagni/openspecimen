@@ -141,8 +141,9 @@ public class CollectionProtocolGroup extends BaseEntity {
 
 	public void delete(String reason) {
 		setName(Utility.getDisabledValue(getName(), 64));
-		getCps().clear();
-		getForms().clear();
+
+		daoFactory.getCpGroupDao().removeCpsFromGroup(getId());
+		daoFactory.getCpGroupDao().deleteForms(getId());
 
 		if (StringUtils.isNotBlank(reason)) {
 			setOpComments(reason);

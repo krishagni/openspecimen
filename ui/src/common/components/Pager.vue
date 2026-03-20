@@ -52,6 +52,7 @@ export default {
   border-radius: 1rem;
   background: #fff;
   color: #337ab7;
+  margin-right: 1rem;
 }
 
 .os-pager button:disabled {
@@ -64,12 +65,13 @@ export default {
   background: #eee;
 }
 
-.os-pager button:first-child {
+/* Removed because the Ask OS button overlaps the Next button */
+/*.os-pager button:first-child {
   float: left;
 }
 
 .os-pager button:last-child {
   float: right;
-  margin-right: 1rem;
-}
+  margin-left: 1rem;
+}*/
 </style>

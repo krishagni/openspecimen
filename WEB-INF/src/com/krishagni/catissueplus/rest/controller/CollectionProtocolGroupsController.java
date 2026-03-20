@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupDetail;
+
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupSummary;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupFormsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
@@ -36,7 +36,6 @@ import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolGr
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
-import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -81,29 +80,66 @@ public class CollectionProtocolGroupsController {
 	@RequestMapping(method = RequestMethod.GET, value = "{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public CollectionProtocolGroupDetail getGroup(@PathVariable("id") Long groupId) {
+	public CollectionProtocolGroupSummary getGroup(@PathVariable("id") Long groupId) {
 		return ResponseEvent.unwrap(groupSvc.getGroup(RequestEvent.wrap(new EntityQueryCriteria(groupId))));
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public CollectionProtocolGroupDetail createGroup(@RequestBody CollectionProtocolGroupDetail group) {
+	public CollectionProtocolGroupSummary createGroup(@RequestBody CollectionProtocolGroupSummary group) {
 		return ResponseEvent.unwrap(groupSvc.createGroup(RequestEvent.wrap(group)));
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public CollectionProtocolGroupDetail updateGroup(
+	public CollectionProtocolGroupSummary updateGroup(
 		@PathVariable("id")
 		Long groupId,
 
 		@RequestBody
-		CollectionProtocolGroupDetail group) {
+		CollectionProtocolGroupSummary group) {
 
 		group.setId(groupId);
 		return ResponseEvent.unwrap(groupSvc.updateGroup(RequestEvent.wrap(group)));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "{id}/cps")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Integer> addGroupCps(
+		@PathVariable("id")
+		Long groupId,
+
+		@RequestBody
+		CollectionProtocolGroupSummary input) {
+
+		input.setId(groupId);
+		return Collections.singletonMap("added", ResponseEvent.unwrap(groupSvc.addGroupCps(RequestEvent.wrap(input))));
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "{id}/cps")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Integer> removeGroupCps(
+		@PathVariable("id")
+		Long groupId,
+
+		@RequestParam(value = "cpId")
+		List<Long> cpIds) {
+
+		CollectionProtocolGroupSummary input = new CollectionProtocolGroupSummary();
+		input.setId(groupId);
+		input.setCps(getCps(cpIds));
+		return Collections.singletonMap("removed", ResponseEvent.unwrap(groupSvc.removeGroupCps(RequestEvent.wrap(input))));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "{id}/permissions")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Boolean> getPermissions(@PathVariable("id") Long groupId) {
+		return ResponseEvent.unwrap(groupSvc.getPermissions(RequestEvent.wrap(new EntityQueryCriteria(groupId))));
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
@@ -251,6 +287,16 @@ public class CollectionProtocolGroupsController {
 				FormSummary fs = new FormSummary();
 				fs.setFormId(formId);
 				return fs;
+			}
+		).collect(Collectors.toList());
+	}
+
+	private List<CollectionProtocolSummary> getCps(List<Long> cpIds) {
+		return cpIds.stream().map(
+			cpId -> {
+				CollectionProtocolSummary cps = new CollectionProtocolSummary();
+				cps.setId(cpId);
+				return cps;
 			}
 		).collect(Collectors.toList());
 	}

@@ -25,12 +25,15 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelAutoPrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.SpecimenLabelPrePrintMode;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.VisitNamePrintMode;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSiteDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpSpecimenLabelPrintSettingDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -143,6 +146,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setConsentsSource(input, cp, ose);
 		setCatalogId(input, cp, ose);
 		setReqManagers(input, cp, ose);
+		setCpGroup(input, cp, ose);
 
 		ose.checkAndThrow();
 		return cp;
@@ -187,6 +191,8 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		cp.setSopDocumentName(input.getSopDocumentName());
 		setDistributionProtocolSettings(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
+		setCpGroup(input, cp, ose);
+
 		ose.checkAndThrow();
 		return cp;
 	}
@@ -633,6 +639,29 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		}
 
 		result.setReqManagers(reqManagers);
+	}
+
+	private void setCpGroup(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		CollectionProtocolGroupSummary inputGroup = input.getCpg();
+		if (inputGroup == null) {
+			return;
+		}
+
+		Object key = null;
+		CollectionProtocolGroup cpGroup = null;
+		if (inputGroup.getId() != null) {
+			cpGroup = daoFactory.getCpGroupDao().getById(inputGroup.getId());
+			key = inputGroup.getId();
+		} else if (StringUtils.isNotBlank(inputGroup.getName())) {
+			cpGroup = daoFactory.getCpGroupDao().getByName(inputGroup.getName());
+			key = inputGroup.getName();
+		}
+
+		if (key != null && cpGroup == null) {
+			ose.addError(CpGroupErrorCode.NOT_FOUND, key);
+		}
+
+		result.setCpGroup(cpGroup);
 	}
 	
 	private User getUser(UserSummary userDetail) {

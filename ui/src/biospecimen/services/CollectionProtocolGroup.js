@@ -14,6 +14,19 @@ class CollectionProtocolGroup {
     return http.get('collection-protocol-groups/' + id);
   }
 
+  getPermissions(id) {
+    return http.get('collection-protocol-groups/' + id + '/permissions');
+  }
+
+  addCps(groupId, cps) {
+    return http.post('collection-protocol-groups/' + groupId + '/cps', {cps});
+  }
+
+  removeCps(groupId, cpIds) {
+    const cpIdQp = cpIds.map(cpId => 'cpId=' + cpId).join('&');
+    return http.delete('collection-protocol-groups/' + groupId + '/cps?' + cpIdQp);
+  }
+
   saveOrUpdate(cpg) {
     if (cpg.id > 0) {
       return http.put('collection-protocol-groups/' + cpg.id, cpg);

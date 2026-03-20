@@ -1,7 +1,19 @@
 import http from "@/common/services/HttpClient.js"
+import routerSvc from "@/common/services/Router.js";
 
 export default {
   fields:  [
+    {
+      "type": "dropdown",
+      "labelCode": "cps.cpg",
+      "name": "cp.cpg",
+      "href": ({cp}) => cp.cpg && cp.cpg.id > 0 && routerSvc.getUrl('CpgDetail.Overview', {cpgId: cp.cpg.id}),
+      "listSource": {
+        "apiUrl": "collection-protocol-groups",
+        "displayProp": "name",
+        "searchProp": "query"
+      }
+    },
     {
       "type": "site",
       "multiple": true,

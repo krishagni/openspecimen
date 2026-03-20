@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
@@ -102,6 +103,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private String activityStatus;
 
 	private User principalInvestigator;
+
+	private CollectionProtocolGroup cpGroup;
 	
 	private String irbIdentifier;
 	
@@ -270,6 +273,15 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	public void setPrincipalInvestigator(User principalInvestigator) {
 		this.principalInvestigator = principalInvestigator;
+	}
+
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+	public CollectionProtocolGroup getCpGroup() {
+		return cpGroup;
+	}
+
+	public void setCpGroup(CollectionProtocolGroup cpGroup) {
+		this.cpGroup = cpGroup;
 	}
 
 	public String getIrbIdentifier() {
@@ -792,6 +804,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setExtension(cp.getExtension());
 		setCatalogId(cp.getCatalogId());
 		setReqManagers(cp.getReqManagers());
+		setCpGroup(cp.getCpGroup());
 		
 		updateSites(cp.getSites());
 		updateSpecimenLabelPrintSettings(cp.getSpmnLabelPrintSettings());

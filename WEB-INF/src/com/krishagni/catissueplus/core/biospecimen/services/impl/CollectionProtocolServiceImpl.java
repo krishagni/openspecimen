@@ -2688,6 +2688,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				crit = new CpListCriteria()
 					.siteCps(siteCps)
 					.ids(job.getRecordIds())
+					.groupId(getGroupId(job))
 					.orderBy("cp.id");
 				paramsInited = true;
 			}
@@ -2751,6 +2752,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				crit = new CpListCriteria()
 					.siteCps(siteCps)
 					.ids(cpIds)
+					.groupId(getGroupId(job))
 					.maxResults(1)
 					.orderBy("cp.id");
 				paramsInited = true;
@@ -2828,6 +2830,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				crit = new CpListCriteria()
 					.siteCps(siteCps)
 					.ids(cpIds)
+					.groupId(getGroupId(job))
 					.maxResults(1)
 					.orderBy("cp.id");
 				paramsInited = true;
@@ -2882,6 +2885,18 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				return units.computeIfAbsent(key, (k) -> SpecimenUtil.getInstance().getUnit(cp, specimenClass, type));
 			}
 		};
+	}
+
+	private Long getGroupId(ExportJob job) {
+		String groupIdStr = job.param("groupId");
+		Long groupId = null;
+		if (StringUtils.isNotBlank(groupIdStr)) {
+			try {
+				groupId = Long.parseLong(groupIdStr);
+			} catch (NumberFormatException nfe) {
+			}
+		}
+		return groupId;
 	}
 
 	private static final String PPID_MSG                     = "cp_ppid";

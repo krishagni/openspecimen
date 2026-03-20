@@ -6,22 +6,6 @@
   <record> 
     <name>com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail</name>
     
-    <record>
-      <attribute>cpSites</attribute>
-      <multiple>true</multiple>
-      <caption>#getMessage("cp_sites")</caption>
-      
-      <field>
-        <caption>#getMessage("cp_site_name")</caption>
-        <attribute>siteName</attribute>
-      </field>
-      
-      <field>
-        <caption>#getMessage("cp_site_code")</caption>
-        <attribute>code</attribute>
-      </field>
-    </record>
-    
     <field>
       <caption>#getMessage("cp_identifier")</caption>
       <attribute>id</attribute>
@@ -41,6 +25,16 @@
       <caption>#getMessage("cp_code")</caption>
       <attribute>code</attribute>
     </field>
+
+    <record>
+      <attribute>cpg</attribute>
+      <caption>#getMessage("cp_group")</caption>
+
+      <field>
+        <caption>#getMessage("common_name")</caption>
+        <attribute>name</attribute>
+      </field>
+    </record>
     
     <record>
       <attribute>principalInvestigator</attribute>
@@ -62,7 +56,23 @@
         <attribute>emailAddress</attribute>
       </field>
     </record>
-    
+
+    <record>
+      <attribute>cpSites</attribute>
+      <multiple>true</multiple>
+      <caption>#getMessage("cp_sites")</caption>
+
+      <field>
+        <caption>#getMessage("cp_site_name")</caption>
+        <attribute>siteName</attribute>
+      </field>
+
+      <field>
+        <caption>#getMessage("cp_site_code")</caption>
+        <attribute>code</attribute>
+      </field>
+    </record>
+
     <field>
       <type>dateOnly</type>
       <caption>#getMessage("cp_start_date")</caption>

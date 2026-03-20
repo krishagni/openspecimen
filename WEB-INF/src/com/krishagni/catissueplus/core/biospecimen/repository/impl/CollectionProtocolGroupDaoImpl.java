@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.repository.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,9 +16,11 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.repository.CollectionProtocolGroupDao;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpGroupListCriteria;
+import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.SubQuery;
+import com.krishagni.catissueplus.core.common.util.Status;
 
 public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtocolGroup> implements CollectionProtocolGroupDao  {
 
@@ -67,26 +70,107 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 			.setParameterList("groupIds", groupIds)
 			.list();
 
-		Map<Long, Integer> result = new HashMap<>();
-		for (Object[] row : rows) {
-			result.put((Long) row[0], (Integer) row[1]);
-		}
-
+		Map<Long, Integer> result = rows.stream().collect(
+			Collectors.toMap(
+				row -> (Long) row[0],
+				row -> (Integer) row[1],
+				(oldVal, newVal) -> newVal
+			)
+		);
+		groupIds.stream().filter(groupId -> !result.containsKey(groupId)).forEach(groupId -> result.put(groupId, 0));
 		return result;
 	}
 
 	@Override
-	public List<String> getCpsUsedInOtherGroups(CollectionProtocolGroup group) {
-		Criteria<String> query = createCriteria(CollectionProtocolGroup.class, String.class, "g")
-			.join("g.cps", "cp")
-			.select("cp.shortTitle");
-
-		if (group.getId() != null) {
-			query.add(query.ne("g.id", group.getId()));
+	public List<Long> getGroupCpIds(Long groupId, Collection<Long> cpIds) {
+		if (CollectionUtils.isEmpty(cpIds)) {
+			return Collections.emptyList();
 		}
 
-		List<Long> cpIds = group.getCps().stream().map(CollectionProtocol::getId).collect(Collectors.toList());
-		return query.add(query.in("cp.id", cpIds)).list();
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp")
+			.join("cp.cpGroup", "cpg");
+		return query.add(query.eq("cpg.id", groupId))
+			.add(query.in("cp.id", cpIds))
+			.select("cp.id")
+			.list();
+	}
+
+	@Override
+	public List<String> getCpsAssignedToOtherGroup(Long groupId, Collection<Long> cpIds) {
+		if (CollectionUtils.isEmpty(cpIds)) {
+			return Collections.emptyList();
+		}
+
+		Criteria<String> query = createCriteria(CollectionProtocol.class, String.class, "cp")
+			.join("cp.cpGroup", "cpg")
+			.select("cp.shortTitle");
+
+		return query.add(query.ne("cpg.id", groupId != null ? groupId : -1L))
+			.add(query.isNotNull("cpg.id"))
+			.add(query.in("cp.id", cpIds))
+			.list();
+	}
+
+	@Override
+	public int getCpsCount(Long groupId, Set<SiteCpPair> siteCps) {
+		if (siteCps != null && siteCps.isEmpty()) {
+			return 0;
+		}
+
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp")
+			.join("cp.cpGroup", "cpg");
+
+		query.add(query.eq("cpg.id", groupId))
+			.add(query.ne("cp.activityStatus", Status.ACTIVITY_STATUS_DISABLED.getStatus()));
+
+		if (CollectionUtils.isNotEmpty(siteCps)) {
+			SubQuery<Long> allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, siteCps);
+			query.add(query.in("cp.id", allowedCps));
+		}
+
+		return query.getCount("cp.id").intValue();
+	}
+
+	@Override
+	public void addCpsToGroup(Long groupId, Collection<Long> cpIds) {
+		if (CollectionUtils.isEmpty(cpIds)) {
+			return;
+		}
+
+		createNativeQuery(SET_CP_GROUP_ID_SQL)
+			.setParameter("groupId", groupId)
+			.setParameterList("cpIds", cpIds)
+			.executeUpdate();
+	}
+
+	@Override
+	public int removeCpsFromGroup(Long groupId, Collection<Long> cpIds) {
+		if (CollectionUtils.isEmpty(cpIds)) {
+			return 0;
+		}
+
+		return createNativeQuery(UNSET_CP_GROUP_ID_SQL)
+			.setParameter("groupId", groupId)
+			.setParameterList("cpIds", cpIds)
+			.executeUpdate();
+	}
+
+	@Override
+	public int removeCpsFromGroup(Long groupId) {
+		return createNativeQuery(UNSET_GROUP_ID_SQL)
+			.setParameter("groupId", groupId)
+			.executeUpdate();
+	}
+
+	@Override
+	public Set<Long> filterCps(Collection<Long> cpIds, Set<SiteCpPair> siteCps) {
+		Criteria<Long> query = createCriteria(CollectionProtocol.class, Long.class, "cp");
+		SubQuery<Long> allowedCps = BiospecimenDaoHelper.getInstance().getCpIdsFilter(query, siteCps);
+		List<Long> result = query.add(query.in("cp.id", allowedCps))
+			.add(query.in("cp.id", cpIds))
+			.select("cp.id")
+			.list();
+		return new HashSet<>(result);
 	}
 
 	@Override
@@ -110,9 +194,15 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 	}
 
 	@Override
-	public void deleteForms(Collection<Long> formIds) {
-		createNamedQuery(DELETE_GROUP_FORMS, Integer.class)
+	public int deleteForms(Collection<Long> formIds) {
+		return createNamedQuery(DELETE_FORMS_BY_ID)
 			.setParameterList("formIds", formIds)
+			.executeUpdate();
+	}
+
+	public int deleteForms(Long groupId) {
+		return createNamedQuery(DELETE_ALL_FORMS)
+			.setParameter("groupId", groupId)
 			.executeUpdate();
 	}
 
@@ -124,5 +214,13 @@ public class CollectionProtocolGroupDaoImpl extends AbstractDao<CollectionProtoc
 
 	private static final String GET_CP_FORMS_BY_ENTITY = FQN + ".getEntityFormsByCp";
 
-	private static final String DELETE_GROUP_FORMS = FQN + ".deleteGroupForms";
+	private static final String DELETE_FORMS_BY_ID = FQN + ".deleteFormsById";
+
+	private static final String DELETE_ALL_FORMS = FQN + ".deleteAllForms";
+
+	private static final String SET_CP_GROUP_ID_SQL = "update catissue_collection_protocol set cp_group_id = :groupId where identifier in (:cpIds)";
+
+	private static final String UNSET_CP_GROUP_ID_SQL = "update catissue_collection_protocol set cp_group_id = null where cp_group_id = :groupId and identifier in (:cpIds)";
+
+	private static final String UNSET_GROUP_ID_SQL = "update catissue_collection_protocol set cp_group_id = null where cp_group_id = :groupId";
 }

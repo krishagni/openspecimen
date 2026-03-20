@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,9 +21,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpGroupForm;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
-import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolGroupFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
-import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupFormsDetail;
@@ -37,13 +36,17 @@ import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
+import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityOp;
 import com.krishagni.catissueplus.core.common.events.BulkDeleteEntityResp;
 import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
+import com.krishagni.catissueplus.core.common.events.Operation;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
+import com.krishagni.catissueplus.core.common.events.Resource;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
+import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
@@ -57,8 +60,6 @@ import com.krishagni.catissueplus.core.importer.services.ImportService;
 import com.krishagni.rbac.common.errors.RbacErrorCode;
 
 public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGroupService {
-	private CollectionProtocolGroupFactory groupFactory;
-
 	private DaoFactory daoFactory;
 
 	private FormDao formDao;
@@ -70,10 +71,6 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 	private ExportService exportSvc;
 
 	private ImportService importSvc;
-
-	public void setGroupFactory(CollectionProtocolGroupFactory groupFactory) {
-		this.groupFactory = groupFactory;
-	}
 
 	public void setDaoFactory(DaoFactory daoFactory) {
 		this.daoFactory = daoFactory;
@@ -105,7 +102,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		try {
 			CpGroupListCriteria crit = req.getPayload();
 			Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
-			if (siteCps != null && siteCps.isEmpty()) {
+			if (!AuthUtil.isAdmin() && siteCps != null && siteCps.isEmpty()) {
 				return ResponseEvent.response(Collections.emptyList());
 			}
 
@@ -129,12 +126,14 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<CollectionProtocolGroupDetail> getGroup(RequestEvent<EntityQueryCriteria> req) {
+	public ResponseEvent<CollectionProtocolGroupSummary> getGroup(RequestEvent<EntityQueryCriteria> req) {
 		try {
 			EntityQueryCriteria crit = req.getPayload();
 			CollectionProtocolGroup group = getGroup(crit.getId(), crit.getName());
 			ensureReadAccess(group);
-			return ResponseEvent.response(CollectionProtocolGroupDetail.from(group));
+
+			group.setCpsCount(getCpsCount(group.getId()));
+			return ResponseEvent.response(CollectionProtocolGroupSummary.from(group));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -144,14 +143,19 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<CollectionProtocolGroupDetail> createGroup(RequestEvent<CollectionProtocolGroupDetail> req) {
+	public ResponseEvent<CollectionProtocolGroupSummary> createGroup(RequestEvent<CollectionProtocolGroupSummary> req) {
 		try {
-			CollectionProtocolGroup group = groupFactory.createGroup(req.getPayload());
+			CollectionProtocolGroupSummary input = req.getPayload();
+			if (CollectionUtils.isEmpty(input.getCps())) {
+				throw OpenSpecimenException.userError(CpGroupErrorCode.CP_REQ);
+			}
+
+			CollectionProtocolGroup group = createGroup(input);
 			ensureUniqueName(null, group);
-			ensureCpsNotInOtherGroups(group);
-			ensureUpdateAccess(group);
-			daoFactory.getCpGroupDao().saveOrUpdate(group);
-			return ResponseEvent.response(CollectionProtocolGroupDetail.from(group));
+			daoFactory.getCpGroupDao().saveOrUpdate(group, true);
+
+			addCps(group, input.getCps());
+			return ResponseEvent.response(CollectionProtocolGroupSummary.from(group));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -161,23 +165,81 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 
 	@Override
 	@PlusTransactional
-	public ResponseEvent<CollectionProtocolGroupDetail> updateGroup(RequestEvent<CollectionProtocolGroupDetail> req) {
+	public ResponseEvent<CollectionProtocolGroupSummary> updateGroup(RequestEvent<CollectionProtocolGroupSummary> req) {
 		try {
 			CollectionProtocolGroup existingGroup = getGroup(req.getPayload().getId(), null);
 			ensureUpdateAccess(existingGroup);
 
-			CollectionProtocolGroup group = groupFactory.createGroup(req.getPayload());
+			CollectionProtocolGroup group = createGroup(req.getPayload());
 			ensureUniqueName(existingGroup, group);
-			ensureCpsNotInOtherGroups(group);
-			ensureUpdateAccess(group);
-
-			Set<CollectionProtocol> addedCps = Utility.subtract(group.getCps(), existingGroup.getCps());
-			existingGroup.update(group);
-			addCps(existingGroup, addedCps);
-
-			return ResponseEvent.response(CollectionProtocolGroupDetail.from(existingGroup));
+			existingGroup.setName(group.getName());
+			return ResponseEvent.response(CollectionProtocolGroupSummary.from(existingGroup));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Integer> addGroupCps(RequestEvent<CollectionProtocolGroupSummary> req) {
+		try {
+			CollectionProtocolGroupSummary input = req.getPayload();
+			if (CollectionUtils.isEmpty(input.getCps())) {
+				return ResponseEvent.response(0);
+			}
+
+			CollectionProtocolGroup group = getGroup(input.getId(), input.getName());
+			return ResponseEvent.response(addCps(group, input.getCps()));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Integer> removeGroupCps(RequestEvent<CollectionProtocolGroupSummary> req) {
+		try {
+			CollectionProtocolGroupSummary input = req.getPayload();
+			if (CollectionUtils.isEmpty(input.getCps())) {
+				return ResponseEvent.response(0);
+			}
+
+			CollectionProtocolGroup group = getGroup(input.getId(), input.getName());
+
+			List<CollectionProtocol> inputCps = getCps(input.getCps());
+			Set<Long> cpsToRemove = inputCps.stream().map(CollectionProtocol::getId).collect(Collectors.toSet());
+			List<Long> existingCpIds = daoFactory.getCpGroupDao().getGroupCpIds(group.getId(), cpsToRemove);
+			if (existingCpIds.isEmpty()) {
+				return ResponseEvent.response(0);
+			}
+
+			ensureUpdateCpRights(inputCps, new HashSet<>(existingCpIds));
+			daoFactory.getCpGroupDao().removeCpsFromGroup(group.getId(), existingCpIds);
+			return ResponseEvent.response(existingCpIds.size());
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Boolean>> getPermissions(RequestEvent<EntityQueryCriteria> req) {
+		Map<String, Boolean> result = new HashMap<>();
+		result.put("updateAllowed", false);
+
+		try {
+			EntityQueryCriteria crit = req.getPayload();
+			ensureUpdateAccess(crit.getId());
+			result.put("updateAllowed", true);
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.response(result);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
@@ -363,28 +425,126 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 	}
 
 	private void ensureReadAccess(CollectionProtocolGroup group) {
-		for (CollectionProtocol cp : group.getCps()) {
-			try {
-				AccessCtrlMgr.getInstance().ensureReadCpRights(cp);
-				return;
-			} catch (OpenSpecimenException ose) {
-				// continue testing with the next CP
-			}
+		if (AuthUtil.isAdmin()) {
+			return;
 		}
 
-		if (!group.getCps().isEmpty() || !AuthUtil.isAdmin()) {
+		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getReadableSiteCps();
+		if (siteCps != null && siteCps.isEmpty()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		if (daoFactory.getCpGroupDao().getCpsCount(group.getId(), siteCps) <= 0) {
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 	}
 
 	private void ensureUpdateAccess(CollectionProtocolGroup group) {
-		for (CollectionProtocol cp : group.getCps()) {
-			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
+		ensureUpdateAccess(group.getId());
+	}
+
+	private void ensureUpdateAccess(Long groupId) {
+		if (AuthUtil.isAdmin()) {
+			//
+			// admins can update any CPG
+			//
+			return;
 		}
 
-		if (group.getCps().isEmpty() && !AuthUtil.isAdmin()) {
+		if (groupId == null) {
+			//
+			// new group being created
+			// user needs to have CP update rights to create a new group
+			//
+			if (!AccessCtrlMgr.getInstance().hasUpdateCpRights()) {
+				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+			}
+
+			return;
+		}
+
+		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getSiteCps(Resource.CP, Operation.UPDATE, false);
+		if (siteCps != null && siteCps.isEmpty()) {
 			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 		}
+
+		int total = getCpsCount(groupId);
+		if (total == 0) {
+			//
+			// existing group without any CPs is accessible only to admins
+			//
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		int accessible = daoFactory.getCpGroupDao().getCpsCount(groupId, siteCps);
+		if (accessible < total) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+	}
+
+	private int getCpsCount(Long groupId) {
+		Map<Long, Integer> counts = daoFactory.getCpGroupDao().getCpsCount(Collections.singleton(groupId));
+		Integer count = counts.get(groupId);
+		return count != null ? count : 0;
+	}
+
+	private CollectionProtocolGroup createGroup(CollectionProtocolGroupSummary input) {
+		OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
+
+		CollectionProtocolGroup group = new CollectionProtocolGroup();
+		group.setId(input.getId());
+		if (StringUtils.isBlank(input.getName())) {
+			ose.addError(CpGroupErrorCode.NAME_REQ);
+		}
+
+		group.setName(input.getName());
+		group.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
+		ose.checkAndThrow();
+		return group;
+	}
+
+	private List<CollectionProtocol> getCps(List<CollectionProtocolSummary> cps) {
+		Set<Long> ids = new HashSet<>();
+		Set<String> shortTitles = new HashSet<>();
+		for (CollectionProtocolSummary cp : cps) {
+			if (cp.getId() != null) {
+				ids.add(cp.getId());
+			} else if (StringUtils.isNotBlank(cp.getShortTitle())) {
+				shortTitles.add(cp.getShortTitle());
+			}
+		}
+
+		if (ids.isEmpty() && shortTitles.isEmpty()) {
+			throw OpenSpecimenException.userError(CpGroupErrorCode.CP_REQ);
+		}
+
+		List<CollectionProtocol> result = new ArrayList<>();
+		if (!ids.isEmpty()) {
+			List<CollectionProtocol> found = daoFactory.getCollectionProtocolDao().getByIds(ids);
+			if (found.size() != ids.size()) {
+				ids.removeAll(found.stream().map(CollectionProtocol::getId).collect(Collectors.toSet()));
+				throw OpenSpecimenException.userError(
+					CpGroupErrorCode.CP_NOT_FOUND,
+					ids.stream().map(Object::toString).collect(Collectors.joining(",")),
+					ids.size());
+			}
+
+			result.addAll(found);
+		}
+
+		if (!shortTitles.isEmpty()) {
+			List<CollectionProtocol> found = daoFactory.getCollectionProtocolDao().getCpsByShortTitle(shortTitles);
+			if (found.size() != shortTitles.size()) {
+				shortTitles.removeIf(st -> found.stream().anyMatch(cp -> cp.getShortTitle().equalsIgnoreCase(st)));
+				if (!shortTitles.isEmpty()) {
+					throw OpenSpecimenException.userError(CpGroupErrorCode.CP_NOT_FOUND, String.join(",", shortTitles), shortTitles.size());
+				}
+			}
+
+			result.addAll(found);
+		}
+
+		return result;
 	}
 
 	private void ensureUniqueName(CollectionProtocolGroup existingGrp, CollectionProtocolGroup newGrp) {
@@ -398,8 +558,8 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		}
 	}
 
-	private void ensureCpsNotInOtherGroups(CollectionProtocolGroup group) {
-		List<String> cpsInOtherGroups = daoFactory.getCpGroupDao().getCpsUsedInOtherGroups(group);
+	private void ensureCpsNotInOtherGroups(Long groupId, Collection<Long> cpIds) {
+		List<String> cpsInOtherGroups = daoFactory.getCpGroupDao().getCpsAssignedToOtherGroup(groupId, cpIds);
 		if (CollectionUtils.isNotEmpty(cpsInOtherGroups)) {
 			throw OpenSpecimenException.userError(
 				CpGroupErrorCode.CP_IN_OTH_GRPS,
@@ -429,7 +589,48 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		return group;
 	}
 
-	private void addCps(CollectionProtocolGroup group, Set<CollectionProtocol> cps) {
+	private int addCps(CollectionProtocolGroup group, List<CollectionProtocolSummary> cps) {
+		List<CollectionProtocol> inputCps = getCps(cps);
+
+		Set<Long> cpIdsToAdd = inputCps.stream().map(CollectionProtocol::getId).collect(Collectors.toSet());
+		List<Long> existingCpIds = daoFactory.getCpGroupDao().getGroupCpIds(group.getId(), cpIdsToAdd);
+
+		cpIdsToAdd.removeAll(existingCpIds);
+		if (cpIdsToAdd.isEmpty()) {
+			return 0;
+		}
+
+		ensureUpdateCpRights(inputCps, cpIdsToAdd);
+		ensureCpsNotInOtherGroups(group.getId(), cpIdsToAdd);
+		daoFactory.getCpGroupDao().addCpsToGroup(group.getId(), cpIdsToAdd);
+
+		Set<CollectionProtocol> addedCps = inputCps.stream().filter(cp -> cpIdsToAdd.contains(cp.getId())).collect(Collectors.toSet());
+		addGroupSettingsToCps(group, addedCps);
+		return addedCps.size();
+	}
+
+	private void ensureUpdateCpRights(List<CollectionProtocol> inputCps, Set<Long> cpIds) {
+		if (AuthUtil.isAdmin()) {
+			return;
+		}
+
+		Set<SiteCpPair> siteCps = AccessCtrlMgr.getInstance().getSiteCps(Resource.CP, Operation.UPDATE, false);
+		if (siteCps != null && siteCps.isEmpty()) {
+			throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+		}
+
+		Set<Long> accessibleCpIds = daoFactory.getCpGroupDao().filterCps(cpIds, siteCps);
+		if (accessibleCpIds.containsAll(cpIds)) {
+			return;
+		}
+
+		Set<Long> inaccessibleCpIds = Utility.subtract(cpIds, accessibleCpIds);
+		String titles = inputCps.stream().filter(cp -> inaccessibleCpIds.contains(cp.getId())).map(CollectionProtocol::getShortTitle).collect(Collectors.joining(", "));
+		throw OpenSpecimenException.userError(CpGroupErrorCode.CP_UPDATE_REQ, titles);
+	}
+
+
+	private void addGroupSettingsToCps(CollectionProtocolGroup group, Set<CollectionProtocol> cps) {
 		if (CollectionUtils.isEmpty(cps)) {
 			return;
 		}

@@ -230,12 +230,7 @@
 
   <bean id="cpChangeListener" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolChangeListener" />
 
-  <bean id="cpGroupFactory" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.CollectionProtocolGroupFactoryImpl">
-    <property name="daoFactory" ref="biospecimenDaoFactory" />
-  </bean>
-
   <bean id="cpGroupSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolGroupServiceImpl">
-    <property name="groupFactory" ref="cpGroupFactory"/>
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="formDao" ref="formDao"/>
     <property name="formSvc" ref="formSvc"/>
