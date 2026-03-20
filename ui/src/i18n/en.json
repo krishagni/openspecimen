@@ -940,6 +940,7 @@
     "cp_delete_in_progress": "Collection Protocol {shortTitle} deletion is taking longer time than anticipated. You'll receive email on successful deletion.",
     "cp_published": "Collection Protocol {shortTitle} published!",
     "cp_reopened": "Collection Protocol {shortTitle} reopened!",
+    "cpg": "CP Group",
     "copies": "Copies",
     "create_cp": "Create Collection Protocol",
     "create_aliquots": "Create Aliquots",

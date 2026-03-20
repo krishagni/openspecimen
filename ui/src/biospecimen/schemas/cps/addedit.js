@@ -2,6 +2,9 @@ export default {
   layout: {
     rows: [
       {
+        fields: [ { name: "cp.cpg" } ]
+      },
+      {
         fields: [ { name: "cp.sites" } ]
       },
       {
