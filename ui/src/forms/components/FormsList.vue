@@ -4,8 +4,8 @@
       <os-menu left-icon="plus" :label="$t('common.buttons.add')" :options="formsList"
         :lazy-load="true" v-if="formsList.length > 0" />
 
-      <os-menu left-icon="plus" :label="$t('forms.survey_mode')" :options="surveys"
-        :lazy-load="true" v-if="surveys.length > 0" />
+      <os-menu left-icon="plus" :label="$t('forms.survey_mode')" :options="surveyOptions"
+        :lazy-load="true" v-if="surveyOptions.length > 0" />
     </template>
 
     <template #right v-if="filledFormsList.length > 1">
@@ -44,6 +44,14 @@
               <os-button left-icon="edit" :label="$t('common.buttons.edit')" @click="editRecord(rowObject)"
                 v-if="isUpdateAllowed && expanded.length > 0 && !expanded[0].sysForm" />
 
+              <os-button left-icon="poll" :label="$t('forms.survey_mode')"
+                @click="switchToSurveyMode(surveyMap[rowObject.fcId], true, rowObject.recordId)"
+                v-if="isUpdateAllowed && expanded.length > 0 && surveyMap[rowObject.fcId]" />
+
+              <os-button left-icon="paper-plane" :label="$t('forms.send_survey')"
+                @click="sendSurvey(surveyMap[rowObject.fcId], rowObject.recordId)"
+                v-if="isUpdateAllowed && expanded.length > 0 && surveyMap[rowObject.fcId] && viewProps.cpr && !viewProps.visit" />
+
               <os-button left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteRecord(rowObject)"
                 v-if="isUpdateAllowed && expanded.length > 0 && !expanded[0].sysForm" />
 
@@ -63,6 +71,7 @@
 </template>
 
 <script>
+import alertsSvc from '@/common/services/Alerts.js';
 import formSvc from '@/forms/services/Form.js';
 import routerSvc from '@/common/services/Router.js';
 import util   from '@/common/services/Util.js';
@@ -183,6 +192,31 @@ export default {
 
     viewProps: function() {
       return (this.api && typeof this.api.getViewProps == 'function' && this.api.getViewProps()) || {};
+    },
+
+    surveyOptions: function() {
+      return (this.surveys || []).filter(
+        survey => {
+          for (const form of this.forms || []) {
+            if (form.entityType == survey.entityType && form.formCtxtId == survey.formCtxtId) {
+              return !form.sysForm && (form.noOfRecords == 0 || form.multiRecord);
+            }
+          }
+
+          return false;
+        }
+      ).map(
+        survey => ({caption: survey.formCaption, onSelect: () => this.switchToSurveyMode(survey)})
+      );
+    },
+
+    surveyMap: function() {
+      return (this.surveys || [])
+        .filter(({expired, archived, type}) => !expired && !archived && type == 'deForms')
+        .reduce((map, survey) => {
+          map[survey.formCtxtId] = survey;
+          return map;
+        }, {});
     }
   },
 
@@ -228,8 +262,28 @@ export default {
       );
     },
 
-    switchToSurveyMode: function(survey) {
-      this.$refs.selectSurveyMode.gotoSurvey(survey);
+    switchToSurveyMode: function(survey, editMode, recordId) {
+      this.$refs.selectSurveyMode.gotoSurvey({...survey, editMode: !!editMode, recordId});
+    },
+
+    sendSurvey: function({id: surveyId}, recordId) {
+      const {cpShortTitle, ppid} = this.object || {};
+      const criteria = {
+        cpShortTitle,
+        ppids: [ppid],
+        surveyIds: [surveyId],
+        editMode: true,
+        closeExistingSurveys: true,
+        recordId
+      };
+
+      const {edcSurveySvc} = this.$osSvc;
+      if (!edcSurveySvc) {
+        alert('Survey module not installed');
+        return;
+      }
+
+      edcSurveySvc.createInvitation(criteria).then(() => alertsSvc.success({code: 'forms.survey_link_sent'}));
     },
 
     _loadForms: function() {
@@ -245,19 +299,7 @@ export default {
       Promise.all(promises).then(
         ([forms, surveys]) => {
           this.forms = forms;
-          this.surveys = surveys.filter(
-            survey => {
-              for (let form of forms) {
-                if (form.entityType == survey.entityType && form.formCtxtId == survey.formCtxtId) {
-                  return !form.sysForm && (form.noOfRecords == 0 || form.multiRecord);
-                }
-              }
-
-              return false;
-            }
-          ).map(
-            survey => ({caption: survey.formCaption, onSelect: () => this.switchToSurveyMode(survey)})
-          );
+          this.surveys = surveys;
         }
       );
     },

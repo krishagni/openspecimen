@@ -1,29 +1,39 @@
 
 <template>
   <div>
-    <div class="os-signature" v-show="editMode || imageData || imageSrc">
-      <canvas ref="canvasEl" :tabindex="tabOrder" v-show="editMode"></canvas>
-
-      <div class="read" v-if="!editMode">
+    <div class="os-signature" v-show="imageData || imageSrc">
+      <div class="read">
         <img :src="imageData" :tabindex="tabOrder" v-if="imageData" />
         <img :src="imageSrc"  :tabindex="tabOrder" v-else-if="imageSrc" />
       </div>
 
-      <div class="actions" v-if="editMode">
-        <input type="button" :value="$t('common.buttons.save')"   @click="save" />
-        <input type="button" :value="$t('common.buttons.clear')"  @click="clear" />
-        <input type="button" :value="$t('common.buttons.cancel')" @click="cancel" />
-      </div>
-      <div class="actions" v-else-if="!disabled">
+      <div class="actions" v-if="!disabled">
         <input type="button" :value="$t('common.buttons.edit')" @click="edit" />
         <input type="button" :value="$t('common.buttons.remove')" @click="remove"/>
       </div>
     </div>
-    <div class="os-signature-add" v-show="!editMode && !imageData && !imageSrc" >
+
+    <div class="os-signature-add" v-show="!imageData && !imageSrc" >
       <Button left-icon="plus" :label="$t('common.buttons.add')" :tabindex="tabOrder"
         @click="edit" v-show="!disabled" />
       <span v-t="'common.none'" v-show="disabled"></span>
     </div>
+
+    <os-dialog ref="dialog" :closable="false" @opened="initSignaturePad">
+      <template #header>
+        <span v-t="'common.draw_signature'">Draw Signature</span>
+      </template>
+      <template #content>
+        <div class="os-canvas-container">
+          <canvas ref="canvasEl"></canvas>
+        </div>
+      </template>
+      <template #footer>
+        <os-button text      :label="$t('common.buttons.cancel')" @click="cancel" />
+        <os-button secondary :label="$t('common.buttons.clear')"  @click="clear" />
+        <os-button primary   :label="$t('common.buttons.done')"   @click="save" />
+      </template>
+    </os-dialog>
   </div>
 </template>
 
@@ -43,14 +53,11 @@ export default {
 
   data() {
     return {
-      editMode: false,
-
       imageData: ''
     }
   },
 
   mounted() {
-    this.signaturePad = new SignaturePad(this.$refs.canvasEl, {backgroundColor: 'rgb(255, 255, 255)'});
   },
 
   computed: {
@@ -75,12 +82,16 @@ export default {
 
   methods: {
     edit: function() {
-      this.signaturePad.clear();
-      this.editMode = true;
+      this.signaturePad = null;
+      this.$refs.dialog.open();
+    },
+
+    initSignaturePad: function() {
+      this.signaturePad = new SignaturePad(this.$refs.canvasEl, {backgroundColor: 'rgb(255, 255, 255)'});
+      this._resizeCanvas();
     },
 
     remove: function() {
-      this.signaturePad.clear();
       this.imageData = null;
       this.$emit('update:modelValue', null);
     },
@@ -99,7 +110,8 @@ export default {
         alertSvc.success({code: 'common.signature.saved'});
       }
 
-      this.editMode = false;
+      this.$refs.dialog.close();
+      this.signaturePad = null;
     },
 
     clear: function() {
@@ -107,11 +119,23 @@ export default {
     },
 
     cancel: function() {
-      this.editMode = false;
+      this.$refs.dialog.close();
+      this.signaturePad = null;
     },
 
     getDisplayValue: function() {
       return this.inputValue;
+    },
+
+    _resizeCanvas: function() {
+      const canvas = this.$refs.canvasEl;
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+
+      this.signaturePad.clear();
     }
   }
 }
@@ -125,6 +149,11 @@ export default {
   border-color: #ced4da;
   border-radius: 4px;
   width: fit-content;
+}
+
+.os-signature img {
+  width: 300px;
+  height: 150px;
 }
 
 .os-signature .actions {
@@ -163,5 +192,19 @@ export default {
   border: 1px solid;
   border-color: #007bff;
   border-radius: 1.125rem;
+}
+
+.os-canvas-container {
+  margin: auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid;
+  border-color: #ced4da;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.os-canvas-container canvas {
+  width: 450px;
+  height: 225px;
 }
 </style>
