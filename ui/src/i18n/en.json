@@ -226,6 +226,7 @@
     "delete_na_reason": "Cannot delete {type} '{title}' because of the following dependent objects:",
     "disabled": "Disabled",
     "draft": "Draft",
+    "draw_signature": "Draw Signature",
     "enabled": "Enabled",
     "enter_delete_captcha": "Type 'DELETE ANYWAY' to continue.",
     "enter_delete_reason": "Specify the reason, at least 10 characters in length, for deletion:",
@@ -1288,6 +1289,8 @@
     "search_records": "Filter by form...",
     "select_form_xml": "Select the form XML to upload...",
     "send_notif_to_users": "Send notifications to users on adding/editing form records",
+    "send_survey": "Send Survey",
+    "survey_link_sent": "Survey link sent to the participant",
     "survey_mode": "Survey Mode",
     "title": "Title",
     "view_preview": "View Preview"
