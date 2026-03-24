@@ -4,10 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 
+@JsonFilter("withoutId")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CollectionProtocolGroupSummary {
 	private Long id;
