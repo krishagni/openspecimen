@@ -758,4 +758,18 @@
       <column name="RESERVATION_ID" type="${text.type}(40)" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Recreate the sequence generator index to remove the changing column - 1">
+    <preConditions>
+      <indexExists tableName="KEQ_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX" />
+    </preConditions>
+    <dropIndex tableName="KEQ_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Recreate the sequence generator index to remove the changing column - 2">
+    <createIndex tableName="KEY_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX">
+      <column name="KEY_TYPE" type="${text.type}(255)" />
+      <column name="KEY_VALUE" type="${text.type}(255)" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
