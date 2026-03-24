@@ -761,9 +761,9 @@
 
   <changeSet author="vpawar" id="Recreate the sequence generator index to remove the changing column - 1">
     <preConditions>
-      <indexExists tableName="KEQ_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX" />
+      <indexExists tableName="KEY_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX" />
     </preConditions>
-    <dropIndex tableName="KEQ_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX" />
+    <dropIndex tableName="KEY_SEQ_GENERATOR" indexName="OS_SEQ_KEY_IDX" />
   </changeSet>
 
   <changeSet author="vpawar" id="Recreate the sequence generator index to remove the changing column - 2">
