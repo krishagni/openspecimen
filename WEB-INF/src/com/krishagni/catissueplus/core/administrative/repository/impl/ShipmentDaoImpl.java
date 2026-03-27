@@ -199,7 +199,7 @@ public class ShipmentDaoImpl extends AbstractDao<Shipment> implements ShipmentDa
 
 	@Override
 	public void removeShipmentCart(Long cartId) {
-		getCurrentSession().getNamedQuery(REMOVE_SHIPMENT_CART)
+		getCurrentSession().createNativeMutationQuery(REMOVE_SHIPMENT_CART)
 			.setParameter("cartId", cartId)
 			.executeUpdate();
 	}

@@ -1,21 +1,19 @@
 package com.krishagni.catissueplus.rest.filter;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.saml2.provider.service.metadata.OpenSamlMetadataResolver;
-import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
+import org.springframework.security.saml2.provider.service.metadata.OpenSaml4MetadataResolver;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
-import org.springframework.security.saml2.provider.service.servlet.filter.Saml2WebSsoAuthenticationFilter;
-import org.springframework.security.saml2.provider.service.servlet.filter.Saml2WebSsoAuthenticationRequestFilter;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
+import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
+import org.springframework.security.saml2.provider.service.web.Saml2WebSsoAuthenticationRequestFilter;
+import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.krishagni.catissueplus.core.auth.services.impl.SamlAuthenticationHandler;
 
@@ -30,14 +28,14 @@ public class SamlSecurityConfig {
 	}
 
 	@Bean
-	public Converter<HttpServletRequest, RelyingPartyRegistration> relyingPartyRegistrationResolver() {
+	public RelyingPartyRegistrationResolver relyingPartyRegistrationResolver() {
 		// This bean is available now because it is in a dedicated @Configuration
 		return new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
 	}
 
 	@Bean
-	public Saml2MetadataFilter saml2MetadataFilter(Converter<HttpServletRequest, RelyingPartyRegistration> relyingPartyRegistrationResolver) {
-		OpenSamlMetadataResolver metadataResolver = new OpenSamlMetadataResolver();
+	public Saml2MetadataFilter saml2MetadataFilter(RelyingPartyRegistrationResolver relyingPartyRegistrationResolver) {
+		OpenSaml4MetadataResolver metadataResolver = new OpenSaml4MetadataResolver();
 		return new Saml2MetadataFilter(relyingPartyRegistrationResolver, metadataResolver);
 	}
 
@@ -46,10 +44,19 @@ public class SamlSecurityConfig {
 	throws Exception {
 		http.authorizeHttpRequests(
 			authorize -> authorize
-				.antMatchers("/login/saml2/**", "/saml2/**", "/logout/saml2/**").permitAll() // Allow access to authenticate / login
+				.requestMatchers(
+					new AntPathRequestMatcher("/login/saml2/**"),
+					new AntPathRequestMatcher("/saml2/**"),
+					new AntPathRequestMatcher("/logout/saml2/**")
+				).permitAll() // Allow access to authenticate / login
 				.anyRequest().authenticated()
 			)
-			.csrf(csrf -> csrf.ignoringAntMatchers("/saml/**", "/login/saml2/sso/**", "/saml2/**", "/logout/saml2/slo/**"))
+			.csrf(csrf -> csrf.ignoringRequestMatchers(
+				new AntPathRequestMatcher("/saml/**"),
+				new AntPathRequestMatcher("/login/saml2/sso/**"),
+				new AntPathRequestMatcher("/saml2/**"),
+				new AntPathRequestMatcher("/logout/saml2/slo/**")
+			))
 			.saml2Login(
 				saml2 -> saml2
 					.relyingPartyRegistrationRepository(this.relyingPartyRegistrationRepository)

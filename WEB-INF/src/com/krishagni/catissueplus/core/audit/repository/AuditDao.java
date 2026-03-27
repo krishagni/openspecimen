@@ -25,7 +25,7 @@ public interface AuditDao extends Dao<UserApiCallLog> {
 
 	Date getLatestApiCallTime(Long userId, String token);
 
-	void saveOrUpdate(DeleteLog log);
+	void saveDeleteLog(DeleteLog log);
 
 	List<UserApiCallLog> getApiCallLogs(RevisionsListCriteria crit);
 

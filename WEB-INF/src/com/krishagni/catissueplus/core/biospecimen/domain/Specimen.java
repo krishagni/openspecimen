@@ -2311,7 +2311,7 @@ public class Specimen extends BaseExtensionEntity {
 			labSvc.setUnits(svc.getUnits());
 			labSvc.setServiceDate(getCreatedOn());
 			labSvc.setServicedBy(AuthUtil.getCurrentUser());
-			daoFactory.getSpecimenDao().saveOrUpdate(labSvc);
+			daoFactory.getSpecimenDao().save(labSvc);
 		}
 	}
 

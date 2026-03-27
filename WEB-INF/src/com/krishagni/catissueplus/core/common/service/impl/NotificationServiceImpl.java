@@ -2,7 +2,6 @@ package com.krishagni.catissueplus.core.common.service.impl;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,7 +14,6 @@ import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.domain.Notification;
 import com.krishagni.catissueplus.core.common.domain.UserNotification;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
-import com.krishagni.catissueplus.core.common.errors.NotificationErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
@@ -120,7 +118,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 		if (!notifiedUsers.isEmpty()) {
 			notification.setNotifiedUsers(notifiedUsers);
-			daoFactory.getUserNotificationDao().saveOrUpdate(notification);
+			daoFactory.getUserNotificationDao().saveNotification(notification);
 		}
 	}
 }

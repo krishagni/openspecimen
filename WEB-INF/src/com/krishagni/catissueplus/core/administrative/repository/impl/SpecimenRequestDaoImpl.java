@@ -61,7 +61,7 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 
 	@Override
 	public void removeRequestCart(Long cartId) {
-		getCurrentSession().getNamedQuery(REMOVE_REQ_CART)
+		getCurrentSession().createNamedMutationQuery(REMOVE_REQ_CART)
 			.setParameter("cartId", cartId)
 			.executeUpdate();
 	}

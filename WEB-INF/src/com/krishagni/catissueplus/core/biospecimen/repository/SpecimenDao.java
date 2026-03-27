@@ -95,7 +95,7 @@ public interface SpecimenDao extends Dao<Specimen> {
 
 	Map<Long, Pair<String, BigDecimal>> getLabSpecimenServicesRate(List<Long> specimenIds);
 
-	void saveOrUpdate(LabSpecimenService svc);
+	void save(LabSpecimenService svc);
 
 	void delete(LabSpecimenService svc);
 

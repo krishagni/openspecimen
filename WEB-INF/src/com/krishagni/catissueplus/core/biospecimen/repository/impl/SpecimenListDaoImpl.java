@@ -141,7 +141,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	public void saveListItems(List<SpecimenListItem> items) {
 		int i = 0;
 		for (SpecimenListItem item : items) {
-			getCurrentSession().saveOrUpdate(item);
+			getCurrentSession().persist(item);
 			i++;
 
 			if (i % 50 == 0) {
@@ -188,6 +188,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void saveOrUpdate(SpecimensPickList session) {
 		getCurrentSession().saveOrUpdate(session);
 	}
@@ -229,11 +230,11 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public void deletePickList(Long cartId, Long pickListId) {
-		getCurrentSession().getNamedQuery(DELETE_ALL_PICKED_ITEMS)
+		getCurrentSession().createNamedMutationQuery(DELETE_ALL_PICKED_ITEMS)
 			.setParameter("pickListId", pickListId)
 			.executeUpdate();
 
-		getCurrentSession().getNamedQuery(DELETE_PICK_LIST)
+		getCurrentSession().createNamedMutationQuery(DELETE_PICK_LIST)
 			.setParameter("cartId", cartId)
 			.setParameter("listId", pickListId)
 			.executeUpdate();
@@ -257,7 +258,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public Map<Long, Map<String, Long>> getPickListSpecimensCount(Collection<Long> pickListIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_PICK_LIST_ITEMS_COUNT)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_PICK_LIST_ITEMS_COUNT, Object[].class)
 			.setParameterList("pickListIds", pickListIds)
 			.list();
 		if (rows.isEmpty()) {
@@ -279,7 +280,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public void savePickListItem(PickedSpecimen pickedSpecimen) {
-		getCurrentSession().saveOrUpdate(pickedSpecimen);
+		getCurrentSession().persist(pickedSpecimen);
 	}
 
 	@Override
@@ -294,7 +295,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 			pickedSpecimen.setSpecimen(specimen);
 			pickedSpecimen.setUpdater(pickedBy);
 			pickedSpecimen.setUpdateTime(pickTime);
-			getCurrentSession().saveOrUpdate(pickedSpecimen);
+			getCurrentSession().persist(pickedSpecimen);
 
 			++count;
 			if (count % 25 == 0) {
@@ -308,7 +309,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public int deleteSpecimensFromPickList(Long pickListId, List<Long> specimenIds) {
-		return getCurrentSession().getNamedQuery(DELETE_PICKED_ITEMS)
+		return getCurrentSession().createNamedMutationQuery(DELETE_PICKED_ITEMS)
 			.setParameter("pickListId", pickListId)
 			.setParameterList("specimenIds", specimenIds)
 			.executeUpdate();
@@ -316,7 +317,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public List<Tuple> getInactivePickLists(Date activeBefore) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_INACTIVE_PICK_LISTS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_INACTIVE_PICK_LISTS, Object[].class)
 			.setParameter("cutOffDate", activeBefore)
 			.list();
 
@@ -335,7 +336,7 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 
 	@Override
 	public void deletePickListItems(Long cartId, Collection<Long> specimenIds) {
-		getCurrentSession().getNamedQuery(DEL_PICK_LIST_ITEMS_BY_CART_N_SPMNS)
+		getCurrentSession().createMutationQuery(DEL_PICK_LIST_ITEMS_BY_CART_N_SPMNS)
 			.setParameter("cartId", cartId)
 			.setParameterList("specimenIds", specimenIds)
 			.executeUpdate();

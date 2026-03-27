@@ -39,9 +39,10 @@ public class AbstractDao<T> implements Dao<T> {
 	}
 	
 	@Override
+	@SuppressWarnings({"deprecation"})
 	public void saveOrUpdate(T obj, boolean flush) {
 		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(obj);
+			getCurrentSession().saveOrUpdate(obj);
 			if (flush) {
 				flush();
 			}
@@ -62,6 +63,7 @@ public class AbstractDao<T> implements Dao<T> {
 	}
 
 	@Override
+	@SuppressWarnings({"deprecation"})
 	public <R> void delete(R obj) {
 		getCurrentSession().delete(obj);
 	}

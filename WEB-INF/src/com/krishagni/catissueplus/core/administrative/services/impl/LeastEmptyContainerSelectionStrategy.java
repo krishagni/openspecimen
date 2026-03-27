@@ -66,12 +66,11 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		getContainersCache().put(container.getId(), container);
 		return container;
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	private List<Long> getLeastEmptyContainerIds(ContainerCriteria crit, Boolean aliquotsInSameContainer) {
 		sessionFactory.getCurrentSession().flush();
 
-		String sql = sessionFactory.getCurrentSession().createNamedQuery(GET_LEAST_EMPTY_CONTAINER_ID).getQueryString();
+		String sql = sessionFactory.getCurrentSession().createNamedQuery(GET_LEAST_EMPTY_CONTAINER_ID, Long.class).getQueryString();
 		int orderByIdx = sql.indexOf("order by");
 		String beforeOrderBySql = sql.substring(0, orderByIdx);
 		String orderByLaterSql  = sql.substring(orderByIdx);
@@ -83,7 +82,7 @@ public class LeastEmptyContainerSelectionStrategy implements ContainerSelectionS
 		}
 
 		sql += orderByLaterSql;
-		return (List<Long>) sessionFactory.getCurrentSession().createNativeQuery(sql)
+		return sessionFactory.getCurrentSession().createNativeQuery(sql, Long.class)
 			.addScalar("containerId", StandardBasicTypes.LONG)
 			.setParameter("cpId", crit.specimen().getCpId())
 			.setParameter("specimenClass", crit.specimen().getSpecimenClass())

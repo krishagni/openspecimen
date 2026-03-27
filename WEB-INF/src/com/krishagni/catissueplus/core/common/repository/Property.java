@@ -1,6 +1,6 @@
 package com.krishagni.catissueplus.core.common.repository;
 
-import javax.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Expression;
 
 public class Property {
 	private Expression<?> expr;

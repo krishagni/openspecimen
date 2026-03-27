@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.core.common.repository;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 public abstract class Junction {
 	protected CriteriaBuilder cb;

@@ -9,14 +9,14 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.AbstractQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.MapJoin;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.AbstractQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.MapJoin;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
@@ -101,10 +101,10 @@ public abstract class AbstractCriteria<T extends AbstractCriteria<T, R>, R> {
 		}
 
 		switch (joinType) {
-			case LEFT_JOIN -> joins.put(alias, joinFrom.join(joinWith, javax.persistence.criteria.JoinType.LEFT));
-			case RIGHT_JOIN -> joins.put(alias, joinFrom.join(joinWith, javax.persistence.criteria.JoinType.RIGHT));
+			case LEFT_JOIN -> joins.put(alias, joinFrom.join(joinWith, jakarta.persistence.criteria.JoinType.LEFT));
+			case RIGHT_JOIN -> joins.put(alias, joinFrom.join(joinWith, jakarta.persistence.criteria.JoinType.RIGHT));
 			case INNER_JOIN_MAP -> joins.put(alias, joinFrom.joinMap(joinWith));
-			case LEFT_JOIN_MAP -> joins.put(alias, joinFrom.joinMap(joinWith, javax.persistence.criteria.JoinType.LEFT));
+			case LEFT_JOIN_MAP -> joins.put(alias, joinFrom.joinMap(joinWith, jakarta.persistence.criteria.JoinType.LEFT));
 			default -> joins.put(alias, joinFrom.join(joinWith));
 		}
 

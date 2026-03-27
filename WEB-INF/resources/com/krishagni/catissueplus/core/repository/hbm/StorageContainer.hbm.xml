@@ -208,7 +208,7 @@
         delete from
           com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition p
         where
-          (p.blocked is null or p.blocked = 0) and p.reservationTime < :expireTime
+          (p.blocked is null or p.blocked = false) and p.reservationTime < :expireTime
       ]]>
     </query>
 

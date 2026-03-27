@@ -245,7 +245,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	@Override
 	public Long getCustomFieldRecordId(Long cprId, Long formId, Long formCtxtId) {
-		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+		return getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_ID, Long.class)
 			.setParameter("cprId", cprId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -254,7 +254,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	@Override
 	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> cprIds, Long formId, Long formCtxtId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS, Object[].class)
 			.setParameterList("cprIds", cprIds)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -270,14 +270,14 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	@Override
 	public int insertCustomFieldRecordId(Long cprId, Long formId, Long formCtxtId, Long recordId, String formStatus) {
-		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+		int rows = getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_RECORD)
 			.setParameter("cprId", cprId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
 			.setParameter("recordId", recordId)
 			.executeUpdate();
 
-		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+		getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
 			.setParameter("cprId", cprId)
 			.setParameter("formId", formId)
 			.setParameter("recordId", recordId)
@@ -289,7 +289,7 @@ public class CollectionProtocolRegistrationDaoImpl extends AbstractDao<Collectio
 
 	@Override
 	public int updateCustomFieldRecStatus(Long cprId, Long formId, Long recordId, String formStatus) {
-		return getCurrentSession().getNamedQuery(UPDATE_CUSTOM_FIELD_REC_STATUS)
+		return getCurrentSession().createNamedMutationQuery(UPDATE_CUSTOM_FIELD_REC_STATUS)
 			.setParameter("formStatus", formStatus)
 			.setParameter("cprId", cprId)
 			.setParameter("formId", formId)

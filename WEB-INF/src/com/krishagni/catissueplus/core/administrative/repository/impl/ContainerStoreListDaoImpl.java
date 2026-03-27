@@ -54,6 +54,7 @@ public class ContainerStoreListDaoImpl extends AbstractDao<ContainerStoreList> i
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void saveOrUpdateItem(ContainerStoreListItem item) {
 		getCurrentSession().saveOrUpdate(item);
 	}

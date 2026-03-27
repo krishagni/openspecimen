@@ -37,7 +37,12 @@ public class UniqueIdGeneratorImpl extends AbstractDao<KeySequence> implements U
 
 		Long uniqueId = seq.increment();
 		seq.incrementBy(incrementBy >= 1 ? incrementBy - 1 : 0);
-		getCurrentSession().saveOrUpdate(seq);
+		if (seq.getId() == null) {
+			getCurrentSession().persist(seq);
+		} else {
+			getCurrentSession().merge(seq);
+		}
+
 		return uniqueId;
 	}
 

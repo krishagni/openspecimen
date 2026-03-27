@@ -116,7 +116,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	@Override
 	public List<String> getRevisionEntityNames() {
-		return (List<String>) getCurrentSession().getNamedQuery(GET_ENTITY_NAMES).list();
+		return getCurrentSession().createNamedQuery(GET_ENTITY_NAMES, String.class).list();
 	}
 
 	@Override
@@ -197,8 +197,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	@Override
-	public void saveOrUpdate(DeleteLog log) {
-		getCurrentSession().saveOrUpdate(log);
+	public void saveDeleteLog(DeleteLog log) {
+		getCurrentSession().persist(log);
 	}
 
 	@Override
@@ -231,7 +231,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	public int deleteApiCallLogs(int olderThanDays, int maxRows) {
 		LocalDate olderThan = LocalDate.now().minus(olderThanDays, ChronoUnit.DAYS);
 		String sql = String.format(DELETE_OLDER_API_CALL_LOGS_SQL, isMySQL() ? " limit " : " and rownum < ")  + maxRows;
-		return getCurrentSession().createNativeQuery(sql)
+		return getCurrentSession().createNativeMutationQuery(sql)
 			.setParameter("olderThan", java.sql.Date.valueOf(olderThan))
 			.executeUpdate();
 	}

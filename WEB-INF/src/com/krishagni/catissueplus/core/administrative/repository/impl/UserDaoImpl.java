@@ -146,7 +146,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	
 	@Override
 	public void saveFpToken(ForgotPasswordToken token) {
-		getCurrentSession().saveOrUpdate(token);
+		getCurrentSession().persist(token);
 	}
 	
 	@Override
@@ -281,6 +281,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void saveUiState(UserUiState state) {
 		getCurrentSession().saveOrUpdate(state);
 	}
@@ -308,7 +309,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 	@Override
 	public List<Map<String, Object>> getFormRecords(String entityType, Long instituteId, Long formId, List<String> emailIds, int startAt, int maxResults) {
-		String sql = getCurrentSession().getNamedQuery(GET_FORM_RECS).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(GET_FORM_RECS, Object[].class).getQueryString();
 		if (CollectionUtils.isNotEmpty(emailIds)) {
 			int orderByIdx = sql.lastIndexOf("order by");
 			sql = sql.substring(0, orderByIdx) + " and usr.email_address in (:emailIds) " + sql.substring(orderByIdx);

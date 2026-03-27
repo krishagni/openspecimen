@@ -16,7 +16,7 @@ public interface UserNotificationDao extends Dao<UserNotification> {
 	//
 	// if notification object related methods grow, we can move them to NotificationDao
 	//
-	void saveOrUpdate(Notification notification);
+	void saveNotification(Notification notification);
 
 	int deleteNotificationsOlderThan(int olderThanDay, int maxNotifs);
 }

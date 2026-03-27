@@ -28,7 +28,7 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 
 	@Override
 	public List<SearchEntityKeyword> getMatches(String entity, String searchTerm, int maxResults) {
-		String sql = getCurrentSession().createNamedQuery(GET_MATCHES).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(GET_MATCHES, Object[].class).getQueryString();
 		if (entity != null) {
 			sql = String.format(sql, " r.short_name = :entity and ");
 		} else {
@@ -63,7 +63,7 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 
 	@Override
 	public List<String> getMatchingEntities(String entity, String searchTerm) {
-		String sql = getCurrentSession().createNamedQuery(GET_MATCHING_ENTITIES).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(GET_MATCHING_ENTITIES, String.class).getQueryString();
 		if (entity != null) {
 			sql = String.format(sql, " and r.short_name = :entity");
 		} else {

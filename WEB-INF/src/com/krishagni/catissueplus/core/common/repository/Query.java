@@ -3,15 +3,14 @@ package com.krishagni.catissueplus.core.common.repository;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.LockModeType;
+import jakarta.persistence.LockModeType;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.query.internal.QueryImpl;
+import org.hibernate.type.BasicTypeReference;
 import org.hibernate.type.StandardBasicTypes;
-import org.hibernate.type.Type;
 
 public class Query<R> {
 	private org.hibernate.query.Query<R> query;
@@ -32,19 +31,19 @@ public class Query<R> {
 
 	@SuppressWarnings("unchecked")
 	public static <R> Query<R> createNamedQuery(Session session, String name) {
-		return new Query<R>(session.createNamedQuery(name));
+		return new Query<R>(session.createNamedQuery(name, (Class<R>) Object.class));
 	}
 
 	public static <R> Query<R> createQuery(Session session, String hql, Class<R> returnType) {
 		return new Query<>(session.createQuery(hql, returnType));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "deprecation"})
 	public static <R> Query<R> createQuery(Session session, String hql) {
 		return new Query<R>(session.createQuery(hql));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "deprecation"})
 	public static <R> Query<R> createNativeQuery(Session session, String sql) {
 		Query<R> query = new Query<R>(session.createNativeQuery(sql));
 		query.nativeQuery = true;
@@ -131,15 +130,16 @@ public class Query<R> {
 		return query.getQueryString();
 	}
 
-	public String getSqlString() {
-		String[] sqlPlans = ((QueryImpl<Object>) query).getQueryPlan().getSqlStrings();
-		return sqlPlans[0];
-	}
+//	public String getSqlString() {
+//		// Hibernate 6 no longer exposes QueryImpl internals. For native queries, the
+//		// query string is already SQL; for HQL/JPQL we return the HQL string.
+//		return query.getQueryString();
+//	}
 
 	//
 
 
-	private Query<R> addScalar(String alias, Type type) {
+	private Query<R> addScalar(String alias, BasicTypeReference<?> type) {
 		if (nativeQuery) {
 			((NativeQuery<?>)query).addScalar(alias, type);
 		}

@@ -244,7 +244,7 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 		}
 
 		@Override
-		public boolean requiresPostCommitHanding(EntityPersister persister) {
+		public boolean requiresPostCommitHandling(EntityPersister persister) {
 			return false;
 		}
 	}

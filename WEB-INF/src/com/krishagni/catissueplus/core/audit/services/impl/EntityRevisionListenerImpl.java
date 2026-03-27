@@ -1,7 +1,5 @@
 package com.krishagni.catissueplus.core.audit.services.impl;
 
-import java.io.Serializable;
-
 import org.hibernate.envers.EntityTrackingRevisionListener;
 import org.hibernate.envers.RevisionType;
 
@@ -23,7 +21,7 @@ public class EntityRevisionListenerImpl implements EntityTrackingRevisionListene
 	}
 
 	@Override
-	public void entityChanged(Class entityClass, String entityName, Serializable entityId, RevisionType revisionType, Object revisionEntity) {
+	public void entityChanged(Class entityClass, String entityName, Object entityId, RevisionType revisionType, Object revisionEntity) {
 		if (!(entityId instanceof Number)) {
 			return;
 		}

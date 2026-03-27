@@ -62,7 +62,7 @@ public class ScheduledJobDaoImpl extends AbstractDao<ScheduledJob> implements Sc
 
 	@Override
 	public void saveOrUpdateJobRun(ScheduledJobRun jobRun) {
-		getCurrentSession().saveOrUpdate(jobRun);
+		getCurrentSession().persist(jobRun);
 	}
 	
 	@Override

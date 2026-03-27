@@ -16,8 +16,8 @@ import java.util.UUID;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.core.xml.XMLObject;
@@ -138,7 +138,7 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 			return Collections.emptyMap();
 		}
 
-		String idpSloUrl = rp.getAssertingPartyDetails().getSingleLogoutServiceLocation();
+		String idpSloUrl = rp.getAssertingPartyMetadata().getSingleLogoutServiceLocation();
 		if (StringUtils.isBlank(idpSloUrl)) {
 			return Collections.emptyMap();
 		}
@@ -258,7 +258,7 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		logoutReq.setID("_" + UUID.randomUUID());
 		logoutReq.setIssueInstant(Instant.now());
 		logoutReq.setVersion(SAMLVersion.VERSION_20);
-		logoutReq.setDestination(rp.getAssertingPartyDetails().getSingleLogoutServiceLocation());
+		logoutReq.setDestination(rp.getAssertingPartyMetadata().getSingleLogoutServiceLocation());
 
 		// Issuer - We the service provider - SP
 		Issuer issuer = (Issuer) XMLObjectSupport.buildXMLObject(Issuer.DEFAULT_ELEMENT_NAME);

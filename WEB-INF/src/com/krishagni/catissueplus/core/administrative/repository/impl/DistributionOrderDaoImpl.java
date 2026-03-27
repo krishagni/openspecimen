@@ -66,24 +66,21 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public DistributionOrder getOrder(String name) {
 		List<DistributionOrder> result = getOrders(Collections.singletonList(name));
 		return result.isEmpty() ? null : result.iterator().next();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<DistributionOrder> getOrders(List<String> names) {
-		return getCurrentSession().getNamedQuery(GET_ORDERS_BY_NAME)
+		return getCurrentSession().createNamedQuery(GET_ORDERS_BY_NAME, DistributionOrder.class)
 			.setParameterList("names", names)
 			.list();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<DistributionOrder> getUnpickedOrders(Date distSince, int startAt, int maxOrders) {
-		return getCurrentSession().getNamedQuery(GET_UNPICKED_ORDERS)
+		return getCurrentSession().createNamedQuery(GET_UNPICKED_ORDERS, DistributionOrder.class)
 			.setParameter("distEarlierThan", distSince)
 			.setFirstResult(startAt)
 			.setMaxResults(maxOrders)
@@ -91,10 +88,8 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<DistributionOrderItem> getDistributedOrderItems(List<Long> specimenIds) {
-		return getSessionFactory().getCurrentSession()
-			.getNamedQuery(GET_DISTRIBUTED_ITEMS_BY_SPMN_IDS)
+		return getCurrentSession().createNamedQuery(GET_DISTRIBUTED_ITEMS_BY_SPMN_IDS, DistributionOrderItem.class)
 			.setParameterList("ids", specimenIds)
 			.list();
 	}
@@ -110,7 +105,6 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<DistributionOrderItem> getOrderItems(DistributionOrderItemListCriteria crit) {
 		Criteria<DistributionOrderItem> query = Criteria.create(getCurrentSession(), DistributionOrderItem.class, "orderItem");
 		query.createAlias("orderItem.order", "order")
@@ -141,18 +135,19 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void saveOrUpdateOrderItem(DistributionOrderItem item) {
 		getCurrentSession().saveOrUpdate(item);
 	}
 
 	@Override
 	public void deleteOrderItem(DistributionOrderItem item) {
-		getCurrentSession().delete(item);
+		getCurrentSession().remove(item);
 	}
 
 	@Override
 	public Long getCustomFieldRecordId(Long orderId, Long formId, Long formCtxtId) {
-		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+		return getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_ID, Long.class)
 			.setParameter("orderId", orderId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -161,7 +156,7 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 
 	@Override
 	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> orderIds, Long formId, Long formCtxtId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS, Object[].class)
 			.setParameterList("orderIds", orderIds)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -177,14 +172,14 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 
 	@Override
 	public int insertCustomFieldRecordId(Long orderId, Long formId, Long formCtxtId, Long recordId) {
-		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+		int rows = getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_RECORD)
 			.setParameter("orderId", orderId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
 			.setParameter("recordId", recordId)
 			.executeUpdate();
 
-		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+		getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
 			.setParameter("orderId", orderId)
 			.setParameter("formId", formId)
 			.setParameter("recordId", recordId)
@@ -193,7 +188,6 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 		return rows;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Criteria<Object[]> getOrderListQuery(DistributionOrderListCriteria crit) {
 		Criteria<Object[]> query = createCriteria(DistributionOrder.class, Object[].class, "order")
 			.join("order.distributionProtocol", "dp")

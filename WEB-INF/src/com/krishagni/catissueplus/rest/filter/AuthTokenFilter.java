@@ -14,13 +14,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.HttpHeaders;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -419,7 +419,18 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	}
 
 	private boolean matches(HttpServletRequest httpReq, String url) {
-		return new AntPathRequestMatcher(getUrlPattern(url), httpReq.getMethod(), true).matches(httpReq);
+		AntPathRequestMatcher matcher = new AntPathRequestMatcher(getUrlPattern(url), httpReq.getMethod(), true);
+		if (matcher.matches(httpReq)) {
+			return true;
+		}
+
+		// Allow optional trailing slash in configured URLs
+		if (!url.endsWith("/**")) {
+			String modifiedUrl = url.endsWith("/") ? url.substring(0, url.length() - 1) : url + "/";
+			return new AntPathRequestMatcher(getUrlPattern(modifiedUrl), httpReq.getMethod(), true).matches(httpReq);
+		}
+
+		return false;
 	}
 
 	private String getUrlPattern(String url) {
@@ -440,7 +451,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		ResponseEntity<Object> resp = new RestErrorController().handleOtherException(e, new ServletWebRequest(httpReq));
 
 		httpResp.setContentType("application/json");
-		httpResp.setStatus(resp.getStatusCodeValue());
+		httpResp.setStatus(resp.getStatusCode().value());
 		httpResp.getOutputStream().write(toJsonString(resp.getBody()).getBytes());
 		httpResp.getOutputStream().flush();
 		httpResp.getOutputStream().close();

@@ -98,7 +98,7 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public void saveAuthToken(AuthToken token) {
-		getCurrentSession().saveOrUpdate(token);
+		getCurrentSession().persist(token);
 	}
 	
 	@Override
@@ -124,7 +124,7 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public int deleteAuthTokens(List<String> tokens) {
-		return createNamedQuery(DELETE_AUTH_TOKENS)
+		return getCurrentSession().createNamedMutationQuery(DELETE_AUTH_TOKENS)
 			.setParameter("tokens", tokens)
 			.executeUpdate();
 	}
@@ -173,12 +173,12 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	
 	@Override
 	public void saveLoginAuditLog(LoginAuditLog log) {
-		getCurrentSession().saveOrUpdate(log);
+		getCurrentSession().persist(log);
 	}
 
 	@Override
 	public void saveCredentials(AuthCredential credential) {
-		getCurrentSession().saveOrUpdate(credential);
+		getCurrentSession().persist(credential);
 	}
 
 	@Override
@@ -209,9 +209,8 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 			.uniqueResult();
 	}
 
-	@Override
-	public void saveOrUpdate(LoginOtp otp) {
-		getCurrentSession().saveOrUpdate(otp);
+	public void saveLoginOtp(LoginOtp otp) {
+		getCurrentSession().persist(otp);
 	}
 
 	@Override
@@ -221,7 +220,8 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public void deleteLoginOtp(LoginOtp otp) {
-		getCurrentSession().delete(otp);
+		// assumes the otp is attached to the current session
+		getCurrentSession().remove(otp);
 	}
 
 	@Override

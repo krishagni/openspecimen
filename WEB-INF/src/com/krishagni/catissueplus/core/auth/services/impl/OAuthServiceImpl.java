@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
@@ -166,7 +166,7 @@ public class OAuthServiceImpl implements OAuthService, InitializingBean, Applica
 
 		Map<String, String> props = provider.getProps();
 		String scope = StringUtils.isBlank(props.get("scope")) ? "openid" : props.get("scope");
-		return UriComponentsBuilder.fromHttpUrl(props.get("authorizeUrl"))
+		return UriComponentsBuilder.fromUriString(props.get("authorizeUrl"))
 			.queryParam("response_type", "code")
 			.queryParam("client_id", props.get("clientId"))
 			.queryParam("audience", props.get("audience"))

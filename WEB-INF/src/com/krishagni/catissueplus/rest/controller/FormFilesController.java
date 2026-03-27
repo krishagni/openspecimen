@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.rest.controller;
 import java.io.File;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

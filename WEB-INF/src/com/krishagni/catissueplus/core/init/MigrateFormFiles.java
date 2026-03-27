@@ -72,7 +72,7 @@ public class MigrateFormFiles implements InitializingBean {
 
 	@PlusTransactional
 	private boolean areFormFilesMigrated() {
-		Number count = (Number) sessionFactory.getCurrentSession().createNativeQuery(GET_MIGRATED_FILES_COUNT).uniqueResult();
+		Number count = sessionFactory.getCurrentSession().createNativeQuery(GET_MIGRATED_FILES_COUNT, Long.class).uniqueResult();
 		return count != null && count.longValue() > 0L;
 	}
 
@@ -157,7 +157,7 @@ public class MigrateFormFiles implements InitializingBean {
 
 	@PlusTransactional
 	private List<Object[]> getFileIds(String sql, int startAt, int maxResults) {
-		return sessionFactory.getCurrentSession().createNativeQuery(sql)
+		return sessionFactory.getCurrentSession().createNativeQuery(sql, Object[].class)
 			.setFirstResult(startAt)
 			.setMaxResults(maxResults)
 			.list();

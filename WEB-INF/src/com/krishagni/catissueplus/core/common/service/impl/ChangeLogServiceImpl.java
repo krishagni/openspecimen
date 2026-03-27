@@ -17,7 +17,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 
 	@Override
 	public boolean doesChangeLogExists(String id, String author, String filename) {
-		Integer count = (Integer) sessionFactory.getCurrentSession().createNativeQuery(GET_CHANGE_LOG_COUNT_SQL)
+		Integer count = sessionFactory.getCurrentSession().createNativeQuery(GET_CHANGE_LOG_COUNT_SQL, Integer.class)
 			.addScalar("cnt", StandardBasicTypes.INTEGER)
 			.setParameter("id", id)
 			.setParameter("author", author)
@@ -28,14 +28,14 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 
 	@Override
 	public void insertChangeLog(String id, String author, String filename) {
-		Integer orderNo = (Integer) sessionFactory.getCurrentSession().createNativeQuery(GET_LATEST_CHANGE_LOG_ORDER_SQL)
+		Integer orderNo = sessionFactory.getCurrentSession().createNativeQuery(GET_LATEST_CHANGE_LOG_ORDER_SQL, Integer.class)
 			.addScalar("orderNo", StandardBasicTypes.INTEGER)
 			.uniqueResult();
 		if (orderNo == null) {
 			orderNo = 0;
 		}
 
-		sessionFactory.getCurrentSession().createNativeQuery(INSERT_CHANGE_LOG)
+		sessionFactory.getCurrentSession().createNamedMutationQuery(INSERT_CHANGE_LOG)
 			.setParameter("id", id)
 			.setParameter("author", author)
 			.setParameter("filename", filename)

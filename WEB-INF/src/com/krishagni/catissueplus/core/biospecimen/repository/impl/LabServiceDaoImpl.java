@@ -52,7 +52,7 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 
 	@Override
 	public List<LabServicesRateListDetail> getRateLists(Long serviceId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_RATE_LISTS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_RATE_LISTS, Object[].class)
 			.setParameter("serviceId", serviceId)
 			.list();
 
@@ -68,7 +68,7 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 
 	@Override
 	public Map<Long, Long> getRateListsCount(Collection<Long> serviceIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_RATE_LISTS_COUNT)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_RATE_LISTS_COUNT, Object[].class)
 			.setParameterList("serviceIds", serviceIds)
 			.list();
 
@@ -82,7 +82,7 @@ public class LabServiceDaoImpl extends AbstractDao<LabService> implements LabSer
 
 	@Override
 	public Map<String, Long> getSpecimensCountServicedBy(Collection<Long> serviceIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SPECIMENS_COUNT_BY_SERVICE)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_SPECIMENS_COUNT_BY_SERVICE, Object[].class)
 			.setParameterList("serviceIds", serviceIds)
 			.list();
 
