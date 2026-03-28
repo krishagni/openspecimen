@@ -15,17 +15,29 @@ public class ClassPathUtil {
 
 	public static void addURL(URL u) 
 	throws IOException {
-		ClassLoader loader = ClassPathUtil.class.getClassLoader();
-		Class<URLClassLoader> urlLoaderCls = URLClassLoader.class;
-
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try {
-			Method method = urlLoaderCls.getDeclaredMethod(
-				"addURL",
-				new Class<?>[] { URL.class });
+			Method method = findAddUrlMethod(loader.getClass());
+			if (method == null) {
+				throw new IOException("No addURL method found in " + loader.getClass().getName());
+			}
+
 			method.setAccessible(true);
-			method.invoke(loader, new Object[] { u });
-		} catch (Throwable t) {
-			throw new IOException("Error, could not add URL to classloader: " + u, t);
+			method.invoke(loader, u);
+		} catch (Exception e) {
+			throw new IOException("Failed to inject URL: " + u, e);
 		}
+	}
+
+	private static Method findAddUrlMethod(Class<?> type) {
+		Class<?> cls = type;
+		while (cls != null && cls != URLClassLoader.class) {
+			try {
+				return cls.getDeclaredMethod("addURL", URL.class);
+			} catch (NoSuchMethodException e) {
+				cls = cls.getSuperclass();
+			}
+		}
+		return null;
 	}
 }
