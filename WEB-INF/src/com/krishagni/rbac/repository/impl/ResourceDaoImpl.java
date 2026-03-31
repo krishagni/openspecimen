@@ -25,7 +25,7 @@ public class ResourceDaoImpl extends AbstractDao<Resource> implements ResourceDa
 
 	@Override
 	public Resource getResource(Long resourceId) {
-		return getCurrentSession().get(Resource.class, resourceId);
+		return getCurrentSession().find(Resource.class, resourceId);
 	}
 
 	@Override

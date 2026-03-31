@@ -31,7 +31,7 @@ import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
-public class BaseEntity {
+public class BaseEntity implements Identifiable<Long> {
 
 	private static final LogUtil logger = LogUtil.getLogger(BaseEntity.class);
 

@@ -236,6 +236,15 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			.executeUpdate();
 	}
 
+	@Override
+	public int updateApiCallLog(Long callLogId, Date endTime, String statusCode) {
+		return getCurrentSession().createNamedMutationQuery(UPDATE_API_CALL_LOG_TIME)
+			.setParameter("endTime", endTime)
+			.setParameter("statusCode", statusCode)
+			.setParameter("callLogId", callLogId)
+			.executeUpdate();
+	}
+
 	private Object[] getLatestRevisionInfo(String auditTable, Long objectId, int revType) {
 		String[] parts = auditTable.split(":");
 
@@ -678,6 +687,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	private static final String GET_LATEST_API_CALL_TIME = FQN + ".getLatestApiCallTime";
 
 	private static final String DELETE_OLDER_API_CALL_LOGS = FQN + ".deleteOlderLogs";
+
+	private static final String UPDATE_API_CALL_LOG_TIME = FQN + ".updateApiCallLogTime";
 
 	private static final String GET_ENTITY_NAMES = "com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord.getEntityNames";
 

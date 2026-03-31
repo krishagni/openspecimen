@@ -614,7 +614,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		userAuditLog.setCallStartTime(Calendar.getInstance().getTime());
 		userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
 		userAuditLog.setLoginAuditLog(loginAuditLog);
-		auditService.saveOrUpdateApiLog(userAuditLog);
+		auditService.saveApiCallLog(userAuditLog);
 	}
 
 	private boolean isSystemLockedDown() {

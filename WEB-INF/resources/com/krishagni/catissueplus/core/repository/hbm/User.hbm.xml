@@ -37,7 +37,7 @@
 	
     <property name="password" column="PASSWORD"/>
 	    
-    <set name="passwords" inverse="true" cascade="save-update">
+    <set name="passwords" inverse="true" cascade="persist,merge">
       <key column="USER_ID"/>
       <one-to-many  class="com.krishagni.catissueplus.core.administrative.domain.Password" />
     </set>

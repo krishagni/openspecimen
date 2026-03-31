@@ -16,9 +16,6 @@ import java.util.UUID;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.util.XMLObjectSupport;
@@ -33,7 +30,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml2.core.Saml2X509Credential;
-import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
+import org.springframework.security.saml2.provider.service.authentication.Saml2AssertionAuthentication;
+import org.springframework.security.saml2.provider.service.authentication.Saml2ResponseAssertionAccessor;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -59,6 +57,8 @@ import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 
 //
@@ -97,16 +97,15 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 	@PlusTransactional
 	public void onAuthenticationSuccess(HttpServletRequest httpReq, HttpServletResponse httpResp, Authentication auth)
 	throws IOException {
-		Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) auth.getPrincipal();
-
-		String idpId = principal.getRelyingPartyRegistrationId();
+		Saml2AssertionAuthentication saml2Auth = (Saml2AssertionAuthentication) auth;
+		String idpId = saml2Auth.getRelyingPartyRegistrationId();
 		AuthDomain domain = daoFactory.getAuthDao().getAuthDomainByName(idpId);
 		if (domain == null) {
 			httpResp.sendRedirect(errorUrl(UserErrorCode.DOMAIN_NOT_FOUND, idpId));
 			return;
 		}
 
-		User user = getUser(httpResp, principal, domain);
+		User user = getUser(httpResp, saml2Auth.getCredentials(), domain);
 		if (user == null) {
 			return;
 		}
@@ -114,7 +113,7 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		String encodedToken = generateAuthToken(httpReq, httpResp, auth, user);
 		AuthCredential credential = new AuthCredential();
 		credential.setToken(AuthUtil.decodeToken(encodedToken));
-		credential.setCredential(auth.getPrincipal());
+		credential.setCredential(saml2Auth.getCredentials());
 		daoFactory.getAuthDao().saveCredentials(credential);
 		httpResp.sendRedirect(homeUrl());
 	}
@@ -149,13 +148,13 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 			return Collections.emptyMap();
 		}
 
-		Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) credential.getCredential();
-		if (principal == null) {
+		Saml2ResponseAssertionAccessor assertion = (Saml2ResponseAssertionAccessor) credential.getCredential();
+		if (assertion == null) {
 			return Collections.emptyMap();
 		}
 
 		Saml2X509Credential signingCred = getSigningCredential(rp);
-		String encodedReq = samlEncode(buildLogoutRequest(rp, principal));
+		String encodedReq = samlEncode(buildLogoutRequest(rp, assertion));
 		String signAlg    = urlEncode(getSigningAlgUri(signingCred));
 
 		String queryToSign = "SAMLRequest=" + encodedReq + "&SigAlg=" + signAlg;
@@ -167,7 +166,7 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		return Collections.singletonMap("url", redirectUrl);
 	}
 
-	private User getUser(HttpServletResponse httpResp, Saml2AuthenticatedPrincipal principal, AuthDomain domain)
+	private User getUser(HttpServletResponse httpResp, Saml2ResponseAssertionAccessor assertion, AuthDomain domain)
 	throws IOException {
 		Map<String, String> props = domain.getAuthProvider().getProps();
 		String loginNameAttr      = props.get("loginNameAttr");
@@ -176,11 +175,11 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		String key = null;
 		User user = null;
 		if (StringUtils.isNotBlank(loginNameAttr)) {
-			String loginName = principal.getFirstAttribute(loginNameAttr);
+			String loginName = assertion.getFirstAttribute(loginNameAttr);
 			user = daoFactory.getUserDao().getUser(loginName, domain.getName());
 			key = loginName;
 		} else if (StringUtils.isNotBlank(emailAttr)) {
-			String emailId = principal.getFirstAttribute(emailAttr);
+			String emailId = assertion.getFirstAttribute(emailAttr);
 			user = daoFactory.getUserDao().getUserByEmailAddress(emailId);
 			key = emailId;
 		}
@@ -247,11 +246,11 @@ public class SamlAuthenticationHandler implements AuthenticationSuccessHandler, 
 		return encodedToken;
 	}
 
-	private LogoutRequest buildLogoutRequest(RelyingPartyRegistration rp, Saml2AuthenticatedPrincipal principal) {
-		String nameIdValue = principal.getName();
+	private LogoutRequest buildLogoutRequest(RelyingPartyRegistration rp, Saml2ResponseAssertionAccessor assertion) {
+		String nameIdValue = assertion.getNameId();
 		String sessionIdxValue = null;
-		if (principal.getSessionIndexes() != null && !principal.getSessionIndexes().isEmpty()) {
-			sessionIdxValue = principal.getSessionIndexes().iterator().next();
+		if (assertion.getSessionIndexes() != null && !assertion.getSessionIndexes().isEmpty()) {
+			sessionIdxValue = assertion.getSessionIndexes().iterator().next();
 		}
 
 		LogoutRequest logoutReq = (LogoutRequest) XMLObjectSupport.buildXMLObject(LogoutRequest.DEFAULT_ELEMENT_NAME);

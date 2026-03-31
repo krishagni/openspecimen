@@ -8,6 +8,10 @@ public interface Dao<T> {
 	void saveOrUpdate(T t);
 	
 	void saveOrUpdate(T t, boolean flush);
+
+	void save(Object obj);
+
+	void update(Object obj);
 	
 	<R> void delete(R t);
 	

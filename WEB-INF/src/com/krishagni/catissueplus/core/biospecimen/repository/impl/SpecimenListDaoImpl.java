@@ -188,9 +188,8 @@ public class SpecimenListDaoImpl extends AbstractDao<SpecimenList> implements Sp
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void saveOrUpdate(SpecimensPickList session) {
-		getCurrentSession().saveOrUpdate(session);
+		saveOrUpdate(sessionFactory, session, false);
 	}
 
 	@Override

@@ -137,7 +137,7 @@ public class DistributionOrderDaoImpl extends AbstractDao<DistributionOrder> imp
 	@Override
 	@SuppressWarnings("deprecation")
 	public void saveOrUpdateOrderItem(DistributionOrderItem item) {
-		getCurrentSession().saveOrUpdate(item);
+		saveOrUpdate(sessionFactory, item, false);
 	}
 
 	@Override

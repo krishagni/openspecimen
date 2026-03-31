@@ -57,7 +57,7 @@ public class ScheduledJobDaoImpl extends AbstractDao<ScheduledJob> implements Sc
 
 	@Override
 	public ScheduledJobRun getJobRun(Long id) {
-		return getCurrentSession().get(ScheduledJobRun.class, id);
+		return getCurrentSession().find(ScheduledJobRun.class, id);
 	}
 
 	@Override

@@ -66,7 +66,7 @@ public interface UserDao extends Dao<User> {
 
 	List<User> getSuperAndInstituteAdmins(String instituteName);
 
-	void saveUiState(UserUiState state);
+	void saveUiState(boolean update, UserUiState state);
 
 	UserUiState getState(Long userId);
 

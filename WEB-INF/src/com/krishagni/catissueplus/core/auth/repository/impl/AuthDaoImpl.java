@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.query.MutationQuery;
 
 import com.krishagni.catissueplus.core.auth.domain.AuthCredential;
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
@@ -113,7 +114,7 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 			sql += " and token != :exceptToken";
 		}
 
-		Query<?> query = createNativeQuery(sql);
+		MutationQuery query = getCurrentSession().createNativeMutationQuery(sql);
 		query.setParameter("userId", userId);
 		if (StringUtils.isNotBlank(except)) {
 			query.setParameter("exceptToken", except);
@@ -159,14 +160,14 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	
 	@Override
 	public void deleteInactiveAuthTokens(Date latestAccessTime) {
-		createNamedQuery(DELETE_INACTIVE_AUTH_TOKENS)
+		getCurrentSession().createNamedMutationQuery(DELETE_INACTIVE_AUTH_TOKENS)
 			.setParameter("latestCallTime", latestAccessTime)
 			.executeUpdate();
 	}
 	
 	@Override
 	public int deleteAuthTokensByUser(List<Long> userIds) {
-		return createNamedQuery(DELETE_AUTH_TOKENS_BY_USER_ID)
+		return getCurrentSession().createNamedMutationQuery(DELETE_AUTH_TOKENS_BY_USER_ID)
 			.setParameterList("ids", userIds)
 			.executeUpdate();
 	}
@@ -190,14 +191,14 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public void deleteCredentials(String token) {
-		createNamedQuery(DELETE_CREDENTIAL)
+		getCurrentSession().createNamedMutationQuery(DELETE_CREDENTIAL)
 			.setParameter("token", token)
 			.executeUpdate();
 	}
 
 	@Override
 	public void deleteDanglingCredentials() {
-		createNamedQuery(DELETE_DANGLING_CREDS).executeUpdate();
+		getCurrentSession().createNamedMutationQuery(DELETE_DANGLING_CREDS).executeUpdate();
 	}
 
 	@Override
@@ -215,7 +216,7 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 
 	@Override
 	public void deleteLoginOtps(Long userId) {
-		createNamedQuery(DELETE_USER_LOGIN_OTPS).setParameter("userId", userId).executeUpdate();
+		getCurrentSession().createNamedMutationQuery(DELETE_USER_LOGIN_OTPS).setParameter("userId", userId).executeUpdate();
 	}
 
 	@Override
@@ -228,7 +229,7 @@ public class AuthDaoImpl extends AbstractDao<AuthDomain> implements AuthDao {
 	public void deleteExpiredLoginOtps() {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.MINUTE, -5);
-		createNamedQuery(DELETE_EXPIRED_USER_LOGIN_OTPS).setParameter("expiryTime", cal.getTime()).executeUpdate();
+		getCurrentSession().createNamedMutationQuery(DELETE_EXPIRED_USER_LOGIN_OTPS).setParameter("expiryTime", cal.getTime()).executeUpdate();
 	}
 
 

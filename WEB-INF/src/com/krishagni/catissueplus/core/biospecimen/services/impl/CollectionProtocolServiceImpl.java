@@ -2051,7 +2051,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		if (includeIds) {
 			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept());
 		} else {
-			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "statementId"));
+			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "cpId", "eventId", "instituteId", "siteId", "statementId"));
 		}
 
 		try {

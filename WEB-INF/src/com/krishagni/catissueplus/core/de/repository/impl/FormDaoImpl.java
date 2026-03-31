@@ -515,9 +515,18 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 	
 	@Override
-	@SuppressWarnings("deprecation")
-	public void saveOrUpdateRecordEntry(FormRecordEntryBean recordEntry) {
-		sessionFactory.getCurrentSession().saveOrUpdate(recordEntry);
+	public void saveOrUpdateRecordEntry(FormRecordEntryBean re) {
+		Session session = getCurrentSession();
+		if (re.getIdentifier() == null) {
+			session.persist(re);
+			return;
+		}
+
+		if (!session.contains(re)) {
+			throw OpenSpecimenException.serverError(CommonErrorCode.SERVER_ERROR, "FormDaoImpl.saveOrUpdateRecordEntry called with unmanaged record entry");
+		}
+
+		session.merge(re);
 	}
 
 	@Override

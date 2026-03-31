@@ -39,7 +39,7 @@
     <property name="changeLog" value="classpath:db/db-os-changelog-master-${datasource.type}.xml" />
   </bean>
 
-  <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+  <bean id="sessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
     <property name="dataSource" ref="dataSource" />
     <property name="mappingLocations">
       <list>
@@ -60,7 +60,7 @@
     </property>
   </bean>
 
-  <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+  <bean id="transactionManager" class="org.springframework.orm.jpa.hibernate.HibernateTransactionManager">
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
   

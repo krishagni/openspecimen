@@ -148,14 +148,14 @@
       name="position"
       class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
       property-ref="occupyingContainer"
-      cascade="save-update"
+      cascade="persist,merge"
       fetch="join"/>
 
     <one-to-one
       name="blockedPosition"
       class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
       property-ref="blockedForContainer"
-      cascade="save-update"
+      cascade="persist,merge"
       fetch="join" />
 
     <!-- OPSMN-6269: do not use batch size on occupied positions as this can result in materialising of dimensionless

@@ -249,12 +249,8 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void saveCpe(CollectionProtocolEvent cpe, boolean flush) {
-		getCurrentSession().saveOrUpdate(cpe);
-		if (flush) {
-			getCurrentSession().flush();
-		}		
+		saveOrUpdate(sessionFactory, cpe, flush);
 	}
 
 	@Override
@@ -267,7 +263,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public SpecimenRequirement getSpecimenRequirement(Long requirementId) {
-		return getCurrentSession().get(SpecimenRequirement.class, requirementId);
+		return getCurrentSession().find(SpecimenRequirement.class, requirementId);
 	}
 
 	@Override	
@@ -285,9 +281,8 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void saveCpWorkflows(CpWorkflowConfig cfg) {
-		getCurrentSession().saveOrUpdate(cfg);
+		saveOrUpdate(sessionFactory, cfg, false);
 	}
 
 	@Override

@@ -25,7 +25,8 @@ import jakarta.ws.rs.core.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.GenericFilterBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -394,14 +395,15 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 				apiCall.setCallStartTime(Calendar.getInstance().getTime());
 				apiCall.setLoginAuditLog(loginAuditLog);
 				apiCall.setResponseCode("000");
+				auditService.saveApiCallLog(apiCall);
 			} else {
 				apiCall.setCallEndTime(Calendar.getInstance().getTime());
 				if (httpResp != null) {
 					apiCall.setResponseCode(Integer.toString(httpResp.getStatus()));
 				}
-			}
 
-			auditService.saveOrUpdateApiLog(apiCall);
+				auditService.updateApiCallLog(apiCall);
+			}
 		} catch (Throwable t) {
 			String msg = Utility.getErrorMessage(t);
 			Date startTime = apiCall != null ? apiCall.getCallStartTime() : Calendar.getInstance().getTime();
@@ -419,31 +421,46 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	}
 
 	private boolean matches(HttpServletRequest httpReq, String url) {
-		AntPathRequestMatcher matcher = new AntPathRequestMatcher(getUrlPattern(url), httpReq.getMethod(), true);
-		if (matcher.matches(httpReq)) {
+		if (matchesPattern(httpReq, getUrlPattern(httpReq, url))) {
 			return true;
 		}
 
 		// Allow optional trailing slash in configured URLs
 		if (!url.endsWith("/**")) {
 			String modifiedUrl = url.endsWith("/") ? url.substring(0, url.length() - 1) : url + "/";
-			return new AntPathRequestMatcher(getUrlPattern(modifiedUrl), httpReq.getMethod(), true).matches(httpReq);
+			return matchesPattern(httpReq, getUrlPattern(httpReq, modifiedUrl));
 		}
 
 		return false;
 	}
 
-	private String getUrlPattern(String url) {
-		if (!url.startsWith("/**")) {
-			String prefix = "/**";
-			if (!url.startsWith("/")) {
-				prefix += "/";
-			}
+	private boolean matchesPattern(HttpServletRequest httpReq, String pattern) {
+		HttpMethod method = HttpMethod.valueOf(httpReq.getMethod().toUpperCase());
+		PathPatternRequestMatcher matcher = (method != null)
+			? PathPatternRequestMatcher.pathPattern(method, pattern)
+			: PathPatternRequestMatcher.pathPattern(pattern);
+		return matcher.matches(httpReq);
+	}
 
-			url = prefix + url;
+	private String getUrlPattern(HttpServletRequest req, String url) {
+		String pattern = url.startsWith("/") ? url : "/" + url;
+
+		String servletPath = req.getServletPath();
+		if (StringUtils.isBlank(servletPath)) {
+			return pattern;
 		}
 
-		return url;
+		// If the pattern already includes the servlet path, leave it as-is
+		if (pattern.startsWith(servletPath + "/") || pattern.equals(servletPath)) {
+			return pattern;
+		}
+
+		// Prefix with servlet path (e.g., /rest/ng)
+		if (pattern.startsWith("/")) {
+			return servletPath + pattern;
+		}
+
+		return servletPath + "/" + pattern;
 	}
 
 	private void sendError(HttpServletRequest httpReq, HttpServletResponse httpResp, Exception e)

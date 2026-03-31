@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+
 import com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 
+@JsonFilter("withoutId")
 public class CpSpecimenLabelPrintSettingDetail implements Comparable<CpSpecimenLabelPrintSettingDetail> {
 	private Long id;
 	

@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
@@ -176,12 +177,13 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 			processor = new KeywordProcessor();
 			processors.put(txn, processor);
 
-			event.getSession().getActionQueue().registerProcess(
+			((SessionImplementor) event.getSession()).getActionQueue().registerCallback(
 				(session) -> {
 					final KeywordProcessor process = processors.get(txn);
 					if (process != null) {
-						process.process(session);
-						session.flush();
+						org.hibernate.Session hibSession = session.unwrap(org.hibernate.Session.class);
+						process.process(hibSession);
+						hibSession.flush();
 					}
 
 					processors.remove(txn);
@@ -256,7 +258,7 @@ public class SearchServiceImpl implements SearchService, InitializingBean {
 			this.keywords.addAll(keywords);
 		}
 
-		public void process(SessionImplementor session) {
+		public void process(Session session) {
 			SearchEntityKeywordDao keywordDao = daoFactory.getSearchEntityKeywordDao();
 
 			for (SearchEntityKeyword keyword : keywords) {

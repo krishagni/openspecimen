@@ -5,13 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Selection;
-
 import org.hibernate.Session;
 import org.hibernate.query.criteria.JpaCriteriaQuery;
-import org.apache.commons.lang3.StringUtils;
+
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Selection;
 
 public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 	protected boolean distinct;
@@ -91,7 +89,7 @@ public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 		if (selections == null || selections.isEmpty()) {
 			cq.select((Selection<? extends R>) root);
 		} else {
-			cq.multiselect(selections);
+			cq.select((Selection<? extends R>) builder.array(selections));
 		}
 
 		if (startAt >= 0 && maxResults >= 0) {
@@ -107,7 +105,7 @@ public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 		if (selections == null || selections.isEmpty()) {
 			cq.select((Selection<? extends R>) root);
 		} else {
-			cq.multiselect(selections);
+			cq.select((Selection<? extends R>) builder.array(selections));
 		}
 
 		return session.createQuery(cq).uniqueResult();

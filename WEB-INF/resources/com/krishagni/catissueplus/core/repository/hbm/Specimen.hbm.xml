@@ -70,13 +70,13 @@
       name="position"
       class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
       property-ref="occupyingSpecimen"
-      cascade="save-update"/>
+      cascade="persist,merge"/>
 
     <one-to-one
       name="checkoutPosition"
       class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
       property-ref="checkoutSpecimen"
-      cascade="save-update"
+      cascade="persist,merge"
       fetch="join" />
 
     <many-to-one name="parentSpecimen" column="PARENT_SPECIMEN_ID"/>

@@ -562,9 +562,11 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 	@PlusTransactional
 	public ResponseEvent<UserUiState> saveUiState(RequestEvent<Map<String, Object>> req) {
 		UserUiState uiState = daoFactory.getUserDao().getState(AuthUtil.getCurrentUser().getId());
+		boolean update = true;
 		if (uiState == null) {
 			uiState = new UserUiState();
 			uiState.setUserId(AuthUtil.getCurrentUser().getId());
+			update = false;
 		}
 
 		if (uiState.getState() == null) {
@@ -573,7 +575,7 @@ public class UserServiceImpl implements UserService, ObjectAccessor, Initializin
 
 		uiState.getState().putAll(req.getPayload());
 		uiState.getState().remove("authToken");
-		daoFactory.getUserDao().saveUiState(uiState);
+		daoFactory.getUserDao().saveUiState(update, uiState);
 		return ResponseEvent.response(uiState);
 	}
 

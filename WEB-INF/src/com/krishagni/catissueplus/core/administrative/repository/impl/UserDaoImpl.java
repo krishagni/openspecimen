@@ -282,8 +282,12 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 	@Override
 	@SuppressWarnings("deprecation")
-	public void saveUiState(UserUiState state) {
-		getCurrentSession().saveOrUpdate(state);
+	public void saveUiState(boolean update, UserUiState state) {
+		if (update) {
+			update(state);
+		} else {
+			save(state);
+		}
 	}
 
 	@Override

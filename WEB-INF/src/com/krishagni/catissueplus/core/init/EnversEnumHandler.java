@@ -50,7 +50,7 @@ public class EnversEnumHandler implements InitializingBean {
 						}
 
 						EnumJavaType enumTypeDescriptor = new OsEnumJavaType(enumClass);
-						FieldUtils.writeDeclaredField(userType, "enumJavaType", enumTypeDescriptor, true);
+						((org.hibernate.type.EnumType) userType).setEnumJavaType(enumTypeDescriptor);
 						javaTypeRegistry.addDescriptor(enumTypeDescriptor);
 					}
 				} catch (Exception e) {

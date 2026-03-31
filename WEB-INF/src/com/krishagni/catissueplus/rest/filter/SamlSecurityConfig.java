@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.saml2.provider.service.metadata.OpenSaml4MetadataResolver;
+import org.springframework.security.saml2.provider.service.metadata.OpenSaml5MetadataResolver;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
@@ -13,7 +13,7 @@ import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilt
 import org.springframework.security.saml2.provider.service.web.Saml2WebSsoAuthenticationRequestFilter;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import com.krishagni.catissueplus.core.auth.services.impl.SamlAuthenticationHandler;
 
@@ -35,7 +35,7 @@ public class SamlSecurityConfig {
 
 	@Bean
 	public Saml2MetadataFilter saml2MetadataFilter(RelyingPartyRegistrationResolver relyingPartyRegistrationResolver) {
-		OpenSaml4MetadataResolver metadataResolver = new OpenSaml4MetadataResolver();
+		OpenSaml5MetadataResolver metadataResolver = new OpenSaml5MetadataResolver();
 		return new Saml2MetadataFilter(relyingPartyRegistrationResolver, metadataResolver);
 	}
 
@@ -45,17 +45,17 @@ public class SamlSecurityConfig {
 		http.authorizeHttpRequests(
 			authorize -> authorize
 				.requestMatchers(
-					new AntPathRequestMatcher("/login/saml2/**"),
-					new AntPathRequestMatcher("/saml2/**"),
-					new AntPathRequestMatcher("/logout/saml2/**")
+					PathPatternRequestMatcher.pathPattern("/login/saml2/**"),
+					PathPatternRequestMatcher.pathPattern("/saml2/**"),
+					PathPatternRequestMatcher.pathPattern("/logout/saml2/**")
 				).permitAll() // Allow access to authenticate / login
 				.anyRequest().authenticated()
 			)
 			.csrf(csrf -> csrf.ignoringRequestMatchers(
-				new AntPathRequestMatcher("/saml/**"),
-				new AntPathRequestMatcher("/login/saml2/sso/**"),
-				new AntPathRequestMatcher("/saml2/**"),
-				new AntPathRequestMatcher("/logout/saml2/slo/**")
+				PathPatternRequestMatcher.pathPattern("/saml/**"),
+				PathPatternRequestMatcher.pathPattern("/login/saml2/sso/**"),
+				PathPatternRequestMatcher.pathPattern("/saml2/**"),
+				PathPatternRequestMatcher.pathPattern("/logout/saml2/slo/**")
 			))
 			.saml2Login(
 				saml2 -> saml2
