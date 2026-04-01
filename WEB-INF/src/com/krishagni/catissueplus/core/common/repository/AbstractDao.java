@@ -75,6 +75,21 @@ public class AbstractDao<T> implements Dao<T> {
 	}
 
 	@Override
+	public T merge(T obj) {
+		return merge(obj, false);
+	}
+
+	@Override
+	public T merge(T obj, boolean flush) {
+		T mergedObj = getCurrentSession().merge(obj);
+		if (flush) {
+			flush();
+		}
+
+		return mergedObj;
+	}
+
+	@Override
 	public void save(Object obj) {
 		getCurrentSession().persist(obj);
 	}

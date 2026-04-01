@@ -27,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.GenericFilterBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,6 +60,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	private static final String BASIC_AUTH = "Basic ";
 
 	private static final String BEARER_TOKEN = "Bearer ";
+
+	private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
 	private Set<String> allowedOrigins;
 	
@@ -435,6 +438,10 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	}
 
 	private boolean matchesPattern(HttpServletRequest httpReq, String pattern) {
+		if (hasMiddleWildcard(pattern)) {
+			return antPathMatcher.match(pattern, getRequestPath(httpReq));
+		}
+
 		HttpMethod method = HttpMethod.valueOf(httpReq.getMethod().toUpperCase());
 		PathPatternRequestMatcher matcher = (method != null)
 			? PathPatternRequestMatcher.pathPattern(method, pattern)
@@ -461,6 +468,21 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		}
 
 		return servletPath + "/" + pattern;
+	}
+
+	private String getRequestPath(HttpServletRequest httpReq) {
+		String path = httpReq.getRequestURI();
+		String contextPath = httpReq.getContextPath();
+		if (StringUtils.isNotBlank(contextPath) && path.startsWith(contextPath)) {
+			path = path.substring(contextPath.length());
+		}
+
+		return path;
+	}
+
+	private boolean hasMiddleWildcard(String pattern) {
+		int idx = pattern.indexOf("**");
+		return idx > 0 && idx < pattern.length() - 2;
 	}
 
 	private void sendError(HttpServletRequest httpReq, HttpServletResponse httpResp, Exception e)

@@ -33,7 +33,7 @@ public class FormFilesController {
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
-	public FileDetail uploadFile(@PathVariable("file") MultipartFile file) {
+	public FileDetail uploadFile(@RequestParam("file") MultipartFile file) {
 		return response(formSvc.uploadFile(request(file)));
 	}
 

@@ -9,6 +9,10 @@ public interface Dao<T> {
 	
 	void saveOrUpdate(T t, boolean flush);
 
+	T merge(T t);
+
+	T merge(T t, boolean flush);
+
 	void save(Object obj);
 
 	void update(Object obj);

@@ -139,7 +139,7 @@ public class SitesController {
 	@RequestMapping(method = RequestMethod.GET, value = "/byid/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SiteDetail getSiteById(@PathVariable Long id) {
+	public SiteDetail getSiteById(@PathVariable("id") Long id) {
 		return this.getSite(id);
 	}
 	

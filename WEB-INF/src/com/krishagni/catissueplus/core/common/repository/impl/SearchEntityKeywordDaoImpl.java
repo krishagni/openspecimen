@@ -28,12 +28,7 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 
 	@Override
 	public List<SearchEntityKeyword> getMatches(String entity, String searchTerm, int maxResults) {
-		String sql = getCurrentSession().createNamedQuery(GET_MATCHES, Object[].class).getQueryString();
-		if (entity != null) {
-			sql = String.format(sql, " r.short_name = :entity and ");
-		} else {
-			sql = String.format(sql, "");
-		}
+		String sql = String.format(GET_MATCHES_SQL, entity != null ? " r.short_name = :entity and " : "");
 
 		Query<Object[]> query = createNativeQuery(sql, Object[].class);
 		if (entity != null) {
@@ -63,12 +58,7 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 
 	@Override
 	public List<String> getMatchingEntities(String entity, String searchTerm) {
-		String sql = getCurrentSession().createNamedQuery(GET_MATCHING_ENTITIES, String.class).getQueryString();
-		if (entity != null) {
-			sql = String.format(sql, " and r.short_name = :entity");
-		} else {
-			sql = String.format(sql, "", "");
-		}
+		String sql = String.format(GET_MATCHING_ENTITIES_SQL, entity != null ? " and r.short_name = :entity" : "");
 
 		Query<String> query = createNativeQuery(sql, String.class)
 			.addStringScalar("entity");
@@ -91,9 +81,38 @@ public class SearchEntityKeywordDaoImpl extends AbstractDao<SearchEntityKeyword>
 
 	private static final String GET_KEYWORDS = FQN + ".getKeywords";
 
-	private static final String GET_MATCHES = FQN + ".getMatches";
-
-	private static final String GET_MATCHING_ENTITIES = FQN + ".getMatchingEntities";
-
 	private static final String GET_ENTITY_RANK_BY_SHORT_NAME = FQN + ".getEntityRankByShortName";
+
+	private static final String GET_MATCHES_SQL =
+		"select " +
+		"  k.identifier, k.entity, k.entity_id, k.name, k.value, k.status " +
+		"from " +
+		"  os_search_entity_keywords k " +
+		"  inner join os_search_entity_ranks r on r.entity = k.entity " +
+		"where " +
+		"  %s" +
+		"  k.value like :value and " +
+		"  k.status = 1 " +
+		"order by " +
+		"  r.sort_order";
+
+	private static final String GET_MATCHING_ENTITIES_SQL =
+		"select " +
+		"  r.entity as entity " +
+		"from " +
+		"  os_search_entity_ranks r " +
+		"where " +
+		"  exists ( " +
+		"    select " +
+		"      k.entity " +
+		"    from " +
+		"      os_search_entity_keywords k " +
+		"    where " +
+		"      k.value like :value and " +
+		"      k.status = 1 and " +
+		"      k.entity = r.entity " +
+		"  ) " +
+		"  %s " +
+		"order by " +
+		"  r.sort_order";
 }
