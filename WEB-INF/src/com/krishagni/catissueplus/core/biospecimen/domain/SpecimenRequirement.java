@@ -2,6 +2,7 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -514,6 +515,15 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		specimen.setAvailableQuantity(getInitialQuantity());
 		specimen.setConcentration(getConcentration());
 		specimen.setSpecimenRequirement(this);
+		if (isPrimary()) {
+			specimen.setCollectionContainer(getCollectionContainer());
+			specimen.setCollectionProcedure(getCollectionProcedure());
+			specimen.setCollectionUser(getCollector());
+			specimen.setCollectionTime(Calendar.getInstance().getTime());
+			specimen.setReceivedUser(getReceiver());
+			specimen.setReceivedTime(Calendar.getInstance().getTime());
+		}
+
 		specimen.setExtension(DeObject.createExtension(getDefaultCustomFieldValues(), specimen));
 		return specimen;
 	}
