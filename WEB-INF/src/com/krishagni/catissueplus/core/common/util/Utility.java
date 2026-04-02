@@ -1373,6 +1373,21 @@ public class Utility {
 		}
 	}
 
+	public static String normaliseIpRange(String ipRange) {
+		if (StringUtils.isBlank(ipRange)) {
+			return ipRange;
+		}
+
+		ipRange = ipRange.trim();
+
+		// Legacy: 0.0.0.0/-1 was treated as "match all IPv4"
+		if (ipRange.endsWith("/-1")) {
+			return ipRange.substring(0, ipRange.length() - 3) + "/0";
+		}
+
+		return ipRange;
+	}
+
 	private static boolean equals(Object obj1, Object obj2, String fieldName) {
 		try {
 			Object val1 = PropertyUtils.getProperty(obj1, fieldName);

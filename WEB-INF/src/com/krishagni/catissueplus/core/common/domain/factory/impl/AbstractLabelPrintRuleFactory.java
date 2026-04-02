@@ -257,7 +257,7 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 			return;
 		}
 
-		String ipRange = input.get("ipAddressMatcher").toString();
+		String ipRange = Utility.normaliseIpRange(input.get("ipAddressMatcher").toString());
 		IpAddressMatcher ipAddressMatcher = null;
 		try {
 			ipAddressMatcher = new IpAddressMatcher(ipRange);
@@ -268,6 +268,7 @@ public abstract class AbstractLabelPrintRuleFactory implements LabelPrintRuleFac
 
 		rule.setIpAddressMatcher(ipAddressMatcher);
 	}
+
 
 	private void setUsers(Map<String, Object> input, boolean failOnError, LabelPrintRule rule, OpenSpecimenException ose) {
 		List<String> userLogins = objToList(input.get("users"));
