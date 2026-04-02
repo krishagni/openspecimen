@@ -837,7 +837,7 @@ public class ExportServiceImpl implements ExportService, InitializingBean {
 
 		@PlusTransactional
 		private void saveJob() {
-			exportJobDao.saveOrUpdate(job);
+			exportJobDao.merge(job);
 		}
 	}
 
