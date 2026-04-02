@@ -577,7 +577,18 @@ export default {
           const hasConsentFields = cprDict.some(field => field.name.indexOf('consents.') == 0);
           if (hasConsentFields && cpr.id > 0) {
             return cprSvc.getConsents(cpr)
-              .then(consents => [cprDict, cpr, consents])
+              .then(
+                consent => {
+                  const codedResps = {};
+                  if (consent) {
+                    for (const resp of consent.responses || []) {
+                      codedResps[resp.code] = resp.response;
+                    }
+                  }
+
+                  return [cprDict, cpr, codedResps];
+                }
+              )
               .catch(() => [cprDict, cpr, {}]);
           }
 
