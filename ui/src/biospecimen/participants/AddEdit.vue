@@ -578,7 +578,7 @@ export default {
           if (hasConsentFields && cpr.id > 0) {
             return cprSvc.getConsents(cpr)
               .then(consents => [cprDict, cpr, consents])
-              .error(() => [cprDict, cpr, {}]);
+              .catch(() => [cprDict, cpr, {}]);
           }
 
           return [cprDict, cpr, {}];
