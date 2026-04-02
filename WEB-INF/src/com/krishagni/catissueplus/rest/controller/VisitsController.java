@@ -170,7 +170,7 @@ public class VisitsController {
 		@PathVariable("id") 
 		Long visitId, 
 		
-		@PathVariable("file") 
+		@RequestParam("file")
 		MultipartFile file)
 	throws IOException {
 		ResponseEvent<String> resp = null;
