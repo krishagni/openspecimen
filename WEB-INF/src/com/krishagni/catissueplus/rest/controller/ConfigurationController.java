@@ -129,7 +129,7 @@ public class ConfigurationController {
 		@RequestParam(value = "property")
 		String property,
 
-		@PathVariable("file") MultipartFile file)
+		@RequestParam("file") MultipartFile file)
 	throws IOException {
 		InputStream in = null;
 		try {

@@ -269,7 +269,7 @@ public class CollectionProtocolGroupsController {
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/workflows-file")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public CpGroupWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long groupId, @PathVariable("file") MultipartFile file) {
+	public CpGroupWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long groupId, @RequestParam("file") MultipartFile file) {
 		List<WorkflowDetail> workflows;
 
 		try {

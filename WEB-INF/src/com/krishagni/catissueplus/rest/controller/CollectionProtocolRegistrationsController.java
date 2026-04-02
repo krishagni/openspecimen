@@ -240,7 +240,7 @@ public class CollectionProtocolRegistrationsController {
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/consent-form")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public String uploadConsentForm(@PathVariable("id") Long cprId, @PathVariable("file") MultipartFile file) 
+	public String uploadConsentForm(@PathVariable("id") Long cprId, @RequestParam("file") MultipartFile file)
 	throws IOException {
 		FileDetail detail = new FileDetail();
 		detail.setId(cprId);

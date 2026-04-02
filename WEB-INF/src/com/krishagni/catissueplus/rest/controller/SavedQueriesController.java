@@ -153,7 +153,7 @@ public class SavedQueriesController {
 	@RequestMapping(method = RequestMethod.POST, value="/definition-file")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody		
-	public SavedQueryDetail importQuery(@PathVariable("file") MultipartFile file)
+	public SavedQueryDetail importQuery(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		Date startTime = Calendar.getInstance().getTime();
 		String json = new String(file.getBytes());

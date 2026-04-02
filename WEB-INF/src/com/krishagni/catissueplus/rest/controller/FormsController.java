@@ -491,7 +491,7 @@ public class FormsController {
 	@RequestMapping(method = RequestMethod.POST, value="/definition-zip")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public FormSummary importForm(@PathVariable("file") MultipartFile file)
+	public FormSummary importForm(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		Date startDate = Calendar.getInstance().getTime();
 		File tmpDir = new File(getTmpDirName());
