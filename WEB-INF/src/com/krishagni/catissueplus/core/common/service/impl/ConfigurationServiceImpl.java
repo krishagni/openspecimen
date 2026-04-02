@@ -148,7 +148,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		if (existing == null) {
 			return ResponseEvent.userError(ConfigErrorCode.SETTING_NOT_FOUND);
 		}
-		
+
 		String setting = detail.getValue();
 		if (!isValidSetting(existing.getProperty(), setting)) {
 			return ResponseEvent.userError(ConfigErrorCode.INVALID_SETTING_VALUE, setting);
@@ -157,6 +157,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		boolean successful = false;
 		try {
 			ConfigSetting newSetting = createSetting(existing, setting);
+
+			existing = daoFactory.getConfigSettingDao().getById(existing.getId());
 			existing.setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 
 			daoFactory.getConfigSettingDao().saveOrUpdate(existing);
