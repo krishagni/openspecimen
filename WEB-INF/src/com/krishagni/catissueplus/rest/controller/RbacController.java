@@ -218,7 +218,7 @@ public class RbacController {
 	@RequestMapping(method = RequestMethod.GET, value="/roles/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public RoleDetail getRole(@PathVariable Long id) {
+	public RoleDetail getRole(@PathVariable("id") Long id) {
 		ResponseEvent<RoleDetail> resp = rbacSvc.getRole(getRequest(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
@@ -236,7 +236,7 @@ public class RbacController {
 	@RequestMapping(method = RequestMethod.PUT, value="/roles/{roleId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public RoleDetail updateRole(@PathVariable Long roleId, @RequestBody RoleDetail roleDetail) {
+	public RoleDetail updateRole(@PathVariable("roleId") Long roleId, @RequestBody RoleDetail roleDetail) {
 		roleDetail.setId(roleId);
 		ResponseEvent<RoleDetail> resp = rbacSvc.updateRole(getRequest(roleDetail));
 		resp.throwErrorIfUnsuccessful();
@@ -259,7 +259,7 @@ public class RbacController {
 	@RequestMapping(method = RequestMethod.GET, value="/subjects/{subjectId}/roles")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<SubjectRoleDetail> getSubjectRoles(@PathVariable Long subjectId) {
+	public List<SubjectRoleDetail> getSubjectRoles(@PathVariable("subjectId") Long subjectId) {
 		ResponseEvent<List<SubjectRoleDetail>> resp = rbacSvc.getSubjectRoles(getRequest(subjectId));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
@@ -325,7 +325,7 @@ public class RbacController {
 	@RequestMapping(method = RequestMethod.GET, value="/groups/{groupId}/roles")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<GroupRoleDetail> getGroupRoles(@PathVariable Long groupId) {
+	public List<GroupRoleDetail> getGroupRoles(@PathVariable("groupId") Long groupId) {
 		ResponseEvent<List<GroupRoleDetail>> resp = rbacSvc.getGroupRoles(getRequest(groupId));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();

@@ -259,7 +259,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public UserDetail updateUser(@PathVariable Long id, @RequestBody UserDetail userDetail) {
+	public UserDetail updateUser(@PathVariable("id") Long id, @RequestBody UserDetail userDetail) {
 		userDetail.setId(id);
 		
 		RequestEvent<UserDetail> req = new RequestEvent<UserDetail>(userDetail);
@@ -272,7 +272,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.PATCH, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public UserDetail patchUser(@PathVariable Long id, @RequestBody UserDetail userDetail) {
+	public UserDetail patchUser(@PathVariable("id") Long id, @RequestBody UserDetail userDetail) {
 		userDetail.setId(id);
 		
 		RequestEvent<UserDetail> req = new RequestEvent<UserDetail>(userDetail);
@@ -286,7 +286,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/activity-status")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public UserDetail updateUserStatus(@PathVariable Long id, @RequestBody Map<String, String> props) {
+	public UserDetail updateUserStatus(@PathVariable("id") Long id, @RequestBody Map<String, String> props) {
 		UserDetail detail = new UserDetail();
  		detail.setId(id);
 		detail.setActivityStatus(props.get("activityStatus"));
@@ -310,7 +310,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/dependent-entities")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public List<DependentEntityDetail> getDependentEntities(@PathVariable Long id) {
+	public List<DependentEntityDetail> getDependentEntities(@PathVariable("id") Long id) {
 		RequestEvent<Long> req = new RequestEvent<Long>(id);
 		ResponseEvent<List<DependentEntityDetail>> resp = userService.getDependentEntities(req);
 		resp.throwErrorIfUnsuccessful();
@@ -321,7 +321,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public UserDetail deleteUser(@PathVariable Long id) {
+	public UserDetail deleteUser(@PathVariable("id") Long id) {
 		DeleteEntityOp deleteEntityOp = new DeleteEntityOp(id, false);
 		RequestEvent<DeleteEntityOp> req = new RequestEvent<DeleteEntityOp>(deleteEntityOp);
 		ResponseEvent<UserDetail> resp = userService.deleteUser(req);
@@ -422,7 +422,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/institute")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public InstituteDetail getInstitute(@PathVariable Long id) {
+	public InstituteDetail getInstitute(@PathVariable("id") Long id) {
 		ResponseEvent<InstituteDetail> resp = userService.getInstitute(new RequestEvent<Long>(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();

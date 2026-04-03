@@ -359,7 +359,7 @@ public class CollectionProtocolsController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/consents-waived")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public CollectionProtocolDetail updateConsentsWaived(@PathVariable Long id, @RequestBody Map<String, String> props) {
+	public CollectionProtocolDetail updateConsentsWaived(@PathVariable("id") Long id, @RequestBody Map<String, String> props) {
 		CollectionProtocolDetail cp = new  CollectionProtocolDetail();
 		cp.setId(id);
 		cp.setConsentsWaived(Boolean.parseBoolean(props.get("consentsWaived")));
@@ -369,7 +369,7 @@ public class CollectionProtocolsController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/consents-source")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public CollectionProtocolDetail updateConsentsSource(@PathVariable Long id, @RequestBody CollectionProtocolSummary source) {
+	public CollectionProtocolDetail updateConsentsSource(@PathVariable("id") Long id, @RequestBody CollectionProtocolSummary source) {
 		CollectionProtocolDetail cp = new  CollectionProtocolDetail();
 		cp.setId(id);
 		cp.setConsentsSource(source);
@@ -380,7 +380,7 @@ public class CollectionProtocolsController {
 	@RequestMapping(method = RequestMethod.GET, value="/{id}/dependent-entities")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<DependentEntityDetail> getCpDependentEntities(@PathVariable Long id) {
+	public List<DependentEntityDetail> getCpDependentEntities(@PathVariable("id") Long id) {
 		ResponseEvent<List<DependentEntityDetail>> resp = cpSvc.getCpDependentEntities(request(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();

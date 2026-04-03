@@ -109,7 +109,7 @@ public class SpecimenListsController {
 	@RequestMapping(method = RequestMethod.PUT, value="/{listId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SpecimenListDetail updateSpecimenList(@PathVariable Long listId, @RequestBody SpecimenListDetail details) {
+	public SpecimenListDetail updateSpecimenList(@PathVariable("listId") Long listId, @RequestBody SpecimenListDetail details) {
 		details.setId(listId);
 		return response(specimenListSvc.updateSpecimenList(request(details)));
 	}
@@ -117,7 +117,7 @@ public class SpecimenListsController {
 	@RequestMapping(method = RequestMethod.PATCH, value="/{listId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SpecimenListDetail patchSpecimenList(@PathVariable Long listId, @RequestBody SpecimenListDetail details) {
+	public SpecimenListDetail patchSpecimenList(@PathVariable("listId") Long listId, @RequestBody SpecimenListDetail details) {
 		details.setId(listId);
 		return response(specimenListSvc.patchSpecimenList(request(details)));
 	}
@@ -125,7 +125,7 @@ public class SpecimenListsController {
 	@RequestMapping(method = RequestMethod.DELETE, value="/{listId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SpecimenListDetail deleteSpecimenList(@PathVariable Long listId) {
+	public SpecimenListDetail deleteSpecimenList(@PathVariable("listId") Long listId) {
 		return response(specimenListSvc.deleteSpecimenList(request(listId)));
 	}
 

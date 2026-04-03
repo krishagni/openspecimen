@@ -95,7 +95,7 @@ public class SpecimenKitsController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/report")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public QueryDataExportResult exportReport(@PathVariable Long id) {
+	public QueryDataExportResult exportReport(@PathVariable("id") Long id) {
 		ResponseEvent<QueryDataExportResult> resp = kitSvc.exportReport(getRequest(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();

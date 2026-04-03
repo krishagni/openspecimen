@@ -125,7 +125,7 @@ public class SitesController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SiteDetail getSite(@PathVariable Long id) {
+	public SiteDetail getSite(@PathVariable("id") Long id) {
 		SiteQueryCriteria crit = new SiteQueryCriteria();
 		crit.setId(id);
 		
@@ -172,7 +172,7 @@ public class SitesController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public SiteDetail updateSite(@PathVariable Long id, @RequestBody SiteDetail siteDetail) {
+	public SiteDetail updateSite(@PathVariable("id") Long id, @RequestBody SiteDetail siteDetail) {
 		siteDetail.setId(id);
 		
 		RequestEvent<SiteDetail> req = new RequestEvent<>(siteDetail);
@@ -185,7 +185,7 @@ public class SitesController {
 	@RequestMapping(method = RequestMethod.PATCH, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public SiteDetail patchSite(@PathVariable Long id, @RequestBody SiteDetail siteDetail) {
+	public SiteDetail patchSite(@PathVariable("id") Long id, @RequestBody SiteDetail siteDetail) {
 		siteDetail.setId(id);
 		
 		RequestEvent<SiteDetail> req = new RequestEvent<>(siteDetail);
@@ -208,7 +208,7 @@ public class SitesController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/dependent-entities")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public List<DependentEntityDetail> getDependentEntities(@PathVariable Long id) {
+	public List<DependentEntityDetail> getDependentEntities(@PathVariable("id") Long id) {
 		RequestEvent<Long> req = new RequestEvent<>(id);
 		ResponseEvent<List<DependentEntityDetail>> resp = siteService.getDependentEntities(req);
 		resp.throwErrorIfUnsuccessful();

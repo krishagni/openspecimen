@@ -81,7 +81,7 @@ public class QueryAuditLogsController {
 	@RequestMapping(method = RequestMethod.GET, value="{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
-	public QueryAuditLogDetail getAuditLog(@PathVariable Long id) {
+	public QueryAuditLogDetail getAuditLog(@PathVariable("id") Long id) {
 		return ResponseEvent.unwrap(querySvc.getAuditLog(RequestEvent.wrap(id)));
 	}
 

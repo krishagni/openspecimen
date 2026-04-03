@@ -73,7 +73,7 @@ public class QueryFoldersController {
 	@RequestMapping(method = RequestMethod.PUT, value="/{folderId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public QueryFolderDetails updateFolder(@PathVariable Long folderId, @RequestBody QueryFolderDetails folderDetails) {
+	public QueryFolderDetails updateFolder(@PathVariable("folderId") Long folderId, @RequestBody QueryFolderDetails folderDetails) {
 		folderDetails.setId(folderId);
 		
 		return response(querySvc.updateFolder(getRequest(folderDetails)));
@@ -82,7 +82,7 @@ public class QueryFoldersController {
 	@RequestMapping(method = RequestMethod.DELETE, value="/{folderId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Long deleteFolder(@PathVariable Long folderId) {
+	public Long deleteFolder(@PathVariable("folderId") Long folderId) {
 		return response(querySvc.deleteFolder(getRequest(folderId)));
 	}
 			

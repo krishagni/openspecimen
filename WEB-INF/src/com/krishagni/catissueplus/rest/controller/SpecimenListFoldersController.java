@@ -80,7 +80,7 @@ public class SpecimenListFoldersController {
 	@RequestMapping(method = RequestMethod.PUT, value="/{folderId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SpecimenListsFolderDetail updateFolder(@PathVariable Long folderId, @RequestBody SpecimenListsFolderDetail input) {
+	public SpecimenListsFolderDetail updateFolder(@PathVariable("folderId") Long folderId, @RequestBody SpecimenListsFolderDetail input) {
 		input.setId(folderId);
 		return ResponseEvent.unwrap(specimenListSvc.updateFolder(RequestEvent.wrap(input)));
 	}
@@ -88,7 +88,7 @@ public class SpecimenListFoldersController {
 	@RequestMapping(method = RequestMethod.DELETE, value="/{folderId}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public SpecimenListsFolderDetail deleteFolder(@PathVariable Long folderId) {
+	public SpecimenListsFolderDetail deleteFolder(@PathVariable("folderId") Long folderId) {
 		return ResponseEvent.unwrap(specimenListSvc.deleteFolder(RequestEvent.wrap(new EntityQueryCriteria(folderId))));
 	}
 

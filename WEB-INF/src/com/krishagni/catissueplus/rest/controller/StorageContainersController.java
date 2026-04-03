@@ -525,7 +525,7 @@ public class StorageContainersController {
 	@RequestMapping(method = RequestMethod.GET, value="/{id}/dependent-entities")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<DependentEntityDetail> getDependentEntities(@PathVariable Long id) {
+	public List<DependentEntityDetail> getDependentEntities(@PathVariable("id") Long id) {
 		RequestEvent<Long> req = new RequestEvent<Long>(id);
 		ResponseEvent<List<DependentEntityDetail>> resp = storageContainerSvc.getDependentEntities(req);
 		resp.throwErrorIfUnsuccessful();
@@ -570,7 +570,7 @@ public class StorageContainersController {
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/replica")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, Boolean> replicateStorageContainer(@PathVariable Long id, @RequestBody ContainerReplicationDetail repl) {
+	public Map<String, Boolean> replicateStorageContainer(@PathVariable("id") Long id, @RequestBody ContainerReplicationDetail repl) {
 		repl.setSourceContainerId(id);
 
 		RequestEvent<ContainerReplicationDetail> req = new RequestEvent<>(repl);

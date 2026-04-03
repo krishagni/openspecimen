@@ -156,7 +156,7 @@ public class DistributionProtocolController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public DistributionProtocolDetail getDistributionProtocol(@PathVariable Long id) {
+	public DistributionProtocolDetail getDistributionProtocol(@PathVariable("id") Long id) {
 		ResponseEvent<DistributionProtocolDetail> resp = dpSvc.getDistributionProtocol(getRequest(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
@@ -175,7 +175,7 @@ public class DistributionProtocolController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public DistributionProtocolDetail updateDistributionProtocol(@PathVariable Long id,
+	public DistributionProtocolDetail updateDistributionProtocol(@PathVariable("id") Long id,
 			@RequestBody DistributionProtocolDetail detail) {
 		detail.setId(id);
 		ResponseEvent<DistributionProtocolDetail> resp = dpSvc.updateDistributionProtocol(getRequest(detail));
@@ -186,7 +186,7 @@ public class DistributionProtocolController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/dependent-entities")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public List<DependentEntityDetail> getDependentEntities(@PathVariable Long id) {
+	public List<DependentEntityDetail> getDependentEntities(@PathVariable("id") Long id) {
 		RequestEvent<Long> req = new RequestEvent<Long>(id);
 		ResponseEvent<List<DependentEntityDetail>> resp = dpSvc.getDependentEntities(req);
 		resp.throwErrorIfUnsuccessful();
@@ -197,7 +197,7 @@ public class DistributionProtocolController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public DistributionProtocolDetail deleteDistributionProtocol(@PathVariable Long id) {
+	public DistributionProtocolDetail deleteDistributionProtocol(@PathVariable("id") Long id) {
 		return deleteDistributionProtocols(new Long[]{id}).get(0);
 	}
 

@@ -136,7 +136,7 @@ public class ContainerTypesController {
 	@RequestMapping(method = RequestMethod.GET, value= "/{id}/dependent-entities")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public List<DependentEntityDetail> getDependentEntities(@PathVariable Long id) {
+	public List<DependentEntityDetail> getDependentEntities(@PathVariable("id") Long id) {
 		RequestEvent<Long> req = new RequestEvent<Long>(id);
 		ResponseEvent<List<DependentEntityDetail>> resp = containerTypeSvc.getDependentEntities(req);
 		resp.throwErrorIfUnsuccessful();
@@ -146,7 +146,7 @@ public class ContainerTypesController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public ContainerTypeDetail deleteContainerType(@PathVariable Long id) {
+	public ContainerTypeDetail deleteContainerType(@PathVariable("id") Long id) {
 		RequestEvent<Long> req = new RequestEvent<Long>(id);
 		ResponseEvent<ContainerTypeDetail> resp = containerTypeSvc.deleteContainerType(req);
 		resp.throwErrorIfUnsuccessful();

@@ -45,28 +45,6 @@ public class ParticipantController {
 	public ParticipantDetail getParticipantById(@PathVariable("id") Long participantId) {
 		return response(participantSvc.getParticipant(request(participantId)));
 	}
-	
-	/*@RequestMapping(method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public ParticipantDetail createParticipant(@RequestBody ParticipantDetail participantDetail) {
-		return response(participantSvc.createParticipant(request(participantDetail)));
-	}
-
-	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public ParticipantDetail updateParticipant(@PathVariable Long id, @RequestBody ParticipantDetail participantDetail) {
-		participantDetail.setId(id);
-		return response(participantSvc.updateParticipant(request(participantDetail)));
-	}
-
-	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public ParticipantDetail delete(@PathVariable Long id) {
-		return response(participantSvc.delete(request(id)));
-	}*/
 
 	@RequestMapping(method = RequestMethod.POST, value = "/match")
 	@ResponseStatus(HttpStatus.OK)

@@ -97,7 +97,7 @@ public class InstitutesController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public InstituteDetail getInstitute(@PathVariable Long id) {
+	public InstituteDetail getInstitute(@PathVariable("id") Long id) {
 		InstituteQueryCriteria crit = new InstituteQueryCriteria();
 		crit.setId(id);
 
