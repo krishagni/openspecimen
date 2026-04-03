@@ -33,7 +33,7 @@ public abstract class AbstractSearchResultProcessor implements SearchResultProce
 			}
 		}
 
-		List<Object[]> rows = (List<Object[]>) getSessionFactory().getCurrentSession().createNativeQuery(query)
+		List<Object[]> rows = getSessionFactory().getCurrentSession().createNativeQuery(query, Object[].class)
 			.addScalar("identifier", StandardBasicTypes.LONG)
 			.addScalar("entity", StandardBasicTypes.STRING)
 			.addScalar("entity_id", StandardBasicTypes.LONG)
@@ -67,7 +67,7 @@ public abstract class AbstractSearchResultProcessor implements SearchResultProce
 			return Collections.emptyMap();
 		}
 
-		List<Object[]> rows = (List<Object[]>) getSessionFactory().getCurrentSession().createNativeQuery(propsQuery)
+		List<Object[]> rows = getSessionFactory().getCurrentSession().createNativeQuery(propsQuery, Object[].class)
 			.addScalar("entityId", StandardBasicTypes.LONG)
 			.addScalar("name", StandardBasicTypes.STRING)
 			.addScalar("value", StandardBasicTypes.STRING)

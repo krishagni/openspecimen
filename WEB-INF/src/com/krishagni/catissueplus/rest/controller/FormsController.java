@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -491,7 +491,7 @@ public class FormsController {
 	@RequestMapping(method = RequestMethod.POST, value="/definition-zip")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public FormSummary importForm(@PathVariable("file") MultipartFile file)
+	public FormSummary importForm(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		Date startDate = Calendar.getInstance().getTime();
 		File tmpDir = new File(getTmpDirName());

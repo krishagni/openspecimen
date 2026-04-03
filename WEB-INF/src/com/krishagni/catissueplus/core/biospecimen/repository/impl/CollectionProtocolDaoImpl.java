@@ -250,10 +250,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public void saveCpe(CollectionProtocolEvent cpe, boolean flush) {
-		getCurrentSession().saveOrUpdate(cpe);
-		if (flush) {
-			getCurrentSession().flush();
-		}		
+		saveOrUpdate(sessionFactory, cpe, flush);
 	}
 
 	@Override
@@ -266,7 +263,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public SpecimenRequirement getSpecimenRequirement(Long requirementId) {
-		return getCurrentSession().get(SpecimenRequirement.class, requirementId);
+		return getCurrentSession().find(SpecimenRequirement.class, requirementId);
 	}
 
 	@Override	
@@ -285,7 +282,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public void saveCpWorkflows(CpWorkflowConfig cfg) {
-		getCurrentSession().saveOrUpdate(cfg);
+		saveOrUpdate(sessionFactory, cfg, false);
 	}
 
 	@Override
@@ -341,7 +338,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public Long getCustomFieldRecordId(Long cpId, Long formId, Long formCtxtId) {
-		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+		return getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_ID, Long.class)
 			.setParameter("cpId", cpId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -350,7 +347,7 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> cpIds, Long formId, Long formCtxtId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS, Object[].class)
 			.setParameterList("cpIds", cpIds)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -366,14 +363,14 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 
 	@Override
 	public int insertCustomFieldRecordId(Long cpId, Long formId, Long formCtxtId, Long recordId) {
-		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+		int rows = getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_RECORD)
 			.setParameter("cpId", cpId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
 			.setParameter("recordId", recordId)
 			.executeUpdate();
 
-		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+		getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
 			.setParameter("cpId", cpId)
 			.setParameter("formId", formId)
 			.setParameter("recordId", recordId)

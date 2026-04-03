@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.rest.controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;

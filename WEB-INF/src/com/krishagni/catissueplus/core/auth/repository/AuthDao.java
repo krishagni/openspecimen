@@ -66,7 +66,7 @@ public interface AuthDao extends Dao<AuthDomain> {
 	// login OTPs
 	LoginOtp getLoginOtp(String emailAddress, String otp);
 
-	void saveOrUpdate(LoginOtp otp);
+	void saveLoginOtp(LoginOtp otp);
 
 	void deleteLoginOtps(Long userId);
 

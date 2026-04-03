@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -153,7 +153,7 @@ public class SavedQueriesController {
 	@RequestMapping(method = RequestMethod.POST, value="/definition-file")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody		
-	public SavedQueryDetail importQuery(@PathVariable("file") MultipartFile file)
+	public SavedQueryDetail importQuery(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		Date startTime = Calendar.getInstance().getTime();
 		String json = new String(file.getBytes());

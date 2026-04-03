@@ -26,7 +26,9 @@ public interface AuditService {
 
 	// Internal APIs
 
-	void saveOrUpdateApiLog(UserApiCallLog userAuditLog);
+	void saveApiCallLog(UserApiCallLog userAuditLog);
+
+	void updateApiCallLog(UserApiCallLog userAuditLog);
 	
 	long getTimeSinceLastApiCall(Long userId, String token);
 

@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,7 +71,7 @@ public class PrintRuleConfigsController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public PrintRuleConfigDetail getConfigPrintRule(@PathVariable Long id) {
+	public PrintRuleConfigDetail getConfigPrintRule(@PathVariable("id") Long id) {
 		return response(printRuleConfigSvc.getPrintRuleConfig(request(id)));
 	}
 
@@ -85,7 +85,7 @@ public class PrintRuleConfigsController {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public PrintRuleConfigDetail updateConfigPrintRule(@PathVariable Long id, @RequestBody PrintRuleConfigDetail detail) {
+	public PrintRuleConfigDetail updateConfigPrintRule(@PathVariable("id") Long id, @RequestBody PrintRuleConfigDetail detail) {
 		detail.setId(id);
 		return response(printRuleConfigSvc.updatePrintRuleConfig(request(detail)));
 	}
@@ -93,7 +93,7 @@ public class PrintRuleConfigsController {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public List<PrintRuleConfigDetail>  deleteConfigPrintRule(@PathVariable Long id) {
+	public List<PrintRuleConfigDetail>  deleteConfigPrintRule(@PathVariable("id") Long id) {
 		BulkDeleteEntityOp op = new BulkDeleteEntityOp();
 		op.setIds(Collections.singleton(id));
 		return response(printRuleConfigSvc.deletePrintRuleConfigs(request(op)));
@@ -112,14 +112,14 @@ public class PrintRuleConfigsController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<FileEntry> getCommandFiles(@PathVariable("id") Long ruleId) {
-		return ResponseEvent.unwrap(printRuleConfigSvc.getCommandFiles(RequestEvent.wrap(ruleId)));
+		return response(printRuleConfigSvc.getCommandFiles(request(ruleId)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/command-files/{filename:.+}")
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public void getCommandFile(@PathVariable("id") Long ruleId, @PathVariable("filename") String filename, HttpServletResponse httpResp) {
-		File cmdFile = ResponseEvent.unwrap(printRuleConfigSvc.getCommandFile(RequestEvent.wrap(Pair.make(ruleId, filename))));
+		File cmdFile = response(printRuleConfigSvc.getCommandFile(request(Pair.make(ruleId, filename))));
 		Utility.sendToClient(httpResp, filename, cmdFile);
 	}
 
@@ -127,7 +127,7 @@ public class PrintRuleConfigsController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Map<String, Integer> clearCommandFiles(@PathVariable("id") Long ruleId) {
-		return Collections.singletonMap("count", ResponseEvent.unwrap(printRuleConfigSvc.clearCommandFiles(RequestEvent.wrap(ruleId))));
+		return Collections.singletonMap("count", response(printRuleConfigSvc.clearCommandFiles(request(ruleId))));
 	}
 
 	private <T> RequestEvent<T> request(T payload) {
@@ -135,7 +135,6 @@ public class PrintRuleConfigsController {
 	}
 
 	private <T> T response(ResponseEvent<T> resp) {
-		resp.throwErrorIfUnsuccessful();
-		return resp.getPayload();
+		return ResponseEvent.unwrap(resp);
 	}
 }

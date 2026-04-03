@@ -1,19 +1,19 @@
 package com.krishagni.catissueplus.core.common.repository;
 
 public class Order {
-	private javax.persistence.criteria.Order order;
+	private jakarta.persistence.criteria.Order order;
 
-	public static Order of(javax.persistence.criteria.Order order) {
+	public static Order of(jakarta.persistence.criteria.Order order) {
 		Order result = new Order();
 		result.setOrder(order);
 		return result;
 	}
 
-	public javax.persistence.criteria.Order getOrder() {
+	public jakarta.persistence.criteria.Order getOrder() {
 		return order;
 	}
 
-	public void setOrder(javax.persistence.criteria.Order order) {
+	public void setOrder(jakarta.persistence.criteria.Order order) {
 		this.order = order;
 	}
 }

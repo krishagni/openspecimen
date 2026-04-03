@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,7 +170,7 @@ public class VisitsController {
 		@PathVariable("id") 
 		Long visitId, 
 		
-		@PathVariable("file") 
+		@RequestParam("file")
 		MultipartFile file)
 	throws IOException {
 		ResponseEvent<String> resp = null;

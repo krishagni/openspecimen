@@ -37,7 +37,7 @@
 	
     <property name="password" column="PASSWORD"/>
 	    
-    <set name="passwords" inverse="true" cascade="save-update">
+    <set name="passwords" inverse="true" cascade="persist,merge">
       <key column="USER_ID"/>
       <one-to-many  class="com.krishagni.catissueplus.core.administrative.domain.Password" />
     </set>
@@ -196,7 +196,7 @@
           where
             user.type != 'CONTACT' and
             user.activityStatus = 'Active' and
-            ((log.loginSuccessful is null and user.creationDate &lt;= :lastLoginTime) or log.loginSuccessful = 1)
+            ((log.loginSuccessful is null and user.creationDate &lt;= :lastLoginTime) or log.loginSuccessful = true)
           group by
             user.id
           having

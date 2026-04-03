@@ -3,7 +3,7 @@ package com.krishagni.catissueplus.rest.controller;
 import java.io.File;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ public class FormFilesController {
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
-	public FileDetail uploadFile(@PathVariable("file") MultipartFile file) {
+	public FileDetail uploadFile(@RequestParam("file") MultipartFile file) {
 		return response(formSvc.uploadFile(request(file)));
 	}
 

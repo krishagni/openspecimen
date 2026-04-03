@@ -31,7 +31,7 @@ public class RefreshAnticipatedSpecimens implements ScheduledTask {
 
 		args = cpIds.stream().map(String::trim).filter(StringUtils::isNotBlank).collect(Collectors.joining(","));
 		sessionFactory.getCurrentSession()
-			.createNativeQuery("call refresh_anticipated_specimens('" + args + "')")
+			.createNativeMutationQuery("call refresh_anticipated_specimens('" + args + "')")
 			.executeUpdate();
 	}
 }

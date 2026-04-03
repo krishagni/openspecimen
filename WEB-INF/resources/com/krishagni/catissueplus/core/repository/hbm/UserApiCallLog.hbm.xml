@@ -48,5 +48,15 @@
           l.callStartTime < :olderThan
       ]]>
     </query>
+
+    <query name="updateApiCallLogTime">
+      update
+        com.krishagni.catissueplus.core.audit.domain.UserApiCallLog l
+      set
+        l.callEndTime = :endTime,
+        l.responseCode = :statusCode
+      where
+        l.id = :callLogId
+    </query>
   </class>
 </hibernate-mapping>

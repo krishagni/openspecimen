@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.type.StandardBasicTypes;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -161,8 +161,8 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 	}
 
 	private void updateContainerTransferEvent(SpecimenEventDetail event) {
-		Long containerEventId = (Long) sessionFactory.getCurrentSession()
-			.createNativeQuery(GET_CONTAINER_TRANSFER_EVENT_ID_SQL)
+		Long containerEventId = sessionFactory.getCurrentSession()
+			.createNativeQuery(GET_CONTAINER_TRANSFER_EVENT_ID_SQL, Long.class)
 			.addScalar("event_id", StandardBasicTypes.LONG)
 			.setParameter("eventId", event.getId())
 			.uniqueResult();
@@ -195,7 +195,9 @@ public class SpecimenEventUpdater implements ObjectImporter<SpecimenEventDetail,
 			.collect(Collectors.joining(","));
 
 		String updateSql = String.format(UPDATE_EVENT_SQL, eventTable, setter, eventIdCol);
-		Query<?> query = sessionFactory.getCurrentSession().createNativeQuery(updateSql).setParameter("eventId", eventId);
+		MutationQuery query = sessionFactory.getCurrentSession()
+			.createNativeMutationQuery(updateSql)
+			.setParameter("eventId", eventId);
 		params.forEach(query::setParameter);
 		query.executeUpdate();
 	}

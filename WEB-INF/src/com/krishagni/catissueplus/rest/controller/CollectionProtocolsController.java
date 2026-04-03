@@ -15,8 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,7 +274,7 @@ public class CollectionProtocolsController {
 	@RequestMapping(method = RequestMethod.POST, value="/definition")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody		
-	public CollectionProtocolDetail importCpDef(@PathVariable("file") MultipartFile file) 
+	public CollectionProtocolDetail importCpDef(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		Date startTime = Calendar.getInstance().getTime();
 		CollectionProtocolDetail cp = new ObjectMapper().readValue(file.getBytes(), CollectionProtocolDetail.class);
@@ -301,7 +301,7 @@ public class CollectionProtocolsController {
 	@RequestMapping(method = RequestMethod.POST, value="/sop-documents")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public String uploadSopDocument(@PathVariable("file") MultipartFile file)
+	public String uploadSopDocument(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		InputStream in = null;
 		try {
@@ -553,7 +553,7 @@ public class CollectionProtocolsController {
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/workflows-file")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public CpWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long cpId, @PathVariable("file") MultipartFile file) {
+	public CpWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long cpId, @RequestParam("file") MultipartFile file) {
 		List<WorkflowDetail> workflows;
 
 		Date startTime = Calendar.getInstance().getTime();

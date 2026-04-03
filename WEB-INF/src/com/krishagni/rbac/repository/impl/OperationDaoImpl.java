@@ -25,7 +25,7 @@ public class OperationDaoImpl extends AbstractDao<Operation> implements Operatio
 
 	@Override
 	public Operation getOperation(Long id) {
-		return getCurrentSession().get(Operation.class, id);
+		return getCurrentSession().find(Operation.class, id);
 	}
 
 	@Override

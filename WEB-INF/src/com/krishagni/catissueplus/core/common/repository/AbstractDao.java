@@ -13,6 +13,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
+import com.krishagni.catissueplus.core.biospecimen.domain.Identifiable;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -33,37 +35,81 @@ public class AbstractDao<T> implements Dao<T> {
 		this.sessionFactory = sessionFactory;
 	}
 
-	@Override
-	public void saveOrUpdate(T obj) {
-		saveOrUpdate(obj, false);
-	}
-	
-	@Override
-	public void saveOrUpdate(T obj, boolean flush) {
+	public static <T> void saveOrUpdate(SessionFactory sessionFactory, T obj, boolean flush) {
 		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(obj);
+			if (!(obj instanceof Identifiable<?> idObj)) {
+				throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "AbstractDao.saveOrUpdate can be invoked only with Identifiable objects as input. Input: " + obj.getClass().getName());
+			}
+
+			Session session = sessionFactory.getCurrentSession();
+			if (idObj.getId() != null) {
+				if (session.contains(idObj)) {
+					session.merge(obj);
+				} else {
+					throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "AbstractDao.saveOrUpdate can be invoked on new object or existing object that is already attached to the session. Input: " + obj.getClass().getName());
+				}
+			} else {
+				session.persist(obj);
+			}
+
 			if (flush) {
-				flush();
+				session.flush();
 			}
 
-			if (!(obj instanceof BaseEntity)) {
-				return;
+			if (idObj instanceof BaseEntity beObj && CollectionUtils.isNotEmpty(beObj.getOnSaveProcs())) {
+				beObj.getOnSaveProcs().forEach(Runnable::run);
 			}
-
-			BaseEntity entity = (BaseEntity) obj;
-			if (CollectionUtils.isEmpty(entity.getOnSaveProcs())) {
-				return;
-			}
-
-			entity.getOnSaveProcs().forEach(Runnable::run);
 		} catch (HibernateException he) {
 			throw OpenSpecimenException.serverError(he);
 		}
 	}
 
 	@Override
+	public void saveOrUpdate(T obj) {
+		saveOrUpdate(obj, false);
+	}
+
+	@Override
+	public void saveOrUpdate(T obj, boolean flush) {
+		saveOrUpdate(sessionFactory, obj, flush);
+	}
+
+	@Override
+	public T merge(T obj) {
+		return merge(obj, false);
+	}
+
+	@Override
+	public T merge(T obj, boolean flush) {
+		T mergedObj = getCurrentSession().merge(obj);
+		if (flush) {
+			flush();
+		}
+
+		return mergedObj;
+	}
+
+	@Override
+	public void save(Object obj) {
+		getCurrentSession().persist(obj);
+	}
+
+	@Override
+	public void update(Object obj) {
+		if (!getCurrentSession().contains(obj)) {
+			throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "Attempting to update unmanaged object. Input: " + obj.getClass().getName());
+		}
+
+		getCurrentSession().merge(obj);
+	}
+
+	@Override
 	public <R> void delete(R obj) {
-		getCurrentSession().delete(obj);
+		if (!getCurrentSession().contains(obj)) {
+			throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "AbstractDao.delete can be invoked only with managed object. Input: " + obj.getClass().getName());
+		}
+
+		getCurrentSession().remove(obj);
 	}
 
 	@Override

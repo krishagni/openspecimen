@@ -53,7 +53,7 @@
         do.status = 'EXECUTED' and
         (dpr.specimenType is null or dpr.specimenType = spec.specimenType) and
         (dpr.anatomicSite is null or dpr.anatomicSite = spec.tissueSite) and
-        (dpr.pathologyStatuses.size = 0 or spec.pathologicalStatus in elements(dpr.pathologyStatuses)) and
+        (dpr.pathologyStatuses is empty or spec.pathologicalStatus in elements(dpr.pathologyStatuses)) and
         (dpr.clinicalDiagnosis is null or dpr.clinicalDiagnosis in elements(visit.clinicalDiagnoses))
       group by
         dpr.id

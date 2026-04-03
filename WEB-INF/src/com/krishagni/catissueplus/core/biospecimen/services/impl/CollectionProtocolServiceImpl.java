@@ -1564,7 +1564,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			cp.setDraftMode(false);
 			CollectionProtocolPublishedVersion version = new CollectionProtocolPublishedVersion();
 			version.setDefinition(toJson(cp, true));
-			daoFactory.getCollectionProtocolPublishEventDao().saveOrUpdate(version, true);
+			daoFactory.getCollectionProtocolPublishEventDao().save(version, true);
 
 			publishEvent.setPublishedVersion(version);
 			daoFactory.getCollectionProtocolPublishEventDao().saveOrUpdate(publishEvent, true);
@@ -2051,7 +2051,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		if (includeIds) {
 			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept());
 		} else {
-			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "statementId"));
+			filters.addFilter("withoutId", SimpleBeanPropertyFilter.serializeAllExcept("id", "cpId", "eventId", "instituteId", "siteId", "statementId"));
 		}
 
 		try {
@@ -2413,7 +2413,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 				}
 
 				List<Object[]> dbRows = sessionFactory.getCurrentSession()
-					.getNamedQuery(CollectionProtocol.class.getName() + ".getParticipantAndSpecimenCount")
+					.createNamedQuery(CollectionProtocol.class.getName() + ".getParticipantAndSpecimenCount", Object[].class)
 					.setParameterList("cpIds", cpRows.keySet())
 					.list();
 

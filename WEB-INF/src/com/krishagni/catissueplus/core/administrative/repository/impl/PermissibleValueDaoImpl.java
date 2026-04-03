@@ -27,7 +27,7 @@ public class PermissibleValueDaoImpl extends AbstractDao<PermissibleValue> imple
 
 	@Override
 	public PermissibleValue getById(Long id) {
-		return getCurrentSession().get(PermissibleValue.class, id);
+		return getCurrentSession().find(PermissibleValue.class, id);
 	}
 
 	@Override

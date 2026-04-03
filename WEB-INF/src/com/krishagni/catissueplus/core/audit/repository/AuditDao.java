@@ -25,10 +25,11 @@ public interface AuditDao extends Dao<UserApiCallLog> {
 
 	Date getLatestApiCallTime(Long userId, String token);
 
-	void saveOrUpdate(DeleteLog log);
+	void saveDeleteLog(DeleteLog log);
 
 	List<UserApiCallLog> getApiCallLogs(RevisionsListCriteria crit);
 
 	int deleteApiCallLogs(int olderThanDays, int maxRows);
-}
 
+	int updateApiCallLog(Long callLogId, Date endTime, String statusCode);
+}

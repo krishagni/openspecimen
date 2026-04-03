@@ -32,6 +32,6 @@ public class DeleteLogUtil {
 		log.setDate(Calendar.getInstance().getTime());
 		log.setUser(AuthUtil.getCurrentUser());
 		log.setReason(obj.getOpComments());
-		daoFactory.getAuditDao().saveOrUpdate(log);
+		daoFactory.getAuditDao().saveDeleteLog(log);
 	}
 }

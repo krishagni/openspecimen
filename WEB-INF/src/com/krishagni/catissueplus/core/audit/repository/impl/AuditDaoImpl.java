@@ -116,7 +116,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 
 	@Override
 	public List<String> getRevisionEntityNames() {
-		return (List<String>) getCurrentSession().getNamedQuery(GET_ENTITY_NAMES).list();
+		return getCurrentSession().createNamedQuery(GET_ENTITY_NAMES, String.class).list();
 	}
 
 	@Override
@@ -197,8 +197,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	@Override
-	public void saveOrUpdate(DeleteLog log) {
-		getCurrentSession().saveOrUpdate(log);
+	public void saveDeleteLog(DeleteLog log) {
+		getCurrentSession().persist(log);
 	}
 
 	@Override
@@ -231,8 +231,17 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	public int deleteApiCallLogs(int olderThanDays, int maxRows) {
 		LocalDate olderThan = LocalDate.now().minus(olderThanDays, ChronoUnit.DAYS);
 		String sql = String.format(DELETE_OLDER_API_CALL_LOGS_SQL, isMySQL() ? " limit " : " and rownum < ")  + maxRows;
-		return getCurrentSession().createNativeQuery(sql)
+		return getCurrentSession().createNativeMutationQuery(sql)
 			.setParameter("olderThan", java.sql.Date.valueOf(olderThan))
+			.executeUpdate();
+	}
+
+	@Override
+	public int updateApiCallLog(Long callLogId, Date endTime, String statusCode) {
+		return getCurrentSession().createNamedMutationQuery(UPDATE_API_CALL_LOG_TIME)
+			.setParameter("endTime", endTime)
+			.setParameter("statusCode", statusCode)
+			.setParameter("callLogId", callLogId)
 			.executeUpdate();
 	}
 
@@ -678,6 +687,8 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	private static final String GET_LATEST_API_CALL_TIME = FQN + ".getLatestApiCallTime";
 
 	private static final String DELETE_OLDER_API_CALL_LOGS = FQN + ".deleteOlderLogs";
+
+	private static final String UPDATE_API_CALL_LOG_TIME = FQN + ".updateApiCallLogTime";
 
 	private static final String GET_ENTITY_NAMES = "com.krishagni.catissueplus.core.audit.domain.RevisionEntityRecord.getEntityNames";
 

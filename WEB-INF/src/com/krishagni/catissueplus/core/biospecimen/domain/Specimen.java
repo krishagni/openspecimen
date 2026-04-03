@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -16,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -301,14 +305,18 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void setTissueSite(PermissibleValue tissueSite) {
-		if (!Objects.equals(this.tissueSite, tissueSite)) {
-			getChildCollection().stream()
-				.filter(child -> child.isAliquot() || Objects.equals(this.tissueSite, child.getTissueSite()))
-				.forEach(child -> child.setTissueSite(tissueSite));
-		}
-		
 		this.tissueSite = tissueSite;
 	}
+
+	public void updateTissueSite(PermissibleValue newSite) {
+		if (Objects.equals(this.tissueSite, newSite)) {
+			return;
+		}
+
+		PermissibleValue oldSite = this.tissueSite;
+		updateDescendants(s -> s.tissueSite = newSite, c -> c.isAliquot() || Objects.equals(oldSite, c.getTissueSite()));
+	}
+
 
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public PermissibleValue getTissueSide() {
@@ -316,13 +324,16 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void setTissueSide(PermissibleValue tissueSide) {
-		if (!Objects.equals(this.tissueSide, tissueSide)) {
-			getChildCollection().stream()
-				.filter(child -> child.isAliquot() || Objects.equals(this.tissueSide, child.getTissueSide()))
-				.forEach(child -> child.setTissueSide(tissueSide));
-		}
-		
 		this.tissueSide = tissueSide;
+	}
+
+	public void updateTissueSide(PermissibleValue newSide) {
+		if (Objects.equals(this.tissueSide, newSide)) {
+			return;
+		}
+
+		PermissibleValue oldSide = this.tissueSide;
+		updateDescendants(s -> s.tissueSide = newSide, c -> c.isAliquot() || Objects.equals(oldSide, c.getTissueSide()));
 	}
 
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
@@ -331,15 +342,15 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void setPathologicalStatus(PermissibleValue pathologicalStatus) {
-		if (!Objects.equals(this.pathologicalStatus, pathologicalStatus)) {
-			for (Specimen child : getChildCollection()) {
-				if (child.isAliquot()) {
-					child.setPathologicalStatus(pathologicalStatus);
-				}
-			}
-		}
-				
 		this.pathologicalStatus = pathologicalStatus;
+	}
+
+	public void updatePathologicalStatus(PermissibleValue newPathStatus) {
+		if (Objects.equals(this.pathologicalStatus, newPathStatus)) {
+			return;
+		}
+
+		updateDescendants(s -> s.pathologicalStatus = newPathStatus, Specimen::isAliquot);
 	}
 
 	public String getLineage() {
@@ -364,15 +375,15 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void setSpecimenClass(PermissibleValue specimenClass) {
-		if (!Objects.equals(this.specimenClass, specimenClass)) {
-			for (Specimen child : getChildCollection()) {
-				if (child.isAliquot()) {
-					child.setSpecimenClass(specimenClass);
-				}				
-			}
-		}
-		
 		this.specimenClass = specimenClass;
+	}
+
+	public void updateSpecimenClass(PermissibleValue specimenClass) {
+		if (Objects.equals(this.specimenClass, specimenClass)) {
+			return;
+		}
+
+		updateDescendants(s -> s.specimenClass = specimenClass, Specimen::isAliquot);
 	}
 
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
@@ -381,16 +392,17 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public void setSpecimenType(PermissibleValue specimenType) {
-		if (!Objects.equals(this.specimenType, specimenType)) {
-			for (Specimen child : getChildCollection()) {
-				if (child.isAliquot()) {
-					child.setSpecimenType(specimenType);
-				}				
-			}
-		}
-				
 		this.specimenType = specimenType;
 	}
+
+	public void updateSpecimenType(PermissibleValue specimenType) {
+		if (Objects.equals(this.specimenType, specimenType)) {
+			return;
+		}
+
+		updateDescendants(s -> s.specimenType = specimenType, Specimen::isAliquot);
+	}
+
 
 	public BigDecimal getConcentration() {
 		return concentration;
@@ -513,14 +525,17 @@ public class Specimen extends BaseExtensionEntity {
 	}
 	
 	public void updateBiohazards(Set<PermissibleValue> biohazards) {
-		getBiohazards().addAll(biohazards);
-		getBiohazards().retainAll(biohazards);
-		
-		for (Specimen child : getChildCollection()) {
-			if (child.isAliquot()) {
-				child.updateBiohazards(biohazards);
-			}
+		if (getBiohazards().size() == biohazards.size() && getBiohazards().containsAll(biohazards)) {
+			return;
 		}
+
+		updateDescendants(
+			s -> {
+				s.getBiohazards().addAll(biohazards);
+				s.getBiohazards().retainAll(biohazards);
+			},
+			Specimen::isAliquot
+		);
 	}
 
 	public Integer getFreezeThawCycles() {
@@ -1414,12 +1429,12 @@ public class Specimen extends BaseExtensionEntity {
 			spmnToUpdateFrom = specimen;
 		}
 
-		setTissueSite(spmnToUpdateFrom.getTissueSite());
-		setTissueSide(spmnToUpdateFrom.getTissueSide());
-		setSpecimenClass(spmnToUpdateFrom.getSpecimenClass());
-		setSpecimenType(spmnToUpdateFrom.getSpecimenType());
+		updateTissueSite(spmnToUpdateFrom.getTissueSite());
+		updateTissueSide(spmnToUpdateFrom.getTissueSide());
+		updateSpecimenClass(spmnToUpdateFrom.getSpecimenClass());
+		updateSpecimenType(spmnToUpdateFrom.getSpecimenType());
 		updateBiohazards(spmnToUpdateFrom.getBiohazards());
-		setPathologicalStatus(spmnToUpdateFrom.getPathologicalStatus());
+		updatePathologicalStatus(spmnToUpdateFrom.getPathologicalStatus());
 		setComment(specimen.getComment());
 
 		setExtension(specimen.getExtension());
@@ -2311,7 +2326,7 @@ public class Specimen extends BaseExtensionEntity {
 			labSvc.setUnits(svc.getUnits());
 			labSvc.setServiceDate(getCreatedOn());
 			labSvc.setServicedBy(AuthUtil.getCurrentUser());
-			daoFactory.getSpecimenDao().saveOrUpdate(labSvc);
+			daoFactory.getSpecimenDao().save(labSvc);
 		}
 	}
 
@@ -2804,5 +2819,21 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		return user;
+	}
+
+	private void updateDescendants(Consumer<Specimen> action, Predicate<Specimen> inclusionFilter) {
+		Deque<Specimen> stack = new ArrayDeque<>();
+		stack.push(this);
+
+		while (!stack.isEmpty()) {
+			Specimen current = stack.pop();
+
+			action.accept(current);
+			for (Specimen child : current.getChildCollection()) {
+				if (inclusionFilter.test(child)) {
+					stack.push(child);
+				}
+			}
+		}
 	}
 }

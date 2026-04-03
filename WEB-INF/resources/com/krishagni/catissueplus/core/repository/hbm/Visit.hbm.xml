@@ -44,7 +44,7 @@
 
     <many-to-one name="site" column="SITE_ID" />
 
-    <set name="specimens" table="CATISSUE_SPECIMEN" inverse="true" cascade="save-update">
+    <set name="specimens" table="CATISSUE_SPECIMEN" inverse="true" cascade="persist,merge">
       <key column="SPECIMEN_COLLECTION_GROUP_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Specimen" />
       <filter name="activeEntity"/>

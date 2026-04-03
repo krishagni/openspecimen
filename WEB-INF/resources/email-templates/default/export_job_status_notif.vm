@@ -11,7 +11,7 @@
             <tr>
               <td style="padding:0px;border-collapse:collapse;padding:0px;padding-bottom:10px">
                 <p style="margin:10px 0 0 0">
-                  Hello $job.createdBy.firstName $job.createdBy.lastName,
+                  Hello $job.createdBy.formattedName(),
                   <br><br>
                   Below is the status of your recent export records job:
                 </p>

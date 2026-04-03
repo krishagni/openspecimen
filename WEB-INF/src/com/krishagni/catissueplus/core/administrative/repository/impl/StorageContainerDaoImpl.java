@@ -428,14 +428,14 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 
 	@Override
 	public int deleteReservedPositions(List<String> reservationIds) {
-		return createNamedQuery(DEL_POS_BY_RSV_ID)
+		return getCurrentSession().createNamedMutationQuery(DEL_POS_BY_RSV_ID)
 			.setParameterList("reservationIds", reservationIds)
 			.executeUpdate();
 	}
 
 	@Override
 	public int deleteReservedPositionsOlderThan(Date expireTime) {
-		return createNamedQuery(DEL_EXPIRED_RSV_POS)
+		return getCurrentSession().createNamedMutationQuery(DEL_EXPIRED_RSV_POS)
 			.setParameter("expireTime", expireTime)
 			.executeUpdate();
 	}

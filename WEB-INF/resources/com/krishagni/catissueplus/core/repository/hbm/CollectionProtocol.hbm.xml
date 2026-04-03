@@ -139,7 +139,7 @@
        <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite"/>
     </set>
 
-    <set name="collectionProtocolEvents" table="CATISSUE_COLL_PROT_EVENT" inverse="true" cascade="save-update">
+    <set name="collectionProtocolEvents" table="CATISSUE_COLL_PROT_EVENT" inverse="true" cascade="persist,merge">
       <key column="COLLECTION_PROTOCOL_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent"/>
       <filter name="activeEntity"/>

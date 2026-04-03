@@ -181,7 +181,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 
 	@Override
 	public Long getCustomFieldRecordId(Long visitId, Long formId, Long formCtxtId) {
-		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+		return getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_ID, Long.class)
 			.setParameter("visitId", visitId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -190,7 +190,7 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 
 	@Override
 	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> visitIds, Long formId, Long formCtxtId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS, Object[].class)
 			.setParameterList("visitIds", visitIds)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -206,14 +206,14 @@ public class VisitsDaoImpl extends AbstractDao<Visit> implements VisitsDao {
 
 	@Override
 	public int insertCustomFieldRecordId(Long visitId, Long formId, Long formCtxtId, Long recordId) {
-		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+		int rows = getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_RECORD)
 			.setParameter("visitId", visitId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
 			.setParameter("recordId", recordId)
 			.executeUpdate();
 
-		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+		getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
 			.setParameter("visitId", visitId)
 			.setParameter("formId", formId)
 			.setParameter("recordId", recordId)

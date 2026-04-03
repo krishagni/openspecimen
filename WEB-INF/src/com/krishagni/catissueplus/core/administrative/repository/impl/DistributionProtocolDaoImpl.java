@@ -138,7 +138,7 @@ public class DistributionProtocolDaoImpl extends AbstractDao<DistributionProtoco
 
 	@Override
 	public void saveReservedEvents(Collection<SpecimenReservedEvent> events) {
-		events.forEach(event -> getCurrentSession().saveOrUpdate(event));
+		events.forEach(event -> getCurrentSession().persist(event));
 	}
 
 	@Override

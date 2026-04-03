@@ -13,7 +13,7 @@ public class SpecimenRequirementDaoImpl extends AbstractDao<SpecimenRequirement>
 	
 	@Override
 	public SpecimenRequirement getSpecimenRequirement(Long id) {
-		return getCurrentSession().get(SpecimenRequirement.class, id);
+		return getCurrentSession().find(SpecimenRequirement.class, id);
 	}
 	
 	@Override

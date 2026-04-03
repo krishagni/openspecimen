@@ -3,8 +3,9 @@ package com.krishagni.catissueplus.core.de.domain;
 import java.util.Date;
 
 import com.krishagni.catissueplus.core.administrative.domain.User;
+import com.krishagni.catissueplus.core.biospecimen.domain.Identifiable;
 
-public class QueryAuditLog {
+public class QueryAuditLog implements Identifiable<Long> {
 	private Long id;
 	
 	private SavedQuery query;

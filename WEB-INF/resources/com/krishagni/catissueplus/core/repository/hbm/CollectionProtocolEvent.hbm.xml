@@ -62,7 +62,7 @@
       table="CATISSUE_SPECIMEN_COLL_GROUP"
       lazy="true"
       inverse="true"
-      cascade="save-update">
+      cascade="persist,merge">
       <key column="COLLECTION_PROTOCOL_EVENT_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Visit"/>
       <filter name="activeEntity"/>

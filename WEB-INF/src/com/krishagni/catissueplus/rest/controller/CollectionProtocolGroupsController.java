@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -269,7 +269,7 @@ public class CollectionProtocolGroupsController {
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/workflows-file")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public CpGroupWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long groupId, @PathVariable("file") MultipartFile file) {
+	public CpGroupWorkflowCfgDetail saveWorkflowCfg(@PathVariable("id") Long groupId, @RequestParam("file") MultipartFile file) {
 		List<WorkflowDetail> workflows;
 
 		try {

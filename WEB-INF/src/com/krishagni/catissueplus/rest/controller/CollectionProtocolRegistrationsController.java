@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -240,7 +240,7 @@ public class CollectionProtocolRegistrationsController {
 	@RequestMapping(method = RequestMethod.POST, value="/{id}/consent-form")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public String uploadConsentForm(@PathVariable("id") Long cprId, @PathVariable("file") MultipartFile file) 
+	public String uploadConsentForm(@PathVariable("id") Long cprId, @RequestParam("file") MultipartFile file)
 	throws IOException {
 		FileDetail detail = new FileDetail();
 		detail.setId(cprId);

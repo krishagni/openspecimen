@@ -43,7 +43,7 @@ public class NotifUtil {
 
 		if (!userNotifs.isEmpty()) {
 			notif.setNotifiedUsers(userNotifs);
-			daoFactory.getUserNotificationDao().saveOrUpdate(notif);
+			daoFactory.getUserNotificationDao().saveNotification(notif);
 		}
 	}
 }

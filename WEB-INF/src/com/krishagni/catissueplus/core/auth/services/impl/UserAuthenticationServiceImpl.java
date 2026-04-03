@@ -381,7 +381,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 			loginOtp.setTime(Calendar.getInstance().getTime());
 			loginOtp.setIpAddress(loginDetail.getIpAddress());
 			loginOtp.setOtp(generateOtp());
-			daoFactory.getAuthDao().saveOrUpdate(loginOtp);
+			daoFactory.getAuthDao().saveLoginOtp(loginOtp);
 
 			Map<String, Object> props = new HashMap<>();
 			props.put("user", loginOtp.getUser());
@@ -614,7 +614,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 		userAuditLog.setCallStartTime(Calendar.getInstance().getTime());
 		userAuditLog.setCallEndTime(Calendar.getInstance().getTime());
 		userAuditLog.setLoginAuditLog(loginAuditLog);
-		auditService.saveOrUpdateApiLog(userAuditLog);
+		auditService.saveApiCallLog(userAuditLog);
 	}
 
 	private boolean isSystemLockedDown() {

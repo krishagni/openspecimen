@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Selection;
-
 import org.hibernate.Session;
+import org.hibernate.query.criteria.JpaCriteriaQuery;
+
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Selection;
 
 public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 	protected boolean distinct;
@@ -89,7 +89,7 @@ public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 		if (selections == null || selections.isEmpty()) {
 			cq.select((Selection<? extends R>) root);
 		} else {
-			cq.multiselect(selections);
+			cq.select((Selection<? extends R>) builder.array(selections));
 		}
 
 		if (startAt >= 0 && maxResults >= 0) {
@@ -105,7 +105,7 @@ public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 		if (selections == null || selections.isEmpty()) {
 			cq.select((Selection<? extends R>) root);
 		} else {
-			cq.multiselect(selections);
+			cq.select((Selection<? extends R>) builder.array(selections));
 		}
 
 		return session.createQuery(cq).uniqueResult();
@@ -113,8 +113,30 @@ public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 
 	public Long getCount(String attribute) {
 		CriteriaQuery<R> cq = (CriteriaQuery<R>) query;
-		cq.select((Expression<R>) builder.count(getExpression(attribute)));
-		return (Long) session.createQuery(cq).getSingleResult();
+		cq.select(getExpression(attribute));
+		JpaCriteriaQuery<Long> countQuery = ((JpaCriteriaQuery<R>) cq).createCountQuery();
+		return session.createQuery(countQuery).getSingleResult();
+//		boolean prevDistinct = distinct;
+//		List<Selection<?>> prevSelections = selections;
+//		try {
+//			if (StringUtils.isNotBlank(attribute)) {
+//				selections = new ArrayList<>();
+//				selections.add(getExpression(attribute));
+//			}
+//
+//			cq.distinct(distinct);
+//			if (selections == null || selections.isEmpty()) {
+//				cq.select((Selection<? extends R>) root);
+//			} else {
+//				cq.multiselect(selections);
+//			}
+//
+//			JpaCriteriaQuery<Long> countQuery = ((JpaCriteriaQuery<R>) cq).createCountQuery();
+//			return session.createQuery(countQuery).getSingleResult();
+//		} finally {
+//			distinct = prevDistinct;
+//			selections = prevSelections;
+//		}
 	}
 
 	public Criteria<R> orderBy(Order... orderList) {
@@ -125,7 +147,7 @@ public class Criteria<R> extends AbstractCriteria<Criteria<R>, R> {
 
 	public Criteria<R> addOrder(Order order) {
 		CriteriaQuery<R> cq = (CriteriaQuery<R>) query;
-		List<javax.persistence.criteria.Order> orderList = cq.getOrderList();
+		List<jakarta.persistence.criteria.Order> orderList = cq.getOrderList();
 		if (orderList == null || orderList.isEmpty()) {
 			orderList = new ArrayList<>();
 			cq.orderBy(orderList);

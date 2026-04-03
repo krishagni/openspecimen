@@ -44,8 +44,8 @@ public class UserNotificationDaoImpl extends AbstractDao<UserNotification> imple
 	}
 
 	@Override
-	public void saveOrUpdate(Notification notification) {
-		getCurrentSession().saveOrUpdate(notification);
+	public void saveNotification(Notification notification) {
+		getCurrentSession().persist(notification);
 	}
 
 	public int deleteNotificationsOlderThan(int olderThanDays, int maxNotifs) {
@@ -59,8 +59,9 @@ public class UserNotificationDaoImpl extends AbstractDao<UserNotification> imple
 			return 0;
 		}
 
-		getCurrentSession().getNamedQuery(DELETE_NOTIF_USERS).setParameterList("notifIds", notifIds).executeUpdate();
-		return getCurrentSession().getNamedQuery(DELETE_NOTIFS).setParameterList("notifIds", notifIds).executeUpdate();
+
+		getCurrentSession().createNamedMutationQuery(DELETE_NOTIF_USERS).setParameterList("notifIds", notifIds).executeUpdate();
+		return getCurrentSession().createNamedMutationQuery(DELETE_NOTIFS).setParameterList("notifIds", notifIds).executeUpdate();
 	}
 
 	private Criteria<UserNotification> getUserNotificationsListCriteria(UserNotifsListCriteria crit) {

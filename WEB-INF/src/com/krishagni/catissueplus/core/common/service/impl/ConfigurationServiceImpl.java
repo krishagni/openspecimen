@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -148,7 +148,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		if (existing == null) {
 			return ResponseEvent.userError(ConfigErrorCode.SETTING_NOT_FOUND);
 		}
-		
+
 		String setting = detail.getValue();
 		if (!isValidSetting(existing.getProperty(), setting)) {
 			return ResponseEvent.userError(ConfigErrorCode.INVALID_SETTING_VALUE, setting);
@@ -157,6 +157,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, Initializ
 		boolean successful = false;
 		try {
 			ConfigSetting newSetting = createSetting(existing, setting);
+
+			existing = daoFactory.getConfigSettingDao().getById(existing.getId());
 			existing.setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 
 			daoFactory.getConfigSettingDao().saveOrUpdate(existing);

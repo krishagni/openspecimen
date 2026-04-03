@@ -2,6 +2,7 @@
 package com.krishagni.catissueplus.core.administrative.domain.factory.impl;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -429,9 +430,9 @@ public class UserFactoryImpl implements UserFactory {
 		user.setIpRange(detail.getIpRange());
 		try {
 			if (StringUtils.isNotBlank(user.getIpRange()) && !user.getIpRange().equals("*")) {
-				String[] addresses = user.getIpRange().split(",");
+				List<String> addresses = Utility.csvToStringList(user.getIpRange());
 				for (String address : addresses) {
-					new IpAddressMatcher(address);
+					new IpAddressMatcher(Utility.normaliseIpRange(address));
 				}
 			}
 		} catch (Exception e) {

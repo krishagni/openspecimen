@@ -49,7 +49,7 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 
 	@Override
 	public Map<Long, Pair<Long, Long>> getRateListsStats(Collection<Long> rateListIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_RATE_LISTS_STATS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_RATE_LISTS_STATS, Object[].class)
 			.setParameterList("rateListIds", rateListIds)
 			.list();
 
@@ -107,19 +107,19 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		}
 
 		String cloneSql = String.format(CLONE_CPS, idColumnName, idColumnValue, tgtRateListId);
-		return getCurrentSession().createNativeQuery(cloneSql)
+		return getCurrentSession().createNativeMutationQuery(cloneSql)
 			.setParameter("rateListId", srcRateListId)
 			.executeUpdate();
 	}
 
 	@Override
 	public void saveRateListCp(LabServiceRateListCp rateListCp) {
-		getCurrentSession().saveOrUpdate(rateListCp);
+		getCurrentSession().persist(rateListCp);
 	}
 
 	@Override
 	public void deleteRateListCp(LabServiceRateListCp rateListCp) {
-		getCurrentSession().delete(rateListCp);
+		getCurrentSession().remove(rateListCp);
 	}
 
 	@Override
@@ -132,14 +132,14 @@ public class LabServicesRateListDaoImpl extends AbstractDao<LabServicesRateList>
 		}
 
 		String cloneSql = String.format(CLONE_SERVICE_RATES, idColumnName, idColumnValue, tgtRateListId);
-		return getCurrentSession().createNativeQuery(cloneSql)
+		return getCurrentSession().createNativeMutationQuery(cloneSql)
 			.setParameter("rateListId", srcRateListId)
 			.executeUpdate();
 	}
 
 	@Override
 	public List<Object[]> getOverlappingServiceRates(LabServicesRateList rateList) {
-		return getCurrentSession().getNamedQuery(GET_OVERLAPPING_SERVICE_RATES)
+		return getCurrentSession().createNamedQuery(GET_OVERLAPPING_SERVICE_RATES, Object[].class)
 			.setParameter("rateListId", rateList.getId())
 			.setParameter("startDate", rateList.getStartDate())
 			.setParameter("endDate", rateList.getEndDate() != null ? rateList.getEndDate() : DISTANT_FUTURE)

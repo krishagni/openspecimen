@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,7 +221,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public UserDetail getUser(@PathVariable Long id) {
+	public UserDetail getUser(@PathVariable("id") Long id) {
 		ResponseEvent<UserDetail> resp = userService.getUser(new RequestEvent<Long>(id));
 		resp.throwErrorIfUnsuccessful();
 		return resp.getPayload();
@@ -230,7 +230,7 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.GET, value = "/byid/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public UserDetail getUserById(@PathVariable Long id) {
+	public UserDetail getUserById(@PathVariable("id") Long id) {
 		return this.getUser(id);
 	}
 

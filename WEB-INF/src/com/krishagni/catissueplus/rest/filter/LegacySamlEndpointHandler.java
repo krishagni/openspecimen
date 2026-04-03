@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.FilterChain;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.krishagni.catissueplus.core.auth.domain.AuthDomain;
@@ -24,11 +24,11 @@ public class LegacySamlEndpointHandler extends GenericFilterBean {
 	//
 	// Mapping of Purpose -> Legacy endpoint
 	//
-	private static final Map<String, AntPathRequestMatcher> REQ_MATCHERS = new HashMap<>() {
+	private static final Map<String, PathPatternRequestMatcher> REQ_MATCHERS = new HashMap<>() {
 		{
-			put("login",  new AntPathRequestMatcher("/saml/login"));
-			put("acs",    new AntPathRequestMatcher("/saml/SSO/**"));
-			put("logout", new AntPathRequestMatcher("/saml/SingleLogout/**"));
+			put("login",  PathPatternRequestMatcher.pathPattern("/saml/login"));
+			put("acs",    PathPatternRequestMatcher.pathPattern("/saml/SSO/**"));
+			put("logout", PathPatternRequestMatcher.pathPattern("/saml/SingleLogout/**"));
 		}
 	};
 
@@ -41,7 +41,7 @@ public class LegacySamlEndpointHandler extends GenericFilterBean {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest httpReq = (HttpServletRequest) request;
-		for (Map.Entry<String, AntPathRequestMatcher> matcherEntry : REQ_MATCHERS.entrySet()) {
+		for (Map.Entry<String, PathPatternRequestMatcher> matcherEntry : REQ_MATCHERS.entrySet()) {
 			if (matcherEntry.getValue().matches(httpReq)) {
 				String targetUrl = getTargetUrl(matcherEntry.getKey());
 				if (StringUtils.isBlank(targetUrl)) {

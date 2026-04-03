@@ -29,7 +29,7 @@
 
     <many-to-one name="container" column="STORAGE_CONTAINER_ID"/>
 
-    <many-to-one name="occupyingSpecimen" column="OCCUPYING_SPECIMEN_ID" unique="true" cascade="save-update"/>
+    <many-to-one name="occupyingSpecimen" column="OCCUPYING_SPECIMEN_ID" unique="true" cascade="persist,merge"/>
 
     <many-to-one name="occupyingContainer" column="OCCUPYING_CONTAINER_ID" unique="true"/>
 

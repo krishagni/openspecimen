@@ -14,18 +14,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.HttpHeaders;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.GenericFilterBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +60,8 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	private static final String BASIC_AUTH = "Basic ";
 
 	private static final String BEARER_TOKEN = "Bearer ";
+
+	private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
 	private Set<String> allowedOrigins;
 	
@@ -394,14 +398,15 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 				apiCall.setCallStartTime(Calendar.getInstance().getTime());
 				apiCall.setLoginAuditLog(loginAuditLog);
 				apiCall.setResponseCode("000");
+				auditService.saveApiCallLog(apiCall);
 			} else {
 				apiCall.setCallEndTime(Calendar.getInstance().getTime());
 				if (httpResp != null) {
 					apiCall.setResponseCode(Integer.toString(httpResp.getStatus()));
 				}
-			}
 
-			auditService.saveOrUpdateApiLog(apiCall);
+				auditService.updateApiCallLog(apiCall);
+			}
 		} catch (Throwable t) {
 			String msg = Utility.getErrorMessage(t);
 			Date startTime = apiCall != null ? apiCall.getCallStartTime() : Calendar.getInstance().getTime();
@@ -419,20 +424,65 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 	}
 
 	private boolean matches(HttpServletRequest httpReq, String url) {
-		return new AntPathRequestMatcher(getUrlPattern(url), httpReq.getMethod(), true).matches(httpReq);
-	}
-
-	private String getUrlPattern(String url) {
-		if (!url.startsWith("/**")) {
-			String prefix = "/**";
-			if (!url.startsWith("/")) {
-				prefix += "/";
-			}
-
-			url = prefix + url;
+		if (matchesPattern(httpReq, getUrlPattern(httpReq, url))) {
+			return true;
 		}
 
-		return url;
+		// Allow optional trailing slash in configured URLs
+		if (!url.endsWith("/**")) {
+			String modifiedUrl = url.endsWith("/") ? url.substring(0, url.length() - 1) : url + "/";
+			return matchesPattern(httpReq, getUrlPattern(httpReq, modifiedUrl));
+		}
+
+		return false;
+	}
+
+	private boolean matchesPattern(HttpServletRequest httpReq, String pattern) {
+		if (hasMiddleWildcard(pattern)) {
+			return antPathMatcher.match(pattern, getRequestPath(httpReq));
+		}
+
+		HttpMethod method = HttpMethod.valueOf(httpReq.getMethod().toUpperCase());
+		PathPatternRequestMatcher matcher = (method != null)
+			? PathPatternRequestMatcher.pathPattern(method, pattern)
+			: PathPatternRequestMatcher.pathPattern(pattern);
+		return matcher.matches(httpReq);
+	}
+
+	private String getUrlPattern(HttpServletRequest req, String url) {
+		String pattern = url.startsWith("/") ? url : "/" + url;
+
+		String servletPath = req.getServletPath();
+		if (StringUtils.isBlank(servletPath)) {
+			return pattern;
+		}
+
+		// If the pattern already includes the servlet path, leave it as-is
+		if (pattern.startsWith(servletPath + "/") || pattern.equals(servletPath)) {
+			return pattern;
+		}
+
+		// Prefix with servlet path (e.g., /rest/ng)
+		if (pattern.startsWith("/")) {
+			return servletPath + pattern;
+		}
+
+		return servletPath + "/" + pattern;
+	}
+
+	private String getRequestPath(HttpServletRequest httpReq) {
+		String path = httpReq.getRequestURI();
+		String contextPath = httpReq.getContextPath();
+		if (StringUtils.isNotBlank(contextPath) && path.startsWith(contextPath)) {
+			path = path.substring(contextPath.length());
+		}
+
+		return path;
+	}
+
+	private boolean hasMiddleWildcard(String pattern) {
+		int idx = pattern.indexOf("**");
+		return idx > 0 && idx < pattern.length() - 2;
 	}
 
 	private void sendError(HttpServletRequest httpReq, HttpServletResponse httpResp, Exception e)
@@ -440,7 +490,7 @@ public class AuthTokenFilter extends GenericFilterBean implements InitializingBe
 		ResponseEntity<Object> resp = new RestErrorController().handleOtherException(e, new ServletWebRequest(httpReq));
 
 		httpResp.setContentType("application/json");
-		httpResp.setStatus(resp.getStatusCodeValue());
+		httpResp.setStatus(resp.getStatusCode().value());
 		httpResp.getOutputStream().write(toJsonString(resp.getBody()).getBytes());
 		httpResp.getOutputStream().flush();
 		httpResp.getOutputStream().close();

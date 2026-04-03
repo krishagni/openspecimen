@@ -18,7 +18,7 @@ public class OAuthStateDaoImpl extends AbstractDao<OAuthState> implements OAuthS
 
 	@Override
 	public int deleteStatesOlderThan(Instant time) {
-		return getCurrentSession().getNamedQuery(DELETE_OLD_STATES)
+		return getCurrentSession().createNamedMutationQuery(DELETE_OLD_STATES)
 			.setParameter("staleTime", time)
 			.executeUpdate();
 	}

@@ -371,7 +371,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public void savedPooledEvent(SpecimenPooledEvent event) {
-		getCurrentSession().saveOrUpdate(event);
+		getCurrentSession().persist(event);
 		getCurrentSession().flush();
 	}
 
@@ -503,7 +503,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public Map<Long, Pair<String, BigDecimal>> getLabSpecimenServicesRate(List<Long> specimenIds) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_SERVICE_RATES)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_SERVICE_RATES, Object[].class)
 			.setParameterList("specimenIds", specimenIds)
 			.list();
 
@@ -516,13 +516,13 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@Override
-	public void saveOrUpdate(LabSpecimenService labSpecimenService) {
-		sessionFactory.getCurrentSession().saveOrUpdate(labSpecimenService);
+	public void save(LabSpecimenService labSpecimenService) {
+		sessionFactory.getCurrentSession().persist(labSpecimenService);
 	}
 
 	@Override
 	public void delete(LabSpecimenService svc) {
-		sessionFactory.getCurrentSession().delete(svc);
+		sessionFactory.getCurrentSession().remove(svc);
 	}
 
 	@Override
@@ -534,7 +534,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public Long getCustomFieldRecordId(Long specimenId, Long formId, Long formCtxtId) {
-		return (Long) getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_ID)
+		return getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_ID, Long.class)
 			.setParameter("specimenId", specimenId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -543,7 +543,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public Map<Long, Long> getCustomFieldRecordIds(Collection<Long> specimenIds, Long formId, Long formCtxtId) {
-		List<Object[]> rows = getCurrentSession().getNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS)
+		List<Object[]> rows = getCurrentSession().createNamedQuery(GET_CUSTOM_FIELD_RECORD_IDS, Object[].class)
 			.setParameterList("specimenIds", specimenIds)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
@@ -559,14 +559,14 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public int insertCustomFieldRecordId(Long specimenId, Long formId, Long formCtxtId, Long recordId) {
-		int rows = getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_RECORD)
+		int rows = getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_RECORD)
 			.setParameter("specimenId", specimenId)
 			.setParameter("formId", formId)
 			.setParameter("formCtxtId", formCtxtId)
 			.setParameter("recordId", recordId)
 			.executeUpdate();
 
-		getCurrentSession().getNamedQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
+		getCurrentSession().createNamedMutationQuery(INSERT_CUSTOM_FIELD_REC_STATUS)
 			.setParameter("specimenId", specimenId)
 			.setParameter("formId", formId)
 			.setParameter("recordId", recordId)
@@ -846,7 +846,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	private Specimen getByVisitAndSrId(String hql, Long visitId, Long srId) {
-		List<Specimen> specimens = getCurrentSession().getNamedQuery(hql)
+		List<Specimen> specimens = getCurrentSession().createNamedQuery(hql, Specimen.class)
 			.setParameter("visitId", visitId)
 			.setParameter("srId", srId)
 			.list();

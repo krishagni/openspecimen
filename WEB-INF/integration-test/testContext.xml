@@ -40,7 +40,7 @@
     <property name="password" value=""/>
   </bean>
   
-  <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+  <bean id="sessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
     <property name="dataSource" ref="dataSource" />
     <property name="configLocation">
       <value>classpath:hibernate.test.cfg.xml</value>

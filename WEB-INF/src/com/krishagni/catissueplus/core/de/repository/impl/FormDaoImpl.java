@@ -515,8 +515,18 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 	}
 	
 	@Override
-	public void saveOrUpdateRecordEntry(FormRecordEntryBean recordEntry) {
-		sessionFactory.getCurrentSession().saveOrUpdate(recordEntry);
+	public void saveOrUpdateRecordEntry(FormRecordEntryBean re) {
+		Session session = getCurrentSession();
+		if (re.getIdentifier() == null) {
+			session.persist(re);
+			return;
+		}
+
+		if (!session.contains(re)) {
+			throw OpenSpecimenException.serverError(CommonErrorCode.SERVER_ERROR, "FormDaoImpl.saveOrUpdateRecordEntry called with unmanaged record entry");
+		}
+
+		session.merge(re);
 	}
 
 	@Override
@@ -1244,7 +1254,7 @@ public class FormDaoImpl extends AbstractDao<FormContextBean> implements FormDao
 		int startAt, int maxResults,
 		Function<Object[], Map<String, Object>> rowMapper) {
 
-		String sql = getCurrentSession().createNamedQuery(queryName).getQueryString();
+		String sql = getCurrentSession().createNamedQuery(queryName, Object[].class).getQueryString();
 		if (CollectionUtils.isNotEmpty(names)) {
 			int orderByIdx = sql.lastIndexOf("order by");
 			sql = sql.substring(0, orderByIdx) + " and " + namesCond + " " + sql.substring(orderByIdx);

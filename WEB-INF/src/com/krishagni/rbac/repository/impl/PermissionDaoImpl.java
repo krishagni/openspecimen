@@ -14,7 +14,7 @@ public class PermissionDaoImpl extends AbstractDao<Permission> implements Permis
 	
 	@Override
 	public Permission getPermission(Long permissionId) {
-		return getCurrentSession().get(Permission.class, permissionId);
+		return getCurrentSession().find(Permission.class, permissionId);
 	}
 
 	@Override

@@ -24,8 +24,8 @@ public class CollectionProtocolPublishEventDaoImpl extends AbstractDao<Collectio
 	}
 
 	@Override
-	public void saveOrUpdate(CollectionProtocolPublishedVersion version, boolean flush) {
-		getCurrentSession().saveOrUpdate(version);
+	public void save(CollectionProtocolPublishedVersion version, boolean flush) {
+		getCurrentSession().persist(version);
 		if (flush) {
 			getCurrentSession().flush();
 		}

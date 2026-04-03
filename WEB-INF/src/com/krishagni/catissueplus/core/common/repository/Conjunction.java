@@ -1,7 +1,7 @@
 package com.krishagni.catissueplus.core.common.repository;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
 
 public class Conjunction extends Junction {
 

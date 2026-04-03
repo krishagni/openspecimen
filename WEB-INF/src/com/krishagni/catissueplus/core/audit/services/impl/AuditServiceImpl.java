@@ -304,8 +304,14 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 
 	@Override
 	@PlusTransactional
-	public void saveOrUpdateApiLog(UserApiCallLog userAuditLog) {
-		daoFactory.getAuditDao().saveOrUpdate(userAuditLog);
+	public void saveApiCallLog(UserApiCallLog userAuditLog) {
+		daoFactory.getAuditDao().save(userAuditLog);
+	}
+
+	@Override
+	@PlusTransactional
+	public void updateApiCallLog(UserApiCallLog userAuditLog) {
+		daoFactory.getAuditDao().updateApiCallLog(userAuditLog.getId(), userAuditLog.getCallEndTime(), userAuditLog.getResponseCode());
 	}
 
 	@Override

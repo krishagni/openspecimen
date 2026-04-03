@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,7 +91,7 @@ public class BulkObjectImportController {
 	@RequestMapping(method = RequestMethod.POST, value = "/input-file")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody		
-	public Map<String, String> uploadJobInputFile(@PathVariable("file") MultipartFile file) 
+	public Map<String, String> uploadJobInputFile(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		RequestEvent<InputStream> req = new RequestEvent<>(file.getInputStream());
 		ResponseEvent<String> resp = importSvc.uploadImportJobFile(req);
@@ -204,7 +204,7 @@ public class BulkObjectImportController {
 	@RequestMapping(method = RequestMethod.POST, value = "schedule")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public Map<String, Integer> scheduleJobs(@PathVariable("file") MultipartFile file)
+	public Map<String, Integer> scheduleJobs(@RequestParam("file") MultipartFile file)
 	throws IOException {
 		FileDetail input = new FileDetail();
 		input.setFilename(file.getOriginalFilename());

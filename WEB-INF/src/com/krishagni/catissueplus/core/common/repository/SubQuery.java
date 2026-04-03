@@ -1,9 +1,9 @@
 package com.krishagni.catissueplus.core.common.repository;
 
-import javax.persistence.criteria.AbstractQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.AbstractQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Subquery;
 
 public class SubQuery<R> extends AbstractCriteria<SubQuery<R>, R> {
 	protected boolean distinct;

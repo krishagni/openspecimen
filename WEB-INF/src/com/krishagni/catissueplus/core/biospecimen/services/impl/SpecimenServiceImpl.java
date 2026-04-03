@@ -996,7 +996,7 @@ public class SpecimenServiceImpl implements SpecimenService, ObjectAccessor, Con
 			existing.update(spmnSvc);
 			spmnSvc = existing;
 		} else {
-			daoFactory.getSpecimenDao().saveOrUpdate(spmnSvc);
+			daoFactory.getSpecimenDao().save(spmnSvc);
 		}
 
 		return SpecimenServiceDetail.from(spmnSvc, Boolean.TRUE.equals(input.getIncludeSpmnDetailsInResp()));
