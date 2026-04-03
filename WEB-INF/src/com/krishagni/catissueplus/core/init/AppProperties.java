@@ -43,7 +43,7 @@ public class AppProperties implements FactoryBean<Properties> {
 
 	private static final String ORA_TYPE        = "oracle";
 
-	private static final String ORA_DIALECT     = "org.hibernate.dialect.Oracle10gDialect";
+	private static final String ORA_DIALECT     = "org.hibernate.dialect.OracleDialect";
 
 	private static final String DEF_CFG_LOC     = "%s" + File.separator + "conf" + File.separator + "%s.properties";
 
