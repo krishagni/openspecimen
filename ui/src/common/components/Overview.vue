@@ -402,9 +402,9 @@ export default {
 }
 
 .os-key-value-pairs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 0.5rem;
+  column-gap: 2.5rem; /* gap between columns */
+  column-width: 350px; /* minimum width of each column */
+  column-count: 3; /* max columns limit */
   list-style-type: none;
   padding: 0rem;
   margin: 1.25rem 0rem;
@@ -412,30 +412,35 @@ export default {
 
 /* Width of a medium column is 250px for key and 330px for value = 580px */
 .os-key-value-pairs.md-col {
-  grid-template-columns: repeat(auto-fit, minmax(580px, 1fr));
+  column-width: 580px;
+  column-count: 2;
 }
 
 /* Width of a big column is 300px for key and 400px for value = 700px */
 .os-key-value-pairs.bg-col {
-  grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+  column-width: 700px;
+  column-count: 1;
 }
 
 /* Width of a XL column is 400px for key and 530px for value = 930px */
 .os-key-value-pairs.xl-col {
-  grid-template-columns: repeat(auto-fit, minmax(930px, 1fr));
+  column-width: 930px;
+  column-count: 1;
 }
 
 .os-key-value-pairs.os-one-col,
 .os-key-value-pairs.md-col.os-one-col,
 .os-key-value-pairs.bg-col.os-one-col,
 .os-key-value-pairs.xl-col.os-one-col {
-  grid-template-columns: 1fr;
+  column-count: 1;
 }
 
 .os-key-value-pairs .item {
   display: flex;
   align-items: center;
   min-width: 350px;
+  break-inside: avoid;
+  margin-bottom: 0.5rem;
 }
 
 .os-key-value-pairs.md-col .item {
@@ -446,7 +451,7 @@ export default {
   min-width: 700px;
 }
 
-.os-key-value-pairs.bg-col .item {
+.os-key-value-pairs.xl-col .item {
   min-width: 930px;
 }
 
