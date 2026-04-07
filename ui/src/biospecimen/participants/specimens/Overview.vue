@@ -86,7 +86,7 @@
     </template>
     <template #footer>
       <os-button text   :label="$t('common.buttons.close')" @click="closeEventOverview()" />
-      <os-plugin-views page="specimen-detail" view="event-overview" :view-props="pluginViewProps" />
+      <os-plugin-views page="specimen-detail" view="event-overview" :view-props="eventOverviewPluginProps" />
       <os-button danger left-icon="trash" :label="$t('common.buttons.delete')" @click="deleteEvent(ctx.event)"
         v-if="!ctx.event.sysForm && isUpdateAllowed" />
       <os-button primary left-icon="edit" :label="$t('common.buttons.edit')" @click="editEvent(ctx.event)"
@@ -179,7 +179,7 @@ export default {
         event: {}
       },
 
-      pluginViewProps: { },
+      eventOverviewPluginProps: { },
 
       transferSchema,
 
@@ -284,13 +284,14 @@ export default {
     },
 
     eventDict: function() {
+      let dict = [];
       if (this.ctx.event.id == 'SpecimenCollectionEvent') {
-        return specimenSvc.getCollectionEventDict();
+        dict = specimenSvc.getCollectionEventDict();
       } else if (this.ctx.event.id == 'SpecimenReceivedEvent') {
-        return specimenSvc.getReceivedEventDict();
-      } else {
-        return [];
+        dict = specimenSvc.getReceivedEventDict();
       }
+
+      return dict.map(field => ({...field, label: this.$t(field.labelCode)}));
     }
   },
 
@@ -360,10 +361,12 @@ export default {
 
     showEvent: function(event) {
       const {formId, id: recordId} = event;
+      const pluginProps = this.eventOverviewPluginProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
       if (recordId == 'SpecimenCollectionEvent' || recordId == 'SpecimenReceivedEvent') {
         const msgCode = 'specimens.' + (recordId == 'SpecimenCollectionEvent' ? 'collection_event' : 'received_event');
         this.ctx.event = {name: this.$t(msgCode), id: recordId, sysForm: true, isEditable: this.isUpdateAllowed};
         this.ctx.eventRecord = {specimen: this.ctx.specimen};
+        pluginProps.dict = this.eventDict;
         this.$refs.eventOverviewDialog.open();
       } else {
         formSvc.getRecord({formId, recordId}, {includeMetadata: true}).then(
@@ -377,7 +380,7 @@ export default {
               sysForm,
               isEditable: !sysForm && this.isUpdateAllowed
             };
-            this.ctx.eventRecord = this.pluginViewProps.record = record;
+            this.ctx.eventRecord = pluginProps.record = record;
             this.$refs.eventOverviewDialog.open();
           }
         );
@@ -586,7 +589,7 @@ export default {
         return;
       }
 
-      const ctxt = this.pluginViewProps = {...this.ctx, cpViewCtx: this.cpViewCtx};
+      const ctxt = {...this.ctx, cpViewCtx: this.cpViewCtx};
       util.getPluginMenuOptions(this.$refs.moreMenuPluginViews, 'specimen-detail', 'more-menu', ctxt)
         .then(pluginOptions => this.ctx.pluginOptions = pluginOptions);
     }
