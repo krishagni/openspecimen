@@ -69,8 +69,7 @@
     <one-to-one
       name="position"
       class="com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition"
-      property-ref="occupyingSpecimen"
-      cascade="persist,merge"/>
+      property-ref="occupyingSpecimen"/>
 
     <one-to-one
       name="checkoutPosition"
