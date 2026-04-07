@@ -991,9 +991,9 @@
             <value>/sessions</value>
             <value>/sessions/otp</value>
             <value>/sessions/verify-otp</value>
-            <value>/reset-password</value>
-            <value>/forgot-password</value>
-            <value>/sign-up</value>
+            <value>/users/reset-password</value>
+            <value>/users/forgot-password</value>
+            <value>/users/sign-up</value>
           </list>
         </entry>
         <entry key="GET">
