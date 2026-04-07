@@ -459,7 +459,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 				lock.setLocked(true);
 				lock.setLockTime(Calendar.getInstance().getTime());
 				lock.setNode(Utility.getNodeName());
-				daoFactory.getLockDao().saveOrUpdate(lock, true);
+				daoFactory.getLockDao().save(lock, true);
 				return true;
 			}
 		));
@@ -473,7 +473,7 @@ public class AuditServiceImpl implements AuditService, InitializingBean {
 					lock.setLocked(false);
 					lock.setLockTime(null);
 					lock.setNode(null);
-					daoFactory.getLockDao().saveOrUpdate(lock, true);
+					daoFactory.getLockDao().update(lock, true);
 				}
 
 				return true;

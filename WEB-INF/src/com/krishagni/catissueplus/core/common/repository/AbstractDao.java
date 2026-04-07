@@ -91,16 +91,32 @@ public class AbstractDao<T> implements Dao<T> {
 
 	@Override
 	public void save(Object obj) {
+		save(obj, false);
+	}
+
+	@Override
+	public void save(Object obj, boolean flush) {
 		getCurrentSession().persist(obj);
+		if (flush) {
+			flush();
+		}
 	}
 
 	@Override
 	public void update(Object obj) {
+		update(obj, false);
+	}
+
+	@Override
+	public void update(Object obj, boolean flush) {
 		if (!getCurrentSession().contains(obj)) {
 			throw OpenSpecimenException.userError(CommonErrorCode.SERVER_ERROR, "Attempting to update unmanaged object. Input: " + obj.getClass().getName());
 		}
 
 		getCurrentSession().merge(obj);
+		if (flush) {
+			flush();
+		}
 	}
 
 	@Override

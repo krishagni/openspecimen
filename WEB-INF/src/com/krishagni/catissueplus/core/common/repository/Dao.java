@@ -15,7 +15,11 @@ public interface Dao<T> {
 
 	void save(Object obj);
 
+	void save(Object obj, boolean flush);
+
 	void update(Object obj);
+
+	void update(Object obj, boolean flush);
 	
 	<R> void delete(R t);
 	
