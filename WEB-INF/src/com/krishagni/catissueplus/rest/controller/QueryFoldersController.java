@@ -52,7 +52,7 @@ public class QueryFoldersController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public QueryFolderDetails getFolder(
-		@PathVariable
+		@PathVariable("folderId")
 		Long folderId,
 
 		@RequestParam(value = "includeQueries", defaultValue = "true", required = false)
