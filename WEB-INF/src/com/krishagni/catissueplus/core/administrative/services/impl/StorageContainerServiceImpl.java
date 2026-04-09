@@ -559,6 +559,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				.map(posDetail -> createPosition(container, posDetail, op.getVacateOccupant()))
 				.collect(Collectors.toList());
 
+			if (!container.isDimensionless() && CollectionUtils.isNotEmpty(positions)) {
+				// Materialize once to avoid per-position DB lookups in assignPositions
+				container.getOccupiedPositions().size();
+			}
+
 			container.assignPositions(positions, op.getVacateOccupant());
 			daoFactory.getStorageContainerDao().saveOrUpdate(container, true);
 			if (container.isDimensionless()) {
@@ -910,6 +915,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 				.map(detail -> container.createPosition(detail.getPosOne(), detail.getPosTwo()))
 				.collect(Collectors.toList());
 
+			// Materialize once so blockPositions uses the in-memory collection
+			container.getOccupiedPositions().size();
 			if (positions.isEmpty()) {
 				container.blockAllPositions();
 			} else {
@@ -943,8 +950,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			List<StorageContainerPosition> positions = Utility.nullSafeStream(opDetail.getPositions())
 				.map(detail -> container.createPosition(detail.getPosOne(), detail.getPosTwo()))
-				.collect(Collectors.toList());
+				.toList();
 
+			// Materialize once so unblockPositions uses the in-memory collection
+			container.getOccupiedPositions().size();
 			if (positions.isEmpty()) {
 				container.unblockAllPositions();
 			} else {

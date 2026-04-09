@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,12 +133,12 @@ public class DefaultContainerDefragmenter implements ContainerDefragmenter {
 
 		StorageContainer container = getContainer(containerId);
 		List<StorageContainerPosition> positions = container.getOccupiedPositions().stream()
-			.sorted((p1, p2) -> p1.getPosition().compareTo(p2.getPosition()))
-			.collect(Collectors.toList());
+			.sorted(Comparator.comparing(StorageContainerPosition::getPosition))
+			.toList();
 
 		info = new ContainerInfo();
 		info.emptyPositions      = container.emptyPositionsOrdinals().stream()
-			.sorted((p1, p2) -> p1.compareTo(p2))
+			.sorted(Integer::compareTo)
 			.collect(Collectors.toList());
 		info.occupiedPositionIds = positions.stream()
 			.filter(p -> !p.isBlocked())

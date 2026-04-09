@@ -55,5 +55,58 @@
         pos_two_str = :rowLabel and
         pos_one_str = :colLabel
     </sql-query>
+
+    <sql-query name="getOccupiedPositionOrdinals">
+      <return-scalar column="pos_one" type="int" />
+      <return-scalar column="pos_two" type="int" />
+
+      select
+        pos_one as pos_one,
+        pos_two as pos_two
+      from
+        os_container_positions
+      where
+        storage_container_id = :containerId
+    </sql-query>
+
+    <query name="getPositionByOrdinals">
+      from
+        com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition p
+      where
+        p.container.id = :containerId and
+        p.posOneOrdinal = :posOne and
+        p.posTwoOrdinal = :posTwo
+    </query>
+
+    <query name="getReservedPosition">
+      from
+        com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition p
+      where
+        p.container.id = :containerId and
+        p.posTwo = :rowLabel and
+        p.posOne = :colLabel and
+        p.reservationId = :reservationId
+    </query>
+
+    <sql-query name="getPositionsBeyondCapacity">
+      <return-scalar column="cnt" type="long" />
+
+      <![CDATA[
+
+      select
+        count(*) as cnt
+      from
+        os_container_positions
+      where
+        storage_container_id = :containerId and
+        (
+          pos_two > :maxRow or
+          pos_one > :maxCol or
+          pos_two < 1 or
+          pos_one < 1
+        )
+
+      ]]>
+    </sql-query>
   </class>
 </hibernate-mapping>

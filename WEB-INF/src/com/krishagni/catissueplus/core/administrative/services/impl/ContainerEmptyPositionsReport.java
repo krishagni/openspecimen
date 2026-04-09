@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -14,7 +14,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.krishagni.catissueplus.core.administrative.domain.PositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.RowMajorPositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
-import com.krishagni.catissueplus.core.administrative.domain.StorageContainerPosition;
 import com.krishagni.catissueplus.core.administrative.events.StorageContainerSummary;
 import com.krishagni.catissueplus.core.administrative.services.ContainerReport;
 import com.krishagni.catissueplus.core.common.Pair;
@@ -132,13 +131,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 		PositionAssigner pa = container.getPositionAssigner();
 		boolean rowMajor = pa instanceof RowMajorPositionAssigner;
 
-		Map<Integer, StorageContainerPosition> occupantsMap =
-			container.getOccupiedPositions().stream().collect(
-				Collectors.toMap(
-					pos -> pa.toPosition(container, pos.getPosTwoOrdinal(), pos.getPosOneOrdinal()),
-					pos -> pos
-				)
-			);
+		Set<Integer> occupiedPositions = container.occupiedPositionsOrdinals();
 
 		String name = container.getName();
 		String barcode = container.getBarcode();
@@ -150,8 +143,7 @@ public class ContainerEmptyPositionsReport extends AbstractContainerReport imple
 			for (int c = 1; c <= container.getNoOfColumns(); ++c) {
 				Pair<Integer, Integer> cood = pa.fromMapIdx(container, r - 1, c - 1);
 				Integer pos = pa.toPosition(container, cood.first(), cood.second());
-				StorageContainerPosition occupant = occupantsMap.get(pos);
-				if (occupant != null) {
+				if (occupiedPositions.contains(pos)) {
 					continue;
 				}
 

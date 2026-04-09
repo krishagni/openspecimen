@@ -140,6 +140,7 @@ public abstract class DeObject {
 			saveOrUpdateRecordEntry(isInsert);
 			attrs.clear();
 			attrs.addAll(getAttrs(formData));
+			this.recordLoaded = true;
 			return revision != formData.getRevision();
 		} catch(IllegalArgumentException ex) {
 			throw OpenSpecimenException.userError(FormErrorCode.INVALID_DATA, ex.getMessage());

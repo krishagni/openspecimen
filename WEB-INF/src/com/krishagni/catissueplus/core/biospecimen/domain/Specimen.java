@@ -276,6 +276,11 @@ public class Specimen extends BaseExtensionEntity {
 	private transient String shipmentReceiveQuality;
 
 	//
+	// a transfer event to track movement of a specimen within the container in same txn
+	//
+	private transient SpecimenTransferEvent transferEvent;
+
+	//
 	// holdingLocation and dp are used during distribution to record the location
 	// where the specimen will be stored temporarily post distribution.
 	//
@@ -974,6 +979,10 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void setShipmentReceiveQuality(String shipmentReceiveQuality) {
 		this.shipmentReceiveQuality = shipmentReceiveQuality;
+	}
+
+	public void setTransferEvent(SpecimenTransferEvent transferEvent) {
+		this.transferEvent = transferEvent;
 	}
 
 	public StorageContainerPosition getHoldingLocation() {
@@ -1911,7 +1920,7 @@ public class Specimen extends BaseExtensionEntity {
 			AccessCtrlMgr.getInstance().ensureSpecimenStoreRights(newPosition.getContainer());
 		}
 
-		SpecimenTransferEvent transferEvent = new SpecimenTransferEvent(this);
+		SpecimenTransferEvent transferEvent = this.transferEvent != null ? this.transferEvent : new SpecimenTransferEvent(this);
 		transferEvent.setUser(user == null ? AuthUtil.getCurrentUser() : user);
 		transferEvent.setTime(time == null ? Calendar.getInstance().getTime() : time);
 		transferEvent.setComments(comments);

@@ -91,4 +91,23 @@
   <changeSet author="vpawar" id="Drop CP group join table">
     <dropTable tableName="OS_CP_GROUP_CPS" cascadeConstraints="true" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on the container position" dbms="mysql">
+    <addUniqueConstraint constraintName="OS_CONTAINER_POS_UQ"
+      tableName="OS_CONTAINER_POSITIONS" columnNames="STORAGE_CONTAINER_ID,POS_ONE_STR,POS_TWO_STR"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on the container position" dbms="oracle">
+    <sql>
+      create unique index
+        OS_CONTAINER_POS_UQ
+      on os_container_positions(
+        case when
+          pos_one_str is not null and pos_two_str is not null
+        then
+          storage_container_id || '-' || pos_one_str || '-' || pos_two_str
+        end
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>
