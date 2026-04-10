@@ -978,35 +978,19 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		specimen.setHoldingLocation(getPosition(specimen, detail.getHoldingLocation(), ose));
 	}
 	
-	private void setCollectionDetail(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
+	private void setCollectionDetail(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
 		try {
-			specimen.setCollectionDetails(detail.getCollectionEvent());
+			specimen.setCollectionDetails(existing, detail.getCollectionEvent());
 		} catch (OpenSpecimenException ce) {
 			ose.addErrors(ce.getErrors());
 		}
 	}
 	
-	private void setCollectionDetail(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
-		if (existing == null || detail.isAttrModified("collectionEvent")) {
-			setCollectionDetail(detail, specimen, ose);
-		} else {
-			specimen.updateCollectionDetails(existing);
-		}
-	}
-	
-	private void setReceiveDetail(SpecimenDetail detail, Specimen specimen, OpenSpecimenException ose) {
+	private void setReceiveDetail(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
 		try {
-			specimen.setReceivedDetails(detail.getReceivedEvent());
+			specimen.setReceivedDetails(existing, detail.getReceivedEvent());
 		} catch (OpenSpecimenException re) {
 			ose.addErrors(re.getErrors());
-		}
-	}
-	
-	private void setReceiveDetail(SpecimenDetail detail, Specimen existing, Specimen specimen, OpenSpecimenException ose) {
-		if (existing == null || detail.isAttrModified("receivedEvent")) {
-			setReceiveDetail(detail, specimen, ose);
-		} else {
-			specimen.updateReceivedDetails(existing);
 		}
 	}
 
