@@ -249,7 +249,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 			return 0;
 		}
 
-		return createNamedQuery(UPDATE_STATUS)
+		return getCurrentSession().createNamedMutationQuery(UPDATE_STATUS)
 			.setParameter("activityStatus", status)
 			.setParameterList("userIds", users.stream().map(User::getId).collect(Collectors.toList()))
 			.executeUpdate();
