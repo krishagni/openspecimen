@@ -1702,7 +1702,6 @@ public class Specimen extends BaseExtensionEntity {
 			setReceivedTime(existing.getReceivedTime());
 		}
 
-
 		if (existing == null || input.isAttrModified("comments")) {
 			setReceivedComments(input.getComments());
 		} else {
