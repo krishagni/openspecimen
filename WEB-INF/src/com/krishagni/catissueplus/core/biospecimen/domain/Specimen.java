@@ -1516,7 +1516,7 @@ public class Specimen extends BaseExtensionEntity {
 		setStatusChanged(true);
 	}
 
-	public void setCollectionDetails(CollectionEventDetail input) {
+	public void setCollectionDetails(Specimen existing, CollectionEventDetail input) {
 		if (isAliquot() || isDerivative()) {
 			return;
 		}
@@ -1526,64 +1526,78 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		SpecimenRequirement sr = getSpecimenRequirement();
-		if (StringUtils.isNotBlank(input.getContainer())) {
-			PermissibleValue contPv = getPv(CONTAINER, input.getContainer(), false);
-			if (contPv != null) {
-				setCollectionContainer(contPv);
+		if (existing == null || input.isAttrModified("container")) {
+			if (StringUtils.isNotBlank(input.getContainer())) {
+				PermissibleValue contPv = getPv(CONTAINER, input.getContainer(), false);
+				if (contPv != null) {
+					setCollectionContainer(contPv);
+				} else {
+					throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_COLL_CONTAINER, input.getContainer());
+				}
+			} else if (sr != null) {
+				setCollectionContainer(sr.getCollectionContainer());
 			} else {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_COLL_CONTAINER, input.getContainer());
+				setCollectionContainer(getPv(CONTAINER, Specimen.NOT_SPECIFIED, true));
 			}
-		} else if (sr != null) {
-			setCollectionContainer(sr.getCollectionContainer());
 		} else {
-			setCollectionContainer(getPv(CONTAINER, Specimen.NOT_SPECIFIED, true));
+			setCollectionContainer(existing.getCollectionContainer());
 		}
 
-		if (StringUtils.isNotBlank(input.getProcedure())) {
-			PermissibleValue procPv = getPv(COLL_PROC, input.getProcedure(), false);
-			if (procPv != null) {
-				setCollectionProcedure(procPv);
+		if (existing == null || input.isAttrModified("procedure")) {
+			if (StringUtils.isNotBlank(input.getProcedure())) {
+				PermissibleValue procPv = getPv(COLL_PROC, input.getProcedure(), false);
+				if (procPv != null) {
+					setCollectionProcedure(procPv);
+				} else {
+					throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_COLL_PROC, input.getProcedure());
+				}
+			} else if (sr != null) {
+				setCollectionProcedure(sr.getCollectionProcedure());
 			} else {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_COLL_PROC, input.getProcedure());
+				setCollectionProcedure(getPv(COLL_PROC, Specimen.NOT_SPECIFIED, true));
 			}
-		} else if (sr != null) {
-			setCollectionProcedure(sr.getCollectionProcedure());
 		} else {
-			setCollectionProcedure(getPv(COLL_PROC, Specimen.NOT_SPECIFIED, true));
+			setCollectionProcedure(existing.getCollectionProcedure());
 		}
 
-		if (StringUtils.isNotBlank(input.getComments())) {
+		if (existing == null || input.isAttrModified("comments")) {
 			setCollectionComments(input.getComments());
+		} else {
+			setCollectionComments(existing.getCollectionComments());
 		}
 
-		User user = getUser(input.getUser());
-		if (user != null) {
-			setCollectionUser(user);
+		if (existing == null || input.isAttrModified("user")) {
+			User user = getUser(input.getUser());
+			setCollectionUser(user != null ? user : AuthUtil.getCurrentUser());
 		} else {
-			setCollectionUser(AuthUtil.getCurrentUser());
+			setCollectionUser(existing.getCollectionUser());
 		}
 
-		if (input.getTime() != null) {
-			setCollectionTime(input.getTime());
+		if (existing == null || input.isAttrModified("time")) {
+			if (input.getTime() != null) {
+				setCollectionTime(input.getTime());
+			} else {
+				String defCollectionDate = null;
+				if (getCollectionProtocol() != null) {
+					defCollectionDate = CpWorkflowTxnCache.getInstance()
+						.getValue(getCollectionProtocol().getId(), "specimenCollection", "defCollectionDate");
+				}
+
+				Date collectionTime = null;
+				if (StringUtils.equals(defCollectionDate, "current_date")) {
+					collectionTime = Calendar.getInstance().getTime();
+				} else if (!getCollectionProtocol().isSpecimenCentric() && getVisit() != null) {
+					collectionTime = getVisit().getVisitDate();
+				}
+
+				if (collectionTime == null) {
+					collectionTime = Calendar.getInstance().getTime();
+				}
+
+				setCollectionTime(collectionTime);
+			}
 		} else {
-			String defCollectionDate = null;
-			if (getCollectionProtocol() != null) {
-				defCollectionDate = CpWorkflowTxnCache.getInstance()
-					.getValue(getCollectionProtocol().getId(), "specimenCollection", "defCollectionDate");
-			}
-
-			Date collectionTime = null;
-			if (StringUtils.equals(defCollectionDate, "current_date")) {
-				collectionTime = Calendar.getInstance().getTime();
-			} else if (!getCollectionProtocol().isSpecimenCentric() && getVisit() != null) {
-				collectionTime = getVisit().getVisitDate();
-			}
-
-			if (collectionTime == null) {
-				collectionTime = Calendar.getInstance().getTime();
-			}
-
-			setCollectionTime(collectionTime);
+			setCollectionTime(existing.getCollectionTime());
 		}
 	}
 
@@ -1599,7 +1613,7 @@ public class Specimen extends BaseExtensionEntity {
 		setCollectionComments(other.getCollectionComments());
 	}
 
-	public void setReceivedDetails(ReceivedEventDetail input) {
+	public void setReceivedDetails(Specimen existing, ReceivedEventDetail input) {
 		if (isAliquot() || isDerivative()) {
 			return;
 		}
@@ -1608,54 +1622,75 @@ public class Specimen extends BaseExtensionEntity {
 			input = new ReceivedEventDetail();
 		}
 
-		String recvQuality = null;
-		if (StringUtils.isNotBlank(input.getReceivedQuality())) {
-			recvQuality = input.getReceivedQuality();
+		if (existing == null || input.isAttrModified("receivedQuality")) {
+			String recvQuality = null;
+			if (StringUtils.isNotBlank(input.getReceivedQuality())) {
+				recvQuality = input.getReceivedQuality();
+			} else {
+				if (getCollectionProtocol() != null) {
+					recvQuality = CpWorkflowTxnCache.getInstance()
+						.getValue(getCollectionProtocol().getId(), "specimenCollection", "defReceiveQuality");
+				}
+
+				if (StringUtils.isBlank(recvQuality)) {
+					recvQuality = Specimen.ACCEPTABLE;
+				}
+			}
+
+			PermissibleValue recvQualityPv = getPv(RECV_QUALITY, recvQuality, true);
+			if (recvQualityPv == null) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_RECV_QUALITY, recvQuality);
+			}
+
+			setReceivedQuality(recvQualityPv);
 		} else {
-			if (getCollectionProtocol() != null) {
-				recvQuality = CpWorkflowTxnCache.getInstance()
-					.getValue(getCollectionProtocol().getId(), "specimenCollection", "defReceiveQuality");
-			}
-
-			if (StringUtils.isBlank(recvQuality)) {
-				recvQuality = Specimen.ACCEPTABLE;
-			}
+			setReceivedQuality(existing.getReceivedQuality());
 		}
 
-		PermissibleValue recvQualityPv = getPv(RECV_QUALITY, recvQuality, true);
-		if (recvQualityPv == null) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.INVALID_RECV_QUALITY, recvQuality);
-		}
-
-		setReceivedQuality(recvQualityPv);
-		if (TO_BE_RECEIVED.equals(recvQualityPv.getValue())) {
+		PermissibleValue recvQualityPv = getReceivedQuality();
+		if (recvQualityPv == null || TO_BE_RECEIVED.equals(recvQualityPv.getValue())) {
 			return;
 		}
 
-		User user = getUser(input.getUser());
-		if (user == null) {
-			user = getSpecimenRequirement() != null && getSpecimenRequirement().getReceiver() != null
-				? getSpecimenRequirement().getReceiver()
-				: AuthUtil.getCurrentUser();
-		}
-		setReceivedUser(user);
-
-		Date receivedTime = null;
-		if (input.getTime() != null) {
-			receivedTime = input.getTime();
-		} else if (!getCollectionProtocol().isSpecimenCentric() && getVisit() != null && getVisit().getVisitDate() != null) {
-			receivedTime = getVisit().getVisitDate();
+		if (existing == null || input.isAttrModified("user")) {
+			User user = getUser(input.getUser());
+			if (user == null) {
+				user = getSpecimenRequirement() != null && getSpecimenRequirement().getReceiver() != null
+					? getSpecimenRequirement().getReceiver()
+					: AuthUtil.getCurrentUser();
+			}
+			setReceivedUser(user);
 		} else {
-			receivedTime = Calendar.getInstance().getTime();
+			setReceivedUser(existing.getReceivedUser());
 		}
-		setReceivedTime(receivedTime);
 
-		if (StringUtils.isNotBlank(input.getComments())) {
+		if (existing == null || input.isAttrModified("time")) {
+			Date receivedTime = null;
+			if (input.getTime() != null) {
+				receivedTime = input.getTime();
+			} else if (!getCollectionProtocol().isSpecimenCentric() && getVisit() != null && getVisit().getVisitDate() != null) {
+				receivedTime = getVisit().getVisitDate();
+			} else {
+				receivedTime = Calendar.getInstance().getTime();
+			}
+			setReceivedTime(receivedTime);
+		} else {
+			setReceivedTime(existing.getReceivedTime());
+		}
+
+
+		if (existing == null || input.isAttrModified("comments")) {
 			setReceivedComments(input.getComments());
+		} else {
+			setReceivedComments(existing.getReceivedComments());
 		}
 
-		if (StringUtils.isNotBlank(input.getNewLabel())) {
-			setNewLabel(input.getNewLabel());
+		if (existing == null || input.isAttrModified("newLabel")) {
+			if (StringUtils.isNotBlank(input.getNewLabel())) {
+				setNewLabel(input.getNewLabel());
+			}
+		} else {
+			setNewLabel(existing.getNewLabel());
 		}
 	}
 
@@ -2551,7 +2586,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	private void addCollectionDetails() {
-		setCollectionDetails(null);
+		setCollectionDetails(null, null);
 	}
 
 	private void clearCollectionDetails() {
@@ -2563,7 +2598,7 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	private void addReceivedDetails() {
-		setReceivedDetails(null);
+		setReceivedDetails(null, null);
 	}
 
 	private void clearReceivedDetails() {

@@ -3,8 +3,10 @@ package com.krishagni.catissueplus.core.biospecimen.events;
 import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail;
+import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
+@ListenAttributeChanges
 public class ReceivedEventDetail extends SpecimenEventDetail {
 	private String receivedQuality;
 
