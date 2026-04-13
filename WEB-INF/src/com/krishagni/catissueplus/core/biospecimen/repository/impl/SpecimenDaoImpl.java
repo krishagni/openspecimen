@@ -364,7 +364,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	@Override
 	public int activateSpecimen(Long specimenId, boolean includeChildren) {
 		String query = includeChildren ? ACTIVATE_HIERARCHY : ACTIVATE_SPMN;
-		return createNamedQuery(query, Integer.class)
+		return getCurrentSession().createNamedMutationQuery(query)
 			.setParameter("specimenId", specimenId)
 			.executeUpdate();
 	}
@@ -527,7 +527,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public void deleteServices(Long specimenId) {
-		createNamedQuery(DELETE_SERVICES)
+		getCurrentSession().createNamedMutationQuery(DELETE_SERVICES)
 			.setParameter("specimenId", specimenId)
 			.executeUpdate();
 	}
