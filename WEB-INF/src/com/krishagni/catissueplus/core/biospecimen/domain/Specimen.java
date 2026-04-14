@@ -1958,7 +1958,17 @@ public class Specimen extends BaseExtensionEntity {
 		transferEvent.setUser(user == null ? AuthUtil.getCurrentUser() : user);
 		transferEvent.setTime(time == null ? Calendar.getInstance().getTime() : time);
 		transferEvent.setComments(comments);
-		
+
+		if (!checkout && getCheckoutPosition() != null) {
+			getCheckoutPosition().vacate();
+			setCheckoutPosition(null);
+			transferEvent.setStatus("CHECK-IN");
+			transferEvent.setComments(comments);
+
+			// need to avoid unique constraint error on the same position
+			daoFactory.getStorageContainerPositionDao().flush();
+		}
+
 		if (oldPosition != null && newPosition != null) {
 			oldPosition.getContainer().retrieveSpecimen(this);
 			newPosition.getContainer().storeSpecimen(this);
@@ -1974,7 +1984,12 @@ public class Specimen extends BaseExtensionEntity {
 			}
 
 			transferEvent.setFromLocation(oldPosition);
+			oldPosition.vacate();
+			setPosition(null);
+
 			if (checkout) {
+				daoFactory.getStorageContainerPositionDao().flush();
+
 				StorageContainerPosition checkoutPos = new StorageContainerPosition();
 				checkoutPos.setPosOneOrdinal(oldPosition.getPosOneOrdinal());
 				checkoutPos.setPosOne(oldPosition.getPosOne());
@@ -1990,9 +2005,6 @@ public class Specimen extends BaseExtensionEntity {
 
 				transferEvent.setStatus("CHECK-OUT");
 			}
-
-			oldPosition.vacate();
-			setPosition(null);
 		} else if (newPosition != null) {
 			newPosition.getContainer().storeSpecimen(this);
 			transferEvent.setToLocation(newPosition);
@@ -2002,13 +2014,6 @@ public class Specimen extends BaseExtensionEntity {
 			setPosition(newPosition);
 		}
 
-		if (!checkout && getCheckoutPosition() != null) {
-			getCheckoutPosition().vacate();
-			setCheckoutPosition(null);
-			transferEvent.setStatus("CHECK-IN");
-			transferEvent.setComments(comments);
-		}
-		
 		transferEvent.saveOrUpdate();		
 	}
 
