@@ -27,6 +27,8 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	private Long userId;
 
+	private Collection<Long> reqMgrCatalogIds;
+
 
 	@Override
 	public SpecimenRequestListCriteria self() {
@@ -102,6 +104,15 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	public SpecimenRequestListCriteria userId(Long userId) {
 		this.userId = userId;
+		return self();
+	}
+
+	public Collection<Long> reqMgrCatalogIds() {
+		return reqMgrCatalogIds;
+	}
+
+	public SpecimenRequestListCriteria reqMgrCatalogIds(Collection<Long> reqMgrCatalogIds) {
+		this.reqMgrCatalogIds = reqMgrCatalogIds;
 		return self();
 	}
 }

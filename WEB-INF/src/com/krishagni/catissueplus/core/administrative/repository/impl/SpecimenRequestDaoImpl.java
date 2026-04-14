@@ -194,6 +194,10 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 			orCond.add(query.eq("requestor.id", crit.requestorId()));
 		}
 
+		if (CollectionUtils.isNotEmpty(crit.reqMgrCatalogIds())) {
+			orCond.add(query.in("req.catalogId", crit.reqMgrCatalogIds()));
+		}
+
 		if (crit.userId() != null) {
 			SubQuery<Long> rmCpsQuery = query.createSubQuery(CollectionProtocol.class, "cp")
 				.join("cp.reqManagers", "mug")
