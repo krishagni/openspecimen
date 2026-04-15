@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Discontinue usage of default query result view fields">
+    <sql>
+      update
+        os_cfg_props
+      set
+        activity_status = 'Disabled'
+      where
+        module_id = (select identifier from os_modules where name = 'query') and
+        name = 'default_result_view'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Discontinue usage of specimen imaging config props">
+    <sql>
+      update
+        os_cfg_props
+      set
+        activity_status = 'Disabled'
+      where
+        module_id = (select identifier from os_modules where name = 'biospecimen') and
+        name in ('image_url_tmpl', 'imaging')
+    </sql>
+  </changeSet>
+</databaseChangeLog>
