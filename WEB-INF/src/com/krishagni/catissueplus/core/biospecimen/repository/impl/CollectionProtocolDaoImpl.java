@@ -414,8 +414,11 @@ public class CollectionProtocolDaoImpl extends AbstractDao<CollectionProtocol> i
 			
 			if (hasQuery) {
 				searchCond.add(query.ilike("cp.irbIdentifier", searchTerm));
-			}	
-			
+				if (StringUtils.isNumeric(searchTerm)) {
+					searchCond.add(query.eq("cp.id", Long.parseLong(searchTerm)));
+				}
+			}
+
 			query.add(searchCond);
 		}
 

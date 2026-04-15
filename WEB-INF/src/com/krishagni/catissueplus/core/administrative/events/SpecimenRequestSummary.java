@@ -181,7 +181,7 @@ public class SpecimenRequestSummary implements Serializable {
 		}
 
 		if (request.getCp() != null) {
-			summary.setCpId(request.getCp().getCpId());
+			summary.setCpId(request.getCp().getId());
 			summary.setCpShortTitle(request.getCp().getShortTitle());
 		}
 
