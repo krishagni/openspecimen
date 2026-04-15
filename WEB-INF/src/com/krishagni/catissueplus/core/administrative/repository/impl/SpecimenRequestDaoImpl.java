@@ -1,13 +1,11 @@
 package com.krishagni.catissueplus.core.administrative.repository.impl;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +19,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
-import com.krishagni.catissueplus.core.common.events.UserSummary;
+import com.krishagni.catissueplus.core.common.repository.AbstractCriteria;
 import com.krishagni.catissueplus.core.common.repository.AbstractDao;
 import com.krishagni.catissueplus.core.common.repository.Criteria;
 import com.krishagni.catissueplus.core.common.repository.Disjunction;
@@ -35,10 +33,10 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 
 	@Override
 	public List<SpecimenRequestSummary> getSpecimenRequests(SpecimenRequestListCriteria crit) {
-		Criteria<Object[]> query = addSummaryFields(getListQuery(crit), CollectionUtils.isNotEmpty(crit.sites()));
-		return query.orderBy(query.desc("req.id"))
-			.list(crit.startAt(), crit.maxResults())
-			.stream().map(this::getRequest).collect(Collectors.toList());
+		Criteria<SpecimenRequest> query = getListQuery(crit);
+		List<SpecimenRequest> requests = query.orderBy(query.desc("selectedReq.id"))
+			.list(crit.startAt(), crit.maxResults());
+		return SpecimenRequestSummary.from(requests);
 	}
 
 	@Override
@@ -66,36 +64,46 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 			.executeUpdate();
 	}
 
-	private Criteria<Object[]> getListQuery(SpecimenRequestListCriteria crit) {
-		Criteria<Object[]> query = createCriteria(SpecimenRequest.class, Object[].class, "req")
+	private Criteria<SpecimenRequest> getListQuery(SpecimenRequestListCriteria crit) {
+		Criteria<SpecimenRequest> query = createCriteria(SpecimenRequest.class, "selectedReq")
+			.leftJoin("selectedReq.cp", "ocp")
+			.leftJoin("selectedReq.dp", "odp")
+			.leftJoin("selectedReq.requestor", "orequestor");
+
+		SubQuery<Long> reqIds = query.createSubQuery(SpecimenRequest.class, "req")
 			.leftJoin("req.cp", "cp")
 			.leftJoin("req.dp", "dp")
-			.leftJoin("req.requestor", "requestor");
-		addCatalogCond(query, crit);
-		addCpCond(query, crit);
-		addDateConds(query, crit);
-		addStatusConds(query, crit);
-		return addUserRestrictions(query, crit);
+			.leftJoin("req.requestor", "requestor")
+			.select("req.id");
+
+		addCatalogCond(reqIds, crit);
+		addCpCond(reqIds, crit);
+		addDateConds(reqIds, crit);
+		addStatusConds(reqIds, crit);
+		addUserRestrictions(reqIds, crit);
+
+		query.add(query.in("selectedReq.id", reqIds));
+		return query;
 	}
 
-	private Criteria<Object[]> addCatalogCond(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
+	private void addCatalogCond(AbstractCriteria<?, ?> query, SpecimenRequestListCriteria crit) {
 		if (crit.catalogId() == null) {
-			return query;
+			return;
 		}
 
-		return query.add(query.eq("req.catalogId", crit.catalogId()));
+		query.add(query.eq("req.catalogId", crit.catalogId()));
 	}
 
-	private Criteria<Object[]> addCpCond(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
+	private void addCpCond(AbstractCriteria<?, ?> query, SpecimenRequestListCriteria crit) {
 		if (crit.cpId() == null) {
-			return query;
+			return;
 		}
 
-		return query.add(query.eq("cp.id", crit.cpId()));
+		query.add(query.eq("cp.id", crit.cpId()));
 	}
 
 
-	private Criteria<Object[]> addDateConds(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
+	private void addDateConds(AbstractCriteria<?, ?> query, SpecimenRequestListCriteria crit) {
 		if (crit.fromReqDate() != null) {
 			query.add(query.ge("req.dateOfRequest", Utility.chopTime(crit.fromReqDate())));
 		}
@@ -103,13 +111,11 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		if (crit.toReqDate() != null) {
 			query.add(query.le("req.dateOfRequest", Utility.getEndOfDay(crit.toReqDate())));
 		}
-
-		return query;
 	}
 
-	private Criteria<Object[]> addStatusConds(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
+	private void addStatusConds(AbstractCriteria<?, ?> query, SpecimenRequestListCriteria crit) {
 		if (StringUtils.isBlank(crit.status())) {
-			return query;
+			return;
 		}
 
 		if (crit.status().equals("PROCESSED")) {
@@ -134,11 +140,9 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 				throw OpenSpecimenException.userError(CommonErrorCode.INVALID_INPUT, crit.status());
 			}
 		}
-
-		return query;
 	}
 
-	private Criteria<Object[]> addUserRestrictions(Criteria<Object[]> query, SpecimenRequestListCriteria crit) {
+	private void addUserRestrictions(AbstractCriteria<?, ?> query, SpecimenRequestListCriteria crit) {
 		Disjunction orCond = query.disjunction();
 
 		if (CollectionUtils.isNotEmpty(crit.sites())) {
@@ -194,6 +198,10 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 			orCond.add(query.eq("requestor.id", crit.requestorId()));
 		}
 
+		if (CollectionUtils.isNotEmpty(crit.reqMgrCatalogIds())) {
+			orCond.add(query.in("req.catalogId", crit.reqMgrCatalogIds()));
+		}
+
 		if (crit.userId() != null) {
 			SubQuery<Long> rmCpsQuery = query.createSubQuery(CollectionProtocol.class, "cp")
 				.join("cp.reqManagers", "mug")
@@ -203,44 +211,7 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 			orCond.add(query.in("cp.id", rmCpsQuery));
 		}
 
-		return query.add(orCond);
-	}
-
-	private Criteria<Object[]> addSummaryFields(Criteria<Object[]> query, boolean distinct) {
-		return query.select(
-			"req.id", "req.catalogId",
-			"requestor.id", "requestor.firstName", "requestor.lastName", "requestor.emailAddress", "req.requestorEmailId",
-			"req.irbId", "dp.id", "dp.shortTitle",
-			"req.dateOfRequest", "req.dateOfScreening", "req.screeningStatus", "req.activityStatus"
-		).distinct(distinct);
-	}
-
-	private SpecimenRequestSummary getRequest(Object[] row) {
-		int idx = 0;
-		SpecimenRequestSummary req = new SpecimenRequestSummary();
-		req.setId((Long)row[idx++]);
-		req.setCatalogId((Long)row[idx++]);
-
-		UserSummary requestor = new UserSummary();
-		requestor.setId((Long)row[idx++]);
-		requestor.setFirstName((String)row[idx++]);
-		requestor.setLastName((String)row[idx++]);
-		requestor.setEmailAddress((String)row[idx++]);
-		if (requestor.getId() != null) {
-			req.setRequestor(requestor);
-		}
-
-		req.setRequestorEmailId((String)row[idx++]);
-		req.setIrbId((String)row[idx++]);
-		req.setDpId((Long)row[idx++]);
-		req.setDpShortTitle((String)row[idx++]);
-		req.setDateOfRequest((Date)row[idx++]);
-		req.setDateOfScreening((Date)row[idx++]);
-
-		SpecimenRequest.ScreeningStatus status = (SpecimenRequest.ScreeningStatus)row[idx++];
-		req.setScreeningStatus(status != null ? status.name() : null);
-		req.setActivityStatus((String)row[idx++]);
-		return req;
+		query.add(orCond);
 	}
 
 	private static final String REMOVE_REQ_CART = SpecimenRequest.class.getName() + ".removeRequestCart";
