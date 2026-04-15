@@ -1763,6 +1763,22 @@ public class StorageContainer extends BaseExtensionEntity {
 		transferEvent.setReason(transferReasons);
 
 		StorageContainerPosition oldPosition = null;
+		if (!checkOut && getBlockedPosition() != null) {
+			String prefix = "";
+			if (!"ARCHIVED".equals(transferReasons)) {
+				prefix = "CHECK-IN: ";
+			}
+
+			getBlockedPosition().getContainer().removePosition(getBlockedPosition());
+			setBlockedPosition(null);
+			setStatus(null);
+			transferEvent.setReason(prefix + (transferReasons != null ? transferReasons : ""));
+
+			if (otherParentContainer != null) {
+				getDaoFactory().getStorageContainerPositionDao().flush();
+			}
+		}
+
 		if (otherParentContainer == null) {
 			if (getParentContainer() != null) {
 				oldPosition = position;
@@ -1777,6 +1793,20 @@ public class StorageContainer extends BaseExtensionEntity {
 
 			setPosition(null);
 			setSite(otherSite);
+
+			if (checkOut && oldPosition != null) {
+				getDaoFactory().getStorageContainerPositionDao().flush();
+
+				StorageContainerPosition blockedPosition = oldPosition.getContainer().createPosition(
+					oldPosition.getPosOneOrdinal(), oldPosition.getPosOne(),
+					oldPosition.getPosTwoOrdinal(), oldPosition.getPosTwo()
+				);
+				blockedPosition.setBlocked(true);
+				blockedPosition.setBlockedForContainer(this);
+				setBlockedPosition(blockedPosition);
+				setStatus(Status.CHECKED_OUT);
+				transferEvent.setReason("CHECK-OUT: " + (transferReasons != null ? transferReasons : ""));
+			}
 		} else {
 			setParentContainer(otherParentContainer);
 			setSite(otherParentContainer.getSite());
@@ -1805,29 +1835,6 @@ public class StorageContainer extends BaseExtensionEntity {
 
 		transferEvent.toLocation(site, !checkOut ? parentContainer : null, position);
 		getTransferEvents().add(transferEvent);
-
-		if (checkOut && oldPosition != null) {
-			StorageContainerPosition blockedPosition = oldPosition.getContainer().createPosition(
-				oldPosition.getPosOneOrdinal(), oldPosition.getPosOne(),
-				oldPosition.getPosTwoOrdinal(), oldPosition.getPosTwo()
-			);
-			blockedPosition.setBlocked(true);
-			blockedPosition.setBlockedForContainer(this);
-			setBlockedPosition(blockedPosition);
-			setStatus(Status.CHECKED_OUT);
-			transferEvent.setReason("CHECK-OUT: " + (transferReasons != null ? transferReasons : ""));
-		} else if (getBlockedPosition() != null) {
-			String prefix = "";
-			if (!"ARCHIVED".equals(transferReasons)) {
-				prefix = "CHECK-IN: ";
-			}
-
-			getBlockedPosition().getContainer().removePosition(getBlockedPosition());
-			setBlockedPosition(null);
-			setStatus(null);
-			transferEvent.setReason(prefix + (transferReasons != null ? transferReasons : ""));
-		}
-
 		oldPosition = null;
 	}
 	
