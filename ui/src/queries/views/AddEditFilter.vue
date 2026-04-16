@@ -176,7 +176,7 @@ export default {
             users => users.map(({firstName, lastName}) => ({name: firstName + ' ' + lastName, value: firstName + ' ' + lastName}))
           );
         } else if (apiUrl.indexOf('sites') >= 0) {
-          return siteSvc.getSites({...filters, name: searchTerm}).then(
+          return siteSvc.getSites({...filters, name: searchTerm, listAll: true}).then(
             sites => sites.map(site => ({name: site.name, value: site.name}))
           );
         } else if (apiUrl.indexOf('storage-containers') >= 0) {
