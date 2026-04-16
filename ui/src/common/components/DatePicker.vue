@@ -97,18 +97,7 @@ export default {
       },
 
       set(value) {
-        if (value && this.dateOnly) {
-          const dt = new Date(value);
-          const year  = "" + dt.getFullYear();
-          const month = (dt.getMonth() < 9 ? "0" : "") + (dt.getMonth() + 1);
-          const date  = (dt.getDate() < 10 ? "0" : "") + dt.getDate();
-          value = year + "-" + month + "-" + date;
-        } else if (value && this.isoString) {
-          const dt = new Date(value);
-          value = dt.toISOString();
-        }
-
-        this.$emit('update:modelValue', value);
+        this._emitValue(value);
       }
     },
 
@@ -146,7 +135,7 @@ export default {
     },
 
     onTodaySelect: function() {
-      this.$emit('update:modelValue', new Date());
+      this._emitValue(new Date());
     },
 
     onDateSelect: function(date) {
@@ -158,6 +147,21 @@ export default {
     hideCalendar: function(event) {
       this.$refs.cal.overlayVisible = false;
       event.preventDefault();
+    },
+
+    _emitValue: function(value) {
+      if (value && this.dateOnly) {
+        const dt = new Date(value);
+        const year  = "" + dt.getFullYear();
+        const month = (dt.getMonth() < 9 ? "0" : "") + (dt.getMonth() + 1);
+        const date  = (dt.getDate() < 10 ? "0" : "") + dt.getDate();
+        value = year + "-" + month + "-" + date;
+      } else if (value && this.isoString) {
+        const dt = new Date(value);
+        value = dt.toISOString();
+      }
+
+      this.$emit('update:modelValue', value);
     }
   }
 }
