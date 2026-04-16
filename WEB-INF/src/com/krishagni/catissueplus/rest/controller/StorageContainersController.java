@@ -537,7 +537,7 @@ public class StorageContainersController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public Map<String, Integer> deleteStorageContainer(
-			@PathVariable
+			@PathVariable("id")
 			Long id,
 
 			@RequestParam(value = "forceDelete", required = false, defaultValue = "false")
