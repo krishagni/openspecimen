@@ -56,6 +56,10 @@ class HttpClient {
 
   getUrl(url, {query = ''} = {}) {
     if (url.indexOf('http://') != 0 && url.indexOf('https://') != 0) {
+      if (url.indexOf('/') == 0) {
+        url = url.substring(1);
+      }
+
       url = this.getServerAppUrl() + 'rest/ng/' + url;
     }
 
@@ -165,11 +169,13 @@ class HttpClient {
         delete this.headers['X-OS-API-TOKEN'];
 
         const {name, params, query} = routerSvc.getCurrentRoute();
-        if (name && name != 'App' && name != 'UserLogin') {
-          localStorage.osReqState = JSON.stringify({name, params, query});
+        if (this._canSaveReqState(name)) {
+          localStorage.setItem('osReqState', JSON.stringify({name, params, query, at: Date.now()}));
+          routerSvc.goto('UserLogin', {}, {redirect: true});
+        } else {
+          localStorage.removeItem('osReqState');
+          routerSvc.goto('UserLogin');
         }
-
-        routerSvc.goto('UserLogin');
         return;
       }
 
@@ -185,6 +191,27 @@ class HttpClient {
     } else {
       alert(resp);
     }
+  }
+
+  _canSaveReqState(name) {
+    if (!name) {
+      return false;
+    }
+
+    const noLoginRoutes = [
+      'App',
+      'LoginApp',
+      'NoLoginApp',
+      'AppShell',
+      'UserLogin',
+      'UserLoginError',
+      'UserForgotPassword',
+      'UserResetPassword',
+      'UserSignUp',
+      'UserResetOtpSecretCode'
+    ];
+
+    return noLoginRoutes.indexOf(name) == -1;
   }
 
   promise(method, apiCall, errorHandler) {
