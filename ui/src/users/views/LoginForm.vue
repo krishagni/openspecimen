@@ -57,6 +57,10 @@ export default {
   },
 
   mounted() {
+    if (!this._isRedirectLoginFlow()) {
+      localStorage.removeItem('osReqState');
+    }
+
     this._getDomains().then(
       domains => {
         this.domains = domains.filter(domain => domain.allowLogins);
@@ -98,7 +102,7 @@ export default {
           if (resp.resetPasswordToken && !resp.token) {
             routerSvc.goto('UserResetPassword', {}, {resetToken: resp.resetPasswordToken});
           } else {
-            routerSvc.goto('HomePage');
+            this._gotoPostLoginView();
           }
         }
       );
@@ -120,6 +124,38 @@ export default {
 
     _getDomains: function() {
       return loginSvc.getAuthDomains();
+    },
+
+    _gotoPostLoginView: function() {
+      const reqState = this._isRedirectLoginFlow() ? this._consumeReqState() : null;
+      if (reqState && reqState.name) {
+        routerSvc.goto(reqState.name, reqState.params, reqState.query);
+      } else {
+        localStorage.removeItem('osReqState');
+        routerSvc.goto('HomePage');
+      }
+    },
+
+    _consumeReqState: function() {
+      const reqState = localStorage.getItem('osReqState');
+      localStorage.removeItem('osReqState');
+      if (!reqState) {
+        return null;
+      }
+
+      try {
+        const {name, params, query} = JSON.parse(reqState);
+        return {name, params: params || {}, query: query || {}};
+      } catch (e) {
+        console.log('Error processing the req state: ' + reqState);
+        console.error(e);
+        return null;
+      }
+    },
+
+    _isRedirectLoginFlow: function() {
+      const {query = {}} = routerSvc.getCurrentRoute();
+      return query.redirect == true || query.redirect == 'true';
     }
   }
 }

@@ -109,7 +109,9 @@ export default {
         this.loading = false;
         const {name} = routerSvc.getCurrentRoute();
         if (name == 'App') {
-          setTimeout(() => routerSvc.goto('HomePage'), 0);
+          const reqState = this._consumeReqState();
+          const toNav = (reqState && reqState.name) ? reqState : {name: 'HomePage'};
+          setTimeout(() => routerSvc.goto(toNav.name, toNav.params, toNav.query), 0);
         }
       }
     );
@@ -293,6 +295,23 @@ export default {
     _clearLogoutUrl: function() {
       /* This allows to remove the iframe from the view, if any */
       return setTimeout(() => window.osLogoutUrl = this.logoutUrl = null, 10000);
+    },
+
+    _consumeReqState: function() {
+      const reqState = localStorage.getItem('osReqState');
+      localStorage.removeItem('osReqState');
+      if (!reqState) {
+        return null;
+      }
+
+      try {
+        const {name, params, query} = JSON.parse(reqState);
+        return {name, params: params || {}, query: query || {}};
+      } catch (e) {
+        console.log('Error processing the req state: ' + reqState);
+        console.error(e);
+        return null;
+      }
     }
   }
 }
