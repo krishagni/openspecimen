@@ -37,7 +37,7 @@ export default class CpViewContext {
   constructor(cp, {accessBasedOnMrn, coordinatorRole}) {
     this.cp = cp;
     this.cpId = cp.id;
-    this.cpSites = cp.cpSites.map(({siteName}) => siteName);
+    this.cpSites = cp.cpSites ? cp.cpSites.map(({siteName}) => siteName) : null;
     this.accessBasedOnMrn = accessBasedOnMrn;
     this.coordinatorRole = coordinatorRole;
     this._loadAccessRights();

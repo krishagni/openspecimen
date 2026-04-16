@@ -113,7 +113,7 @@ export default {
     _allowedEntityTypes: async function() {
       const cpViewCtx = await this._getAccessCtx();
       const cp = cpViewCtx.getCp();
-      
+
       const entityTypes = [];
       if (!cp.id && authSvc.isAllowed(['CollectionProtocol'], ['Export Import'])) {
         entityTypes.push('CollectionProtocol');
@@ -383,7 +383,7 @@ export default {
         const roleSetting = await settingSvc.getSetting('biospecimen', 'coordinator_role_name');
         const coordinatorRole = roleSetting[0].value;
 
-        result = new CpViewContext({cpSites: []}, {accessBasedOnMrn, coordinatorRole});
+        result = new CpViewContext({}, {accessBasedOnMrn, coordinatorRole});
       }
 
       return result;
