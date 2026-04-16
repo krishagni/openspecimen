@@ -36,6 +36,7 @@ public class ScheduledContainerActivityDaoImpl extends AbstractDao<ScheduledCont
 			query.add(query.eq("activity.activityStatus", crit.activityStatus()));
 		}
 
+		query.add(query.eq("container.activityStatus", "Active"));
 		return query.orderBy(query.asc("activity.id")).list(crit.startAt(), crit.maxResults());
 	}
 
