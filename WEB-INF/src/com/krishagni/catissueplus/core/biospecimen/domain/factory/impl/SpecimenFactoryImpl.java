@@ -24,6 +24,7 @@ import com.krishagni.catissueplus.core.administrative.events.StorageLocationSumm
 import com.krishagni.catissueplus.core.administrative.services.StorageContainerService;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
+import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenExternalIdentifier;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
@@ -419,8 +420,15 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 
 		SpecimenRequirement existingReq = null;
 		if (existing != null) {
-			if (!existing.isPrimary() || existing.getVisit().equals(visit)) {
-				existingReq = existing.getSpecimenRequirement();
+			existingReq = existing.getSpecimenRequirement();
+			if (existing.isPrimary() && !existing.getVisit().equals(visit)) {
+				// primary specimen moved to a different visit
+				CollectionProtocolEvent cpEvent = visit != null ? visit.getCpEvent() : null;
+				if (cpEvent != null && existingReq != null) {
+					existingReq = existingReq.getMatchingReq(cpEvent.getTopLevelAnticipatedSpecimens());
+				} else {
+					existingReq = null;
+				}
 			}
 		}
 
