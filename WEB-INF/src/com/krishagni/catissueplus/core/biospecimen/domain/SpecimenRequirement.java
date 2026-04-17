@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -584,6 +585,18 @@ public class SpecimenRequirement extends BaseEntity implements Comparable<Specim
 		}
 	}
 
+	public SpecimenRequirement getMatchingReq(Collection<SpecimenRequirement> reqs) {
+		if (CollectionUtils.isEmpty(reqs) ||  StringUtils.isBlank(getCode())) {
+			return null;
+		}
+
+		return reqs.stream()
+			.filter(sr -> getCode().equals(sr.getCode()))
+			.filter(sr -> getLineage().equals(sr.getLineage()))
+			.filter(sr -> getSpecimenType().equals(sr.getSpecimenType()))
+			.findFirst()
+			.orElse(null);
+	}
 	private SpecimenRequirement deepCopy(CollectionProtocolEvent cpe, SpecimenRequirement parent) {
 		SpecimenRequirement result = copy();
 		result.setCollectionProtocolEvent(cpe);

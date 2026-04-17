@@ -1392,7 +1392,11 @@ public class Specimen extends BaseExtensionEntity {
 
 		if (!getVisit().equals(specimen.getVisit())) {
 			if (isPrimary()) {
-				updateVisit(specimen.getVisit(), specimen.getSpecimenRequirement());
+				updateVisit(specimen.getVisit());
+
+				SpecimenRequirement sr = specimen.getSpecimenRequirement() != null ? specimen.getSpecimenRequirement() : null;
+				sr = getMatchingReq(specimen.getVisit(), sr);
+				updateRequirement(sr);
 			} else {
 				throw OpenSpecimenException.userError(SpecimenErrorCode.VISIT_CHG_NOT_ALLOWED, getLabel());
 			}
@@ -1452,7 +1456,19 @@ public class Specimen extends BaseExtensionEntity {
 		setShipmentReceiveQuality(specimen.getShipmentReceiveQuality());
 		setUpdated(true);
 	}
-	
+
+	public void updateRequirement(SpecimenRequirement sr) {
+		updateRequirement0(sr);
+	}
+
+	public SpecimenRequirement getMatchingReq(Visit visit, SpecimenRequirement sourceSr) {
+		if (visit == null || sourceSr == null || visit.getCpEvent() == null) {
+			return null;
+		}
+
+		return sourceSr.getMatchingReq(visit.getCpEvent().getTopLevelAnticipatedSpecimens());
+	}
+
 	public void updateStatus(Specimen otherSpecimen, String comments) {
 		updateStatus(otherSpecimen.getActivityStatus(), AuthUtil.getCurrentUser(), Calendar.getInstance().getTime(), "Not Specified", comments, isForceDelete());
 
@@ -1843,6 +1859,36 @@ public class Specimen extends BaseExtensionEntity {
 
 	public void virtualise(String comments) {
 		virtualize(Calendar.getInstance().getTime(), comments);
+	}
+
+	private void updateVisit(Visit visit) {
+		setVisit(visit);
+		setCollectionProtocol(visit.getCollectionProtocol());
+		getChildCollection().forEach(child -> child.updateVisit(visit));
+	}
+
+	private void updateRequirement0(SpecimenRequirement sr) {
+		if (Objects.equals(getSpecimenRequirement(), sr)) {
+			return;
+		}
+
+		if (sr != null && !isPrimary()) {
+			if (!Objects.equals(getParentSpecimen().getSpecimenRequirement(), sr.getParentSpecimenRequirement())) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.REQ_PARENT_MISMATCH);
+			}
+		}
+
+		setSpecimenRequirement(sr);
+
+		Collection<SpecimenRequirement> childReqs = sr != null ? sr.getChildSpecimenRequirements() : Collections.emptyList();
+		getChildCollection().forEach(child -> {
+			SpecimenRequirement childSr = null;
+			if (child.getSpecimenRequirement() != null) {
+				childSr = child.getSpecimenRequirement().getMatchingReq(childReqs);
+			}
+
+			child.updateRequirement0(childSr);
+		});
 	}
 
 	private void updateCreatedOn(Date createdOn) {
@@ -2745,31 +2791,6 @@ public class Specimen extends BaseExtensionEntity {
 			// recently collected child specimen
 			//
 			parentSpmn.addToChildrenEvent(childSpmn);
-		}
-	}
-
-	private void updateVisit(Visit visit, SpecimenRequirement sr) {
-		setVisit(visit);
-		setCollectionProtocol(visit.getCollectionProtocol());
-		setSpecimenRequirement(sr);
-		getChildCollection().forEach(child -> child.updateVisit(visit, null));
-	}
-
-	private void updateRequirement(SpecimenRequirement sr) {
-		if (Objects.equals(getSpecimenRequirement(), sr)) {
-			return;
-		}
-
-		boolean hasPrevReq = getSpecimenRequirement() != null;
-		setSpecimenRequirement(sr);
-		if (hasPrevReq) {
-			getChildCollection().forEach(child -> child.updateRequirement(null));
-		}
-
-		if (sr != null && !isPrimary()) {
-			if (!Objects.equals(getParentSpecimen().getSpecimenRequirement(), sr.getParentSpecimenRequirement())) {
-				throw OpenSpecimenException.userError(SpecimenErrorCode.REQ_PARENT_MISMATCH);
-			}
 		}
 	}
 
