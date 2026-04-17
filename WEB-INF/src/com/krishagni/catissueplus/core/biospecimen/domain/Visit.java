@@ -756,9 +756,14 @@ public class Visit extends BaseExtensionEntity {
 			return;
 		}
 
-		// events differ. nullify the specimen requirements
-		for (Specimen spmn : getSpecimens()) {
-			spmn.setSpecimenRequirement(null);
+		List<SpecimenRequirement> newEventSrs = newEvent != null ? newEvent.getOrderedTopLevelAnticipatedSpecimens() : Collections.emptyList();
+		for (Specimen spmn : getOrderedTopLevelSpecimens()) {
+			SpecimenRequirement matchingReq = null;
+			if (spmn.getSpecimenRequirement() != null) {
+				matchingReq = spmn.getSpecimenRequirement().getMatchingReq(newEventSrs);
+			}
+
+			spmn.updateRequirement(matchingReq);
 		}
 	}
 
@@ -774,10 +779,18 @@ public class Visit extends BaseExtensionEntity {
 			return;
 		}
 
-		// CPs differ
-		for (Specimen spmn : getSpecimens()) {
-			spmn.setSpecimenRequirement(null);
-			spmn.setCollectionProtocol(newCpr.getCollectionProtocol());
+		Collection<SpecimenRequirement> eventReqs = getCpEvent() != null ? getCpEvent().getOrderedTopLevelAnticipatedSpecimens() : Collections.emptyList();
+		for (Specimen specimen : getSpecimens()) {
+			specimen.setCollectionProtocol(newCpr.getCollectionProtocol());
+		}
+
+		for (Specimen specimen : getOrderedTopLevelSpecimens()) { // TODO: This block appears duplicate
+			SpecimenRequirement newReq = null;
+			if (specimen.getSpecimenRequirement() != null) {
+				newReq = specimen.getSpecimenRequirement().getMatchingReq(eventReqs);
+			}
+
+			specimen.updateRequirement(newReq);
 		}
 	}
 }
