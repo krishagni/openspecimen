@@ -2351,7 +2351,7 @@
     "query": {
       "title": "Query",
       "acl_tab_min_site_cp_pairs": "ACL Table Strategy",
-      "acl_tab_min_site_cp_pairs_desc": "Minimum number of site/CP access pairs required to use ACL table-based filtering. If the user has fewer pairs, predicate-based site/CP filtering is used. Default: 5.",
+      "acl_tab_min_site_cp_pairs_desc": "Applicable only when subquery filtering is enabled. In subquery mode, ACL table strategy is used when the user has at least this many site/CP access pairs; otherwise predicate-based filtering is used. Default: 5",
       "default_result_view": "Default Result View Fields",
       "default_result_view_desc": "List of field values to be displayed in default query result view.",
       "floating_point_precision": "Real Numbers Precision",
@@ -2361,7 +2361,7 @@
       "max_recs_in_memory": "In-memory Records Limit",
       "max_recs_in_memory_desc": "Maximum number of query records that are allowed to be cached in-memory. When limit is reached, excessive records are spooled to disk",
       "subquery_for_site_cp_filtering": "Subquery for Site/CP Filtering",
-      "subquery_for_site_cp_filtering_desc": "Controls how site/CP access filtering is applied: when enabled, use a subquery; when disabled, use join conditions in the main query. Default: disabled. When disabled, only the predicate-based site/CP filtering is used."
+      "subquery_for_site_cp_filtering_desc": "Controls site/CP filtering mode: when enabled, filtering is applied through a subquery (and may use ACL table strategy based on threshold); when disabled, CP/site joins and inline predicates are applied in the main query. Default: disabled."
     },
 
     "training": {
