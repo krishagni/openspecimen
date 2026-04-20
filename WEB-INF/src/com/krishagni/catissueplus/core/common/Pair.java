@@ -53,13 +53,9 @@ public class Pair<T, U> {
 		}
 		
 		if (second == null) {
-			if (other.second != null) {
-				return false;
-			}
-		} else if (!second.equals(other.second)) {
-			return false;
+			return other.second == null;
+		} else {
+			return second.equals(other.second);
 		}
-		
-		return true;
 	}
 }

@@ -646,6 +646,8 @@
     <property name="templateService" ref="templateService"/>
     <property name="cfgService" ref="cfgSvc"/>
     <property name="starredItemSvc" ref="starredItemSvc"/>
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="taskManager" ref="scheduledTaskMgr"/>
   </bean>
 
   <bean id="reportSettingsFact" class="com.krishagni.catissueplus.core.biospecimen.domain.factory.impl.CpReportSettingsFactoryImpl">
