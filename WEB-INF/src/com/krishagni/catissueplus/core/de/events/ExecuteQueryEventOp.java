@@ -45,6 +45,11 @@ public class ExecuteQueryEventOp  {
 
 	private String reportName;
 
+	//
+	// Not for use by the query client
+	//
+	private String queryUid;
+
 	public String getQuerySpace() {
 		return querySpace;
 	}
@@ -179,5 +184,13 @@ public class ExecuteQueryEventOp  {
 
 	public void setReportName(String reportName) {
 		this.reportName = reportName;
+	}
+
+	public String getQueryUid() {
+		return queryUid;
+	}
+
+	public void setQueryUid(String queryUid) {
+		this.queryUid = queryUid;
 	}
 }

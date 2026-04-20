@@ -6,7 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +44,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.dao.QueryTimeoutException;
@@ -47,6 +56,7 @@ import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 import com.krishagni.catissueplus.core.administrative.domain.factory.UserErrorCode;
 import com.krishagni.catissueplus.core.administrative.repository.UserDao;
+import com.krishagni.catissueplus.core.administrative.services.ScheduledTaskManager;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.repository.impl.BiospecimenDaoHelper;
 import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
@@ -70,6 +80,7 @@ import com.krishagni.catissueplus.core.common.service.StarredItemService;
 import com.krishagni.catissueplus.core.common.service.TemplateService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
+import com.krishagni.catissueplus.core.common.util.DbUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
@@ -122,7 +133,7 @@ import edu.common.dynamicextensions.query.QuerySpace;
 import edu.common.dynamicextensions.query.ResultColumn;
 import edu.common.dynamicextensions.query.WideRowMode;
 
-public class QueryServiceImpl implements QueryService {
+public class QueryServiceImpl implements QueryService, InitializingBean {
 	private static final LogUtil logger = LogUtil.getLogger(QueryServiceImpl.class);
 
 	private static final String cpForm = "CollectionProtocol";
@@ -166,6 +177,10 @@ public class QueryServiceImpl implements QueryService {
 	private ConfigurationService cfgService;
 
 	private StarredItemService starredItemSvc;
+
+	private SessionFactory sessionFactory;
+
+	private ScheduledTaskManager taskManager;
 
 	private int maxConcurrentQueries = DEF_MAX_CONCURRENT_QUERIES;
 
@@ -232,6 +247,14 @@ public class QueryServiceImpl implements QueryService {
 
 	public void setStarredItemSvc(StarredItemService starredItemSvc) {
 		this.starredItemSvc = starredItemSvc;
+	}
+
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+
+	public void setTaskManager(ScheduledTaskManager taskManager) {
+		this.taskManager = taskManager;
 	}
 
 	@Override
@@ -459,18 +482,20 @@ public class QueryServiceImpl implements QueryService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<QueryExecResult> executeQuery(RequestEvent<ExecuteQueryEventOp> req) {
-		QueryResultData queryResult = null;
+		String queryId = UUID.randomUUID().toString();
+		ExecuteQueryEventOp opDetail = req.getPayload();
 
+		QueryResultData queryResult = null;
 		boolean queryCntIncremented = false;
 		try {
-			ExecuteQueryEventOp opDetail = req.getPayload();
+
 			if (!opDetail.isDisableAccessChecks()) {
 				ensureReadRights();
 			}
 
 			queryCntIncremented = incConcurrentQueriesCnt();
 
-			Query query = getQuery(opDetail);
+			Query query = getQuery(opDetail, queryId);
 			QueryResponse resp = query.getData();
 			insertAuditLog(AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, resp);
 			
@@ -522,6 +547,12 @@ public class QueryServiceImpl implements QueryService {
 				} catch (Exception e) {
 					logger.error("Error closing query result stream", e);
 				}				
+			}
+
+			try {
+				cleanupSiteCpsInAclTable(queryId, opDetail.isDisableAccessChecks());
+			} catch (Exception e) {
+				logger.error("Error cleaning the query ACL table", e);
 			}
 		}
 	}
@@ -1101,20 +1132,28 @@ public class QueryServiceImpl implements QueryService {
 	@Override
 	@PlusTransactional
 	public ResponseEvent<List<FacetDetail>> getFacetValues(RequestEvent<GetFacetValuesOp> req) {
+		String queryId = UUID.randomUUID().toString();
+		GetFacetValuesOp op = req.getPayload();
 		try {
-			GetFacetValuesOp op = req.getPayload();
 			if (!op.isDisableAccessChecks()) {
 				ensureReadRights();
 			}
 
+			QuerySpace qs = getQuerySpace(op.getQuerySpace());
+			String restriction = qs == null ?
+				getRestriction(AuthUtil.getCurrentUser(), op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(), queryId) :
+				StringUtils.EMPTY;
+
 			List<FacetDetail> result = op.getFacets().stream()
-				.map(facet -> getFacetDetail(op, facet))
+				.map(facet -> getFacetDetail(op, facet, restriction))
 				.collect(Collectors.toList());
 			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
+		} finally {
+			cleanupSiteCpsInAclTable(queryId, op != null && op.isDisableAccessChecks());
 		}
 	}
 
@@ -1170,6 +1209,39 @@ public class QueryServiceImpl implements QueryService {
 		}
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		taskManager.scheduleWithFixedDelay(
+			new Runnable() {
+				@Override
+				public void run() {
+					try {
+						logger.debug("Woken up to clean the stale query ACL tab entries...");
+						run0();
+					} catch (Throwable e) {
+						logger.error("Error deleting stale query ACL tab entries", e);
+					}
+				}
+
+				@PlusTransactional
+				private void run0() {
+					Calendar cal = Calendar.getInstance();
+					cal.add(Calendar.MINUTE, -60); // any entry older than 60 minutes is considered older
+
+					sessionFactory.getCurrentSession().doWork(
+						(conn) -> {
+							try (PreparedStatement pstmt = conn.prepareStatement(DELETE_ACL_CP_SITE_TS_SQL)) {
+								pstmt.setTimestamp(1, new Timestamp(cal.getTimeInMillis()));
+								pstmt.executeUpdate();
+							}
+						}
+					);
+				}
+			},
+			30
+		);
+	}
+
 	private String getObjectName() {
 		return "saved_query";
 	}
@@ -1208,7 +1280,7 @@ public class QueryServiceImpl implements QueryService {
 			queryDetail.getHavingClause());
 	}
 
-	private Query getQuery(ExecuteQueryEventOp op) {
+	private Query getQuery(ExecuteQueryEventOp op, String queryId) {
 		boolean countQuery = "Count".equals(op.getRunType());
 		User user = AuthUtil.getCurrentUser();
 		TimeZone tz = AuthUtil.getUserTimeZone();
@@ -1224,7 +1296,6 @@ public class QueryServiceImpl implements QueryService {
 			.timeZone(tz != null ? tz.getID() : null)
 			.timeout(op.getTimeout());
 		addAutoJoinParams(query);
-
 
 		if (StringUtils.isNotBlank(op.getQuerySpace())) {
 			QuerySpace qs = getQuerySpace(op.getQuerySpace());
@@ -1248,7 +1319,7 @@ public class QueryServiceImpl implements QueryService {
 			aql = getAqlWithCpIdInSelect(user, countQuery, aql);
 		}
 
-		query.compile(rootForm, aql, getRestriction(user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks()));
+		query.compile(rootForm, aql, getRestriction(user, op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks(), queryId));
 		op.setAql(aql);
 		return query;
 	}
@@ -1289,7 +1360,7 @@ public class QueryServiceImpl implements QueryService {
 		return formattedResult;
 	}
 
-	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks) {
+	private String getRestriction(User user, Long cpId, Long groupId, boolean disableAccessChecks, String queryId) {
 		String restriction = null;
 		if (groupId != null && groupId != -1) {
 			Set<Long> cpIds = AccessCtrlMgr.getInstance().getReadAccessGroupCpIds(groupId);
@@ -1321,19 +1392,132 @@ public class QueryServiceImpl implements QueryService {
 				throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
 			}
 
-			boolean useMrnSites = AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn();
-			String siteCpsAql = BiospecimenDaoHelper.getInstance().getSiteCpsCondAql(siteCps, useMrnSites);
-			String restrictionAql = "Participant.id in (select Participant.id where " + siteCpsAql + ")";
-			if (restriction != null) {
-				restriction = "(" + restriction + " and " + restrictionAql + ")";
-			} else {
-				restriction = restrictionAql;
-			}
+			restriction = appendRestriction(restriction, getSiteCpRestriction(queryId, siteCps));
 		}
 
 		return restriction;
 	}
-	
+
+	private void insertSiteCpsInAclTable(String queryId, Set<SiteCpPair> siteCps) {
+		sessionFactory.getCurrentSession().doWork(
+			connection -> {
+				Set<Pair<Long, Long>> siteCpIds = getSiteCpIdPairs(connection, siteCps);
+				insertSiteCpIds(connection, queryId, siteCpIds);
+			}
+		);
+	}
+
+	private Set<Pair<Long, Long>> getSiteCpIdPairs(Connection connection, Set<SiteCpPair> siteCps) {
+		Set<Pair<Long, Long>> siteCpIds = new LinkedHashSet<>();
+		for (SiteCpPair siteCp : siteCps) {
+			if (siteCp.getSiteId() != null) {
+				siteCpIds.add(Pair.make(siteCp.getSiteId(), siteCp.getCpId()));
+			} else {
+				List<Long> siteIds = getInstituteSiteIds(connection, siteCp.getInstituteId());
+				for (Long siteId : siteIds) {
+					siteCpIds.add(Pair.make(siteId, siteCp.getCpId()));
+				}
+			}
+		}
+		return siteCpIds;
+	}
+
+	private List<Long> getInstituteSiteIds(Connection conn, Long instituteId) {
+		try (PreparedStatement pstmt = conn.prepareStatement(GET_INSTITUTE_SITE_IDS_SQL)) {
+			pstmt.setLong(1, instituteId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				List<Long> siteIds = new ArrayList<>();
+				while (rs.next()) {
+					siteIds.add(rs.getLong(1));
+				}
+
+				return siteIds;
+			}
+		} catch (Exception e) {
+			throw OpenSpecimenException.serverError(e);
+		}
+	}
+
+	private void insertSiteCpIds(Connection connection, String queryId, Set<Pair<Long, Long>> siteCpIds)
+	throws SQLException {
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+		try (PreparedStatement pstmt = connection.prepareStatement(INSERT_ACL_CP_SITE_SQL)) {
+			for (Pair<Long, Long> siteCpId : siteCpIds) {
+				pstmt.setString(1, queryId);
+				pstmt.setLong(2, siteCpId.first());
+				if (siteCpId.second() == null) {
+					pstmt.setNull(3, Types.BIGINT);
+				} else {
+					pstmt.setLong(3, siteCpId.second());
+				}
+				pstmt.setTimestamp(4, now);
+				pstmt.addBatch();
+			}
+
+			pstmt.executeBatch();
+		}
+	}
+
+	private String getRestrictionSql(String queryId) {
+		boolean useMrnSites = AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn();
+		String mrnTableJoin = useMrnSites ? MRN_TABLE_JOIN : "";
+		String mrnSiteCond  = useMrnSites ? MRN_SITE_COND : "";
+		String restrictionSql = String.format(CP_SITE_RESTRICTION_SQL, mrnTableJoin, queryId, mrnSiteCond);
+		return "Participant.id in " + sql(restrictionSql);
+	}
+
+	private String getSiteCpRestriction(String queryId, Set<SiteCpPair> siteCps) {
+		boolean useSqForSiteCpsFiltering = useSqForSiteCpsFiltering();
+		if (useSqForSiteCpsFiltering && useAclTableRestrictions(siteCps)) {
+			insertSiteCpsInAclTable(queryId, siteCps);
+			return getRestrictionSql(queryId);
+		}
+
+		boolean useMrnSites = AccessCtrlMgr.getInstance().isAccessRestrictedBasedOnMrn();
+		String siteCpsAql = BiospecimenDaoHelper.getInstance().getSiteCpsCondAql(siteCps, useMrnSites);
+		if (useSqForSiteCpsFiltering) {
+			return "Participant.id in (select Participant.id where " + siteCpsAql + ")";
+		} else {
+			return siteCpsAql;
+		}
+	}
+
+	private boolean useSqForSiteCpsFiltering() {
+		return ConfigUtil.getInstance().getBoolSetting("query", "subquery_for_site_cp_filtering", false);
+	}
+
+	private boolean useAclTableRestrictions(Set<SiteCpPair> siteCps) {
+		int minPairs = ConfigUtil.getInstance().getIntSetting("query", "acl_tab_min_site_cp_pairs", 5);
+		if (minPairs < 0) {
+			minPairs = 0;
+		}
+
+		return siteCps.size() >= minPairs;
+	}
+
+	private String appendRestriction(String base, String toAppend) {
+		if (StringUtils.isBlank(base)) {
+			return toAppend;
+		}
+
+		return "(" + base + " and " + toAppend + ")";
+	}
+
+	private void cleanupSiteCpsInAclTable(String queryId, boolean disableAccessChecks) {
+		if (AuthUtil.isAdmin() || disableAccessChecks) {
+			return;
+		}
+
+		sessionFactory.getCurrentSession().doWork(
+			connection -> {
+				try (PreparedStatement pstmt = connection.prepareStatement(DELETE_ACL_CP_SITE_SQL)) {
+					pstmt.setString(1, queryId);
+					pstmt.executeUpdate();
+				}
+			}
+		);
+	}
+
 	private String getAqlWithCpIdInSelect(User user, boolean isCount, String aql) {
 		aql = aql.trim();
 		if (user.isAdmin() || isCount) {
@@ -1620,7 +1804,7 @@ public class QueryServiceImpl implements QueryService {
 		NotifUtil.getInstance().notify(notif, Collections.singletonMap("folder-queries", sharedUsers));
 	}
 
-	private FacetDetail getFacetDetail(GetFacetValuesOp op, String facet) {
+	private FacetDetail getFacetDetail(GetFacetValuesOp op, String facet, String restriction) {
 		String[] fieldParts = facet.split("\\.");
 		String rootForm = fieldParts[0];
 
@@ -1695,11 +1879,6 @@ public class QueryServiceImpl implements QueryService {
 			.wideRowMode(WideRowMode.OFF)
 			.querySpace(qs);
 		addAutoJoinParams(query);
-
-		String restriction = null;
-		if (qs == null) {
-			restriction = getRestriction(AuthUtil.getCurrentUser(), op.getCpId(), op.getCpGroupId(), op.isDisableAccessChecks());
-		}
 
 		QueryResultData queryResult = null;
 		try {
@@ -1793,6 +1972,7 @@ public class QueryServiceImpl implements QueryService {
 
 	private QueryDataExportResult exportData(ExecuteQueryEventOp op, ExportProcessor proc, BiConsumer<QueryResultData, OutputStream> procFn) {
 		OutputStream out = null;
+		String queryId = UUID.randomUUID().toString();
 
 		try {
 			if (proc == null) {
@@ -1801,13 +1981,20 @@ public class QueryServiceImpl implements QueryService {
 
 			op.setTimeout(-1);
 			op.setRunType("Export");
+
+			//
+			// this is run in a separate new txn so that the inserts are visible to the query
+			//
+			Query query = DbUtil.newTxn(() -> getQuery(op, queryId));
+
 			ExportQueryDataTask task = new ExportQueryDataTask();
 			task.op = op;
 			task.auth = AuthUtil.getAuth();
 			task.user = AuthUtil.getCurrentUser();
 			task.ipAddress = AuthUtil.getRemoteAddr();
 			task.filename = getExportFilename(op, procFn == null ? proc : null);
-			task.query = getQuery(op);
+			task.query = query;
+			task.queryId = queryId;
 			task.proc = proc instanceof ExtendedExportProcessor ? (ExtendedExportProcessor) proc : null;
 			task.procFn = procFn;
 			task.fout = new FileOutputStream(new File(getExportDataDir(), task.filename));
@@ -1863,6 +2050,8 @@ public class QueryServiceImpl implements QueryService {
 
 		private BiConsumer<QueryResultData, OutputStream> procFn;
 
+		private String queryId;
+
 		@Override
 		@PlusTransactional
 		public Boolean call() {
@@ -1915,6 +2104,12 @@ public class QueryServiceImpl implements QueryService {
 				}
 
 				FileUtils.deleteQuietly(progressFile);
+				DbUtil.newTxn(
+					() -> {
+						cleanupSiteCpsInAclTable(queryId, op != null && op.isDisableAccessChecks());
+						return null;
+					}
+				);
 			}
 
 			return true;
@@ -1966,14 +2161,6 @@ public class QueryServiceImpl implements QueryService {
 		}
 	}
 
-	private String getAqlSiteIdRestriction(String property, SiteCpPair siteCp) {
-		if (siteCp.getSiteId() != null) {
-			return property + " = " + siteCp.getSiteId();
-		} else {
-			return property + " in " + sql(String.format(INSTITUTE_SITE_IDS_SQL, siteCp.getInstituteId()));
-		}
-	}
-
 	private String sql(String sql) {
 		return "sql(\"" + sql + "\")";
 	}
@@ -1991,6 +2178,32 @@ public class QueryServiceImpl implements QueryService {
 		return null;
 	}
 
-	private static final String INSTITUTE_SITE_IDS_SQL =
-		"select identifier from catissue_site where institute_id = %d and activity_status != 'Disabled'";
+	private static final String GET_INSTITUTE_SITE_IDS_SQL =
+		"select identifier from catissue_site where institute_id = ? and activity_status != 'Disabled'";
+
+	private static final String INSERT_ACL_CP_SITE_SQL =
+		"insert into OS_QUERY_ACL_CP_SITES(query_id, site_id, cp_id, creation_time) values (?, ?, ?, ?)";
+
+	private static final String DELETE_ACL_CP_SITE_SQL =
+		"delete from OS_QUERY_ACL_CP_SITES where query_id = ?";
+
+	private static final String DELETE_ACL_CP_SITE_TS_SQL =
+		"delete from OS_QUERY_ACL_CP_SITES where creation_time < ?";
+
+	private static final String CP_SITE_RESTRICTION_SQL =
+		"select " +
+		"  cpr.cpr_id " +
+		"from " +
+		"  os_cpr_recs cpr " +
+		"  left join catissue_collection_protocol cp on cp.identifier = cpr.cp_id and cp.activity_status != 'Disabled' " +
+		"  left join catissue_site_cp cp_site on cp_site.collection_protocol_id = cp.identifier " +
+		"  %s " +
+		"  left join os_query_acl_cp_sites acl on acl.query_id = '%s' and acl.site_id = cp_site.site_id %s and (acl.cp_id is null or acl.cp_id = cp_site.collection_protocol_id) " +
+		"where " +
+		"  acl.query_id is not null and " +
+		"  cpr.activity_status != 'Disabled'";
+
+	private static final String MRN_TABLE_JOIN = " left join catissue_part_medical_id pmi on pmi.participant_id = cpr.participant_id";
+
+	private static final String MRN_SITE_COND = "and (pmi.site_id is null or acl.site_id = pmi.site_id)";
 }

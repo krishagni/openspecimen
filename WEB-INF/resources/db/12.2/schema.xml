@@ -772,4 +772,31 @@
       <column name="KEY_VALUE" type="${text.type}(255)" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Materialised user ACL for use in the query module">
+    <createTable tableName="OS_QUERY_ACL_CP_SITES">
+      <column name="QUERY_ID" type="${text.type}(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="SITE_ID" type="${int.type}">
+        <constraints nullable="false" />
+      </column>
+      <column name="CP_ID" type="${int.type}" />
+      <column name="CREATION_TIME" type="${nullable.ts.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on the key query ACL table for faster ACL checks">
+    <createIndex tableName="OS_QUERY_ACL_CP_SITES" indexName="OS_QUERY_ACL_CP_SITES_IDX">
+      <column name="QUERY_ID" type="${text.type}(255)" />
+      <column name="SITE_ID" type="${int.type}" />
+      <column name="CP_ID" type="${int.type}" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on the creation time of ACL for faster cleanup">
+    <createIndex tableName="OS_QUERY_ACL_CP_SITES" indexName="OS_QUERY_ACL_CREATION_TS_IDX">
+      <column name="CREATION_TIME" type="${nullable.ts.type}" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>

@@ -34,4 +34,25 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Threshold for using materialised ACL table in query restrictions">
+    <sql>
+      call add_cfg_prop(
+        'query', 'acl_tab_min_site_cp_pairs',
+        'acl_tab_min_site_cp_pairs', 'acl_tab_min_site_cp_pairs',
+        'INT', '5'
+      );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Setting to choose between using a sub-query or join mechanism for filtering data based on site-cp pairs">
+    <sql>
+      call add_cfg_prop(
+        'query', 'subquery_for_site_cp_filtering',
+        'subquery_for_site_cp_filtering', 'subquery_for_site_cp_filtering',
+        'BOOLEAN', 'false'
+      );
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>
