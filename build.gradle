@@ -325,6 +325,7 @@ processResources {
 task create_war(type: War) {
   from ('./') {
     include 'index.html'
+    include 'index-redirect.js'
   }
 
   from ('./WEB-INF/') {
