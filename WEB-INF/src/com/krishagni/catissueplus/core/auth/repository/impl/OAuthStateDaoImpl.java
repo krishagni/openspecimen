@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.auth.repository.impl;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 
 import com.krishagni.catissueplus.core.auth.domain.OAuthState;
@@ -19,7 +20,7 @@ public class OAuthStateDaoImpl extends AbstractDao<OAuthState> implements OAuthS
 	@Override
 	public int deleteStatesOlderThan(Instant time) {
 		return getCurrentSession().createNamedMutationQuery(DELETE_OLD_STATES)
-			.setParameter("staleTime", time)
+			.setParameter("staleTime", Timestamp.from(time))
 			.executeUpdate();
 	}
 

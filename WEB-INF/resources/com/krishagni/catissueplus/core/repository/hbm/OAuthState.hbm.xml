@@ -23,13 +23,13 @@
 
     <property name="time" column="AUTH_TIME" />
 
-    <query name="deleteOldStates">
+    <sql-query name="deleteOldStates">
       <![CDATA[
         delete from
-          com.krishagni.catissueplus.core.auth.domain.OAuthState s
+          OS_OAUTH_STATES
         where
-          s.time < :staleTime
+          AUTH_TIME < :staleTime
       ]]>
-    </query>
+    </sql-query>
   </class>
 </hibernate-mapping>
