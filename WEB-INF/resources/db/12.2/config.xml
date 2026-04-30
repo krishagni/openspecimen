@@ -55,4 +55,14 @@
     </sql>
   </changeSet>
 
+  <changeSet author="vpawar" id="Setting to show or hide Ask OS button">
+    <sql>
+      call add_cfg_prop(
+        'common', 'ask_os_button_enabled',
+        'ask_os_button_enabled', 'ask_os_button_enabled',
+        'BOOLEAN', 'true'
+      );
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>
