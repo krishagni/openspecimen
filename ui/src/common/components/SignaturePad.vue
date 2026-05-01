@@ -19,7 +19,8 @@
       <span v-t="'common.none'" v-show="disabled"></span>
     </div>
 
-    <os-dialog ref="dialog" :closable="false" @opened="initSignaturePad">
+    <os-dialog ref="dialog" :closable="false" dialog-class="os-signature-dialog"
+      position="center" @opened="initSignaturePad">
       <template #header>
         <span v-t="'common.draw_signature'">Draw Signature</span>
       </template>
@@ -152,8 +153,9 @@ export default {
 }
 
 .os-signature img {
-  width: 300px;
-  height: 150px;
+  width: min(300px, calc(100vw - 3rem));
+  aspect-ratio: 2 / 1;
+  height: auto;
 }
 
 .os-signature .actions {
@@ -195,16 +197,35 @@ export default {
 }
 
 .os-canvas-container {
+  box-sizing: border-box;
   margin: auto;
   padding: 0.5rem 0.75rem;
   border: 1px solid;
   border-color: #ced4da;
   border-radius: 4px;
-  width: fit-content;
+  max-width: 100%;
+  width: min(450px, 100%);
 }
 
 .os-canvas-container canvas {
-  width: 450px;
-  height: 225px;
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  height: auto;
+  touch-action: none;
+}
+</style>
+
+<style>
+
+@media (max-width: 575px), (max-width: 900px) and (max-height: 575px) {
+  .os-signature-dialog.p-dialog {
+    max-width: calc(100vw - 1rem);
+    width: calc(100vw - 1rem) !important;
+  }
+
+  .os-signature-dialog.p-dialog .p-dialog-content {
+    overflow-x: hidden;
+  }
 }
 </style>

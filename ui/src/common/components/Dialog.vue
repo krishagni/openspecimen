@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model:visible="showDialog" :style="style" position="top"
+  <Dialog v-model:visible="showDialog" :style="style" :class="dialogClass" :position="position || 'top'"
     :modal="true" :autoZIndex="false" :closable="showCloseIcon" @show="onShow" @hide="onHide">
     <template #header>
       <slot name="header"></slot>
@@ -19,7 +19,7 @@
 import Dialog from 'primevue/dialog';
 
 export default {
-  props: ['size', 'contentClass', 'closable'],
+  props: ['size', 'contentClass', 'closable', 'dialogClass', 'position'],
 
   emits: ['opened', 'closed'],
 
