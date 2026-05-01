@@ -2193,6 +2193,8 @@
       "allowed_req_origins_desc": "Comma-separated list of allowed request origin servers.",
       "app_url": "Application URL",
       "app_url_desc": "Server URL to be used in the emails to end users.",
+      "ask_os_button_enabled": "Ask OS Button",
+      "ask_os_button_enabled_desc": "Display the Ask OS button on the navigation bar.",
       "cart_specimens_rpt_query": "Cart Specimens Report",
       "cart_specimens_rpt_query_desc": "Saved query to use for generating cart specimens report",
       "cont_spmns_report_query": "Container Specimens Report",

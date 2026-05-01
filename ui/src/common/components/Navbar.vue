@@ -28,7 +28,7 @@
 
         <os-notifs-overlay v-if="!minimalLogin" />
 
-        <os-ask-os />
+        <os-ask-os v-if="showAskOs" />
 
         <div class="user-profile" v-os-tooltip.bottom="$t('common.user_profile')" v-if="authenticated">
           <button @click="toggleProfileMenu">
@@ -69,6 +69,7 @@ import http from '@/common/services/HttpClient.js';
 import loginSvc from '@/common/services/Login.js';
 import routerSvc from '@/common/services/Router.js';
 import settingSvc from '@/common/services/Setting.js';
+import util from '@/common/services/Util.js';
 
 import About          from '@/common/components/About';
 import AddToFavorites from '@/common/components/AddToFavorites.vue';
@@ -93,7 +94,9 @@ export default {
 
   data() {
     return {
-      osLogo: osLogo
+      osLogo: osLogo,
+
+      showAskOs: false
     }
   },
 
@@ -103,6 +106,8 @@ export default {
       callFailed:    () => this.decrCallCount(),
       callCompleted: () => this.decrCallCount(),
     });
+
+    this.loadAskOsButtonSetting();
   },
 
   computed: {
@@ -156,6 +161,15 @@ export default {
     decrCallCount: function() {
       if (this.$refs && this.$refs.loadingBar) {
         this.$refs.loadingBar.decrement();
+      }
+    },
+
+    loadAskOsButtonSetting: async function() {
+      try {
+        const [{value}] = await settingSvc.getSetting('common', 'ask_os_button_enabled');
+        this.showAskOs = !util.isFalse(value);
+      } catch (e) {
+        this.showAskOs = true;
       }
     },
 
