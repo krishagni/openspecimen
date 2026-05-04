@@ -142,6 +142,10 @@ export default {
       return this.$filters.username(this.$ui.currentUser);
     },
 
+    signedIn: function() {
+      return this.$ui.currentUser && this.$ui.currentUser.id > 0;
+    },
+
     homeUrl: function() {
       return routerSvc.getUrl('HomePage');
     }
@@ -165,6 +169,11 @@ export default {
     },
 
     loadAskOsButtonSetting: async function() {
+      if (!this.signedIn) {
+        this.showAskOs = false;
+        return;
+      }
+
       try {
         const [{value}] = await settingSvc.getSetting('common', 'ask_os_button_enabled');
         this.showAskOs = !util.isFalse(value);
