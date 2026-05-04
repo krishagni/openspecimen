@@ -233,7 +233,7 @@ export default {
     if (this.cp) {
       settingsSvc.getSetting('biospecimen', 'coordinator_role_name').then(
         (settings) => {
-          this.ctx.isCoordinator = settings[0].value == authSvc.getRole(this.cp);
+          this.ctx.isCoordinator = !!settings[0].value && settings[0].value == authSvc.getRole(this.cp);
         }
       );
     }

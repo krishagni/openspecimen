@@ -90,11 +90,12 @@ class Authorization {
       return 'system-admin';
     }
 
-    if (!ui.currentUser.roles || ui.currentUser.roles.length == 0) {
+    const userRoles = this.getUserRoles();
+    if (!userRoles || userRoles.length == 0) {
       return null;
     }
 
-    for (let sr of ui.currentUser.roles) {
+    for (let sr of userRoles) {
       if (!sr.site && !sr.collectionProtocol) {
         return sr.role.name;
       } else if (sr.collectionProtocol && sr.collectionProtocol.id == cp.id) {
