@@ -95,7 +95,7 @@ public class SubjectDaoImpl extends AbstractDao<Subject> implements SubjectDao {
 
 	@Override
 	public Integer removeRolesByCp(Long cpId) {
-		return createNamedQuery(REMOVE_ROLES_BY_CP)
+		return getCurrentSession().createNamedMutationQuery(REMOVE_ROLES_BY_CP)
 			.setParameter("cpId", cpId)
 			.executeUpdate();
 	}

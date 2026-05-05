@@ -390,7 +390,7 @@ public class CollectionProtocolsController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public EntityDeleteResp<CollectionProtocolDetail> deleteCollectionProtocol(
-			@PathVariable
+			@PathVariable("id")
 			Long id,
 
 			@RequestParam(value = "forceDelete", required = false, defaultValue = "false")
