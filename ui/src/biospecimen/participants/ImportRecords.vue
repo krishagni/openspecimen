@@ -115,7 +115,7 @@ export default {
       const cp = cpViewCtx.getCp();
 
       const entityTypes = [];
-      if (!cp.id && authSvc.isAllowed(['CollectionProtocol'], ['Export Import'])) {
+      if (!cp.id && authSvc.isAllowed({resources: ['CollectionProtocol'], operations: ['Export Import']})) {
         entityTypes.push('CollectionProtocol');
       }
 
