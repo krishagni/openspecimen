@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenTypeUnit;
@@ -95,6 +96,7 @@ public class SpecimenTypeUnitDetail {
 		this.activityStatus = activityStatus;
 	}
 
+	@JsonIgnore
 	public String getKey() {
 		List<String> keyParts = new ArrayList<>();
 		if (cpId != null && cpId > 0L) {

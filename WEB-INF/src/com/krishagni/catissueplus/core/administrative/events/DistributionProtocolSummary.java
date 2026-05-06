@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.administrative.domain.DistributionProtocol;
@@ -14,6 +15,7 @@ import com.krishagni.catissueplus.core.common.events.UserSummary;
 import com.krishagni.catissueplus.core.common.util.Utility;
 
 @ListenAttributeChanges
+@JsonFilter("withoutId")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DistributionProtocolSummary extends AttributeModifiedSupport {
 	private Long id;

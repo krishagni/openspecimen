@@ -701,7 +701,6 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 	public ResponseEvent<CollectionProtocolDetail> importCollectionProtocol(RequestEvent<CollectionProtocolDetail> req) {
 		try {
 			CollectionProtocolDetail cpDetail = req.getPayload();
-			cpDetail.setDistributionProtocols(null);
 			
 			ResponseEvent<CollectionProtocolDetail> resp = createCollectionProtocol(req);
 			resp.throwErrorIfUnsuccessful();
@@ -883,7 +882,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
 			
 			cp.addCpe(cpe);
-			daoFactory.getCollectionProtocolDao().saveOrUpdate(cp, true);
+			daoFactory.getCollectionProtocolDao().saveCpe(cpe, true);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cp));
 			return ResponseEvent.response(CollectionProtocolEventDetail.from(cpe));
 		} catch (OpenSpecimenException ose) {
@@ -941,8 +940,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			CollectionProtocolEvent cpe = cpeFactory.createCpeCopy(opDetail.getCpe(), existing);
 			existing.copySpecimenRequirementsTo(cpe);			
 			
-			cp.addCpe(cpe);			
-			cpDao.saveOrUpdate(cp, true);
+			cp.addCpe(cpe);
+			cpDao.saveCpe(cpe, true);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cp));
 			return ResponseEvent.response(CollectionProtocolEventDetail.from(cpe));			
 		} catch (OpenSpecimenException ose) {
@@ -1072,9 +1071,9 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			SpecimenRequirement requirement = srFactory.createSpecimenRequirement(req.getPayload());			
 			CollectionProtocolEvent cpe = requirement.getCollectionProtocolEvent();
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cpe.getCollectionProtocol());
-			
+
 			cpe.addSpecimenRequirement(requirement);
-			daoFactory.getCollectionProtocolDao().saveCpe(cpe, true);
+			daoFactory.getSpecimenRequirementDao().saveOrUpdate(requirement, true);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(cpe.getCollectionProtocol()));
 			return ResponseEvent.response(SpecimenRequirementDetail.from(requirement));
 		} catch (OpenSpecimenException ose) {
