@@ -445,6 +445,9 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 			CollectionProtocol existingCp = getCollectionProtocol(detail.getId(), null, detail.getShortTitle());
 			detail.setId(existingCp.getId());
+			if (Status.isDisabledStatus(detail.getActivityStatus())) {
+				return ResponseEvent.userError(CpErrorCode.DELETE_USING_UPDATE_NA);
+			}
 
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(existingCp);
 			CollectionProtocol cp = cpFactory.createCollectionProtocol(detail);

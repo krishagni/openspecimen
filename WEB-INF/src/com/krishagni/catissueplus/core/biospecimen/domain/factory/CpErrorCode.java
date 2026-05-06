@@ -63,6 +63,8 @@ public enum CpErrorCode implements ErrorCode {
 	CONSENT_TIER_FOUND,
 	
 	CONSENTS_WAIVED,
+
+	DELETE_USING_UPDATE_NA,
 	
 	DUP_CP_SITE_CODES,
 
