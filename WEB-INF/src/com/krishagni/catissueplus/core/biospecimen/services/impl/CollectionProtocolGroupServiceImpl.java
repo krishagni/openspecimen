@@ -16,6 +16,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
+import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
 import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
@@ -26,13 +28,10 @@ import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGrou
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupFormsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupWorkflowCfgDetail;
-import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpGroupListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolGroupService;
-import com.krishagni.catissueplus.core.biospecimen.services.CollectionProtocolService;
-import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.PlusTransactional;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
@@ -50,7 +49,6 @@ import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.domain.Form;
 import com.krishagni.catissueplus.core.de.domain.FormErrorCode;
-import com.krishagni.catissueplus.core.de.events.FormContextDetail;
 import com.krishagni.catissueplus.core.de.events.FormSummary;
 import com.krishagni.catissueplus.core.de.events.RemoveFormContextOp;
 import com.krishagni.catissueplus.core.de.repository.FormDao;
@@ -66,7 +64,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 
 	private FormService formSvc;
 
-	private CollectionProtocolService cpSvc;
+	private CpGroupSettingsApplier cpGroupSettingsApplier;
 
 	private ExportService exportSvc;
 
@@ -84,8 +82,8 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		this.formSvc = formSvc;
 	}
 
-	public void setCpSvc(CollectionProtocolService cpSvc) {
-		this.cpSvc = cpSvc;
+	public void setCpGroupSettingsApplier(CpGroupSettingsApplier cpGroupSettingsApplier) {
+		this.cpGroupSettingsApplier = cpGroupSettingsApplier;
 	}
 
 	public void setExportSvc(ExportService exportSvc) {
@@ -173,6 +171,12 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = createGroup(req.getPayload());
 			ensureUniqueName(existingGroup, group);
 			existingGroup.setName(group.getName());
+			if (req.getPayload().isAttrModified("reqManagers")) {
+				UserGroup existingReqManagers = existingGroup.getReqManagers();
+				existingGroup.setReqManagers(group.getReqManagers());
+				cpGroupSettingsApplier.applyReqManagers(existingReqManagers, group.getReqManagers(), existingGroup.getCps());
+			}
+
 			return ResponseEvent.response(CollectionProtocolGroupSummary.from(existingGroup));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -273,19 +277,18 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = getGroup(crit.getId(), crit.getName());
 			ensureReadAccess(group);
 
-			String level = crit.paramString("level");
+			String inputLevel = crit.paramString("level");
 			Map<String, Set<CpGroupForm>> groupFormsByLevel;
-			if (StringUtils.isBlank(level)) {
+			if (StringUtils.isBlank(inputLevel)) {
 				groupFormsByLevel = group.getFormsByLevel();
 			} else {
-				groupFormsByLevel = Collections.singletonMap(level, group.getForms(level));
+				groupFormsByLevel = Collections.singletonMap(inputLevel, group.getForms(inputLevel));
 			}
 
 			List<CpGroupFormsDetail> result = new ArrayList<>();
-			for (Map.Entry<String, Set<CpGroupForm>> gfEntry : groupFormsByLevel.entrySet()) {
-				List<Form> forms = gfEntry.getValue().stream().map(CpGroupForm::getForm).collect(Collectors.toList());
-				result.add(CpGroupFormsDetail.from(group, gfEntry.getKey(), gfEntry.getValue()));
-			}
+			groupFormsByLevel.forEach(
+				(level, forms) -> result.add(CpGroupFormsDetail.from(group, level, forms))
+			);
 
 			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
@@ -307,21 +310,23 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = getGroup(input.getGroupId(), input.getGroupName());
 			ensureUpdateAccess(group);
 
-			List<Pair<Form, FormSummary>> forms = new ArrayList<>();
+			List<FormSummary> forms = new ArrayList<>();
 			for (FormSummary inputForm : input.getForms()) {
 				Form form = getForm(inputForm.getFormId(), inputForm.getName());
 				if (group.containsForm(input.getLevel(), form)) {
 					continue;
 				}
 
-				forms.add(Pair.make(form, inputForm));
+				inputForm.setFormId(form.getId());
+				inputForm.setDbForm(form);
+				forms.add(inputForm);
 			}
 
 			if (!isMultipleFormsLevel(input.getLevel())) {
 				forms = Collections.singletonList(forms.get(forms.size() - 1));
 			}
 
-			addForms(group, input.getLevel(), forms);
+			cpGroupSettingsApplier.addFormContexts(group, input.getLevel(), forms);
 			group.addForms(input.getLevel(), forms);
 			return ResponseEvent.response(true);
 		} catch (OpenSpecimenException ose) {
@@ -393,12 +398,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = getGroup(input.getGroupId(), input.getGroupName());
 			ensureUpdateAccess(group);
 
-			CpWorkflowCfgDetail cpCfgDetail = new CpWorkflowCfgDetail();
-			cpCfgDetail.setWorkflows(input.getWorkflows());
-			for (CollectionProtocol cp : group.getCps()) {
-				cpCfgDetail.setCpId(cp.getId());
-				cpSvc.saveWorkflows(cp, cpCfgDetail);
-			}
+			cpGroupSettingsApplier.applyWorkflows(input.getWorkflows(), group.getCps());
 
 			if (input.getWorkflows() != null) {
 				Map<String, CpWorkflowConfig.Workflow> wfMap = new HashMap<>();
@@ -498,9 +498,32 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		}
 
 		group.setName(input.getName());
+		group.setReqManagers(getReqManagers(input.getReqManagers(), ose));
 		group.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		ose.checkAndThrow();
 		return group;
+	}
+
+	private UserGroup getReqManagers(UserGroupSummary input, OpenSpecimenException ose) {
+		if (input == null) {
+			return null;
+		}
+
+		Object key = null;
+		UserGroup reqManagers = null;
+		if (input.getId() != null) {
+			reqManagers = daoFactory.getUserGroupDao().getById(input.getId());
+			key = input.getId();
+		} else if (StringUtils.isNotBlank(input.getName())) {
+			reqManagers = daoFactory.getUserGroupDao().getByName(input.getName());
+			key = input.getName();
+		}
+
+		if (key != null && reqManagers == null) {
+			ose.addError(UserGroupErrorCode.NOT_FOUND, key);
+		}
+
+		return reqManagers;
 	}
 
 	private List<CollectionProtocol> getCps(List<CollectionProtocolSummary> cps) {
@@ -605,7 +628,7 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		daoFactory.getCpGroupDao().addCpsToGroup(group.getId(), cpIdsToAdd);
 
 		Set<CollectionProtocol> addedCps = inputCps.stream().filter(cp -> cpIdsToAdd.contains(cp.getId())).collect(Collectors.toSet());
-		addGroupSettingsToCps(group, addedCps);
+		cpGroupSettingsApplier.apply(group, addedCps);
 		return addedCps.size();
 	}
 
@@ -627,103 +650,6 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		Set<Long> inaccessibleCpIds = Utility.subtract(cpIds, accessibleCpIds);
 		String titles = inputCps.stream().filter(cp -> inaccessibleCpIds.contains(cp.getId())).map(CollectionProtocol::getShortTitle).collect(Collectors.joining(", "));
 		throw OpenSpecimenException.userError(CpGroupErrorCode.CP_UPDATE_REQ, titles);
-	}
-
-
-	private void addGroupSettingsToCps(CollectionProtocolGroup group, Set<CollectionProtocol> cps) {
-		if (CollectionUtils.isEmpty(cps)) {
-			return;
-		}
-
-		//
-		// add forms
-		//
-		List<Long> cpIds = cps.stream().map(CollectionProtocol::getId).collect(Collectors.toList());
-		for (Map.Entry<String, Set<CpGroupForm>> levelForms : group.getFormsByLevel().entrySet()) {
-			Map<Long, Set<Long>> cpForms = daoFactory.getCpGroupDao().getCpForms(cpIds, levelForms.getKey());
-			for (CollectionProtocol cp : cps) {
-				Set<Long> formIds = getCpFormIds(cpForms, cp.getId());
-				for (CpGroupForm form : levelForms.getValue()) {
-					FormSummary input = new FormSummary();
-					input.setMultipleRecords(form.isMultipleRecords());
-					input.setNotifEnabled(form.isNotifEnabled());
-					input.setDataInNotif(form.isDataInNotif());
-					if (form.isNotifEnabled()) {
-						input.setNotifUserGroups(form.getNotifUserGroups().stream()
-							.map(ug -> {
-								UserGroupSummary result = new UserGroupSummary();
-								result.setId(ug.getId());
-								return result;
-							})
-							.collect(Collectors.toList())
-						);
-					}
-
-					addForm(cp, levelForms.getKey(), form.getForm(), input, formIds);
-				}
-			}
-		}
-
-		//
-		// add workflows
-		//
-		Map<String, CpWorkflowConfig.Workflow> groupWfs = group.getWorkflows();
-		if (!groupWfs.isEmpty()) {
-			CpWorkflowCfgDetail cpWfs = new CpWorkflowCfgDetail();
-			cpWfs.setWorkflows(WorkflowDetail.from(groupWfs.values()));
-			for (CollectionProtocol cp : cps) {
-				cpWfs.setCpId(cp.getId());
-				cpSvc.saveWorkflows(cp, cpWfs);
-			}
-		}
-	}
-
-	private void addForms(CollectionProtocolGroup group, String level, List<Pair<Form, FormSummary>> inputForms) {
-		Map<Long, Set<Long>> cpForms = daoFactory.getCpGroupDao().getCpForms(group.getCpIds(), level);
-		for (CollectionProtocol cp : group.getCps()) {
-			Set<Long> formIds = getCpFormIds(cpForms, cp.getId());
-			for (Pair<Form, FormSummary> form : inputForms) {
-				addForm(cp, level, form.first(), form.second(), formIds);
-			}
-		}
-	}
-
-	private void addForm(CollectionProtocol cp, String level, Form form, FormSummary input, Set<Long> formIds) {
-		boolean multipleForms = isMultipleFormsLevel(level);
-		if (CollectionUtils.isNotEmpty(formIds)) {
-			if (formIds.contains(form.getId())) {
-				return;
-			}
-		}
-
-		CollectionProtocolSummary cpSummary = new CollectionProtocolSummary();
-		cpSummary.setId(cp.getId());
-
-		FormContextDetail formCtxt = new FormContextDetail();
-		formCtxt.setCollectionProtocol(cpSummary);
-		formCtxt.setFormId(form.getId());
-		formCtxt.setLevel(level);
-		formCtxt.setMultiRecord(multipleForms && input.isMultipleRecords());
-		formCtxt.setNotifEnabled(multipleForms && input.isNotifEnabled());
-		if (formCtxt.isNotifEnabled()) {
-			formCtxt.setDataInNotif(input.isDataInNotif());
-			formCtxt.setNotifUserGroups(input.getNotifUserGroups());
-		}
-
-		ResponseEvent.unwrap(formSvc.addFormContexts( RequestEvent.wrap(Collections.singletonList(formCtxt))));
-	}
-
-	private Set<Long> getCpFormIds(Map<Long, Set<Long>> cpForms, Long cpId) {
-		Set<Long> result = new HashSet<>();
-		if (cpForms.get(-1L) != null) {
-			result.addAll(cpForms.get(-1L));
-		}
-
-		if (cpForms.get(cpId) != null) {
-			result.addAll(cpForms.get(cpId));
-		}
-
-		return result;
 	}
 
 	private boolean removeForms(CollectionProtocolGroup group, String level, List<Form> inputForms) {

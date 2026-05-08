@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
@@ -44,6 +45,8 @@ public class FormSummary {
 	private Long formCtxtId;
 
 	private Long cpId;
+
+	private Form dbForm;
 
 	public Long getFormId() {
 		return formId;
@@ -163,6 +166,15 @@ public class FormSummary {
 
 	public void setCpId(Long cpId) {
 		this.cpId = cpId;
+	}
+
+	@JsonIgnore
+	public Form getDbForm() {
+		return dbForm;
+	}
+
+	public void setDbForm(Form dbForm) {
+		this.dbForm = dbForm;
 	}
 
 	public static FormSummary from(Form form) {

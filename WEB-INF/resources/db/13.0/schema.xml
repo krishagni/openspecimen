@@ -110,4 +110,13 @@
       );
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="CP group request managers">
+    <addColumn tableName="OS_CP_GROUPS">
+      <column name="REQ_MANAGERS_USER_GROUP_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_CPG_REQ_MANAGERS_UG_IDX" referencedTableName="OS_USER_GROUPS"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

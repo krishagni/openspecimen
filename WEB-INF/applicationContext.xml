@@ -215,6 +215,11 @@
     <property name="daoFactory" ref="biospecimenDaoFactory" />
   </bean>
 
+  <bean id="cpGroupSettingsApplier" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CpGroupSettingsApplier">
+    <property name="daoFactory" ref="biospecimenDaoFactory"/>
+    <property name="formSvc" ref="formSvc"/>
+  </bean>
+
   <bean id="cpSvc" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolServiceImpl">
     <property name="taskExecutor" ref="taskExecutor"/>
     <property name="cpFactory" ref="cpFactory"/>
@@ -227,6 +232,7 @@
     <property name="sessionFactory" ref="sessionFactory"/>
     <property name="starredItemSvc" ref="starredItemSvc"/>
     <property name="exportSvc" ref="exportSvc"/>
+    <property name="cpGroupSettingsApplier" ref="cpGroupSettingsApplier"/>
   </bean>
 
   <bean id="cpChangeListener" class="com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolChangeListener" />
@@ -235,7 +241,7 @@
     <property name="daoFactory" ref="biospecimenDaoFactory"/>
     <property name="formDao" ref="formDao"/>
     <property name="formSvc" ref="formSvc"/>
-    <property name="cpSvc" ref="cpSvc"/>
+    <property name="cpGroupSettingsApplier" ref="cpGroupSettingsApplier"/>
     <property name="exportSvc" ref="exportSvc" />
     <property name="importSvc" ref="importObjectsSvc" />
   </bean>

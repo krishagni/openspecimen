@@ -19,10 +19,16 @@
                 <span v-t="'cpgs.forms'">Forms</span>
               </router-link>
             </li>
+            <li>
+              <router-link :to="getRoute('OtherSettings')">
+                <span v-t="'cpgs.other_settings'">Other settings</span>
+              </router-link>
+            </li>
           </ul>
         </os-tab-menu>
 
-        <router-view :cpg="ctx.cpg" :perm-opts="ctx.permOpts" v-if="ctx.cpg && ctx.cpg.id > 0" :key="ctx.cpg.id" />
+        <router-view :cpg="ctx.cpg" :perm-opts="ctx.permOpts" :key="ctx.cpg.id"
+          @cpg-saved="onCpgSaved" v-if="ctx.cpg && ctx.cpg.id > 0" />
       </div>
     </os-page-body>
   </os-page>
@@ -89,6 +95,10 @@ export default {
 
     getRoute: function(routeName, params, query) {
       return { name: 'CpgDetail.' + routeName, params, query: {...this.query, query} };
+    },
+
+    onCpgSaved: function(cpg) {
+      this.ctx.cpg = cpg;
     }
   }
 }

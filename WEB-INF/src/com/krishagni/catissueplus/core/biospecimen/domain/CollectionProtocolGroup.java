@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -18,6 +19,7 @@ import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupEr
 import com.krishagni.catissueplus.core.audit.services.impl.DeleteLogUtil;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.common.Pair;
+import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.common.util.Utility;
@@ -29,6 +31,8 @@ public class CollectionProtocolGroup extends BaseEntity {
 	private String name;
 
 	private String activityStatus;
+
+	private UserGroup reqManagers;
 
 	private Set<CollectionProtocol> cps = new HashSet<>();
 
@@ -57,6 +61,14 @@ public class CollectionProtocolGroup extends BaseEntity {
 
 	public void setActivityStatus(String activityStatus) {
 		this.activityStatus = activityStatus;
+	}
+
+	public UserGroup getReqManagers() {
+		return reqManagers;
+	}
+
+	public void setReqManagers(UserGroup reqManagers) {
+		this.reqManagers = reqManagers;
 	}
 
 	public Set<CollectionProtocol> getCps() {
@@ -136,6 +148,7 @@ public class CollectionProtocolGroup extends BaseEntity {
 		}
 
 		setName(other.getName());
+		setReqManagers(other.getReqManagers());
 		setCps(other.getCps());
 	}
 
@@ -153,17 +166,21 @@ public class CollectionProtocolGroup extends BaseEntity {
 		setActivityStatus(Status.ACTIVITY_STATUS_DISABLED.getStatus());
 	}
 
-	public void addForms(String level, List<Pair<Form, FormSummary>> formsToAdd) {
-		for (Pair<Form, FormSummary> form : formsToAdd) {
-			if (containsForm(level, form.first())) {
+	public void addForms(String level, List<FormSummary> formsToAdd) {
+		for (FormSummary input : formsToAdd) {
+			if (input.getDbForm() == null) {
+				String id = input.getFormId() != null ? input.getFormId().toString() : (StringUtils.isNotBlank(input.getName()) ? input.getName() : "<unknown>");
+				throw OpenSpecimenException.serverError(CommonErrorCode.SERVER_ERROR, "Input form " + id + " not resolved to DB form!");
+			}
+
+			if (containsForm(level, input.getDbForm())) {
 				continue;
 			}
 
-			FormSummary input = form.second();
 			CpGroupForm groupForm = new CpGroupForm();
 			groupForm.setGroup(this);
 			groupForm.setLevel(level);
-			groupForm.setForm(form.first());
+			groupForm.setForm(input.getDbForm());
 			groupForm.setMultipleRecords(input.isMultipleRecords());
 			groupForm.setNotifEnabled(input.isNotifEnabled());
 			if (groupForm.isNotifEnabled()) {

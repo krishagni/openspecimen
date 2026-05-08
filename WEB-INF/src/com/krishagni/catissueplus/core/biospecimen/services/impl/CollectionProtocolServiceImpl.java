@@ -169,6 +169,8 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	private ExportService exportSvc;
 
+	private CpGroupSettingsApplier cpGroupSettingsApplier;
+
 	public void setTaskExecutor(ThreadPoolTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
@@ -211,6 +213,10 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 
 	public void setExportSvc(ExportService exportSvc) {
 		this.exportSvc = exportSvc;
+	}
+
+	public void setCpGroupSettingsApplier(CpGroupSettingsApplier cpGroupSettingsApplier) {
+		this.cpGroupSettingsApplier = cpGroupSettingsApplier;
 	}
 
 	@Override
@@ -453,6 +459,7 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			CollectionProtocol cp = cpFactory.createCollectionProtocol(detail);
 			AccessCtrlMgr.getInstance().ensureUpdateCpRights(cp);
 			ensureUsersBelongtoCpSites(cp);
+			boolean cpGroupChanged = isCpGroupChanged(existingCp.getCpGroup(), cp.getCpGroup());
 			
 			OpenSpecimenException ose = new OpenSpecimenException(ErrorType.USER_ERROR);
 			ensureUniqueTitle(existingCp, cp, ose);
@@ -473,6 +480,10 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 			existingCp.addOrUpdateExtension();
 			
 			fixSopDocumentName(existingCp);
+			if (cpGroupChanged) {
+				applyCpGroupSettings(existingCp);
+			}
+
 			notifyUsersOnCpUpdate(existingCp, addedSites, removedSites);
 			EventPublisher.getInstance().publish(new CollectionProtocolSavedEvent(existingCp));
 			return ResponseEvent.response(CollectionProtocolDetail.from(existingCp));
@@ -1662,8 +1673,21 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		cp.addOrUpdateExtension();
 		fixSopDocumentName(cp);
 		copyWorkflows(existing, cp);
+		applyCpGroupSettings(cp);
 		copySpecimenUnits(existing, cp);
 		return cp;
+	}
+
+	private void applyCpGroupSettings(CollectionProtocol cp) {
+		if (cp.getCpGroup() != null) {
+			cpGroupSettingsApplier.apply(cp.getCpGroup(), Collections.singleton(cp));
+		}
+	}
+
+	private boolean isCpGroupChanged(CollectionProtocolGroup oldGroup, CollectionProtocolGroup newGroup) {
+		Long oldGroupId = oldGroup != null ? oldGroup.getId() : null;
+		Long newGroupId = newGroup != null ? newGroup.getId() : null;
+		return oldGroupId == null ? newGroupId != null : !oldGroupId.equals(newGroupId);
 	}
 
 	private void ensureUsersBelongtoCpSites(CollectionProtocol cp) {
