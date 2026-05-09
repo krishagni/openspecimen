@@ -54,15 +54,26 @@
             <div>
               <os-overview :schema="ctx.cprDict" :object="ctx" :columns="2" v-if="ctx.cprDict && ctx.cprDict.length > 0" />
 
-              <template v-if="ctx.cpr && ctx.cpr.id > 0">
-                <template v-for="(widget, idx) of matchingPartWidgets" :key="idx">
-                  <component :is="widget.name" :context="ctx" v-bind="widget.params" />
+              <os-section v-if="getRegisteredCps(rowObject).length > 0">
+                <template #title>
+                  <span v-t="'participants.registrations'">Participant Registrations</span>
                 </template>
-              </template>
+
+                <template #content>
+                  <os-list-view :data="getRegisteredCps(rowObject)" :schema="ctx.registrationsTs"
+                    :expanded="ctx.expandedRegs" @rowClicked="viewRegistrationDetails">
+                    <template #expansionRow="{rowObject: reg}">
+                      <template v-for="(widget, idx) of getMatchingPartWidgets(reg)" :key="idx">
+                        <component :is="widget.name" :context="getRegistrationCtx(reg)" v-bind="widget.params" />
+                      </template>
+                    </template>
+                  </os-list-view>
+                </template>
+              </os-section>
 
               <div>
                 <os-button primary  @click="useSelectedMatch(rowObject)"
-                  :label="$t(!dataCtx.cpr.id || !(ctx.cpr.id > 0) ?
+                  :label="$t(!dataCtx.cpr.id || !isOsParticipant(rowObject) ?
                   'participants.use_selected_match' : 'participants.merge_with_selected_part')" />
               </div>
             </div>
@@ -144,6 +155,8 @@ import pvSvc      from '@/common/services/PermissibleValue.js';
 import routerSvc  from '@/common/services/Router.js';
 import util       from '@/common/services/Util.js';
 
+const DEFAULT_REGISTRATION_FIELDS = ['cpShortTitle', 'ppid', 'registrationDate', 'site'];
+
 export default {
   props: ['cpr', 'participantId'],
 
@@ -195,6 +208,8 @@ export default {
 
         selectMatchTs: {columns: []},
 
+        registrationsTs: {columns: []},
+
         step: 'lookup',
 
         history: [],
@@ -202,6 +217,8 @@ export default {
         matches: [],
 
         expandedMatches: [],
+
+        expandedRegs: [],
 
         lockedFields: [],
 
@@ -347,23 +364,6 @@ export default {
     cpEventOptions: function() {
       return (this.cpEvents || [])
         .map(event => ({caption: cpSvc.getEventDescription(event), onSelect: () => this.saveOrUpdate(event)}));
-    },
-
-    matchingPartWidgets: function() {
-      const widgets = this._getMatchingParticipantWidgets();
-      const result = [];
-      for (const widget of widgets) {
-        const {name, params} = widget;
-        const item = {name};
-        if (item.name.indexOf('os-') == -1) {
-          item.name = 'os-' + name;
-        }
-
-        item.params = this._getInstantiatedParams(params);
-        result.push(item);
-      }
-
-      return result;
     }
   },
 
@@ -401,10 +401,6 @@ export default {
       );
     },
 
-    selectMatch: function({index}) {
-      this.ctx.selectedMatch = this.ctx.matches[index];
-    },
-
     useSelectedMatch: function(match) {
       this.ctx.history.unshift({
         step: 'choose_match',
@@ -414,11 +410,12 @@ export default {
       this._useSelectedMatch(match);
     },
 
-    viewMatchingParticipantDetails: function(match) {
+    viewMatchingParticipantDetails: async function(match) {
       const {expandedMatches} = this.ctx;
       if (expandedMatches && expandedMatches.length == 1 && expandedMatches[0] == match) {
         // close the expanded panel
         expandedMatches.length = 0;
+        this.ctx.expandedRegs = [];
         return;
       }
 
@@ -428,16 +425,51 @@ export default {
           .then(widgets => this.ctx.participantWidgets = widgets || []);
       }
 
-      this.ctx.cprDict = [];
-      this.ctx.cpr = this.ctx.consents = {};
-      this._loadCprDetails(match).then(
-        ([cprDict, cpr, consents]) => {
-          this.ctx.cprDict = cprDict;
-          this.ctx.cpr = cpr;
-          this.ctx.consents = consents;
-          this.ctx.expandedMatches = [match];
-        }
-      );
+      await this._loadRegistrationsTableSchema();
+
+      this.ctx.cpr = {participant: match.participant};
+      this.ctx.expandedRegs = [];
+      if (!this.ctx.cprDict) {
+        this.ctx.cprDict = await this.getCprDict();
+      }
+
+      await this._loadRegistrationDetailsIfNeeded(match);
+      this.ctx.expandedMatches = [match]; // set it only after the required details are loaded
+    },
+
+    getRegisteredCps: function(match) {
+      const {participant} = match || {};
+      if (!participant) {
+        return [];
+      }
+
+      if (!participant.registrations) {
+        participant.registrations = (participant.registeredCps || []).map(this._toRegistrationRow);
+      }
+
+      return participant.registrations;
+    },
+
+    isOsParticipant: function(match) {
+      return match && match.participant && match.participant.id > 0;
+    },
+
+    viewRegistrationDetails: function(registration) {
+      const {expandedRegs} = this.ctx;
+      if (expandedRegs && expandedRegs.length == 1 && expandedRegs[0] == registration) {
+        expandedRegs.length = 0;
+      } else {
+        this.ctx.expandedRegs = [registration];
+      }
+    },
+
+    getRegistrationCtx: function(registration) {
+      const regCpr = {
+        ...(registration || {}),
+        id: registration && (registration.cprId || registration.id)
+      };
+
+      return {...this.ctx, cpr: regCpr};
     },
 
     saveOrUpdate: function(cpEvent, saveAsDraft, gotoConsents) {
@@ -487,7 +519,6 @@ export default {
         return;
       }
 
-      this.ctx.selectedMatch = null;
       if (step == 'register' || step == 'lookup') {
         this.ctx.autoSelectedMatch = null;
         this.dataCtx.cpr = data;
@@ -510,7 +541,7 @@ export default {
     _handleParticipantMatches(matches, action) {
       const ctx = this.ctx;
 
-      ctx.matches = matches = this._flattenMatches(matches);
+      ctx.matches = matches;
       ctx.allowIgnoreMatches = matches.every(({matchedAttrs}) => matchedAttrs.length == 1 && matchedAttrs[0] == 'lnameAndDob');
 
       matches.forEach(
@@ -552,72 +583,13 @@ export default {
       }
     },
 
-    _flattenMatches: function(matches) {
-      return matches.flatMap(
-        match =>
-          match.participant.registeredCps.map(({cpId, cpShortTitle, cprId: id}) => ({...match, cpId, cpShortTitle, id}))
-      );
-    },
-
-    _loadCprDetails: async function(match) {
-      const {id: cprId, participant} = match;
-      const cprsQ = this.cprsQ = this.cprsQ || {};
-      let cprQ = cprsQ[cprId];
-      if (!cprQ) {
-        if (cprId > 0) {
-          cprQ = cprsQ[cprId] = this._getCpr(cprId);
-        } else {
-          cprQ = new Promise((resolve) => resolve({participant}));
-        }
+    getCprDict: async function() {
+      if (this.matchingPartDict) {
+        return this.matchingPartDict;
       }
 
-      const cprDictQ = this._getCprDict();
-      return Promise.all([cprDictQ, cprQ]).then(
-        ([cprDict, cpr]) => {
-          const hasConsentFields = cprDict.some(field => field.name.indexOf('consents.') == 0);
-          if (hasConsentFields && cpr.id > 0) {
-            return cprSvc.getConsents(cpr)
-              .then(
-                consent => {
-                  const codedResps = {};
-                  if (consent) {
-                    for (const resp of consent.responses || []) {
-                      codedResps[resp.code] = resp.response;
-                    }
-                  }
-
-                  return [cprDict, cpr, codedResps];
-                }
-              )
-              .catch(() => [cprDict, cpr, {}]);
-          }
-
-          return [cprDict, cpr, {}];
-        }
-      );
-    },
-
-    _getCprDict: function() {
-      const cpCtx = this.cpViewCtx;
-      const cprDictQ = cpCtx.getCprDict();
-      const consentsDictQ = cpCtx.getConsentsDict();
-      return Promise.all([cprDictQ, consentsDictQ]).then(
-        ([cprFields, consentFields]) => {
-          const dict = [];
-          Array.prototype.push.apply(dict, cprFields || []);
-          Array.prototype.push.apply(dict, consentFields || []);
-          return dict;
-        }
-      );
-    },
-
-    _getCpr: function(cprId) {
-      return cprSvc.getCpr(cprId).then(
-        cpr => {
-          formUtil.createCustomFieldsMap(cpr.participant, true);
-          return cpr;
-        }
-      );
+      const fields = await this.cpViewCtx.getCprDict();
+      return this.matchingPartDict = (fields || []).filter(field => field.name.indexOf('cpr.participant.') == 0);
     },
 
     _useSelectedMatch: async function({participant}) {
@@ -679,6 +651,63 @@ export default {
       this.cpViewCtx.getSelectMatchTabSchema().then(schema => this.ctx.selectMatchTs = schema);
     },
 
+    _loadRegistrationsTableSchema: async function() {
+      const {registrationsTs: {columns}} = this.ctx;
+      if (columns.length > 0) {
+        return this.ctx.registrationsTs;
+      }
+
+      return this.ctx.registrationsTs = await this.cpViewCtx.getMatchingRegsTs();
+    },
+
+    _loadRegistrationDetailsIfNeeded: async function(match) {
+      const registrations = this.getRegisteredCps(match);
+      if (!this._isFullRegistrationDetailsNeeded()) {
+        return;
+      }
+
+      const cprIds = registrations.map(({cprId, id}) => cprId || id).filter(id => id > 0);
+      match.participant.registrations = await this._getFullRegistrations(cprIds);
+    },
+
+    _isFullRegistrationDetailsNeeded: function() {
+      const {columns} = this.ctx.registrationsTs || {};
+      if (!columns || columns.length == 0) {
+        return false;
+      }
+
+      return columns.some(column => DEFAULT_REGISTRATION_FIELDS.indexOf(this._getRegistrationFieldName(column.name)) == -1);
+    },
+
+    _getRegistrationFieldName: function(name) {
+      if (name && name.indexOf('cpr.') == 0) {
+        name = name.substring(4);
+      }
+
+      return name;
+    },
+
+    _getFullRegistrations: async function(cprIds) {
+      this.cprs = this.cprs || {};
+      const pendingIds = cprIds.filter(cprId => !this.cprs[cprId]);
+      if (pendingIds.length > 0) {
+        const cprs = await cprSvc.getCprs(pendingIds);
+        cprs.forEach(cpr => this.cprs[cpr.id] = this._toRegistrationRow(cpr));
+      }
+
+      return cprIds.map(cprId => this.cprs[cprId]).filter(cpr => !!cpr);
+    },
+
+    _toRegistrationRow: function(cpr) {
+      if (cpr.participant) {
+        formUtil.createCustomFieldsMap(cpr.participant, true);
+      }
+
+      const cprRow = {...cpr, cprId: cpr.cprId || cpr.id};
+      cprRow.cpr = {...cprRow}; // Keep workflow columns configured with cpr.* paths working, e.g. cpr.ppid.
+      return cprRow;
+    },
+
     _getMatchingParticipantWidgets() {
       const {participantWidgets} = this.ctx;
       if (participantWidgets && participantWidgets.length > 0) {
@@ -732,8 +761,22 @@ export default {
       }
     },
 
-    _getInstantiatedParams(params) {
-      return util.getInstantiatedParams(this.ctx, params);
+    getMatchingPartWidgets(registration) {
+      const widgetCtx = this.getRegistrationCtx(registration);
+      const widgets = this._getMatchingParticipantWidgets();
+      const result = [];
+      for (const widget of widgets) {
+        const {name, params} = widget;
+        const item = {name};
+        if (item.name.indexOf('os-') == -1) {
+          item.name = 'os-' + name;
+        }
+
+        item.params = util.getInstantiatedParams(widgetCtx, params);
+        result.push(item);
+      }
+
+      return result;
     },
 
     _navToNextView: function(savedCpr) {

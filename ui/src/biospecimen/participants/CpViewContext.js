@@ -95,6 +95,18 @@ export default class CpViewContext {
     return matchingTab;
   }
 
+  async getMatchingRegsTs() {
+    return cpSvc.getWorkflowProperty(this.cpId, 'matching-participants', 'registrations-table').then(
+      (table) => {
+        if (table instanceof Array) {
+          table = {columns: table};
+        }
+
+        return table && table.columns && table.columns.length > 0 ? table : matchingTab.registrationsTable;
+      }
+    );
+  }
+
   async getParticipantForms(context) {
     const {cpr} = context;
     const promises = [

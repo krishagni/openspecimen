@@ -1,10 +1,12 @@
+import routerSvc from '@/common/services/Router.js';
+
 export default {
   columns: [
-    {
+    /*{
       "name": "cpShortTitle",
       "labelCode": "participants.cp",
       "type": "span"
-    },
+    },*/
     {
       "name": "participant.firstName",
       "labelCode": "participants.first_name",
@@ -40,5 +42,37 @@ export default {
         return (pmis || []).map(({siteName, mrn}) => siteName + (mrn ? ' (' + mrn + ') ' : '')).join(', ');
       }
     }
-  ]
+  ],
+
+  registrationsTable: {
+    columns: [
+      {
+        "name": "cpShortTitle",
+        "labelCode": "participants.cp",
+        "type": "span",
+        "href": ({rowObject: {cpId, cprId}}) => {
+          if (cpId > 0 && cprId > 0) {
+            return routerSvc.getUrl('ParticipantsListItemDetail.Overview', {cpId, cprId});
+          }
+        },
+        "hrefTarget": "_blank"
+      },
+      {
+        "name": "ppid",
+        "labelCode": "participants.ppid",
+        "type": "span"
+      },
+      {
+        "name": "registrationDate",
+        "labelCode": "participants.registration_date",
+        "type": "span",
+        "displayType": "datePicker"
+      },
+      {
+        "name": "site",
+        "labelCode": "participants.registration_site",
+        "type": "span"
+      }
+    ]
+  }
 }

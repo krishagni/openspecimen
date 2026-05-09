@@ -24,6 +24,8 @@ public class CprSummary {
 	private Long cpId;
 
 	private String cpShortTitle;
+
+	private String site;
 	
 	private Long scgCount;
 	
@@ -85,6 +87,14 @@ public class CprSummary {
 		this.cpShortTitle = cpShortTitle;
 	}
 
+	public String getSite() {
+		return site;
+	}
+
+	public void setSite(String site) {
+		this.site = site;
+	}
+
 	public Long getScgCount() {
 		return scgCount;
 	}
@@ -109,6 +119,7 @@ public class CprSummary {
 		result.setPpid(cpr.getPpid());
 		result.setCpId(cpr.getCollectionProtocol().getId());
 		result.setCpShortTitle(cpr.getCollectionProtocol().getShortTitle());
+		result.setSite(cpr.getSite() != null ? cpr.getSite().getName() : null);
 		result.setParticipant(ParticipantSummary.from(cpr.getParticipant(), excludePhi));
 		return result;
 	}

@@ -426,6 +426,7 @@ public class ParticipantDetail extends AttributeModifiedSupport {
 		cprSummary.setCprId(cpr.getId());
 		cprSummary.setPpid(cpr.getPpid());
 		cprSummary.setRegistrationDate(cpr.getRegistrationDate());
+		cprSummary.setSite(cpr.getSite() != null ? cpr.getSite().getName() : null);
 		return cprSummary;
 	}
 }

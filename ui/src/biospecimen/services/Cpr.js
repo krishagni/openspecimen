@@ -15,6 +15,10 @@ class CollectionProtocolRegistration {
     return http.get('collection-protocol-registrations/' + cprId);
   }
 
+  async getCprs(cprIds) {
+    return http.get('collection-protocol-registrations', {id: cprIds});
+  }
+
   async getMatchingParticipants(cpr) {
     cpr = cpr || {};
     const participant = cpr.participant || {};
