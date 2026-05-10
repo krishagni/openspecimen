@@ -2,11 +2,6 @@ import routerSvc from '@/common/services/Router.js';
 
 export default {
   columns: [
-    /*{
-      "name": "cpShortTitle",
-      "labelCode": "participants.cp",
-      "type": "span"
-    },*/
     {
       "name": "participant.firstName",
       "labelCode": "participants.first_name",

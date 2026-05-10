@@ -92,18 +92,14 @@ export default class CpViewContext {
   }
 
   async getSelectMatchTabSchema() {
-    return matchingTab;
+    return cpSvc.getWorkflowProperty(this.cpId, 'matching-participants', 'participants-table').then(
+      (table) => this._resolveTable(table, matchingTab)
+    );
   }
 
   async getMatchingRegsTs() {
     return cpSvc.getWorkflowProperty(this.cpId, 'matching-participants', 'registrations-table').then(
-      (table) => {
-        if (table instanceof Array) {
-          table = {columns: table};
-        }
-
-        return table && table.columns && table.columns.length > 0 ? table : matchingTab.registrationsTable;
-      }
+      (table) => this._resolveTable(table, matchingTab.registrationsTable)
     );
   }
 
@@ -738,6 +734,14 @@ export default class CpViewContext {
     }
 
     return this.wfIds[propName] == -1 ? null : this.wfIds[propName];
+  }
+
+  _resolveTable(table, defTable) {
+    if (table instanceof Array) {
+      table = {columns: table};
+    }
+
+    return table && table.columns && table.columns.length > 0 ? table : defTable;
   }
 
   _loadSettings(cp) {
