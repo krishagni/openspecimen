@@ -438,6 +438,8 @@ export default {
       let value = undefined;
       if (typeof column.value == 'function') {
         value = column.value(data.rowObject);
+      } else if (column.valueResolver) {
+        value = this._resolveColumnValue(data.rowObject, column);
       } else {
         value = exprUtil.eval(data.rowObject, column.name);
       }
@@ -497,6 +499,66 @@ export default {
 
     rowStarToggled: function({rowObject}) {
       this.$emit('rowStarToggled', rowObject);
+    },
+
+    _resolveColumnValue: function(rowObject, column) {
+      const resolver = typeof column.valueResolver == 'string' ? {name: column.valueResolver} : column.valueResolver;
+      if (!resolver) {
+        return undefined;
+      }
+
+      if (resolver.name == 'concat') {
+        return this._concatColumnValue(rowObject, column, resolver);
+      }
+
+      return undefined;
+    },
+
+    _concatColumnValue: function(rowObject, column, resolver) {
+      let value = exprUtil.getValue(rowObject, column.name);
+      if (value == undefined || value == null) {
+        return value;
+      }
+
+      if (!(value instanceof Array)) {
+        value = [value];
+      }
+
+      const separator = resolver.separator || ', ';
+      return value.map(item => this._formatConcatItem(item, resolver))
+        .filter(item => this._hasValue(item))
+        .join(separator);
+    },
+
+    _formatConcatItem: function(item, resolver) {
+      if (!item || typeof item != 'object') {
+        return item;
+      }
+
+      const format = resolver.format;
+      if (format) {
+        return format.replace(
+          /\{([^}]+)\}/g,
+          (match, prop) => this._getValueForConcat(item, prop.trim())
+        ).trim();
+      }
+
+      const props = resolver.props;
+      if (props && props.length > 0) {
+        const separator = resolver.propSeparator || ' ';
+        return props.map(prop => this._getValueForConcat(item, prop)).filter(value => this._hasValue(value)).join(separator);
+      }
+
+      return undefined;
+    },
+
+    _getValueForConcat: function(object, prop) {
+      const value = exprUtil.getValue(object, prop);
+      return value == undefined || value == null ? '' : value;
+    },
+
+    _hasValue: function(value) {
+      return value != undefined && value != null && value !== '';
     }
   },
 
