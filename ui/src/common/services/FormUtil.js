@@ -328,7 +328,9 @@ class FormUtil {
       if (attr.type == 'subForm') {
         value = (attr.value || []).map(sfAttrs => this._createCustomFieldsMap(sfAttrs, useDisplayValue));
       } else if (attr.type == 'datePicker') {
-        if (attr.value == 'current_date' || attr.value == 'current_time') {
+        if (useDisplayValue && attr.displayValue) {
+          value = attr.displayValue;
+        } else if (attr.value == 'current_date' || attr.value == 'current_time') {
           value = Date.now();
         } else if (!isNaN(attr.value) && !isNaN(parseInt(attr.value))) {
           value = new Date(parseInt(attr.value));
