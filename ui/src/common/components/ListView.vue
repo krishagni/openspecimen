@@ -509,9 +509,24 @@ export default {
 
       if (resolver.name == 'concat') {
         return this._concatColumnValue(rowObject, column, resolver);
+      } else if (resolver.name == 'format') {
+        return this._formatColumnValue(rowObject, column, resolver);
       }
 
       return undefined;
+    },
+
+    _formatColumnValue: function(rowObject, column, resolver) {
+      let object = column.name ? exprUtil.getValue(rowObject, column.name) : undefined;
+      if (object == undefined || object == null) {
+        object = rowObject;
+      }
+
+      if (!object || typeof object != 'object') {
+        return object;
+      }
+
+      return this._formatValue(object, resolver);
     },
 
     _concatColumnValue: function(rowObject, column, resolver) {
@@ -525,12 +540,12 @@ export default {
       }
 
       const separator = resolver.separator || ', ';
-      return value.map(item => this._formatConcatItem(item, resolver))
+      return value.map(item => this._formatValue(item, resolver))
         .filter(item => this._hasValue(item))
         .join(separator);
     },
 
-    _formatConcatItem: function(item, resolver) {
+    _formatValue: function(item, resolver) {
       if (!item || typeof item != 'object') {
         return item;
       }
@@ -539,20 +554,20 @@ export default {
       if (format) {
         return format.replace(
           /\{([^}]+)\}/g,
-          (match, prop) => this._getValueForConcat(item, prop.trim())
+          (match, prop) => this._getValue(item, prop.trim())
         ).trim();
       }
 
       const props = resolver.props;
       if (props && props.length > 0) {
         const separator = resolver.propSeparator || ' ';
-        return props.map(prop => this._getValueForConcat(item, prop)).filter(value => this._hasValue(value)).join(separator);
+        return props.map(prop => this._getValue(item, prop)).filter(value => this._hasValue(value)).join(separator);
       }
 
       return undefined;
     },
 
-    _getValueForConcat: function(object, prop) {
+    _getValue: function(object, prop) {
       const value = exprUtil.getValue(object, prop);
       return value == undefined || value == null ? '' : value;
     },
