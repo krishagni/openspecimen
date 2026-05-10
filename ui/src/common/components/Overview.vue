@@ -384,16 +384,16 @@ export default {
 </script>
 
 <style scoped>
-
 .os-sf-table {
   width: 100%;
   padding: 0.125rem 0.250rem;
   overflow-x: auto;
 }
 
+.os-key-value-pairs .item .value.value-md img,
 .os-sf-table img {
-  height: 150px;
-  width: 300px;
+  height: 75px;
+  width: 150px;
 }
 
 .os-textarea {
