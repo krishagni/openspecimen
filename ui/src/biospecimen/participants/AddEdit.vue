@@ -38,29 +38,35 @@
       </os-form>
 
       <div class="participant-matches" v-else-if="ctx.step == 'choose_match'">
-        <os-message type="info">
-          <span v-t="'participants.following_matches_found'">Following matching participant/s were found: </span>
-        </os-message>
+        <div class="message" v-if="!ctx.detailView">
+          <os-message type="info">
+            <span v-t="'participants.following_matches_found'">Following matching participant/s were found: </span>
+          </os-message>
+        </div>
 
         <os-list-view class="os-list-shadowed-rows"
           :data="ctx.matches"
           :schema="ctx.selectMatchTs"
-          :showRowActions="true"
-          :expanded="ctx.expandedMatches"
+          :showRowActions="!ctx.detailView"
+          :split-view="true"
+          :detail-view="ctx.detailView"
+          :split-view-title="$t('participants.matching_participants')"
+          :selected="ctx.selectedMatch"
           @rowClicked="viewMatchingParticipantDetails"
+          @detailViewClosed="showMatchingParticipantsTable"
           ref="listView">
-
-          <template #expansionRow="{rowObject}">
-            <div>
+          <template #detail="{rowObject: match}">
+            <div class="match-detail-card">
               <os-overview :schema="ctx.cprDict" :object="ctx" :columns="2" v-if="ctx.cprDict && ctx.cprDict.length > 0" />
 
-              <os-section v-if="getRegisteredCps(rowObject).length > 0">
+              <os-section v-if="getRegisteredCps(match).length > 0">
                 <template #title>
                   <span v-t="'participants.registrations'">Participant Registrations</span>
                 </template>
 
                 <template #content>
-                  <os-list-view :data="getRegisteredCps(rowObject)" :schema="ctx.registrationsTs"
+                  <os-list-view class="os-list-shadowed-rows"
+                    :data="getRegisteredCps(match)" :schema="ctx.registrationsTs"
                     :expanded="ctx.expandedRegs" @rowClicked="viewRegistrationDetails">
                     <template #expansionRow="{rowObject: reg}">
                       <template v-for="(widget, idx) of getMatchingPartWidgets(reg)" :key="idx">
@@ -70,30 +76,28 @@
                   </os-list-view>
                 </template>
               </os-section>
-
-              <div>
-                <os-button primary  @click="useSelectedMatch(rowObject)"
-                  :label="$t(!dataCtx.cpr.id || !isOsParticipant(rowObject) ?
-                  'participants.use_selected_match' : 'participants.merge_with_selected_part')" />
-              </div>
             </div>
-          </template>
 
-          <template #footer>
             <div>
-              <os-divider />
-
-              <div class="buttons">
-                <os-button primary v-if="ctx.allowIgnoreMatches" :label="$t('participants.ignore_matches_proceed')"
-                  @click="ignoreMatches" />
-
-                <os-button secondary :label="$t('common.buttons.back')" @click="back" v-if="ctx.history.length > 0" />
-
-                <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
-              </div>
+              <os-button primary  @click="useSelectedMatch(match)"
+                :label="$t(!dataCtx.cpr.id || !isOsParticipant(match) ?
+                'participants.use_selected_match' : 'participants.merge_with_selected_part')" />
             </div>
           </template>
         </os-list-view>
+
+        <div class="participant-match-actions">
+          <os-divider />
+
+          <div class="buttons">
+            <os-button primary v-if="ctx.allowIgnoreMatches" :label="$t('participants.ignore_matches_proceed')"
+              @click="ignoreMatches" />
+
+            <os-button secondary :label="$t('common.buttons.back')" @click="back" v-if="ctx.history.length > 0" />
+
+            <os-button text :label="$t('common.buttons.cancel')" @click="cancel" />
+          </div>
+        </div>
       </div>
 
       <os-form ref="cprForm" :schema="ctx.addEditFs" :disabled-fields="ctx.lockedFields"
@@ -216,9 +220,11 @@ export default {
 
         matches: [],
 
-        expandedMatches: [],
-
         expandedRegs: [],
+
+        detailView: false,
+
+        selectedMatch: null,
 
         lockedFields: [],
 
@@ -411,14 +417,6 @@ export default {
     },
 
     viewMatchingParticipantDetails: async function(match) {
-      const {expandedMatches} = this.ctx;
-      if (expandedMatches && expandedMatches.length == 1 && expandedMatches[0] == match) {
-        // close the expanded panel
-        expandedMatches.length = 0;
-        this.ctx.expandedRegs = [];
-        return;
-      }
-
       if (!this.ctx.participantWidgets) {
         const {cp: {id: cpId}} = this.dataCtx;
         cpSvc.getWorkflowProperty(cpId, 'matching-participants', 'detail-widgets')
@@ -434,7 +432,12 @@ export default {
       }
 
       await this._loadRegistrationDetailsIfNeeded(match);
-      this.ctx.expandedMatches = [match]; // set it only after the required details are loaded
+      this.ctx.selectedMatch = match; // set it only after the required details are loaded
+      this.ctx.detailView = true;
+    },
+
+    showMatchingParticipantsTable: function() {
+      this._resetMatchingParticipantDetailView();
     },
 
     getRegisteredCps: function(match) {
@@ -470,6 +473,33 @@ export default {
       };
 
       return {...this.ctx, cpr: regCpr};
+    },
+
+    getMatchingPartWidgets(registration) {
+      const widgetCtx = this.getRegistrationCtx(registration);
+      const widgets = this._getMatchingParticipantWidgets();
+      const result = [];
+      for (const widget of widgets) {
+        const {name, params} = widget;
+        const item = {name};
+        if (item.name.indexOf('os-') == -1) {
+          item.name = 'os-' + name;
+        }
+
+        item.params = util.getInstantiatedParams(widgetCtx, params);
+        result.push(item);
+      }
+
+      return result;
+    },
+
+    getCprDict: async function() {
+      if (this.matchingPartDict) {
+        return this.matchingPartDict;
+      }
+
+      const fields = await this.cpViewCtx.getCprDict();
+      return this.matchingPartDict = (fields || []).filter(field => field.name.indexOf('cpr.participant.') == 0);
     },
 
     saveOrUpdate: function(cpEvent, saveAsDraft, gotoConsents) {
@@ -532,6 +562,12 @@ export default {
       this._navToNextView(this.dataCtx.cpr);
     },
 
+    _resetMatchingParticipantDetailView: function() {
+      this.ctx.detailView = false;
+      this.ctx.selectedMatch = null;
+      this.ctx.expandedRegs = [];
+    },
+
     _saveOrUpdate: function(cpr) {
       const toSave = util.clone(cpr);
       toSave.participant.source = 'OpenSpecimen';
@@ -542,6 +578,7 @@ export default {
       const ctx = this.ctx;
 
       ctx.matches = matches;
+      this._resetMatchingParticipantDetailView();
       ctx.allowIgnoreMatches = matches.every(({matchedAttrs}) => matchedAttrs.length == 1 && matchedAttrs[0] == 'lnameAndDob');
 
       matches.forEach(
@@ -581,15 +618,6 @@ export default {
 
         this.ctx.history.unshift(action);
       }
-    },
-
-    getCprDict: async function() {
-      if (this.matchingPartDict) {
-        return this.matchingPartDict;
-      }
-
-      const fields = await this.cpViewCtx.getCprDict();
-      return this.matchingPartDict = (fields || []).filter(field => field.name.indexOf('cpr.participant.') == 0);
     },
 
     _useSelectedMatch: async function({participant}) {
@@ -761,24 +789,6 @@ export default {
       }
     },
 
-    getMatchingPartWidgets(registration) {
-      const widgetCtx = this.getRegistrationCtx(registration);
-      const widgets = this._getMatchingParticipantWidgets();
-      const result = [];
-      for (const widget of widgets) {
-        const {name, params} = widget;
-        const item = {name};
-        if (item.name.indexOf('os-') == -1) {
-          item.name = 'os-' + name;
-        }
-
-        item.params = util.getInstantiatedParams(widgetCtx, params);
-        result.push(item);
-      }
-
-      return result;
-    },
-
     _navToNextView: function(savedCpr) {
       if (savedCpr.activityStatus == 'Active') {
         if (this.ctx.gotoConsents) {
@@ -862,6 +872,38 @@ export default {
 .participant-matches {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.participant-matches > .message {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.participant-matches > .message :deep(.p-message) {
+  flex: 1;
+}
+
+.participant-matches :deep(> .os-list) {
+  flex: 1;
+  min-height: 0;
+}
+
+.participant-matches .participant-match-actions {
+  flex: 0 0 auto;
+}
+
+.participant-matches .match-detail-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  padding: 1rem;
 }
 
 .buttons :deep(button) {

@@ -1643,6 +1643,7 @@
     "list": "Participants",
     "many_deleted": "One participant deleted. | {count} participants deleted.",
     "master_specimens": "Master Specimens",
+    "matching_participants": "Matching Participants",
     "medical_ids": "Medical Identifiers",
     "merge_participant_warning": "Participant {name} will be deleted after merge. Do you want to continue?",
     "merge_with_selected_part": "Merge with the Selected Participant",
