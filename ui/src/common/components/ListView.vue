@@ -1,5 +1,50 @@
 <template>
-  <div class="os-list os-list-hover" :class="{'show-filters': showFilters}" v-if="!summaryView">
+  <div class="os-list os-list-split-view" v-if="splitView && detailView">
+    <div v-if="loading || list.length == 0" class="info">
+      <div v-show="loading">
+        <os-message type="info">
+          <span v-t="'common.lists.loading'">Loading records, please wait for a moment...</span>
+        </os-message>
+      </div>
+      <div v-show="!loading && list.length == 0">
+        <os-message type="info">
+          <span v-t="noRecordsMsg || 'common.lists.no_records'">No records to show</span>
+        </os-message>
+      </div>
+    </div>
+
+    <div class="split-view" v-else>
+      <div class="split-list-pane">
+        <div class="split-list-header p-panel p-component" v-if="$slots.splitViewTitle || splitViewTitle">
+          <div class="p-panel-header">
+            <div class="title">
+              <slot name="splitViewTitle">{{splitViewTitle}}</slot>
+            </div>
+          </div>
+        </div>
+
+        <div class="split-list">
+          <button type="button" class="split-list-item" v-for="(item, idx) of list" :key="item.key || idx"
+            :class="{selected: isSelectedItem(item)}" @click="itemSelected($event, item)">
+            <span class="split-list-item-row" v-for="column of schema.columns" :key="column.name">
+              <span class="split-list-item-label">{{caption(column)}}</span>
+              <span class="split-list-item-value">{{columnValue(item, column)}}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="split-detail" v-if="selectedRow">
+        <Button class="split-detail-close" size="small" left-icon="times" @click="$emit('detailViewClosed')" />
+
+        <div class="split-detail-body">
+          <slot name="detail" :rowObject="selectedRow.rowObject"> </slot>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="os-list os-list-hover" :class="{'show-filters': showFilters}" v-else-if="!summaryView">
     <div class="results">
       <div class="info" v-if="loading || list.length == 0">
         <div v-show="loading">
@@ -222,7 +267,10 @@ export default {
     'noRecordsMsg',
     'rowClass',
     'idFilter',
-    'hidePageSizeSelector'
+    'hidePageSizeSelector',
+    'splitView',
+    'detailView',
+    'splitViewTitle'
   ],
 
   emits: [
@@ -231,7 +279,8 @@ export default {
     'pageSizeChanged',
     'rowClicked',
     'sort',
-    'rowStarToggled'
+    'rowStarToggled',
+    'detailViewClosed'
   ],
 
   components: {
@@ -411,13 +460,25 @@ export default {
 
     getRowClass: function(row) {
       const {rowObject} = row;
+      const expanded = this.expanded && this.expanded.indexOf(rowObject) != -1;
+      let rowClass = undefined;
       if (typeof this.schema.rowClass == 'function') {
-        return this.schema.rowClass(rowObject);
+        rowClass = this.schema.rowClass(rowObject);
       } else if (typeof this.rowClass == 'function') {
-        return this.rowClass(rowObject);
+        rowClass = this.rowClass(rowObject);
       }
 
-      return undefined;
+      if (!expanded) {
+        return rowClass;
+      } else if (typeof rowClass == 'string') {
+        return (rowClass + ' os-row-expanded').trim();
+      } else if (rowClass instanceof Array) {
+        return rowClass.concat('os-row-expanded');
+      } else if (rowClass && typeof rowClass == 'object') {
+        return {...rowClass, 'os-row-expanded': true};
+      }
+
+      return 'os-row-expanded';
     },
 
     caption: function({caption, captionCode, label, labelCode}) {
@@ -473,6 +534,11 @@ export default {
 
       this.selectedItem = item.rowObject;
       this.$emit('rowClicked', item.rowObject);
+    },
+
+    isSelectedItem: function(item) {
+      const selected = this.selected || this.selectedItem;
+      return selected && (item.rowObject == selected || (item.key && item.key == selected.key));
     },
 
     valueFn: function(input) {
@@ -647,6 +713,15 @@ export default {
       return result;
     },
 
+    selectedRow: function() {
+      const selected = this.selected || this.selectedItem;
+      if (!selected) {
+        return null;
+      }
+
+      return this.list.find(item => item.rowObject == selected || (item.key && item.key == selected.key));
+    },
+
     searchFilters() {
       const filters      = this.schema.filters || [];
       const filterValues = this.filterValues || {};
@@ -685,7 +760,9 @@ export default {
 
     selected: {
       handler(newVal) {
-        if (newVal && this.selectedItem != newVal) {
+        if (!newVal) {
+          this.selectedItem = null;
+        } else if (this.selectedItem != newVal) {
           this.selectedItem = newVal;
           let idx = this.list.findIndex(item => item.rowObject == this.selectedItem);
           if (idx == -1 && this.schema.key) {
@@ -1003,6 +1080,123 @@ export default {
   margin: 0.5rem 0rem;
 }
 
+.os-list-split-view {
+  height: 100%;
+  min-height: 0;
+}
+
+.os-list-split-view .split-view {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.os-list-split-view .split-list-pane {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 22rem;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+}
+
+.os-list-split-view .split-list-header {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  margin-bottom: 0.5rem;
+}
+
+.os-list-split-view .split-list-header .p-panel-header {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5rem 1rem;
+}
+
+.os-list-split-view .split-list-header .title {
+  padding-right: 15px;
+}
+
+.os-list-split-view .split-list {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+}
+
+.os-list-split-view .split-list-item {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+
+.os-list-split-view .split-list-item:hover {
+  border-color: #aaa;
+}
+
+.os-list-split-view .split-list-item.selected {
+  border-color: #428bca;
+  box-shadow: inset 3px 0 0 #428bca;
+}
+
+.os-list-split-view .split-list-item-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.os-list-split-view .split-list-item-label {
+  color: #777;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.os-list-split-view .split-list-item-value {
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.os-list-split-view .split-detail {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+  position: relative;
+}
+
+.os-list-split-view .split-detail-close {
+  position: absolute;
+  right: 1rem;
+  top: 0.75rem;
+  z-index: 1;
+}
+
+.os-list-split-view .split-detail-body {
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
 .os-list-shadowed-rows.os-list .results .results-inner {
   padding-right: 0rem;
 }
@@ -1045,6 +1239,11 @@ export default {
 
 .os-list-shadowed-rows :deep(table.p-datatable-table > tbody > tr:hover) {
   background: transparent;
+}
+
+.os-list :deep(table.p-datatable-table > tbody > tr.os-row-expanded) {
+  box-shadow: inset 3px 0 0 #428bca, 0 0 0 1px #428bca,
+    0 1px 2px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15) !important;
 }
 
 .os-list-shadowed-rows :deep(table.p-datatable-table > tbody > tr > td) {
