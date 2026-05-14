@@ -18,6 +18,11 @@ public class ExecuteSavedQueryOp {
 
 	private List<Criterion> criteria = Collections.emptyList();
 
+	//
+	// Not for use by the query client
+	//
+	private boolean useReportingDataSource;
+
 	public Long getSavedQueryId() {
 		return savedQueryId;
 	}
@@ -76,6 +81,14 @@ public class ExecuteSavedQueryOp {
 
 	public void setMaxResults(int maxResults) {
 		this.maxResults = maxResults;
+	}
+
+	public boolean isUseReportingDataSource() {
+		return useReportingDataSource;
+	}
+
+	public void setUseReportingDataSource(boolean useReportingDataSource) {
+		this.useReportingDataSource = useReportingDataSource;
 	}
 
 	public enum SearchType {

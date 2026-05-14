@@ -52,6 +52,7 @@ public class QueryController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
 	public QueryExecResult executeQuery(@RequestBody ExecuteQueryEventOp opDetail) {
+		opDetail.setUseReportingDataSource(true);
 		return response(querySvc.executeQuery(request(opDetail)));
 	}
 
@@ -66,6 +67,7 @@ public class QueryController {
 			ExecuteSavedQueryOp opDetail) {
 
 		opDetail.setSavedQueryId(queryId);
+		opDetail.setUseReportingDataSource(true);
 		return response(querySvc.executeSavedQuery(request(opDetail)));
 	}
 
@@ -89,6 +91,7 @@ public class QueryController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public QueryDataExportResult exportQueryData(@RequestBody ExecuteQueryEventOp opDetail) {
+		opDetail.setUseReportingDataSource(true);
 		return response(querySvc.exportQueryData(request(opDetail)));
 	}	
 	
@@ -122,6 +125,7 @@ public class QueryController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<FacetDetail> getFacetValues(@RequestBody GetFacetValuesOp op) {
+		op.setUseReportingDataSource(true);
 		return response(querySvc.getFacetValues(request(op)));
 	}
 

@@ -53,6 +53,7 @@ public class ScheduledQueryTask implements ScheduledTask {
 		op.setOutputColumnExprs(query.isOutputColumnExprs());
 		op.setCaseSensitive(query.isCaseSensitive());
 		op.setSynchronous(true);
+		op.setUseReportingDataSource(true);
 
 		QueryService.ExportProcessor processor = new DefaultQueryExportProcessor(query.getCpId(), query.getCpGroupId()) {
 			@Override
