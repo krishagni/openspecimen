@@ -365,13 +365,35 @@
     </customChange>
   </changeSet>
 
-  <!-- changeSet author="vpawar" id="Unique constraint on os_form_record_statuses">
+  <changeSet author="vpawar" id="Cleanup duplicate form record statuses by retaining the latest one">
+    <sql>
+      delete from
+        os_form_record_statuses
+      where
+        identifier in (
+          select
+            identifier
+          from (
+            select distinct
+              s1.identifier
+            from
+              os_form_record_statuses s1
+              inner join os_form_record_statuses s2 on
+                s2.form_id = s1.form_id and
+                s2.record_id = s1.record_id and
+                s2.identifier > s1.identifier
+          ) duplicate_records
+        );
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on os_form_record_statuses">
     <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
       <param name="tableName" value="OS_FORM_RECORD_STATUSES" />
       <param name="columnNames" value="RECORD_ID,FORM_ID" />
       <param name="constraintName" value="OS_FORM_RECORD_STATUS_UQ" />
     </customChange>
-  </changeSet -->
+  </changeSet>
 
   <changeSet author="vpawar" id="Unique constraint on os_specimen_stats">
     <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
