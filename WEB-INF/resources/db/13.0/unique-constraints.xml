@@ -365,13 +365,13 @@
     </customChange>
   </changeSet>
 
-  <changeSet author="vpawar" id="Unique constraint on os_form_record_statuses">
+  <!-- changeSet author="vpawar" id="Unique constraint on os_form_record_statuses">
     <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
       <param name="tableName" value="OS_FORM_RECORD_STATUSES" />
       <param name="columnNames" value="RECORD_ID,FORM_ID" />
       <param name="constraintName" value="OS_FORM_RECORD_STATUS_UQ" />
     </customChange>
-  </changeSet>
+  </changeSet -->
 
   <changeSet author="vpawar" id="Unique constraint on os_specimen_stats">
     <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
