@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <!-- changeSet author="vpawar" id="Unique constraint on CATISSUE_IMPORT_QUERIES_LOG">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="CATISSUE_IMPORT_QUERIES_LOG" />
+      <param name="columnNames" value="FILENAME,MD5_DIGEST" />
+      <param name="constraintName" value="CATISSUE_IMP_QRY_LOG_UQ" />
+    </customChange>
+  </changeSet -->
+
+  <changeSet author="vpawar" id="Unique constraint on CATISSUE_RACE">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="CATISSUE_RACE" />
+      <param name="columnNames" value="PARTICIPANT_ID,RACE_ID" />
+      <param name="constraintName" value="CATISSUE_RACE_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_AUTH_CREDENTIALS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_AUTH_CREDENTIALS" />
+      <param name="columnNames" value="TOKEN" />
+      <param name="constraintName" value="OS_AUTH_CREDENTIALS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_AUTH_PROVIDER_PROPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_AUTH_PROVIDER_PROPS" />
+      <param name="columnNames" value="AUTH_PROVIDER_ID,NAME" />
+      <param name="constraintName" value="OS_AUTH_PROVIDER_PROPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_AUTO_FREEZER_PROVIDER_PROPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_AUTO_FREEZER_PROVIDER_PROPS" />
+      <param name="columnNames" value="PROVIDER_ID,NAME" />
+      <param name="constraintName" value="OS_AUTO_FRZR_PROV_PROPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_BULK_IMPORT_JOB_PARAMS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_BULK_IMPORT_JOB_PARAMS" />
+      <param name="columnNames" value="JOB_ID,PARAM" />
+      <param name="constraintName" value="OS_BULK_IMPORT_JOB_PARAMS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_CP_CUST_FIELDS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_CP_CUST_FIELDS" />
+      <param name="columnNames" value="CP_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_CP_CUST_FIELDS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_CP_GROUP_FORM_NOTIF_USERS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_CP_GROUP_FORM_NOTIF_USERS" />
+      <param name="columnNames" value="CP_GROUP_FORM_ID,USER_GROUP_ID" />
+      <param name="constraintName" value="OS_CP_GRP_FORM_NOTIF_USR_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_CP_REPORT_RCPTS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_CP_REPORT_RCPTS" />
+      <param name="columnNames" value="REPORT_ID,USER_ID" />
+      <param name="constraintName" value="OS_CP_REPORT_RCPTS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_CPR_CUST_FIELDS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_CPR_CUST_FIELDS" />
+      <param name="columnNames" value="CPR_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_CPR_CUST_FIELDS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_CPR_EXTN_RECS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_CPR_EXTN_RECS" />
+      <param name="columnNames" value="CPR_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_CPR_EXTN_RECS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_DPR_PATHOLOGY_STATUSES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_DPR_PATHOLOGY_STATUSES" />
+      <param name="columnNames" value="DPR_ID,PATHOLOGY_STATUS_ID" />
+      <param name="constraintName" value="OS_DPR_PATH_STATUSES_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_EXPORT_JOB_PARAMS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_EXPORT_JOB_PARAMS" />
+      <param name="columnNames" value="JOB_ID,PARAM" />
+      <param name="constraintName" value="OS_EXPORT_JOB_PARAMS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_EXT_APP_ID_PROPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_EXT_APP_ID_PROPS" />
+      <param name="columnNames" value="EXTERNAL_ID,NAME" />
+      <param name="constraintName" value="OS_EXT_APP_ID_PROPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_FORM_NOTIF_USER_GRPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_FORM_NOTIF_USER_GRPS" />
+      <param name="columnNames" value="FORM_CTXT_ID,USER_GROUP_ID" />
+      <param name="constraintName" value="OS_FORM_NOTIF_USER_GRPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_ORDER_CUST_FIELDS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_ORDER_CUST_FIELDS" />
+      <param name="columnNames" value="ORDER_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_ORDER_CUST_FIELDS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_PARTICIPANT_ETHNICITIES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_PARTICIPANT_ETHNICITIES" />
+      <param name="columnNames" value="PARTICIPANT_ID,ETHNICITY_ID" />
+      <param name="constraintName" value="OS_PARTICIPANT_ETH_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_PARTICIPANT_EXTN_RECS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_PARTICIPANT_EXTN_RECS" />
+      <param name="columnNames" value="PARTICIPANT_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_PARTICIPANT_EXTN_RECS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_POOLED_SPECIMEN_ITEMS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_POOLED_SPECIMEN_ITEMS" />
+      <param name="columnNames" value="POOLED_EVENT_ID,SPECIMEN_ID" />
+      <param name="constraintName" value="OS_POOLED_SPMN_ITEMS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_PUBLISHED_CP_REVIEWERS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_PUBLISHED_CP_REVIEWERS" />
+      <param name="columnNames" value="PUBLISH_EVENT_ID,USER_ID" />
+      <param name="constraintName" value="OS_PUBLISHED_CP_REVIEWERS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_PV_PROPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_PV_PROPS" />
+      <param name="columnNames" value="PV_ID,NAME" />
+      <param name="constraintName" value="OS_PV_PROPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SCHED_CONT_ACT_USERS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SCHED_CONT_ACT_USERS" />
+      <param name="columnNames" value="ACTIVITY_ID,USER_ID" />
+      <param name="constraintName" value="OS_SCHED_CONT_ACT_USERS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SCHEDULED_JOB_SHARED_USERS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SCHEDULED_JOB_SHARED_USERS" />
+      <param name="columnNames" value="SCHEDULED_JOB_ID,USER_ID" />
+      <param name="constraintName" value="OS_SCHED_JOB_SHARED_USR_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SCHEDULED_JOBS_NOTIF_RCPTS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SCHEDULED_JOBS_NOTIF_RCPTS" />
+      <param name="columnNames" value="SCHEDULED_JOB_ID,USER_ID" />
+      <param name="constraintName" value="OS_SCHED_JOB_NOTIF_RCPTS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SEARCH_ENTITY_RANKS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SEARCH_ENTITY_RANKS" />
+      <param name="columnNames" value="ENTITY" />
+      <param name="constraintName" value="OS_SEARCH_ENTITY_RANKS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SHIPMENT_NOTIFY_USERS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SHIPMENT_NOTIFY_USERS" />
+      <param name="columnNames" value="SHIPMENT_ID,USER_ID" />
+      <param name="constraintName" value="OS_SHIPMENT_NOTIFY_USERS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SPECIMEN_BIOHAZARDS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SPECIMEN_BIOHAZARDS" />
+      <param name="columnNames" value="SPECIMEN_ID,BIOHAZARD_ID" />
+      <param name="constraintName" value="OS_SPECIMEN_BIOHAZARDS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SPMN_CUST_FIELDS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SPMN_CUST_FIELDS" />
+      <param name="columnNames" value="SPECIMEN_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_SPMN_CUST_FIELDS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_SPMN_EXTN_RECS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SPMN_EXTN_RECS" />
+      <param name="columnNames" value="SPECIMEN_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_SPMN_EXTN_RECS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STAGED_PART_ETHNICITIES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STAGED_PART_ETHNICITIES" />
+      <param name="columnNames" value="PARTICIPANT_ID,ETHNICITY_ID" />
+      <param name="constraintName" value="OS_STAGED_PART_ETH_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STAGED_PARTICIPANT_RACES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STAGED_PARTICIPANT_RACES" />
+      <param name="columnNames" value="PARTICIPANT_ID,RACE_ID" />
+      <param name="constraintName" value="OS_STAGED_PART_RACES_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STAGED_VISIT_DIAGNOSES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STAGED_VISIT_DIAGNOSES" />
+      <param name="columnNames" value="VISIT_ID,CLINICAL_DIAGNOSIS" />
+      <param name="constraintName" value="OS_STAGED_VISIT_DIAG_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONT_COMP_SPEC_CLASSES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONT_COMP_SPEC_CLASSES" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,SPECIMEN_CLASS_ID" />
+      <param name="constraintName" value="OS_STOR_CONT_COMP_CLS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONT_COMP_SPEC_TYPES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONT_COMP_SPEC_TYPES" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,SPECIMEN_TYPE_ID" />
+      <param name="constraintName" value="OS_STOR_CONT_COMP_TYPE_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONT_SPEC_CLASSES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONT_SPEC_CLASSES" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,SPECIMEN_CLASS_ID" />
+      <param name="constraintName" value="OS_STOR_CONT_SPEC_CLS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONT_SPEC_TYPES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONT_SPEC_TYPES" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,SPECIMEN_TYPE_ID" />
+      <param name="constraintName" value="OS_STOR_CONT_SPEC_TYPE_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONTAINER_COMP_CPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONTAINER_COMP_CPS" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,CP_ID" />
+      <param name="constraintName" value="OS_STOR_CONT_COMP_CPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONTAINER_COMP_DPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONTAINER_COMP_DPS" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,DP_ID" />
+      <param name="constraintName" value="OS_STOR_CONT_COMP_DPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONTAINER_CPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONTAINER_CPS" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,CP_ID" />
+      <param name="constraintName" value="OS_STOR_CONTAINER_CPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_STOR_CONTAINER_DPS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_STOR_CONTAINER_DPS" />
+      <param name="columnNames" value="STORAGE_CONTAINER_ID,DP_ID" />
+      <param name="constraintName" value="OS_STOR_CONTAINER_DPS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_VISIT_CLIN_DIAGNOSES">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_VISIT_CLIN_DIAGNOSES" />
+      <param name="columnNames" value="VISIT_ID,CLINICAL_DIAGNOSIS_ID" />
+      <param name="constraintName" value="OS_VISIT_CLIN_DIAG_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_VISIT_CUST_FIELDS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_VISIT_CUST_FIELDS" />
+      <param name="columnNames" value="VISIT_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_VISIT_CUST_FIELDS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on OS_VISIT_EXTN_RECS">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_VISIT_EXTN_RECS" />
+      <param name="columnNames" value="VISIT_ID,FORM_ID,RECORD_ID" />
+      <param name="constraintName" value="OS_VISIT_EXTN_RECS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on catissue_site_coordinators">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="CATISSUE_SITE_COORDINATORS" />
+      <param name="columnNames" value="SITE_ID,USER_ID" />
+      <param name="constraintName" value="CATISSUE_SITE_COORD_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on os_cpr_spmn_stats">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_CPR_SPMN_STATS" />
+      <param name="columnNames" value="IDENTIFIER" />
+      <param name="constraintName" value="OS_CPR_SPMN_STATS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on os_form_record_statuses">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_FORM_RECORD_STATUSES" />
+      <param name="columnNames" value="RECORD_ID,FORM_ID" />
+      <param name="constraintName" value="OS_FORM_RECORD_STATUS_UQ" />
+    </customChange>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on os_specimen_stats">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.AddUniqueConstraint">
+      <param name="tableName" value="OS_SPECIMEN_STATS" />
+      <param name="columnNames" value="SPECIMEN_ID" />
+      <param name="constraintName" value="OS_SPECIMEN_STATS_UQ" />
+    </customChange>
+  </changeSet>
+</databaseChangeLog>
