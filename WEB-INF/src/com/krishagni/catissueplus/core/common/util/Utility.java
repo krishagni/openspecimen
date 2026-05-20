@@ -83,6 +83,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.mime.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
@@ -526,12 +527,28 @@ public class Utility {
 		return mediaType != null ? mediaType.toString() : null;
 	}
 
+	public static String getContentType(String filename, InputStream in) {
+		MediaType mediaType = getMediaType(filename, in);
+		return mediaType != null ? mediaType.toString() : null;
+	}
+
 	public static String getFileType(String contentType) {
 		try {
 			return getTikaConfig().getMimeRepository().forName(contentType).getExtension();
 		} catch (Exception e) {
 			throw OpenSpecimenException.userError(CommonErrorCode.FILE_TYPE_DETECT_FAILED, e.getLocalizedMessage());
 		}
+	}
+
+	public static String getFileTypeWithoutDot(String contentType) {
+		String fileType = getFileType(contentType);
+		if (StringUtils.isBlank(fileType) || fileType.charAt(0) != '.') {
+			throw OpenSpecimenException.userError(
+				CommonErrorCode.INVALID_INPUT,
+				"File with content type '" + contentType + "' is not allowed.");
+		}
+
+		return fileType.substring(1).toLowerCase();
 	}
 
 	public static String ensureFileUploadAllowed(File file) {
@@ -543,8 +560,8 @@ public class Utility {
 	}
 
 	public static String ensureFileUploadAllowed(String filename, InputStream in) {
-		final String contentType = getContentType(in);
-		String detectedFileType = getFileType(contentType).substring(1).toLowerCase();
+		final String contentType = getContentType(filename, in);
+		String detectedFileType = getFileTypeWithoutDot(contentType);
 		String allowedTypesStr = ConfigUtil.getInstance().getStrSetting("common", "allowed_file_types", "");
 		Set<String> allowedTypes = Arrays.stream(allowedTypesStr.split(","))
 			.map(type -> type.trim().toLowerCase())
@@ -1671,8 +1688,16 @@ public class Utility {
 	}
 
 	private static MediaType getMediaType(InputStream in) {
+		return getMediaType(null, in);
+	}
+
+	private static MediaType getMediaType(String filename, InputStream in) {
 		try {
 			Metadata metadata = new Metadata();
+			if (StringUtils.isNotBlank(filename)) {
+				metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, filename);
+			}
+
 			return getTikaConfig().getDetector().detect(TikaInputStream.get(in), metadata);
 		} catch (Exception e) {
 			throw OpenSpecimenException.userError(CommonErrorCode.CONTENT_DETECT_FAILED, e.getLocalizedMessage());

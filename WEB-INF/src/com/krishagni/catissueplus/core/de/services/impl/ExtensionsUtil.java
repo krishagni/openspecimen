@@ -91,7 +91,7 @@ public class ExtensionsUtil {
 			String contentType = Utility.ensureFileUploadAllowed(fileToUpload);
 			String extn = null;
 			if (saveExtn) {
-				extn = Utility.getFileType(contentType).substring(1).toLowerCase();
+				extn = Utility.getFileTypeWithoutDot(contentType);
 			}
 
 			fin = new FileInputStream(fileToUpload);
