@@ -2104,12 +2104,14 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 			boolean error = false;
 			QueryResultData data = null;
+			Date startTime = null;
 			File progressFile = new File(getExportDataDir(), filename + ".in_progress");
 			try {
 				FileUtils.writeStringToFile(progressFile, "In Progress", Charset.defaultCharset());
 				progressFile.deleteOnExit();
 
 				QueryResponse resp;
+				startTime = Calendar.getInstance().getTime();
 				if (procFn == null && proc == null) {
 					QueryResultExporter exporter = new QueryResultCsvExporter(Utility.getFieldSeparator());
 					resp = exporter.export(fout, query, getResultScreener(query));
@@ -2127,8 +2129,15 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				insertAuditLog(user, ipAddress, op, resp);
 				notifyExportCompleted();
 			} catch (Exception e) {
+				String timeoutError = getQueryTimeoutError(e);
+				auditFailedQuery(user, ipAddress, op, query, startTime, timeoutError != null ? timeoutError : Utility.getErrorMessage(e));
+
 				logger.error("Error exporting query data", e);
 				error = true;
+				if (timeoutError != null) {
+					throw OpenSpecimenException.userError(SavedQueryErrorCode.TIMEOUT, timeoutError);
+				}
+
 				throw OpenSpecimenException.serverError(e);
 			} finally {
 				IOUtils.closeQuietly(fout);
