@@ -69,6 +69,12 @@ public class QueryAuditLogDaoImpl extends AbstractDao<QueryAuditLog> implements 
 			}
 		}
 
+		if (crit.failed()) {
+			query.add(query.eq("al.recordCount", -1L))
+				.add(query.isNotNull("al.error"))
+				.add(query.ne("al.error", ""));
+		}
+
 		return query;
 	}
 }
