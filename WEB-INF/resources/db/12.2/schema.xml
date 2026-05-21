@@ -799,4 +799,10 @@
       <column name="CREATION_TIME" type="${nullable.ts.type}" />
     </createIndex>
   </changeSet>
+
+  <changeSet author="vpawar" id="Query audit error message">
+    <addColumn tableName="CATISSUE_QUERY_AUDIT_LOGS">
+      <column name="ERROR_MESSAGE" type="${text.type}(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

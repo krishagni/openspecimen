@@ -25,6 +25,8 @@ public class QueryAuditLog {
 	
 	private String sql;
 
+	private String error;
+
 	public Long getId() {
 		return id;
 	}
@@ -103,5 +105,13 @@ public class QueryAuditLog {
 
 	public void setSql(String sql) {
 		this.sql = sql;
-	}		
+	}
+
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
 }

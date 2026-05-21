@@ -485,17 +485,19 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		String queryId = UUID.randomUUID().toString();
 		ExecuteQueryEventOp opDetail = req.getPayload();
 
+		Query query = null;
 		QueryResultData queryResult = null;
+		Date startTime = null;
 		boolean queryCntIncremented = false;
 		try {
-
 			if (!opDetail.isDisableAccessChecks()) {
 				ensureReadRights();
 			}
 
 			queryCntIncremented = incConcurrentQueriesCnt();
 
-			Query query = getQuery(opDetail, queryId);
+			query = getQuery(opDetail, queryId);
+			startTime = Calendar.getInstance().getTime();
 			QueryResponse resp = query.getData();
 			insertAuditLog(AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, resp);
 			
@@ -524,15 +526,17 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			return ResponseEvent.userError(getErrorCode(qe.getErrorCode()), qe.getMessage());
 		} catch (IllegalAccessError iae) {
 			return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED, iae.getMessage());
-		} catch (QueryTimeoutException qte) {
-			logger.error("Query aborted", qte);
-			return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, Utility.getErrorMessage(qte));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
-			SQLTimeoutException timeoutException = getSqlTimeoutException(e);
-			if (timeoutException != null) {
-				return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, Utility.getErrorMessage(timeoutException));
+			String timeoutError = getQueryTimeoutError(e);
+			auditFailedQuery(
+				AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, query, startTime,
+				timeoutError != null ? timeoutError : Utility.getErrorMessage(e));
+
+			if (timeoutError != null) {
+				logger.error("Query aborted", e);
+				return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, timeoutError);
 			}
 
 			return ResponseEvent.serverError(e);
@@ -1580,6 +1584,21 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	}
 
 	private void insertAuditLog(User user, String ipAddress, ExecuteQueryEventOp opDetail, QueryResponse resp) {
+		insertAuditLog(
+			user,
+			ipAddress,
+			opDetail,
+			resp.getSql(),
+			resp.getTimeOfExecution(),
+			resp.getExecutionTime(),
+			(long) resp.getResultData().getDbRowsCount(),
+			null);
+	}
+
+	private void insertAuditLog(
+		User user, String ipAddress, ExecuteQueryEventOp opDetail, String sql, Date timeOfExecution, Long timeToFinish,
+		Long dbRowsCount, String errorMessage) {
+
 		if (opDetail.isDisableAuditing()) {
 			return;
 		}
@@ -1594,13 +1613,39 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		auditLog.setQuery(query);
 		auditLog.setRunBy(user);
 		auditLog.setIpAddress(ipAddress);
-		auditLog.setTimeOfExecution(resp.getTimeOfExecution());
-		auditLog.setTimeToFinish(resp.getExecutionTime());
+		auditLog.setTimeOfExecution(timeOfExecution);
+		auditLog.setTimeToFinish(timeToFinish);
 		auditLog.setRunType(opDetail.getRunType());
 		auditLog.setAql(opDetail.getAql());
-		auditLog.setRecordCount((long) resp.getResultData().getDbRowsCount());
-		auditLog.setSql(resp.getSql());
+		auditLog.setRecordCount(dbRowsCount);
+		auditLog.setSql(sql);
+		auditLog.setError(StringUtils.abbreviate(errorMessage, 255));
 		daoFactory.getQueryAuditLogDao().saveOrUpdate(auditLog);
+	}
+
+	private void auditFailedQuery(
+		User user, String ipAddress, ExecuteQueryEventOp opDetail, Query query, Date startTime, String errorMessage) {
+
+		if (query == null) {
+			return;
+		}
+
+		try {
+			String sql = query.getDataSql();
+			if (StringUtils.isBlank(sql)) {
+				return;
+			}
+
+			DbUtil.newTxn(
+				() -> {
+					Date timeOfExecution = startTime != null ? startTime : Calendar.getInstance().getTime();
+					insertAuditLog(user, ipAddress, opDetail, sql, timeOfExecution, -1L, -1L, errorMessage);
+					return null;
+				}
+			);
+		} catch (Exception e) {
+			logger.error("Error auditing failed query", e);
+		}
 	}
 
 	private void ensureReadRights() {
@@ -2163,6 +2208,15 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private String sql(String sql) {
 		return "sql(\"" + sql + "\")";
+	}
+
+	private String getQueryTimeoutError(Exception e) {
+		if (e instanceof QueryTimeoutException) {
+			return Utility.getErrorMessage(e);
+		}
+
+		SQLTimeoutException timeoutException = getSqlTimeoutException(e);
+		return timeoutException != null ? Utility.getErrorMessage(timeoutException) : null;
 	}
 
 	private SQLTimeoutException getSqlTimeoutException(Exception e) {

@@ -27,6 +27,8 @@ public class QueryAuditLogSummary {
 	
 	private Long recordCount;
 
+	private String error;
+
 	public Long getId() {
 		return id;
 	}
@@ -91,6 +93,14 @@ public class QueryAuditLogSummary {
 		this.recordCount = recordCount;
 	}
 
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+
 	public static <T extends QueryAuditLogSummary> T copyTo(QueryAuditLog log, T result) {
 		result.setId(log.getId());
 
@@ -104,6 +114,7 @@ public class QueryAuditLogSummary {
 		result.setTimeOfExecution(log.getTimeOfExecution());
 		result.setTimeToFinish(log.getTimeToFinish());
 		result.setRecordCount(log.getRecordCount());
+		result.setError(log.getError());
 		return result;
 	}
 
