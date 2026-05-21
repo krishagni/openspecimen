@@ -20,6 +20,10 @@ class QueryAudit {
   downloadReport(fileId) {
     http.downloadFile(http.getUrl('query-audit-logs/exported-file', {query: {fileId}}));
   }
+
+  downloadDiagnostics(auditLogId) {
+    http.downloadFile(http.getUrl('query-audit-logs/' + auditLogId + '/diagnostics'));
+  }
 }
 
 export default new QueryAudit();
