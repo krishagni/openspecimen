@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -155,6 +156,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	private static final String MAX_RECS_IN_MEM = "max_recs_in_memory";
 
 	private static final int DEF_MAX_RECS_IN_MEM = 100;
+
+	private static final String QUERY_AUDIT_LOGS_DIR = "query-audit-logs";
 
 	private static final int EXPORT_THREAD_POOL_SIZE = getThreadPoolSize();
 	
@@ -998,6 +1001,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				return ResponseEvent.userError(SavedQueryErrorCode.AUDIT_LOG_NOT_FOUND, auditLogId);
 			}
 
+			ensureAuditLogAccess(log);
 			return ResponseEvent.response(QueryAuditLogDetail.from(log));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1005,6 +1009,30 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			return ResponseEvent.serverError(e);
 		}
     }
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<File> getAuditLogDiagnosticFile(RequestEvent<Long> req) {
+		try {
+			Long auditLogId = req.getPayload();
+			QueryAuditLog log = daoFactory.getQueryAuditLogDao().getById(auditLogId);
+			if (log == null) {
+				return ResponseEvent.userError(SavedQueryErrorCode.AUDIT_LOG_NOT_FOUND, auditLogId);
+			}
+
+			ensureAuditLogAccess(log);
+			File file = getDiagnosticZipFile(auditLogId);
+			if (!file.exists()) {
+				return ResponseEvent.userError(CommonErrorCode.FILE_NOT_FOUND, file.getName());
+			}
+
+			return ResponseEvent.response(file);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 
 	@Override
 	@PlusTransactional
@@ -1583,6 +1611,27 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		return dir;
 	}
 
+	private void ensureAuditLogAccess(QueryAuditLog log) {
+		User currentUser = AuthUtil.getCurrentUser();
+		if (currentUser != null) {
+			if (currentUser.isAdmin()) {
+				return;
+			}
+
+			if (currentUser.isInstituteAdmin() && isSameInstitute(currentUser, log.getRunBy())) {
+				return;
+			}
+		}
+
+		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+	}
+
+	private boolean isSameInstitute(User user1, User user2) {
+		Long instituteId1 = user1 != null && user1.getInstitute() != null ? user1.getInstitute().getId() : null;
+		Long instituteId2 = user2 != null && user2.getInstitute() != null ? user2.getInstitute().getId() : null;
+		return Objects.equals(instituteId1, instituteId2);
+	}
+
 	private void insertAuditLog(User user, String ipAddress, ExecuteQueryEventOp opDetail, QueryResponse resp) {
 		insertAuditLog(
 			user,
@@ -1595,12 +1644,12 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			null);
 	}
 
-	private void insertAuditLog(
+	private QueryAuditLog insertAuditLog(
 		User user, String ipAddress, ExecuteQueryEventOp opDetail, String sql, Date timeOfExecution, Long timeToFinish,
 		Long dbRowsCount, String errorMessage) {
 
 		if (opDetail.isDisableAuditing()) {
-			return;
+			return null;
 		}
 
 		SavedQuery query = null;
@@ -1621,6 +1670,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		auditLog.setSql(sql);
 		auditLog.setError(StringUtils.abbreviate(errorMessage, 255));
 		daoFactory.getQueryAuditLogDao().saveOrUpdate(auditLog);
+		return auditLog;
 	}
 
 	private void auditFailedQuery(
@@ -1636,16 +1686,75 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				return;
 			}
 
-			DbUtil.newTxn(
+			Long auditLogId = DbUtil.newTxn(
 				() -> {
 					Date timeOfExecution = startTime != null ? startTime : Calendar.getInstance().getTime();
-					insertAuditLog(user, ipAddress, opDetail, sql, timeOfExecution, -1L, -1L, errorMessage);
-					return null;
+					QueryAuditLog auditLog = insertAuditLog(user, ipAddress, opDetail, sql, timeOfExecution, -1L, -1L, errorMessage);
+					return auditLog != null ? auditLog.getId() : null;
 				}
 			);
+			saveQueryDiagnostics(auditLogId, sql);
 		} catch (Exception e) {
 			logger.error("Error auditing failed query", e);
 		}
+	}
+
+	private void saveQueryDiagnostics(Long auditLogId, String sql) {
+		if (!Utility.isMySQL() || auditLogId == null || StringUtils.isBlank(sql)) {
+			return;
+		}
+
+		File jsonFile = getDiagnosticJsonFile(auditLogId);
+		try {
+			Object explain = DbUtil.newTxn(() -> getExplainPlan(sql));
+
+			Map<String, Object> diagnostics = new LinkedHashMap<>();
+			diagnostics.put("query", sql);
+			diagnostics.put("explain", explain);
+
+			FileUtils.forceMkdir(getQueryAuditLogsDir());
+			FileUtils.writeStringToFile(jsonFile, Utility.mapToJson(diagnostics), Charset.defaultCharset());
+
+			String entryName = "query_audit_log_" + auditLogId + ".json";
+			Utility.zipFilesWithNames(
+				Collections.singletonList(Pair.make(jsonFile.getAbsolutePath(), entryName)),
+				getDiagnosticZipFile(auditLogId).getAbsolutePath()
+			);
+		} catch (Exception e) {
+			logger.error("Error saving query audit log diagnostics: " + auditLogId, e);
+		} finally {
+			FileUtils.deleteQuietly(jsonFile);
+		}
+	}
+
+	private Object getExplainPlan(String sql) {
+		List<Object> result = new ArrayList<>();
+		sessionFactory.getCurrentSession().doWork(
+			conn -> {
+				try (
+					PreparedStatement stmt = conn.prepareStatement("explain format=json " + sql);
+					ResultSet rs = stmt.executeQuery()
+				) {
+					while (rs.next()) {
+						result.add(Utility.jsonToObject(rs.getString(1), Map.class));
+					}
+				}
+			}
+		);
+
+		return result.size() == 1 ? result.get(0) : result;
+	}
+
+	private File getDiagnosticJsonFile(Long auditLogId) {
+		return Utility.getFile(getQueryAuditLogsDir(), auditLogId + ".json");
+	}
+
+	private File getDiagnosticZipFile(Long auditLogId) {
+		return Utility.getFile(getQueryAuditLogsDir(), auditLogId + ".json.zip");
+	}
+
+	private File getQueryAuditLogsDir() {
+		return Utility.getFile(ConfigUtil.getInstance().getDataDir(), QUERY_AUDIT_LOGS_DIR);
 	}
 
 	private void ensureReadRights() {

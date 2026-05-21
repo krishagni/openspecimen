@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.krishagni.catissueplus.core.common.events.ExportedFileDetail;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
+import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogDetail;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogSummary;
 import com.krishagni.catissueplus.core.de.events.QueryAuditLogsListCriteria;
@@ -83,6 +84,14 @@ public class QueryAuditLogsController {
 	@ResponseBody	
 	public QueryAuditLogDetail getAuditLog(@PathVariable Long id) {
 		return ResponseEvent.unwrap(querySvc.getAuditLog(RequestEvent.wrap(id)));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value="{id}/diagnostics")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public void downloadAuditLogDiagnostics(@PathVariable Long id, HttpServletResponse httpResp) {
+		File file = ResponseEvent.unwrap(querySvc.getAuditLogDiagnosticFile(RequestEvent.wrap(id)));
+		Utility.sendToClient(httpResp, "query_audit_log_" + id + ".json.zip", file);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value="/export")
