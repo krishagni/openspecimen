@@ -82,14 +82,14 @@ public class QueryAuditLogsController {
 	@RequestMapping(method = RequestMethod.GET, value="{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody	
-	public QueryAuditLogDetail getAuditLog(@PathVariable Long id) {
+	public QueryAuditLogDetail getAuditLog(@PathVariable("id") Long id) {
 		return ResponseEvent.unwrap(querySvc.getAuditLog(RequestEvent.wrap(id)));
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value="{id}/diagnostics")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public void downloadAuditLogDiagnostics(@PathVariable Long id, HttpServletResponse httpResp) {
+	public void downloadAuditLogDiagnostics(@PathVariable("id") Long id, HttpServletResponse httpResp) {
 		File file = ResponseEvent.unwrap(querySvc.getAuditLogDiagnosticFile(RequestEvent.wrap(id)));
 		Utility.sendToClient(httpResp, "query_audit_log_" + id + ".json.zip", file);
 	}
