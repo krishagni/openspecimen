@@ -1,5 +1,7 @@
 package com.krishagni.catissueplus.core.de.repository.impl;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,6 +30,15 @@ public class QueryAuditLogDaoImpl extends AbstractDao<QueryAuditLog> implements 
 		Criteria<QueryAuditLog> query = getLogsQuery(crit);
 		return query.orderBy(crit.asc() ? query.asc("al.id") : query.desc("al.id"))
 			.list(crit.startAt(), crit.maxResults());
+	}
+
+	@Override
+	public int deleteLogsOlderThan(int olderThanDays, int maxRows) {
+		LocalDate olderThan = LocalDate.now().minus(olderThanDays, ChronoUnit.DAYS);
+		String sql = String.format(DELETE_OLDER_QUERY_AUDIT_LOGS_SQL, isMySQL() ? " limit " : " and rownum < ") + maxRows;
+		return getCurrentSession().createNativeQuery(sql)
+			.setParameter("olderThan", java.sql.Date.valueOf(olderThan))
+			.executeUpdate();
 	}
 
 	private Criteria<QueryAuditLog> getLogsQuery(QueryAuditLogsListCriteria crit) {
@@ -77,4 +88,7 @@ public class QueryAuditLogDaoImpl extends AbstractDao<QueryAuditLog> implements 
 
 		return query;
 	}
+
+	private static final String DELETE_OLDER_QUERY_AUDIT_LOGS_SQL =
+		"delete from catissue_query_audit_logs where time_of_exec < :olderThan %s";
 }
