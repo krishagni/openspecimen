@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -157,6 +158,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	private static final String MAX_RECS_IN_MEM = "max_recs_in_memory";
 
 	private static final int DEF_MAX_RECS_IN_MEM = 100;
+
+	private static final String QUERY_AUDIT_LOGS_DIR = "query-audit-logs";
 
 	private static final int EXPORT_THREAD_POOL_SIZE = getThreadPoolSize();
 	
@@ -493,17 +496,19 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		String queryId = UUID.randomUUID().toString();
 		ExecuteQueryEventOp opDetail = req.getPayload();
 
+		Query query = null;
 		QueryResultData queryResult = null;
+		Date startTime = null;
 		boolean queryCntIncremented = false;
 		try {
-
 			if (!opDetail.isDisableAccessChecks()) {
 				ensureReadRights();
 			}
 
 			queryCntIncremented = incConcurrentQueriesCnt();
 
-			Query query = getQuery(opDetail, queryId);
+			query = getQuery(opDetail, queryId);
+			startTime = Calendar.getInstance().getTime();
 			QueryResponse resp = query.getData();
 			insertAuditLog(AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, resp);
 			
@@ -532,15 +537,17 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			return ResponseEvent.userError(getErrorCode(qe.getErrorCode()), qe.getMessage());
 		} catch (IllegalAccessError iae) {
 			return ResponseEvent.userError(SavedQueryErrorCode.OP_NOT_ALLOWED, iae.getMessage());
-		} catch (QueryTimeoutException qte) {
-			logger.error("Query aborted", qte);
-			return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, Utility.getErrorMessage(qte));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
-			SQLTimeoutException timeoutException = getSqlTimeoutException(e);
-			if (timeoutException != null) {
-				return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, Utility.getErrorMessage(timeoutException));
+			String timeoutError = getQueryTimeoutError(e);
+			auditFailedQuery(
+				AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, query, startTime,
+				timeoutError != null ? timeoutError : Utility.getErrorMessage(e));
+
+			if (timeoutError != null) {
+				logger.error("Query aborted", e);
+				return ResponseEvent.userError(SavedQueryErrorCode.TIMEOUT, timeoutError);
 			}
 
 			return ResponseEvent.serverError(e);
@@ -998,6 +1005,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				return ResponseEvent.userError(SavedQueryErrorCode.AUDIT_LOG_NOT_FOUND, auditLogId);
 			}
 
+			ensureAuditLogAccess(log);
 			return ResponseEvent.response(QueryAuditLogDetail.from(log));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -1005,6 +1013,30 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			return ResponseEvent.serverError(e);
 		}
     }
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<File> getAuditLogDiagnosticFile(RequestEvent<Long> req) {
+		try {
+			Long auditLogId = req.getPayload();
+			QueryAuditLog log = daoFactory.getQueryAuditLogDao().getById(auditLogId);
+			if (log == null) {
+				return ResponseEvent.userError(SavedQueryErrorCode.AUDIT_LOG_NOT_FOUND, auditLogId);
+			}
+
+			ensureAuditLogAccess(log);
+			File file = getDiagnosticZipFile(auditLogId);
+			if (!file.exists()) {
+				return ResponseEvent.userError(CommonErrorCode.FILE_NOT_FOUND, file.getName());
+			}
+
+			return ResponseEvent.response(file);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
 
 	@Override
 	@PlusTransactional
@@ -1592,9 +1624,45 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		return dir;
 	}
 
+	private void ensureAuditLogAccess(QueryAuditLog log) {
+		User currentUser = AuthUtil.getCurrentUser();
+		if (currentUser != null) {
+			if (currentUser.isAdmin()) {
+				return;
+			}
+
+			if (currentUser.isInstituteAdmin() && isSameInstitute(currentUser, log.getRunBy())) {
+				return;
+			}
+		}
+
+		throw OpenSpecimenException.userError(RbacErrorCode.ACCESS_DENIED);
+	}
+
+	private boolean isSameInstitute(User user1, User user2) {
+		Long instituteId1 = user1 != null && user1.getInstitute() != null ? user1.getInstitute().getId() : null;
+		Long instituteId2 = user2 != null && user2.getInstitute() != null ? user2.getInstitute().getId() : null;
+		return Objects.equals(instituteId1, instituteId2);
+	}
+
 	private void insertAuditLog(User user, String ipAddress, ExecuteQueryEventOp opDetail, QueryResponse resp) {
+		insertAuditLog(
+			user,
+			ipAddress,
+			opDetail,
+			resp.getSql(),
+			resp.getTimeOfExecution(),
+			resp.getExecutionTime(),
+			(long) resp.getResultData().getDbRowsCount(),
+			null);
+	}
+
+	private QueryAuditLog insertAuditLog(
+		User user, String ipAddress, ExecuteQueryEventOp opDetail, String sql, Date timeOfExecution, Long timeToFinish,
+		Long dbRowsCount, String errorMessage) {
+
 		if (opDetail.isDisableAuditing()) {
-			return;
+			return null;
 		}
 
 		SavedQuery query = null;
@@ -1607,13 +1675,99 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		auditLog.setQuery(query);
 		auditLog.setRunBy(user);
 		auditLog.setIpAddress(ipAddress);
-		auditLog.setTimeOfExecution(resp.getTimeOfExecution());
-		auditLog.setTimeToFinish(resp.getExecutionTime());
+		auditLog.setTimeOfExecution(timeOfExecution);
+		auditLog.setTimeToFinish(timeToFinish);
 		auditLog.setRunType(opDetail.getRunType());
 		auditLog.setAql(opDetail.getAql());
-		auditLog.setRecordCount((long) resp.getResultData().getDbRowsCount());
-		auditLog.setSql(resp.getSql());
+		auditLog.setRecordCount(dbRowsCount);
+		auditLog.setSql(sql);
+		auditLog.setError(StringUtils.abbreviate(errorMessage, 255));
 		daoFactory.getQueryAuditLogDao().saveOrUpdate(auditLog);
+		return auditLog;
+	}
+
+	private void auditFailedQuery(
+		User user, String ipAddress, ExecuteQueryEventOp opDetail, Query query, Date startTime, String errorMessage) {
+
+		if (query == null) {
+			return;
+		}
+
+		try {
+			String sql = query.getDataSql();
+			if (StringUtils.isBlank(sql)) {
+				return;
+			}
+
+			Long auditLogId = DbUtil.newTxn(
+				() -> {
+					Date timeOfExecution = startTime != null ? startTime : Calendar.getInstance().getTime();
+					QueryAuditLog auditLog = insertAuditLog(user, ipAddress, opDetail, sql, timeOfExecution, -1L, -1L, errorMessage);
+					return auditLog != null ? auditLog.getId() : null;
+				}
+			);
+			saveQueryDiagnostics(auditLogId, sql);
+		} catch (Exception e) {
+			logger.error("Error auditing failed query", e);
+		}
+	}
+
+	private void saveQueryDiagnostics(Long auditLogId, String sql) {
+		if (!Utility.isMySQL() || auditLogId == null || StringUtils.isBlank(sql)) {
+			return;
+		}
+
+		File jsonFile = getDiagnosticJsonFile(auditLogId);
+		try {
+			Object explain = DbUtil.newTxn(() -> getExplainPlan(sql));
+
+			Map<String, Object> diagnostics = new LinkedHashMap<>();
+			diagnostics.put("query", sql);
+			diagnostics.put("explain", explain);
+
+			FileUtils.forceMkdir(getQueryAuditLogsDir());
+			FileUtils.writeStringToFile(jsonFile, Utility.mapToJson(diagnostics), Charset.defaultCharset());
+
+			String entryName = "query_audit_log_" + auditLogId + ".json";
+			Utility.zipFilesWithNames(
+				Collections.singletonList(Pair.make(jsonFile.getAbsolutePath(), entryName)),
+				getDiagnosticZipFile(auditLogId).getAbsolutePath()
+			);
+		} catch (Exception e) {
+			logger.error("Error saving query audit log diagnostics: " + auditLogId, e);
+		} finally {
+			FileUtils.deleteQuietly(jsonFile);
+		}
+	}
+
+	private Object getExplainPlan(String sql) {
+		List<Object> result = new ArrayList<>();
+		sessionFactory.getCurrentSession().doWork(
+			conn -> {
+				try (
+					PreparedStatement stmt = conn.prepareStatement("explain format=json " + sql);
+					ResultSet rs = stmt.executeQuery()
+				) {
+					while (rs.next()) {
+						result.add(Utility.jsonToObject(rs.getString(1), Map.class));
+					}
+				}
+			}
+		);
+
+		return result.size() == 1 ? result.get(0) : result;
+	}
+
+	private File getDiagnosticJsonFile(Long auditLogId) {
+		return Utility.getFile(getQueryAuditLogsDir(), auditLogId + ".json");
+	}
+
+	private File getDiagnosticZipFile(Long auditLogId) {
+		return Utility.getFile(getQueryAuditLogsDir(), auditLogId + ".json.zip");
+	}
+
+	private File getQueryAuditLogsDir() {
+		return Utility.getFile(ConfigUtil.getInstance().getDataDir(), QUERY_AUDIT_LOGS_DIR);
 	}
 
 	private void ensureReadRights() {
@@ -2073,12 +2227,14 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 			boolean error = false;
 			QueryResultData data = null;
+			Date startTime = null;
 			File progressFile = new File(getExportDataDir(), filename + ".in_progress");
 			try {
 				FileUtils.writeStringToFile(progressFile, "In Progress", Charset.defaultCharset());
 				progressFile.deleteOnExit();
 
 				QueryResponse resp;
+				startTime = Calendar.getInstance().getTime();
 				if (procFn == null && proc == null) {
 					QueryResultExporter exporter = new QueryResultCsvExporter(Utility.getFieldSeparator());
 					resp = exporter.export(fout, query, getResultScreener(query));
@@ -2096,8 +2252,15 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				insertAuditLog(user, ipAddress, op, resp);
 				notifyExportCompleted();
 			} catch (Exception e) {
+				String timeoutError = getQueryTimeoutError(e);
+				auditFailedQuery(user, ipAddress, op, query, startTime, timeoutError != null ? timeoutError : Utility.getErrorMessage(e));
+
 				logger.error("Error exporting query data", e);
 				error = true;
+				if (timeoutError != null) {
+					throw OpenSpecimenException.userError(SavedQueryErrorCode.TIMEOUT, timeoutError);
+				}
+
 				throw OpenSpecimenException.serverError(e);
 			} finally {
 				IOUtils.closeQuietly(fout);
@@ -2177,6 +2340,15 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private String sql(String sql) {
 		return "sql(\"" + sql + "\")";
+	}
+
+	private String getQueryTimeoutError(Exception e) {
+		if (e instanceof QueryTimeoutException) {
+			return Utility.getErrorMessage(e);
+		}
+
+		SQLTimeoutException timeoutException = getSqlTimeoutException(e);
+		return timeoutException != null ? Utility.getErrorMessage(timeoutException) : null;
 	}
 
 	private SQLTimeoutException getSqlTimeoutException(Exception e) {

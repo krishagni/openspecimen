@@ -38,9 +38,11 @@ export default {
     {
       name: "auditLog.timeToFinish",
       captionCode: "queries.exec_time",
-      value: ({auditLog}) => auditLog.timeToFinish / 1000
+      value: ({auditLog}) => auditLog.error ? i18n.msg('queries.failed') : auditLog.timeToFinish / 1000
     }
   ],
+
+  rowClass: ({auditLog}) => auditLog.error ? 'failed' : undefined,
 
   filters: [
     {

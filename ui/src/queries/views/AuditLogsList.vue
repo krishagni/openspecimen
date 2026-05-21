@@ -31,14 +31,25 @@
       </os-page-toolbar>
 
       <os-list-view
+        class="audit-logs"
         :data="ctx.auditLogs"
         :schema="listSchema"
         :query="ctx.query"
         :loading="ctx.loading"
+        :showRowActions="true"
         @filtersUpdated="loadLogs"
         @rowClicked="showQuerySqlDialog"
-        ref="listView"
-      />
+        ref="listView">
+        <template #rowActions="{rowObject: {auditLog}}">
+          <os-button
+            v-if="auditLog.error && queryDiagnosticsEnabled"
+            left-icon="download"
+            size="small"
+            v-os-tooltip.bottom="$t('queries.download_diagnostics')"
+            @click="downloadDiagnostics(auditLog)"
+          />
+        </template>
+      </os-list-view>
     </os-page-body>
   </os-page>
 
@@ -82,6 +93,8 @@ import util         from '@/common/services/Util.js';
 export default {
   props: ['filters'],
 
+  inject: ['ui'],
+
   data() {
     return {
       ctx: {
@@ -103,6 +116,13 @@ export default {
       listSchema,
 
       exportLogsFs: exportLogsSchema.layout
+    }
+  },
+
+  computed: {
+    queryDiagnosticsEnabled: function() {
+      const {global: {appProps}} = this.ui;
+      return appProps.queryDiagnosticsEnabled;
     }
   },
 
@@ -178,12 +198,29 @@ export default {
           this.hideExportLogsDialog();
         }
       );
+    },
+
+    downloadDiagnostics: function(auditLog) {
+      alertsSvc.info({code: 'queries.downloading_diagnostics'});
+      auditLogsSvc.downloadDiagnostics(auditLog.id);
     }
   }
 }
 </script>
 
 <style scoped>
+.audit-logs :deep(.failed > td) {
+  background-color: #fff4f4;
+}
+
+.audit-logs :deep(.failed > td:first-child) {
+  border-left: 0.25rem solid #d14343;
+}
+
+.audit-logs :deep(.failed:hover > td) {
+  background-color: #ffecec;
+}
+
 .sql-code {
   white-space: pre-wrap;
   word-break: break-all;

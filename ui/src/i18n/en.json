@@ -1871,7 +1871,9 @@
     "description": "Description",
     "description_req": "Description is mandatory",
     "display_field_names": "Display Field Names",
+    "download_diagnostics": "Download Diagnostics",
     "downloading_audit_log_report": "Downloading query audit logs report...",
+    "downloading_diagnostics": "Downloading query diagnostics...",
     "edit_filter": "Edit Filter",
     "enable_wide_rows": "Enable Wide Rows",
     "end_date": "End Date",
@@ -1883,6 +1885,7 @@
     "expression": "Expression",
     "expression_req": "Expression is mandatory",
     "expressions_n_filters": "Expressions and Filters",
+    "failed": "Failed",
     "field": "Field",
     "field_labels": "Field Labels",
     "fns": {

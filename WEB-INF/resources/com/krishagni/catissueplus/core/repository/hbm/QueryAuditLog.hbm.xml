@@ -30,5 +30,7 @@
     <property name="sql" column="QUERY_SQL" />
 
     <property name="aql" column="AQL" />
+
+    <property name="error" column="ERROR_MESSAGE" />
   </class>
 </hibernate-mapping>

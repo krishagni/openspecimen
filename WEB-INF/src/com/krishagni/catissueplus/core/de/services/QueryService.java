@@ -89,6 +89,8 @@ public interface QueryService {
 
 	ResponseEvent<QueryAuditLogDetail> getAuditLog(RequestEvent<Long> req);
 
+	ResponseEvent<File> getAuditLogDiagnosticFile(RequestEvent<Long> req);
+
 	ResponseEvent<ExportedFileDetail> exportAuditLogs(RequestEvent<QueryAuditLogsListCriteria> req);
 
 	ResponseEvent<File> getExportedAuditLogsFile(RequestEvent<String> req);
