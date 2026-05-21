@@ -38,10 +38,15 @@ public class FilesBacklogCleaner implements ScheduledTask {
 
 	private static final int API_LOG_RETENTION_DAYS = 90;
 
+	private static final int QUERY_AUDIT_LOG_RETENTION_DAYS = 90;
+
 	private static final int NOTIF_RETENTION_DAYS = 90;
 
 	@Autowired
 	private DaoFactory daoFactory;
+
+	@Autowired
+	private com.krishagni.catissueplus.core.de.repository.DaoFactory deDaoFactory;
 	
 	@Override
 	public void doJob(ScheduledJobRun jobRun) 
@@ -73,6 +78,7 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		cleanupOlderFiles(getDataDir(), effectivePeriod, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"), false);
 
 		cleanupApiCallsLog(argsMap);
+		cleanupQueryAuditLogs(argsMap);
 		cleanupNotifs(argsMap);
 	}
 
@@ -198,6 +204,20 @@ public class FilesBacklogCleaner implements ScheduledTask {
 	@PlusTransactional
 	private int cleanupApiCallsLog0(int apiLogsRetentionDays) {
 		return daoFactory.getAuditDao().deleteApiCallLogs(apiLogsRetentionDays, 10000);
+	}
+
+	private int cleanupQueryAuditLogs(Map<String, String> argsMap) {
+		return cleanupOldDbEntries(
+			"Query audit log entries",
+			this::cleanupQueryAuditLogs0,
+			argsMap,
+			"queryAuditLogsRetentionDays",
+			QUERY_AUDIT_LOG_RETENTION_DAYS);
+	}
+
+	@PlusTransactional
+	private int cleanupQueryAuditLogs0(int queryAuditLogsRetentionDays) {
+		return deDaoFactory.getQueryAuditLogDao().deleteLogsOlderThan(queryAuditLogsRetentionDays, 1000);
 	}
 
 	private int cleanupNotifs(Map<String, String> argsMap) {

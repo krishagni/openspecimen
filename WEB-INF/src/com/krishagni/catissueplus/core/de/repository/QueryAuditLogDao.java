@@ -10,4 +10,6 @@ public interface QueryAuditLogDao extends Dao<QueryAuditLog>{
 	Long getLogsCount(QueryAuditLogsListCriteria crit);
 
 	List<QueryAuditLog> getLogs(QueryAuditLogsListCriteria crit);
+
+	int deleteLogsOlderThan(int olderThanDays, int maxRows);
 }
