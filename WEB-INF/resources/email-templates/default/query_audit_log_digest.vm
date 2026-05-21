@@ -1,0 +1,94 @@
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate;background:#f6f8fb">
+  <tbody>
+    <tr>
+      <td style="border-collapse:collapse;padding:22px">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;color:#263238">
+          <tbody>
+            <tr>
+              <td style="border-collapse:collapse;padding:0 0 18px 0">
+                <div style="font-size:20px;line-height:28px;font-weight:700;color:#1f2933">Query Audit Log Digest</div>
+                <div style="font-size:13px;line-height:20px;color:#5b6876;margin-top:4px">Period: <b>$startTime</b> to <b>$endTime</b></div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="border-collapse:collapse;padding:0 0 22px 0">
+                <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;background:#ffffff;border:1px solid #e3e8ef;border-radius:6px;overflow:hidden">
+                  <thead>
+                    <tr>
+                      <th colspan="2" style="background:#2f6f9f;color:#ffffff;text-align:left;padding:10px 16px;font-size:14px;line-height:20px">
+                        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse">
+                          <tr>
+                            <td style="color:#ffffff;font-size:14px;line-height:20px;font-weight:700">Execution Summary</td>
+                            <td style="text-align:right">
+                              <a href="$failedLogsUrl" target="_blank" style="display:inline-block;background:#ffffff;color:#bd2b2b;text-decoration:none;font-weight:700;font-size:12px;line-height:16px;padding:6px 10px;border-radius:4px">View Failed Queries</a>
+                            </td>
+                          </tr>
+                        </table>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;color:#52606d">Queries run</td>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;text-align:right;font-weight:700;color:#1f2933">$digest.total</td>
+                    </tr>
+                    <tr>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;color:#52606d">Successful queries</td>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;text-align:right;font-weight:700;color:#177245">$digest.successful</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:12px 16px;color:#52606d">Failed queries</td>
+                      <td style="padding:12px 16px;text-align:right;font-weight:700;color:#bd2b2b">$digest.failed</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="border-collapse:collapse;padding:0 0 8px 0">
+                <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;background:#ffffff;border:1px solid #e3e8ef;border-radius:6px;overflow:hidden">
+                  <thead>
+                    <tr>
+                      <th colspan="3" style="background:#2f6f9f;color:#ffffff;text-align:left;padding:12px 16px;font-size:14px;line-height:20px">Successful Query Runtime</th>
+                    </tr>
+                    <tr>
+                      <th style="border-bottom:1px solid #edf1f5;padding:10px 16px;text-align:left;color:#52606d;font-size:12px;text-transform:uppercase;letter-spacing:.03em">Percentile</th>
+                      <th style="border-bottom:1px solid #edf1f5;padding:10px 16px;text-align:right;color:#52606d;font-size:12px;text-transform:uppercase;letter-spacing:.03em">Runtime</th>
+                      <th style="border-bottom:1px solid #edf1f5;padding:10px 16px;text-align:right;color:#52606d;font-size:12px;text-transform:uppercase;letter-spacing:.03em">Milliseconds</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    #foreach ($stat in $perfStats)
+                    #set ($statLabel = $stat.name)
+                    #if ($stat.name == "p50")
+                      #set ($statLabel = "P50")
+                    #elseif ($stat.name == "p90")
+                      #set ($statLabel = "P90")
+                    #elseif ($stat.name == "p95")
+                      #set ($statLabel = "P95")
+                    #elseif ($stat.name == "p99")
+                      #set ($statLabel = "P99")
+                    #end
+                    <tr>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;color:#52606d">$statLabel</td>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;text-align:right;font-weight:700;color:#1f2933">$stat.runtimeInSecs sec</td>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;text-align:right;font-weight:700;color:#1f2933">$stat.runtime</td>
+                    </tr>
+                    #end
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="background:#ffffff">
+        #parse( $footer )
+      </td>
+    </tr>
+  </tbody>
+</table>
