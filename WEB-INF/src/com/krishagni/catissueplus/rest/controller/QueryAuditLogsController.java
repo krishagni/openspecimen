@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,6 +50,17 @@ public class QueryAuditLogsController {
 		@RequestParam(value = "userId", required = false)
 		Long userId,
 
+		@RequestParam(value = "failed", required = false, defaultValue = "false")
+		boolean failed,
+
+		@RequestParam(value = "startDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		Date startDate,
+
+		@RequestParam(value = "endDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		Date endDate,
+
 		@RequestParam(value = "orderDirection", required = false, defaultValue = "desc")
 		String orderDirection,
 
@@ -58,7 +71,9 @@ public class QueryAuditLogsController {
 		int maxResults) {
 		
 		QueryAuditLogsListCriteria crit = new QueryAuditLogsListCriteria()
-			.query(query).userId(userId)
+			.query(query).userId(userId).failed(failed)
+			.startDate(startDate != null ? Utility.chopTime(startDate) : null)
+			.endDate(endDate != null ? Utility.getEndOfDay(endDate) : null)
 			.asc("asc".equalsIgnoreCase(orderDirection))
 			.startAt(startAt).maxResults(maxResults);
 		return ResponseEvent.unwrap(querySvc.getAuditLogs(RequestEvent.wrap(crit)));
@@ -72,9 +87,23 @@ public class QueryAuditLogsController {
 		String query,
 
 		@RequestParam(value = "userId", required = false)
-		Long userId) {
+		Long userId,
 
-		QueryAuditLogsListCriteria crit = new QueryAuditLogsListCriteria().query(query).userId(userId);
+		@RequestParam(value = "failed", required = false, defaultValue = "false")
+		boolean failed,
+
+		@RequestParam(value = "startDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		Date startDate,
+
+		@RequestParam(value = "endDate", required = false)
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		Date endDate) {
+
+		QueryAuditLogsListCriteria crit = new QueryAuditLogsListCriteria()
+			.query(query).userId(userId).failed(failed)
+			.startDate(startDate != null ? Utility.chopTime(startDate) : null)
+			.endDate(endDate != null ? Utility.getEndOfDay(endDate) : null);
 		Long count = ResponseEvent.unwrap(querySvc.getAuditLogsCount(RequestEvent.wrap(crit)));
 		return Collections.singletonMap("count", count);
 	}
@@ -89,7 +118,7 @@ public class QueryAuditLogsController {
 	@RequestMapping(method = RequestMethod.GET, value="{id}/diagnostics")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public void downloadAuditLogDiagnostics(@PathVariable Long id, HttpServletResponse httpResp) {
+	public void downloadAuditLogDiagnostics(@PathVariable("id") Long id, HttpServletResponse httpResp) {
 		File file = ResponseEvent.unwrap(querySvc.getAuditLogDiagnosticFile(RequestEvent.wrap(id)));
 		Utility.sendToClient(httpResp, "query_audit_log_" + id + ".json.zip", file);
 	}

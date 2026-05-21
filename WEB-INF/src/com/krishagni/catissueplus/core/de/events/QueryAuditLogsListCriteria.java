@@ -22,6 +22,8 @@ public class QueryAuditLogsListCriteria extends AbstractListCriteria<QueryAuditL
 
 	private Long instituteId;
 
+	private boolean failed;
+
 	@JsonProperty("startDate")
 	public QueryAuditLogsListCriteria startDate(Date startDate) {
 		this.startDate = startDate;
@@ -73,6 +75,17 @@ public class QueryAuditLogsListCriteria extends AbstractListCriteria<QueryAuditL
 		return self();
 	}
 
+	@JsonProperty("failed")
+	public boolean failed() {
+		return failed;
+	}
+
+	@JsonProperty("failed")
+	public QueryAuditLogsListCriteria failed(boolean failed) {
+		this.failed = failed;
+		return self();
+	}
+
 	@Override
 	public QueryAuditLogsListCriteria self() {
 		return this;
@@ -84,7 +97,8 @@ public class QueryAuditLogsListCriteria extends AbstractListCriteria<QueryAuditL
 			.append("start date = ").append(startDate()).append(", ")
 			.append("end date = ").append(endDate()).append(", ")
 			.append("users = ").append(userIds()).append(", ")
-			.append("institute = ").append(instituteId())
+			.append("institute = ").append(instituteId()).append(", ")
+			.append("failed = ").append(failed())
 			.toString();
 	}
 
@@ -104,6 +118,10 @@ public class QueryAuditLogsListCriteria extends AbstractListCriteria<QueryAuditL
 
 		if (instituteId != null) {
 			result.put("instituteId", instituteId.toString());
+		}
+
+		if (failed) {
+			result.put("failed", Boolean.toString(failed));
 		}
 
 		return result;

@@ -51,6 +51,23 @@ export default {
       captionCode: "queries.id_or_title"
     },
     {
+      name: "failed",
+      type: "booleanCheckbox",
+      captionCode: "queries.failed_only"
+    },
+    {
+      name: "startDate",
+      type: "date",
+      captionCode: "queries.start_date",
+      dateOnly: true
+    },
+    {
+      name: "endDate",
+      type: "date",
+      captionCode: "queries.end_date",
+      dateOnly: true
+    },
+    {
       name: "userId",
       type: "user",
       captionCode: "queries.executed_by",

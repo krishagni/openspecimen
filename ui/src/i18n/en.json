@@ -1886,6 +1886,7 @@
     "expression_req": "Expression is mandatory",
     "expressions_n_filters": "Expressions and Filters",
     "failed": "Failed",
+    "failed_only": "Failed Only",
     "field": "Field",
     "field_labels": "Field Labels",
     "fns": {
