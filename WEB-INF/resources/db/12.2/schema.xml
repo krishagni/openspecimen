@@ -805,4 +805,10 @@
       <column name="ERROR_MESSAGE" type="${text.type}(255)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Index on query audit execution time">
+    <createIndex tableName="CATISSUE_QUERY_AUDIT_LOGS" indexName="OS_QUERY_AUDIT_TIME_IDX">
+      <column name="TIME_OF_EXEC" type="${timestamp.type}" />
+    </createIndex>
+  </changeSet>
 </databaseChangeLog>
