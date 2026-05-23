@@ -373,6 +373,13 @@ public class StorageContainersController {
 		return resp.getPayload();
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value="{id}/utilisation-map")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<StorageContainerSummary> getContainerUtilisationMap(@PathVariable("id") Long containerId) {
+		return ResponseEvent.unwrap(storageContainerSvc.getUtilisationMap(RequestEvent.wrap(containerId)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "{id}/specimens")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

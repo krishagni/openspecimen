@@ -256,6 +256,7 @@
     <sql-query name="getRootAndChildContainers">
       <return-scalar column="containerId"   type="long"/>
       <return-scalar column="containerName" type="string"/>
+      <return-scalar column="barcode"       type="string"/>
       <return-scalar column="displayName"   type="string"/>
       <return-scalar column="noOfRows"      type="int"/>
       <return-scalar column="noOfColumns"   type="int"/>
@@ -269,7 +270,7 @@
       <return-scalar column="colStr"        type="string"/>
 
       select
-        s.identifier as containerId, s.name as containerName, s.display_name as displayName,
+        s.identifier as containerId, s.name as containerName, s.barcode, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, s.pos_assignment as posAssignment,
         s.status, s.activity_status as activityStatus, s.parent_container_id as parentId,
         p.pos_two as rowNo, p.pos_one as colNo, p.pos_two_str as rowStr, p.pos_one_str as colStr
@@ -282,7 +283,7 @@
       union all
 
       select
-        s.identifier as containerId, s.name as containerName, s.display_name as displayName,
+        s.identifier as containerId, s.name as containerName, s.barcode, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, s.pos_assignment as posAssignment,
         s.status, s.activity_status as activityStatus, null as parentId, null as rowNo, null as colNo,
         null as rowStr, null as colStr
@@ -295,6 +296,7 @@
     <sql-query name="getChildContainers">
       <return-scalar column="containerId"   type="long"/>
       <return-scalar column="containerName" type="string"/>
+      <return-scalar column="barcode"       type="string"/>
       <return-scalar column="displayName"   type="string"/>
       <return-scalar column="noOfRows"      type="int"/>
       <return-scalar column="noOfColumns"   type="int"/>
@@ -307,8 +309,9 @@
       <return-scalar column="rowStr"        type="string"/>
       <return-scalar column="colStr"        type="string"/>
 
+
       select
-        s.identifier as containerId, s.name as containerName, s.display_name as displayName,
+        s.identifier as containerId, s.name as containerName, s.barcode, s.display_name as displayName,
         s.no_of_rows as noOfRows, s.no_of_cols as noOfColumns, null as posAssignment,
         s.status, s.activity_status as activityStatus, s.parent_container_id as parentId,
         p.pos_two as rowNo, p.pos_one as colNo, p.pos_two_str as rowStr, p.pos_one_str as colStr
@@ -439,6 +442,28 @@
       where
         b.identifier in (:containerIds) and
         b.activity_status != 'Disabled'
+    </sql-query>
+
+    <sql-query name="getContainerUtilisationStats">
+      <return-scalar column="containerId" type="long"/>
+      <return-scalar column="occupiedSlots" type="integer"/>
+      <return-scalar column="freeSlots" type="integer"/>
+
+      select
+        a.identifier as containerId,
+        coalesce(sum(d.utilisation), 0) as occupiedSlots,
+        coalesce(sum((d.no_of_rows * d.no_of_cols) - d.utilisation), 0) as freeSlots
+      from
+        os_storage_containers a
+        inner join os_containers_hierarchy h on h.ancestor_id = a.identifier
+        inner join os_storage_containers d on d.identifier = h.descendent_id
+      where
+        a.identifier in (:containerIds) and
+        a.activity_status != 'Disabled' and
+        d.activity_status != 'Disabled' and
+        d.store_specimens = 1
+      group by
+        a.identifier
     </sql-query>
 
     <sql-query name="getContainerReportDetails">

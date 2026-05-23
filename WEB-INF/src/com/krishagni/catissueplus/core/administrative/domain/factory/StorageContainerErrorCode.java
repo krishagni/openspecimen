@@ -72,6 +72,8 @@ public enum StorageContainerErrorCode implements ErrorCode {
 
 	DIMLESS_NO_MAP,
 
+	DIMLESS_NO_UTILISATION_MAP,
+
 	INVALID_CAPACITY,
 
 	AUTOMATED_NOT_DIMENSIONLESS,

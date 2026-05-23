@@ -71,6 +71,11 @@ public interface StorageContainerDao extends Dao<StorageContainer> {
 
 	List<StorageContainerSummary> getUtilisations(Collection<Long> containerIds);
 
+	//
+	// Returns map of container ID and {occupied positions, free positions} tuples.
+	//
+	Map<Long, int[]> getUtilisationStats(Collection<Long> containerIds);
+
 	List<ContainerTransferEventDetail> getTransferEvents(ContainerReportCriteria crit);
 
 	List<StorageContainerSummary> fetchReportDetails(List<Long> containerIds);

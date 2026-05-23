@@ -33,6 +33,12 @@
               </router-link>
             </li>
             <li v-if="ctx.container.activityStatus == 'Active'">
+              <router-link :to="getRoute('Utilisation')">
+                <os-icon name="chart-pie" />
+                <span class="label" v-t="'containers.utilisation'">Utilisation</span>
+              </router-link>
+            </li>
+            <li v-if="ctx.container.activityStatus == 'Active'">
               <router-link :to="getRoute('Specimens')">
                 <os-icon name="flask" />
                 <span class="label" v-t="'containers.specimens'">Specimens</span>

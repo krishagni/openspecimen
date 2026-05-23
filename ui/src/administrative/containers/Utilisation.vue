@@ -1,0 +1,294 @@
+<template>
+  <os-page-toolbar>
+    <template #default>
+      <div class="os-utilisation-legend" v-if="!isDimensionless">
+        <span class="legend-item" v-for="item of legend" :key="item.key">
+          <span :class="['legend-swatch', item.key]" />
+          <span>{{item.label}}</span>
+        </span>
+      </div>
+    </template>
+  </os-page-toolbar>
+
+  <div class="os-container-utilisation">
+    <Layout class="map" :container="ctx.container" :occupants="ctx.occupants" v-if="!isDimensionless && hasChildContainers">
+      <template #occupant_container="slotProps">
+        <a :class="['utilisation-cell', getUtilisationClass(slotProps.occupant)]"
+          v-os-tooltip="getTooltip(slotProps.occupant)"
+          @click.prevent="showUtilisation(slotProps.occupant)">
+          <span class="container-name">{{getDisplayName(slotProps.occupant)}}</span>
+          <span class="utilisation-value">{{slotProps.occupant.utilisation}}%</span>
+          <span class="utilisation-counts">
+            {{getOccupiedSlots(slotProps.occupant)}} / {{slotProps.occupant.totalSlots}}
+          </span>
+        </a>
+      </template>
+
+      <template #empty>
+        <span />
+      </template>
+    </Layout>
+
+    <div v-else-if="isDimensionless">
+      <os-message type="info">
+        <span v-t="'containers.no_utilisation_map_for_dimless'">Utilisation map is not available for dimensionless containers.</span>
+      </os-message>
+    </div>
+
+    <div v-else>
+      <os-message type="info">
+        <span v-t="'containers.no_child_containers_for_utilisation'">This container does not store any child containers.</span>
+      </os-message>
+    </div>
+  </div>
+</template>
+
+<script>
+import { reactive } from 'vue';
+
+import boxUtil      from '@/common/services/BoxUtil.js';
+import containerSvc from '@/administrative/services/Container.js';
+import routerSvc    from '@/common/services/Router.js';
+
+import Layout from './Layout.vue';
+
+export default {
+  props: ['container'],
+
+  components: {
+    Layout
+  },
+
+  setup() {
+    const ctx = reactive({
+      container: {},
+      occupants: []
+    });
+
+    return { ctx };
+  },
+
+  created() {
+    this._setupView();
+  },
+
+  watch: {
+    'container.id': function(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this._setupView();
+      }
+    }
+  },
+
+  computed: {
+    isDimensionless: function() {
+      return !(this.ctx.container.noOfRows > 0 && this.ctx.container.noOfColumns > 0);
+    },
+
+    hasChildContainers: function() {
+      return this.ctx.occupants.length > 0;
+    },
+
+    legend: function() {
+      return ['full', 'high', 'medium', 'low', 'empty'].map(
+        key => ({key, label: this.$t('containers.utilisation_' + key)})
+      );
+    }
+  },
+
+  methods: {
+    getUtilisationClass: function(occupant) {
+      const utilisation = occupant.utilisation || 0;
+      if (utilisation >= 100) {
+        return 'full';
+      } else if (utilisation > 80) {
+        return 'high';
+      } else if (utilisation > 50) {
+        return 'medium';
+      } else if (utilisation > 0) {
+        return 'low';
+      }
+
+      return 'empty';
+    },
+
+    getTooltip: function(occupant) {
+      return this.$t(
+        'containers.utilisation_cell_tooltip',
+        {
+          name: this.getDisplayName(occupant),
+          utilisation: occupant.utilisation,
+          occupied: this.getOccupiedSlots(occupant),
+          total: occupant.totalSlots
+        }
+      );
+    },
+
+    showUtilisation: function(occupant) {
+      const containerId = occupant.id;
+      if (containerId) {
+        routerSvc.goto('ContainerDetail.Utilisation', {containerId});
+      }
+    },
+
+    getDisplayName: function(occupant) {
+      return occupant.displayName || occupant.occupyingEntityName || occupant.name;
+    },
+
+    getOccupiedSlots: function(occupant) {
+      return (occupant.totalSlots || 0) - (occupant.freeSlots || 0);
+    },
+
+    _setupView: async function() {
+      this.ctx.container = this.container;
+      this.ctx.occupants = [];
+      if (this.isDimensionless) {
+        return;
+      }
+
+      const occupants = await containerSvc.getUtilisationMap(this.ctx.container);
+      this.ctx.occupants = (occupants || []).map(occupant => this._toOccupant(occupant));
+    },
+
+    _toOccupant: function(occupant) {
+      const location = occupant.storageLocation || {};
+      const assigner = boxUtil.getPositionAssigner(this.ctx.container.positionAssignment);
+      const {row, column} = assigner.fromPos({
+        pos: location.position,
+        nr: this.ctx.container.noOfRows,
+        nc: this.ctx.container.noOfColumns
+      });
+      const totalSlots = occupant.totalPositions || 0;
+      const usedSlots  = occupant.usedPositions || 0;
+      return {
+        ...occupant,
+        occuypingEntity: 'container',
+        occupyingEntityId: occupant.id,
+        occupyingEntityName: occupant.name,
+        posTwo: location.positionY,
+        posOne: location.positionX,
+        posTwoOrdinal: row,
+        posOneOrdinal: column,
+        freeSlots: occupant.freePositions || 0,
+        totalSlots: totalSlots,
+        utilisation: totalSlots > 0 ? Math.round(usedSlots * 100 / totalSlots) : 0
+      };
+    }
+  }
+}
+</script>
+
+<style scoped>
+.os-container-utilisation {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.os-container-utilisation .map {
+  flex: 1;
+}
+
+.os-container-utilisation .map :deep(td.occupied) {
+  background: transparent;
+}
+
+.os-container-utilisation .map :deep(td.occupied .coord) {
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.os-container-utilisation .map :deep(.occupant-wrapper) {
+  position: static;
+  padding: 0;
+}
+
+.os-utilisation-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+}
+
+.os-utilisation-legend .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.os-utilisation-legend .legend-swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+}
+
+.utilisation-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  inset: 2px;
+  padding: 1.65rem 0.45rem 0.45rem;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.utilisation-cell:hover {
+  color: #fff;
+  filter: brightness(0.96);
+}
+
+.utilisation-cell .container-name,
+.utilisation-cell .utilisation-counts {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.utilisation-cell .container-name {
+  font-weight: 600;
+}
+
+.utilisation-cell .utilisation-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.utilisation-cell .utilisation-counts {
+  font-size: 0.85rem;
+}
+
+.full,
+.legend-swatch.full {
+  background: #b91c1c;
+}
+
+.high,
+.legend-swatch.high {
+  background: #dc5f57;
+}
+
+.medium,
+.legend-swatch.medium {
+  background: #d97706;
+}
+
+.low,
+.legend-swatch.low {
+  background: #2e7d32;
+}
+
+.empty,
+.legend-swatch.empty {
+  background: #2f80a7;
+}
+</style>

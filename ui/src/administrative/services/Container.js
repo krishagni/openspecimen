@@ -88,6 +88,10 @@ class Container {
     return http.get('storage-containers/' + container.id + '/occupied-positions');
   }
 
+  async getUtilisationMap(container) {
+    return http.get('storage-containers/' + container.id + '/utilisation-map');
+  }
+
   async printLabels(containerIds) {
     return http.post('container-label-printer', {containerIds});
   }

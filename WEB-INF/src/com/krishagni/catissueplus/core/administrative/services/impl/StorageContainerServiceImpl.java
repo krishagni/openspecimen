@@ -344,6 +344,46 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	@Override
 	@PlusTransactional
+	public ResponseEvent<List<StorageContainerSummary>> getUtilisationMap(RequestEvent<Long> req) {
+		try {
+			StorageContainer container = getContainer(req.getPayload(), null);
+			if (container.isArchived()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.ARCHIVED, container.getName());
+			}
+
+			if (container.isDimensionless()) {
+				return ResponseEvent.userError(StorageContainerErrorCode.DIMLESS_NO_UTILISATION_MAP, container.getName());
+			}
+
+			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+			List<StorageContainerSummary> result = daoFactory.getStorageContainerDao().getChildContainers(container);
+
+			Map<Long, int[]> stats = daoFactory.getStorageContainerDao().getUtilisationStats(
+				result.stream().map(StorageContainerSummary::getId).collect(Collectors.toList())
+			);
+
+			for (StorageContainerSummary child : result) {
+				int[] stat = stats.get(child.getId());
+				if (stat == null) {
+					continue;
+				}
+
+				int occupiedSlots = stat[0], freeSlots = stat[1], totalSlots = occupiedSlots + freeSlots;
+				child.setUsedPositions(occupiedSlots);
+				child.setFreePositions(freeSlots);
+				child.setTotalPositions(totalSlots);
+			}
+
+			return ResponseEvent.response(result);
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
 	public ResponseEvent<List<SpecimenInfo>> getSpecimens(RequestEvent<SpecimenListCriteria> req) {
 		StorageContainer container = getContainer(req.getPayload().ancestorContainerId(), null);
 		if (container.isArchived()) {

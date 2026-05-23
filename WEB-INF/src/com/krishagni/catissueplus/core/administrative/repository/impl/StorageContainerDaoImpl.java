@@ -537,6 +537,26 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	}
 
 	@Override
+	public Map<Long, int[]> getUtilisationStats(Collection<Long> containerIds) {
+		if (isEmpty(containerIds)) {
+			return Collections.emptyMap();
+		}
+
+		List<Object[]> rows = createNamedQuery(GET_CONTAINER_UTILISATION_STATS, Object[].class)
+			.setParameterList("containerIds", containerIds)
+			.list();
+
+		Map<Long, int[]> result = new HashMap<>();
+		for (Object[] row : rows) {
+			int idx = -1;
+			Long containerId = (Long) row[++idx];
+			result.put(containerId, new int[] {(Integer) row[++idx], (Integer) row[++idx]});
+		}
+
+		return result;
+	}
+
+	@Override
 	public List<ContainerTransferEventDetail> getTransferEvents(ContainerReportCriteria crit) {
 		String selectClause = "select r, c, tr";
 		String fromClause = "from " +
@@ -679,6 +699,7 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		StorageContainerSummary container = new StorageContainerSummary();
 		container.setId((Long)row[idx++]);
 		container.setName((String)row[idx++]);
+		container.setBarcode((String)row[idx++]);
 		container.setDisplayName((String)row[idx++]);
 		container.setNoOfRows((Integer)row[idx++]);
 		container.setNoOfColumns((Integer)row[idx++]);
@@ -1411,6 +1432,8 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 	private static final String GET_SHIPPED_CONTAINERS = FQN + ".getShippedContainers";
 
 	private static final String GET_CONTAINER_UTILISATION = FQN + ".getContainersUtilisation";
+
+	private static final String GET_CONTAINER_UTILISATION_STATS = FQN + ".getContainerUtilisationStats";
 
 	private static final String GET_CONTAINER_DETAILS = FQN + ".getContainerReportDetails";
 

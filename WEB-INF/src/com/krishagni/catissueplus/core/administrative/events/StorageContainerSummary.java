@@ -57,6 +57,8 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 	private Integer freePositions;
 
 	private Integer usedPositions;
+
+	private Integer totalPositions;
 	
 	private Boolean storeSpecimensEnabled;
 
@@ -246,6 +248,14 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 
 	public void setUsedPositions(Integer usedPositions) {
 		this.usedPositions = usedPositions;
+	}
+
+	public Integer getTotalPositions() {
+		return totalPositions;
+	}
+
+	public void setTotalPositions(Integer totalPositions) {
+		this.totalPositions = totalPositions;
 	}
 
 	@JsonProperty

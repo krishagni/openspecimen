@@ -977,6 +977,11 @@ const routes = [
             component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Locations.vue')
           },
           {
+            path: 'utilisation',
+            name: 'ContainerDetail.Utilisation',
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Utilisation.vue')
+          },
+          {
             path: 'specimens',
             name: 'ContainerDetail.Specimens',
             component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Specimens.vue')
