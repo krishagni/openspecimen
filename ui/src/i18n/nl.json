@@ -256,6 +256,7 @@
     "downloading_empty_pos_report": "Lege posities aan het downloaden...",
     "downloading_map": "Overzicht van containers aan het downloaden...",
     "downloading_utilisation_report": "Gebruiksrapport aan het downloaden...",
+    "empty_container_slot": "Lege {type} positie",
     "empty_pos_report_by_email": "Genereren van rapport met lege posities duurt langer dan verwacht. De link om het rapport te downloaden zal u per e-mail worden toegestuurd.",
     "empty_positions": "Lege posities",
     "event_id": "Verrichting ID",

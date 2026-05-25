@@ -357,9 +357,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			List<StorageContainerSummary> result = daoFactory.getStorageContainerDao().getChildContainers(container);
+			addEmptySlots(container, result);
 
 			Map<Long, int[]> stats = daoFactory.getStorageContainerDao().getUtilisationStats(
-				result.stream().map(StorageContainerSummary::getId).collect(Collectors.toList())
+				result.stream().map(StorageContainerSummary::getId).filter(Objects::nonNull).collect(Collectors.toList())
 			);
 
 			for (StorageContainerSummary child : result) {
@@ -379,6 +380,43 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
+		}
+	}
+
+	private void addEmptySlots(StorageContainer container, List<StorageContainerSummary> result) {
+		ContainerType type = container.getType();
+		if (type == null || type.getCanHold() == null || type.getCanHold().getCapacity() == null) {
+			return;
+		}
+
+		ContainerType canHold = type.getCanHold();
+		Set<Integer> occupiedPositions = result.stream()
+			.map(StorageContainerSummary::getStorageLocation)
+			.filter(Objects::nonNull)
+			.map(StorageLocationSummary::getPosition)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toSet());
+
+		int numPositions = container.getNoOfRows() * container.getNoOfColumns();
+		for (int position = 1; position <= numPositions; ++position) {
+			if (occupiedPositions.contains(position)) {
+				continue;
+			}
+
+			StorageContainerSummary slot = new StorageContainerSummary();
+			slot.setTypeId(canHold.getId());
+			slot.setTypeName(canHold.getName());
+			slot.setFreePositions(canHold.getCapacity().intValue());
+			slot.setUsedPositions(0);
+			slot.setTotalPositions(canHold.getCapacity().intValue());
+
+			Pair<Integer, Integer> coord = container.getPositionAssigner().fromPosition(container, position);
+			StorageLocationSummary location = new StorageLocationSummary();
+			location.setPosition(position);
+			location.setPositionY(container.toRowLabelingScheme(coord.first()));
+			location.setPositionX(container.toColumnLabelingScheme(coord.second()));
+			slot.setStorageLocation(location);
+			result.add(slot);
 		}
 	}
 

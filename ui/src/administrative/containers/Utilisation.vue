@@ -132,6 +132,10 @@ export default {
     },
 
     getDisplayName: function(occupant) {
+      if (occupant.emptySlot) {
+        return this.$t('containers.empty_container_slot', {type: occupant.typeName});
+      }
+
       return occupant.displayName || occupant.occupyingEntityName || occupant.name;
     },
 
@@ -162,6 +166,7 @@ export default {
       const usedSlots  = occupant.usedPositions || 0;
       return {
         ...occupant,
+        emptySlot: !occupant.id,
         occuypingEntity: 'container',
         occupyingEntityId: occupant.id,
         occupyingEntityName: occupant.name,
@@ -229,15 +234,16 @@ export default {
 .utilisation-cell {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   position: absolute;
   inset: 2px;
-  padding: 1.65rem 0.45rem 0.45rem;
+  padding: 1.5rem 0.45rem 0.35rem;
   color: #fff;
   text-align: center;
   text-decoration: none;
   border-radius: 4px;
+  overflow: hidden;
 }
 
 .utilisation-cell:hover {
@@ -255,16 +261,18 @@ export default {
 
 .utilisation-cell .container-name {
   font-weight: 600;
+  min-height: 1.2rem;
 }
 
 .utilisation-cell .utilisation-value {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.2;
+  margin-top: auto;
 }
 
 .utilisation-cell .utilisation-counts {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .full,

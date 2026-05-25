@@ -625,6 +625,7 @@
     "downloading_map": "Downloading the container map...",
     "downloading_transfer_report": "Downloading the transfer report...",
     "downloading_utilisation_report": "Downloading the utilisation report...",
+    "empty_container_slot": "Empty {type} slot",
     "empty_pos_report_by_email": "Empty positions report generation is taking more time than anticipated. Link to download the report will be sent to you by email.",
     "empty_positions": "Empty Positions",
     "event_id": "Event ID",

@@ -451,17 +451,24 @@
 
       select
         a.identifier as containerId,
-        coalesce(sum(d.utilisation), 0) as occupiedSlots,
-        coalesce(sum((d.no_of_rows * d.no_of_cols) - d.utilisation), 0) as freeSlots
+        coalesce(sum(case when d.store_specimens = 1 then d.utilisation else 0 end), 0) as occupiedSlots,
+        coalesce(sum(case
+          when d.store_specimens = 1 then coalesce(d.free_spaces, (d.no_of_rows * d.no_of_cols) - d.utilisation)
+          else 0
+        end), 0) +
+        coalesce(sum(case
+          when ct.capacity is not null then coalesce(d.free_spaces, 0) * ct.capacity
+          else 0
+        end), 0) as freeSlots
       from
         os_storage_containers a
-        inner join os_containers_hierarchy h on h.ancestor_id = a.identifier
-        inner join os_storage_containers d on d.identifier = h.descendent_id
+        left join os_containers_hierarchy h on h.ancestor_id = a.identifier
+        left join os_storage_containers d on d.identifier = h.descendent_id and d.activity_status != 'Disabled'
+        left join os_container_types t on t.identifier = d.type_id and t.activity_status != 'Disabled'
+        left join os_container_types ct on ct.identifier = t.can_hold and ct.activity_status != 'Disabled'
       where
         a.identifier in (:containerIds) and
-        a.activity_status != 'Disabled' and
-        d.activity_status != 'Disabled' and
-        d.store_specimens = 1
+        a.activity_status != 'Disabled'
       group by
         a.identifier
     </sql-query>
