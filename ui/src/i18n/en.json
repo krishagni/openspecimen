@@ -487,6 +487,7 @@
   "container_types": {
     "bulk_deleted": "Container types deleted successfully!",
     "can_hold": "Can Hold",
+    "capacity": "Capacity (Specimens)",
     "column_labeling_scheme_required": "Column Labeling Scheme is mandatory",
     "columns": "Columns",
     "columns_required": "Columns is mandatory",

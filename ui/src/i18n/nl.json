@@ -167,6 +167,7 @@
   "container_types": {
     "bulk_deleted": "Container types succesvol verwijderd!",
     "can_hold": "Kan bevatten",
+    "capacity": "Capaciteit (materialen)",
     "column_labeling_scheme_required": "Kolom etiketteringsschema is verplicht",
     "columns": "Kolommen",
     "columns_required": "Kolommen is verplicht",

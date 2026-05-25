@@ -18,4 +18,11 @@
       <column name="cpGroup_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to container type capacity">
+    <addColumn tableName="OS_CONTAINER_TYPES_AUD">
+      <column name="CAPACITY" type="${int.type}" />
+      <column name="capacity_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

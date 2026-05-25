@@ -119,4 +119,10 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Capacity in container types">
+    <addColumn tableName="OS_CONTAINER_TYPES">
+      <column name="CAPACITY" type="${int.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

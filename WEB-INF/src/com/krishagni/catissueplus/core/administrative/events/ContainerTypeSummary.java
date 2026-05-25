@@ -31,6 +31,8 @@ public class ContainerTypeSummary extends AttributeModifiedSupport {
 
 	private boolean storeSpecimenEnabled;
 
+	private Long capacity;
+
 	private String activityStatus;
 
 	public Long getId() {
@@ -121,6 +123,14 @@ public class ContainerTypeSummary extends AttributeModifiedSupport {
 		this.storeSpecimenEnabled = storeSpecimenEnabled;
 	}
 
+	public Long getCapacity() {
+		return capacity;
+	}
+
+	public void setCapacity(Long capacity) {
+		this.capacity = capacity;
+	}
+
 	public String getActivityStatus() {
 		return activityStatus;
 	}
@@ -141,6 +151,7 @@ public class ContainerTypeSummary extends AttributeModifiedSupport {
 		detail.setRowLabelingScheme(containerType.getRowLabelingScheme());
 		detail.setTemperature(containerType.getTemperature());
 		detail.setStoreSpecimenEnabled(containerType.isStoreSpecimenEnabled());
+		detail.setCapacity(containerType.getCapacity());
 		detail.setActivityStatus(containerType.getActivityStatus());
 	}
 	

@@ -5,9 +5,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <include file="db/data-type-definitions.xml"/>
-
-  <include file="db/5.2/post-init.xml" />
-  <include file="db/11.2/post-init.xml" />
-  <include file="db/13.0/post-init.xml" />
+  <changeSet author="vpawar" id="Initialize container type capacity">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.InitializeContainerTypeCapacity" />
+  </changeSet>
 </databaseChangeLog>

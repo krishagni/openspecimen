@@ -43,6 +43,8 @@
 
     <property name="storeSpecimenEnabled" column="STORE_SPECIMENS"/>
 
+    <property name="capacity" column="CAPACITY"/>
+
     <many-to-one name="canHold" column="CAN_HOLD"/>
     
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
@@ -78,6 +80,17 @@
         ch.id is null
       order by
         t.name
+    </query>
+
+    <query name="getActiveParentTypes">
+      select
+        t
+      from
+        com.krishagni.catissueplus.core.administrative.domain.ContainerType t
+        left join t.canHold ch
+      where
+        t.activityStatus != 'Disabled' and
+        ch.id = :typeId
     </query>
 
     <sql-query name="getDependentEntities">

@@ -1,5 +1,26 @@
 import routerSvc from '@/common/services/Router.js';
 
+function getCapacity(type) {
+  const {noOfRows, noOfColumns, storeSpecimenEnabled, canHold, capacity} = type || {};
+  if (!noOfRows || !noOfColumns) {
+    return null;
+  }
+
+  const positions = noOfRows * noOfColumns;
+  if (storeSpecimenEnabled) {
+    return positions;
+  } else if (canHold && canHold.capacity) {
+    return positions * canHold.capacity;
+  }
+
+  return capacity;
+}
+
+function formatCapacity(type) {
+  const capacity = getCapacity(type);
+  return capacity != null ? new Number(capacity).toLocaleString() : null;
+}
+
 export default {
   fields:  [
     {
@@ -193,6 +214,14 @@ export default {
 
         return routerSvc.getUrl('ContainerTypeDetail.Overview', {typeId: type.canHold.id});
       }
+    },
+    {
+      "type": "span",
+      "labelCode": "container_types.capacity",
+      "name": "type.uiCapacity",
+      "value": ({type}) => formatCapacity(type),
+      "showInOverviewWhen": "type.capacity != null",
+      "summary": true
     }
   ]
 }

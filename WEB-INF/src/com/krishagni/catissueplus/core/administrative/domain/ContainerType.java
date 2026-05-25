@@ -42,6 +42,8 @@ public class ContainerType extends BaseEntity {
 	private Double temperature;
 	
 	private boolean storeSpecimenEnabled;
+
+	private Long capacity;
 	
 	private ContainerType canHold;
 	
@@ -140,6 +142,14 @@ public class ContainerType extends BaseEntity {
 
 	public void setStoreSpecimenEnabled(boolean storeSpecimenEnabled) {
 		this.storeSpecimenEnabled = storeSpecimenEnabled;
+	}
+
+	public Long getCapacity() {
+		return capacity;
+	}
+
+	public void setCapacity(Long capacity) {
+		this.capacity = capacity;
 	}
 
 	public ContainerType getCanHold() {

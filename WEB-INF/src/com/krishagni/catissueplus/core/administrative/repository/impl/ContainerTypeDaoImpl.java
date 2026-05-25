@@ -53,6 +53,13 @@ public class ContainerTypeDaoImpl extends AbstractDao<ContainerType> implements 
 	}
 
 	@Override
+	public List<ContainerType> getActiveParentTypes(Long typeId) {
+		return createNamedQuery(GET_ACTIVE_PARENT_TYPES, ContainerType.class)
+			.setParameter("typeId", typeId)
+			.list();
+	}
+
+	@Override
 	public List<DependentEntityDetail> getDependentEntities(Long typeId) {
 		List<Object[]> rows = createNamedQuery(GET_DEPENDENTS, Object[].class)
 			.setParameter("typeId", typeId)
@@ -101,6 +108,8 @@ public class ContainerTypeDaoImpl extends AbstractDao<ContainerType> implements 
 	private static final String GET_BY_NAMES = FQN + ".getByNames";
 
 	private static final String GET_LEAF_IDS = FQN + ".getLeafTypeIds";
+
+	private static final String GET_ACTIVE_PARENT_TYPES = FQN + ".getActiveParentTypes";
 
 	private static final String GET_DEPENDENTS = FQN + ".getDependentEntities";
 }

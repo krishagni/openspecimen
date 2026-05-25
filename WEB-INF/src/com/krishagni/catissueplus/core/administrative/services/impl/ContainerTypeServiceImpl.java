@@ -33,6 +33,7 @@ import com.krishagni.catissueplus.core.common.events.EntityQueryCriteria;
 import com.krishagni.catissueplus.core.common.events.RequestEvent;
 import com.krishagni.catissueplus.core.common.events.ResponseEvent;
 import com.krishagni.catissueplus.core.common.service.ObjectAccessor;
+import com.krishagni.catissueplus.core.common.util.Status;
 import com.krishagni.catissueplus.core.exporter.domain.ExportJob;
 import com.krishagni.catissueplus.core.exporter.services.ExportService;
 
@@ -106,6 +107,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService, ObjectAcc
 			ContainerTypeDetail input = req.getPayload();
 			ContainerType containerType = containerTypeFactory.createContainerType(input);
 			ensureUniqueConstraints(null, containerType);
+			updateCapacity(containerType);
 			
 			daoFactory.getContainerTypeDao().saveOrUpdate(containerType, true);
 			return ResponseEvent.response(ContainerTypeDetail.from(containerType));
@@ -146,6 +148,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService, ObjectAcc
 			AccessCtrlMgr.getInstance().ensureCreateOrUpdateContainerTypeRights();
 			ContainerType existing = getContainerType(req.getPayload(), null);
 			existing.delete();
+			updateCapacity(existing);
 			return ResponseEvent.response(ContainerTypeDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -165,6 +168,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService, ObjectAcc
 			Collections.reverse(types);
 			for (ContainerType type : types) {
 				type.delete();
+				updateCapacity(type);
 				daoFactory.getContainerTypeDao().saveOrUpdate(type, true);
 				++count;
 			}
@@ -241,8 +245,15 @@ public class ContainerTypeServiceImpl implements ContainerTypeService, ObjectAcc
 			ContainerType containerType = containerTypeFactory.createContainerType(input, partial ? existing : null);
 			ensureUniqueConstraints(existing, containerType);
 
-			existing.update(containerType);
+			if (Status.isDisabledStatus(containerType.getActivityStatus())) {
+				existing.delete();
+			} else {
+				existing.update(containerType);
+			}
+
+			updateCapacity(existing);
 			daoFactory.getContainerTypeDao().saveOrUpdate(existing);
+			updateParentCapacities(existing, new HashSet<>());
 			return ResponseEvent.response(ContainerTypeDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -284,6 +295,40 @@ public class ContainerTypeServiceImpl implements ContainerTypeService, ObjectAcc
 		}
 
 		return result;
+	}
+
+	private void updateCapacity(ContainerType type) {
+		if (Status.isDisabledStatus(type.getActivityStatus()) || type.isDimensionless()) {
+			type.setCapacity(null);
+			return;
+		}
+
+		long positions = (long) type.getNoOfRows() * type.getNoOfColumns();
+		if (type.isStoreSpecimenEnabled()) {
+			type.setCapacity(positions);
+			return;
+		}
+
+		ContainerType canHold = type.getCanHold();
+		if (canHold == null || Status.isDisabledStatus(canHold.getActivityStatus()) || canHold.getCapacity() == null) {
+			type.setCapacity(null);
+			return;
+		}
+
+		type.setCapacity(positions * canHold.getCapacity());
+	}
+
+	private void updateParentCapacities(ContainerType type, Set<Long> visited) {
+		if (type.getId() == null || !visited.add(type.getId())) {
+			return;
+		}
+
+		List<ContainerType> parents = daoFactory.getContainerTypeDao().getActiveParentTypes(type.getId());
+		for (ContainerType parent : parents) {
+			updateCapacity(parent);
+			daoFactory.getContainerTypeDao().saveOrUpdate(parent);
+			updateParentCapacities(parent, visited);
+		}
 	}
 
 

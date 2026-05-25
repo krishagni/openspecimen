@@ -76,6 +76,9 @@ export default {
       },
       {
         "fields": [ { "name": "type.canHold" } ]
+      },
+      {
+        "fields": [ { "name": "type.uiCapacity" } ]
       }
     ]
   }

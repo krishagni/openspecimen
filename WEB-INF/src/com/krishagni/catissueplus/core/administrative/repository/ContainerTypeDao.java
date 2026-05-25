@@ -18,5 +18,7 @@ public interface ContainerTypeDao extends Dao<ContainerType> {
 
 	List<Long> getLeafTypeIds();
 
+	List<ContainerType> getActiveParentTypes(Long typeId);
+
 	List<DependentEntityDetail> getDependentEntities(Long typeId);
 }
