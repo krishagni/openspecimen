@@ -70,6 +70,8 @@ public interface StorageContainerService {
 	ResponseEvent<ExportedFileDetail> exportEmptyPositions(RequestEvent<ContainerQueryCriteria> req);
 
 	ResponseEvent<ExportedFileDetail> exportUtilisation(RequestEvent<ContainerReportCriteria> req);
+
+	ResponseEvent<ExportedFileDetail> exportUtilisationMap(RequestEvent<ContainerQueryCriteria> req);
 	
 	ResponseEvent<List<StorageContainerPositionDetail>> assignPositions(RequestEvent<PositionsDetail> req);
 		

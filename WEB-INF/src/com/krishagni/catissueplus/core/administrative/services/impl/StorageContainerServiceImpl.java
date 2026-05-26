@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -150,6 +151,8 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	private ContainerReport utilisationReport;
 
+	private ContainerReport utilisationMapReport;
+
 	private ContainerReport defragReport;
 
 	private LabelGenerator nameGenerator;
@@ -202,6 +205,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 	public void setUtilisationReport(ContainerReport utilisationReport) {
 		this.utilisationReport = utilisationReport;
+	}
+
+	public void setUtilisationMapReport(ContainerReport utilisationMapReport) {
+		this.utilisationMapReport = utilisationMapReport;
 	}
 
 	public void setDefragReport(ContainerReport defragReport) {
@@ -357,7 +364,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			List<StorageContainerSummary> result = daoFactory.getStorageContainerDao().getChildContainers(container);
-			addEmptySlots(container, result);
+			StorageContainerSummary.addEmptySlots(container, result);
 
 			Map<Long, int[]> stats = daoFactory.getStorageContainerDao().getUtilisationStats(
 				result.stream().map(StorageContainerSummary::getId).filter(Objects::nonNull).collect(Collectors.toList())
@@ -380,43 +387,6 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
-		}
-	}
-
-	private void addEmptySlots(StorageContainer container, List<StorageContainerSummary> result) {
-		ContainerType type = container.getType();
-		if (type == null || type.getCanHold() == null || type.getCanHold().getCapacity() == null) {
-			return;
-		}
-
-		ContainerType canHold = type.getCanHold();
-		Set<Integer> occupiedPositions = result.stream()
-			.map(StorageContainerSummary::getStorageLocation)
-			.filter(Objects::nonNull)
-			.map(StorageLocationSummary::getPosition)
-			.filter(Objects::nonNull)
-			.collect(Collectors.toSet());
-
-		int numPositions = container.getNoOfRows() * container.getNoOfColumns();
-		for (int position = 1; position <= numPositions; ++position) {
-			if (occupiedPositions.contains(position)) {
-				continue;
-			}
-
-			StorageContainerSummary slot = new StorageContainerSummary();
-			slot.setTypeId(canHold.getId());
-			slot.setTypeName(canHold.getName());
-			slot.setFreePositions(canHold.getCapacity().intValue());
-			slot.setUsedPositions(0);
-			slot.setTotalPositions(canHold.getCapacity().intValue());
-
-			Pair<Integer, Integer> coord = container.getPositionAssigner().fromPosition(container, position);
-			StorageLocationSummary location = new StorageLocationSummary();
-			location.setPosition(position);
-			location.setPositionY(container.toRowLabelingScheme(coord.first()));
-			location.setPositionX(container.toColumnLabelingScheme(coord.second()));
-			slot.setStorageLocation(location);
-			result.add(slot);
 		}
 	}
 
@@ -620,6 +590,11 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
 		}
+	}
+
+	@Override
+	public ResponseEvent<ExportedFileDetail> exportUtilisationMap(RequestEvent<ContainerQueryCriteria> req) {
+		return exportReport(req, utilisationMapReport);
 	}
 
 	@Override
@@ -1194,7 +1169,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			return ResponseEvent.userError(CommonErrorCode.INVALID_INPUT, fileId);
 		}
 
-		if (!parts[2].equals(AuthUtil.getCurrentUser().getId().toString())) {
+		if (!parts[2].equals(AuthUtil.getCurrentUser().getId().toString()) && !AuthUtil.isAdmin()) {
 			return ResponseEvent.userError(RbacErrorCode.ACCESS_DENIED);
 		}
 
@@ -2324,6 +2299,13 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			return ResponseEvent.response(result.get(30, TimeUnit.SECONDS));
 		} catch (TimeoutException te) {
 			return ResponseEvent.response(null);
+		} catch (ExecutionException ee) {
+			Throwable cause = ee.getCause();
+			if (cause instanceof OpenSpecimenException) {
+				return ResponseEvent.error((OpenSpecimenException) cause);
+			}
+
+			return ResponseEvent.serverError(cause instanceof Exception ? (Exception) cause : ee);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.events;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,9 +13,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.krishagni.catissueplus.core.administrative.domain.ContainerType;
+import com.krishagni.catissueplus.core.administrative.domain.PositionAssigner;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
+import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.events.UserSummary;
 
 @ListenAttributeChanges
@@ -484,5 +488,44 @@ public class StorageContainerSummary extends AttributeModifiedSupport {
 		}
 
 		return containers.stream().map(c -> from(c, includeChildren)).collect(Collectors.toList());
+	}
+
+	public static void addEmptySlots(StorageContainer container, List<StorageContainerSummary> result) {
+		ContainerType type = container.getType();
+		if (type == null || type.getCanHold() == null || type.getCanHold().getCapacity() == null || container.isDimensionless()) {
+			return;
+		}
+
+		Set<Integer> occupiedPositions = result.stream()
+			.map(StorageContainerSummary::getStorageLocation)
+			.filter(location -> location != null && location.getPosition() != null)
+			.map(StorageLocationSummary::getPosition)
+			.collect(Collectors.toSet());
+
+		PositionAssigner assigner = container.getPositionAssigner();
+		ContainerType childType = type.getCanHold();
+		List<StorageContainerSummary> emptySlots = new ArrayList<>();
+		for (int position = 1; position <= container.getNoOfRows() * container.getNoOfColumns(); ++position) {
+			if (occupiedPositions.contains(position)) {
+				continue;
+			}
+
+			StorageContainerSummary slot = new StorageContainerSummary();
+			slot.setTypeId(childType.getId());
+			slot.setTypeName(childType.getName());
+			slot.setUsedPositions(0);
+			slot.setFreePositions(childType.getCapacity().intValue());
+			slot.setTotalPositions(childType.getCapacity().intValue());
+
+			Pair<Integer, Integer> coord = assigner.fromPosition(container, position);
+			StorageLocationSummary location = new StorageLocationSummary();
+			location.setPosition(position);
+			location.setPositionY(container.toRowLabelingScheme(coord.first()));
+			location.setPositionX(container.toColumnLabelingScheme(coord.second()));
+			slot.setStorageLocation(location);
+			emptySlots.add(slot);
+		}
+
+		result.addAll(emptySlots);
 	}
 }

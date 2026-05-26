@@ -777,6 +777,11 @@
         <property name="daoFactory" ref="biospecimenDaoFactory"/>
       </bean>
     </property>
+    <property name="utilisationMapReport">
+      <bean class="com.krishagni.catissueplus.core.administrative.services.impl.ContainerUtilisationMapReport">
+        <property name="daoFactory" ref="biospecimenDaoFactory"/>
+      </bean>
+    </property>
     <property name="defragReport">
       <bean class="com.krishagni.catissueplus.core.administrative.services.impl.ContainerDefragReport">
         <property name="daoFactory" ref="biospecimenDaoFactory"/>

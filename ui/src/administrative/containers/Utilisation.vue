@@ -1,12 +1,20 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <div class="os-utilisation-legend" v-if="!isDimensionless">
-        <span class="legend-item" v-for="item of legend" :key="item.key">
-          <span :class="['legend-swatch', item.key]" />
-          <span>{{item.label}}</span>
-        </span>
-      </div>
+      <os-button left-icon="palette" :label="$t('containers.view_utilisation_legend')" @click="toggleLegend"
+        v-if="!isDimensionless" />
+
+      <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportUtilisationMap"
+        v-if="!isDimensionless && hasChildContainers" />
+
+      <os-overlay ref="legendOverlay">
+        <ul class="os-utilisation-legend">
+          <li class="legend-item" v-for="item of legend" :key="item.key">
+            <span :class="['legend-swatch', item.key]" />
+            <span class="legend-label">{{item.range}}, {{item.label}}</span>
+          </li>
+        </ul>
+      </os-overlay>
     </template>
   </os-page-toolbar>
 
@@ -48,6 +56,7 @@ import { reactive } from 'vue';
 
 import boxUtil      from '@/common/services/BoxUtil.js';
 import containerSvc from '@/administrative/services/Container.js';
+import alertsSvc    from '@/common/services/Alerts.js';
 import routerSvc    from '@/common/services/Router.js';
 
 import Layout from './Layout.vue';
@@ -90,13 +99,32 @@ export default {
     },
 
     legend: function() {
-      return ['full', 'high', 'medium', 'low', 'empty'].map(
-        key => ({key, label: this.$t('containers.utilisation_' + key)})
-      );
+      return [
+        {key: 'full',   range: '100%',  label: this.$t('containers.utilisation_full')},
+        {key: 'high',   range: '> 80%', label: this.$t('containers.utilisation_high_label')},
+        {key: 'medium', range: '51-80%', label: this.$t('containers.utilisation_medium_label')},
+        {key: 'low',    range: '1-50%', label: this.$t('containers.utilisation_low_label')},
+        {key: 'empty',  range: '0%',    label: this.$t('containers.utilisation_empty_label')}
+      ];
     }
   },
 
   methods: {
+    exportUtilisationMap: async function() {
+      alertsSvc.info({code: 'containers.generating_utilisation_map_report'});
+      const resp = await containerSvc.exportUtilisationMap(this.ctx.container);
+      if (resp.fileId) {
+        alertsSvc.info({code: 'containers.downloading_utilisation_map_report'});
+        containerSvc.downloadReport(resp.fileId);
+      } else {
+        alertsSvc.info({code: 'containers.utilisation_map_report_by_email'});
+      }
+    },
+
+    toggleLegend: function(event) {
+      this.$refs.legendOverlay.toggle(event);
+    },
+
     getUtilisationClass: function(occupant) {
       const utilisation = occupant.utilisation || 0;
       if (utilisation >= 100) {
@@ -210,16 +238,17 @@ export default {
 }
 
 .os-utilisation-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  align-items: center;
+  margin: -0.75rem -1rem;
+  padding: 0.5rem 0;
+  min-width: 12rem;
+  list-style: none;
 }
 
 .os-utilisation-legend .legend-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
   white-space: nowrap;
 }
 
@@ -229,6 +258,10 @@ export default {
   height: 0.9rem;
   border-radius: 2px;
   border: 1px solid rgba(0, 0, 0, 0.16);
+}
+
+.os-utilisation-legend .legend-label {
+  font-size: 0.875rem;
 }
 
 .utilisation-cell {

@@ -501,6 +501,15 @@ public class StorageContainersController {
 		return Collections.singletonMap("fileId", file != null ? file.getName() : null);
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/{id}/export-utilisation-map")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, String> exportUtilisationMap(@PathVariable("id") Long id) {
+		ContainerQueryCriteria crit = new ContainerQueryCriteria(id);
+		ExportedFileDetail file = ResponseEvent.unwrap(storageContainerSvc.exportUtilisationMap(RequestEvent.wrap(crit)));
+		return Collections.singletonMap("fileId", file != null ? file.getName() : null);
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value="/export-utilisation")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

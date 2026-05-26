@@ -134,6 +134,10 @@ class Container {
     }
   }
 
+  async exportUtilisationMap(container) {
+    return http.post('storage-containers/' + container.id + '/export-utilisation-map', {});
+  }
+
   async exportDefragReport(container, defragDetail) {
     return http.post('storage-containers/' + container.id + '/defragment', defragDetail);
   }

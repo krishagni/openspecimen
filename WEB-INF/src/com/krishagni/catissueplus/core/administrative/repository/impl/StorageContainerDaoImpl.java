@@ -369,6 +369,10 @@ public class StorageContainerDaoImpl extends AbstractDao<StorageContainer> imple
 		innerQuery.join("cont.ancestorContainers", "ancestors")
 			.add(innerQuery.eq("ancestors.id", crit.parentContainerId()));
 
+		if (crit.lastId() != null) {
+			innerQuery.add(innerQuery.gt("cont.id", crit.lastId()));
+		}
+
 		boolean cpAliasAdded = false;
 		if (CollectionUtils.isNotEmpty(crit.cpShortTitles())) {
 			innerQuery.leftJoin("cont.compAllowedCps", "cp")
