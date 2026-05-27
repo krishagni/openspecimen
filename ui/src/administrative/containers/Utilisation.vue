@@ -1,11 +1,18 @@
 <template>
   <os-page-toolbar>
     <template #default>
-      <os-button left-icon="palette" :label="$t('containers.view_utilisation_legend')" @click="toggleLegend"
-        v-if="!isDimensionless" />
+      <os-button left-icon="map" :label="$t('containers.view_utilisation_heatmap')" @click="showUtilisationMap"
+        v-if="isSpecimensCountView" />
 
-      <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportUtilisationMap"
-        v-if="!isDimensionless && hasChildContainers" />
+      <span v-else>
+        <os-button left-icon="chart-pie" :label="$t('containers.specimens_by_type')" @click="showSpecimensCount" />
+
+        <os-button left-icon="palette" :label="$t('containers.view_utilisation_legend')" @click="toggleLegend"
+          v-if="!isDimensionless && hasChildContainers" />
+
+        <os-button left-icon="download" :label="$t('common.buttons.export')" @click="exportUtilisationMap"
+          v-if="!isDimensionless && hasChildContainers" />
+      </span>
 
       <os-overlay ref="legendOverlay">
         <ul class="os-utilisation-legend">
@@ -19,7 +26,22 @@
   </os-page-toolbar>
 
   <div class="os-container-utilisation">
-    <Layout class="map" :container="ctx.container" :occupants="ctx.occupants" v-if="!isDimensionless && hasChildContainers">
+    <div class="specimens-count-view" v-if="isSpecimensCountView">
+      <div class="specimens-count-chart" v-if="ctx.spmnCountsLoaded && ctx.storedSpmns > 0">
+        <div class="chart-body">
+          <os-chart type="doughnut" :data="ctx.spmnTypesStorage" :options="ctx.spmnTypesChartOptions"
+            :plugins="ctx.spmnTypesChartPlugins" />
+        </div>
+
+        <div class="chart-title" v-t="'containers.top_5_specimens_by_type'">Top 5 Specimens by Type</div>
+      </div>
+
+      <os-message type="info" v-else-if="ctx.spmnCountsLoaded">
+        <span v-t="'containers.no_specimens_by_type'">No specimens have been stored in this container.</span>
+      </os-message>
+    </div>
+
+    <Layout class="map" :container="ctx.container" :occupants="ctx.occupants" v-else-if="!isDimensionless && hasChildContainers">
       <template #occupant_container="slotProps">
         <a :class="['utilisation-cell', getUtilisationClass(slotProps.occupant)]"
           v-os-tooltip="getTooltip(slotProps.occupant)"
@@ -43,7 +65,7 @@
       </os-message>
     </div>
 
-    <div v-else>
+    <div v-else-if="ctx.occupantsLoaded">
       <os-message type="info">
         <span v-t="'containers.no_child_containers_for_utilisation'">This container does not store any child containers.</span>
       </os-message>
@@ -61,8 +83,44 @@ import routerSvc    from '@/common/services/Router.js';
 
 import Layout from './Layout.vue';
 
+const specimenPctPlugin = {
+  id: 'specimenPctPlugin',
+
+  afterDatasetsDraw: function(chart) {
+    const dataset = chart.data.datasets[0] || {};
+    const data = dataset.data || [];
+    const total = dataset.totalSpecimens || data.reduce((sum, count) => sum + count, 0);
+    if (total <= 0) {
+      return;
+    }
+
+    const {ctx} = chart;
+    const meta = chart.getDatasetMeta(0);
+    ctx.save();
+    ctx.font = '600 12px sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 3;
+
+    meta.data.forEach((arc, idx) => {
+      const value = data[idx];
+      if (value <= 0) {
+        return;
+      }
+
+      const {x, y} = arc.tooltipPosition();
+      const pct = Math.round(value * 100 / total);
+      ctx.fillText(pct + '%', x, y);
+    });
+
+    ctx.restore();
+  }
+};
+
 export default {
-  props: ['container'],
+  props: ['container', 'view'],
 
   components: {
     Layout
@@ -71,7 +129,30 @@ export default {
   setup() {
     const ctx = reactive({
       container: {},
-      occupants: []
+
+      occupants: [],
+
+      occupantsLoaded: false,
+
+      spmnTypesStorage: {},
+
+      spmnTypesChartOptions: {
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+          legend: {
+            position: 'right'
+          }
+        }
+      },
+
+      spmnTypesChartPlugins: [specimenPctPlugin],
+
+      storedSpmns: null,
+
+      spmnCountsLoaded: false
     });
 
     return { ctx };
@@ -86,6 +167,12 @@ export default {
       if (newVal != oldVal) {
         this._setupView();
       }
+    },
+
+    view: function(newVal, oldVal) {
+      if (newVal != oldVal && this.ctx.container.id) {
+        this._loadCurrentView();
+      }
     }
   },
 
@@ -96,6 +183,10 @@ export default {
 
     hasChildContainers: function() {
       return this.ctx.occupants.length > 0;
+    },
+
+    isSpecimensCountView: function() {
+      return this._getView() == 'specimensCount';
     },
 
     legend: function() {
@@ -110,6 +201,69 @@ export default {
   },
 
   methods: {
+    showUtilisationMap: async function(updateRoute) {
+      if (updateRoute !== false) {
+        this._updateViewInRoute('heatmap');
+        return;
+      }
+
+      if (!this.isDimensionless) {
+        await this._loadUtilisationMap();
+      }
+    },
+
+    showSpecimensCount: async function(updateRoute) {
+      if (updateRoute !== false) {
+        this._updateViewInRoute('specimensCount');
+        return;
+      }
+
+      if (this.ctx.spmnCountsLoaded) {
+        return;
+      }
+
+      this.ctx.spmnTypesStorage = {};
+      this.ctx.storedSpmns = null;
+      this.ctx.spmnCountsLoaded = false;
+
+      const containerId = this.ctx.container.id;
+      const specimensByType = await containerSvc.getSpecimensCountByType(this.ctx.container);
+      // Ignore stale responses if the user selected another container or switched views before the API returned.
+      if (containerId != this.ctx.container.id || !this.isSpecimensCountView) {
+        return;
+      }
+
+      const types = Object.keys(specimensByType || {})
+        .sort((t1, t2) => specimensByType[t2] - specimensByType[t1]);
+
+      let storedSpmns = 0, spmnTypes = [], spmnCounts = [];
+      for (let type of types) {
+        storedSpmns += specimensByType[type];
+        if (spmnTypes.length < 5) {
+          spmnTypes.push(type);
+          spmnCounts.push(specimensByType[type]);
+        }
+      }
+
+      this.ctx.spmnTypesStorage = {
+        labels: spmnTypes,
+        datasets: [
+          {
+            data: spmnCounts,
+            totalSpecimens: storedSpmns,
+            backgroundColor: containerSvc.getSpecimenTypeColors(spmnTypes)
+          }
+        ]
+      };
+
+      this.ctx.storedSpmns = storedSpmns;
+      this.ctx.spmnCountsLoaded = true;
+    },
+
+    toggleLegend: function(event) {
+      this.$refs.legendOverlay.toggle(event);
+    },
+
     exportUtilisationMap: async function() {
       alertsSvc.info({code: 'containers.generating_utilisation_map_report'});
       const resp = await containerSvc.exportUtilisationMap(this.ctx.container);
@@ -119,10 +273,6 @@ export default {
       } else {
         alertsSvc.info({code: 'containers.utilisation_map_report_by_email'});
       }
-    },
-
-    toggleLegend: function(event) {
-      this.$refs.legendOverlay.toggle(event);
     },
 
     getUtilisationClass: function(occupant) {
@@ -174,12 +324,41 @@ export default {
     _setupView: async function() {
       this.ctx.container = this.container;
       this.ctx.occupants = [];
-      if (this.isDimensionless) {
+      this.ctx.occupantsLoaded = false;
+      this.ctx.spmnTypesStorage = {};
+      this.ctx.storedSpmns = null;
+      this.ctx.spmnCountsLoaded = false;
+
+      await this._loadCurrentView();
+    },
+
+    _getView: function() {
+      return this.view == 'specimensCount' ? 'specimensCount' : 'utilisation';
+    },
+
+    _loadCurrentView: async function() {
+      if (this.isSpecimensCountView) {
+        await this.showSpecimensCount(false);
         return;
       }
 
+      await this.showUtilisationMap(false);
+    },
+
+    _loadUtilisationMap: async function() {
+      if (this.ctx.occupantsLoaded || this.isDimensionless) {
+        return;
+      }
+
+      const containerId = this.ctx.container.id;
       const occupants = await containerSvc.getUtilisationMap(this.ctx.container);
+      // Ignore stale responses if the user selected another container or switched views before the API returned.
+      if (containerId != this.ctx.container.id || this.isSpecimensCountView) {
+        return;
+      }
+
       this.ctx.occupants = (occupants || []).map(occupant => this._toOccupant(occupant));
+      this.ctx.occupantsLoaded = true;
     },
 
     _toOccupant: function(occupant) {
@@ -206,6 +385,11 @@ export default {
         totalSlots: totalSlots,
         utilisation: totalSlots > 0 ? Math.round(usedSlots * 100 / totalSlots) : 0
       };
+    },
+
+    _updateViewInRoute: function(view) {
+      const {name, params, query} = this.$route || {};
+      this.$router.replace({name, params, query: {...query, view}});
     }
   }
 }
@@ -220,6 +404,34 @@ export default {
 
 .os-container-utilisation .map {
   flex: 1;
+}
+
+.os-container-utilisation .specimens-count-view {
+  width: min(100%, 40rem);
+  height: min(30rem, calc(100vh - 14rem));
+}
+
+.os-container-utilisation .specimens-count-chart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.os-container-utilisation .chart-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.os-container-utilisation .chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+.os-container-utilisation .chart-body :deep(.os-chart) {
+  height: 100%;
 }
 
 .os-container-utilisation .map :deep(td.occupied) {

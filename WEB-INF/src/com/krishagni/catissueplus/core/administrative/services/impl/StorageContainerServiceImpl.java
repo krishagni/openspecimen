@@ -314,13 +314,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			StorageContainerDetail detail = StorageContainerDetail.from(container);
 			if (req.getPayload().includeStats()) {
-				Long rootId = container.getId();
-				if (container.getPosition() != null) {
-					rootId = daoFactory.getStorageContainerDao().getRootContainerId(container.getId());
-				}
-
-				detail.setSpecimensByType(daoFactory.getStorageContainerDao().getSpecimensCountByType(detail.getId()));
-				detail.setRootContainerId(rootId);
+				detail.setSpecimensByType(getSpecimensCountByType(container.getId()));
 			}
 
 			return ResponseEvent.response(detail);
@@ -418,6 +412,14 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 		Long count = daoFactory.getStorageContainerDao().getSpecimensCount(crit);
 		return ResponseEvent.response(count);
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Integer>> getSpecimensCountByType(RequestEvent<Long> req) {
+		StorageContainer container = getContainer(req.getPayload(), null);
+		AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
+		return ResponseEvent.response(getSpecimensCountByType(container.getId()));
 	}
 
 	@Override
@@ -1814,6 +1816,10 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 		}
 
 		return container;
+	}
+
+	private Map<String, Integer> getSpecimensCountByType(Long containerId) {
+		return daoFactory.getStorageContainerDao().getSpecimensCountByType(containerId);
 	}
 
 	private ResponseEvent<StorageContainerDetail> updateStorageContainer(RequestEvent<StorageContainerDetail> req, boolean partial) {

@@ -290,6 +290,7 @@
     "no_child_containers_for_utilisation": "Deze container bevat geen onderliggende containers.",
     "no_free_positions": "Container bevat niet genoeg vrije posities om de ingevoerde materialen op te slaan.",
     "no_map_for_dimless": "De overzichtsweergave is niet beschikbaar voor dimensieloze container.",
+    "no_specimens_by_type": "Er zijn geen materialen opgeslagen in deze container.",
     "no_utilisation_map_for_dimless": "Gebruiksoverzicht is niet beschikbaar voor dimensieloze containers.",
     "num_containers": "Aantal containers",
     "num_containers_required": "Aantal containers is verplicht",
@@ -342,6 +343,7 @@
     "specimen_label": "Materiaaletiket",
     "specimen_types": "Materiaalsoorten",
     "specimens": "Materialen",
+    "specimens_by_type": "Materialen per type",
     "specimens_not_found": "Eén of meerdere materialen zijn niet gevonden.",
     "specimens_stored": "Eén materiaal opgeslagen in de container. | {count} materialen opgeslagen in de container.",
     "start_date": "Startdatum",
@@ -356,7 +358,7 @@
     "tasks": "Taken",
     "to_location": "Naar locatie",
     "to_site": "Naar Site",
-    "top_5_specimen_types": "Top 5 materiaalsoorten",
+    "top_5_specimens_by_type": "Top 5 materialen per type",
     "transfer": "Overdracht",
     "transfer_date_time": "Datum en tijd",
     "transfer_date_time_required": "Datum en tijd is verplicht",
@@ -397,6 +399,7 @@
     "vacate_existing_specimens": "Bestaande materialen ontruimen",
     "view_color_coding": "Bekijk kleurcodering",
     "view_specimens": "Bekijk materialen",
+    "view_utilisation_heatmap": "Gebruiksoverzicht",
     "view_utilisation_legend": "Legenda"
   },
 

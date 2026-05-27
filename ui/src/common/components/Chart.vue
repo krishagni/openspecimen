@@ -1,5 +1,5 @@
 <template>
-  <Chart class="os-chart" :type="type" :data="data" :options="options" />
+  <Chart class="os-chart" :type="type" :data="data" :options="options" :plugins="plugins" />
 </template>
 
 <script>
@@ -7,7 +7,7 @@
 import Chart from 'primevue/chart';
 
 export default {
-  props: ['type', 'data', 'options'],
+  props: ['type', 'data', 'options', 'plugins'],
 
   components: {
     Chart
@@ -21,4 +21,3 @@ export default {
   height: 100%;
 }
 </style>
-

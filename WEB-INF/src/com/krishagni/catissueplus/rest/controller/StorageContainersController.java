@@ -464,6 +464,13 @@ public class StorageContainersController {
 		return Collections.singletonMap("count", resp.getPayload());
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "{id}/specimens-count-by-type")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Integer> getContainerSpecimensCountByType(@PathVariable("id") Long id) {
+		return ResponseEvent.unwrap(storageContainerSvc.getSpecimensCountByType(RequestEvent.wrap(id)));
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "{id}/report")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody

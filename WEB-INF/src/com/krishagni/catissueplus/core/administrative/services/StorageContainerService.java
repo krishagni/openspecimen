@@ -53,6 +53,8 @@ public interface StorageContainerService {
 
 	ResponseEvent<Long> getSpecimensCount(RequestEvent<SpecimenListCriteria> req);
 
+	ResponseEvent<Map<String, Integer>> getSpecimensCountByType(RequestEvent<Long> req);
+
 	ResponseEvent<QueryDataExportResult> getSpecimensReport(RequestEvent<ContainerQueryCriteria> req);
 	
 	ResponseEvent<StorageContainerDetail> createStorageContainer(RequestEvent<StorageContainerDetail> req);

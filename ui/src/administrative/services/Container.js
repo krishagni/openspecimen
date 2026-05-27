@@ -92,6 +92,50 @@ class Container {
     return http.get('storage-containers/' + container.id + '/utilisation-map');
   }
 
+  async getSpecimensCountByType(container) {
+    return http.get('storage-containers/' + container.id + '/specimens-count-by-type');
+  }
+
+  getSpecimenTypeColors(types) {
+    return (types || []).map(type => this.getSpecimenTypeColor(type));
+  }
+
+  getSpecimenTypeColor(type) {
+    const value = type || '';
+    let hash = 0;
+    for (let i = 0; i < value.length; ++i) {
+      hash = ((hash << 5) - hash) + value.charCodeAt(i);
+      hash |= 0;
+    }
+
+    hash = Math.abs(hash);
+
+    //
+    // hue is wheel of 360 degree
+    // 0-119: Red, 120-239: Green, 240-359: Blue
+    //
+    const hue = hash % 360;
+
+    //
+    // to keep the saturation between 62 to 73 for vivid, bright colors and
+    // avoid washed-out gray colors or oversaturated neon colors
+    //
+    const saturation = 62 + (hash % 12);
+
+    //
+    // the division by 12 is to decorelate lightness from saturation
+    // the lightness increases for one full cycle of 12 saturation cycle
+    // the mod by 10 is to limit the lightness to 10 levels
+    //
+    const lightness = 48 + (Math.floor(hash / 12) % 10);
+
+    //
+    // effectively we have a grid of 12 saturation and 10 lightness levels to
+    // create 120 combinations
+    //
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+
   async printLabels(containerIds) {
     return http.post('container-label-printer', {containerIds});
   }

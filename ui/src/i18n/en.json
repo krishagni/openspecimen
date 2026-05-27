@@ -694,9 +694,10 @@
     "no_free_positions": "Container does not have enough free positions to store input specimens.",
     "no_layout_detail_to_render": "Container layout detail is not available to render the map view.",
     "no_map_for_dimless": "The map view is not available for dimensionless container.",
-    "no_utilisation_map_for_dimless": "Utilisation map is not available for dimensionless containers.",
     "no_specimens": "No specimens have been stored in the freezer, so the utilization chart cannot be displayed.",
+    "no_specimens_by_type": "No specimens have been stored in this container.",
     "no_tube_barcodes_detected": "No specimen barcodes were detected.",
+    "no_utilisation_map_for_dimless": "Utilisation map is not available for dimensionless containers.",
     "not_checked_out": "No locations blocked by the specimens: {labels}.",
     "not_stored": "Not Stored",
     "num_containers": "No. of Containers",
@@ -772,6 +773,7 @@
     "specimen_types": "Specimen Types",
     "specimens": "Specimens",
     "specimens_added": "One specimen added to the box {box}.|{count} specimens added to the box {box}.",
+    "specimens_by_type": "Specimens by Type",
     "specimens_not_found": "One or more specimens not found.",
     "specimens_not_found_ids": "Following specimens were not found: {ids}.",
     "specimens_stored": "One specimen stored in the container. | {count} specimens stored in the container.",
@@ -792,7 +794,7 @@
     "to_date": "To Date",
     "to_location": "To Location",
     "to_site": "To Site",
-    "top_5_specimen_types": "Top 5 Specimen Types",
+    "top_5_specimens_by_type": "Top 5 Specimens by Type",
     "transfer": "Transfer",
     "transfer_containers": "Transfer Containers",
     "transfer_date_time": "Date and Time",
@@ -845,8 +847,9 @@
     "view_map": "View Map",
     "view_specimens": "View Specimens",
     "view_stats": "View Insights",
-    "view_utilisation_legend": "Legend",
-    "view_utilisation": "View Utilisation"
+    "view_utilisation": "View Utilisation",
+    "view_utilisation_heatmap": "Utilisation Heatmap",
+    "view_utilisation_legend": "Legend"
   },
 
   "cpgs": {

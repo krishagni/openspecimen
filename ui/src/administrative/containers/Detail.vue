@@ -165,9 +165,9 @@ export default {
       formUtil.createCustomFieldsMap(this.ctx.container, true);
     },
 
-    selectContainer: function(container) {
-      const route = this.$route.matched[this.$route.matched.length - 1];
-      this.$goto(route.name, {containerId: container.id});
+    selectContainer: function({id: containerId}) {
+      const {name} = this.$route.matched[this.$route.matched.length - 1];
+      this.$goto(name, {containerId}, this.$route.query);
     },
 
     toggleTree: function({show}) {

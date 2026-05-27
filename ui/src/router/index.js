@@ -979,7 +979,8 @@ const routes = [
           {
             path: 'utilisation',
             name: 'ContainerDetail.Utilisation',
-            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Utilisation.vue')
+            component: () => import(/* webpackChunkName: "containers" */ '../administrative/containers/Utilisation.vue'),
+            props: (route) => ({view: route.query.view})
           },
           {
             path: 'specimens',
