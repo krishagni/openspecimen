@@ -3327,6 +3327,8 @@
         "max_concurrent_queries_desc": "Maximum number of queries that are allowed to run simultaneously before rejecting new query execution requests",
         "max_recs_in_memory": "In-memory Records Limit",
         "max_recs_in_memory_desc": "Maximum number of query records that are allowed to be cached in-memory. When limit is reached, excessive records are spooled to disk",
+        "optimisation_settings": "Optimisation Settings",
+        "optimisation_settings_desc": "JSON file containing the query optimisation settings. Leave blank to use the default settings.",
         "default_result_view": "Default Result View Fields",
         "default_result_view_desc": "List of field values to be displayed in default query result view.",
         "floating_point_precision": "Real Numbers Precision",

@@ -28,4 +28,14 @@
         name in ('image_url_tmpl', 'imaging')
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Query optimisation settings">
+    <sql>
+      call add_cfg_prop(
+        'query', 'optimisation_settings',
+        'optimisation_settings', 'optimisation_settings_desc',
+        'FILE', null
+      );
+    </sql>
+  </changeSet>
 </databaseChangeLog>

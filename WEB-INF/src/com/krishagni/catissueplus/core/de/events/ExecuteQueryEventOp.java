@@ -206,4 +206,5 @@ public class ExecuteQueryEventOp  {
 	public void setUseReportingDataSource(boolean useReportingDataSource) {
 		this.useReportingDataSource = useReportingDataSource;
 	}
+
 }

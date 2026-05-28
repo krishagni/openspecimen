@@ -54,6 +54,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.util.HtmlUtils;
 
 import com.krishagni.catissueplus.core.administrative.domain.ScheduledJob;
 import com.krishagni.catissueplus.core.administrative.domain.User;
@@ -84,6 +85,7 @@ import com.krishagni.catissueplus.core.common.service.TemplateService;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
 import com.krishagni.catissueplus.core.common.util.ConfigUtil;
 import com.krishagni.catissueplus.core.common.util.DbUtil;
+import com.krishagni.catissueplus.core.common.util.EmailUtil;
 import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.MessageUtil;
 import com.krishagni.catissueplus.core.common.util.NotifUtil;
@@ -126,7 +128,9 @@ import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.query.Query;
 import edu.common.dynamicextensions.query.QueryException;
+import edu.common.dynamicextensions.query.QueryOptimisationConfig;
 import edu.common.dynamicextensions.query.QueryParserException;
+import edu.common.dynamicextensions.query.QueryRejectedException;
 import edu.common.dynamicextensions.query.QueryResponse;
 import edu.common.dynamicextensions.query.QueryResultCsvExporter;
 import edu.common.dynamicextensions.query.QueryResultData;
@@ -149,6 +153,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	
 	private static final String SHARE_QUERY_FOLDER_EMAIL_TMPL = "query_share_query_folder";
 
+	private static final String QUERY_REJECTED_EMAIL_TMPL = "query_rejected";
+
 	private static final String CFG_MOD = "query";
 
 	private static final String MAX_CONCURRENT_QUERIES = "max_concurrent_queries";
@@ -158,6 +164,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 	private static final String MAX_RECS_IN_MEM = "max_recs_in_memory";
 
 	private static final int DEF_MAX_RECS_IN_MEM = 100;
+
+	private static final String OPTIMISATION_SETTINGS = "optimisation_settings";
 
 	private static final String QUERY_AUDIT_LOGS_DIR = "query-audit-logs";
 
@@ -193,6 +201,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private int maxRecsInMemory = DEF_MAX_RECS_IN_MEM;
 
+	private volatile QueryOptimisationConfig optimisationConfig = QueryOptimisationConfig.defaultConfig();
+
 	private AtomicInteger concurrentQueriesCnt = new AtomicInteger(0);
 
 	private List<QuerySpaceProvider> querySpaceProviders = new ArrayList<>();
@@ -223,11 +233,11 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	public void setCfgService(ConfigurationService cfgService) {
 		this.cfgService = cfgService;
-		refreshConfig();
+		refreshConfig(StringUtils.EMPTY);
 		cfgService.registerChangeListener("query", new ConfigChangeListener() {
 			@Override
 			public void onConfigChange(String name, String value) {
-				refreshConfig();
+				refreshConfig(name);
 
 				if (!StringUtils.equals(name, "floating_point_precision")) {
 					return;
@@ -401,6 +411,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				.ic(!queryDetail.isCaseSensitive())
 				.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 				.timeFormat(ConfigUtil.getInstance().getTimeFmt())
+				.optimiseQueries(optimisationConfig)
 				.compile(cprForm, getAql(queryDetail));
 			SavedQuery savedQuery = getSavedQuery(queryDetail);
 			daoFactory.getSavedQueryDao().saveOrUpdate(savedQuery);
@@ -429,6 +440,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				.ic(!queryDetail.isCaseSensitive())
 				.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 				.timeFormat(ConfigUtil.getInstance().getTimeFmt())
+				.optimiseQueries(optimisationConfig)
 				.compile(cprForm, getAql(queryDetail));
 			SavedQuery savedQuery = getSavedQuery(queryDetail);
 			SavedQuery existing = daoFactory.getSavedQueryDao().getQuery(queryDetail.getId());
@@ -540,6 +552,12 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
+			ResponseEvent<QueryExecResult> result = handleQueryRejectedException(
+				AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, startTime, e);
+			if (result != null) {
+				return result;
+			}
+
 			String timeoutError = getQueryTimeoutError(e);
 			auditFailedQuery(
 				AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), opDetail, query, startTime,
@@ -1187,6 +1205,12 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
+			ResponseEvent<List<FacetDetail>> result = handleQueryRejectedException(
+				AuthUtil.getCurrentUser(), AuthUtil.getRemoteAddr(), null, Calendar.getInstance().getTime(), e);
+			if (result != null) {
+				return result;
+			}
+
 			return ResponseEvent.serverError(e);
 		} finally {
 			cleanupSiteCpsInAclTable(queryId, op != null && op.isDisableAccessChecks());
@@ -1331,7 +1355,8 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt())
 			.timeZone(tz != null ? tz.getID() : null)
-			.timeout(op.getTimeout());
+			.timeout(op.getTimeout())
+			.optimiseQueries(optimisationConfig);
 		addAutoJoinParams(query);
 
 		if (StringUtils.isNotBlank(op.getQuerySpace())) {
@@ -1686,15 +1711,38 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		return auditLog;
 	}
 
-	private void auditFailedQuery(
-		User user, String ipAddress, ExecuteQueryEventOp opDetail, Query query, Date startTime, String errorMessage) {
+	private <T> ResponseEvent<T> handleQueryRejectedException(User user, String ipAddress, ExecuteQueryEventOp op, Date startTime, Exception e) {
+		QueryRejectedException qre = getQueryRejectedException(e);
+		if (qre == null) {
+			return null;
+		}
 
+		if (op == null) {
+			op = getExecuteQueryOp(qre.aql());
+		}
+
+		auditFailedQuery(user, ipAddress, op, qre.sql(), qre.explainPlanText(), startTime, qre.reason());
+		notifyQueryRejected(user, ipAddress, qre);
+		return ResponseEvent.userError(SavedQueryErrorCode.REJECTED, qre.reason());
+	}
+
+	private ExecuteQueryEventOp getExecuteQueryOp(String aql) {
+		ExecuteQueryEventOp op = new ExecuteQueryEventOp();
+		op.setAql(aql);
+		op.setRunType("Data");
+		return op;
+	}
+
+	private void auditFailedQuery(User user, String ipAddress, ExecuteQueryEventOp op, Query query, Date startTime, String error) {
 		if (query == null) {
 			return;
 		}
 
+		auditFailedQuery(user, ipAddress, op, query.getDataSql(), null, startTime, error);
+	}
+
+	private void auditFailedQuery(User user, String ipAddress, ExecuteQueryEventOp op, String sql, String explainText, Date startTime, String error) {
 		try {
-			String sql = query.getDataSql();
 			if (StringUtils.isBlank(sql)) {
 				return;
 			}
@@ -1702,24 +1750,36 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			Long auditLogId = DbUtil.newTxn(
 				() -> {
 					Date timeOfExecution = startTime != null ? startTime : Calendar.getInstance().getTime();
-					QueryAuditLog auditLog = insertAuditLog(user, ipAddress, opDetail, sql, timeOfExecution, -1L, -1L, errorMessage);
+					QueryAuditLog auditLog = insertAuditLog(user, ipAddress, op, sql, timeOfExecution, -1L, -1L, error);
 					return auditLog != null ? auditLog.getId() : null;
 				}
 			);
-			saveQueryDiagnostics(auditLogId, sql);
+
+			saveQueryDiagnostics(auditLogId, sql, explainText);
 		} catch (Exception e) {
 			logger.error("Error auditing failed query", e);
 		}
 	}
 
-	private void saveQueryDiagnostics(Long auditLogId, String sql) {
+	private void saveQueryDiagnostics(Long auditLogId, String sql, String explainText) {
 		if (!Utility.isMySQL() || auditLogId == null || StringUtils.isBlank(sql)) {
 			return;
 		}
 
 		File jsonFile = getDiagnosticJsonFile(auditLogId);
 		try {
-			Object explain = DbUtil.newTxn(() -> getExplainPlan(sql));
+			Object explain = null;
+			if (StringUtils.isNotBlank(explainText) && explainText.trim().startsWith("{")) {
+				try {
+					explain = Utility.jsonToMap(explainText);
+				} catch (Exception e) {
+					logger.debug("Could not parse optimiser explain plan as JSON. Falling back to DB explain.", e);
+				}
+			}
+
+			if (explain == null) {
+				explain = DbUtil.newTxn(() -> getExplainPlan(sql));
+			}
 
 			Map<String, Object> diagnostics = new LinkedHashMap<>();
 			diagnostics.put("query", sql);
@@ -2045,6 +2105,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt())
 			.timeZone(tz != null ? tz.getID() : null)
 			.wideRowMode(WideRowMode.OFF)
+			.optimiseQueries(optimisationConfig)
 			.querySpace(qs);
 		addAutoJoinParams(query);
 
@@ -2078,10 +2139,107 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		}
 	}
 
-	private void refreshConfig() {
+	private void notifyQueryRejected(User user, String ipAddress, QueryRejectedException qre) {
+		try {
+			String itAdminEmailId = ConfigUtil.getInstance().getItAdminEmailId();
+			if (StringUtils.isBlank(itAdminEmailId)) {
+				logger.error("Query rejected by optimiser, but IT admin email ID is not configured");
+				return;
+			}
+
+			Map<String, Object> props = new HashMap<>();
+			props.put("userName", user != null ? user.formattedName() : "System");
+			props.put("loginName", user != null ? user.getLoginName() : "system");
+			props.put("ipAddress", StringUtils.defaultIfBlank(ipAddress, "Not Available"));
+			props.put("rejectedOn", Calendar.getInstance().getTime());
+			props.put("inputAql", html(qre.aql()));
+			props.put("generatedSql", html(qre.sql()));
+			props.put("reason", html(qre.reason()));
+			props.put("$subject", new Object[] { StringUtils.abbreviate(qre.reason(), 120) });
+
+			File explainPlanFile = getExplainPlanFile(qre);
+			File[] attachments = explainPlanFile != null ? new File[] { explainPlanFile } : null;
+			if (explainPlanFile != null) {
+				props.put("$attachments", Collections.singletonMap(explainPlanFile.getName(), "explain-plan.txt"));
+			}
+
+			EmailUtil.getInstance().sendEmail(
+				QUERY_REJECTED_EMAIL_TMPL, new String[] { itAdminEmailId }, attachments, props);
+		} catch (Exception e) {
+			logger.error("Error sending query rejection email", e);
+		}
+	}
+
+	private File getExplainPlanFile(QueryRejectedException qre) {
+		String explainPlan = qre.explainPlanText();
+		if (StringUtils.isBlank(explainPlan)) {
+			return null;
+		}
+
+		try {
+			File file = File.createTempFile("query-explain-plan-", ".txt", ConfigUtil.getInstance().getTempDir());
+			FileUtils.writeStringToFile(file, explainPlan, Charset.defaultCharset());
+			file.deleteOnExit();
+			return file;
+		} catch (Exception e) {
+			logger.error("Error writing rejected query explain plan to file", e);
+			return null;
+		}
+	}
+
+	private QueryRejectedException getQueryRejectedException(Throwable t) {
+		while (t != null) {
+			if (t instanceof QueryRejectedException) {
+				return (QueryRejectedException) t;
+			}
+
+			t = t.getCause();
+		}
+
+		return null;
+	}
+
+	private String html(String input) {
+		if (StringUtils.isBlank(input)) {
+			return "Not Available";
+		}
+
+		return HtmlUtils.htmlEscape(input);
+	}
+
+	private void refreshConfig(String name) {
 		maxConcurrentQueries = cfgService.getIntSetting(CFG_MOD, MAX_CONCURRENT_QUERIES, DEF_MAX_CONCURRENT_QUERIES);
 		maxRecsInMemory = cfgService.getIntSetting(CFG_MOD, MAX_RECS_IN_MEM, DEF_MAX_RECS_IN_MEM);
 		DeConfiguration.getInstance().maxCacheElementsInMemory(maxRecsInMemory);
+
+		if (StringUtils.equals(name, OPTIMISATION_SETTINGS)) {
+			optimisationConfig = parseOptimisationConfig(true);
+		} else if (StringUtils.isBlank(name)) {
+			optimisationConfig = parseOptimisationConfig(false);
+		}
+	}
+
+	private QueryOptimisationConfig parseOptimisationConfig(boolean failOnError) {
+		try {
+			String json = cfgService.getFileContent(CFG_MOD, OPTIMISATION_SETTINGS);
+			if (StringUtils.isBlank(json)) {
+				return QueryOptimisationConfig.defaultConfig();
+			}
+
+			return QueryOptimisationConfig.fromJson(json);
+		} catch (Exception e) {
+			if (failOnError) {
+				if (e instanceof OpenSpecimenException) {
+					throw (OpenSpecimenException) e;
+				}
+
+				throw OpenSpecimenException.userError(
+					CommonErrorCode.INVALID_INPUT, "Invalid query optimisation settings JSON file");
+			}
+
+			logger.error("Error parsing query optimisation settings. Using the default settings.", e);
+			return QueryOptimisationConfig.defaultConfig();
+		}
 	}
 
 	private boolean incConcurrentQueriesCnt() {
@@ -2252,11 +2410,17 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				insertAuditLog(user, ipAddress, op, resp);
 				notifyExportCompleted();
 			} catch (Exception e) {
+				error = true;
+
+				ResponseEvent<?> result = handleQueryRejectedException(user, ipAddress, op, startTime, e);
+				if (result != null) {
+					throw result.getError();
+				}
+
 				String timeoutError = getQueryTimeoutError(e);
 				auditFailedQuery(user, ipAddress, op, query, startTime, timeoutError != null ? timeoutError : Utility.getErrorMessage(e));
 
 				logger.error("Error exporting query data", e);
-				error = true;
 				if (timeoutError != null) {
 					throw OpenSpecimenException.userError(SavedQueryErrorCode.TIMEOUT, timeoutError);
 				}

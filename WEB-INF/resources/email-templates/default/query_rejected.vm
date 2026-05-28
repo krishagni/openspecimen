@@ -1,0 +1,100 @@
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-spacing:0;border-collapse:separate;background:#f6f8fb">
+  <tbody>
+    <tr>
+      <td style="border-collapse:collapse;padding:22px">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;font-family:Arial,sans-serif;color:#263238">
+          <tbody>
+            <tr>
+              <td style="border-collapse:collapse;padding:0 0 18px 0">
+                <div style="font-size:20px;line-height:28px;font-weight:700;color:#1f2933">Query rejected by optimiser</div>
+                <div style="font-size:13px;line-height:20px;color:#5b6876;margin-top:4px">
+                  The optimiser rejected a generated SQL statement before execution.
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="border-collapse:collapse;padding:0 0 18px 0">
+                <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;background:#ffffff;border:1px solid #e3e8ef;border-radius:6px;overflow:hidden">
+                  <tbody>
+                    <tr>
+                      <td style="background:#8a2d2d;color:#ffffff;padding:11px 16px;font-size:14px;line-height:20px;font-weight:700">Rejection Summary</td>
+                    </tr>
+                    <tr>
+                      <td style="border-bottom:1px solid #edf1f5;padding:12px 16px;color:#52606d">
+                        <div style="font-size:12px;text-transform:uppercase;color:#7b8794;font-weight:700">Reason</div>
+                        <div style="font-size:14px;line-height:20px;color:#1f2933;margin-top:4px">$reason</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:12px 16px;color:#52606d">
+                        <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse">
+                          <tr>
+                            <td style="padding:0 18px 0 0;color:#52606d;font-size:13px;line-height:20px">
+                              <b style="color:#1f2933">User:</b> $userName ($loginName)
+                            </td>
+                            <td style="padding:0 18px 0 0;color:#52606d;font-size:13px;line-height:20px">
+                              <b style="color:#1f2933">IP:</b> $ipAddress
+                            </td>
+                            <td style="padding:0;color:#52606d;font-size:13px;line-height:20px">
+                              <b style="color:#1f2933">Time:</b> $rejectedOn
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="border-collapse:collapse;padding:0 0 18px 0">
+                <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;background:#ffffff;border:1px solid #e3e8ef;border-radius:6px;overflow:hidden">
+                  <tbody>
+                    <tr>
+                      <td style="background:#2f6f9f;color:#ffffff;padding:11px 16px;font-size:14px;line-height:20px;font-weight:700">Input AQL</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 16px">
+                        <pre style="margin:0;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:18px;white-space:pre-wrap;color:#1f2933;background:#f8fafc;border:1px solid #edf1f5;border-radius:4px;padding:12px">$inputAql</pre>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="border-collapse:collapse;padding:0">
+                <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;background:#ffffff;border:1px solid #e3e8ef;border-radius:6px;overflow:hidden">
+                  <tbody>
+                    <tr>
+                      <td style="background:#2f6f9f;color:#ffffff;padding:11px 16px;font-size:14px;line-height:20px;font-weight:700">Generated SQL</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 16px">
+                        <pre style="margin:0;font-family:Consolas,Monaco,monospace;font-size:12px;line-height:18px;white-space:pre-wrap;color:#1f2933;background:#f8fafc;border:1px solid #edf1f5;border-radius:4px;padding:12px">$generatedSql</pre>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:14px 0 0 0;color:#5b6876;font-size:13px;line-height:20px">
+                The raw explain plan is attached when available.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="background:#ffffff">
+        #parse( $footer )
+      </td>
+    </tr>
+  </tbody>
+</table>

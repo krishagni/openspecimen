@@ -55,7 +55,9 @@ public enum SavedQueryErrorCode implements ErrorCode {
 
 	DEPS_FOUND,
 
-	TIMEOUT;
+	TIMEOUT,
+
+	REJECTED;
 	
 	@Override
 	public String code() {
