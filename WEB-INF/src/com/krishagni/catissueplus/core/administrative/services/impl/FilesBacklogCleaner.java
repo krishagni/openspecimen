@@ -76,6 +76,7 @@ public class FilesBacklogCleaner implements ScheduledTask {
 		cleanupOlderFiles(getDirPath("oc", "import-logs"), effectivePeriod, null, true);
 		cleanupOlderFiles(getDirPath("oc", "auto-importer"), effectivePeriod, null, true);
 		cleanupOlderFiles(getDataDir(), effectivePeriod, (dir, name) -> !new File(dir, name).isDirectory() && name.endsWith(".csv"), false);
+		cleanupOlderFiles(ConfigUtil.getInstance().getTempDir().getCanonicalPath(), 7, null, true);
 
 		cleanupApiCallsLog(argsMap);
 		cleanupQueryAuditLogs(argsMap);
