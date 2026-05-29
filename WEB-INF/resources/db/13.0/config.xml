@@ -29,11 +29,37 @@
     </sql>
   </changeSet>
 
-  <changeSet author="vpawar" id="Query optimisation settings">
+  <changeSet author="vpawar" id="Remove query optimisation settings">
+    <sql>
+      delete from
+        os_cfg_settings
+      where
+        property_id in (
+          select
+            p.identifier
+          from
+            os_cfg_props p
+            inner join os_modules m on m.identifier = p.module_id
+          where
+            m.name = 'query' and
+            p.name = 'optimisation_settings'
+        )
+    </sql>
+
+    <sql>
+      delete from
+        os_cfg_props
+      where
+        module_id = (select identifier from os_modules where name = 'query') and
+        name = 'optimisation_settings'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Query risk assessment rules">
     <sql>
       call add_cfg_prop(
-        'query', 'optimisation_settings',
-        'optimisation_settings', 'optimisation_settings_desc',
+        'query', 'risk_assessment_rules',
+        'risk_assessment_rules', 'risk_assessment_rules_desc',
         'FILE', null
       );
     </sql>

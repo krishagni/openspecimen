@@ -128,10 +128,10 @@ import edu.common.dynamicextensions.domain.nui.Control;
 import edu.common.dynamicextensions.nutility.DeConfiguration;
 import edu.common.dynamicextensions.query.Query;
 import edu.common.dynamicextensions.query.QueryException;
-import edu.common.dynamicextensions.query.QueryOptimisationConfig;
 import edu.common.dynamicextensions.query.QueryParserException;
 import edu.common.dynamicextensions.query.QueryRejectedException;
 import edu.common.dynamicextensions.query.QueryResponse;
+import edu.common.dynamicextensions.query.QueryRiskAssessmentConfig;
 import edu.common.dynamicextensions.query.QueryResultCsvExporter;
 import edu.common.dynamicextensions.query.QueryResultData;
 import edu.common.dynamicextensions.query.QueryResultExporter;
@@ -165,7 +165,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private static final int DEF_MAX_RECS_IN_MEM = 100;
 
-	private static final String OPTIMISATION_SETTINGS = "optimisation_settings";
+	private static final String RISK_ASSESSMENT_RULES = "risk_assessment_rules";
 
 	private static final String QUERY_AUDIT_LOGS_DIR = "query-audit-logs";
 
@@ -201,7 +201,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 
 	private int maxRecsInMemory = DEF_MAX_RECS_IN_MEM;
 
-	private volatile QueryOptimisationConfig optimisationConfig = QueryOptimisationConfig.defaultConfig();
+	private volatile QueryRiskAssessmentConfig riskAssessmentConfig = QueryRiskAssessmentConfig.defaultConfig();
 
 	private AtomicInteger concurrentQueriesCnt = new AtomicInteger(0);
 
@@ -411,7 +411,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				.ic(!queryDetail.isCaseSensitive())
 				.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 				.timeFormat(ConfigUtil.getInstance().getTimeFmt())
-				.optimiseQueries(optimisationConfig)
+				.assessQueryRisk(riskAssessmentConfig)
 				.compile(cprForm, getAql(queryDetail));
 			SavedQuery savedQuery = getSavedQuery(queryDetail);
 			daoFactory.getSavedQueryDao().saveOrUpdate(savedQuery);
@@ -440,7 +440,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				.ic(!queryDetail.isCaseSensitive())
 				.dateFormat(ConfigUtil.getInstance().getDeDateFmt())
 				.timeFormat(ConfigUtil.getInstance().getTimeFmt())
-				.optimiseQueries(optimisationConfig)
+				.assessQueryRisk(riskAssessmentConfig)
 				.compile(cprForm, getAql(queryDetail));
 			SavedQuery savedQuery = getSavedQuery(queryDetail);
 			SavedQuery existing = daoFactory.getSavedQueryDao().getQuery(queryDetail.getId());
@@ -1356,7 +1356,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt())
 			.timeZone(tz != null ? tz.getID() : null)
 			.timeout(op.getTimeout())
-			.optimiseQueries(optimisationConfig);
+			.assessQueryRisk(riskAssessmentConfig);
 		addAutoJoinParams(query);
 
 		if (StringUtils.isNotBlank(op.getQuerySpace())) {
@@ -1773,7 +1773,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				try {
 					explain = Utility.jsonToMap(explainText);
 				} catch (Exception e) {
-					logger.debug("Could not parse optimiser explain plan as JSON. Falling back to DB explain.", e);
+					logger.debug("Could not parse risk assessment explain plan as JSON. Falling back to DB explain.", e);
 				}
 			}
 
@@ -2105,7 +2105,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 			.timeFormat(ConfigUtil.getInstance().getTimeFmt())
 			.timeZone(tz != null ? tz.getID() : null)
 			.wideRowMode(WideRowMode.OFF)
-			.optimiseQueries(optimisationConfig)
+			.assessQueryRisk(riskAssessmentConfig)
 			.querySpace(qs);
 		addAutoJoinParams(query);
 
@@ -2143,7 +2143,7 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		try {
 			String itAdminEmailId = ConfigUtil.getInstance().getItAdminEmailId();
 			if (StringUtils.isBlank(itAdminEmailId)) {
-				logger.error("Query rejected by optimiser, but IT admin email ID is not configured");
+				logger.error("Query rejected by risk assessment advisor, but IT admin email ID is not configured");
 				return;
 			}
 
@@ -2212,21 +2212,21 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 		maxRecsInMemory = cfgService.getIntSetting(CFG_MOD, MAX_RECS_IN_MEM, DEF_MAX_RECS_IN_MEM);
 		DeConfiguration.getInstance().maxCacheElementsInMemory(maxRecsInMemory);
 
-		if (StringUtils.equals(name, OPTIMISATION_SETTINGS)) {
-			optimisationConfig = parseOptimisationConfig(true);
+		if (StringUtils.equals(name, RISK_ASSESSMENT_RULES)) {
+			riskAssessmentConfig = parseRiskAssessmentConfig(true);
 		} else if (StringUtils.isBlank(name)) {
-			optimisationConfig = parseOptimisationConfig(false);
+			riskAssessmentConfig = parseRiskAssessmentConfig(false);
 		}
 	}
 
-	private QueryOptimisationConfig parseOptimisationConfig(boolean failOnError) {
+	private QueryRiskAssessmentConfig parseRiskAssessmentConfig(boolean failOnError) {
 		try {
-			String json = cfgService.getFileContent(CFG_MOD, OPTIMISATION_SETTINGS);
+			String json = cfgService.getFileContent(CFG_MOD, RISK_ASSESSMENT_RULES);
 			if (StringUtils.isBlank(json)) {
-				return QueryOptimisationConfig.defaultConfig();
+				return QueryRiskAssessmentConfig.defaultConfig();
 			}
 
-			return QueryOptimisationConfig.fromJson(json);
+			return QueryRiskAssessmentConfig.fromJson(json);
 		} catch (Exception e) {
 			if (failOnError) {
 				if (e instanceof OpenSpecimenException) {
@@ -2234,11 +2234,11 @@ public class QueryServiceImpl implements QueryService, InitializingBean {
 				}
 
 				throw OpenSpecimenException.userError(
-					CommonErrorCode.INVALID_INPUT, "Invalid query optimisation settings JSON file");
+					CommonErrorCode.INVALID_INPUT, "Invalid query risk assessment settings JSON file");
 			}
 
-			logger.error("Error parsing query optimisation settings. Using the default settings.", e);
-			return QueryOptimisationConfig.defaultConfig();
+			logger.error("Error parsing query risk assessment settings. Using the default settings.", e);
+			return QueryRiskAssessmentConfig.defaultConfig();
 		}
 	}
 

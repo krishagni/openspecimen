@@ -6,9 +6,9 @@
           <tbody>
             <tr>
               <td style="border-collapse:collapse;padding:0 0 18px 0">
-                <div style="font-size:20px;line-height:28px;font-weight:700;color:#1f2933">Query rejected by optimiser</div>
+                <div style="font-size:20px;line-height:28px;font-weight:700;color:#1f2933">Query rejected by risk assessment advisor</div>
                 <div style="font-size:13px;line-height:20px;color:#5b6876;margin-top:4px">
-                  The optimiser rejected a generated SQL statement before execution.
+                  The query risk assessment advisor rejected a generated SQL statement before execution.
                 </div>
               </td>
             </tr>
