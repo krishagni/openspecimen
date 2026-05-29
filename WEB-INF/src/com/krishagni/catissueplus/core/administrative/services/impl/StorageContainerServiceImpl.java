@@ -313,7 +313,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 
 			AccessCtrlMgr.getInstance().ensureReadContainerRights(container);
 			StorageContainerDetail detail = StorageContainerDetail.from(container);
-			if (req.getPayload().includeStats()) {
+			if (container.getParentContainer() == null && req.getPayload().includeStats()) {
 				detail.setSpecimensByType(getSpecimensCountByType(container.getId()));
 			}
 
