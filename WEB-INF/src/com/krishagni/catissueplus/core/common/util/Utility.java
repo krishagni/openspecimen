@@ -1007,27 +1007,23 @@ public class Utility {
 
 	// files => [{filePath, name}]
 	public static File zipFilesWithNames(List<Pair<String, String>> files, String zipFilePath) {
-		ZipOutputStream zout = null;
-		FileOutputStream fout = null;
-		File result = null;
+		File result = new File(zipFilePath);
 
-		try {
-			result = new File(zipFilePath);
-			fout = new FileOutputStream(result);
-			zout = new ZipOutputStream(fout);
-
+		try (
+			FileOutputStream fout = new FileOutputStream(result);
+			ZipOutputStream zout = new ZipOutputStream(fout)
+		) {
 			for (Pair<String, String> fd : files) {
-				InputStream in = null;
-				try {
-					File file = new File(fd.first());
-					in = new FileInputStream(file);
-
+				File file = new File(fd.first());
+				try (InputStream in = new FileInputStream(file)) {
 					String entryName = StringUtils.isBlank(fd.second()) ? file.getName() : fd.second();
+					if (!StringUtils.equals(entryName, FilenameUtils.getName(entryName)) || StringUtils.equalsAny(entryName, ".", "..")) {
+						throw new IllegalArgumentException("Invalid ZIP entry name: " + entryName);
+					}
+
 					zout.putNextEntry(new ZipEntry(entryName));
 					IOUtils.copy(in, zout);
-				} finally {
 					zout.closeEntry();
-					IOUtils.closeQuietly(in);
 				}
 			}
 
@@ -1035,10 +1031,8 @@ public class Utility {
 			zout.flush();
 			return result;
 		} catch (Exception e) {
+			FileUtils.deleteQuietly(result);
 			throw OpenSpecimenException.serverError(e);
-		} finally {
-			IOUtils.closeQuietly(fout);
-			IOUtils.closeQuietly(zout);
 		}
 	}
 
