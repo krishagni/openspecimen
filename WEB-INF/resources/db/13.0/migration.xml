@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet author="vpawar" id="Set primary specimen ID" dbms="mysql">
+    <sql>
+      update
+        catissue_specimen s
+        inner join catissue_specimen_hierarchy h on h.descendent_id = s.identifier
+        inner join catissue_specimen p on p.identifier = h.ancestor_id and p.parent_specimen_id is null
+      set
+        s.primary_specimen_id = p.identifier
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Set primary specimen ID" dbms="oracle">
+    <sql>
+      merge into
+        catissue_specimen s
+      using (
+        select
+          h.descendent_id, h.ancestor_id
+        from
+          catissue_specimen_hierarchy h
+          inner join catissue_specimen p on p.identifier = h.ancestor_id and p.parent_specimen_id is null
+      ) h on (h.descendent_id = s.identifier)
+      when matched then
+        update set
+          s.primary_specimen_id = h.ancestor_id
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Move specimen collection and received details">
+    <sql>
+      insert into
+        os_spmn_coll_recv_details(
+          primary_specimen_id,
+          collection_container_id,
+          collection_procedure_id,
+          collection_user_id,
+          collection_time,
+          collection_comments,
+          received_quality_id,
+          received_user_id,
+          received_time,
+          received_comments
+        )
+      select
+        s.identifier,
+        s.collection_container_id,
+        s.collection_procedure_id,
+        s.collection_user_id,
+        s.collection_time,
+        s.collection_comments,
+        s.received_quality_id,
+        s.received_user_id,
+        s.received_time,
+        s.received_comments
+      from
+        catissue_specimen s
+      where
+        s.parent_specimen_id is null and
+        s.lineage = 'New'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop specimen collection and received detail columns">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="CATISSUE_SPECIMEN" columnName="COLLECTION_CONTAINER_ID"/>
+    </preConditions>
+
+    <dropForeignKeyConstraint baseTableName="CATISSUE_SPECIMEN" constraintName="FK_SPECIMEN_CONTAINER_ID"/>
+    <dropForeignKeyConstraint baseTableName="CATISSUE_SPECIMEN" constraintName="FK_SPECIMEN_PROCEDURE_ID"/>
+    <dropForeignKeyConstraint baseTableName="CATISSUE_SPECIMEN" constraintName="FK_SPECIMEN_COLLECTOR_ID"/>
+    <dropForeignKeyConstraint baseTableName="CATISSUE_SPECIMEN" constraintName="FK_SPECIMEN_RECV_QUALITY_ID"/>
+    <dropForeignKeyConstraint baseTableName="CATISSUE_SPECIMEN" constraintName="FK_SPECIMEN_RECEIVER_ID"/>
+
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="COLLECTION_CONTAINER_ID"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="COLLECTION_PROCEDURE_ID"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="COLLECTION_USER_ID"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="COLLECTION_TIME"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="COLLECTION_COMMENTS"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="RECEIVED_QUALITY_ID"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="RECEIVED_USER_ID"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="RECEIVED_TIME"/>
+    <dropColumn tableName="CATISSUE_SPECIMEN" columnName="RECEIVED_COMMENTS"/>
+  </changeSet>
+</databaseChangeLog>

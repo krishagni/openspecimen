@@ -445,14 +445,6 @@ public class Visit extends BaseExtensionEntity {
 		setSprName(sprName);
 	}	
 	
-	public void addSpecimen(Specimen specimen) {
-		specimen.setVisit(this);
-		getSpecimens().add(specimen);
-		daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
-		specimen.addOrUpdateExtension();
-		EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
-	}
-	
 	public CollectionProtocol getCollectionProtocol() {
 		return registration.getCollectionProtocol();
 	}
@@ -693,6 +685,7 @@ public class Visit extends BaseExtensionEntity {
 		for (SpecimenRequirement sr : anticipated) {
 			Specimen specimen = sr.getSpecimen();
 			specimen.setVisit(this);
+			specimen.setPrimarySpecimen(specimen);
 			specimen.updateCollectionStatus(status);
 			addSpecimen(specimen);
 		}
@@ -705,6 +698,7 @@ public class Visit extends BaseExtensionEntity {
 
 		Specimen specimen = sr.getSpecimen();
 		specimen.setParentSpecimen(parent);
+		specimen.setPrimarySpecimen(parent != null ? parent.getPrimarySpecimen() : specimen);
 		specimen.setVisit(this);
 		specimen.setCollectionStatus(Specimen.PENDING);
 		specimen.updateAvailableStatus();
@@ -722,6 +716,13 @@ public class Visit extends BaseExtensionEntity {
 		}
 
 		return specimen;
+	}
+
+	private void addSpecimen(Specimen specimen) {
+		getSpecimens().add(specimen);
+		daoFactory.getSpecimenDao().saveOrUpdate(specimen, true);
+		specimen.addOrUpdateExtension();
+		EventPublisher.getInstance().publish(new SpecimenSavedEvent(specimen));
 	}
 
 	private List<PrintItem<Specimen>> getSpecimenPrintItems(Collection<Specimen> specimens) {

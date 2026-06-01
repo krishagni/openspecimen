@@ -25,4 +25,38 @@
       <column name="capacity_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Primary specimen ID in specimen audit">
+    <addColumn tableName="CATISSUE_SPECIMEN_AUD">
+      <column name="PRIMARY_SPECIMEN_ID" type="${int.type}" />
+      <column name="primarySpecimen_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen collection and received details audit">
+    <createTable tableName="OS_SPMN_COLL_RECV_DETAILS_AUD">
+      <column name="PRIMARY_SPECIMEN_ID" type="${int.type}" />
+      <column name="primarySpecimen_MOD" type="${boolean.type}" />
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${smallint.type}" />
+      <column name="COLLECTION_CONTAINER_ID" type="${int.type}" />
+      <column name="collContainer_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_PROCEDURE_ID" type="${int.type}" />
+      <column name="collProcedure_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_USER_ID" type="${int.type}" />
+      <column name="collector_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_TIME" type="${nullable.ts.type}" />
+      <column name="collTime_MOD" type="${boolean.type}" />
+      <column name="COLLECTION_COMMENTS" type="${text.type}(512)" />
+      <column name="collComments_MOD" type="${boolean.type}" />
+      <column name="RECEIVED_QUALITY_ID" type="${int.type}" />
+      <column name="recvQuality_MOD" type="${boolean.type}" />
+      <column name="RECEIVED_USER_ID" type="${int.type}" />
+      <column name="receiver_MOD" type="${boolean.type}" />
+      <column name="RECEIVED_TIME" type="${nullable.ts.type}" />
+      <column name="recvTime_MOD" type="${boolean.type}" />
+      <column name="RECEIVED_COMMENTS" type="${text.type}(512)" />
+      <column name="recvComments_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

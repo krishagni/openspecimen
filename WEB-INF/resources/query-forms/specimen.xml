@@ -555,75 +555,69 @@
         <name>spmnCollRecvDetails</name>
         <udn>spmnCollRecvDetails</udn>
         <caption>#getMessage("specimen_coll_recv_details")</caption>
-        <table>OS_SPMN_COLL_RECV_DETAILS_VIEW</table>
-        <primaryKey>SPECIMEN_ID</primaryKey>
-        <foreignKey>SPECIMEN_ID</foreignKey>
-        <parentKey>IDENTIFIER</parentKey>
+        <table>OS_SPMN_COLL_RECV_DETAILS</table>
+        <primaryKey>PRIMARY_SPECIMEN_ID</primaryKey>
+        <foreignKey>PRIMARY_SPECIMEN_ID</foreignKey>
+        <parentKey>PRIMARY_SPECIMEN_ID</parentKey>
         <row>
-          <dropDown>
+          <pvField>
             <name>collContainer</name>
             <udn>collContainer</udn>
             <caption>#getMessage("specimen_collection_container")</caption>
-            <column>COLL_CONTAINER</column>
-            <options>
-              <sql>select value from catissue_permissible_value where public_id = 'collection_container' order by value</sql>
-            </options>
-          </dropDown>
-          <dropDown>
+            <column>COLLECTION_CONTAINER_ID</column>
+            <attribute>collection_container</attribute>
+          </pvField>
+          <pvField>
             <name>collProcedure</name>
             <udn>collProcedure</udn>
             <caption>#getMessage("specimen_collection_procedure")</caption>
-            <column>COLL_PROCEDURE</column>
-            <options>
-              <sql>select value from catissue_permissible_value where public_id = 'collection_procedure' order by value</sql>
-            </options>
-          </dropDown>
+            <column>COLLECTION_PROCEDURE_ID</column>
+            <attribute>collection_procedure</attribute>
+          </pvField>
           <userField>
             <name>collector</name>
             <udn>collector</udn>
             <caption>#getMessage("specimen_collector")</caption>
-            <column>COLLECTOR_ID</column>
+            <column>COLLECTION_USER_ID</column>
           </userField>
           <datePicker>
             <name>collTime</name>
             <udn>collTime</udn>
             <caption>#getMessage("specimen_collection_date")</caption>
-            <column>COLL_TIME</column>
+            <column>COLLECTION_TIME</column>
             <format>MM-dd-yyyy HH:mm</format>
           </datePicker>
           <textField>
             <name>collComments</name>
             <udn>collComments</udn>
             <caption>#getMessage("specimen_collection_comments")</caption>
-            <column>COLL_COMMENTS</column>
+            <column>COLLECTION_COMMENTS</column>
           </textField>
-          <dropDown>
+          <pvField>
             <name>recvQuality</name>
             <udn>recvQuality</udn>
             <caption>#getMessage("specimen_received_quality")</caption>
-            <column>RECV_QUALITY</column>
-            <options>
-              <sql>select value from catissue_permissible_value where public_id = 'receive_quality' order by value</sql>
-            </options>
-          </dropDown>
+            <column>RECEIVED_QUALITY_ID</column>
+            <attribute>receive_quality</attribute>
+          </pvField>
           <userField>
             <name>receiver</name>
             <udn>receiver</udn>
             <caption>#getMessage("specimen_receiver")</caption>
-            <column>RECEIVER_ID</column>
+            <column>RECEIVED_USER_ID</column>
           </userField>
           <datePicker>
             <name>recvTime</name>
             <udn>recvTime</udn>
             <caption>#getMessage("specimen_received_date")</caption>
-            <column>RECV_TIME</column>
+            <column>RECEIVED_TIME</column>
             <format>MM-dd-yyyy HH:mm</format>
           </datePicker>
           <textField>
             <name>recvComments</name>
             <udn>recvComments</udn>
             <caption>#getMessage("specimen_received_comments")</caption>
-            <column>RECV_COMMENTS</column>
+            <column>RECEIVED_COMMENTS</column>
           </textField>
         </row>
       </subForm>

@@ -2,16 +2,19 @@ package com.krishagni.catissueplus.core.biospecimen.domain;
 
 import java.util.Date;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
+
+import com.krishagni.catissueplus.core.administrative.domain.PermissibleValue;
 import com.krishagni.catissueplus.core.administrative.domain.User;
 
-public class SpecimenCollectionReceiveDetail {
-	private Specimen specimen;
+@Audited
+public class SpecimenCollectionReceiveDetail implements Identifiable<Long> {
+	private Specimen primarySpecimen;
 
-	private Long collEventId;
+	private PermissibleValue collContainer;
 
-	private String collContainer;
-
-	private String collProcedure;
+	private PermissibleValue collProcedure;
 
 	private User collector;
 
@@ -19,9 +22,7 @@ public class SpecimenCollectionReceiveDetail {
 
 	private String collComments;
 
-	private Long recvEventId;
-
-	private String recvQuality;
+	private PermissibleValue recvQuality;
 
 	private User receiver;
 
@@ -30,44 +31,46 @@ public class SpecimenCollectionReceiveDetail {
 	private String recvComments;
 
 	public Long getId() {
-		return specimen == null ? null : specimen.getId();
+		return primarySpecimen == null ? null : primarySpecimen.getId();
 	}
 
 	public void setId(Long id) {
 	}
 
-	public Specimen getSpecimen() {
-		return specimen;
+	public Specimen getPrimarySpecimen() {
+		return primarySpecimen;
 	}
 
-	public void setSpecimen(Specimen specimen) {
-		this.specimen = specimen;
+	public void setPrimarySpecimen(Specimen primarySpecimen) {
+		this.primarySpecimen = primarySpecimen;
 	}
 
 	public Long getCollEventId() {
-		return collEventId;
+		return getId();
 	}
 
 	public void setCollEventId(Long collEventId) {
-		this.collEventId = collEventId;
 	}
 
-	public String getCollContainer() {
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+	public PermissibleValue getCollContainer() {
 		return collContainer;
 	}
 
-	public void setCollContainer(String collContainer) {
+	public void setCollContainer(PermissibleValue collContainer) {
 		this.collContainer = collContainer;
 	}
 
-	public String getCollProcedure() {
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+	public PermissibleValue getCollProcedure() {
 		return collProcedure;
 	}
 
-	public void setCollProcedure(String collProcedure) {
+	public void setCollProcedure(PermissibleValue collProcedure) {
 		this.collProcedure = collProcedure;
 	}
 
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public User getCollector() {
 		return collector;
 	}
@@ -93,21 +96,22 @@ public class SpecimenCollectionReceiveDetail {
 	}
 
 	public Long getRecvEventId() {
-		return recvEventId;
+		return getId();
 	}
 
 	public void setRecvEventId(Long recvEventId) {
-		this.recvEventId = recvEventId;
 	}
 
-	public String getRecvQuality() {
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+	public PermissibleValue getRecvQuality() {
 		return recvQuality;
 	}
 
-	public void setRecvQuality(String recvQuality) {
+	public void setRecvQuality(PermissibleValue recvQuality) {
 		this.recvQuality = recvQuality;
 	}
 
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	public User getReceiver() {
 		return receiver;
 	}

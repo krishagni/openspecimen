@@ -331,11 +331,13 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 	
 	private void setParentSpecimen(SpecimenDetail detail, Specimen parent, Specimen specimen, OpenSpecimenException ose) {
 		if (StringUtils.isBlank(specimen.getLineage()) || specimen.getLineage().equals(Specimen.NEW)) {
+			specimen.setPrimarySpecimen(specimen);
 			return;
 		}
 		
 		if (parent != null) {
 			specimen.setParentSpecimen(parent);
+			specimen.setPrimarySpecimen(parent.getPrimarySpecimen());
 			if (!parent.isCollected()) {
 				specimen.setAutoCollectParents(true);
 			}
@@ -358,6 +360,10 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 		}
 		
 		specimen.setParentSpecimen(parent);
+		if (parent != null) {
+			specimen.setPrimarySpecimen(parent.getPrimarySpecimen());
+		}
+
 		if (parent != null && !parent.isCollected()) {
 			specimen.setAutoCollectParents(true);
 		}
@@ -382,7 +388,14 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 				parentOfParent = createParent(parent);
 			}
 
+			if (parentOfParent == null) {
+				throw OpenSpecimenException.userError(SpecimenErrorCode.PARENT_REQUIRED);
+			}
+
 			parent.setParentSpecimen(parentOfParent);
+			parent.setPrimarySpecimen(parentOfParent.getPrimarySpecimen());
+		} else {
+			parent.setPrimarySpecimen(parent);
 		}
 
 		parent.setKitLabelsIfEmpty();
@@ -407,10 +420,11 @@ public class SpecimenFactoryImpl implements SpecimenFactory {
 	}
 	
 	private void setParentSpecimen(SpecimenDetail detail, Specimen existing, Specimen parent, Specimen specimen, OpenSpecimenException ose) {
-		if (existing == null || detail.isAttrModified("parentLabel")) {
+		if (existing == null || detail.isAttrModified("parentId") || detail.isAttrModified("parentLabel")) {
 			setParentSpecimen(detail, parent, specimen, ose);
 		} else {
 			specimen.setParentSpecimen(existing.getParentSpecimen());
+			specimen.setPrimarySpecimen(existing.getPrimarySpecimen());
 		}
 	}
 

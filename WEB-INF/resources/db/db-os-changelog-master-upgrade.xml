@@ -206,6 +206,7 @@
   <include file="db/13.0/unique-constraints.xml" />
   <include file="db/13.0/audit.xml" />
   <include file="db/13.0/config.xml" />
+  <include file="db/13.0/migration.xml" />
 
   <include file="db/procs.xml" />
   <!-- Views are created always at the last -->

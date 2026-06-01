@@ -658,14 +658,14 @@ public class SpecimenInfo extends AttributeModifiedSupport implements Comparable
 		SpecimenCollectionReceiveDetail collRecvDetail = specimen.getCollRecvDetails();
 		if (collRecvDetail != null) {
 			result.setCollector(UserSummary.from(collRecvDetail.getCollector()));
-			result.setCollectionContainer(collRecvDetail.getCollContainer());
+			result.setCollectionContainer(PermissibleValue.getValue(collRecvDetail.getCollContainer()));
 			result.setCollectionDate(collRecvDetail.getCollTime());
 		} else if (specimen.isPrimary() && specimen.getSpecimenRequirement() != null) {
 			result.setCollector(UserSummary.from(specimen.getSpecimenRequirement().getCollector()));
 			result.setCollectionContainer(PermissibleValue.getValue(specimen.getSpecimenRequirement().getCollectionContainer()));
 		}
 
-		if (specimen.getCollRecvDetails() != null && !Specimen.TO_BE_RECEIVED.equals(specimen.getCollRecvDetails().getRecvQuality())) {
+		if (specimen.getCollRecvDetails() != null && !Specimen.TO_BE_RECEIVED.equals(PermissibleValue.getValue(specimen.getCollRecvDetails().getRecvQuality()))) {
 			result.setReceiver(UserSummary.from(specimen.getCollRecvDetails().getReceiver()));
 		} else if (specimen.isPrimary() && specimen.getSpecimenRequirement() != null) {
 			result.setReceiver(UserSummary.from(specimen.getSpecimenRequirement().getReceiver()));

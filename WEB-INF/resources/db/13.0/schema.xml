@@ -125,4 +125,59 @@
       <column name="CAPACITY" type="${int.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Primary specimen ID">
+    <addColumn tableName="CATISSUE_SPECIMEN">
+      <column name="PRIMARY_SPECIMEN_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_PRIMARY_SPECIMEN_ID" referencedTableName="CATISSUE_SPECIMEN"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on primary specimen ID">
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_PRIMARY_SPMN_IDX">
+      <column name="PRIMARY_SPECIMEN_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen collection and received details">
+    <createTable tableName="OS_SPMN_COLL_RECV_DETAILS">
+      <column name="PRIMARY_SPECIMEN_ID" type="${int.type}">
+        <constraints nullable="false" primaryKey="true" foreignKeyName="FK_SPMN_CRD_PRIMARY_SPMN"
+          referencedTableName="CATISSUE_SPECIMEN" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COLLECTION_CONTAINER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_CRD_COLL_CONT" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COLLECTION_PROCEDURE_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_CRD_COLL_PROC" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COLLECTION_USER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_CRD_COLLECTOR" referencedTableName="CATISSUE_USER"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="COLLECTION_TIME" type="${nullable.ts.type}" defaultValue="null" />
+      <column name="COLLECTION_COMMENTS" type="${text.type}(512)" />
+      <column name="RECEIVED_QUALITY_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_CRD_RECV_QUALITY" referencedTableName="CATISSUE_PERMISSIBLE_VALUE"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="RECEIVED_USER_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_CRD_RECEIVER" referencedTableName="CATISSUE_USER"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="RECEIVED_TIME" type="${nullable.ts.type}" defaultValue="null" />
+      <column name="RECEIVED_COMMENTS" type="${text.type}(512)" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop specimen collection and received details view">
+    <preConditions onFail="MARK_RAN">
+      <viewExists viewName="OS_SPMN_COLL_RECV_DETAILS_VIEW"/>
+    </preConditions>
+    <dropView viewName="OS_SPMN_COLL_RECV_DETAILS_VIEW"/>
+  </changeSet>
 </databaseChangeLog>

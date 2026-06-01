@@ -164,6 +164,8 @@ public class Specimen extends BaseExtensionEntity {
 
 	private Specimen parentSpecimen;
 
+	private Specimen primarySpecimen;
+
 	private Set<Specimen> childCollection = new HashSet<>();
 
 	private SpecimenPooledEvent pooledEvent;
@@ -185,27 +187,6 @@ public class Specimen extends BaseExtensionEntity {
 	private SpecimenChildrenEvent parentEvent;
 
 	//
-	// collectionEvent and receivedEvent are valid only for primary specimens
-	//
-	private PermissibleValue collectionProcedure;
-
-	private PermissibleValue collectionContainer;
-
-	private User collectionUser;
-
-	private Date collectionTime;
-
-	private String collectionComments;
-	
-	private PermissibleValue receivedQuality;
-
-	private User receivedUser;
-
-	private Date receivedTime;
-
-	private String receivedComments;
-
-	//
 	// record the DP for which this specimen is currently reserved
 	//
 	private SpecimenReservedEvent reservedEvent;
@@ -213,7 +194,7 @@ public class Specimen extends BaseExtensionEntity {
 	//
 	// Available for all specimens in hierarchy based on values set for primary specimens
 	//
-	private Set<SpecimenCollectionReceiveDetail> collRecvDetailsList;
+	private SpecimenCollectionReceiveDetail collRecvDetails;
 
 	private List<SpecimenTransferEvent> transferEvents;
 	
@@ -608,6 +589,14 @@ public class Specimen extends BaseExtensionEntity {
 		this.parentSpecimen = parentSpecimen;
 	}
 
+	public Specimen getPrimarySpecimen() {
+		return primarySpecimen;
+	}
+
+	public void setPrimarySpecimen(Specimen primarySpecimen) {
+		this.primarySpecimen = primarySpecimen;
+	}
+
 	@NotAudited
 	public Set<Specimen> getChildCollection() {
 		return childCollection;
@@ -675,43 +664,43 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public PermissibleValue getCollectionProcedure() {
-		return collectionProcedure;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getCollProcedure() : null;
 	}
 
 	public void setCollectionProcedure(PermissibleValue collectionProcedure) {
-		this.collectionProcedure = collectionProcedure;
+		getCollectionReceiveDetail(true).setCollProcedure(collectionProcedure);
 	}
 
 	public PermissibleValue getCollectionContainer() {
-		return collectionContainer;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getCollContainer() : null;
 	}
 
 	public void setCollectionContainer(PermissibleValue collectionContainer) {
-		this.collectionContainer = collectionContainer;
+		getCollectionReceiveDetail(true).setCollContainer(collectionContainer);
 	}
 
 	public User getCollectionUser() {
-		return collectionUser;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getCollector() : null;
 	}
 
 	public void setCollectionUser(User collectionUser) {
-		this.collectionUser = collectionUser;
+		getCollectionReceiveDetail(true).setCollector(collectionUser);
 	}
 
 	public Date getCollectionTime() {
-		return collectionTime;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getCollTime() : null;
 	}
 
 	public void setCollectionTime(Date collectionTime) {
-		this.collectionTime = collectionTime;
+		getCollectionReceiveDetail(true).setCollTime(collectionTime);
 	}
 
 	public String getCollectionComments() {
-		return collectionComments;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getCollComments() : null;
 	}
 
 	public void setCollectionComments(String collectionComments) {
-		this.collectionComments = collectionComments;
+		getCollectionReceiveDetail(true).setCollComments(collectionComments);
 	}
 
 	@NotAudited
@@ -720,35 +709,35 @@ public class Specimen extends BaseExtensionEntity {
 	}
 
 	public PermissibleValue getReceivedQuality() {
-		return receivedQuality;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getRecvQuality() : null;
 	}
 
 	public void setReceivedQuality(PermissibleValue receivedQuality) {
-		this.receivedQuality = receivedQuality;
+		getCollectionReceiveDetail(true).setRecvQuality(receivedQuality);
 	}
 
 	public User getReceivedUser() {
-		return receivedUser;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getReceiver() : null;
 	}
 
 	public void setReceivedUser(User receivedUser) {
-		this.receivedUser = receivedUser;
+		getCollectionReceiveDetail(true).setReceiver(receivedUser);
 	}
 
 	public Date getReceivedTime() {
-		return receivedTime;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getRecvTime() : null;
 	}
 
 	public void setReceivedTime(Date receivedTime) {
-		this.receivedTime = receivedTime;
+		getCollectionReceiveDetail(true).setRecvTime(receivedTime);
 	}
 
 	public String getReceivedComments() {
-		return receivedComments;
+		return getCollectionReceiveDetail(false) != null ? getCollectionReceiveDetail(false).getRecvComments() : null;
 	}
 
 	public void setReceivedComments(String receivedComments) {
-		this.receivedComments = receivedComments;
+		getCollectionReceiveDetail(true).setRecvComments(receivedComments);
 	}
 
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
@@ -762,16 +751,21 @@ public class Specimen extends BaseExtensionEntity {
 
 	@NotAudited
 	public SpecimenCollectionReceiveDetail getCollRecvDetails() {
-		return collRecvDetailsList != null && !collRecvDetailsList.isEmpty() ? collRecvDetailsList.iterator().next() : null;
+		return getCollectionReceiveDetail(false);
 	}
 
 	@NotAudited
-	public Set<SpecimenCollectionReceiveDetail> getCollRecvDetailsList() {
-		return collRecvDetailsList;
+	public SpecimenCollectionReceiveDetail getCollectionReceiveDetail(boolean create) {
+		if (collRecvDetails == null && create) {
+			collRecvDetails = new SpecimenCollectionReceiveDetail();
+			collRecvDetails.setPrimarySpecimen(getPrimarySpecimen());
+		}
+
+		return collRecvDetails;
 	}
 
-	public void setCollRecvDetailsList(Set<SpecimenCollectionReceiveDetail> collRecvDetailsList) {
-		this.collRecvDetailsList = collRecvDetailsList;
+	public void setCollRecvDetails(SpecimenCollectionReceiveDetail collRecvDetails) {
+		this.collRecvDetails = collRecvDetails;
 	}
 
 	@NotAudited
@@ -825,15 +819,6 @@ public class Specimen extends BaseExtensionEntity {
 
 	public LabelGenerator getLabelGenerator() {
 		return labelGenerator;
-	}
-
-	public Specimen getPrimarySpecimen() {
-		Specimen specimen = this;
-		while (specimen.getParentSpecimen() != null) {
-			specimen = specimen.getParentSpecimen();
-		}
-
-		return specimen;
 	}
 
 	@Override
@@ -2070,6 +2055,7 @@ public class Specimen extends BaseExtensionEntity {
 		}
 
 		specimen.setParentSpecimen(this);
+		specimen.setPrimarySpecimen(getPrimarySpecimen());
 		if (!isCollected() && specimen.isCollected()) {
 			autoCollectParentSpecimens(specimen);
 		}
@@ -2736,6 +2722,7 @@ public class Specimen extends BaseExtensionEntity {
 			Specimen specimen = sr.getSpecimen();
 			specimen.setVisit(getVisit());
 			specimen.setParentSpecimen(this);
+			specimen.setPrimarySpecimen(getPrimarySpecimen());
 			specimen.setCollectionStatus(status);
 			specimen.updateAvailableStatus();
 			daoFactory.getSpecimenDao().saveOrUpdate(specimen);
@@ -2828,6 +2815,7 @@ public class Specimen extends BaseExtensionEntity {
 
 			Specimen specimen = childSr.getSpecimen();
 			specimen.setParentSpecimen(parent);
+			specimen.setPrimarySpecimen(parent.getPrimarySpecimen());
 			specimen.setVisit(parent.getVisit());
 			specimen.setCollectionStatus(Specimen.PENDING);
 			specimen.updateAvailableStatus();

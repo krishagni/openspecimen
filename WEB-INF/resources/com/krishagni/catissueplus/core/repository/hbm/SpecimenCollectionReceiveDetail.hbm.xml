@@ -5,37 +5,31 @@
 
 <hibernate-mapping auto-import="false">
   <class name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail"
-    table="OS_SPMN_COLL_RECV_DETAILS_VIEW" mutable="false" batch-size="100"
+    table="OS_SPMN_COLL_RECV_DETAILS" batch-size="100"
     entity-name="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail">
 
-    <id name="id" column="SPECIMEN_ID" type="long">
-      <generator class="foreign">
-        <param name="property">specimen</param>
-      </generator>
+    <id name="id" column="PRIMARY_SPECIMEN_ID" type="long">
+      <generator class="assigned"/>
     </id>
 
-    <property name="collEventId" column="COLL_EVENT_ID"/>
+    <many-to-one name="primarySpecimen" column="PRIMARY_SPECIMEN_ID" insert="false" update="false"/>
 
-    <property name="collContainer" column="COLL_CONTAINER"/>
+    <many-to-one name="collContainer" column="COLLECTION_CONTAINER_ID" fetch="join"/>
 
-    <property name="collProcedure" column="COLL_PROCEDURE"/>
+    <many-to-one name="collProcedure" column="COLLECTION_PROCEDURE_ID" fetch="join"/>
 
-    <many-to-one name="collector" column="COLLECTOR_ID"/>
+    <many-to-one name="collector" column="COLLECTION_USER_ID"/>
 
-    <property name="collTime" column="COLL_TIME"/>
+    <property name="collTime" column="COLLECTION_TIME"/>
 
-    <property name="collComments" column="COLL_COMMENTS"/>
+    <property name="collComments" column="COLLECTION_COMMENTS"/>
 
-    <property name="recvEventId" column="RECV_EVENT_ID"/>
+    <many-to-one name="recvQuality" column="RECEIVED_QUALITY_ID" fetch="join"/>
 
-    <property name="recvQuality" column="RECV_QUALITY"/>
+    <many-to-one name="receiver" column="RECEIVED_USER_ID"/>
 
-    <many-to-one name="receiver" column="RECEIVER_ID"/>
+    <property name="recvTime" column="RECEIVED_TIME"/>
 
-    <property name="recvTime" column="RECV_TIME"/>
-
-    <property name="recvComments" column="RECV_COMMENTS"/>
-
-    <many-to-one name="specimen" column="SPECIMEN_ID" insert="false" update="false"/>
+    <property name="recvComments" column="RECEIVED_COMMENTS"/>
   </class>
 </hibernate-mapping>

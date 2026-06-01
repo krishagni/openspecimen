@@ -80,6 +80,8 @@
 
     <many-to-one name="parentSpecimen" column="PARENT_SPECIMEN_ID"/>
 
+    <many-to-one name="primarySpecimen" column="PRIMARY_SPECIMEN_ID"/>
+
     <set name="childCollection" table="CATISSUE_SPECIMEN" inverse="true" cascade="all" batch-size="25">
       <key column="PARENT_SPECIMEN_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.Specimen"/>
@@ -97,33 +99,14 @@
 
     <many-to-one name="specimenRequirement" column="REQ_SPECIMEN_ID"/>
 
-    <set name="collRecvDetailsList" table="OS_SPMN_COLL_RECV_DETAILS_VIEW" inverse="true" mutable="false" batch-size="100">
-      <key column="SPECIMEN_ID"/>
-      <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail"/>
-    </set>
+    <many-to-one name="collRecvDetails" column="PRIMARY_SPECIMEN_ID"
+      class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail"
+      insert="false" update="false"/>
 
     <set name="specimenListItems" table="CATISSUE_SPEC_TAG_ITEMS" lazy="true">
       <key column="OBJ_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem"/>
     </set>
-
-    <many-to-one name="collectionProcedure" column="COLLECTION_PROCEDURE_ID" />
-
-    <many-to-one name="collectionContainer" column="COLLECTION_CONTAINER_ID" />
-
-    <many-to-one name="collectionUser" column="COLLECTION_USER_ID" />
-
-    <property name="collectionTime" column="COLLECTION_TIME" />
-
-    <property name="collectionComments" column="COLLECTION_COMMENTS" />
-
-    <many-to-one name="receivedQuality" column="RECEIVED_QUALITY_ID" />
-
-    <many-to-one name="receivedUser" column="RECEIVED_USER_ID" />
-
-    <property name="receivedTime" column="RECEIVED_TIME" />
-
-    <property name="receivedComments" column="RECEIVED_COMMENTS" />
 
     <many-to-one name="parentEvent" column="PARENT_EVENT_ID" fetch="join"/>
 
@@ -351,13 +334,11 @@
       <return-scalar column="rootId" type="long"/>
 
       select
-        s.identifier as rootId
+        s.primary_specimen_id as rootId
       from
-        catissue_specimen_hierarchy h
-        inner join catissue_specimen s on s.identifier = h.ancestor_id
+        catissue_specimen s
       where
-        h.descendent_id = :specimenId and
-        s.parent_specimen_id is null and
+        s.identifier = :specimenId and
         s.activity_status != 'Disabled'
     </sql-query>
 

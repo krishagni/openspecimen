@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
 import com.krishagni.catissueplus.core.biospecimen.domain.LabSpecimenService;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
+import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenCollectionReceiveDetail;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenPooledEvent;
 import com.krishagni.catissueplus.core.biospecimen.domain.SpecimenRequirement;
 import com.krishagni.catissueplus.core.biospecimen.domain.Visit;
@@ -376,6 +377,35 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	}
 
 	@Override
+	public void saveOrUpdate(Specimen specimen) {
+		saveOrUpdate(specimen, false);
+	}
+
+	@Override
+	public void saveOrUpdate(Specimen specimen, boolean flush) {
+		SpecimenCollectionReceiveDetail collRecvDetail = getCollectionReceiveDetail(specimen);
+		if (collRecvDetail != null && specimen.getId() != null) {
+			specimen.setCollRecvDetails(saveCollectionReceiveDetails(collRecvDetail));
+			collRecvDetail = null;
+		}
+
+		boolean forceFlush = specimen.getId() == null && collRecvDetail != null;
+		if (forceFlush) {
+			specimen.setCollRecvDetails(null);
+		}
+
+		saveOrUpdate(sessionFactory, specimen, flush || forceFlush);
+		if (collRecvDetail != null) {
+			collRecvDetail.setPrimarySpecimen(specimen.getPrimarySpecimen());
+			specimen.setCollRecvDetails(saveCollectionReceiveDetails(collRecvDetail));
+		}
+
+		if (flush) {
+			getCurrentSession().flush();
+		}
+	}
+
+	@Override
 	public List<Map<String, String>> getKitLabels(Visit visit, SpecimenRequirement sr) {
 		List<Map<String, String>> kitLabels = new ArrayList<>();
 
@@ -519,6 +549,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	public void save(LabSpecimenService labSpecimenService) {
 		sessionFactory.getCurrentSession().persist(labSpecimenService);
 	}
+
 
 	@Override
 	public void delete(LabSpecimenService svc) {
@@ -904,9 +935,22 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 			return;
 		}
 
-		query.join("specimen.collRecvDetailsList", "collRecvEvent")
+		query.join("specimen.collRecvDetails", "collRecvEvent")
 			.add(query.eq("specimen.lineage", Specimen.NEW))
-			.add(query.eq("collRecvEvent.recvQuality", Specimen.TO_BE_RECEIVED));
+			.add(query.eq("collRecvEvent.recvQuality.value", Specimen.TO_BE_RECEIVED));
+	}
+
+	private SpecimenCollectionReceiveDetail getCollectionReceiveDetail(Specimen specimen) {
+		if (!specimen.isPrimary() || specimen.getCollRecvDetails() == null) {
+			return null;
+		}
+
+		specimen.getCollRecvDetails().setPrimarySpecimen(specimen.getPrimarySpecimen());
+		return specimen.getCollRecvDetails();
+	}
+
+	private SpecimenCollectionReceiveDetail saveCollectionReceiveDetails(SpecimenCollectionReceiveDetail detail) {
+		return getCurrentSession().merge(detail);
 	}
 
 	private static final String FQN = Specimen.class.getName();
