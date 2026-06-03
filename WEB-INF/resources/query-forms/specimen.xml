@@ -390,6 +390,25 @@
                 <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
               </siteField>
             </row>
+            <row>
+              <subForm>
+                <name>type</name>
+                <udn>type</udn>
+                <caption>#getMessage("container_type")</caption>
+                <table>OS_CONTAINER_TYPES</table>
+                <foreignKey>IDENTIFIER</foreignKey>
+                <parentKey>TYPE_ID</parentKey>
+                <primaryKey>IDENTIFIER</primaryKey>
+                <row>
+                  <textField>
+                    <name>name</name>
+                    <udn>name</udn>
+                    <caption>#getMessage("specimen_spec_position_container_type_name")</caption>
+                    <column>NAME</column>
+                  </textField>
+                </row>
+              </subForm>
+            </row>
           </subForm>
         </row>
         <row>
@@ -1568,6 +1587,25 @@
                 <column>SITE_ID</column>
                 <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
               </siteField>
+            </row>
+            <row>
+              <subForm>
+                <name>type</name>
+                <udn>type</udn>
+                <caption>#getMessage("container_type")</caption>
+                <table>OS_CONTAINER_TYPES</table>
+                <foreignKey>IDENTIFIER</foreignKey>
+                <parentKey>TYPE_ID</parentKey>
+                <primaryKey>IDENTIFIER</primaryKey>
+                <row>
+                  <textField>
+                    <name>name</name>
+                    <udn>name</udn>
+                    <caption>#getMessage("specimen_spec_position_container_type_name")</caption>
+                    <column>NAME</column>
+                  </textField>
+                </row>
+              </subForm>
             </row>
           </subForm>
         </row>
