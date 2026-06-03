@@ -529,7 +529,7 @@
                    }
                },
                {
-                   "expr": "concat(Specimen.specimenPosition.containerName, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
+                   "expr": "concat(Specimen.specimenPosition.container.name, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
                    "caption": "Location"
                }
            ],

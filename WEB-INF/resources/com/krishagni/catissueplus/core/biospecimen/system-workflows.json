@@ -166,7 +166,7 @@
                     }
                 },
                 {
-                    "expr": "concat(Specimen.specimenPosition.containerName, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
+                    "expr": "concat(Specimen.specimenPosition.container.name, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
                     "caption": "Location"
                 }
             ],
@@ -266,7 +266,7 @@
                     }
                 },
                 {
-                    "expr": "concat(Specimen.specimenPosition.containerName, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
+                    "expr": "concat(Specimen.specimenPosition.container.name, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
                     "caption": "Location"
                 }
             ],
@@ -304,7 +304,7 @@
                     "caption": "Quantity"
                 },
                 {
-                    "expr": "Specimen.specimenPosition.containerName",
+                    "expr": "Specimen.specimenPosition.container.name",
                     "caption": "Storage Container"
                 },
                 {
@@ -362,7 +362,7 @@
                     }
                 },
                 {
-                    "expr": "concat(Specimen.specimenPosition.containerName, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
+                    "expr": "concat(Specimen.specimenPosition.container.name, concat_ws(\"\", concat(\" (\", Specimen.specimenPosition.formattedPos, \")\")))",
                     "caption": "Location"
                 },
                 {

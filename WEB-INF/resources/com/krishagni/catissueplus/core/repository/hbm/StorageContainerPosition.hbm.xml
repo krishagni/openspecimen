@@ -21,6 +21,8 @@
 
     <property name="posTwo" column="POS_TWO_STR"/>
 
+    <property name="formattedPosition" column="FORMATTED_POSITION"/>
+
     <property name="reservationId" column="RESERVATION_ID"/>
 
     <property name="reservationTime" column="RESERVATION_TIME"/>

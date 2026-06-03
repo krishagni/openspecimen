@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ import com.krishagni.catissueplus.core.common.OpenSpecimenAppCtxProvider;
 import com.krishagni.catissueplus.core.common.Pair;
 import com.krishagni.catissueplus.core.common.TransactionCache;
 import com.krishagni.catissueplus.core.common.access.AccessCtrlMgr;
+import com.krishagni.catissueplus.core.common.errors.ErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.events.DependentEntityDetail;
 import com.krishagni.catissueplus.core.common.util.AuthUtil;
@@ -214,6 +214,8 @@ public class StorageContainer extends BaseExtensionEntity {
 	// position assignment changes
 	//
 	private transient Map<StorageContainerPosition, Pair<Integer, Integer>> newPositions;
+
+	private transient boolean formattedPositionsDirty;
 
 	private transient boolean createStoreList = true;
 
@@ -698,8 +700,9 @@ public class StorageContainer extends BaseExtensionEntity {
 		setTemperature(other.getTemperature());
 		setAutomated(other.isAutomated());
 		setAutoFreezerProvider(other.getAutoFreezerProvider());
+
 		updateCapacity(other);
-		setPositionLabelingMode(other.getPositionLabelingMode());
+		updatePositionLabelingMode(other);
 		updateLabelingScheme(other);
 		updatePositionAssignment(other);
 		updateContainerLocation(other);
@@ -714,6 +717,7 @@ public class StorageContainer extends BaseExtensionEntity {
 
 	public void updatePositionsIfChanged() {
 		if (newPositions == null || newPositions.isEmpty()) {
+			updateFormattedPositions();
 			return;
 		}
 
@@ -729,6 +733,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		}
 
 		newPositions = null;
+		updateFormattedPositions();
 	}
 
 	public void moveTo(StorageContainer newContainer) {
@@ -865,6 +870,7 @@ public class StorageContainer extends BaseExtensionEntity {
 	
 	public void addPosition(StorageContainerPosition position) {
 		position.setContainer(this);
+		position.updateFormattedPosition();
 		getDaoFactory().getStorageContainerPositionDao().saveOrUpdate(position);
 
 		if (!isDimensionless()) {
@@ -1606,6 +1612,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		position.setPosTwoOrdinal(posTwoOrdinal);
 		position.setPosTwo(posTwo);
 		position.setContainer(this);
+		position.updateFormattedPosition();
 
 		return position;
 	}
@@ -1659,25 +1666,44 @@ public class StorageContainer extends BaseExtensionEntity {
 	}
 	
 	private void updateCapacity(StorageContainer other) {
-		if (isDimensionless() && !other.isDimensionless()) {
-			throw OpenSpecimenException.userError(StorageContainerErrorCode.DL_TO_REG_NA);
-		} else if (!isDimensionless() && other.isDimensionless()) {
-			throw OpenSpecimenException.userError(StorageContainerErrorCode.REG_TO_DL_NA);
-		} else if (!isDimensionless()) {
+		if (isDimensionless() != other.isDimensionless()) {
+			ErrorCode error = isDimensionless() ? StorageContainerErrorCode.DL_TO_REG_NA : StorageContainerErrorCode.REG_TO_DL_NA;
+			throw OpenSpecimenException.userError(error);
+		}
+
+		if (!isDimensionless()) {
+			boolean capacityChanged = !Objects.equals(getNoOfColumns(), other.getNoOfColumns());
+			capacityChanged = capacityChanged || !Objects.equals(getNoOfRows(), other.getNoOfRows());
+
 			if (other.getNoOfColumns() < getNoOfColumns() || other.getNoOfRows() < getNoOfRows()) {
-				if (arePositionsOccupiedBeyondCapacity(other.getNoOfColumns(), other.getNoOfRows())) {
+				if (arePositionsOccupiedBeyondCapacity(other.getNoOfRows(), other.getNoOfColumns())) {
 					throw OpenSpecimenException.userError(StorageContainerErrorCode.CANNOT_SHRINK_CONTAINER);
 				}
 			}
 
-			setNoOfColumns(other.getNoOfColumns());
 			setNoOfRows(other.getNoOfRows());
+			setNoOfColumns(other.getNoOfColumns());
 			ensureWithinCapacityLimits();
+			formattedPositionsDirty = formattedPositionsDirty || capacityChanged;
 		}
 
 		if (other.getCapacity() != null && other.getCapacity() > 0) {
 			setCapacity(other.getCapacity());
 		}
+	}
+
+	private void updatePositionLabelingMode(StorageContainer other) {
+		if (isDimensionless()) {
+			return;
+		}
+
+		if (getPositionLabelingMode() == other.getPositionLabelingMode()) {
+			return;
+		}
+
+		setPositionLabelingMode(other.getPositionLabelingMode());
+		formattedPositionsDirty = true;
+		return;
 	}
 
 	private void updateLabelingScheme(StorageContainer other) {
@@ -1690,7 +1716,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		if (!colSchemeChanged && !rowSchemeChanged) {
 			return;
 		}
-		
+
 		for (StorageContainerPosition pos : getOccupiedPositions()) {
 			if (colSchemeChanged) {
 				pos.setPosOne(fromOrdinal(other.getColumnLabelingScheme(), pos.getPosOneOrdinal()));
@@ -1703,6 +1729,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		
 		setColumnLabelingScheme(other.getColumnLabelingScheme());
 		setRowLabelingScheme(other.getRowLabelingScheme());
+		formattedPositionsDirty = true;
 	}
 
 	private void updatePositionAssignment(StorageContainer other) {
@@ -1727,6 +1754,16 @@ public class StorageContainer extends BaseExtensionEntity {
 		}
 
 		setPositionAssignment(other.getPositionAssignment());
+		formattedPositionsDirty = true;
+	}
+
+	private void updateFormattedPositions() {
+		if (!formattedPositionsDirty) {
+			return;
+		}
+
+		getOccupiedPositions().forEach(StorageContainerPosition::updateFormattedPosition);
+		formattedPositionsDirty = false;
 	}
 	
 	private void updateContainerLocation(StorageContainer other) {
@@ -1971,7 +2008,7 @@ public class StorageContainer extends BaseExtensionEntity {
 		}
 	}
 		
-	private boolean arePositionsOccupiedBeyondCapacity(int noOfCols, int noOfRows) {
+	private boolean arePositionsOccupiedBeyondCapacity(int noOfRows, int noOfCols) {
 		if (getId() == null || isDimensionless()) {
 			return false;
 		}

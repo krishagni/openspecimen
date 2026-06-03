@@ -88,4 +88,130 @@
     <dropColumn tableName="CATISSUE_SPECIMEN" columnName="RECEIVED_TIME"/>
     <dropColumn tableName="CATISSUE_SPECIMEN" columnName="RECEIVED_COMMENTS"/>
   </changeSet>
+
+  <changeSet author="vpawar" id="Set formatted container position" dbms="mysql">
+    <sql>
+      drop temporary table if exists os_pos_fmt_pos
+    </sql>
+
+    <sql>
+      create temporary table os_pos_fmt_pos as
+      select
+        p.identifier,
+        (
+          case when c.pos_labeling_mode = 'LINEAR' and p.pos_one is not null and p.pos_two is not null
+          then
+            case when c.pos_assignment like 'HZ_%'
+            then
+              concat('', ((p.pos_two - 1) * c.no_of_cols) + p.pos_one)
+            else
+              concat('', ((p.pos_two - 1) * c.no_of_rows) + p.pos_one)
+            end
+          when p.pos_two_str is not null and p.pos_one_str is not null
+          then
+            concat(p.pos_two_str, concat(', ', p.pos_one_str))
+          else
+            null
+          end
+        ) as formatted_position
+      from
+        os_container_positions p
+        inner join os_storage_containers c on c.identifier = p.storage_container_id
+    </sql>
+
+    <sql>
+      update
+        os_container_positions p
+        inner join os_pos_fmt_pos f on f.identifier = p.identifier
+      set
+        p.formatted_position = f.formatted_position
+    </sql>
+
+    <sql>
+      drop temporary table os_pos_fmt_pos
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Set formatted container position" dbms="oracle">
+    <sql>
+      merge into
+        os_container_positions p
+      using
+        os_storage_containers c
+      on
+        (c.identifier = p.storage_container_id)
+      when matched then
+        update set
+          p.formatted_position =
+            case when c.pos_labeling_mode = 'LINEAR' and p.pos_one is not null and p.pos_two is not null
+            then
+              case when c.pos_assignment like 'HZ_%'
+              then
+                concat('', ((p.pos_two - 1) * c.no_of_cols) + p.pos_one)
+              else
+                concat('', ((p.pos_two - 1) * c.no_of_rows) + p.pos_one)
+              end
+            when p.pos_two_str is not null and p.pos_one_str is not null
+            then
+              concat(p.pos_two_str, concat(', ', p.pos_one_str))
+            else
+              null
+            end
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update specimen position container fields in saved queries">
+    <sql>
+      update
+        catissue_saved_queries
+      set
+        query_def =
+          replace(
+            replace(
+              replace(
+                replace(
+                  replace(
+                    replace(
+                      replace(
+                        replace(
+                          query_def,
+                          'Specimen.specimenPosition.containerName',
+                          'Specimen.specimenPosition.container.name'
+                        ),
+                        'Specimen.specimenPosition.containerDisplayName',
+                        'Specimen.specimenPosition.container.displayName'
+                      ),
+                      'Specimen.specimenPosition.containerBarcode',
+                      'Specimen.specimenPosition.container.barcode'
+                    ),
+                    'Specimen.specimenPosition.containerSite',
+                    'Specimen.specimenPosition.container.site'
+                  ),
+                  'Specimen.checkoutPosition.containerName',
+                  'Specimen.checkoutPosition.container.name'
+                ),
+                'Specimen.checkoutPosition.containerDisplayName',
+                'Specimen.checkoutPosition.container.displayName'
+              ),
+              'Specimen.checkoutPosition.containerBarcode',
+              'Specimen.checkoutPosition.container.barcode'
+            ),
+            'Specimen.checkoutPosition.containerSite',
+            'Specimen.checkoutPosition.container.site'
+          )
+      where
+        query_def like '%Specimen.specimenPosition.containerName%' or
+        query_def like '%Specimen.specimenPosition.containerDisplayName%' or
+        query_def like '%Specimen.specimenPosition.containerBarcode%' or
+        query_def like '%Specimen.specimenPosition.containerSite%' or
+        query_def like '%Specimen.checkoutPosition.containerName%' or
+        query_def like '%Specimen.checkoutPosition.containerDisplayName%' or
+        query_def like '%Specimen.checkoutPosition.containerBarcode%' or
+        query_def like '%Specimen.checkoutPosition.containerSite%'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update specimen position container fields in system workflows">
+    <customChange class="com.krishagni.catissueplus.core.upgrade.UpdateSystemWorkflowContainerFields" />
+  </changeSet>
 </databaseChangeLog>

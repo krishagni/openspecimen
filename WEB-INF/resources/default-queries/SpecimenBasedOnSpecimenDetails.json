@@ -68,7 +68,7 @@
     },
     {
       "id": 6,
-      "field": "Specimen.specimenPosition.containerName",
+      "field": "Specimen.specimenPosition.container.name",
       "op": "EXISTS",
       "values": [
         null
@@ -179,7 +179,7 @@
     "Specimen.spmnCollRecvDetails.collector",
     "Specimen.spmnCollRecvDetails.collComments",
     "Specimen.type",
-    "Specimen.specimenPosition.containerName",
+    "Specimen.specimenPosition.container.name",
     "Specimen.specimenPosition.positionDimensionOneString",
     "Specimen.specimenPosition.positionDimensionTwoString",
     "Specimen.pathologicalStatus",

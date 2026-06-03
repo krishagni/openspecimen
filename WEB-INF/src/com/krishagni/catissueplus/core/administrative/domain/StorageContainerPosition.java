@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.springframework.beans.BeanUtils;
 
 import com.krishagni.catissueplus.core.biospecimen.domain.BaseEntity;
@@ -19,6 +20,8 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 	private String posOne;
 	
 	private String posTwo;
+
+	private String formattedPosition;
 	
 	private StorageContainer container;
 	
@@ -74,6 +77,15 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 
 	public void setPosTwo(String posTwo) {
 		this.posTwo = posTwo;
+	}
+
+	@NotAudited
+	public String getFormattedPosition() {
+		return formattedPosition;
+	}
+
+	public void setFormattedPosition(String formattedPosition) {
+		this.formattedPosition = formattedPosition;
 	}
 
 	public Integer getPosition() {
@@ -208,13 +220,22 @@ public class StorageContainerPosition extends BaseEntity implements Comparable<S
 		// Therefore the hack is to only the new position and not remove it from old
 		// container
 		//
-		
 		boolean isContainerChanged = !getContainer().equals(other.getContainer());
 		BeanUtils.copyProperties(other, this, POS_UPDATE_IGN_PROPS);
+		updateFormattedPosition();
 		
 		if (isContainerChanged) { // The old position is not freed because hibernate deletes it 
 			occupy();
 		}
+	}
+
+	public void updateFormattedPosition() {
+		if (getContainer() == null || getContainer().isDimensionless() || !isSpecified() || getPosTwo() == null || getPosOne() == null) {
+			setFormattedPosition(null);
+			return;
+		}
+
+		setFormattedPosition(getContainer().usesLinearLabelingMode() ? String.valueOf(getPosition()) : (getPosTwo() + ", " + getPosOne()));
 	}
 	
 	public void occupy() {

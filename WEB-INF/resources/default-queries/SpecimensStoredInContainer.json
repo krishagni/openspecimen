@@ -20,7 +20,7 @@
     },
     {
       "id": 7,
-      "field": "Specimen.specimenPosition.containerName",
+      "field": "Specimen.specimenPosition.container.name",
       "op": "EXISTS",
       "values": [
         null
@@ -58,7 +58,7 @@
     "Specimen.spmnCollRecvDetails.collTime",
     "Specimen.class",
     "Specimen.type",
-    "Specimen.specimenPosition.containerName",
+    "Specimen.specimenPosition.container.name",
     "Specimen.specimenPosition.positionDimensionOneString",
     "Specimen.specimenPosition.positionDimensionTwoString",
     "Specimen.pathologicalStatus",

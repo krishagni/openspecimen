@@ -804,8 +804,8 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 						case "Specimen.type" -> specimen.setType(row[idx]);
 						case "Specimen.availableQty" -> specimen.setAvailableQty(StringUtils.isNotBlank(row[idx]) ? new BigDecimal(row[idx]) : null);
 						case "Specimen.specimenPosition.containerHierarchy.hierarchy" -> location.setHierarchy(row[idx]);
-						case "Specimen.specimenPosition.containerDisplayName" -> location.setDisplayName(row[idx]);
-						case "Specimen.specimenPosition.containerName" -> location.setName(row[idx]);
+						case "Specimen.specimenPosition.container.displayName" -> location.setDisplayName(row[idx]);
+						case "Specimen.specimenPosition.container.name" -> location.setName(row[idx]);
 						case "Specimen.specimenPosition.formattedPos" -> location.setFormattedPosition(row[idx]);
 						case "Specimen.pickedSpecimens.pickedBy.userId" -> pickedBy.setId(Long.parseLong(row[idx]));
 						case "Specimen.pickedSpecimens.pickedBy.firstName" -> pickedBy.setFirstName(row[idx]);
@@ -1725,23 +1725,23 @@ public class SpecimenListServiceImpl implements SpecimenListService, Initializin
 		"select " +
 		"  CollectionProtocol.id, CollectionProtocol.shortTitle, Specimen.id, Specimen.label, Specimen.barcode, Specimen.class, Specimen.type, " +
 		"  Specimen.availableQty, Specimen.specimenPosition.ancestors.root_container_name, " +
-		"  Specimen.specimenPosition.containerHierarchy.hierarchy, Specimen.specimenPosition.containerDisplayName, " +
-		"  Specimen.specimenPosition.containerName, Specimen.specimenPosition.formattedPos, " +
+		"  Specimen.specimenPosition.containerHierarchy.hierarchy, Specimen.specimenPosition.container.displayName, " +
+		"  Specimen.specimenPosition.container.name, Specimen.specimenPosition.formattedPos, " +
 		"  Specimen.specimenPosition.rowOrdinal, Specimen.specimenPosition.columnOrdinal " +
 		"where " +
 		"  Specimen.specimenCarts.name = %s and " +
 		"  Specimen.id not in (select Specimen.id where Specimen.pickedSpecimens.pickListId = %d) " +
 		"  %s " + // filters
 		"order by " +
-		"  Specimen.specimenPosition.containerName, Specimen.specimenPosition.rowOrdinal, Specimen.specimenPosition.columnOrdinal " +
+		"  Specimen.specimenPosition.container.name, Specimen.specimenPosition.rowOrdinal, Specimen.specimenPosition.columnOrdinal " +
 		"limit %d, %d";
 
 	private static final String PICKED_SPECIMENS_AQL =
 		"select " +
 		"  CollectionProtocol.id, CollectionProtocol.shortTitle, Specimen.id, Specimen.label, Specimen.barcode, Specimen.class, Specimen.type, " +
 		"  Specimen.availableQty, Specimen.specimenPosition.ancestors.root_container_name, " +
-		"  Specimen.specimenPosition.containerHierarchy.hierarchy, Specimen.specimenPosition.containerDisplayName, " +
-		"  Specimen.specimenPosition.containerName, Specimen.specimenPosition.formattedPos, " +
+		"  Specimen.specimenPosition.containerHierarchy.hierarchy, Specimen.specimenPosition.container.displayName, " +
+		"  Specimen.specimenPosition.container.name, Specimen.specimenPosition.formattedPos, " +
 		"  Specimen.specimenPosition.rowOrdinal, Specimen.specimenPosition.columnOrdinal, " +
 		"  Specimen.pickedSpecimens.pickedBy.userId, Specimen.pickedSpecimens.pickedBy.firstName, " +
 		"  Specimen.pickedSpecimens.pickedBy.lastName, Specimen.pickedSpecimens.pickedBy.emailAddress, " +

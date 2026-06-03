@@ -11,7 +11,7 @@
   "filters":[
     {
       "id":2,
-      "field":"Specimen.specimenPosition.containerName",
+      "field":"Specimen.specimenPosition.container.name",
       "op":"EXISTS",
       "values":[null],
       "expr":null,
@@ -33,7 +33,7 @@
     "Specimen.tissueSite",
     "Specimen.pathologicalStatus",
     "Specimen.availableQty",
-    "Specimen.specimenPosition.containerName",
+    "Specimen.specimenPosition.container.name",
     "Specimen.specimenPosition.formattedPos"
   ],
   "reporting":{

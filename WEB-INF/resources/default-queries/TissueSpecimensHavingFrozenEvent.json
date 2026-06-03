@@ -97,7 +97,7 @@
     "Specimen.type",
     "Specimen.tissueSite",
     "Specimen.availableQty",
-    "Specimen.specimenPosition.containerName",
+    "Specimen.specimenPosition.container.name",
     "Specimen.specimenPosition.positionDimensionOneString",
     "Specimen.specimenPosition.positionDimensionTwoString",
     "Specimen.extensions.SpecimenFrozenEvent.frozenMethod",

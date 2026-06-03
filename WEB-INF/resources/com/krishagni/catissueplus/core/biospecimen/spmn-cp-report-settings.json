@@ -1,5 +1,5 @@
 {
-  "dataQueryAql": "select Specimen.type, count(distinct Specimen.id) as \"Specimens\" where  Specimen.collectionStatus = \"Collected\" and  Specimen.specimenPosition.containerName exists and date_range(Specimen.createdOn, last_cal_month)",
+  "dataQueryAql": "select Specimen.type, count(distinct Specimen.id) as \"Specimens\" where  Specimen.collectionStatus = \"Collected\" and  Specimen.specimenPosition.container.name exists and date_range(Specimen.createdOn, last_cal_month)",
 
   "metricsCfg": {
     "primarySpmns": {

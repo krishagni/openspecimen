@@ -279,17 +279,7 @@
         c.display_name as container_display_name, c.barcode as container_barcode,
         p.identifier as position_identifier, p.pos_one_str, p.pos_two_str,
         p.pos_one, p.pos_two,
-        case when c.pos_labeling_mode = 'LINEAR'
-        then
-          case when c.pos_assignment like 'HZ_%'
-          then
-              concat('', ((p.pos_two - 1) * c.no_of_cols) + p.pos_one)
-          else
-              concat('', ((p.pos_two - 1) * c.no_of_rows) + p.pos_one)
-          end
-        else
-          concat(p.pos_two_str, concat(', ', p.pos_one_str))
-        end as formatted_position,
+        p.formatted_position,
         p.occupying_specimen_id as specimen_id,
         s.identifier as site_id,
         s.name as site_name
@@ -420,5 +410,21 @@
       where
         o.activity_status != 'Disabled'
     </createView>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop specimen positions view">
+    <preConditions onFail="MARK_RAN">
+      <viewExists viewName="OS_SPECIMEN_POSITIONS_VIEW"/>
+    </preConditions>
+
+    <dropView viewName="OS_SPECIMEN_POSITIONS_VIEW"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop checked out specimens view">
+    <preConditions onFail="MARK_RAN">
+      <viewExists viewName="OS_CHECKED_OUT_SPECIMENS_VIEW"/>
+    </preConditions>
+
+    <dropView viewName="OS_CHECKED_OUT_SPECIMENS_VIEW"/>
   </changeSet>
 </databaseChangeLog>

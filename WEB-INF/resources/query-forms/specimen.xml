@@ -285,16 +285,16 @@
         <name>specimenPosition</name>
         <udn>specimenPosition</udn>
         <caption>#getMessage("specimen_spec_position")</caption>
-        <table>OS_SPECIMEN_POSITIONS_VIEW</table>
-        <foreignKey>SPECIMEN_ID</foreignKey>
+        <table>OS_CONTAINER_POSITIONS</table>
+        <foreignKey>OCCUPYING_SPECIMEN_ID</foreignKey>
         <parentKey>IDENTIFIER</parentKey>
-        <primaryKey>SPECIMEN_ID</primaryKey>
+        <primaryKey>IDENTIFIER</primaryKey>
         <row>
           <numberField>
             <name>positionId</name>
             <udn>positionId</udn>
             <caption>#getMessage("specimen_spec_position_id")</caption>
-            <column>POSITION_IDENTIFIER</column>
+            <column>IDENTIFIER</column>
             <hidden>true</hidden>
           </numberField>
 
@@ -302,47 +302,16 @@
             <name>containerId</name>
             <udn>containerId</udn>
             <caption>Container ID</caption>
-            <column>CONTAINER_IDENTIFIER</column>
+            <column>STORAGE_CONTAINER_ID</column>
             <hidden>true</hidden>
           </numberField>
-
-          <textField>
-            <name>containerName</name>
-            <udn>containerName</udn>
-            <caption>#getMessage("specimen_spec_position_container_name")</caption>
-            <column>CONTAINER_NAME</column>
-            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
-          </textField>
-
-          <textField>
-            <name>containerDisplayName</name>
-            <udn>containerDisplayName</udn>
-            <caption>#getMessage("specimen_spec_position_container_display_name")</caption>
-            <column>CONTAINER_DISPLAY_NAME</column>
-          </textField>
-
-          <textField>
-            <name>containerBarcode</name>
-            <udn>containerBarcode</udn>
-            <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
-            <column>CONTAINER_BARCODE</column>
-            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
-          </textField>
-
-          <siteField>
-            <name>containerSite</name>
-            <udn>containerSite</udn>
-            <caption>#getMessage("specimen_spec_position_container_site")</caption>
-            <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
-          </siteField>
 
           <textField>
             <name>positionDimensionTwoString</name>
             <udn>positionDimensionTwoString</udn>
             <caption>#getMessage("specimen_spec_position_container_row")</caption>
             <column>POS_TWO_STR</column>
-          </textField>              
+          </textField>
 
           <textField>
             <name>positionDimensionOneString</name>
@@ -374,12 +343,63 @@
         </row>
         <row>
           <subForm>
+            <name>container</name>
+            <udn>container</udn>
+            <caption>#getMessage("storage_container_details")</caption>
+            <table>OS_STORAGE_CONTAINERS</table>
+            <foreignKey>IDENTIFIER</foreignKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
+            <primaryKey>IDENTIFIER</primaryKey>
+            <row>
+              <numberField>
+                <name>id</name>
+                <udn>id</udn>
+                <caption>Container ID</caption>
+                <column>IDENTIFIER</column>
+                <hidden>true</hidden>
+              </numberField>
+
+              <textField>
+                <name>name</name>
+                <udn>name</udn>
+                <caption>#getMessage("specimen_spec_position_container_name")</caption>
+                <column>NAME</column>
+                <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+              </textField>
+
+              <textField>
+                <name>displayName</name>
+                <udn>displayName</udn>
+                <caption>#getMessage("specimen_spec_position_container_display_name")</caption>
+                <column>DISPLAY_NAME</column>
+              </textField>
+
+              <textField>
+                <name>barcode</name>
+                <udn>barcode</udn>
+                <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
+                <column>BARCODE</column>
+                <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
+              </textField>
+
+              <siteField>
+                <name>site</name>
+                <udn>site</udn>
+                <caption>#getMessage("specimen_spec_position_container_site")</caption>
+                <column>SITE_ID</column>
+                <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+              </siteField>
+            </row>
+          </subForm>
+        </row>
+        <row>
+          <subForm>
             <name>containerHierarchy</name>
             <udn>containerHierarchy</udn>
             <caption>#getMessage("specimen_spec_position_container_hierarchy")</caption>
             <table>OS_CONTAINER_HIERARCHY_VIEW</table>
             <foreignKey>CONTAINER_ID</foreignKey>
-            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
             <primaryKey>CONTAINER_ID</primaryKey>
             <row>
               <textField>
@@ -399,7 +419,7 @@
             <caption>#getMessage("specimen_spec_position_container_ancestors")</caption>
             <table>OS_CONTAINER_ANCESTORS_VIEW</table>
             <foreignKey>CONTAINER_ID</foreignKey>
-            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
             <primaryKey>CONTAINER_ID</primaryKey>
             <row>
               <textField>
@@ -420,7 +440,7 @@
             <caption>#getMessage("specimen_spec_position_container_all_ancestors")</caption>
             <table>OS_CONTAINERS_HIERARCHY</table>
             <foreignKey>DESCENDENT_ID</foreignKey>
-            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
             <pathLink>true</pathLink>
             <row>
               <numberField>
@@ -1444,49 +1464,26 @@
         <name>checkoutPosition</name>
         <udn>checkoutPosition</udn>
         <caption>#getMessage("specimen_checkout_details")</caption>
-        <table>OS_CHECKED_OUT_SPECIMENS_VIEW</table>
-        <foreignKey>SPECIMEN_ID</foreignKey>
+        <table>OS_CONTAINER_POSITIONS</table>
+        <foreignKey>CHECKOUT_SPECIMEN_ID</foreignKey>
         <parentKey>IDENTIFIER</parentKey>
-        <primaryKey>SPECIMEN_ID</primaryKey>
+        <primaryKey>IDENTIFIER</primaryKey>
         <row>
           <numberField>
             <name>positionId</name>
             <udn>positionId</udn>
             <caption>#getMessage("specimen_spec_position_id")</caption>
-            <column>POSITION_IDENTIFIER</column>
+            <column>IDENTIFIER</column>
             <hidden>true</hidden>
           </numberField>
 
-          <textField>
-            <name>containerName</name>
-            <udn>containerName</udn>
-            <caption>#getMessage("specimen_spec_position_container_name")</caption>
-            <column>CONTAINER_NAME</column>
-            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
-          </textField>
-
-          <textField>
-            <name>containerDisplayName</name>
-            <udn>containerDisplayName</udn>
-            <caption>#getMessage("specimen_spec_position_container_display_name")</caption>
-            <column>CONTAINER_DISPLAY_NAME</column>
-          </textField>
-
-          <textField>
-            <name>containerBarcode</name>
-            <udn>containerBarcode</udn>
-            <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
-            <column>CONTAINER_BARCODE</column>
-            <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
-          </textField>
-
-          <siteField>
-            <name>containerSite</name>
-            <udn>containerSite</udn>
-            <caption>#getMessage("specimen_spec_position_container_site")</caption>
-            <column>SITE_ID</column>
-            <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
-          </siteField>
+          <numberField>
+            <name>containerId</name>
+            <udn>containerId</udn>
+            <caption>Container ID</caption>
+            <column>STORAGE_CONTAINER_ID</column>
+            <hidden>true</hidden>
+          </numberField>
 
           <textField>
             <name>rowY</name>
@@ -1525,12 +1522,63 @@
         </row>
         <row>
           <subForm>
+            <name>container</name>
+            <udn>container</udn>
+            <caption>#getMessage("storage_container_details")</caption>
+            <table>OS_STORAGE_CONTAINERS</table>
+            <foreignKey>IDENTIFIER</foreignKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
+            <primaryKey>IDENTIFIER</primaryKey>
+            <row>
+              <numberField>
+                <name>id</name>
+                <udn>id</udn>
+                <caption>Container ID</caption>
+                <column>IDENTIFIER</column>
+                <hidden>true</hidden>
+              </numberField>
+
+              <textField>
+                <name>name</name>
+                <udn>name</udn>
+                <caption>#getMessage("specimen_spec_position_container_name")</caption>
+                <column>NAME</column>
+                <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=name&amp;value={{$value}}</recordUrl>
+              </textField>
+
+              <textField>
+                <name>displayName</name>
+                <udn>displayName</udn>
+                <caption>#getMessage("specimen_spec_position_container_display_name")</caption>
+                <column>DISPLAY_NAME</column>
+              </textField>
+
+              <textField>
+                <name>barcode</name>
+                <udn>barcode</udn>
+                <caption>#getMessage("specimen_spec_position_container_barcode")</caption>
+                <column>BARCODE</column>
+                <recordUrl>#/object-state-params-resolver?stateName=ContainerDetail.Locations&amp;objectName=storage_container&amp;key=barcode&amp;value={{$value}}</recordUrl>
+              </textField>
+
+              <siteField>
+                <name>site</name>
+                <udn>site</udn>
+                <caption>#getMessage("specimen_spec_position_container_site")</caption>
+                <column>SITE_ID</column>
+                <recordUrl>#/object-state-params-resolver?stateName=SitesListItemDetail.Overview&amp;objectName=site&amp;key=name&amp;value={{$value}}</recordUrl>
+              </siteField>
+            </row>
+          </subForm>
+        </row>
+        <row>
+          <subForm>
             <name>containerHierarchy</name>
             <udn>containerHierarchy</udn>
             <caption>#getMessage("specimen_spec_position_container_hierarchy")</caption>
             <table>OS_CONTAINER_HIERARCHY_VIEW</table>
             <foreignKey>CONTAINER_ID</foreignKey>
-            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
             <primaryKey>CONTAINER_ID</primaryKey>
             <row>
               <textField>
@@ -1549,7 +1597,7 @@
             <caption>#getMessage("specimen_spec_position_container_ancestors")</caption>
             <table>OS_CONTAINER_ANCESTORS_VIEW</table>
             <foreignKey>CONTAINER_ID</foreignKey>
-            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
             <primaryKey>CONTAINER_ID</primaryKey>
             <row>
               <textField>
@@ -1569,7 +1617,7 @@
             <caption>#getMessage("specimen_spec_position_container_all_ancestors")</caption>
             <table>OS_CONTAINERS_HIERARCHY</table>
             <foreignKey>DESCENDENT_ID</foreignKey>
-            <parentKey>CONTAINER_IDENTIFIER</parentKey>
+            <parentKey>STORAGE_CONTAINER_ID</parentKey>
             <pathLink>true</pathLink>
             <row>
               <numberField>

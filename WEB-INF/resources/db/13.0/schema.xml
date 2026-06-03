@@ -180,4 +180,10 @@
     </preConditions>
     <dropView viewName="OS_SPMN_COLL_RECV_DETAILS_VIEW"/>
   </changeSet>
+
+  <changeSet author="vpawar" id="Formatted container position">
+    <addColumn tableName="OS_CONTAINER_POSITIONS">
+      <column name="FORMATTED_POSITION" type="${text.type}(32)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

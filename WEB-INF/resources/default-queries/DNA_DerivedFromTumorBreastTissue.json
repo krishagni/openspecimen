@@ -150,7 +150,7 @@
     "Specimen.spmnCollRecvDetails.collTime",
     "Specimen.class",
     "Specimen.type",
-    "Specimen.specimenPosition.containerName",
+    "Specimen.specimenPosition.container.name",
     "Specimen.specimenPosition.positionDimensionOneString",
     "Specimen.specimenPosition.positionDimensionTwoString",
     "Specimen.pathologicalStatus",

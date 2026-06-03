@@ -2409,7 +2409,7 @@ public class StorageContainerServiceImpl implements StorageContainerService, Obj
 			orderBy = Collections.singletonList(positionId);
 		} else {
 			Column name = new Column();
-			name.setExpr("Specimen.specimenPosition.containerName");
+			name.setExpr("Specimen.specimenPosition.container.name");
 			name.setDirection("asc");
 
 			Column row = new Column();
