@@ -211,7 +211,7 @@
     </sql>
   </changeSet>
 
-  <changeSet author="vpawar" id="Update specimen position container fields in system workflows">
+  <changeSet author="vpawar" id="Update specimen position and checkout container fields in system workflows">
     <customChange class="com.krishagni.catissueplus.core.upgrade.UpdateSystemWorkflowContainerFields" />
   </changeSet>
 

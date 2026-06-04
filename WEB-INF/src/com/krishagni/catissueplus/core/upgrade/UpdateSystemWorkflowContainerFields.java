@@ -30,6 +30,7 @@ public class UpdateSystemWorkflowContainerFields implements CustomTaskChange {
 			JdbcConnection conn = (JdbcConnection) database.getConnection();
 			String workflowFile = getSettingValue(conn, GET_SYS_WORKFLOWS_SQL);
 			if (StringUtils.isBlank(workflowFile) || workflowFile.startsWith(CLASSPATH_PREFIX)) {
+				logger.info("No customised system workflows JSON!");
 				return;
 			}
 
@@ -48,6 +49,13 @@ public class UpdateSystemWorkflowContainerFields implements CustomTaskChange {
 			String newContent = updateFieldPaths(oldContent);
 			if (!oldContent.equals(newContent)) {
 				Files.writeString(workflowPath, newContent, StandardCharsets.UTF_8);
+				logger.info("The updated system workflows differs from the old ones.");
+				logger.info("Old Workflow:\n" + oldContent);
+				logger.info("New Workflow:\n" + newContent);
+				logger.info("System workflows JSON updated: " + workflowPath);
+			} else {
+				logger.info("There's no change in the system workflows");
+				logger.info("System workflows JSON: " + oldContent);
 			}
 		} catch (CustomChangeException e) {
 			throw e;
