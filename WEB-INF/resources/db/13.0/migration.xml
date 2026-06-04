@@ -214,4 +214,109 @@
   <changeSet author="vpawar" id="Update specimen position container fields in system workflows">
     <customChange class="com.krishagni.catissueplus.core.upgrade.UpdateSystemWorkflowContainerFields" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Update specimen position container fields in CP workflows">
+    <sql>
+      update
+        os_cp_workflows
+      set
+        workflows =
+          replace(
+            replace(
+              replace(
+                replace(
+                  replace(
+                    replace(
+                      replace(
+                        replace(
+                          workflows,
+                          'Specimen.specimenPosition.containerName',
+                          'Specimen.specimenPosition.container.name'
+                        ),
+                        'Specimen.specimenPosition.containerDisplayName',
+                        'Specimen.specimenPosition.container.displayName'
+                      ),
+                      'Specimen.specimenPosition.containerBarcode',
+                      'Specimen.specimenPosition.container.barcode'
+                    ),
+                    'Specimen.specimenPosition.containerSite',
+                    'Specimen.specimenPosition.container.site'
+                  ),
+                  'Specimen.checkoutPosition.containerName',
+                  'Specimen.checkoutPosition.container.name'
+                ),
+                'Specimen.checkoutPosition.containerDisplayName',
+                'Specimen.checkoutPosition.container.displayName'
+              ),
+              'Specimen.checkoutPosition.containerBarcode',
+              'Specimen.checkoutPosition.container.barcode'
+            ),
+            'Specimen.checkoutPosition.containerSite',
+            'Specimen.checkoutPosition.container.site'
+          )
+      where
+        workflows like '%Specimen.specimenPosition.containerName%' or
+        workflows like '%Specimen.specimenPosition.containerDisplayName%' or
+        workflows like '%Specimen.specimenPosition.containerBarcode%' or
+        workflows like '%Specimen.specimenPosition.containerSite%' or
+        workflows like '%Specimen.checkoutPosition.containerName%' or
+        workflows like '%Specimen.checkoutPosition.containerDisplayName%' or
+        workflows like '%Specimen.checkoutPosition.containerBarcode%' or
+        workflows like '%Specimen.checkoutPosition.containerSite%'
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Update specimen position container fields in CP group workflows">
+    <sql>
+      update
+        os_cp_groups
+      set
+        workflows =
+          replace(
+            replace(
+              replace(
+                replace(
+                  replace(
+                    replace(
+                      replace(
+                        replace(
+                          workflows,
+                          'Specimen.specimenPosition.containerName',
+                          'Specimen.specimenPosition.container.name'
+                        ),
+                        'Specimen.specimenPosition.containerDisplayName',
+                        'Specimen.specimenPosition.container.displayName'
+                      ),
+                      'Specimen.specimenPosition.containerBarcode',
+                      'Specimen.specimenPosition.container.barcode'
+                    ),
+                    'Specimen.specimenPosition.containerSite',
+                    'Specimen.specimenPosition.container.site'
+                  ),
+                  'Specimen.checkoutPosition.containerName',
+                  'Specimen.checkoutPosition.container.name'
+                ),
+                'Specimen.checkoutPosition.containerDisplayName',
+                'Specimen.checkoutPosition.container.displayName'
+              ),
+              'Specimen.checkoutPosition.containerBarcode',
+              'Specimen.checkoutPosition.container.barcode'
+            ),
+            'Specimen.checkoutPosition.containerSite',
+            'Specimen.checkoutPosition.container.site'
+          )
+      where
+        workflows is not null and
+        (
+          workflows like '%Specimen.specimenPosition.containerName%' or
+          workflows like '%Specimen.specimenPosition.containerDisplayName%' or
+          workflows like '%Specimen.specimenPosition.containerBarcode%' or
+          workflows like '%Specimen.specimenPosition.containerSite%' or
+          workflows like '%Specimen.checkoutPosition.containerName%' or
+          workflows like '%Specimen.checkoutPosition.containerDisplayName%' or
+          workflows like '%Specimen.checkoutPosition.containerBarcode%' or
+          workflows like '%Specimen.checkoutPosition.containerSite%'
+        )
+    </sql>
+  </changeSet>
 </databaseChangeLog>
