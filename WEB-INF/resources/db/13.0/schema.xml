@@ -39,15 +39,6 @@
     </createIndex>
   </changeSet>
 
-  <changeSet author="vpawar" id="CP Request managers">
-    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
-      <column name="REQ_MANAGERS_USER_GROUP_ID" type="${int.type}">
-        <constraints foreignKeyName="FK_CP_REQ_MANAGERS_UG_IDX" referencedTableName="OS_USER_GROUPS"
-          referencedColumnNames="IDENTIFIER" />
-      </column>
-    </addColumn>
-  </changeSet>
-
   <changeSet author="vpawar" id="CP group ID in CP table">
     <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
       <column name="CP_GROUP_ID" type="${int.type}">
@@ -109,15 +100,6 @@
         end
       );
     </sql>
-  </changeSet>
-
-  <changeSet author="vpawar" id="CP group request managers">
-    <addColumn tableName="OS_CP_GROUPS">
-      <column name="REQ_MANAGERS_USER_GROUP_ID" type="${int.type}">
-        <constraints foreignKeyName="FK_CPG_REQ_MANAGERS_UG_IDX" referencedTableName="OS_USER_GROUPS"
-          referencedColumnNames="IDENTIFIER" />
-      </column>
-    </addColumn>
   </changeSet>
 
   <changeSet author="vpawar" id="Capacity in container types">
@@ -185,5 +167,19 @@
     <addColumn tableName="OS_CONTAINER_POSITIONS">
       <column name="FORMATTED_POSITION" type="${text.type}(32)" />
     </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop CP and CPG request managers">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="CATISSUE_COLLECTION_PROTOCOL" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
+    </preConditions>
+    <dropColumn tableName="CATISSUE_COLLECTION_PROTOCOL" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop CPG request managers">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="OS_CP_GROUPS" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
+    </preConditions>
+    <dropColumn tableName="OS_CP_GROUPS" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
   </changeSet>
 </databaseChangeLog>

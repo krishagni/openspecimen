@@ -21,11 +21,6 @@ export default {
               path: 'forms',
               name: 'CpgDetail.Forms',
               component: () => import(/* webpackChunkName: "cp-groups" */ './Forms.vue'),
-            },
-            {
-              path: 'other-settings',
-              name: 'CpgDetail.OtherSettings',
-              component: () => import(/* webpackChunkName: "cp-groups" */ './OtherSettings.vue'),
             }
           ]
         }

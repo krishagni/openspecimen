@@ -19,11 +19,6 @@
                 <span v-t="'cpgs.forms'">Forms</span>
               </router-link>
             </li>
-            <li>
-              <router-link :to="getRoute('OtherSettings')">
-                <span v-t="'cpgs.other_settings'">Other settings</span>
-              </router-link>
-            </li>
           </ul>
         </os-tab-menu>
 

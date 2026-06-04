@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import com.krishagni.catissueplus.core.administrative.events.DistributionProtocolSummary;
-import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.SpecimenUtil;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
@@ -99,8 +98,6 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 	private List<DistributionProtocolSummary> distributionProtocols;
 
 	private Long catalogId;
-
-	private UserGroupSummary reqManagers;
 
 	private String activityStatus;
 
@@ -433,14 +430,6 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		this.catalogId = catalogId;
 	}
 
-	public UserGroupSummary getReqManagers() {
-		return reqManagers;
-	}
-
-	public void setReqManagers(UserGroupSummary reqManagers) {
-		this.reqManagers = reqManagers;
-	}
-
 	public String getActivityStatus() {
 		return activityStatus;
 	}
@@ -554,7 +543,6 @@ public class CollectionProtocolDetail extends CollectionProtocolSummary {
 		result.setSpmnLabelPrintSettings(CpSpecimenLabelPrintSettingDetail.from(cp.getSpmnLabelPrintSettings()));
 		result.setDistributionProtocols(DistributionProtocolSummary.from(cp.getDistributionProtocols()));
 		result.setCatalogId(cp.getCatalogId());
-		result.setReqManagers(UserGroupSummary.from(cp.getReqManagers()));
 		result.setActivityStatus(cp.getActivityStatus());
 		result.setCpSites(CollectionProtocolSiteDetail.from(cp.getSites()));
 		result.setExtensionDetail(ExtensionDetail.from(cp.getExtension()));

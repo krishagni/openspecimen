@@ -16,9 +16,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
-import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
-import com.krishagni.catissueplus.core.administrative.domain.factory.UserGroupErrorCode;
-import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpGroupForm;
@@ -171,12 +168,6 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = createGroup(req.getPayload());
 			ensureUniqueName(existingGroup, group);
 			existingGroup.setName(group.getName());
-			if (req.getPayload().isAttrModified("reqManagers")) {
-				UserGroup existingReqManagers = existingGroup.getReqManagers();
-				existingGroup.setReqManagers(group.getReqManagers());
-				cpGroupSettingsApplier.applyReqManagers(existingReqManagers, group.getReqManagers(), existingGroup.getCps());
-			}
-
 			return ResponseEvent.response(CollectionProtocolGroupSummary.from(existingGroup));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -498,32 +489,9 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		}
 
 		group.setName(input.getName());
-		group.setReqManagers(getReqManagers(input.getReqManagers(), ose));
 		group.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		ose.checkAndThrow();
 		return group;
-	}
-
-	private UserGroup getReqManagers(UserGroupSummary input, OpenSpecimenException ose) {
-		if (input == null) {
-			return null;
-		}
-
-		Object key = null;
-		UserGroup reqManagers = null;
-		if (input.getId() != null) {
-			reqManagers = daoFactory.getUserGroupDao().getById(input.getId());
-			key = input.getId();
-		} else if (StringUtils.isNotBlank(input.getName())) {
-			reqManagers = daoFactory.getUserGroupDao().getByName(input.getName());
-			key = input.getName();
-		}
-
-		if (key != null && reqManagers == null) {
-			ose.addError(UserGroupErrorCode.NOT_FOUND, key);
-		}
-
-		return reqManagers;
 	}
 
 	private List<CollectionProtocol> getCps(List<CollectionProtocolSummary> cps) {

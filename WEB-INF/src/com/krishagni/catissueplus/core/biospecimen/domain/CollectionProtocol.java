@@ -26,7 +26,6 @@ import com.krishagni.catissueplus.core.administrative.domain.DistributionProtoco
 import com.krishagni.catissueplus.core.administrative.domain.Site;
 import com.krishagni.catissueplus.core.administrative.domain.StorageContainer;
 import com.krishagni.catissueplus.core.administrative.domain.User;
-import com.krishagni.catissueplus.core.administrative.domain.UserGroup;
 import com.krishagni.catissueplus.core.biospecimen.ConfigParams;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolRegistrationFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
@@ -199,8 +198,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 	private boolean draftMode = false;
 
 	private Long catalogId;
-
-	private UserGroup reqManagers;
 
 	@Autowired
 	private DaoFactory daoFactory;
@@ -754,14 +751,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.catalogId = catalogId;
 	}
 
-	public UserGroup getReqManagers() {
-		return reqManagers;
-	}
-
-	public void setReqManagers(UserGroup reqManagers) {
-		this.reqManagers = reqManagers;
-	}
-
 	public void update(CollectionProtocol cp) {
 		setTitle(cp.getTitle()); 
 		setShortTitle(cp.getShortTitle());
@@ -803,7 +792,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setUnsignedConsentDocumentURL(cp.getUnsignedConsentDocumentURL());
 		setExtension(cp.getExtension());
 		setCatalogId(cp.getCatalogId());
-		setReqManagers(cp.getReqManagers());
 		setCpGroup(cp.getCpGroup());
 		
 		updateSites(cp.getSites());
@@ -855,7 +843,6 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setVisitNamePrintCopies(getVisitNamePrintCopies());
 		cp.setSpmnLabelPrePrintMode(getSpmnLabelPrePrintMode());
 		cp.setCatalogId(getCatalogId());
-		cp.setReqManagers(getReqManagers());
 
 		copyLabelPrintSettingsTo(cp);
 		copyExtensionTo(cp);

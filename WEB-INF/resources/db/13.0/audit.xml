@@ -5,13 +5,6 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-  <changeSet author="vpawar" id="CP request managers">
-    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
-      <column name="REQ_MANAGERS_USER_GROUP_ID" type="${int.type}" />
-      <column name="reqManagers_MOD" type="${boolean.type}" />
-    </addColumn>
-  </changeSet>
-
   <changeSet author="vpawar" id="CP group ID in CP audit">
     <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
       <column name="CP_GROUP_ID" type="${int.type}" />
@@ -58,5 +51,19 @@
       <column name="RECEIVED_COMMENTS" type="${text.type}(512)" />
       <column name="recvComments_MOD" type="${boolean.type}" />
     </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop CP request managers audit column">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="CAT_COLLECTION_PROTOCOL_AUD" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
+    </preConditions>
+    <dropColumn tableName="CAT_COLLECTION_PROTOCOL_AUD" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop CP request managers audit flag">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="CAT_COLLECTION_PROTOCOL_AUD" columnName="reqManagers_MOD"/>
+    </preConditions>
+    <dropColumn tableName="CAT_COLLECTION_PROTOCOL_AUD" columnName="reqManagers_MOD"/>
   </changeSet>
 </databaseChangeLog>

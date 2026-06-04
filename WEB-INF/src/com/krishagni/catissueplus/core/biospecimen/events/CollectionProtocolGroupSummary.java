@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import com.krishagni.catissueplus.core.administrative.events.UserGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.common.AttributeModifiedSupport;
 import com.krishagni.catissueplus.core.common.ListenAttributeChanges;
@@ -21,8 +20,6 @@ public class CollectionProtocolGroupSummary extends AttributeModifiedSupport {
 	private String name;
 
 	private Integer cpsCount;
-
-	private UserGroupSummary reqManagers;
 
 	private List<CollectionProtocolSummary> cps;
 
@@ -50,14 +47,6 @@ public class CollectionProtocolGroupSummary extends AttributeModifiedSupport {
 		this.cpsCount = cpsCount;
 	}
 
-	public UserGroupSummary getReqManagers() {
-		return reqManagers;
-	}
-
-	public void setReqManagers(UserGroupSummary reqManagers) {
-		this.reqManagers = reqManagers;
-	}
-
 	public List<CollectionProtocolSummary> getCps() {
 		return cps;
 	}
@@ -71,7 +60,6 @@ public class CollectionProtocolGroupSummary extends AttributeModifiedSupport {
 		result.setId(group.getId());
 		result.setName(group.getName());
 		result.setCpsCount(group.getCpsCount());
-		result.setReqManagers(UserGroupSummary.from(group.getReqManagers()));
 		return result;
 	}
 

@@ -15,7 +15,6 @@ import com.krishagni.catissueplus.core.administrative.domain.SpecimenRequest;
 import com.krishagni.catissueplus.core.administrative.events.SpecimenRequestSummary;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestDao;
 import com.krishagni.catissueplus.core.administrative.repository.SpecimenRequestListCriteria;
-import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.common.access.SiteCpPair;
 import com.krishagni.catissueplus.core.common.errors.CommonErrorCode;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
@@ -200,15 +199,6 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 
 		if (CollectionUtils.isNotEmpty(crit.reqMgrCatalogIds())) {
 			orCond.add(query.in("req.catalogId", crit.reqMgrCatalogIds()));
-		}
-
-		if (crit.userId() != null) {
-			SubQuery<Long> rmCpsQuery = query.createSubQuery(CollectionProtocol.class, "cp")
-				.join("cp.reqManagers", "mug")
-				.join("mug.users", "user");
-			rmCpsQuery.add(rmCpsQuery.eq("user.id", crit.userId()))
-					.select("cp.id");
-			orCond.add(query.in("cp.id", rmCpsQuery));
 		}
 
 		query.add(orCond);

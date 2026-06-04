@@ -32,8 +32,6 @@ public class CollectionProtocolGroup extends BaseEntity {
 
 	private String activityStatus;
 
-	private UserGroup reqManagers;
-
 	private Set<CollectionProtocol> cps = new HashSet<>();
 
 	private Set<CpGroupForm> forms = new HashSet<>();
@@ -61,14 +59,6 @@ public class CollectionProtocolGroup extends BaseEntity {
 
 	public void setActivityStatus(String activityStatus) {
 		this.activityStatus = activityStatus;
-	}
-
-	public UserGroup getReqManagers() {
-		return reqManagers;
-	}
-
-	public void setReqManagers(UserGroup reqManagers) {
-		this.reqManagers = reqManagers;
 	}
 
 	public Set<CollectionProtocol> getCps() {
@@ -148,7 +138,6 @@ public class CollectionProtocolGroup extends BaseEntity {
 		}
 
 		setName(other.getName());
-		setReqManagers(other.getReqManagers());
 		setCps(other.getCps());
 	}
 
