@@ -20,11 +20,14 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpGroupForm;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
+import com.krishagni.catissueplus.core.biospecimen.domain.RequestManagerGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.RequestManagerGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupFormsDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpGroupWorkflowCfgDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.RequestManagerGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.CpGroupListCriteria;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
@@ -168,6 +171,14 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 			CollectionProtocolGroup group = createGroup(req.getPayload());
 			ensureUniqueName(existingGroup, group);
 			existingGroup.setName(group.getName());
+
+
+			if (req.getPayload().isAttrModified("requestManagerGroup")) {
+				RequestManagerGroup oldRmg = existingGroup.getRequestManagerGroup();
+				existingGroup.setRequestManagerGroup(group.getRequestManagerGroup());
+				cpGroupSettingsApplier.applyRequestManagerGroup(oldRmg, existingGroup.getRequestManagerGroup(), existingGroup.getCps());
+			}
+
 			return ResponseEvent.response(CollectionProtocolGroupSummary.from(existingGroup));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -489,9 +500,32 @@ public class CollectionProtocolGroupServiceImpl implements CollectionProtocolGro
 		}
 
 		group.setName(input.getName());
+		group.setRequestManagerGroup(getRequestManagerGroup(input.getRequestManagerGroup(), ose));
 		group.setActivityStatus(Status.ACTIVITY_STATUS_ACTIVE.getStatus());
 		ose.checkAndThrow();
 		return group;
+	}
+
+	private RequestManagerGroup getRequestManagerGroup(RequestManagerGroupSummary input, OpenSpecimenException ose) {
+		if (input == null) {
+			return null;
+		}
+
+		Object key = null;
+		RequestManagerGroup rmg = null;
+		if (input.getId() != null) {
+			rmg = daoFactory.getRequestManagerGroupDao().getById(input.getId());
+			key = input.getId();
+		} else if (StringUtils.isNotBlank(input.getName())) {
+			rmg = daoFactory.getRequestManagerGroupDao().getByName(input.getName());
+			key = input.getName();
+		}
+
+		if (key != null && rmg == null) {
+			ose.addError(RequestManagerGroupErrorCode.NOT_FOUND, key);
+		}
+
+		return rmg;
 	}
 
 	private List<CollectionProtocol> getCps(List<CollectionProtocolSummary> cps) {

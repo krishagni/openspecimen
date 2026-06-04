@@ -173,6 +173,7 @@
     <preConditions onFail="MARK_RAN">
       <columnExists tableName="CATISSUE_COLLECTION_PROTOCOL" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
     </preConditions>
+    <dropForeignKeyConstraint baseTableName="CATISSUE_COLLECTION_PROTOCOL" constraintName="FK_CP_REQ_MANAGERS_UG_IDX"/>
     <dropColumn tableName="CATISSUE_COLLECTION_PROTOCOL" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
   </changeSet>
 
@@ -180,6 +181,58 @@
     <preConditions onFail="MARK_RAN">
       <columnExists tableName="OS_CP_GROUPS" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
     </preConditions>
+    <dropForeignKeyConstraint baseTableName="OS_CP_GROUPS" constraintName="FK_CPG_REQ_MANAGERS_UG_IDX"/>
     <dropColumn tableName="OS_CP_GROUPS" columnName="REQ_MANAGERS_USER_GROUP_ID"/>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Request manager groups">
+    <createTable tableName="OS_REQ_MGR_GROUPS">
+      <column name="IDENTIFIER" type="${int.type}" autoIncrement="${autoIncrement}">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="NAME" type="${text.type}(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="USER_GROUP_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_RMG_USER_GROUP" referencedTableName="OS_USER_GROUPS"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Request manager group ID generator" dbms="oracle">
+    <createSequence sequenceName="OS_REQ_MGR_GROUPS_SEQ" startValue="1" incrementBy="1" ordered="true" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unique constraint on request manager group name">
+    <addUniqueConstraint constraintName="OS_REQ_MGR_GROUP_NAME_UQ"
+      tableName="OS_REQ_MGR_GROUPS" columnNames="NAME" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP request manager group">
+    <addColumn tableName="CATISSUE_COLLECTION_PROTOCOL">
+      <column name="RMG_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_CP_REQ_MGR_GROUP" referencedTableName="OS_REQ_MGR_GROUPS"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CPG request manager group">
+    <addColumn tableName="OS_CP_GROUPS">
+      <column name="RMG_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_CPG_REQ_MGR_GROUP" referencedTableName="OS_REQ_MGR_GROUPS"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen request manager group">
+    <addColumn tableName="OS_SPECIMEN_REQUESTS">
+      <column name="RMG_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_SPMN_REQ_REQ_MGR_GROUP" referencedTableName="OS_REQ_MGR_GROUPS"
+          referencedColumnNames="IDENTIFIER" />
+      </column>
+    </addColumn>
   </changeSet>
 </databaseChangeLog>

@@ -199,6 +199,8 @@ public class CollectionProtocol extends BaseExtensionEntity {
 
 	private Long catalogId;
 
+	private RequestManagerGroup requestManagerGroup;
+
 	@Autowired
 	private DaoFactory daoFactory;
 
@@ -751,6 +753,14 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		this.catalogId = catalogId;
 	}
 
+	public RequestManagerGroup getRequestManagerGroup() {
+		return requestManagerGroup;
+	}
+
+	public void setRequestManagerGroup(RequestManagerGroup requestManagerGroup) {
+		this.requestManagerGroup = requestManagerGroup;
+	}
+
 	public void update(CollectionProtocol cp) {
 		setTitle(cp.getTitle()); 
 		setShortTitle(cp.getShortTitle());
@@ -792,6 +802,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		setUnsignedConsentDocumentURL(cp.getUnsignedConsentDocumentURL());
 		setExtension(cp.getExtension());
 		setCatalogId(cp.getCatalogId());
+		setRequestManagerGroup(cp.getRequestManagerGroup());
 		setCpGroup(cp.getCpGroup());
 		
 		updateSites(cp.getSites());
@@ -843,6 +854,7 @@ public class CollectionProtocol extends BaseExtensionEntity {
 		cp.setVisitNamePrintCopies(getVisitNamePrintCopies());
 		cp.setSpmnLabelPrePrintMode(getSpmnLabelPrePrintMode());
 		cp.setCatalogId(getCatalogId());
+		cp.setRequestManagerGroup(getRequestManagerGroup());
 
 		copyLabelPrintSettingsTo(cp);
 		copyExtensionTo(cp);

@@ -25,14 +25,17 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol.Vis
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSite;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpSpecimenLabelPrintSetting;
+import com.krishagni.catissueplus.core.biospecimen.domain.RequestManagerGroup;
 import com.krishagni.catissueplus.core.biospecimen.domain.Specimen;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CollectionProtocolFactory;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.domain.factory.CpGroupErrorCode;
+import com.krishagni.catissueplus.core.biospecimen.domain.factory.RequestManagerGroupErrorCode;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSiteDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.CpSpecimenLabelPrintSettingDetail;
+import com.krishagni.catissueplus.core.biospecimen.events.RequestManagerGroupSummary;
 import com.krishagni.catissueplus.core.biospecimen.repository.DaoFactory;
 import com.krishagni.catissueplus.core.biospecimen.services.impl.CollectionProtocolCopier;
 import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
@@ -143,6 +146,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setConsentsSource(input, cp, ose);
 		setCatalogId(input, cp, ose);
 		setCpGroup(input, cp, ose);
+		setRequestManagerGroup(input, cp, ose);
 
 		ose.checkAndThrow();
 		return cp;
@@ -188,6 +192,7 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		setDistributionProtocolSettings(input, cp, ose);
 		setCollectionProtocolExtension(input, cp, ose);
 		setCpGroup(input, cp, ose);
+		setRequestManagerGroup(input, cp, ose);
 
 		ose.checkAndThrow();
 		return cp;
@@ -636,6 +641,16 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 
 		result.setCpGroup(cpGroup);
 	}
+
+	private void setRequestManagerGroup(CollectionProtocolDetail input, CollectionProtocol result, OpenSpecimenException ose) {
+		RequestManagerGroupSummary inputRmg = input.getRequestManagerGroup();
+		if (inputRmg == null) {
+			result.setRequestManagerGroup(null);
+			return;
+		}
+
+		result.setRequestManagerGroup(getRequestManagerGroup(inputRmg, ose));
+	}
 	
 	private User getUser(UserSummary userDetail) {
 		if (userDetail == null) {
@@ -652,5 +667,23 @@ public class CollectionProtocolFactoryImpl implements CollectionProtocolFactory 
 		}
 		
 		return user;
+	}
+
+	private RequestManagerGroup getRequestManagerGroup(RequestManagerGroupSummary input, OpenSpecimenException ose) {
+		Object key = null;
+		RequestManagerGroup rmg = null;
+		if (input.getId() != null) {
+			rmg = daoFactory.getRequestManagerGroupDao().getById(input.getId());
+			key = input.getId();
+		} else if (StringUtils.isNotBlank(input.getName())) {
+			rmg = daoFactory.getRequestManagerGroupDao().getByName(input.getName());
+			key = input.getName();
+		}
+
+		if (key != null && rmg == null) {
+			ose.addError(RequestManagerGroupErrorCode.NOT_FOUND, key);
+		}
+
+		return rmg;
 	}
 }

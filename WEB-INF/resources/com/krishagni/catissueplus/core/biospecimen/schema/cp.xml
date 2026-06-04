@@ -35,7 +35,7 @@
         <attribute>name</attribute>
       </field>
     </record>
-    
+
     <record>
       <attribute>principalInvestigator</attribute>
       <caption>#getMessage("cp_pi")</caption>
@@ -279,6 +279,16 @@
       <caption>#getMessage("cp_catalog_id")</caption>
       <attribute>catalogId</attribute>
     </field>
+
+    <record>
+      <attribute>requestManagerGroup</attribute>
+      <caption>#getMessage("cp_req_mgr_group")</caption>
+
+      <field>
+        <caption>#getMessage("common_name")</caption>
+        <attribute>name</attribute>
+      </field>
+    </record>
 
     <field>
       <caption>#getMessage("cp_activity_status")</caption>

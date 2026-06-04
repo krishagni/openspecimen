@@ -1,10 +1,11 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
-import java.util.Collections;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocolSave
 import com.krishagni.catissueplus.core.biospecimen.domain.CpGroupForm;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig;
 import com.krishagni.catissueplus.core.biospecimen.domain.CpWorkflowConfig.Workflow;
+import com.krishagni.catissueplus.core.biospecimen.domain.RequestManagerGroup;
 import com.krishagni.catissueplus.core.biospecimen.events.CollectionProtocolSummary;
 import com.krishagni.catissueplus.core.biospecimen.events.CpWorkflowCfgDetail;
 import com.krishagni.catissueplus.core.biospecimen.events.WorkflowDetail;
@@ -48,11 +50,22 @@ public class CpGroupSettingsApplier {
 		}
 
 		addFormContexts(group, cps);
+		boolean rmgApplied = applyRequestManagerGroup(group.getRequestManagerGroup(), cps, false);
 		boolean workflowsApplied = applyWorkflows(group.getWorkflows().values(), cps, false);
-		if (workflowsApplied) {
+		if (rmgApplied || workflowsApplied) {
 			publishCpSavedEvents(cps);
 		}
 	}
+
+	public boolean applyRequestManagerGroup(RequestManagerGroup oldRmg, RequestManagerGroup newRmg, Set<CollectionProtocol> cps) {
+		if (newRmg != null) {
+			return applyRequestManagerGroup(newRmg, cps, true);
+		}
+
+		return removeRequestManagerGroup(oldRmg, cps, true);
+	}
+
+
 
 	public boolean applyWorkflows(Map<String, WorkflowDetail> workflows, Set<CollectionProtocol> cps) {
 		return applyWorkflows(workflows, cps, true);
@@ -129,6 +142,48 @@ public class CpGroupSettingsApplier {
 		return result;
 	}
 
+	private boolean applyRequestManagerGroup(RequestManagerGroup rmg, Set<CollectionProtocol> cps, boolean publish) {
+		// TODO: should we allow null rmg to be applied?
+		if (rmg == null || CollectionUtils.isEmpty(cps)) {
+			return false;
+		}
+
+		for (CollectionProtocol cp : cps) {
+			cp.setRequestManagerGroup(rmg);
+		}
+
+		if (publish) {
+			publishCpSavedEvents(cps);
+		}
+
+		return true;
+	}
+
+	private boolean removeRequestManagerGroup(RequestManagerGroup oldRmg, Set<CollectionProtocol> cps, boolean publish) {
+		if (oldRmg == null || CollectionUtils.isEmpty(cps)) {
+			return false;
+		}
+
+		Set<CollectionProtocol> updatedCps = new HashSet<>();
+		for (CollectionProtocol cp : cps) {
+			if (!Objects.equals(cp.getRequestManagerGroup(), oldRmg)) {
+				continue;
+			}
+
+			cp.setRequestManagerGroup(null);
+			updatedCps.add(cp);
+		}
+
+		if (CollectionUtils.isEmpty(updatedCps)) {
+			return false;
+		}
+
+		if (publish) {
+			publishCpSavedEvents(updatedCps);
+		}
+
+		return true;
+	}
 
 	private FormSummary toFormSummary(CpGroupForm form) {
 		FormSummary input = new FormSummary();

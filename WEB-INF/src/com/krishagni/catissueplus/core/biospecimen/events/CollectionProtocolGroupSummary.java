@@ -23,6 +23,8 @@ public class CollectionProtocolGroupSummary extends AttributeModifiedSupport {
 
 	private List<CollectionProtocolSummary> cps;
 
+	private RequestManagerGroupSummary requestManagerGroup;
+
 	public Long getId() {
 		return id;
 	}
@@ -55,11 +57,20 @@ public class CollectionProtocolGroupSummary extends AttributeModifiedSupport {
 		this.cps = cps;
 	}
 
+	public RequestManagerGroupSummary getRequestManagerGroup() {
+		return requestManagerGroup;
+	}
+
+	public void setRequestManagerGroup(RequestManagerGroupSummary requestManagerGroup) {
+		this.requestManagerGroup = requestManagerGroup;
+	}
+
 	public static CollectionProtocolGroupSummary from(CollectionProtocolGroup group) {
 		CollectionProtocolGroupSummary result = new CollectionProtocolGroupSummary();
 		result.setId(group.getId());
 		result.setName(group.getName());
 		result.setCpsCount(group.getCpsCount());
+		result.setRequestManagerGroup(RequestManagerGroupSummary.from(group.getRequestManagerGroup()));
 		return result;
 	}
 

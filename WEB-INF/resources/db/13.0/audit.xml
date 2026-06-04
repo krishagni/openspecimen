@@ -66,4 +66,30 @@
     </preConditions>
     <dropColumn tableName="CAT_COLLECTION_PROTOCOL_AUD" columnName="reqManagers_MOD"/>
   </changeSet>
+
+  <changeSet author="vpawar" id="Request manager groups audit">
+    <createTable tableName="OS_REQ_MGR_GROUPS_AUD">
+      <column name="IDENTIFIER" type="${int.type}" />
+      <column name="REV" type="${int.type}" />
+      <column name="REVTYPE" type="${smallint.type}" />
+      <column name="NAME" type="${text.type}(255)" />
+      <column name="name_MOD" type="${boolean.type}" />
+      <column name="USER_GROUP_ID" type="${int.type}" />
+      <column name="userGroup_MOD" type="${boolean.type}" />
+    </createTable>
+  </changeSet>
+
+  <changeSet author="vpawar" id="CP request manager group audit">
+    <addColumn tableName="CAT_COLLECTION_PROTOCOL_AUD">
+      <column name="RMG_ID" type="${int.type}" />
+      <column name="requestManagerGroup_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Specimen request manager group audit">
+    <addColumn tableName="OS_SPECIMEN_REQUESTS_AUD">
+      <column name="RMG_ID" type="${int.type}" />
+      <column name="requestManagerGroup_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

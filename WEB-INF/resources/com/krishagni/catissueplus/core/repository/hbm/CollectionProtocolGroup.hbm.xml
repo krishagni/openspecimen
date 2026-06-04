@@ -19,6 +19,8 @@
 
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
 
+    <many-to-one name="requestManagerGroup" column="RMG_ID"/>
+
     <set name="cps" table="CATISSUE_COLLECTION_PROTOCOL" inverse="true">
       <key column="CP_GROUP_ID"/>
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.CollectionProtocol"/>

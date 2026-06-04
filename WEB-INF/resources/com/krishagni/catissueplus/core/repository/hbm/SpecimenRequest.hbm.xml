@@ -46,6 +46,8 @@
 
     <many-to-one name="dp" column="DP_ID"/>
 
+    <many-to-one name="requestManagerGroup" column="RMG_ID"/>
+
     <property name="comments" column="COMMENTS"/>
 
     <property name="itemsCriteriaJson" column="ITEMS_CRIT_JSON"/>
