@@ -37,5 +37,20 @@
       where
         rmg.name = :name
     </query>
+
+    <sql-query name="getActiveCpCounts">
+      <return-scalar column="rmg_id" type="long" />
+      <return-scalar column="cp_count" type="long" />
+
+      select
+        cp.rmg_id as rmg_id, count(cp.identifier) as cp_count
+      from
+        catissue_collection_protocol cp
+      where
+        cp.rmg_id in (:groupIds) and
+        cp.activity_status != 'Disabled'
+      group by
+        cp.rmg_id
+    </sql-query>
   </class>
 </hibernate-mapping>

@@ -883,6 +883,7 @@
     "notif_rcpts": "Notification Recipients",
     "notif_rcpts_req": "Notification Recipients are mandatory",
     "participant": "Participant",
+    "request_manager_group": "Request Manager Group",
     "select_atleast_one_cp": "Please select at least one collection protocol to add to the group",
     "select_cps": "Select Collection Protocols",
     "settings_saved": "Collection protocol group settings saved.",

@@ -19,6 +19,11 @@
                 <span v-t="'cpgs.forms'">Forms</span>
               </router-link>
             </li>
+            <li v-if="ctx.hasCatalogPlugin">
+              <router-link :to="getRoute('Settings')">
+                <span v-t="'cps.settings'">Settings</span>
+              </router-link>
+            </li>
           </ul>
         </os-tab-menu>
 
@@ -38,12 +43,17 @@ export default {
 
   props: ['cpgId'],
 
+  inject: ['ui'],
+
   data() {
+    const {global: {appProps: {plugins}}} = this.ui;
     return {
       ctx: {
         cpg: {},
 
-        permOpts: {}
+        permOpts: {},
+
+        hasCatalogPlugin: (plugins || []).indexOf('sc') >= 0
       }
     };
   },

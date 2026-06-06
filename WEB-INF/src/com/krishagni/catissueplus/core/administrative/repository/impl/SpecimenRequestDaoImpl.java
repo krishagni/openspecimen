@@ -31,11 +31,16 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 	}
 
 	@Override
-	public List<SpecimenRequestSummary> getSpecimenRequests(SpecimenRequestListCriteria crit) {
+	public List<SpecimenRequestSummary> getRequests(SpecimenRequestListCriteria crit) {
 		Criteria<SpecimenRequest> query = getListQuery(crit);
 		List<SpecimenRequest> requests = query.orderBy(query.desc("selectedReq.id"))
 			.list(crit.startAt(), crit.maxResults());
 		return SpecimenRequestSummary.from(requests);
+	}
+
+	@Override
+	public Long getRequestsCount(SpecimenRequestListCriteria crit) {
+		return getListQuery(crit).getCount("selectedReq.id");
 	}
 
 	@Override
@@ -67,6 +72,7 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		Criteria<SpecimenRequest> query = createCriteria(SpecimenRequest.class, "selectedReq")
 			.leftJoin("selectedReq.cp", "ocp")
 			.leftJoin("selectedReq.dp", "odp")
+			.leftJoin("selectedReq.requestManagerGroup", "ormg")
 			.leftJoin("selectedReq.requestor", "orequestor");
 
 		SubQuery<Long> reqIds = query.createSubQuery(SpecimenRequest.class, "req")
@@ -77,6 +83,7 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 
 		addCatalogCond(reqIds, crit);
 		addCpCond(reqIds, crit);
+		addRmgCond(reqIds, crit);
 		addDateConds(reqIds, crit);
 		addStatusConds(reqIds, crit);
 		addUserRestrictions(reqIds, crit);
@@ -101,6 +108,14 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 		query.add(query.eq("cp.id", crit.cpId()));
 	}
 
+	private void addRmgCond(AbstractCriteria<?, ?> query, SpecimenRequestListCriteria crit) {
+		if (crit.rmgId() == null) {
+			return;
+		}
+
+		query.leftJoin("req.requestManagerGroup", "filterRmg")
+			.add(query.eq("filterRmg.id", crit.rmgId()));
+	}
 
 	private void addDateConds(AbstractCriteria<?, ?> query, SpecimenRequestListCriteria crit) {
 		if (crit.fromReqDate() != null) {
@@ -195,6 +210,19 @@ public class SpecimenRequestDaoImpl extends AbstractDao<SpecimenRequest> impleme
 
 		if (crit.requestorId() != null) {
 			orCond.add(query.eq("requestor.id", crit.requestorId()));
+		}
+
+		if (crit.userId() != null) {
+			query.leftJoin("req.requestManagerGroup", "rmg")
+				.leftJoin("rmg.userGroup", "rmgUserGroup")
+				.leftJoin("rmgUserGroup.users", "rmgUser");
+
+			orCond.add(
+				query.or(
+					query.eq("requestor.id", crit.userId()),
+					query.eq("rmgUser.id", crit.userId())
+				)
+			);
 		}
 
 		if (CollectionUtils.isNotEmpty(crit.reqMgrCatalogIds())) {

@@ -8,7 +8,9 @@ import com.krishagni.catissueplus.core.administrative.events.SpecimenRequestSumm
 import com.krishagni.catissueplus.core.common.repository.Dao;
 
 public interface SpecimenRequestDao extends Dao<SpecimenRequest> {
-	List<SpecimenRequestSummary> getSpecimenRequests(SpecimenRequestListCriteria crit);
+	List<SpecimenRequestSummary> getRequests(SpecimenRequestListCriteria crit);
+
+	Long getRequestsCount(SpecimenRequestListCriteria crit);
 
 	Map<String, Object> getRequestIds(String key, Object value);
 

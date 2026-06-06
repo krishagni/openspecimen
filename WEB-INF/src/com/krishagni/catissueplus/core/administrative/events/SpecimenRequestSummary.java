@@ -14,6 +14,12 @@ public class SpecimenRequestSummary implements Serializable {
 
 	private Long catalogId;
 
+	private String catalogTitle;
+
+	private Long rmgId;
+
+	private String rmgName;
+
 	private UserSummary requestor;
 
 	private String requestorEmailId;
@@ -54,6 +60,30 @@ public class SpecimenRequestSummary implements Serializable {
 
 	public void setCatalogId(Long catalogId) {
 		this.catalogId = catalogId;
+	}
+
+	public String getCatalogTitle() {
+		return catalogTitle;
+	}
+
+	public void setCatalogTitle(String catalogTitle) {
+		this.catalogTitle = catalogTitle;
+	}
+
+	public Long getRmgId() {
+		return rmgId;
+	}
+
+	public void setRmgId(Long rmgId) {
+		this.rmgId = rmgId;
+	}
+
+	public String getRmgName() {
+		return rmgName;
+	}
+
+	public void setRmgName(String rmgName) {
+		this.rmgName = rmgName;
 	}
 
 	public UserSummary getRequestor() {
@@ -175,6 +205,11 @@ public class SpecimenRequestSummary implements Serializable {
 		summary.setDateOfScreening(request.getDateOfScreening());
 		summary.setScreeningComments(request.getScreeningComments());
 		summary.setActivityStatus(request.getActivityStatus());
+
+		if (request.getRequestManagerGroup() != null) {
+			summary.setRmgId(request.getRequestManagerGroup().getId());
+			summary.setRmgName(request.getRequestManagerGroup().getName());
+		}
 
 		if (request.getScreenedBy() != null) {
 			summary.setScreenedBy(UserSummary.from(request.getScreenedBy()));

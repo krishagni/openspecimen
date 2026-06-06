@@ -12,6 +12,8 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	private Long cpId;
 
+	private Long rmgId;
+
 	private Date fromReqDate;
 
 	private Date toReqDate;
@@ -50,6 +52,15 @@ public class SpecimenRequestListCriteria extends AbstractListCriteria<SpecimenRe
 
 	public SpecimenRequestListCriteria cpId(Long cpId) {
 		this.cpId = cpId;
+		return this;
+	}
+
+	public Long rmgId() {
+		return rmgId;
+	}
+
+	public SpecimenRequestListCriteria rmgId(Long rmgId) {
+		this.rmgId = rmgId;
 		return this;
 	}
 

@@ -17,6 +17,8 @@ public class RequestManagerGroupSummary {
 
 	private String userGroupName;
 
+	private Long cpCount;
+
 	public Long getId() {
 		return id;
 	}
@@ -47,6 +49,14 @@ public class RequestManagerGroupSummary {
 
 	public void setUserGroupName(String userGroupName) {
 		this.userGroupName = userGroupName;
+	}
+
+	public Long getCpCount() {
+		return cpCount;
+	}
+
+	public void setCpCount(Long cpCount) {
+		this.cpCount = cpCount;
 	}
 
 	public static RequestManagerGroupSummary from(RequestManagerGroup rmg) {

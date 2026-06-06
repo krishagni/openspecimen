@@ -21,6 +21,20 @@ export default {
               path: 'forms',
               name: 'CpgDetail.Forms',
               component: () => import(/* webpackChunkName: "cp-groups" */ './Forms.vue'),
+            },
+            {
+              path: 'settings',
+              name: 'CpgDetail.Settings',
+              component: () => import(/* webpackChunkName: "cp-groups" */ './Settings.vue'),
+              beforeEnter: (to, from, next) => {
+                const {global: {appProps: {plugins}}} = window.osUi;
+                if (plugins instanceof Array && plugins.indexOf('sc') >= 0) {
+                  next();
+                } else {
+                  alert('Specimen Catalog plugin is not installed. Navigating to the Overview page');
+                  next({name: 'CpgDetail.Overview', params: {cpgId: to.params.cpgId}});
+                }
+              }
             }
           ]
         }
