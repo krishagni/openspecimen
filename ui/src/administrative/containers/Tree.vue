@@ -123,7 +123,9 @@ export default {
             el = el[0];
           }
 
-          el.scrollIntoView({block: 'center', behaviour: 'smooth'});
+          if (el) {
+            el.scrollIntoView({block: 'center', behavior: 'smooth'});
+          }
         }, 500);
     },
 
