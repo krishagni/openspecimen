@@ -204,6 +204,34 @@
     </row>
 
     <row>
+      <subForm>
+        <name>units</name>
+        <udn>units</udn>
+        <caption>#getMessage("specimen_units")</caption>
+        <table>OS_QUERY_SPMN_UNITS</table>
+        <foreignKey>UNIT_KEY</foreignKey>
+        <parentKey>UNIT_KEY</parentKey>
+        <primaryKey>UNIT_KEY</primaryKey>
+        <row>
+          <pvField>
+            <name>quantityUnit</name>
+            <udn>quantityUnit</udn>
+            <caption>#getMessage("specimen_quantity_unit")</caption>
+            <column>QUANTITY_UNIT_ID</column>
+            <attribute>specimen_unit</attribute>
+          </pvField>
+          <pvField>
+            <name>concentrationUnit</name>
+            <udn>concentrationUnit</udn>
+            <caption>#getMessage("specimen_concentration_unit")</caption>
+            <column>CONC_UNIT_ID</column>
+            <attribute>specimen_unit</attribute>
+          </pvField>
+        </row>
+      </subForm>
+    </row>
+
+    <row>
       <pvField>
         <name>biohazards</name>
         <udn>biohazards</udn>

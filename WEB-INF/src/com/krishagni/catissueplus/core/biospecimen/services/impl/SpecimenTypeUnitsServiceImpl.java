@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.services.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -69,7 +70,8 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService, I
 			ensureCreateOrUpdateUnitRights(unit);
 
 			ensureUniqueUnit(null, unit);
-			daoFactory.getSpecimenTypeUnitDao().saveOrUpdate(unit);
+			daoFactory.getSpecimenTypeUnitDao().saveOrUpdate(unit, true);
+			refreshQuerySpecimenUnits(UnitScope.from(unit));
 			return ResponseEvent.response(SpecimenTypeUnitDetail.from(unit));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -93,6 +95,7 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService, I
 				return ResponseEvent.userError(SpecimenTypeUnitError.NOT_FOUND, unit.getId());
 			}
 
+			UnitScope oldScope = UnitScope.from(existing);
 			ensureCreateOrUpdateUnitRights(existing);
 			if (!Objects.equals(existing.getCp(), unit.getCp())) {
 				ensureCreateOrUpdateUnitRights(unit);
@@ -100,7 +103,9 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService, I
 
 			ensureUniqueUnit(existing, unit);
 			existing.update(unit);
-			daoFactory.getSpecimenTypeUnitDao().saveOrUpdate(existing);
+			daoFactory.getSpecimenTypeUnitDao().saveOrUpdate(existing, true);
+			refreshQuerySpecimenUnits(oldScope);
+			refreshQuerySpecimenUnitsIfNeeded(oldScope, UnitScope.from(existing));
 			return ResponseEvent.response(SpecimenTypeUnitDetail.from(existing));
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
@@ -124,8 +129,31 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService, I
 			}
 
 			ensureCreateOrUpdateUnitRights(unit);
+			UnitScope oldScope = UnitScope.from(unit);
 			daoFactory.getSpecimenTypeUnitDao().delete(unit);
+			daoFactory.getSpecimenTypeUnitDao().flush();
+			refreshQuerySpecimenUnits(oldScope);
 			return ResponseEvent.response(SpecimenTypeUnitDetail.from(unit));
+		} catch (OpenSpecimenException ose) {
+			return ResponseEvent.error(ose);
+		} catch (Exception e) {
+			return ResponseEvent.serverError(e);
+		}
+	}
+
+	@Override
+	@PlusTransactional
+	public ResponseEvent<Map<String, Integer>> rebuildQueryUnits() {
+		try {
+			AccessCtrlMgr.getInstance().ensureUserIsAdmin();
+
+			int deleted = daoFactory.getSpecimenTypeUnitDao().deleteQueryUnits();
+			int inserted = daoFactory.getSpecimenTypeUnitDao().addQueryUnits();
+
+			Map<String, Integer> result = new HashMap<>();
+			result.put("deleted", deleted);
+			result.put("inserted", inserted);
+			return ResponseEvent.response(result);
 		} catch (OpenSpecimenException ose) {
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
@@ -255,6 +283,16 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService, I
 		}
 	}
 
+	private void refreshQuerySpecimenUnits(UnitScope scope) {
+		daoFactory.getSpecimenTypeUnitDao().refreshQueryUnits(scope.cpId, scope.specimenClassId, scope.typeId);
+	}
+
+	private void refreshQuerySpecimenUnitsIfNeeded(UnitScope refreshedScope, UnitScope scope) {
+		if (!refreshedScope.contains(scope)) {
+			refreshQuerySpecimenUnits(scope);
+		}
+	}
+
 	private Function<ExportJob, List<? extends Object>> getUnitsGenerator() {
 		return new Function<>() {
 			private boolean paramsInited = false;
@@ -332,5 +370,39 @@ public class SpecimenTypeUnitsServiceImpl implements SpecimenTypeUnitsService, I
 				paramsInited = true;
 			}
 		};
+	}
+
+	private static class UnitScope {
+		private final Long cpId;
+
+		private final Long specimenClassId;
+
+		private final Long typeId;
+
+		private UnitScope(Long cpId, Long specimenClassId, Long typeId) {
+			this.cpId = cpId;
+			this.specimenClassId = specimenClassId;
+			this.typeId = typeId;
+		}
+
+		private static UnitScope from(SpecimenTypeUnit unit) {
+			return new UnitScope(
+				unit.getCp() != null ? unit.getCp().getId() : null,
+				unit.getSpecimenClass().getId(),
+				unit.getType() != null ? unit.getType().getId() : null
+			);
+		}
+
+		private boolean contains(UnitScope other) {
+			return containsCp(other) && specimenClassId.equals(other.specimenClassId) && containsType(other);
+		}
+
+		private boolean containsCp(UnitScope other) {
+			return cpId == null || cpId.equals(other.cpId);
+		}
+
+		private boolean containsType(UnitScope other) {
+			return typeId == null || typeId.equals(other.typeId);
+		}
 	}
 }

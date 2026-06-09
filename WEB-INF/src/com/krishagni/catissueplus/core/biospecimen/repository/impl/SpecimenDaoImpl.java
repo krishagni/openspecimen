@@ -383,6 +383,8 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 
 	@Override
 	public void saveOrUpdate(Specimen specimen, boolean flush) {
+		specimen.updateUnitKey();
+
 		SpecimenCollectionReceiveDetail collRecvDetail = getCollectionReceiveDetail(specimen);
 		if (collRecvDetail != null && specimen.getId() != null) {
 			specimen.setCollRecvDetails(saveCollectionReceiveDetails(collRecvDetail));

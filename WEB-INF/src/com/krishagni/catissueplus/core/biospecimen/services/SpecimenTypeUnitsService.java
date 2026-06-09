@@ -1,6 +1,7 @@
 package com.krishagni.catissueplus.core.biospecimen.services;
 
 import java.util.List;
+import java.util.Map;
 
 import com.krishagni.catissueplus.core.biospecimen.events.SpecimenTypeUnitDetail;
 import com.krishagni.catissueplus.core.biospecimen.repository.SpecimenTypeUnitsListCriteria;
@@ -17,4 +18,6 @@ public interface SpecimenTypeUnitsService {
 	ResponseEvent<SpecimenTypeUnitDetail> updateUnit(RequestEvent<SpecimenTypeUnitDetail> req);
 
 	ResponseEvent<SpecimenTypeUnitDetail> deleteUnit(RequestEvent<SpecimenTypeUnitDetail> req);
+
+	ResponseEvent<Map<String, Integer>> rebuildQueryUnits();
 }

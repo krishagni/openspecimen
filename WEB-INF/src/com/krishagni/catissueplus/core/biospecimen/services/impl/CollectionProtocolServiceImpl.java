@@ -1675,7 +1675,13 @@ public class CollectionProtocolServiceImpl implements CollectionProtocolService,
 		copyWorkflows(existing, cp);
 		applyCpGroupSettings(cp);
 		copySpecimenUnits(existing, cp);
+		addQueryUnitsForCp(cp);
 		return cp;
+	}
+
+	private void addQueryUnitsForCp(CollectionProtocol cp) {
+		daoFactory.getSpecimenTypeUnitDao().flush();
+		daoFactory.getSpecimenTypeUnitDao().addQueryUnitsForCp(cp.getId());
 	}
 
 	private void applyCpGroupSettings(CollectionProtocol cp) {

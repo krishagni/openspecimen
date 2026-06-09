@@ -126,6 +126,8 @@ public class Specimen extends BaseExtensionEntity {
 
 	private PermissibleValue specimenType;
 
+	private String unitKey;
+
 	private BigDecimal concentration;
 
 	private String label;
@@ -369,7 +371,13 @@ public class Specimen extends BaseExtensionEntity {
 			return;
 		}
 
-		updateDescendants(s -> s.specimenClass = specimenClass, Specimen::isAliquot);
+		updateDescendants(
+			s -> {
+				s.specimenClass = specimenClass;
+				s.updateUnitKey();
+			},
+			Specimen::isAliquot
+		);
 	}
 
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
@@ -386,9 +394,27 @@ public class Specimen extends BaseExtensionEntity {
 			return;
 		}
 
-		updateDescendants(s -> s.specimenType = specimenType, Specimen::isAliquot);
+		updateDescendants(
+			s -> {
+				s.specimenType = specimenType;
+				s.updateUnitKey();
+			},
+			Specimen::isAliquot
+		);
 	}
 
+	@NotAudited
+	public String getUnitKey() {
+		return unitKey;
+	}
+
+	public void setUnitKey(String unitKey) {
+		this.unitKey = unitKey;
+	}
+
+	public void updateUnitKey() {
+		unitKey = getUnitKey(collectionProtocol, specimenClass, specimenType);
+	}
 
 	public BigDecimal getConcentration() {
 		return concentration;
@@ -1849,6 +1875,7 @@ public class Specimen extends BaseExtensionEntity {
 	private void updateVisit(Visit visit) {
 		setVisit(visit);
 		setCollectionProtocol(visit.getCollectionProtocol());
+		updateUnitKey();
 		getChildCollection().forEach(child -> child.updateVisit(visit));
 	}
 
@@ -2892,5 +2919,21 @@ public class Specimen extends BaseExtensionEntity {
 				}
 			}
 		}
+	}
+
+	private String getUnitKey(CollectionProtocol cp, PermissibleValue specimenClass, PermissibleValue specimenType) {
+		if (cp == null || specimenClass == null || specimenType == null) {
+			return null;
+		}
+
+		return getUnitKey(cp.getId(), specimenClass.getId(), specimenType.getId());
+	}
+
+	private String getUnitKey(Long cpId, Long specimenClassId, Long specimenTypeId) {
+		if (cpId == null || specimenClassId == null || specimenTypeId == null) {
+			return null;
+		}
+
+		return cpId + ":" + specimenClassId + ":" + specimenTypeId;
 	}
 }

@@ -23,6 +23,8 @@
 
     <many-to-one name="specimenType" column="SPECIMEN_TYPE_ID" fetch="join"/>
 
+    <property name="unitKey" column="UNIT_KEY"/>
+
     <property name="label" column="LABEL" />
 
     <property name="additionalLabel" column="ADDITIONAL_LABEL" />

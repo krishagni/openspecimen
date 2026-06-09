@@ -17,4 +17,14 @@ public interface SpecimenTypeUnitDao extends Dao<SpecimenTypeUnit> {
 	List<SpecimenTypeUnit> getMatchingUnits(Long cpId, Long specimenClassId, Long typeId);
 
 	List<SpecimenTypeUnit> getMatchingUnits(String cpShortTitle, String specimenClass, String type);
+
+	void refreshQueryUnits(Long cpId, Long specimenClassId, Long typeId);
+
+	void addQueryUnitsForCp(Long cpId);
+
+	void addQueryUnitsForSpecimenType(Long specimenClassId, Long typeId);
+
+	int deleteQueryUnits();
+
+	int addQueryUnits();
 }

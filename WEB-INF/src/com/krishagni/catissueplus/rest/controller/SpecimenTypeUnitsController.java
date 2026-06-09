@@ -100,4 +100,11 @@ public class SpecimenTypeUnitsController {
 		input.setId(id);
 		return ResponseEvent.unwrap(unitsSvc.deleteUnit(RequestEvent.wrap(input)));
 	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/query-units/rebuild")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Map<String, Integer> rebuildQueryUnits() {
+		return ResponseEvent.unwrap(unitsSvc.rebuildQueryUnits());
+	}
 }

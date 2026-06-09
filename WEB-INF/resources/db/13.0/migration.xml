@@ -319,4 +319,74 @@
         )
     </sql>
   </changeSet>
+
+  <changeSet author="vpawar" id="Seed resolved specimen units for query">
+    <sql>
+      insert into
+        os_query_spmn_units (
+          cp_id,
+          class_id,
+          type_id,
+          unit_key,
+          quantity_unit_id,
+          conc_unit_id
+        )
+      select
+        cp.identifier,
+        st.parent_identifier,
+        st.identifier,
+        concat(cp.identifier, concat(':', concat(st.parent_identifier, concat(':', st.identifier)))),
+        coalesce(cp_type.quantity_unit_id, cp_class.quantity_unit_id, sys_type.quantity_unit_id, sys_class.quantity_unit_id),
+        coalesce(cp_type.concentration_unit_id, cp_class.concentration_unit_id, sys_type.concentration_unit_id, sys_class.concentration_unit_id)
+      from
+        catissue_collection_protocol cp
+        inner join catissue_permissible_value st on st.public_id = 'specimen_type' and st.parent_identifier is not null
+        left join os_specimen_type_units cp_type on
+          cp_type.cp_id = cp.identifier and
+          cp_type.specimen_class_id = st.parent_identifier and
+          cp_type.specimen_type_id = st.identifier
+        left join os_specimen_type_units cp_class on
+          cp_class.cp_id = cp.identifier and
+          cp_class.specimen_class_id = st.parent_identifier and
+          cp_class.specimen_type_id is null
+        left join os_specimen_type_units sys_type on
+          sys_type.cp_id is null and
+          sys_type.specimen_class_id = st.parent_identifier and
+          sys_type.specimen_type_id = st.identifier
+        left join os_specimen_type_units sys_class on
+          sys_class.cp_id is null and
+          sys_class.specimen_class_id = st.parent_identifier and
+          sys_class.specimen_type_id is null
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Set specimen unit key" dbms="mysql">
+    <sql>
+      update
+        catissue_specimen s
+        inner join os_query_spmn_units u on
+          u.cp_id = s.collection_protocol_id and
+          u.class_id = s.specimen_class_id and
+          u.type_id = s.specimen_type_id
+      set
+        s.unit_key = u.unit_key
+    </sql>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Set specimen unit key" dbms="oracle">
+    <sql>
+      merge into
+        catissue_specimen s
+      using
+        os_query_spmn_units u
+      on (
+        u.cp_id = s.collection_protocol_id and
+        u.class_id = s.specimen_class_id and
+        u.type_id = s.specimen_type_id
+      )
+      when matched then
+        update set
+          s.unit_key = u.unit_key
+    </sql>
+  </changeSet>
 </databaseChangeLog>

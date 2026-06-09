@@ -235,4 +235,67 @@
       </column>
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Resolved specimen units for query">
+    <createTable tableName="OS_QUERY_SPMN_UNITS">
+      <column name="CP_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_OS_QSU_CP_ID"
+          referencedTableName="CATISSUE_COLLECTION_PROTOCOL" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CLASS_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_OS_QSU_CLASS_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="TYPE_ID" type="${int.type}">
+        <constraints nullable="false" foreignKeyName="FK_OS_QSU_TYPE_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="UNIT_KEY" type="${text.type}(255)">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="OS_QSU_PK" />
+      </column>
+      <column name="QUANTITY_UNIT_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_OS_QSU_QTY_UNIT_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+      <column name="CONC_UNIT_ID" type="${int.type}">
+        <constraints foreignKeyName="FK_OS_QSU_CONC_UNIT_ID"
+          referencedTableName="CATISSUE_PERMISSIBLE_VALUE" referencedColumnNames="IDENTIFIER" />
+      </column>
+    </createTable>
+
+    <addUniqueConstraint constraintName="OS_QSU_CP_CLASS_TYPE_UQ"
+      tableName="OS_QUERY_SPMN_UNITS" columnNames="CP_ID,CLASS_ID,TYPE_ID" />
+
+    <createIndex tableName="OS_QUERY_SPMN_UNITS" indexName="OS_QSU_QTY_UNIT_IDX">
+      <column name="QUANTITY_UNIT_ID" />
+    </createIndex>
+
+    <createIndex tableName="OS_QUERY_SPMN_UNITS" indexName="OS_QSU_CONC_UNIT_IDX">
+      <column name="CONC_UNIT_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Unit key in specimen table">
+    <addColumn tableName="CATISSUE_SPECIMEN">
+      <column name="UNIT_KEY" type="${text.type}(255)" />
+    </addColumn>
+
+    <createIndex tableName="CATISSUE_SPECIMEN" indexName="OS_SPMN_UNIT_KEY_IDX">
+      <column name="UNIT_KEY" />
+    </createIndex>
+  </changeSet>
+
+  <!-- Temporarily add FK to validate UNIT_KEY charset/collation compatibility.
+  It is dropped immediately after because OS_QUERY_SPMN_UNITS is maintained
+  as query support data using delete/insert refreshes. -->
+
+  <changeSet author="vpawar" id="Specimen unit key foreign key">
+    <addForeignKeyConstraint constraintName="FK_SPMN_UNIT_KEY"
+      baseTableName="CATISSUE_SPECIMEN" baseColumnNames="UNIT_KEY"
+      referencedTableName="OS_QUERY_SPMN_UNITS" referencedColumnNames="UNIT_KEY" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop Specimen unit key foreign key">
+    <dropForeignKeyConstraint constraintName="FK_SPMN_UNIT_KEY" baseTableName="CATISSUE_SPECIMEN" />
+  </changeSet>
 </databaseChangeLog>
