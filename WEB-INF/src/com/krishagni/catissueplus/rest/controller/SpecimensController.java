@@ -160,11 +160,13 @@ public class SpecimensController {
 		}
 
 		if (size > 10000) {
-			throw OpenSpecimenException.userError(SpecimenErrorCode.LABELS_SRCH_LIMIT_MAXED, 1000);
+			throw OpenSpecimenException.userError(SpecimenErrorCode.LABELS_SRCH_LIMIT_MAXED, 10000);
 		}
 
 		if (crit.maxResults() > 10000) {
 			crit.maxResults(10000);
+		} else if (size > 0 && !crit.maxResultsSpecified()) {
+			crit.maxResults(size);
 		}
 
 		return ResponseEvent.unwrap(specimenSvc.getSpecimens(RequestEvent.wrap(crit.limitItems(true))));

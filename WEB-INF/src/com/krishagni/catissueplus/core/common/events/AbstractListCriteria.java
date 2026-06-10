@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements ListCriteria<T> {
@@ -13,6 +14,8 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 	private int startAt;
 	
 	private int maxResults;
+
+	private boolean maxResultsSpecified;
 
 	private boolean limitItems;
 	
@@ -70,7 +73,13 @@ public abstract class AbstractListCriteria<T extends ListCriteria<T>> implements
 	@JsonProperty("maxResults")
 	public T maxResults(int maxResults) {
 		this.maxResults = maxResults;
+		this.maxResultsSpecified = true;
 		return self();
+	}
+
+	@JsonIgnore
+	public boolean maxResultsSpecified() {
+		return maxResultsSpecified;
 	}
 
 	public int rangeFactor() {
