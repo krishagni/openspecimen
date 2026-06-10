@@ -5,6 +5,12 @@ import java.io.FileWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -69,6 +75,7 @@ public class TemplateServiceImpl implements TemplateService {
 			props.put("messageSource", messageSource);
 			props.put("dateFmt", dateFmt);
 			props.put("dateOnlyFmt", dateOnlyFmt);
+			props.put("datePickerFmt", new DatePickerFormatter(dateFmt, dateOnlyFmt));
 			props.put("Integer", Integer.class);
 			props.put("Long", Long.class);
 			props.put("String", String.class);
@@ -104,6 +111,7 @@ public class TemplateServiceImpl implements TemplateService {
 			props.put("messageSource", messageSource);
 			props.put("dateFmt", dateFmt);
 			props.put("dateOnlyFmt", dateOnlyFmt);
+			props.put("datePickerFmt", new DatePickerFormatter(dateFmt, dateOnlyFmt));
 			props.put("barcodeGenerator", barcodeGenerator);
 
 			VelocityContext context = new VelocityContext(props);
@@ -119,5 +127,98 @@ public class TemplateServiceImpl implements TemplateService {
 
 	private String getDateOnlyFormat() {
 		return cfgSvc.getDateFormat();
+	}
+
+	private static class DatePickerFormatter {
+		private static final DateTimeFormatter ISO_TZ_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+		private static final DateTimeFormatter ISO_TZ_FMT_NO_MILLIS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+
+		private final SimpleDateFormat dateFmt;
+
+		private final SimpleDateFormat dateOnlyFmt;
+
+		public DatePickerFormatter(SimpleDateFormat dateFmt, SimpleDateFormat dateOnlyFmt) {
+			this.dateFmt = dateFmt;
+			this.dateOnlyFmt = dateOnlyFmt;
+		}
+
+		public String format(Object input, boolean includeTime) {
+			Date date = objToDate(input);
+			return date != null ? (includeTime ? dateFmt : dateOnlyFmt).format(date) : input.toString();
+		}
+
+		private Date objToDate(Object input) {
+			if (input instanceof Date) {
+				return (Date)input;
+			} else if (input instanceof Number) {
+				return new Date(((Number)input).longValue());
+			} else if (input instanceof String) {
+				return strToDate((String)input);
+			}
+
+			return null;
+		}
+
+		private Date strToDate(String input) {
+			String trimmedInput = input.trim();
+			if (trimmedInput.isEmpty()) {
+				return null;
+			} else if (trimmedInput.matches("\\d+")) {
+				try {
+					return new Date(Long.parseLong(trimmedInput));
+				} catch (NumberFormatException nfe) {
+					return null;
+				}
+			}
+
+			ZoneId zoneId = dateFmt.getTimeZone().toZoneId();
+			try {
+				// parse strings of the form: yyyy-MM-ddTHH:mm:ss.SSZ (100th of second)
+				return Date.from(Instant.parse(trimmedInput));
+			} catch (Exception e) {
+				// Try other date/time representations below.
+			}
+
+			try {
+				// parse strings of the form: yyyy-MM-ddTHH:mm:ssXX (offset format)
+				return Date.from(OffsetDateTime.parse(trimmedInput).toInstant());
+			} catch (Exception e) {
+				// Try other date/time representations below.
+			}
+
+			try {
+				// parse strings of the form: yyyy-MM-ddTHH:mm:ssXX (offset format)
+				return Date.from(ZonedDateTime.parse(trimmedInput).toInstant());
+			} catch (Exception e) {
+				// Try other date/time representations below.
+			}
+
+			try {
+				return Date.from(OffsetDateTime.parse(trimmedInput, ISO_TZ_FMT).toInstant());
+			} catch (Exception e) {
+				// Try other date/time representations below.
+			}
+
+			try {
+				return Date.from(OffsetDateTime.parse(trimmedInput, ISO_TZ_FMT_NO_MILLIS).toInstant());
+			} catch (Exception e) {
+				// Try other date/time representations below.
+			}
+
+			try {
+				// yyyy-MM-ddTHH:mm:ss
+				return Date.from(LocalDateTime.parse(trimmedInput).atZone(zoneId).toInstant());
+			} catch (Exception e) {
+				// Try date-only representation below.
+			}
+
+			try {
+				// yyyy-MM-dd
+				return Date.from(LocalDate.parse(trimmedInput).atStartOfDay(zoneId).toInstant());
+			} catch (Exception e) {
+				return null;
+			}
+		}
 	}
 }

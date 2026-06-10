@@ -33,9 +33,9 @@
                         <span>Signature cannot be displayed</span>
                       #elseif($field.type == 'datePicker')
                         #if($field.format.contains('HH:mm'))
-                          <span>$dateFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($field.value))))</span>
+                          <span>$datePickerFmt.format($field.value, true)</span>
                         #else
-                          <span>$dateOnlyFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($field.value))))</span>
+                          <span>$datePickerFmt.format($field.value, false)</span>
                         #end
                       #elseif($field.type == 'checkbox' || $field.type == 'multiSelectListbox')
                         <span>$String.join(", ", $field.value)</span>
@@ -82,9 +82,9 @@
                               <span>Signature cannot be displayed</span>
                             #elseif($sfField.type == 'datePicker')
                               #if($sfField.format.contains('HH:mm'))
-                                <span>$dateFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($sfField.value))))</span>
+                                <span>$datePickerFmt.format($sfField.value, true)</span>
                               #else
-                                <span>$dateOnlyFmt.format($Date.from($Instant.ofEpochMilli($Long.parseLong($sfField.value))))</span>
+                                <span>$datePickerFmt.format($sfField.value, false)</span>
                               #end
                             #elseif($sfField.type == 'checkbox' || $sfField.type == 'multiSelectListbox')
                               <span>$String.join(", ", $sfField.value)</span>
