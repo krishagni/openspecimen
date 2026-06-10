@@ -72,6 +72,9 @@ export default {
         "fields": [ { "name": "type.temperature" } ]
       },
       {
+        "fields": [ { "name": "type.rate" } ]
+      },
+      {
         "fields": [ { "name": "type.storeSpecimenEnabled" } ]
       },
       {

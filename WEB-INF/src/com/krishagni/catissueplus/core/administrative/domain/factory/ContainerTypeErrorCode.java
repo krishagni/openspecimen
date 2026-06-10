@@ -14,6 +14,8 @@ public enum ContainerTypeErrorCode implements ErrorCode {
 	
 	INVALID_CAPACITY,
 
+	INVALID_RATE,
+
 	INVALID_POSITION_LABELING_MODE,
 
 	INVALID_POSITION_ASSIGNMENT,

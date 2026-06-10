@@ -14,6 +14,7 @@ import com.krishagni.catissueplus.core.common.errors.ActivityStatusErrorCode;
 import com.krishagni.catissueplus.core.common.errors.ErrorType;
 import com.krishagni.catissueplus.core.common.errors.OpenSpecimenException;
 import com.krishagni.catissueplus.core.common.service.LabelGenerator;
+import com.krishagni.catissueplus.core.common.util.NumUtil;
 import com.krishagni.catissueplus.core.common.util.Status;
 
 public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
@@ -48,6 +49,7 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 		setName(detail, existing, containerType, ose);
 		setNameFormat(detail, existing, containerType, ose);
 		setTemperature(detail, existing, containerType, ose);
+		setRate(detail, existing, containerType, ose);
 		setDimension(detail, existing, containerType, ose);
 		setPositionLabelingMode(detail, existing, containerType, ose);
 		setPositionAssignment(detail, existing, containerType, ose);
@@ -105,6 +107,22 @@ public class ContainerTypeFactoryImpl implements ContainerTypeFactory {
 			containerType.setTemperature(detail.getTemperature());
 		} else {
 			containerType.setTemperature(existing.getTemperature());
+		}
+	}
+
+	private void setRate(ContainerTypeDetail detail, ContainerType containerType, OpenSpecimenException ose) {
+		if (NumUtil.lessThanZero(detail.getRate())) {
+			ose.addError(ContainerTypeErrorCode.INVALID_RATE, detail.getRate());
+		}
+
+		containerType.setRate(detail.getRate());
+	}
+
+	private void setRate(ContainerTypeDetail detail, ContainerType existing, ContainerType containerType, OpenSpecimenException ose) {
+		if (detail.isAttrModified("rate") || existing == null) {
+			setRate(detail, containerType, ose);
+		} else {
+			containerType.setRate(existing.getRate());
 		}
 	}
 

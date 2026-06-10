@@ -434,6 +434,14 @@
                     <caption>#getMessage("specimen_spec_position_container_type_name")</caption>
                     <column>NAME</column>
                   </textField>
+
+                  <numberField>
+                    <name>rate</name>
+                    <udn>rate</udn>
+                    <caption>#getMessage("specimen_spec_position_container_type_rate")</caption>
+                    <column>RATE</column>
+                    <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
+                  </numberField>
                 </row>
               </subForm>
             </row>
@@ -1632,6 +1640,14 @@
                     <caption>#getMessage("specimen_spec_position_container_type_name")</caption>
                     <column>NAME</column>
                   </textField>
+
+                  <numberField>
+                    <name>rate</name>
+                    <udn>rate</udn>
+                    <caption>#getMessage("specimen_spec_position_container_type_rate")</caption>
+                    <column>RATE</column>
+                    <noOfDigitsAfterDecimal>2</noOfDigitsAfterDecimal>
+                  </numberField>
                 </row>
               </subForm>
             </row>

@@ -26,6 +26,11 @@
     </field>
 
     <field>
+      <caption>#getMessage("container_type_rate")</caption>
+      <attribute>rate</attribute>
+    </field>
+
+    <field>
       <caption>#getMessage("container_type_no_of_rows")</caption>
       <attribute>noOfRows</attribute>
     </field>

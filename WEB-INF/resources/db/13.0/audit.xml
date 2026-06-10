@@ -92,4 +92,11 @@
       <column name="requestManagerGroup_MOD" type="${boolean.type}" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Audit and track changes to container type rate">
+    <addColumn tableName="OS_CONTAINER_TYPES_AUD">
+      <column name="RATE" type="${decimal.type}(10, 2)" />
+      <column name="rate_MOD" type="${boolean.type}" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

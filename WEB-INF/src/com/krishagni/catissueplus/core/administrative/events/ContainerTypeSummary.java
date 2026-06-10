@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.events;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,8 @@ public class ContainerTypeSummary extends AttributeModifiedSupport {
 	private String rowLabelingScheme;
 
 	private Double temperature;
+
+	private BigDecimal rate;
 
 	private boolean storeSpecimenEnabled;
 
@@ -115,6 +118,14 @@ public class ContainerTypeSummary extends AttributeModifiedSupport {
 		this.temperature = temperature;
 	}
 
+	public BigDecimal getRate() {
+		return rate;
+	}
+
+	public void setRate(BigDecimal rate) {
+		this.rate = rate;
+	}
+
 	public boolean isStoreSpecimenEnabled() {
 		return storeSpecimenEnabled;
 	}
@@ -150,6 +161,7 @@ public class ContainerTypeSummary extends AttributeModifiedSupport {
 		detail.setColumnLabelingScheme(containerType.getColumnLabelingScheme());
 		detail.setRowLabelingScheme(containerType.getRowLabelingScheme());
 		detail.setTemperature(containerType.getTemperature());
+		detail.setRate(containerType.getRate());
 		detail.setStoreSpecimenEnabled(containerType.isStoreSpecimenEnabled());
 		detail.setCapacity(containerType.getCapacity());
 		detail.setActivityStatus(containerType.getActivityStatus());

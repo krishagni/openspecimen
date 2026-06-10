@@ -298,4 +298,10 @@
   <changeSet author="vpawar" id="Drop Specimen unit key foreign key">
     <dropForeignKeyConstraint constraintName="FK_SPMN_UNIT_KEY" baseTableName="CATISSUE_SPECIMEN" />
   </changeSet>
+
+  <changeSet author="vpawar" id="Rate in container types">
+    <addColumn tableName="OS_CONTAINER_TYPES">
+      <column name="RATE" type="${decimal.type}(10, 2)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>

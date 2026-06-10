@@ -31,6 +31,10 @@ export default {
       captionCode: "container_types.name_format"
     },
     {
+      name: "type.rate",
+      captionCode: "container_types.rate"
+    },
+    {
       name: "type.dimension",
       captionCode: "container_types.dimension",
       value: function({type}) {

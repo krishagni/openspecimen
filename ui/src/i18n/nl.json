@@ -187,6 +187,8 @@
     "position_labeling_linear": "Lineair",
     "position_labeling_required": "Toewijzing van positie is verplicht",
     "position_labeling_two_d": "Rijen en kolommen",
+    "rate": "Tarief",
+    "rate_invalid": "Tarief moet nul of meer zijn",
     "row_labeling_scheme_required": "Rij etiketteringsschema is verplicht",
     "rows": "Rijen",
     "rows_required": "Rijen is verplicht",

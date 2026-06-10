@@ -1,5 +1,6 @@
 package com.krishagni.catissueplus.core.administrative.domain;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +41,8 @@ public class ContainerType extends BaseEntity {
 	private String rowLabelingScheme;
 	
 	private Double temperature;
+
+	private BigDecimal rate;
 	
 	private boolean storeSpecimenEnabled;
 
@@ -135,6 +138,14 @@ public class ContainerType extends BaseEntity {
 	public void setTemperature(Double temperature) {
 		this.temperature = temperature;
 	}
+
+	public BigDecimal getRate() {
+		return rate;
+	}
+
+	public void setRate(BigDecimal rate) {
+		this.rate = rate;
+	}
 	
 	public boolean isStoreSpecimenEnabled() {
 		return storeSpecimenEnabled;
@@ -197,6 +208,7 @@ public class ContainerType extends BaseEntity {
 		setColumnLabelingScheme(containerType.getColumnLabelingScheme());
 		setRowLabelingScheme(containerType.getRowLabelingScheme());
 		setTemperature(containerType.getTemperature());
+		setRate(containerType.getRate());
 		setStoreSpecimenEnabled(containerType.isStoreSpecimenEnabled());
 		setActivityStatus(containerType.getActivityStatus());
 		updateCanHold(containerType.getCanHold());

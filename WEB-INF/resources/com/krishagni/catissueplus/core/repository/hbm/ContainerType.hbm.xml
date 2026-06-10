@@ -19,6 +19,8 @@
 
     <property name="temperature" column="TEMPERATURE"/>
 
+    <property name="rate" column="RATE"/>
+
     <property name="noOfColumns" column="NO_OF_COLS"/>
 
     <property name="noOfRows" column="NO_OF_ROWS"/>

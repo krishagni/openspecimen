@@ -509,6 +509,8 @@
     "position_labeling_linear": "Linear",
     "position_labeling_required": "Position Labeling is mandatory",
     "position_labeling_two_d": "Rows and Columns",
+    "rate": "Rate",
+    "rate_invalid": "Rate should be zero or more",
     "row_labeling_scheme_required": "Row Labeling Scheme is mandatory",
     "rows": "Rows",
     "rows_required": "Rows is mandatory",

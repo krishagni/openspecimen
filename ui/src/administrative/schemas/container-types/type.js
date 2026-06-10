@@ -45,6 +45,19 @@ export default {
       "name": "type.temperature",
     },
     {
+      "type": "number",
+      "labelCode": "container_types.rate",
+      "name": "type.rate",
+      "maxFractionDigits": 2,
+      "validations": {
+        "ge": {
+          "value": 0,
+          "messageCode": "container_types.rate_invalid"
+        }
+      },
+      "summary": true
+    },
+    {
       "type": "text",
       "labelCode": "container_types.dimension",
       "name": "type.uiDimension",
