@@ -13,10 +13,29 @@ import routerSvc from '@/common/services/Router.js';
 export default {
   props: ['downloadUrl'],
 
-  created() {
-    window.open(this.downloadUrl, '_self');
+  mounted() {
+    this._downloadFile();
     alertSvc.info({code: 'common.file_download_initiated'});
     routerSvc.goto('HomePage');
+  },
+
+  methods: {
+    _downloadFile() {
+      if (!this.downloadUrl) {
+        return;
+      }
+
+      let link = document.createElement('a');
+      link.href = this.downloadUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.download = '';
+      link.style.display = 'none';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 }
 </script>
