@@ -143,6 +143,7 @@ export default {
         fields: [
           {
             type: 'number',
+            maxFractionDigits: 6,
             name: 'reporting.params.minQty',
             labelCode: 'queries.min_qty',
             showWhen: 'reporting.type == "specimenqty"'
@@ -153,6 +154,7 @@ export default {
         fields: [
           {
             type: 'number',
+            maxFractionDigits: 6,
             name: 'reporting.params.maxQty',
             labelCode: 'queries.max_qty',
             showWhen: 'reporting.type == "specimenqty"'
