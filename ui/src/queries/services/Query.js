@@ -43,7 +43,29 @@ class Query {
       caseSensitive: (query.caseSensitive == undefined || query.caseSensitive == null || query.caseSensitive)
     };
 
-    return http.post('query', payload);
+    const {type: reportType} = query.reporting || {};
+    return http.post('query', payload).then(
+      (result) => {
+        if (reportType != 'crosstab') {
+          return result;
+        }
+
+        const {rows} = result;
+        if (rows instanceof Array) {
+          for (const row of rows) {
+            if (row instanceof Array) {
+              for (let i = 0; i < row.length; ++i) {
+                if (row[i] === '\0\0\0\0\0') {
+                  row[i] = '';
+                }
+              }
+            }
+          }
+        }
+
+        return result;
+      }
+    );
   }
 
   async exportData(query, facets) {
