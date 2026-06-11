@@ -129,7 +129,7 @@ public class TemplateServiceImpl implements TemplateService {
 		return cfgSvc.getDateFormat();
 	}
 
-	private static class DatePickerFormatter {
+	public static class DatePickerFormatter {
 		private static final DateTimeFormatter ISO_TZ_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 		private static final DateTimeFormatter ISO_TZ_FMT_NO_MILLIS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -143,9 +143,14 @@ public class TemplateServiceImpl implements TemplateService {
 			this.dateOnlyFmt = dateOnlyFmt;
 		}
 
-		public String format(Object input, boolean includeTime) {
+		public String formatDate(Object input) {
 			Date date = objToDate(input);
-			return date != null ? (includeTime ? dateFmt : dateOnlyFmt).format(date) : input.toString();
+			return date != null ? dateOnlyFmt.format(date) : input.toString();
+		}
+
+		public String formatDateTime(Object input) {
+			Date date = objToDate(input);
+			return date != null ? dateFmt.format(date) : input.toString();
 		}
 
 		private Date objToDate(Object input) {

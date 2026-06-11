@@ -33,9 +33,9 @@
                         <span>Signature cannot be displayed</span>
                       #elseif($field.type == 'datePicker')
                         #if($field.format.contains('HH:mm'))
-                          <span>$datePickerFmt.format($field.value, true)</span>
+                          <span>$datePickerFmt.formatDateTime($field.value)</span>
                         #else
-                          <span>$datePickerFmt.format($field.value, false)</span>
+                          <span>$datePickerFmt.formatDate($field.value)</span>
                         #end
                       #elseif($field.type == 'checkbox' || $field.type == 'multiSelectListbox')
                         <span>$String.join(", ", $field.value)</span>
@@ -82,9 +82,9 @@
                               <span>Signature cannot be displayed</span>
                             #elseif($sfField.type == 'datePicker')
                               #if($sfField.format.contains('HH:mm'))
-                                <span>$datePickerFmt.format($sfField.value, true)</span>
+                                <span>$datePickerFmt.formatDateTime($sfField.value)</span>
                               #else
-                                <span>$datePickerFmt.format($sfField.value, false)</span>
+                                <span>$datePickerFmt.formatDate($sfField.value)</span>
                               #end
                             #elseif($sfField.type == 'checkbox' || $sfField.type == 'multiSelectListbox')
                               <span>$String.join(", ", $sfField.value)</span>
