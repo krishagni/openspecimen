@@ -24,6 +24,20 @@
         <span v-t="{path: 'import.confirm_offline_txn_per_record_job', args: ctx}" v-else-if="ctx.status == 'LARGE_TXN_N_JOB'"></span>
       </template>
     </os-confirm>
+
+    <os-confirm ref="confirmColumnsMismatchDialog">
+      <template #title>
+        <span v-t="'import.csv_columns_mismatch'">CSV Columns Mismatch</span>
+      </template>
+      <template #message>
+        <div>
+          <span v-t="'import.confirm_csv_columns_mismatch'"></span>
+          <ul class="mismatched-columns">
+            <li v-for="(column, idx) of ctx.unmatchedColumns" :key="idx">{{column}}</li>
+          </ul>
+        </div>
+      </template>
+    </os-confirm>
   </div>
 </template>
 
@@ -178,6 +192,7 @@ export default {
       payload.objectParams = this.objectParams || {};
       payload.csvType      = this.csvType;
       payload.importType   = payload.importType || payload.objectParams.importType;
+      payload.validateColumns = (payload.validateColumns != false);
 
       if (+payload.entityId > 0) {
         payload.objectParams.entityId = payload.entityId;
@@ -196,6 +211,8 @@ export default {
           const {status} = savedJob;
           if (status == 'TXN_SIZE_EXCEEDED' || status == 'TOO_LARGE' || status == 'LARGE_TXN_N_JOB') {
             return this._handleSizeExceeded(savedJob);
+          } else if (status == 'CSV_COLUMNS_MISMATCH') {
+            return this._handleColumnsMismatch(savedJob);
           }
 
           alertsSvc.success({code: 'import.job_created', args: savedJob});
@@ -254,6 +271,18 @@ export default {
       return null;
     },
 
+    _handleColumnsMismatch: async function(job) {
+      Object.assign(this.ctx, {unmatchedColumns: job.unmatchedColumns || []});
+
+      const resp = await this.$refs.confirmColumnsMismatchDialog.open();
+      if (resp == 'proceed') {
+        this.ctx.job.validateColumns = false;
+        return this.importRecords();
+      }
+
+      return null;
+    },
+
     _getMatchingType: function(predicate) {
       for (const group of this.ctx.recordTypes) {
         for (const rt of group.types) {
@@ -273,5 +302,11 @@ export default {
 .template-url {
   display: inline-block;
   margin: 0.5rem 0rem;
+}
+
+.mismatched-columns {
+  margin: 1rem 0rem 0rem;
+  max-height: 12rem;
+  overflow: auto;
 }
 </style>

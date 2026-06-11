@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -130,6 +133,12 @@ public class ObjectReader implements Closeable {
 	public List<String> getCsvColumnNames() {
 		return new ArrayList<>(Arrays.asList(csvReader.getColumnNames()));
 	}
+
+	public List<String> getUnmatchedColumns() {
+		Set<String> unmatchedColumns = new LinkedHashSet<>(getCsvColumnNames());
+		getUnmatchedColumns(schema.getRecord(), "", unmatchedColumns);
+		return new ArrayList<>(unmatchedColumns);
+	}
 	
 	public List<String> getCsvRow() {
 		return new ArrayList<>(Arrays.asList(currentRow));
@@ -217,7 +226,7 @@ public class ObjectReader implements Closeable {
 		
 		return props;
 	}
-	
+
 	private Map<String, Object> parseFields(Record record, String prefix)
 	throws Exception {
 		Map<String, Object> props = new LinkedHashMap<>();
@@ -515,6 +524,60 @@ public class ObjectReader implements Closeable {
 		}
 
 		return result;
+	}
+
+	private boolean getUnmatchedColumns(Record record, String prefix, Set<String> unmatchedColumns) {
+		boolean matched = getUnmatchedColumns(record.getFields(), prefix, unmatchedColumns);
+		for (Record subRec : record.getSubRecords()) {
+			String newPrefix = prefix;
+			if (StringUtils.isNotBlank(subRec.getCaption())) {
+				newPrefix += subRec.getCaption() + "#";
+			}
+
+			if (subRec.isMultiple()) {
+				for (int idx = 1; true; ++idx) {
+					if (!getUnmatchedColumns(subRec, newPrefix + idx + "#", unmatchedColumns)) {
+						break;
+					}
+
+					matched = true;
+				}
+			} else {
+				matched = getUnmatchedColumns(subRec, newPrefix, unmatchedColumns) || matched;
+			}
+		}
+
+		return matched;
+	}
+
+	private boolean getUnmatchedColumns(List<Field> fields, String prefix, Set<String> unmatchedColumns) {
+		boolean matched = false;
+		for (Field field : fields) {
+			if (field.isMultiple()) {
+				for (int idx = 1; true; ++idx) {
+					if (!removeColumn(unmatchedColumns, prefix + field.getCaption() + "#" + idx)) {
+						break;
+					}
+
+					matched = true;
+				}
+			} else {
+				matched = removeColumn(unmatchedColumns, prefix + field.getCaption()) || matched;
+			}
+		}
+
+		return matched;
+	}
+
+	private boolean removeColumn(Set<String> unmatchedColumns, String column) {
+		for (Iterator<String> iter = unmatchedColumns.iterator(); iter.hasNext();) {
+			if (StringUtils.equalsIgnoreCase(iter.next(), column)) {
+				iter.remove();
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public static void main(String[] args)

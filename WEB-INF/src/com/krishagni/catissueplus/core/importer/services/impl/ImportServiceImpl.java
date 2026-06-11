@@ -251,6 +251,13 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 				inputFile = inflateAndGetInputCsvFile(inputFile, detail.getInputFileId());
 			}
 
+			if (detail.isValidateColumns()) {
+				List<String> unmatchedColumns = getUnmatchedColumns(inputFile, detail);
+				if (!unmatchedColumns.isEmpty()) {
+					return ResponseEvent.response(ImportJobDetail.columnsMismatch(unmatchedColumns));
+				}
+			}
+
 			//
 			// Ensure transaction size is well within configured limits
 			//
@@ -287,6 +294,21 @@ public class ImportServiceImpl implements ImportService, ApplicationListener<Con
 			return ResponseEvent.error(ose);
 		} catch (Exception e) {
 			return ResponseEvent.serverError(e);
+		}
+	}
+
+	private List<String> getUnmatchedColumns(String inputFile, ImportDetail detail) {
+		ObjectSchema schema = schemaFactory.getSchema(detail.getObjectType(), detail.getObjectParams());
+		if (schema == null) {
+			throw OpenSpecimenException.userError(ImportJobErrorCode.OBJ_SCHEMA_NOT_FOUND, detail.getObjectType());
+		}
+
+		ObjectReader reader = null;
+		try {
+			reader = new ObjectReader(inputFile, schema, detail.getDateFormat(), detail.getTimeFormat(), detail.getFieldSeparator());
+			return reader.getUnmatchedColumns();
+		} finally {
+			IOUtils.closeQuietly(reader);
 		}
 	}
 

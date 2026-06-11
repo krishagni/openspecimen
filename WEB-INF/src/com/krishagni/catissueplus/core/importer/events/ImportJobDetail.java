@@ -38,6 +38,8 @@ public class ImportJobDetail {
 
 	private String fieldSeparator;
 
+	private List<String> unmatchedColumns;
+
 	public Long getId() {
 		return id;
 	}
@@ -150,6 +152,14 @@ public class ImportJobDetail {
 		this.fieldSeparator = fieldSeparator;
 	}
 
+	public List<String> getUnmatchedColumns() {
+		return unmatchedColumns;
+	}
+
+	public void setUnmatchedColumns(List<String> unmatchedColumns) {
+		this.unmatchedColumns = unmatchedColumns;
+	}
+
 	public static ImportJobDetail from(ImportJob job) {
 		ImportJobDetail detail = new ImportJobDetail();
 		detail.setId(job.getId());
@@ -177,6 +187,13 @@ public class ImportJobDetail {
 		ImportJobDetail detail = new ImportJobDetail();
 		detail.setStatus(status.name());
 		detail.setTotalRecords((long) inputRecordsCnt);
+		return detail;
+	}
+
+	public static ImportJobDetail columnsMismatch(List<String> unmatchedColumns) {
+		ImportJobDetail detail = new ImportJobDetail();
+		detail.setStatus(ImportJob.Status.CSV_COLUMNS_MISMATCH.name());
+		detail.setUnmatchedColumns(new ArrayList<>(unmatchedColumns));
 		return detail;
 	}
 }

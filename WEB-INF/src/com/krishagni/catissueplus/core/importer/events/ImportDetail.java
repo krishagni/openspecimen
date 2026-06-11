@@ -26,6 +26,8 @@ public class ImportDetail {
 
 	private boolean offlineQueue;
 
+	private boolean validateColumns;
+
 	public String getObjectType() {
 		return objectType;
 	}
@@ -112,5 +114,13 @@ public class ImportDetail {
 
 	public void setOfflineQueue(boolean offlineQueue) {
 		this.offlineQueue = offlineQueue;
+	}
+
+	public boolean isValidateColumns() {
+		return validateColumns;
+	}
+
+	public void setValidateColumns(boolean validateColumns) {
+		this.validateColumns = validateColumns;
 	}
 }

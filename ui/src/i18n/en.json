@@ -1332,11 +1332,13 @@
   },
 
   "import": {
+    "confirm_csv_columns_mismatch": "The following columns do not match the expected column names and their values will be ignored. Do you want to continue?",
     "confirm_stop_job": "Are you sure you want to stop the job #{id}?",
     "confirm_offline_execution": "Your file of {totalRecords} records exceeds the online import limit of {onlineJobSizeLimit} records. To proceed, your file will be imported during off-peak hours. Do you want to continue?",
     "confirm_offline_txn_per_record_job": "Your file of {totalRecords} records exceeds both the pre-validation limit {maxTxnSize} records and online import limit {onlineJobSizeLimit} records. To proceed, only the valid records will be imported during off-peak hours. Do you want to continue?",
     "confirm_txn_per_record": "Your file of {totalRecords} records exceeds the pre-validation limit {maxTxnSize} records. To proceed, only the valid records will be imported. Do you want to continue?",
     "create": "Create",
+    "csv_columns_mismatch": "CSV Columns Mismatch",
     "date": "Date",
     "date_format": "Date Format",
     "date_format_required": "Date format is mandatory",

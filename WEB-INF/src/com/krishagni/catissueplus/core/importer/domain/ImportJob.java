@@ -18,7 +18,8 @@ public class ImportJob extends BaseEntity {
 		STOPPED,
 		TXN_SIZE_EXCEEDED,
 		TOO_LARGE,
-		LARGE_TXN_N_JOB
+		LARGE_TXN_N_JOB,
+		CSV_COLUMNS_MISMATCH
 	}
 	
 	public enum Type {
