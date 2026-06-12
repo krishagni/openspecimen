@@ -541,6 +541,14 @@
       "not_found_msg": "Following containers were not found either because you do not have access to them or they do not satisfy the criteria:",
       "proceed_q": "Do you want to proceed?"
     },
+    "add_containers_limit": {
+      "ignored_msg": "Only the first {allowed} scanned containers will be processed; the remaining {ignored} will be ignored.",
+      "message": "You selected {count} containers: {existing} already in the list and {scanned} scanned now. At most {limit} containers can be transferred, checked-in, or checked-out at one time.",
+      "none_allowed_msg": "No additional scanned containers can be added.",
+      "proceed": "Continue",
+      "proceed_q": "Do you want to continue?",
+      "title": "Container limit exceeded"
+    },
     "all_blocked_pos_freed": "All blocked positions freed.",
     "all_free_pos_blocked": "All free positions blocked.",
     "approx_capacity": "Approx. Capacity (Specimens)",

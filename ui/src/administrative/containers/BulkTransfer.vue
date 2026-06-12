@@ -82,6 +82,33 @@
           </div>
         </template>
       </os-confirm>
+
+      <os-confirm class="os-limit-confirm" ref="containerLimitConfirm"
+        :yes-button="$t('containers.add_containers_limit.proceed')"
+        :no-button="$t('common.buttons.cancel')">
+        <template #title>
+          <span v-t="'containers.add_containers_limit.title'">Container limit exceeded</span>
+        </template>
+
+        <template #message>
+          <div class="message">
+            <div v-t="{path: 'containers.add_containers_limit.message', args: ctx.containerLimit}">
+              At most {{ctx.containerLimit.limit}} containers can be transferred, checked-in, or checked-out at one time.
+            </div>
+
+            <div v-if="ctx.containerLimit.allowed > 0"
+              v-t="{path: 'containers.add_containers_limit.ignored_msg', args: ctx.containerLimit}">
+              Only the first {{ctx.containerLimit.allowed}} scanned containers will be processed.
+            </div>
+
+            <div v-else v-t="'containers.add_containers_limit.none_allowed_msg'">
+              No additional scanned containers can be added.
+            </div>
+
+            <div v-t="'containers.add_containers_limit.proceed_q'">Do you want to continue?</div>
+          </div>
+        </template>
+      </os-confirm>
     </os-page-body>
   </os-page>
 </template>
@@ -111,7 +138,9 @@ export default {
 
         containers: [],
 
-        notFound: []
+        notFound: [],
+
+        containerLimit: {}
       },
 
       txCtx: {
@@ -130,65 +159,18 @@ export default {
         return;
       }
 
-      const filterOpts = {};
-      if (this.checkin) {
-        filterOpts.status = ['CHECKED_OUT'];
-      }
-
-      if (this.ctx.useBarcode) {
-        filterOpts.barcode = itemLabels;
-      } else {
-        filterOpts.naam = itemLabels;
-      }
-
-      this.ctx.notFound = [];
-      containerSvc.getContainers(filterOpts).then(
-        async (containers) => {
-          itemLabels = itemLabels.map(i => i.toLowerCase());
-
-          let idxFn, cmpFn;
-          if (this.ctx.useBarcode) {
-            idxFn = (c) => itemLabels.indexOf(c.barcode.toLowerCase());
-            cmpFn = (c, barcode) => barcode == c.barcode.toLowerCase();
-          } else {
-            idxFn = (c) => itemLabels.indexOf(c.name.toLowerCase());
-            cmpFn = (c, label) => label == c.name.toLowerCase();
+      this._limitItemLabels(itemLabels).then(
+        (allowedLabels) => {
+          if (!allowedLabels) {
+            return;
           }
 
-          containers.sort((c1, c2) => idxFn(c1) - idxFn(c2));
-
-          const notFound = [];
-          for (let label of itemLabels) {
-            let found = false;
-            for (let container of containers) {
-              if (cmpFn(container, label)) {
-                found = true;
-                break;
-              }
-            }
-
-            if (!found) {
-              notFound.push(label);
-            }
+          if (allowedLabels.length == 0) {
+            this.$refs.addItems.clearInput();
+            return;
           }
 
-          if (notFound.length > 0) {
-            this.ctx.notFound = notFound;
-            const resp = await this.$refs.notFoundConfirm.open();
-            if (resp != 'proceed') {
-              return;
-            }
-          }
-
-          for (let container of containers) {
-            if (containers.some(c => c.id == container)) {
-              continue;
-            }
-
-            this.ctx.containers.push({container});
-          }
-
-          this.$refs.addItems.clearInput();
+          this._addContainers(allowedLabels);
         }
       );
     },
@@ -288,13 +270,103 @@ export default {
 
     cancel: function() {
       this.$goto('ContainersList');
+    },
+
+    _limitItemLabels: async function(itemLabels) {
+      const limit = 100;
+      const existingCount = this.ctx.containers.length;
+      const allowedCount = Math.max(limit - existingCount, 0);
+      if (itemLabels.length <= allowedCount) {
+        return itemLabels;
+      }
+
+      this.ctx.containerLimit = {
+        count: existingCount + itemLabels.length,
+        existing: existingCount,
+        scanned: itemLabels.length,
+        limit: limit,
+        allowed: allowedCount,
+        ignored: itemLabels.length - allowedCount
+      };
+
+      const resp = await this.$refs.containerLimitConfirm.open();
+      if (resp != 'proceed') {
+        return null;
+      }
+
+      return itemLabels.slice(0, allowedCount);
+    },
+
+    _addContainers: function(itemLabels) {
+      const filterOpts = {};
+      if (this.checkin) {
+        filterOpts.status = ['CHECKED_OUT'];
+      }
+
+      if (this.ctx.useBarcode) {
+        filterOpts.barcode = itemLabels;
+      } else {
+        filterOpts.naam = itemLabels;
+      }
+
+      this.ctx.notFound = [];
+      containerSvc.getContainers(filterOpts).then(
+        async (containers) => {
+          itemLabels = itemLabels.map(i => i.toLowerCase());
+
+          let idxFn, cmpFn;
+          if (this.ctx.useBarcode) {
+            idxFn = (c) => itemLabels.indexOf(c.barcode.toLowerCase());
+            cmpFn = (c, barcode) => barcode == c.barcode.toLowerCase();
+          } else {
+            idxFn = (c) => itemLabels.indexOf(c.name.toLowerCase());
+            cmpFn = (c, label) => label == c.name.toLowerCase();
+          }
+
+          containers.sort((c1, c2) => idxFn(c1) - idxFn(c2));
+
+          const notFound = [];
+          for (let label of itemLabels) {
+            let found = false;
+            for (let container of containers) {
+              if (cmpFn(container, label)) {
+                found = true;
+                break;
+              }
+            }
+
+            if (!found) {
+              notFound.push(label);
+            }
+          }
+
+          if (notFound.length > 0) {
+            this.ctx.notFound = notFound;
+            const resp = await this.$refs.notFoundConfirm.open();
+            if (resp != 'proceed') {
+              return;
+            }
+          }
+
+          for (let container of containers) {
+            if (this.ctx.containers.some(ro => ro.container.id == container.id)) {
+              continue;
+            }
+
+            this.ctx.containers.push({container});
+          }
+
+          this.$refs.addItems.clearInput();
+        }
+      );
     }
   }
 }
 </script>
 
 <style scoped>
-.os-not-found-confirm .message > div {
+.os-not-found-confirm .message > div,
+.os-limit-confirm .message > div {
   padding: 0.5rem 0.25rem;
 }
 </style>
