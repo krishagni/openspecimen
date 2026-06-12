@@ -20,6 +20,8 @@ import com.krishagni.catissueplus.core.common.util.LogUtil;
 import com.krishagni.catissueplus.core.common.util.Utility;
 import com.krishagni.catissueplus.core.init.AppProperties;
 
+import edu.common.dynamicextensions.ndao.DbSettingsFactory;
+
 public class AbstractDao<T> implements Dao<T> {
 	private static LogUtil logger = LogUtil.getLogger(AbstractDao.class);
 
@@ -187,6 +189,10 @@ public class AbstractDao<T> implements Dao<T> {
 		}
 
 		return Collections.singletonMap(propName, rows.iterator().next());
+	}
+
+	protected String getLimitSql(String baseSql, int startAt, int maxResults) {
+		return getLimitSql(baseSql, startAt, maxResults, DbSettingsFactory.isOracle());
 	}
 
 	protected String getLimitSql(String baseSql, int startAt, int maxResults, boolean oracle) {

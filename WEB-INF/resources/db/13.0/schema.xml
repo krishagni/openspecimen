@@ -304,4 +304,168 @@
       <column name="RATE" type="${decimal.type}(10, 2)" />
     </addColumn>
   </changeSet>
+
+  <changeSet author="vpawar" id="Index on form record entries for audit export">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="CATISSUE_FORM_RECORD_ENTRY" columnNames="FORM_CTXT_ID,RECORD_ID,OBJECT_ID" />
+      </not>
+    </preConditions>
+
+    <createIndex tableName="CATISSUE_FORM_RECORD_ENTRY" indexName="OS_FRE_AUD_IDX">
+      <column name="FORM_CTXT_ID" />
+      <column name="RECORD_ID" />
+      <column name="OBJECT_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on CP custom fields for audit export">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="OS_CP_CUST_FIELDS" columnNames="FORM_CTXT_ID,RECORD_ID,CP_ID" />
+      </not>
+    </preConditions>
+
+    <createIndex tableName="OS_CP_CUST_FIELDS" indexName="OS_CP_CF_AUD_IDX">
+      <column name="FORM_CTXT_ID" />
+      <column name="RECORD_ID" />
+      <column name="CP_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on CPR custom fields for audit export">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="OS_CPR_CUST_FIELDS" columnNames="FORM_CTXT_ID,RECORD_ID,CPR_ID" />
+      </not>
+    </preConditions>
+
+    <createIndex tableName="OS_CPR_CUST_FIELDS" indexName="OS_CPR_CF_AUD_IDX">
+      <column name="FORM_CTXT_ID" />
+      <column name="RECORD_ID" />
+      <column name="CPR_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on visit custom fields for audit export">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="OS_VISIT_CUST_FIELDS" columnNames="FORM_CTXT_ID,RECORD_ID,VISIT_ID" />
+      </not>
+    </preConditions>
+
+    <createIndex tableName="OS_VISIT_CUST_FIELDS" indexName="OS_VISIT_CF_AUD_IDX">
+      <column name="FORM_CTXT_ID" />
+      <column name="RECORD_ID" />
+      <column name="VISIT_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on specimen custom fields for audit export">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="OS_SPMN_CUST_FIELDS" columnNames="FORM_CTXT_ID,RECORD_ID,SPECIMEN_ID" />
+      </not>
+    </preConditions>
+
+    <createIndex tableName="OS_SPMN_CUST_FIELDS" indexName="OS_SPMN_CF_AUD_IDX">
+      <column name="FORM_CTXT_ID" />
+      <column name="RECORD_ID" />
+      <column name="SPECIMEN_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Index on order custom fields for audit export">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="OS_ORDER_CUST_FIELDS" columnNames="FORM_CTXT_ID,RECORD_ID,ORDER_ID" />
+      </not>
+    </preConditions>
+
+    <createIndex tableName="OS_ORDER_CUST_FIELDS" indexName="OS_ORDER_CF_AUD_IDX">
+      <column name="FORM_CTXT_ID" />
+      <column name="RECORD_ID" />
+      <column name="ORDER_ID" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant CP custom fields form context index" dbms="mysql">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_CP_CUST_FIELDS" indexName="FK_CP_CUSTOM_FIELD_FC" />
+    </preConditions>
+
+    <dropIndex tableName="OS_CP_CUST_FIELDS" indexName="FK_CP_CUSTOM_FIELD_FC" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant CPR custom fields form context index" dbms="mysql">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_CPR_CUST_FIELDS" indexName="FK_CPR_CUSTOM_FIELD_FC" />
+    </preConditions>
+
+    <dropIndex tableName="OS_CPR_CUST_FIELDS" indexName="FK_CPR_CUSTOM_FIELD_FC" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant visit custom fields form context index" dbms="mysql">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_VISIT_CUST_FIELDS" indexName="FK_VISIT_CUSTOM_FIELD_FC" />
+    </preConditions>
+
+    <dropIndex tableName="OS_VISIT_CUST_FIELDS" indexName="FK_VISIT_CUSTOM_FIELD_FC" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant specimen custom fields form context index" dbms="mysql">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_SPMN_CUST_FIELDS" indexName="FK_SPMN_CUSTOM_FIELD_FC" />
+    </preConditions>
+
+    <dropIndex tableName="OS_SPMN_CUST_FIELDS" indexName="FK_SPMN_CUSTOM_FIELD_FC" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant order custom fields form context index" dbms="mysql">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_ORDER_CUST_FIELDS" indexName="FK_ORD_CUSTOM_FIELD_FC" />
+    </preConditions>
+
+    <dropIndex tableName="OS_ORDER_CUST_FIELDS" indexName="FK_ORD_CUSTOM_FIELD_FC" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant CP custom fields owner index">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_CP_CUST_FIELDS" indexName="OS_CP_CUST_FIELDS_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="OS_CP_CUST_FIELDS" indexName="OS_CP_CUST_FIELDS_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant CPR custom fields owner index">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_CPR_CUST_FIELDS" indexName="OS_CPR_CUST_FIELDS_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="OS_CPR_CUST_FIELDS" indexName="OS_CPR_CUST_FIELDS_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant visit custom fields owner index">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_VISIT_CUST_FIELDS" indexName="OS_VISIT_CUST_FIELDS_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="OS_VISIT_CUST_FIELDS" indexName="OS_VISIT_CUST_FIELDS_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant specimen custom fields owner index">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_SPMN_CUST_FIELDS" indexName="OS_SPMN_CUST_FIELDS_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="OS_SPMN_CUST_FIELDS" indexName="OS_SPMN_CUST_FIELDS_IDX" />
+  </changeSet>
+
+  <changeSet author="vpawar" id="Drop redundant order custom fields owner index">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="OS_ORDER_CUST_FIELDS" indexName="OS_ORDER_CUST_FIELDS_IDX" />
+    </preConditions>
+
+    <dropIndex tableName="OS_ORDER_CUST_FIELDS" indexName="OS_ORDER_CUST_FIELDS_IDX" />
+  </changeSet>
 </databaseChangeLog>

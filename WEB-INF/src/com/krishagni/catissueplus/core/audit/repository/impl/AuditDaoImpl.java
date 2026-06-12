@@ -373,7 +373,11 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 	}
 
 	private Query<Object[]> buildFormDataRevisionsQuery(RevisionsListCriteria criteria) {
-		String sql = String.format(GET_FORM_DATA_AUD_EVENTS_SQL, buildBaseFormDataRevisionsQuery(criteria), buildQueryRestrictions(criteria));
+		String sql = getLimitSql(
+			String.format(GET_FORM_DATA_AUD_EVENTS_SQL, buildFormDataRevisionsQueryRestrictions(criteria)),
+			criteria.startAt(),
+			criteria.maxResults());
+
 		Query<Object[]> query = createNativeQuery(sql, Object[].class)
 			.addLongScalar("identifier")
 			.addTimestampScalar("event_timestamp")
@@ -448,7 +452,7 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		}
 
 		result += " order by r.rev desc ";
-		String sql = getLimitSql(result, criteria.startAt(), criteria.maxResults(), DbSettingsFactory.isOracle());
+		String sql = getLimitSql(result, criteria.startAt(), criteria.maxResults());
 		Query<Object[]> query = createNativeQuery(sql, Object[].class)
 			.addLongScalar("rev")
 			.addTimestampScalar("rev_time")
@@ -490,8 +494,9 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		return query;
 	}
 
-	private String buildBaseFormDataRevisionsQuery(RevisionsListCriteria criteria) {
+	private String buildFormDataRevisionsQueryRestrictions(RevisionsListCriteria criteria) {
 		List<String> whereClauses = new ArrayList<>();
+		whereClauses.add(GET_FORM_RECORD_OBJECT_ID_SQL + " is not null");
 
 		if (CollectionUtils.isNotEmpty(criteria.userIds())) {
 			whereClauses.add("e.user_id in (:userIds)");
@@ -509,23 +514,13 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 			whereClauses.add("e.identifier < :lastId");
 		}
 
-		String result = GET_FORM_DATA_AUD_EVENTS_BASE_SQL;
-		if (!whereClauses.isEmpty()) {
-			result += " where " + StringUtils.join(whereClauses, " and ");
-		}
-
-		result += " order by e.identifier desc ";
-		return getLimitSql(result, criteria.startAt(), criteria.maxResults(), DbSettingsFactory.isOracle());
-	}
-
-	private String buildQueryRestrictions(RevisionsListCriteria criteria) {
 		if (CollectionUtils.isNotEmpty(criteria.entities())) {
-			return "where fc.entity_type in :entities";
+			whereClauses.add("fc.entity_type in (:entities)");
 		} else if (CollectionUtils.isNotEmpty(criteria.records())) {
-			return "where f.name in :formNames";
-		} else {
-			return StringUtils.EMPTY;
+			whereClauses.add("f.name in (:formNames)");
 		}
+
+		return "where " + StringUtils.join(whereClauses, " and ");
 	}
 
 	private void loadModifiedProps(RevisionDetail revision, Map<String, List<RevisionEntityRecordDetail>> entitiesMap) {
@@ -639,28 +634,30 @@ public class AuditDaoImpl extends AbstractDao<UserApiCallLog> implements AuditDa
 		"where " +
 		"  t.identifier = :objectId";
 
-	private static final String GET_FORM_DATA_AUD_EVENTS_BASE_SQL =
-		"select" +
-		"  e.identifier, e.event_timestamp, e.ip_address, e.user_id, e.event_type, e.record_id, e.form_id, e.form_data " +
-		"from " +
-		"  dyextn_audit_events e";
+	private static final String GET_FORM_RECORD_OBJECT_ID_SQL =
+		"coalesce(fre.object_id, cpf.cp_id, cprf.cpr_id, vf.visit_id, sf.specimen_id, ofr.order_id)";
 
 	private static final String GET_FORM_DATA_AUD_EVENTS_SQL =
 		"select" +
-		"  t.identifier, t.event_timestamp, t.event_type, t.ip_address, fre.object_id, t.record_id, " +
-		"  t.form_data, fc.entity_type, f.caption, " +
-		"  t.user_id, u.first_name, u.last_name, u.email_address, u.login_name, i.name, d.domain_name " +
+		"  e.identifier, e.event_timestamp, e.event_type, e.ip_address, " + GET_FORM_RECORD_OBJECT_ID_SQL + " as object_id, e.record_id, " +
+		"  e.form_data, fc.entity_type, f.caption, " +
+		"  e.user_id, u.first_name, u.last_name, u.email_address, u.login_name, i.name, d.domain_name " +
 		"from " +
-		"  (%s) t " +
-		"  inner join dyextn_containers f on f.identifier = t.form_id " +
-		"  inner join catissue_form_context fc on fc.container_id = f.identifier " +
-		"  inner join catissue_form_record_entry fre on fre.record_id = t.record_id and fre.form_ctxt_id = fc.identifier " +
-		"  inner join catissue_user u on u.identifier = t.user_id " +
+		"  dyextn_audit_events e " +
+		"  inner join dyextn_containers f on f.identifier = e.form_id " +
+		"  inner join catissue_form_context fc on fc.container_id = e.form_id " +
+		"  left join catissue_form_record_entry fre on fre.form_ctxt_id = fc.identifier and fre.record_id = e.record_id " +
+		"  left join os_cp_cust_fields cpf on cpf.form_ctxt_id = fc.identifier and cpf.record_id = e.record_id " +
+		"  left join os_cpr_cust_fields cprf on cprf.form_ctxt_id = fc.identifier and cprf.record_id = e.record_id " +
+		"  left join os_visit_cust_fields vf on vf.form_ctxt_id = fc.identifier and vf.record_id = e.record_id " +
+		"  left join os_spmn_cust_fields sf on sf.form_ctxt_id = fc.identifier and sf.record_id = e.record_id " +
+		"  left join os_order_cust_fields ofr on ofr.form_ctxt_id = fc.identifier and ofr.record_id = e.record_id " +
+		"  inner join catissue_user u on u.identifier = e.user_id " +
 		"  inner join catissue_institution i on i.identifier = u.institute_id " +
 		"  inner join os_auth_domains d on d.identifier = u.domain_id " +
 		"%s " +
 		"order by " +
-		" t.identifier desc";
+		" e.identifier desc ";
 
 	private static final String GET_FORM_REVISIONS_SQL =
 		"select" +
