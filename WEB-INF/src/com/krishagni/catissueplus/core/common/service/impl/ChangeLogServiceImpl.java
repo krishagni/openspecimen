@@ -35,7 +35,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 			orderNo = 0;
 		}
 
-		sessionFactory.getCurrentSession().createNamedMutationQuery(INSERT_CHANGE_LOG)
+		sessionFactory.getCurrentSession().createNativeMutationQuery(INSERT_CHANGE_LOG)
 			.setParameter("id", id)
 			.setParameter("author", author)
 			.setParameter("filename", filename)
