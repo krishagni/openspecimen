@@ -67,7 +67,7 @@ public class SpecimenDaoImpl extends AbstractDao<Specimen> implements SpecimenDa
 	@Override
 	public List<Long> getSpecimenIds(SpecimenListCriteria crit) {
 		Criteria<Long> query = createCriteria(Specimen.class, Long.class, "s");
-		return query.add(query.in("s.id", getSpecimenIdsQuery(crit, query))).list();
+		return query.add(query.in("s.id", getSpecimenIdsQuery(crit, query))).select("s.id").list();
 	}
 
 	@Override
