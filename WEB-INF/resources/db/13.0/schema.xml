@@ -429,7 +429,7 @@
     <dropIndex tableName="OS_ORDER_CUST_FIELDS" indexName="FK_ORD_CUSTOM_FIELD_FC" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Drop redundant CP custom fields owner index">
+  <changeSet author="vpawar" id="Drop redundant CP custom fields owner index" dbms="mysql">
     <preConditions onFail="MARK_RAN">
       <indexExists tableName="OS_CP_CUST_FIELDS" indexName="OS_CP_CUST_FIELDS_IDX" />
     </preConditions>
@@ -437,7 +437,7 @@
     <dropIndex tableName="OS_CP_CUST_FIELDS" indexName="OS_CP_CUST_FIELDS_IDX" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Drop redundant CPR custom fields owner index">
+  <changeSet author="vpawar" id="Drop redundant CPR custom fields owner index" dbms="mysql">
     <preConditions onFail="MARK_RAN">
       <indexExists tableName="OS_CPR_CUST_FIELDS" indexName="OS_CPR_CUST_FIELDS_IDX" />
     </preConditions>
@@ -445,7 +445,7 @@
     <dropIndex tableName="OS_CPR_CUST_FIELDS" indexName="OS_CPR_CUST_FIELDS_IDX" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Drop redundant visit custom fields owner index">
+  <changeSet author="vpawar" id="Drop redundant visit custom fields owner index" dbms="mysql">
     <preConditions onFail="MARK_RAN">
       <indexExists tableName="OS_VISIT_CUST_FIELDS" indexName="OS_VISIT_CUST_FIELDS_IDX" />
     </preConditions>
@@ -453,7 +453,7 @@
     <dropIndex tableName="OS_VISIT_CUST_FIELDS" indexName="OS_VISIT_CUST_FIELDS_IDX" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Drop redundant specimen custom fields owner index">
+  <changeSet author="vpawar" id="Drop redundant specimen custom fields owner index" dbms="mysql">
     <preConditions onFail="MARK_RAN">
       <indexExists tableName="OS_SPMN_CUST_FIELDS" indexName="OS_SPMN_CUST_FIELDS_IDX" />
     </preConditions>
@@ -461,7 +461,7 @@
     <dropIndex tableName="OS_SPMN_CUST_FIELDS" indexName="OS_SPMN_CUST_FIELDS_IDX" />
   </changeSet>
 
-  <changeSet author="vpawar" id="Drop redundant order custom fields owner index">
+  <changeSet author="vpawar" id="Drop redundant order custom fields owner index" dbms="mysql">
     <preConditions onFail="MARK_RAN">
       <indexExists tableName="OS_ORDER_CUST_FIELDS" indexName="OS_ORDER_CUST_FIELDS_IDX" />
     </preConditions>
