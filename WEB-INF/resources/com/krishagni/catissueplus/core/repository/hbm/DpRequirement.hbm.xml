@@ -13,18 +13,18 @@
       </generator>
     </id>
     
-    <many-to-one name="distributionProtocol" column="DP_ID" fetch="join"/>
+    <many-to-one name="distributionProtocol" column="DP_ID" lazy="false" fetch="join"/>
     
-    <many-to-one name="specimenType" column="SPECIMEN_TYPE_ID" fetch="join"/>
+    <many-to-one name="specimenType" column="SPECIMEN_TYPE_ID" lazy="false" fetch="join"/>
     
-    <many-to-one name="anatomicSite" column="ANATOMIC_SITE_ID" fetch="join"/>
+    <many-to-one name="anatomicSite" column="ANATOMIC_SITE_ID" lazy="false" fetch="join"/>
     
     <set name="pathologyStatuses" table="OS_DPR_PATHOLOGY_STATUSES">
       <key column="DPR_ID"/>
       <many-to-many class="com.krishagni.catissueplus.core.administrative.domain.PermissibleValue" column="PATHOLOGY_STATUS_ID"/>
     </set>
 
-    <many-to-one name="clinicalDiagnosis" column="CLINICAL_DIAGNOSIS_ID" fetch="join"/>
+    <many-to-one name="clinicalDiagnosis" column="CLINICAL_DIAGNOSIS_ID" lazy="false" fetch="join"/>
 
     <property name="cost" column="COST"/>
     

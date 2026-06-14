@@ -17,7 +17,7 @@
 
     <many-to-one name="group" column="GROUP_ID"/>
 
-    <many-to-one name="form" column="FORM_ID" fetch="join"/>
+    <many-to-one name="form" column="FORM_ID" lazy="false" fetch="join"/>
 
     <property name="multipleRecords" column="MULTIPLE_RECORDS"/>
 

@@ -17,6 +17,6 @@
 
     <many-to-one name="container" column="CONTAINER_ID"/>
 
-    <many-to-one name="receivedQuality" column="RECEIVED_QUALITY_ID" fetch="join"/>
+    <many-to-one name="receivedQuality" column="RECEIVED_QUALITY_ID" lazy="false" fetch="join"/>
   </class>
 </hibernate-mapping>

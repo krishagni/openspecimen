@@ -14,9 +14,9 @@
 
     <many-to-one name="primarySpecimen" column="PRIMARY_SPECIMEN_ID" insert="false" update="false"/>
 
-    <many-to-one name="collContainer" column="COLLECTION_CONTAINER_ID" fetch="join"/>
+    <many-to-one name="collContainer" column="COLLECTION_CONTAINER_ID" lazy="false" fetch="join"/>
 
-    <many-to-one name="collProcedure" column="COLLECTION_PROCEDURE_ID" fetch="join"/>
+    <many-to-one name="collProcedure" column="COLLECTION_PROCEDURE_ID" lazy="false" fetch="join"/>
 
     <many-to-one name="collector" column="COLLECTION_USER_ID"/>
 
@@ -24,7 +24,7 @@
 
     <property name="collComments" column="COLLECTION_COMMENTS"/>
 
-    <many-to-one name="recvQuality" column="RECEIVED_QUALITY_ID" fetch="join"/>
+    <many-to-one name="recvQuality" column="RECEIVED_QUALITY_ID" lazy="false" fetch="join"/>
 
     <many-to-one name="receiver" column="RECEIVED_USER_ID"/>
 

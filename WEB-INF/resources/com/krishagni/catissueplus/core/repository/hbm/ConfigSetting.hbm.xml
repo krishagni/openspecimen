@@ -13,7 +13,7 @@
       </generator>
     </id>
 
-    <many-to-one name="property" column="PROPERTY_ID" not-null="true" fetch="join"/>
+    <many-to-one name="property" column="PROPERTY_ID" not-null="true" lazy="false" fetch="join"/>
 
     <property name="value" column="VALUE"/>
 

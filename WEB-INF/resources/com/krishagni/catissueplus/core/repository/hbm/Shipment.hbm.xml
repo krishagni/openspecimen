@@ -59,7 +59,7 @@
       </type>
     </property>
 
-    <many-to-one name="requestStatus" column="REQUEST_STATUS" fetch="join" />
+    <many-to-one name="requestStatus" column="REQUEST_STATUS" lazy="false" fetch="join" />
     
     <property name="activityStatus" column="ACTIVITY_STATUS"/>
     

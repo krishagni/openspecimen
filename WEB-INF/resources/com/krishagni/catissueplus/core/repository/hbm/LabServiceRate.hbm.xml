@@ -13,9 +13,9 @@
       </generator>
     </id>
 
-    <many-to-one name="rateList" column="RATE_LIST_ID" not-null="true" fetch="join" />
+    <many-to-one name="rateList" column="RATE_LIST_ID" not-null="true" lazy="false" fetch="join" />
 
-    <many-to-one name="service" column="SERVICE_ID" not-null="true" fetch="join" />
+    <many-to-one name="service" column="SERVICE_ID" not-null="true" lazy="false" fetch="join" />
 
     <property name="rate" column="RATE" not-null="true" />
   </class>

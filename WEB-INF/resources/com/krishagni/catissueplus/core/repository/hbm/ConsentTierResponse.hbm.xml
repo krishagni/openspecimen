@@ -13,9 +13,9 @@
       </generator>
     </id>
 
-    <many-to-one name="response" column="RESPONSE_ID" fetch="join"/>
+    <many-to-one name="response" column="RESPONSE_ID" lazy="false" fetch="join"/>
 
-    <many-to-one name="consentTier" column="CONSENT_TIER_ID" fetch="join"/>
+    <many-to-one name="consentTier" column="CONSENT_TIER_ID" lazy="false" fetch="join"/>
 
     <many-to-one name="cpr" column="COLL_PROT_REG_ID"/>
   </class>

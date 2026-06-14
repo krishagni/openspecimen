@@ -13,11 +13,11 @@
       </generator>
     </id>
 
-    <many-to-one name="pickList" column="PICK_LIST_ID" not-null="true" fetch="join" />
+    <many-to-one name="pickList" column="PICK_LIST_ID" not-null="true" lazy="false" fetch="join" />
 
-    <many-to-one name="specimen" column="SPECIMEN_ID" not-null="true" fetch="join" />
+    <many-to-one name="specimen" column="SPECIMEN_ID" not-null="true" lazy="false" fetch="join" />
 
-    <many-to-one name="updater" column="UPDATED_BY" not-null="true" fetch="join" />
+    <many-to-one name="updater" column="UPDATED_BY" not-null="true" lazy="false" fetch="join" />
 
     <property name="updateTime" column="UPDATE_TIME" not-null="true" />
 

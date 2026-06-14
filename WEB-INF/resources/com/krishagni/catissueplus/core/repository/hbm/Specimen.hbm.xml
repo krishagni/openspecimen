@@ -15,13 +15,13 @@
 
     <property name="initialQuantity" column="INITIAL_QUANTITY" />
 
-    <many-to-one name="pathologicalStatus" column="PATHOLOGICAL_STATUS_ID" fetch="join"/>
+    <many-to-one name="pathologicalStatus" column="PATHOLOGICAL_STATUS_ID" lazy="false" fetch="join"/>
 
     <property name="lineage" column="LINEAGE" />
 
-    <many-to-one name="specimenClass" column="SPECIMEN_CLASS_ID" fetch="join"/>
+    <many-to-one name="specimenClass" column="SPECIMEN_CLASS_ID" lazy="false" fetch="join"/>
 
-    <many-to-one name="specimenType" column="SPECIMEN_TYPE_ID" fetch="join"/>
+    <many-to-one name="specimenType" column="SPECIMEN_TYPE_ID" lazy="false" fetch="join"/>
 
     <property name="unitKey" column="UNIT_KEY"/>
 
@@ -45,9 +45,9 @@
     
     <property name="concentration" column="CONCENTRATION"/>
 
-    <many-to-one name="tissueSide" column="LATERALITY_ID" fetch="join"/>
+    <many-to-one name="tissueSide" column="LATERALITY_ID" lazy="false" fetch="join"/>
 		
-    <many-to-one name="tissueSite" column="ANATOMIC_SITE_ID" fetch="join"/>
+    <many-to-one name="tissueSite" column="ANATOMIC_SITE_ID" lazy="false" fetch="join"/>
 
     <property name="freezeThawCycles" column="FREEZE_THAW_CYCLES"/>
 
@@ -110,7 +110,7 @@
       <one-to-many class="com.krishagni.catissueplus.core.biospecimen.domain.SpecimenListItem"/>
     </set>
 
-    <many-to-one name="parentEvent" column="PARENT_EVENT_ID" fetch="join"/>
+    <many-to-one name="parentEvent" column="PARENT_EVENT_ID" lazy="false" fetch="join"/>
 
     <set name="childrenEvents" table="OS_CHILD_SPMN_EVENTS" inverse="true" cascade="all-delete-orphan" order-by="id">
       <key column="SPECIMEN_ID"/>

@@ -13,8 +13,8 @@
       </generator>
     </id>
 
-    <many-to-one name="rateList" column="RATE_LIST_ID" fetch="join" />
+    <many-to-one name="rateList" column="RATE_LIST_ID" lazy="false" fetch="join" />
 
-    <many-to-one name="cp" column="CP_ID" fetch="join" />
+    <many-to-one name="cp" column="CP_ID" lazy="false" fetch="join" />
   </class>
 </hibernate-mapping>

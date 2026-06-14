@@ -15,7 +15,7 @@
 
     <property name="medicalRecordNumber"  column="MEDICAL_RECORD_NUMBER"/>
 
-    <many-to-one name="site" column="SITE_ID" fetch="join"/>
+    <many-to-one name="site" column="SITE_ID" lazy="false" fetch="join"/>
 
     <many-to-one name="participant" column="PARTICIPANT_ID"/>
   </class>

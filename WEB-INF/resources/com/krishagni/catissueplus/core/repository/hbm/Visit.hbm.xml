@@ -13,7 +13,7 @@
       </generator>
     </id>
 
-    <many-to-one name="clinicalStatus" column="CLINICAL_STATUS_ID" fetch="join"/>
+    <many-to-one name="clinicalStatus" column="CLINICAL_STATUS_ID" lazy="false" fetch="join"/>
 
     <property name="activityStatus" column="ACTIVITY_STATUS" />
 
@@ -31,7 +31,7 @@
 
     <property name="visitDate" type="timestamp" column="COLLECTION_TIMESTAMP" />
 
-    <many-to-one name="missedReason" column="MISSED_REASON_ID" fetch="join"/>
+    <many-to-one name="missedReason" column="MISSED_REASON_ID" lazy="false" fetch="join"/>
 
     <set name="clinicalDiagnoses" table="OS_VISIT_CLIN_DIAGNOSES">
       <key column="VISIT_ID"/>
@@ -52,7 +52,7 @@
 
     <many-to-one name="missedBy" column="MISSED_BY"/>
     
-    <many-to-one name="cohort" column="COHORT_ID" fetch="join"/>
+    <many-to-one name="cohort" column="COHORT_ID" lazy="false" fetch="join"/>
 
     <property name="extensionRev" column="EXTENSION_REV"/>
 
